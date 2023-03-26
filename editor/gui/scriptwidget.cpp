@@ -818,9 +818,8 @@ void ScriptWidget::TableSelectionChanged(const QItemSelection&, const QItemSelec
     for (const auto& index : indices)
     {
         const auto& method = app::GetLuaMethodDoc(index.row());
-        const auto& name = QString("%1_%2").arg(app::FromUtf8(method.table)).arg(app::FromUtf8(method.name));
-        mUI.textBrowser->scrollToAnchor(name);
-        //DEBUG("Scroll to anchor. [anchor='%1']", name);
+        const auto& anchor = app::GenerateLuaDocHtmlAnchor(method);
+        mUI.textBrowser->scrollToAnchor(anchor);
     }
 }
 

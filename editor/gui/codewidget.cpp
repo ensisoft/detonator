@@ -320,7 +320,7 @@ void TextEditor::Complete(const QString& text, const QModelIndex& index)
     if (item.type == app::LuaMemberType::TableProperty ||
         item.type == app::LuaMemberType::ObjectProperty)
     {
-        QString completion = app::FromUtf8(item.name);
+        QString completion = item.name;
         if (text.startsWith(completion))
             completion = text;
 
@@ -333,7 +333,7 @@ void TextEditor::Complete(const QString& text, const QModelIndex& index)
     else if (item.type == app::LuaMemberType::Function ||
              item.type == app::LuaMemberType::Method)
     {
-        const QString& name = app::FromUtf8(item.name);
+        const QString& name = item.name;
         const QString& args = app::FormatArgCompletion(item);
         if (text.startsWith(name))
         {
