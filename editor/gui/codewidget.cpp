@@ -30,6 +30,7 @@
 #include <set>
 
 #include "editor/app/eventlog.h"
+#include "editor/app/lua-tools.h"
 #include "editor/gui/codewidget.h"
 
 namespace gui
@@ -60,6 +61,15 @@ std::set<TextEditor*> open_editors;
 // static
 TextEditor::Settings TextEditor::mSettings;
 
+void TextEditor::Reparse()
+{
+    if (mHighlighter)
+    {
+        mHighlighter->Parse(document()->toPlainText());
+        mHighlighter->rehighlight();
+    }
+}
+
 // static
 void TextEditor::SetDefaultSettings(const Settings& settings)
 {
@@ -85,6 +95,8 @@ TextEditor::TextEditor(QWidget *parent) : QPlainTextEdit(parent)
     connect(this, &TextEditor::undoAvailable, this, &TextEditor::UndoAvailable);
 
     open_editors.insert(this);
+
+    setLineWrapMode(LineWrapMode::NoWrap);
 }
 
 TextEditor::~TextEditor()
@@ -244,7 +256,14 @@ void TextEditor::keyPressEvent(QKeyEvent* key)
         cursor.movePosition(QTextCursor::MoveOperation::NextBlock);
         setTextCursor(cursor);
 
-    } else  QPlainTextEdit::keyPressEvent(key);
+    }
+    else
+    {
+        if (code == Qt::Key_Return && mHighlighter)
+            mHighlighter->Parse(document()->toPlainText());
+
+        QPlainTextEdit::keyPressEvent(key);
+    }
 }
 
 void TextEditor::HighlightCurrentLine()
@@ -309,10 +328,10 @@ void TextEditor::ApplySettings()
 
     if (mSettings.highlight_syntax && !mHighlighter)
     {
-        auto highliter = new QSourceHighlite::QSourceHighliter(mDocument);
-        highliter->setCurrentLanguage(QSourceHighlite::QSourceHighliter::CodeLua);
-        mHighlighter = highliter;
+        mHighlighter = new app::LuaParser(mDocument);
         mHighlighter->setParent(this);
+        mHighlighter->SetTheme(app::LuaParser::ColorTheme::Monokai);
+        mHighlighter->Parse(document()->toPlainText());
         mHighlighter->rehighlight();
     }
     else if (!mSettings.highlight_syntax && mHighlighter)

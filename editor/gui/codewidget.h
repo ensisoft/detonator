@@ -31,6 +31,11 @@ class QWidget;
 class QTextDocument;
 class QSyntaxHighlighter;
 
+namespace app {
+    class LuaParser;
+    class LuaTheme;
+} // namespace
+
 namespace gui
 {
     // simple text editor widget for simplistic editing functionality.
@@ -74,6 +79,7 @@ namespace gui
         { mFontSize = size; }
         void ResetFontSize()
         { mFontSize.reset(); }
+        void Reparse();
 
         static void SetDefaultSettings(const Settings& settings);
         static void GetDefaultSettings(Settings* settings);
@@ -91,7 +97,7 @@ namespace gui
         static Settings mSettings;
     private:
         QWidget* mLineNumberArea = nullptr;
-        QSyntaxHighlighter* mHighlighter = nullptr;
+        app::LuaParser* mHighlighter = nullptr;
         QTextDocument* mDocument = nullptr;
         bool mCanCopy = false;
         bool mCanUndo = false;
