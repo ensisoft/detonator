@@ -48,286 +48,42 @@ namespace gui
 // static
 ScriptWidget::Settings ScriptWidget::mSettings;
 
-class ScriptWidget::TableModel : public QAbstractTableModel
-{
-public:
-    virtual QVariant data(const QModelIndex& index, int role) const override
-    {
-        const auto& doc = app::GetLuaMethodDoc(index.row());
-        if (role == Qt::DisplayRole) {
-            if (index.column() == 0) return app::FromUtf8(doc.table);
-            else if (index.column() == 1) return app::toString(doc.type);
-            else if (index.column() == 2) return app::FromUtf8(doc.name);
-            else if (index.column() == 3) return app::FromUtf8(doc.desc);
-        } else if (role == Qt::DecorationRole && index.column() == 1)  {
-            if (doc.type == app::LuaMemberType::Function ||
-                doc.type == app::LuaMemberType::Method  ||
-                doc.type == app::LuaMemberType::MetaMethod)
-                return QIcon("icons:function.png");
-            else return QIcon("icons:bullet_red.png");
-        }
-        return {};
-    }
-    virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override
-    {
-        if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
-            if (section == 0) return "Table";
-            else if (section == 1) return "Type";
-            else if (section == 2) return "Member";
-            else if (section == 3) return "Desc";
-        }
-        return {};
-    }
-    virtual int rowCount(const QModelIndex&) const override
-    { return app::GetNumLuaMethodDocs(); }
-    virtual int columnCount(const QModelIndex&) const override
-    { return 4; }
-private:
-};
-class ScriptWidget::TableModelProxy : public QSortFilterProxyModel
-{
-public:
-    void SetTableModel(TableModel* model)
-    { mModel = model; }
-    void SetFilterString(const QString& text)
-    {
-        mFilter = base::ToUpperUtf8(app::ToUtf8(text));
-    }
-protected:
-    virtual bool filterAcceptsRow(int row, const QModelIndex& parent) const override
-    {
-        if (mFilter.empty())
-            return true;
-        const auto& doc = app::GetLuaMethodDoc(row);
-        if (base::Contains(base::ToUpperUtf8(doc.name), mFilter) ||
-            base::Contains(base::ToUpperUtf8(doc.desc), mFilter) ||
-            base::Contains(base::ToUpperUtf8(doc.table), mFilter))
-            return true;
-        return false;
-    }
-private:
-    std::string mFilter;
-    TableModel* mModel = nullptr;
-};
-
 ScriptWidget::ScriptWidget(app::Workspace* workspace)
 {
+    DEBUG("Create ScriptWidget");
+
     app::InitLuaDoc();
 
     mWorkspace = workspace;
-    mTableModel.reset(new TableModel);
-    mTableModelProxy.reset(new TableModelProxy);
-    mTableModelProxy->setSourceModel(mTableModel.get());
-    mTableModelProxy->SetTableModel(mTableModel.get());
+    mTableModel.reset(new app::LuaDocTableModel);
+    mModelProxy.reset(new app::LuaDocModelProxy);
+    mModelProxy->SetTableModel(mTableModel.get());
+
     QPlainTextDocumentLayout* layout = new QPlainTextDocumentLayout(&mDocument);
     layout->setParent(this);
-
     mDocument.setDocumentLayout(layout);
-    DEBUG("Create ScriptWidget");
 
     mUI.setupUi(this);
-    //mUI.actionFindText->setShortcut(QKeySequence::Find); // use custom
-
-    const auto font_sizes = QFontDatabase::standardSizes();
-    for (int size : font_sizes)
-    {
-        QSignalBlocker s(mUI.editorFontSize);
-        mUI.editorFontSize->addItem(QString::number(size));
-    }
-    SetValue(mUI.editorFontName, -1);
-    SetValue(mUI.editorFontSize, -1);
-    SetValue(mUI.chkFormatOnSave, Qt::PartiallyChecked);
-
     mUI.formatter->setVisible(false);
     mUI.modified->setVisible(false);
     mUI.find->setVisible(false);
     mUI.code->SetDocument(&mDocument);
-    mUI.tableView->setModel(mTableModelProxy.get());
+    mUI.tableView->setModel(mModelProxy.get());
     mUI.tableView->setColumnWidth(0, 100);
     mUI.tableView->setColumnWidth(2, 200);
     // capture some special key presses in order to move the
     // selection (current item) in the list widget more conveniently.
     mUI.filter->installEventFilter(this);
+    mUI.textBrowser->setHtml(app::GenerateLuaDocHtml());
+
+    PopulateFontSizes(mUI.editorFontSize);
+    SetValue(mUI.editorFontName, -1);
+    SetValue(mUI.editorFontSize, -1);
+    SetValue(mUI.chkFormatOnSave, Qt::PartiallyChecked);
 
     connect(mUI.tableView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
             &ScriptWidget::TableSelectionChanged);
     connect(&mWatcher, &QFileSystemWatcher::fileChanged, this, &ScriptWidget::FileWasChanged);
-
-    std::map<std::string, std::set<std::string>> table_methods;
-    for (size_t i=0; i<app::GetNumLuaMethodDocs(); ++i)
-    {
-        const auto& method = app::GetLuaMethodDoc(i);
-        table_methods[method.table].insert(method.name);
-    }
-
-    QString html;
-    QTextStream stream(&html);
-    stream << R"(
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta name="qrichtext"/>
-    <title>Lua API</title>
-    <style type="text/css">
-    body {
-      font-size: 16px;
-    }
-    div {
-      margin:0px;
-    }
-    div.method {
-      margin-bottom: 20px;
-    }
-    div.description {
-        margin-bottom: 10px;
-        margin-left: 0px;
-        word-wrap: break-word;
-    }
-    div.signature {
-        font-family: monospace;
-    }
-    span.return {
-       font-weight: bold;
-       color: DarkRed;
-    }
-    span.method {
-       font-style: italic;
-       font-weight: bold;
-    }
-    span.arg {
-       font-weight: bold;
-       color: DarkRed;
-    }
-    span.table {
-       font-size: 20px;
-       font-weight: bold;
-       font-style: italic;
-    }
-  </style>
-  </head>
-  <body>
-)";
-
-    // build TOC with unordered lists.
-    stream << "<ul>\n";
-    for (const auto& pair : table_methods)
-    {
-        const auto& table   = app::FromUtf8(pair.first);
-        const auto& methods = pair.second;
-        stream << QString("<li id=\"%1\">%1</li>\n").arg(table);
-        stream << QString("<ul>\n");
-        for (const auto& m : methods)
-        {
-            const auto& method_name   = app::FromUtf8(m);
-            const auto& method_anchor = QString("%1_%2")
-                    .arg(table)
-                    .arg(method_name);
-            stream << QString(R"(<li><a href="#%1">%2</a></li>)")
-                    .arg(method_anchor)
-                    .arg(method_name);
-            stream << "\n";
-        }
-        stream << QString("</ul>\n");
-    }
-    stream << "</ul>\n";
-
-    std::string current_table;
-
-    // build method documentation bodies.
-    for (size_t i=0; i<app::GetNumLuaMethodDocs(); ++i)
-    {
-        const auto& member = app::GetLuaMethodDoc(i);
-        if (member.table != current_table)
-        {
-            stream << QString("<br><span class=\"table\">%1</span><hr>").arg(app::FromUtf8(member.table));
-            current_table = member.table;
-        }
-
-        if (member.type == app::LuaMemberType::Function ||
-            member.type == app::LuaMemberType::Method ||
-            member.type == app::LuaMemberType::MetaMethod)
-        {
-            QString method_args;
-            for (const auto& a : member.args)
-            {
-                method_args.append("<span class=\"arg\">");
-                method_args.append(app::ParseLuaDocTypeString(a.type));
-                method_args.append("</span> ");
-                method_args.append(app::FromUtf8(a.name));
-                method_args.append(", ");
-            }
-            if (!method_args.isEmpty())
-                method_args.chop(2);
-
-            std::string name;
-            if (member.type == app::LuaMemberType::Function)
-                name = member.table + "." + member.name;
-            else if (member.type == app::LuaMemberType::Method)
-            {
-                if (member.name == "new")
-                    name = member.table + ":new";
-                else  name = "obj:" + member.name;
-            }
-            else name = member.name;
-
-            const auto& method_html_name = app::toString("%1_%2", member.table, member.name);
-            const auto& method_html_anchor = app::toString("%1_%2", member.table, member.name);
-            const auto& method_return = app::ParseLuaDocTypeString(member.ret);
-            const auto& method_desc = app::FromUtf8(member.desc);
-            const auto& method_name = app::FromUtf8(name);
-
-            stream << QString(
-R"(<div class="method" name="%1" id="%2">
-  <div class="signature">
-     <span class="return">%3 </span>
-     <span class="method">%4</span>(%5)
-  </div>
-  <div class="description">%6</div>
-</div>
-)").arg(method_html_name)
-   .arg(method_html_anchor)
-   .arg(method_return)
-   .arg(app::FromUtf8(name))
-   .arg(method_args)
-   .arg(method_desc);
-        }
-        else
-        {
-            std::string name;
-            if (member.type == app::LuaMemberType::TableProperty)
-                name = member.table + "." + member.name;
-            else name = "obj." + member.name;
-
-            const auto& prop_html_name = app::toString("%1_%2", member.table, member.name);
-            const auto& prop_html_anchor = app::toString("%1_%2", member.table, member.name);
-            const auto& prop_return = app::ParseLuaDocTypeString(member.ret);
-            const auto& prop_desc = app::FromUtf8(member.desc);
-            const auto& prop_name= app::FromUtf8(name);
-
-            stream << QString(
-R"(<div class="member" name="%1" id="%2">
-   <div class="signature">
-      <span class="return">%3 </span>
-      <span class="method">%4 </span>
-   </div>
-   <div class="description">%5</div>
-</div>
-)").arg(prop_html_name)
-   .arg(prop_html_anchor)
-   .arg(prop_return)
-   .arg(prop_name)
-   .arg(prop_desc);
-        }
-    } // for
-
-    stream << R"(
-</body>
-</html>
-)";
-
-    stream.flush();
-    //mUI.textEdit->setHtml(html);
-    mUI.textBrowser->setHtml(html);
 
     QTimer::singleShot(10, this, &ScriptWidget::SetInitialFocus);
 }
@@ -546,7 +302,13 @@ bool ScriptWidget::HasUnsavedChanges() const
 
 bool ScriptWidget::OnEscape()
 {
-    mUI.find->setVisible(false);
+    if (!mUI.code->CancelCompletion())
+    {
+        if (mUI.luaFormatStdErr->isVisible())
+            mUI.luaFormatStdErr->setVisible(false);
+        else if (mUI.find->isVisible())
+            mUI.find->setVisible(false);
+    }
     mUI.code->setFocus();
     return true;
 }
@@ -915,10 +677,10 @@ void ScriptWidget::on_editorFontSize_currentIndexChanged(int)
 
 void ScriptWidget::on_filter_textChanged(const QString& text)
 {
-    mTableModelProxy->SetFilterString(text);
-    mTableModelProxy->invalidate();
+    mModelProxy->SetFindFilter(text);
+    mModelProxy->invalidate();
 
-    const auto count = mTableModelProxy->rowCount();
+    const auto count = mModelProxy->rowCount();
     auto* model = mUI.tableView->selectionModel();
     model->reset();
 }
@@ -978,16 +740,14 @@ void ScriptWidget::keyPressEvent(QKeyEvent *key)
     if (key->key() == Qt::Key_Escape ||
        (key->key() == Qt::Key_G && key->modifiers() & Qt::ControlModifier))
     {
-        mUI.find->setVisible(false);
-        mUI.formatter->setVisible(false);
-        mUI.code->setFocus();
+        OnEscape();
         return;
     }
     QWidget::keyPressEvent(key);
 }
 bool ScriptWidget::eventFilter(QObject* destination, QEvent* event)
 {
-    const auto count = mTableModelProxy->rowCount();
+    const auto count = mModelProxy->rowCount();
 
     // returning true will eat the event and stop from
     // other event handlers ever seeing the event.

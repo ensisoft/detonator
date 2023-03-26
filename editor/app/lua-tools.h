@@ -91,6 +91,8 @@ namespace app
         const Highlight& GetHighlight(size_t i) const noexcept
         { return mHighlights[i]; }
 
+        const Highlight* FindBlockByOffset(uint32_t position) const noexcept;
+
         LuaParser& operator=(const LuaParser&) = delete;
     protected:
         virtual void highlightBlock(const QString &text) override;

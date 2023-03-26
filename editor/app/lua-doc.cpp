@@ -17,14 +17,22 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QIcon>
 #  include <QString>
 #  include <QStringList>
+#  include <QTextStream>
 #  include <neargye/magic_enum.hpp>
 #include "warnpop.h"
 
+#include <algorithm>
+#include <map>
+
+#include "base/assert.h"
 #include "base/color4f.h"
 #include "base/format.h"
+#include "base/utility.h"
 #include "editor/app/utility.h"
+#include "editor/app/format.h"
 #include "editor/app/lua-doc.h"
 
 #include "wdk/keys.h"
@@ -1513,6 +1521,84 @@ void InitLuaDoc()
     done = true;
 }
 
+QString FindLuaDocTableMatch(const QString& word)
+{
+    // these are the "known" special names that we might expect to encounter.
+    // This might cause failures if a user specified name is somehow associated
+    // with these names but that's probably a bad idea in the game code anyway.
+    if (word == "Audio")
+        return "game.Audio";
+    else if (word == "Game")
+        return "game.Engine";
+    else if (word == "Physics")
+        return "game.Physics";
+    else if (word == "Scene")
+        return "game.Scene";
+    else if (word == "State")
+        return "game.KeyValueStore";
+    else if (word == "ClassLib")
+        return "game.ClassLib";
+
+    // special cases heuristics.
+    if (word.endsWith("entity"))
+        return "game.Entity";
+    else if (word.endsWith("node"))
+        return "game.EntityNode";
+    else if (word.endsWith("scene"))
+        return "game.Scene";
+    else if (word.endsWith("body"))
+        return "game.RigidBody";
+
+    // check for a known table name suffix.
+    for (const auto& item : g_method_docs)
+    {
+        QString table = app::FromUtf8(item.table);
+        if (table.endsWith(word))
+            return table;
+    }
+    return "";
+}
+
+QString FormatArgHelp(const LuaMemberDoc& doc)
+{
+    if (doc.type == LuaMemberType::ObjectProperty ||
+        doc.type == LuaMemberType::TableProperty)
+        return "";
+
+    std::string str;
+    for (const auto& arg : doc.args)
+    {
+        str += arg.type;
+        str += " ";
+        str += arg.name;
+        str += ", ";
+    }
+    if (!str.empty()) {
+        str.pop_back();
+        str.pop_back();
+    }
+    return QString::fromStdString(str);
+}
+
+QString FormatArgCompletion(const LuaMemberDoc& doc)
+{
+    if (doc.type == LuaMemberType::ObjectProperty ||
+        doc.type == LuaMemberType::TableProperty)
+        return "";
+
+    std::string str;
+    for (const auto& arg : doc.args)
+    {
+        str += arg.name;
+        str += ", ";
+    }
+    if (!str.empty()) {
+        str.pop_back();
+        str.pop_back();
+    }
+    return QString::fromStdString("(" + str + ")");
+}
+
 std::size_t GetNumLuaMethodDocs()
 { return g_method_docs.size(); }
 const LuaMemberDoc& GetLuaMethodDoc(size_t index)
@@ -1567,5 +1653,309 @@ QString ParseLuaDocTypeString(const std::string& str)
 {
     return ParseLuaDocTypeString(QString::fromUtf8(str.c_str()));
 }
+
+QString GenerateLuaDocHtml()
+{
+    static QString html;
+    if (!html.isEmpty())
+        return html;
+
+    std::map<std::string, std::set<std::string>> table_methods;
+    for (size_t i=0; i<app::GetNumLuaMethodDocs(); ++i)
+    {
+        const auto& method = app::GetLuaMethodDoc(i);
+        table_methods[method.table].insert(method.name);
+    }
+
+    QTextStream stream(&html);
+    stream << R"(
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="qrichtext"/>
+    <title>Lua API</title>
+    <style type="text/css">
+    body {
+      font-size: 16px;
+    }
+    div {
+      margin:0px;
+    }
+    div.method {
+      margin-bottom: 20px;
+    }
+    div.description {
+        margin-bottom: 10px;
+        margin-left: 0px;
+        word-wrap: break-word;
+    }
+    div.signature {
+        font-family: monospace;
+    }
+    span.return {
+       font-weight: bold;
+       color: DarkRed;
+    }
+    span.method {
+       font-style: italic;
+       font-weight: bold;
+    }
+    span.arg {
+       font-weight: bold;
+       color: DarkRed;
+    }
+    span.table {
+       font-size: 20px;
+       font-weight: bold;
+       font-style: italic;
+    }
+  </style>
+  </head>
+  <body>
+)";
+
+    // build TOC with unordered lists.
+    stream << "<ul>\n";
+    for (const auto& pair : table_methods)
+    {
+        const auto& table   = app::FromUtf8(pair.first);
+        const auto& methods = pair.second;
+        stream << QString("<li id=\"%1\">%1</li>\n").arg(table);
+        stream << QString("<ul>\n");
+        for (const auto& m : methods)
+        {
+            const auto& method_name   = app::FromUtf8(m);
+            const auto& method_anchor = QString("%1_%2")
+                    .arg(table)
+                    .arg(method_name);
+            stream << QString(R"(<li><a href="#%1">%2</a></li>)")
+                    .arg(method_anchor)
+                    .arg(method_name);
+            stream << "\n";
+        }
+        stream << QString("</ul>\n");
+    }
+    stream << "</ul>\n";
+
+    std::string current_table;
+
+    // build method documentation bodies.
+    for (size_t i=0; i<app::GetNumLuaMethodDocs(); ++i)
+    {
+        const auto& member = app::GetLuaMethodDoc(i);
+        if (member.table != current_table)
+        {
+            stream << QString("<br><span class=\"table\">%1</span><hr>").arg(app::FromUtf8(member.table));
+            current_table = member.table;
+        }
+
+        if (member.type == app::LuaMemberType::Function ||
+            member.type == app::LuaMemberType::Method ||
+            member.type == app::LuaMemberType::MetaMethod)
+        {
+            QString method_args;
+            for (const auto& a : member.args)
+            {
+                method_args.append("<span class=\"arg\">");
+                method_args.append(app::ParseLuaDocTypeString(a.type));
+                method_args.append("</span> ");
+                method_args.append(app::FromUtf8(a.name));
+                method_args.append(", ");
+            }
+            if (!method_args.isEmpty())
+                method_args.chop(2);
+
+            std::string name;
+            if (member.type == app::LuaMemberType::Function)
+                name = member.table + "." + member.name;
+            else if (member.type == app::LuaMemberType::Method)
+            {
+                if (member.name == "new")
+                    name = member.table + ":new";
+                else  name = "obj:" + member.name;
+            }
+            else name = member.name;
+
+            const auto& method_html_name = app::toString("%1_%2", member.table, member.name);
+            const auto& method_html_anchor = app::toString("%1_%2", member.table, member.name);
+            const auto& method_return = app::ParseLuaDocTypeString(member.ret);
+            const auto& method_desc = app::FromUtf8(member.desc);
+            const auto& method_name = app::FromUtf8(name);
+
+            stream << QString(
+R"(<div class="method" name="%1" id="%2">
+  <div class="signature">
+     <span class="return">%3 </span>
+     <span class="method">%4</span>(%5)
+  </div>
+  <div class="description">%6</div>
+</div>
+)").arg(method_html_name)
+   .arg(method_html_anchor)
+   .arg(method_return)
+   .arg(app::FromUtf8(name))
+   .arg(method_args)
+   .arg(method_desc);
+        }
+        else
+        {
+            std::string name;
+            if (member.type == app::LuaMemberType::TableProperty)
+                name = member.table + "." + member.name;
+            else name = "obj." + member.name;
+
+            const auto& prop_html_name = app::toString("%1_%2", member.table, member.name);
+            const auto& prop_html_anchor = app::toString("%1_%2", member.table, member.name);
+            const auto& prop_return = app::ParseLuaDocTypeString(member.ret);
+            const auto& prop_desc = app::FromUtf8(member.desc);
+            const auto& prop_name= app::FromUtf8(name);
+
+            stream << QString(
+R"(<div class="member" name="%1" id="%2">
+   <div class="signature">
+      <span class="return">%3 </span>
+      <span class="method">%4 </span>
+   </div>
+   <div class="description">%5</div>
+</div>
+)").arg(prop_html_name)
+   .arg(prop_html_anchor)
+   .arg(prop_return)
+   .arg(prop_name)
+   .arg(prop_desc);
+        }
+    } // for
+
+    stream << R"(
+</body>
+</html>
+)";
+
+    stream.flush();
+    return html;
+}
+
+QVariant LuaDocTableModel::data(const QModelIndex& index, int role) const
+{
+    const auto& doc = app::GetLuaMethodDoc(index.row());
+
+    if (mMode == Mode::HelpView)
+    {
+        if (role == Qt::DisplayRole)
+        {
+            if (index.column() == 0) return app::FromUtf8(doc.table);
+            else if (index.column() == 1) return app::toString(doc.type);
+            else if (index.column() == 2) return app::FromUtf8(doc.name);
+            else if (index.column() == 3) return app::FromUtf8(doc.desc);
+        }
+        else if (role == Qt::DecorationRole && index.column() == 1)
+        {
+            if (doc.type == app::LuaMemberType::Function ||
+                doc.type == app::LuaMemberType::Method ||
+                doc.type == app::LuaMemberType::MetaMethod)
+                return QIcon("icons:function.png");
+            else return QIcon("icons:bullet_red.png");
+        }
+    }
+    else if (mMode == Mode::CodeCompletion)
+    {
+        if (role == Qt::DisplayRole)
+        {
+            if (index.column() == 0) return app::toString(doc.type);
+            else if (index.column() == 1) return app::FromUtf8(doc.name);
+            else if (index.column() == 2) return app::FormatArgCompletion(doc);
+        }
+        else if (role == Qt::DecorationRole && index.column() == 0)
+        {
+            if (doc.type == app::LuaMemberType::Function ||
+                doc.type == app::LuaMemberType::Method ||
+                doc.type == app::LuaMemberType::MetaMethod)
+                return QIcon("icons:function.png");
+            else return QIcon("icons:bullet_red.png");
+        }
+    }
+    return {};
+}
+
+QVariant LuaDocTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
+    {
+        if (mMode == Mode::HelpView)
+        {
+            if (section == 0) return "Table";
+            else if (section == 1) return "Type";
+            else if (section == 2) return "Member";
+            else if (section == 3) return "Desc";
+        }
+        else if (mMode == Mode::CodeCompletion)
+        {
+            if (section == 0) return "Type";
+            else if (section == 1) return "Member";
+            else if (section == 2) return "Args";
+        }
+    }
+    return {};
+}
+int LuaDocTableModel::rowCount(const QModelIndex&) const
+{ return static_cast<int>(app::GetNumLuaMethodDocs()); }
+int LuaDocTableModel::columnCount(const QModelIndex&) const
+{
+    if (mMode == Mode::HelpView)
+        return 4;
+    else if (mMode ==Mode::CodeCompletion)
+        return 3;
+    else BUG("Unknown table mode");
+}
+
+const LuaMemberDoc& LuaDocTableModel::GetDocItem(size_t index) const
+{ return GetLuaMethodDoc(index); }
+
+const LuaMemberDoc& LuaDocTableModel::GetDocItem(const QModelIndex& index) const
+{ return GetLuaMethodDoc(static_cast<size_t>(index.row())); }
+
+void LuaDocModelProxy::SetFindFilter(const QString& filter)
+{
+    mFindString = base::ToUpperUtf8(app::ToUtf8(filter));
+}
+void LuaDocModelProxy::SetTableNameFilter(const QString& name)
+{
+    mTableName = app::ToUtf8(name);
+}
+
+void LuaDocModelProxy::SetFieldNameFilter(const QString& name)
+{
+    mFieldName = app::ToUtf8(name);
+}
+
+bool LuaDocModelProxy::filterAcceptsRow(int row, const QModelIndex& parent) const
+{
+    // do the fastest test up front before doing any string
+    // based filter testing.
+    const auto& doc = app::GetLuaMethodDoc(row);
+    if (!mBits.test(doc.type))
+        return false;
+
+    bool find_string_match = true;
+    bool table_name_string_match = true;
+    bool field_name_string_match = true;
+    if (!mFindString.empty())
+    {
+        find_string_match = base::Contains(base::ToUpperUtf8(doc.name), mFindString) ||
+                            base::Contains(base::ToUpperUtf8(doc.desc), mFindString) ||
+                            base::Contains(base::ToUpperUtf8(doc.table), mFindString);
+    }
+    if (!mTableName.empty())
+    {
+        table_name_string_match = base::EndsWith(doc.table, mTableName);
+    }
+    if (!mFieldName.empty())
+    {
+        field_name_string_match = base::StartsWith(doc.name, mFieldName);
+    }
+
+    return find_string_match && table_name_string_match && field_name_string_match;
+}
+
 
 } // namespace

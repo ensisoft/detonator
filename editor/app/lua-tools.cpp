@@ -76,6 +76,29 @@ LuaParser::~LuaParser()
         ts_parser_delete(mParser);
 }
 
+const LuaParser::Highlight* LuaParser::FindBlockByOffset(uint32_t position) const noexcept
+{
+    // find first highlight with starting position equal or greater than position
+    auto it = std::lower_bound(mHighlights.begin(), mHighlights.end(), position,
+        [](const auto& hilight, uint32_t position) {
+            return hilight.start < position;
+        });
+    if (it == mHighlights.end())
+        return nullptr;
+
+    if (it->start == position)
+        return &(*it);
+
+    while (it != mHighlights.begin())
+    {
+        const auto& hilight = *it;
+        if (position >= hilight.start && position <= hilight.start + hilight.length)
+            return &hilight;
+        --it;
+    }
+    return nullptr;
+}
+
 void LuaParser::highlightBlock(const QString& text)
 {
     // potential problem here that the characters in the plainText() result

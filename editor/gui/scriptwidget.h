@@ -27,6 +27,7 @@
 #  include <QDialog>
 #include "warnpop.h"
 
+#include "editor/app/lua-doc.h"
 #include "editor/gui/mainwidget.h"
 
 namespace app {
@@ -105,10 +106,8 @@ namespace gui
     private:
         Ui::ScriptWidget mUI;
     private:
-        class TableModel;
-        class TableModelProxy;
-        std::unique_ptr<TableModel> mTableModel;
-        std::unique_ptr<TableModelProxy> mTableModelProxy;
+        std::unique_ptr<app::LuaDocTableModel> mTableModel;
+        std::unique_ptr<app::LuaDocModelProxy> mModelProxy;
         app::Workspace* mWorkspace = nullptr;
         QFileSystemWatcher mWatcher;
         QTextDocument mDocument;
