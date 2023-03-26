@@ -96,7 +96,7 @@ namespace gui
         void on_textBrowser_forwardAvailable(bool available);
 
         void FileWasChanged();
-        void TableSelectionChanged(const QItemSelection, const QItemSelection&);
+        void TableSelectionChanged(const QItemSelection&, const QItemSelection&);
         void SetInitialFocus();
     private:
         virtual void keyPressEvent(QKeyEvent* key) override;

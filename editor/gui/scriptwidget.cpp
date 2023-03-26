@@ -121,6 +121,7 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     mTableModelProxy->SetTableModel(mTableModel.get());
     QPlainTextDocumentLayout* layout = new QPlainTextDocumentLayout(&mDocument);
     layout->setParent(this);
+
     mDocument.setDocumentLayout(layout);
     DEBUG("Create ScriptWidget");
 
@@ -358,7 +359,7 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace, const app::Resource& resou
         SetValue(mUI.editorFontName, font_name);
     }
 
-    QString font_size = 0;
+    QString font_size;
     if (GetUserProperty(resource, "font_size", &font_size))
     {
         mUI.code->SetFontSize(font_size.toInt());
@@ -514,7 +515,7 @@ bool ScriptWidget::LoadState(const gui::Settings& settings)
         SetValue(mUI.editorFontName, font_name);
     }
 
-    QString font_size = 0;
+    QString font_size;
     if (settings.GetValue("Script", "font_size", &font_size))
     {
         mUI.code->SetFontSize(font_size.toInt());
@@ -653,6 +654,7 @@ void ScriptWidget::on_actionSave_triggered()
             //mUI.code->ensureCursorVisible();
         }
     }
+    mUI.code->Reparse();
 
     // start watching this file if it wasn't being watched before.
     mWatcher.addPath(mFilename);
@@ -1045,11 +1047,12 @@ bool ScriptWidget::LoadDocument(const QString& file)
     mDocument.setPlainText(data);
     mFileHash = qHash(data);
     mFilename = file;
+    mUI.code->Reparse();
     DEBUG("Loaded script file. [file='%1']", mFilename);
     return true;
 }
 
-void ScriptWidget::TableSelectionChanged(const QItemSelection, const QItemSelection&)
+void ScriptWidget::TableSelectionChanged(const QItemSelection&, const QItemSelection&)
 {
     const auto& indices = GetSelection(mUI.tableView);
     for (const auto& index : indices)
