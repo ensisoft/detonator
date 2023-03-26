@@ -318,7 +318,8 @@ void TextEditor::Complete(const QString& text, const QModelIndex& index)
     const auto& item = mDocProxy.GetDocItemFromSource(index);
 
     if (item.type == app::LuaMemberType::TableProperty ||
-        item.type == app::LuaMemberType::ObjectProperty)
+        item.type == app::LuaMemberType::ObjectProperty ||
+        item.type == app::LuaMemberType::Table)
     {
         QString completion = item.name;
         if (text.startsWith(completion))
@@ -429,6 +430,7 @@ void TextEditor::keyPressEvent(QKeyEvent* event)
             mDocProxy.SetVisible(0); // nothing
             mDocProxy.SetVisible(app::LuaDocModelProxy::Show::TableProperty, true);
             mDocProxy.SetVisible(app::LuaDocModelProxy::Show::Function, true);
+            mDocProxy.SetVisible(app::LuaDocModelProxy::Show::Table, true);
         }
         else if (key == Qt::Key_Colon)
         {
