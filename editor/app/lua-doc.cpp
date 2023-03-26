@@ -39,15 +39,15 @@
 
 namespace {
 using namespace app;
-std::string table_name;
+QString table_name;
 std::vector<LuaMemberDoc> g_method_docs;
 
-void SetTable(const std::string& name)
+void SetTable(const QString& name)
 {
     table_name = name;
 }
 
-void AddMethod(LuaMemberType type, const std::string& ret, const std::string& name, const std::string& desc)
+void AddMethod(LuaMemberType type, const QString& ret, const QString& name, const QString& desc)
 {
     LuaMemberDoc doc;
     doc.type  = type;
@@ -58,8 +58,8 @@ void AddMethod(LuaMemberType type, const std::string& ret, const std::string& na
     g_method_docs.push_back(std::move(doc));
 }
 
-void AddMethod(LuaMemberType type, const std::string& ret, const std::string& name, const std::string& desc,
-               const std::string& arg0_type, const std::string& arg0_name)
+void AddMethod(LuaMemberType type, const QString& ret, const QString& name, const QString& desc,
+               const QString& arg0_type, const QString& arg0_name)
 {
     LuaMemberDoc doc;
     doc.type  = type;
@@ -70,9 +70,9 @@ void AddMethod(LuaMemberType type, const std::string& ret, const std::string& na
     doc.args.push_back({arg0_name,  arg0_type});
     g_method_docs.push_back(std::move(doc));
 }
-void AddMethod(LuaMemberType type, const std::string& ret, const std::string& name, const std::string& desc,
-               const std::string& arg0_type, const std::string& arg0_name,
-               const std::string& arg1_type, const std::string& arg1_name)
+void AddMethod(LuaMemberType type, const QString& ret, const QString& name, const QString& desc,
+               const QString& arg0_type, const QString& arg0_name,
+               const QString& arg1_type, const QString& arg1_name)
 {
     LuaMemberDoc doc;
     doc.type  = type;
@@ -84,10 +84,10 @@ void AddMethod(LuaMemberType type, const std::string& ret, const std::string& na
     doc.args.push_back({arg1_name,  arg1_type});
     g_method_docs.push_back(std::move(doc));
 }
-void AddMethod(LuaMemberType type, const std::string& ret, const std::string& name, const std::string& desc,
-               const std::string& arg0_type, const std::string& arg0_name,
-               const std::string& arg1_type, const std::string& arg1_name,
-               const std::string& arg2_type, const std::string& arg2_name)
+void AddMethod(LuaMemberType type, const QString& ret, const QString& name, const QString& desc,
+               const QString& arg0_type, const QString& arg0_name,
+               const QString& arg1_type, const QString& arg1_name,
+               const QString& arg2_type, const QString& arg2_name)
 {
     LuaMemberDoc doc;
     doc.type  = type;
@@ -101,11 +101,11 @@ void AddMethod(LuaMemberType type, const std::string& ret, const std::string& na
     g_method_docs.push_back(std::move(doc));
 }
 
-void AddMethod(LuaMemberType type, const std::string& ret, const std::string& name, const std::string& desc,
-               const std::string& arg0_type, const std::string& arg0_name,
-               const std::string& arg1_type, const std::string& arg1_name,
-               const std::string& arg2_type, const std::string& arg2_name,
-               const std::string& arg3_type, const std::string& arg3_name)
+void AddMethod(LuaMemberType type, const QString& ret, const QString& name, const QString& desc,
+               const QString& arg0_type, const QString& arg0_name,
+               const QString& arg1_type, const QString& arg1_name,
+               const QString& arg2_type, const QString& arg2_name,
+               const QString& arg3_type, const QString& arg3_name)
 {
     LuaMemberDoc doc;
     doc.type  = type;
@@ -119,12 +119,12 @@ void AddMethod(LuaMemberType type, const std::string& ret, const std::string& na
     doc.args.push_back({arg3_name,  arg3_type});
     g_method_docs.push_back(std::move(doc));
 }
-void AddMethod(LuaMemberType type, const std::string& ret, const std::string& name, const std::string& desc,
-               const std::string& arg0_type, const std::string& arg0_name,
-               const std::string& arg1_type, const std::string& arg1_name,
-               const std::string& arg2_type, const std::string& arg2_name,
-               const std::string& arg3_type, const std::string& arg3_name,
-               const std::string& arg4_type, const std::string& arg4_name)
+void AddMethod(LuaMemberType type, const QString& ret, const QString& name, const QString& desc,
+               const QString& arg0_type, const QString& arg0_name,
+               const QString& arg1_type, const QString& arg1_name,
+               const QString& arg2_type, const QString& arg2_name,
+               const QString& arg3_type, const QString& arg3_name,
+               const QString& arg4_type, const QString& arg4_name)
 {
     LuaMemberDoc doc;
     doc.type  = type;
@@ -139,13 +139,13 @@ void AddMethod(LuaMemberType type, const std::string& ret, const std::string& na
     doc.args.push_back({arg4_name,  arg4_type});
     g_method_docs.push_back(std::move(doc));
 }
-void AddMethod(LuaMemberType type, const std::string& ret, const std::string& name, const std::string& desc,
-               const std::string& arg0_type, const std::string& arg0_name,
-               const std::string& arg1_type, const std::string& arg1_name,
-               const std::string& arg2_type, const std::string& arg2_name,
-               const std::string& arg3_type, const std::string& arg3_name,
-               const std::string& arg4_type, const std::string& arg4_name,
-               const std::string& arg5_type, const std::string& arg5_name)
+void AddMethod(LuaMemberType type, const QString& ret, const QString& name, const QString& desc,
+               const QString& arg0_type, const QString& arg0_name,
+               const QString& arg1_type, const QString& arg1_name,
+               const QString& arg2_type, const QString& arg2_name,
+               const QString& arg3_type, const QString& arg3_name,
+               const QString& arg4_type, const QString& arg4_name,
+               const QString& arg5_type, const QString& arg5_name)
 {
     LuaMemberDoc doc;
     doc.type  = type;
@@ -162,7 +162,7 @@ void AddMethod(LuaMemberType type, const std::string& ret, const std::string& na
     g_method_docs.push_back(std::move(doc));
 }
 
-void AddProperty(LuaMemberType type, const std::string& ret, const std::string& name, const std::string& desc)
+void AddProperty(LuaMemberType type, const QString& ret, const QString& name, const QString& desc)
 {
     LuaMemberDoc doc;
     doc.type  = type;
@@ -447,7 +447,7 @@ void InitLuaDoc()
     for (const auto& color : magic_enum::enum_values<base::Color>())
     {
         const std::string name(magic_enum::enum_name(color));
-        DOC_TABLE_PROPERTY("int", name, base::FormatString("Color value for '%1'.", name));
+        DOC_TABLE_PROPERTY("int", QString::fromStdString(name), app::toString("Color value for '%1'.", name));
     }
 
     DOC_TABLE("base.Color4f");
@@ -659,19 +659,19 @@ void InitLuaDoc()
     for (const auto& key : magic_enum::enum_values<wdk::Keysym>())
     {
         const std::string name(magic_enum::enum_name(key));
-        DOC_TABLE_PROPERTY("int", name, base::FormatString("Key value for '%1'.", name));
+        DOC_TABLE_PROPERTY("int", QString::fromStdString(name), app::toString("Key value for '%1'.", name));
     }
     DOC_TABLE("wdk.Mods");
     for (const auto& mod : magic_enum::enum_values<wdk::Keymod>())
     {
         const std::string name(magic_enum::enum_name(mod));
-        DOC_TABLE_PROPERTY("int", name, base::FormatString("Modifier value for '%1'.", name));
+        DOC_TABLE_PROPERTY("int", QString::fromStdString(name), app::toString("Modifier value for '%1'.", name));
     }
     DOC_TABLE("wdk.Buttons");
     for (const auto& btn : magic_enum::enum_values<wdk::MouseButton>())
     {
         const std::string name(magic_enum::enum_name(btn));
-        DOC_TABLE_PROPERTY("int", name, base::FormatString("Mouse button value for '%1'.", name));
+        DOC_TABLE_PROPERTY("int", QString::fromStdString(name), app::toString("Mouse button value for '%1'.", name));
     }
     DOC_TABLE("wdk.KeyBitSet");
     DOC_METHOD_0("wdk.KeyBitSet", "new", "Construct new key symbol bit set.");
@@ -1552,7 +1552,7 @@ QString FindLuaDocTableMatch(const QString& word)
     // check for a known table name suffix.
     for (const auto& item : g_method_docs)
     {
-        QString table = app::FromUtf8(item.table);
+        const auto& table = item.table;
         if (table.endsWith(word))
             return table;
     }
@@ -1565,7 +1565,7 @@ QString FormatArgHelp(const LuaMemberDoc& doc)
         doc.type == LuaMemberType::TableProperty)
         return "";
 
-    std::string str;
+    QString str;
     for (const auto& arg : doc.args)
     {
         str += arg.type;
@@ -1573,11 +1573,10 @@ QString FormatArgHelp(const LuaMemberDoc& doc)
         str += arg.name;
         str += ", ";
     }
-    if (!str.empty()) {
-        str.pop_back();
-        str.pop_back();
-    }
-    return QString::fromStdString(str);
+    if (!str.isEmpty())
+        str.chop(2);
+
+    return str;
 }
 
 QString FormatArgCompletion(const LuaMemberDoc& doc)
@@ -1586,17 +1585,16 @@ QString FormatArgCompletion(const LuaMemberDoc& doc)
         doc.type == LuaMemberType::TableProperty)
         return "";
 
-    std::string str;
+    QString str;
     for (const auto& arg : doc.args)
     {
         str += arg.name;
         str += ", ";
     }
-    if (!str.empty()) {
-        str.pop_back();
-        str.pop_back();
-    }
-    return QString::fromStdString("(" + str + ")");
+    if (!str.isEmpty())
+        str.chop(2);
+
+    return "(" + str + ")";
 }
 
 std::size_t GetNumLuaMethodDocs()
@@ -1649,9 +1647,9 @@ QString ParseLuaDocTypeString(const QString& str)
     return ret;
 }
 
-QString ParseLuaDocTypeString(const std::string& str)
+QString GenerateLuaDocHtmlAnchor(const LuaMemberDoc& doc)
 {
-    return ParseLuaDocTypeString(QString::fromUtf8(str.c_str()));
+    return app::toString("%1_%2", doc.table, doc.name);
 }
 
 QString GenerateLuaDocHtml()
@@ -1660,7 +1658,7 @@ QString GenerateLuaDocHtml()
     if (!html.isEmpty())
         return html;
 
-    std::map<std::string, std::set<std::string>> table_methods;
+    std::map<QString, std::set<QString>> table_methods;
     for (size_t i=0; i<app::GetNumLuaMethodDocs(); ++i)
     {
         const auto& method = app::GetLuaMethodDoc(i);
@@ -1716,15 +1714,13 @@ QString GenerateLuaDocHtml()
 
     // build TOC with unordered lists.
     stream << "<ul>\n";
-    for (const auto& pair : table_methods)
+    for (const auto& [table, methods] : table_methods)
     {
-        const auto& table   = app::FromUtf8(pair.first);
-        const auto& methods = pair.second;
         stream << QString("<li id=\"%1\">%1</li>\n").arg(table);
         stream << QString("<ul>\n");
         for (const auto& m : methods)
         {
-            const auto& method_name   = app::FromUtf8(m);
+            const auto& method_name   = m;
             const auto& method_anchor = QString("%1_%2")
                     .arg(table)
                     .arg(method_name);
@@ -1737,7 +1733,7 @@ QString GenerateLuaDocHtml()
     }
     stream << "</ul>\n";
 
-    std::string current_table;
+    QString current_table;
 
     // build method documentation bodies.
     for (size_t i=0; i<app::GetNumLuaMethodDocs(); ++i)
@@ -1745,7 +1741,7 @@ QString GenerateLuaDocHtml()
         const auto& member = app::GetLuaMethodDoc(i);
         if (member.table != current_table)
         {
-            stream << QString("<br><span class=\"table\">%1</span><hr>").arg(app::FromUtf8(member.table));
+            stream << QString("<br><span class=\"table\">%1</span><hr>").arg(member.table);
             current_table = member.table;
         }
 
@@ -1759,13 +1755,13 @@ QString GenerateLuaDocHtml()
                 method_args.append("<span class=\"arg\">");
                 method_args.append(app::ParseLuaDocTypeString(a.type));
                 method_args.append("</span> ");
-                method_args.append(app::FromUtf8(a.name));
+                method_args.append(a.name);
                 method_args.append(", ");
             }
             if (!method_args.isEmpty())
                 method_args.chop(2);
 
-            std::string name;
+            QString name;
             if (member.type == app::LuaMemberType::Function)
                 name = member.table + "." + member.name;
             else if (member.type == app::LuaMemberType::Method)
@@ -1779,8 +1775,8 @@ QString GenerateLuaDocHtml()
             const auto& method_html_name = app::toString("%1_%2", member.table, member.name);
             const auto& method_html_anchor = app::toString("%1_%2", member.table, member.name);
             const auto& method_return = app::ParseLuaDocTypeString(member.ret);
-            const auto& method_desc = app::FromUtf8(member.desc);
-            const auto& method_name = app::FromUtf8(name);
+            const auto& method_desc = member.desc;
+            const auto& method_name = name;
 
             stream << QString(
 R"(<div class="method" name="%1" id="%2">
@@ -1793,13 +1789,13 @@ R"(<div class="method" name="%1" id="%2">
 )").arg(method_html_name)
    .arg(method_html_anchor)
    .arg(method_return)
-   .arg(app::FromUtf8(name))
+   .arg(name)
    .arg(method_args)
    .arg(method_desc);
         }
         else
         {
-            std::string name;
+            QString name;
             if (member.type == app::LuaMemberType::TableProperty)
                 name = member.table + "." + member.name;
             else name = "obj." + member.name;
@@ -1807,8 +1803,8 @@ R"(<div class="method" name="%1" id="%2">
             const auto& prop_html_name = app::toString("%1_%2", member.table, member.name);
             const auto& prop_html_anchor = app::toString("%1_%2", member.table, member.name);
             const auto& prop_return = app::ParseLuaDocTypeString(member.ret);
-            const auto& prop_desc = app::FromUtf8(member.desc);
-            const auto& prop_name= app::FromUtf8(name);
+            const auto& prop_desc = member.desc;
+            const auto& prop_name = name;
 
             stream << QString(
 R"(<div class="member" name="%1" id="%2">
@@ -1843,10 +1839,10 @@ QVariant LuaDocTableModel::data(const QModelIndex& index, int role) const
     {
         if (role == Qt::DisplayRole)
         {
-            if (index.column() == 0) return app::FromUtf8(doc.table);
+            if (index.column() == 0) return doc.table;
             else if (index.column() == 1) return app::toString(doc.type);
-            else if (index.column() == 2) return app::FromUtf8(doc.name);
-            else if (index.column() == 3) return app::FromUtf8(doc.desc);
+            else if (index.column() == 2) return doc.name;
+            else if (index.column() == 3) return doc.desc;
         }
         else if (role == Qt::DecorationRole && index.column() == 1)
         {
@@ -1862,7 +1858,7 @@ QVariant LuaDocTableModel::data(const QModelIndex& index, int role) const
         if (role == Qt::DisplayRole)
         {
             if (index.column() == 0) return app::toString(doc.type);
-            else if (index.column() == 1) return app::FromUtf8(doc.name);
+            else if (index.column() == 1) return doc.name;
             else if (index.column() == 2) return app::FormatArgCompletion(doc);
         }
         else if (role == Qt::DecorationRole && index.column() == 0)
@@ -1916,16 +1912,16 @@ const LuaMemberDoc& LuaDocTableModel::GetDocItem(const QModelIndex& index) const
 
 void LuaDocModelProxy::SetFindFilter(const QString& filter)
 {
-    mFindString = base::ToUpperUtf8(app::ToUtf8(filter));
+    mFindString = filter.toUpper();
 }
 void LuaDocModelProxy::SetTableNameFilter(const QString& name)
 {
-    mTableName = app::ToUtf8(name);
+    mTableName = name;
 }
 
 void LuaDocModelProxy::SetFieldNameFilter(const QString& name)
 {
-    mFieldName = app::ToUtf8(name);
+    mFieldName = name;
 }
 
 bool LuaDocModelProxy::filterAcceptsRow(int row, const QModelIndex& parent) const
@@ -1939,21 +1935,20 @@ bool LuaDocModelProxy::filterAcceptsRow(int row, const QModelIndex& parent) cons
     bool find_string_match = true;
     bool table_name_string_match = true;
     bool field_name_string_match = true;
-    if (!mFindString.empty())
+    if (!mFindString.isEmpty())
     {
-        find_string_match = base::Contains(base::ToUpperUtf8(doc.name), mFindString) ||
-                            base::Contains(base::ToUpperUtf8(doc.desc), mFindString) ||
-                            base::Contains(base::ToUpperUtf8(doc.table), mFindString);
+        find_string_match = doc.name.contains(mFindString, Qt::CaseInsensitive) ||
+                            doc.desc.contains(mFindString, Qt::CaseInsensitive) ||
+                            doc.table.contains(mFindString, Qt::CaseInsensitive);
     }
-    if (!mTableName.empty())
+    if (!mTableName.isEmpty())
     {
-        table_name_string_match = base::EndsWith(doc.table, mTableName);
+        table_name_string_match = doc.table.endsWith(mTableName);
     }
-    if (!mFieldName.empty())
+    if (!mFieldName.isEmpty())
     {
-        field_name_string_match = base::StartsWith(doc.name, mFieldName);
+        field_name_string_match = doc.name.startsWith(mFieldName);
     }
-
     return find_string_match && table_name_string_match && field_name_string_match;
 }
 

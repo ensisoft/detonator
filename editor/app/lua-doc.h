@@ -32,8 +32,8 @@
 namespace app
 {
     struct LuaMethodArg {
-        std::string name;
-        std::string type;
+        QString name;
+        QString type;
     };
     enum class LuaMemberType {
         TableProperty,
@@ -45,10 +45,10 @@ namespace app
 
     struct LuaMemberDoc {
         LuaMemberType type = LuaMemberType::Function;
-        std::string table;
-        std::string name;
-        std::string desc;
-        std::string ret;
+        QString table;
+        QString name;
+        QString desc;
+        QString ret;
         std::vector<LuaMethodArg> args;
     };
 
@@ -60,9 +60,9 @@ namespace app
     QString FormatArgHelp(const LuaMemberDoc& doc);
     QString FormatArgCompletion(const LuaMemberDoc& doc);
     QString ParseLuaDocTypeString(const QString& str);
-    QString ParseLuaDocTypeString(const std::string& str);
-    QString GenerateLuaDocHtml();
     QString FindLuaDocTableMatch(const QString& text);
+    QString GenerateLuaDocHtml();
+    QString GenerateLuaDocHtmlAnchor(const LuaMemberDoc& doc);
 
     class LuaDocTableModel : public QAbstractTableModel
     {
@@ -122,9 +122,9 @@ namespace app
     protected:
         virtual bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
     private:
-        std::string mFindString;
-        std::string mTableName;
-        std::string mFieldName;
+        QString mFindString;
+        QString mTableName;
+        QString mFieldName;
         LuaDocTableModel* mModel = nullptr;
         base::bitflag<Show> mBits;
     };
