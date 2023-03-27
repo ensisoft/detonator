@@ -224,7 +224,7 @@ void InitLuaDoc()
     DOC_TABLE("_G");
     DOC_TABLE_PROPERTY("game.Audio", "Audio", "Global audio engine instance.");
     DOC_TABLE_PROPERTY("game.Physics", "Physics", "Global physics engine instance.");
-    DOC_TABLE_PROPERTY("game.ClassLib", "ClassLib", "Global class library instance.");
+    DOC_TABLE_PROPERTY("game.ClassLibrary", "ClassLib", "Global class library instance.");
     DOC_TABLE_PROPERTY("game.KeyValueStore", "State", "Global key-value store instance.");
     DOC_TABLE_PROPERTY("game.Engine", "Game", "Global game engine instance.");
     DOC_TABLE_PROPERTY("game.Scene", "Scene", "Global scene instance or nil if no scene is being played.");
@@ -257,14 +257,11 @@ void InitLuaDoc()
                  "string", "filename");
     DOC_FUNCTION_1("string", "RandomString", "Generate a random alpha numeric string of specified length.<br>"
                                            "Useful for things such as pseudo-unique identifiers.",
-                 "int", "length");
+                 "unsigned", "length");
     DOC_FUNCTION_2("string", "FormatString", "Format a string with %1, %2,...%n placeholders with N variable arguments.<br>"
                                            "For example: FormatString('this is %1 that is %2', 123, 'foo') returns 'this is 123 that is foo'.<br>"
-                                           "Supported types: string, int, float, bool "
-                                           "base.FSize, base.FPoint, base.FRect, base.Color4f "
-                                           "glm.vec2, glm.vec3, glm.vec4<br>"
                                            "Any given index can be repeated multiple times.",
-                 "string", "fmt", "...", "args");
+                 "string", "fmt", "bool|int|float|string|glm.vec2|glm.vec3|glm.vec4|base.Color4f|base.FSize|base.FRect|base.FPoint", "...");
     DOC_FUNCTION_2("string", "Join", "Concatenate and join the items in a string array together with a separator.",
                    "util.StringArrayInterface", "array", "string", "separator");
 
@@ -375,14 +372,14 @@ void InitLuaDoc()
                                    "Do not call this function unless you know what you're doing.<br>"
                                    "For a safer alternative use the overload without index.",
                  "string", "message",
-                 "int", "index");
-    DOC_FUNCTION_1("int", "enter", "Enter a new tracing scope for measuring time spent inside the scope.<br>"
+                 "unsigned", "index");
+    DOC_FUNCTION_1("unsigned", "enter", "Enter a new tracing scope for measuring time spent inside the scope.<br>"
                                  "You must manually call trace.leave with index that you received from this call. "
                                  "Not doing so will likely crash the application. ",
                  "string", "scope_name");
     DOC_FUNCTION_1("void", "leave", "Leave a tracing scope that was entered previously.<br>"
                                   "The index must be from a previous call to trace.enter.",
-                 "int", "index");
+                 "unsigned", "index");
 
     DOC_TABLE("base.FRect");
     DOC_METHOD_0("base.FRect", "new", "Construct a new axis aligned rectangle without any size.");
@@ -397,33 +394,41 @@ void InitLuaDoc()
     DOC_METHOD_1("void", "SetWidth", "Set a new rectangle width.", "float", "width");
     DOC_METHOD_1("void", "SetHeight", "Set a new rectangle height.", "float", "height");
     DOC_METHOD_2("void", "Resize", "Resize the rectangle to new width and height.", "float", "width", "float", "height");
+    DOC_METHOD_1("void", "Resize", "Resize the rectangle to new width and height.", "base.FSize|glm.vec2", "size");
     DOC_METHOD_2("void", "Grow", "Grow (or shrink) the dimensions of the rectangle.", "float", "dx", "float", "dy");
-    DOC_METHOD_2("void", "Move", "Move the rectangle to a new x,y position.", "float", "x", "float", "y");
+    DOC_METHOD_1("void", "Grow", "Grow (or shrink) the dimensions of the rectangle.", "base.FSize|glm.vec2", "delta");
+    DOC_METHOD_2("void", "Move", "Move the rectangle to a new position.", "float", "x", "float", "y");
+    DOC_METHOD_1("void", "Move", "Move the rectangle to a new position.", "base.FPoint|glm.vec2", "pos");
     DOC_METHOD_2("void", "Translate", "Translate (offset) the rectangle relative to the current position.", "float", "dx", "float", "dy");
-    DOC_METHOD_0("bool", "IsEmpty", "Returns true if the rectangle is empty (has zero width or height).");
+    DOC_METHOD_1("void", "Translate", "Translate (offset) the rectangle relative to the current position.", "base.FPoint|glm.vec2", "translate");
+    DOC_METHOD_0("bool", "IsEmpty", "Returns true if the rectangle is empty.<br>An empty rectangle has either zero width or height.");
     DOC_METHOD_2("bool", "TestPoint", "Test whether the given point is inside the rectangle or not.",
                  "float", "x", "float", "y");
     DOC_METHOD_1("bool", "TestPoint", "Test whether the given point is inside the rectangle or not.",
                  "base.FPoint|glm.vec2", "point");
-    DOC_METHOD_2("base.FPoint", "MapToGlobal", "Map a point relative to the rect origin to a global point.",
+    DOC_METHOD_2("base.FPoint", "MapToGlobal", "Map a local point relative to the rect origin to a global point.",
                  "float", "x", "float", "y");
-    DOC_METHOD_1("base.FPoint", "MapToGlobal", "Map a point relative to the rect origin to a global point.",
+    DOC_METHOD_1("base.FPoint", "MapToGlobal", "Map a local point relative to the rect origin to a global point.",
                  "base.FPoint|glm.vec2", "point");
     DOC_METHOD_2("base.FPoint", "MapToLocal", "Map a global point to a local point relative to the rect origin.",
                  "float", "x", "float", "y");
     DOC_METHOD_1("base.FPoint", "MapToLocal", "Map a global point to a local point relative to the rect origin.",
                  "base.FPoint|glm.vec2", "point");
-    DOC_METHOD_0("base.FRect, base.FRect, base.FRect, base.FRect", "GetQuadrants", "Split the rectangle into 4 quadrants.");
-    DOC_METHOD_0("base.FPoint, base.FPoint, base.FPoint, base.FPoint", "GetCorners", "Get the 4 corners of the rectangle.");
+    DOC_METHOD_0("base.FRect, base.FRect, base.FRect, base.FRect", "GetQuadrants",
+                 "Split the rectangle into 4 quadrants.<br>"
+                 "The returned quadrants are top_left, bottom_left, top_right, bottom_right");
+    DOC_METHOD_0("base.FPoint, base.FPoint, base.FPoint, base.FPoint", "GetCorners",
+                 "Get the 4 corners of the rectangle.<br>"
+                 "The corners are top_left, bottom_left, top_right, bottom_right");
     DOC_METHOD_0("base.FPoint", "GetCenter", "Get the center point of the rectangle.");
     DOC_FUNCTION_2("base.FRect", "Combine", "Create an union of the given rectangles.<br>"
-                                          "Example: local union = base.FRect.Combine(a, b)",
+                                            "If a is an empty rect then b is returned.<br>"
+                                            "If b is an empty rect then a is returned.<br>",
                  "base.FRect", "a", "base.FRect", "b");
-    DOC_FUNCTION_2("base.FRect", "Intersect", "Create an intersection of the given rectangles.<br>"
-                                            "Example: local intersection = base.FRect.Intersect(a, b)",
+    DOC_FUNCTION_2("base.FRect", "Intersect", "Create an intersection of the given rectangles.<br>",
                  "base.FRect", "a", "base.FRect", "b");
     DOC_FUNCTION_2("bool", "TestIntersect", "Test whether the rectangles intersect.<br>"
-                                          "Example: local ret = base.FRect.TestIntersect(a, b)",
+                                            "If either rect is an empty rect then an empty rect is returned.",
                  "base.FRect", "a", "base.FRect", "b");
     DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.",
                  "base.FRect", "rect");
@@ -434,6 +439,7 @@ void InitLuaDoc()
                "float", "width", "float", "height");
     DOC_METHOD_0("float", "GetWidth", "Get the width of the size.");
     DOC_METHOD_0("float", "GetHeight", "Get the height of the size.");
+    DOC_METHOD_0("bool", "IsZero", "Check whether the size is a zero size. A size is zero when it has no width or height.");
     DOC_META_METHOD_2("base.FSize", "operator *", "Lua multiplication meta method.", "base.FSize", "size", "float", "scalar");
     DOC_META_METHOD_2("base.FSize", "operator +", "Lua addition meta method.", "base.FSize", "lhs", "base.FSize", "rhs");
     DOC_META_METHOD_2("base.FSize", "operator -", "Lua subtraction meta method.", "base.FSize", "lhs", "base.FSize", "rhs");
@@ -450,9 +456,9 @@ void InitLuaDoc()
     DOC_META_METHOD_2("base.FPoint", "operator -", "Lua subtraction meta method.", "base.FPoint", "lhs", "base.FPoint", "rhs");
     DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.", "base.FPoint", "point");
     DOC_FUNCTION_2("float", "Distance", "Compute the actual distance between two points.", "base.FPoint", "a", "base.FPoint", "b");
-    DOC_FUNCTION_2("float", "SquareDistance", "Compute the square distance between two points. This function offers better performance than Distance <br>"
-                                              "when only a comparable value is needed and not the actual distance.<br>"
-                                              "A squared distance is sufficient for example when finding a closest object to any other object.",
+    DOC_FUNCTION_2("float", "SquareDistance", "Compute the square distance between two points. This function offers better performance when "
+                                              "the actual distance is not needed but only a value that can be compared when for example finding "
+                                              "the object closest to any other object.",
                    "base.FPoint", "a", "base.FPoint", "b");
 
     DOC_TABLE("base.Colors");
@@ -466,9 +472,9 @@ void InitLuaDoc()
     DOC_METHOD_0("base.Color4f", "new", "Construct a new color with default channel value.");
     DOC_METHOD_4("base.Color4f", "new", "Construct a new color with normalized float [0.0, 1.0] channel values.",
                  "float", "r", "float", "g", "float", "b", "float", "a");
-    DOC_METHOD_4("base.Color4f", "new", "Construct a new color with int [0, 255] channel values.<br>"
-                                        "The values are expected to be in linear color space.",
+    DOC_METHOD_4("base.Color4f", "new", "Construct a new color with int [0, 255] channel values.",
                  "int", "r", "int", "g", "int", "b", "int", "a");
+    DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.", "base.Color4f", "color");
     DOC_METHOD_0("float", "GetRed", "Get normalized red channel value.");
     DOC_METHOD_0("float", "GetGreen", "Get normalized green channel value.");
     DOC_METHOD_0("float", "GetBlue", "Get normalized blue channel value.");
@@ -483,61 +489,37 @@ void InitLuaDoc()
     DOC_FUNCTION_1("base.Color4f", "FromEnum", "Construct a new color from base.Colors color name.", "string", "color");
 
     DOC_TABLE("data.Reader");
-    DOC_METHOD_1("bool, float", "ReadFloat", "Read a float value from the data chunk.",
-                "string", "key");
-    DOC_METHOD_1("bool, int", "ReadInt", "Read an int value from the data chunk.",
-                 "string", "key");
-    DOC_METHOD_1("bool, bool", "ReadBool", "Read a bool value from the data chunk.",
-                 "string", "key");
-    DOC_METHOD_1("bool, string", "ReadString", "Read a string value from the data chunk.",
-                 "string", "key");
-    DOC_METHOD_1("bool, glm.vec2", "ReadVec2", "Read a glm.vec2 value from the data chunk.",
-                 "string", "key");
-    DOC_METHOD_1("bool, glm.vec3", "ReadVec3", "Read a glm.vec3 value from the data chunk.",
-                 "string", "key");
-    DOC_METHOD_1("bool, glm.vec4", "ReadVec4", "Read a glm.vec4 value from the data chunk.",
-                 "string", "key");
-    DOC_METHOD_1("bool, base.FRect", "ReadFRect", "Read a base.FRect value from the data chunk.",
-                 "string", "key");
-    DOC_METHOD_1("bool, base.FPoint", "ReadFPoint", "Read a base.FPoint value from the data chunk.",
-                 "string", "key");
-    DOC_METHOD_1("bool, base.FSize", "ReadFSize", "Read a base.FSize value from the data chunk.",
-                 "string", "key");
-    DOC_METHOD_1("bool, base.Color4f", "ReadColor4f", "Read a base.Color4f value from the data chunk.",
-                 "string", "key");
-
-    DOC_METHOD_2("bool, float", "Read", "Read a float value from the data chunk.",
-                 "string", "key", "float", "default");
-    DOC_METHOD_2("bool, int", "Read", "Read an int value from the data chunk.",
-                 "string", "key", "int", "default");
-    DOC_METHOD_2("bool, bool", "Read", "Read a bool value from the data chunk.",
-                 "string", "key", "bool", "default");
-    DOC_METHOD_2("bool, string", "Read", "Read a string value from the data chunk.",
-                 "string", "key", "string", "default");
-    DOC_METHOD_2("bool, glm.vec2", "Read", "Read a glm.vec2 value from the data chunk.",
-                 "string", "key", "glm.vec2", "default");
-    DOC_METHOD_2("bool, glm.vec3", "Read", "Read a glm.vec3 value from the data chunk.",
-                 "string", "key", "glm.vec3", "default");
-    DOC_METHOD_2("bool, glm.vec4", "Read", "Read a glm.vec4 value from the data chunk.",
-                 "string", "key", "glm.vec4", "default");
-    DOC_METHOD_2("bool, base.FRect", "Read", "Read a base.FRect value from the data chunk.",
-                 "string", "key", "base.FRect", "default");
-    DOC_METHOD_2("bool, base.FPoint", "Read", "Read a base.FPoint value from the data chunk.",
-                 "string", "key", "base.FPoint", "default");
-    DOC_METHOD_2("bool, base.FSize", "Read", "Read a base.FSize value from the data chunk.",
-                 "string", "key", "base.FSize", "default");
-    DOC_METHOD_2("bool, base.Color4f", "Read", "Read a base.Color4f value from the data chunk.",
-                 "string", "key", "base.Color4f", "default");
-
+    DOC_METHOD_1("bool, float", "ReadFloat", "Read a float value from the data chunk.", "string", "key");
+    DOC_METHOD_1("bool, int", "ReadInt", "Read an int value from the data chunk.", "string", "key");
+    DOC_METHOD_1("bool, bool", "ReadBool", "Read a bool value from the data chunk.", "string", "key");
+    DOC_METHOD_1("bool, string", "ReadString", "Read a string value from the data chunk.", "string", "key");
+    DOC_METHOD_1("bool, glm.vec2", "ReadVec2", "Read a glm.vec2 value from the data chunk.", "string", "key");
+    DOC_METHOD_1("bool, glm.vec3", "ReadVec3", "Read a glm.vec3 value from the data chunk.", "string", "key");
+    DOC_METHOD_1("bool, glm.vec4", "ReadVec4", "Read a glm.vec4 value from the data chunk.", "string", "key");
+    DOC_METHOD_1("bool, base.FRect", "ReadFRect", "Read a base.FRect value from the data chunk.", "string", "key");
+    DOC_METHOD_1("bool, base.FPoint", "ReadFPoint", "Read a base.FPoint value from the data chunk.", "string", "key");
+    DOC_METHOD_1("bool, base.FSize", "ReadFSize", "Read a base.FSize value from the data chunk.", "string", "key");
+    DOC_METHOD_1("bool, base.Color4f", "ReadColor4f", "Read a base.Color4f value from the data chunk.", "string", "key");
+    DOC_METHOD_2("bool, float", "Read", "Read a float value from the data chunk.", "string", "key", "float", "default");
+    DOC_METHOD_2("bool, int", "Read", "Read an int value from the data chunk.", "string", "key", "int", "default");
+    DOC_METHOD_2("bool, bool", "Read", "Read a bool value from the data chunk.", "string", "key", "bool", "default");
+    DOC_METHOD_2("bool, string", "Read", "Read a string value from the data chunk.", "string", "key", "string", "default");
+    DOC_METHOD_2("bool, glm.vec2", "Read", "Read a glm.vec2 value from the data chunk.", "string", "key", "glm.vec2", "default");
+    DOC_METHOD_2("bool, glm.vec3", "Read", "Read a glm.vec3 value from the data chunk.", "string", "key", "glm.vec3", "default");
+    DOC_METHOD_2("bool, glm.vec4", "Read", "Read a glm.vec4 value from the data chunk.", "string", "key", "glm.vec4", "default");
+    DOC_METHOD_2("bool, base.FRect", "Read", "Read a base.FRect value from the data chunk.", "string", "key", "base.FRect", "default");
+    DOC_METHOD_2("bool, base.FPoint", "Read", "Read a base.FPoint value from the data chunk.", "string", "key", "base.FPoint", "default");
+    DOC_METHOD_2("bool, base.FSize", "Read", "Read a base.FSize value from the data chunk.", "string", "key", "base.FSize", "default");
+    DOC_METHOD_2("bool, base.Color4f", "Read", "Read a base.Color4f value from the data chunk.", "string", "key", "base.Color4f", "default");
     DOC_METHOD_1("bool", "HasValue", "Check whether the given key exists in the data chunk or not.","string", "key");
     DOC_METHOD_1("bool", "HasChunk", "Check whether a data chunk by the given key exists or not.","string", "key");
     DOC_METHOD_0("bool", "IsEmpty", "Check whether the data chunk is empty or not.<br>"
                                    "A data chunk is considered empty when it has no values or child data chunks.");
-    DOC_METHOD_1("int", "GetNumChunks", "Get the number of data chunks under the given key.","string", "key");
+    DOC_METHOD_1("unsigned", "GetNumChunks", "Get the number of data chunks under the given key.","string", "key");
     DOC_METHOD_2("data.Reader", "GetReadChunk", "Get a read chunk at the given index under the given key.<br>"
                                                 "Returns a new data reader object for that chunk.<br>"
                                                 "Both key and index must be valid.",
-                 "string", "key", "int", "index");
+                 "string", "key", "unsigned", "index");
 
     DOC_TABLE("data.Writer");
     DOC_METHOD_2("void", "Write", "Write a float value to the data chunk.", "string", "key", "float", "value");
@@ -613,7 +595,7 @@ void InitLuaDoc()
     DOC_TABLE("glm.vec2");
     DOC_METHOD_0("glm.vec2", "new", "Construct a new glm.vec2.");
     DOC_METHOD_2("glm.vec2", "new", "Construct a new glm.vec2.", "float", "x", "float", "y");
-    DOC_META_METHOD_2("float", "operator []", "Lua index meta method.", "glm.vec2", "vec", "int", "index");
+    DOC_META_METHOD_2("float", "operator []", "Lua index meta method.", "glm.vec2", "vec", "unsigned", "index");
     DOC_META_METHOD_2("glm.vec2", "operator +", "Lua addition meta method.", "glm.vec2", "a", "glm.vec2", "b");
     DOC_META_METHOD_2("glm.vec2", "operator -", "Lua subtraction meta method.", "glm.vec2", "a", "glm.vec2", "b");
     DOC_META_METHOD_2("glm.vec2", "operator *", "Lua multiplication meta method.", "glm.vec2|float", "a", "glm.vec2|float", "b");
@@ -627,7 +609,7 @@ void InitLuaDoc()
     DOC_TABLE("glm.vec3");
     DOC_METHOD_0("glm.vec3", "new", "Construct a new glm.vec3.");
     DOC_METHOD_3("glm.vec3", "new", "Construct a new glm.vec3.", "float", "x", "float", "y", "float", "z");
-    DOC_META_METHOD_2("float", "operator []", "Lua index meta method.", "glm.vec3", "vec", "int", "index");
+    DOC_META_METHOD_2("float", "operator []", "Lua index meta method.", "glm.vec3", "vec", "unsigned", "index");
     DOC_META_METHOD_2("glm.vec3", "operator +", "Lua addition meta method.", "glm.vec3", "a", "glm.vec3", "b");
     DOC_META_METHOD_2("glm.vec3", "operator -", "Lua subtraction meta  method.", "glm.vec3", "a", "glm.vec3", "b");
     DOC_META_METHOD_2("glm.vec3", "operator *", "Lua multiplication meta method.", "glm.vec3|float", "a", "glm.vec3|float", "b");
@@ -642,7 +624,7 @@ void InitLuaDoc()
     DOC_TABLE("glm.vec4");
     DOC_METHOD_0("glm.vec4", "new", "Construct a new glm.vec3.");
     DOC_METHOD_4("glm.vec4", "new", "Construct a new glm.vec3.", "float", "x", "float", "y", "float", "z", "float", "w");
-    DOC_META_METHOD_2("float", "operator []", "Lua index meta method.", "glm.vec4", "vec", "int", "index");
+    DOC_META_METHOD_2("float", "operator []", "Lua index meta method.", "glm.vec4", "vec", "unsigned", "index");
     DOC_META_METHOD_2("glm.vec4", "operator +", "Lua addition meta method.", "glm.vec4", "a", "glm.vec4", "b");
     DOC_META_METHOD_2("glm.vec4", "operator -", "Lua subtraction meta method.", "glm.vec4", "a", "glm.vec4", "b");
     DOC_META_METHOD_2("glm.vec4", "operator *", "Lua multiplication meta method.", "glm.vec4|float", "a", "glm.vec4|float", "b");
@@ -656,45 +638,45 @@ void InitLuaDoc()
     DOC_OBJECT_PROPERTY("float", "w", "W component of the vector.");
 
     DOC_TABLE("wdk");
-    DOC_FUNCTION_1("string", "KeyStr", "Convert a key value to a named key string.", "int", "key");
-    DOC_FUNCTION_1("string", "BtnStr", "Convert a mouse button value to a named button string.", "int", "button");
-    DOC_FUNCTION_1("string", "ModStr", "Convert a modifier key value to a named modifier string.", "int", "modifier");
-    DOC_FUNCTION_1("string", "ModBitStr", "Map keyboard key modifier bit string to a named modifier string.", "int", "mod_bits");
+    DOC_FUNCTION_1("string", "KeyStr", "Convert a key value to a named key string.", "unsigned", "key");
+    DOC_FUNCTION_1("string", "BtnStr", "Convert a mouse button value to a named button string.", "unsigned", "button");
+    DOC_FUNCTION_1("string", "ModStr", "Convert a modifier key value to a named modifier string.", "unsigned", "modifier");
+    DOC_FUNCTION_1("string", "ModBitStr", "Map keyboard key modifier bit string to a named modifier string.", "unsigned", "mod_bits");
     DOC_FUNCTION_1("bool", "TestKeyDown", "Test whether the given keyboard key is currently down.<br>"
                                         "The key value is one of the key values in in wdk.Keys. <br>"
                                         "This function is only available on Windows and Linux. ",
-                                        "int", "key");
+                                        "unsigned", "key");
     DOC_FUNCTION_2("bool", "TestMod", "Test whether the given modifier bit is set in the bitset of modifier keys.",
-                 "int", "modifier_bits", "int", "modifier_value");
+                 "unsigned", "modifier_bits", "unsigned", "modifier_value");
 
     DOC_TABLE("wdk.Keys");
     for (const auto& key : magic_enum::enum_values<wdk::Keysym>())
     {
         const std::string name(magic_enum::enum_name(key));
-        DOC_TABLE_PROPERTY("int", QString::fromStdString(name), app::toString("Key value for '%1'.", name));
+        DOC_TABLE_PROPERTY("unsigned", QString::fromStdString(name), app::toString("Key value for '%1'.", name));
     }
     DOC_TABLE("wdk.Mods");
     for (const auto& mod : magic_enum::enum_values<wdk::Keymod>())
     {
         const std::string name(magic_enum::enum_name(mod));
-        DOC_TABLE_PROPERTY("int", QString::fromStdString(name), app::toString("Modifier value for '%1'.", name));
+        DOC_TABLE_PROPERTY("unsigned", QString::fromStdString(name), app::toString("Modifier value for '%1'.", name));
     }
     DOC_TABLE("wdk.Buttons");
     for (const auto& btn : magic_enum::enum_values<wdk::MouseButton>())
     {
         const std::string name(magic_enum::enum_name(btn));
-        DOC_TABLE_PROPERTY("int", QString::fromStdString(name), app::toString("Mouse button value for '%1'.", name));
+        DOC_TABLE_PROPERTY("unsigned", QString::fromStdString(name), app::toString("Mouse button value for '%1'.", name));
     }
     DOC_TABLE("wdk.KeyBitSet");
     DOC_METHOD_0("wdk.KeyBitSet", "new", "Construct new key symbol bit set.");
-    DOC_METHOD_2("void", "Set", "Set a key symbol bit on or off.", "int", "key", "bool", "on");
-    DOC_METHOD_1("bool", "Test", "Test whether a key symbol bit is on or off.", "int", "key");
+    DOC_METHOD_2("void", "Set", "Set a key symbol bit on or off.", "unsigned", "key", "bool", "on");
+    DOC_METHOD_1("bool", "Test", "Test whether a key symbol bit is on or off.", "unsigned", "key");
     DOC_METHOD_0("bool", "AnyBit", "Check whether any bit is set.");
     DOC_METHOD_0("void", "Clear", "Clear all bits.");
     DOC_META_METHOD_2("wdk.KeyBitSet", "operator &", "Lua bitwise and meta method.", "wdk.KeyBitSet", "lhs", "wdk.KeyBitSet", "rhs");
-    DOC_META_METHOD_2("wdk.KeyBitSet", "operator &", "Lua bitwise and meta method.", "wdk.KeyBitSet", "bits", "int", "key");
+    DOC_META_METHOD_2("wdk.KeyBitSet", "operator &", "Lua bitwise and meta method.", "wdk.KeyBitSet", "bits", "unsigned", "key");
     DOC_META_METHOD_2("wdk.KeyBitSet", "operator |", "Lua bitwise or meta method.", "wdk.KeyBitSet", "lhs", "wdk.KeyBitSet", "rhs");
-    DOC_META_METHOD_2("wdk.KeyBitSet", "operator |", "Lua bitwise or meta method.", "wdk.KeyBitSet", "bits", "int", "key");
+    DOC_META_METHOD_2("wdk.KeyBitSet", "operator |", "Lua bitwise or meta method.", "wdk.KeyBitSet", "bits", "unsigned", "key");
 
     DOC_TABLE("uik");
     DOC_TABLE("uik.Widget");
@@ -786,7 +768,7 @@ void InitLuaDoc()
     DOC_TABLE("uik.Window");
     DOC_METHOD_0("string", "GetId", "Get the window ID.");
     DOC_METHOD_0("string", "GetName", "Get the window name.");
-    DOC_METHOD_0("int", "GetNumWidgets", "Get the number of widgets in the window.");
+    DOC_METHOD_0("unsigned", "GetNumWidgets", "Get the number of widgets in the window.");
     DOC_METHOD_1("uik.Widget", "FindWidgetById", "Find a widget by the given Widget ID.<br>"
                                                  "The returned widget will already be downcast to the right widget type.<br>"
                                                  "Returns nil if there's no such widget.",
@@ -800,7 +782,7 @@ void InitLuaDoc()
                                                    "Returns nil if the widget is the root widget and doesn't have a parent."
                                                    "The returned widget will already be downcast to the right widget type.<br>",
                  "uik.Widget", "widget");
-    DOC_METHOD_1("uik.Widget", "GetWidget", "Get a widget by the given index."
+    DOC_METHOD_1("uik.Widget", "GetWidget", "Get a widget by the given index. The indexing is zero based and the index must be a valid index.<br>"
                                             "The returned widget will already be downcast to the right widget type.<br>",
                  "unsigned", "index");
 
@@ -825,23 +807,23 @@ void InitLuaDoc()
                  "game.SceneClass|string", "klass|name");
     DOC_METHOD_2("game.Entity", "SpawnEntity", "Spawn a new entity in the scene.<br>"
                                                "Spawning a new entity doesn't immediately place the entity in the scene but will only add it to the list of "
-                                               "entities to be spawned at the start of the next iteration of the game loop.<br>"
-                                               "Then each entity that was just spawned will have their HasBeenSpawned flag on.<br>"
+                                               "entities to be spawned at the start of the next iteration of the game loop and "
+                                               "then each entity that was just spawned will have their HasBeenSpawned flag on.<br><br>"
                                                "If link is true the entity is linked to the current scene's entity hierarchy.<br>"
                                                "If link is false the entity is not linked to the current scene's entity hierarchy and you should manually call LinkChild later.<br>"
-                                               "The args table is a Lua table for packing all the spawn arguments with the following keys.<br>"
-                                               " id, string, the ID for the entity. Default = '' <br>"
-                                               " name, string, the name for the entity. Default = ''<br>"
-                                               " sx, float, scale factor for X axis. Default = 1.0<br>"
-                                               " sy, float, scale factor for Y axis. Default = 1.0<br>"
-                                               " x, float, translation on the X axis. Default = 0.0<br>"
-                                               " y, float, translation on the Y axis. Default = 0.0<br>"
-                                               " r, float, rotation in radians around the Z axis. Default = 0.0<br>"
-                                               " pos, glm.vec2 translation vector. (Alternative for x, y). Default = glm.vec2(0.0, 0.0)<br>"
-                                               " scale, glm.vec2 scaling vector (Alternative for sx, sy). Default = glm.vec2(1.0, 1.0)<br>"
-                                               " logging, bool, Flag to enable/disable entity logging. Default = false<br>"
-                                               " layer, int, Scene layer index. Default = 0<br>"
-                                               " link, bool, Flag to control linking to scene root in scene graph. Default = true",
+                                               "The args table is a Lua table for packing all the spawn arguments with the following keys.<br><br>"
+                                               " &nbsp;&nbsp; id,   string, the ID for the entity. Default = '' <br>"
+                                               " &nbsp;&nbsp; name, string, the name for the entity. Default = ''<br>"
+                                               " &nbsp;&nbsp; sx,   float, scale factor for X axis. Default = 1.0<br>"
+                                               " &nbsp;&nbsp; sy,   float, scale factor for Y axis. Default = 1.0<br>"
+                                               " &nbsp;&nbsp; x,    float, translation on the X axis. Default = 0.0<br>"
+                                               " &nbsp;&nbsp; y,    float, translation on the Y axis. Default = 0.0<br>"
+                                               " &nbsp;&nbsp; r,    float, rotation in radians around the Z axis. Default = 0.0<br>"
+                                               " &nbsp;&nbsp; pos,  glm.vec2 translation vector. (Alternative for x, y). Default = glm.vec2(0.0, 0.0)<br>"
+                                               " &nbsp;&nbsp; scale, glm.vec2 scaling vector (Alternative for sx, sy). Default = glm.vec2(1.0, 1.0)<br>"
+                                               " &nbsp;&nbsp; logging, bool, Flag to enable/disable entity logging. Default = false<br>"
+                                               " &nbsp;&nbsp; layer, int, Scene layer index. Default = 0<br>"
+                                               " &nbsp;&nbsp; link, bool, Flag to control linking to scene root in scene graph. Default = true",
                  "string", "klass_name", "table", "args");
     DOC_METHOD_1("game.Entity", "SpawnEntity", "Spawn a new entity in the scene with default arguments for everything.<br>",
                  "string", "klass_name");
@@ -850,7 +832,7 @@ void InitLuaDoc()
     DOC_METHOD_0("void", "EndPlay", "End the play of the current scene. Will invoke EndPlay callbacks and end game play cleanly.");
     DOC_METHOD_1("void", "Quit", "Quit the game by asking the host application to exit.", "int", "exit_code");
     DOC_METHOD_1("void", "Delay", "Insert a time delay into the engine request queue. <br>"
-                                  "All the functions in the game.Engine interface are pushed into a queue and<br>"
+                                  "All the functions in the game.Engine interface are pushed into a queue and "
                                   "adding a delay will postpone the processing of all subsequent engine requests.<br>"
                                   "For example if Delay(2.0) OpenUI('MyUI') the UI will be opened after 2 seconds.",
                  "float", "seconds");
@@ -859,60 +841,59 @@ void InitLuaDoc()
     DOC_METHOD_1("void", "ShowDebug", "Toggle debug messages on/off in the engine.", "bool", "show");
     DOC_METHOD_1("void", "SetFullScreen", "Request the host application to toggle full screen mode.", "bool", "full_screen");
     DOC_METHOD_1("void", "BlockKeyboard", "Toggle blocking keyboard events on/off.<br>"
-                                          "When keyboard block is enabled the keyboard events are coming from the OS are not processed,<br>"
+                                          "When keyboard block is enabled the keyboard events coming from the OS are not processed, "
                                           "and none of the entity/scene keyboard handlers are called.<br>"
-                                          "Note that this does not block low level keyboard polling such as wdk.TestKeyDown from working,<br>"
+                                          "Note that this does not block low level keyboard polling such as wdk.TestKeyDown from working "
                                           "but only *event* based keyboard processing is affected.",
                  "bool", "block");
     DOC_METHOD_1("void", "BlockMouse", "Turn mouse blocking on or off.<br>"
-                                       "When mouse block is enabled the mouse events coming from the OS are not processed<br>"
+                                       "When mouse block is enabled the mouse events coming from the OS are not processed "
                                        "and none of the entity/scene mouse event handlers are called.",
                  "bool", "block");
     DOC_METHOD_1("void", "DebugPrint", "Print a debug message in the game window.", "string", "message");
-    DOC_METHOD_4("void", "DebugDrawLine", "Draw a debug line from point A to point B.",
+    DOC_METHOD_4("void", "DebugDrawLine", "Draw a debug line from point A to point B in game space.",
                  "glm.vec2|base.FPoint", "a", "glm.vec2|base.FPoint", "b", "base.Color4f", "color", "float", "line_width");
-    DOC_METHOD_6("void", "DebugDrawLine", "Draw a debug line from point x0,y0 to x1,y1.",
+    DOC_METHOD_6("void", "DebugDrawLine", "Draw a debug line from point x0,y0 to x1,y1 in game space.",
                  "float", "x0", "float", "y0", "float", "x1", "float", "y1", "base.Color4f", "color", "float", "line_width");
-    DOC_METHOD_4("void", "DebugDrawRect", "Draw a debug rect from top left corner to bottom right corner.",
+    DOC_METHOD_4("void", "DebugDrawRect", "Draw a debug rect from top left corner to bottom right corner in game space.",
                  "glm.vec2|base.FPoint", "top_left", "glm.vec2|base.FPoint", "bottom_right", "base.Color4f", "color", "float", "line_width");
     DOC_METHOD_0("void", "DebugClear", "Clear all previous debug prints from the game window.");
     DOC_METHOD_1("uik.Window", "OpenUI", "Open a new uik.Window and place it on the top of the UI Window stack.<br>"
                                          "The window will remain open until CloseUI is called.<br>"
-                                         "Returns a reference to the window that was opened so it's possible to use the<br>"
+                                         "Returns a reference to the window that was opened so it's possible to use the "
                                          "returned window object to query for widgets etc. and set their initial values conveniently.",
                  "uik.Window|string", "window|name");
-    DOC_METHOD_1("void", "CloseUI", "Close the topmost UI Window and pop it off the window stack.", "int", "exit_code");
+    DOC_METHOD_1("void", "CloseUI", "Close the topmost UI Window and pop it off the window stack. <br>"
+                                    "The associated exit_code will be passed to any OnUIClose event handlers as the result value.",
+                 "int", "exit_code");
     DOC_METHOD_1("void", "PostEvent", "Post a GameEvent to all OnGameEvent handlers.", "game.GameEvent", "event");
     DOC_METHOD_1("void", "ShowDeveloperUI", "Show or hide the developer UI when supported by the host app/platform.", "bool", "show");
-    DOC_METHOD_2("void", "EnableEffect", "Enable/disable a rendering effect.", "string", "effect_name", "bool", "on_off");
+    DOC_METHOD_2("void", "EnableEffect", "Enable/disable a rendering effect. <br>Possible effects: 'Bloom'.",
+                 "string", "name", "bool", "on_off");
     DOC_METHOD_1("void", "SetViewport", "Set the game's logical (in game units) viewport that covers the currently visible part of the game world.<br>"
-                                        "This method is only available in the game main script.<br>"
                                         "The initial viewport is a viewport without any dimensions.",
                  "base.FRect", "viewport");
     DOC_METHOD_4("void", "SetViewport", "Set the game's logical (in game units) viewport that covers the currently visible part of the game world.<br>"
-                                        "This method is only available in the game main script.<br>"
                                         "The initial viewport is a viewport without any dimensions.",
                  "float", "x", "float", "y", "float", "width", "float", "height");
     DOC_METHOD_2("void", "SetViewport", "Set the game's logical (in game units) viewport that covers the currently visible part of the game world.<br>"
-                                        "This method is only available in the game main script.<br>"
                                         "The initial viewport is a viewport without any dimensions.<br>"
                                         "This function keeps the viewport at 0,0 and resizes it to the given width and height.",
                  "float", "width", "float", "height");
-    DOC_METHOD_0("uik.Window", "GetTopUI", "Get the topmost UI Window from the window stack. If no window is currently open then nil is returned.<br>"
-                                           "This method is only available in the game main script.");
+    DOC_METHOD_0("uik.Window", "GetTopUI", "Get the topmost UI Window from the window stack. If no window is currently open then nil is returned.<br>");
 
     DOC_TABLE("game.ClassLibrary");
     DOC_METHOD_1("game.EntityClass", "FindEntityClassByName", "Find an entity class by name.<br>"
                                                               "Returns nil if no such class object could be found.","string", "name");
-    DOC_METHOD_1("game.EntityClass", "FindEntityClassById", "Find an entity class by its class ID.<br>"
+    DOC_METHOD_1("game.EntityClass", "FindEntityClassById", "Find an entity class by class ID.<br>"
                                                             "Returns nil if no such class object could be found.","string", "id");
     DOC_METHOD_1("game.SceneClass", "FindSceneClassByName", "Find a scene class by name.<br>"
                                                             "Returns nil if no such class object could be found.","string", "name");
-    DOC_METHOD_1("game.SceneClass", "FindSceneClassById", "Find a scene class by its class ID.<br>"
+    DOC_METHOD_1("game.SceneClass", "FindSceneClassById", "Find a scene class by class ID.<br>"
                                                           "Returns nil if no such class object could be found.","string", "id");
     DOC_METHOD_1("audio.GraphClass", "FindAudioGraphClassByName", "Find an audio graph class by name.<br>"
                                                             "Returns nil if no such class object could be found.","string", "name");
-    DOC_METHOD_1("audio.GraphClass", "FindAudioGraphClassById", "Find an audio graph class by its class ID.<br>"
+    DOC_METHOD_1("audio.GraphClass", "FindAudioGraphClassById", "Find an audio graph class by class ID.<br>"
                                                           "Returns nil if no such class object could be found.","string", "id");
     DOC_METHOD_1("uik.Window", "FindUIByName", "Find a UI Window by name.<br>"
                                                "Returns nil if no such window object could be found.","string", "name");
@@ -931,8 +912,7 @@ void InitLuaDoc()
     DOC_METHOD_0("bool", "IsVisible", "Check whether the drawable is currently visible or not.");
     DOC_METHOD_1("void", "SetVisible", "Hide or show the drawable.", "bool", "visible");
     DOC_METHOD_2("void", "SetUniform", "Set a material parameter (shader uniform) value.<br>"
-                                       "The parameter is identified by its uniform name in the material shader.<br>"
-                                       "Supported values are float, int, base.Color4f, glm.vec2, glm.vec3, glm.vec4",
+                                       "The parameter is identified by its uniform name in the material shader.<br>",
                  "string", "name", "float|int|base.Color4f|glm.vec2|glm.vec3|glm.vec4", "value");
     DOC_METHOD_1("float|int|base.Color4f|glm.vec2|glm.vec3|glm.vec4", "FindUniform",
                  "Find a material parameter (shader uniform) value by name.<br>"
@@ -1058,7 +1038,7 @@ void InitLuaDoc()
     DOC_METHOD_0("string", "GetName", "Get the actuator class name.");
     DOC_METHOD_0("string", "GetId", "Get the actuator class ID.");
     DOC_METHOD_0("string", "GetNodeId", "Get the entity node ID that the actuator will apply on.");
-    DOC_METHOD_0("float", "GetStartTime", "Get the animation time (in seconds) when the actuator will start.");
+    DOC_METHOD_0("float", "GetStartTime", "Get the animation time in seconds when the actuator will start.");
     DOC_METHOD_0("float", "GetDuration", "Get the duration of the actuator's operation in seconds.");
     DOC_METHOD_0("string", "GetType", "Get the type of actuator. <br>"
                                       "One of: 'Transform', 'Kinematic', 'SetValue', 'SetFlag', 'Material'");
@@ -1066,7 +1046,7 @@ void InitLuaDoc()
     DOC_METHOD_0("string", "GetClassId", "Get the actuator class ID.");
     DOC_METHOD_0("string", "GetName", "Get the actuator class name.");
     DOC_METHOD_0("string", "GetNodeId", "Get the entity node ID that the actuator will apply on.");
-    DOC_METHOD_0("float", "GetStartTime", "Get the animation time (in seconds) when the actuator will start.");
+    DOC_METHOD_0("float", "GetStartTime", "Get the animation time in seconds when the actuator will start.");
     DOC_METHOD_0("float", "GetDuration", "Get the duration of the actuator's operation.");
     DOC_METHOD_0("game.TransformActuator", "AsTransformActuator", "Cast the actuator to a TransformActuator. Returns nil if the cast failed.");
     DOC_METHOD_0("game.SetFlagActuator", "AsFlagActuator", "Cast the actuator to a SetFlagActuator. Returns nil if the cast failed.");
@@ -1125,8 +1105,8 @@ void InitLuaDoc()
                                                       "Takes an optional type string for down casting the actuator to a specific type.",
                  "string", "id", "string", "type");
     DOC_METHOD_2("game.Actuator", "FindActuatorByName", "Find an animation actuator by its class name.<br>"
-                                                        "If multiple actuators have the same name it's unspecified which one is returned.<br>"
                                                         "Returns nil if no such actuator could be found.<br>"
+                                                        "In case multiple actuators have the same name it's unspecified which one is returned.<br>"
                                                         "Takes an optional type string for down casting the actuator to a specific type.",
                  "string", "name", "string", "type");
 
@@ -1143,7 +1123,7 @@ void InitLuaDoc()
     DOC_METHOD_0("string", "GetClassName", "Get entity class type name.");
     DOC_METHOD_0("string", "GetClassId", "Get entity class type ID.");
     DOC_METHOD_0("string", "GetTag", "Get entity tag string.");
-    DOC_METHOD_0("int", "GetNumNodes", "Get the number of entity nodes in this entity.");
+    DOC_METHOD_0("unsigned", "GetNumNodes", "Get the number of entity nodes in this entity.");
     DOC_METHOD_0("float", "GetTime", "Get the entity's current accumulated (life) time.");
     DOC_METHOD_0("int" , "GetLayer", "Get the entity's render layer in the scene rendering.");
     DOC_METHOD_1("void", "SetLayer", "Set the entity's render layer in the scene rendering.", "int", "layer");
@@ -1156,17 +1136,15 @@ void InitLuaDoc()
     DOC_METHOD_0("bool", "HasBeenSpawned", "Checks whether the entity has just been spawned and exists for the first iteration of the game loop.<br>"
                                            "This flag is only ever true on the first iteration of the game loop during the entity's lifetime.");
     DOC_METHOD_0("game.Scene", "GetScene", "Get the current scene.");
-    DOC_METHOD_1("game.EntityNode", "GetNode", "Get an entity node at the the given index.", "int", "index");
-    DOC_METHOD_1("game.EntityNode", "FindNodeByClassName", "Find a node in the entity by it's class name.<br>"
-                                                           "If multiple nodes have the same class name it's unspecified which one is returned.<br>"
-                                                           "Returns nil if no such node could be found.",
-                 "string", "class_name");
-    DOC_METHOD_1("game.EntityNode", "FindNodeByClassId", "Find a node in the entity by its class ID.<br>"
-                                                         "Returns nil if no such node could be found.",
-                 "string", "class_id");
-    DOC_METHOD_1("game.EntityNode", "FindNodeByInstanceId", "Find a node in the entity by its instance ID.<br>"
-                                                            "If multiple nodes have the same ID it's unspecified which one is returned.<br>"
-                                                            "Returns nil if no such node could be found.",
+    DOC_METHOD_1("game.EntityNode", "GetNode", "Get an entity node at the the given index. The indexing is 0 based and the index must be a valid index.",
+                 "unsigned", "index");
+    DOC_METHOD_1("game.EntityNode", "FindNodeByClassName", "Find a node in the entity by its class name. Returns nil if no such node could be found.<br>"
+                                                           "If multiple nodes have the same class name it's unspecified which one is returned.<br>",
+                 "string", "name");
+    DOC_METHOD_1("game.EntityNode", "FindNodeByClassId", "Find a node in the entity by class ID. Returns nil if no such node could be found.",
+                 "string", "id");
+    DOC_METHOD_1("game.EntityNode", "FindNodeByInstanceId", "Find a node in the entity by instance ID. Returns nil if no such node could be found.<br>"
+                                                            "If multiple nodes have the same ID it's unspecified which one is returned.<br>",
                  "string", "id");
     DOC_METHOD_0("game.Animation", "PlayIdle", "Play the entity's idle animation (if any).<br>"
                                                "Returns nil if the entity doesn't have any idle animation or is already playing an animation.");
@@ -1181,14 +1159,13 @@ void InitLuaDoc()
     DOC_METHOD_1("bool", "TestFlag", "Test entity flag.<br>"
                                      "Possible flags: 'VisibleInGame', 'LimitLifetime', 'KillAtLifetime', 'KillAtBoundary', 'TickEntity', 'UpdateEntity', 'WantsKeyEvents', 'WantsMouseEvents'",
                  "string", "flag_name");
-    DOC_METHOD_2("void", "SetFlag", "Set entity flag.<br>"
-                                    "Possible flags: 'VisibleInGame', 'LimitLifetime', 'KillAtLifetime', 'KillAtBoundary', 'TickEntity', 'UpdateEntity', 'WantsKeyEvents', 'WantsMouseEvents'",
+    DOC_METHOD_2("void", "SetFlag", "Set entity flag. Possible flags: 'VisibleInGame', 'LimitLifetime', 'KillAtLifetime', 'KillAtBoundary', 'TickEntity', 'UpdateEntity', 'WantsKeyEvents', 'WantsMouseEvents'",
                  "string", "name", "bool", "on_off");
     DOC_METHOD_1("void", "SetVisible", "Set entity visibility flag.", "bool", "on_off");
     DOC_METHOD_0("void", "Die", "Let the entity die and be removed from the scene.");
     DOC_METHOD_2("void", "SetTimer", "Set a named timer on the entity.<br>"
                                      "The timer's resolution is based on the game's update resolution configured in the project settings.<br>"
-                                     "When the timer fires OnTimer entity callback is called. The value 'jitter' indicates the delta time <br>"
+                                     "When the timer fires OnTimer entity callback is called and the provided value 'jitter' indicates the delta time "
                                      "between the ideal time and the actual time when he timer fired. A negative value indicates that the timer"
                                      "fired late.",
                  "string", "name", "float", "time");
@@ -1198,8 +1175,8 @@ void InitLuaDoc()
     DOC_METHOD_1("void", "PostEvent", "Post an event to this entity.<br>"
                                       "The entity will be able to process this event in its OnEvent callback.",
                  "game.EntityEvent", "event");
-    DOC_METHOD_1("game.ScriptVar", "FindScriptVarById", "Find a script variable by its ID. Returns nil if no such variable was found.", "string", "id");
-    DOC_METHOD_1("game.ScriptVar", "FindScriptVarByName", "Find a script variable byt its name. Returns nil if no such variable was found.", "string", "name");
+    DOC_METHOD_1("game.ScriptVar", "FindScriptVarById", "Find a script variable by ID. Returns nil if no such variable was found.", "string", "id");
+    DOC_METHOD_1("game.ScriptVar", "FindScriptVarByName", "Find a script variable byt name. Returns nil if no such variable was found.", "string", "name");
 
 
     DOC_TABLE("game.EntityEvent");
@@ -1222,7 +1199,8 @@ void InitLuaDoc()
                                       "Default is 0.0 (i.e no rotation).");
     DOC_OBJECT_PROPERTY("bool", "logging", "Whether to enable life time related engine logs for this entity.<br>"
                                    "Default is true.");
-    DOC_OBJECT_PROPERTY("int", "layer", "The scene layer index for the entity. Default is 0.");
+    DOC_OBJECT_PROPERTY("int", "layer", "The scene layer index for the entity.<br>"
+                                        "Default is 0.");
 
     DOC_TABLE("game.SpatialQueryResultSet");
     DOC_METHOD_0("bool", "IsEmpty", "Check whether the result set is an empty set or not.");
@@ -1230,8 +1208,8 @@ void InitLuaDoc()
     DOC_METHOD_0("bool", "Next", "Move to the next item (if any) in the result set. <br>"
                                  "Returns true if there is a next item or false when there are no more items.");
     DOC_METHOD_0("void", "Begin", "(Re)start the iteration over the result set. <br>"
-                                  "The iteration is already started automatically when the query is created.<br>"
-                                  "So this only needs to be called if restarting.");
+                                  "The iteration is already started automatically when the query is created, "
+                                  "so this only needs to be called if restarting.");
     DOC_METHOD_0("game.EntityNode", "Get", "Get the current item at this point of iteration over the result set.");
     DOC_METHOD_0("game.EntityNode", "GetNext", "Get the current item and move onto next item in the result set.");
     DOC_METHOD_1("game.EntityNode", "Find", "Find an entity node in the result set by invoking the specified Lua callback on each entity node in the set.<br>"
@@ -1282,7 +1260,7 @@ void InitLuaDoc()
                                   "The iteration is already started automatically when the list is created,<br>"
                                   "so this only needs to be called if restarting.");
     DOC_METHOD_0("game.Entity", "Get", "Get the current item at this point of iteration over the list.");
-    DOC_METHOD_1("game.Entity", "GetAt", "Get an item at a given index.", "unsigned", "index");
+    DOC_METHOD_1("game.Entity", "GetAt", "Get an item at a given index. The indexing is zero based and the index must be a valid index.", "unsigned", "index");
     DOC_METHOD_0("game.Entity", "GetNext", "Get the current item and move on to the next item.");
     DOC_METHOD_0("unsigned", "Size", "Get the number of items in the entity list.");
     DOC_FUNCTION_2("game.EntityList", "Join", "Join two entity lists together into a new entity list.",
@@ -1297,7 +1275,7 @@ void InitLuaDoc()
                                                            "For example a script variable named 'score' would be accessible as object.score.");
     DOC_METHOD_1("game.EntityList", "ListEntitiesByClassName", "List all entities of the given class identified by its class name", "string", "class");
     DOC_METHOD_1("game.EntityList", "ListEntitiesByTag", "List all entities that match the given tag string.", "string", "tag");
-    DOC_METHOD_0("int", "GetNumEntities", "Get the number of entities currently in the scene.");
+    DOC_METHOD_0("unsigned", "GetNumEntities", "Get the number of entities currently in the scene.");
     DOC_METHOD_1("game.Entity", "FindEntityByInstanceId", "Find an entity with the given instance ID.<br>"
                                                           "Returns nil if no such entity could be found.",
                  "string", "id");
@@ -1305,7 +1283,7 @@ void InitLuaDoc()
                                                             "Returns nil if no such entity could be found.<br>"
                                                             "In case of multiple entities with the same name the first one with a matching name is returned.",
                  "string", "name");
-    DOC_METHOD_1("game.Entity", "GetEntity", "Get an entity at the given index.", "int", "index");
+    DOC_METHOD_1("game.Entity", "GetEntity", "Get an entity at the given index. The indexing is zero based and the index must be a valid index.", "unsigned", "index");
     DOC_METHOD_1("void", "KillEntity", "Flag an entity for removal from the scene. <br>"
                                        "Killing an entity doesn't not immediately remove it from the scene but will only "
                                        "set a flag that will indicate the new state of the entity. The entity will then continue to exist "
@@ -1327,7 +1305,7 @@ void InitLuaDoc()
     DOC_METHOD_1("base.FRect", "FindEntityBoundingRect", "Find the axis aligned bounding box (AABB) for the entity in the scene.", "game.Entity", "entity");
     DOC_METHOD_2("base.FRect", "FindEntityNodeBoundingRect", "Find the axis aligned bounding box (AABB) for the entity node in the scene",
                  "game.Entity", "entity", "game.EntityNode", "node");
-    DOC_METHOD_2("base.FBox", "FindEntityNodeBoundingBox", "Find the oriented bounding box (OOB) for the entity node in the scene.",
+    DOC_METHOD_2("base.FBox", "FindEntityNodeBoundingBox", "Find the object oriented bounding box (OOB) for the entity node in the scene.",
                  "game.Entity", "entity", "game.EntityNode", "node");
     DOC_METHOD_3("glm.vec2", "MapVectorFromEntityNode", "Map a a directional vector relative to entity node coordinate basis into scene/world space.<br>"
                                                     "The resulting vector is not translated, unit length direction vector in world/scene space.",
@@ -1374,13 +1352,13 @@ void InitLuaDoc()
                                   "The iteration is already started automatically when the result vector is created,<br>"
                                   "so this only needs to be called if restarting.");
     DOC_METHOD_0("game.RayCastResult", "Get", "Get the current item at this point of iteration over the result vector.");
-    DOC_METHOD_1("game.RayCastResult", "GetAt", "Get a result at a given index.", "size_t", "index");
+    DOC_METHOD_1("game.RayCastResult", "GetAt", "Get a result at a given index. The index is zero based and the index must be a valid index." , "unsigned", "index");
     DOC_METHOD_0("game.RayCastResult", "GetNext", "Get the current item and move onto next.");
     DOC_METHOD_0("unsigned", "Size", "Get the number of items in the ray cast result vector.");
 
     DOC_TABLE("game.Physics");
     DOC_METHOD_3("game.RayCastResultVector", "RayCast", "Perform ray cast to find entity nodes with rigid bodies that intersect with the bounded ray between start and end points.<br"
-                                                        "The casting is performed in the physics world coordinate space.<br>"
+                                                        "The casting is performed in the physics world coordinate space. <br>"
                                                         "You can use MapVectorFromGame to transform points from game world space to physics world space.<br>"
                                                         "Possible modes, 'Closest', 'First', 'All'<br>"
                                                         "Closest = finds the entity node closest to the starting point of the ray.<br>"
@@ -1390,25 +1368,23 @@ void InitLuaDoc()
 
     DOC_METHOD_2("bool", "ApplyImpulseToCenter", "Apply an impulse in Newtons per second to the center of the given physics node.<br>"
                                                 "Returns true if impulse was applied otherwise false.",
-                "string|game.EntityNode", "id|node", "glm.vec2", "impulse");
+                "game.EntityNode|string", "node|id", "glm.vec2", "impulse");
     DOC_METHOD_2("bool", "ApplyForceToCenter", "Apply force in Newtons to the center of the given physics node. <br>"
                                                "Returns true if force was applied otherwise false",
-                 "string|game.EntityNode", "id|node", "glm.vec2", "force");
+                 "game.EntityNode|string", "node|id", "glm.vec2", "force");
     DOC_METHOD_2("bool", "SetLinearVelocity", "Immediately adjust the linear velocity (m/s) of the rigid body to the given velocity value."
                                               "Returns true if the velocity was adjusted otherwise false.",
-                 "string|game.EntityNode", "id|node", "glm.vec2", "velocity");
+                 "game.EntityNode|string", "node|id", "glm.vec2", "velocity");
 
-    DOC_METHOD_1("bool, glm.vec2", "FindCurrentLinearVelocity", "Find the current linear velocity of a physics body.<br>"
-                                                                "Returns true and the current velocity if the body was found otherwise false and zero vector.<br>"
-                                                                "meters per second in world space.",
-                 "string|game.EntityNode", "id|node");
-    DOC_METHOD_1("bool, float", "FindCurrentAngularVelocity", "Find the current angular velocity of a physics body.<br>"
-                                                              "Returns true and the current velocity if the body was found, otherwise false and 0 velocity.<br>"
-                                                              "Radians per second in world space.",
-                 "string|game.EntityNode", "id|node");
+    DOC_METHOD_1("bool, glm.vec2", "FindCurrentLinearVelocity", "Find the current linear velocity of a physics body in meters/s in world space.<br>"
+                                                                "Returns true and the current velocity if the body was found otherwise false and zero vector.<br>",
+                 "game.EntityNode|string", "node|id");
+    DOC_METHOD_1("bool, float", "FindCurrentAngularVelocity", "Find the current angular velocity of a physics body in radians/s in world space.<br>"
+                                                              "Returns true and the current velocity if the body was found, otherwise false and 0 velocity.<br>",
+                 "game.EntityNode|string", "node|id");
     DOC_METHOD_1("bool, float", "FindMass", "Find the mass (Kg) of a physics body based on size and density.<br>"
                                             "Returns true and mass if the body was found, otherwise false and 0 mass.",
-                 "string|game.EntityNode", "id|node");
+                 "game.EntityNode|string", "node|id");
     DOC_METHOD_0("glm.vec2", "GetScale", "Get the current scaling coefficient for scaling game units to physics world.");
     DOC_METHOD_0("glm.vec2", "GetGravity", "Get the current physics world gravity vector.");
     DOC_METHOD_0("float", "GetTimeStep", "Get the current time step (in seconds) taken on every simulation step.<br>"
@@ -1426,12 +1402,12 @@ void InitLuaDoc()
     DOC_METHOD_1("float", "MapAngleToGame", "Map an angle (radians) from physics world into game world.",
                  "float", "angle");
     DOC_METHOD_1("void", "SetGravity", "Set the physics engine gravity vector.<br>"
-                                       "Normally the gravity setting is applied through project settings but<br>"
+                                       "Normally the gravity setting is applied through project settings but "
                                        "this function allows explicit control to override that value.<br>"
                                        "The new gravity setting should be called before any physics world is created, i.e. before any scene is loaded",
                  "glm.vec2", "gravity");
     DOC_METHOD_1("void", "SetScale", "Set the physics engine scaling vector for scaling units from game to physics world and vice versa.<br>"
-                                     "Normally the scale setting is applied through project settings but<br>"
+                                     "Normally the scale setting is applied through project settings but "
                                      "this function allows explicit control to override that value.<br>"
                                      "The new scale setting should be called before any physics world is created., i.e. before any scene is loaded",
                  "glm.vec2", "scale");
@@ -1443,30 +1419,32 @@ void InitLuaDoc()
                                               "The audio graph is initially only prepared and sent to the audio mixer in paused state.<br>"
                                               "In order to start the actual audio playback ResumeMusic must be called separately.<br>"
                                               "Returns true if the audio graph was prepared successfully or false on error.",
-                 "audio.GraphClass|string", "graph|graph_name");
+                 "audio.GraphClass|string", "graph|name");
     DOC_METHOD_1("bool", "PlayMusic", "Similar to PrepareMusicGraph except the audio playback is also started immediately.",
-                 "audio.GraphClass|string", "graph|graph_name");
+                 "audio.GraphClass|string", "graph|name");
     DOC_METHOD_2("bool", "PlayMusic", "Similar to PrepareMusicGraph except the audio playback is started after some delay (in milliseconds) elapses.",
-                 "audio.GraphClass|string", "graph|graph_name", "unsigned", "delay");
+                 "audio.GraphClass|string", "graph|name", "unsigned", "delay");
     DOC_METHOD_1("void", "ResumeMusic", "Resume the playback of the named music graph immediately.",
-                 "string", "graph_name");
+                 "string", "name");
     DOC_METHOD_2("void", "ResumeMusic", "Resume the playback of the named music graph after some delay (in milliseconds) elapses.",
-                 "string", "graph_name", "unsigned", "delay");
+                 "string", "name", "unsigned", "delay");
     DOC_METHOD_1("void", "PauseMusic", "Pause the playback of the named music graph immediately.", "string", "name");
     DOC_METHOD_2("void", "PauseMusic", "Pause the playback of the named music graph after some delay (in milliseconds) elapses.",
-                 "string", "graph_name", "unsigned", "delay");
+                 "string", "name", "unsigned", "delay");
     DOC_METHOD_1("void", "KillMusic", "Kill the named music graph immediately.", "string", "name");
     DOC_METHOD_2("void", "KillMusic", "Kill the named music graph after some delay (in milliseconds) elapses.",
-                 "string", "graph_name", "unsigned", "delay");
+                 "string", "name", "unsigned", "delay");
     DOC_METHOD_0("void", "KillAllMusic", "Kill all currently playing music graphs.");
-    DOC_METHOD_1("void", "CancelMusicCmds", "Cancel all pending named music graph commands.", "string", "graph_name");
+    DOC_METHOD_1("void", "CancelMusicCmds", "Cancel all pending named music graph commands.<br>"
+                                            "The music graph should be previously created with PrepareMusicGraph or PlayMusic.",
+                 "string", "name");
     DOC_METHOD_3("void", "SetMusicEffect", "Set an audio effect on the named music graph.<br>"
                                            "Effect can be one of the following: 'FadeIn', 'FadeOut'",
                  "string", "graph_name", "string", "effect_name", "unsigned", "duration");
     DOC_METHOD_1("void", "SetMusicGain", "Set the overall music gain (volume adjustment) in the audio mixer.", "float", "gain");
-    DOC_METHOD_1("void", "PlaySoundEffect", "Play a sound effect audio graph immediately.", "audio.GraphClass|string", "graph|graph_name");
+    DOC_METHOD_1("void", "PlaySoundEffect", "Play a sound effect audio graph immediately.", "audio.GraphClass|string", "graph|name");
     DOC_METHOD_2("void", "PlaySoundEffect", "Play a sound effect audio graph after some delay (in milliseconds) elapses.",
-                 "audio.GraphClass|string", "graph|graph_name", "unsigned", "delay");
+                 "audio.GraphClass|string", "graph|name", "unsigned", "delay");
     DOC_METHOD_1("void", "SetSoundEffectGain", "Set the overall sound effect gain (volume adjustment) in the audio mixer.", "float", "gain");
     DOC_METHOD_1("void", "EnableEffects", "Enable or disable actual sound effect playing. "
                                           "Toggling the flag does not affect currently playing effects.<br>"
@@ -1482,9 +1460,9 @@ void InitLuaDoc()
     DOC_OBJECT_PROPERTY("glm.vec2", "window_coord", "Mouse cursor position in native window coordinates.");
     DOC_OBJECT_PROPERTY("glm.vec2", "scene_coord", "Mouse cursor position in scene coordinates.<br>"
                                             "Only valid when over_scene is true.");
-    DOC_OBJECT_PROPERTY("int", "button", "The mouse button value that was pressed.<br>"
+    DOC_OBJECT_PROPERTY("unsigned", "button", "The mouse button value that was pressed.<br>"
                                   "For a list of available buttons see wdk.Buttons");
-    DOC_OBJECT_PROPERTY("int", "modifiers", "A bit string of keyboard modifier keys that were pressed.<br>"
+    DOC_OBJECT_PROPERTY("unsigned", "modifiers", "A bit string of keyboard modifier keys that were pressed.<br>"
                                      "For a list of available modifiers see wdk.Mods.<br>"
                                      "For testing a modifier use wdk.TestMod(bits, key).");
     DOC_OBJECT_PROPERTY("bool", "over_scene", "True when the mouse is within the game viewport in the window.<br>"
@@ -1512,7 +1490,7 @@ void InitLuaDoc()
                                     "It is an error to try to access a key that doesn't exist.",
                  "string", "key");
     DOC_METHOD_2("...", "GetValue", "Get a value by the given key if it exists or return default.",
-                 "string", "key", "...", "default");
+                 "string", "key", "bool|int|float|string|glm.vec2|glm.vec3|glm.vec4|base.Color4f|base.FSize|base.FRect|base.FPoint", "default");
     DOC_METHOD_1("bool", "HasValue", "Check whether the given key exists in the key-value store.", "string", "key");
     DOC_METHOD_0("void", "Clear", "Remove all keys and values from the store.");
     DOC_METHOD_1("void", "Persist", "Serialize the contents of the key-value store into a data object.",
@@ -1520,7 +1498,7 @@ void InitLuaDoc()
     DOC_METHOD_1("bool", "Restore", "Deserialize the contents of the key-value store from a data object.",
                  "data.JsonObject|data.Reader", "data");
     DOC_METHOD_2("void", "InitValue", "Initialize a key with a value if it doesn't yet exist.",
-                 "string", "key", "...", "value");
+                 "string", "key", "bool|int|float|string|glm.vec2|glm.vec3|glm.vec4|base.Color4f|base.FSize|base.FRect|base.FPoint", "value");
 
     std::sort(g_method_docs.begin(), g_method_docs.end(),
         [](const auto& left, const auto& right) {
@@ -1549,7 +1527,7 @@ QString FindLuaDocTableMatch(const QString& word)
     else if (word == "State")
         return "game.KeyValueStore";
     else if (word == "ClassLib")
-        return "game.ClassLib";
+        return "game.ClassLibrary";
 
     // special cases heuristics.
     if (word.endsWith("entity"))
