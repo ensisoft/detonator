@@ -103,6 +103,7 @@ namespace gui
         virtual void keyPressEvent(QKeyEvent* key) override;
         virtual bool eventFilter(QObject* destination, QEvent* event) override;
         bool LoadDocument(const QString& file);
+        void FilterHelp(const QString& keyword);
     private:
         Ui::ScriptWidget mUI;
     private:

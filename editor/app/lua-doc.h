@@ -61,7 +61,8 @@ namespace app
     QString FormatArgHelp(const LuaMemberDoc& doc);
     QString FormatArgCompletion(const LuaMemberDoc& doc);
     QString ParseLuaDocTypeString(const QString& str);
-    QString FindLuaDocTableMatch(const QString& text);
+    QString FindLuaDocTableMatch(const QString& word);
+    QString FindLuaDocFieldMatch(const QString& word);
     QString GenerateLuaDocHtml();
     QString GenerateLuaDocHtmlAnchor(const LuaMemberDoc& doc);
 
