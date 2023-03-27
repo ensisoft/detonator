@@ -229,7 +229,26 @@ void InitLuaDoc()
     DOC_TABLE_PROPERTY("game.Engine", "Game", "Global game engine instance.");
     DOC_TABLE_PROPERTY("game.Scene", "Scene", "Global scene instance or nil if no scene is being played.");
     DOC_FUNCTION_3("...", "CallMethod", "Call a method on an entity, scene or UI with variable arguments.",
-                   "game.Entity|game.Scene|uik.Window", "object", "string", "method", "...", "args");
+                   "game.Entity|game.Scene|uik.Window", "object", "string", "method", "...", "...");
+
+    // Lua built-in functions.
+    DOC_FUNCTION_2("void", "assert", "Raises an error if the value of its argument arg is false (i.e., nil or false); otherwise, returns all its arguments. "
+                                   "In case of error, message is the error object; when absent, it defaults to \"assertion failed!\" string",
+                 "bool|object", "arg", "object", "message = \"assertion failed\"");
+    DOC_FUNCTION_2("void", "error", "Raises an error with message as the error object. This function never returns. <br>"
+                                  "Usually, error adds some information about the error position at the beginning of the message, "
+                                  "if the message is a string. The level argument specifies how to get the error position.<br>"
+                                  "With level 1 (the default), the error position is where the error function was called. "
+                                  "Level 2 points the error to where the function that called error was called; and so on.<br>"
+                                  "Passing a level 0 avoids the addition of error position information to the message.",
+                                  "string", "message", "int", "level");
+    DOC_FUNCTION_1("string", "tostring", "Receives a value of any type and converts it to a string in a human-readable format.", "object", "v");
+    DOC_FUNCTION_2("void", "warn", "Emits a warning with a message composed by the concatenation of all its arguments (which should be strings).",
+                   "string", "msg", "string", "...");
+    DOC_FUNCTION_1("void", "print", "Receives any number of arguments and prints their values to stdout, converting each argument to a string following the same rules of tostring. ",
+                   "...", "...");
+    DOC_TABLE_PROPERTY("string", "_VERSION", "The Lua version number.");
+
 
     DOC_TABLE("util");
     DOC_FUNCTION_1("float", "GetRotationFromMatrix", "Get the rotational component from the given matrix.",
