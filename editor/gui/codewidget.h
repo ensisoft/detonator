@@ -117,6 +117,8 @@ namespace gui
 
         bool CancelCompletion();
 
+        QString GetCurrentWord() const;
+
         static void SetDefaultSettings(const Settings& settings);
         static void GetDefaultSettings(Settings* settings);
     protected:
@@ -130,9 +132,6 @@ namespace gui
         void CopyAvailable(bool yes_no);
         void UndoAvailable(bool yes_no);
         void Complete(const QString& text, const QModelIndex& index);
-    private:
-        QString GetCurrentWord() const;
-
     private:
         static Settings mSettings;
     private:

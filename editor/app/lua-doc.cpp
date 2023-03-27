@@ -1549,6 +1549,16 @@ QString FindLuaDocTableMatch(const QString& word)
     return "";
 }
 
+QString FindLuaDocFieldMatch(const QString& word)
+{
+    for (const auto& item : g_method_docs)
+    {
+        if (item.name.contains(word))
+            return item.name;
+    }
+    return "";
+}
+
 QString FormatArgHelp(const LuaMemberDoc& doc)
 {
     if (doc.type == LuaMemberType::ObjectProperty ||

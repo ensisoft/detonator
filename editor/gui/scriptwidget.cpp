@@ -307,7 +307,9 @@ bool ScriptWidget::OnEscape()
         if (mUI.luaFormatStdErr->isVisible())
             mUI.luaFormatStdErr->setVisible(false);
         else if (mUI.find->isVisible())
-            mUI.find->setVisible(false);
+            on_btnFindClose_clicked();
+        else if (mUI.settings->isVisible())
+            on_btnSettingsClose_clicked();
     }
     mUI.code->setFocus();
     return true;
@@ -498,6 +500,20 @@ void ScriptWidget::on_actionFindHelp_triggered()
         sizes[1] = 500;
         mUI.mainSplitter->setSizes(sizes);
     }
+
+    const auto& word = mUI.code->GetCurrentWord();
+    if (word.trimmed().isEmpty())
+        return;
+
+    if (const auto& table = app::FindLuaDocTableMatch(word); !table.isEmpty())
+    {
+        FilterHelp(table);
+    }
+    else if (const auto& field = app::FindLuaDocFieldMatch(word); !field.isEmpty())
+    {
+        // not a bug! want to filter by word to find whatever matches
+        FilterHelp(word);
+    }
 }
 
 void ScriptWidget::on_actionFindText_triggered()
@@ -680,7 +696,6 @@ void ScriptWidget::on_filter_textChanged(const QString& text)
     mModelProxy->SetFindFilter(text);
     mModelProxy->invalidate();
 
-    const auto count = mModelProxy->rowCount();
     auto* model = mUI.tableView->selectionModel();
     model->reset();
 }
@@ -810,6 +825,21 @@ bool ScriptWidget::LoadDocument(const QString& file)
     mUI.code->Reparse();
     DEBUG("Loaded script file. [file='%1']", mFilename);
     return true;
+}
+
+void ScriptWidget::FilterHelp(const QString& keyword)
+{
+    SetValue(mUI.filter, keyword);
+    mModelProxy->SetFindFilter(keyword);
+    mModelProxy->invalidate();
+
+    auto* model = mUI.tableView->selectionModel();
+    model->reset();
+
+    // If there's only 1 good match then jump to that directly
+    // for convenience.
+    if (const auto count = GetCount(mUI.tableView))
+        SelectRow(mUI.tableView, 0);
 }
 
 void ScriptWidget::TableSelectionChanged(const QItemSelection&, const QItemSelection&)

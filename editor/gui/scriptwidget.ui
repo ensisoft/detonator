@@ -326,6 +326,9 @@
          <property name="title">
           <string>Lua formatter</string>
          </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
          <layout class="QVBoxLayout" name="verticalLayout_6">
           <property name="leftMargin">
            <number>0</number>
@@ -366,7 +369,7 @@
         <item>
          <widget class="QLineEdit" name="filter">
           <property name="placeholderText">
-           <string>Find in Help (Alt+H)</string>
+           <string>Find in Help (Alt+H) </string>
           </property>
          </widget>
         </item>
