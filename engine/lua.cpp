@@ -2229,12 +2229,50 @@ void BindBase(sol::state& L)
     rect["SetY"]           = &base::FRect::SetY;
     rect["SetWidth"]       = &base::FRect::SetWidth;
     rect["SetHeight"]      = &base::FRect::SetHeight;
-    rect["Resize"]         = (void(base::FRect::*)(float, float))&base::FRect::Resize;
-    rect["Grow"]           = (void(base::FRect::*)(float, float))&base::FRect::Grow;
-    rect["Move"]           = (void(base::FRect::*)(float, float))&base::FRect::Move;
-    rect["Translate"]      = (void(base::FRect::*)(float, float))&base::FRect::Translate;
     rect["IsEmpty"]        = &base::FRect::IsEmpty;
-    rect["TestPoint"]      = sol::overload(
+    rect["Resize"]         = sol::overload(
+        [](base::FRect& rect, float x, float y) {
+            rect.Resize(x, y);
+        },
+        [](base::FRect& rect, const FSize& point) {
+            rect.Resize(point);
+        },
+        [](base::FRect& rect, const glm::vec2& point) {
+            rect.Resize(point.x, point.y);
+        });
+    rect["Grow"] =  sol::overload(
+        [](base::FRect& rect, float x, float y) {
+            rect.Grow(x, y);
+        },
+        [](base::FRect& rect, const FSize& point) {
+            rect.Grow(point);
+        },
+        [](base::FRect& rect, const glm::vec2& point) {
+            rect.Grow(point.x, point.y);
+        });
+    rect["Move"] =  sol::overload(
+        [](base::FRect& rect, float x, float y) {
+            rect.Move(x, y);
+        },
+        [](base::FRect& rect, const FPoint& point) {
+            rect.Move(point);
+        },
+        [](base::FRect& rect, const glm::vec2& point) {
+            rect.Move(point.x, point.y);
+        });
+
+    rect["Translate"]  =  sol::overload(
+        [](base::FRect& rect, float x, float y) {
+            rect.Translate(x, y);
+        },
+        [](base::FRect& rect, const FPoint& point) {
+            rect.Translate(point);
+        },
+        [](base::FRect& rect, const glm::vec2& point) {
+            rect.Translate(point.x, point.y);
+        });
+
+    rect["TestPoint"] = sol::overload(
         [](const base::FRect& rect, float x, float y) {
             return rect.TestPoint(x, y);
         },
@@ -2279,6 +2317,7 @@ void BindBase(sol::state& L)
     auto size = base.new_usertype<base::FSize>("FSize", size_ctors);
     size["GetWidth"]  = &base::FSize::GetWidth;
     size["GetHeight"] = &base::FSize::GetHeight;
+    size["IsZero"]    = &base::FSize::IsZero;
     size.set_function(sol::meta_function::multiplication, [](const base::FSize& size, float scalar) { return size * scalar; });
     size.set_function(sol::meta_function::addition, [](const base::FSize& lhs, const base::FSize& rhs) { return lhs + rhs; });
     size.set_function(sol::meta_function::subtraction, [](const base::FSize& lhs, const base::FSize& rhs) { return lhs - rhs; });
