@@ -1500,6 +1500,44 @@ void InitLuaDoc()
     DOC_METHOD_2("void", "InitValue", "Initialize a key with a value if it doesn't yet exist.",
                  "string", "key", "bool|int|float|string|glm.vec2|glm.vec3|glm.vec4|base.Color4f|base.FSize|base.FRect|base.FPoint", "value");
 
+    // Lua standard libraries
+    DOC_TABLE("math");
+    DOC_FUNCTION_1("number", "abs", "Returns the absolute value of x.", "number", "x");
+    DOC_FUNCTION_1("float", "acos", "Returns the arc cosine of x (in radians).", "float", "x");
+    DOC_FUNCTION_1("float", "asin", "Returns the arc sine of x (in radians).", "float", "x");
+    DOC_FUNCTION_2("float", "atan2", "Returns the arc tangent of y/x (in radians), but uses the signs of both parameters to find the quadrant of the result. "
+                                      "(It also handles correctly the case of x being zero.)",
+                   "float", "y", "float", "x = 1.0");
+    DOC_FUNCTION_1("int", "ceil", "Returns the smallest integer larger than or equal to x.", "float", "x");
+    DOC_FUNCTION_1("float", "cos", "Returns the cosine of x (assumed to be in radians).", "number", "x");
+    DOC_FUNCTION_1("float", "cosh", "Returns the hyperbolic cosine of x.", "number", "x");
+    DOC_FUNCTION_1("float", "deg", "Returns the angle x (given in radians) in degrees.", "number", "x");
+    DOC_FUNCTION_1("float", "exp", "Returns the value e power x.", "float", "x");
+    DOC_FUNCTION_1("int", "floor", "Returns the largest integer smaller than or equal to x.", "number", "x");
+    DOC_FUNCTION_2("number", "fmod", "Returns the remainder of the division of x by y that rounds the quotient towards zero.", "number", "x", "number", "y");
+    DOC_FUNCTION_1("number, number", "frexp", "Returns m and e such that x = m2e, e is an integer and the absolute value of m is in the range [0.5, 1) (or zero when x is zero).", "number", "x");
+    DOC_FUNCTION_2("number", "ldexp", "Returns m2e (e should be an integer).", "number", "m", "integer", "e");
+    DOC_FUNCTION_2("float", "log", "Returns the natural logarithm of x.", "float", "x", "float", "base=e");
+    DOC_FUNCTION_1("number", "log10", "Returns the base-10 logarithm of x.", "number", "x");
+    DOC_FUNCTION_1("number", "max", "Returns the maximum value among its arguments.", "number", "...");
+    DOC_FUNCTION_1("number", "min", "Returns the minimum value among its arguments.", "number", "...");
+    DOC_FUNCTION_1("int, float", "modf", "Returns two numbers, the integral part of x and the fractional part of x.", "float", "x");
+    DOC_FUNCTION_1("float", "rad", "Returns the angle x (given in degrees) in radians.", "float", "x");
+    DOC_FUNCTION_1("float", "sin", "Returns the sine of x (assumed to be in radians).", "float", "x");
+    DOC_FUNCTION_1("float", "sinh", "Returns the hyperbolic sine of x.", "float", "x");
+    DOC_FUNCTION_1("float", "sqrt", "Returns the square root of x. (Note you can also use the expression x^0.5 to compute this value.", "float", "x");
+    DOC_FUNCTION_1("float", "tan", "Returns the tangent of x (assumed to be in radians).", "float", "x");
+    DOC_FUNCTION_1("float", "tanh", "Returns the hyperbolic tangent of x.", "float", "x");
+    DOC_FUNCTION_0("float", "random", "Returns a pseudo-random real number in the range [0, 1].");
+    DOC_FUNCTION_1("int", "random", "Returns a pseudo random integer number in the range [1, m].", "int", "m");
+    DOC_FUNCTION_2("int", "random", "Returns a pseudo random integer number in the range [m, n].", "int", "m", "int", "n");
+    DOC_FUNCTION_1("void", "randomseed", "Seed the pseudo random generator. ", "number", "x");
+    DOC_FUNCTION_1("int", "tointeger", "If the value is convertible to integer returns that integer. Otherwise, returns nil.", "number", "x");
+    DOC_FUNCTION_1("string", "type", "Returns \"integer\" if x is an integer, \"float\" if it is a float, or \"fail\" if x is not a number.", "number", "x");
+    DOC_FUNCTION_2("bool", "ult", "Returns a boolean, true if and only if integer m is below integer n when they are compared as unsigned integers.", "int", "m", "int", "n");
+    DOC_TABLE_PROPERTY("number", "pi", "The value of pi.");
+    DOC_TABLE_PROPERTY("number", "huge", "The value HUGE_VAL, a value larger than or equal to any other numerical value.");
+
     std::sort(g_method_docs.begin(), g_method_docs.end(),
         [](const auto& left, const auto& right) {
             if (left.table < right.table)
