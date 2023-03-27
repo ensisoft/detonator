@@ -1,0 +1,9 @@
+https://opengameart.org/content/applause
+https://opengameart.org/content/picked-coin-echo
+https://opengameart.org/content/picked-coin-echo-2
+https://opengameart.org/content/falling
+https://opengameart.org/content/7-assorted-sound-effects-menu-level-up
+https://opengameart.org/content/win-jingle
+https://opengameart.org/content/won-orchestral-winning-jingle
+https://opengameart.org/content/power-up-level-up-beansjam
+https://opengameart.org/content/completion-sound

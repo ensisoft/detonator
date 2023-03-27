@@ -2,13 +2,23 @@
 -- This script will be called for every instance of 'Ball'
 -- in the scene during gameplay.
 -- You're free to delete functions you don't need.
--- Called when the game play begins for an entity in the scene.
 function TestAdjacent(scene, brick_pos)
-    local bricks = scene:QuerySpatialNodes(brick_pos, 'First')
-    if bricks:IsEmpty() then
+    -- Check whether the position adjacent to the given brick position
+    -- contains another brick. 
+    local bricks = scene:QuerySpatialNodes(brick_pos, 'All')
+    -- use a high order function to find a brick in the reuslt set.
+    local brick = bricks:Find(function(node)
+        local entity = node:GetEntity()
+        local klass = entity:GetClassName()
+        if string.find(klass, 'Brick') then
+            return true
+        end
         return false
+    end)
+    if brick ~= nil then
+        return true
     end
-    return true
+    return false
 end
 
 function LostBall(ball)
@@ -21,6 +31,7 @@ function LostBall(ball)
     Game:PostEvent(ball_died)
 end
 
+-- Called when the game play begins for an entity in the scene.
 function BeginPlay(ball, scene)
     if ball.demo_ball then
         ball.enabled = true
@@ -44,6 +55,7 @@ function Update(ball, game_time, dt)
     end
 
     local scene = ball:GetScene()
+    local paddle = scene:FindEntityByInstanceName('Paddle')
     local ball_body = ball:GetNode(0)
     local ball_position = ball_body:GetTranslation()
     local ball_velocity = ball.velocity
@@ -51,26 +63,45 @@ function Update(ball, game_time, dt)
 
     ball_position = ball_position + dt * ball_velocity
 
-    if ball_position.x > 500.0 then
-        ball_position.x = 500.0
+    local wall_thickness = 10.0
+
+    -- check hitting the left and right walls
+    if ball_position.x > 500.0 - wall_thickness then
+        ball_position.x = 500.0 - wall_thickness
         ball_velocity.x = -ball_velocity.x
-    elseif ball_position.x < -500.0 then
-        ball_position.x = -500.0
+    elseif ball_position.x < -500.0 + wall_thickness then
+        ball_position.x = -500.0 + wall_thickness
         ball_velocity.x = -ball_velocity.x
     end
 
+    -- check for losign the ball or hitting the ceiling
     if ball_position.y > 400.0 then
+        if paddle ~= nil then
+            CallMethod(paddle, 'EndPowerup')
+        end
         LostBall(ball)
         return
-    elseif ball_position.y < -400.0 then
-        ball_position.y = -400.0
+    elseif ball_position.y < -400.0 + wall_thickness then
+        ball_position.y = -400.0 + wall_thickness
         ball_velocity.y = -ball_velocity.y
     end
 
     local ball_radius = 10.0
 
-    local bricks =
-        scene:QuerySpatialNodes(ball_position, ball_radius, 'Closest')
+    local bricks = scene:QuerySpatialNodes(ball_position, ball_radius, 'All')
+
+    -- use a lambda to filter the spatial node result set so that it only
+    -- contains bricks. do not do anything stupid in this callback just
+    -- check the parameter node!
+    bricks:Filter(function(node)
+        local entity = node:GetEntity()
+        local klass = entity:GetClassName()
+        if string.find(klass, 'Brick') then
+            return true
+        end
+        return false
+    end)
+
     while bricks:HasNext() do
 
         local brick_node = bricks:GetNext()
@@ -163,7 +194,6 @@ function Update(ball, game_time, dt)
         end
 
         -- useful for 'debugging' i.e. seeing how the ball gets adjusted after hitting something
-
         -- ball.enabled = false
 
         CallMethod(brick_entity, 'BallHit')
@@ -172,8 +202,6 @@ function Update(ball, game_time, dt)
 
     --    ball.velocity = ball_velocity
     --    ball_body:SetTranslation(ball_position)
-
-    local paddle = scene:FindEntityByInstanceName('Paddle')
 
     if paddle ~= nil then
         local paddle_body = paddle:GetNode(0)
@@ -229,7 +257,7 @@ function OnMousePress(ball, mouse)
     end
 
     ball.launched = true
-    ball.velocity = glm.vec2:new(0.0, -500.0)
+    ball.velocity = glm.vec2:new(0.0, -650.0)
 end
 
 -- Called on mouse button release events.

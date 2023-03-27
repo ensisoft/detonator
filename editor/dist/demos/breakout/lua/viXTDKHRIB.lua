@@ -1,7 +1,36 @@
--- Entity 'Green Brick' script.
--- This script will be called for every instance of 'Green Brick'
+-- Entity 'Brick' script.
+-- This script will be called for every instance of 'Brick'
 -- in the scene during gameplay.
 -- You're free to delete functions you don't need.
+function DropPowerup(brick)
+    -- drop a powerup if any 
+    local node = brick:GetNode(0)
+    local scene = brick:GetScene()
+    -- lookup for a powerup entity within the brick's vicinity
+    local nodes = scene:QuerySpatialNodes(node:GetTranslation(), 'All')
+    local powerup_node = nodes:Find(function(node)
+        local entity = node:GetEntity()
+        local klass = entity:GetClassName()
+        if string.find(klass, 'Powerup') or string.find(klass, 'Points') then
+            return true
+        end
+        return false
+    end)
+
+    if powerup_node == nil then
+        return
+    end
+
+    Game:DebugPrint('Brick powerup ' .. powerup_node:GetClassName())
+
+    local powerup = powerup_node:GetEntity()
+    powerup:SetVisible(true)
+    powerup:SetLayer(2)
+
+    local powerup_body = powerup_node:GetRigidBody()
+    powerup_body:Enable(true)
+end
+
 -- Called when the game play begins for an entity in the scene.
 function BeginPlay(brick, scene)
 
@@ -70,5 +99,7 @@ function BallHit(brick)
     Game:PostEvent(kill_brick)
 
     brick:Die()
+
+    DropPowerup(brick)
 end
 
