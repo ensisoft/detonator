@@ -1,11 +1,21 @@
 -- Scene 'Level 0' script.
-
 -- This script will be called for every instance of 'Level 0'
 -- during gameplay.
 -- You're free to delete functions you don't need.
-
 -- Called when the scene begins play.
 function BeginPlay(level)
+    local num_items = 0
+    local num_entities = level:GetNumEntities()
+    for i = 0, num_entities - 1, 1 do
+        local entity = level:GetEntity(i)
+        local klass = entity:GetClassName()
+        if string.find(klass, 'Points') or string.find(klass, 'Powerup') then
+            entity:SetVisible(false)
+            local node = entity:GetNode(0)
+            local body = node:GetRigidBody()
+            body:Enable(false)
+        end
+    end
 end
 
 -- Called when the scene ends play.
@@ -19,24 +29,24 @@ end
 
 -- Called when an entity has been killed from the scene.
 function KillEntity(level, carcass)
-    local num_bricks   = 0
+    local num_bricks = 0
     local num_entities = level:GetNumEntities()
-    for i=0, num_entities-1, 1 do
+    for i = 0, num_entities - 1, 1 do
         local entity = level:GetEntity(i)
-        local klass  = entity:GetClassName()
+        local klass = entity:GetClassName()
         if string.match(klass, "Brick") then
             if entity:HasBeenKilled() == false and entity.immortal == false then
                 num_bricks = num_bricks + 1
             end
         end
     end
-    --Game:DebugPrint("Bricks" .. tostring(num_bricks))
+    -- Game:DebugPrint("Bricks" .. tostring(num_bricks))
     if num_bricks ~= 0 then
         return
     end
-    local level_clear   = game.GameEvent:new()
-    level_clear.from    = 'level'
-    level_clear.to      = 'game'
+    local level_clear = game.GameEvent:new()
+    level_clear.from = 'level'
+    level_clear.to = 'game'
     level_clear.message = 'level-clear'
     Game:PostEvent(level_clear)
 

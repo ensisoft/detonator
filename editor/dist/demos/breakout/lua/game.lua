@@ -9,11 +9,10 @@ _State = {
     current_level = 1,
     current_lives = 2,
     current_score = 0,
-
     current_state = _GameStates.Menu
 }
 
-function _SpawnBall()
+function SpawnBall()
     local args = game.EntityArgs:new()
     args.class = ClassLib:FindEntityClassByName('Ball')
     args.name = 'ball'
@@ -34,7 +33,7 @@ end
 function BeginPlay(scene)
     Game:DebugPrint('BeginPlay called.')
     if _State.current_state == _GameStates.Play then
-        _SpawnBall()
+        SpawnBall()
     end
 end
 
@@ -133,6 +132,7 @@ function OnUIAction(ui, action)
     if action.name == 'exit' then
         Game:Quit(0)
     elseif action.name == 'play' then
+        Audio:PlaySoundEffect('Menu Confirm')
         Game:CloseUI(0)
         Game:Play('Level 1')
         Game:ShowMouse(false)
@@ -182,7 +182,7 @@ function OnGameEvent(event)
                 local hud = Game:GetTopUI()
                 local lives = hud:FindWidgetByName('lives')
                 lives:SetText(tostring(_State.current_lives))
-                _SpawnBall()
+                SpawnBall()
             end
         end
     elseif event.from == 'level' then
@@ -211,8 +211,14 @@ function OnGameEvent(event)
         if event.message == 'kill-brick' then
             _State.current_score = _State.current_score + event.value
             local hud = Game:GetTopUI()
-            local score = hud:FindWidgetByName('score')
-            score:SetText(tostring(_State.current_score))
+            hud.score:SetText(tostring(_State.current_score))
+        end
+    elseif event.from == 'paddle' then
+        if event.message == 'extra-points' then
+            _State.current_score = _State.current_score + event.value
+            local hud = Game:GetTopUI()
+            hud.score:SetText(tostring(_State.current_score))
         end
     end
 end
+
