@@ -98,7 +98,8 @@ void Process::Start(const QString& executable,
         mLogFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
         if (!mLogFile.isOpen())
         {
-            WARN("Unable to write log file %1, %2", logFile, mLogFile.error());
+            if (!mSilentMode)
+                WARN("Unable to write log file %1, %2", logFile, mLogFile.error());
         }
     }
 
@@ -153,9 +154,12 @@ bool Process::RunAndCapture(const QString& executable,
     const QStringList& args,
     QStringList* stdout_buffer,
     QStringList* stderr_buffer,
-    Error* error_code)
+    Error* error_code,
+    int* exit_code,
+    bool silent)
 {
     Process process;
+    process.SetSilentMode(silent);
     process.onStdErr = [&stdout_buffer](const QString& line) {
         stdout_buffer->append(line);
     };
@@ -167,9 +171,12 @@ bool Process::RunAndCapture(const QString& executable,
 
     const auto NeverTimeout = -1;
     process.mProcess.waitForFinished(NeverTimeout);
+    if (exit_code)
+        *exit_code = process.mProcess.exitCode();
     if (process.GetError() != Error::None)
     {
-        *error_code = process.GetError();
+        if (error_code)
+            *error_code = process.GetError();
         return false;
     }
 
@@ -234,8 +241,8 @@ void Process::ProcessStdErr()
 
 void Process::ProcessFinished(int exitCode, QProcess::ExitStatus status)
 {
-    DEBUG("%1 finished. code: %2 status: %3",
-        mExecutable, exitCode, status);
+    if (!mSilentMode)
+        DEBUG("%1 finished. code: %2 status: %3", mExecutable, exitCode, status);
 
     ProcessStdOut();
     ProcessStdErr();
@@ -253,8 +260,11 @@ void Process::ProcessFinished(int exitCode, QProcess::ExitStatus status)
 
 void Process::ProcessError(QProcess::ProcessError error)
 {
-    DEBUG("%1 error %2", mExecutable, error);
-    ERROR("%1 error %2", mExecutable, error);
+    if (!mSilentMode)
+    {
+        DEBUG("%1 error %2", mExecutable, error);
+        ERROR("%1 error %2", mExecutable, error);
+    }
 
     // Umh.. Qt's QProcessError doesn't have a "no error" enum.
     // so apprently we don't really know if an error happened
@@ -292,7 +302,8 @@ void Process::ProcessError(QProcess::ProcessError error)
 
 void Process::ProcessState(QProcess::ProcessState state)
 {
-    DEBUG("%1 state: %2", mExecutable, state);
+    if (!mSilentMode)
+        DEBUG("%1 state: %2", mExecutable, state);
 }
 
 void Process::ProcessTimeout()
@@ -300,7 +311,8 @@ void Process::ProcessTimeout()
     if (!mEnableTimeout)
         return;
 
-    DEBUG("%1 has been timed out. No input was detected.", mExecutable);
+    if (!mSilentMode)
+        DEBUG("%1 has been timed out. No input was detected.", mExecutable);
 
     mError  = Error::Timedout;
     mKilled = true;

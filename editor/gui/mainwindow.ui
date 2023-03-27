@@ -1334,10 +1334,9 @@
     </property>
     <widget class="QMenu" name="menuImport">
      <property name="title">
-      <string>Import</string>
+      <string>Import Resource</string>
      </property>
      <addaction name="actionImportTiles"/>
-     <addaction name="separator"/>
      <addaction name="actionImportFiles"/>
      <addaction name="actionImportJSON"/>
      <addaction name="actionImportZIP"/>
@@ -1352,13 +1351,13 @@
     <addaction name="actionNewAudioGraph"/>
     <addaction name="actionNewScript"/>
     <addaction name="actionNewResource"/>
-    <addaction name="actionSelectResourceForEditing"/>
     <addaction name="separator"/>
     <addaction name="menuImport"/>
+    <addaction name="actionSelectResourceForEditing"/>
     <addaction name="separator"/>
-    <addaction name="actionPackageResources"/>
-    <addaction name="separator"/>
+    <addaction name="actionProjectSync"/>
     <addaction name="actionProjectSettings"/>
+    <addaction name="actionPackageResources"/>
     <addaction name="separator"/>
     <addaction name="actionProjectPlay"/>
    </widget>
@@ -1775,7 +1774,7 @@
      <normaloff>:/16x16_ico_png/package.png</normaloff>:/16x16_ico_png/package.png</iconset>
    </property>
    <property name="text">
-    <string>Package Project ...</string>
+    <string>Package ...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+P</string>
@@ -1811,7 +1810,7 @@
      <normaloff>:/16x16_ico_png/settings.png</normaloff>:/16x16_ico_png/settings.png</iconset>
    </property>
    <property name="text">
-    <string>Project Settings ...</string>
+    <string>Settings ...</string>
    </property>
    <property name="toolTip">
     <string>Workspace settings</string>
@@ -2168,7 +2167,7 @@
      <normaloff>:/16x16_ico_png/compress.png</normaloff>:/16x16_ico_png/compress.png</iconset>
    </property>
    <property name="text">
-    <string>Resource Pack...</string>
+    <string> Pack...</string>
    </property>
    <property name="toolTip">
     <string>Import resources from a zip package</string>
@@ -2180,7 +2179,7 @@
      <normaloff>:/16x16_ico_png/compress.png</normaloff>:/16x16_ico_png/compress.png</iconset>
    </property>
    <property name="text">
-    <string>Resource Pack...</string>
+    <string>Pack...</string>
    </property>
    <property name="toolTip">
     <string>Export selected resources into a zip package</string>
@@ -2211,6 +2210,18 @@
    </property>
    <property name="text">
     <string>Font Map ...</string>
+   </property>
+  </action>
+  <action name="actionProjectSync">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/git-icon.png</normaloff>:/16x16_ico_png/git-icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>VCS Sync...</string>
+   </property>
+   <property name="toolTip">
+    <string>Synchronoize changes in the project to version control</string>
    </property>
   </action>
  </widget>

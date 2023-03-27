@@ -2423,6 +2423,88 @@ ResourceList Workspace::ListDependencies(std::size_t index) const
     return ListDependencies(std::vector<size_t>{index});
 }
 
+QStringList Workspace::ListFileResources(const QModelIndexList& list) const
+{
+    std::vector<size_t> indices;
+    for (const auto& index : list)
+        indices.push_back(index.row());
+
+    return ListFileResources(std::move(indices));
+}
+QStringList Workspace::ListFileResources(std::vector<size_t> indices) const
+{
+    // setup a phoney resource packer that actually does no packing
+    // but only captures all the resource URIs
+    class Phoney : public ResourcePacker {
+    public:
+        explicit Phoney(const QString& workspace)
+          : mWorkspaceDir(workspace)
+        {}
+
+        virtual void CopyFile(const std::string& uri, const std::string& dir) override
+        {
+            RecordURI(uri);
+        }
+
+        virtual void WriteFile(const std::string& uri, const std::string& dir, const void* data, size_t len) override
+        {
+            RecordURI(uri);
+        }
+        virtual bool ReadFile(const std::string& uri, QByteArray* bytes) const override
+        {
+            return app::detail::LoadArrayBuffer(MapWorkspaceUri(uri, mWorkspaceDir), bytes);
+        }
+        virtual std::string MapUri(const std::string& uri) const override
+        { return uri; }
+        virtual bool HasMapping(const std::string& uri) const override
+        { return true; }
+
+        QStringList ListUris() const
+        {
+            QStringList ret;
+            for (const auto& uri : mURIs)
+                ret.push_back(FromUtf8(uri));
+            return ret;
+        }
+        void RecordURI(const std::string& uri)
+        {
+            // hack for now to copy the bitmap font image.
+            // this will not work if:
+            // - the file extension is not .png
+            // - the file name is same as the .json file base name
+            if (base::Contains(uri, "fonts/") && base::EndsWith(uri, ".json"))
+            {
+                const auto& src_png_uri = boost::replace_all_copy(uri, ".json", ".png");
+                mURIs.insert(src_png_uri);
+            }
+            mURIs.insert(uri); // keep track of the URIs we're seeing
+        }
+
+    private:
+        const QString mWorkspaceDir;
+    private:
+        mutable std::unordered_set<std::string> mURIs;
+
+    } packer(mWorkspaceDir);
+
+    for (size_t index : indices)
+    {
+        // this is mutable, but we know the contents do not change.
+        // the API isn't exactly a perfect match since it was designed
+        // for packing which mutates the resources at one go. It could
+        // be refactored into 2 steps, first iterate and transact on
+        // the resources and then update the resources.
+        const auto& resource  = GetUserDefinedResource(index);
+        const_cast<Resource&>(resource).Pack(packer);
+    }
+    return packer.ListUris();
+}
+
+QStringList Workspace::ListFileResources(std::size_t index) const
+{
+    return ListFileResources(std::vector<size_t> {index});
+}
+
 void Workspace::SaveResource(const Resource& resource)
 {
     RECURSION_GUARD(this, "ResourceList");

@@ -69,6 +69,7 @@
 #include "editor/gui/dlgmigrationlog.h"
 #include "editor/gui/dlgimgview.h"
 #include "editor/gui/dlgfontmap.h"
+#include "editor/gui/dlgvcs.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/gfxwidget.h"
 #include "editor/gui/animationtrackwidget.h"
@@ -224,6 +225,7 @@ void MainWindow::LoadSettings()
     mSettings.script_editor_executable = "/usr/bin/gedit";
     mSettings.audio_editor_executable  = "/usr/bin/audacity";
     mSettings.python_executable        = "/usr/bin/python";
+    mSettings.vcs_executable           = "/usr/bin/git";
     // no emsdk selected, user has to do that :(
 #elif defined(WINDOWS_OS)
     mSettings.image_editor_executable  = "mspaint.exe";
@@ -233,7 +235,15 @@ void MainWindow::LoadSettings()
     // use python from emssdk ? use python packaged with gamestudio ?
     // emsdk must be selected in any case.
     mSettings.python_executable = app::GetAppInstFilePath("python/python.exe");
+    mSettings.vcs_executable           = "C:\\Program Files\\Git\\cmd\\git.exe";
+
 #endif
+    mSettings.vcs_cmd_commit_file = "add -f ${file}";
+    mSettings.vcs_cmd_add_file    = "add -f ${file}";
+    mSettings.vcs_cmd_del_file    = "rm -f --cached ${file}";
+    mSettings.vcs_cmd_list_files  = "ls-files ${workspace}";
+    mSettings.vcs_ignore_list     = "content.json,workspace.json,readme,license,screenshot.png";
+
     Settings settings("Ensisoft", "Gamestudio Editor");
     if (!settings.Load())
     {
@@ -265,6 +275,12 @@ void MainWindow::LoadSettings()
     settings.GetValue("Settings", "frame_delay",                &mSettings.frame_delay);
     settings.GetValue("Settings", "mouse_cursor",               &mSettings.mouse_cursor);
     settings.GetValue("Settings", "viewer_geometry",            &mSettings.viewer_geometry);
+    settings.GetValue("Settings", "vcs_executable",             &mSettings.vcs_executable);
+    settings.GetValue("Settings", "vcs_cmd_list_files",         &mSettings.vcs_cmd_list_files);
+    settings.GetValue("Settings", "vcs_cmd_add_file",           &mSettings.vcs_cmd_add_file);
+    settings.GetValue("Settings", "vcs_cmd_del_file",           &mSettings.vcs_cmd_del_file);
+    settings.GetValue("Settings", "vcs_cmd_commit_file",        &mSettings.vcs_cmd_commit_file);
+    settings.GetValue("Settings", "vcs_ignore_list",            &mSettings.vcs_ignore_list);
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
     // disabling the VSYNC setting for now since there are just too many problems
     // making it scale nicely when having multiple windows.
@@ -288,6 +304,8 @@ void MainWindow::LoadSettings()
     settings.GetValue("ScriptWidget", "lua_formatter_args", &script_widget_settings.lua_formatter_args);
     settings.GetValue("ScriptWidget", "lua_format_on_save", &script_widget_settings.lua_format_on_save);
     ScriptWidget::SetDefaultSettings(script_widget_settings);
+
+
 
     if (!mSettings.style_name.isEmpty())
     {
@@ -2087,6 +2105,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     script.addAction(mUI.actionNewUIScript);
 
     QMenu import;
+    import.setIcon(QIcon("icons:import.png"));
     import.setTitle("Import");
     import.addAction(mUI.actionImportTiles);
     import.addSeparator();
@@ -2095,9 +2114,11 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     import.addAction(mUI.actionImportZIP);
 
     QMenu export_;
+    export_.setIcon(QIcon("icons:export.png"));
     export_.setTitle("Export");
     export_.addAction(mUI.actionExportJSON);
     export_.addAction(mUI.actionExportZIP);
+    export_.setEnabled(!indices.isEmpty());
 
     QMenu menu(this);
     menu.addAction(mUI.actionNewMaterial);
@@ -2110,17 +2131,16 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionNewAudioGraph);
     menu.addMenu(&script);
     menu.addSeparator();
+    menu.addMenu(&import);
+    menu.addSeparator();
     menu.addAction(mUI.actionEditResource);
     menu.addAction(mUI.actionEditResourceNewWindow);
     menu.addAction(mUI.actionEditResourceNewTab);
     menu.addSeparator();
     menu.addAction(mUI.actionRenameResource);
     menu.addAction(mUI.actionDuplicateResource);
-    menu.addAction(mUI.actionDeleteResource);
-    menu.addSeparator();
-    menu.addMenu(&import);
-    menu.addSeparator();
     menu.addMenu(&export_);
+    menu.addAction(mUI.actionDeleteResource);
     menu.addSeparator();
     menu.addMenu(&show);
     menu.exec(QCursor::pos());
@@ -2350,6 +2370,17 @@ void MainWindow::on_actionProjectPlay_triggered()
             mPlayWindow->ActivateWindow();
         }
     }
+}
+
+void MainWindow::on_actionProjectSync_triggered()
+{
+    if (!mWorkspace)
+        return;
+
+    DlgVCS dlg(this, mWorkspace.get(), mSettings);
+
+    if (dlg.exec() == QDialog::Rejected)
+        return;
 }
 
 void MainWindow::on_btnDemoBandit_clicked()
@@ -2995,6 +3026,12 @@ void MainWindow::SaveSettings()
     settings.SetValue("Settings", "frame_delay",                mSettings.frame_delay);
     settings.SetValue("Settings", "mouse_cursor",               mSettings.mouse_cursor);
     settings.SetValue("Settings", "viewer_geometry",            mSettings.viewer_geometry);
+    settings.SetValue("Settings", "vcs_executable",             mSettings.vcs_executable);
+    settings.SetValue("Settings", "vcs_cmd_list_files",         mSettings.vcs_cmd_list_files);
+    settings.SetValue("Settings", "vcs_cmd_add_file",           mSettings.vcs_cmd_add_file);
+    settings.SetValue("Settings", "vcs_cmd_del_file",           mSettings.vcs_cmd_del_file);
+    settings.SetValue("Settings", "vcs_cmd_commit_file",        mSettings.vcs_cmd_commit_file);
+    settings.SetValue("Settings", "vcs_ignore_list",            mSettings.vcs_ignore_list);
     TextEditor::Settings editor_settings;
     TextEditor::GetDefaultSettings(&editor_settings);
     settings.SetValue("TextEditor", "font",                   editor_settings.font_description);
@@ -3010,6 +3047,7 @@ void MainWindow::SaveSettings()
     settings.SetValue("ScriptWidget", "lua_formatter_exec", script_widget_settings.lua_formatter_exec);
     settings.SetValue("ScriptWidget", "lua_formatter_args", script_widget_settings.lua_formatter_args);
     settings.SetValue("ScriptWidget", "lua_format_on_save", script_widget_settings.lua_format_on_save);
+
     if (settings.Save())
         INFO("Saved application settings.");
     else WARN("Failed to save application settings.");

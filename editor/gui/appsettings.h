@@ -92,6 +92,21 @@ namespace gui
         GfxWindow::MouseCursor mouse_cursor = GfxWindow::MouseCursor::Native;
         // Encoded geometry of the editor when running in viewer mode.
         QString viewer_geometry;
+
+        // Version control executable.
+        QString vcs_executable;
+        // version control commands. These are modelled after Git and probably
+        // won't work for anything else.
+        // This command should produce a list of files in the version control.
+        QString vcs_cmd_list_files;
+        // This command should add a new file to the version control.
+        QString vcs_cmd_add_file;
+        // This command should delete a file from the version control.
+        QString vcs_cmd_del_file;
+        // The command should commit changes made to a file.
+        QString vcs_cmd_commit_file;
+        // List of (file) names to ignore when scanning for VCS files.
+        QString vcs_ignore_list;
     };
 
 } // namespace

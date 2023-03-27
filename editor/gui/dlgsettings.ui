@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>800</height>
+    <width>577</width>
+    <height>645</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Settings</string>
@@ -19,7 +25,13 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
-    <widget class="QTabWidget" name="tabWidget">
+    <widget class="QTabWidget" name="tabVersion">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -36,7 +48,24 @@
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
            <layout class="QGridLayout" name="gridLayout_3">
-            <item row="1" column="1" colspan="2">
+            <item row="0" column="1">
+             <widget class="QComboBox" name="cmbStyle"/>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_20">
+              <property name="text">
+               <string>Frame loop delay</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_21">
+              <property name="text">
+               <string>Mouse cursor</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
              <widget class="QComboBox" name="cmbWinOrTab">
               <item>
                <property name="text">
@@ -50,21 +79,7 @@
               </item>
              </widget>
             </item>
-            <item row="5" column="1">
-             <widget class="QCheckBox" name="chkVSYNC">
-              <property name="text">
-               <string>VSYNC</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_8">
-              <property name="text">
-               <string>Window open mode</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="1">
+            <item row="6" column="1">
              <widget class="QCheckBox" name="chkSaveAutomatically">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -77,12 +92,15 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_20">
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_8">
               <property name="text">
-               <string>Frame loop delay</string>
+               <string>Window open mode</string>
               </property>
              </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QComboBox" name="cmbMouseCursor"/>
             </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_5">
@@ -91,23 +109,29 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="1" colspan="2">
-             <widget class="QComboBox" name="cmbStyle"/>
-            </item>
-            <item row="2" column="1" colspan="2">
+            <item row="2" column="1">
              <widget class="QSpinBox" name="spinFrameDelay">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
               <property name="suffix">
                <string> ms</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="1" colspan="2">
-             <widget class="QComboBox" name="cmbMouseCursor"/>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_21">
+            <item row="7" column="1">
+             <widget class="QCheckBox" name="chkVSYNC">
               <property name="text">
-               <string>Mouse cursor</string>
+               <string>VSYNC</string>
               </property>
              </widget>
             </item>
@@ -144,13 +168,109 @@
          <layout class="QVBoxLayout" name="verticalLayout_10">
           <item>
            <layout class="QGridLayout" name="gridLayout_7">
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_18">
+              <property name="text">
+               <string>Default zoom level</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <item>
+               <widget class="color_widgets::ColorSelector" name="gridColor">
+                <property name="focusPolicy">
+                 <enum>Qt::StrongFocus</enum>
+                </property>
+                <property name="color">
+                 <color>
+                  <red>255</red>
+                  <green>255</green>
+                  <blue>255</blue>
+                 </color>
+                </property>
+                <property name="display_mode" stdset="0">
+                 <enum>color_widgets::ColorPreview::SplitAlpha</enum>
+                </property>
+                <property name="background">
+                 <brush brushstyle="Dense3Pattern">
+                  <color alpha="255">
+                   <red>128</red>
+                   <green>128</green>
+                   <blue>128</blue>
+                  </color>
+                 </brush>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="btnResetGridColor">
+                <property name="text">
+                 <string>Browse ...</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resource/resource.qrc">
+                  <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+               <widget class="color_widgets::ColorSelector" name="clearColor">
+                <property name="focusPolicy">
+                 <enum>Qt::StrongFocus</enum>
+                </property>
+                <property name="color">
+                 <color>
+                  <red>255</red>
+                  <green>255</green>
+                  <blue>255</blue>
+                 </color>
+                </property>
+                <property name="display_mode" stdset="0">
+                 <enum>color_widgets::ColorPreview::SplitAlpha</enum>
+                </property>
+                <property name="background">
+                 <brush brushstyle="Dense3Pattern">
+                  <color alpha="255">
+                   <red>128</red>
+                   <green>128</green>
+                   <blue>128</blue>
+                  </color>
+                 </brush>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="btnResetClearColor">
+                <property name="text">
+                 <string>Browse ...</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resource/resource.qrc">
+                  <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
             <item row="0" column="1">
              <widget class="QComboBox" name="cmbGrid">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_13">
+              <property name="text">
+               <string>Default grid color</string>
               </property>
              </widget>
             </item>
@@ -176,6 +296,13 @@
               </property>
               <property name="value">
                <double>1.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_22">
+              <property name="text">
+               <string>Default clear color</string>
               </property>
              </widget>
             </item>
@@ -235,13 +362,6 @@
               </item>
              </layout>
             </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_18">
-              <property name="text">
-               <string>Default zoom level</string>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_16">
               <property name="sizePolicy">
@@ -252,102 +372,6 @@
               </property>
               <property name="text">
                <string>Default grid</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <layout class="QHBoxLayout" name="horizontalLayout_4">
-              <item>
-               <widget class="color_widgets::ColorSelector" name="clearColor">
-                <property name="focusPolicy">
-                 <enum>Qt::StrongFocus</enum>
-                </property>
-                <property name="color">
-                 <color>
-                  <red>255</red>
-                  <green>255</green>
-                  <blue>255</blue>
-                 </color>
-                </property>
-                <property name="display_mode" stdset="0">
-                 <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-                </property>
-                <property name="background">
-                 <brush brushstyle="Dense3Pattern">
-                  <color alpha="255">
-                   <red>128</red>
-                   <green>128</green>
-                   <blue>128</blue>
-                  </color>
-                 </brush>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QToolButton" name="btnResetClearColor">
-                <property name="text">
-                 <string>Browse ...</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resource/resource.qrc">
-                  <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_22">
-              <property name="text">
-               <string>Default clear color</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <layout class="QHBoxLayout" name="horizontalLayout_5">
-              <item>
-               <widget class="color_widgets::ColorSelector" name="gridColor">
-                <property name="focusPolicy">
-                 <enum>Qt::StrongFocus</enum>
-                </property>
-                <property name="color">
-                 <color>
-                  <red>255</red>
-                  <green>255</green>
-                  <blue>255</blue>
-                 </color>
-                </property>
-                <property name="display_mode" stdset="0">
-                 <enum>color_widgets::ColorPreview::SplitAlpha</enum>
-                </property>
-                <property name="background">
-                 <brush brushstyle="Dense3Pattern">
-                  <color alpha="255">
-                   <red>128</red>
-                   <green>128</green>
-                   <blue>128</blue>
-                  </color>
-                 </brush>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QToolButton" name="btnResetGridColor">
-                <property name="text">
-                 <string>Browse ...</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../resource/resource.qrc">
-                  <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_13">
-              <property name="text">
-               <string>Default grid color</string>
               </property>
              </widget>
             </item>
@@ -390,7 +414,25 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="edtImageEditorExecutable"/>
+           <widget class="QLineEdit" name="edtImageEditorExecutable">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QToolButton" name="btnSelectImageEditor">
+            <property name="text">
+             <string>Browse ...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
+            </property>
+           </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_2">
@@ -403,17 +445,6 @@
            <widget class="QLineEdit" name="edtImageEditorArguments">
             <property name="text">
              <string>${file}</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2" colspan="2">
-           <widget class="QToolButton" name="btnSelectImageEditor">
-            <property name="text">
-             <string>Browse ...</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resource/resource.qrc">
-              <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
             </property>
            </widget>
           </item>
@@ -436,6 +467,17 @@
           <item row="0" column="1">
            <widget class="QLineEdit" name="edtShaderEditorExecutable"/>
           </item>
+          <item row="0" column="2">
+           <widget class="QToolButton" name="btnSelectShaderEditor">
+            <property name="text">
+             <string>Browse ...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
+            </property>
+           </widget>
+          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_4">
             <property name="text">
@@ -447,17 +489,6 @@
            <widget class="QLineEdit" name="edtShaderEditorArguments">
             <property name="text">
              <string>${file}</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2" colspan="2">
-           <widget class="QToolButton" name="btnSelectShaderEditor">
-            <property name="text">
-             <string>Browse ...</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resource/resource.qrc">
-              <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
             </property>
            </widget>
           </item>
@@ -487,13 +518,6 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="edtScriptEditorArguments">
-            <property name="text">
-             <string>${file}</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="2" colspan="2">
            <widget class="QToolButton" name="btnSelectScriptEditor">
             <property name="text">
@@ -502,6 +526,13 @@
             <property name="icon">
              <iconset resource="../resource/resource.qrc">
               <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="edtScriptEditorArguments">
+            <property name="text">
+             <string>${file}</string>
             </property>
            </widget>
           </item>
@@ -531,13 +562,6 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="edtAudioEditorArguments">
-            <property name="text">
-             <string>${file}</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="2" colspan="2">
            <widget class="QToolButton" name="btnSelectAudioEditor">
             <property name="text">
@@ -546,6 +570,50 @@
             <property name="icon">
              <iconset resource="../resource/resource.qrc">
               <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="edtAudioEditorArguments">
+            <property name="text">
+             <string>${file}</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_10">
+         <property name="title">
+          <string>Lua formatter (.lua files)</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_8">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_15">
+            <property name="text">
+             <string>Executable</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="edtLuaFormatterExec">
+            <property name="text">
+             <string>${install-dir}/lua-format/lua-format</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_19">
+            <property name="text">
+             <string>Arguments</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="edtLuaFormatterArgs">
+            <property name="text">
+             <string>${file} -i --config=${install-dir}/lua-format/style.yaml</string>
             </property>
            </widget>
           </item>
@@ -616,7 +684,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_8">
          <property name="title">
-          <string>Emscripten path</string>
+          <string>Emscripten SDK path</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_8">
           <item>
@@ -654,6 +722,148 @@
          </layout>
         </widget>
        </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_11">
+         <property name="title">
+          <string>Version control</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_9">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_29">
+            <property name="text">
+             <string>VCS tool</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_24">
+            <property name="text">
+             <string>List files cmd</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLineEdit" name="vcsCommitFile">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>add ${file}</string>
+            </property>
+            <property name="placeholderText">
+             <string>Specify a command to delete a file from the version control</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="vcsDelFile">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>rm --cached ${file}</string>
+            </property>
+            <property name="placeholderText">
+             <string>Specify a command to delete a file from the version control</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_26">
+            <property name="text">
+             <string>Remove file cmd</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_28">
+            <property name="text">
+             <string>Commit file cmd</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_25">
+            <property name="text">
+             <string>Add file cmd</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="vcsExecutable">
+            <property name="text">
+             <string>/usr/bin/git</string>
+            </property>
+            <property name="placeholderText">
+             <string>Select version control executable</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0" colspan="2">
+           <widget class="QLabel" name="label_27">
+            <property name="text">
+             <string>Specify the version control commands for syncing project changes to repository.</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="vcsListFiles">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>ls-files ${workspace}</string>
+            </property>
+            <property name="placeholderText">
+             <string>Specify a command to list files in version control</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="vcsAddFile">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>add ${file}</string>
+            </property>
+            <property name="placeholderText">
+             <string>Specify a command to add a file to the version control</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLineEdit" name="vcsIgnoreList">
+            <property name="text">
+             <string>workspace.json, content.json, readme</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_30">
+            <property name="text">
+             <string>Ignore these</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabEditor">
@@ -669,10 +879,10 @@
          <layout class="QVBoxLayout" name="verticalLayout_6">
           <item>
            <layout class="QGridLayout" name="gridLayout_5">
-            <item row="2" column="1">
-             <widget class="QCheckBox" name="editorShowLineNumbers">
+            <item row="5" column="1">
+             <widget class="QCheckBox" name="editorHightlightSyntax">
               <property name="text">
-               <string>Show line numbers</string>
+               <string>Highlight syntax</string>
               </property>
               <property name="checked">
                <bool>true</bool>
@@ -688,7 +898,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>Font</string>
+               <string>Font name</string>
               </property>
              </widget>
             </item>
@@ -699,46 +909,27 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="2">
-             <widget class="QComboBox" name="editorFontSize"/>
+            <item row="2" column="1">
+             <widget class="QComboBox" name="editorTheme"/>
             </item>
-            <item row="4" column="1">
-             <widget class="QCheckBox" name="editorHightlightSyntax">
+            <item row="7" column="1">
+             <widget class="QCheckBox" name="editorFormatOnSave">
               <property name="text">
-               <string>Highlight syntax</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
+               <string>Lua format on save</string>
               </property>
              </widget>
             </item>
             <item row="3" column="1">
-             <widget class="QCheckBox" name="editorHightlightCurrentLine">
+             <widget class="QCheckBox" name="editorShowLineNumbers">
               <property name="text">
-               <string>Highlight current line</string>
+               <string>Show line numbers</string>
               </property>
               <property name="checked">
                <bool>true</bool>
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_10">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Theme</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QComboBox" name="editorTheme"/>
-            </item>
-            <item row="5" column="1">
+            <item row="6" column="1">
              <widget class="QCheckBox" name="editorInsertSpaces">
               <property name="text">
                <string>Insert spaces on Tab</string>
@@ -748,51 +939,47 @@
               </property>
              </widget>
             </item>
-            <item row="6" column="1">
-             <widget class="QCheckBox" name="editorFormatOnSave">
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_10">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
-               <string>Lua format on save</string>
+               <string>Color theme</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QCheckBox" name="editorHightlightCurrentLine">
+              <property name="text">
+               <string>Highlight current line</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QComboBox" name="editorFontSize">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_23">
+              <property name="text">
+               <string>Font size</string>
               </property>
              </widget>
             </item>
            </layout>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="groupBox_10">
-            <property name="title">
-             <string>Lua formatter</string>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_8">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_15">
-               <property name="text">
-                <string>Executable</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLineEdit" name="edtLuaFormatterExec">
-               <property name="text">
-                <string>${install-dir}/lua-format/lua-format</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_19">
-               <property name="text">
-                <string>Arguments</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QLineEdit" name="edtLuaFormatterArgs">
-               <property name="text">
-                <string>${file} -i --config=${install-dir}/lua-format/style.yaml</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
           </item>
           <item>
            <spacer name="verticalSpacer_3">
@@ -860,7 +1047,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>tabWidget</tabstop>
+  <tabstop>tabVersion</tabstop>
   <tabstop>cmbStyle</tabstop>
   <tabstop>cmbWinOrTab</tabstop>
   <tabstop>spinFrameDelay</tabstop>
@@ -889,10 +1076,18 @@
   <tabstop>edtAudioEditorExecutable</tabstop>
   <tabstop>btnSelectAudioEditor</tabstop>
   <tabstop>edtAudioEditorArguments</tabstop>
+  <tabstop>edtLuaFormatterExec</tabstop>
+  <tabstop>edtLuaFormatterArgs</tabstop>
   <tabstop>edtPythonExecutable</tabstop>
   <tabstop>btnSelectPython</tabstop>
   <tabstop>edtEmscriptenPath</tabstop>
+  <tabstop>vcsExecutable</tabstop>
   <tabstop>btnSelectEmsdk</tabstop>
+  <tabstop>vcsListFiles</tabstop>
+  <tabstop>vcsAddFile</tabstop>
+  <tabstop>vcsDelFile</tabstop>
+  <tabstop>vcsCommitFile</tabstop>
+  <tabstop>vcsIgnoreList</tabstop>
   <tabstop>editorFont</tabstop>
   <tabstop>editorFontSize</tabstop>
   <tabstop>editorTheme</tabstop>
@@ -901,8 +1096,6 @@
   <tabstop>editorHightlightSyntax</tabstop>
   <tabstop>editorInsertSpaces</tabstop>
   <tabstop>editorFormatOnSave</tabstop>
-  <tabstop>edtLuaFormatterExec</tabstop>
-  <tabstop>edtLuaFormatterArgs</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
  </tabstops>

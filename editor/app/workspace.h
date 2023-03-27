@@ -250,6 +250,13 @@ namespace app
         ResourceList ListDependencies(std::vector<size_t> indices) const;
         ResourceList ListDependencies(std::size_t index) const;
 
+        // List the files on the filesystem used by the user defined resources.
+        // The files are provided by their URIs which can then be expanded to the
+        // actual filesystem paths.
+        QStringList ListFileResources(const QModelIndexList& list) const;
+        QStringList ListFileResources(std::vector<size_t> indices) const;
+        QStringList ListFileResources(std::size_t index) const;
+
         // Map material ID to its human-readable name.
         QString MapMaterialIdToName(const AnyString& id) const;
         // Map drawable ID to its human-readable name.
@@ -285,10 +292,11 @@ namespace app
         { return mVisibleCount; }
 
         // Get resource at a specific index in the list of all resources.
+        // This will get any resource regardless user defined or not.
         Resource& GetResource(size_t i);
         // Get a user defined resource.
         Resource& GetUserDefinedResource(size_t index);
-        // Get a user defined resource.
+        // Get a primitive (built-in) resource.
         Resource& GetPrimitiveResource(size_t index);
         // Get a resource identified by name and type. The resource must exist.
         Resource& GetResourceByName(const QString& name, Resource::Type type);
@@ -306,8 +314,11 @@ namespace app
         // Find resource by name and type. Returns nullptr if not found.
         const Resource* FindResourceByName(const QString& name, Resource::Type type) const;
         // Get resource at a specific index in the list of all resources.
+        // This will get any resource regardless user defined or not.
         const Resource& GetResource(size_t i) const;
+        // Get a user defined resource.
         const Resource& GetUserDefinedResource(size_t index) const;
+        // Get a primitive (built-in) resource.
         const Resource& GetPrimitiveResource(size_t index) const;
         // Delete the resources identified by the selection list.
         // The list can contain multiple items and can be discontinuous
@@ -330,7 +341,7 @@ namespace app
         bool ImportResourcesFromJson(const QString& filename, std::vector<std::unique_ptr<Resource>>& resources);
 
         // Import and create new resource based on a file.
-        // Currently supports creating material resources out of
+        // Currently, supports creating material resources out of
         // images (.jpeg and .png) files
         void ImportFilesAsResource(const QStringList& files);
 
