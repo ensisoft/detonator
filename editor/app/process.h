@@ -90,6 +90,8 @@ namespace app
 
         void EnableTimeout(bool on_off)
         { mEnableTimeout = on_off; }
+        void SetSilentMode(bool on_off)
+        { mSilentMode = on_off; }
 
         // run the given executable and capture the output
         // into stdout and stderr as a series of text lines.
@@ -101,7 +103,9 @@ namespace app
             const QStringList& args,
             QStringList* stdout_buffer,
             QStringList* stderr_buffer,
-            Error* error_code = nullptr);
+            Error* error_code = nullptr,
+            int* exit_code = nullptr,
+            bool silent = false);
     private slots:
         void ProcessStdOut();
         void ProcessStdErr();
@@ -125,6 +129,7 @@ namespace app
         Error mError = Error::None;
         bool mKilled = false;
         bool mEnableTimeout = false;
+        bool mSilentMode = false;
     private:
     };
 } // namespace

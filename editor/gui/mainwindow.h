@@ -160,6 +160,7 @@ namespace gui
         void on_actionNewResource_triggered();
         void on_actionProjectSettings_triggered();
         void on_actionProjectPlay_triggered();
+        void on_actionProjectSync_triggered();
         void on_btnDemoBandit_clicked();
         void on_btnDemoBlast_clicked();
         void on_btnDemoBreak_clicked();

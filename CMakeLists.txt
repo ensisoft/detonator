@@ -361,6 +361,9 @@ add_executable(Detonator
     editor/gui/dlgeventlog.h
     editor/gui/dlgeventlog.ui
     editor/gui/dlgeventlog.cpp
+    editor/gui/dlgvcs.h
+    editor/gui/dlgvcs.ui
+    editor/gui/dlgvcs.cpp
     editor/gui/dlgabout.h
     editor/gui/dlgabout.ui
     editor/gui/dlgabout.cpp

@@ -66,6 +66,12 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings,
     SetUIValue(mUI.edtEmscriptenPath,         settings.emsdk);
     SetUIValue(mUI.clearColor,                settings.clear_color);
     SetUIValue(mUI.gridColor,                 settings.grid_color);
+    SetUIValue(mUI.vcsExecutable,             settings.vcs_executable);
+    SetUIValue(mUI.vcsAddFile,                settings.vcs_cmd_add_file);
+    SetUIValue(mUI.vcsDelFile,                settings.vcs_cmd_del_file);
+    SetUIValue(mUI.vcsCommitFile,             settings.vcs_cmd_commit_file);
+    SetUIValue(mUI.vcsListFiles,              settings.vcs_cmd_list_files);
+    SetUIValue(mUI.vcsIgnoreList,             settings.vcs_ignore_list);
     SetUIValue(mUI.cmbGrid,                   widget.grid);
     SetUIValue(mUI.zoom,                      widget.zoom);
     SetUIValue(mUI.chkShowGrid,               widget.show_grid);
@@ -75,6 +81,7 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings,
     SetUIValue(mUI.edtLuaFormatterExec,       mScriptSettings.lua_formatter_exec);
     SetUIValue(mUI.edtLuaFormatterArgs,       mScriptSettings.lua_formatter_args);
     SetUIValue(mUI.editorFormatOnSave,        mScriptSettings.lua_format_on_save);
+
 
     // add Qt's built-in / plugin styles.
     const auto& styles = QStyleFactory::keys();
@@ -123,6 +130,13 @@ void DlgSettings::on_btnAccept_clicked()
     GetUIValue(mUI.edtEmscriptenPath,         &mSettings.emsdk);
     GetUIValue(mUI.clearColor,                &mSettings.clear_color);
     GetUIValue(mUI.gridColor,                 &mSettings.grid_color);
+    GetUIValue(mUI.vcsExecutable,             &mSettings.vcs_executable);
+    GetUIValue(mUI.vcsAddFile,                &mSettings.vcs_cmd_add_file);
+    GetUIValue(mUI.vcsDelFile,                &mSettings.vcs_cmd_del_file);
+    GetUIValue(mUI.vcsCommitFile,             &mSettings.vcs_cmd_commit_file);
+    GetUIValue(mUI.vcsListFiles,              &mSettings.vcs_cmd_list_files);
+    GetUIValue(mUI.vcsIgnoreList,             &mSettings.vcs_ignore_list);
+
     // text editor settings.
     GetUIValue(mUI.editorTheme,                 &mEditorSettings.theme);
     GetUIValue(mUI.editorShowLineNumbers,       &mEditorSettings.show_line_numbers);

@@ -52,6 +52,8 @@
     <file>16x16_ico_png/database.png</file>
     <file>16x16_ico_png/audio.png</file>
     <file>16x16_ico_png/import.png</file>
+    <file>16x16_ico_png/export.png</file>
+    <file>16x16_ico_png/git-icon.png</file>
     <file>16x16_ico_png/ui.png</file>
     <file>16x16_ico_png/tag.png</file>
     <file>16x16_ico_png/help.png</file>
@@ -75,6 +77,13 @@
     <file>16x16_ico_png/crossed_eye.png</file>
     <file>16x16_ico_png/compress.png</file>
     <file>16x16_ico_png/tab_go.png</file>
+    <file>16x16_ico_png/transmit.png</file>
+    <file>16x16_ico_png/transmit_add.png</file>
+    <file>16x16_ico_png/transmit_blue.png</file>
+    <file>16x16_ico_png/transmit_delete.png</file>
+    <file>16x16_ico_png/transmit_edit.png</file>
+    <file>16x16_ico_png/transmit_error.png</file>
+    <file>16x16_ico_png/transmit_go.png</file>
 
     <file>32x32_ico_png/save.png</file>
     <file>32x32_ico_png/play.png</file>
