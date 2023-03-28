@@ -99,13 +99,16 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
           "bools": [
             0
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "BEvkjRXES2",
-          "name": "dragging",
-          "readonly": false
+          "name": "dragging"
         }
       ]
     },
@@ -314,13 +317,16 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
           "bools": [
             0
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "aQiDUBhvIu",
-          "name": "dragging",
-          "readonly": false
+          "name": "dragging"
         }
       ]
     },
@@ -509,13 +515,16 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
           "bools": [
             0
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "aQiDUBhvIu",
-          "name": "dragging",
-          "readonly": false
+          "name": "dragging"
         }
       ]
     },
@@ -661,13 +670,16 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
           "bools": [
             0
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "xL1u8XEHD5",
-          "name": "dragging",
-          "readonly": false
+          "name": "dragging"
         }
       ]
     },
@@ -896,13 +908,16 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
           "bools": [
             0
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "f8PunzKnDF",
-          "name": "dragging",
-          "readonly": false
+          "name": "dragging"
         }
       ]
     },
@@ -1432,13 +1447,16 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
           "bools": [
             0
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "gtAlh44Upa",
-          "name": "dragging",
-          "readonly": false
+          "name": "dragging"
         }
       ]
     },
@@ -1667,13 +1685,16 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
           "bools": [
             0
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "tKvHfmYnJH",
-          "name": "dragging",
-          "readonly": false
+          "name": "dragging"
         }
       ]
     },
@@ -2270,13 +2291,16 @@
       "tag": "",
       "vars": [
         {
-          "array": false,
           "bools": [
             0
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "udJPMW8the",
-          "name": "dragging",
-          "readonly": false
+          "name": "dragging"
         }
       ]
     },
@@ -3666,6 +3690,77 @@
       },
       "resource_id": "1XgDNiDXTz",
       "resource_name": "Fireworks Explosion Red",
+      "script_file": "",
+      "tag": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "ZnvR8kE3vD",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "My Entity",
+      "nodes": [
+        {
+          "class": "7hGhRTTZC5",
+          "drawable_item": {
+            "drawable": "_rect",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "_checkerboard",
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": -153.5,
+            "y": -151.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 217.0,
+            "y": 240.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "7hGhRTTZC5"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "ZnvR8kE3vD",
+      "resource_name": "My Entity",
       "script_file": "",
       "tag": ""
     }

@@ -68,6 +68,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -185,6 +186,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -272,6 +274,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -359,6 +362,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -446,6 +450,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -533,6 +538,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -603,6 +609,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -690,6 +697,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -777,6 +785,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -864,6 +873,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -951,6 +961,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1038,6 +1049,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1125,6 +1137,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1212,6 +1225,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1299,6 +1313,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1386,6 +1401,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1473,6 +1489,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1560,6 +1577,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1630,6 +1648,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1717,6 +1736,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1787,6 +1807,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1857,6 +1878,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -1927,6 +1949,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2034,6 +2057,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2071,6 +2095,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2108,6 +2133,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2145,6 +2171,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2182,6 +2209,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2219,6 +2247,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -2960,40 +2989,52 @@
       ],
       "vars": [
         {
-          "array": false,
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "i1H9Y16IyZ",
           "ints": [
             0
           ],
-          "name": "coins",
-          "readonly": false
+          "name": "coins"
         },
         {
-          "array": false,
           "bools": [
             0
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "7Mk6fLbXqk",
-          "name": "died",
-          "readonly": false
+          "name": "died"
         },
         {
-          "array": false,
           "bools": [
             1
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "jeHEPWKRvo",
-          "name": "can_move_right",
-          "readonly": false
+          "name": "can_move_right"
         },
         {
-          "array": false,
           "bools": [
             1
           ],
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
           "id": "GFqruXXZiv",
-          "name": "can_move_left",
-          "readonly": false
+          "name": "can_move_left"
         }
       ]
     },
@@ -3058,6 +3099,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3095,6 +3137,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3132,6 +3175,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3169,6 +3213,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3385,6 +3430,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3422,6 +3468,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3459,6 +3506,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3496,6 +3544,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3760,6 +3809,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3884,6 +3934,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3921,6 +3972,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3958,6 +4010,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -3995,6 +4048,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4032,6 +4086,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4069,6 +4124,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4171,6 +4227,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4241,6 +4298,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4311,6 +4369,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4348,6 +4407,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4385,6 +4445,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4422,6 +4483,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4459,6 +4521,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4496,6 +4559,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4533,6 +4597,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4570,6 +4635,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4607,6 +4673,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4644,6 +4711,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4718,6 +4786,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4755,6 +4824,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4792,6 +4862,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4829,6 +4900,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -4866,6 +4938,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5013,6 +5086,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5083,6 +5157,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5153,6 +5228,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5190,6 +5266,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5227,6 +5304,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5332,6 +5410,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5484,6 +5563,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5554,6 +5634,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5641,6 +5722,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5693,6 +5775,7 @@
           "text_item": {
             "flags": {
               "BlinkText": false,
+              "PP_EnableBloom": true,
               "StaticContent": false,
               "UnderlineText": false,
               "VisibleInGame": true
@@ -5721,6 +5804,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -5773,6 +5857,7 @@
           "text_item": {
             "flags": {
               "BlinkText": false,
+              "PP_EnableBloom": true,
               "StaticContent": false,
               "UnderlineText": false,
               "VisibleInGame": true
@@ -5855,6 +5940,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Objects/StoneBlock.png",
         "flags": {
           "AllowPacking": true,
@@ -5909,6 +5997,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Tile/tile1.png",
         "flags": {
           "AllowPacking": true,
@@ -5963,6 +6054,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Tile/tile2.png",
         "flags": {
           "AllowPacking": true,
@@ -6017,6 +6111,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Tile/tile3.png",
         "flags": {
           "AllowPacking": true,
@@ -6071,6 +6168,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Tile/tile4.png",
         "flags": {
           "AllowPacking": true,
@@ -6125,6 +6225,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Tile/tile5.png",
         "flags": {
           "AllowPacking": true,
@@ -6179,6 +6282,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Tile/tile6.png",
         "flags": {
           "AllowPacking": true,
@@ -6233,6 +6339,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Tile/tile7.png",
         "flags": {
           "AllowPacking": true,
@@ -6287,6 +6396,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Tile/tile8.png",
         "flags": {
           "AllowPacking": true,
@@ -6341,6 +6453,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Tile/tile9.png",
         "flags": {
           "AllowPacking": true,
@@ -6395,6 +6510,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Tile/tile10.png",
         "flags": {
           "AllowPacking": true,
@@ -6449,6 +6567,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Tile/tile11.png",
         "flags": {
           "AllowPacking": true,
@@ -6503,6 +6624,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Tile/tile12.png",
         "flags": {
           "AllowPacking": true,
@@ -6557,6 +6681,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Tile/tile13.png",
         "flags": {
           "AllowPacking": true,
@@ -6611,6 +6738,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Tile/tile14.png",
         "flags": {
           "AllowPacking": true,
@@ -6665,6 +6795,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Tile/tile15.png",
         "flags": {
           "AllowPacking": true,
@@ -6719,6 +6852,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Tile/tile16.png",
         "flags": {
           "AllowPacking": true,
@@ -6773,6 +6909,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Objects/Bush (1).png",
         "flags": {
           "AllowPacking": true,
@@ -6827,6 +6966,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Objects/Bush (2).png",
         "flags": {
           "AllowPacking": true,
@@ -6881,6 +7023,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Objects/Cactus (1).png",
         "flags": {
           "AllowPacking": true,
@@ -6935,6 +7080,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Objects/Cactus (2).png",
         "flags": {
           "AllowPacking": true,
@@ -6989,6 +7137,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Objects/Cactus (3).png",
         "flags": {
           "AllowPacking": true,
@@ -7043,6 +7194,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Objects/Crate.png",
         "flags": {
           "AllowPacking": true,
@@ -7097,6 +7251,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Objects/Grass (1).png",
         "flags": {
           "AllowPacking": true,
@@ -7151,6 +7308,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Objects/Grass (2).png",
         "flags": {
           "AllowPacking": true,
@@ -7205,6 +7365,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Objects/Sign.png",
         "flags": {
           "AllowPacking": true,
@@ -7259,6 +7422,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Objects/SignArrow.png",
         "flags": {
           "AllowPacking": true,
@@ -7313,6 +7479,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Objects/Skeleton.png",
         "flags": {
           "AllowPacking": true,
@@ -7367,6 +7536,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Objects/Stone.png",
         "flags": {
           "AllowPacking": true,
@@ -7421,6 +7593,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/Objects/Tree.png",
         "flags": {
           "AllowPacking": true,
@@ -7475,6 +7650,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/BG_layer_0.png",
         "flags": {
           "AllowPacking": true,
@@ -7543,6 +7721,9 @@
       "textures": [
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_000.png",
           "flags": {
             "AllowPacking": true,
@@ -7561,6 +7742,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_001.png",
           "flags": {
             "AllowPacking": true,
@@ -7579,6 +7763,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_002.png",
           "flags": {
             "AllowPacking": true,
@@ -7597,6 +7784,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_003.png",
           "flags": {
             "AllowPacking": true,
@@ -7615,6 +7805,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_004.png",
           "flags": {
             "AllowPacking": true,
@@ -7633,6 +7826,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_005.png",
           "flags": {
             "AllowPacking": true,
@@ -7651,6 +7847,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_006.png",
           "flags": {
             "AllowPacking": true,
@@ -7669,6 +7868,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_007.png",
           "flags": {
             "AllowPacking": true,
@@ -7687,6 +7889,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_008.png",
           "flags": {
             "AllowPacking": true,
@@ -7705,6 +7910,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_009.png",
           "flags": {
             "AllowPacking": true,
@@ -7723,6 +7931,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_010.png",
           "flags": {
             "AllowPacking": true,
@@ -7741,6 +7952,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_011.png",
           "flags": {
             "AllowPacking": true,
@@ -7802,6 +8016,9 @@
       "textures": [
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_000.png",
           "flags": {
             "AllowPacking": true,
@@ -7820,6 +8037,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_001.png",
           "flags": {
             "AllowPacking": true,
@@ -7838,6 +8058,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_002.png",
           "flags": {
             "AllowPacking": true,
@@ -7856,6 +8079,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_003.png",
           "flags": {
             "AllowPacking": true,
@@ -7874,6 +8100,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_004.png",
           "flags": {
             "AllowPacking": true,
@@ -7892,6 +8121,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_005.png",
           "flags": {
             "AllowPacking": true,
@@ -7910,6 +8142,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_006.png",
           "flags": {
             "AllowPacking": true,
@@ -7928,6 +8163,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_007.png",
           "flags": {
             "AllowPacking": true,
@@ -7989,6 +8227,9 @@
       "textures": [
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_000.png",
           "flags": {
             "AllowPacking": true,
@@ -8007,6 +8248,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_001.png",
           "flags": {
             "AllowPacking": true,
@@ -8025,6 +8269,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_002.png",
           "flags": {
             "AllowPacking": true,
@@ -8043,6 +8290,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_003.png",
           "flags": {
             "AllowPacking": true,
@@ -8061,6 +8311,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_004.png",
           "flags": {
             "AllowPacking": true,
@@ -8079,6 +8332,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_005.png",
           "flags": {
             "AllowPacking": true,
@@ -8097,6 +8353,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_006.png",
           "flags": {
             "AllowPacking": true,
@@ -8115,6 +8374,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_007.png",
           "flags": {
             "AllowPacking": true,
@@ -8176,6 +8438,9 @@
       "textures": [
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_000.png",
           "flags": {
             "AllowPacking": true,
@@ -8194,6 +8459,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_001.png",
           "flags": {
             "AllowPacking": true,
@@ -8212,6 +8480,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_002.png",
           "flags": {
             "AllowPacking": true,
@@ -8230,6 +8501,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_003.png",
           "flags": {
             "AllowPacking": true,
@@ -8248,6 +8522,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_004.png",
           "flags": {
             "AllowPacking": true,
@@ -8266,6 +8543,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_005.png",
           "flags": {
             "AllowPacking": true,
@@ -8284,6 +8564,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_006.png",
           "flags": {
             "AllowPacking": true,
@@ -8302,6 +8585,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_007.png",
           "flags": {
             "AllowPacking": true,
@@ -8363,6 +8649,9 @@
       "textures": [
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_000.png",
           "flags": {
             "AllowPacking": true,
@@ -8381,6 +8670,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_001.png",
           "flags": {
             "AllowPacking": true,
@@ -8399,6 +8691,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_002.png",
           "flags": {
             "AllowPacking": true,
@@ -8417,6 +8712,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_003.png",
           "flags": {
             "AllowPacking": true,
@@ -8435,6 +8733,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_004.png",
           "flags": {
             "AllowPacking": true,
@@ -8453,6 +8754,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_005.png",
           "flags": {
             "AllowPacking": true,
@@ -8471,6 +8775,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_006.png",
           "flags": {
             "AllowPacking": true,
@@ -8489,6 +8796,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_007.png",
           "flags": {
             "AllowPacking": true,
@@ -8550,6 +8860,9 @@
       "textures": [
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_000.png",
           "flags": {
             "AllowPacking": true,
@@ -8568,6 +8881,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_001.png",
           "flags": {
             "AllowPacking": true,
@@ -8586,6 +8902,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_002.png",
           "flags": {
             "AllowPacking": true,
@@ -8604,6 +8923,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_003.png",
           "flags": {
             "AllowPacking": true,
@@ -8622,6 +8944,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_004.png",
           "flags": {
             "AllowPacking": true,
@@ -8640,6 +8965,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_005.png",
           "flags": {
             "AllowPacking": true,
@@ -8658,6 +8986,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_006.png",
           "flags": {
             "AllowPacking": true,
@@ -8676,6 +9007,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_007.png",
           "flags": {
             "AllowPacking": true,
@@ -8737,6 +9071,9 @@
       "textures": [
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_000.png",
           "flags": {
             "AllowPacking": true,
@@ -8755,6 +9092,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_001.png",
           "flags": {
             "AllowPacking": true,
@@ -8773,6 +9113,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_002.png",
           "flags": {
             "AllowPacking": true,
@@ -8791,6 +9134,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_003.png",
           "flags": {
             "AllowPacking": true,
@@ -8809,6 +9155,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_004.png",
           "flags": {
             "AllowPacking": true,
@@ -8827,6 +9176,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_005.png",
           "flags": {
             "AllowPacking": true,
@@ -8845,6 +9197,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_006.png",
           "flags": {
             "AllowPacking": true,
@@ -8863,6 +9218,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_007.png",
           "flags": {
             "AllowPacking": true,
@@ -8910,6 +9268,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/BG_layer_1.png",
         "flags": {
           "AllowPacking": true,
@@ -8964,6 +9325,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/BG_layer_2.png",
         "flags": {
           "AllowPacking": true,
@@ -9032,6 +9396,9 @@
       "textures": [
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Coin/Spin/star coin rotate 1.png",
           "flags": {
             "AllowPacking": true,
@@ -9050,6 +9417,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Coin/Spin/star coin rotate 2.png",
           "flags": {
             "AllowPacking": true,
@@ -9068,6 +9438,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Coin/Spin/star coin rotate 3.png",
           "flags": {
             "AllowPacking": true,
@@ -9086,6 +9459,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Coin/Spin/star coin rotate 4.png",
           "flags": {
             "AllowPacking": true,
@@ -9104,6 +9480,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Coin/Spin/star coin rotate 5.png",
           "flags": {
             "AllowPacking": true,
@@ -9122,6 +9501,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/Coin/Spin/star coin rotate 6.png",
           "flags": {
             "AllowPacking": true,
@@ -9169,6 +9551,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/diamond/diamond violet.png",
         "flags": {
           "AllowPacking": true,
@@ -9223,6 +9608,9 @@
       "surface": "Opaque",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/desert tile set/BG.png",
         "flags": {
           "AllowPacking": true,
@@ -9486,8 +9874,8 @@
           "name": "Player",
           "parent_render_tree_node": "",
           "position": {
-            "x": -1917.4998779296875,
-            "y": 202.49993896484375
+            "x": -1942.5,
+            "y": 197.5
           },
           "rotation": 0.0,
           "scale": {
@@ -13988,13 +14376,16 @@
       "tilemap": "",
       "vars": [
         {
-          "array": false,
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": true
+          },
           "id": "rirgM7AvyE",
           "ints": [
             123
           ],
-          "name": "foobar",
-          "readonly": true
+          "name": "foobar"
         }
       ]
     },
@@ -17525,7 +17916,7 @@
                 "h": 800.0,
                 "w": 1200.0
               },
-              "style": "{\"materials\":[{\"key\":\"TxMXBP1JDO/background\",\"type\":\"Null\"}]}",
+              "style": "{\"materials\":[{\"key\":\"background\",\"type\":\"Null\"}]}",
               "tab_index": 0,
               "type": "Form",
               "widgets": [
@@ -17546,7 +17937,7 @@
                     "h": 122.0,
                     "w": 124.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"3TkC6O4BkK/background\",\"material\":\"bBSpmT5CN0\",\"type\":\"Reference\"}]}",
+                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"bBSpmT5CN0\",\"type\":\"Reference\"}]}",
                   "tab_index": 0,
                   "text": "",
                   "type": "Label"
@@ -17568,7 +17959,7 @@
                     "h": 122.0,
                     "w": 124.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"osEMp7g053/background\",\"material\":\"bBSpmT5CN0\",\"type\":\"Reference\"}]}",
+                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"bBSpmT5CN0\",\"type\":\"Reference\"}]}",
                   "tab_index": 0,
                   "text": "",
                   "type": "Label"
@@ -17610,7 +18001,7 @@
                     "h": 53.0,
                     "w": 119.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"mouse-over/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.0313725508749485,\"g\":0.3451133072376251,\"r\":0.9098039269447327}},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.0313725508749485,\"g\":0.3451133072376251,\"r\":0.9098039269447327}},{\"key\":\"text-size\",\"value\":28},{\"key\":\"edit-text-size\",\"value\":28},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"}]}",
+                  "style": "{\"properties\":[{\"key\":\"mouse-over/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.0313725508749485,\"g\":0.3451133072376251,\"r\":0.9098039269447327}},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.0313725508749485,\"g\":0.3451133072376251,\"r\":0.9098039269447327}},{\"key\":\"text-size\",\"value\":28},{\"key\":\"edit-text-size\",\"value\":28}]}",
                   "tab_index": 1,
                   "text": "Play",
                   "type": "PushButton"
