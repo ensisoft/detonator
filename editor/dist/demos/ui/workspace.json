@@ -9,6 +9,7 @@
         "checked_for_packing": 1
     },
     "oTENvjff4e": {
+        "checked_for_packing": 1
     },
     "project": {
         "application_identifier": "nzHsJhRp8RDr",
@@ -108,7 +109,6 @@
         "checked_for_packing": 1
     },
     "zNOWw04fYZ": {
-        "checked_for_packing": 1,
         "elem_0sroSvwwzT_pos_x": -292,
         "elem_0sroSvwwzT_pos_y": -134,
         "elem_GhszDt2nDm_pos_x": -560,
@@ -117,10 +117,10 @@
         "link_wE822ZDz3i_dst_y": -84,
         "link_wE822ZDz3i_src_x": -360,
         "link_wE822ZDz3i_src_y": -59,
-        "mapping_0_link": "wE822ZDz3i",
-        "mapping_0_port": "0sroSvwwzT:in",
-        "mapping_1_link": "wE822ZDz3i",
-        "mapping_1_port": "GhszDt2nDm:out",
+        "mapping_0_link:%2": "wE822ZDz3i",
+        "mapping_0_port:%2": "0sroSvwwzT:in",
+        "mapping_1_link:%2": "wE822ZDz3i",
+        "mapping_1_port:%2": "GhszDt2nDm:out",
         "mapping_count": 2
     }
 }

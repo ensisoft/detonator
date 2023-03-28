@@ -169,6 +169,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -206,6 +207,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -359,6 +361,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -473,6 +476,7 @@
             "flags": {
               "FlipHorizontally": false,
               "FlipVertically": false,
+              "PP_EnableBloom": true,
               "RestartDrawable": true,
               "UpdateDrawable": true,
               "UpdateMaterial": true,
@@ -633,6 +637,9 @@
       "textures": [
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/FlappyBird/Flying/frame-1.png",
           "flags": {
             "AllowPacking": true,
@@ -651,6 +658,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/FlappyBird/Flying/frame-2.png",
           "flags": {
             "AllowPacking": true,
@@ -669,6 +679,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/FlappyBird/Flying/frame-3.png",
           "flags": {
             "AllowPacking": true,
@@ -687,6 +700,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/FlappyBird/Flying/frame-4.png",
           "flags": {
             "AllowPacking": true,
@@ -705,6 +721,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/FlappyBird/Flying/frame-5.png",
           "flags": {
             "AllowPacking": true,
@@ -723,6 +742,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/FlappyBird/Flying/frame-6.png",
           "flags": {
             "AllowPacking": true,
@@ -741,6 +763,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/FlappyBird/Flying/frame-7.png",
           "flags": {
             "AllowPacking": true,
@@ -759,6 +784,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/FlappyBird/Flying/frame-8.png",
           "flags": {
             "AllowPacking": true,
@@ -806,6 +834,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/Background/full_background.png",
         "flags": {
           "AllowPacking": true,
@@ -874,6 +905,9 @@
       "textures": [
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/FlappyBird/Hurt/frame-1.png",
           "flags": {
             "AllowPacking": true,
@@ -892,6 +926,9 @@
         },
         {
           "colorspace": "Linear",
+          "effects": {
+            "Blur": false
+          },
           "file": "ws://textures/FlappyBird/Hurt/frame-2.png",
           "flags": {
             "AllowPacking": true,
@@ -939,6 +976,9 @@
       "surface": "Transparent",
       "texture": {
         "colorspace": "Linear",
+        "effects": {
+          "Blur": false
+        },
         "file": "ws://textures/Spikes/sharp wood.png",
         "flags": {
           "AllowPacking": true,
