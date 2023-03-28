@@ -25,102 +25,18 @@
      </property>
      <widget class="QWidget" name="tabMain">
       <attribute name="title">
-       <string>Application</string>
+       <string>Game</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QGroupBox" name="grpApplication">
          <property name="title">
-          <string>Application settings</string>
+          <string>Game information</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="6" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Name</string>
-            </property>
-           </widget>
-          </item>
-          <item row="13" column="1">
-           <widget class="QCheckBox" name="chkLogWarnings">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Log warnings</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Identifier</string>
-            </property>
-           </widget>
-          </item>
-          <item row="11" column="0">
-           <widget class="QLabel" name="label_46">
-            <property name="text">
-             <string>Event logging</string>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="0">
-           <widget class="QLabel" name="label_26">
-            <property name="text">
-             <string>Main game script</string>
-            </property>
-           </widget>
-          </item>
-          <item row="11" column="1">
-           <widget class="QCheckBox" name="chkLogDebug">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Log debug</string>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Version</string>
-            </property>
-           </widget>
-          </item>
-          <item row="11" column="2">
-           <widget class="QCheckBox" name="chkLogInfo">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Log information</string>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="1" colspan="2">
-           <widget class="QLineEdit" name="edtGameScript">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>ws://lua/game.lua</string>
-            </property>
-           </widget>
-          </item>
           <item row="9" column="1" colspan="2">
            <widget class="QLineEdit" name="edtAppVersion">
             <property name="sizePolicy">
@@ -129,15 +45,18 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="placeholderText">
+             <string>Give your game's version here (none)</string>
+            </property>
            </widget>
           </item>
-          <item row="6" column="1" colspan="2">
-           <widget class="QLineEdit" name="edtAppName">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+          <item row="6" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Name</string>
             </property>
            </widget>
           </item>
@@ -154,18 +73,120 @@
             </property>
            </widget>
           </item>
-          <item row="13" column="2">
-           <widget class="QCheckBox" name="chkLogErrors">
+          <item row="9" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Version</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1" colspan="2">
+           <widget class="QLineEdit" name="edtAppName">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="text">
-             <string>Log errors</string>
+            <property name="placeholderText">
+             <string>Give your game's name here (unnamed)</string>
             </property>
            </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Identifier</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_9">
+         <property name="title">
+          <string>Game execution</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_14">
+          <item>
+           <layout class="QGridLayout" name="gridLayout_13">
+            <item row="1" column="0">
+             <widget class="QCheckBox" name="chkLogDebug">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Log debug</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QCheckBox" name="chkLogInfo">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Log information</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QCheckBox" name="chkLogWarnings">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Log warnings</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" colspan="2">
+             <widget class="QLineEdit" name="edtGameScript">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>ws://lua/game.lua</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_26">
+              <property name="text">
+               <string>Main game script</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QCheckBox" name="chkLogErrors">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Log errors</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -175,20 +196,16 @@
          <property name="title">
           <string>Debug settings (optional)</string>
          </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
          <layout class="QGridLayout" name="gridLayout_12">
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_44">
-            <property name="text">
-             <string>FPS</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="1" colspan="2">
            <layout class="QHBoxLayout" name="horizontalLayout_11">
             <item>
              <widget class="QComboBox" name="cmbDebugFont">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -220,45 +237,38 @@
             </item>
            </layout>
           </item>
-          <item row="3" column="1">
-           <widget class="QCheckBox" name="chkDebugShowMsg">
-            <property name="text">
-             <string>Show messages</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_34">
             <property name="text">
-             <string>Font</string>
+             <string>Debug font</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QCheckBox" name="chkDebugPrintFps">
+          <item row="3" column="0" colspan="3">
+           <widget class="QCheckBox" name="chkDebugShowMsg">
             <property name="text">
-             <string>Print FPS</string>
+             <string>Show debug messages</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
+          <item row="1" column="0" colspan="2">
            <widget class="QCheckBox" name="chkDebugShowFps">
             <property name="text">
-             <string>Show FPS</string>
+             <string>Show current FPS</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="2">
+          <item row="4" column="0" colspan="2">
            <widget class="QCheckBox" name="chkDebugDraw">
             <property name="text">
-             <string>Debug draw</string>
+             <string>Draw debug lines, rects etc.</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_45">
+          <item row="5" column="0" colspan="2">
+           <widget class="QCheckBox" name="chkDebugPrintFps">
             <property name="text">
-             <string>Other</string>
+             <string>Print current FPS to debug log</string>
             </property>
            </widget>
           </item>
@@ -289,74 +299,22 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
-        <widget class="QGroupBox" name="groupBox_6">
+        <widget class="QGroupBox" name="groupBox_11">
          <property name="title">
-          <string>Desktop settings</string>
+          <string>Engine</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_8">
-          <item row="9" column="0">
-           <widget class="QLabel" name="label_38">
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_14">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_12">
             <property name="text">
-             <string>Window pointer</string>
+             <string>Engine library</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="2">
-           <widget class="QCheckBox" name="chkVsync">
-            <property name="text">
-             <string>VSYNC</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1" colspan="2">
-           <widget class="QComboBox" name="cmbWindowMode"/>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_35">
-            <property name="text">
-             <string>Default audio IO</string>
-            </property>
-           </widget>
-          </item>
-          <item row="12" column="0">
-           <widget class="QLabel" name="label_43">
-            <property name="text">
-             <string>Other flags</string>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Window surface </string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QLabel" name="label_9">
-            <property name="text">
-             <string>Window mode</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QCheckBox" name="chkSrgb">
-            <property name="text">
-             <string>Use sRGB color buffer</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="8" column="0">
-           <widget class="QLabel" name="label_37">
-            <property name="text">
-             <string>Window flags</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1" colspan="2">
+          <item row="0" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QLineEdit" name="edtAppLibrary">
@@ -381,7 +339,29 @@
             </item>
            </layout>
           </item>
-          <item row="2" column="1" colspan="2">
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_6">
+         <property name="title">
+          <string>Graphics settings</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_8">
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="chkSrgb">
+            <property name="text">
+             <string>Use sRGB color buffer</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
            <widget class="QComboBox" name="cmbMSAA">
             <property name="editable">
              <bool>false</bool>
@@ -408,28 +388,65 @@
             </item>
            </widget>
           </item>
-          <item row="12" column="1">
-           <widget class="QCheckBox" name="chkSaveGeom">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_6">
             <property name="text">
-             <string>Save window geometry</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_39">
-            <property name="text">
-             <string>Graphics flags</string>
+             <string>MSAA</string>
             </property>
            </widget>
           </item>
           <item row="2" column="0">
-           <widget class="QLabel" name="label_6">
+           <widget class="QCheckBox" name="chkVsync">
             <property name="text">
-             <string>Graphics MSAA</string>
+             <string>Use VSYNC surface</string>
             </property>
            </widget>
           </item>
-          <item row="6" column="2">
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_12">
+         <property name="title">
+          <string>Audio settings</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_15">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_35">
+            <property name="text">
+             <string>Default IO strategy</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="cmbDesktopAudioIO"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_13">
+         <property name="title">
+          <string>Window settings</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_16">
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Window width</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
            <widget class="QSpinBox" name="wndHeight">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -454,21 +471,41 @@
             </property>
            </widget>
           </item>
-          <item row="9" column="2">
-           <widget class="QCheckBox" name="chkGrabMouse">
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="chkWndCanResize">
             <property name="text">
-             <string>Grab mouse</string>
+             <string>Window is resizable</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="chkWndHasBorder">
+            <property name="text">
+             <string>Window has border</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="cmbWindowMode"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Window height</string>
             </property>
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="label_12">
+           <widget class="QLabel" name="label_37">
             <property name="text">
-             <string>Engine library</string>
+             <string>Window mode</string>
             </property>
            </widget>
           </item>
-          <item row="6" column="1">
+          <item row="1" column="1">
            <widget class="QSpinBox" name="wndWidth">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -493,7 +530,19 @@
             </property>
            </widget>
           </item>
-          <item row="9" column="1">
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_14">
+         <property name="title">
+          <string>Mouse pointer</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_17">
+          <item row="0" column="0">
            <widget class="QCheckBox" name="chkCursor">
             <property name="text">
              <string>Show mouse pointer</string>
@@ -503,23 +552,29 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="1" colspan="2">
-           <widget class="QComboBox" name="cmbDesktopAudioIO"/>
-          </item>
-          <item row="8" column="1">
-           <widget class="QCheckBox" name="chkWndCanResize">
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="chkGrabMouse">
             <property name="text">
-             <string>Resizable</string>
+             <string>Grab mouse pointer</string>
             </property>
            </widget>
           </item>
-          <item row="8" column="2">
-           <widget class="QCheckBox" name="chkWndHasBorder">
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_15">
+         <property name="title">
+          <string>Other</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_18">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="chkSaveGeom">
             <property name="text">
-             <string>Window border</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
+             <string>Remember window geometry</string>
             </property>
            </widget>
           </item>
@@ -549,119 +604,147 @@
        <item>
         <widget class="QGroupBox" name="groupBox_8">
          <property name="title">
-          <string>HTML5/WASM settings</string>
+          <string>Canvas</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_10">
-          <item row="4" column="1">
-           <widget class="QComboBox" name="cmbWasmAudioIO"/>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_33">
-            <property name="text">
-             <string>Power preference</string>
-            </property>
-           </widget>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="cmbCanvasMode"/>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label_27">
             <property name="text">
-             <string>Canvas mode</string>
+             <string>Mode</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QSpinBox" name="canvasHeight">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="suffix">
+             <string> px</string>
+            </property>
+            <property name="minimum">
+             <number>256</number>
+            </property>
+            <property name="maximum">
+             <number>8192</number>
+            </property>
+            <property name="value">
+             <number>768</number>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_32">
             <property name="text">
-             <string>Canvas size</string>
+             <string>Width</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="cmbCanvasMode"/>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_36">
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_33">
             <property name="text">
-             <string>Default audio IO</string>
+             <string>Height</string>
             </property>
            </widget>
-          </item>
-          <item row="6" column="1">
-           <widget class="QCheckBox" name="chkDevUI">
-            <property name="text">
-             <string>Show dev control panel</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QComboBox" name="cmbPowerPref"/>
           </item>
           <item row="1" column="1">
-           <layout class="QHBoxLayout" name="horizontalLayout_10">
-            <item>
-             <widget class="QSpinBox" name="canvasWidth">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="suffix">
-               <string> px</string>
-              </property>
-              <property name="minimum">
-               <number>256</number>
-              </property>
-              <property name="maximum">
-               <number>8192</number>
-              </property>
-              <property name="value">
-               <number>1024</number>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSpinBox" name="canvasHeight">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="suffix">
-               <string> px</string>
-              </property>
-              <property name="minimum">
-               <number>256</number>
-              </property>
-              <property name="maximum">
-               <number>8192</number>
-              </property>
-              <property name="value">
-               <number>768</number>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           <widget class="QSpinBox" name="canvasWidth">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="suffix">
+             <string> px</string>
+            </property>
+            <property name="minimum">
+             <number>256</number>
+            </property>
+            <property name="maximum">
+             <number>8192</number>
+            </property>
+            <property name="value">
+             <number>1024</number>
+            </property>
+           </widget>
           </item>
-          <item row="2" column="1">
+          <item row="3" column="0">
            <widget class="QCheckBox" name="chkAntialias">
             <property name="text">
              <string>Antialias</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_41">
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_16">
+         <property name="title">
+          <string>Power preferrence</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_19">
+          <item row="0" column="1">
+           <widget class="QComboBox" name="cmbPowerPref"/>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_38">
             <property name="text">
-             <string>Canvas flags</string>
+             <string>Power profile</string>
             </property>
            </widget>
           </item>
-          <item row="6" column="0">
-           <widget class="QLabel" name="label_42">
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_17">
+         <property name="title">
+          <string>Audio settings</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_20">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_36">
             <property name="text">
-             <string>Other flags</string>
+             <string>Default IO strategy</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="cmbWasmAudioIO"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_18">
+         <property name="title">
+          <string>Other</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_21">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="chkDevUI">
+            <property name="text">
+             <string>Show developer control panel</string>
             </property>
            </widget>
           </item>
@@ -692,6 +775,9 @@
         <widget class="QGroupBox" name="groupBox_7">
          <property name="title">
           <string>Updates</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_9">
           <item row="1" column="0">
@@ -754,6 +840,9 @@
          <property name="title">
           <string>Physics settings</string>
          </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
          <property name="checkable">
           <bool>true</bool>
          </property>
@@ -801,6 +890,9 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="prefix">
+               <string>x = </string>
+              </property>
               <property name="suffix">
                <string> u</string>
               </property>
@@ -829,6 +921,9 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="prefix">
+               <string>y = </string>
+              </property>
               <property name="suffix">
                <string> u</string>
               </property>
@@ -854,14 +949,14 @@
           <item row="2" column="0">
            <widget class="QLabel" name="label_18">
             <property name="text">
-             <string>Gravity (x,y)</string>
+             <string>Gravity vector</string>
             </property>
            </widget>
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="label_19">
             <property name="text">
-             <string>Scale (x,y)</string>
+             <string>Scale vector</string>
             </property>
            </widget>
           </item>
@@ -899,6 +994,9 @@
 
 </string>
               </property>
+              <property name="prefix">
+               <string>x = </string>
+              </property>
               <property name="suffix">
                <string> u</string>
               </property>
@@ -932,6 +1030,9 @@
 
 </string>
               </property>
+              <property name="prefix">
+               <string>y = </string>
+              </property>
               <property name="suffix">
                <string> u</string>
               </property>
@@ -961,6 +1062,9 @@
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
           <string>Graphics settings</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="1" column="0">
@@ -1046,14 +1150,10 @@
          <property name="title">
           <string>Audio settings</string>
          </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
          <layout class="QGridLayout" name="gridLayout_7">
-          <item row="4" column="1">
-           <widget class="QCheckBox" name="audioCaching">
-            <property name="text">
-             <string>Enable PCM caching</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_29">
             <property name="text">
@@ -1134,9 +1234,9 @@
            <widget class="QComboBox" name="audioChannels"/>
           </item>
           <item row="4" column="0">
-           <widget class="QLabel" name="label_47">
+           <widget class="QCheckBox" name="audioCaching">
             <property name="text">
-             <string>Audio flags</string>
+             <string>Enable PCM caching</string>
             </property>
            </widget>
           </item>
@@ -1149,7 +1249,10 @@
           <enum>Qt::StrongFocus</enum>
          </property>
          <property name="title">
-          <string>Pointer settings</string>
+          <string>Game mouse pointer</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -1192,7 +1295,7 @@
           <item row="5" column="0">
            <widget class="QLabel" name="label_24">
             <property name="text">
-             <string>Hotspot (x,y)</string>
+             <string>Hotspot</string>
             </property>
            </widget>
           </item>
@@ -1203,6 +1306,9 @@
            <layout class="QHBoxLayout" name="horizontalLayout_6">
             <item>
              <widget class="QDoubleSpinBox" name="hotspotX">
+              <property name="prefix">
+               <string>x = </string>
+              </property>
               <property name="minimum">
                <double>0.000000000000000</double>
               </property>
@@ -1222,6 +1328,9 @@
             </item>
             <item>
              <widget class="QDoubleSpinBox" name="hotspotY">
+              <property name="prefix">
+               <string>y = </string>
+              </property>
               <property name="minimum">
                <double>0.000000000000000</double>
               </property>
@@ -1251,7 +1360,7 @@
           <item row="4" column="0">
            <widget class="QLabel" name="label_25">
             <property name="text">
-             <string>Size (x,y) </string>
+             <string>Size in units</string>
             </property>
            </widget>
           </item>
@@ -1276,6 +1385,12 @@
            <layout class="QHBoxLayout" name="horizontalLayout_7">
             <item>
              <widget class="QSpinBox" name="cursorWidth">
+              <property name="suffix">
+               <string/>
+              </property>
+              <property name="prefix">
+               <string>x = </string>
+              </property>
               <property name="minimum">
                <number>1</number>
               </property>
@@ -1289,6 +1404,9 @@
             </item>
             <item>
              <widget class="QSpinBox" name="cursorHeight">
+              <property name="prefix">
+               <string>y = </string>
+              </property>
               <property name="minimum">
                <number>1</number>
               </property>
@@ -1328,34 +1446,16 @@
        <item>
         <widget class="QGroupBox" name="groupBox_2">
          <property name="title">
-          <string>Launch game settings</string>
+          <string>Game launch</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_40">
-            <property name="text">
-             <string>Launch flags</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_11">
             <property name="text">
              <string>Arguments</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QCheckBox" name="chkGameProcess">
-            <property name="text">
-             <string>Separate process</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_10">
-            <property name="text">
-             <string>Working folder</string>
             </property>
            </widget>
           </item>
@@ -1397,13 +1497,30 @@
             </item>
            </layout>
           </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Working folder</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="chkGameProcess">
+            <property name="text">
+             <string>Use separate process</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_4">
          <property name="title">
-          <string>Preview settings</string>
+          <string>Game object preview</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_11">
           <item row="0" column="0">
@@ -1412,34 +1529,6 @@
              <string>Entity script</string>
             </property>
            </widget>
-          </item>
-          <item row="1" column="1">
-           <layout class="QHBoxLayout" name="horizontalLayout_13">
-            <item>
-             <widget class="QLineEdit" name="edtPreviewSceneScript">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>app://scripts/preview/scene.lua</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="btnSelectPreviewSceneScript">
-              <property name="text">
-               <string>Browse ...</string>
-              </property>
-              <property name="icon">
-               <iconset resource="../resource/resource.qrc">
-                <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
-              </property>
-             </widget>
-            </item>
-           </layout>
           </item>
           <item row="0" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -1469,6 +1558,34 @@
             </item>
            </layout>
           </item>
+          <item row="1" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_13">
+            <item>
+             <widget class="QLineEdit" name="edtPreviewSceneScript">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>app://scripts/preview/scene.lua</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="btnSelectPreviewSceneScript">
+              <property name="text">
+               <string>Browse ...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_49">
             <property name="text">
@@ -1483,6 +1600,9 @@
         <widget class="QGroupBox" name="groupBox_5">
          <property name="title">
           <string>Game viewport</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
           <item row="1" column="0">
@@ -1641,10 +1761,10 @@
   <tabstop>chkLogErrors</tabstop>
   <tabstop>cmbDebugFont</tabstop>
   <tabstop>btnResetDebugFont</tabstop>
-  <tabstop>chkDebugPrintFps</tabstop>
   <tabstop>chkDebugShowFps</tabstop>
   <tabstop>chkDebugShowMsg</tabstop>
   <tabstop>chkDebugDraw</tabstop>
+  <tabstop>chkDebugPrintFps</tabstop>
   <tabstop>edtAppLibrary</tabstop>
   <tabstop>btnSelectEngine</tabstop>
   <tabstop>cmbMSAA</tabstop>
