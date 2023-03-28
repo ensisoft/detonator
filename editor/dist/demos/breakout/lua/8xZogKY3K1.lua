@@ -2,9 +2,14 @@
 -- This script will be called for every instance of 'Ball'
 -- in the scene during gameplay.
 -- You're free to delete functions you don't need.
+--
+--
+-- keep track of currently available balls since we're splitting them
+local ball_count = 0
+
+-- Check whether the position adjacent to the given brick position
+-- contains another brick. 
 function TestAdjacent(scene, brick_pos)
-    -- Check whether the position adjacent to the given brick position
-    -- contains another brick. 
     local bricks = scene:QuerySpatialNodes(brick_pos, 'All')
     -- use a high order function to find a brick in the reuslt set.
     local brick = bricks:Find(function(node)
@@ -21,22 +26,78 @@ function TestAdjacent(scene, brick_pos)
     return false
 end
 
+-- Called to make ball heavy
+function SetBallWeight(ball, weight)
+    if ball.demo_ball then
+        return
+    end
+
+    local light_node = ball:FindNodeByClassName('Light')
+    local heavy_node = ball:FindNodeByClassName('Heavy')
+    local light_draw = light_node:GetDrawable()
+    local heavy_draw = heavy_node:GetDrawable()
+
+    if weight == 'Heavy' then
+        ball.heavy = true
+        light_draw:SetVisible(false)
+        heavy_draw:SetVisible(true)
+    else
+        ball.heavy = false
+        light_draw:SetVisible(true)
+        heavy_draw:SetVisible(false)
+    end
+end
+
+-- Called to split the current ball into two balls
+function SplitBall(ball)
+    if ball.demo_ball then
+        return
+    end
+
+    local node = ball:GetNode(0)
+    local position = node:GetTranslation()
+
+    local copy = Game:SpawnEntity('Ball', {
+        pos = position,
+        layer = 2
+    })
+
+    copy.launched = true
+    -- the new ball must travel to a different direction
+    -- or at different velocity in order to not overlap with the
+    -- parent ball, simple solution just invert the direction
+    copy.velocity = ball.velocity * -1
+end
+
 function LostBall(ball)
     Scene:KillEntity(ball)
-    Audio:PlaySoundEffect('Fail')
+
+    ball_count = ball_count - 1
+    if ball_count > 0 then
+        return
+    end
+
+    -- if we're down to zero balls then post an event
+    -- about (conceptually) having lost the ball!
+
     local ball_died = game.GameEvent:new()
     ball_died.from = 'ball'
     ball_died.to = 'game'
     ball_died.message = 'died'
     Game:PostEvent(ball_died)
+
+    Audio:PlaySoundEffect('Fail')
 end
 
 -- Called when the game play begins for an entity in the scene.
 function BeginPlay(ball, scene)
     if ball.demo_ball then
-        ball.enabled = true
+        ball.launched = true
         ball.velocity = glm.normalize(glm.vec2:new(300, 500.0)) * 300
+        return
     end
+
+    ball_count = ball_count + 1
 end
 
 -- Called when the game play ends for an entity in the scene.
@@ -46,22 +107,26 @@ end
 
 -- Called on every low frequency game tick.
 function Tick(ball, game_time, dt)
+
 end
 
 -- Called on every iteration of game loop.
 function Update(ball, game_time, dt)
-    if not ball.enabled or ball:HasBeenKilled() then
+    if ball:HasBeenKilled() then
         return
     end
 
     local scene = ball:GetScene()
-    local paddle = scene:FindEntityByInstanceName('Paddle')
     local ball_body = ball:GetNode(0)
     local ball_position = ball_body:GetTranslation()
     local ball_velocity = ball.velocity
-    local ball_direction = glm.normalize(ball_velocity)
+    local ball_direction = nil
 
-    ball_position = ball_position + dt * ball_velocity
+    -- remember kids, normalizing a zero vector is bad (division by zero)
+    if ball.launched then
+        ball_direction = glm.normalize(ball_velocity)
+        ball_position = ball_position + dt * ball_velocity
+    end
 
     local wall_thickness = 10.0
 
@@ -74,11 +139,8 @@ function Update(ball, game_time, dt)
         ball_velocity.x = -ball_velocity.x
     end
 
-    -- check for losign the ball or hitting the ceiling
+    -- check for losing the ball or hitting the ceiling
     if ball_position.y > 400.0 then
-        if paddle ~= nil then
-            CallMethod(paddle, 'EndPowerup')
-        end
         LostBall(ball)
         return
     elseif ball_position.y < -400.0 + wall_thickness then
@@ -102,14 +164,19 @@ function Update(ball, game_time, dt)
         return false
     end)
 
+    ::continue::
     while bricks:HasNext() do
-
         local brick_node = bricks:GetNext()
         local brick_entity = brick_node:GetEntity()
         local brick_pos = brick_node:GetTranslation()
         local brick_size = brick_node:GetSize()
         local brick_width = brick_size.x
         local brick_height = brick_size.y
+
+        CallMethod(brick_entity, 'BallHit', ball)
+        if ball.heavy then
+            goto continue
+        end
 
         local left_adjacent = TestAdjacent(scene, brick_pos -
                                                glm.vec2:new(brick_width, 0))
@@ -193,39 +260,39 @@ function Update(ball, game_time, dt)
             -- Game:DebugPrint('Hit brick bottom')
         end
 
-        -- useful for 'debugging' i.e. seeing how the ball gets adjusted after hitting something
-        -- ball.enabled = false
-
-        CallMethod(brick_entity, 'BallHit')
         break
     end
 
-    --    ball.velocity = ball_velocity
-    --    ball_body:SetTranslation(ball_position)
+    local paddle_body = nil
+    local paddle_rect = nil
+    local paddle_position = nil
+    local paddle = scene:FindEntityByInstanceName('Paddle')
 
-    if paddle ~= nil then
-        local paddle_body = paddle:GetNode(0)
+    if paddle == nil then
+        goto update_ball_velocity
+    end
 
-        if ball.launched then
-            local paddle_rect = scene:FindEntityNodeBoundingRect(paddle,
-                                                                 paddle_body)
+    paddle_body = paddle:GetNode(0)
+    paddle_position = paddle_body:GetTranslation()
+    if ball.launched == false then
+        ball_position.x = paddle_position.x
+        goto update_ball_velocity
+    end
 
-            if paddle_rect:TestPoint(ball_position) then
-                ball_position.y = 350.0
-                ball_velocity.y = -ball_velocity.y
-
-                -- we're transferring the horizontal velocity from the paddle to the ball
-                ball_velocity.x = paddle.velocity
-
-                -- ball_velocity = glm.normalize(ball_velocity) * 500.0
-            end
-        else
-            local paddle_position = paddle_body:GetTranslation()
-
-            ball_position.x = paddle_position.x
+    -- check for a collisition with the paddle rect
+    paddle_rect = scene:FindEntityNodeBoundingRect(paddle, paddle_body)
+    if paddle_rect:TestPoint(ball_position) then
+        ball_position.y = 350.0
+        ball_velocity.y = -ball_velocity.y
+        ball_velocity.x = paddle.velocity -- we're transferring the horizontal velocity from the paddle to the ball
+        if paddle.sticky and not ball.heavy then
+            ball.velocity = glm.vec2:new(0, 0)
+            ball_position = glm.vec2:new(paddle_position.x, 340)
+            ball.launched = false
         end
     end
 
+    ::update_ball_velocity::
     ball.velocity = ball_velocity
     ball_body:SetTranslation(ball_position)
 end

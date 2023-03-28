@@ -2,6 +2,8 @@
 -- This script will be called for every instance of 'Level 0'
 -- during gameplay.
 -- You're free to delete functions you don't need.
+--
+--
 -- Called when the scene begins play.
 function BeginPlay(level)
     local num_items = 0

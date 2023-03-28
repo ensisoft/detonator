@@ -2,6 +2,8 @@
 -- This script will be called for every instance of 'Brick'
 -- in the scene during gameplay.
 -- You're free to delete functions you don't need.
+--
+--
 function DropPowerup(brick)
     -- drop a powerup if any 
     local node = brick:GetNode(0)
@@ -28,6 +30,8 @@ function DropPowerup(brick)
     powerup:SetLayer(2)
 
     local powerup_body = powerup_node:GetRigidBody()
+    local spatial_node = powerup_node:GetSpatialNode()
+    spatial_node:Enable(false)
     powerup_body:Enable(true)
 end
 
@@ -81,11 +85,18 @@ end
 function OnMouseMove(brick, mouse)
 end
 
-function BallHit(brick)
-    if brick.immortal then
+function BallHit(brick, ball)
+    if brick.immortal and not ball.heavy then
         return
     end
+
     brick.hit_count = brick.hit_count - 1
+
+    -- heavy ball smashes the brick at one go
+    if ball.heavy then
+        brick.hit_count = 0
+    end
+
     if brick.hit_count > 0 then
         return
     end
