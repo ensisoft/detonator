@@ -3213,6 +3213,13 @@ void BindGameLib(sol::state& L)
     entity_list["Size"]    = &EntityList::GetSize;
     entity_list["GetNext"] = &EntityList::GetNext;
     entity_list["Join"]    = &EntityList::Join;
+    entity_list["ForEach"] = [](EntityList& list, const sol::function& callback, sol::variadic_args args) {
+        list.BeginIteration();
+        while (list.HasNext()) {
+            Entity* entity = list.GetNext();
+            callback(entity, args);
+        }
+    };
 
     auto scene = table.new_usertype<Scene>("Scene",
        sol::meta_function::index,     &GetScriptVar<Scene>,

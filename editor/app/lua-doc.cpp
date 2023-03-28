@@ -1284,6 +1284,8 @@ void InitLuaDoc()
     DOC_METHOD_0("unsigned", "Size", "Get the number of items in the entity list.");
     DOC_FUNCTION_2("game.EntityList", "Join", "Join two entity lists together into a new entity list.",
                    "game.EntityList", "first", "game.EntityList", "second");
+    DOC_METHOD_2("void", "ForEach", "Call a callback function one ach entity in the list. Any optional argument is passed as-is to the callback.",
+                 "function", "callback", "...", "...");
 
     DOC_TABLE("game.Scene");
     DOC_METHOD_0("bool|float|string|int|vec2", "index", "Lua index meta method.<br>"
