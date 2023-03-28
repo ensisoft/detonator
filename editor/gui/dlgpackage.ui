@@ -18,10 +18,16 @@
     <normaloff>:/16x16_ico_png/package.png</normaloff>:/16x16_ico_png/package.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
+   <property name="leftMargin">
+    <number>8</number>
+   </property>
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string>Selected resources</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
@@ -31,12 +37,18 @@
           <property name="text">
            <string>Select All</string>
           </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="btnSelectNone">
           <property name="text">
            <string>Select None</string>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -65,6 +77,9 @@
     <widget class="QGroupBox" name="chkResizeTextures">
      <property name="title">
       <string>Resize textures</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -201,6 +216,9 @@
     <widget class="QGroupBox" name="chkCombineTextures">
      <property name="title">
       <string>Combine textures</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -352,6 +370,9 @@
      <property name="title">
       <string>Output options</string>
      </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="3" column="0">
        <widget class="QCheckBox" name="chkCopyNative">
@@ -384,7 +405,7 @@
       <item row="0" column="0">
        <widget class="QLineEdit" name="editOutDir">
         <property name="placeholderText">
-         <string>Output Directory</string>
+         <string>Select output directory</string>
         </property>
        </widget>
       </item>
