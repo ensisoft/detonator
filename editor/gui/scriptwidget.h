@@ -107,12 +107,13 @@ namespace gui
     private:
         Ui::ScriptWidget mUI;
     private:
-        std::unique_ptr<app::LuaDocTableModel> mTableModel;
-        std::unique_ptr<app::LuaDocModelProxy> mModelProxy;
+        class LuaParser;
+        std::unique_ptr<LuaParser> mLuaParser;
+        app::LuaDocTableModel mLuaHelpData;
+        app::LuaDocModelProxy mLuaHelpFilter;
         app::Workspace* mWorkspace = nullptr;
         QFileSystemWatcher mWatcher;
         QTextDocument mDocument;
-        QTextCursor   mCursor;
         QString mFilename;
         QString mResourceID;
         QString mResourceName;

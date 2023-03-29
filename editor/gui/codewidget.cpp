@@ -28,8 +28,8 @@
 #include <set>
 
 #include "base/math.h"
+#include "editor/app/code-tools.h"
 #include "editor/app/eventlog.h"
-#include "editor/app/lua-tools.h"
 #include "editor/gui/codewidget.h"
 #include "editor/gui/utility.h"
 
@@ -66,25 +66,27 @@ void CodeCompleter::Close()
     mOpen = false;
 }
 
-void CodeCompleter::SetModel(app::LuaDocModelProxy* model)
+void CodeCompleter::SetCompleter(app::CodeCompleter* completer)
 {
-    mUI.tableView->setModel(model);
-    mModel = model;
-    Connect(mUI.tableView, this, &CodeCompleter::TableSelectionChanged);
+    if (mCompleter)
+    {
+        mUI.tableView->setModel(nullptr);
+        mUI.tableView->disconnect(this);
+    }
+    mCompleter = completer;
+
+    if (mCompleter)
+    {
+        mUI.tableView->setModel(completer->GetCompletionModel());
+        Connect(mUI.tableView, this, &CodeCompleter::TableSelectionChanged);
+    }
+
 }
 
 void CodeCompleter::on_lineEdit_textChanged(const QString& text)
 {
-    QString key;
-    for (int i=0; i<text.size(); ++i)
-    {
-        if (text[i] == ' ' || text[i] == '(' || text[i] == '.' || text[i] == '=')
-            break;
-        key += text[i];
-    }
+    mCompleter->FilterPossibleCompletions(text);
 
-    mModel->SetFieldNameFilter(key);
-    mModel->invalidate();
     SelectRow(mUI.tableView, 0);
     UpdateHelp();
 }
@@ -119,7 +121,8 @@ bool CodeCompleter::eventFilter(QObject* destination, QEvent* event)
         return true;
     }
 
-    if (mModel->rowCount() == 0)
+    auto* model = mUI.tableView->model();
+    if (model->rowCount() == 0)
         return false;
 
     int current = GetSelectedRow(mUI.tableView);
@@ -149,9 +152,9 @@ void CodeCompleter::UpdateHelp()
     if (!index.isValid())
         return;
 
-    const auto& item = mModel->GetDocItemFromSource(index);
-    SetValue(mUI.help, item.desc);
-    SetValue(mUI.args, app::FormatArgHelp(item));
+    const auto& help = mCompleter->GetCompletionHelp(index);
+    SetValue(mUI.help, help.desc);
+    SetValue(mUI.args, help.args);
 }
 
 class LineNumberArea : public QWidget
@@ -184,16 +187,15 @@ void TextEditor::Reparse()
 {
     if (mHighlighter)
     {
-        mHighlighter->Parse(document()->toPlainText());
-        mHighlighter->rehighlight();
+        mHighlighter->ApplyHighlight(*mDocument);
     }
 }
 
 bool TextEditor::CancelCompletion()
 {
-    if (mCompleter->IsOpen())
+    if (mCompleterUI->IsOpen())
     {
-        mCompleter->Close();
+        mCompleterUI->Close();
         return true;
     }
     return false;
@@ -217,7 +219,6 @@ void TextEditor::GetDefaultSettings(Settings* settings)
 
 TextEditor::TextEditor(QWidget *parent)
   : QPlainTextEdit(parent)
-  , mDocModel(app::LuaDocTableModel::Mode::CodeCompletion)
 {
     connect(this, &TextEditor::blockCountChanged,     this, &TextEditor::UpdateLineNumberAreaWidth);
     connect(this, &TextEditor::updateRequest,         this, &TextEditor::UpdateLineNumberArea);
@@ -229,20 +230,20 @@ TextEditor::TextEditor(QWidget *parent)
 
     setLineWrapMode(LineWrapMode::NoWrap);
 
-    mDocProxy.SetTableModel(&mDocModel);
-    mCompleter.reset(new CodeCompleter(this));
-    mCompleter->SetModel(&mDocProxy);
-    connect(mCompleter.get(), &CodeCompleter::Complete, this, &TextEditor::Complete);
+    mCompleterUI.reset(new CodeCompleter(this));
+    connect(mCompleterUI.get(), &CodeCompleter::Complete, this, &TextEditor::Complete);
+    connect(mCompleterUI.get(), &CodeCompleter::Filter,   this, &TextEditor::Filter);
 }
 
 TextEditor::~TextEditor()
 {
     open_editors.erase(this);
 
-    mCompleter->disconnect(this);
-    if (mCompleter->IsOpen())
-        mCompleter->Close();
-    mCompleter.reset();
+    mCompleterUI->disconnect(this);
+    if (mCompleterUI->IsOpen())
+        mCompleterUI->Close();
+    mCompleterUI.reset();
+    
 }
 
 void TextEditor::SetDocument(QTextDocument* document)
@@ -251,6 +252,15 @@ void TextEditor::SetDocument(QTextDocument* document)
     mDocument = document;
 
     ApplySettings();
+}
+void TextEditor::SetCompleter(app::CodeCompleter* completer)
+{
+    mCompleter = completer;
+    mCompleterUI->SetCompleter(completer);
+}
+void TextEditor::SetSyntaxHighlighter(app::CodeHighlighter* highlighter)
+{
+    mHighlighter = highlighter;
 }
 
 int TextEditor::ComputeLineNumberAreaWidth() const
@@ -300,64 +310,16 @@ void TextEditor::UndoAvailable(bool yes_no)
 
 void TextEditor::Complete(const QString& text, const QModelIndex& index)
 {
-    if (text.isEmpty() && !index.isValid())
-        return;
-
-    // text takes precedence. i.e. the user can type something beyond
-    // the completion while the popup is open. For example "foobar = 123".
-    // in this case just insert the text.
-    if (!text.isEmpty() && !index.isValid())
+    QTextCursor cursor = textCursor();
+    if (mCompleter && mCompleter->FinishCompletion(text, index, *mDocument, cursor))
     {
-        QTextCursor tc = textCursor();
-        tc.movePosition(QTextCursor::Left);
-        tc.movePosition(QTextCursor::EndOfWord);
-        tc.insertText(text);
-        return;
+        setTextCursor(cursor);
     }
+}
 
-    const auto& item = mDocProxy.GetDocItemFromSource(index);
-
-    if (item.type == app::LuaMemberType::TableProperty ||
-        item.type == app::LuaMemberType::ObjectProperty ||
-        item.type == app::LuaMemberType::Table)
-    {
-        QString completion = item.name;
-        if (text.startsWith(completion))
-            completion = text;
-
-        QTextCursor tc = textCursor();
-        tc.movePosition(QTextCursor::Left);
-        tc.movePosition(QTextCursor::EndOfWord);
-        tc.insertText(completion);
-        setTextCursor(tc);
-    }
-    else if (item.type == app::LuaMemberType::Function ||
-             item.type == app::LuaMemberType::Method)
-    {
-        const QString& name = item.name;
-        const QString& args = app::FormatArgCompletion(item);
-        if (text.startsWith(name))
-        {
-            QTextCursor tc = textCursor();
-            tc.movePosition(QTextCursor::Left);
-            tc.movePosition(QTextCursor::EndOfWord);
-            tc.insertText(text);
-        }
-        else
-        {
-            QTextCursor tc = textCursor();
-            tc.movePosition(QTextCursor::Left);
-            tc.movePosition(QTextCursor::EndOfWord);
-            tc.insertText(name);
-            const auto pos = tc.position();
-            tc.insertText(args);
-            if (!item.args.empty())
-            {
-                tc.setPosition(pos + 1);
-                setTextCursor(tc);
-            }
-        }
-    }
+void TextEditor::Filter(const QString& input)
+{
+    mCompleter->FilterPossibleCompletions(input);
 }
 
 void TextEditor::resizeEvent(QResizeEvent *e)
@@ -382,75 +344,23 @@ void TextEditor::keyPressEvent(QKeyEvent* event)
         return;
     }
 
-    // open completion dialog on . or :
-    if (key == Qt::Key_Period || key == Qt::Key_Colon)
+    if (mCompleter && mSettings.use_code_completer)
     {
-        QString word = GetCurrentWord();
-        if (word.isEmpty())
+        if (mCompleter->StartCompletion(event, *mDocument, textCursor()))
         {
+            const QRect rect = cursorRect();
+            QRect popup;
+            popup.setWidth(500);
+            popup.setHeight(300);
+            popup.moveTo(mapToGlobal(rect.bottomRight()));
+            popup.translate(rect.width(), 10.0);
+            mCompleterUI->Open(popup);
+
+            // propagate to the parent class so the character gets inserted
+            // into the text.
             QPlainTextEdit::keyPressEvent(event);
             return;
         }
-        // simple case, if we're editing a digit like 123.0 then don't
-        // open the completion window.
-        const auto size = word.size();
-
-        if (word[size-1].isDigit() && !word.contains(QRegExp("[a-z]")) && !word.contains(QRegExp("[A-Z]")))
-        {
-            QPlainTextEdit::keyPressEvent(event);
-            return;
-        }
-        Reparse();
-        QTextCursor cursor = textCursor();
-        if (const auto* block = mHighlighter->FindBlockByOffset(cursor.position()))
-        {
-            if (block->type == app::LuaParser::HighlightKey::Comment ||
-                block->type == app::LuaParser::HighlightKey::Literal) {
-                QPlainTextEdit::keyPressEvent(event);
-                return;
-            }
-        }
-
-        DEBUG("Start code completion for prefix. [prefix='%1']", word);
-
-        // if we don't know the table name we have no idea
-        // what the type is. For example:
-        // foo.Doodah()
-        // foo:Doodah()
-        word = app::FindLuaDocTableMatch(word);
-
-        // interpret period as something like glm.length()
-        // i.e. for completion assume the prefix is a table name.
-        // thus, the filtering option is using prefix as table name
-        // and showing only Functions and Properties.
-        mDocProxy.ClearFilter();
-        mDocProxy.SetTableNameFilter(word);
-        if (key == Qt::Key_Period)
-        {
-            mDocProxy.SetVisible(0); // nothing
-            mDocProxy.SetVisible(app::LuaDocModelProxy::Show::TableProperty, true);
-            mDocProxy.SetVisible(app::LuaDocModelProxy::Show::Function, true);
-            mDocProxy.SetVisible(app::LuaDocModelProxy::Show::Table, true);
-        }
-        else if (key == Qt::Key_Colon)
-        {
-            mDocProxy.SetVisible(0); // nothing
-            mDocProxy.SetVisible(app::LuaDocModelProxy::Show::Method, true);
-        }
-        mDocProxy.invalidate();
-
-        const QRect rect = cursorRect();
-        QRect popup;
-        popup.setWidth(500);
-        popup.setHeight(300);
-        popup.moveTo(mapToGlobal(rect.bottomRight()));
-        popup.translate(rect.width(), 10.0);
-        mCompleter->Open(popup);
-
-        // propagate to the parent class so the character gets inserted
-        // into the text.
-        QPlainTextEdit::keyPressEvent(event);
-        return;
     }
 
     if (ctrl && (key == Qt::Key_F))
@@ -532,8 +442,8 @@ void TextEditor::keyPressEvent(QKeyEvent* event)
     }
     else
     {
-        if (mHighlighter && (key == Qt::Key_Return))
-            mHighlighter->Parse(document()->toPlainText());
+        if (mHighlighter && mSettings.highlight_syntax && (key == Qt::Key_Return))
+            mHighlighter->ApplyHighlight(*mDocument);
 
         QPlainTextEdit::keyPressEvent(event);
     }
@@ -601,18 +511,13 @@ void TextEditor::ApplySettings()
     }
     else WARN("Text editor font description is invalid. [font='%1']", font_name);
 
-    if (mSettings.highlight_syntax && !mHighlighter)
+    if (mSettings.highlight_syntax && mHighlighter)
     {
-        mHighlighter = new app::LuaParser(mDocument);
-        mHighlighter->setParent(this);
-        mHighlighter->SetTheme(app::LuaParser::ColorTheme::Monokai);
-        mHighlighter->Parse(document()->toPlainText());
-        mHighlighter->rehighlight();
+        mHighlighter->ApplyHighlight(*mDocument);
     }
     else if (!mSettings.highlight_syntax && mHighlighter)
     {
-        delete mHighlighter;
-        mHighlighter = nullptr;
+        mHighlighter->RemoveHighlight(*mDocument);
     }
     if (mSettings.show_line_numbers && !mLineNumberArea)
     {

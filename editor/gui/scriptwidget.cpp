@@ -35,6 +35,8 @@
 #include "base/assert.h"
 #include "base/color4f.h"
 #include "base/utility.h"
+#include "editor/app/code-tools.h"
+#include "editor/app/lua-tools.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/workspace.h"
 #include "editor/app/utility.h"
@@ -48,6 +50,254 @@ namespace gui
 // static
 ScriptWidget::Settings ScriptWidget::mSettings;
 
+// Our LuaParser provides both syntax highlights and code completion.
+class ScriptWidget::LuaParser : public app::CodeCompleter,
+                                public app::CodeHighlighter
+{
+public:
+    LuaParser()
+    {
+        mTheme.SetTheme(app::LuaTheme::Theme::Monokai);
+        mModel.SetMode(app::LuaDocTableModel::Mode::CodeCompletion);
+        mProxy.SetTableModel(&mModel);
+    }
+    ~LuaParser() override
+    {
+        DEBUG("Destroy ScriptWidget::LuaParser");
+        delete mHilight;
+    }
+
+    virtual bool StartCompletion(const QKeyEvent* event,
+                                 const QTextDocument& document,
+                                 const QTextCursor& cursor)  override
+    {
+        const auto key = event->key();
+        if (key == Qt::Key_Period || key == Qt::Key_Colon)
+        {
+            QTextCursor tc = cursor;
+            tc.select(QTextCursor::WordUnderCursor);
+            QString word = tc.selectedText();
+
+            if (word.isEmpty())
+                return false;
+
+            const auto size = word.size();
+            // simple case, if we're editing a digit like 123.0 then don't
+            // open the completion window.
+            if (word[size-1].isDigit() && !word.contains(QRegExp("[a-z]")) && !word.contains(QRegExp("[A-Z]")))
+                return false;
+
+            mParser.Parse(document.toPlainText());
+            if (const auto* block = mParser.FindBlock(cursor.position()))
+            {
+                if (block->type == app::LuaCodeBlockType::Comment ||
+                    block->type == app::LuaCodeBlockType::Literal)
+                    return false;
+            }
+
+            DEBUG("Start code completion for word. [word='%1']", word);
+
+            word = app::FindLuaDocTableMatch(word);
+
+            // interpret period as something like glm.length()
+            // i.e. for completion assume the prefix is a table name.
+            // thus, the filtering option is using prefix as table name
+            // and showing only Functions and Properties.
+            mProxy.ClearFilter();
+            mProxy.SetTableNameFilter(word);
+            if (key == Qt::Key_Period)
+            {
+                mProxy.SetVisible(0); // nothing
+                mProxy.SetVisible(app::LuaDocModelProxy::Show::TableProperty, true);
+                mProxy.SetVisible(app::LuaDocModelProxy::Show::Function, true);
+                mProxy.SetVisible(app::LuaDocModelProxy::Show::Table, true);
+            }
+            else if (key == Qt::Key_Colon)
+            {
+                mProxy.SetVisible(0); // nothing
+                mProxy.SetVisible(app::LuaDocModelProxy::Show::Method, true);
+            }
+            mProxy.invalidate();
+
+            return true;
+        }
+        return false;
+    }
+    virtual void FilterPossibleCompletions(const QString& input) override
+    {
+        QString key;
+        for (int i=0; i<input.size(); ++i)
+        {
+            if (input[i] == ' ' || input[i] == '(' || input[i] == '.' || input[i] == '=')
+                break;
+            key += input[i];
+        }
+        mProxy.SetFieldNameFilter(key);
+        mProxy.invalidate();
+    }
+    virtual bool FinishCompletion(const QString& input,
+                                  const QModelIndex& index,
+                                  const QTextDocument& document,
+                                  QTextCursor& cursor)  override
+    {
+        if (input.isEmpty() && !index.isValid())
+            return false;
+
+        // text takes precedence. i.e. the user can type something beyond
+        // the completion while the popup is open. For example "foobar = 123".
+        // in this case just insert the text.
+        if (!input.isEmpty() && !index.isValid())
+        {
+            cursor.movePosition(QTextCursor::Left);
+            cursor.movePosition(QTextCursor::EndOfWord);
+            cursor.insertText(input);
+            return true;
+        }
+        const auto& item = mProxy.GetDocItemFromSource(index);
+
+        if (item.type == app::LuaMemberType::TableProperty ||
+            item.type == app::LuaMemberType::ObjectProperty ||
+            item.type == app::LuaMemberType::Table)
+        {
+            QString completion = item.name;
+            if (input.startsWith(completion))
+                completion = input;
+
+            cursor.movePosition(QTextCursor::Left);
+            cursor.movePosition(QTextCursor::EndOfWord);
+            cursor.insertText(completion);
+        }
+        else if (item.type == app::LuaMemberType::Function ||
+                 item.type == app::LuaMemberType::Method)
+        {
+            const QString& name = item.name;
+            const QString& args = app::FormatArgCompletion(item);
+            if (input.startsWith(name))
+            {
+                cursor.movePosition(QTextCursor::Left);
+                cursor.movePosition(QTextCursor::EndOfWord);
+                cursor.insertText(input);
+            }
+            else
+            {
+                cursor.movePosition(QTextCursor::Left);
+                cursor.movePosition(QTextCursor::EndOfWord);
+                cursor.insertText(name);
+                const auto pos = cursor.position();
+                cursor.insertText(args);
+                if (!item.args.empty())
+                {
+                    cursor.setPosition(pos + 1);
+                }
+            }
+        }
+        return true;
+    }
+    virtual ApiHelp GetCompletionHelp(const QModelIndex& index) const override
+    {
+        ApiHelp ret;
+        if (index.isValid())
+        {
+            const auto& item = mProxy.GetDocItemFromSource(index);
+            ret.args = app::FormatArgHelp(item);
+            ret.desc = item.desc;
+        }
+        return ret;
+    }
+    virtual QAbstractItemModel* GetCompletionModel() override
+    {
+        return &mProxy;
+    }
+    // CodeHighlighter impl
+    // Apply code highlight on the given document.
+    virtual void ApplyHighlight(QTextDocument& document) override
+    {
+        if (mHilight == nullptr)
+        {
+            mHilight = new SyntaxHighlightImpl(&document);
+            mHilight->SetLuaTheme(&mTheme);
+            mHilight->SetLuaParser(&mParser);
+        }
+        ASSERT(mHilight->document() == &document);
+
+        // Parse the document
+        mParser.Parse(document.toPlainText());
+        // start highlighting
+        mHilight->rehighlight();
+    }
+    virtual void RemoveHighlight(QTextDocument& document) override
+    {
+        ASSERT(mHilight);
+        ASSERT(mHilight->document() == &document);
+        delete mHilight;
+        mHilight = nullptr;
+    }
+
+protected:
+    class SyntaxHighlightImpl : public QSyntaxHighlighter {
+    public:
+        explicit SyntaxHighlightImpl(QTextDocument* parent)
+          : QSyntaxHighlighter(parent)
+        {
+            // the text document becomes the owner of this. Smart! /s
+        }
+        ~SyntaxHighlightImpl()
+        {
+            DEBUG("Destroy ScriptWidget::LuaParser::SyntaxHighlightImpl");
+        }
+        void SetLuaTheme(app::LuaTheme* theme)
+        { mTheme = theme; }
+        void SetLuaParser(app::LuaParser* parser)
+        { mParser = parser; }
+    protected:
+        virtual void highlightBlock(const QString& text) override
+        {
+            // potential problem here that the characters in the plainText() result
+            // don't map exactly to the text characters in the text document blocks.
+            // Maybe this should use a cursor ? (probably slow as a turtle)
+            // Investigate this more later if there's a problem .
+
+            QTextBlock text_block = currentBlock();
+            // character offset into the document where the block begins.
+            // the position includes all characters prior to including formatting
+            // characters such as newline.
+            const auto text_block_start = text_block.position();
+            const auto text_block_length = text_block.length();
+
+            if (const auto* color = mTheme->GetColor(app::LuaTheme::Key::Other))
+            {
+                QTextCharFormat format;
+                format.setForeground(*color);
+                setFormat(text_block_start, text_block_length, format);
+            }
+
+            const auto& blocks = mParser->FindBlocks(text_block_start, text_block_length);
+            for (const auto& block: blocks)
+            {
+                if (auto* color = mTheme->GetColor(block.type))
+                {
+                    QTextCharFormat format;
+                    format.setForeground(*color);
+
+                    const auto block_offset = block.start - text_block_start;
+                    // setting the format is specified in offsets into the block itself!
+                    setFormat((int) block_offset, (int) block.length, format);
+                }
+            }
+        }
+    private:
+        app::LuaTheme* mTheme = nullptr;
+        app::LuaParser* mParser = nullptr;
+    };
+private:
+    SyntaxHighlightImpl* mHilight = nullptr;
+
+    app::LuaTheme mTheme;
+    app::LuaParser mParser;
+    app::LuaDocTableModel mModel;
+    app::LuaDocModelProxy mProxy;
+};
+
 ScriptWidget::ScriptWidget(app::Workspace* workspace)
 {
     DEBUG("Create ScriptWidget");
@@ -55,11 +305,11 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     app::InitLuaDoc();
 
     mWorkspace = workspace;
-    mTableModel.reset(new app::LuaDocTableModel);
-    mModelProxy.reset(new app::LuaDocModelProxy);
-    mModelProxy->SetTableModel(mTableModel.get());
+    mLuaHelpFilter.SetTableModel(&mLuaHelpData);
+    mLuaHelpFilter.setSourceModel(&mLuaHelpData);
+    mLuaParser.reset(new LuaParser);
 
-    QPlainTextDocumentLayout* layout = new QPlainTextDocumentLayout(&mDocument);
+    auto* layout = new QPlainTextDocumentLayout(&mDocument);
     layout->setParent(this);
     mDocument.setDocumentLayout(layout);
 
@@ -68,7 +318,9 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     mUI.modified->setVisible(false);
     mUI.find->setVisible(false);
     mUI.code->SetDocument(&mDocument);
-    mUI.tableView->setModel(mModelProxy.get());
+    mUI.code->SetSyntaxHighlighter(mLuaParser.get());
+    mUI.code->SetCompleter(mLuaParser.get());
+    mUI.tableView->setModel(&mLuaHelpFilter);
     mUI.tableView->setColumnWidth(0, 100);
     mUI.tableView->setColumnWidth(2, 200);
     // capture some special key presses in order to move the
@@ -131,6 +383,9 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace, const app::Resource& resou
 ScriptWidget::~ScriptWidget()
 {
     DEBUG("Destroy ScriptWidget");
+    mUI.code->SetCompleter(nullptr);
+    mUI.code->SetSyntaxHighlighter(nullptr);
+    mLuaParser.reset();
 }
 
 QString ScriptWidget::GetId() const
@@ -304,8 +559,8 @@ bool ScriptWidget::OnEscape()
 {
     if (!mUI.code->CancelCompletion())
     {
-        if (mUI.luaFormatStdErr->isVisible())
-            mUI.luaFormatStdErr->setVisible(false);
+        if (mUI.formatter->isVisible())
+            mUI.formatter->setVisible(false);
         else if (mUI.find->isVisible())
             on_btnFindClose_clicked();
         else if (mUI.settings->isVisible())
@@ -700,8 +955,8 @@ void ScriptWidget::on_editorFontSize_currentIndexChanged(int)
 
 void ScriptWidget::on_filter_textChanged(const QString& text)
 {
-    mModelProxy->SetFindFilter(text);
-    mModelProxy->invalidate();
+    mLuaHelpFilter.SetFindFilter(text);
+    mLuaHelpFilter.invalidate();
 
     auto* model = mUI.tableView->selectionModel();
     model->reset();
@@ -769,7 +1024,7 @@ void ScriptWidget::keyPressEvent(QKeyEvent *key)
 }
 bool ScriptWidget::eventFilter(QObject* destination, QEvent* event)
 {
-    const auto count = mModelProxy->rowCount();
+    const auto count = mLuaHelpFilter.rowCount();
 
     // returning true will eat the event and stop from
     // other event handlers ever seeing the event.
@@ -806,7 +1061,7 @@ bool ScriptWidget::eventFilter(QObject* destination, QEvent* event)
 
     const auto index = selection.isEmpty() ? 0 : current;
 
-    model->setCurrentIndex(mTableModel->index(index, 0),
+    model->setCurrentIndex(mLuaHelpData.index(index, 0),
                            QItemSelectionModel::SelectionFlag::ClearAndSelect |
                            QItemSelectionModel::SelectionFlag::Rows);
     return true;
@@ -837,8 +1092,8 @@ bool ScriptWidget::LoadDocument(const QString& file)
 void ScriptWidget::FilterHelp(const QString& keyword)
 {
     SetValue(mUI.filter, keyword);
-    mModelProxy->SetFindFilter(keyword);
-    mModelProxy->invalidate();
+    mLuaHelpFilter.SetFindFilter(keyword);
+    mLuaHelpFilter.invalidate();
 
     auto* model = mUI.tableView->selectionModel();
     model->reset();
