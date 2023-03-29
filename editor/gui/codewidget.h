@@ -82,10 +82,10 @@ namespace gui
         struct Settings {
             QString theme = "Monokai";
             QString font_description;
-            bool show_line_numbers = true;
-            bool highlight_syntax = true;
-            bool highlight_current_line = true;
-            bool insert_spaces = true;
+            bool show_line_numbers        = true;
+            bool highlight_syntax         = true;
+            bool highlight_current_line   = true;
+            bool replace_tabs_with_spaces = true;
             unsigned tab_spaces = 4;
             unsigned font_size  = 10;
         };
