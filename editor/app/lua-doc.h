@@ -83,8 +83,11 @@ namespace app
 
         const LuaMemberDoc& GetDocItem(size_t index) const;
         const LuaMemberDoc& GetDocItem(const QModelIndex& index)  const;
+
+        void SetMode(Mode mode)
+        { mMode = mode; }
     private:
-        const Mode mMode = Mode::HelpView;
+        Mode mMode = Mode::HelpView;
     };
 
     class LuaDocModelProxy : public QSortFilterProxyModel

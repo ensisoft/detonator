@@ -26,18 +26,15 @@
 
 #include <optional>
 
-#include "editor/app/lua-doc.h"
-
 class QPaintEvent;
 class QResizeEvent;
 class QSize;
 class QWidget;
 class QTextDocument;
-class QSyntaxHighlighter;
 
 namespace app {
-    class LuaParser;
-    class LuaTheme;
+    class CodeCompleter;
+    class CodeHighlighter;
 } // namespace
 
 namespace gui
@@ -55,9 +52,10 @@ namespace gui
 
         void Close();
 
-        void SetModel(app::LuaDocModelProxy* model);
+        void SetCompleter(app::CodeCompleter* completer);
     signals:
         void Complete(const QString& text, const QModelIndex& index);
+        void Filter(const QString& input);
 
     private slots:
         void on_lineEdit_textChanged(const QString& text);
@@ -69,7 +67,7 @@ namespace gui
         Ui::Completer mUI;
         bool mOpen = false;
     private:
-        app::LuaDocModelProxy* mModel = nullptr;
+        app::CodeCompleter* mCompleter;
     };
 
     // simple text editor widget for simplistic editing functionality.
@@ -86,6 +84,7 @@ namespace gui
             bool highlight_syntax         = true;
             bool highlight_current_line   = true;
             bool replace_tabs_with_spaces = true;
+            bool use_code_completer       = true;
             unsigned tab_spaces = 4;
             unsigned font_size  = 10;
         };
@@ -99,13 +98,15 @@ namespace gui
         { return mCanUndo;}
 
         void SetDocument(QTextDocument* document);
+        void SetCompleter(app::CodeCompleter* completer);
+        void SetSyntaxHighlighter(app::CodeHighlighter* highlighter);
 
         void PaintLineNumbers(const QRect& rect);
 
         int ComputeLineNumberAreaWidth() const;
 
         void ApplySettings();
-        void SetFontName(QString font)
+        void SetFontName(const QString& font)
         { mFontName = font; }
         void ResetFontName()
         { mFontName.reset(); }
@@ -132,13 +133,13 @@ namespace gui
         void CopyAvailable(bool yes_no);
         void UndoAvailable(bool yes_no);
         void Complete(const QString& text, const QModelIndex& index);
+        void Filter(const QString& input);
     private:
         static Settings mSettings;
     private:
-        app::LuaParser* mHighlighter = nullptr;
-        app::LuaDocTableModel mDocModel;
-        app::LuaDocModelProxy mDocProxy;
-        std::unique_ptr<CodeCompleter> mCompleter;
+        std::unique_ptr<CodeCompleter> mCompleterUI;
+        app::CodeCompleter* mCompleter = nullptr;
+        app::CodeHighlighter* mHighlighter = nullptr;
         QWidget* mLineNumberArea = nullptr;
         QTextDocument* mDocument = nullptr;
         QFont mFont;

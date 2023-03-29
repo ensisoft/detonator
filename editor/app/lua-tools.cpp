@@ -76,12 +76,12 @@ LuaParser::~LuaParser()
         ts_parser_delete(mParser);
 }
 
-const LuaParser::Highlight* LuaParser::FindBlockByOffset(uint32_t position) const noexcept
+const LuaParser::CodeBlock* LuaParser::FindBlock(uint32_t position) const noexcept
 {
     // find first highlight with starting position equal or greater than position
     auto it = std::lower_bound(mHighlights.begin(), mHighlights.end(), position,
-        [](const auto& hilight, uint32_t position) {
-            return hilight.start < position;
+        [](const auto& block, uint32_t position) {
+            return block.start < position;
         });
     if (it == mHighlights.end())
         return nullptr;
@@ -99,57 +99,29 @@ const LuaParser::Highlight* LuaParser::FindBlockByOffset(uint32_t position) cons
     return nullptr;
 }
 
-void LuaParser::highlightBlock(const QString& text)
+LuaParser::BlockList LuaParser::FindBlocks(uint32_t position, uint32_t text_length) const noexcept
 {
-    // potential problem here that the characters in the plainText() result
-    // don't map exactly to the text characters in the text document blocks.
-    // Maybe this should use a cursor ? (probably slow as a turtle)
-    // Investigate this more later if there's a problem .
-
-    // If this is enabled then we're parsing and reparsing the document
-    // all the time. maybe pointless, anyway, let the higher level to
-    // decide when to parse the document, for example on a key press or
-    // on save or on Enter or whatever.
-    //QTextDocument* document = this->document();
-    //Parse(document->toPlainText());
-
-    QTextBlock block = currentBlock();
-    // character offset into the document where the block begins.
-    // the position includes all characters prior to including formatting
-    // characters such as newline.
-    const auto block_start  = block.position();
-    const auto block_length = block.length();
-
-    if (const auto* color = mTheme.GetColor(LuaTheme::Key::Other))
-    {
-        QTextCharFormat format;
-        format.setForeground(*color);
-        setFormat(0, block_length, format);
-    }
-
-    auto it = std::lower_bound(mHighlights.begin(), mHighlights.end(), (uint32_t)block_start,
-        [](const auto& hilight, uint32_t start) {
-           return hilight.start < start;
+    // find first code block with start position greater than or equal to the
+    // text position.
+    auto it = std::lower_bound(mHighlights.begin(), mHighlights.end(), position,
+        [](const auto& block, uint32_t start) {
+           return block.start < start;
         });
 
+    BlockList  ret;
+
+    // fetch blocks until block is beyond the current text range.
     for (; it != mHighlights.end(); ++it)
     {
         const auto& highlight = *it;
         const auto start  = highlight.start;
         const auto length = highlight.length;
-        if (start >= block_start + block_length)
+        if (start >= position + text_length)
             break;
 
-        if (auto* color = mTheme.GetColor(highlight.type))
-        {
-            QTextCharFormat format;
-            format.setForeground(*color);
-
-            const auto block_offset = start - block_start;
-            // setting the format is specified in offsets into the block itself!
-            setFormat((int)block_offset, (int)length, format);
-        }
+        ret.push_back(highlight);
     }
+    return ret;
 }
 
 bool LuaParser::Parse(const QString& str)
@@ -159,13 +131,6 @@ bool LuaParser::Parse(const QString& str)
     {
         mParser = ts_parser_new();
         ts_parser_set_language(mParser, language);
-        const auto count = ts_language_field_count(language);
-        for (int i=0; i<count; ++i)
-        {
-            const char* name = ts_language_field_name_for_id(language, i);
-            if (name == nullptr) continue;
-            mFields[name] = i;
-        }
     }
     ts_parser_reset(mParser);
 
@@ -389,66 +354,66 @@ bool LuaParser::Parse(const QString& str)
         //const auto bleh = narrow.substr(start, length);
         //printf("%-20s pattern=%d\tcapture=%d\tstart=%d\tlen=%d\n", bleh.c_str(), pattern, capture_index, start, length);
 
-        Highlight hilight;
-        hilight.type   = Highlight::Type::Keyword;
-        hilight.start  = start;
-        hilight.length = length;
+        CodeBlock block;
+        block.type   = BlockType::Keyword;
+        block.start  = start;
+        block.length = length;
         if (pattern == 0 || pattern == 1 || pattern == 12)
         {
-            hilight.type = Highlight::Type::Keyword;
+            block.type = BlockType::Keyword;
         }
         else if (pattern == 2)
         {
-            hilight.type = Highlight::Type::Comment;
+            block.type = BlockType::Comment;
         }
         else if (pattern == 3)
         {
             const auto name = str.mid((int)start, (int)length);
             if (base::Contains(builtin_functions, name))
-                hilight.type = Highlight::Type::BuiltIn;
-            else hilight.type = Highlight::Type::FunctionCall;
+                block.type = BlockType::BuiltIn;
+            else block.type = BlockType::FunctionCall;
         }
         else if (pattern == 4)
         {
-            hilight.type = Highlight::Type::FunctionCall;
+            block.type = BlockType::FunctionCall;
         }
         else if (pattern == 5)
         {
-            hilight.type = Highlight::Type ::MethodCall;
+            block.type = BlockType ::MethodCall;
         }
         else if (pattern == 6)
         {
-            hilight.type = Highlight::Type::Property;
+            block.type = BlockType::Property;
         }
         else if (pattern == 7)
         {
-            hilight.type = Highlight::Type::FunctionBody;
+            block.type = BlockType::FunctionBody;
         }
         else if (pattern == 8)
         {
-            hilight.type = Highlight::Type::Literal;
+            block.type = BlockType::Literal;
         }
         else if (pattern == 9)
         {
-            hilight.type = Highlight::Type::Punctuation;
+            block.type = BlockType::Punctuation;
         }
         else if (pattern == 10)
         {
-            hilight.type = Highlight::Type::Bracket;
+            block.type = BlockType::Bracket;
         }
         else if (pattern == 11)
         {
-            hilight.type = Highlight::Type::Operator;
+            block.type = BlockType::Operator;
         }
 
         // lower bound returns an iterator pointing to a first value in the range
         // such that the contained value is equal or greater than searched value
         // or end() when no such value is found.
         auto it = std::lower_bound(mHighlights.begin(), mHighlights.end(), start,
-             [](const Highlight& other, uint32_t start) {
+             [](const CodeBlock& other, uint32_t start) {
                  return other.start < start;
         });
-        mHighlights.insert(it, hilight);
+        mHighlights.insert(it, block);
     }
 
     ts_query_cursor_delete(cursor);

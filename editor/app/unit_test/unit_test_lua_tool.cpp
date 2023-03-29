@@ -55,7 +55,7 @@ void unit_test_keywords()
 {
     QTextDocument doc;
 
-    app::LuaParser p(&doc);
+    app::LuaParser p;
 
     const char* code = R"(
 require('kek')
@@ -118,9 +118,9 @@ end
     )";
     p.Parse(code);
 
-    for (unsigned i=0; i<p.GetNumHighlights(); ++i)
+    for (unsigned i=0; i<p.GetNumBlocks(); ++i)
     {
-        const auto& hilight = p.GetHighlight(i);
+        const auto& hilight = p.GetBlock(i);
         const char* beg = code + hilight.start;
         const char* end = code + hilight.start + hilight.length;
         const std::string str(beg, end);

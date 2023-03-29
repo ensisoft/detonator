@@ -20,7 +20,6 @@
 
 #include "warnpush.h"
 #  include <QString>
-#  include <QSyntaxHighlighter>
 #  include <QTextFormat>
 #  include <QColor>
 #  include <tree_sitter/api.h>
@@ -32,26 +31,30 @@
 
 namespace app
 {
+    enum class LuaCodeBlockType {
+        Keyword,
+        Literal,
+        BuiltIn,
+        Comment,
+        Property,
+        FunctionBody,
+        FunctionCall,
+        MethodCall,
+        Punctuation,
+        Bracket,
+        Operator,
+        Other
+    };
+
+
     class LuaTheme
     {
     public:
         enum class Theme {
             Monokai
         };
-        enum class Key {
-            Keyword,
-            Literal,
-            BuiltIn,
-            Comment,
-            Property,
-            FunctionBody,
-            FunctionCall,
-            MethodCall,
-            Punctuation,
-            Bracket,
-            Operator,
-            Other
-        };
+        using Key = LuaCodeBlockType;
+
         void SetTheme(Theme theme);
 
         const QColor* GetColor(Key key) const noexcept;
@@ -59,15 +62,13 @@ namespace app
         std::unordered_map<Key, QColor> mTable;
     };
 
-    class LuaParser : public QSyntaxHighlighter
+    class LuaParser
     {
     public:
-        using HighlightKey = LuaTheme::Key;
-        using ColorTheme = LuaTheme::Theme;
+        using BlockType = LuaCodeBlockType;
 
-        struct Highlight {
-            using Type = HighlightKey;
-            Type type = Type::Keyword;
+        struct CodeBlock {
+            BlockType type = BlockType::Other;
             // character position of the highlight in the current document.
             uint32_t start = 0;
             // length of the highlight in characters
@@ -75,37 +76,30 @@ namespace app
         };
 
         LuaParser(const LuaParser&) = delete;
-        explicit LuaParser(QTextDocument* document)
-          : QSyntaxHighlighter(document)
-        {}
+        LuaParser() = default;
        ~LuaParser();
 
         bool Parse(const QString& str);
-        void SetTheme(LuaTheme&& theme)
-        { mTheme = std::move(theme); }
-        void SetTheme(ColorTheme  theme)
-        { mTheme.SetTheme(theme); }
 
-        size_t GetNumHighlights() const noexcept
+        const CodeBlock* FindBlock(uint32_t text_position) const noexcept;
+
+        using BlockList = std::vector<CodeBlock>;
+
+        BlockList FindBlocks(uint32_t text_position, uint32_t text_length) const noexcept;
+
+        size_t GetNumBlocks() const
         { return mHighlights.size(); }
-        const Highlight& GetHighlight(size_t i) const noexcept
-        { return mHighlights[i]; }
-
-        const Highlight* FindBlockByOffset(uint32_t position) const noexcept;
+        const CodeBlock& GetBlock(size_t index) const
+        { return mHighlights[index]; }
 
         LuaParser& operator=(const LuaParser&) = delete;
-    protected:
-        virtual void highlightBlock(const QString &text) override;
 
     private:
-        std::vector<Highlight> mHighlights;
-        std::unordered_map<Highlight::Type, QTextFormat> mColors;
-        LuaTheme mTheme;
+        std::vector<CodeBlock> mHighlights;
     private:
         TSTree* mTree = nullptr;
         TSParser* mParser = nullptr;
         TSQuery* mQuery = nullptr;
-        std::unordered_map<std::string, uint16_t> mFields;
     };
 
 } // namespace
