@@ -289,14 +289,14 @@ void MainWindow::LoadSettings()
     gui::SetGridColor(ToGfx(mSettings.grid_color));
 
     TextEditor::Settings editor_settings;
-    settings.GetValue("TextEditor", "font",                   &editor_settings.font_description);
-    settings.GetValue("TextEditor", "font_size",              &editor_settings.font_size);
-    settings.GetValue("TextEditor", "theme",                  &editor_settings.theme);
-    settings.GetValue("TextEditor", "show_line_numbers",      &editor_settings.show_line_numbers);
-    settings.GetValue("TextEditor", "highlight_syntax",       &editor_settings.highlight_syntax);
-    settings.GetValue("TextEditor", "highlight_current_line", &editor_settings.highlight_current_line);
-    settings.GetValue("TextEditor", "insert_spaces",          &editor_settings.insert_spaces);
-    settings.GetValue("TextEditor", "tab_spaces",             &editor_settings.tab_spaces);
+    settings.GetValue("TextEditor", "font",                    &editor_settings.font_description);
+    settings.GetValue("TextEditor", "font_size",               &editor_settings.font_size);
+    settings.GetValue("TextEditor", "theme",                   &editor_settings.theme);
+    settings.GetValue("TextEditor", "show_line_numbers",       &editor_settings.show_line_numbers);
+    settings.GetValue("TextEditor", "highlight_syntax",        &editor_settings.highlight_syntax);
+    settings.GetValue("TextEditor", "highlight_current_line",  &editor_settings.highlight_current_line);
+    settings.GetValue("TextEditor", "replace_tab_with_spaces", &editor_settings.replace_tabs_with_spaces);
+    settings.GetValue("TextEditor", "tab_spaces",              &editor_settings.tab_spaces);
     TextEditor::SetDefaultSettings(editor_settings);
 
     ScriptWidget::Settings script_widget_settings;
@@ -3034,14 +3034,14 @@ void MainWindow::SaveSettings()
     settings.SetValue("Settings", "vcs_ignore_list",            mSettings.vcs_ignore_list);
     TextEditor::Settings editor_settings;
     TextEditor::GetDefaultSettings(&editor_settings);
-    settings.SetValue("TextEditor", "font",                   editor_settings.font_description);
-    settings.SetValue("TextEditor", "font_size",              editor_settings.font_size);
-    settings.SetValue("TextEditor", "theme",                  editor_settings.theme);
-    settings.SetValue("TextEditor", "show_line_numbers",      editor_settings.show_line_numbers);
-    settings.SetValue("TextEditor", "highlight_syntax",       editor_settings.highlight_syntax);
-    settings.SetValue("TextEditor", "highlight_current_line", editor_settings.highlight_current_line);
-    settings.SetValue("TextEditor", "insert_spaces",          editor_settings.insert_spaces);
-    settings.SetValue("TextEditor", "tab_spaces",             editor_settings.tab_spaces);
+    settings.SetValue("TextEditor", "font",                    editor_settings.font_description);
+    settings.SetValue("TextEditor", "font_size",               editor_settings.font_size);
+    settings.SetValue("TextEditor", "theme",                   editor_settings.theme);
+    settings.SetValue("TextEditor", "show_line_numbers",       editor_settings.show_line_numbers);
+    settings.SetValue("TextEditor", "highlight_syntax",        editor_settings.highlight_syntax);
+    settings.SetValue("TextEditor", "highlight_current_line",  editor_settings.highlight_current_line);
+    settings.SetValue("TextEditor", "replace_tab_with_spaces", editor_settings.replace_tabs_with_spaces);
+    settings.SetValue("TextEditor", "tab_spaces",              editor_settings.tab_spaces);
     ScriptWidget::Settings script_widget_settings;
     ScriptWidget::GetDefaultSettings(&script_widget_settings);
     settings.SetValue("ScriptWidget", "lua_formatter_exec", script_widget_settings.lua_formatter_exec);

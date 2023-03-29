@@ -94,7 +94,7 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings,
     SetUIValue(mUI.editorShowLineNumbers,       editor.show_line_numbers);
     SetUIValue(mUI.editorHightlightCurrentLine, editor.highlight_current_line);
     SetUIValue(mUI.editorHightlightSyntax,      editor.highlight_syntax);
-    SetUIValue(mUI.editorInsertSpaces,          editor.insert_spaces);
+    SetUIValue(mUI.editorInsertSpaces,          editor.replace_tabs_with_spaces);
     SetUIValue(mUI.editorFontSize,              editor.font_size);
     SetUIValue(mUI.editorFontName,              editor.font_description);
 }
@@ -142,7 +142,7 @@ void DlgSettings::on_btnAccept_clicked()
     GetUIValue(mUI.editorShowLineNumbers,       &mEditorSettings.show_line_numbers);
     GetUIValue(mUI.editorHightlightCurrentLine, &mEditorSettings.highlight_current_line);
     GetUIValue(mUI.editorHightlightSyntax,      &mEditorSettings.highlight_syntax);
-    GetUIValue(mUI.editorInsertSpaces,          &mEditorSettings.insert_spaces);
+    GetUIValue(mUI.editorInsertSpaces,          &mEditorSettings.replace_tabs_with_spaces);
     GetUIValue(mUI.editorFontSize,              &mEditorSettings.font_size);
     GetUIValue(mUI.editorFontName,              &mEditorSettings.font_description);
 

@@ -375,7 +375,7 @@ void TextEditor::keyPressEvent(QKeyEvent* event)
     const auto alt  = event->modifiers() & Qt::AltModifier;
     const auto key  = event->key();
 
-    if (key == Qt::Key_Tab && mSettings.insert_spaces)
+    if (key == Qt::Key_Tab && mSettings.replace_tabs_with_spaces)
     {
         // convert tab to spaces.
         this->insertPlainText("    ");
