@@ -979,12 +979,15 @@
           <item row="0" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_6">
             <item>
-             <widget class="QFontComboBox" name="editorFont">
+             <widget class="QFontComboBox" name="editorFontName">
               <property name="sizePolicy">
                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="editable">
+               <bool>false</bool>
               </property>
               <property name="writingSystem">
                <enum>QFontDatabase::Latin</enum>
@@ -1197,7 +1200,7 @@
   <tabstop>vcsDelFile</tabstop>
   <tabstop>vcsCommitFile</tabstop>
   <tabstop>vcsIgnoreList</tabstop>
-  <tabstop>editorFont</tabstop>
+  <tabstop>editorFontName</tabstop>
   <tabstop>editorFontSize</tabstop>
   <tabstop>editorTheme</tabstop>
   <tabstop>editorHightlightSyntax</tabstop>

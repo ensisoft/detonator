@@ -28,6 +28,11 @@
 #  include <QFileInfo>
 #  include <QPoint>
 #  include <QPixmap>
+#  include <QLineEdit>
+#  include <QComboBox>
+#  include <QSpinBox>
+#  include <QDoubleSpinBox>
+#  include <QFontComboBox>
 #  include <color_selector.hpp>
 #  include <glm/glm.hpp>
 #include "warnpop.h"
@@ -314,7 +319,6 @@ EnumT EnumFromCombo(const QComboBox* combo)
     return val.value();
 }
 
-
 inline void SetValue(gui::DoubleSpinBox* spin, double value)
 {
     QSignalBlocker s(spin);
@@ -378,6 +382,12 @@ struct ListItemId {
     ListItemId(const app::AnyString& str) : id(str)
     {}
 };
+
+inline void SetValue(QFontComboBox* cmb, const QFont& font)
+{
+    QSignalBlocker s(cmb);
+    cmb->setFont(font);
+}
 
 inline void SetValue(QFontComboBox* combo, const QString& str)
 {
@@ -856,6 +866,20 @@ struct ListWidgetItemIdGetter
     const QListWidget* list = nullptr;
 };
 
+struct FontComboValueGetter
+{
+    operator QFont() const
+    {
+        return cmb->currentFont();
+    }
+    operator QString() const
+    {
+        return cmb->currentFont().toString();
+    }
+
+    const QFontComboBox* cmb = nullptr;
+};
+
 struct ComboBoxValueGetter
 {
     template<typename T>
@@ -997,6 +1021,8 @@ struct DoubleSliderValueGetter
     const gui::DoubleSlider* slider = nullptr;
 };
 
+inline FontComboValueGetter GetValue(QFontComboBox* cmb)
+{ return FontComboValueGetter { cmb }; }
 inline DoubleSliderValueGetter GetValue(const gui::DoubleSlider* slider)
 { return DoubleSliderValueGetter { slider }; }
 inline SliderValueGetter GetValue(const QSlider* slider)
@@ -1552,5 +1578,6 @@ void PopulateFontNames(QComboBox* cmb);
 void PopulateFontSizes(QComboBox* cmb);
 void PopulateUIStyles(QComboBox* cmb);
 void PopulateUIKeyMaps(QComboBox* cmb);
+void PopulateQtStyles(QComboBox* cmb);
 
 } // namespace
