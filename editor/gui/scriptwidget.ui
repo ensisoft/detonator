@@ -192,6 +192,9 @@
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
            <widget class="QFontComboBox" name="editorFontName">
+            <property name="editable">
+             <bool>false</bool>
+            </property>
             <property name="placeholderText">
              <string>Default</string>
             </property>
