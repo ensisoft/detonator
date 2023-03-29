@@ -197,7 +197,6 @@ bool LuaParser::Parse(const QString& str)
     if (!mQuery)
     {
         // not working
-        // "break"
         // "require"
         const char* q = R"foo(
 ;; pattern 0
@@ -328,6 +327,9 @@ bool LuaParser::Parse(const QString& str)
   ".."
 ] @operator
 
+;; pattern 12
+(break_statement) @keyword
+
 )foo";
         uint32_t error_offset;
         TSQueryError error_type;
@@ -391,7 +393,7 @@ bool LuaParser::Parse(const QString& str)
         hilight.type   = Highlight::Type::Keyword;
         hilight.start  = start;
         hilight.length = length;
-        if (pattern == 0 || pattern == 1)
+        if (pattern == 0 || pattern == 1 || pattern == 12)
         {
             hilight.type = Highlight::Type::Keyword;
         }
