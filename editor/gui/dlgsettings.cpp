@@ -48,115 +48,103 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings,
     mUI.setupUi(this);
     PopulateFromEnum<MainWidget::GridDensity>(mUI.cmbGrid);
     PopulateFromEnum<GfxWindow::MouseCursor>(mUI.cmbMouseCursor);
-
-    SetUIValue(mUI.edtImageEditorExecutable,  settings.image_editor_executable);
-    SetUIValue(mUI.edtImageEditorArguments,   settings.image_editor_arguments);
-    SetUIValue(mUI.edtShaderEditorExecutable, settings.shader_editor_executable);
-    SetUIValue(mUI.edtShaderEditorArguments,  settings.shader_editor_arguments);
-    SetUIValue(mUI.edtScriptEditorExecutable, settings.script_editor_executable);
-    SetUIValue(mUI.edtScriptEditorArguments,  settings.script_editor_arguments);
-    SetUIValue(mUI.edtAudioEditorExecutable,  settings.audio_editor_executable);
-    SetUIValue(mUI.edtAudioEditorArguments,   settings.audio_editor_arguments);
-    SetUIValue(mUI.cmbWinOrTab,               settings.default_open_win_or_tab);
-    SetUIValue(mUI.spinFrameDelay,            settings.frame_delay);
-    SetUIValue(mUI.cmbMouseCursor,            settings.mouse_cursor);
-    SetUIValue(mUI.chkSaveAutomatically,      settings.save_automatically_on_play);
-    SetUIValue(mUI.chkVSYNC,                  settings.vsync);
-    SetUIValue(mUI.edtPythonExecutable,       settings.python_executable);
-    SetUIValue(mUI.edtEmscriptenPath,         settings.emsdk);
-    SetUIValue(mUI.clearColor,                settings.clear_color);
-    SetUIValue(mUI.gridColor,                 settings.grid_color);
-    SetUIValue(mUI.vcsExecutable,             settings.vcs_executable);
-    SetUIValue(mUI.vcsAddFile,                settings.vcs_cmd_add_file);
-    SetUIValue(mUI.vcsDelFile,                settings.vcs_cmd_del_file);
-    SetUIValue(mUI.vcsCommitFile,             settings.vcs_cmd_commit_file);
-    SetUIValue(mUI.vcsListFiles,              settings.vcs_cmd_list_files);
-    SetUIValue(mUI.vcsIgnoreList,             settings.vcs_ignore_list);
-    SetUIValue(mUI.cmbGrid,                   widget.grid);
-    SetUIValue(mUI.zoom,                      widget.zoom);
-    SetUIValue(mUI.chkShowGrid,               widget.show_grid);
-    SetUIValue(mUI.chkShowOrigin,             widget.show_origin);
-    SetUIValue(mUI.chkShowViewport,           widget.show_viewport);
-    SetUIValue(mUI.chkSnapToGrid,             widget.snap_to_grid);
-    SetUIValue(mUI.edtLuaFormatterExec,       mScriptSettings.lua_formatter_exec);
-    SetUIValue(mUI.edtLuaFormatterArgs,       mScriptSettings.lua_formatter_args);
-    SetUIValue(mUI.editorFormatOnSave,        mScriptSettings.lua_format_on_save);
-
-
-    // add Qt's built-in / plugin styles.
-    const auto& styles = QStyleFactory::keys();
-    for (const auto& style : styles)
-    {
-        mUI.cmbStyle->addItem(style);
-    }
-    SetValue(mUI.cmbStyle, settings.style_name);
+    PopulateFontSizes(mUI.editorFontSize);
+    PopulateQtStyles(mUI.cmbStyle);
 
     mUI.editorTheme->addItem("Monokai");
-    QFont font;
-    if (font.fromString(mEditorSettings.font_description)) {
-        QSignalBlocker b(mUI.editorFont);
-        mUI.editorFont->setCurrentFont(font);
-    }
 
-    const auto font_sizes = QFontDatabase::standardSizes();
-    for (int size : font_sizes)
-        mUI.editorFontSize->addItem(QString::number(size));
-    SetValue(mUI.editorFontSize,               QString::number(mEditorSettings.font_size));
-    SetValue(mUI.editorTheme,                 mEditorSettings.theme);
-    SetValue(mUI.editorShowLineNumbers,       mEditorSettings.show_line_numbers);
-    SetValue(mUI.editorHightlightCurrentLine, mEditorSettings.highlight_current_line);
-    SetValue(mUI.editorHightlightSyntax,      mEditorSettings.highlight_syntax);
-    SetValue(mUI.editorInsertSpaces,          mEditorSettings.insert_spaces);
-    SetValue(mUI.editorShowLineNumbers,       mEditorSettings.show_line_numbers);
+    // general application settings.
+    SetUIValue(mUI.edtImageEditorExecutable,    settings.image_editor_executable);
+    SetUIValue(mUI.edtImageEditorArguments,     settings.image_editor_arguments);
+    SetUIValue(mUI.edtShaderEditorExecutable,   settings.shader_editor_executable);
+    SetUIValue(mUI.edtShaderEditorArguments,    settings.shader_editor_arguments);
+    SetUIValue(mUI.edtScriptEditorExecutable,   settings.script_editor_executable);
+    SetUIValue(mUI.edtScriptEditorArguments,    settings.script_editor_arguments);
+    SetUIValue(mUI.edtAudioEditorExecutable,    settings.audio_editor_executable);
+    SetUIValue(mUI.edtAudioEditorArguments,     settings.audio_editor_arguments);
+    SetUIValue(mUI.cmbWinOrTab,                 settings.default_open_win_or_tab);
+    SetUIValue(mUI.cmbStyle,                    settings.style_name);
+    SetUIValue(mUI.spinFrameDelay,              settings.frame_delay);
+    SetUIValue(mUI.cmbMouseCursor,              settings.mouse_cursor);
+    SetUIValue(mUI.chkSaveAutomatically,        settings.save_automatically_on_play);
+    SetUIValue(mUI.chkVSYNC,                    settings.vsync);
+    SetUIValue(mUI.edtPythonExecutable,         settings.python_executable);
+    SetUIValue(mUI.edtEmscriptenPath,           settings.emsdk);
+    SetUIValue(mUI.clearColor,                  settings.clear_color);
+    SetUIValue(mUI.gridColor,                   settings.grid_color);
+    SetUIValue(mUI.vcsExecutable,               settings.vcs_executable);
+    SetUIValue(mUI.vcsAddFile,                  settings.vcs_cmd_add_file);
+    SetUIValue(mUI.vcsDelFile,                  settings.vcs_cmd_del_file);
+    SetUIValue(mUI.vcsCommitFile,               settings.vcs_cmd_commit_file);
+    SetUIValue(mUI.vcsListFiles,                settings.vcs_cmd_list_files);
+    SetUIValue(mUI.vcsIgnoreList,               settings.vcs_ignore_list);
+    // main widget settings, grid,color etc.
+    SetUIValue(mUI.cmbGrid,                     widget.grid);
+    SetUIValue(mUI.zoom,                        widget.zoom);
+    SetUIValue(mUI.chkShowGrid,                 widget.show_grid);
+    SetUIValue(mUI.chkShowOrigin,               widget.show_origin);
+    SetUIValue(mUI.chkShowViewport,             widget.show_viewport);
+    SetUIValue(mUI.chkSnapToGrid,               widget.snap_to_grid);
+    // Lua script editor settings
+    SetUIValue(mUI.edtLuaFormatterExec,         script.lua_formatter_exec);
+    SetUIValue(mUI.edtLuaFormatterArgs,         script.lua_formatter_args);
+    SetUIValue(mUI.editorFormatOnSave,          script.lua_format_on_save);
+    // text editor settings.
+    SetUIValue(mUI.editorTheme,                 editor.theme);
+    SetUIValue(mUI.editorShowLineNumbers,       editor.show_line_numbers);
+    SetUIValue(mUI.editorHightlightCurrentLine, editor.highlight_current_line);
+    SetUIValue(mUI.editorHightlightSyntax,      editor.highlight_syntax);
+    SetUIValue(mUI.editorInsertSpaces,          editor.insert_spaces);
+    SetUIValue(mUI.editorFontSize,              editor.font_size);
+    SetUIValue(mUI.editorFontName,              editor.font_description);
 }
 
 void DlgSettings::on_btnAccept_clicked()
 {
-    GetUIValue(mUI.edtImageEditorExecutable,  &mSettings.image_editor_executable);
-    GetUIValue(mUI.edtImageEditorArguments,   &mSettings.image_editor_arguments);
-    GetUIValue(mUI.edtShaderEditorExecutable, &mSettings.shader_editor_executable);
-    GetUIValue(mUI.edtShaderEditorArguments,  &mSettings.shader_editor_arguments);
-    GetUIValue(mUI.edtScriptEditorExecutable, &mSettings.script_editor_executable);
-    GetUIValue(mUI.edtScriptEditorArguments,  &mSettings.script_editor_arguments);
-    GetUIValue(mUI.edtAudioEditorExecutable,  &mSettings.audio_editor_executable);
-    GetUIValue(mUI.edtAudioEditorArguments,   &mSettings.audio_editor_arguments);
-    GetUIValue(mUI.cmbWinOrTab,               &mSettings.default_open_win_or_tab);
-    GetUIValue(mUI.cmbStyle,                  &mSettings.style_name);
-    GetUIValue(mUI.chkSaveAutomatically,      &mSettings.save_automatically_on_play);
-    GetUIValue(mUI.spinFrameDelay,            &mSettings.frame_delay);
-    GetUIValue(mUI.cmbMouseCursor,            &mSettings.mouse_cursor);
-    GetUIValue(mUI.chkVSYNC,                  &mSettings.vsync);
-    GetUIValue(mUI.edtPythonExecutable,       &mSettings.python_executable);
-    GetUIValue(mUI.edtEmscriptenPath,         &mSettings.emsdk);
-    GetUIValue(mUI.clearColor,                &mSettings.clear_color);
-    GetUIValue(mUI.gridColor,                 &mSettings.grid_color);
-    GetUIValue(mUI.vcsExecutable,             &mSettings.vcs_executable);
-    GetUIValue(mUI.vcsAddFile,                &mSettings.vcs_cmd_add_file);
-    GetUIValue(mUI.vcsDelFile,                &mSettings.vcs_cmd_del_file);
-    GetUIValue(mUI.vcsCommitFile,             &mSettings.vcs_cmd_commit_file);
-    GetUIValue(mUI.vcsListFiles,              &mSettings.vcs_cmd_list_files);
-    GetUIValue(mUI.vcsIgnoreList,             &mSettings.vcs_ignore_list);
-
+    // general settings
+    GetUIValue(mUI.edtImageEditorExecutable,    &mSettings.image_editor_executable);
+    GetUIValue(mUI.edtImageEditorArguments,     &mSettings.image_editor_arguments);
+    GetUIValue(mUI.edtShaderEditorExecutable,   &mSettings.shader_editor_executable);
+    GetUIValue(mUI.edtShaderEditorArguments,    &mSettings.shader_editor_arguments);
+    GetUIValue(mUI.edtScriptEditorExecutable,   &mSettings.script_editor_executable);
+    GetUIValue(mUI.edtScriptEditorArguments,    &mSettings.script_editor_arguments);
+    GetUIValue(mUI.edtAudioEditorExecutable,    &mSettings.audio_editor_executable);
+    GetUIValue(mUI.edtAudioEditorArguments,     &mSettings.audio_editor_arguments);
+    GetUIValue(mUI.cmbWinOrTab,                 &mSettings.default_open_win_or_tab);
+    GetUIValue(mUI.cmbStyle,                    &mSettings.style_name);
+    GetUIValue(mUI.chkSaveAutomatically,        &mSettings.save_automatically_on_play);
+    GetUIValue(mUI.spinFrameDelay,              &mSettings.frame_delay);
+    GetUIValue(mUI.cmbMouseCursor,              &mSettings.mouse_cursor);
+    GetUIValue(mUI.chkVSYNC,                    &mSettings.vsync);
+    GetUIValue(mUI.edtPythonExecutable,         &mSettings.python_executable);
+    GetUIValue(mUI.edtEmscriptenPath,           &mSettings.emsdk);
+    GetUIValue(mUI.clearColor,                  &mSettings.clear_color);
+    GetUIValue(mUI.gridColor,                   &mSettings.grid_color);
+    GetUIValue(mUI.vcsExecutable,               &mSettings.vcs_executable);
+    GetUIValue(mUI.vcsAddFile,                  &mSettings.vcs_cmd_add_file);
+    GetUIValue(mUI.vcsDelFile,                  &mSettings.vcs_cmd_del_file);
+    GetUIValue(mUI.vcsCommitFile,               &mSettings.vcs_cmd_commit_file);
+    GetUIValue(mUI.vcsListFiles,                &mSettings.vcs_cmd_list_files);
+    GetUIValue(mUI.vcsIgnoreList,               &mSettings.vcs_ignore_list);
+    // main widget settings, grid, color etc.
+    GetUIValue(mUI.cmbGrid,                     &mWidgetSettings.grid);
+    GetUIValue(mUI.zoom,                        &mWidgetSettings.zoom);
+    GetUIValue(mUI.chkShowGrid,                 &mWidgetSettings.show_grid);
+    GetUIValue(mUI.chkShowOrigin,               &mWidgetSettings.show_origin);
+    GetUIValue(mUI.chkShowViewport,             &mWidgetSettings.show_viewport);
+    GetUIValue(mUI.chkSnapToGrid,               &mWidgetSettings.snap_to_grid);
+    // lua script editor settings
+    GetUIValue(mUI.edtLuaFormatterExec,         &mScriptSettings.lua_formatter_exec);
+    GetUIValue(mUI.edtLuaFormatterArgs,         &mScriptSettings.lua_formatter_args);
+    GetUIValue(mUI.editorFormatOnSave,          &mScriptSettings.lua_format_on_save);
     // text editor settings.
     GetUIValue(mUI.editorTheme,                 &mEditorSettings.theme);
     GetUIValue(mUI.editorShowLineNumbers,       &mEditorSettings.show_line_numbers);
     GetUIValue(mUI.editorHightlightCurrentLine, &mEditorSettings.highlight_current_line);
     GetUIValue(mUI.editorHightlightSyntax,      &mEditorSettings.highlight_syntax);
     GetUIValue(mUI.editorInsertSpaces,          &mEditorSettings.insert_spaces);
-    GetUIValue(mUI.editorShowLineNumbers,       &mEditorSettings.show_line_numbers);
     GetUIValue(mUI.editorFontSize,              &mEditorSettings.font_size);
-    mEditorSettings.font_description = mUI.editorFont->currentFont().toString();
-
-    GetUIValue(mUI.cmbGrid,         &mWidgetSettings.grid);
-    GetUIValue(mUI.zoom,            &mWidgetSettings.zoom);
-    GetUIValue(mUI.chkShowGrid,     &mWidgetSettings.show_grid);
-    GetUIValue(mUI.chkShowOrigin,   &mWidgetSettings.show_origin);
-    GetUIValue(mUI.chkShowViewport, &mWidgetSettings.show_viewport);
-    GetUIValue(mUI.chkSnapToGrid,   &mWidgetSettings.snap_to_grid);
-
-    GetUIValue(mUI.edtLuaFormatterExec, &mScriptSettings.lua_formatter_exec);
-    GetUIValue(mUI.edtLuaFormatterArgs, &mScriptSettings.lua_formatter_args);
-    GetUIValue(mUI.editorFormatOnSave,  &mScriptSettings.lua_format_on_save);
+    GetUIValue(mUI.editorFontName,              &mEditorSettings.font_description);
 
     accept();
 }

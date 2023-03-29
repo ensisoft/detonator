@@ -25,6 +25,7 @@
 #  include <QCoreApplication>
 #  include <QIcon>
 #  include <QPixmap>
+#  include <QStyleFactory>
 #include "warnpop.h"
 
 #include "editor/app/utility.h"
@@ -130,5 +131,17 @@ void PopulateUIKeyMaps(QComboBox* cmb)
     }
 }
 
+void PopulateQtStyles(QComboBox* cmb)
+{
+    QSignalBlocker s(cmb);
+    cmb->clear();
+
+    // add Qt's built-in / plugin styles.
+    const auto& styles = QStyleFactory::keys();
+    for (const auto& style : styles)
+    {
+        cmb->addItem(style);
+    }
+}
 
 } // gui
