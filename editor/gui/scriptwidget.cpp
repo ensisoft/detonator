@@ -676,12 +676,19 @@ void ScriptWidget::on_btnSettingsClose_clicked()
     SetEnabled(mUI.actionSettings, true);
 }
 
-void ScriptWidget::on_editorFontName_currentIndexChanged(int)
+void ScriptWidget::on_editorFontName_currentIndexChanged(int index)
 {
-    if (mUI.editorFontName->currentIndex() == -1)
-        mUI.code->ResetFontName();
-    else mUI.code->SetFontName(mUI.editorFontName->currentFont().toString());
-    mUI.code->ApplySettings();
+    // Qt bollocks, this signal is emitted *before* the current value
+    // of the combobox object is changed (except when idnex is -1, huhu!??!).
+    // So we must use the index value coming in the signal to get the right font setting,
+    // except that I don't know how to get the font at the index ????
+    // use a f*n timer to WAR this.
+    QTimer::singleShot(0, [this]() {
+        if (mUI.editorFontName->currentIndex() == -1)
+            mUI.code->ResetFontName();
+        else mUI.code->SetFontName(GetValue(mUI.editorFontName));
+        mUI.code->ApplySettings();
+    });
 }
 void ScriptWidget::on_editorFontSize_currentIndexChanged(int)
 {
