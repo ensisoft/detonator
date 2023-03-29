@@ -597,7 +597,9 @@ void TextEditor::ApplySettings()
         font.setPointSize(font_size);
         mDocument->setDefaultFont(font);
         mFont = font;
+        DEBUG("Apply text editor font setting. [font='%1', size=%2]", font_name, font_size);
     }
+    else WARN("Text editor font description is invalid. [font='%1']", font_name);
 
     if (mSettings.highlight_syntax && !mHighlighter)
     {
