@@ -121,6 +121,14 @@ namespace gui
         bool CancelCompletion();
 
         QString GetCurrentWord() const;
+
+
+        // find the cursor position in the document while ignoring
+        // whitespace, (tabs, spaces, newline)
+        size_t GetCursorPositionHashIgnoreWS() const;
+
+        void SetCursorPositionFromHashIgnoreWS(size_t cursor_hash);
+
     protected:
         virtual void resizeEvent(QResizeEvent *event) override;
         virtual void keyPressEvent(QKeyEvent* key) override;
