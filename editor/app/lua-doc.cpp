@@ -1012,9 +1012,9 @@ void InitLuaDoc()
 
     DOC_TABLE("game.EntityNode");
     DOC_METHOD_0("string", "GetName", "Get the entity node's human readable instance name.");
-    DOC_METHOD_0("string", "GetId", "Get the entity node's instance ID.");
-    DOC_METHOD_0("string", "GetClassName", "Get the name of the entity node's class type.");
-    DOC_METHOD_0("string", "GetClassId", "Get the ID of the entity node's class type.");
+    DOC_METHOD_0("string", "GetId", "Get the entity node instance ID.");
+    DOC_METHOD_0("string", "GetClassName", "Get the entity node class name.");
+    DOC_METHOD_0("string", "GetClassId", "Get the entity node class ID.");
     DOC_METHOD_0("glm.vec2", "GetTranslation", "Get the node's translation relative to its parent.");
     DOC_METHOD_0("glm.vec2", "GetSize", "Get the node's size. Remember that this might not be the same as the node's world size "
                                         "because there might be a scaling transform at some point.");
@@ -1139,9 +1139,9 @@ void InitLuaDoc()
                                                            "Note that you cannot write to the variable if it is marked as 'Read Only'");
     DOC_METHOD_0("string", "GetName", "Get the entity's human readable name.");
     DOC_METHOD_0("string", "GetId", "Get entity instance ID.");
-    DOC_METHOD_0("string", "GetClassName", "Get entity class type name.");
-    DOC_METHOD_0("string", "GetClassId", "Get entity class type ID.");
-    DOC_METHOD_0("string", "GetTag", "Get entity tag string.");
+    DOC_METHOD_0("string", "GetClassName", "Get the entity class name.");
+    DOC_METHOD_0("string", "GetClassId", "Get the entity class ID.");
+    DOC_METHOD_0("string", "GetTag", "Get the entity tag string.");
     DOC_METHOD_0("unsigned", "GetNumNodes", "Get the number of entity nodes in this entity.");
     DOC_METHOD_0("float", "GetTime", "Get the entity's current accumulated (life) time.");
     DOC_METHOD_0("int" , "GetLayer", "Get the entity's render layer in the scene rendering.");
@@ -1162,8 +1162,7 @@ void InitLuaDoc()
                  "string", "name");
     DOC_METHOD_1("game.EntityNode", "FindNodeByClassId", "Find a node in the entity by class ID. Returns nil if no such node could be found.",
                  "string", "id");
-    DOC_METHOD_1("game.EntityNode", "FindNodeByInstanceId", "Find a node in the entity by instance ID. Returns nil if no such node could be found.<br>"
-                                                            "If multiple nodes have the same ID it's unspecified which one is returned.<br>",
+    DOC_METHOD_1("game.EntityNode", "FindNodeByInstanceId", "Find a node in the entity by instance ID. Returns nil if no such node could be found.<br>",
                  "string", "id");
     DOC_METHOD_0("game.Animation", "PlayIdle", "Play the entity's idle animation (if any).<br>"
                                                "Returns nil if the entity doesn't have any idle animation or is already playing an animation.");
@@ -1572,32 +1571,6 @@ void InitLuaDoc()
 
 QString FindLuaDocTableMatch(const QString& word)
 {
-    // these are the "known" special names that we might expect to encounter.
-    // This might cause failures if a user specified name is somehow associated
-    // with these names but that's probably a bad idea in the game code anyway.
-    if (word == "Audio")
-        return "game.Audio";
-    else if (word == "Game")
-        return "game.Engine";
-    else if (word == "Physics")
-        return "game.Physics";
-    else if (word == "Scene")
-        return "game.Scene";
-    else if (word == "State")
-        return "game.KeyValueStore";
-    else if (word == "ClassLib")
-        return "game.ClassLibrary";
-
-    // special cases heuristics.
-    if (word.endsWith("entity"))
-        return "game.Entity";
-    else if (word.endsWith("node"))
-        return "game.EntityNode";
-    else if (word.endsWith("scene"))
-        return "game.Scene";
-    else if (word.endsWith("body"))
-        return "game.RigidBody";
-
     // check for a known table name suffix.
     for (const auto& item : g_method_docs)
     {
@@ -1618,30 +1591,55 @@ QString FindLuaDocFieldMatch(const QString& word)
     return "";
 }
 
-QString FormatArgHelp(const LuaMemberDoc& doc)
+QString FormatArgHelp(const LuaMemberDoc& doc, LuaHelpStyle style, LuaHelpFormat format)
 {
     if (doc.type == LuaMemberType::ObjectProperty ||
         doc.type == LuaMemberType::TableProperty)
-        return "";
+        return doc.ret;
 
-    QString str;
-    for (const auto& arg : doc.args)
+    if (doc.type == LuaMemberType::Function || doc.type == LuaMemberType::Method)
     {
-        str += arg.type;
-        str += " ";
-        str += arg.name;
-        str += ", ";
+        if (style == LuaHelpStyle::DescriptionFormat)
+        {
+            QString str;
+            for (const auto& arg: doc.args)
+            {
+                str += arg.type;
+                str += " ";
+                str += arg.name;
+                str += ", ";
+            }
+            if (!str.isEmpty())
+                str.chop(2);
+            return str;
+        }
+        else if (style == LuaHelpStyle::FunctionCallFormat)
+        {
+            QString str;
+            for (const auto& arg : doc.args)
+            {
+                str += arg.name;
+                str += ", ";
+            }
+            if (!str.isEmpty())
+                str.chop(2);
+            return "(" + str + ")";
+        }
     }
-    if (!str.isEmpty())
-        str.chop(2);
+    return "";
+}
 
-    return str;
+QString FormatHelp(const LuaMemberDoc& doc, LuaHelpFormat format)
+{
+    QString str = doc.desc;
+    return str.replace("<br>", "\n");
 }
 
 QString FormatArgCompletion(const LuaMemberDoc& doc)
 {
     if (doc.type == LuaMemberType::ObjectProperty ||
-        doc.type == LuaMemberType::TableProperty)
+        doc.type == LuaMemberType::TableProperty ||
+        doc.type == LuaMemberType::Table)
         return "";
 
     QString str;
@@ -1892,8 +1890,7 @@ R"(<div class="member" name="%1" id="%2">
 
 QVariant LuaDocTableModel::data(const QModelIndex& index, int role) const
 {
-    const auto& doc = app::GetLuaMethodDoc(index.row());
-
+    const auto& doc = GetDocItem(index);
     if (mMode == Mode::HelpView)
     {
         if (role == Qt::DisplayRole)
@@ -1918,7 +1915,7 @@ QVariant LuaDocTableModel::data(const QModelIndex& index, int role) const
         {
             if (index.column() == 0) return app::toString(doc.type);
             else if (index.column() == 1) return doc.name;
-            else if (index.column() == 2) return app::FormatArgCompletion(doc);
+            else if (index.column() == 2) return app::FormatArgHelp(doc, LuaHelpStyle::FunctionCallFormat, LuaHelpFormat::PlainText);
         }
         else if (role == Qt::DecorationRole && index.column() == 0)
         {
@@ -1953,7 +1950,10 @@ QVariant LuaDocTableModel::headerData(int section, Qt::Orientation orientation, 
     return {};
 }
 int LuaDocTableModel::rowCount(const QModelIndex&) const
-{ return static_cast<int>(app::GetNumLuaMethodDocs()); }
+{
+    return static_cast<int>(app::GetNumLuaMethodDocs() + mDynamicCompletions.size());
+}
+
 int LuaDocTableModel::columnCount(const QModelIndex&) const
 {
     if (mMode == Mode::HelpView)
@@ -1964,10 +1964,23 @@ int LuaDocTableModel::columnCount(const QModelIndex&) const
 }
 
 const LuaMemberDoc& LuaDocTableModel::GetDocItem(size_t index) const
-{ return GetLuaMethodDoc(index); }
+{
+    const auto num_static_docs = app::GetNumLuaMethodDocs();
+    const auto num_dynamic_docs = mDynamicCompletions.size();
+    if (index >= num_static_docs)
+    {
+        const auto dynamic_index = index - num_static_docs;
+        ASSERT(dynamic_index < mDynamicCompletions.size());
+        return mDynamicCompletions[dynamic_index];
+    }
+    return GetLuaMethodDoc(index);
+}
 
 const LuaMemberDoc& LuaDocTableModel::GetDocItem(const QModelIndex& index) const
-{ return GetLuaMethodDoc(static_cast<size_t>(index.row())); }
+{
+    ASSERT(index.row() >= 0);
+    return GetDocItem(index.row());
+}
 
 void LuaDocModelProxy::SetFindFilter(const QString& filter)
 {
@@ -1987,7 +2000,7 @@ bool LuaDocModelProxy::filterAcceptsRow(int row, const QModelIndex& parent) cons
 {
     // do the fastest test up front before doing any string
     // based filter testing.
-    const auto& doc = app::GetLuaMethodDoc(row);
+    const auto& doc = mModel->GetDocItem(row);
     if (!mBits.test(doc.type))
         return false;
 
@@ -2006,7 +2019,7 @@ bool LuaDocModelProxy::filterAcceptsRow(int row, const QModelIndex& parent) cons
     }
     if (!mFieldName.isEmpty())
     {
-        field_name_string_match = doc.name.startsWith(mFieldName);
+        field_name_string_match = doc.name.startsWith(mFieldName, Qt::CaseInsensitive);
     }
     return find_string_match && table_name_string_match && field_name_string_match;
 }

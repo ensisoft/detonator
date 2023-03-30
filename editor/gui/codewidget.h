@@ -46,7 +46,7 @@ namespace gui
     public:
         explicit CodeCompleter(QWidget* parent);
 
-        void Open(const QRect& rect);
+        void Open(const QPoint& pos);
 
         bool IsOpen() const;
 

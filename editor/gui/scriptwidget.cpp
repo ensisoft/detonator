@@ -44,6 +44,9 @@
 #include "editor/app/lua-doc.h"
 #include "editor/gui/settings.h"
 #include "editor/gui/scriptwidget.h"
+#include "game/entity.h"
+#include "game/scene.h"
+#include "uikit/window.h"
 
 namespace gui
 {
@@ -55,7 +58,8 @@ class ScriptWidget::LuaParser : public app::CodeCompleter,
                                 public app::CodeHighlighter
 {
 public:
-    LuaParser()
+    LuaParser(app::Workspace* workspace)
+      : mWorkspace(workspace)
     {
         mTheme.SetTheme(app::LuaTheme::Theme::Monokai);
         mModel.SetMode(app::LuaDocTableModel::Mode::CodeCompletion);
@@ -97,7 +101,7 @@ public:
 
             DEBUG("Start code completion for word. [word='%1']", word);
 
-            word = app::FindLuaDocTableMatch(word);
+            word = DiscoverDynamicCompletions(word);
 
             // interpret period as something like glm.length()
             // i.e. for completion assume the prefix is a table name.
@@ -199,8 +203,9 @@ public:
         if (index.isValid())
         {
             const auto& item = mProxy.GetDocItemFromSource(index);
-            ret.args = app::FormatArgHelp(item);
-            ret.desc = item.desc;
+            ret.args = app::FormatArgHelp(item, app::LuaHelpStyle::DescriptionFormat,
+                                                app::LuaHelpFormat::PlainText);
+            ret.desc = app::FormatHelp(item, app::LuaHelpFormat::PlainText);
         }
         return ret;
     }
@@ -232,6 +237,9 @@ public:
         delete mHilight;
         mHilight = nullptr;
     }
+
+    void SetScriptId(const std::string& id)
+    { mScriptId = id; }
 
 protected:
     class SyntaxHighlightImpl : public QSyntaxHighlighter {
@@ -290,12 +298,168 @@ protected:
         app::LuaParser* mParser = nullptr;
     };
 private:
+    // use some heuristics to suggest a table name for code completion aid.
+    QString DiscoverDynamicCompletions(const QString& word)
+    {
+        mModel.ClearDynamicCompletions();
+
+        // these are the "known" special names that we might expect to encounter.
+        // This might cause failures if a user specified name is somehow associated
+        // with these names but that's probably a bad idea in the game code anyway.
+        if (word == "Audio")
+            return "game.Audio";
+        else if (word == "Game")
+            return "game.Engine";
+        else if (word == "Physics")
+            return "game.Physics";
+        else if (word == "Scene")
+            return "game.Scene";
+        else if (word == "State")
+            return "game.KeyValueStore";
+        else if (word == "ClassLib")
+            return "game.ClassLibrary";
+
+        // if the variable matches the name of some known class type that uses
+        // scripts then assume that the type is the same.
+        // For example 'ball' would match with an entity class resource called 'Ball'.
+        // this way we can offer some extra properties such as the entity script vars
+        // or UI widget names as completions
+        for (size_t i=0; i<mWorkspace->GetNumUserDefinedResources(); ++i)
+        {
+            const auto& res = mWorkspace->GetUserDefinedResource(i);
+            if (const auto* klass = res.GetContent<game::EntityClass>())
+            {
+                if (!klass->HasScriptFile())
+                    continue;
+                else if (klass->GetScriptFileId() != mScriptId)
+                    continue;
+
+                QString name = res.GetName();
+                name.replace(' ', '_');
+                name = name.toLower();
+                if (name != word)
+                    continue;
+
+                AddTableSuggestions(klass);
+                return "game.Entity";
+            }
+            else if (const auto* klass = res.GetContent<game::SceneClass>())
+            {
+                if (!klass->HasScriptFile())
+                    continue;
+                else if (klass->GetScriptFileId() != mScriptId)
+                    continue;
+
+                QString name = res.GetName();
+                name.replace(' ', '_');
+                name = name.toLower();
+                if (name != word)
+                    continue;
+
+                AddTableSuggestions(klass);
+                return "game.Scene";
+            }
+            else if (const auto* window = res.GetContent<uik::Window>())
+            {
+                if (!window->HasScriptFile())
+                    continue;
+                else if (window->GetScriptFile() != mScriptId)
+                    continue;
+
+                QString name = res.GetName();
+                name.replace(' ', '_');
+                name = name.toLower();
+                if (name != word)
+                    continue;
+
+                AddTableSuggestions(window);
+                return "uik.Window";
+            }
+        }
+
+        // special cases heuristics.
+        if (word.endsWith("entity"))
+            return "game.Entity";
+        else if (word.endsWith("node"))
+            return "game.EntityNode";
+        else if (word.endsWith("scene"))
+            return "game.Scene";
+        else if (word.endsWith("body"))
+            return "game.RigidBody";
+        else if (word.endsWith("widget"))
+            return "uik.Widget";
+        else if (word.endsWith("ui"))
+            return "uik.Window";
+
+        return app::FindLuaDocTableMatch(word);
+    }
+    void AddTableSuggestions(const game::EntityClass* klass)
+    {
+        std::vector<app::LuaMemberDoc> docs;
+
+        for (size_t i=0; i<klass->GetNumScriptVars(); ++i)
+        {
+            const auto& var = klass->GetScriptVar(i);
+            app::LuaMemberDoc doc;
+            doc.type = app::LuaMemberType::TableProperty;
+            doc.name = app::FromUtf8(var.GetName());
+            doc.desc = app::toString("Entity script variable (%1)", var.IsReadOnly() ? "readonly" : "read/write");
+            doc.table = "game.Entity";
+            if (var.IsArray())
+                doc.ret = app::toString("%1 []", var.GetType());
+            else doc.ret = app::toString("%1", var.GetType());
+
+            docs.push_back(std::move(doc));
+        }
+        mModel.SetDynamicCompletions(std::move(docs));
+    }
+    void AddTableSuggestions(const game::SceneClass* klass)
+    {
+        std::vector<app::LuaMemberDoc> docs;
+
+        for (size_t i=0; i<klass->GetNumScriptVars(); ++i)
+        {
+            const auto& var = klass->GetScriptVar(i);
+            app::LuaMemberDoc doc;
+            doc.type = app::LuaMemberType::TableProperty;
+            doc.name = app::FromUtf8(var.GetName());
+            doc.desc = app::toString("Scene script variable (%1)", var.IsReadOnly() ? "readonly" : "read/write");
+            doc.table = "game.Scene";
+            if (var.IsArray())
+                doc.ret = app::toString("%1 []", var.GetType());
+            else doc.ret = app::toString("%1", var.GetType());
+
+            docs.push_back(std::move(doc));
+        }
+        mModel.SetDynamicCompletions(std::move(docs));
+    }
+    void AddTableSuggestions(const uik::Window* window)
+    {
+        std::vector<app::LuaMemberDoc> docs;
+
+        for (size_t i=0; i<window->GetNumWidgets(); ++i)
+        {
+            const auto& widget = window->GetWidget(i);
+            app::LuaMemberDoc doc;
+            doc.table = "uik.Window";
+            doc.type  = app::LuaMemberType::TableProperty;
+            doc.name  = app::FromUtf8(widget.GetName());
+            doc.desc  = app::toString("Widget '%1'", widget.GetName());
+            doc.ret   = app::toString(widget.GetType());
+            docs.push_back(std::move(doc));
+        }
+        mModel.SetDynamicCompletions(std::move(docs));
+    }
+
+private:
     SyntaxHighlightImpl* mHilight = nullptr;
 
     app::LuaTheme mTheme;
     app::LuaParser mParser;
     app::LuaDocTableModel mModel;
     app::LuaDocModelProxy mProxy;
+    app::Workspace* mWorkspace = nullptr;
+    std::string mScriptId;
 };
 
 ScriptWidget::ScriptWidget(app::Workspace* workspace)
@@ -307,7 +471,7 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     mWorkspace = workspace;
     mLuaHelpFilter.SetTableModel(&mLuaHelpData);
     mLuaHelpFilter.setSourceModel(&mLuaHelpData);
-    mLuaParser.reset(new LuaParser);
+    mLuaParser.reset(new LuaParser(workspace));
 
     auto* layout = new QPlainTextDocumentLayout(&mDocument);
     layout->setParent(this);
@@ -351,6 +515,7 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace, const app::Resource& resou
     mResourceID   = resource.GetId();
     mResourceName = resource.GetName();
     mWatcher.addPath(mFilename);
+    mLuaParser->SetScriptId(resource.GetIdUtf8());
     LoadDocument(mFilename);
 
     bool show_settings = true;
@@ -538,6 +703,7 @@ bool ScriptWidget::LoadState(const gui::Settings& settings)
         SetValue(mUI.chkFormatOnSave, format_on_save);
 
     mUI.code->ApplySettings();
+    mLuaParser->SetScriptId(app::ToUtf8(mResourceID));
 
     if (mFilename.isEmpty())
         return true;
@@ -706,6 +872,7 @@ void ScriptWidget::on_actionSave_triggered()
 
         mWorkspace->SaveResource(resource);
         mResourceID = app::FromUtf8(script.GetId());
+        mLuaParser->SetScriptId(script.GetId());
     }
     else
     {
