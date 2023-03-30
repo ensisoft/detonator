@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>368</width>
-    <height>276</height>
+    <height>284</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -385,7 +385,7 @@
      <item>
       <widget class="QComboBox" name="widgetFontName">
        <property name="editable">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="placeholderText">
         <string>Default</string>

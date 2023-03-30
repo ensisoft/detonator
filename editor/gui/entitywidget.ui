@@ -32,6 +32,90 @@
         <string>Base properties</string>
        </property>
        <layout class="QGridLayout" name="gridLayout">
+        <item row="1" column="1" colspan="5">
+         <widget class="QLineEdit" name="entityID">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_13">
+          <property name="text">
+           <string>ID</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" colspan="5">
+         <widget class="QLineEdit" name="entityName">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_7">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>On idle</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="5">
+         <widget class="QToolButton" name="btnResetScript">
+          <property name="toolTip">
+           <string>Reset entity script to nothing</string>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resource/resource.qrc">
+            <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>false</bool>
+          </property>
+          <property name="arrowType">
+           <enum>Qt::NoArrow</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_39">
+          <property name="text">
+           <string>Script</string>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="1">
+         <widget class="QCheckBox" name="chkKillAtLifetime">
+          <property name="text">
+           <string>Kill at lifetime</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_11">
+          <property name="text">
+           <string>Tag</string>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="0">
          <widget class="QLabel" name="label">
           <property name="sizePolicy">
@@ -45,21 +129,28 @@
           </property>
          </widget>
         </item>
-        <item row="6" column="0">
+        <item row="10" column="1">
+         <widget class="QCheckBox" name="chkKillAtBoundary">
+          <property name="text">
+           <string>Kill at scene boundary</string>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="0">
          <widget class="QLabel" name="label_9">
           <property name="text">
            <string>Killing</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="0">
+        <item row="5" column="0">
          <widget class="QLabel" name="label_40">
           <property name="text">
            <string>Lifetime</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="1">
+        <item row="2" column="1" colspan="5">
          <widget class="QLineEdit" name="entityTag">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -69,184 +160,171 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="entityID">
+        <item row="3" column="1" colspan="2">
+         <widget class="QComboBox" name="scriptFile">
+          <property name="placeholderText">
+           <string>None</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1" colspan="2">
+         <widget class="QComboBox" name="idleTrack">
+          <property name="placeholderText">
+           <string>Do nothing</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1" colspan="2">
+         <widget class="QDoubleSpinBox" name="entityLifetime">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="readOnly">
-           <bool>true</bool>
+          <property name="specialValueText">
+           <string>Unlimited</string>
+          </property>
+          <property name="suffix">
+           <string> s</string>
+          </property>
+          <property name="minimum">
+           <double>0.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>99999.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="stepType">
+           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
-         <layout class="QHBoxLayout" name="horizontalLayout_5">
-          <item>
-           <widget class="QComboBox" name="scriptFile">
-            <property name="placeholderText">
-             <string>No entity script</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="btnEditScript">
-            <property name="toolTip">
-             <string>Open the script for editing</string>
-            </property>
-            <property name="text">
-             <string>...</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resource/resource.qrc">
-              <normaloff>:/16x16_ico_png/script_go.png</normaloff>:/16x16_ico_png/script_go.png</iconset>
-            </property>
-            <property name="autoRaise">
-             <bool>false</bool>
-            </property>
-            <property name="arrowType">
-             <enum>Qt::NoArrow</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="btnAddScript">
-            <property name="toolTip">
-             <string>Add new entity script</string>
-            </property>
-            <property name="text">
-             <string>...</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resource/resource.qrc">
-              <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
-            </property>
-            <property name="autoRaise">
-             <bool>false</bool>
-            </property>
-            <property name="arrowType">
-             <enum>Qt::NoArrow</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="btnResetScript">
-            <property name="toolTip">
-             <string>Reset entity script to nothing</string>
-            </property>
-            <property name="text">
-             <string>...</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resource/resource.qrc">
-              <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
-            </property>
-            <property name="autoRaise">
-             <bool>false</bool>
-            </property>
-            <property name="arrowType">
-             <enum>Qt::NoArrow</enum>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="entityName">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+        <item row="4" column="5">
+         <widget class="QToolButton" name="btnResetIdleTrack">
+          <property name="toolTip">
+           <string>Reset idle track to nothing</string>
           </property>
-         </widget>
-        </item>
-        <item row="6" column="1">
-         <widget class="QCheckBox" name="chkKillAtLifetime">
           <property name="text">
-           <string>Kill at lifetime</string>
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resource/resource.qrc">
+            <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>false</bool>
+          </property>
+          <property name="arrowType">
+           <enum>Qt::NoArrow</enum>
           </property>
          </widget>
         </item>
-        <item row="3" column="1">
-         <layout class="QHBoxLayout" name="horizontalLayout_12">
-          <item>
-           <widget class="QDoubleSpinBox" name="entityLifetime">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="specialValueText">
-             <string>Unlimited</string>
-            </property>
-            <property name="suffix">
-             <string> s</string>
-            </property>
-            <property name="minimum">
-             <double>0.000000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>99999.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-            <property name="stepType">
-             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="btnResetLifetime">
-            <property name="toolTip">
-             <string>Reset entity lifetime to unlimited</string>
-            </property>
-            <property name="text">
-             <string>...</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resource/resource.qrc">
-              <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
-            </property>
-            <property name="autoRaise">
-             <bool>false</bool>
-            </property>
-            <property name="arrowType">
-             <enum>Qt::NoArrow</enum>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_13">
+        <item row="5" column="5">
+         <widget class="QToolButton" name="btnResetLifetime">
+          <property name="toolTip">
+           <string>Reset entity lifetime to unlimited</string>
+          </property>
           <property name="text">
-           <string>ID</string>
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resource/resource.qrc">
+            <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>false</bool>
+          </property>
+          <property name="arrowType">
+           <enum>Qt::NoArrow</enum>
           </property>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_39">
+        <item row="3" column="3">
+         <widget class="QToolButton" name="btnEditScript">
+          <property name="toolTip">
+           <string>Open the script for editing</string>
+          </property>
           <property name="text">
-           <string>Script</string>
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resource/resource.qrc">
+            <normaloff>:/16x16_ico_png/script_go.png</normaloff>:/16x16_ico_png/script_go.png</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>false</bool>
+          </property>
+          <property name="arrowType">
+           <enum>Qt::NoArrow</enum>
           </property>
          </widget>
         </item>
-        <item row="7" column="1">
-         <widget class="QCheckBox" name="chkKillAtBoundary">
+        <item row="3" column="4">
+         <widget class="QToolButton" name="btnAddScript">
+          <property name="toolTip">
+           <string>Add new entity script</string>
+          </property>
           <property name="text">
-           <string>Kill at scene boundary</string>
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resource/resource.qrc">
+            <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>false</bool>
+          </property>
+          <property name="arrowType">
+           <enum>Qt::NoArrow</enum>
           </property>
          </widget>
         </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_11">
+        <item row="4" column="4">
+         <widget class="QToolButton" name="btnAddIdleTrack">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Add new idle track</string>
+          </property>
           <property name="text">
-           <string>Tag</string>
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resource/resource.qrc">
+            <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>false</bool>
+          </property>
+          <property name="arrowType">
+           <enum>Qt::NoArrow</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="3">
+         <widget class="QToolButton" name="btnEditIdleTrack">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Open the script for editing</string>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resource/resource.qrc">
+            <normaloff>:/16x16_ico_png/script_go.png</normaloff>:/16x16_ico_png/script_go.png</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>false</bool>
+          </property>
+          <property name="arrowType">
+           <enum>Qt::NoArrow</enum>
           </property>
          </widget>
         </item>
@@ -282,7 +360,7 @@
              <x>0</x>
              <y>0</y>
              <width>353</width>
-             <height>715</height>
+             <height>789</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_17">
@@ -398,7 +476,7 @@
               <property name="maximumSize">
                <size>
                 <width>16777215</width>
-                <height>150</height>
+                <height>200</height>
                </size>
               </property>
               <property name="collapsed" stdset="0">
@@ -451,6 +529,58 @@
                    <bool>false</bool>
                   </attribute>
                  </widget>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_20">
+                  <item>
+                   <widget class="QPushButton" name="btnNewScriptVar">
+                    <property name="text">
+                     <string>New ...</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../resource/resource.qrc">
+                      <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+                    </property>
+                    <property name="flat">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="btnEditScriptVar">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="text">
+                     <string>Edit ...</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../resource/resource.qrc">
+                      <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
+                    </property>
+                    <property name="flat">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="btnDeleteScriptVar">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="text">
+                     <string>Delete</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../resource/resource.qrc">
+                      <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+                    </property>
+                    <property name="flat">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </item>
                </layout>
               </widget>
@@ -507,67 +637,52 @@
                  </widget>
                 </item>
                 <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_4">
+                 <layout class="QHBoxLayout" name="horizontalLayout_6">
                   <item>
-                   <widget class="QLabel" name="label_7">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
+                   <widget class="QPushButton" name="btnNewTrack">
                     <property name="text">
-                     <string>On idle</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QComboBox" name="idleTrack">
-                    <property name="placeholderText">
-                     <string>No idle animation</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QToolButton" name="btnAddIdleTrack">
-                    <property name="enabled">
-                     <bool>false</bool>
-                    </property>
-                    <property name="toolTip">
-                     <string>Add new idle track</string>
-                    </property>
-                    <property name="text">
-                     <string>...</string>
+                     <string>New ...</string>
                     </property>
                     <property name="icon">
                      <iconset resource="../resource/resource.qrc">
                       <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
                     </property>
-                    <property name="autoRaise">
-                     <bool>false</bool>
-                    </property>
-                    <property name="arrowType">
-                     <enum>Qt::NoArrow</enum>
+                    <property name="flat">
+                     <bool>true</bool>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QToolButton" name="btnResetIdleTrack">
-                    <property name="toolTip">
-                     <string>Reset idle track to nothing</string>
+                   <widget class="QPushButton" name="btnEditTrack">
+                    <property name="enabled">
+                     <bool>false</bool>
                     </property>
                     <property name="text">
-                     <string>...</string>
+                     <string>Edit ...</string>
                     </property>
                     <property name="icon">
                      <iconset resource="../resource/resource.qrc">
-                      <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+                      <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
                     </property>
-                    <property name="autoRaise">
+                    <property name="flat">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="btnDeleteTrack">
+                    <property name="enabled">
                      <bool>false</bool>
                     </property>
-                    <property name="arrowType">
-                     <enum>Qt::NoArrow</enum>
+                    <property name="text">
+                     <string>Delete</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../resource/resource.qrc">
+                      <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+                    </property>
+                    <property name="flat">
+                     <bool>true</bool>
                     </property>
                    </widget>
                   </item>
@@ -641,6 +756,58 @@
                    <number>24</number>
                   </attribute>
                  </widget>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_11">
+                  <item>
+                   <widget class="QPushButton" name="btnNewJoint">
+                    <property name="text">
+                     <string>New ...</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../resource/resource.qrc">
+                      <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+                    </property>
+                    <property name="flat">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="btnEditJoint">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="text">
+                     <string>Edit ...</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../resource/resource.qrc">
+                      <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
+                    </property>
+                    <property name="flat">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="btnDeleteJoint">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="text">
+                     <string>Delete</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../resource/resource.qrc">
+                      <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+                    </property>
+                    <property name="flat">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </item>
                </layout>
               </widget>
@@ -910,183 +1077,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_20">
-       <item>
-        <spacer name="horizontalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Preferred</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnNewScriptVar">
-         <property name="text">
-          <string>New ...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../resource/resource.qrc">
-           <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnEditScriptVar">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Edit ...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../resource/resource.qrc">
-           <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnDeleteScriptVar">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Delete</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../resource/resource.qrc">
-           <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_6">
-       <item>
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Preferred</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnNewTrack">
-         <property name="text">
-          <string>New ...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../resource/resource.qrc">
-           <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnEditTrack">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Edit ...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../resource/resource.qrc">
-           <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnDeleteTrack">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Delete</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../resource/resource.qrc">
-           <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_11">
-       <item>
-        <spacer name="horizontalSpacer_4">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Preferred</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnNewJoint">
-         <property name="text">
-          <string>New ...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../resource/resource.qrc">
-           <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnEditJoint">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Edit ...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../resource/resource.qrc">
-           <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnDeleteJoint">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Delete</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../resource/resource.qrc">
-           <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
-         </property>
-        </widget>
-       </item>
-      </layout>
      </item>
     </layout>
    </item>
@@ -3449,13 +3439,17 @@
  <tabstops>
   <tabstop>entityName</tabstop>
   <tabstop>entityID</tabstop>
+  <tabstop>entityTag</tabstop>
   <tabstop>scriptFile</tabstop>
   <tabstop>btnEditScript</tabstop>
   <tabstop>btnAddScript</tabstop>
   <tabstop>btnResetScript</tabstop>
+  <tabstop>idleTrack</tabstop>
+  <tabstop>btnEditIdleTrack</tabstop>
+  <tabstop>btnAddIdleTrack</tabstop>
+  <tabstop>btnResetIdleTrack</tabstop>
   <tabstop>entityLifetime</tabstop>
   <tabstop>btnResetLifetime</tabstop>
-  <tabstop>entityTag</tabstop>
   <tabstop>chkKillAtLifetime</tabstop>
   <tabstop>chkKillAtBoundary</tabstop>
   <tabstop>callbacks</tabstop>
@@ -3465,13 +3459,19 @@
   <tabstop>chkMouseEvents</tabstop>
   <tabstop>variables</tabstop>
   <tabstop>scriptVarList</tabstop>
+  <tabstop>btnNewScriptVar</tabstop>
+  <tabstop>btnEditScriptVar</tabstop>
+  <tabstop>btnDeleteScriptVar</tabstop>
   <tabstop>animations</tabstop>
   <tabstop>trackList</tabstop>
-  <tabstop>idleTrack</tabstop>
-  <tabstop>btnAddIdleTrack</tabstop>
-  <tabstop>btnResetIdleTrack</tabstop>
+  <tabstop>btnNewTrack</tabstop>
+  <tabstop>btnEditTrack</tabstop>
+  <tabstop>btnDeleteTrack</tabstop>
   <tabstop>joints</tabstop>
   <tabstop>jointList</tabstop>
+  <tabstop>btnNewJoint</tabstop>
+  <tabstop>btnEditJoint</tabstop>
+  <tabstop>btnDeleteJoint</tabstop>
   <tabstop>translateX</tabstop>
   <tabstop>translateY</tabstop>
   <tabstop>scaleX</tabstop>
@@ -3480,15 +3480,6 @@
   <tabstop>btnViewPlus90</tabstop>
   <tabstop>btnViewMinus90</tabstop>
   <tabstop>btnResetTransform</tabstop>
-  <tabstop>btnNewScriptVar</tabstop>
-  <tabstop>btnEditScriptVar</tabstop>
-  <tabstop>btnDeleteScriptVar</tabstop>
-  <tabstop>btnNewTrack</tabstop>
-  <tabstop>btnEditTrack</tabstop>
-  <tabstop>btnDeleteTrack</tabstop>
-  <tabstop>btnNewJoint</tabstop>
-  <tabstop>btnEditJoint</tabstop>
-  <tabstop>btnDeleteJoint</tabstop>
   <tabstop>widget</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbGrid</tabstop>

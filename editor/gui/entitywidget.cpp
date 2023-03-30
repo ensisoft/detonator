@@ -150,9 +150,9 @@ public:
         if (role == Qt::DisplayRole)
         {
             switch (index.column()) {
-                case 0: return app::toString(var.GetType());
-                case 1: return app::FromUtf8(var.GetName());
-                case 2: return GetScriptVarData(var);
+                //case 0: return app::toString(var.GetType());
+                case 0: return app::FromUtf8(var.GetName());
+                case 1: return GetScriptVarData(var);
                 default: BUG("Unknown script variable data index.");
             }
         }
@@ -163,9 +163,9 @@ public:
         if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
         {
             switch (section) {
-                case 0: return "Type";
-                case 1: return "Name";
-                case 2: return "Value";
+                //case 0: return "Type";
+                case 0: return "Name";
+                case 1: return "Value";
                 default: BUG("Unknown script variable data index.");
             }
         }
@@ -177,7 +177,8 @@ public:
     }
     virtual int columnCount(const QModelIndex&) const override
     {
-        return 3;
+        //return 3;
+        return 2;
     }
     void AddVariable(game::ScriptVar&& var)
     {
@@ -227,12 +228,12 @@ private:
             case game::ScriptVar::Type::Vec2: {
                 if (!var.IsArray()) {
                     const auto& val = var.GetValue<glm::vec2>();
-                    return QString("%1,%2")
+                    return QString("[%1,%2]")
                             .arg(QString::number(val.x, 'f', 2))
                             .arg(QString::number(val.y, 'f', 2));
                 } else {
                     const auto& val = var.GetArray<glm::vec2>()[0];
-                    return QString("[0]=%1,%2 ...")
+                    return QString("[0]=[%1,%2] ...")
                             .arg(QString::number(val.x, 'f', 2))
                             .arg(QString::number(val.y, 'f', 2));
                 }
@@ -481,18 +482,6 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFontSizes(mUI.tiFontSize);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.zoom, 1.0f);
-
-    // Using context menus for now but leaving these buttons
-    // around in case they make a come back later...
-    SetVisible(mUI.btnNewScriptVar, false);
-    SetVisible(mUI.btnEditScriptVar, false);
-    SetVisible(mUI.btnDeleteScriptVar, false);
-    SetVisible(mUI.btnNewJoint, false);
-    SetVisible(mUI.btnEditJoint, false);
-    SetVisible(mUI.btnDeleteJoint, false);
-    SetVisible(mUI.btnNewTrack, false);
-    SetVisible(mUI.btnEditTrack, false);
-    SetVisible(mUI.btnDeleteTrack, false);
 
     RebuildMenus();
     RebuildCombos();

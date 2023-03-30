@@ -50,7 +50,7 @@
           <item>
            <widget class="QComboBox" name="cmbTilemaps">
             <property name="placeholderText">
-             <string>No map selected</string>
+             <string>None</string>
             </property>
            </widget>
           </item>
@@ -152,7 +152,7 @@
           <item>
            <widget class="QComboBox" name="cmbScripts">
             <property name="placeholderText">
-             <string>No script selected</string>
+             <string>None</string>
             </property>
            </widget>
           </item>
@@ -266,7 +266,7 @@
              <x>0</x>
              <y>0</y>
              <width>340</width>
-             <height>779</height>
+             <height>814</height>
             </rect>
            </property>
            <property name="maximumSize">
@@ -299,7 +299,7 @@
               <property name="maximumSize">
                <size>
                 <width>16777215</width>
-                <height>150</height>
+                <height>200</height>
                </size>
               </property>
               <property name="focusPolicy">
@@ -367,6 +367,58 @@
                    <number>24</number>
                   </attribute>
                  </widget>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_7">
+                  <item>
+                   <widget class="QPushButton" name="btnNewScriptVar">
+                    <property name="text">
+                     <string>New ...</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../resource/resource.qrc">
+                      <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+                    </property>
+                    <property name="flat">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="btnEditScriptVar">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="text">
+                     <string>Edit ...</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../resource/resource.qrc">
+                      <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
+                    </property>
+                    <property name="flat">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="btnDeleteScriptVar">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="text">
+                     <string>Delete</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../resource/resource.qrc">
+                      <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+                    </property>
+                    <property name="flat">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </item>
                </layout>
               </widget>
@@ -1170,53 +1222,6 @@
         <number>10</number>
        </property>
       </widget>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_7">
-       <item>
-        <spacer name="horizontalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Preferred</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnNewScriptVar">
-         <property name="text">
-          <string>New ...</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnEditScriptVar">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Edit ...</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnDeleteScriptVar">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Delete</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
      </item>
     </layout>
    </item>
@@ -2082,6 +2087,9 @@
   <tabstop>btnResetMap</tabstop>
   <tabstop>sceneVariablesGroup</tabstop>
   <tabstop>scriptVarList</tabstop>
+  <tabstop>btnNewScriptVar</tabstop>
+  <tabstop>btnEditScriptVar</tabstop>
+  <tabstop>btnDeleteScriptVar</tabstop>
   <tabstop>sceneBoundsGroup</tabstop>
   <tabstop>sceneIndexGroup</tabstop>
   <tabstop>cmbSpatialIndex</tabstop>
@@ -2107,9 +2115,6 @@
   <tabstop>btnViewPlus90</tabstop>
   <tabstop>btnViewMinus90</tabstop>
   <tabstop>btnViewReset</tabstop>
-  <tabstop>btnNewScriptVar</tabstop>
-  <tabstop>btnEditScriptVar</tabstop>
-  <tabstop>btnDeleteScriptVar</tabstop>
   <tabstop>widget</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbGrid</tabstop>
