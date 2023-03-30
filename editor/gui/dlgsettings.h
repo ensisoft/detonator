@@ -24,7 +24,6 @@
 #include "warnpop.h"
 
 #include "editor/gui/appsettings.h"
-#include "editor/gui/codewidget.h"
 #include "editor/gui/scriptwidget.h"
 #include "editor/gui/mainwidget.h"
 
@@ -35,7 +34,6 @@ namespace gui
         Q_OBJECT
     public:
         DlgSettings(QWidget* parent, AppSettings& settings,
-                    TextEditor::Settings& editor,
                     ScriptWidget::Settings& script,
                     MainWidget::UISettings& widget);
     private slots:
@@ -54,7 +52,6 @@ namespace gui
         Ui::DlgSettings mUI;
     private:
         AppSettings& mSettings;
-        TextEditor::Settings& mEditorSettings;
         ScriptWidget::Settings& mScriptSettings;
         MainWidget::UISettings& mWidgetSettings;
     };

@@ -288,24 +288,19 @@ void MainWindow::LoadSettings()
     GfxWindow::SetMouseCursor(mSettings.mouse_cursor);
     gui::SetGridColor(ToGfx(mSettings.grid_color));
 
-    TextEditor::Settings editor_settings;
-    settings.GetValue("TextEditor", "font",                    &editor_settings.font_description);
-    settings.GetValue("TextEditor", "font_size",               &editor_settings.font_size);
-    settings.GetValue("TextEditor", "theme",                   &editor_settings.theme);
-    settings.GetValue("TextEditor", "show_line_numbers",       &editor_settings.show_line_numbers);
-    settings.GetValue("TextEditor", "highlight_syntax",        &editor_settings.highlight_syntax);
-    settings.GetValue("TextEditor", "highlight_current_line",  &editor_settings.highlight_current_line);
-    settings.GetValue("TextEditor", "replace_tab_with_spaces", &editor_settings.replace_tabs_with_spaces);
-    settings.GetValue("TextEditor", "tab_spaces",              &editor_settings.tab_spaces);
-    TextEditor::SetDefaultSettings(editor_settings);
-
     ScriptWidget::Settings script_widget_settings;
-    settings.GetValue("ScriptWidget", "lua_formatter_exec", &script_widget_settings.lua_formatter_exec);
-    settings.GetValue("ScriptWidget", "lua_formatter_args", &script_widget_settings.lua_formatter_args);
-    settings.GetValue("ScriptWidget", "lua_format_on_save", &script_widget_settings.lua_format_on_save);
+    settings.GetValue("ScriptWidget", "color_theme",                    &script_widget_settings.theme);
+    settings.GetValue("ScriptWidget", "lua_formatter_exec",             &script_widget_settings.lua_formatter_exec);
+    settings.GetValue("ScriptWidget", "lua_formatter_args",             &script_widget_settings.lua_formatter_args);
+    settings.GetValue("ScriptWidget", "lua_format_on_save",             &script_widget_settings.lua_format_on_save);
+    settings.GetValue("ScriptWidget", "editor_font_name",               &script_widget_settings.editor_settings.font_description);
+    settings.GetValue("ScriptWidget", "editor_font_size",               &script_widget_settings.editor_settings.font_size);
+    settings.GetValue("ScriptWidget", "editor_show_line_numbers",       &script_widget_settings.editor_settings.show_line_numbers);
+    settings.GetValue("ScriptWidget", "editor_highlight_syntax",        &script_widget_settings.editor_settings.highlight_syntax);
+    settings.GetValue("ScriptWidget", "editor_highlight_current_line",  &script_widget_settings.editor_settings.highlight_current_line);
+    settings.GetValue("ScriptWidget", "editor_replace_tab_with_spaces", &script_widget_settings.editor_settings.replace_tabs_with_spaces);
+    settings.GetValue("ScriptWidget", "editor_num_tab_spaces",          &script_widget_settings.editor_settings.tab_spaces);
     ScriptWidget::SetDefaultSettings(script_widget_settings);
-
-
 
     if (!mSettings.style_name.isEmpty())
     {
@@ -1874,19 +1869,17 @@ void MainWindow::on_actionCloseWorkspace_triggered()
 void MainWindow::on_actionSettings_triggered()
 {
     const QString current_style = mSettings.style_name;
-    TextEditor::Settings editor_settings;
-    TextEditor::GetDefaultSettings(&editor_settings);
+
     ScriptWidget::Settings script_widget_settings;
     ScriptWidget::GetDefaultSettings(&script_widget_settings);
 
-    DlgSettings dlg(this, mSettings, editor_settings, script_widget_settings, mUISettings);
+    DlgSettings dlg(this, mSettings, script_widget_settings, mUISettings);
     if (dlg.exec() == QDialog::Rejected)
         return;
 
     SaveSettings();
 
     ScriptWidget::SetDefaultSettings(script_widget_settings);
-    TextEditor::SetDefaultSettings(editor_settings);
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
     // disabling this setting for now.
     //GfxWindow::SetVSYNC(mSettings.vsync);
@@ -3032,21 +3025,21 @@ void MainWindow::SaveSettings()
     settings.SetValue("Settings", "vcs_cmd_del_file",           mSettings.vcs_cmd_del_file);
     settings.SetValue("Settings", "vcs_cmd_commit_file",        mSettings.vcs_cmd_commit_file);
     settings.SetValue("Settings", "vcs_ignore_list",            mSettings.vcs_ignore_list);
-    TextEditor::Settings editor_settings;
-    TextEditor::GetDefaultSettings(&editor_settings);
-    settings.SetValue("TextEditor", "font",                    editor_settings.font_description);
-    settings.SetValue("TextEditor", "font_size",               editor_settings.font_size);
-    settings.SetValue("TextEditor", "theme",                   editor_settings.theme);
-    settings.SetValue("TextEditor", "show_line_numbers",       editor_settings.show_line_numbers);
-    settings.SetValue("TextEditor", "highlight_syntax",        editor_settings.highlight_syntax);
-    settings.SetValue("TextEditor", "highlight_current_line",  editor_settings.highlight_current_line);
-    settings.SetValue("TextEditor", "replace_tab_with_spaces", editor_settings.replace_tabs_with_spaces);
-    settings.SetValue("TextEditor", "tab_spaces",              editor_settings.tab_spaces);
+
     ScriptWidget::Settings script_widget_settings;
     ScriptWidget::GetDefaultSettings(&script_widget_settings);
-    settings.SetValue("ScriptWidget", "lua_formatter_exec", script_widget_settings.lua_formatter_exec);
-    settings.SetValue("ScriptWidget", "lua_formatter_args", script_widget_settings.lua_formatter_args);
-    settings.SetValue("ScriptWidget", "lua_format_on_save", script_widget_settings.lua_format_on_save);
+    settings.SetValue("ScriptWidget", "color_theme",                    script_widget_settings.theme);
+    settings.SetValue("ScriptWidget", "lua_formatter_exec",             script_widget_settings.lua_formatter_exec);
+    settings.SetValue("ScriptWidget", "lua_formatter_args",             script_widget_settings.lua_formatter_args);
+    settings.SetValue("ScriptWidget", "lua_format_on_save",             script_widget_settings.lua_format_on_save);
+    settings.SetValue("ScriptWidget", "editor_font_name",               script_widget_settings.editor_settings.font_description);
+    settings.SetValue("ScriptWidget", "editor_font_size",               script_widget_settings.editor_settings.font_size);
+    settings.SetValue("ScriptWidget", "editor_show_line_numbers",       script_widget_settings.editor_settings.show_line_numbers);
+    settings.SetValue("ScriptWidget", "editor_highlight_syntax",        script_widget_settings.editor_settings.highlight_syntax);
+    settings.SetValue("ScriptWidget", "editor_highlight_current_line",  script_widget_settings.editor_settings.highlight_current_line);
+    settings.SetValue("ScriptWidget", "editor_replace_tab_with_spaces", script_widget_settings.editor_settings.replace_tabs_with_spaces);
+    settings.SetValue("ScriptWidget", "editor_num_tab_spaces",          script_widget_settings.editor_settings.tab_spaces);
+
 
     if (settings.Save())
         INFO("Saved application settings.");

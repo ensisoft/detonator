@@ -180,12 +180,6 @@ private:
     TextEditor* mCodeWidget = nullptr;
 };
 
-// slightly ugly but okay, works for now
-std::set<TextEditor*> open_editors;
-
-// static
-TextEditor::Settings TextEditor::mSettings;
-
 void TextEditor::Reparse()
 {
     if (mHighlighter)
@@ -204,22 +198,6 @@ bool TextEditor::CancelCompletion()
     return false;
 }
 
-// static
-void TextEditor::SetDefaultSettings(const Settings& settings)
-{
-    mSettings = settings;
-    for (auto* editor : open_editors)
-    {
-        editor->ApplySettings();
-    }
-}
-
-// static
-void TextEditor::GetDefaultSettings(Settings* settings)
-{
-    *settings = mSettings;
-}
-
 TextEditor::TextEditor(QWidget *parent)
   : QPlainTextEdit(parent)
 {
@@ -228,9 +206,6 @@ TextEditor::TextEditor(QWidget *parent)
     connect(this, &TextEditor::cursorPositionChanged, this, &TextEditor::HighlightCurrentLine);
     connect(this, &TextEditor::copyAvailable,         this, &TextEditor::CopyAvailable);
     connect(this, &TextEditor::undoAvailable,         this, &TextEditor::UndoAvailable);
-
-    open_editors.insert(this);
-
     setLineWrapMode(LineWrapMode::NoWrap);
 
     mCompleterUI.reset(new CodeCompleter(this));
@@ -240,21 +215,16 @@ TextEditor::TextEditor(QWidget *parent)
 
 TextEditor::~TextEditor()
 {
-    open_editors.erase(this);
-
     mCompleterUI->disconnect(this);
     if (mCompleterUI->IsOpen())
         mCompleterUI->Close();
     mCompleterUI.reset();
-    
 }
 
 void TextEditor::SetDocument(QTextDocument* document)
 {
     this->setDocument(document);
     mDocument = document;
-
-    ApplySettings();
 }
 void TextEditor::SetCompleter(app::CodeCompleter* completer)
 {
@@ -498,6 +468,8 @@ void TextEditor::PaintLineNumbers(const QRect& rect)
 
 void TextEditor::ApplySettings()
 {
+    mFont = mDocument->defaultFont();
+
     QFont font;
     const auto font_name = mFontName.value_or(mSettings.font_description);
     const auto font_size = mFontSize.value_or(mSettings.font_size);

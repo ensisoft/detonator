@@ -78,7 +78,6 @@ namespace gui
 
     public:
         struct Settings {
-            QString theme = "Monokai";
             QString font_description;
             bool show_line_numbers        = true;
             bool highlight_syntax         = true;
@@ -105,7 +104,8 @@ namespace gui
 
         int ComputeLineNumberAreaWidth() const;
 
-        void ApplySettings();
+        void SetSettings(const Settings& settings)
+        { mSettings = settings; }
         void SetFontName(const QString& font)
         { mFontName = font; }
         void ResetFontName()
@@ -116,12 +116,11 @@ namespace gui
         { mFontSize.reset(); }
         void Reparse();
 
+        void ApplySettings();
+
         bool CancelCompletion();
 
         QString GetCurrentWord() const;
-
-        static void SetDefaultSettings(const Settings& settings);
-        static void GetDefaultSettings(Settings* settings);
     protected:
         virtual void resizeEvent(QResizeEvent *event) override;
         virtual void keyPressEvent(QKeyEvent* key) override;
@@ -134,9 +133,9 @@ namespace gui
         void UndoAvailable(bool yes_no);
         void Complete(const QString& text, const QModelIndex& index);
         void Filter(const QString& input);
+
     private:
-        static Settings mSettings;
-    private:
+        Settings mSettings;
         std::unique_ptr<CodeCompleter> mCompleterUI;
         app::CodeCompleter* mCompleter = nullptr;
         app::CodeHighlighter* mHighlighter = nullptr;

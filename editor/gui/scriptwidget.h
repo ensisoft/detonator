@@ -28,6 +28,7 @@
 #include "warnpop.h"
 
 #include "editor/app/lua-doc.h"
+#include "editor/gui/codewidget.h"
 #include "editor/gui/mainwidget.h"
 
 namespace app {
@@ -42,9 +43,12 @@ namespace gui
         Q_OBJECT
     public:
         struct Settings {
+            QString theme = "Monokai";
             QString lua_formatter_exec = "${install-dir}/lua-format/lua-format";
             QString lua_formatter_args = "${file} -i --config=${install-dir}/lua-format/style.yaml";
             bool lua_format_on_save    = true;
+            bool use_code_heuristics   = true;
+            TextEditor::Settings editor_settings;
         };
 
         ScriptWidget(app::Workspace* workspace);

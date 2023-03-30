@@ -48,6 +48,10 @@
 #include "game/scene.h"
 #include "uikit/window.h"
 
+namespace {
+std::set<gui::ScriptWidget*> all_script_widgets;
+} // namespace
+
 namespace gui
 {
 // static
@@ -240,6 +244,8 @@ public:
 
     void SetScriptId(const std::string& id)
     { mScriptId = id; }
+    void SetCodeCompletionHeuristics(bool on_off)
+    { mUseCodeCompletionHeuristics = on_off; }
 
 protected:
     class SyntaxHighlightImpl : public QSyntaxHighlighter {
@@ -301,6 +307,9 @@ private:
     // use some heuristics to suggest a table name for code completion aid.
     QString DiscoverDynamicCompletions(const QString& word)
     {
+        if (!mUseCodeCompletionHeuristics)
+            return "";
+
         mModel.ClearDynamicCompletions();
 
         // these are the "known" special names that we might expect to encounter.
@@ -460,11 +469,13 @@ private:
     app::LuaDocModelProxy mProxy;
     app::Workspace* mWorkspace = nullptr;
     std::string mScriptId;
+    bool mUseCodeCompletionHeuristics = true;
 };
 
 ScriptWidget::ScriptWidget(app::Workspace* workspace)
 {
     DEBUG("Create ScriptWidget");
+    all_script_widgets.insert(this);
 
     app::InitLuaDoc();
 
@@ -472,6 +483,7 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     mLuaHelpFilter.SetTableModel(&mLuaHelpData);
     mLuaHelpFilter.setSourceModel(&mLuaHelpData);
     mLuaParser.reset(new LuaParser(workspace));
+    mLuaParser->SetCodeCompletionHeuristics(mSettings.use_code_heuristics);
 
     auto* layout = new QPlainTextDocumentLayout(&mDocument);
     layout->setParent(this);
@@ -484,6 +496,7 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     mUI.code->SetDocument(&mDocument);
     mUI.code->SetSyntaxHighlighter(mLuaParser.get());
     mUI.code->SetCompleter(mLuaParser.get());
+    mUI.code->SetSettings(mSettings.editor_settings);
     mUI.tableView->setModel(&mLuaHelpFilter);
     mUI.tableView->setColumnWidth(0, 100);
     mUI.tableView->setColumnWidth(2, 200);
@@ -525,6 +538,7 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace, const app::Resource& resou
     SetVisible(mUI.settings, show_settings);
     SetEnabled(mUI.actionSettings, !show_settings);
 
+    // Custom font name setting (applies to this widget only)
     QString font_name;
     if (GetUserProperty(resource, "font_name", &font_name))
     {
@@ -532,14 +546,13 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace, const app::Resource& resou
         SetValue(mUI.editorFontName, font_name);
     }
 
+    // Custom font size setting (applies to this widget only)
     QString font_size;
     if (GetUserProperty(resource, "font_size", &font_size))
     {
         mUI.code->SetFontSize(font_size.toInt());
         SetValue(mUI.editorFontSize, font_size);
     }
-
-    mUI.code->ApplySettings();
 
     bool format_on_save = false;
     if (GetProperty(resource, "format_on_save", &format_on_save))
@@ -551,6 +564,7 @@ ScriptWidget::~ScriptWidget()
     mUI.code->SetCompleter(nullptr);
     mUI.code->SetSyntaxHighlighter(nullptr);
     mLuaParser.reset();
+    all_script_widgets.erase(this);
 }
 
 QString ScriptWidget::GetId() const
@@ -1288,12 +1302,19 @@ void ScriptWidget::SetInitialFocus()
     cursor.movePosition(QTextCursor::Start);
     mUI.code->setTextCursor(cursor);
     mUI.code->setFocus();
+    mUI.code->ApplySettings();
 }
 
 // static
 void ScriptWidget::SetDefaultSettings(const Settings& settings)
 {
     mSettings = settings;
+    for (auto* widget : all_script_widgets)
+    {
+        widget->mUI.code->SetSettings(settings.editor_settings);
+        widget->mUI.code->ApplySettings();
+        widget->mLuaParser->SetCodeCompletionHeuristics(settings.use_code_heuristics);
+    }
 }
 // static
 void ScriptWidget::GetDefaultSettings(Settings* settings)
