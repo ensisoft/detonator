@@ -58,7 +58,15 @@ namespace app
     std::size_t GetNumLuaMethodDocs();
     const LuaMemberDoc& GetLuaMethodDoc(size_t index);
 
-    QString FormatArgHelp(const LuaMemberDoc& doc);
+    enum class LuaHelpStyle {
+        FunctionCallFormat, DescriptionFormat
+    };
+    enum class LuaHelpFormat {
+        PlainText // HTML not implemented yet.
+    };
+
+    QString FormatArgHelp(const LuaMemberDoc& doc, LuaHelpStyle style, LuaHelpFormat format);
+    QString FormatHelp(const LuaMemberDoc& doc, LuaHelpFormat format);
     QString FormatArgCompletion(const LuaMemberDoc& doc);
     QString ParseLuaDocTypeString(const QString& str);
     QString FindLuaDocTableMatch(const QString& word);
@@ -86,8 +94,16 @@ namespace app
 
         void SetMode(Mode mode)
         { mMode = mode; }
+
+        void ClearDynamicCompletions()
+        { mDynamicCompletions.clear(); }
+        void SetDynamicCompletions(const std::vector<LuaMemberDoc>& data)
+        { mDynamicCompletions = data; }
+        void SetDynamicCompletions(std::vector<LuaMemberDoc>&& data)
+        { mDynamicCompletions = std::move(data); }
     private:
         Mode mMode = Mode::HelpView;
+        std::vector<LuaMemberDoc> mDynamicCompletions;
     };
 
     class LuaDocModelProxy : public QSortFilterProxyModel

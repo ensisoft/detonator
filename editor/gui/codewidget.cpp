@@ -43,9 +43,9 @@ CodeCompleter::CodeCompleter(QWidget* parent)
     mUI.lineEdit->installEventFilter(this);
 }
 
-void CodeCompleter::Open(const QRect& rect)
+void CodeCompleter::Open(const QPoint& point)
 {
-    setGeometry(rect);
+    move(point);
     show();
     mUI.lineEdit->setFocus();
 
@@ -55,6 +55,7 @@ void CodeCompleter::Open(const QRect& rect)
 
     mOpen = true;
 }
+
 bool CodeCompleter::IsOpen() const
 {
     return mOpen;
@@ -78,6 +79,8 @@ void CodeCompleter::SetCompleter(app::CodeCompleter* completer)
     if (mCompleter)
     {
         mUI.tableView->setModel(completer->GetCompletionModel());
+        mUI.tableView->setColumnWidth(0, 150);
+        mUI.tableView->setColumnWidth(1, 220);
         Connect(mUI.tableView, this, &CodeCompleter::TableSelectionChanged);
     }
 
@@ -348,13 +351,9 @@ void TextEditor::keyPressEvent(QKeyEvent* event)
     {
         if (mCompleter->StartCompletion(event, *mDocument, textCursor()))
         {
-            const QRect rect = cursorRect();
-            QRect popup;
-            popup.setWidth(500);
-            popup.setHeight(300);
-            popup.moveTo(mapToGlobal(rect.bottomRight()));
-            popup.translate(rect.width(), 10.0);
-            mCompleterUI->Open(popup);
+            const auto& rect  = cursorRect();
+            const auto& point = mapToGlobal(rect.bottomRight());
+            mCompleterUI->Open(point);
 
             // propagate to the parent class so the character gets inserted
             // into the text.
@@ -519,6 +518,7 @@ void TextEditor::ApplySettings()
     {
         mHighlighter->RemoveHighlight(*mDocument);
     }
+
     if (mSettings.show_line_numbers && !mLineNumberArea)
     {
         mLineNumberArea = new LineNumberArea(this);
