@@ -495,6 +495,7 @@ void TextEditor::ApplySettings()
     if (mSettings.show_line_numbers && !mLineNumberArea)
     {
         mLineNumberArea = new LineNumberArea(this);
+        mLineNumberArea->show();
         UpdateLineNumberAreaWidth(0);
     }
     else if (!mSettings.show_line_numbers && mLineNumberArea)

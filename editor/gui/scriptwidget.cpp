@@ -514,7 +514,7 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
             &ScriptWidget::TableSelectionChanged);
     connect(&mWatcher, &QFileSystemWatcher::fileChanged, this, &ScriptWidget::FileWasChanged);
 
-    QTimer::singleShot(10, this, &ScriptWidget::SetInitialFocus);
+    QTimer::singleShot(0, this, &ScriptWidget::SetInitialFocus);
 }
 
 ScriptWidget::ScriptWidget(app::Workspace* workspace, const app::Resource& resource) : ScriptWidget(workspace)
@@ -716,7 +716,6 @@ bool ScriptWidget::LoadState(const gui::Settings& settings)
     if (settings.GetValue("Script", "format_on_save", &format_on_save))
         SetValue(mUI.chkFormatOnSave, format_on_save);
 
-    mUI.code->ApplySettings();
     mLuaParser->SetScriptId(app::ToUtf8(mResourceID));
 
     if (mFilename.isEmpty())
