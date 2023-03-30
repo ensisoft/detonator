@@ -36,12 +36,10 @@ namespace gui
 {
 
 DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings,
-    TextEditor::Settings& editor,
     ScriptWidget::Settings& script,
     MainWidget::UISettings& widget)
     : QDialog(parent)
     , mSettings(settings)
-    , mEditorSettings(editor)
     , mScriptSettings(script)
     , mWidgetSettings(widget)
 {
@@ -86,17 +84,18 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings,
     SetUIValue(mUI.chkShowViewport,             widget.show_viewport);
     SetUIValue(mUI.chkSnapToGrid,               widget.snap_to_grid);
     // Lua script editor settings
+    SetUIValue(mUI.editorTheme,                 script.theme);
     SetUIValue(mUI.edtLuaFormatterExec,         script.lua_formatter_exec);
     SetUIValue(mUI.edtLuaFormatterArgs,         script.lua_formatter_args);
     SetUIValue(mUI.editorFormatOnSave,          script.lua_format_on_save);
-    // text editor settings.
-    SetUIValue(mUI.editorTheme,                 editor.theme);
-    SetUIValue(mUI.editorShowLineNumbers,       editor.show_line_numbers);
-    SetUIValue(mUI.editorHightlightCurrentLine, editor.highlight_current_line);
-    SetUIValue(mUI.editorHightlightSyntax,      editor.highlight_syntax);
-    SetUIValue(mUI.editorInsertSpaces,          editor.replace_tabs_with_spaces);
-    SetUIValue(mUI.editorFontSize,              editor.font_size);
-    SetUIValue(mUI.editorFontName,              editor.font_description);
+    SetUIValue(mUI.chkUseCodeHeuristics,        script.use_code_heuristics);
+    SetUIValue(mUI.chkUseCodeCompletion,        script.editor_settings.use_code_completer);
+    SetUIValue(mUI.editorShowLineNumbers,       script.editor_settings.show_line_numbers);
+    SetUIValue(mUI.editorHightlightCurrentLine, script.editor_settings.highlight_current_line);
+    SetUIValue(mUI.editorHightlightSyntax,      script.editor_settings.highlight_syntax);
+    SetUIValue(mUI.editorInsertSpaces,          script.editor_settings.replace_tabs_with_spaces);
+    SetUIValue(mUI.editorFontSize,              script.editor_settings.font_size);
+    SetUIValue(mUI.editorFontName,              script.editor_settings.font_description);
 }
 
 void DlgSettings::on_btnAccept_clicked()
@@ -134,17 +133,18 @@ void DlgSettings::on_btnAccept_clicked()
     GetUIValue(mUI.chkShowViewport,             &mWidgetSettings.show_viewport);
     GetUIValue(mUI.chkSnapToGrid,               &mWidgetSettings.snap_to_grid);
     // lua script editor settings
+    GetUIValue(mUI.editorTheme,                 &mScriptSettings.theme);
     GetUIValue(mUI.edtLuaFormatterExec,         &mScriptSettings.lua_formatter_exec);
     GetUIValue(mUI.edtLuaFormatterArgs,         &mScriptSettings.lua_formatter_args);
     GetUIValue(mUI.editorFormatOnSave,          &mScriptSettings.lua_format_on_save);
-    // text editor settings.
-    GetUIValue(mUI.editorTheme,                 &mEditorSettings.theme);
-    GetUIValue(mUI.editorShowLineNumbers,       &mEditorSettings.show_line_numbers);
-    GetUIValue(mUI.editorHightlightCurrentLine, &mEditorSettings.highlight_current_line);
-    GetUIValue(mUI.editorHightlightSyntax,      &mEditorSettings.highlight_syntax);
-    GetUIValue(mUI.editorInsertSpaces,          &mEditorSettings.replace_tabs_with_spaces);
-    GetUIValue(mUI.editorFontSize,              &mEditorSettings.font_size);
-    GetUIValue(mUI.editorFontName,              &mEditorSettings.font_description);
+    GetUIValue(mUI.chkUseCodeHeuristics,        &mScriptSettings.use_code_heuristics);
+    GetUIValue(mUI.chkUseCodeCompletion,        &mScriptSettings.editor_settings.use_code_completer);
+    GetUIValue(mUI.editorShowLineNumbers,       &mScriptSettings.editor_settings.show_line_numbers);
+    GetUIValue(mUI.editorHightlightCurrentLine, &mScriptSettings.editor_settings.highlight_current_line);
+    GetUIValue(mUI.editorHightlightSyntax,      &mScriptSettings.editor_settings.highlight_syntax);
+    GetUIValue(mUI.editorInsertSpaces,          &mScriptSettings.editor_settings.replace_tabs_with_spaces);
+    GetUIValue(mUI.editorFontSize,              &mScriptSettings.editor_settings.font_size);
+    GetUIValue(mUI.editorFontName,              &mScriptSettings.editor_settings.font_description);
 
     accept();
 }

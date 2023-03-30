@@ -1097,6 +1097,28 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="chkUseCodeCompletion">
+         <property name="title">
+          <string>Use code completion</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QCheckBox" name="chkUseCodeHeuristics">
+            <property name="text">
+             <string>Use heuristics to suggest completions</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -1208,8 +1230,11 @@
   <tabstop>editorShowLineNumbers</tabstop>
   <tabstop>editorInsertSpaces</tabstop>
   <tabstop>editorFormatOnSave</tabstop>
+  <tabstop>chkUseCodeCompletion</tabstop>
+  <tabstop>chkUseCodeHeuristics</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
+  <tabstop>checkBox</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
