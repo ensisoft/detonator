@@ -28,6 +28,7 @@
 #include <set>
 
 #include "base/math.h"
+#include "base/hash.h"
 #include "editor/app/code-tools.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/codewidget.h"
@@ -510,6 +511,42 @@ QString TextEditor::GetCurrentWord() const
     QTextCursor tc = textCursor();
     tc.select(QTextCursor::WordUnderCursor);
     return tc.selectedText();
+}
+
+size_t TextEditor::GetCursorPositionHashIgnoreWS() const
+{
+    size_t hash = 0;
+
+    QTextCursor tc = textCursor();
+    const auto pos = tc.position();
+    for (int i=0; i<pos; ++i)
+    {
+        const auto& c = mDocument->characterAt(i);
+        if (c.isSpace())
+            continue;
+        hash = base::hash_combine(hash, c.digitValue());
+    }
+    return hash;
+}
+
+void TextEditor::SetCursorPositionFromHashIgnoreWS(size_t cursor_hash)
+{
+    size_t hash = 0;
+
+    const auto count = mDocument->characterCount();
+    for (int i=0; i<count; ++i)
+    {
+        const auto& c = mDocument->characterAt(i);
+        if (c.isSpace())
+            continue;
+        hash = base::hash_combine(hash, c.digitValue());
+        if (hash == cursor_hash)
+        {
+            QTextCursor tc = textCursor();
+            tc.setPosition(i+1);
+            setTextCursor(tc);
+        }
+    }
 }
 
 } // gui

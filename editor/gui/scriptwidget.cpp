@@ -785,7 +785,7 @@ void ScriptWidget::on_actionSave_triggered()
         file.open(QIODevice::WriteOnly);
         if (!file.isOpen())
         {
-            ERROR("Failed to open '%1' for writing. (%2)", filename, file.error());
+            ERROR("Failed to open file for writing. [file='%1', error=%2]", filename, file.error());
             QMessageBox msg(this);
             msg.setText(tr("There was an error saving the file.\n%1").arg(file.errorString()));
             msg.setIcon(QMessageBox::Critical);
@@ -805,9 +805,8 @@ void ScriptWidget::on_actionSave_triggered()
     if ((format_on_save == Qt::PartiallyChecked && mSettings.lua_format_on_save) ||
          format_on_save == Qt::Checked)
     {
-        QTextCursor cursor = mUI.code->textCursor();
-        auto cursor_position = cursor.position();
-        auto scroll_position = mUI.code->verticalScrollBar()->value();
+        const auto scroll_position = mUI.code->verticalScrollBar()->value();
+        const auto cursor_position = mUI.code->GetCursorPositionHashIgnoreWS();
 
         QSignalBlocker blocker(&mWatcher);
         QString exec = mSettings.lua_formatter_exec;
@@ -824,9 +823,10 @@ void ScriptWidget::on_actionSave_triggered()
 
         QStringList stdout_buffer;
         QStringList stderr_buffer;
-        if (!app::Process::RunAndCapture(exec, "", arg_list, &stdout_buffer, &stderr_buffer))
+        app::Process::Error error;
+        if (!app::Process::RunAndCapture(exec, "", arg_list, &stdout_buffer, &stderr_buffer, &error))
         {
-            ERROR("Failed to run Lua code formatter.");
+            ERROR("Failed to run Lua code formatter. [error=%1]", error);
         }
         else
         {
@@ -846,11 +846,8 @@ void ScriptWidget::on_actionSave_triggered()
                 mUI.formatter->setVisible(false);
             }
             LoadDocument(mFilename);
-            cursor = mUI.code->textCursor();
-            cursor.setPosition(cursor_position);
-            mUI.code->setTextCursor(cursor);
             mUI.code->verticalScrollBar()->setValue(scroll_position);
-            //mUI.code->ensureCursorVisible();
+            mUI.code->SetCursorPositionFromHashIgnoreWS(cursor_position);
         }
     }
     mUI.code->Reparse();

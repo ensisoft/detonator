@@ -204,7 +204,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="editorFontSize"/>
+           <widget class="QComboBox" name="editorFontSize">
+            <property name="placeholderText">
+             <string>Default</string>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QToolButton" name="btnResetFont">
