@@ -217,9 +217,9 @@ public:
         if (role == Qt::DisplayRole)
         {
             switch (index.column()) {
-                case 0: return app::toString(var.GetType());
-                case 1: return app::FromUtf8(var.GetName());
-                case 2: return GetScriptVarData(var);
+                //case 0: return app::toString(var.GetType());
+                case 0: return app::FromUtf8(var.GetName());
+                case 1: return GetScriptVarData(var);
                 default: BUG("Unknown script variable data index.");
             }
         }
@@ -230,9 +230,9 @@ public:
         if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
         {
             switch (section) {
-                case 0: return "Type";
-                case 1: return "Name";
-                case 2: return "Value";
+                //case 0: return "Type";
+                case 0: return "Name";
+                case 1: return "Value";
                 default: BUG("Unknown script variable data index.");
             }
         }
@@ -244,7 +244,8 @@ public:
     }
     virtual int columnCount(const QModelIndex&) const override
     {
-        return 3;
+        return 2;
+        //return 3;
     }
     void AddVariable(game::ScriptVar&& var)
     {
@@ -294,12 +295,12 @@ private:
             case game::ScriptVar::Type::Vec2: {
                 if (!var.IsArray()) {
                     const auto& val = var.GetValue<glm::vec2>();
-                    return QString("%1,%2")
+                    return QString("[%1,%2]")
                             .arg(QString::number(val.x, 'f', 2))
                             .arg(QString::number(val.y, 'f', 2));
                 } else {
                     const auto& val = var.GetArray<glm::vec2>()[0];
-                    return QString("[0]=%1,%2 ...")
+                    return QString("[0]=[%1,%2] ...")
                             .arg(QString::number(val.x, 'f', 2))
                             .arg(QString::number(val.y, 'f', 2));
                 }
@@ -533,12 +534,6 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     SetValue(mUI.zoom, 1.0f);
     SetValue(mUI.ID, mState.scene->GetId());
     SetValue(mUI.name, mState.scene->GetName());
-
-    // Using context menu for now but leaving these buttons
-    // around in case they make a come back later....
-    SetVisible(mUI.btnNewScriptVar,    false);
-    SetVisible(mUI.btnEditScriptVar,   false);
-    SetVisible(mUI.btnDeleteScriptVar, false);
 
     RebuildMenus();
     RebuildCombos();
