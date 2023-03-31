@@ -510,6 +510,10 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     GetUserProperty(resource, "camera_scale_x", mUI.scaleX);
     GetUserProperty(resource, "camera_scale_y", mUI.scaleY);
     GetUserProperty(resource, "camera_rotation", mUI.rotation);
+    GetUserProperty(resource, "callbacks_group", mUI.callbacks);
+    GetUserProperty(resource, "variables_group", mUI.variables);
+    GetUserProperty(resource, "animations_group", mUI.animations);
+    GetUserProperty(resource, "joints_group", mUI.joints);
     mCameraWasLoaded = GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
                        GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
 
@@ -1161,6 +1165,10 @@ void EntityWidget::on_actionSave_triggered()
     SetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     SetUserProperty(resource, "widget", mUI.widget);
     SetUserProperty(resource, "show_viewport", mUI.chkShowViewport);
+    SetUserProperty(resource, "callbacks_group", mUI.callbacks);
+    SetUserProperty(resource, "variables_group", mUI.variables);
+    SetUserProperty(resource, "animations_group", mUI.animations);
+    SetUserProperty(resource, "joints_group", mUI.joints);
 
     // save the track properties.
     for (const auto& p : mTrackProperties)
