@@ -1105,6 +1105,7 @@ void EntityWidget::SaveAnimationTrack(const game::AnimationClass& track, const Q
         other = track;
         INFO("Saved animation track '%1'", track.GetName());
         NOTE("Saved animation track '%1'", track.GetName());
+        DisplayEntityProperties();
         return;
     }
     // add a copy
