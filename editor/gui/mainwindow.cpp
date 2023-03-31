@@ -209,14 +209,6 @@ MainWindow::MainWindow(QApplication& app) : mApplication(app)
 MainWindow::~MainWindow()
 {}
 
-void MainWindow::closeWidget(MainWidget* widget)
-{
-    const auto index = mUI.mainTab->indexOf(widget);
-    if (index == -1)
-        return;
-    mUI.mainTab->removeTab(index);
-}
-
 void MainWindow::LoadSettings()
 {
 #if defined(POSIX_OS)
@@ -393,14 +385,6 @@ void MainWindow::LoadLastWorkspace()
                        "See the application log for more details.").arg(workspace));
         msg.exec();
     }
-}
-
-void MainWindow::focusWidget(const MainWidget* widget)
-{
-    const auto index = mUI.mainTab->indexOf(const_cast<MainWidget*>(widget));
-    if (index == -1)
-        return;
-    mUI.mainTab->setCurrentIndex(index);
 }
 
 void MainWindow::UpdateWindowMenu()
@@ -741,7 +725,7 @@ void MainWindow::CloseWorkspace()
     // delete widget objects in the main tab.
     while (mUI.mainTab->count())
     {
-        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(0));
+        auto* widget = qobject_cast<MainWidget*>(mUI.mainTab->widget(0));
         widget->Shutdown();
         //               !!!!! WARNING !!!!!
         // setParent(nullptr) will cause an OpenGL memory leak
@@ -819,6 +803,8 @@ void MainWindow::CloseWorkspace()
     gfx::SetResourceLoader(nullptr);
 
     ShowHelpWidget();
+
+    mFocusStack = FocusStack();
 }
 
 void MainWindow::showWindow()
@@ -931,6 +917,7 @@ void MainWindow::on_mainTab_currentChanged(int index)
     {
         mCurrentWidget->Deactivate();
         mUI.statusBarFrame->setVisible(false);
+        mFocusStack.push(mCurrentWidget->GetId());
     }
 
     mCurrentWidget = nullptr;
@@ -969,6 +956,7 @@ void MainWindow::on_mainTab_currentChanged(int index)
         mUI.menuEdit->setEnabled(false);
         mUI.actionZoomIn->setEnabled(false);
         mUI.actionZoomOut->setEnabled(false);
+        mFocusStack = FocusStack();
     }
     UpdateWindowMenu();
     ShowHelpWidget();
@@ -976,7 +964,7 @@ void MainWindow::on_mainTab_currentChanged(int index)
 
 void MainWindow::on_mainTab_tabCloseRequested(int index)
 {
-    auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(index));
+    auto* widget = qobject_cast<MainWidget*>(mUI.mainTab->widget(index));
     if (widget->HasUnsavedChanges())
     {
         QMessageBox msg(this);
@@ -1008,6 +996,7 @@ void MainWindow::on_mainTab_tabCloseRequested(int index)
 
     // rebuild window menu.
     UpdateWindowMenu();
+    FocusPreviousTab();
 
     QTimer::singleShot(1000, this, &MainWindow::CleanGarbage);
 }
@@ -2459,11 +2448,11 @@ void MainWindow::RefreshUI()
         }
     }
 
-    // refresh the UI state, and update the tab widget icon/text
-    // if needed.
+    bool did_close_tab = false;
+    // refresh the UI state, and update the tab widget icon/text if needed.
     for (int i=0; i<GetCount(mUI.mainTab);)
     {
-        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
+        auto* widget = qobject_cast<MainWidget*>(mUI.mainTab->widget(i));
         widget->Refresh();
         const auto& icon = widget->windowIcon();
         const auto& text = widget->windowTitle();
@@ -2484,12 +2473,15 @@ void MainWindow::RefreshUI()
             //
             delete widget;
             QTimer::singleShot(1000, this, &MainWindow::CleanGarbage);
+            did_close_tab = true;
         }
         else
         {
             ++i;
         }
     }
+    if (did_close_tab)
+        FocusPreviousTab();
 
     // cull child windows that have been closed.
     // note that we do it this way to avoid having problems with callbacks and recursions.
@@ -3211,7 +3203,7 @@ bool MainWindow::FocusWidget(const QString& id)
 {
     for (int i=0; i<GetCount(mUI.mainTab); ++i)
     {
-        const auto* widget = static_cast<const MainWidget*>(mUI.mainTab->widget(i));
+        const auto* widget = qobject_cast<const MainWidget*>(mUI.mainTab->widget(i));
         if (widget->GetId() == id)
         {
             mUI.mainTab->setCurrentIndex(i);
@@ -3268,6 +3260,26 @@ void MainWindow::UpdateStats()
     SetValue(mUI.statVBO, app::toString("%1/%2", app::Bytes{vbo_use}, app::Bytes{vbo_alloc}));
     SetValue(mUI.statFps, QString::number((int) stats.graphics.fps));
     SetValue(mUI.statVsync, mSettings.vsync  ? QString("ON") : QString("OFF"));
+}
+
+void MainWindow::FocusPreviousTab()
+{
+    // pop widget IDs off of the stack until we find a  widget that
+    // is still valid. I.e. haven't been closed or popped into a child window
+    while (!mFocusStack.empty())
+    {
+        const auto& widget_id = mFocusStack.top();
+        for (int i=0; i<GetCount(mUI.mainTab); ++i)
+        {
+            const auto* widget = qobject_cast<const MainWidget*>(mUI.mainTab->widget(i));
+            if (widget->GetId() == widget_id) {
+                mUI.mainTab->setCurrentIndex(i);
+                mFocusStack.pop();
+                return;
+            }
+        }
+        mFocusStack.pop();
+    }
 }
 
 } // namespace

@@ -29,6 +29,7 @@
 
 #include <vector>
 #include <memory>
+#include <stack>
 
 #include "editor/app/workspace.h"
 #include "editor/app/process.h"
@@ -56,14 +57,6 @@ namespace gui
     public:
         MainWindow(QApplication& app);
        ~MainWindow();
-
-        // Close the widget object and delete it.
-        void closeWidget(MainWidget* widget);
-
-        // Move focus of the application to this widget if the widget
-        // is currently being shown. If the widget is not being shown
-        // then does nothing.
-        void focusWidget(const MainWidget* widget);
 
         // Load the main editor settings.
         void LoadSettings();
@@ -209,6 +202,7 @@ namespace gui
         void ShowHelpWidget();
         void ImportFiles(const QStringList& files);
         void UpdateStats();
+        void FocusPreviousTab();
         ChildWindow* ShowWidget(MainWidget* widget, bool new_window);
         MainWidget* MakeWidget(app::Resource::Type type, const app::Resource* resource = nullptr);
 
@@ -228,7 +222,7 @@ namespace gui
         // current application settings that are not part of any
         // other state. Loaded on startup and saved on exit.
         AppSettings mSettings;
-        // currently focused (current) widget in the main tab.
+        // Current focused widget in the main tab.
         MainWidget* mCurrentWidget = nullptr;
         // Filtering proxy for workspace.
         app::WorkspaceProxy mWorkspaceProxy;
@@ -245,8 +239,7 @@ namespace gui
         bool mIsClosed = false;
         // total time measured in update steps frequency.
         double mTimeTotal = 0.0;
-        // The time accumulator for keeping track of partial
-        // updates.
+        // The time accumulator for keeping track of partial updates.
         double mTimeAccum = 0.0;
         // List of recently opened workspaces.
         QStringList mRecentWorkspaces;
@@ -263,10 +256,14 @@ namespace gui
         app::EventLogProxy mEventLog;
         // the application's main clipboard.
         Clipboard mClipboard;
-
+        // Default settings for the main widgets for visualization.
         MainWidget::UISettings mUISettings;
-
+        // Image packer non-modal dialog (if any)
         std::unique_ptr<DlgImgPack> mDlgImgPack;
+        using FocusStack = std::stack<QString>;
+        // Tab focus stack for moving to the previous widget
+        // when a widget is closed or popped off of the main panel
+        FocusStack mFocusStack;
     };
 
 } // namespace
