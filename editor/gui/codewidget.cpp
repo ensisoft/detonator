@@ -129,6 +129,18 @@ bool CodeCompleter::eventFilter(QObject* destination, QEvent* event)
     if (model->rowCount() == 0)
         return false;
 
+    if (key->key() == Qt::Key_Tab)
+    {
+        const auto& index = GetSelectedIndex(mUI.tableView);
+        if (index.isValid())
+        {
+            const auto& help = mCompleter->GetCompletionHelp(index);
+            SetValue(mUI.lineEdit, help.name);
+            mUI.lineEdit->setCursorPosition(help.name.size());
+        }
+        return true;
+    }
+
     int current = GetSelectedRow(mUI.tableView);
 
     const auto max = GetCount(mUI.tableView);

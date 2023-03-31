@@ -210,6 +210,7 @@ public:
             ret.args = app::FormatArgHelp(item, app::LuaHelpStyle::DescriptionFormat,
                                                 app::LuaHelpFormat::PlainText);
             ret.desc = app::FormatHelp(item, app::LuaHelpFormat::PlainText);
+            ret.name = item.name;
         }
         return ret;
     }
