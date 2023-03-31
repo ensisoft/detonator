@@ -95,7 +95,6 @@ public:
             if (word[size-1].isDigit() && !word.contains(QRegExp("[a-z]")) && !word.contains(QRegExp("[A-Z]")))
                 return false;
 
-            mParser.Parse(document.toPlainText());
             if (const auto* block = mParser.FindBlock(cursor.position()))
             {
                 if (block->type == app::LuaCodeBlockType::Comment ||
@@ -229,16 +228,9 @@ public:
             mHilight->SetLuaParser(&mParser);
         }
         ASSERT(mHilight->document() == &document);
-
-        // Parse the document
-        mParser.Parse(document.toPlainText());
-        // start highlighting
-        mHilight->rehighlight();
     }
     virtual void RemoveHighlight(QTextDocument& document) override
     {
-        ASSERT(mHilight);
-        ASSERT(mHilight->document() == &document);
         delete mHilight;
         mHilight = nullptr;
     }
@@ -247,6 +239,34 @@ public:
     { mScriptId = id; }
     void SetCodeCompletionHeuristics(bool on_off)
     { mUseCodeCompletionHeuristics = on_off; }
+
+    void CleanState()
+    {
+        mParser.ClearParseState();
+        mSource.clear();
+    }
+    void ParseSource(QTextDocument& document)
+    {
+        mSource = document.toPlainText();
+        mParser.ParseSource(mSource);
+        if (mHilight)
+            mHilight->rehighlight();
+    }
+    void EditSource(QTextDocument& document, uint32_t position, uint32_t chars_removed, uint32_t chars_added)
+    {
+        QString current = document.toPlainText();
+        app::LuaParser::Edit edit;
+        edit.position = position;
+        edit.characters_added = chars_added;
+        edit.characters_removed = chars_removed;
+        edit.new_source = &current;
+        edit.old_source = &mSource;
+        mParser.EditSource(edit);
+        mSource = current;
+        mParser.ParseSource(mSource);
+        if (mHilight)
+            mHilight->rehighlight();
+    }
 
 protected:
     class SyntaxHighlightImpl : public QSyntaxHighlighter {
@@ -471,6 +491,7 @@ private:
     app::Workspace* mWorkspace = nullptr;
     std::string mScriptId;
     bool mUseCodeCompletionHeuristics = true;
+    QString mSource;
 };
 
 ScriptWidget::ScriptWidget(app::Workspace* workspace)
@@ -495,7 +516,6 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     mUI.modified->setVisible(false);
     mUI.find->setVisible(false);
     mUI.code->SetDocument(&mDocument);
-    mUI.code->SetSyntaxHighlighter(mLuaParser.get());
     mUI.code->SetCompleter(mLuaParser.get());
     mUI.code->SetSettings(mSettings.editor_settings);
     mUI.tableView->setModel(&mLuaHelpFilter);
@@ -514,6 +534,7 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     connect(mUI.tableView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
             &ScriptWidget::TableSelectionChanged);
     connect(&mWatcher, &QFileSystemWatcher::fileChanged, this, &ScriptWidget::FileWasChanged);
+    connect(&mDocument, &QTextDocument::contentsChange, this, &ScriptWidget::DocumentEdited);
 
     QTimer::singleShot(0, this, &ScriptWidget::SetInitialFocus);
 }
@@ -562,8 +583,9 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace, const app::Resource& resou
 ScriptWidget::~ScriptWidget()
 {
     DEBUG("Destroy ScriptWidget");
+    mWatcher.disconnect(this);
+    mDocument.disconnect(this);
     mUI.code->SetCompleter(nullptr);
-    mUI.code->SetSyntaxHighlighter(nullptr);
     mLuaParser.reset();
     all_script_widgets.erase(this);
 }
@@ -850,7 +872,6 @@ void ScriptWidget::on_actionSave_triggered()
             mUI.code->SetCursorPositionFromHashIgnoreWS(cursor_position);
         }
     }
-    mUI.code->Reparse();
 
     // start watching this file if it wasn't being watched before.
     mWatcher.addPath(mFilename);
@@ -1259,10 +1280,15 @@ bool ScriptWidget::LoadDocument(const QString& file)
     stream.setCodec("UTF-8");
     const QString& data = stream.readAll();
 
+    QSignalBlocker s(mDocument);
+
     mDocument.setPlainText(data);
     mFileHash = qHash(data);
     mFilename = file;
-    mUI.code->Reparse();
+
+    mLuaParser->CleanState();
+    mLuaParser->ParseSource(mDocument);
+
     DEBUG("Loaded script file. [file='%1']", mFilename);
     return true;
 }
@@ -1300,6 +1326,24 @@ void ScriptWidget::SetInitialFocus()
     mUI.code->setTextCursor(cursor);
     mUI.code->setFocus();
     mUI.code->ApplySettings();
+    if (mSettings.editor_settings.highlight_syntax)
+        mLuaParser->ApplyHighlight(mDocument);
+}
+
+void ScriptWidget::DocumentEdited(int position, int chars_removed, int chars_added)
+{
+    //DEBUG("Document edited at %1, removed = %2, added = %3", position, chars_removed, chars_added);
+
+    // this happens when selecting and dragging text to some other location.
+    // don't know how to handle this properly yet. How can a single position
+    // be used for both removal and addition ???
+    if (chars_removed && chars_added)
+    {
+        mLuaParser->CleanState();
+        mLuaParser->ParseSource(mDocument);
+    }
+    else if (chars_removed || chars_added)
+        mLuaParser->EditSource(mDocument, (uint32_t)position, (uint32_t)chars_removed, (uint32_t)chars_added);
 }
 
 // static
@@ -1311,6 +1355,9 @@ void ScriptWidget::SetDefaultSettings(const Settings& settings)
         widget->mUI.code->SetSettings(settings.editor_settings);
         widget->mUI.code->ApplySettings();
         widget->mLuaParser->SetCodeCompletionHeuristics(settings.use_code_heuristics);
+        if (settings.editor_settings.highlight_syntax)
+            widget->mLuaParser->ApplyHighlight(widget->mDocument);
+        else widget->mLuaParser->RemoveHighlight(widget->mDocument);
     }
 }
 // static
