@@ -37,6 +37,7 @@ namespace app
         struct ApiHelp {
             QString desc;
             QString args;
+            QString name;
         };
 
         virtual ~CodeCompleter() = default;
