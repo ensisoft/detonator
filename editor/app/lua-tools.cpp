@@ -32,6 +32,51 @@
 #include "editor/app/lua-tools.h"
 
 extern "C" TSLanguage* tree_sitter_lua();
+
+TSPoint  operator + (const TSPoint& lhs, const TSPoint& rhs)
+{
+    TSPoint ret;
+    ret.column = lhs.column + rhs.column;
+    ret.row    = lhs.row + rhs.row;
+    return ret;
+}
+
+namespace {
+TSPoint PointFromOffset(const QByteArray& buffer, uint32_t start_offset, uint32_t end_offset)
+{
+    ASSERT(start_offset <= end_offset);
+    ASSERT(end_offset <= buffer.size());
+
+    TSPoint start_position = {0, 0};
+    for (uint32_t i=start_offset; i<end_offset; ++i)
+    {
+       if (buffer[i] == '\n') {
+           start_position.row++;
+           start_position.column = 0;
+        } else {
+           start_position.column++;
+       }
+    }
+    return start_position;
+}
+
+bool EqualContent(const QByteArray& a, const QByteArray& b, uint32_t start_offset, uint32_t end_offset)
+{
+    if (start_offset + end_offset > a.size())
+        return false;
+    if (start_offset + end_offset > b.size())
+        return false;
+
+    for (uint32_t i=start_offset; i<end_offset; ++i)
+    {
+        if (a[i] != b[i])
+            return false;
+    }
+    return true;
+}
+
+} // namespace
+
 namespace app {
 
 void LuaTheme::SetTheme(Theme theme)
@@ -66,12 +111,18 @@ const QColor* LuaTheme::GetColor(Key key) const noexcept
     return base::SafeFind(mTable, key);
 }
 
+LuaParser::LuaParser()
+{
+    mParser = ts_parser_new();
+    ts_parser_set_language(mParser, tree_sitter_lua());
+}
+
 LuaParser::~LuaParser()
 {
-    if (mQuery)
-        ts_query_delete(mQuery);
     if (mTree)
         ts_tree_delete(mTree);
+    if (mQuery)
+        ts_query_delete(mQuery);
     if (mParser)
         ts_parser_delete(mParser);
 }
@@ -79,17 +130,17 @@ LuaParser::~LuaParser()
 const LuaParser::CodeBlock* LuaParser::FindBlock(uint32_t position) const noexcept
 {
     // find first highlight with starting position equal or greater than position
-    auto it = std::lower_bound(mHighlights.begin(), mHighlights.end(), position,
+    auto it = std::lower_bound(mBlocks.begin(), mBlocks.end(), position,
         [](const auto& block, uint32_t position) {
             return block.start < position;
         });
-    if (it == mHighlights.end())
+    if (it == mBlocks.end())
         return nullptr;
 
     if (it->start == position)
         return &(*it);
 
-    while (it != mHighlights.begin())
+    while (it != mBlocks.begin())
     {
         const auto& hilight = *it;
         if (position >= hilight.start && position <= hilight.start + hilight.length)
@@ -103,7 +154,7 @@ LuaParser::BlockList LuaParser::FindBlocks(uint32_t position, uint32_t text_leng
 {
     // find first code block with start position greater than or equal to the
     // text position.
-    auto it = std::lower_bound(mHighlights.begin(), mHighlights.end(), position,
+    auto it = std::lower_bound(mBlocks.begin(), mBlocks.end(), position,
         [](const auto& block, uint32_t start) {
            return block.start < start;
         });
@@ -111,7 +162,7 @@ LuaParser::BlockList LuaParser::FindBlocks(uint32_t position, uint32_t text_leng
     BlockList  ret;
 
     // fetch blocks until block is beyond the current text range.
-    for (; it != mHighlights.end(); ++it)
+    for (; it != mBlocks.end(); ++it)
     {
         const auto& highlight = *it;
         const auto start  = highlight.start;
@@ -124,16 +175,102 @@ LuaParser::BlockList LuaParser::FindBlocks(uint32_t position, uint32_t text_leng
     return ret;
 }
 
-bool LuaParser::Parse(const QString& str)
+void LuaParser::ClearParseState()
 {
-    TSLanguage* language = tree_sitter_lua();
-    if (!mParser)
-    {
-        mParser = ts_parser_new();
-        ts_parser_set_language(mParser, language);
-    }
+    mBlocks.clear();
+    if (mTree)
+        ts_tree_delete(mTree);
+
+    mTree = nullptr;
+}
+
+bool LuaParser::ParseSource(const QString& source)
+{
     ts_parser_reset(mParser);
 
+    struct BufferReader {
+        static const char* read(void* payload, uint32_t byte_index, TSPoint position, uint32_t* bytes_read)
+        {
+            auto* buffer = static_cast<QByteArray*>(payload);
+            *bytes_read = buffer->size() - byte_index;
+            return buffer->constData() + byte_index;
+        }
+    };
+
+    // The problem here is that he QString (and QDocument) is in Unicode (using whatever encoding)
+    // and it'd need to be parsed. Apparently someone was sniffing some farts before going on about
+    // inventing ts_parser_parse_string_encoding API with 'const char* string' being used for UTF16.
+    // What does that mean exactly? UTF16 should use a variable number of 16 bit code-units. Also,
+    // should the length then be Unicode characters, bytes or UTF16 sequences ?
+    // If we take the incoming string and convert into UTF8 everything sort of works except that
+    // all tree-sitter offsets will be wrong since they're now offsets into the UTF8 string buffer
+    // and those don't map to Unicode string properly anymore.
+    QByteArray buffer = source.toUtf8();
+
+    TSInput input;
+    input.encoding = TSInputEncodingUTF8;
+    input.payload  = &buffer;
+    input.read     = &BufferReader::read;
+    auto* tree = ts_parser_parse(mParser, mTree, input);
+    if (tree == nullptr)
+        return false;
+
+    ConsumeTree(tree);
+    FindBuiltins(source);
+
+    if (mTree)
+        ts_tree_delete(mTree);
+    mTree = tree;
+    return true;
+}
+
+void LuaParser::EditSource(const Edit& edit)
+{
+    // the source must have been parsed already.
+    ASSERT(mTree);
+
+    ASSERT((edit.characters_added != 0 && edit.characters_removed == 0) ||
+           (edit.characters_added == 0 && edit.characters_removed != 0));
+    ASSERT(edit.position <= edit.new_source->size());
+    ASSERT(edit.position <= edit.old_source->size());
+
+    const QByteArray& old_buffer = edit.old_source->toUtf8();
+    const QByteArray& new_buffer = edit.new_source->toUtf8();
+
+    // I.e. the invariant that must hold is that the sources must equal each other
+    // from the start until the point of edit. Going to remove this ASSERT for now
+    // since it's potentially O(N) scan on every change and the client is correct.
+    // use for development only.
+    //ASSERT(EqualContent(old_buffer, new_buffer, 0, edit.position));
+
+    // starting point of the edit in rows and columns
+    // if we computed the start point for also the new_buffer it should
+    // match the start_point for the old buffer completely.!
+    const TSPoint start_point = PointFromOffset(old_buffer, 0, edit.position);
+
+    // not a lot of information documentation-wise around for how to use the
+    // ts_tree_edit API, but I managed to find this old test code from around 2018
+    // https://github.com/tree-sitter/tree-sitter/blob/2169c45da99ac6c999c9b96ff470d0b5229e5248/test/helpers/spy_input.cc
+    // https://github.com/tree-sitter/tree-sitter/blob/2169c45da99ac6c999c9b96ff470d0b5229e5248/test/runtime/tree_test.cc
+    // This issue from around the same time links to these test files.
+    // https://github.com/tree-sitter/tree-sitter/issues/242
+
+    TSInputEdit ts_edit;
+    ts_edit.start_byte   = edit.position;
+    ts_edit.old_end_byte = edit.position + edit.characters_removed;
+    ts_edit.new_end_byte = edit.position + edit.characters_added;
+    ts_edit.start_point  = start_point;
+    // figure out old ending point in rows and columns. need to use the old copy of
+    // the buffer data here. since it seems that, there's no Qt way of getting the
+    // edited change from the underlying document
+    ts_edit.old_end_point = start_point + PointFromOffset(old_buffer, ts_edit.start_byte, ts_edit.old_end_byte);
+    ts_edit.new_end_point = start_point + PointFromOffset(new_buffer, ts_edit.start_byte, ts_edit.new_end_byte);
+
+    ts_tree_edit(mTree, &ts_edit);
+}
+
+void LuaParser::ConsumeTree(TSTree* ast)
+{
     // S expressions
 
     // a good place to try and see how/what type of S expressions to create
@@ -148,16 +285,6 @@ bool LuaParser::Parse(const QString& str)
     // '#any-of? @something' checks a capture for any of the following patterns.
     // '_' is a wildcard
     // ;; is a comment
-
-    static std::unordered_set<QString> builtin_functions = {
-        "assert", "collectgarbage", "dofile", "error", "getfenv", "getmetatable", "ipairs",
-        "load", "loadfile", "loadstring", "module", "next", "pairs", "pcall", "print",
-        "rawequal", "rawget", "rawlen", "rawset", "require", "select", "setfenv", "setmetatable",
-        "tonumber", "tostring", "type", "unpack", "xpcall",
-        "__add", "__band", "__bnot", "__bor", "__bxor", "__call", "__concat",  "__div", "__eq", "__gc",
-        "__idiv", "__index", "__le", "__len", "__lt", "__metatable", "__mod", "__mul", "__name", "__newindex",
-        "__pairs", "__pow", "__shl", "__shr", "__sub", "__tostring", "__unm"
-    };
 
     if (!mQuery)
     {
@@ -298,7 +425,7 @@ bool LuaParser::Parse(const QString& str)
 )foo";
         uint32_t error_offset;
         TSQueryError error_type;
-        mQuery = ts_query_new(language, q, strlen(q), &error_offset, &error_type);
+        mQuery = ts_query_new(tree_sitter_lua(), q, strlen(q), &error_offset, &error_type);
         // for debugging/unit tests
         //if (mQuery == nullptr)
         //{
@@ -308,34 +435,9 @@ bool LuaParser::Parse(const QString& str)
         ASSERT(mQuery);
     }
 
-    mHighlights.clear();
+    mBlocks.clear();
 
-
-    // The problem here is that he QString (and QDocument) is in Unicode (using whatever encoding)
-    // and it'd need to be parsed. Apparently someone was sniffing some farts before going on about
-    // inventing ts_parser_parse_string_encoding API with 'const char* string' being used for UTF16.
-    // What does that mean exactly? UTF16 should use a variable number of 16 bit code-units. Also,
-    // should the length then be Unicode characters, bytes or UTF16 sequences ?
-    // If we take the incoming string and convert into UTF8 everything sort of works except that
-    // all tree-sitter offsets will be wrong since they're now offsets into the UTF8 string buffer
-    // and those don't map to Unicode string properly anymore.
-
-    const auto& utf8 = str.toUtf8();
-    auto* tree = ts_parser_parse_string_encoding(mParser, nullptr, utf8, utf8.size(), TSInputEncodingUTF8);
-
-    /* for posterity
-    std::vector<unsigned short> utf16;
-    const auto* p = str.utf16();
-    while (*p) {
-        utf16.push_back(*p++);
-    }
-    auto* tree = ts_parser_parse_string_encoding(mParser, nullptr, (const char*)utf16.data(), utf16.size()*2, TSInputEncodingUTF16);
-     */
-
-    if (tree == nullptr)
-        return false;
-
-    TSNode root = ts_tree_root_node(tree);
+    TSNode root = ts_tree_root_node(ast);
     TSQueryCursor* cursor = ts_query_cursor_new();
     ts_query_cursor_exec(cursor, mQuery, root);
 
@@ -359,70 +461,62 @@ bool LuaParser::Parse(const QString& str)
         block.start  = start;
         block.length = length;
         if (pattern == 0 || pattern == 1 || pattern == 12)
-        {
             block.type = BlockType::Keyword;
-        }
         else if (pattern == 2)
-        {
             block.type = BlockType::Comment;
-        }
         else if (pattern == 3)
-        {
-            const auto name = str.mid((int)start, (int)length);
-            if (base::Contains(builtin_functions, name))
-                block.type = BlockType::BuiltIn;
-            else block.type = BlockType::FunctionCall;
-        }
-        else if (pattern == 4)
-        {
             block.type = BlockType::FunctionCall;
-        }
+        else if (pattern == 4)
+            block.type = BlockType::FunctionCall;
         else if (pattern == 5)
-        {
             block.type = BlockType ::MethodCall;
-        }
         else if (pattern == 6)
-        {
             block.type = BlockType::Property;
-        }
         else if (pattern == 7)
-        {
             block.type = BlockType::FunctionBody;
-        }
         else if (pattern == 8)
-        {
             block.type = BlockType::Literal;
-        }
         else if (pattern == 9)
-        {
             block.type = BlockType::Punctuation;
-        }
         else if (pattern == 10)
-        {
             block.type = BlockType::Bracket;
-        }
         else if (pattern == 11)
-        {
             block.type = BlockType::Operator;
-        }
+        else BUG("Missing capture branch.");
 
         // lower bound returns an iterator pointing to a first value in the range
         // such that the contained value is equal or greater than searched value
         // or end() when no such value is found.
-        auto it = std::lower_bound(mHighlights.begin(), mHighlights.end(), start,
+        auto it = std::lower_bound(mBlocks.begin(), mBlocks.end(), start,
              [](const CodeBlock& other, uint32_t start) {
                  return other.start < start;
         });
-        mHighlights.insert(it, block);
+        mBlocks.insert(it, block);
     }
 
     ts_query_cursor_delete(cursor);
+    //ts_tree_delete(ast);
+}
 
-    if (mTree)
-        ts_tree_delete(mTree);
-    mTree = tree;
-
-    return true;
+void LuaParser::FindBuiltins(const QString& source)
+{
+    static std::unordered_set<QString> builtin_functions = {
+        "assert", "collectgarbage", "dofile", "error", "getfenv", "getmetatable", "ipairs",
+        "load", "loadfile", "loadstring", "module", "next", "pairs", "pcall", "print",
+        "rawequal", "rawget", "rawlen", "rawset", "require", "select", "setfenv", "setmetatable",
+        "tonumber", "tostring", "type", "unpack", "xpcall",
+        "__add", "__band", "__bnot", "__bor", "__bxor", "__call", "__concat",  "__div", "__eq", "__gc",
+        "__idiv", "__index", "__le", "__len", "__lt", "__metatable", "__mod", "__mul", "__name", "__newindex",
+        "__pairs", "__pow", "__shl", "__shr", "__sub", "__tostring", "__unm"
+    };
+    for (auto& block : mBlocks)
+    {
+        if (block.type != BlockType::FunctionCall)
+            continue;
+        const auto& name = source.mid((int)block.start, (int)block.length);
+        if (base::Contains(builtin_functions, name))
+            block.type = BlockType::BuiltIn;
+    }
 }
 
 } // namespace

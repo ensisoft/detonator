@@ -76,10 +76,22 @@ namespace app
         };
 
         LuaParser(const LuaParser&) = delete;
-        LuaParser() = default;
+        LuaParser();
        ~LuaParser();
 
-        bool Parse(const QString& str);
+        void ClearParseState();
+
+        bool ParseSource(const QString& source);
+
+        struct Edit {
+            QString* old_source = nullptr;
+            QString* new_source = nullptr;
+            uint32_t position   = 0;
+            uint32_t characters_added = 0;
+            uint32_t characters_removed = 0;
+        };
+
+        void EditSource(const Edit& edit);
 
         const CodeBlock* FindBlock(uint32_t text_position) const noexcept;
 
@@ -88,18 +100,20 @@ namespace app
         BlockList FindBlocks(uint32_t text_position, uint32_t text_length) const noexcept;
 
         size_t GetNumBlocks() const
-        { return mHighlights.size(); }
+        { return mBlocks.size(); }
         const CodeBlock& GetBlock(size_t index) const
-        { return mHighlights[index]; }
+        { return mBlocks[index]; }
 
         LuaParser& operator=(const LuaParser&) = delete;
-
     private:
-        std::vector<CodeBlock> mHighlights;
+        void ConsumeTree(TSTree* ast);
+        void FindBuiltins(const QString& source);
     private:
-        TSTree* mTree = nullptr;
+        std::vector<CodeBlock> mBlocks;
+    private:
         TSParser* mParser = nullptr;
         TSQuery* mQuery = nullptr;
+        TSTree* mTree = nullptr;
     };
 
 } // namespace

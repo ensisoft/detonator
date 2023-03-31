@@ -193,14 +193,6 @@ private:
     TextEditor* mCodeWidget = nullptr;
 };
 
-void TextEditor::Reparse()
-{
-    if (mHighlighter)
-    {
-        mHighlighter->ApplyHighlight(*mDocument);
-    }
-}
-
 bool TextEditor::CancelCompletion()
 {
     if (mCompleterUI->IsOpen())
@@ -243,10 +235,6 @@ void TextEditor::SetCompleter(app::CodeCompleter* completer)
 {
     mCompleter = completer;
     mCompleterUI->SetCompleter(completer);
-}
-void TextEditor::SetSyntaxHighlighter(app::CodeHighlighter* highlighter)
-{
-    mHighlighter = highlighter;
 }
 
 int TextEditor::ComputeLineNumberAreaWidth() const
@@ -422,13 +410,7 @@ void TextEditor::keyPressEvent(QKeyEvent* event)
         setTextCursor(cursor);
 
     }
-    else
-    {
-        if (mHighlighter && mSettings.highlight_syntax && (key == Qt::Key_Return))
-            mHighlighter->ApplyHighlight(*mDocument);
-
-        QPlainTextEdit::keyPressEvent(event);
-    }
+    else QPlainTextEdit::keyPressEvent(event);
 }
 
 void TextEditor::HighlightCurrentLine()
@@ -494,15 +476,6 @@ void TextEditor::ApplySettings()
         DEBUG("Apply text editor font setting. [font='%1', size=%2]", font_name, font_size);
     }
     else WARN("Text editor font description is invalid. [font='%1']", font_name);
-
-    if (mSettings.highlight_syntax && mHighlighter)
-    {
-        mHighlighter->ApplyHighlight(*mDocument);
-    }
-    else if (!mSettings.highlight_syntax && mHighlighter)
-    {
-        mHighlighter->RemoveHighlight(*mDocument);
-    }
 
     if (mSettings.show_line_numbers && !mLineNumberArea)
     {

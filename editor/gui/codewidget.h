@@ -98,7 +98,6 @@ namespace gui
 
         void SetDocument(QTextDocument* document);
         void SetCompleter(app::CodeCompleter* completer);
-        void SetSyntaxHighlighter(app::CodeHighlighter* highlighter);
 
         void PaintLineNumbers(const QRect& rect);
 
@@ -114,7 +113,6 @@ namespace gui
         { mFontSize = size; }
         void ResetFontSize()
         { mFontSize.reset(); }
-        void Reparse();
 
         void ApplySettings();
 
@@ -146,7 +144,6 @@ namespace gui
         Settings mSettings;
         std::unique_ptr<CodeCompleter> mCompleterUI;
         app::CodeCompleter* mCompleter = nullptr;
-        app::CodeHighlighter* mHighlighter = nullptr;
         QWidget* mLineNumberArea = nullptr;
         QTextDocument* mDocument = nullptr;
         QFont mFont;

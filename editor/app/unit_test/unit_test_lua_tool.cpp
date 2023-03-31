@@ -116,7 +116,7 @@ function SomeFunction()
    return 1234
 end
     )";
-    p.Parse(code);
+    p.ParseSource(code);
 
     for (unsigned i=0; i<p.GetNumBlocks(); ++i)
     {

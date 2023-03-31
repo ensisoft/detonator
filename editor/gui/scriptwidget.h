@@ -103,6 +103,7 @@ namespace gui
         void FileWasChanged();
         void TableSelectionChanged(const QItemSelection&, const QItemSelection&);
         void SetInitialFocus();
+        void DocumentEdited(int position, int chars_removed, int chars_added);
     private:
         virtual void keyPressEvent(QKeyEvent* key) override;
         virtual bool eventFilter(QObject* destination, QEvent* event) override;
