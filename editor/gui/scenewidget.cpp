@@ -575,9 +575,11 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "bottom_boundary", mUI.spinBottomBoundary);
     GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x);
     GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
-    GetUserProperty(resource, "scene_variables_group", mUI.sceneVariablesGroup);
-    GetUserProperty(resource, "scene_bounds_group", mUI.sceneBoundsGroup);
+    GetUserProperty(resource, "variables_group", mUI.sceneVariablesGroup);
+    GetUserProperty(resource, "bounds_group", mUI.sceneBoundsGroup);
     GetUserProperty(resource, "index_group", mUI.sceneIndexGroup);
+    GetUserProperty(resource, "effects_group", mUI.effectsGroup);
+    GetUserProperty(resource, "bloom_group", mUI.bloomGroup);
     GetUserProperty(resource, "bloom_threshold", &mBloom.threshold);
     GetUserProperty(resource, "bloom_red",       &mBloom.red);
     GetUserProperty(resource, "bloom_green",     &mBloom.green);
@@ -1209,9 +1211,11 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "right_boundary", mUI.spinRightBoundary);
     SetUserProperty(resource, "top_boundary", mUI.spinTopBoundary);
     SetUserProperty(resource, "bottom_boundary", mUI.spinBottomBoundary);
-    SetUserProperty(resource, "scene_variables_group", mUI.sceneVariablesGroup);
-    SetUserProperty(resource, "scene_bounds_group", mUI.sceneBoundsGroup);
+    SetUserProperty(resource, "variables_group", mUI.sceneVariablesGroup);
+    SetUserProperty(resource, "bounds_group", mUI.sceneBoundsGroup);
     SetUserProperty(resource, "index_group", mUI.sceneIndexGroup);
+    SetUserProperty(resource, "effects_group", mUI.effectsGroup);
+    SetUserProperty(resource, "bloom_group", mUI.bloomGroup);
     SetUserProperty(resource, "bloom_threshold", mBloom.threshold);
     SetUserProperty(resource, "bloom_red",       mBloom.red);
     SetUserProperty(resource, "bloom_green",     mBloom.green);
