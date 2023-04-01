@@ -499,6 +499,19 @@ QString TextEditor::GetCurrentWord() const
     return tc.selectedText();
 }
 
+unsigned TextEditor::GetCursorPosition() const
+{
+    QTextCursor tc = textCursor();
+    return static_cast<unsigned>(tc.position());
+}
+
+void TextEditor::SetCursorPosition(unsigned int position)
+{
+    QTextCursor tc = textCursor();
+    tc.setPosition(position);
+    setTextCursor(tc);
+}
+
 size_t TextEditor::GetCursorPositionHashIgnoreWS() const
 {
     size_t hash = 0;
