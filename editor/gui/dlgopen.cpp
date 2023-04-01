@@ -85,7 +85,7 @@ void DlgOpen::on_filter_textChanged(const QString& text)
     SelectRow(mUI.tableView, 0);
 }
 
-void DlgOpen::on_listWidget_itemDoubleClicked(QListWidgetItem*)
+void DlgOpen::on_tableView_doubleClicked(const QModelIndex&)
 {
     accept();
 }

@@ -42,7 +42,7 @@ namespace gui
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_filter_textChanged(const QString& text);
-        void on_listWidget_itemDoubleClicked(QListWidgetItem* item);
+        void on_tableView_doubleClicked(const QModelIndex& item);
     private:
         virtual bool eventFilter(QObject* destination, QEvent* event) override;
     private:
