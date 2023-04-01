@@ -554,9 +554,13 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace, const app::Resource& resou
     LoadDocument(mFilename);
 
     bool show_settings = true;
+    unsigned scroll_position = 0;
+    unsigned cursor_position = 0;
     GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
     GetUserProperty(resource, "help_splitter", mUI.helpSplitter);
     GetUserProperty(resource, "show_settings", &show_settings);
+    GetUserProperty(resource, "scroll_position", &scroll_position);
+    GetUserProperty(resource, "cursor_position", &cursor_position);
     SetVisible(mUI.settings, show_settings);
     SetEnabled(mUI.actionSettings, !show_settings);
 
@@ -579,6 +583,11 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace, const app::Resource& resou
     bool format_on_save = false;
     if (GetProperty(resource, "format_on_save", &format_on_save))
         SetValue(mUI.chkFormatOnSave, format_on_save);
+
+    QTimer::singleShot(10, [this, scroll_position, cursor_position]() {
+        mUI.code->SetCursorPosition(cursor_position);
+        mUI.code->verticalScrollBar()->setValue(scroll_position);
+    });
 }
 ScriptWidget::~ScriptWidget()
 {
@@ -681,6 +690,8 @@ bool ScriptWidget::SaveState(gui::Settings& settings) const
     settings.SetValue("Script", "resource_name", mResourceName);
     settings.SetValue("Script", "filename", mFilename);
     settings.SetValue("Script", "show_settings", mUI.settings->isVisible());
+    settings.SetValue("Script", "cursor_position", mUI.code->GetCursorPosition());
+    settings.SetValue("Script", "scroll_position", mUI.code->verticalScrollBar()->value());
     settings.SaveWidget("Script", mUI.findText);
     settings.SaveWidget("Script", mUI.replaceText);
     settings.SaveWidget("Script", mUI.findBackwards);
@@ -706,10 +717,14 @@ bool ScriptWidget::SaveState(gui::Settings& settings) const
 bool ScriptWidget::LoadState(const gui::Settings& settings)
 {
     bool show_settings = true;
+    unsigned cursor_position = 0;
+    unsigned scroll_position = 0;
     settings.GetValue("Script", "resource_id", &mResourceID);
     settings.GetValue("Script", "resource_name", &mResourceName);
     settings.GetValue("Script", "filename", &mFilename);
     settings.GetValue("Script", "show_settings", &show_settings);
+    settings.GetValue("Script", "cursor_position", &cursor_position);
+    settings.GetValue("Script", "scroll_position", &scroll_position);
     settings.LoadWidget("Script", mUI.findText);
     settings.LoadWidget("Script", mUI.replaceText);
     settings.LoadWidget("Script", mUI.findBackwards);
@@ -744,7 +759,15 @@ bool ScriptWidget::LoadState(const gui::Settings& settings)
     if (mFilename.isEmpty())
         return true;
     mWatcher.addPath(mFilename);
-    return LoadDocument(mFilename);
+
+    if (LoadDocument(mFilename))
+    {
+        QTimer::singleShot(10, [this, scroll_position, cursor_position]() {
+            mUI.code->SetCursorPosition(cursor_position);
+            mUI.code->verticalScrollBar()->setValue(scroll_position);
+        });
+    }
+    return true;
 }
 
 bool ScriptWidget::HasUnsavedChanges() const
@@ -891,6 +914,8 @@ void ScriptWidget::on_actionSave_triggered()
         SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
         SetUserProperty(resource, "help_splitter", mUI.helpSplitter);
         SetUserProperty(resource, "show_settings", mUI.settings->isVisible());
+        SetUserProperty(resource, "cursor_position", mUI.code->GetCursorPosition());
+        SetUserProperty(resource, "scroll_position", mUI.code->verticalScrollBar()->value());
 
         if (mUI.editorFontName->currentIndex() != -1)
             SetUserProperty(resource, "font_name", mUI.editorFontName->currentFont().toString());
@@ -912,6 +937,8 @@ void ScriptWidget::on_actionSave_triggered()
         SetUserProperty(*resource, "main_splitter", mUI.mainSplitter);
         SetUserProperty(*resource, "help_splitter", mUI.helpSplitter);
         SetUserProperty(*resource, "show_settings", mUI.settings->isVisible());
+        SetUserProperty(*resource, "cursor_position", mUI.code->GetCursorPosition());
+        SetUserProperty(*resource, "scroll_position", mUI.code->verticalScrollBar()->value());
 
         if (mUI.editorFontName->currentIndex() != -1)
             SetUserProperty(*resource, "font_name", mUI.editorFontName->currentFont().toString());

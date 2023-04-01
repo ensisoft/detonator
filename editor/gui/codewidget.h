@@ -120,6 +120,9 @@ namespace gui
 
         QString GetCurrentWord() const;
 
+        unsigned GetCursorPosition() const;
+
+        void SetCursorPosition(unsigned position);
 
         // find the cursor position in the document while ignoring
         // whitespace, (tabs, spaces, newline)
