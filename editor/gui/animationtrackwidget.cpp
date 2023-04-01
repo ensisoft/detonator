@@ -465,6 +465,7 @@ void AnimationTrackWidget::Update(double secs)
         return;
 
     mPlaybackAnimation->Update(secs);
+
     if (mPhysics.HaveWorld())
     {
         mPhysics.UpdateWorld(*mPlaybackAnimation);
@@ -473,36 +474,36 @@ void AnimationTrackWidget::Update(double secs)
     }
     mRenderer.Update(*mPlaybackAnimation, mCurrentTime, secs);
 
-    if (!mPlaybackAnimation->IsAnimating())
-    {
-        mPhysics.DeleteAll();
-        mPhysics.DestroyWorld();
-        mPlaybackAnimation.reset();
-        mUI.timeline->SetCurrentTime(0.0f);
-        mUI.timeline->Update();
-        mUI.timeline->SetFreezeItems(false);
-        mUI.actionPlay->setEnabled(true);
-        mUI.actionPause->setEnabled(false);
-        mUI.actionStop->setEnabled(false);
-        mUI.actionReset->setEnabled(true);
-        mUI.actuatorGroup->setEnabled(true);
-        mUI.baseGroup->setEnabled(true);
-        mPlayState = PlayState::Stopped;
-        ReturnToDefault();
-        SelectedItemChanged(mUI.timeline->GetSelectedItem());
-        NOTE("Animation finished.");
-        DEBUG("Animation finished.");
-    }
-    else
+    if (mPlaybackAnimation->IsAnimating())
     {
         const auto* track = mPlaybackAnimation->GetCurrentAnimation();
-        const auto time = track->GetCurrentTime();
-        if (time >= 0)
-        {
-            mUI.timeline->SetCurrentTime(time);
-            mUI.timeline->Repaint();
-        }
+        mAnimationTime = track->GetCurrentTime();
+        mUI.timeline->SetCurrentTime(mAnimationTime);
+        mUI.timeline->Repaint();
+        return;
     }
+
+    mAnimationTime = mState.track->GetDuration();
+
+    mPhysics.DeleteAll();
+    mPhysics.DestroyWorld();
+    // don't reset the animation entity here but leave it so that the user
+    // can see the end state of the animation.
+    //mPlaybackAnimation.reset();
+    mUI.timeline->SetCurrentTime(mAnimationTime);
+    mUI.timeline->Update();
+    mUI.timeline->SetFreezeItems(false);
+    mUI.actionPlay->setEnabled(true);
+    mUI.actionPause->setEnabled(false);
+    mUI.actionStop->setEnabled(false);
+    mUI.actionReset->setEnabled(true);
+    mUI.actuatorGroup->setEnabled(true);
+    mUI.baseGroup->setEnabled(true);
+    mPlayState = PlayState::Stopped;
+    ReturnToDefault();
+    SelectedItemChanged(mUI.timeline->GetSelectedItem());
+    NOTE("Animation finished.");
+    DEBUG("Animation finished.");
 }
 
 void AnimationTrackWidget::Save()
@@ -522,8 +523,7 @@ bool AnimationTrackWidget::GetStats(Stats* stats) const
 {
     if (mPlaybackAnimation)
     {
-        const auto* track = mPlaybackAnimation->GetCurrentAnimation();
-        stats->time = track->GetCurrentTime();
+        stats->time = mAnimationTime;
     }
     stats->graphics.valid = true;
     stats->graphics.fps   = mUI.widget->getCurrentFPS();
@@ -633,6 +633,7 @@ void AnimationTrackWidget::on_actionPlay_triggered()
         mPhysics.CreateWorld(*mPlaybackAnimation);
 
     mPlayState = PlayState::Playing;
+    mAnimationTime = 0.0f;
 
     mUI.actionPlay->setEnabled(false);
     mUI.actionPause->setEnabled(true);
@@ -641,6 +642,8 @@ void AnimationTrackWidget::on_actionPlay_triggered()
     mUI.actuatorGroup->setEnabled(false);
     mUI.baseGroup->setEnabled(false);
     mUI.timeline->SetFreezeItems(true);
+    mUI.timeline->SetCurrentTime(0.0f);
+    mUI.timeline->Repaint();
 }
 
 void AnimationTrackWidget::on_actionPause_triggered()
@@ -706,6 +709,7 @@ void AnimationTrackWidget::on_actionReset_triggered()
 {
     if (mPlayState != PlayState::Stopped)
         return;
+    mPlaybackAnimation.reset();
     mEntity = game::CreateEntityInstance(mState.entity);
     mUI.tree->Rebuild();
     mUI.timeline->Rebuild();
@@ -1919,7 +1923,7 @@ void AnimationTrackWidget::RemoveDeletedItems()
 void AnimationTrackWidget::ReturnToDefault()
 {
     // put the nodes that were transformed by the animation visualization/playback
-    // back to the their original positions based on the entity class defaults.
+    // back to their original positions based on the entity class defaults.
     // quickest and simplest way to do this is to simply create a new
     // entity instance and then all state is properly set.
     mEntity = game::CreateEntityInstance(mState.entity);
