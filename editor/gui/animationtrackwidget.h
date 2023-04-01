@@ -185,7 +185,9 @@ namespace gui
             std::unordered_map<std::string, std::string> actuator_to_timeline;
         } mState;
         bool mCameraWasLoaded = false;
-        // Current time accumulator.
+        // Time accumulator for animation playback only.
+        float mAnimationTime = 0.0f;
+        // Current time accumulator used by the widget itself.
         float mCurrentTime = 0.0f;
         // Interpolation variables for smoothing view rotations.
         float mViewTransformStartTime = 0.0f;
@@ -207,6 +209,7 @@ namespace gui
         };
         // The current playback/editing state.
         PlayState mPlayState = PlayState::Stopped;
+
         // Entity object that exists when playing back the animation track.
         std::unique_ptr<game::Entity> mPlaybackAnimation;
         // Original hash (when starting to edit an existing track)
