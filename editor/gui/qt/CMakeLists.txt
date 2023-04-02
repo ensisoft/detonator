@@ -11,7 +11,7 @@ find_package(Qt5Designer REQUIRED)
 
 # needed because the widget source pulls in app/format which refers to
 # some Qt types.
-find_package(Qt5 REQUIRED COMPONENTS Core Network)
+find_package(Qt5 REQUIRED COMPONENTS Core Network Svg OpenGL)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
@@ -27,6 +27,7 @@ set(CMAKE_CXX_STANDARD 17)
 add_library(DetonatorQtDesignerPlugin SHARED
     plugin.cpp
     plugin.h
+    ../svg/svgview.cpp
     ../doubleslider.cpp
     ../spinboxwidget.cpp
     ../spinboxwidget.h
@@ -43,7 +44,7 @@ target_include_directories(DetonatorQtDesignerPlugin PRIVATE "${CMAKE_CURRENT_LI
 target_include_directories(DetonatorQtDesignerPlugin PRIVATE "${CMAKE_CURRENT_LIST_DIR}/../../../")
 target_include_directories(DetonatorQtDesignerPlugin PRIVATE "${CMAKE_CURRENT_LIST_DIR}/../../../third_party")
 target_include_directories(DetonatorQtDesignerPlugin PRIVATE "${CMAKE_CURRENT_LIST_DIR}/../../../third_party/glm")
-target_link_libraries(DetonatorQtDesignerPlugin Qt5::Designer)
+target_link_libraries(DetonatorQtDesignerPlugin Qt5::Designer Qt5::Svg Qt5::OpenGL)
 
 
 # install

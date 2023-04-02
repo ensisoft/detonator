@@ -32,6 +32,70 @@
 #include "../rangewidget.h"
 #include "../treewidget.h"
 #include "../collapsible_widget.h"
+#include "../svg/svgview.h"
+
+QtSvgViewWidgetPlugin::QtSvgViewWidgetPlugin(QObject* parent)
+  : QObject(parent)
+{}
+
+bool QtSvgViewWidgetPlugin::isContainer() const
+{
+    return false;
+}
+bool QtSvgViewWidgetPlugin::isInitialized() const
+{
+    return initialized;
+}
+QIcon QtSvgViewWidgetPlugin::icon() const
+{
+    return QIcon();
+}
+QString QtSvgViewWidgetPlugin::domXml() const
+{
+    return "<ui language=\"c++\">\n"
+           " <widget class=\"SvgViewWidget\" name=\"slider\">\n"
+           "  <property name=\"geometry\">\n"
+           "   <rect>\n"
+           "    <x>0</x>\n"
+           "    <y>0</y>\n"
+           "    <width>200</width>\n"
+           "    <height>200</height>\n"
+           "   </rect>\n"
+           "  </property>\n"
+           " </widget>\n"
+           "</ui>\n";
+}
+QString QtSvgViewWidgetPlugin::group() const
+{
+    return "DETONATOR2D";
+}
+
+QString QtSvgViewWidgetPlugin::includeFile() const
+{
+    return "svg/svgview.h";
+}
+
+QString QtSvgViewWidgetPlugin::name() const
+{
+    return "SvgViewWidget";
+}
+QString QtSvgViewWidgetPlugin::toolTip() const
+{
+    return "";
+}
+QString QtSvgViewWidgetPlugin::whatsThis() const
+{
+    return toolTip();
+}
+QWidget* QtSvgViewWidgetPlugin::createWidget(QWidget *parent)
+{
+    return new SvgViewWidget(parent);
+}
+void QtSvgViewWidgetPlugin::initialize(QDesignerFormEditorInterface *core)
+{
+    initialized = true;
+}
+
 
 DoubleSliderWidgetPlugin::DoubleSliderWidgetPlugin(QObject* parent)
   : QObject(parent)
@@ -374,14 +438,13 @@ MyCustomWidgets::MyCustomWidgets(QObject* parent)
     widgets.append(new CollapsibleWidgetPlugin(this));
     widgets.append(new DoubleSpinBoxWidgetPlugin(this));
     widgets.append(new DoubleSliderWidgetPlugin(this));
+    widgets.append(new QtSvgViewWidgetPlugin(this));
 }
 
 QList<QDesignerCustomWidgetInterface*> MyCustomWidgets::customWidgets() const
 {
     return widgets;
 }
-
-
 
 CollapsibleWidgetContainerExtension::CollapsibleWidgetContainerExtension(gui::CollapsibleWidget *widget, QObject *parent)
     : QObject(parent)
