@@ -287,6 +287,7 @@ void DlgImgView::on_btnSelectJson_clicked()
 
 void DlgImgView::on_btnClose_clicked()
 {
+    mClosed =  true;
     close();
 }
 

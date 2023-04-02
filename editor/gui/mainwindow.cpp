@@ -1905,18 +1905,25 @@ void MainWindow::on_actionImagePacker_triggered()
         mDlgImgPack = std::make_unique<DlgImgPack>(nullptr);
 
     mDlgImgPack->show();
+    mDlgImgPack->activateWindow();
 }
 
 void MainWindow::on_actionImageViewer_triggered()
 {
-    DlgImgView dlg(this);
-    dlg.exec();
+    if (!mDlgImgView)
+        mDlgImgView = std::make_unique<DlgImgView>(nullptr);
+
+    mDlgImgView->show();
+    mDlgImgView->activateWindow();
 }
 
 void MainWindow::on_actionFontMap_triggered()
 {
-    DlgFontMap dlg(this);
-    dlg.exec();
+    if (!mDlgFontMap)
+        mDlgFontMap = std::make_unique<DlgFontMap>(nullptr);
+
+    mDlgFontMap->show();
+    mDlgFontMap->activateWindow();
 }
 
 void MainWindow::on_actionLaunchViewer_triggered()
@@ -2547,6 +2554,11 @@ void MainWindow::RefreshUI()
     if (mDlgImgPack && mDlgImgPack->IsClosed())
         mDlgImgPack.reset();
 
+    if (mDlgImgView && mDlgImgView->IsClosed())
+        mDlgImgView.reset();
+
+    if (mDlgFontMap && mDlgFontMap->IsClosed())
+        mDlgFontMap.reset();
 }
 
 void MainWindow::ShowNote(const app::Event& event)

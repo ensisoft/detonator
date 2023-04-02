@@ -45,6 +45,9 @@ namespace gui
 
         void LoadImage(const QString& file);
 
+        bool IsClosed() const
+        { return mClosed; }
+
     private slots:
         void on_cmbColorSpace_currentIndexChanged(int);
         void on_widgetColor_colorChanged(QColor color);
@@ -89,5 +92,6 @@ namespace gui
             Nada, Tracking, Selecting
         };
         Mode mMode = Mode::Nada;
+        bool mClosed = false;
     };
 } // namespace

@@ -62,6 +62,9 @@ namespace gui
         QString GetJsonFileName() const;
         QString GetImageName() const;
 
+        bool IsClosed() const
+        { return mClosed; }
+
     private slots:
         void on_btnSelectImage_clicked();
         void on_btnSelectJson_clicked();
@@ -98,5 +101,6 @@ namespace gui
         QPoint mStartPoint;
         bool mTracking = false;
         bool mDialogMode = false;
+        bool mClosed = false;
     };
 } // namespace
