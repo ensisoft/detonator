@@ -869,6 +869,7 @@ void InitLuaDoc()
                                        "When mouse block is enabled the mouse events coming from the OS are not processed "
                                        "and none of the entity/scene mouse event handlers are called.",
                  "bool", "block");
+    DOC_METHOD_1("void", "DebugPause", "Initiate a debug pause or leave previous debug pause.", "bool", "pause");
     DOC_METHOD_1("void", "DebugPrint", "Print a debug message in the game window.", "string", "message");
     DOC_METHOD_4("void", "DebugDrawLine", "Draw a debug line from point A to point B in game space.",
                  "glm.vec2|base.FPoint", "a", "glm.vec2|base.FPoint", "b", "base.Color4f", "color", "float", "line_width");

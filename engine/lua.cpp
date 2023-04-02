@@ -1344,6 +1344,12 @@ void LuaRuntime::Init()
         DebugClearAction action;
         self.mActionQueue.push(action);
     };
+    engine["DebugPause"] = [](LuaRuntime& self, bool pause) {
+        DebugPauseAction action;
+        action.pause = pause;
+        self.mActionQueue.push(action);
+    };
+
     engine["SetViewport"] = sol::overload(
         [](LuaRuntime& self, const FRect& view) {
             self.mView = view;

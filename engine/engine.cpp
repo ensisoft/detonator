@@ -1018,6 +1018,10 @@ private:
     {
         mDebugDraws.emplace_back(draw);
     }
+    void OnAction(const engine::DebugPauseAction& pause)
+    {
+        mRequests.DebugPause(pause.pause);
+    }
 
     void OnAction(const engine::EnableEffectAction& action)
     {

@@ -109,6 +109,9 @@ namespace engine
         struct ShowDeveloperUI {
             bool show = true;
         };
+        struct DebugPause {
+            bool pause = true;
+        };
 
         // Union of possible window requests.
         using Request = std::variant<
@@ -118,14 +121,15 @@ namespace engine
             QuitApp,
             GrabMouse,
             ShowMouseCursor,
-            ShowDeveloperUI>;
+            ShowDeveloperUI,
+            DebugPause>;
 
         // During the lifetime of the game process the engine may request
         // the host application to provide some services. The engine may queue
         // any such requests and then provide them to the host application through
         // GetNextRequest function. The host application will process any such
         // requests at every main loop iteration. If there are no more requests,
-        // then false should be returned. Otherwise returning true indicates
+        // then false should be returned. Otherwise, returning true indicates
         // that a new request was available and stored into out.
         // There's no actual guarantee that any of these requests are honored,
         // since that depends on the host platform and host implementation.
@@ -429,6 +433,8 @@ namespace engine
         { mQueue.push(engine::Engine::GrabMouse {yes_no} ); }
         inline void ShowDeveloperUI(bool show)
         { mQueue.push(engine::Engine::ShowDeveloperUI {show}); }
+        inline void DebugPause(bool pause)
+        { mQueue.push(engine::Engine::DebugPause {pause}); }
     private:
         std::queue<Request> mQueue;
     };

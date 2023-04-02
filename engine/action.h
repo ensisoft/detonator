@@ -110,6 +110,9 @@ namespace engine
         Color4f color;
         float width = 1.0f;
     };
+    struct DebugPauseAction {
+        bool pause = true;
+    };
 
     struct EnableEffectAction {
         std::string name;
@@ -129,6 +132,7 @@ namespace engine
             DebugClearAction,
             DebugDrawLine,
             DebugDrawRect,
+            DebugPauseAction,
             DelayAction,
             ShowDebugAction,
             ShowMouseAction,
