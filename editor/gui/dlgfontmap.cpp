@@ -232,6 +232,7 @@ void DlgFontMap::on_btnExport_clicked()
 
 void DlgFontMap::on_btnClose_clicked()
 {
+    mClosed = true;
     close();
 }
 

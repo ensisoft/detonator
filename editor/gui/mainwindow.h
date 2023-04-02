@@ -46,6 +46,8 @@ namespace gui
     class ChildWindow;
     class PlayWindow;
     class DlgImgPack;
+    class DlgImgView;
+    class DlgFontMap;
 
     // Main application window. Composes several MainWidgets
     // into a single cohesive window object that the user can
@@ -258,8 +260,10 @@ namespace gui
         Clipboard mClipboard;
         // Default settings for the main widgets for visualization.
         MainWidget::UISettings mUISettings;
-        // Image packer non-modal dialog (if any)
+        // Non modal tool dialogs.
         std::unique_ptr<DlgImgPack> mDlgImgPack;
+        std::unique_ptr<DlgImgView> mDlgImgView;
+        std::unique_ptr<DlgFontMap> mDlgFontMap;
         using FocusStack = std::stack<QString>;
         // Tab focus stack for moving to the previous widget
         // when a widget is closed or popped off of the main panel
