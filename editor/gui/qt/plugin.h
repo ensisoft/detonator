@@ -36,6 +36,31 @@ namespace gui {
 
 // https://doc.qt.io/qt-6/qdesignercustomwidgetcollectioninterface.html#details
 
+class QtSvgViewWidgetPlugin : public QObject, public QDesignerCustomWidgetInterface
+{
+Q_OBJECT
+    Q_INTERFACES(QDesignerCustomWidgetInterface)
+
+public:
+    QtSvgViewWidgetPlugin(QObject* parent = nullptr);
+
+    virtual bool isContainer() const override;
+    virtual bool isInitialized() const override;
+    virtual QIcon icon() const override;
+    virtual QString domXml() const override;
+    virtual QString group() const override;
+    virtual QString includeFile() const override;
+    virtual QString name() const override;
+    virtual QString toolTip() const override;
+    virtual QString whatsThis() const override;
+    virtual QWidget *createWidget(QWidget *parent) override;
+    virtual void initialize(QDesignerFormEditorInterface *core) override;
+
+private:
+    bool initialized = false;
+};
+
+
 class DoubleSliderWidgetPlugin : public QObject, public QDesignerCustomWidgetInterface
 {
 Q_OBJECT

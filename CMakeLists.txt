@@ -117,6 +117,7 @@ endif()
 find_package(Qt5Widgets)
 find_package(Qt5OpenGL)
 find_package(Qt5Network)
+find_package(Qt5Svg)
 if (NOT Qt5Widgets_FOUND)
     message("
 Qt5 was not found. I will not be able to build the game.
@@ -508,6 +509,8 @@ add_executable(Detonator
     editor/gui/timewidget.ui
     editor/gui/timewidget.cpp
     editor/gui/utility.cpp
+    editor/gui/svg/svgview.h
+    editor/gui/svg/svgview.cpp
     editor/resource/resource.qrc
     editor/welcome.qrc
 )
@@ -525,7 +528,7 @@ target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_pa
 target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/tree-sitter/include")
 # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
 target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Editor_autogen/include")
-target_link_libraries(Detonator Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
+target_link_libraries(Detonator Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network Qt5::Svg)
 target_link_libraries(Detonator EngineLib UiLib GfxLib AudioLib DataLib BaseLib)
 target_link_libraries(Detonator Lua)
 target_link_libraries(Detonator QtColorWidgets)
