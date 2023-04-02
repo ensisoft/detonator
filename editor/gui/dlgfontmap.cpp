@@ -297,10 +297,13 @@ void DlgFontMap::OnPaintScene(gfx::Painter& painter, double secs)
     if (!mMaterial)
     {
         ShowInstruction(
+            "Assign font glyphs to Unicode characters.\n\n"
             "INSTRUCTIONS\n"
             "1. Select pre-generated font character texture map.\n"
-            "2. Assign key presses to each character.\n"
-            "3. Click on 'Export' to export the font JSON.\n",
+            "2. Adjust the image offset and glyph sizes.\n"
+            "3. Click on any font glyph.\n"
+            "4. Press keys to assign a character value.\n"
+            "5. When done, click on 'Export' to export the font JSON.\n",
             gfx::FRect(0, 0, width, height),
             painter);
         return;

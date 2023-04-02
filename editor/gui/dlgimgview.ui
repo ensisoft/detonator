@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
+    <width>650</width>
     <height>800</height>
    </rect>
   </property>
@@ -38,7 +38,7 @@
            <bool>true</bool>
           </property>
           <property name="placeholderText">
-           <string>No image file selected</string>
+           <string>Select image file (none selected)</string>
           </property>
          </widget>
         </item>
@@ -78,7 +78,7 @@
            <bool>true</bool>
           </property>
           <property name="placeholderText">
-           <string>No JSON file selected</string>
+           <string>Select descriptor file (none selected)</string>
           </property>
          </widget>
         </item>

@@ -381,15 +381,21 @@ void DlgImgView::OnPaintScene(gfx::Painter& painter, double secs)
 {
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
-    if (!mMaterial)
-    {
-        ShowMessage("No image file selected.", painter);
-        return;
-    }
-
     const float width  = mUI.widget->width();
     const float height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
+
+    if (!mMaterial)
+    {
+        ShowInstruction(
+            "View the contents of a packed image file (atlas).\n"
+            "The contents can be viewed visually and textually.\n\n"
+            "INSTRUCTIONS\n"
+            "1. Select a (packed) image file.\n"
+            "2. Select an associated JSON file.\n",
+            gfx::FRect(0, 0, width, height), painter);
+        return;
+    }
 
     const float zoom   = GetValue(mUI.zoom);
     const float img_width  = mWidth * zoom;
