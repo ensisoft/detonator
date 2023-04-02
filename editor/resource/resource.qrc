@@ -1,6 +1,8 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
   <qresource>
+    <file>16x16_ico_png/exclamation.png</file>
+    <file>16x16_ico_png/tick_ok.png</file>
     <file>16x16_ico_png/log_warning.png</file>
     <file>16x16_ico_png/log_error.png</file>
     <file>16x16_ico_png/log_info.png</file>

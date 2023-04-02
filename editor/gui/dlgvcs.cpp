@@ -68,6 +68,12 @@ public:
                 return QIcon("icons:transmit_add.png");
             else if (file.sync == SyncAction::Delete)
                 return QIcon("icons:transmit_delete.png");
+        } else if (role == Qt::DecorationRole && index.column() == 1)
+        {
+            if (file.status == FileStatus::Success)
+                return QIcon("icons:tick_ok.png");
+            else if (file.status == FileStatus::Failed)
+                return QIcon("icons:exclamation.png");
         }
         return {};
     }
