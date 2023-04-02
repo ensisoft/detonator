@@ -686,6 +686,8 @@ void PlayWindow::RunGameLoopOnce()
                 AskSetFullScreen(ptr->fullscreen);
             else if (const auto* ptr = std::get_if<engine::Engine::ToggleFullScreen>(&request))
                 AskToggleFullScreen();
+            else if (const auto* ptr = std::get_if<engine::Engine::DebugPause>(&request))
+                DebugPause(ptr->pause);
             else if (const auto* ptr = std::get_if<engine::Engine::ShowMouseCursor>(&request)) {
                 if (ptr->show) {
                     mContainer->setCursor(Qt::ArrowCursor);
@@ -1430,6 +1432,12 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
     else return QMainWindow::event(event);
 
     return true;
+}
+
+void PlayWindow::DebugPause(bool pause)
+{
+    SetValue(mUI.actionPause, pause);
+    SetDebugOptions();
 }
 
 void PlayWindow::ResizeSurface(unsigned width, unsigned height)
