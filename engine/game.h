@@ -53,6 +53,8 @@ namespace engine
         using Action = engine::Action;
 
         virtual ~GameRuntime() = default;
+        // Set current frame counter value. This can loop over.
+        virtual void SetFrameNumber(unsigned frame) {}
         // Set rendering surface size.
         virtual void SetSurfaceSize(unsigned width, unsigned height) {}
 

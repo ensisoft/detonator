@@ -230,6 +230,9 @@ void InitLuaDoc()
     DOC_TABLE_PROPERTY("game.Scene", "Scene", "Global scene instance or nil if no scene is being played.");
     DOC_FUNCTION_3("...", "CallMethod", "Call a method on an entity, scene or UI with variable arguments.",
                    "game.Entity|game.Scene|uik.Window", "object", "string", "method", "...", "...");
+    DOC_TABLE_PROPERTY("unsigned", "SurfaceWidth", "Current rendering surface width in pixels.");
+    DOC_TABLE_PROPERTY("unsigned", "SurfaceHeight", "Current rendering surface height in pixels.");
+    DOC_TABLE_PROPERTY("unsigned", "Frame", "Currently running frame number. Starts at zero, can wrap over.");
 
     // Lua built-in functions.
     DOC_FUNCTION_2("void", "assert", "Raises an error if the value of its argument arg is false (i.e., nil or false); otherwise, returns all its arguments. "
