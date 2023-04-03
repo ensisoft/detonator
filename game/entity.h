@@ -1817,6 +1817,8 @@ namespace game
         // Returns a pointer to the animation instance or nullptr if
         // idle animation was started.
         Animation* PlayIdle();
+        // Returns true if someone killed the entity.
+        bool IsDying() const;
         // Returns true if an animation is currently playing.
         bool IsAnimating() const;
         // Returns true if the entity lifetime has been exceeded.
