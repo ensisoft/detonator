@@ -19,6 +19,8 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QRect>
+#  include <QRectF>
 #  include <QString>
 #  include <QColor>
 #  include <QJsonObject>
@@ -48,6 +50,12 @@
 
 namespace app
 {
+
+// Center the source rectangle on target by applying a scale and translation.
+QRect CenterRectOnTarget(const QRect& target, const QRect& source);
+QRect CenterRectOnTarget(const QSize& target_size, const QSize& source_size);
+QRectF CenterRectOnTarget(const QRectF& target, const QRectF& source);
+QRectF CenterRectOnTarget(const QSizeF& target_size, const QSizeF& source_size);
 
 bool SetStyle(const QString& name);
 bool SetTheme(const QString& name);

@@ -74,6 +74,8 @@ public:
     void drawBackground(QPainter *p, const QRectF &rect) override;
 
     QSize svgSize() const;
+    QRect viewBox() const;
+    void setViewBox(const QRect& viewbox);
     QSvgRenderer *renderer() const;
 
     qreal zoomFactor() const;
