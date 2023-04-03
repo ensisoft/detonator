@@ -3084,6 +3084,7 @@ void BindGameLib(sol::state& L)
     entity["GetTime"]              = &Entity::GetTime;
     entity["GetLayer"]             = &Entity::GetLayer;
     entity["SetLayer"]             = &Entity::SetLayer;
+    entity["IsDying"]              = &Entity::IsDying;
     entity["IsVisible"]            = &Entity::IsVisible;
     entity["IsAnimating"]          = &Entity::IsAnimating;
     entity["HasExpired"]           = &Entity::HasExpired;

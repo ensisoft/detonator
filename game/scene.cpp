@@ -1173,13 +1173,15 @@ const Entity* Scene::FindEntityByInstanceName(const std::string& name) const
 
 void Scene::KillEntity(Entity* entity)
 {
-    // if the entity still exists but it has been killed
+    // if the entity still exists, but it has been killed
     // it means it'll be deleted at the end of this loop iteration
     // in EndLoop. Make sure not to add it again in the
     // kill set for next iteration even if the application tries
     // to kill it again.
     if (entity->HasBeenKilled())
         return;
+
+    entity->Die();
 
     mKillSet.insert(entity);
 }

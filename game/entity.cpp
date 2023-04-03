@@ -1796,6 +1796,11 @@ Animation* Entity::PlayIdle()
     return nullptr;
 }
 
+bool Entity::IsDying() const
+{
+    return mControlFlags.test(ControlFlags::WantsToDie);
+}
+
 bool Entity::IsAnimating() const
 {
     return !!mCurrentAnimation;
