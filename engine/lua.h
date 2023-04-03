@@ -36,7 +36,7 @@ namespace engine
     // Implementation of GameRuntime using Lua.
     // Delegates the calls to Lua scripts associated
     // with the entities, UIs and main game.
-    class LuaRuntime : public GameRuntime
+    class LuaRuntime final : public GameRuntime
     {
     public:
         using Action = engine::Action;
@@ -44,8 +44,9 @@ namespace engine
                    const std::string& game_script,
                    const std::string& game_home,
                    const std::string& game_name);
-       ~LuaRuntime();
+       ~LuaRuntime() override;
 
+        virtual void SetFrameNumber(unsigned frame) override;
         virtual void SetSurfaceSize(unsigned width, unsigned height) override;
         virtual void SetEditingMode(bool editing) override;
         virtual void SetPreviewMode(bool preview) override;

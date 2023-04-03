@@ -387,13 +387,15 @@ public:
             gfx::FillShape(*mPainter, rect, *mMouseDrawable, *mMouseMaterial);
         }
 
-        TRACE_CALL("Device::Swap",mDevice->EndFrame(true));
+        TRACE_CALL("Device::Swap", mDevice->EndFrame(true));
         // Note that we *don't* call CleanGarbage here since currently there should
         // be nothing that is creating needless GPU resources.
     }
 
     virtual void BeginMainLoop() override
     {
+        mRuntime->SetFrameNumber(mFrameCounter);
+
         // service the audio system once.
         std::vector<engine::AudioEvent> audio_events;
         TRACE_CALL("Audio::Update", mAudio->Update(&audio_events));
@@ -489,7 +491,9 @@ public:
         TRACE_CALL("GameActions", PerformGameActions(dt));
     }
     virtual void EndMainLoop() override
-    {}
+    {
+        mFrameCounter++;
+    }
 
     virtual void Stop() override
     {
@@ -1179,6 +1183,7 @@ private:
     };
     // current engine flags to control execution etc.
     base::bitflag<Flags> mFlags;
+    unsigned mFrameCounter = 0;
     // current FBO 0 surface sizes
     unsigned mSurfaceWidth  = 0;
     unsigned mSurfaceHeight = 0;

@@ -1096,6 +1096,14 @@ LuaRuntime::~LuaRuntime()
     mGameEnv.reset();
     mLuaState.reset();
 }
+void LuaRuntime::SetFrameNumber(unsigned int frame)
+{
+    if (mLuaState)
+    {
+        (*mLuaState)["Frame"] = frame;
+    }
+}
+
 void LuaRuntime::SetSurfaceSize(unsigned int width, unsigned int height)
 {
     if (mLuaState)
