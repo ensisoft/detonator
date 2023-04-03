@@ -1369,6 +1369,7 @@
     <addaction name="separator"/>
     <addaction name="actionImagePacker"/>
     <addaction name="actionImageViewer"/>
+    <addaction name="actionSvgViewer"/>
     <addaction name="actionFontMap"/>
     <addaction name="separator"/>
     <addaction name="actionLaunchViewer"/>
@@ -2222,6 +2223,18 @@
    </property>
    <property name="toolTip">
     <string>Synchronoize changes in the project to version control</string>
+   </property>
+  </action>
+  <action name="actionSvgViewer">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/svg_logo.png</normaloff>:/16x16_ico_png/svg_logo.png</iconset>
+   </property>
+   <property name="text">
+    <string>SVG Viewer...</string>
+   </property>
+   <property name="toolTip">
+    <string>Launch SVG viewer</string>
    </property>
   </action>
  </widget>

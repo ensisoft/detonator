@@ -99,6 +99,23 @@ QSize SvgViewWidget::svgSize() const
     return m_svgItem ? m_svgItem->boundingRect().size().toSize() : QSize();
 }
 
+QRect SvgViewWidget::viewBox() const
+{
+    if (m_svgItem) {
+        auto* renderer = m_svgItem->renderer();
+        return renderer->viewBox();
+    }
+    return {};
+}
+void SvgViewWidget::setViewBox(const QRect& viewbox)
+{
+    if (m_svgItem) {
+        auto* renderer = m_svgItem->renderer();
+        renderer->setViewBox(viewbox);
+        scene()->invalidate();
+    }
+}
+
 bool SvgViewWidget::openFile(const QString &fileName)
 {
     QGraphicsScene *s = scene();

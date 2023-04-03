@@ -33,6 +33,7 @@
 #  include <langinfo.h>
 #endif
 
+#include <algorithm>
 #include <functional>
 #include <string_view>
 #include <cstring>
@@ -55,10 +56,45 @@ QString ToNativeSeparators(QString p)
 #endif
 }
 
+template<typename Rect>
+Rect center_rect_on_target(const Rect& target, const Rect& source)
+{
+    const float target_width = target.width();
+    const float target_height = target.height();
+    const float src_width = source.width();
+    const float src_height = source.height();
+    const auto scaler = std::min(target_width / src_width, target_height / src_height);
+    const auto actual_width = src_width * scaler;
+    const auto actual_height = src_height * scaler;
+    const auto x = (target_width - actual_width) / 2.0f;
+    const auto y = (target_height - actual_height) / 2.0f;
+
+    return Rect(target.x() + x, target.y() + y, actual_width, actual_height);
+}
+
+
 } // namespace
 namespace app
 {
 
+QRect CenterRectOnTarget(const QRect& target, const QRect& source)
+{
+    return center_rect_on_target<QRect>(target, source);
+}
+
+QRect CenterRectOnTarget(const QSize& target_size, const QSize& source_size)
+{
+    return CenterRectOnTarget(QRect(QPoint(0, 0), target_size), QRect(QPoint(0, 0), source_size));
+}
+
+QRectF CenterRectOnTarget(const QRectF& target, const QRectF& source)
+{
+    return center_rect_on_target<QRectF>(target, source);
+}
+QRectF CenterRectOnTarget(const QSizeF& target_size, const QSizeF& source_size)
+{
+    return CenterRectOnTarget(QRectF(QPointF(0.0f, 0.0f), target_size), QRectF(QPointF(0.0f, 0.0f), source_size));
+}
 
 bool SetTheme(const QString& name)
 {

@@ -70,6 +70,7 @@
 #include "editor/gui/dlgimgview.h"
 #include "editor/gui/dlgfontmap.h"
 #include "editor/gui/dlgvcs.h"
+#include "editor/gui/dlgsvg.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/gfxwidget.h"
 #include "editor/gui/animationtrackwidget.h"
@@ -1917,6 +1918,15 @@ void MainWindow::on_actionImageViewer_triggered()
     mDlgImgView->activateWindow();
 }
 
+void MainWindow::on_actionSvgViewer_triggered()
+{
+    if (!mDlgSvgView)
+        mDlgSvgView = std::make_unique<DlgSvgView>(nullptr);
+
+    mDlgSvgView->show();
+    mDlgSvgView->activateWindow();
+}
+
 void MainWindow::on_actionFontMap_triggered()
 {
     if (!mDlgFontMap)
@@ -2559,6 +2569,9 @@ void MainWindow::RefreshUI()
 
     if (mDlgFontMap && mDlgFontMap->IsClosed())
         mDlgFontMap.reset();
+
+    if (mDlgSvgView && mDlgSvgView->IsClosed())
+        mDlgSvgView.reset();
 }
 
 void MainWindow::ShowNote(const app::Event& event)
