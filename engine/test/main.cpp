@@ -1001,7 +1001,7 @@ public:
         mDevice->CleanGarbage(120, gfx::Device::GCFlags::Textures);
     }
 
-    virtual void Update(double dt) override
+    virtual void Update(float dt) override
     {
         const auto time_step = 1.0/60.0;
         const auto tick_step = 1.0/1.0;

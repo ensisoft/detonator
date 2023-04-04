@@ -322,7 +322,11 @@ namespace engine
         // dt is the current game time step to take. The time step to take
         // is variable and depends on how long previous iteration of the
         // main game loop took.
-        virtual void Update(double dt) {}
+        virtual void Update(float dt) {}
+
+        // Take one game simulation step forward while paused. This is mostly
+        // useful for debugging the game.
+        virtual void Step() {}
 
         // Stop the game. Called once after exiting the main loop and
         // before calling save and shutdown.

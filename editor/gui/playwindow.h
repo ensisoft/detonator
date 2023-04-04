@@ -104,6 +104,7 @@ namespace gui
         void InitPreview(const QString& script);
         void SelectResolution();
         void on_actionPause_toggled(bool val);
+        void on_actionStep_triggered();
         void on_actionClose_triggered();
         void on_actionClearLog_triggered();
         void on_actionLogShowDebug_toggled(bool val);
