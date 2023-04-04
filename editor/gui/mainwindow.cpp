@@ -2377,6 +2377,8 @@ void MainWindow::on_actionProjectSync_triggered()
         return;
 
     DlgVCS dlg(this, mWorkspace.get(), mSettings);
+    dlg.show();
+    dlg.BeginScan();
 
     if (dlg.exec() == QDialog::Rejected)
         return;

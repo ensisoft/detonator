@@ -18,6 +18,7 @@
 
 #include "warnpush.h"
 #  include <QAbstractTableModel>
+#  include <QMessageBox>
 #include "warnpop.h"
 
 #include <vector>
@@ -148,8 +149,6 @@ DlgVCS::DlgVCS(QWidget* parent,
 
     mUI.setupUi(this);
     mUI.tableView->setModel(mModel.get());
-
-    BeginScan();
 }
 
 DlgVCS::~DlgVCS() = default;
@@ -227,6 +226,11 @@ void DlgVCS::BeginScan()
     std::unordered_set<QString> uri_set;
     std::unordered_set<QString> vcs_set;
 
+    // flag to indicate that there are files that are outside the workspace directory structure.
+    // the assumption is that the workspace contains the Git repository and this means that
+    // files that are outside the workspace directory structure then cannot be added to the repo.
+    bool files_outside_workspace = false;
+
     // find our set of files that are used by our user defined resources.
 
     for (size_t i=0; i<mWorkspace->GetNumUserDefinedResources(); ++i)
@@ -252,6 +256,17 @@ void DlgVCS::BeginScan()
                 file.file = uri;
                 file.resource = res.GetName();
                 mModel->AddItem(std::move(file));
+            }
+            else if (uri.startsWith("fs://"))
+            {
+                uri = uri.mid(5);
+                TableModel::FileResource file;
+                file.status = TableModel::FileStatus::Failed;
+                file.sync   = TableModel::SyncAction::None;
+                file.file   = uri;
+                file.resource = res.GetName();
+                mModel->AddItem((std::move(file)));
+                files_outside_workspace = true;
             }
         }
     }
@@ -326,8 +341,17 @@ void DlgVCS::BeginScan()
     }
     mModel->Update(actions);
 
-
     SetEnabled(mUI.btnSync, true);
+
+    if (!files_outside_workspace)
+        return;
+
+    QMessageBox msg(this);
+    msg.setStandardButtons(QMessageBox::Ok);
+    msg.setIcon(QMessageBox::Warning);
+    msg.setText(tr("You have files that are somewhere else on the filesystem outside the current workspace.\n"
+                   "These files cannot be synced to the version control!\n"));
+    msg.exec();
 }
 
 bool DlgVCS::RunCommand(const QStringList& arg_list,

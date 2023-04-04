@@ -42,12 +42,14 @@ namespace gui
         DlgVCS(QWidget* parent, const app::Workspace* workspace, const gui::AppSettings& settings);
        ~DlgVCS();
 
+        void BeginScan();
+
     private slots:
         void on_btnClose_clicked();
         void on_btnSync_clicked();
 
     private:
-        void BeginScan();
+
         void AppendLog(const QString& str);
         bool RunCommand(const QStringList& args,
                         QStringList* stdout_buffer,
