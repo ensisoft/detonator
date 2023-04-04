@@ -529,7 +529,8 @@ PlayWindow::PlayWindow(app::Workspace& workspace, bool is_separate_process) : mW
     //mUI.actionClose->setShortcut(QKeySequence::Close); // use ours
     mUI.log->setModel(&mAppEventLog);
     mUI.statusbar->insertPermanentWidget(0, mUI.statusBarFrame);
-    mUI.problem->setVisible(false);
+    SetVisible(mUI.problem, false);
+    SetEnabled(mUI.actionStep, false);
 
     const auto& settings = mWorkspace.GetProjectSettings();
 
@@ -1192,6 +1193,15 @@ void PlayWindow::SelectResolution()
 void PlayWindow::on_actionPause_toggled(bool val)
 {
     SetDebugOptions();
+    SetEnabled(mUI.actionStep, val);
+}
+
+void PlayWindow::on_actionStep_triggered()
+{
+    if (!mEngine)
+        return;
+
+    mEngine->Step();
 }
 
 void PlayWindow::on_actionClose_triggered()
@@ -1437,6 +1447,7 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
 void PlayWindow::DebugPause(bool pause)
 {
     SetValue(mUI.actionPause, pause);
+    SetEnabled(mUI.actionStep, pause);
     SetDebugOptions();
 }
 

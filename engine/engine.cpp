@@ -64,8 +64,8 @@ namespace
 // which is the interface that enables the game host to communicate
 // with the application/game implementation in order to update/tick/etc.
 // the game and also to handle input from keyboard and mouse.
-class GameStudioEngine : public engine::Engine,
-                         public wdk::WindowListener
+class GameStudioEngine final : public engine::Engine,
+                               public wdk::WindowListener
 {
 public:
     GameStudioEngine() : mDebugPrints(10)
@@ -405,12 +405,16 @@ public:
         }
     }
 
-    virtual void Update(double dt) override
+    virtual void Step() override
+    {
+        mStepForward = true;
+    }
+
+    virtual void Update(float dt) override
     {
         // Game play update. NOT the place for any kind of
         // real time/wall time subsystem (such as audio) service
-
-        if (mDebug.debug_pause)
+        if (mDebug.debug_pause && !mStepForward)
             return;
 
         // there's plenty of information about different ways to write a basic
@@ -487,6 +491,8 @@ public:
                 TRACE_CALL("Runtime::EndLoop", mRuntime->EndLoop());
                 TRACE_CALL("Scene::EndLoop", mScene->EndLoop());
             }
+
+            mStepForward = false;
         }
         TRACE_CALL("GameActions", PerformGameActions(dt));
     }
@@ -1252,6 +1258,8 @@ private:
         short lifetime = 3;
     };
     boost::circular_buffer<DebugPrint> mDebugPrints;
+    // Time to consume until game actions are processed.
+    float mActionDelay = 0.0;
     // The size of the game time step (in seconds) to take for each
     // update of the game simulation state.
     float mGameTimeStep = 0.0f;
@@ -1264,7 +1272,6 @@ private:
     float mTimeAccum = 0.0f;
     // Total accumulated game time so far.
     double mGameTimeTotal = 0.0f;
-    float mActionDelay = 0.0;
     // The bitbag for storing game state.
     engine::KeyValueStore mStateStore;
     // Debug draw actions.
@@ -1273,6 +1280,8 @@ private:
     // next draw. next call to draw will draw them and clear
     // the vector.
     std::vector<DebugDraw> mDebugDraws;
+    // debug stepping flag to control taking a single update step.
+    bool mStepForward = false;
 };
 
 } //namespace
