@@ -1561,7 +1561,7 @@ void Scene::Rebuild()
                 const auto& node = entity->GetNode(i);
                 mTransform.Push(entity->FindNodeModelTransform(&node));
                 const auto& aabb = ComputeBoundingRect(mTransform.GetAsMatrix());
-                if (const auto* spatial = node.GetSpatialNode(); spatial && mIndex)
+                if (const auto* spatial = node.GetSpatialNode(); spatial && spatial->IsEnabled() && mIndex)
                 {
                     const auto left   = (double)aabb.GetX();
                     const auto right  = (double)aabb.GetX() + aabb.GetWidth();

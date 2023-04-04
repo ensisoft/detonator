@@ -83,6 +83,7 @@ namespace game
             AABB
         };
         enum class Flags {
+            Enabled,
             ReportOverlap
         };
         SpatialNodeClass();
@@ -870,11 +871,12 @@ namespace game
     public:
         using Flags = SpatialNodeClass::Flags;
         using Shape = SpatialNodeClass::Shape;
-        SpatialNode(std::shared_ptr<const SpatialNodeClass> klass)
+        SpatialNode(std::shared_ptr<const SpatialNodeClass> klass) noexcept
           : mClass(klass)
+          , mFlags(klass->GetFlags())
         {}
         bool TestFlag(Flags flag) const noexcept
-        { return mClass->TestFlag(flag); }
+        { return mFlags.test(flag); }
         Shape GetShape() const noexcept
         { return mClass->GetShape(); }
         // class access
@@ -882,8 +884,13 @@ namespace game
         { return *mClass; }
         const SpatialNodeClass* operator->() const noexcept
         { return mClass.get(); }
+        inline bool IsEnabled() const noexcept
+        { return mFlags.test(Flags::Enabled); }
+        void Enable(bool value) noexcept
+        { mFlags.set(Flags::Enabled, value); }
     private:
         std::shared_ptr<const SpatialNodeClass> mClass;
+        base::bitflag<Flags> mFlags;
     };
 
     class EntityNodeClass

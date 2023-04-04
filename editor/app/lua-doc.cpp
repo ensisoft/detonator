@@ -1013,6 +1013,9 @@ void InitLuaDoc()
     DOC_TABLE("game.SpatialNode");
     DOC_METHOD_0("string", "GetShape", "Get the shape used for spatial indexing.<br>"
                                        "Possible values. 'AABB'");
+    DOC_METHOD_0("bool", "IsEnabled", "Check whether the spatial node is enabled or not.<br>"
+                                      "Nodes that are not enabled will not be indexed.");
+    DOC_METHOD_1("void", "Enable", "Enable or disable spatial index.", "bool", "on_off");
 
     DOC_TABLE("game.EntityNode");
     DOC_METHOD_0("string", "GetName", "Get the entity node's human readable instance name.");

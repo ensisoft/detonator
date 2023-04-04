@@ -359,7 +359,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>353</width>
+             <width>359</width>
              <height>789</height>
             </rect>
            </property>
@@ -2661,29 +2661,8 @@
            <property name="checked">
             <bool>false</bool>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_20">
-            <item>
-             <layout class="QGridLayout" name="gridLayout_8">
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_35">
-                <property name="text">
-                 <string>Shape</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QComboBox" name="spnShape">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
+           <layout class="QGridLayout" name="gridLayout_8">
+            <item row="3" column="0">
              <spacer name="verticalSpacer_5">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
@@ -2698,6 +2677,36 @@
                </size>
               </property>
              </spacer>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_35">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Shape</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="spnShape">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QCheckBox" name="spnEnabled">
+              <property name="text">
+               <string>Enabled</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -3558,6 +3567,7 @@
   <tabstop>tiText</tabstop>
   <tabstop>spatialNode</tabstop>
   <tabstop>spnShape</tabstop>
+  <tabstop>spnEnabled</tabstop>
   <tabstop>fixture</tabstop>
   <tabstop>fxBody</tabstop>
   <tabstop>fxShape</tabstop>
