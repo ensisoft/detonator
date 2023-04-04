@@ -385,7 +385,7 @@
      <item>
       <widget class="QComboBox" name="widgetFontName">
        <property name="editable">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="placeholderText">
         <string>Default</string>
