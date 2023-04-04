@@ -233,6 +233,8 @@ void InitLuaDoc()
     DOC_TABLE_PROPERTY("unsigned", "SurfaceWidth", "Current rendering surface width in pixels.");
     DOC_TABLE_PROPERTY("unsigned", "SurfaceHeight", "Current rendering surface height in pixels.");
     DOC_TABLE_PROPERTY("unsigned", "Frame", "Currently running frame number. Starts at zero, can wrap over.");
+    DOC_TABLE_PROPERTY("bool", "PreviewMode", "True when doing a preview of an entity, scene or UI.");
+    DOC_TABLE_PROPERTY("bool", "EditingMode", "True when live edits to game content are enabled.");
 
     // Lua built-in functions.
     DOC_FUNCTION_2("void", "assert", "Raises an error if the value of its argument arg is false (i.e., nil or false); otherwise, returns all its arguments. "
