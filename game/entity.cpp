@@ -45,7 +45,9 @@ namespace game
 {
 
 SpatialNodeClass::SpatialNodeClass()
-{}
+{
+    mFlags.set(Flags::Enabled, true);
+}
 std::size_t SpatialNodeClass::GetHash() const
 {
     size_t hash = 0;

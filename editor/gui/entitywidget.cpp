@@ -2184,6 +2184,11 @@ void EntityWidget::on_spnShape_currentIndexChanged(const QString&)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_spnEnabled_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_fxShape_currentIndexChanged(const QString&)
 {
     UpdateCurrentNodeProperties();
@@ -2397,6 +2402,7 @@ void EntityWidget::on_spatialNode_toggled(bool on)
             {
                 game::SpatialNodeClass sp;
                 sp.SetShape(GetValue(mUI.spnShape));
+                sp.SetFlag(game::SpatialNodeClass::Flags::Enabled, GetValue(mUI.spnEnabled));
                 node->SetSpatialNode(sp);
                 DEBUG("Added spatial node to '%1'.", node->GetName());
             }
@@ -3007,6 +3013,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.tiStatic, false);
     SetValue(mUI.tiBloom, false);
     SetValue(mUI.spnShape, game::SpatialNodeClass::Shape::AABB);
+    SetValue(mUI.spnEnabled, true);
     SetValue(mUI.fixture, false);
     SetValue(mUI.fxBody, QString(""));
     SetValue(mUI.fxShape, game::FixtureClass::CollisionShape::Box);
@@ -3115,6 +3122,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
         {
             SetValue(mUI.spatialNode, true);
             SetValue(mUI.spnShape, sp->GetShape());
+            SetValue(mUI.spnEnabled, sp->TestFlag(game::SpatialNodeClass::Flags::Enabled));
         }
         if (const auto* fixture = node->GetFixture())
         {
@@ -3290,6 +3298,7 @@ void EntityWidget::UpdateCurrentNodeProperties()
     if (auto* sp = node->GetSpatialNode())
     {
         sp->SetShape(GetValue(mUI.spnShape));
+        sp->SetFlag(game::SpatialNodeClass::Flags::Enabled, GetValue(mUI.spnEnabled));
     }
 
     RealizeEntityChange(mState.entity);

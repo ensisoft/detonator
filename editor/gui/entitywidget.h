@@ -208,6 +208,7 @@ namespace gui
         void on_tiStatic_stateChanged(int);
         void on_tiBloom_stateChanged(int);
         void on_spnShape_currentIndexChanged(const QString&);
+        void on_spnEnabled_stateChanged(int);
         void on_fxShape_currentIndexChanged(const QString&);
         void on_fxBody_currentIndexChanged(const QString&);
         void on_fxPolygon_currentIndexChanged(const QString&);

@@ -2903,6 +2903,8 @@ void BindGameLib(sol::state& L)
     spn["GetShape"] = [](const SpatialNode* node) {
         return magic_enum::enum_name(node->GetShape());
     };
+    spn["IsEnabled"] = &SpatialNode::IsEnabled;
+    spn["Enable"]    = &SpatialNode::Enable;
 
     auto entity_node = table.new_usertype<EntityNode>("EntityNode");
     entity_node["GetId"]          = &EntityNode::GetId;
