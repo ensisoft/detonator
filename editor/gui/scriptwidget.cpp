@@ -411,7 +411,9 @@ private:
         if (word.endsWith("entity"))
             return "game.Entity";
         else if (word.endsWith("node"))
-            return "game.EntityNode";
+            if (word.contains("spatial"))
+                return "game.SpatialNode";
+            else return "game.EntityNode";
         else if (word.endsWith("scene"))
             return "game.Scene";
         else if (word.endsWith("body"))
