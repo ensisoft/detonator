@@ -23819,7 +23819,7 @@
                 "h": 800.0,
                 "w": 1000.0
               },
-              "style": "{\"materials\":[{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"background\",\"type\":\"Null\"}]}",
+              "style": "{\"materials\":[{\"key\":\"background\",\"type\":\"Null\"},{\"key\":\"border\",\"type\":\"Null\"}]}",
               "tab_index": 0,
               "type": "Form",
               "widgets": [
@@ -23839,7 +23839,7 @@
                     "h": 100.0,
                     "w": 900.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"border\",\"material\":\"rAn0G88CKj\",\"type\":\"Reference\"},{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"}]}",
+                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"},{\"key\":\"border\",\"material\":\"rAn0G88CKj\",\"type\":\"Reference\"}]}",
                   "tab_index": 0,
                   "text": "GroupBox",
                   "type": "GroupBox",
@@ -23861,7 +23861,7 @@
                         "h": 100.0,
                         "w": 350.0
                       },
-                      "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/G7_Cube_5.ttf\"},{\"key\":\"text-vertical-align\",\"value\":\"Center\"},{\"key\":\"edit-text-size\",\"value\":26},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"text-size\",\"value\":48},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.125490203499794,\"g\":0.8234989047050476,\"r\":1.0}}]}",
+                      "style": "{\"properties\":[{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.125490203499794,\"g\":0.8234989047050476,\"r\":1.0}},{\"key\":\"text-size\",\"value\":48},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"edit-text-size\",\"value\":26},{\"key\":\"text-vertical-align\",\"value\":\"Center\"},{\"key\":\"text-font\",\"value\":\"app://fonts/G7_Cube_5.ttf\"}]}",
                       "tab_index": 0,
                       "text": "BREAKOUT\n",
                       "type": "Label"
@@ -23883,7 +23883,7 @@
                         "h": 100.0,
                         "w": 500.0
                       },
-                      "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/G7_Cube_5.ttf\"},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.2980392277240753,\"g\":0.8313725590705872,\"r\":0.6705729961395264}},{\"key\":\"text-vertical-align\",\"value\":\"Center\"},{\"key\":\"edit-text-size\",\"value\":26},{\"key\":\"text-size\",\"value\":48},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"}]}",
+                      "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"text-size\",\"value\":48},{\"key\":\"edit-text-size\",\"value\":26},{\"key\":\"text-vertical-align\",\"value\":\"Center\"},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.2980392277240753,\"g\":0.8313725590705872,\"r\":0.6705729961395264}},{\"key\":\"text-font\",\"value\":\"app://fonts/G7_Cube_5.ttf\"}]}",
                       "tab_index": 0,
                       "text": "DETONATOR 2D\n",
                       "type": "Label"
@@ -23906,7 +23906,7 @@
                     "h": 50.0,
                     "w": 150.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"border\",\"material\":\"_Silver\",\"type\":\"Reference\"},{\"color\":{\"a\":1.0,\"b\":0.21568627655506134,\"g\":0.21568627655506134,\"r\":0.9490196108818054},\"key\":\"mouse-over/border\",\"type\":\"Color\"},{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"}],\"properties\":[{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.21568627655506134,\"g\":0.21568627655506134,\"r\":0.9490196108818054}},{\"key\":\"edit-text-size\",\"value\":28},{\"key\":\"text-size\",\"value\":28},{\"key\":\"text-line-height\",\"value\":1.2000000476837158},{\"key\":\"text-font\",\"value\":\"app://fonts/G7_Cube_5.ttf\"},{\"key\":\"text-blink\",\"value\":false},{\"key\":\"button-border-width\",\"value\":1.0}]}",
+                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"},{\"color\":{\"a\":1.0,\"b\":0.21568627655506134,\"g\":0.21568627655506134,\"r\":0.9490196108818054},\"key\":\"mouse-over/border\",\"type\":\"Color\"},{\"key\":\"border\",\"material\":\"_Silver\",\"type\":\"Reference\"}],\"properties\":[{\"key\":\"button-border-width\",\"value\":1.0},{\"key\":\"text-blink\",\"value\":false},{\"key\":\"text-font\",\"value\":\"app://fonts/G7_Cube_5.ttf\"},{\"key\":\"text-line-height\",\"value\":1.2000000476837158},{\"key\":\"text-size\",\"value\":28},{\"key\":\"edit-text-size\",\"value\":28},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.21568627655506134,\"g\":0.21568627655506134,\"r\":0.9490196108818054}}]}",
                   "tab_index": 0,
                   "text": "exit",
                   "type": "PushButton"
@@ -23927,7 +23927,7 @@
                     "h": 50.0,
                     "w": 150.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"},{\"color\":{\"a\":1.0,\"b\":0.1254749298095703,\"g\":0.9028305411338806,\"r\":0.6738994717597961},\"key\":\"mouse-over/border\",\"type\":\"Color\"},{\"key\":\"border\",\"material\":\"_Silver\",\"type\":\"Reference\"},{\"key\":\"button-border\",\"material\":\"rAn0G88CKj\",\"type\":\"Reference\"}],\"properties\":[{\"key\":\"text-size\",\"value\":28},{\"key\":\"text-font\",\"value\":\"app://fonts/G7_Cube_5.ttf\"},{\"key\":\"text-blink\",\"value\":false},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.24705882370471954,\"g\":0.8196078538894653,\"r\":0.650995671749115}},{\"key\":\"edit-text-size\",\"value\":28},{\"key\":\"text-line-height\",\"value\":1.2000000476837158}]}",
+                  "style": "{\"materials\":[{\"key\":\"button-border\",\"material\":\"rAn0G88CKj\",\"type\":\"Reference\"},{\"key\":\"border\",\"material\":\"_Silver\",\"type\":\"Reference\"},{\"color\":{\"a\":1.0,\"b\":0.1254749298095703,\"g\":0.9028305411338806,\"r\":0.6738994717597961},\"key\":\"mouse-over/border\",\"type\":\"Color\"},{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"}],\"properties\":[{\"key\":\"text-line-height\",\"value\":1.2000000476837158},{\"key\":\"edit-text-size\",\"value\":28},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.24705882370471954,\"g\":0.8196078538894653,\"r\":0.650995671749115}},{\"key\":\"text-blink\",\"value\":false},{\"key\":\"text-font\",\"value\":\"app://fonts/G7_Cube_5.ttf\"},{\"key\":\"text-size\",\"value\":28}]}",
                   "tab_index": 1,
                   "text": "play",
                   "type": "PushButton"
@@ -23949,7 +23949,7 @@
                     "h": 50.0,
                     "w": 600.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":26},{\"key\":\"text-size\",\"value\":24},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ARCADE.TTF\"}]}",
+                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"text-size\",\"value\":24},{\"key\":\"edit-text-size\",\"value\":26}]}",
                   "tab_index": 0,
                   "text": "ENSISOFT (c) 2023 presents DETONATOR 2D BREAKOUT !",
                   "type": "Label"
@@ -23971,7 +23971,7 @@
                     "h": 100.0,
                     "w": 700.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"edit-text-size\",\"value\":26},{\"key\":\"text-size\",\"value\":28}]}",
+                  "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":28},{\"key\":\"edit-text-size\",\"value\":26},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ARCADE.TTF\"}]}",
                   "tab_index": 0,
                   "text": "Break the bricks to advance to next level\nbut don't let the ball escape!\n",
                   "type": "Label"
@@ -24015,7 +24015,7 @@
                 "h": 800.0,
                 "w": 1000.0
               },
-              "style": "{\"materials\":[{\"key\":\"background\",\"type\":\"Null\"},{\"key\":\"border\",\"type\":\"Null\"}]}",
+              "style": "{\"materials\":[{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"background\",\"type\":\"Null\"}]}",
               "tab_index": 0,
               "type": "Form",
               "widgets": [
@@ -24035,7 +24035,7 @@
                     "h": 52.0,
                     "w": 1000.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"},{\"key\":\"border\",\"material\":\"rAn0G88CKj\",\"type\":\"Reference\"}]}",
+                  "style": "{\"materials\":[{\"key\":\"border\",\"material\":\"rAn0G88CKj\",\"type\":\"Reference\"},{\"key\":\"background\",\"material\":\"1Oau6Iem5r\",\"type\":\"Reference\"}]}",
                   "tab_index": 0,
                   "text": "GroupBox",
                   "type": "GroupBox",
@@ -24057,7 +24057,7 @@
                         "h": 28.0,
                         "w": 99.0
                       },
-                      "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"10togPdjU7\",\"type\":\"Reference\"}],\"properties\":[{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":0.0}},{\"key\":\"edit-text-size\",\"value\":20},{\"key\":\"text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":0.0}},{\"key\":\"text-size\",\"value\":36}]}",
+                      "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"10togPdjU7\",\"type\":\"Reference\"}],\"properties\":[{\"key\":\"text-size\",\"value\":36},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":0.0}},{\"key\":\"text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"edit-text-size\",\"value\":20},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.0,\"g\":0.0,\"r\":0.0}}]}",
                       "tab_index": 0,
                       "text": "3",
                       "type": "Label"
@@ -24079,7 +24079,7 @@
                         "h": 50.0,
                         "w": 100.0
                       },
-                      "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"text-size\",\"value\":36}]}",
+                      "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":36},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"edit-text-size\",\"value\":36}]}",
                       "tab_index": 0,
                       "text": "Label",
                       "type": "Label"
@@ -24101,7 +24101,7 @@
                         "h": 50.0,
                         "w": 100.0
                       },
-                      "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"text-size\",\"value\":36},{\"key\":\"text-font\",\"value\":\"app://fonts/ARCADE.TTF\"}]}",
+                      "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"text-size\",\"value\":36},{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"}]}",
                       "tab_index": 0,
                       "text": "Label",
                       "type": "Label"
@@ -24123,7 +24123,7 @@
                         "h": 50.0,
                         "w": 620.0
                       },
-                      "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"text-size\",\"value\":36},{\"key\":\"text-font\",\"value\":\"app://fonts/ARCADE.TTF\"}]}",
+                      "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"text-size\",\"value\":36},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/ARCADE.TTF\"},{\"key\":\"edit-text-size\",\"value\":36}]}",
                       "tab_index": 0,
                       "text": "",
                       "type": "Label"
@@ -24144,7 +24144,7 @@
                         "h": 5.0,
                         "w": 100.0
                       },
-                      "style": "{\"materials\":[{\"key\":\"progress-bar-fill\",\"material\":\"_Green\",\"type\":\"Reference\"},{\"key\":\"progress-bar-background\",\"type\":\"Null\"}]}",
+                      "style": "{\"materials\":[{\"key\":\"progress-bar-background\",\"type\":\"Null\"},{\"key\":\"progress-bar-fill\",\"material\":\"_Green\",\"type\":\"Reference\"}]}",
                       "tab_index": 0,
                       "text": "",
                       "type": "ProgressBar",
