@@ -32,7 +32,7 @@ Currently, supported major features:
 * Entity system with animation tracks
 * Audio engine with approx. dozen audio elements
 * Lua based scripting for entities, scenes and UIs
-* Built-in Lua script editor with code formatting and API help
+* Built-in Lua script editor with code formatting, API help and code completion
 * Scene builder
 * Styleable UI system (JSON style files *and* material system integration) 
 * Physics engine based on Box2D
@@ -40,7 +40,11 @@ Currently, supported major features:
 * Game content packaging for native and HTML5/WASM (with Emscripten)
 * Resource archives, export and import between projects (in zip)
 * Tilemap importer, several handy dialogs for materials, fonts, colors etc.
-* Several tools for texture packing, font map packing, etc.
+* Several other tools such as:
+  * Image packer (for packing textures manually when needed)
+  * Bitmap font mapper (map glyps to characters and vice versa)
+  * SVG viewer and PNG exporter
+  * VCS (Git) integration for syncing project changes to Git
 
 Currently, not yet 100% complete major features:
 * Continued work on tilemaps 
@@ -90,7 +94,8 @@ Supported formats are wav, mp3, ogg and flac.
 
 ![Screenshot](screens/editor-script.png "Script editor")
 Use the built-in code editor to write the Lua scripts for the entities, scenes, game or UI. The editor has a built-in
-help system for accessing the engine side Lua API documentation as well as automatic Lua code formatting and linting.
+help system for accessing the engine side Lua API documentation as well as automatic Lua code formatting and linting and
+a code completion system! 
 
 ![Screenshot](screens/editor-particle.png "Particle editor")
 The particle editor allows several types of particle effects to be created conveniently by adjusting several sliders 
