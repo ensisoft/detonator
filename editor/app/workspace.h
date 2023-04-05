@@ -150,6 +150,8 @@ namespace app
         // game::Loader implementation
         virtual game::TilemapDataHandle LoadTilemapData(const game::Loader::TilemapDataDesc& desc) const override;
 
+        static gfx::ResourceHandle LoadAppResource(const std::string& URI);
+
         template<typename T>
         engine::ClassHandle<T> FindClassHandleByName(const std::string& name, Resource::Type type) const
         {

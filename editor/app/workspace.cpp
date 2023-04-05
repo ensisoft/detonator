@@ -1741,21 +1741,12 @@ engine::EngineDataHandle Workspace::LoadEngineDataId(const std::string& id) cons
 
 gfx::ResourceHandle Workspace::LoadResource(const std::string& URI)
 {
-    // static map of resources that are part of the application, i.e.
-    // app://something. They're not expected to change.
-    static std::unordered_map<std::string,
-            std::shared_ptr<const GraphicsBuffer>> application_resources;
-    if (base::StartsWith(URI, "app://")) {
-        auto it = application_resources.find(URI);
-        if (it != application_resources.end())
-            return it->second;
-    }
+    if (base::StartsWith(URI, "app://"))
+        return LoadAppResource(URI);
+
     const auto& file = MapFileToFilesystem(URI);
     DEBUG("URI '%1' => '%2'", URI, file);
     auto ret = GraphicsBuffer::LoadFromFile(file);
-    if (base::StartsWith(URI, "app://")) {
-        application_resources[URI] = ret;
-    }
     return ret;
 }
 
@@ -1775,6 +1766,26 @@ game::TilemapDataHandle Workspace::LoadTilemapData(const game::Loader::TilemapDa
         return TilemapMemoryMap::OpenFilemap(file);
 
     return TilemapBuffer::LoadFromFile(file);
+}
+
+// static
+gfx::ResourceHandle Workspace::LoadAppResource(const std::string& URI)
+{
+    // static map of resources that are part of the application, i.e.
+    // app://something. They're not expected to change.
+    static std::unordered_map<std::string,
+            std::shared_ptr<const GraphicsBuffer>> application_resources;
+
+    auto it = application_resources.find(URI);
+    if (it != application_resources.end())
+        return it->second;
+
+    QString file = app::FromUtf8(URI);
+    file = CleanPath(file.replace("app://", GetAppDir()));
+
+    auto ret = GraphicsBuffer::LoadFromFile(file);
+    application_resources[URI] = ret;
+    return ret;
 }
 
 bool Workspace::LoadWorkspace(MigrationLog* log)
