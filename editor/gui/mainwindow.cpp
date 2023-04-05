@@ -40,6 +40,8 @@
 #include "base/assert.h"
 #include "data/json.h"
 #include "graphics/resource.h"
+#include "graphics/loader.h"
+#include "editor/app/buffer.h"
 #include "editor/app/format.h"
 #include "editor/app/utility.h"
 #include "editor/app/eventlog.h"
@@ -169,6 +171,17 @@ void LaunchExternalApplication(const ExternalApplicationArgs& args)
 namespace gui
 {
 
+class MainWindow::GfxResourceLoader : public gfx::Loader {
+public:
+    virtual gfx::ResourceHandle LoadResource(const std::string& URI) override
+    {
+        if (base::StartsWith(URI, "app://")) {
+            return app::Workspace::LoadAppResource(URI);
+        }
+        return app::GraphicsBuffer::LoadFromFile(app::FromUtf8(URI));
+    }
+};
+
 MainWindow::MainWindow(QApplication& app) : mApplication(app)
 {
     mUI.setupUi(this);
@@ -205,6 +218,13 @@ MainWindow::MainWindow(QApplication& app) : mApplication(app)
     SetValue(mUI.grpHelp, QString("Welcome to %1").arg(APP_TITLE));
     setWindowTitle(APP_TITLE);
     setAcceptDrops(true);
+
+    // need this loader for the tool dialogs that use GFX based rendering
+    // and use resources under application, i.e. with app:// resource URI
+    // When a workspace is opened the resource loader is then replaced with
+    // the "real" thing, i.e the workspace object.
+    mLoader = std::make_unique<GfxResourceLoader>();
+    gfx::SetResourceLoader(mLoader.get());
 }
 
 MainWindow::~MainWindow()
@@ -801,7 +821,7 @@ void MainWindow::CloseWorkspace()
     mWorkspaceProxy.setSourceModel(nullptr);
     mWorkspace.reset();
 
-    gfx::SetResourceLoader(nullptr);
+    gfx::SetResourceLoader(mLoader.get());
 
     ShowHelpWidget();
 

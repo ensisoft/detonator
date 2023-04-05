@@ -220,6 +220,8 @@ namespace gui
         Ui::MainWindow mUI;
 
     private:
+        class GfxResourceLoader;
+
         QApplication& mApplication;
         // the refresh timer to do low frequency UI updates.
         QTimer mRefreshTimer;
@@ -271,6 +273,8 @@ namespace gui
         // Tab focus stack for moving to the previous widget
         // when a widget is closed or popped off of the main panel
         FocusStack mFocusStack;
+        // GFX Resource loader that is used when there's no workspace.
+        std::unique_ptr<GfxResourceLoader> mLoader;
     };
 
 } // namespace
