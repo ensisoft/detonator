@@ -238,6 +238,7 @@ void DlgFontMap::on_btnClose_clicked()
 
 void DlgFontMap::finished()
 {
+    mClosed = true;
     mUI.widget->dispose();
 }
 
