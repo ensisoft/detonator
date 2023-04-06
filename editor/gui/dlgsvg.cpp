@@ -25,10 +25,13 @@
 #  include <QImageWriter>
 #  include <QPainter>
 #  include <QSvgRenderer>
+#  include <QDomDocument>
+#  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
 #include <algorithm>
 
+#include "base/json.h"
 #include "editor/app/format.h"
 #include "editor/app/utility.h"
 #include "editor/gui/dlgsvg.h"
@@ -40,6 +43,7 @@ namespace gui
 DlgSvgView::DlgSvgView(QWidget* parent) : QDialog(parent)
 {
     mUI.setupUi(this);
+    SetVisible(mUI.chkRasterAspect, false);
 }
 
 void DlgSvgView::on_btnClose_clicked()
@@ -65,6 +69,36 @@ void DlgSvgView::on_btnSelectImage_clicked()
         msg.exec();
         return;
     }
+    QStringList items;
+    items << "";
+
+    QFile::FileError err_val;
+    QString err_str;
+    QString svg_xml = app::ReadTextFile(file, &err_val, &err_str);
+    if (svg_xml.isEmpty())
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setText("Failed to open the SVG file.");
+        msg.exec();
+        return;
+    }
+    QDomDocument document("svg");
+    document.setContent(svg_xml);
+    const QDomElement& root = document.firstChildElement();
+    const QDomNodeList& ids = root.elementsByTagName("g");
+    for (int i=0; i<ids.count(); ++i) {
+        const QDomNode& node = ids.at(i);
+        const QDomElement& elem = node.toElement();
+        if (elem.isNull())
+            continue;
+        const QString& attr = elem.attribute("id");
+        if (attr.isNull())
+            continue;
+        items << attr;
+    }
+
     const auto& view_box = mUI.view->viewBox();
     const auto& svg_size = mUI.view->svgSize();
     SetValue(mUI.imageFile, file);
@@ -75,13 +109,10 @@ void DlgSvgView::on_btnSelectImage_clicked()
     SetValue(mUI.rasterWidth, svg_size.width());
     SetValue(mUI.rasterHeight, svg_size.height());
     SetEnabled(mUI.btnSaveAs, true);
-    mOriginalViewBox = view_box;
-    mOriginalRasterSize = svg_size;
+    SetList(mUI.cmbElement, items);
 
+    mElements = items;
     mViewAspect = (float)view_box.width() / (float)view_box.height();
-    mRasterAspect = (float)svg_size.width() / (float)svg_size.height();
-
-    SetVisible(mUI.chkRasterAspect, false);
 }
 
 void DlgSvgView::on_chkShowBackground_stateChanged(int)
@@ -177,7 +208,10 @@ void DlgSvgView::on_btnSaveAs_clicked()
     if (filename.isEmpty())
         return;
 
+    // SVG Canvas size used to rasterize the contents.
     const auto& svg_size = mUI.view->svgSize();
+    // This is the logical SVG viewport size.
+    const auto& box_size = mUI.view->viewBox();
 
     QSize raster_size;
     raster_size.setWidth(GetValue(mUI.rasterWidth));
@@ -185,11 +219,11 @@ void DlgSvgView::on_btnSaveAs_clicked()
     QImage image(raster_size, QImage::Format_ARGB32);
     image.fill(Qt::transparent);
 
-
+    const auto& target = app::CenterRectOnTarget(raster_size, svg_size);
 
     QPainter painter;
     painter.begin(&image);
-    mUI.view->renderer()->render(&painter, app::CenterRectOnTarget(raster_size, svg_size));
+    mUI.view->renderer()->render(&painter, target);
     painter.end();
 
     QImageWriter writer;
@@ -206,7 +240,69 @@ void DlgSvgView::on_btnSaveAs_clicked()
         return;
     }
 
+    if (GetValue(mUI.chkJson))
+    {
+        nlohmann::json json;
+        base::JsonWrite(json, "json_version", 1);
+        base::JsonWrite(json, "made_with_app", APP_TITLE);
+        base::JsonWrite(json, "made_with_ver", APP_VERSION);
+        base::JsonWrite(json, "image_file", app::ToUtf8(filename));
+        base::JsonWrite(json, "image_width", raster_size.width());
+        base::JsonWrite(json, "image_height", raster_size.height());
+
+        const auto current = mUI.view->element();
+
+        const float box_width  = box_size.width();
+        const float box_height = box_size.height();
+        //const float svg_width  = svg_size.width();
+        //const float svg_height = svg_size.height();
+        const float raster_width  = raster_size.width();
+        const float raster_height = raster_size.height();
+
+        // First element is an empty string and refers to the whole SVG file.
+        for (int i=1; i<mElements.size(); ++i)
+        {
+            const auto& element = mElements[i];
+            // todo: should we worry about the element transform here?
+            const auto& bounds  = mUI.view->elementBounds(element);
+            const float xpos = bounds.x() / box_width * target.width() + target.x();
+            const float ypos = bounds.y() / box_height * target.height() + target.y();
+            const float width = bounds.width() / box_width * target.width();
+            const float height = bounds.height() / box_height * target.height();
+            nlohmann::json tile_json;
+            base::JsonWrite(tile_json, "xpos", (unsigned)xpos);
+            base::JsonWrite(tile_json, "ypos", (unsigned)ypos);
+            base::JsonWrite(tile_json, "width",  (unsigned)width);
+            base::JsonWrite(tile_json, "height", (unsigned)height);
+            base::JsonWrite(tile_json, "name", app::ToUtf8(element));
+            json["images"].push_back(std::move(tile_json));
+        }
+        mUI.view->setElement(current);
+        QString err_str;
+        QFile::FileError err_val = QFile::FileError::NoError;
+        if (!app::WriteTextFile(filename + ".json", json.dump(2), &err_val, &err_str))
+        {
+            QMessageBox msg(this);
+            msg.setIcon(QMessageBox::Critical);
+            msg.setStandardButtons(QMessageBox::Ok);
+            msg.setText(tr("Failed to write the JSON description file.\n"
+                           "File error '%1'").arg(err_str));
+            msg.exec();
+        }
+
+    }
     mLastSaveFile = filename;
+}
+
+void DlgSvgView::on_cmbElement_currentIndexChanged(const QString&)
+{
+    mUI.view->setElement(GetValue(mUI.cmbElement));
+    const auto& view_box = mUI.view->viewBox();
+    SetValue(mUI.viewX, view_box.x());
+    SetValue(mUI.viewY, view_box.y());
+    SetValue(mUI.viewW, view_box.width());
+    SetValue(mUI.viewH, view_box.height());
+    mViewAspect = (float)view_box.width() / (float)view_box.height();
 }
 
 void DlgSvgView::SetViewBox()

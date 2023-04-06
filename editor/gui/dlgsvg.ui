@@ -74,6 +74,16 @@
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
+          <widget class="QComboBox" name="cmbElement">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QLabel" name="label_2">
            <property name="text">
             <string>X</string>
@@ -164,19 +174,6 @@
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
           <widget class="QPushButton" name="btnDoubleSize">
            <property name="text">
             <string>Size x2</string>
@@ -242,7 +239,7 @@
       <item>
        <widget class="QGroupBox" name="groupBox_3">
         <property name="title">
-         <string>Export</string>
+         <string>Canvas</string>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -298,6 +295,16 @@
           <widget class="QCheckBox" name="chkRasterAspect">
            <property name="text">
             <string>Keep aspect</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="chkJson">
+           <property name="text">
+            <string>Generate JSON</string>
            </property>
            <property name="checked">
             <bool>true</bool>
