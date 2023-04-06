@@ -49,6 +49,7 @@ namespace gui
     class DlgImgView;
     class DlgFontMap;
     class DlgSvgView;
+    class DlgTilemap;
 
     // Main application window. Composes several MainWidgets
     // into a single cohesive window object that the user can
@@ -143,6 +144,7 @@ namespace gui
         void on_actionImageViewer_triggered();
         void on_actionSvgViewer_triggered();
         void on_actionFontMap_triggered();
+        void on_actionTilemap_triggered();
         void on_actionLaunchViewer_triggered();
         void on_actionClearLog_triggered();
         void on_actionLogShowInfo_toggled(bool val);
@@ -269,6 +271,7 @@ namespace gui
         std::unique_ptr<DlgImgView> mDlgImgView;
         std::unique_ptr<DlgFontMap> mDlgFontMap;
         std::unique_ptr<DlgSvgView> mDlgSvgView;
+        std::unique_ptr<DlgTilemap> mDlgTilemap;
         using FocusStack = std::stack<QString>;
         // Tab focus stack for moving to the previous widget
         // when a widget is closed or popped off of the main panel

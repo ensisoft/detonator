@@ -1247,7 +1247,7 @@
      <x>0</x>
      <y>0</y>
      <width>1853</width>
-     <height>28</height>
+     <height>36</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1371,6 +1371,7 @@
     <addaction name="actionImageViewer"/>
     <addaction name="actionSvgViewer"/>
     <addaction name="actionFontMap"/>
+    <addaction name="actionTilemap"/>
     <addaction name="separator"/>
     <addaction name="actionLaunchViewer"/>
    </widget>
@@ -2235,6 +2236,15 @@
    </property>
    <property name="toolTip">
     <string>Launch SVG viewer</string>
+   </property>
+  </action>
+  <action name="actionTilemap">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/image.png</normaloff>:/16x16_ico_png/image.png</iconset>
+   </property>
+   <property name="text">
+    <string>Tilemap...</string>
    </property>
   </action>
  </widget>

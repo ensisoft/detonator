@@ -59,42 +59,84 @@ namespace {
             ERROR("Failed to parse JSON file. [file='%1']", file);
             return false;
         }
-        if (!json.contains("images") || !json["images"].is_array())
+
+        if (json.contains("images") && json["images"].is_array())
         {
-            ERROR("JSON file doesn't contain images array. [file='%1']", file);
-            return false;
+            for (const auto& img_json: json["images"].items())
+            {
+                const auto& obj = img_json.value();
+
+                gui::DlgImgView::Image img;
+                std::string name;
+                std::string character;
+                unsigned width = 0;
+                unsigned height = 0;
+                unsigned index = 0;
+
+                if (base::JsonReadSafe(obj, "name", &name))
+                    img.name = app::FromUtf8(name);
+                if (base::JsonReadSafe(obj, "char", &character))
+                    img.character = app::FromUtf8(character);
+                if (base::JsonReadSafe(obj, "width", &width))
+                    img.width = width;
+                if (base::JsonReadSafe(obj, "height", &height))
+                    img.height = height;
+                if (base::JsonReadSafe(obj, "index", &index))
+                    img.index = index;
+                if (!base::JsonReadSafe(obj, "xpos", &img.xpos))
+                    WARN("Image is missing 'xpos' attribute. [file='%1']", file);
+                if (!base::JsonReadSafe(obj, "ypos", &img.ypos))
+                    WARN("Image is missing 'ypos' attribute. [file='%1']", file);
+
+                out->push_back(std::move(img));
+            }
         }
-        for (const auto& img_json : json["images"].items())
+        else
         {
-            const auto& obj = img_json.value();
+            unsigned image_width  = 0;
+            unsigned image_height = 0;
+            unsigned tile_width  = 0;
+            unsigned tile_height = 0;
+            unsigned xoffset = 0;
+            unsigned yoffset = 0;
+            bool error = true;
 
-            gui::DlgImgView::Image img;
+            if (!base::JsonReadSafe(json, "image_width", &image_width))
+                ERROR("Missing image_width property. [file='%1']", file);
+            else if (!base::JsonReadSafe(json, "image_height", &image_height))
+                ERROR("Missing image_height property. [file='%1']", file);
+            else if (!base::JsonReadSafe(json, "tile_width", &tile_width))
+                ERROR("Missing tile_width property. [file='%1']", file);
+            else if (!base::JsonReadSafe(json, "tile_height", &tile_height))
+                ERROR("Missing tile_height property. [file='%1']", file);
+            else if (!base::JsonReadSafe(json, "xoffset", &xoffset))
+                ERROR("Missing xoffset property.[file='%1']", file);
+            else if (!base::JsonReadSafe(json, "yoffset", &yoffset))
+                ERROR("Missing yoffset property. [file='%1']", file);
+            else error = false;
+            if (error) return false;
 
-            std::string name;
-            std::string character;
-            unsigned width  = 0;
-            unsigned height = 0;
-            unsigned index  = 0;
+            const auto max_rows = (image_height - yoffset) / tile_height;
+            const auto max_cols = (image_width - xoffset) / tile_width;
+            for (unsigned row=0; row<max_rows; ++row)
+            {
+                for (unsigned col=0; col<max_cols; ++col)
+                {
+                    const auto index = row * max_cols + col;
+                    const auto tile_xpos = xoffset + col * tile_width;
+                    const auto tile_ypos = yoffset + row * tile_height;
 
-            if (base::JsonReadSafe(obj, "name", &name))
-                img.name = app::FromUtf8(name);
-            if (base::JsonReadSafe(obj, "char", &character))
-                img.character = app::FromUtf8(character);
-            if (base::JsonReadSafe(obj, "width", &width))
-                img.width = width;
-            if (base::JsonReadSafe(obj, "height", &height))
-                img.height = height;
-            if (base::JsonReadSafe(obj, "index", &index))
-                img.index = index;
-            if (!base::JsonReadSafe(obj, "xpos", &img.xpos))
-                WARN("Image is missing 'xpos' attribute. [file='%1'", file);
-            if (!base::JsonReadSafe(obj, "ypos", &img.ypos))
-                WARN("Image is missing 'ypos' attribute. [file='%1']", file);
-
-            out->push_back(std::move(img));
+                    gui::DlgImgView::Image img;
+                    img.width  = tile_width;
+                    img.height = tile_height;
+                    img.xpos   = tile_xpos;
+                    img.ypos   = tile_ypos;
+                    out->push_back(std::move(img));
+                }
+            }
         }
 
-        // finally sort based on the image index.
+        // finally, sort based on the image index.
         std::sort(std::begin(*out), std::end(*out), [&](const auto& a, const auto& b) {
             return a.index < b.index;
         });
@@ -182,8 +224,9 @@ void DlgImgView::LoadJson(const QString& file)
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Ok);
         msg.setIcon(QMessageBox::Critical);
-        msg.setText(tr("There was a problem reading the file.\n'%1'\n"
-                       "Perhaps the image is not a valid JSON file?").arg(file));
+        msg.setText(tr("There was a problem reading the file.\n"
+                       "Perhaps the image is not a valid image descriptor JSON file?\n"
+                       "Please see the log for details."));
         msg.exec();
         return;
     }
@@ -264,8 +307,11 @@ void DlgImgView::on_btnSelectImage_clicked()
         return;
 
     LoadImage(file);
-    if (FileExists(file + ".json"))
-        LoadJson(file + ".json");
+
+    QString json = file;
+    json.replace(".png", ".json");
+    if (FileExists(json))
+        LoadJson(json);
 }
 
 void DlgImgView::on_btnSelectJson_clicked()
@@ -371,6 +417,7 @@ void DlgImgView::on_tabWidget_currentChanged(int)
 
 void DlgImgView::finished()
 {
+    mClosed = true;
     mUI.widget->dispose();
 }
 void DlgImgView::timer()
