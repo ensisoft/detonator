@@ -31,9 +31,9 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <item>
-             <widget class="QLineEdit" name="fileSource">
+           <layout class="QGridLayout" name="gridLayout_3">
+            <item row="1" column="0">
+             <widget class="QLineEdit" name="jsonFile">
               <property name="sizePolicy">
                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -44,12 +44,28 @@
                <bool>true</bool>
               </property>
               <property name="placeholderText">
-               <string>No image loaded</string>
+               <string>Select descriptor file (none selected)</string>
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QToolButton" name="btnSelectFile">
+            <item row="0" column="0">
+             <widget class="QLineEdit" name="imageFile">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+              <property name="placeholderText">
+               <string>Select image file (none selected)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QToolButton" name="btnSelectImage">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -68,137 +84,43 @@
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QLabel" name="label_7">
-              <property name="text">
-               <string>Offset</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSpinBox" name="offsetX">
+            <item row="1" column="1">
+             <widget class="QToolButton" name="btnSelectJson">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="suffix">
-               <string> px</string>
-              </property>
-              <property name="minimum">
-               <number>0</number>
-              </property>
-              <property name="maximum">
-               <number>16384</number>
-              </property>
-              <property name="value">
-               <number>0</number>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSpinBox" name="offsetY">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="suffix">
-               <string> px</string>
-              </property>
-              <property name="minimum">
-               <number>0</number>
-              </property>
-              <property name="maximum">
-               <number>16384</number>
-              </property>
-              <property name="value">
-               <number>0</number>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_4">
               <property name="text">
-               <string>Tile Size</string>
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
+              </property>
+              <property name="toolButtonStyle">
+               <enum>Qt::ToolButtonIconOnly</enum>
               </property>
              </widget>
             </item>
-            <item>
-             <widget class="QSpinBox" name="tileWidth">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="suffix">
-               <string> px</string>
-              </property>
-              <property name="minimum">
-               <number>1</number>
-              </property>
-              <property name="maximum">
-               <number>16384</number>
-              </property>
-              <property name="value">
-               <number>32</number>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSpinBox" name="tileHeight">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="suffix">
-               <string> px</string>
-              </property>
-              <property name="minimum">
-               <number>1</number>
-              </property>
-              <property name="maximum">
-               <number>16384</number>
-              </property>
-              <property name="value">
-               <number>32</number>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="btnSelectAll">
-              <property name="text">
-               <string>Select All</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="btnSelectNone">
-              <property name="text">
-               <string>Select None</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_3">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Preferred</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
+            <item row="0" column="2" rowspan="2">
+             <layout class="QVBoxLayout" name="verticalLayout_7">
+              <item>
+               <widget class="QPushButton" name="btnSelectAll">
+                <property name="text">
+                 <string>Select All</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btnSelectNone">
+                <property name="text">
+                 <string>Select None</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </item>
@@ -266,16 +188,6 @@
              </spacer>
             </item>
             <item>
-             <widget class="QCheckBox" name="chkGrid">
-              <property name="text">
-               <string>Show tile grid</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
              <widget class="color_widgets::ColorSelector" name="widgetColor">
               <property name="minimumSize">
                <size>
@@ -297,7 +209,7 @@
      </widget>
      <widget class="QWidget" name="tabImport">
       <attribute name="title">
-       <string>2. Review Tiles</string>
+       <string>2. Import Tiles</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <item>
@@ -329,8 +241,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>92</width>
-               <height>22</height>
+               <width>590</width>
+               <height>662</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -357,6 +269,9 @@
            <property name="title">
             <string>Material generation</string>
            </property>
+           <property name="flat">
+            <bool>false</bool>
+           </property>
            <layout class="QGridLayout" name="gridLayout_2">
             <item row="4" column="1">
              <widget class="QComboBox" name="magFilter">
@@ -374,7 +289,7 @@
             <item row="1" column="0">
              <widget class="QLabel" name="label_25">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -394,7 +309,7 @@
             <item row="3" column="1">
              <widget class="QComboBox" name="minFilter">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -424,7 +339,7 @@
             <item row="0" column="0">
              <widget class="QLabel" name="label_5">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -458,12 +373,19 @@
              <widget class="QComboBox" name="materialType"/>
             </item>
             <item row="2" column="1">
-             <widget class="QLineEdit" name="spriteName"/>
+             <widget class="QLineEdit" name="spriteName">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
             </item>
             <item row="3" column="0">
              <widget class="QLabel" name="label_30">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -484,6 +406,12 @@
            <layout class="QGridLayout" name="gridLayout">
             <item row="4" column="1">
              <widget class="QSpinBox" name="tileMargin">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="suffix">
                <string> px</string>
               </property>
@@ -499,13 +427,13 @@
             <item row="4" column="0">
              <widget class="QLabel" name="label_10">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
               <property name="text">
-               <string>Tile margin</string>
+               <string>Marging</string>
               </property>
              </widget>
             </item>
@@ -521,6 +449,15 @@
             </item>
             <item row="2" column="1">
              <widget class="QSpinBox" name="imageQuality">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="suffix">
+               <string> %</string>
+              </property>
               <property name="maximum">
                <number>100</number>
               </property>
@@ -541,6 +478,12 @@
             </item>
             <item row="3" column="1">
              <widget class="QLineEdit" name="folder">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
                <string>textures/</string>
               </property>
@@ -661,17 +604,14 @@
  </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
-  <tabstop>fileSource</tabstop>
-  <tabstop>btnSelectFile</tabstop>
-  <tabstop>offsetX</tabstop>
-  <tabstop>offsetY</tabstop>
-  <tabstop>tileWidth</tabstop>
-  <tabstop>tileHeight</tabstop>
+  <tabstop>imageFile</tabstop>
+  <tabstop>btnSelectImage</tabstop>
+  <tabstop>jsonFile</tabstop>
+  <tabstop>btnSelectJson</tabstop>
   <tabstop>btnSelectAll</tabstop>
   <tabstop>btnSelectNone</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbColorSpace</tabstop>
-  <tabstop>chkGrid</tabstop>
   <tabstop>widgetColor</tabstop>
   <tabstop>renameTiles</tabstop>
   <tabstop>scrollArea</tabstop>
