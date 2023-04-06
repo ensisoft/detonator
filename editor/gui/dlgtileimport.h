@@ -44,9 +44,9 @@ namespace gui
         Q_OBJECT
 
     public:
-        ImportedTile(QWidget* parent);
+        explicit ImportedTile(QWidget* parent);
 
-        void SetPreview(QPixmap pix);
+        void SetPreview(const QPixmap& pix);
 
         QString GetName() const;
         void SetName(const QString& name);
@@ -61,22 +61,29 @@ namespace gui
         Q_OBJECT
 
     public:
+        struct Image {
+            QString name;
+            unsigned xpos = 0;
+            unsigned ypos = 0;
+            unsigned width = 0;
+            unsigned height = 0;
+            bool selected = false;
+            ImportedTile* widget = nullptr;
+        };
+
         DlgTileImport(QWidget* parent, app::Workspace* workspace);
        ~DlgTileImport();
 
         void LoadState();
 
     private slots:
-        void on_btnSelectFile_clicked();
+        void on_btnSelectImage_clicked();
+        void on_btnSelectJson_clicked();
         void on_btnSelectAll_clicked();
         void on_btnSelectNone_clicked();
         void on_btnClose_clicked();
         void on_btnImport_clicked();
         void on_tabWidget_currentChanged(int);
-        void on_tileWidth_valueChanged(int);
-        void on_tileHeight_valueChanged(int);
-        void on_offsetX_valueChanged(int);
-        void on_offsetY_valueChanged(int);
         void on_renameTiles_textChanged(const QString& name);
         void on_widgetColor_colorChanged(QColor color);
         void on_materialType_currentIndexChanged(int);
@@ -86,14 +93,13 @@ namespace gui
         void timer();
     private:
         void ToggleSelection();
-        void SplitIntoTiles();
-        void LoadFile(const QString& file);
+        void LoadImageFile(const QString& file);
+        void LoadJsonFile(const QString& file);
         void SaveState();
         void OnPaintScene(gfx::Painter& painter, double secs);
         void OnMousePress(QMouseEvent* mickey);
         void OnMouseMove(QMouseEvent* mickey);
         void OnMouseRelease(QMouseEvent* mickey);
-        bool OnKeyPress(QKeyEvent* event);
     private:
         Ui::DlgTileImport mUI;
     private:
@@ -109,16 +115,13 @@ namespace gui
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
 
-        struct Tile {
-            bool selected = false;
-            ImportedTile* widget = nullptr;
-        };
-        std::vector<Tile> mTiles;
+        std::vector<Image> mImages;
+        std::size_t mIndexUnderMouse = 0;
         enum class Mode {
             Nada, Tracking, Selecting
         };
         Mode mMode = Mode::Nada;
-        std::set<unsigned> mTilesTouched;
+        std::set<size_t> mTilesTouched;
     };
 
 } // namespace
