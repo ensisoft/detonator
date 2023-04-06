@@ -25,6 +25,7 @@
 #  include <QColor>
 #  include <QJsonObject>
 #  include <QIcon>
+#  include <QFile>
 #  include <QVariant>
 #  include <QVariantMap>
 #  include <neargye/magic_enum.hpp>
@@ -155,11 +156,16 @@ bool ReadBinaryFile(const QString& file, std::vector<T>& data)
 // Simple helper to dump a string into a text file.
 // Previous contents of the file will be overwritten.
 // Returns false on failure.
-bool WriteTextFile(const QString& file, const QString& contents, QString* error = nullptr);
+bool WriteTextFile(const QString& file, const QString& contents, QFile::FileError* err_val = nullptr, QString* err_str = nullptr);
+// Write string to a text file. Expect UTF-8
+bool WriteTextFile(const QString& file, const std::string& contents, QFile::FileError* err_val = nullptr, QString* err_str = nullptr);
+// Write a NUL terminated narrow string to a text file. Expect UTF-8
+bool WriteTextFile(const QString& file, const char* contents, QFile::FileError* err_val = nullptr, QString* err_str = nullptr);
 
 // Read the contents of a text file into a string.
-// Provides no error checking.
-QString ReadTextFile(const QString& file);
+QString ReadTextFile(const QString& file, QFile::FileError* err_val = nullptr, QString* err_str = nullptr);
+
+QByteArray ReadBinaryFile(const QString& file, QFile::FileError* err_val = nullptr, QString* err_str = nullptr);
 
 // Generate a random string.
 QString RandomString();

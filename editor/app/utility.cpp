@@ -384,14 +384,15 @@ bool WriteBinaryFile(const QString& file, const void* data, std::size_t bytes)
     return true;
 }
 
-bool WriteTextFile(const QString& file, const QString& content, QString* error)
+bool WriteTextFile(const QString& file, const QString& content, QFile::FileError* err_val, QString* err_str)
 {
     QFile out;
     out.setFileName(file);
     out.open(QIODevice::WriteOnly | QIODevice::Truncate);
     if (!out.isOpen())
     {
-        if (error) *error = out.errorString();
+        if (err_val) *err_val = out.error();
+        if (err_str) *err_str = out.errorString();
         return false;
     }
 
@@ -401,14 +402,69 @@ bool WriteTextFile(const QString& file, const QString& content, QString* error)
     return true;
 }
 
-QString ReadTextFile(const QString& file)
+bool WriteTextFile(const QString& file, const std::string& contents, QFile::FileError* err_val, QString* err_str)
+{
+    QFile out;
+    out.setFileName(file);
+    out.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    if (!out.isOpen())
+    {
+        if (err_val) *err_val = out.error();
+        if (err_str) *err_str = out.errorString();
+    }
+    if (contents.empty())
+        return true;
+    out.write(&contents[0], contents.size());
+    out.close();
+    return true;
+}
+bool WriteTextFile(const QString& file, const char* contents, QFile::FileError* err_val, QString* err_str)
+{
+    QFile out;
+    out.setFileName(file);
+    out.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    if (!out.isOpen())
+    {
+        if (err_val) *err_val = out.error();
+        if (err_str) *err_str = out.errorString();
+    }
+    if (!contents)
+        return true;
+    const auto len = std::strlen(contents);
+    if (!len)
+        return true;
+
+    out.write(contents, len);
+    out.close();
+    return true;
+}
+
+
+QString ReadTextFile(const QString& file, QFile::FileError* err_val, QString* err_str)
 {
     QFile in;
     in.setFileName(file);
     in.open(QIODevice::ReadOnly);
     if (!in.isOpen())
-        return QString();
+    {
+        if (err_val) *err_val = in.error();
+        if (err_str) *err_str = in.errorString();
+        return "";
+    }
     return QString::fromUtf8(in.readAll());
+}
+
+QByteArray ReadBinaryFile(const QString& file, QFile::FileError* err_val, QString* err_str)
+{
+    QFile in;
+    in.setFileName(file);
+    in.open(QIODevice::ReadOnly);
+    if (!in.isOpen())
+    {
+        if (err_val) *err_val = in.error();
+        if (err_str) *err_str = in.errorString();
+    }
+    return in.readAll();
 }
 
 QString RandomString()

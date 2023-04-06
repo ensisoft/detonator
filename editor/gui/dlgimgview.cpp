@@ -39,18 +39,15 @@
 namespace {
     bool ReadTexturePack(const QString& file, std::vector<gui::DlgImgView::Image>* out)
     {
-        QFile io(file);
-        if (!io.open(QIODevice::ReadOnly))
+        QString err_str;
+        QFile::FileError err_val = QFile::FileError::NoError;
+        const auto& buff = app::ReadBinaryFile(file, &err_val, &err_str);
+        if (err_val != QFile::FileError::NoError)
         {
-            ERROR("Failed to open file for reading. [file='%1', error=%2]", file, io.error());
+            ERROR("Failed to read file. [file='%1', error='%2']", file, err_str);
             return false;
         }
-        const auto& buff = io.readAll();
-        if (buff.isEmpty())
-        {
-            ERROR("JSON file contains no JSON content. [file='%1']", file);
-            return false;
-        }
+
         const auto* beg  = buff.data();
         const auto* end  = buff.data() + buff.size();
         const auto& json = nlohmann::json::parse(beg, end, nullptr, false);

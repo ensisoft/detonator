@@ -522,14 +522,15 @@ constexpr auto json = R"(
 
         for (int i=0; i<2; ++i)
         {
-            QString error;
-            if (!app::WriteTextFile(files[i], content[i], &error))
+            QString error_str;
+            QFile::FileError err_val;
+            if (!app::WriteTextFile(files[i], content[i], &err_val, &error_str))
             {
-                ERROR("Failed to write shader glsl file. [file='%1', error=%2]", files[i], error);
+                ERROR("Failed to write shader glsl file. [file='%1', error=%2]", files[i], error_str);
                 QMessageBox msg(this);
                 msg.setIcon(QMessageBox::Critical);
                 msg.setWindowTitle("Filesystem Error");
-                msg.setText(tr("Failed to write file.\n%1\n%2").arg(files[i]).arg(error));
+                msg.setText(tr("Failed to write file.\n%1\n%2").arg(files[i]).arg(error_str));
                 msg.exec();
                 return;
             }
