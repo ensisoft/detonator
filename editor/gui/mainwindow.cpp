@@ -71,6 +71,7 @@
 #include "editor/gui/dlgmigrationlog.h"
 #include "editor/gui/dlgimgview.h"
 #include "editor/gui/dlgfontmap.h"
+#include "editor/gui/dlgtilemap.h"
 #include "editor/gui/dlgvcs.h"
 #include "editor/gui/dlgsvg.h"
 #include "editor/gui/utility.h"
@@ -1956,6 +1957,15 @@ void MainWindow::on_actionFontMap_triggered()
     mDlgFontMap->activateWindow();
 }
 
+void MainWindow::on_actionTilemap_triggered()
+{
+    if (!mDlgTilemap)
+        mDlgTilemap = std::make_unique<DlgTilemap>(nullptr);
+
+    mDlgTilemap->show();
+    mDlgTilemap->activateWindow();
+}
+
 void MainWindow::on_actionLaunchViewer_triggered()
 {
     if (!mWorkspace)
@@ -2594,6 +2604,9 @@ void MainWindow::RefreshUI()
 
     if (mDlgSvgView && mDlgSvgView->IsClosed())
         mDlgSvgView.reset();
+
+    if (mDlgTilemap && mDlgTilemap->IsClosed())
+        mDlgTilemap.reset();
 }
 
 void MainWindow::ShowNote(const app::Event& event)

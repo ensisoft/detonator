@@ -432,6 +432,9 @@ add_executable(Detonator
     editor/gui/dlggradient.ui
     editor/gui/dlgnew.h
     editor/gui/dlgnew.ui
+    editor/gui/dlgtilemap.h
+    editor/gui/dlgtilemap.ui
+    editor/gui/dlgtilemap.cpp
     editor/gui/dlgfontmap.h
     editor/gui/dlgfontmap.ui
     editor/gui/dlgfontmap.cpp
