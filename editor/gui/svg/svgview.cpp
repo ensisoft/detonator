@@ -94,6 +94,13 @@ void SvgViewWidget::drawBackground(QPainter *p, const QRectF &)
     p->restore();
 }
 
+QRectF SvgViewWidget::elementBounds(const QString& id)
+{
+    if (m_svgItem)
+        return m_svgItem->renderer()->boundsOnElement(id);
+    return QRectF(0.0f, 0.0f, 0.0f, 0.0f);
+}
+
 QSize SvgViewWidget::svgSize() const
 {
     return m_svgItem ? m_svgItem->boundingRect().size().toSize() : QSize();
@@ -112,6 +119,14 @@ void SvgViewWidget::setViewBox(const QRect& viewbox)
     if (m_svgItem) {
         auto* renderer = m_svgItem->renderer();
         renderer->setViewBox(viewbox);
+        scene()->invalidate();
+    }
+}
+
+void SvgViewWidget::setElement(const QString& id)
+{
+    if (m_svgItem) {
+        m_svgItem->setElementId(id);
         scene()->invalidate();
     }
 }
@@ -252,5 +267,12 @@ QSvgRenderer *SvgViewWidget::renderer() const
     if (m_svgItem)
         return m_svgItem->renderer();
     return nullptr;
+}
+
+QString SvgViewWidget::element() const
+{
+    if (m_svgItem)
+        return m_svgItem->elementId();
+    return "";
 }
 

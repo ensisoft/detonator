@@ -20,8 +20,8 @@
 
 #include "warnpush.h"
 #  include "ui_dlgsvg.h"
-#  include <QTimer>
 #  include <QDialog>
+#  include <QStringList>
 #include "warnpop.h"
 
 namespace gui
@@ -31,7 +31,7 @@ namespace gui
     Q_OBJECT
 
     public:
-        DlgSvgView(QWidget* parent);
+        explicit DlgSvgView(QWidget* parent);
 
         bool IsClosed() const
         { return mClosed; }
@@ -50,6 +50,7 @@ namespace gui
         void on_btnDoubleSize_clicked();
         void on_btnHalveSize_clicked();
         void on_btnSaveAs_clicked();
+        void on_cmbElement_currentIndexChanged(const QString&);
 
     private:
         void SetViewBox();
@@ -58,11 +59,9 @@ namespace gui
         Ui::DlgSvg mUI;
     private:
         bool mClosed = false;
+        QStringList mElements;
         QString mLastSaveFile;
-        QRect mOriginalViewBox;
-        QSize mOriginalRasterSize;
         float mViewAspect = 1.0f;
-        float mRasterAspect = 1.0f;
     };
 
 } // namespace

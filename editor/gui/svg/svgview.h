@@ -72,11 +72,14 @@ public:
     bool openFile(const QString &fileName);
     void setRenderer(RendererType type = Native);
     void drawBackground(QPainter *p, const QRectF &rect) override;
+    void setElement(const QString& id);
 
+    QRectF elementBounds(const QString& id);
     QSize svgSize() const;
     QRect viewBox() const;
     void setViewBox(const QRect& viewbox);
     QSvgRenderer *renderer() const;
+    QString element() const;
 
     qreal zoomFactor() const;
 
