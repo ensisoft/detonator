@@ -216,14 +216,27 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_3">
+         <widget class="QComboBox" name="cmbColorSpace"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_5">
           <property name="text">
-           <string>Color space</string>
+           <string>Min filter</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="cmbColorSpace"/>
+         <widget class="QComboBox" name="cmbMinFilter"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Mag filter</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cmbMagFilter"/>
         </item>
         <item>
          <spacer name="horizontalSpacer_2">
