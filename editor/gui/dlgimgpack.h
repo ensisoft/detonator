@@ -26,6 +26,8 @@
 #  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
+#include <vector>
+
 namespace gui
 {
     class DlgImgPack : public QDialog
@@ -46,13 +48,30 @@ namespace gui
         void on_colorChanged();
         void on_padding_valueChanged(int);
         void on_chkPot_stateChanged(int);
-        void on_glyphIndex_textChanged(const QString&);
+        void on_glyphIndex_textChanged(const QString& text);
+        void on_imgName_textChanged(const QString& text);
     private:
+        struct SourceImage;
+        static bool ReadJson(const QString& file, std::vector<SourceImage>* sources);
+        static bool ReadList(const QString& file, std::vector<SourceImage>* sources);
+        static bool ReadImage(const QString& file, std::vector<SourceImage>* sources);
         void repack();
-
     private:
         Ui::DlgImgPack mUI;
     private:
+        struct SourceImage {
+            QString name;
+            QString file;
+            QString glyph;
+            unsigned width  = 0;
+            unsigned height = 0;
+            unsigned xpos = 0;
+            unsigned ypos = 0;
+            unsigned index = 0;
+            bool sub_image = false;
+        };
+        std::vector<SourceImage> mSources;
+
         QImage mPackedImage;
         nlohmann::json mJson;
         bool mClosed = false;
