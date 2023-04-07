@@ -50,6 +50,8 @@ namespace gui
 
     private slots:
         void on_cmbColorSpace_currentIndexChanged(int);
+        void on_cmbMinFilter_currentIndexChanged(int);
+        void on_cmbMagFilter_currentIndexChanged(int);
         void on_widgetColor_colorChanged(QColor color);
         void on_tileWidth_valueChanged(int);
         void on_tileHeight_valueChanged(int);

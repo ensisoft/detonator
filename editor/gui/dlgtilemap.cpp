@@ -64,6 +64,8 @@ DlgTilemap::DlgTilemap(QWidget* parent) : QDialog(parent)
     connect(&mTimer, &QTimer::timeout, this, &DlgTilemap::timer);
 
     PopulateFromEnum<gfx::detail::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
+    PopulateFromEnum<gfx::MaterialClass::MinTextureFilter>(mUI.cmbMinFilter);
+    PopulateFromEnum<gfx::MaterialClass::MagTextureFilter>(mUI.cmbMagFilter);
     SetEnabled(mUI.btnExport, false);
     SetValue(mUI.zoom, 1.0f);
 }
@@ -121,6 +123,21 @@ void DlgTilemap::on_cmbColorSpace_currentIndexChanged(int)
     auto* source = mClass->GetTextureSource();
     auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(source);
     file_source->SetColorSpace(GetValue(mUI.cmbColorSpace));
+}
+
+void DlgTilemap::on_cmbMinFilter_currentIndexChanged(int)
+{
+    if (!mClass)
+        return;
+
+    mClass->SetTextureMinFilter(GetValue(mUI.cmbMinFilter));
+}
+void DlgTilemap::on_cmbMagFilter_currentIndexChanged(int)
+{
+    if (!mClass)
+        return;
+
+    mClass->SetTextureMagFilter(GetValue(mUI.cmbMagFilter));
 }
 
 void DlgTilemap::on_widgetColor_colorChanged(QColor color)

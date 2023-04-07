@@ -162,14 +162,27 @@
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="label_3">
+             <widget class="QComboBox" name="cmbColorSpace"/>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_4">
               <property name="text">
-               <string>Color space</string>
+               <string>Min filter</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="cmbColorSpace"/>
+             <widget class="QComboBox" name="cmbMinFilter"/>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Mag filter</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="cmbMagFilter"/>
             </item>
             <item>
              <spacer name="horizontalSpacer_2">
@@ -612,6 +625,8 @@
   <tabstop>btnSelectNone</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbColorSpace</tabstop>
+  <tabstop>cmbMinFilter</tabstop>
+  <tabstop>cmbMagFilter</tabstop>
   <tabstop>widgetColor</tabstop>
   <tabstop>renameTiles</tabstop>
   <tabstop>scrollArea</tabstop>

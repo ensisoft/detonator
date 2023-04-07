@@ -87,14 +87,15 @@ namespace {
                 std::string character;
                 unsigned width = 0;
                 unsigned height = 0;
-                unsigned index = 0;
 
-                if (base::JsonReadSafe(obj, "name", &name))
-                    img.name = app::FromUtf8(name);
-                if (base::JsonReadSafe(obj, "width", &width))
-                    img.width = width;
-                if (base::JsonReadSafe(obj, "height", &height))
-                    img.height = height;
+                // optional
+                base::JsonReadSafe(obj, "name", &name);
+                base::JsonReadSafe(obj, "index", &img.index);
+
+                if (!base::JsonReadSafe(obj, "width", &img.width))
+                    WARN("Image is missing 'width' attribute. [file='%1']", file);
+                if (!base::JsonReadSafe(obj, "height", &img.height))
+                    WARN("Image is missing 'height' attribute. [file='%1']", file);
                 if (!base::JsonReadSafe(obj, "xpos", &img.xpos))
                     WARN("Image is missing 'xpos' attribute. [file='%1']", file);
                 if (!base::JsonReadSafe(obj, "ypos", &img.ypos))
@@ -204,6 +205,8 @@ DlgTileImport::DlgTileImport(QWidget* parent, app::Workspace* workspace)
     PopulateFromEnum<gfx::MaterialClass::MinTextureFilter>(mUI.minFilter);
     PopulateFromEnum<gfx::MaterialClass::MagTextureFilter>(mUI.magFilter);
     PopulateFromEnum<gfx::detail::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
+    PopulateFromEnum<gfx::MaterialClass::MinTextureFilter>(mUI.cmbMinFilter);
+    PopulateFromEnum<gfx::MaterialClass::MagTextureFilter>(mUI.cmbMagFilter);
     PopulateFromEnum<MaterialType>(mUI.materialType);
     PopulateFromEnum<TextureCutting>(mUI.cmbCutting);
     PopulateFromEnum<ImageFormat>(mUI.cmbImageFormat);
@@ -539,10 +542,19 @@ void DlgTileImport::on_tabWidget_currentChanged(int tab)
 
 void DlgTileImport::on_renameTiles_textChanged(const QString& name)
 {
+    size_t counter = 0;
+
     for (auto& tile : mImages)
     {
-        if (tile.widget)
-            tile.widget->SetName(name);
+        if (!tile.widget)
+            continue;
+
+        QString str = name;
+        str.replace("$c", QString::number(counter));
+        str.replace("$i", QString::number(tile.index));
+        str.replace("$n", tile.name);
+        tile.widget->SetName(str);
+        counter++;
     }
 }
 
@@ -571,6 +583,22 @@ void DlgTileImport::on_cmbColorSpace_currentIndexChanged(int)
     auto* source = mClass->GetTextureSource();
     auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(source);
     file_source->SetColorSpace(GetValue(mUI.cmbColorSpace));
+}
+
+void DlgTileImport::on_cmbMinFilter_currentIndexChanged(int)
+{
+    if (!mClass)
+        return;
+
+    mClass->SetTextureMinFilter(GetValue(mUI.cmbMinFilter));
+}
+
+void DlgTileImport::on_cmbMagFilter_currentIndexChanged(int)
+{
+    if (!mClass)
+        return;
+
+    mClass->SetTextureMagFilter(GetValue(mUI.cmbMagFilter));
 }
 
 void DlgTileImport::on_cmbCutting_currentIndexChanged(int)
@@ -646,6 +674,7 @@ void DlgTileImport::LoadImageFile(const QString& ret)
     mClass->SetTexture(std::move(source));
     mClass->SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
     mClass->SetGamma(1.0f);
+    mClass->SetTextureMinFilter(GetValue(mUI.cmbMinFilter));
     mMaterial = gfx::CreateMaterialInstance(mClass);
     SetValue(mUI.imageFile, info.absoluteFilePath());
 }
@@ -684,8 +713,10 @@ void DlgTileImport::LoadState()
     GetUserProperty(*mWorkspace, "dlg-tile-import-material-type", mUI.materialType);
     GetUserProperty(*mWorkspace, "dlg-tile-import-material-surface", mUI.surfaceType);
     SetUserProperty(*mWorkspace, "dlg-tile-import-sprite-name", mUI.spriteName);
-    GetUserProperty(*mWorkspace, "dlg-tile-import-min-filter", mUI.minFilter);
-    GetUserProperty(*mWorkspace, "dlg-tile-import-mag-filter", mUI.magFilter);
+    GetUserProperty(*mWorkspace, "dlg-tile-import-import-min-filter", mUI.minFilter);
+    GetUserProperty(*mWorkspace, "dlg-tile-import-import-mag-filter", mUI.magFilter);
+    GetUserProperty(*mWorkspace, "dlg-tile-import-view-min-filter", mUI.cmbMinFilter);
+    GetUserProperty(*mWorkspace, "dlg-tile-import-view-mag-filter", mUI.cmbMagFilter);
     GetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin", mUI.tileMargin);
     GetUserProperty(*mWorkspace, "dlg-tile-import-premul-alpha", mUI.chkPremulAlpha);
     GetUserProperty(*mWorkspace, "dlg-tile-import-premul-alpha-blend", mUI.chkPremulAlphaBlend);
@@ -719,8 +750,10 @@ void DlgTileImport::SaveState()
     SetUserProperty(*mWorkspace, "dlg-tile-import-material-type", mUI.materialType);
     SetUserProperty(*mWorkspace, "dlg-tile-import-material-surface", mUI.surfaceType);
     SetUserProperty(*mWorkspace, "dlg-tile-import-sprite-name", mUI.spriteName);
-    SetUserProperty(*mWorkspace, "dlg-tile-import-min-filter", mUI.minFilter);
-    SetUserProperty(*mWorkspace, "dlg-tile-import-mag-filter", mUI.magFilter);
+    SetUserProperty(*mWorkspace, "dlg-tile-import-import-min-filter", mUI.minFilter);
+    SetUserProperty(*mWorkspace, "dlg-tile-import-import-mag-filter", mUI.magFilter);
+    SetUserProperty(*mWorkspace, "dlg-tile-import-view-min-filter", mUI.cmbMinFilter);
+    SetUserProperty(*mWorkspace, "dlg-tile-import-view-mag-filter", mUI.cmbMagFilter);
     SetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin", mUI.tileMargin);
     SetUserProperty(*mWorkspace, "dlg-tile-import-premul-alpha", mUI.chkPremulAlpha);
     SetUserProperty(*mWorkspace, "dlg-tile-import-premul-alpha-blend", mUI.chkPremulAlphaBlend);

@@ -63,6 +63,7 @@ namespace gui
     public:
         struct Image {
             QString name;
+            unsigned index = 0;
             unsigned xpos = 0;
             unsigned ypos = 0;
             unsigned width = 0;
@@ -88,6 +89,8 @@ namespace gui
         void on_widgetColor_colorChanged(QColor color);
         void on_materialType_currentIndexChanged(int);
         void on_cmbColorSpace_currentIndexChanged(int);
+        void on_cmbMinFilter_currentIndexChanged(int);
+        void on_cmbMagFilter_currentIndexChanged(int);
         void on_cmbCutting_currentIndexChanged(int);
         void finished();
         void timer();
