@@ -44,6 +44,14 @@
 // todo: output image format / bit depth ?
 // todo: packing algorithm params, i.e. keep square or not (wastes more space)
 
+namespace {
+    QString GetFileName(const QString& file)
+    {
+        const QFileInfo info(file);
+        return info.baseName();
+    }
+}
+
 namespace gui
 {
 
@@ -60,61 +68,49 @@ void DlgImgPack::on_btnDeleteImage_clicked()
     const auto row = mUI.listWidget->currentRow();
     if (row == -1)
         return;
+
     delete mUI.listWidget->takeItem(row);
+    base::SafeErase(mSources, static_cast<size_t>(row));
+
     repack();
 }
 void DlgImgPack::on_btnBrowseImage_clicked()
 {
     const auto& list = QFileDialog::getOpenFileNames(this,
         tr("Select Image File(s)"), "",
-        tr("Images (*.png *.jpg *.jpeg);;Source list (*.list.txt)"));
+        tr("Images (*.png *.jpg *.jpeg);;Json (*.json);;Source list (*.list.txt)"));
+
+    std::vector<SourceImage> sources;
+
     for (int i=0; i<list.size(); ++i)
     {
         const auto& filename = list[i];
-        if (filename.endsWith(".list.txt"))
+        bool success = true;
+        if (filename.endsWith(".list.txt", Qt::CaseInsensitive))
+            success = ReadList(filename, &sources);
+        else if (filename.endsWith(".json", Qt::CaseInsensitive))
+            success = ReadJson(filename, &sources);
+        else success = ReadImage(filename, &sources);
+
+        if (!success)
         {
-            QFile file;
-            file.setFileName(filename);
-            if (!file.open(QIODevice::ReadOnly))
-            {
-                QMessageBox msg(this);
-                msg.setStandardButtons(QMessageBox::Ok);
-                msg.setIcon(QMessageBox::Critical);
-                msg.setText(tr("There was a problem reading the file.\n'%1'\n").arg(filename));
-                msg.exec();
-                continue;
-            }
-            QTextStream stream(&file);
-            stream.setCodec("UTF-8");
-            while (!stream.atEnd())
-            {
-                QString line = stream.readLine();
-                if (line.isEmpty())
-                    continue;
-                QPixmap pix(line);
-                if (pix.isNull())
-                    continue;
-                AddItem(mUI.listWidget, line);
-            }
-        }
-        else
-        {
-            const QPixmap pix(filename);
-            if (pix.isNull())
-            {
-                QMessageBox msg(this);
-                msg.setStandardButtons(QMessageBox::Ok);
-                msg.setIcon(QMessageBox::Critical);
-                msg.setText(tr("There was a problem reading the image.\n'%1'\n"
-                               "Perhaps the image is not a valid image?").arg(filename));
-                msg.exec();
-                continue;
-            }
-            AddItem(mUI.listWidget, filename);
+            QMessageBox msg(this);
+            msg.setStandardButtons(QMessageBox::Ok);
+            msg.setIcon(QMessageBox::Critical);
+            msg.setText(tr("There was a problem reading the source file.\n'%1'\n"
+                           "Please see the application log for details").arg(filename));
+            msg.exec();
         }
     }
-    const auto index = mUI.listWidget->currentRow();
-    mUI.listWidget->setCurrentRow(index == -1 ? 0 : index);
+
+    ClearList(mUI.listWidget);
+    for (const auto& source : sources)
+        AddItem(mUI.listWidget, source.file);
+
+    mSources = std::move(sources);
+
+    SetCurrentRow(mUI.listWidget, 0);
+    on_listWidget_currentRowChanged(0);
 
     repack();
 
@@ -152,7 +148,7 @@ void DlgImgPack::on_btnSaveAs_clicked()
         msg.exec();
         return;
     }
-    DEBUG("Wrote packaged image to '%1'.", filename);
+    INFO("Wrote packaged image to '%1'.", filename);
 
     {
         // dump the source files into a simple .txt list file so that
@@ -165,10 +161,11 @@ void DlgImgPack::on_btnSaveAs_clicked()
         {
             QTextStream stream(&file);
             stream.setCodec("UTF-8");
-            for (int i=0; i<GetCount(mUI.listWidget); ++i)
+            for (const auto& src : mSources)
             {
-                auto* item = mUI.listWidget->item(i);
-                stream << item->text();
+                if (src.sub_image)
+                    continue;
+                stream << src.file;
                 stream << "\n";
             }
             // don't write these for now since this is only a list of source images
@@ -209,23 +206,19 @@ void DlgImgPack::on_btnSaveAs_clicked()
     // todo: should we ask for the JSON filename too?
     // seems a bit excessive, but this could overwrite a file unexpectedly
 
-    QFile file;
-    file.setFileName(filename + ".json");
-    if (!file.open(QIODevice::WriteOnly))
+    QString err_str;
+    QFile::FileError err_val = QFile::FileError::NoError;
+    if (!app::WriteTextFile(filename + ".json", mJson.dump(2), &err_val, &err_str))
     {
         QMessageBox msg(this);
-        msg.setStandardButtons(QMessageBox::Ok);
         msg.setIcon(QMessageBox::Critical);
+        msg.setStandardButtons(QMessageBox::Ok);
         msg.setText(tr("Failed to write the JSON description file.\n"
-                       "File error '%1'").arg(file.errorString()));
+                       "File error '%1'").arg(err_str));
         msg.exec();
         return;
     }
-
-    const auto& json = mJson.dump(2);
-    file.write(&json[0], json.size());
-    file.close();
-    DEBUG("Wrote package image json file to '%1'.", filename + ".json");
+    INFO("Wrote packaged image json file to '%1'.", filename + ".json");
 }
 
 void DlgImgPack::on_btnClose_clicked()
@@ -236,33 +229,45 @@ void DlgImgPack::on_btnClose_clicked()
 
 void DlgImgPack::on_listWidget_currentRowChanged(int index)
 {
-    if (index == -1)
+    if (index == -1 || mSources.empty())
     {
         SetEnabled(mUI.grpImageProperties, false);
         SetEnabled(mUI.btnDeleteImage, false);
+        SetValue(mUI.lblImageOffset, QString(""));
         SetValue(mUI.lblImageWidth, QString(""));
         SetValue(mUI.lblImageHeight, QString(""));
         SetValue(mUI.lblImageDepth, QString(""));
         SetImage(mUI.lblImagePreview, QPixmap(":texture.png"));
         SetValue(mUI.glyphIndex, QString(""));
+        SetValue(mUI.imgName, QString(""));
         return;
     }
 
-    const QListWidgetItem* item = mUI.listWidget->item(index);
-    const QString& file  = item->text();
-    const QString& glyph = item->data(Qt::UserRole).toString();
-    SetValue(mUI.glyphIndex, glyph);
+    const auto& source = mSources[index];
+    SetValue(mUI.imgName, source.name);
+    SetValue(mUI.glyphIndex, source.glyph);
+    SetValue(mUI.lblImageOffset, app::toString("%1,%2", source.xpos, source.ypos));
     SetEnabled(mUI.btnDeleteImage, true);
     SetEnabled(mUI.grpImageProperties, true);
 
-    QPixmap pix(file);
+    const QPixmap pix(source.file);
     if (pix.isNull())
         return;
 
-    SetValue(mUI.lblImageWidth, pix.width());
-    SetValue(mUI.lblImageHeight, pix.height());
-    SetValue(mUI.lblImageDepth, pix.depth());
-    SetImage(mUI.lblImagePreview, pix);
+    if (source.sub_image)
+    {
+        SetValue(mUI.lblImageWidth, source.width);
+        SetValue(mUI.lblImageHeight, source.height);
+        SetValue(mUI.lblImageDepth, pix.depth());
+        SetImage(mUI.lblImagePreview, pix.copy(source.xpos, source.ypos, source.width, source.height));
+    }
+    else
+    {
+        SetValue(mUI.lblImageWidth, pix.width());
+        SetValue(mUI.lblImageHeight, pix.height());
+        SetValue(mUI.lblImageDepth, pix.depth());
+        SetImage(mUI.lblImagePreview, pix);
+    }
 }
 
 void DlgImgPack::on_colorChanged()
@@ -282,10 +287,199 @@ void DlgImgPack::on_chkPot_stateChanged(int)
 
 void DlgImgPack::on_glyphIndex_textChanged(const QString& text)
 {
-    if (auto* item = mUI.listWidget->currentItem())
+    const auto row = GetCurrentRow(mUI.listWidget);
+    if (row == -1)
+        return;
+
+    base::SafeIndex(mSources, static_cast<size_t>(row)).glyph = text;
+}
+
+void DlgImgPack::on_imgName_textChanged(const QString& text)
+{
+    const auto row = GetCurrentRow(mUI.listWidget);
+    if (row == -1)
+        return;
+
+    base::SafeIndex(mSources, static_cast<size_t>(row)).name = text;
+}
+
+// static
+bool DlgImgPack::ReadJson(const QString& file, std::vector<SourceImage>* sources)
+{
+    QString err_str;
+    QFile::FileError err_val = QFile::FileError::NoError;
+    const auto& buff = app::ReadBinaryFile(file, &err_val, &err_str);
+    if (err_val != QFile::FileError::NoError)
     {
-        item->setData(Qt::UserRole, text);
+        ERROR("Failed to read file. [file='%1', error='%2']", file, err_str);
+        return false;
     }
+
+    const auto* beg  = buff.data();
+    const auto* end  = buff.data() + buff.size();
+    const auto& json = nlohmann::json::parse(beg, end, nullptr, false);
+    if (json.is_discarded())
+    {
+        ERROR("Failed to parse JSON file. [file='%1']", file);
+        return false;
+    }
+
+    /*
+    std::string image_file;
+    if (!base::JsonReadSafe(json, "image_file", &image_file))
+    {
+        ERROR("Missing image_source property. [file='%1']", file);
+        return false;
+    }
+     */
+    // the json should have something like "image.png"
+    // and we're going to assume that the image is then in the
+    // same folder as the JSON file.
+    const QString& image_source_file = app::FindJsonImageFile(file);
+    if (image_source_file.isEmpty())
+    {
+        ERROR("Failed to find image file for JSON. [file='%1']", file);
+        return false;
+    }
+
+
+    if (json.contains("images") && json["images"].is_array())
+    {
+        for (const auto& img_json: json["images"].items())
+        {
+            const auto& obj = img_json.value();
+
+            DlgImgPack::SourceImage img;
+            img.sub_image = true;
+            img.file = image_source_file;
+            if (!base::JsonReadSafe(obj, "width", &img.width))
+                WARN("Image is missing 'width' attribute. [file='%1']", file);
+            if (!base::JsonReadSafe(obj, "height", &img.height))
+                WARN("Image is missing 'height' attribute. [file='%1']", file);
+            if (!base::JsonReadSafe(obj, "xpos", &img.xpos))
+                WARN("Image is missing 'xpos' attribute. [file='%1']", file);
+            if (!base::JsonReadSafe(obj, "ypos", &img.ypos))
+                WARN("Image is missing 'ypos' attribute. [file='%1']", file);
+
+            // optional
+            std::string name;
+            if (base::JsonReadSafe(obj, "name", &name))
+                img.name = app::FromUtf8(name);
+
+            std::string character;
+            if (base::JsonReadSafe(obj, "char", &character))
+                img.glyph = app::FromUtf8(character);
+
+            unsigned index = 0;
+            if (base::JsonReadSafe(obj, "index", &index))
+                img.index = index;
+
+            sources->push_back(std::move(img));
+        }
+    }
+    else
+    {
+        unsigned image_width  = 0;
+        unsigned image_height = 0;
+        unsigned tile_width  = 0;
+        unsigned tile_height = 0;
+        unsigned xoffset = 0;
+        unsigned yoffset = 0;
+        bool error = true;
+
+        // must have this data in order to split the source image into tiles.
+        if (!base::JsonReadSafe(json, "image_width", &image_width))
+            ERROR("Missing image_width property. [file='%1']", file);
+        else if (!base::JsonReadSafe(json, "image_height", &image_height))
+            ERROR("Missing image_height property. [file='%1']", file);
+        else if (!base::JsonReadSafe(json, "tile_width", &tile_width))
+            ERROR("Missing tile_width property. [file='%1']", file);
+        else if (!base::JsonReadSafe(json, "tile_height", &tile_height))
+            ERROR("Missing tile_height property. [file='%1']", file);
+        else if (!base::JsonReadSafe(json, "xoffset", &xoffset))
+            ERROR("Missing xoffset property.[file='%1']", file);
+        else if (!base::JsonReadSafe(json, "yoffset", &yoffset))
+            ERROR("Missing yoffset property. [file='%1']", file);
+        else error = false;
+        if (error) return false;
+
+        const auto max_rows = (image_height - yoffset) / tile_height;
+        const auto max_cols = (image_width - xoffset) / tile_width;
+        for (unsigned row=0; row<max_rows; ++row)
+        {
+            for (unsigned col=0; col<max_cols; ++col)
+            {
+                const auto index = row * max_cols + col;
+                const auto tile_xpos = xoffset + col * tile_width;
+                const auto tile_ypos = yoffset + row * tile_height;
+
+                SourceImage img;
+                img.sub_image = true;
+                img.width  = tile_width;
+                img.height = tile_height;
+                img.xpos   = tile_xpos;
+                img.ypos   = tile_ypos;
+                sources->push_back(std::move(img));
+            }
+        }
+    }
+
+    // finally, sort based on the image index.
+    std::sort(std::begin(*sources), std::end(*sources), [&](const auto& a, const auto& b) {
+        return a.index < b.index;
+    });
+
+    INFO("Successfully parsed '%1'. %2 images found.", file, sources->size());
+    return true;
+}
+
+// static
+bool DlgImgPack::ReadList(const QString& filename, std::vector<SourceImage>* sources)
+{
+    QFile file;
+    file.setFileName(filename);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        ERROR("Failed to open file. [file='%1', error='%2']", filename, file.errorString());
+        return false;
+    }
+
+    QTextStream stream(&file);
+    stream.setCodec("UTF-8");
+    while (!stream.atEnd())
+    {
+        QString line = stream.readLine();
+        if (line.isEmpty())
+            continue;
+        QPixmap pix(line);
+        if (pix.isNull())
+        {
+            WARN("Could not open image file. [file='%1']", line);
+            continue;
+        }
+
+        SourceImage source;
+        source.file = line;
+        source.name = GetFileName(line);
+        sources->push_back(source);
+    }
+    return true;
+}
+
+// static
+bool DlgImgPack::ReadImage(const QString& filename, std::vector<SourceImage>* sources)
+{
+    const QPixmap pix(filename);
+    if (pix.isNull())
+    {
+        WARN("Could not open image file. [file='%1']", filename);
+        return false;
+    }
+    SourceImage source;
+    source.file = filename;
+    source.name = GetFileName(filename);
+    sources->push_back(source);
+    return true;
 }
 
 void DlgImgPack::repack()
@@ -295,28 +489,38 @@ void DlgImgPack::repack()
     const unsigned padding  = GetValue(mUI.padding);
     const bool power_of_two = GetValue(mUI.chkPot);
 
+    QPixmap pixmap;
+    QString pixmap_file;
+
     // take the files and build a list of "named images" for the algorithm
     // to work on.
-    for (int i=0; i<mUI.listWidget->count(); ++i)
+    for (size_t index=0; index<mSources.size(); ++index)
     {
-        const auto* item = mUI.listWidget->item(i);
-        const auto& file = item->text();
-
-        QPixmap pix(file);
-        if (pix.isNull())
+        const auto& src = mSources[index];
+        // only load new QPixmap if the source filepath has changed.
+        if (src.file != pixmap_file)
         {
-            QMessageBox msg(this);
-            msg.setStandardButtons(QMessageBox::Ok);
-            msg.setIcon(QMessageBox::Critical);
-            msg.setText(tr("There was a problem reading the image.\n'%1'\n"
-                            "Perhaps the image is not a valid image?").arg(file));
-            msg.exec();
-            continue;
+            QPixmap pix(src.file);
+            if (pix.isNull())
+            {
+                QMessageBox msg(this);
+                msg.setStandardButtons(QMessageBox::Ok);
+                msg.setIcon(QMessageBox::Critical);
+                msg.setText(tr("There was a problem reading the image.\n'%1'\n"
+                               "Perhaps the image is not a valid image?").arg(src.file));
+                msg.exec();
+                continue;
+            }
+            pixmap = pix;
+            pixmap_file = src.file;
         }
+        const auto width  = src.sub_image ? src.width  : pixmap.width();
+        const auto height = src.sub_image ? src.height : pixmap.height();
+
         app::PackingRectangle img;
-        img.width  = pix.width() + 2 * padding;
-        img.height = pix.height() + 2 * padding;
-        img.index  = i; // index to the source list.
+        img.width  = width + 2 * padding;
+        img.height = height + 2 * padding;
+        img.index  = index; // index to the source list.
         images.push_back(img);
     }
 
@@ -363,34 +567,38 @@ void DlgImgPack::repack()
     // longer the same as the input order (obviously).
     for (size_t i=0; i<images.size(); ++i)
     {
-        const auto& img     = images[i];
-        const auto index    = img.index;
-        const auto* item    = mUI.listWidget->item(index);
-        const QString& image_file = item->text();
-        const QString& glyph_key  = item->data(Qt::UserRole).toString();
+        const auto& img  = images[i];
+        const auto& src  = mSources[img.index];
 
+        // this is where the source image ends up in the destination
         const auto xpos   = img.xpos+padding;
         const auto ypos   = img.ypos+padding;
         const auto width  = img.width-2*padding;
         const auto height = img.height-2*padding;
 
-        const QRectF dst(xpos, ypos, width, height);
-        const QRectF src(0, 0, width, height);
-        const QPixmap pix(image_file);
-        painter.drawPixmap(dst, pix, src);
+        const QRectF dst_rect(xpos, ypos, width, height);
+        const QRectF src_rect(src.xpos, src.ypos, src.width, src.height);
+        // only load the pixmap if the pixmap source file has changed.
+        if (pixmap_file != src.file)
+        {
+            pixmap = QPixmap(src.file);
+            pixmap_file = src.file;
+        }
+        painter.drawPixmap(dst_rect, pixmap, src_rect);
 
         if (GetValue(mUI.chkJson))
         {
-            const QFileInfo info(image_file);
             nlohmann::json json;
-            base::JsonWrite(json, "name",   app::ToUtf8(info.fileName()));
             base::JsonWrite(json, "width",  width);
             base::JsonWrite(json, "height", height);
             base::JsonWrite(json, "xpos",   xpos);
             base::JsonWrite(json, "ypos",   ypos);
-            base::JsonWrite(json, "index", (unsigned)index);
-            if (!glyph_key.isEmpty())
-                base::JsonWrite(json, "char",  app::ToUtf8(glyph_key));
+            base::JsonWrite(json, "index",  (unsigned)img.index);
+            if (!src.glyph.isEmpty())
+                base::JsonWrite(json, "char",  app::ToUtf8(src.glyph));
+            if (!src.name.isEmpty())
+                base::JsonWrite(json, "name", app::ToUtf8(src.name));
+
             mJson["images"].push_back(std::move(json));
         }
     }

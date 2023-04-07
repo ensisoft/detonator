@@ -461,6 +461,18 @@ inline void ClearList(QListWidget* list)
     list->clear();
 }
 
+inline void SetCurrentRow(QListWidget* list, int row)
+{
+    QSignalBlocker s(list);
+    list->setCurrentRow(row, QItemSelectionModel::SelectionFlag::ClearAndSelect);
+}
+
+inline int GetCurrentRow(QListWidget* list)
+{
+    QSignalBlocker s(list);
+    return list->currentRow();
+}
+
 inline void ClearTable(QTableWidget* table)
 {
     QSignalBlocker s(table);
