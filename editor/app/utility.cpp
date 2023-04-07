@@ -77,6 +77,47 @@ Rect center_rect_on_target(const Rect& target, const Rect& source)
 namespace app
 {
 
+QString FindImageJsonFile(const QString& image_file)
+{
+    // foo.png -> foo.png.json
+    QString tmp = image_file;
+    tmp.append(".json");
+    if (FileExists(tmp))
+        return tmp;
+
+    // foo.png, foo.bmp etc. -> foo.json
+    const char* suffices[] = {".png", ".bmp", ".jpg", ".jpeg"};
+    for (const auto* suffix : suffices)
+    {
+        tmp = image_file;
+        tmp.replace(suffix, ".json", Qt::CaseInsensitive);
+        if (FileExists(tmp))
+            return tmp;
+    }
+    return "";
+}
+
+QString FindJsonImageFile(const QString& json_file)
+{
+    // foo.png.json -> foo.png
+    QString tmp = json_file;
+    tmp.replace(".json", "", Qt::CaseInsensitive);
+    if (FileExists(tmp))
+        return tmp;
+
+    // foo.json -> foo.png, foo.bmp, etc.
+    const char* suffices[] = {".png", ".bmp", ".jpg", ".jpeg"};
+    for (const auto* suffix : suffices)
+    {
+        tmp = json_file;
+        tmp.replace(".json", suffix, Qt::CaseInsensitive);
+        if (FileExists(tmp))
+            return tmp;
+    }
+    return "";
+}
+
+
 QRect CenterRectOnTarget(const QRect& target, const QRect& source)
 {
     return center_rect_on_target<QRect>(target, source);

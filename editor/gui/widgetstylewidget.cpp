@@ -29,6 +29,7 @@
 #include "uikit/widget.h"
 #include "engine/ui.h"
 #include "engine/color.h"
+#include "editor/app/utility.h"
 #include "editor/app/workspace.h"
 #include "editor/gui/widgetstylewidget.h"
 #include "editor/gui/dlgmaterial.h"
@@ -534,7 +535,7 @@ void WidgetStyleWidget::SetMaterialImage(const char* key)
 
         QString image_name;
         QString json_file;
-        json_file = image_file + ".json";
+        json_file = app::FindImageJsonFile(image_file);
         if (FileExists(json_file))
         {
             DlgImgView dlg(this);

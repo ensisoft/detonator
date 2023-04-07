@@ -52,6 +52,12 @@
 namespace app
 {
 
+// Find the json file associated with an image file (if any)
+QString FindImageJsonFile(const QString& image_file);
+// Find the image file associated with a json file (if any)
+QString FindJsonImageFile(const QString& json_file);
+
+
 // Center the source rectangle on target by applying a scale and translation.
 QRect CenterRectOnTarget(const QRect& target, const QRect& source);
 QRect CenterRectOnTarget(const QSize& target_size, const QSize& source_size);
