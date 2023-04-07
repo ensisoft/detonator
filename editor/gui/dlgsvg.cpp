@@ -242,11 +242,13 @@ void DlgSvgView::on_btnSaveAs_clicked()
 
     if (GetValue(mUI.chkJson))
     {
+        const QFileInfo info(filename);
+
         nlohmann::json json;
         base::JsonWrite(json, "json_version", 1);
         base::JsonWrite(json, "made_with_app", APP_TITLE);
         base::JsonWrite(json, "made_with_ver", APP_VERSION);
-        base::JsonWrite(json, "image_file", app::ToUtf8(filename));
+        base::JsonWrite(json, "image_file", app::ToUtf8(info.fileName()));
         base::JsonWrite(json, "image_width", raster_size.width());
         base::JsonWrite(json, "image_height", raster_size.height());
 
