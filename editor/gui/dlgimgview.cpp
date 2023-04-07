@@ -305,9 +305,8 @@ void DlgImgView::on_btnSelectImage_clicked()
 
     LoadImage(file);
 
-    QString json = file;
-    json.replace(".png", ".json");
-    if (FileExists(json))
+    QString json = app::FindImageJsonFile(file);
+    if (!json.isEmpty())
         LoadJson(json);
 }
 
@@ -321,11 +320,9 @@ void DlgImgView::on_btnSelectJson_clicked()
 
     LoadJson(file);
 
-    QString img = file;
-    img.replace(".json", ".png", Qt::CaseInsensitive);
-    if (FileExists(img))
+    QString img =  app::FindJsonImageFile(file);
+    if (!img.isEmpty())
         LoadImage(img);
-
 }
 
 void DlgImgView::on_btnClose_clicked()
