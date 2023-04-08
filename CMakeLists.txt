@@ -185,6 +185,7 @@ add_library(GfxLib
     third_party/base64/base64.cpp)
 add_library(EngineLib
     game/animation.cpp
+    game/actuator.cpp
     game/entity.cpp
     game/scriptvar.cpp
     game/scene.cpp
@@ -810,6 +811,7 @@ add_library(GameLibTesting
     game/entity.cpp
     game/scriptvar.cpp
     game/animation.cpp
+    game/actuator.cpp
     game/scene.cpp
     game/tilemap.cpp)
 add_library(EngineLibTesting
