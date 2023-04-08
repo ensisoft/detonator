@@ -41,6 +41,7 @@ add_executable(UnitTest
     ../data/json.cpp
     ../game/scriptvar.cpp
     ../game/animation.cpp
+    ../game/actuator.cpp
     ../game/entity.cpp
     ../game/scene.cpp)
 target_compile_definitions(UnitTest PRIVATE UNIT_TEST_BUNDLE)
@@ -74,6 +75,7 @@ add_executable(GameEngine
     ../data/json.cpp
     ../data/io.cpp
     ../game/animation.cpp
+    ../game/actuator.cpp
     ../game/entity.cpp
     ../game/scene.cpp
     ../game/scriptvar.cpp
