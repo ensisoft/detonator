@@ -24,7 +24,6 @@
 #  include <QDir>
 #  include <QFile>
 #  include <QPoint>
-#  include <QLocalSocket>
 #  include <QProcess>
 #  include <neargye/magic_enum.hpp>
 #  include <glm/vec2.hpp>
@@ -37,24 +36,24 @@
 
 #include "audio/format.h"
 #include "base/format.h"
-#include "editor/app/types.h"
 
 namespace app
 {
     QString toString(QFile::FileError error);
-    QString toString(QLocalSocket::LocalSocketError error);
     QString toString(QProcess::ProcessState state);
     QString toString(QProcess::ProcessError error);
     QString toString(const audio::Format& format);
     QString toString(const base::Color4f& color);
 
     inline QString toString(const std::string& s)
-    { return FromUtf8(s); }
+    { return QString::fromUtf8(s.c_str());  }
     inline QString toString(const char* str)
-    { return FromUtf8(str); }
+    { return QString::fromUtf8(str); }
     inline QString toString(const QString& str)
     { return str; }
     inline QString toString(const QPoint& point)
+    { return QString("%1,%2").arg(point.x()).arg(point.y()); }
+    inline QString toString(const QPointF& point)
     { return QString("%1,%2").arg(point.x()).arg(point.y()); }
     inline QString toString(bool value)
     { return (value ? "True" : "False"); }
@@ -62,6 +61,10 @@ namespace app
     { return QString("%1,%2").arg(vec.x).arg(vec.y); }
     inline QString toString(const glm::vec4& vec)
     { return QString("%1,%2,%3,%4").arg(vec.x).arg(vec.y).arg(vec.z).arg(vec.w); }
+
+    struct Bytes {
+        quint64 bytes = 0;
+    };
 
     QString toString(const Bytes& b);
 

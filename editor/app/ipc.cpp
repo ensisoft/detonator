@@ -46,6 +46,32 @@ namespace {
 namespace app
 {
 
+// moved form app/format.cpp to here because this is the
+// only place that needs this and since the QLocalSocket
+// is in the Qt5::Network library it creates an unnecessary
+// drag on everything else.
+QString toString(QLocalSocket::LocalSocketError error)
+{
+    using e = QLocalSocket::LocalSocketError;
+    switch (error)
+    {
+        case e::ConnectionError:                 return "Connection error";
+        case e::ConnectionRefusedError:          return "Connection refused error.";
+        case e::DatagramTooLargeError:           return "Datagram too large error.";
+        case e::OperationError:                  return "Operation error.";
+        case e::PeerClosedError:                 return "Peer closed error.";
+        case e::ServerNotFoundError:             return "Server not found error.";
+        case e::SocketAccessError:               return "Socket access error.";
+        case e::SocketResourceError:             return "Socket resource error.";
+        case e::SocketTimeoutError:              return "Socket timeout error.";
+        case e::UnknownSocketError:              return "Unknown socket error.";
+        case e::UnsupportedSocketOperationError: return "Unsupported socket operation error.";
+    }
+    BUG("???");
+    return "";
+}
+
+
 IPCHost::~IPCHost()
 {
     DEBUG("Destroy IPCHost");

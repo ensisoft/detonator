@@ -921,8 +921,8 @@ namespace app
     using DrawableResource = GameResource<gfx::DrawableClass, DerivedType>;
 
     struct ResourceListItem {
-        QString name;
-        QString id;
+        AnyString name;
+        AnyString id;
         QIcon icon;
         const Resource* resource = nullptr;
         boost::tribool selected = boost::indeterminate;
