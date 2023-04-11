@@ -450,8 +450,8 @@ using PropertyKey = app::PropertyKey;
 using Bytes = app::Bytes;
 
 struct ListItem {
-    QString name;
-    QString id;
+    app::AnyString name;
+    app::AnyString id;
 };
 using ItemList = std::vector<ListItem>;
 
@@ -859,23 +859,23 @@ struct ListWidgetItemIdGetter
 {
     operator std::string() const
     {
-        if (const auto* item = list->currentItem())
+        if (item)
             return app::ToUtf8(item->data(Qt::UserRole).toString());
         return "";
     }
     operator QString() const
     {
-        if (const auto* item = list->currentItem())
+        if (item)
             return item->data(Qt::UserRole).toString();
         return QString("");
     }
     operator app::AnyString() const
     {
-        if (const auto* item = list->currentItem())
+        if (item)
             return item->data(Qt::UserRole).toString();
         return QString("");
     }
-    const QListWidget* list = nullptr;
+    const QListWidgetItem* item = nullptr;
 };
 
 struct FontComboValueGetter
@@ -1046,7 +1046,9 @@ inline ComboBoxValueGetter GetValue(const QComboBox* cmb)
 inline ComboBoxItemIdGetter GetItemId(const QComboBox* cmb)
 { return ComboBoxItemIdGetter { cmb }; }
 inline ListWidgetItemIdGetter GetItemId(const QListWidget* list)
-{ return ListWidgetItemIdGetter { list}; }
+{ return ListWidgetItemIdGetter { list->currentItem() }; }
+inline ListWidgetItemIdGetter GetItemId(const QListWidgetItem* item)
+{ return ListWidgetItemIdGetter { item }; }
 inline LineEditValueGetter GetValue(const QLineEdit* edit)
 { return LineEditValueGetter { edit }; }
 inline PlainTextEditValueGetter GetValue(const QPlainTextEdit* edit)

@@ -45,6 +45,7 @@
 #include "base/bitflag.h"
 #include "editor/app/format.h"
 #include "editor/app/event.h"
+#include "editor/app/utility.h"
 
 // Careful with the macros here. base/logging.h has macros by the same name.
 // we're going to hijack the names here and change the definition to better

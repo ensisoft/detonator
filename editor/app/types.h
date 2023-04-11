@@ -22,14 +22,11 @@
 
 #include <string>
 
+#include "editor/app/format.h"
 #include "editor/app/utility.h"
 
 namespace app
 {
-    struct Bytes {
-        quint64 bytes = 0;
-    };
-
     // Facilitate implicit conversion from different
     // types into a property key string.
     class PropertyKey
@@ -44,16 +41,19 @@ namespace app
         PropertyKey(const std::string& key)
           : mKey(FromUtf8(key))
         {}
-        PropertyKey(const char* key, size_t index)
-          : mKey(QString("%1:%2").arg(key).arg(index))
-        {}
-        PropertyKey(const QString& key, size_t index)
-          : mKey(QString("%1:%2").arg(key).arg(index))
-        {}
-        PropertyKey(const std::string& key, size_t index)
-          : mKey(QString("%1:%2").arg(FromUtf8(key), index))
-        {}
 
+        template<typename T>
+        PropertyKey(const char* key, T value)
+          : mKey(toString("%1:%2", key, value))
+        {}
+        template<typename T>
+        PropertyKey(const QString& key, T value)
+          : mKey(toString("%1:%2", key, value))
+        {}
+        template<typename T>
+        PropertyKey(const std::string& key, T value)
+          : mKey(toString("%1:%2", key, value))
+        {}
         operator const QString& () const
         { return mKey; }
         const QString& key() const
@@ -65,6 +65,8 @@ namespace app
     class AnyString
     {
     public:
+        AnyString() = default;
+
         AnyString(const char* str)
           : mStr(str)
         {}
@@ -74,16 +76,33 @@ namespace app
         AnyString(const std::string& str)
           : mStr(FromUtf8(str))
         {}
-        operator const QString& () const
+        operator QString () const
         { return mStr; }
-
-        operator const std::string () const
+        operator QVariant () const
+        { return mStr; }
+        operator std::string () const
         { return app::ToUtf8(mStr); }
 
         const QString& GetWide() const
         { return mStr; }
         const std::string GetUtf8() const
         { return app::ToUtf8(mStr); }
+
+        AnyString& operator=(const QString& str)
+        {
+            mStr = str;
+            return *this;
+        }
+        AnyString& operator=(const char* str)
+        {
+            mStr = str;
+            return *this;
+        }
+        AnyString& operator=(const std::string& str)
+        {
+            mStr = FromUtf8(str);
+            return *this;
+        }
     private:
         friend bool operator==(const AnyString&, const AnyString&);
         friend bool operator!=(const AnyString&, const AnyString&);
@@ -93,6 +112,8 @@ namespace app
 
         friend bool operator==(const QString&, const AnyString&);
         friend bool operator!=(const QString&, const AnyString&);
+
+        friend bool operator<(const AnyString& lhs, const AnyString& rhs);
     private:
         QString mStr;
     };
@@ -111,6 +132,9 @@ namespace app
     { return lhs == rhs.mStr; }
     inline bool operator!=(const QString& lhs, const AnyString& rhs)
     { return lhs != rhs.mStr; }
+
+    inline bool operator<(const AnyString& lhs, const AnyString& rhs)
+    { return lhs.mStr < rhs.mStr; }
 
 
     template<typename Key, typename Value>

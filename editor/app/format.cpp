@@ -48,27 +48,6 @@ QString toString(QFile::FileError error)
     return "";
 }
 
-QString toString(QLocalSocket::LocalSocketError error)
-{
-    using e = QLocalSocket::LocalSocketError;
-    switch (error)
-    {
-        case e::ConnectionError:                 return "Connection error";
-        case e::ConnectionRefusedError:          return "Connection refused error.";
-        case e::DatagramTooLargeError:           return "Datagram too large error.";
-        case e::OperationError:                  return "Operation error.";
-        case e::PeerClosedError:                 return "Peer closed error.";
-        case e::ServerNotFoundError:             return "Server not found error.";
-        case e::SocketAccessError:               return "Socket access error.";
-        case e::SocketResourceError:             return "Socket resource error.";
-        case e::SocketTimeoutError:              return "Socket timeout error.";
-        case e::UnknownSocketError:              return "Unknown socket error.";
-        case e::UnsupportedSocketOperationError: return "Unsupported socket operation error.";
-    }
-    BUG("???");
-    return "";
-}
-
 QString toString(QProcess::ProcessState state)
 {
     using s = QProcess::ProcessState;
@@ -100,12 +79,12 @@ QString toString(QProcess::ProcessError error)
 
 QString toString(const audio::Format& format)
 {
-    return app::FromUtf8(audio::ToString(format));
+    return QString::fromStdString(audio::ToString(format));
 }
 
 QString toString(const base::Color4f& color)
 {
-    return app::FromUtf8(base::ToString(color));
+    return QString::fromStdString(base::ToString(color));
 }
 
 QString toString(const Bytes& bytes)
