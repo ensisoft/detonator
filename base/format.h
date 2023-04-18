@@ -23,7 +23,9 @@
 #  if defined(BASE_FORMAT_SUPPORT_GLM)
 #    include <glm/glm.hpp>
 #  endif
-#  include <neargye/magic_enum.hpp> // todo: put ifndef ?
+#  if defined(BASE_FORMAT_SUPPORT_MAGIC_ENUM)
+#    include <neargye/magic_enum.hpp>
+#  endif
 #include "warnpop.h"
 
 #include <sstream>
@@ -75,9 +77,11 @@ namespace base
         std::string ToString(const FPoint& point);
         std::string ToString(const Color4f& color);
 
+#if defined(BASE_FORMAT_SUPPORT_MAGIC_ENUM)
         template<typename Enum> inline
         std::string EnumToString(const Enum value)
         { return std::string(magic_enum::enum_name(value)); }
+#endif
 
         template<typename T> inline
         std::string ValueToString(const T& value)
@@ -91,9 +95,13 @@ namespace base
         template<typename T> inline
         std::string ToString(const T& value)
         {
+#if defined(BASE_FORMAT_SUPPORT_MAGIC_ENUM)
             if constexpr (std::is_enum<T>::value)
                 return EnumToString(value);
             else return ValueToString(value);
+#else
+            return ValueToString(value);
+#endif
         }
 
         template<typename T>

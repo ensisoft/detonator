@@ -380,7 +380,7 @@ void measure_allocation_times()
 
 struct RefCountEntity : public mem::RefBase {
     std::string name;
-    glm::vec2 position;
+    float position = 0.0f;
     float rotation = 0.0f;
 
     RefCountEntity(const Entity&) = delete;

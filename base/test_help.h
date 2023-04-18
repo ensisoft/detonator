@@ -19,7 +19,9 @@
 // this file should only be included in unit test files.
 
 #include "warnpush.h"
+#if defined(BASE_TEST_HELP_SUPPORT_GLM)
 #  include <glm/vec2.hpp>
+#endif
 #include "warnpop.h"
 
 #include <cstdio>
@@ -38,12 +40,14 @@
 
 #include "base/snafu.h"
 
+#if defined(BASE_TEST_HELP_SUPPORT_GLM)
 namespace glm {
 static bool operator==(const glm::vec2& lhs, const glm::vec2& rhs)
 { return real::equals(lhs.x, rhs.x) && real::equals(lhs.y, rhs.y); }
 static bool operator!=(const glm::vec2& lhs, const glm::vec2& rhs)
 { return !(lhs == rhs); }
 } // glm
+#endif
 
 namespace base {
 static bool operator==(const Color4f& lhs, const Color4f& rhs)
