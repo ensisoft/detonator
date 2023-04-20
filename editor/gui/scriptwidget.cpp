@@ -424,6 +424,13 @@ private:
             return "uik.Window";
         else if (word.endsWith("animator"))
             return "game.Animator";
+        else if (word.endsWith("drawable"))
+            return "game.DrawableItem";
+        else if (word.endsWith("item"))
+            if (word.contains("draw"))
+                return "game.DrawableItem";
+            else if (word.contains("text"))
+                return "game.TextItem";
 
         return app::FindLuaDocTableMatch(word);
     }
