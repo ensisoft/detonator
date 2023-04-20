@@ -682,6 +682,11 @@ void GfxWidget::focusOutEvent(QFocusEvent* focus)
     //DEBUG("GfxWidget lost focus");
 }
 
+void GfxWidget::SetClearColor(const QColor& color)
+{
+    mWindow->SetClearColor(ToGfx(color));
+}
+
 void GfxWidget::ShowColorDialog()
 {
     gfx::Color4f clear_color;
