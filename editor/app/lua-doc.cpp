@@ -829,28 +829,6 @@ void InitLuaDoc()
     DOC_METHOD_1("game.Scene", "Play", "Play a scene. Any previous scene is deleted and the new scene is started.<br>"
                                        "Returns a reference to the new scene for convenience.",
                  "game.SceneClass|string", "klass|name");
-    DOC_METHOD_2("game.Entity", "SpawnEntity", "Spawn a new entity in the scene.<br>"
-                                               "Spawning a new entity doesn't immediately place the entity in the scene but will only add it to the list of "
-                                               "entities to be spawned at the start of the next iteration of the game loop and "
-                                               "then each entity that was just spawned will have their HasBeenSpawned flag on.<br><br>"
-                                               "If link is true the entity is linked to the current scene's entity hierarchy.<br>"
-                                               "If link is false the entity is not linked to the current scene's entity hierarchy and you should manually call LinkChild later.<br>"
-                                               "The args table is a Lua table for packing all the spawn arguments with the following keys.<br><br>"
-                                               " &nbsp;&nbsp; id,   string, the ID for the entity. Default = '' <br>"
-                                               " &nbsp;&nbsp; name, string, the name for the entity. Default = ''<br>"
-                                               " &nbsp;&nbsp; sx,   float, scale factor for X axis. Default = 1.0<br>"
-                                               " &nbsp;&nbsp; sy,   float, scale factor for Y axis. Default = 1.0<br>"
-                                               " &nbsp;&nbsp; x,    float, translation on the X axis. Default = 0.0<br>"
-                                               " &nbsp;&nbsp; y,    float, translation on the Y axis. Default = 0.0<br>"
-                                               " &nbsp;&nbsp; r,    float, rotation in radians around the Z axis. Default = 0.0<br>"
-                                               " &nbsp;&nbsp; pos,  glm.vec2 translation vector. (Alternative for x, y). Default = glm.vec2(0.0, 0.0)<br>"
-                                               " &nbsp;&nbsp; scale, glm.vec2 scaling vector (Alternative for sx, sy). Default = glm.vec2(1.0, 1.0)<br>"
-                                               " &nbsp;&nbsp; logging, bool, Flag to enable/disable entity logging. Default = false<br>"
-                                               " &nbsp;&nbsp; layer, int, Scene layer index. Default = 0<br>"
-                                               " &nbsp;&nbsp; link, bool, Flag to control linking to scene root in scene graph. Default = true",
-                 "string", "klass_name", "table", "args");
-    DOC_METHOD_1("game.Entity", "SpawnEntity", "Spawn a new entity in the scene with default arguments for everything.<br>",
-                 "string", "klass_name");
 
     // todo: resume/suspend
     DOC_METHOD_0("void", "EndPlay", "End the play of the current scene. Will invoke EndPlay callbacks and end game play cleanly.");
@@ -1342,8 +1320,31 @@ void InitLuaDoc()
                                                "Then each entity that was just spawned will have their HasBeenSpawned flag on.<br>"
                                                "If link_to_root is true the entity is linked to the current scene's entity hierarchy.<br>"
                                                "If link_to_root is false the entity is not linked to the current scene's entity hierarchy and you should manually call LinkChild later.<br>"
-                                               "This is a low level method of spawning and you're likely better off using Engine.SpawnEntity instead which is more convenient to use.",
+                                               "This is a low level method of spawning and you're likely better off using another SpawnEntity instead which is more convenient to use.",
                  "game.EntityArgs", "args", "bool", "link_to_root = true");
+    DOC_METHOD_1("game.Entity", "SpawnEntity", "Spawn a new entity in the scene with default arguments for everything.<br>",
+                 "string", "klass_name");
+    DOC_METHOD_2("game.Entity", "SpawnEntity", "Spawn a new entity in the scene.<br>"
+                                               "Spawning a new entity doesn't immediately place the entity in the scene but will only add it to the list of "
+                                               "entities to be spawned at the start of the next iteration of the game loop and "
+                                               "then each entity that was just spawned will have their HasBeenSpawned flag on.<br><br>"
+                                               "If link is true the entity is linked to the current scene's entity hierarchy.<br>"
+                                               "If link is false the entity is not linked to the current scene's entity hierarchy and you should manually call LinkChild later.<br>"
+                                               "The args table is a Lua table for packing all the spawn arguments with the following keys.<br><br>"
+                                               " &nbsp;&nbsp; id,   string, the ID for the entity. Default = '' <br>"
+                                               " &nbsp;&nbsp; name, string, the name for the entity. Default = ''<br>"
+                                               " &nbsp;&nbsp; sx,   float, scale factor for X axis. Default = 1.0<br>"
+                                               " &nbsp;&nbsp; sy,   float, scale factor for Y axis. Default = 1.0<br>"
+                                               " &nbsp;&nbsp; x,    float, translation on the X axis. Default = 0.0<br>"
+                                               " &nbsp;&nbsp; y,    float, translation on the Y axis. Default = 0.0<br>"
+                                               " &nbsp;&nbsp; r,    float, rotation in radians around the Z axis. Default = 0.0<br>"
+                                               " &nbsp;&nbsp; pos,  glm.vec2 translation vector. (Alternative for x, y). Default = glm.vec2(0.0, 0.0)<br>"
+                                               " &nbsp;&nbsp; scale, glm.vec2 scaling vector (Alternative for sx, sy). Default = glm.vec2(1.0, 1.0)<br>"
+                                               " &nbsp;&nbsp; logging, bool, Flag to enable/disable entity logging. Default = false<br>"
+                                               " &nbsp;&nbsp; layer, int, Scene layer index. Default = 0<br>"
+                                               " &nbsp;&nbsp; link, bool, Flag to control linking to scene root in scene graph. Default = true",
+                 "string", "klass_name", "table", "args");
+
     DOC_METHOD_1("glm.mat4", "FindEntityTransform", "Find the transform for transforming the entity into the world/scene coordinate space.",
                  "game.Entity", "entity");
     DOC_METHOD_2("glm.mat4", "FindEntityNodeTransform", "Find the transform for transforming the entity node into the the world/scene coordinate space.",
