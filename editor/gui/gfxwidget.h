@@ -99,6 +99,7 @@ namespace gui
 
         void SetClearColor(const gfx::Color4f& color)
         { mClearColor = color; }
+
         void ResetClearColor()
         { mClearColor.reset(); }
 
@@ -216,6 +217,8 @@ namespace gui
         { return mWindow ? mWindow->GetPainter() : nullptr; }
         gfx::Device::ResourceStats getDeviceResourceStats() const
         { return mWindow->getDeviceResourceStats(); }
+
+        void SetClearColor(const QColor& color);
 
         void SetClearColor(const gfx::Color4f& color)
         { mWindow->SetClearColor(color); }
