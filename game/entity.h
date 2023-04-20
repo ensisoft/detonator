@@ -565,11 +565,12 @@ namespace game
 
         DrawableItem(std::shared_ptr<const DrawableItemClass> klass)
           : mClass(klass)
+          , mMaterialId(mClass->GetMaterialId())
           , mInstanceFlags(mClass->GetFlags())
           , mMaterialParams(mClass->GetMaterialParams())
         {}
         const std::string& GetMaterialId() const noexcept
-        { return mClass->GetMaterialId(); }
+        { return mMaterialId; }
         const std::string& GetDrawableId() const noexcept
         { return mClass->GetDrawableId(); }
         int GetLayer() const noexcept
@@ -592,6 +593,8 @@ namespace game
         { mInstanceFlags.set(flag, on_off); }
         void SetTimeScale(float scale) noexcept
         { mInstanceTimeScale = scale; }
+        void SetMaterialId(std::string id) noexcept
+        { mMaterialId = std::move(id); }
         void SetMaterialParam(const std::string& name, const MaterialParam& value)
         { mMaterialParams[name] = value; }
         MaterialParamMap GetMaterialParams()
@@ -627,6 +630,7 @@ namespace game
         { return mClass.get(); }
     private:
         std::shared_ptr<const DrawableItemClass> mClass;
+        std::string mMaterialId;
         base::bitflag<Flags> mInstanceFlags;
         float mInstanceTimeScale = 1.0f;
         MaterialParamMap mMaterialParams;

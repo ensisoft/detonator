@@ -296,9 +296,8 @@ void unit_test_drawable_item()
         TEST_REQUIRE(bmp.Compare(gfx::URect(0, 0, 200, 100), gfx::Color::Blue));
     }
 
-    // change material at class level to a sprite so that
-    // updating makes a visual difference.
-    klass->GetNode(0).GetDrawable()->SetMaterialId("red-green");
+    // change material so that updating makes a visual difference.
+    entity->GetNode(0).GetDrawable()->SetMaterialId("red-green");
 
     // test horizontal flip
     {
@@ -337,9 +336,8 @@ void unit_test_drawable_item()
         TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(100, 0, 100, 100), gfx::Color::Red, 0.95));
     }
 
-    // change material at class level to a sprite so that
-    // updating makes a visual difference.
-    klass->GetNode(0).GetDrawable()->SetMaterialId("red-green-sprite");
+    // change material so that updating makes a visual difference.
+    entity->GetNode(0).GetDrawable()->SetMaterialId("red-green-sprite");
 
     // check material update
     {
@@ -395,9 +393,8 @@ void unit_test_drawable_item()
         TEST_REQUIRE(TestPixelCount(bmp, gfx::URect(0, 0, 200, 100), gfx::Color::Green, 0.95));
     }
 
-    // change material at class level to a sprite so that
-    // updating makes a visual difference.
-    klass->GetNode(0).GetDrawable()->SetMaterialId("custom");
+    // change material so that updating makes a visual difference.
+    entity->GetNode(0).GetDrawable()->SetMaterialId("custom");
 
     // check material parameter
     {
