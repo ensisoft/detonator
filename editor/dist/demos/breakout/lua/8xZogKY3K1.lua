@@ -57,7 +57,7 @@ function SplitBall(ball)
     local node = ball:GetNode(0)
     local position = node:GetTranslation()
 
-    local copy = Game:SpawnEntity('Ball', {
+    local copy = Scene:SpawnEntity('Ball', {
         pos = position,
         layer = 2
     })

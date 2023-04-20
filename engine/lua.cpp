@@ -1260,43 +1260,6 @@ void LuaRuntime::Init()
 
     auto engine = table.new_usertype<LuaRuntime>("Engine");
 
-    engine["SpawnEntity"] = sol::overload(
-        [](const LuaRuntime& self, const std::string& klass, const sol::table& args_table) {
-            if (!self.mScene)
-                throw GameError("No scene is currently being played.");
-            game::EntityArgs args;
-            args.klass = self.mClassLib->FindEntityClassByName(klass);
-            if (!args.klass)
-                throw GameError("No such entity class could be found: " + klass);
-            args.id   = args_table.get_or("id", std::string(""));
-            args.name = args_table.get_or("name", std::string(""));
-            args.scale.x = args_table.get_or("sx", 1.0f);
-            args.scale.y = args_table.get_or("sy", 1.0f);
-            args.position.x = args_table.get_or("x", 0.0f);
-            args.position.y = args_table.get_or("y", 0.0f);
-            args.rotation = args_table.get_or("r", 0.0f);
-            args.enable_logging = args_table.get_or("logging", false);
-            args.layer = args_table.get_or("layer", 0);
-            const bool link_to_root = args_table.get_or("link", true);
-            const glm::vec2* pos = nullptr;
-            const glm::vec2* scale = nullptr;
-            if (const auto* ptr = args_table.get_or("pos", pos))
-                args.position = *ptr;
-            if (const auto* ptr = args_table.get_or("scale", scale))
-                args.scale = *ptr;
-
-            return self.mScene->SpawnEntity(args, link_to_root);
-        },
-        [](const LuaRuntime& self, const std::string& klass) {
-            if (!self.mScene)
-                throw GameError("No scene is currently being played.");
-            game::EntityArgs args;
-            args.klass = self.mClassLib->FindEntityClassByName(klass);
-            if (!args.klass)
-                throw GameError("No such entity class could be found: " + klass);
-            return self.mScene->SpawnEntity(args);
-        }
-    );
     engine["Play"] = sol::overload(
         [](LuaRuntime& self, ClassHandle<SceneClass> klass) {
             if (!klass)
@@ -3487,8 +3450,53 @@ void BindGameLib(sol::state& L)
             return scene.MapPointFromEntityNode(entity, node, point);
         });
     scene["SpawnEntity"] = sol::overload(
-        [](Scene& scene, const EntityArgs& args) { return scene.SpawnEntity(args, true); },
-        [](Scene& scene, const EntityArgs& args, bool link) { return scene.SpawnEntity(args, link); });
+        [](Scene& scene, const EntityArgs& args) {
+            return scene.SpawnEntity(args, true);
+        },
+        [](Scene& scene, const EntityArgs& args, bool link) {
+            return scene.SpawnEntity(args, link);
+        },
+        [](Scene& scene, const std::string& klass, sol::this_state this_state) {
+            sol::state_view L(this_state);
+            ClassLibrary* classlib = L["ClassLib"];
+
+            game::EntityArgs args;
+            args.klass = classlib->FindEntityClassByName(klass);
+            if (!args.klass)
+                throw GameError("No such entity class could be found: " + klass);
+
+            return scene.SpawnEntity(args);
+        },
+        [](Scene& scene, const std::string& klass, const sol::table& args_table, sol::this_state this_state) {
+            sol::state_view L(this_state);
+            ClassLibrary* classlib = L["ClassLib"];
+
+            game::EntityArgs args;
+            args.klass = classlib->FindEntityClassByName(klass);
+            if (!args.klass)
+                throw GameError("No such entity class could be found: " + klass);
+
+            args.id             = args_table.get_or("id", std::string(""));
+            args.name           = args_table.get_or("name", std::string(""));
+            args.layer          = args_table.get_or("layer", 0);
+            args.scale.x        = args_table.get_or("sx", 1.0f);
+            args.scale.y        = args_table.get_or("sy", 1.0f);
+            args.position.x     = args_table.get_or("x", 0.0f);
+            args.position.y     = args_table.get_or("y", 0.0f);
+            args.rotation       = args_table.get_or("r", 0.0f);
+            args.enable_logging = args_table.get_or("logging", false);
+
+            const bool link_to_root = args_table.get_or("link", true);
+            const glm::vec2* pos = nullptr;
+            const glm::vec2* scale = nullptr;
+            if (const auto* ptr = args_table.get_or("pos", pos))
+                args.position = *ptr;
+            if (const auto* ptr = args_table.get_or("scale", scale))
+                args.scale = *ptr;
+
+            return scene.SpawnEntity(args, link_to_root);
+        });
+
     scene["QuerySpatialNodes"] = sol::overload(
         [](Scene& scene, const base::FPoint& point, const std::string& mode) {
             const auto enum_val = magic_enum::enum_cast<game::Scene::SpatialQueryMode>(mode);
