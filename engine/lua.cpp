@@ -46,6 +46,7 @@
 #include "game/util.h"
 #include "game/scene.h"
 #include "game/transform.h"
+#include "graphics/material.h"
 #include "engine/game.h"
 #include "engine/audio.h"
 #include "engine/classlib.h"
@@ -2979,7 +2980,16 @@ void BindGameLib(sol::state& L)
     classlib["FindAudioGraphClassById"]   = &ClassLibrary::FindAudioGraphClassById;
 
     auto drawable = table.new_usertype<DrawableItem>("Drawable");
-    drawable["GetPaletteMaterialId"] = &DrawableItem::GetMaterialId;
+    drawable["SetMaterial"] = [](DrawableItem& item, const std::string& name, sol::this_state this_state) {
+        sol::state_view L(this_state);
+        ClassLibrary* lib = L["ClassLib"];
+        const auto ret = lib->FindMaterialClassByName(name);
+        if (ret)
+            item.SetMaterialId(ret->GetId());
+        else WARN("No such material class. [name='%1']", name);
+    };
+    drawable["SetMaterialId"] = &DrawableItem::SetMaterialId;
+    drawable["GetMaterialId"] = &DrawableItem::GetMaterialId;
     drawable["GetDrawableId"] = &DrawableItem::GetDrawableId;
     drawable["GetLayer"]      = &DrawableItem::GetLayer;
     drawable["GetLineWidth"]  = &DrawableItem::GetLineWidth;
@@ -3010,7 +3020,7 @@ void BindGameLib(sol::state& L)
             return sol::make_object(L, *value);
         return sol::make_object(L, sol::nil);
     };
-    drawable["HasUniform"] = &DrawableItem::HasMaterialParam;
+    drawable["HasUniform"]    = &DrawableItem::HasMaterialParam;
     drawable["DeleteUniform"] = &DrawableItem::DeleteMaterialParam;
 
     auto body = table.new_usertype<RigidBodyItem>("RigidBody");
@@ -3052,7 +3062,6 @@ void BindGameLib(sol::state& L)
     body["GetCollisionShapeType"] = [](const RigidBodyItem* item) {
         return magic_enum::enum_name(item->GetCollisionShape());
     };
-
 
     auto text = table.new_usertype<TextItem>("TextItem");
     text["GetText"]       = &TextItem::GetText;
