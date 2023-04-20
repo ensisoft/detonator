@@ -1450,6 +1450,24 @@ namespace game
         // Returns the first animation object with a matching name.
         const AnimationClass* FindAnimationByName(const std::string& name) const;
 
+        // Add a new animator class object. Returns a pointer to the animator
+        // that was added to the entity class.
+        AnimatorClass* AddAnimator(AnimatorClass&& animator);
+        AnimatorClass* AddAnimator(const AnimatorClass& animator);
+        AnimatorClass* AddAnimator(const std::shared_ptr<AnimatorClass>& animator);
+
+        void DeleteAnimator(size_t index);
+        bool DeleteAnimatorByName(const std::string& name);
+        bool DeleteAnimatorById(const std::string& id);
+
+        AnimatorClass& GetAnimator(size_t index);
+        AnimatorClass* FindAnimatorByName(const std::string& name);
+        AnimatorClass* FindAnimatorById(const std::string& id);
+
+        const AnimatorClass& GetAnimator(size_t index) const;
+        const AnimatorClass* FindAnimatorByName(const std::string& name) const;
+        const AnimatorClass* FindAnimatorById(const std::string& id) const;
+
         // Link the given child node with the parent.
         // The parent may be a nullptr in which case the child
         // is added to the root of the entity. The child node needs
@@ -1584,6 +1602,8 @@ namespace game
         std::size_t GetHash() const;
         std::size_t GetNumNodes() const noexcept
         { return mNodes.size(); }
+        std::size_t GetNumAnimators() const noexcept
+        { return mAnimators.size(); }
         std::size_t GetNumAnimations() const noexcept
         { return mAnimations.size(); }
         std::size_t GetNumScriptVars() const noexcept
@@ -1613,6 +1633,8 @@ namespace game
         { return mScriptVars[index]; }
         std::shared_ptr<const PhysicsJoint> GetSharedJoint(size_t index) const noexcept
         { return mJoints[index]; }
+        std::shared_ptr<const AnimatorClass> GEtSharedAnimatorClass(size_t index) const noexcept
+        { return mAnimators[index]; }
 
         // Serialize the entity into JSON.
         void IntoJson(data::Writer& data) const;
@@ -1639,6 +1661,8 @@ namespace game
         std::vector<std::shared_ptr<EntityNodeClass>> mNodes;
         // the list of joints that belong to this entity.
         std::vector<std::shared_ptr<PhysicsJoint>> mJoints;
+        // the list of animators
+        std::vector<std::shared_ptr<AnimatorClass>> mAnimators;
         // The render tree for hierarchical traversal and
         // transformation of the entity and its nodes.
         RenderTree mRenderTree;
@@ -1715,9 +1739,9 @@ namespace game
 
         // Construct a new entity with the initial state based
         // on the entity class object's state.
-        Entity(const EntityArgs& args);
-        Entity(std::shared_ptr<const EntityClass> klass);
-        Entity(const EntityClass& klass);
+        explicit Entity(const EntityArgs& args);
+        explicit Entity(const std::shared_ptr<const EntityClass>& klass);
+        explicit Entity(const EntityClass& klass);
         Entity(const Entity& other) = delete;
         
         // Get the entity node by index. The index must be valid.
@@ -1803,6 +1827,16 @@ namespace game
         using Event = std::variant<TimerEvent, PostedEvent>;
 
         void Update(float dt, std::vector<Event>* events = nullptr);
+
+        using AnimatorAction = game::Animator::Action;
+        using AnimationState = game::AnimationState;
+        using AnimationTransition = game::AnimationTransition;
+
+        void UpdateAnimator(float dt, std::vector<AnimatorAction>* actions);
+        void UpdateAnimator(const AnimationTransition* transition, const AnimationState* next);
+
+        const AnimationState* GetCurrentAnimatorState() noexcept;
+        const AnimationTransition* GetCurrentAnimationTransition() noexcept;
 
         // Play the given animation immediately. If there's any
         // current animation it is replaced.
@@ -1929,6 +1963,7 @@ namespace game
         void PostEvent(PostedEvent&& event)
         { mEvents.push_back(std::move(event)); }
 
+
         // Get the current track if any. (when IsAnimating is true)
         Animation* GetCurrentAnimation() noexcept
         { return mCurrentAnimation.get(); }
@@ -1979,6 +2014,12 @@ namespace game
         { return TestFlag(Flags::VisibleInGame); }
         bool HasIdleTrack() const noexcept
         { return !mIdleTrackId.empty() || mClass->HasIdleTrack(); }
+        bool HasAnimator() const noexcept
+        { return mAnimator.has_value(); }
+        const Animator* GetAnimator() const
+        { return base::GetOpt(mAnimator); }
+        Animator* GetAnimator()
+        { return base::GetOpt(mAnimator); }
         RenderTree& GetRenderTree() noexcept
         { return mRenderTree; }
         const RenderTree& GetRenderTree() const noexcept
@@ -2002,6 +2043,7 @@ namespace game
         // entity's render tree that is to be used as the parent
         // of this entity's nodes.
         std::string mParentNodeId;
+        std::optional<game::Animator> mAnimator;
         // The current animation if any.
         std::unique_ptr<Animation> mCurrentAnimation;
         // the list of nodes that are in the entity.

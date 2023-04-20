@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#define LOGTAG "entity"
+#define LOGTAG "gui"
 
 #include "config.h"
 
@@ -52,6 +52,7 @@
 #include "editor/gui/dlgfont.h"
 #include "editor/gui/dlgmaterialparams.h"
 #include "editor/gui/dlgjoint.h"
+#include "editor/gui/dlganimator.h"
 #include "editor/gui/clipboard.h"
 #include "editor/gui/playwindow.h"
 #include "base/assert.h"
@@ -373,7 +374,7 @@ public:
         auto* child = mState.entity->AddNode(std::move(node));
         mState.entity->LinkChild(nullptr, child);
         mState.view->Rebuild();
-        mState.view->SelectItemById(app::FromUtf8(child->GetId()));
+        mState.view->SelectItemById(child->GetId());
         DEBUG("Added new shape '%1'", name);
         return true;
     }
@@ -514,8 +515,9 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     GetUserProperty(resource, "variables_group", mUI.variables);
     GetUserProperty(resource, "animations_group", mUI.animations);
     GetUserProperty(resource, "joints_group", mUI.joints);
-    mCameraWasLoaded = GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
-                       GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
+    GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x);
+    GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
+    mCameraWasLoaded = true;
 
     mState.entity = std::make_shared<game::EntityClass>(*content);
 
@@ -525,7 +527,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
         const auto& track = mState.entity->GetAnimation(i);
         const auto& Id = track.GetId();
         QVariantMap properties;
-        GetProperty(resource, "track_" + app::FromUtf8(Id), &properties);
+        GetProperty(resource, "track_" + Id, &properties);
         mTrackProperties[Id] = properties;
     }
     // load per node comments
@@ -534,8 +536,18 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
         const auto& node = mState.entity->GetNode(i);
         const auto& id = node.GetId();
         QString comment;
-        GetProperty(resource, "comment_" + app::FromUtf8(id), &comment);
+        GetProperty(resource, "comment_" + id, &comment);
         mComments[id] = comment;
+    }
+
+    // load animator properties
+    for (size_t i=0; i<mState.entity->GetNumAnimators(); ++i)
+    {
+        const auto& anim = mState.entity->GetAnimator(i);
+        const auto& Id = anim.GetId();
+        QVariantMap properties;
+        GetProperty(resource, "animator_" + Id, &properties);
+        mAnimatorProperties[Id] = properties;
     }
 
     mOriginalHash = ComputeHash();
@@ -652,15 +664,19 @@ bool EntityWidget::SaveState(Settings& settings) const
     settings.SetValue("Entity", "camera_offset_x", mState.camera_offset_x);
     settings.SetValue("Entity", "camera_offset_y", mState.camera_offset_y);
 
-    for (const auto& p : mTrackProperties)
+    for (const auto& [id, props] : mTrackProperties)
     {
-        settings.SetValue("Entity", app::FromUtf8(p.first), p.second);
+        settings.SetValue("Entity", "track_" + id, props);
     }
 
-    for (const auto& [node, comment] : mComments)
+    for (const auto& [id, comment] : mComments)
     {
-        if (mState.entity->FindNodeById(node))
-            settings.SetValue("Entity", "comment_" + app::FromUtf8(node), comment);
+        settings.SetValue("Entity", "comment_" + id, comment);
+    }
+
+    for (const auto& [id, props] : mAnimatorProperties)
+    {
+        settings.SetValue("Entity", "animator_" + id, props);
     }
 
     settings.SaveWidget("Entity", mUI.scaleX);
@@ -720,9 +736,10 @@ bool EntityWidget::LoadState(const Settings& settings)
     for (size_t i=0; i< mState.entity->GetNumAnimations(); ++i)
     {
         const auto& track = mState.entity->GetAnimation(i);
+        const auto& id = track.GetId();
         QVariantMap properties;
-        settings.GetValue("Entity", app::FromUtf8(track.GetId()), &properties);
-        mTrackProperties[track.GetId()] = properties;
+        settings.GetValue("Entity", "track_ " + id, &properties);
+        mTrackProperties[id] = properties;
     }
 
     for (size_t i=0; i<mState.entity->GetNumNodes(); ++i)
@@ -730,9 +747,20 @@ bool EntityWidget::LoadState(const Settings& settings)
         const auto& node = mState.entity->GetNode(i);
         const auto& id = node.GetId();
         QString comment;
-        settings.GetValue("Entity", "comment_" + app::FromUtf8(id), &comment);
+        settings.GetValue("Entity", "comment_" + id, &comment);
         mComments[id] = comment;
     }
+
+    // load animator properties
+    for (size_t i=0; i<mState.entity->GetNumAnimators(); ++i)
+    {
+        const auto& anim = mState.entity->GetAnimator(i);
+        const auto& Id = anim.GetId();
+        QVariantMap properties;
+        settings.GetValue("Entity", "animator_" + Id, &properties);
+        mAnimatorProperties[Id] = properties;
+    }
+
 
     UpdateDeletedResourceReferences();
     RebuildCombosInternal();
@@ -1079,8 +1107,9 @@ bool EntityWidget::OnEscape()
 
 bool EntityWidget::LaunchScript(const QString& id)
 {
-    const auto& our_id = (QString) GetItemId(mUI.scriptFile);
-    if (our_id == id)
+    const auto& entity_script_id = (QString)GetItemId(mUI.scriptFile);
+    const auto& animator_script_id = (QString)GetItemId(mUI.animatorScript);
+    if (entity_script_id ==  id || animator_script_id == id)
     {
         on_actionPreview_triggered();
         return true;
@@ -1088,7 +1117,7 @@ bool EntityWidget::LaunchScript(const QString& id)
     return false;
 }
 
-void EntityWidget::SaveAnimationTrack(const game::AnimationClass& track, const QVariantMap& properties)
+void EntityWidget::SaveAnimation(const game::AnimationClass& track, const QVariantMap& properties)
 {
     // keep track of the associated track properties 
     // separately. these only pertain to the UI and are not
@@ -1112,13 +1141,36 @@ void EntityWidget::SaveAnimationTrack(const game::AnimationClass& track, const Q
     mState.entity->AddAnimation(track);
     INFO("Saved animation track '%1'", track.GetName());
     NOTE("Saved animation track '%1'", track.GetName());
-
     DisplayEntityProperties();
 }
 
-void EntityWidget::on_widgetColor_colorChanged(QColor color)
+void EntityWidget::SaveAnimator(const game::AnimatorClass& animator, const QVariantMap& properties)
 {
-    mUI.widget->SetClearColor(ToGfx(color));
+    mAnimatorProperties[animator.GetId()] = properties;
+
+    for (size_t i=0; i<mState.entity->GetNumAnimators(); ++i)
+    {
+        auto& other = mState.entity->GetAnimator(i);
+        if (other.GetId() != animator.GetId())
+            continue;
+
+        // copy it over.
+        other = animator;
+        INFO("Saved animator '%1'", animator.GetName());
+        NOTE("Saved animator '%1'", animator.GetName());
+        DisplayEntityProperties();
+        return;
+    }
+    // add a copy
+    mState.entity->AddAnimator(animator);
+    INFO("Saved animator '%1'", animator.GetName());
+    NOTE("Saved animator '%1'", animator.GetName());
+    DisplayEntityProperties();
+}
+
+void EntityWidget::on_widgetColor_colorChanged(const QColor& color)
+{
+    mUI.widget->SetClearColor(color);
 }
 
 void EntityWidget::on_actionPlay_triggered()
@@ -1172,15 +1224,19 @@ void EntityWidget::on_actionSave_triggered()
     SetUserProperty(resource, "joints_group", mUI.joints);
 
     // save the track properties.
-    for (const auto& p : mTrackProperties)
+    for (const auto& [id, props] : mTrackProperties)
     {
-        SetProperty(resource, "track_" + app::FromUtf8(p.first), p.second);
+        SetProperty(resource, "track_" + id, props);
     }
     // save the node comments
-    for (const auto& [node, comment] : mComments)
+    for (const auto& [id, comment] : mComments)
     {
-        if (mState.entity->FindNodeById(node))
-            SetProperty(resource, "comment_"  + app::FromUtf8(node), comment);
+        SetProperty(resource, "comment_"  + id, comment);
+    }
+    // save the animator properties
+    for (const auto& [id, props] : mAnimatorProperties)
+    {
+        SetProperty(resource, "animator_" + id, props);
     }
 
     mState.workspace->SaveResource(resource);
@@ -1295,8 +1351,8 @@ void EntityWidget::on_actionNodeVarRef_triggered()
         {
             const auto& node = mState.entity->GetNode(i);
             ResourceListItem item;
-            item.name = app::FromUtf8(node.GetName());
-            item.id = app::FromUtf8(node.GetId());
+            item.name = node.GetName();
+            item.id   = node.GetId();
             nodes.push_back(std::move(item));
         }
         QString name = app::FromUtf8(node->GetName());
@@ -1617,6 +1673,22 @@ void EntityWidget::on_btnResetScript_clicked()
     SetEnabled(mUI.btnEditScript, false);
 }
 
+void EntityWidget::on_btnEditAnimator_clicked()
+{
+    if (!mAnimator)
+    {
+        const auto& animator = mState.entity->GetAnimator(0);
+
+        QVariantMap props;
+        if (const auto* ptr = base::SafeFind(mAnimatorProperties, animator.GetId()))
+            props = *ptr;
+        mAnimator = std::make_unique<DlgAnimator>(nullptr, *mState.entity, animator, props);
+        mAnimator->SetEntityWidget(this);
+    }
+    mAnimator->show();
+    mAnimator->activateWindow();
+}
+
 void EntityWidget::on_btnViewPlus90_clicked()
 {
     const float value = GetValue(mUI.rotation);
@@ -1654,7 +1726,7 @@ void EntityWidget::on_btnNewTrack_clicked()
 {
     // sharing the animation class object with the new animation
     // track widget.
-    AnimationTrackWidget* widget = new AnimationTrackWidget(mState.workspace, mState.entity);
+    auto* widget = new AnimationTrackWidget(mState.workspace, mState.entity);
     widget->SetZoom(GetValue(mUI.zoom));
     widget->SetShowGrid(GetValue(mUI.chkShowGrid));
     widget->SetShowOrigin(GetValue(mUI.chkShowOrigin));
@@ -1690,11 +1762,11 @@ void EntityWidget::on_btnEditTrack_clicked()
 }
 void EntityWidget::on_btnDeleteTrack_clicked()
 {
-    auto items = mUI.trackList->selectedItems();
+    const auto& items = mUI.trackList->selectedItems();
     if (items.isEmpty())
         return;
-    QListWidgetItem* item = items[0];
-    const auto& trackId = app::ToUtf8(item->data(Qt::UserRole).toString());
+    const auto* item = items[0];
+    const auto& trackId = (std::string)GetItemId(item);
 
     if (mState.entity->HasIdleTrack())
     {
@@ -1728,8 +1800,8 @@ void EntityWidget::on_btnNewScriptVar_clicked()
     {
         const auto& node = mState.entity->GetNode(i);
         ResourceListItem item;
-        item.name = app::FromUtf8(node.GetName());
-        item.id   = app::FromUtf8(node.GetId());
+        item.name = node.GetName();
+        item.id   = node.GetId();
         nodes.push_back(std::move(item));
     }
     game::ScriptVar var("My_Var", std::string(""));
@@ -1754,8 +1826,8 @@ void EntityWidget::on_btnEditScriptVar_clicked()
     {
         const auto& node = mState.entity->GetNode(i);
         ResourceListItem item;
-        item.name = app::FromUtf8(node.GetName());
-        item.id   = app::FromUtf8(node.GetId());
+        item.name = node.GetName();
+        item.id   = node.GetId();
         nodes.push_back(std::move(item));
     }
 
@@ -1893,6 +1965,125 @@ void EntityWidget::on_btnEditMaterial_clicked()
     }
 }
 
+void EntityWidget::on_btnEditAnimatorScript_clicked()
+{
+    const auto& id = (QString)GetItemId(mUI.animatorScript);
+    if (id.isEmpty())
+        return;
+
+    emit OpenResource(id);
+}
+
+void EntityWidget::on_btnAddAnimatorScript_clicked()
+{
+    if (mState.entity->GetNumAnimators() == 0)
+        return;
+
+    auto& animator = mState.entity->GetAnimator(0);
+
+    const char* script_source = R"(
+--
+-- Entity animator script
+-- This script will be called for every entity animator instance that
+-- has this particular script assigned.
+-- This script allows you to write the logic for performing some
+-- particular actions when entering/leaving animation states and
+-- when transitioning from one state to another.
+--
+-- You're free to delete functions you don't need.
+--
+
+-- Called once when the entity enters a new animation state at the end
+-- of a transition.
+function EnterState(animator, state, entity)
+
+end
+
+-- Called once when the entity is leaving an animation state at the start
+-- of a transition.
+function LeaveState(animator, state, entity)
+
+end
+
+-- Called continuously on the current state. This is the place where you can
+-- realize changes to the current input when in some particular state.
+function UpdateState(animator, state, time, dt, entity)
+
+end
+
+-- Evaluate the condition to trigger a transition from one animation state
+-- to another. Return true to take the transition or false to reject it.
+function EvalTransition(animator, from, to, entity)
+    return false
+end
+
+-- Called once when a transition is started from one state to another.
+function StartTransition(animator, from, to, duration, entity)
+
+end
+
+-- Called once when the transition from one state to another is finished.
+function FinishTransition(animator, from, to, entity)
+
+end
+
+-- Called continuously on a transition while it's in progress.
+function UpdateTransition(animator, from, to, duration, time, dt, entity)
+
+end
+)";
+    app::Script script;
+    const auto& uri = app::toString("ws://lua/%1.lua", script.GetId());
+    const auto& file = mState.workspace->MapFileToFilesystem(uri);
+    if (app::FileExists(file))
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Question);
+        msg.setWindowTitle("File Exists");
+        msg.setText(tr("Overwrite existing script file?\n%1").arg(file));
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+        if (msg.exec() == QMessageBox::Cancel)
+            return;
+    }
+    QFile::FileError err_val = QFile::FileError::NoError;
+    QString err_str;
+    if (!app::WriteTextFile(file, script_source, &err_val, &err_str))
+    {
+        ERROR("Failed to write file. [file='%1', err_val=%2, err_str='%3']", file, err_val, err_str);
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setWindowTitle("Error Occurred");
+        msg.setText(tr("Failed to write the script file. [%1]").arg(err_str));
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.exec();
+        return;
+    }
+    script.SetFileURI(uri);
+    script.SetName(base::FormatString("%1 / Animator", mState.entity->GetName()));
+    app::ScriptResource resource(script, app::toString("%1 / Animator", mState.entity->GetName()));
+    mState.workspace->SaveResource(resource);
+
+    animator.SetScriptId(script.GetId());
+
+    auto* widget = new ScriptWidget(mState.workspace, resource);
+    emit OpenNewWidget(widget);
+
+    SetValue(mUI.animatorScript, ListItemId(script.GetId()));
+    SetEnabled(mUI.btnEditAnimatorScript, true);
+    SetEnabled(mUI.btnResetAnimatorScript, true);
+}
+void EntityWidget::on_btnResetAnimatorScript_clicked()
+{
+    if (mState.entity->GetNumAnimators() == 0)
+        return;
+
+    auto& animator = mState.entity->GetAnimator(0);
+    animator.SetScriptId("");
+    SetValue(mUI.animatorScript, -1);
+    SetEnabled(mUI.btnEditAnimatorScript, false);
+    SetEnabled(mUI.btnResetAnimatorScript, false);
+}
+
 void EntityWidget::on_trackList_itemSelectionChanged()
 {
     auto list = mUI.trackList->selectedItems();
@@ -1916,10 +2107,35 @@ void EntityWidget::on_scriptFile_currentIndexChanged(int index)
     {
         mState.entity->ResetScriptFile();
         SetEnabled(mUI.btnEditScript, false);
+        SetEnabled(mUI.btnResetScript, false);
         return;
     }
     mState.entity->SetSriptFileId(GetItemId(mUI.scriptFile));
     SetEnabled(mUI.btnEditScript, true);
+}
+
+void EntityWidget::on_animatorScript_currentIndexChanged(int index)
+{
+    if (index == -1)
+    {
+        for (size_t i=0; i<mState.entity->GetNumAnimators(); ++i)
+        {
+            auto& anim = mState.entity->GetAnimator(i);
+            anim.SetScriptId("");
+        }
+        SetEnabled(mUI.btnEditAnimatorScript, false);
+        SetEnabled(mUI.btnResetAnimatorScript, false);
+    }
+    else
+    {
+        for (size_t i=0; i<mState.entity->GetNumAnimators(); ++i)
+        {
+            auto& anim = mState.entity->GetAnimator(i);
+            anim.SetScriptId(GetItemId(mUI.animatorScript));
+        }
+        SetEnabled(mUI.btnEditAnimatorScript, true);
+        SetEnabled(mUI.btnResetAnimatorScript, true);
+    }
 }
 
 void EntityWidget::on_nodeName_textChanged(const QString& text)
@@ -2464,6 +2680,24 @@ void EntityWidget::on_fixture_toggled(bool on)
     DisplayCurrentNodeProperties();
 }
 
+void EntityWidget::on_animator_toggled(bool on)
+{
+    if (on)
+    {
+        ASSERT(mAnimator == nullptr);
+        game::AnimatorClass animator;
+        animator.SetName("My Animator");
+        mState.entity->AddAnimator(std::move(animator));
+    }
+    else
+    {
+        if (mAnimator)
+            mAnimator.reset();
+        ASSERT(mState.entity->GetNumAnimators() == 1);
+        mState.entity->DeleteAnimator(0);
+    }
+}
+
 void EntityWidget::on_tree_customContextMenuRequested(QPoint)
 {
     const auto* node = GetCurrentNode();
@@ -2924,14 +3158,15 @@ void EntityWidget::DisplayEntityProperties()
     {
         const auto& track = mState.entity->GetAnimation(i);
         ResourceListItem item;
-        item.name = app::FromUtf8(track.GetName());
-        item.id   = app::FromUtf8(track.GetId());
+        item.name = track.GetName();
+        item.id   = track.GetId();
         item.icon = QIcon("icons:animation_track.png");
         tracks.push_back(std::move(item));
     }
     SetList(mUI.trackList, tracks);
     SetList(mUI.idleTrack, tracks);
 
+    const auto animators = mState.entity->GetNumAnimators();
     const auto vars   = mState.entity->GetNumScriptVars();
     const auto joints = mState.entity->GetNumJoints();
     SetEnabled(mUI.btnEditScriptVar, vars > 0);
@@ -2942,6 +3177,7 @@ void EntityWidget::DisplayEntityProperties()
     SetEnabled(mUI.btnDeleteJoint, joints > 0);
     SetEnabled(mUI.btnEditScript, mState.entity->HasScriptFile());
 
+    SetValue(mUI.animator, animators > 0);
     SetValue(mUI.entityName, mState.entity->GetName());
     SetValue(mUI.entityTag, mState.entity->GetTag());
     SetValue(mUI.entityID, mState.entity->GetId());
@@ -2955,6 +3191,27 @@ void EntityWidget::DisplayEntityProperties()
     SetValue(mUI.chkUpdateEntity, mState.entity->TestFlag(game::EntityClass::Flags::UpdateEntity));
     SetValue(mUI.chkKeyEvents, mState.entity->TestFlag(game::EntityClass::Flags::WantsKeyEvents));
     SetValue(mUI.chkMouseEvents, mState.entity->TestFlag(game::EntityClass::Flags::WantsMouseEvents));
+
+    if (animators > 0)
+    {
+        const auto& animator = mState.entity->GetAnimator(0);
+        if (animator.HasScriptId())
+        {
+            SetValue(mUI.animatorScript, ListItemId(animator.GetScriptId()));
+            SetEnabled(mUI.btnResetAnimatorScript, true);
+            SetEnabled(mUI.btnEditAnimatorScript, true);
+        }
+        else
+        {
+            SetValue(mUI.animatorScript, -1);
+            SetEnabled(mUI.btnResetAnimatorScript, false);
+            SetEnabled(mUI.btnEditAnimatorScript, false);
+        }
+    }
+    else
+    {
+        SetValue(mUI.animatorScript, -1);
+    }
 
     if (!mUI.trackList->selectedItems().isEmpty())
     {
@@ -3355,6 +3612,7 @@ void EntityWidget::RebuildCombos()
     SetList(mUI.rbPolygon, polygons);
     SetList(mUI.fxPolygon, polygons);
     SetList(mUI.scriptFile, scripts);
+    SetList(mUI.animatorScript, scripts);
 }
 
 void EntityWidget::RebuildCombosInternal()
@@ -3367,8 +3625,8 @@ void EntityWidget::RebuildCombosInternal()
         if (auto* body = node.GetRigidBody())
         {
             ResourceListItem pair;
-            pair.name = app::FromUtf8(node.GetName());
-            pair.id   = app::FromUtf8(node.GetId());
+            pair.name = node.GetName();
+            pair.id   = node.GetId();
             bodies.push_back(pair);
         }
     }

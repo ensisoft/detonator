@@ -943,6 +943,10 @@ struct LineEditValueGetter
     {
         return app::ToUtf8(edit->text().trimmed());
     }
+    operator app::AnyString() const
+    {
+        return edit->text().trimmed();
+    }
     const QLineEdit* edit = nullptr;
 };
 

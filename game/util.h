@@ -25,6 +25,8 @@
 #include "warnpop.h"
 
 #include <algorithm> // for min/max
+#include <vector>
+#include <string>
 
 #include "game/types.h"
 
@@ -99,5 +101,73 @@ inline FBox TransformRect(const FRect& rect, const glm::mat4& mat)
     const auto h = rect.GetHeight();
     return FBox(mat, x, y, w, h);
 }
+
+
+template<typename T>
+bool EraseByName(std::vector<T>& vector, const std::string& name)
+{
+    for (auto it=vector.begin(); it != vector.end(); ++it)
+    {
+        if ((*it)->GetName() == name) {
+            vector.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+template<typename T>
+bool EraseById(std::vector<T>& vector, const std::string& id)
+{
+    for (auto it=vector.begin(); it != vector.end(); ++it)
+    {
+        if ((*it)->GetId() == id) {
+            vector.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+template<typename T>
+T* FindByName(std::vector<std::shared_ptr<T>>& vector, const std::string& name)
+{
+    for (const auto& obj : vector) {
+        if (obj->GetName() == name)
+            return obj.get();
+    }
+    return nullptr;
+}
+
+template<typename T>
+T* FindById(std::vector<std::shared_ptr<T>>& vector, const std::string& id)
+{
+    for (const auto& obj : vector) {
+        if (obj->GetId() == id)
+            return obj.get();
+    }
+    return nullptr;
+}
+
+template<typename T>
+const T* FindByName(const std::vector<std::shared_ptr<T>>& vector, const std::string& name)
+{
+    for (const auto& obj : vector) {
+        if (obj->GetName() == name)
+            return obj.get();
+    }
+    return nullptr;
+}
+
+template<typename T>
+const T* FindById(const std::vector<std::shared_ptr<T>>& vector, const std::string& id)
+{
+    for (const auto& obj : vector) {
+        if (obj->GetId() == id)
+            return obj.get();
+    }
+    return nullptr;
+}
+
 
 } // namespace

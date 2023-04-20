@@ -19,6 +19,11 @@
 #include "config.h"
 
 namespace game {
+    class AnimationClass;
+    class Animation;
+    class ActuatorClass;
+    class AnimatorClass;
+    class Animator;
     class TilemapClass;
     class Tilemap;
     class EntityNodeClass;
@@ -41,4 +46,5 @@ namespace game {
     class SetValueActuator;
     class KinematicActuator;
     class MaterialActuator;
+
 } // namespace

@@ -33,6 +33,7 @@ add_executable(UnitTest
     ../base/unit_test/unit_test_memory.cpp
     ../game/unit_test/unit_test_entity.cpp
     ../game/unit_test/unit_test_scene.cpp
+    ../game/unit_test/unit_test_animation.cpp
     ../base/trace.cpp
     ../base/logging.cpp
     ../base/assert.cpp

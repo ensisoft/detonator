@@ -700,7 +700,7 @@ void AnimationTrackWidget::on_actionSave_triggered()
         properties[app::FromUtf8(p.first)] = app::FromUtf8(p.second);
     }
 
-    parent->SaveAnimationTrack(*mState.track, properties);
+    parent->SaveAnimation(*mState.track, properties);
 
     setWindowTitle(GetValue(mUI.trackName));
 }
@@ -1501,8 +1501,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     const auto xs     = (float)GetValue(mUI.viewScaleX);
     const auto ys     = (float)GetValue(mUI.viewScaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
-    const auto view_rotation_time = math::clamp(0.0f, 1.0f,
-        mCurrentTime - mViewTransformStartTime);
+    const auto view_rotation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTransformStartTime);
     const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.viewRotation->value(),
         view_rotation_time, math::Interpolation::Cosine);
 
