@@ -734,6 +734,12 @@ EntityClass::EntityClass(const EntityClass& other)
         mJoints.push_back(std::make_shared<PhysicsJoint>(*joint));
     }
 
+    // Deepy copy animators
+    for (const auto& animator : other.mAnimators)
+    {
+        mAnimators.push_back(std::make_shared<AnimatorClass>(*animator));
+    }
+
     mRenderTree.FromTree(other.GetRenderTree(), [&map](const EntityNodeClass* node) {
         return map[node];
     });
@@ -936,34 +942,17 @@ AnimationClass* EntityClass::AddAnimation(std::unique_ptr<AnimationClass> track)
     mAnimations.push_back(std::move(track));
     return mAnimations.back().get();
 }
-void EntityClass::DeleteAnimation(size_t i)
+void EntityClass::DeleteAnimation(size_t index)
 {
-    ASSERT(i < mAnimations.size());
-    auto it = mAnimations.begin();
-    std::advance(it, i);
-    mAnimations.erase(it);
+    base::SafeErase(mAnimations, index);
 }
 bool EntityClass::DeleteAnimationByName(const std::string& name)
 {
-    for (auto it = mAnimations.begin(); it != mAnimations.end(); ++it)
-    {
-        if ((*it)->GetName() == name) {
-            mAnimations.erase(it);
-            return true;
-        }
-    }
-    return false;
+    return EraseByName(mAnimations, name);
 }
 bool EntityClass::DeleteAnimationById(const std::string& id)
 {
-    for (auto it = mAnimations.begin(); it != mAnimations.end(); ++it)
-    {
-        if ((*it)->GetId() == id) {
-            mAnimations.erase(it);
-            return true;
-        }
-    }
-    return false;
+    return EraseById(mAnimations, id);
 }
 AnimationClass& EntityClass::GetAnimation(size_t i)
 {
@@ -972,12 +961,7 @@ AnimationClass& EntityClass::GetAnimation(size_t i)
 }
 AnimationClass* EntityClass::FindAnimationByName(const std::string& name)
 {
-    for (const auto& klass : mAnimations)
-    {
-        if (klass->GetName() == name)
-            return klass.get();
-    }
-    return nullptr;
+    return FindByName(mAnimations, name);
 }
 const AnimationClass& EntityClass::GetAnimation(size_t i) const
 {
@@ -986,12 +970,63 @@ const AnimationClass& EntityClass::GetAnimation(size_t i) const
 }
 const AnimationClass* EntityClass::FindAnimationByName(const std::string& name) const
 {
-    for (const auto& klass : mAnimations)
-    {
-        if (klass->GetName() == name)
-            return klass.get();
-    }
-    return nullptr;
+    return FindByName(mAnimations, name);
+}
+
+AnimatorClass* EntityClass::AddAnimator(AnimatorClass&& animator)
+{
+    mAnimators.push_back(std::make_shared<AnimatorClass>(std::move(animator)));
+    return mAnimators.back().get();
+}
+AnimatorClass* EntityClass::AddAnimator(const AnimatorClass& animator)
+{
+    mAnimators.push_back(std::make_shared<AnimatorClass>(animator));
+    return mAnimators.back().get();
+}
+AnimatorClass* EntityClass::AddAnimator(const std::shared_ptr<AnimatorClass>& animator)
+{
+    mAnimators.push_back(animator);
+    return mAnimators.back().get();
+}
+
+void EntityClass::DeleteAnimator(size_t index)
+{
+    base::SafeErase(mAnimators, index);
+}
+bool EntityClass::DeleteAnimatorByName(const std::string& name)
+{
+    return EraseByName(mAnimators, name);
+}
+
+bool EntityClass::DeleteAnimatorById(const std::string& id)
+{
+    return EraseById(mAnimators, id);
+}
+
+AnimatorClass& EntityClass::GetAnimator(size_t index)
+{
+    return *base::SafeIndex(mAnimators, index);
+}
+AnimatorClass* EntityClass::FindAnimatorByName(const std::string& name)
+{
+    return FindByName(mAnimators, name);
+}
+AnimatorClass* EntityClass::FindAnimatorById(const std::string& id)
+{
+    return FindById(mAnimators, id);
+}
+
+const AnimatorClass& EntityClass::GetAnimator(size_t index) const
+{
+    return *base::SafeIndex(mAnimators, index);
+}
+const AnimatorClass* EntityClass::FindAnimatorByName(const std::string& name) const
+{
+    return FindByName(mAnimators, name);
+}
+const AnimatorClass* EntityClass::FindAnimatorById(const std::string& id) const
+{
+    return FindById(mAnimators, id);
 }
 
 void EntityClass::LinkChild(EntityNodeClass* parent, EntityNodeClass* child)
@@ -1198,6 +1233,12 @@ std::size_t EntityClass::GetHash() const
         }
         hash = base::hash_combine(hash, jh);
     }
+
+    for (const auto& animator : mAnimators)
+    {
+        hash = base::hash_combine(hash, animator->GetHash());
+    }
+
     return hash;
 }
 
@@ -1252,6 +1293,13 @@ void EntityClass::IntoJson(data::Writer& data) const
             chunk->Write("stiffness", ptr->stiffness);
         }
         data.AppendChunk("joints", std::move(chunk));
+    }
+
+    for (const auto& animator : mAnimators)
+    {
+        auto chunk = data.NewWriteChunk();
+        animator->IntoJson(*chunk);
+        data.AppendChunk("animators", std::move(chunk));
     }
 
     auto chunk = data.NewWriteChunk();
@@ -1331,6 +1379,14 @@ bool EntityClass::FromJson(const data::Reader& data)
             joint->params = params;
         }
         mJoints.push_back(std::move(joint));
+    }
+
+    for (unsigned i=0; i<data.GetNumChunks("animators"); ++i)
+    {
+        const auto& chunk = data.GetReadChunk("animators", i);
+        auto animator = std::make_shared<AnimatorClass>();
+        ok &= animator->FromJson(*chunk);
+        mAnimators.push_back(std::move(animator));
     }
 
     const auto& chunk = data.GetReadChunk("render_tree");
@@ -1419,6 +1475,12 @@ EntityClass EntityClass::Clone() const
         ret.mJoints.push_back(std::move(clone));
     }
 
+    for (const auto& animator : mAnimators)
+    {
+        auto clone = std::make_shared<AnimatorClass>(animator->Clone());
+        ret.mAnimators.push_back(std::move(clone));
+    }
+
     ret.mRenderTree.FromTree(mRenderTree, [&map](const EntityNodeClass* node) {
         return map[node];
     });
@@ -1439,14 +1501,15 @@ EntityClass& EntityClass::operator=(const EntityClass& other)
     mJoints          = std::move(tmp.mJoints);
     mScriptVars      = std::move(tmp.mScriptVars);
     mScriptFile      = std::move(tmp.mScriptFile);
-    mFlags           = std::move(tmp.mFlags);
-    mLifetime        = std::move(tmp.mLifetime);
     mRenderTree      = std::move(tmp.mRenderTree);
-    mAnimations = std::move(tmp.mAnimations);
+    mAnimations      = std::move(tmp.mAnimations);
+    mAnimators       = std::move(tmp.mAnimators);
+    mFlags           = tmp.mFlags;
+    mLifetime        = tmp.mLifetime;
     return *this;
 }
 
-Entity::Entity(std::shared_ptr<const EntityClass> klass)
+Entity::Entity(const std::shared_ptr<const EntityClass>& klass)
   : mClass(klass)
   , mInstanceId(FastId(10))
   , mInstanceTag(klass->GetTag())
@@ -1496,6 +1559,11 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
                            FastId(10),
                            inst_src_node, inst_dst_node);
         mJoints.push_back(std::move(joint));
+    }
+
+    if (mClass->GetNumAnimators())
+    {
+        mAnimator = Animator(mClass->GEtSharedAnimatorClass(0));
     }
 }
 
@@ -1741,6 +1809,40 @@ void Entity::Update(float dt, std::vector<Event>* events)
     //      mClass->GetName(), mInstanceName, mCurrentAnimation->GetName());
     std::swap(mCurrentAnimation, mFinishedAnimation);
     mCurrentAnimation.reset();
+}
+
+void Entity::UpdateAnimator(float dt, std::vector<AnimatorAction>* actions)
+{
+    if (auto* animator = base::GetOpt(mAnimator))
+    {
+        animator->Update(dt, actions);
+    }
+}
+void Entity::UpdateAnimator(const game::Entity::AnimationTransition* transition,
+                            const game::Entity::AnimationState* next)
+{
+    if (auto* animator = base::GetOpt(mAnimator))
+    {
+        animator->Update(transition, next);
+    }
+}
+
+const Entity::AnimationState* Entity::GetCurrentAnimatorState() noexcept
+{
+    if (auto* animator = base::GetOpt(mAnimator))
+    {
+        return animator->GetCurrentState();
+    }
+    return nullptr;
+}
+
+const Entity::AnimationTransition* Entity::GetCurrentAnimationTransition() noexcept
+{
+    if (auto* animator = base::GetOpt(mAnimator))
+    {
+        return animator->GetTransition();
+    }
+    return nullptr;
 }
 
 Animation* Entity::PlayAnimation(std::unique_ptr<Animation> animation)

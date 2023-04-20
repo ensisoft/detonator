@@ -30,6 +30,25 @@
 #include "game/scene.h"
 #include "engine/lua.h"
 #include "engine/loader.h"
+#include "engine/event.h"
+
+
+bool Eq(const engine::GameEventValue& lhs, const engine::GameEventValue& rhs)
+{
+    return lhs == rhs;
+}
+template<typename T>
+bool Eq(const engine::GameEventValue& lhs, const T& rhs)
+{
+    if (const auto* p = std::get_if<T>(&lhs))
+        return *p == rhs;
+    return false;
+}
+bool Eq(const engine::GameEventValue& lhs, const char* str)
+{
+    return Eq(lhs, std::string(str));
+}
+
 
 // the test coverage here is quite poor but OTOH the binding code is
 // for the most part very straightforward just plumbing calls from Lua
@@ -985,6 +1004,215 @@ end
     script.EndLoop();
 }
 
+void unit_test_entity_animation_state()
+{
+    TEST_CASE(test::Type::Feature)
+
+    base::OverwriteTextFile("entity_animator.lua", R"(
+function EnterState(animator, state, entity)
+  print('Enter State: ' .. state)
+
+  local event = game.GameEvent:new()
+  event.message = 'enter state'
+  event.state   = state
+  Game:PostEvent(event)
+end
+
+function LeaveState(animator, state, entity)
+  print('Leave State: ' .. state)
+
+  local event = game.GameEvent:new()
+  event.message = 'leave state'
+  event.state   = state
+  Game:PostEvent(event)
+end
+
+function UpdateState(animator, state, time, dt, entity)
+  print('Update State: ' .. state)
+
+  local event = game.GameEvent:new()
+  event.message = 'update state'
+  event.state   = state
+  Game:PostEvent(event)
+end
+
+function EvalTransition(animator, from, to, entity)
+    if from == 'idle' then
+       if to == 'jump' then
+           return true
+       end
+    end
+    return false
+end
+
+function StartTransition(animator, from, to, duration, entity)
+   print('Start Transition: ' .. from .. ' => ' .. to)
+
+  local event = game.GameEvent:new()
+  event.message = 'start transition'
+  event.src_state = from
+  event.dst_state = to
+  Game:PostEvent(event)
+end
+
+function FinishTransition(animator, from, to, entity)
+   print('Finish Transition: ' .. from .. ' => ' .. to)
+
+  local event = game.GameEvent:new()
+  event.message = 'finish transition'
+  event.src_state = from
+  event.dst_state = to
+  Game:PostEvent(event)
+end
+
+function UpdateTransition(animator, from, to, duration, time, dt, entity)
+   print('Update Transition: ' .. from .. ' => ' .. to)
+   print("duration: " .. tostring(duration))
+   print("time: " .. tostring(time) .. " dt: " .. tostring(dt))
+
+  local event = game.GameEvent:new()
+  event.message = 'update transition'
+  event.src_state = from
+  event.dst_state = to
+  event.duration  = duration
+  event.time      = time
+  event.dt        = dt
+  Game:PostEvent(event)
+end
+)");
+
+    auto foo = std::make_shared<game::EntityClass>();
+    foo->SetName("foo");
+
+    {
+        game::AnimatorClass klass;
+        klass.SetName("Animator");
+        klass.SetScriptId("entity_animator");
+
+        game::AnimationStateClass idle;
+        idle.SetName("idle");
+        klass.AddState(idle);
+
+        game::AnimationStateClass run;
+        run.SetName("run");
+        klass.AddState(run);
+
+        game::AnimationStateClass jump;
+        jump.SetName("jump");
+        klass.AddState(jump);
+
+        game::AnimationStateTransitionClass idle_to_run;
+        idle_to_run.SetName("idle to run");
+        idle_to_run.SetSrcStateId(idle.GetId());
+        idle_to_run.SetDstStateId(run.GetId());
+        klass.AddTransition(idle_to_run);
+
+        game::AnimationStateTransitionClass run_to_idle;
+        run_to_idle.SetName("run to idle");
+        run_to_idle.SetSrcStateId(run.GetId());
+        run_to_idle.SetDstStateId(idle.GetId());
+        run_to_idle.SetDuration(1.0f);
+        klass.AddTransition(run_to_idle);
+
+        game::AnimationStateTransitionClass idle_to_jump;
+        idle_to_jump.SetName("idle to jump");
+        idle_to_jump.SetSrcStateId(idle.GetId());
+        idle_to_jump.SetDstStateId(jump.GetId());
+        klass.AddTransition(idle_to_jump);
+
+        game::AnimationStateTransitionClass jump_to_idle;
+        jump_to_idle.SetName("jump to idle");
+        jump_to_idle.SetSrcStateId(jump.GetId());
+        jump_to_idle.SetDstStateId(idle.GetId());
+        klass.AddTransition(jump_to_idle);
+
+        klass.SetInitialStateId(idle.GetId());
+
+        foo->AddAnimator(std::move(klass));
+    }
+
+    game::SceneClass scene_class;
+    {
+        game::SceneNodeClass node;
+        node.SetName("foo");
+        node.SetEntity(foo);
+        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+    }
+
+    TestLoader loader;
+
+    float time = 0.0f;
+    float step = 1.0f/60.0f;
+
+    game::Scene scene(scene_class);
+    engine::LuaRuntime script(".", "", "", "");
+    script.SetDataLoader(&loader);
+    script.Init();
+
+    script.BeginPlay(&scene);
+    script.BeginLoop();
+    script.Update(time, step);
+    time += step;
+
+    engine::Action action;
+    TEST_REQUIRE(script.GetNextAction(&action));
+    auto* event = std::get_if<engine::PostEventAction>(&action);
+    TEST_REQUIRE(event->event.message == "enter state");
+    TEST_REQUIRE(Eq(event->event.values["state"], "idle"));
+
+    TEST_REQUIRE(script.GetNextAction(&action));
+    event = std::get_if<engine::PostEventAction>(&action);
+    TEST_REQUIRE(event->event.message == "update state");
+    TEST_REQUIRE(Eq(event->event.values["state"], "idle"));
+
+    TEST_REQUIRE(!script.GetNextAction(&action));
+
+    script.EndLoop();
+    script.BeginLoop();
+    script.Update(time, step);
+    time += step;
+
+    TEST_REQUIRE(script.GetNextAction(&action));
+    event = std::get_if<engine::PostEventAction>(&action);
+    TEST_REQUIRE(event->event.message == "leave state");
+    TEST_REQUIRE(Eq(event->event.values["state"], "idle"));
+
+    TEST_REQUIRE(script.GetNextAction(&action));
+    event = std::get_if<engine::PostEventAction>(&action);
+    TEST_REQUIRE(event->event.message == "start transition");
+    TEST_REQUIRE(Eq(event->event.values["src_state"], "idle"));
+    TEST_REQUIRE(Eq(event->event.values["dst_state"], "jump"));
+
+    TEST_REQUIRE(script.GetNextAction(&action));
+    event = std::get_if<engine::PostEventAction>(&action);
+    TEST_REQUIRE(event->event.message == "update transition");
+    TEST_REQUIRE(Eq(event->event.values["src_state"], "idle"));
+    TEST_REQUIRE(Eq(event->event.values["dst_state"], "jump"));
+
+    TEST_REQUIRE(script.GetNextAction(&action));
+    event = std::get_if<engine::PostEventAction>(&action);
+    TEST_REQUIRE(event->event.message == "finish transition");
+    TEST_REQUIRE(Eq(event->event.values["src_state"], "idle"));
+    TEST_REQUIRE(Eq(event->event.values["dst_state"], "jump"));
+
+    TEST_REQUIRE(script.GetNextAction(&action));
+    event = std::get_if<engine::PostEventAction>(&action);
+    TEST_REQUIRE(event->event.message == "enter state");
+    TEST_REQUIRE(Eq(event->event.values["state"], "jump"));
+
+    TEST_REQUIRE(!script.GetNextAction(&action));
+
+    script.EndLoop();
+    script.BeginLoop();
+    script.Update(time, step);
+    time += step;
+
+    TEST_REQUIRE(script.GetNextAction(&action));
+    event = std::get_if<engine::PostEventAction>(&action);
+    TEST_REQUIRE(event->event.message == "update state");
+    TEST_REQUIRE(Eq(event->event.values["state"], "jump"));
+}
+
 void unit_test_entity_private_environment()
 {
     TEST_CASE(test::Type::Feature)
@@ -1440,6 +1668,7 @@ int test_main(int argc, char* argv[])
     unit_test_scene_interface();
     unit_test_entity_begin_end_play();
     unit_test_entity_tick_update();
+    unit_test_entity_animation_state();
     unit_test_entity_private_environment();
     unit_test_entity_private_variable();
     unit_test_entity_cross_env_call();

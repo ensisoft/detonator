@@ -48,6 +48,7 @@ namespace gui
     class TreeWidget;
     class MouseTool;
     class PlayWindow;
+    class DlgAnimator;
 
     class EntityWidget : public MainWidget
     {
@@ -86,9 +87,11 @@ namespace gui
 
         std::string GetEntityId() const
         { return mState.entity->GetId(); }
-        void SaveAnimationTrack(const game::AnimationClass& track, const QVariantMap& properties);
+
+        void SaveAnimation(const game::AnimationClass& track, const QVariantMap& properties);
+        void SaveAnimator(const game::AnimatorClass& animator, const QVariantMap& properties);
     private slots:
-        void on_widgetColor_colorChanged(QColor color);
+        void on_widgetColor_colorChanged(const QColor& color);
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
         void on_actionStop_triggered();
@@ -134,6 +137,7 @@ namespace gui
         void on_btnAddScript_clicked();
         void on_btnEditScript_clicked();
         void on_btnResetScript_clicked();
+        void on_btnEditAnimator_clicked();
         void on_btnViewPlus90_clicked();
         void on_btnViewMinus90_clicked();
         void on_btnResetTransform_clicked();
@@ -151,9 +155,13 @@ namespace gui
         void on_btnSetMaterialParams_clicked();
         void on_btnEditDrawable_clicked();
         void on_btnEditMaterial_clicked();
+        void on_btnEditAnimatorScript_clicked();
+        void on_btnAddAnimatorScript_clicked();
+        void on_btnResetAnimatorScript_clicked();
         void on_trackList_itemSelectionChanged();
         void on_idleTrack_currentIndexChanged(int);
         void on_scriptFile_currentIndexChanged(int);
+        void on_animatorScript_currentIndexChanged(int);
         void on_nodeName_textChanged(const QString& text);
         void on_nodeComment_textChanged(const QString& text);
         void on_nodeSizeX_valueChanged(double value);
@@ -223,12 +231,12 @@ namespace gui
         void on_btnSelectFontFile_clicked();
         void on_btnResetTextRasterWidth_clicked();
         void on_btnResetTextRasterHeight_clicked();
-
         void on_drawableItem_toggled(bool on);
         void on_rigidBodyItem_toggled(bool on);
         void on_textItem_toggled(bool on);
         void on_spatialNode_toggled(bool on);
         void on_fixture_toggled(bool on);
+        void on_animator_toggled(bool on);
         void on_tree_customContextMenuRequested(QPoint);
         void on_scriptVarList_customContextMenuRequested(QPoint);
         void on_jointList_customContextMenuRequested(QPoint);
@@ -303,15 +311,18 @@ namespace gui
         double mViewTransformStartTime = 0.0;
         float mViewTransformRotation = 0.0f;
         bool mCameraWasLoaded = false;
-        // storage for keeping per track properties around until
-        // being saved.
+        // map animator to some properties
+        std::unordered_map<std::string, QVariantMap> mAnimatorProperties;
+        // map animation to some properties
         std::unordered_map<std::string, QVariantMap> mTrackProperties;
         // Undo "stack" with fixed capacity that begins
         // overwrite old items when space is exceeded
         boost::circular_buffer<game::EntityClass> mUndoStack;
         // map entity nodes to associated comments (if any)
         std::unordered_map<std::string, QString> mComments;
-
+        // the entity preview window if any.
         std::unique_ptr<PlayWindow> mPreview;
+        // the animator dialog if any.
+        std::unique_ptr<DlgAnimator> mAnimator;
     };
 }

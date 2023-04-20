@@ -1111,6 +1111,20 @@ void InitLuaDoc()
     DOC_TABLE("game.SetKinematicActuator");
     DOC_TABLE("game.MaterialActuator");
 
+    DOC_TABLE("game.Animator");
+    DOC_METHOD_0("string", "GetName", "Get the animator name.");
+    DOC_METHOD_0("string", "GetId", "Get the animator class ID.");
+    DOC_METHOD_1("bool", "HasValue", "Check whether the animator has a value by the given name.", "string", "name");
+    DOC_METHOD_2("void", "SetValue", "Set an animator value.",
+                 "string", "name", "bool|int|float|string|glm.vec2", "value");
+    DOC_METHOD_1("bool|int|float|string|glm.vec2", "FindValue", "Find an animator value if any. If no such value exists then return nil.",
+                 "string", "name");
+    DOC_METHOD_0("float", "GetTime", "Get the animator time. When the animator is not transitioning from one state to another the time "
+                                     "measures the time spent in the current animation state. When a transition to another state is taking "
+                                     "place the time measures the time spent in transition.");
+    DOC_META_METHOD_0("...", "index", "Lua index meta method.");
+    DOC_META_METHOD_0("...", "newindex", "Lua new index meta method.");
+
     DOC_TABLE("game.AnimationClass");
     DOC_METHOD_0("string", "GetName", "Get the animation class name.");
     DOC_METHOD_0("string", "GetId", "Get the animation class ID.");
@@ -1164,6 +1178,8 @@ void InitLuaDoc()
                                           "Entities that have been killed will be deleted from the scene at the end of this game loop.");
     DOC_METHOD_0("bool", "HasBeenSpawned", "Checks whether the entity has just been spawned and exists for the first iteration of the game loop.<br>"
                                            "This flag is only ever true on the first iteration of the game loop during the entity's lifetime.");
+    DOC_METHOD_0("bool", "HasAnimator", "Checks whether the entity has an animator component or not.");
+    DOC_METHOD_0("game.Animator", "GetAnimator", "Get the entity animator instance if any.");
     DOC_METHOD_0("game.Scene", "GetScene", "Get the current scene.");
     DOC_METHOD_1("game.EntityNode", "GetNode", "Get an entity node at the the given index. The indexing is 0 based and the index must be a valid index.",
                  "unsigned", "index");

@@ -24,10 +24,11 @@
 
 #include <memory>
 #include <queue>
+#include <vector>
 #include <unordered_map>
-#include <stack>
 
 #include "game/types.h"
+#include "game/animation.h"
 #include "engine/game.h"
 #include "engine/action.h"
 
@@ -88,6 +89,7 @@ namespace engine
         bool HasAction() const
         { return !mActionQueue.empty(); }
     private:
+        sol::environment* GetTypeEnv(const game::AnimatorClass& klass);
         sol::environment* GetTypeEnv(const game::EntityClass& klass);
         sol::environment* GetTypeEnv(const uik::Window& window);
         sol::object CallCrossEnvMethod(sol::object object, const std::string& method, sol::variadic_args va);
@@ -105,6 +107,7 @@ namespace engine
         const Loader* mDataLoader = nullptr;
         KeyValueStore* mStateStore = nullptr;
         std::unique_ptr<sol::state> mLuaState;
+        std::unordered_map<std::string, std::shared_ptr<sol::environment>> mAnimatorEnvs;
         std::unordered_map<std::string, std::shared_ptr<sol::environment>> mEntityEnvs;
         std::unordered_map<std::string, std::unique_ptr<sol::environment>> mWindowEnvs;
         std::unique_ptr<sol::environment> mSceneEnv;

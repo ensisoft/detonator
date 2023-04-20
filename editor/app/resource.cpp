@@ -93,8 +93,68 @@ QVariantMap DuplicateResourceProperties(const game::EntityClass& src, const game
 {
     ASSERT(src.GetNumNodes() == dupe.GetNumNodes());
     ASSERT(src.GetNumAnimations() == dupe.GetNumAnimations());
+    ASSERT(src.GetNumAnimators() == dupe.GetNumAnimators());
 
     QVariantMap ret = props;
+
+    // map the properties associated with the resource object, i.e. the variant map
+    // from properties using the old IDs to properties using new IDs
+    for (size_t i=0; i<src.GetNumAnimators(); ++i)
+    {
+        const auto& src_animator = src.GetAnimator(i);
+        const auto& dst_animator = dupe.GetAnimator(i);
+        // map state and link IDs from the src animator IDs to the
+        // duplicate animator IDs
+        std::unordered_map<std::string, std::string> mapping;
+        for (size_t i=0; i<src_animator.GetNumStates(); ++i)
+        {
+            const auto& src_state = src_animator.GetState(i);
+            const auto& dst_state = dst_animator.GetState(i);
+            mapping[src_state.GetId()] = dst_state.GetId();
+        }
+        for (const auto& [old_id, new_id] : mapping)
+        {
+            const float xpos = props[app::PropertyKey("scene_pos_x", old_id)].toFloat();
+            const float ypos = props[app::PropertyKey("scene_pos_y", old_id)].toFloat();
+            ret.remove(app::PropertyKey("scene_pos_x", old_id));
+            ret.remove(app::PropertyKey("scene_pos_y", old_id));
+            ret[app::PropertyKey("scene_pos_x", new_id)] = xpos;
+            ret[app::PropertyKey("scene_pos_y", new_id)] = ypos;
+        }
+
+        mapping.clear();
+
+        for (size_t i=0; i<src_animator.GetNumTransitions(); ++i)
+        {
+            const auto& src_transition = src_animator.GetTransition(i);
+            const auto& dst_transition = dst_animator.GetTransition(i);
+            mapping[src_transition.GetId()] = dst_transition.GetId();
+        }
+
+        for (const auto& [old_id, new_id] : mapping)
+        {
+            const float srcx = props[app::PropertyKey("src_point_x", old_id)].toFloat();
+            const float srcy = props[app::PropertyKey("src_point_y", old_id)].toFloat();
+            const float dstx = props[app::PropertyKey("dst_point_x", old_id)].toFloat();
+            const float dsty = props[app::PropertyKey("dst_point_y", old_id)].toFloat();
+            const float posx = props[app::PropertyKey("scene_pos_x", old_id)].toFloat();
+            const float posy = props[app::PropertyKey("scene_pos_y", old_id)].toFloat();
+
+            ret.remove(app::PropertyKey("src_point_x", old_id));
+            ret.remove(app::PropertyKey("src_point_y", old_id));
+            ret.remove(app::PropertyKey("dst_point_x", old_id));
+            ret.remove(app::PropertyKey("dst_point_y", old_id));
+            ret.remove(app::PropertyKey("scene_pos_x", old_id));
+            ret.remove(app::PropertyKey("scene_pos_y", old_id));
+
+            ret[app::PropertyKey("src_point_x", old_id)] = srcx;
+            ret[app::PropertyKey("src_point_y", old_id)] = srcy;
+            ret[app::PropertyKey("dst_point_x", old_id)] = dstx;
+            ret[app::PropertyKey("dst_point_y", old_id)] = dsty;
+            ret[app::PropertyKey("scene_pos_x", old_id)] = posx;
+            ret[app::PropertyKey("scene_pos_y", old_id)] = posy;
+        }
+    }
 
     std::unordered_map<std::string, std::string> node_id_map;
     for (size_t i=0; i<src.GetNumNodes(); ++i)
@@ -193,6 +253,13 @@ QStringList ListResourceDependencies(const game::EntityClass& entity, const QVar
 {
     QStringList ret;
     PushBack(ret, entity.GetScriptFileId());
+
+    for (size_t i=0; i<entity.GetNumAnimators(); ++i)
+    {
+        const auto& animator = entity.GetAnimator(0);
+        if (animator.HasScriptId())
+            PushBack(ret, animator.GetScriptId());
+    }
 
     for (size_t i=0; i<entity.GetNumNodes(); ++i)
     {

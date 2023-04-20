@@ -361,6 +361,9 @@ add_executable(Detonator
     editor/gui/playwindow.h
     editor/gui/playwindow.cpp
     editor/gui/playwindow.ui
+    editor/gui/dlganimator.h
+    editor/gui/dlganimator.ui
+    editor/gui/dlganimator.cpp
     editor/gui/dlgeventlog.h
     editor/gui/dlgeventlog.ui
     editor/gui/dlgeventlog.cpp

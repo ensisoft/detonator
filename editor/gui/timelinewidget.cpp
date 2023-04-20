@@ -55,6 +55,7 @@ namespace  gui
 
 TimelineWidget::TimelineWidget(QWidget* parent) : QAbstractScrollArea(parent)
 {
+    setFrameShape(QAbstractScrollArea::Shape::NoFrame);
     // need to enable mouse tracking in order to get mouse move events.
     setMouseTracking(true);
 }

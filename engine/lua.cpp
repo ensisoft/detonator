@@ -449,11 +449,14 @@ void BindArrayInterface(sol::table& table, const char* name)
     arr["Clear"]      = &Type::Clear;
 }
 
+// Call into Lua, i.e. invoke a function in some Lua script.
+// Returns true if the call was executed, or false to indicate that
+// there's no such function to call. Throws an exception on script error.
 template<typename... Args>
-void CallLua(const sol::protected_function& func, const Args&... args)
+bool CallLua(const sol::protected_function& func, const Args&... args)
 {
     if (!func.valid())
-        return;
+        return false;
     const auto& result = func(args...);
     // All the calls into Lua begin by the engine calling into Lua.
     // The protected_function will create a new protected scope and
@@ -466,13 +469,44 @@ void CallLua(const sol::protected_function& func, const Args&... args)
     // an exception. This would turn an engine (binding code) BUG
     // into a Lua game bug which is not what we want!
     if (result.valid())
-        return;
+        return true;
     const sol::error err = result;
 
     // todo: Lua code has failed. This information should likely be
     // propagated in a logical Lua error object rather than by
     // throwing an exception.
-    throw std::runtime_error(err.what());
+    throw GameError(err.what());
+}
+
+template<typename Ret, typename... Args>
+bool CallLua(Ret* retval, const sol::protected_function& func, const Args&... args)
+{
+    if (!func.valid())
+        return false;
+    const auto& result = func(args...);
+    // All the calls into Lua begin by the engine calling into Lua.
+    // The protected_function will create a new protected scope and
+    //   a) realize Lua errors raised by error(...)
+    //   b) catch c++ exceptions
+    // then return validity status and any error message through the
+    // result object.
+    // However, we must take care inside the Binding code since any
+    // *BUGS* there i.e. calling sol3 wrong will also have sol3 throw
+    // an exception. This would turn an engine (binding code) BUG
+    // into a Lua game bug which is not what we want!
+    if (result.valid())
+    {
+        if (result.return_count() != 1)
+            throw GameError("No return value from Lua.");
+        *retval = result;
+        return true;
+    }
+    const sol::error err = result;
+
+    // todo: Lua code has failed. This information should likely be
+    // propagated in a logical Lua error object rather than by
+    // throwing an exception.
+    throw GameError(err.what());
 }
 
 template<typename Type>
@@ -718,7 +752,7 @@ void SetKvValue(engine::KeyValueStore& kv, const char* key, sol::object value)
         kv.SetValue(key, value.as<base::FRect>());
     else if (value.is<base::FPoint>())
         kv.SetValue(key, value.as<base::FPoint>());
-    else throw GameError("Unsupported key value store type.");
+    else throw GameError("Unsupported key-value store value type.");
 }
 
 // WAR. G++ 10.2.0 has internal segmentation fault when using the Get/SetScriptVar helpers
@@ -727,6 +761,40 @@ template sol::object GetScriptVar<game::Scene>(game::Scene&, const char*, sol::t
 template sol::object GetScriptVar<game::Entity>(game::Entity&, const char*, sol::this_state, sol::this_environment);
 template void SetScriptVar<game::Scene>(game::Scene&, const char* key, sol::object, sol::this_state, sol::this_environment);
 template void SetScriptVar<game::Entity>(game::Entity&, const char* key, sol::object, sol::this_state, sol::this_environment);
+
+sol::object GetAnimatorVar(const game::Animator& animator, const char* key, sol::this_state this_state)
+{
+    sol::state_view state(this_state);
+    if (const auto* ptr = animator.FindValue(key))
+    {
+        if (const auto* p = std::get_if<bool>(ptr))
+            return sol::make_object(state, *p);
+        else if (const auto* p = std::get_if<int>(ptr))
+            return sol::make_object(state, *p);
+        else if (const auto* p = std::get_if<float>(ptr))
+            return sol::make_object(state, *p);
+        else if (const auto* p = std::get_if<std::string>(ptr))
+            return sol::make_object(state, *p);
+        else if (const auto* p = std::get_if<glm::vec2>(ptr))
+            return sol::make_object(state, *p);
+        else BUG("Missing animator value type.");
+    }
+    return sol::nil;
+}
+void SetAnimatorVar(game::Animator& animator, const char* key, sol::object value, sol::this_state this_state)
+{
+    if (value.is<bool>())
+        animator.SetValue(key, value.as<bool>());
+    else if (value.is<int>())
+        animator.SetValue(key, value.as<int>());
+    else if (value.is<float>())
+        animator.SetValue(key, value.as<float>());
+    else if (value.is<std::string>())
+        animator.SetValue(key, value.as<std::string>());
+    else if (value.is<glm::vec2>())
+        animator.SetValue(key, value.as<glm::vec2>());
+    else throw GameError("Unsupported animator value type.");
+}
 
 // shim to help with uik::WidgetCast overload resolution.
 template<typename Widget> inline
@@ -1090,6 +1158,7 @@ LuaRuntime::~LuaRuntime()
 {
     // careful here, make sure to clean up the environment objects
     // first since they depend on lua state.
+    mAnimatorEnvs.clear();
     mEntityEnvs.clear();
     mWindowEnvs.clear();
     mSceneEnv.reset();
@@ -1192,41 +1261,41 @@ void LuaRuntime::Init()
     auto engine = table.new_usertype<LuaRuntime>("Engine");
 
     engine["SpawnEntity"] = sol::overload(
-            [](const LuaRuntime& self, const std::string& klass, const sol::table& args_table) {
-                if (!self.mScene)
-                    throw GameError("No scene is currently being played.");
-                game::EntityArgs args;
-                args.klass = self.mClassLib->FindEntityClassByName(klass);
-                if (!args.klass)
-                    throw GameError("No such entity class could be found: " + klass);
-                args.id   = args_table.get_or("id", std::string(""));
-                args.name = args_table.get_or("name", std::string(""));
-                args.scale.x = args_table.get_or("sx", 1.0f);
-                args.scale.y = args_table.get_or("sy", 1.0f);
-                args.position.x = args_table.get_or("x", 0.0f);
-                args.position.y = args_table.get_or("y", 0.0f);
-                args.rotation = args_table.get_or("r", 0.0f);
-                args.enable_logging = args_table.get_or("logging", false);
-                args.layer = args_table.get_or("layer", 0);
-                const bool link_to_root = args_table.get_or("link", true);
-                const glm::vec2* pos = nullptr;
-                const glm::vec2* scale = nullptr;
-                if (const auto* ptr = args_table.get_or("pos", pos))
-                    args.position = *ptr;
-                if (const auto* ptr = args_table.get_or("scale", scale))
-                    args.scale = *ptr;
+        [](const LuaRuntime& self, const std::string& klass, const sol::table& args_table) {
+            if (!self.mScene)
+                throw GameError("No scene is currently being played.");
+            game::EntityArgs args;
+            args.klass = self.mClassLib->FindEntityClassByName(klass);
+            if (!args.klass)
+                throw GameError("No such entity class could be found: " + klass);
+            args.id   = args_table.get_or("id", std::string(""));
+            args.name = args_table.get_or("name", std::string(""));
+            args.scale.x = args_table.get_or("sx", 1.0f);
+            args.scale.y = args_table.get_or("sy", 1.0f);
+            args.position.x = args_table.get_or("x", 0.0f);
+            args.position.y = args_table.get_or("y", 0.0f);
+            args.rotation = args_table.get_or("r", 0.0f);
+            args.enable_logging = args_table.get_or("logging", false);
+            args.layer = args_table.get_or("layer", 0);
+            const bool link_to_root = args_table.get_or("link", true);
+            const glm::vec2* pos = nullptr;
+            const glm::vec2* scale = nullptr;
+            if (const auto* ptr = args_table.get_or("pos", pos))
+                args.position = *ptr;
+            if (const auto* ptr = args_table.get_or("scale", scale))
+                args.scale = *ptr;
 
-                return self.mScene->SpawnEntity(args, link_to_root);
-            },
-            [](const LuaRuntime& self, const std::string& klass) {
-                if (!self.mScene)
-                    throw GameError("No scene is currently being played.");
-                game::EntityArgs args;
-                args.klass = self.mClassLib->FindEntityClassByName(klass);
-                if (!args.klass)
-                    throw GameError("No such entity class could be found: " + klass);
-                return self.mScene->SpawnEntity(args);
-            }
+            return self.mScene->SpawnEntity(args, link_to_root);
+        },
+        [](const LuaRuntime& self, const std::string& klass) {
+            if (!self.mScene)
+                throw GameError("No scene is currently being played.");
+            game::EntityArgs args;
+            args.klass = self.mClassLib->FindEntityClassByName(klass);
+            if (!args.klass)
+                throw GameError("No such entity class could be found: " + klass);
+            return self.mScene->SpawnEntity(args);
+        }
     );
     engine["Play"] = sol::overload(
         [](LuaRuntime& self, ClassHandle<SceneClass> klass) {
@@ -1399,7 +1468,7 @@ void LuaRuntime::Init()
         action.result = result;
         self.mActionQueue.push(std::move(action));
     };
-    engine["PostEvent"] = [](LuaRuntime& self, const GameEvent& event) {
+    engine["PostEvent"] =  [](LuaRuntime& self, const GameEvent& event) {
         PostEventAction action;
         action.event = event;
         self.mActionQueue.push(std::move(action));
@@ -1483,6 +1552,7 @@ void LuaRuntime::BeginPlay(Scene* scene)
     // per each instance.
     std::unordered_map<std::string, std::shared_ptr<sol::environment>> entity_env_map;
     std::unordered_map<std::string, std::shared_ptr<sol::environment>> script_env_map;
+    std::unordered_map<std::string, std::shared_ptr<sol::environment>> animator_env_map;
 
     for (size_t i=0; i<scene->GetNumEntities(); ++i)
     {
@@ -1531,6 +1601,55 @@ void LuaRuntime::BeginPlay(Scene* scene)
         entity_env_map[klass.GetId()] = it->second;
     }
 
+    for (size_t i=0; i<scene->GetNumEntities(); ++i)
+    {
+        const auto& entity = scene->GetEntity(i);
+        const auto& klass  = entity.GetClass();
+        if (klass.GetNumAnimators() == 0)
+            continue;
+        const auto& animator = klass.GetAnimator(0);
+        if (!animator.HasScriptId())
+            continue;
+
+        if (animator_env_map.find(animator.GetId()) != animator_env_map.end())
+            continue;
+
+        const auto& scriptId = animator.GetScriptId();
+        auto it = script_env_map.find(scriptId);
+        if (it == script_env_map.end())
+        {
+            const auto& script_buff = mDataLoader->LoadEngineDataId(scriptId);
+            if (!script_buff)
+            {
+                ERROR("Failed to load entity animator script file. [class='%1', script='%2']", klass.GetName(), scriptId);
+                continue;
+            }
+            auto script_env = std::make_shared<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
+            // store the script ID with the script object/environment
+            // this is used when for example checking access to a scripting variable.
+            // i.e. we check that the entity's script ID is the same as the script ID
+            // stored the script environment.
+            (*script_env)["__script_id__"] = scriptId;
+
+            const auto& script_file = script_buff->GetName();
+            const auto& script_view = script_buff->GetStringView();
+            const auto& result = mLuaState->script(script_view, *script_env);
+            if (!result.valid())
+            {
+                const sol::error err = result;
+                ERROR("Lua script error. [file='%1', error='%2']", script_file, err.what());
+                // throwing here is just too convenient way to propagate the Lua
+                // specific error message up the stack without cluttering the interface,
+                // and when running the engine inside the editor we really want to
+                // have this lua error propagated all the way to the UI
+                throw std::runtime_error(err.what());
+            }
+            it = script_env_map.insert({scriptId, script_env}).first;
+            DEBUG("Entity animator script loaded. [class='%1', file='%2']", klass.GetName(), script_file);
+        }
+        animator_env_map[animator.GetId()] = it->second;
+    }
+
     std::unique_ptr<sol::environment> scene_env;
     if ((*scene)->HasScriptFile())
     {
@@ -1565,6 +1684,7 @@ void LuaRuntime::BeginPlay(Scene* scene)
 
     mSceneEnv   = std::move(scene_env);
     mEntityEnvs = std::move(entity_env_map);
+    mAnimatorEnvs = std::move(animator_env_map);
 
     mScene = scene;
     (*mLuaState)["Scene"] = mScene;
@@ -1642,32 +1762,74 @@ void LuaRuntime::Update(double game_time, double dt)
                    CallLua((*mGameEnv)["Update"], game_time, dt));
     }
 
-    if (mScene)
+    if (!mScene)
+        return;
+
+    if (mSceneEnv)
     {
-        if (mSceneEnv)
+        TRACE_CALL("Lua::Scene::Update",
+                   CallLua((*mSceneEnv)["Update"], mScene, game_time, dt));
+    }
+
+    TRACE_SCOPE("Lua::Entity::Update");
+    for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
+    {
+        auto* entity = &mScene->GetEntity(i);
+        if (auto* env = GetTypeEnv(entity->GetClass()))
         {
-            TRACE_CALL("Lua::Scene::Update",
-                       CallLua((*mSceneEnv)["Update"], mScene, game_time, dt));
+            if (const auto* anim = entity->GetFinishedAnimation())
+            {
+                CallLua((*env)["OnAnimationFinished"], entity, anim);
+            }
+            if (entity->TestFlag(Entity::Flags::UpdateEntity))
+            {
+                CallLua((*env)["Update"], entity, game_time, dt);
+            }
         }
 
-        TRACE_SCOPE("Lua::Entity::Update");
-        for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
+        // The animator code is here simply because it's just too convenient to have the
+        // animator a) be scriptable b) have access to the same Lua APIs that exist everywhere
+        // else too.. This should be pretty flexible in terms of what can be done to the
+        // entity when changing animation states. Also possible to play audio effects etc.
+        if (!entity->HasAnimator())
+            continue;
+
+        const auto& entity_klass = entity->GetClass();
+        const auto& animator_klass = entity_klass.GetAnimator(0);
+
+        std::vector<game::Entity::AnimatorAction> actions;
+        entity->UpdateAnimator(dt, &actions);
+        if (auto* env = GetTypeEnv(animator_klass))
         {
-            auto* entity = &mScene->GetEntity(i);
-            if (auto* env = GetTypeEnv(entity->GetClass()))
+            auto& e = *env;
+            auto* animator = entity->GetAnimator();
+            for (auto& action : actions)
             {
-                if (const auto* anim = entity->GetFinishedAnimation())
+                if (auto* ptr = std::get_if<Animator::EnterState>(&action))
+                    CallLua(e["EnterState"], animator, ptr->state->GetName(), entity);
+                else if (auto* ptr = std::get_if<Animator::LeaveState>(&action))
+                    CallLua(e["LeaveState"], animator, ptr->state->GetName(), entity);
+                else if (auto* ptr = std::get_if<Animator::UpdateState>(&action))
+                    CallLua(e["UpdateState"], animator, ptr->state->GetName(), ptr->time, ptr->dt, entity);
+                else if (auto* ptr = std::get_if<Animator::EvalTransition>(&action))
                 {
-                    CallLua((*env)["OnAnimationFinished"], entity, anim);
+                    // if the call to Lua succeeds and the return value is true then update the animator to
+                    // take a transition from the current state to the next state.
+                    bool return_value_from_lua = false;
+                    if (CallLua(&return_value_from_lua, e["EvalTransition"], animator, ptr->from->GetName(), ptr->to->GetName(), entity) && return_value_from_lua)
+                        entity->UpdateAnimator(ptr->transition, ptr->to);
                 }
-                if (entity->TestFlag(Entity::Flags::UpdateEntity))
-                {
-                    CallLua((*env)["Update"], entity, game_time, dt);
-                }
+                else if (auto* ptr = std::get_if<Animator::StartTransition>(&action))
+                    CallLua(e["StartTransition"], animator, ptr->from->GetName(), ptr->to->GetName(), ptr->transition->GetDuration(), entity);
+                else if (auto* ptr = std::get_if<Animator::FinishTransition>(&action))
+                    CallLua(e["FinishTransition"], animator, ptr->from->GetName(), ptr->to->GetName(),entity);
+                else if (auto* ptr = std::get_if<Animator::UpdateTransition>(&action))
+                    CallLua(e["UpdateTransition"], animator, ptr->from->GetName(), ptr->to->GetName(), ptr->transition->GetDuration(), ptr->time, ptr->dt, entity);
             }
         }
     }
 }
+
 void LuaRuntime::PostUpdate(double game_time)
 {
     TRACE_SCOPE("Lua::Entity::PostUpdate");
@@ -1693,6 +1855,7 @@ void LuaRuntime::BeginLoop()
         auto* entity = &mScene->GetEntity(i);
         if (!entity->TestFlag(game::Entity::ControlFlags::Spawned))
             continue;
+
         if (mSceneEnv)
             CallLua((*mSceneEnv)["SpawnEntity"], mScene, entity);
 
@@ -1998,6 +2161,47 @@ sol::object LuaRuntime::CallCrossEnvMethod(sol::object object, const std::string
         return ret;
     }
     return sol::make_object(*mLuaState, sol::nil);
+}
+
+sol::environment* LuaRuntime::GetTypeEnv(const AnimatorClass& klass)
+{
+    if (!klass.HasScriptId())
+        return nullptr;
+    const auto& klassId = klass.GetId();
+    auto it = mAnimatorEnvs.find(klassId);
+    if (it != mAnimatorEnvs.end())
+        return it->second.get();
+
+    const auto& script = klass.GetScriptId();
+    const auto& script_buff = mDataLoader->LoadEngineDataId(script);
+    if (!script_buff)
+    {
+        ERROR("Failed to load entity animator script file. [class='%1', script='%2']", klass.GetName(), script);
+        return nullptr;
+    }
+    auto script_env = std::make_shared<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
+    // store the script ID with the script object/environment
+    // this is used when for example checking access to a scripting variable.
+    // i.e. we check that the entity's script ID is the same as the script ID
+    // stored the script environment.
+    (*script_env)["__script_id__"] = script;
+
+    const auto& script_file = script_buff->GetName();
+    const auto& script_view = script_buff->GetStringView();
+    const auto& result = mLuaState->script(script_view, *script_env);
+    if (!result.valid())
+    {
+        const sol::error err = result;
+        ERROR("Lua script error. [file='%1', error='%2']", script_file, err.what());
+        // throwing here is just too convenient way to propagate the Lua
+        // specific error message up the stack without cluttering the interface,
+        // and when running the engine inside the editor we really want to
+        // have this lua error propagated all the way to the UI
+        throw std::runtime_error(err.what());
+    }
+    DEBUG("Entity animator script loaded. [class='%1', file='%2']", klass.GetName(), script_file);
+    it = mAnimatorEnvs.insert({klassId, script_env}).first;
+    return it->second.get();
 }
 
 sol::environment* LuaRuntime::GetTypeEnv(const EntityClass& klass)
@@ -3005,6 +3209,15 @@ void BindGameLib(sol::state& L)
     auto material_actuator = table.new_usertype<MaterialActuator>("MaterialActuator");
     BindActuatorInterface<MaterialActuator>(material_actuator);
 
+    auto animator = table.new_usertype<Animator>("Animator",
+        sol::meta_function::index,     &GetAnimatorVar,
+        sol::meta_function::new_index, &SetAnimatorVar);
+    animator["GetName"]   = &Animator::GetName;
+    animator["GetTime"]   = &Animator::GetTime;
+    animator["HasValue"]  = &Animator::HasValue;
+    animator["SetValue"]  = &SetAnimatorVar;
+    animator["FindValue"] = &GetAnimatorVar;
+
     auto anim_class = table.new_usertype<AnimationClass>("AnimationClass");
     anim_class["GetName"]     = &AnimationClass::GetName;
     anim_class["GetId"]       = &AnimationClass::GetId;
@@ -3092,6 +3305,8 @@ void BindGameLib(sol::state& L)
     entity["HasExpired"]           = &Entity::HasExpired;
     entity["HasBeenKilled"]        = &Entity::HasBeenKilled;
     entity["HasBeenSpawned"]       = &Entity::HasBeenSpawned;
+    entity["HasAnimator"]          = &Entity::HasAnimator;
+    entity["GetAnimator"]          = (Animator*(Entity::*)(void))&Entity::GetAnimator;
     entity["GetScene"]             = (Scene*(Entity::*)(void))&Entity::GetScene;
     entity["GetNode"]              = (EntityNode&(Entity::*)(size_t))&Entity::GetNode;
     entity["FindScriptVarById"]    = (ScriptVar*(Entity::*)(const std::string&))&Entity::FindScriptVarById;

@@ -186,11 +186,11 @@ namespace gui
         } mState;
         bool mCameraWasLoaded = false;
         // Time accumulator for animation playback only.
-        float mAnimationTime = 0.0f;
+        double mAnimationTime = 0.0f;
         // Current time accumulator used by the widget itself.
-        float mCurrentTime = 0.0f;
+        double mCurrentTime = 0.0f;
         // Interpolation variables for smoothing view rotations.
-        float mViewTransformStartTime = 0.0f;
+        double mViewTransformStartTime = 0.0f;
         float mViewTransformRotation = 0.0f;
         // Entity object is used render the animation track
         // while it's being edited. We use an entity object

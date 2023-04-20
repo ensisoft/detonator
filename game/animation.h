@@ -18,9 +18,15 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <glm/vec2.hpp>
+#include "warnpop.h"
+
 #include <string>
 #include <memory>
+#include <unordered_map>
 
+#include "base/utility.h"
 #include "game/actuator.h"
 
 namespace game
@@ -223,6 +229,270 @@ namespace game
         float mCurrentTime = 0.0f;
     };
 
+    class AnimationStateClass
+    {
+    public:
+        explicit AnimationStateClass(std::string id = base::RandomString(10));
+
+        inline void SetName(std::string name) noexcept
+        { mName = std::move(name); }
+        inline std::string GetId() const noexcept
+        { return mId; }
+        inline std::string GetName() const noexcept
+        { return mName; }
+
+        std::size_t GetHash() const noexcept;
+
+        void IntoJson(data::Writer& data) const;
+        bool FromJson(const data::Reader& data);
+
+        AnimationStateClass Clone() const;
+    private:
+        std::string mName;
+        std::string mId;
+    };
+
+    class AnimationStateTransitionClass
+    {
+    public:
+        explicit AnimationStateTransitionClass(std::string id = base::RandomString(10));
+
+        inline void SetDuration(float duration) noexcept
+        { mDuration = duration; }
+        inline void SetName(std::string name) noexcept
+        { mName = std::move(name); }
+        inline std::string GetId() const noexcept
+        { return mId; }
+        inline std::string GetName() const noexcept
+        { return mName; }
+        inline std::string GetDstStateId() const noexcept
+        { return mDstStateId; }
+        inline std::string GetSrcStateId() const noexcept
+        { return mSrcStateId; }
+        inline void SetSrcStateId(std::string id) noexcept
+        { mSrcStateId = std::move(id); }
+        inline void SetDstStateId(std::string id) noexcept
+        { mDstStateId = std::move(id); }
+        inline float GetDuration() const noexcept
+        { return mDuration; }
+
+        std::size_t GetHash() const noexcept;
+        void IntoJson(data::Writer& data) const;
+        bool FromJson(const data::Reader& data);
+
+        AnimationStateTransitionClass Clone() const;
+    private:
+        std::string mName;
+        std::string mId;
+        std::string mSrcStateId;
+        std::string mDstStateId;
+        float mDuration = 0.0f;
+    };
+
+
+    class AnimatorClass
+    {
+    public:
+        explicit AnimatorClass(std::string id = base::RandomString(10));
+
+        void AddState(const AnimationStateClass& state)
+        { mStates.push_back(state); }
+        void AddState(AnimationStateClass&& state)
+        { mStates.push_back(std::move(state)); }
+        void AddTransition(const AnimationStateTransitionClass& transition)
+        { mTransitions.push_back(transition); }
+        void AddTransition(AnimationStateTransitionClass&& transition)
+        { mTransitions.push_back(std::move(transition)); }
+
+        inline void SetInitialStateId(std::string id) noexcept
+        { mInitState = std::move(id); }
+        inline void SetName(std::string name) noexcept
+        { mName = std::move(name); }
+        inline void SetScriptId(std::string id) noexcept
+        { mScriptId = id; }
+        inline std::string GetId() const noexcept
+        { return mId; }
+        inline std::string GetName() const noexcept
+        { return mName; }
+        inline std::string GetInitialStateId() const noexcept
+        { return mInitState; }
+        inline std::string GetScriptId() const noexcept
+        { return mScriptId; }
+        inline bool HasScriptId() const noexcept
+        { return !mScriptId.empty(); }
+
+        inline std::size_t GetNumStates() const noexcept
+        { return mStates.size(); }
+        inline std::size_t GetNumTransitions() const noexcept
+        { return mTransitions.size(); }
+        inline const AnimationStateClass& GetState(size_t index) const noexcept
+        { return base::SafeIndex(mStates, index); }
+        inline const AnimationStateTransitionClass& GetTransition(size_t index) const noexcept
+        { return base::SafeIndex(mTransitions, index); }
+        inline AnimationStateClass& GetState(size_t index) noexcept
+        { return base::SafeIndex(mStates, index); }
+        inline AnimationStateTransitionClass& GetTransition(size_t index) noexcept
+        { return base::SafeIndex(mTransitions, index); }
+        inline void ClearStates() noexcept
+        { mStates.clear(); }
+        inline void ClearTransitions() noexcept
+        { mTransitions.clear(); }
+
+        const AnimationStateClass* FindStateById(const std::string& id) const noexcept;
+        const AnimationStateClass* FindStateByName(const std::string& name) const noexcept;
+        const AnimationStateTransitionClass* FindTransitionByName(const std::string& name) const noexcept;
+        const AnimationStateTransitionClass* FindTransitionById(const std::string& id) const noexcept;
+
+        AnimationStateClass* FindStateById(const std::string& id) noexcept;
+        AnimationStateClass* FindStateByName(const std::string& name) noexcept;
+        AnimationStateTransitionClass* FindTransitionByName(const std::string& name) noexcept;
+        AnimationStateTransitionClass* FindTransitionById(const std::string& id) noexcept;
+
+        std::size_t GetHash() const noexcept;
+        void IntoJson(data::Writer& data) const;
+        bool FromJson(const data::Reader& data);
+
+        AnimatorClass Clone() const;
+    private:
+        std::string mName;
+        std::string mId;
+        std::string mInitState;
+        std::string mScriptId;
+        std::vector<AnimationStateClass> mStates;
+        std::vector<AnimationStateTransitionClass> mTransitions;
+    };
+
+    using AnimationState = AnimationStateClass;
+    using AnimationTransition = AnimationStateTransitionClass;
+
+    class Animator
+    {
+    public:
+        struct EnterState {
+            const AnimationState* state;
+        };
+        struct LeaveState {
+            const AnimationState* state;
+        };
+        struct UpdateState {
+            const AnimationState* state;
+            float time;
+            float dt;
+        };
+        struct StartTransition {
+            const AnimationState* from;
+            const AnimationState* to;
+            const AnimationTransition* transition;
+        };
+        struct FinishTransition {
+            const AnimationState* from;
+            const AnimationState* to;
+            const AnimationTransition* transition;
+        };
+        struct UpdateTransition {
+            const AnimationState* from;
+            const AnimationState* to;
+            const AnimationTransition* transition;
+            float time;
+            float dt;
+        };
+        struct EvalTransition {
+            const AnimationState* from;
+            const AnimationState* to;
+            const AnimationTransition* transition;
+        };
+
+        using Action = std::variant<std::monostate,
+           EnterState, LeaveState, UpdateState,
+           StartTransition, FinishTransition, UpdateTransition, EvalTransition>;
+
+        using Value = std::variant<bool, int, float,
+            std::string, glm::vec2>;
+
+        explicit Animator(AnimatorClass&& klass);
+        explicit Animator(const AnimatorClass& klass);
+        explicit Animator(const std::shared_ptr<const AnimatorClass>& klass);
+
+        // Update the animator state machine state.
+        // When the current animator state is updated the resulting actions that should
+        // be taken  as a result are stored into the actions vector. The caller can then
+        // perform some actions (such as call some evaluation code) or choose do nothing.
+        // The only action that should be handled is the response to a state transition
+        // evaluation, otherwise no state transitions are possible.
+        void Update(float dt, std::vector<Action>* actions);
+        // Update the animator state machine by starting a transition from the current
+        // state towards the next state.
+        void Update(const AnimationTransition* transition, const AnimationState* next);
+
+        enum class State {
+            InTransition, InState
+        };
+        // Get the current animator state state, i.e. whether in state or in transition.
+        State GetAnimatorState() const noexcept;
+
+        // Check whether the animator has a value by the given name or not.
+        inline bool HasValue(const std::string& name) const noexcept
+        { return base::SafeFind(mValues, name) != nullptr; }
+        // Find an animator value by the given name. Returns nullptr if no such value.
+        inline const Value* FindValue(const std::string& name) const noexcept
+        { return base::SafeFind(mValues, name); }
+        // Set an animator value by the given name. Overwrites any previous values if any.
+        inline void SetValue(std::string name, Value value) noexcept
+        { mValues[std::move(name)] = std::move(value); }
+        // Clear all animator values.
+        inline void ClearValues() noexcept
+        { mValues.clear(); }
+        // Get current state object. This only exists when the animator is InState.
+        // During transitions there's no current state.
+        inline const AnimationState* GetCurrentState() const noexcept
+        { return mCurrent; }
+        // Get the next state (the state we're transitioning to) when doing a transition.
+        // The next state only exists during transition.
+        inline const AnimationState* GetNextState() const noexcept
+        { return mNext; }
+        // Get the prev state (the state we're transitioning from) when doing a transition.
+        // The prev state only exists during transition.
+        inline const AnimationState* GetPrevState() const noexcept
+        { return mPrev; }
+        // Get the current transition if any.
+        inline const AnimationTransition* GetTransition() const noexcept
+        { return mTransition; }
+        // Get the currently accumulated time. If there's a current transition
+        // then the time value measures the time elapsed in the transition, other
+        // it measures the time spent in some particular state.
+        inline float GetTime() const noexcept
+        { return mTime; }
+        // Class object
+        inline const AnimatorClass& GetClass() const
+        { return *mClass; }
+        inline const AnimatorClass* operator ->() const
+        { return mClass.get(); }
+
+        inline std::string GetName() const noexcept
+        { return mClass->GetName(); }
+        inline std::string GetId() const noexcept
+        { return mClass->GetId(); }
+    public:
+        std::shared_ptr<const AnimatorClass> mClass;
+        // Current state if any. no state during transition
+        const AnimationState* mCurrent = nullptr;
+        // previous state when doing a transition (if any)
+        const AnimationState * mPrev = nullptr;
+        // next state when doing a transition (if any)
+        const AnimationState* mNext = nullptr;
+        // the current transition (if any)
+        const AnimationTransition* mTransition = nullptr;
+        // the current transition or state time.
+        float mTime = 0.0f;
+        // some values that can be routed through the animator
+        // from one part of the system (the entity script) to another
+        // part of the system (the animator script)
+        std::unordered_map<std::string, Value> mValues;
+    };
+
     std::unique_ptr<Animation> CreateAnimationInstance(const std::shared_ptr<const AnimationClass>& klass);
+    std::unique_ptr<Animator> CreateAnimatorInstance(const std::shared_ptr<const AnimatorClass>& klass);
+    std::unique_ptr<Animator> CreateAnimatorInstance(const AnimatorClass& klass);
+    std::unique_ptr<Animator> CreateAnimatorInstance(AnimatorClass&& klass);
 
 } // namespace
