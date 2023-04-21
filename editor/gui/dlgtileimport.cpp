@@ -277,7 +277,10 @@ void DlgTileImport::on_btnClose_clicked()
 
 void DlgTileImport::on_btnImport_clicked()
 {
-    const auto tile_margin  = (unsigned)GetValue(mUI.tileMargin);
+    const auto tile_margin_top  = (unsigned)GetValue(mUI.tileMarginTop);
+    const auto tile_margin_left = (unsigned)GetValue(mUI.tileMarginLeft);
+    const auto tile_margin_right = (unsigned)GetValue(mUI.tileMarginRight);
+    const auto tile_margin_bottom = (unsigned)GetValue(mUI.tileMarginBottom);
     const auto premul_alpha = (bool)GetValue(mUI.chkPremulAlpha);
     const auto premul_alpha_blend = (bool)GetValue(mUI.chkPremulAlphaBlend);
     const float img_height = mHeight;
@@ -427,10 +430,10 @@ void DlgTileImport::on_btnImport_clicked()
             if (cutting == TextureCutting::UseOriginal)
             {
                 const auto rect = gfx::FRect(
-                  float(img.xpos + tile_margin) / img_width,
-                  float(img.ypos + tile_margin) / img_height,
-                  float(img.width - tile_margin * 2) / img_width,
-                  float(img.height - tile_margin * 2) / img_height);
+                  float(img.xpos + tile_margin_left) / img_width,
+                  float(img.ypos + tile_margin_top) / img_height,
+                  float(img.width - tile_margin_left - tile_margin_right) / img_width,
+                  float(img.height - tile_margin_top - tile_margin_bottom) / img_height);
                 klass.SetTextureRect(rect);
             }
             else if (cutting == TextureCutting::CutNewTexture)
@@ -472,10 +475,10 @@ void DlgTileImport::on_btnImport_clicked()
                 texture.SetFileName(mFileUri);
                 texture.SetName(mFileName);
                 const auto rect = gfx::FRect(
-                    float(img.xpos + tile_margin) / img_width,
-                    float(img.ypos + tile_margin) / img_height,
-                    float(img.width - tile_margin * 2) / img_width,
-                    float(img.height - tile_margin * 2) / img_height);
+                    float(img.xpos + tile_margin_left) / img_width,
+                    float(img.ypos + tile_margin_top) / img_height,
+                    float(img.width - tile_margin_left - tile_margin_right) / img_width,
+                    float(img.height - tile_margin_top - tile_margin_bottom) / img_height);
                 klass.AddTexture(texture.Copy(), rect);
             } else if (cutting == TextureCutting::CutNewTexture)
             {
@@ -522,6 +525,7 @@ void DlgTileImport::on_tabWidget_currentChanged(int tab)
         pixmap.convertFromImage(img);
     }
 
+    unsigned counter = 0;
     for (auto& img : mImages)
     {
         if (img.widget)
@@ -534,8 +538,11 @@ void DlgTileImport::on_tabWidget_currentChanged(int tab)
 
         img.widget = new ImportedTile(this);
         img.widget->SetPreview(pixmap.copy(img.xpos, img.ypos, img.width, img.height));
-        img.widget->SetName(img.name);
+        if (img.name.isEmpty())
+            img.widget->SetName(app::toString("Tile %1", counter));
+        else img.widget->SetName(img.name);
         mUI.layout->addWidget(img.widget);
+        ++counter;
     }
     SetValue(mUI.renameTiles, QString(""));
 }
@@ -609,14 +616,20 @@ void DlgTileImport::on_cmbCutting_currentIndexChanged(int)
         SetEnabled(mUI.cmbImageFormat, false);
         SetEnabled(mUI.imageQuality, false);
         SetEnabled(mUI.folder, false);
-        SetEnabled(mUI.tileMargin, true);
+        SetEnabled(mUI.tileMarginTop,    true);
+        SetEnabled(mUI.tileMarginLeft,   true);
+        SetEnabled(mUI.tileMarginRight,  true);
+        SetEnabled(mUI.tileMarginBottom, true);
     }
     else
     {
         SetEnabled(mUI.cmbImageFormat, true);
         SetEnabled(mUI.imageQuality, true);
         SetEnabled(mUI.folder, true);
-        SetEnabled(mUI.tileMargin, false);
+        SetEnabled(mUI.tileMarginTop,    false);
+        SetEnabled(mUI.tileMarginLeft,   false);
+        SetEnabled(mUI.tileMarginRight,  false);
+        SetEnabled(mUI.tileMarginBottom, false);
     }
 }
 
@@ -664,10 +677,17 @@ void DlgTileImport::LoadImageFile(const QString& ret)
         return;
     }
 
-    mWidth    = bitmap->GetWidth();
-    mHeight   = bitmap->GetHeight();
+    const auto img_width = bitmap->GetWidth();
+    const auto img_height = bitmap->GetHeight();
+    const auto width  = mUI.widget->width();
+    const auto height = mUI.widget->height();
+    const auto scale = std::min((float)width/(float)img_width,
+                                (float)height/(float)img_height);
+    mWidth    = img_width;
+    mHeight   = img_height;
     mFileUri  = std::move(file_uri);
     mFileName = std::move(file_name);
+    mTrackingOffset = QPoint(0, 0);
 
     mClass = std::make_shared<gfx::TextureMap2DClass>();
     mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
@@ -677,6 +697,7 @@ void DlgTileImport::LoadImageFile(const QString& ret)
     mClass->SetTextureMinFilter(GetValue(mUI.cmbMinFilter));
     mMaterial = gfx::CreateMaterialInstance(mClass);
     SetValue(mUI.imageFile, info.absoluteFilePath());
+    SetValue(mUI.zoom, scale);
 }
 
 void DlgTileImport::LoadJsonFile(const QString& file)
@@ -717,7 +738,10 @@ void DlgTileImport::LoadState()
     GetUserProperty(*mWorkspace, "dlg-tile-import-import-mag-filter", mUI.magFilter);
     GetUserProperty(*mWorkspace, "dlg-tile-import-view-min-filter", mUI.cmbMinFilter);
     GetUserProperty(*mWorkspace, "dlg-tile-import-view-mag-filter", mUI.cmbMagFilter);
-    GetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin", mUI.tileMargin);
+    GetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-top", mUI.tileMarginTop);
+    GetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-left", mUI.tileMarginLeft);
+    GetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-right", mUI.tileMarginRight);
+    GetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-bottom", mUI.tileMarginBottom);
     GetUserProperty(*mWorkspace, "dlg-tile-import-premul-alpha", mUI.chkPremulAlpha);
     GetUserProperty(*mWorkspace, "dlg-tile-import-premul-alpha-blend", mUI.chkPremulAlphaBlend);
     GetUserProperty(*mWorkspace, "dlg-tile-import-cut-texture", mUI.cmbCutting);
@@ -754,7 +778,10 @@ void DlgTileImport::SaveState()
     SetUserProperty(*mWorkspace, "dlg-tile-import-import-mag-filter", mUI.magFilter);
     SetUserProperty(*mWorkspace, "dlg-tile-import-view-min-filter", mUI.cmbMinFilter);
     SetUserProperty(*mWorkspace, "dlg-tile-import-view-mag-filter", mUI.cmbMagFilter);
-    SetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin", mUI.tileMargin);
+    SetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-top", mUI.tileMarginTop);
+    SetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-left", mUI.tileMarginLeft);
+    SetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-right", mUI.tileMarginRight);
+    SetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-bottom", mUI.tileMarginBottom);
     SetUserProperty(*mWorkspace, "dlg-tile-import-premul-alpha", mUI.chkPremulAlpha);
     SetUserProperty(*mWorkspace, "dlg-tile-import-premul-alpha-blend", mUI.chkPremulAlphaBlend);
     SetUserProperty(*mWorkspace, "dlg-tile-import-cut-texture", mUI.cmbCutting);
@@ -778,12 +805,12 @@ void DlgTileImport::OnPaintScene(gfx::Painter& painter, double secs)
     if (!mMaterial)
     {
         ShowInstruction(
+            "Import tilemap data as materials and textures.\n\n"
             "INSTRUCTIONS\n"
             "1. Select a tilemap image file.\n"
-            "2. Adjust the image offsets and tile sizes as needed.\n"
-            "3. Click on any tile to toggle selection.\n"
-            "4. Go to 'Review Tiles' and select options.\n"
-            "5. Click on 'Import' to import the tiles into project.\n",
+            "2. Click on any tile to toggle selection.\n"
+            "3. Go to 'Review Tiles' and select options.\n"
+            "4. Click 'Import' to import the tiles into project.\n",
             gfx::FRect(0, 0, width, height), painter);
         return;
     }
