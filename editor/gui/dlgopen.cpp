@@ -105,7 +105,7 @@ bool DlgOpen::eventFilter(QObject* destination, QEvent* event)
     const bool ctrl = key->modifiers() & Qt::ControlModifier;
     const bool shift = key->modifiers() & Qt::ShiftModifier;
 
-    if (shift)
+    if (key->key() == Qt::Key_Tab)
     {
         auto index = mUI.cmbOpenMode->currentIndex();
         index = math::wrap(0, 1, index + 1);
