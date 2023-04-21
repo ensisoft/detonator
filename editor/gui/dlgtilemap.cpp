@@ -101,6 +101,7 @@ void DlgTilemap::LoadImage(const QString& file)
     const auto height = mUI.widget->height();
     const auto scale = std::min((float)width/(float)img_width,
                                 (float)height/(float)img_height);
+    mTrackingOffset = QPoint(0, 0);
     mWidth  = img_width;
     mHeight = img_height;
     mClass = std::make_shared<gfx::TextureMap2DClass>();
@@ -116,31 +117,7 @@ void DlgTilemap::LoadImage(const QString& file)
     SplitIntoTiles();
 }
 
-void DlgTilemap::on_cmbColorSpace_currentIndexChanged(int)
-{
-    if (!mClass)
-        return;
-    auto* source = mClass->GetTextureSource();
-    auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(source);
-    file_source->SetColorSpace(GetValue(mUI.cmbColorSpace));
-}
-
-void DlgTilemap::on_cmbMinFilter_currentIndexChanged(int)
-{
-    if (!mClass)
-        return;
-
-    mClass->SetTextureMinFilter(GetValue(mUI.cmbMinFilter));
-}
-void DlgTilemap::on_cmbMagFilter_currentIndexChanged(int)
-{
-    if (!mClass)
-        return;
-
-    mClass->SetTextureMagFilter(GetValue(mUI.cmbMagFilter));
-}
-
-void DlgTilemap::on_widgetColor_colorChanged(QColor color)
+void DlgTilemap::on_widgetColor_colorChanged(const QColor& color)
 {
     mUI.widget->SetClearColor(ToGfx(color));
 }
@@ -207,13 +184,13 @@ void DlgTilemap::on_btnExport_clicked()
     base::JsonWrite(json, "xoffset",       tile_xoffset);
     base::JsonWrite(json, "yoffset",       tile_yoffset);
     base::JsonWrite(json, "color_space", (gfx::detail::TextureFileSource::ColorSpace)GetValue(mUI.cmbColorSpace));
-    //base::JsonWrite(json, "premultiply_alpha_hint", (bool)GetValue(mUI.chkAlpha));
-    //base::JsonWrite(json, "case_sensitive", (bool)GetValue(mUI.chkCaseSensitive));
-
+    base::JsonWrite(json, "min_filter", (gfx::MaterialClass::MinTextureFilter)GetValue(mUI.cmbMinFilter));
+    base::JsonWrite(json, "mag_filter", (gfx::MaterialClass::MagTextureFilter)GetValue(mUI.cmbMagFilter));
+    base::JsonWrite(json, "premultiply_alpha", (bool)GetValue(mUI.chkPremulAlpha));
+    base::JsonWrite(json, "premulalpha_blend", (bool)GetValue(mUI.chkPremulAlphaBlend));
     // going to skip the writing of the images array for now since it's just
     // repeated information that can be created out of the tile size, offset and
     // img size information.
-
 #if 0
     const auto max_rows = (mHeight-tile_yoffset) / tile_height;
     const auto max_cols = (mWidth-tile_xoffset) / tile_width;
@@ -316,15 +293,21 @@ void DlgTilemap::OnPaintScene(gfx::Painter& painter, double secs)
     if (!mMaterial)
     {
         ShowInstruction(
-            "Split a tilemap image into tiles of correct size and position.\n"
+            "Split a tilemap image into tiles.\n\n"
             "INSTRUCTIONS\n"
-            "1. Select the tilemap image file\n"
-            "2. Adjust the x,y offset and tile sizes\n"
-            "3. When done, click on 'Export' to export the tile JSON.\n",
+            "1. Select the tilemap image file.\n"
+            "2. Adjust the X and Y offset and tile width and height.\n"
+            "3. When done, click 'Export' to export the tile JSON.\n",
             gfx::FRect(0, 0, width, height),
             painter);
         return;
     }
+    mClass->SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, GetValue(mUI.chkPremulAlphaBlend));
+    mClass->SetTextureMinFilter(GetValue(mUI.cmbMinFilter));
+    mClass->SetTextureMagFilter(GetValue(mUI.cmbMagFilter));
+    auto* texture_source = dynamic_cast<gfx::detail::TextureFileSource*>(mClass->GetTextureSource());
+    texture_source->SetColorSpace(GetValue(mUI.cmbColorSpace));
+    texture_source->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, GetValue(mUI.chkPremulAlpha));
 
     const float zoom   = GetValue(mUI.zoom);
     const float img_width  = mWidth * zoom;

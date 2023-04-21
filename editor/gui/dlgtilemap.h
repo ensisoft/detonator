@@ -49,10 +49,7 @@ namespace gui
         { return mClosed; }
 
     private slots:
-        void on_cmbColorSpace_currentIndexChanged(int);
-        void on_cmbMinFilter_currentIndexChanged(int);
-        void on_cmbMagFilter_currentIndexChanged(int);
-        void on_widgetColor_colorChanged(QColor color);
+        void on_widgetColor_colorChanged(const QColor& color);
         void on_tileWidth_valueChanged(int);
         void on_tileHeight_valueChanged(int);
         void on_offsetX_valueChanged(int);
@@ -86,10 +83,6 @@ namespace gui
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
 
-        //struct Tile {
-        //};
-        //std::vector<Tile> mTiles;
-        //std::optional<std::size_t> mSelectedIndex;
         enum class Mode {
             Nada, Tracking, Selecting
         };
