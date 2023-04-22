@@ -182,7 +182,9 @@ bool CollapsibleWidget::focusNextPrevChild(bool next)
         if (focus_list[focus_widget_index] == focus_widget)
             break;
     }
-    ASSERT(focus_widget_index < focus_list.size());
+    //ASSERT(focus_widget_index < focus_list.size());
+    if (focus_widget_index == focus_list.size())
+        return false;
 
     const auto first_index = focus_widget_index == 0;
     const auto last_index  = focus_widget_index == focus_list.size() -1;
