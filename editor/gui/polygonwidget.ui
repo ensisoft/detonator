@@ -156,11 +156,7 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
-           <widget class="QLabel" name="label_9">
-            <property name="text">
-             <string>Blueprint</string>
-            </property>
-           </widget>
+           <widget class="QComboBox" name="cmbGrid"/>
           </item>
           <item>
            <widget class="QComboBox" name="blueprints">
@@ -171,7 +167,32 @@
              </sizepolicy>
             </property>
             <property name="placeholderText">
-             <string>None selected</string>
+             <string>Select Blueprint</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="alpha">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="prefix">
+             <string>a = </string>
+            </property>
+            <property name="suffix">
+             <string> %</string>
+            </property>
+            <property name="maximum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.870000000000000</double>
             </property>
            </widget>
           </item>
@@ -194,41 +215,6 @@
              <enum>Qt::NoArrow</enum>
             </property>
            </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_12">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Alpha</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="alpha">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximum">
-             <double>1.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.010000000000000</double>
-            </property>
-            <property name="value">
-             <double>0.870000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="cmbGrid"/>
           </item>
           <item>
            <spacer name="horizontalSpacer_2">
@@ -389,12 +375,13 @@
   <tabstop>ID</tabstop>
   <tabstop>staticInstance</tabstop>
   <tabstop>widget</tabstop>
-  <tabstop>blueprints</tabstop>
-  <tabstop>btnResetBlueprint</tabstop>
-  <tabstop>alpha</tabstop>
   <tabstop>cmbGrid</tabstop>
+  <tabstop>blueprints</tabstop>
+  <tabstop>alpha</tabstop>
+  <tabstop>btnResetBlueprint</tabstop>
   <tabstop>chkSnap</tabstop>
   <tabstop>chkShowGrid</tabstop>
+  <tabstop>widgetColor</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

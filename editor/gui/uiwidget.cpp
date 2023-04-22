@@ -636,10 +636,14 @@ void UIWidget::SetViewerMode()
     SetVisible(mUI.widgetStyle,      false);
     SetVisible(mUI.widgetData,       false);
     SetVisible(mUI.lblHelp,          false);
-    SetValue(mUI.chkShowGrid,        false);
+    SetVisible(mUI.chkSnap,          false);
+    SetVisible(mUI.chkShowOrigin,    false);
+    SetVisible(mUI.chkShowBounds,    false);
+    SetVisible(mUI.chkShowTabOrder,  false);
+    SetValue(mUI.chkSnap,            false);
+    SetValue(mUI.chkShowOrigin,      false);
     SetValue(mUI.chkShowBounds,      false);
     SetValue(mUI.chkShowTabOrder,    false);
-    SetValue(mUI.chkShowOrigin,      false);
     QTimer::singleShot(10, this, &UIWidget::on_btnResetTransform_clicked);
     on_actionPlay_triggered();
 }
@@ -1124,13 +1128,7 @@ void UIWidget::on_actionPlay_triggered()
     SetEnabled(mUI.actionNewForm,        false);
     SetEnabled(mUI.actionNewLabel,       false);
     SetEnabled(mUI.actionNewPushButton,  false);
-    SetEnabled(mUI.cmbGrid,              false);
-    SetEnabled(mUI.zoom,                 false);
-    SetEnabled(mUI.chkSnap,              false);
-    SetEnabled(mUI.chkShowOrigin,        false);
-    SetEnabled(mUI.chkShowGrid,          false);
-    SetEnabled(mUI.chkShowBounds,        false);
-    SetEnabled(mUI.chkShowTabOrder,      false);
+
     mUI.widget->setFocus();
 }
 void UIWidget::on_actionPause_triggered()

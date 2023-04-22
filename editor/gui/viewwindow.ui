@@ -85,6 +85,9 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
           <property name="selectionMode">
            <enum>QAbstractItemView::SingleSelection</enum>
           </property>
@@ -141,7 +144,7 @@ font: 18pt &quot;Sans Serif&quot;;</string>
         <item>
          <widget class="QGroupBox" name="demos">
           <property name="title">
-           <string/>
+           <string>Demos</string>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>

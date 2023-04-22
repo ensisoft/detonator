@@ -591,6 +591,8 @@ void EntityWidget::InitializeSettings(const UISettings& settings)
 void EntityWidget::SetViewerMode()
 {
     SetVisible(mUI.baseProperties, false);
+    SetVisible(mUI.animator,       false);
+    SetVisible(mUI.entity,         false);
     SetVisible(mUI.scrollArea,     false);
     SetVisible(mUI.transform,      false);
     SetVisible(mUI.lblHelp,        false);
@@ -601,6 +603,13 @@ void EntityWidget::SetViewerMode()
     SetValue(mUI.chkShowGrid,      false);
     SetValue(mUI.chkShowOrigin,    false);
     SetValue(mUI.chkShowViewport,  false);
+    SetValue(mUI.chkShowOrigin,    false);
+    SetValue(mUI.chkSnap,          false);
+    SetValue(mUI.chkShowComments,  false);
+    SetVisible(mUI.chkShowComments, false);
+    SetVisible(mUI.chkShowViewport, false);
+    SetVisible(mUI.chkSnap,        false);
+    SetVisible(mUI.chkShowOrigin,  false);
 
     QTimer::singleShot(10, this, &EntityWidget::on_btnResetTransform_clicked);
     on_actionPlay_triggered();
