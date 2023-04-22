@@ -737,8 +737,9 @@ bool EntityWidget::LoadState(const Settings& settings)
     {
         const auto& track = mState.entity->GetAnimation(i);
         const auto& id = track.GetId();
+
         QVariantMap properties;
-        settings.GetValue("Entity", "track_ " + id, &properties);
+        settings.GetValue("Entity", "track_" + id, &properties);
         mTrackProperties[id] = properties;
     }
 
