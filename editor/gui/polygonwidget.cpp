@@ -165,6 +165,11 @@ void ShapeWidget::SetViewerMode()
 {
     SetVisible(mUI.baseProperties, false);
     SetVisible(mUI.lblHelp,        false);
+    SetVisible(mUI.blueprints,     false);
+    SetVisible(mUI.alpha,          false);
+    SetVisible(mUI.chkSnap,        false);
+    SetVisible(mUI.chkSnap,        false);
+    SetVisible(mUI.btnResetBlueprint, false);
 }
 
 void ShapeWidget::AddActions(QToolBar& bar)

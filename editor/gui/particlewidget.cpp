@@ -367,6 +367,12 @@ void ParticleEditorWidget::SetViewerMode()
     SetVisible(mUI.particleProperties, false);
     SetVisible(mUI.sizeDerivatives,    false);
     SetVisible(mUI.alphaDerivatives,   false);
+    SetVisible(mUI.materials,          false);
+    SetVisible(mUI.btnSelectMaterial,  false);
+    SetVisible(mUI.chkShowEmitter,     false);
+    SetVisible(mUI.chkShowBounds,      false);
+    SetValue(mUI.chkShowEmitter,       false);
+    SetValue(mUI.chkShowBounds,        false);
     mViewMode = true;
     on_actionPlay_triggered();
 }
