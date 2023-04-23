@@ -599,6 +599,7 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace, const app::Resource& resou
         mUI.code->SetCursorPosition(cursor_position);
         mUI.code->verticalScrollBar()->setValue(scroll_position);
     });
+    setWindowTitle(resource.GetName());
 }
 ScriptWidget::~ScriptWidget()
 {

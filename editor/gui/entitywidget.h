@@ -325,4 +325,8 @@ namespace gui
         // the animator dialog if any.
         std::unique_ptr<DlgAnimator> mAnimator;
     };
-}
+
+    QString GenerateEntityScriptSource(QString entity);
+    QString GenerateAnimatorScriptSource();
+
+} // namespace

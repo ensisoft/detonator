@@ -120,6 +120,7 @@ namespace gui
         void on_actionNewEntityScript_triggered();
         void on_actionNewSceneScript_triggered();
         void on_actionNewUIScript_triggered();
+        void on_actionNewAnimatorScript_triggered();
         void on_actionNewUI_triggered();
         void on_actionNewTilemap_triggered();
         void on_actionNewAudioGraph_triggered();
