@@ -2247,6 +2247,18 @@
     <string>Tilemap...</string>
    </property>
   </action>
+  <action name="actionNewAnimatorScript">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/animation.png</normaloff>:/16x16_ico_png/animation.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Animator Script</string>
+   </property>
+   <property name="toolTip">
+    <string>Create new entity animator script</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>btnDemoBandit</tabstop>

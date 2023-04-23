@@ -1217,84 +1217,39 @@ void MainWindow::on_actionNewEntityScript_triggered()
     // use the script ID as the file name so that we can
     // avoid naming clashes and always find the correct lua
     // file even if the entity is later renamed.
-    const auto& filename = app::FromUtf8(script.GetId());
-    const auto& fileuri  = QString("ws://lua/%1.lua").arg(filename);
-    const auto& filepath = mWorkspace->MapFileToFilesystem(fileuri);
-    const QFileInfo info(filepath);
-    if (info.exists())
+    const auto& uri  = app::toString("ws://lua/%1.lua", script.GetId());
+    const auto& file = mWorkspace->MapFileToFilesystem(uri);
+    if (app::FileExists(file))
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Question);
-        msg.setWindowTitle(tr("File already exists"));
-        msg.setText(tr("Overwrite existing script file?\n%1").arg(filepath));
+        msg.setWindowTitle(tr("File Exists"));
+        msg.setText(tr("Overwrite existing script file?\n%1").arg(file));
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
         if (msg.exec() == QMessageBox::Cancel)
             return;
     }
 
-    QFile io;
-    io.setFileName(filepath);
-    if (!io.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    QString source = GenerateEntityScriptSource("entity");
+
+    QFile::FileError err_val = QFile::FileError::NoError;
+    QString err_str;
+    if (!app::WriteTextFile(file, source, &err_val, &err_str))
     {
-        ERROR("Failed to open file for writing. [file='%1', error='%2']", filepath, io.errorString());
+        ERROR("Failed to write file. [file='%1', err_val=%2, err_str='%3']", file, err_val, err_str);
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);
-        msg.setWindowTitle(tr("Error Occurred"));
-        msg.setText(tr("There was a problem creating the script file.\n%1").arg(io.errorString()));
+        msg.setWindowTitle("Error Occurred");
+        msg.setText(tr("Failed to write the script file. [%1]").arg(err_str));
         msg.setStandardButtons(QMessageBox::Ok);
+        msg.exec();
         return;
     }
 
-    QString var = "entity";
-    QTextStream stream(&io);
-
-    // TODO: refactor this and a dupe from entity widget into a single place.
-    stream.setCodec("UTF-8");
-    stream << "-- Entity script.\n\n";
-    stream << "-- This script will be called for every assigned entity instance\n";
-    stream << "-- You're free to delete functions you don't need.\n\n";
-    stream << "-- Called when the game play begins for an entity in the scene.\n";
-    stream << QString("function BeginPlay(%1, scene)\nend\n\n").arg(var);
-    stream << "-- Called when the game play ends for an entity in the scene.\n";
-    stream << QString("function EndPlay(%1, scene)\nend\n\n").arg(var);
-    stream << "-- Called on every low frequency game tick.\n";
-    stream << QString("function Tick(%1, game_time, dt)\nend\n\n").arg(var);
-    stream << "-- Called on every iteration of the game loop.\n";
-    stream << QString("function Update(%1, game_time, dt)\nend\n\n").arg(var);
-    stream << "-- Called on every iteration of the game loop game\n";
-    stream << "-- after *all* entities have been updated.\n";
-    stream << QString("function PostUpdate(%1, game_time)\nend\n\n").arg(var);
-    stream << "-- Called on collision events with other objects.\n";
-    stream << QString("function OnBeginContact(%1, node, other, other_node)\nend\n\n").arg(var);
-    stream << "-- Called on collision events with other objects.\n";
-    stream << QString("function OnEndContact(%1, node, other, other_node)\nend\n\n").arg(var);
-    stream << "-- Called on key down events.\n";
-    stream << QString("function OnKeyDown(%1, symbol, modifier_bits)\nend\n\n").arg(var);
-    stream << "-- Called on key up events.\n";
-    stream << QString("function OnKeyUp(%1, symbol, modifier_bits)\nend\n\n").arg(var);
-    stream << "-- Called on mouse button press events.\n";
-    stream << QString("function OnMousePress(%1, mouse)\nend\n\n").arg(var);
-    stream << "-- Called on mouse button release events.\n";
-    stream << QString("function OnMouseRelease(%1, mouse)\nend\n\n").arg(var);
-    stream << "-- Called on mouse move events.\n";
-    stream << QString("function OnMouseMove(%1, mouse)\nend\n\n").arg(var);
-    stream << "-- Called on game events.\n";
-    stream << QString("function OnGameEvent(%1, event)\nend\n\n").arg(var);
-    stream << "-- Called on animation finished events.\n";
-    stream << QString("function OnAnimationFinished(%1, animation)\nend\n\n").arg(var);
-    stream << "-- Called on timer events.\n";
-    stream << QString("function OnTimer(%1, timer, jitter)\nend\n\n").arg(var);
-    stream << "-- Called on posted entity events.\n";
-    stream << QString("function OnEvent(%1, event)\nend\n\n").arg(var);
-
-    io.flush();
-    io.close();
-
-    script.SetFileURI(app::ToUtf8(fileuri));
+    script.SetFileURI(uri);
     app::ScriptResource resource(script, "Entity Script");
     mWorkspace->SaveResource(resource);
     auto widget = new ScriptWidget(mWorkspace.get(), resource);
-
     OpenNewWidget(widget);
 }
 void MainWindow::on_actionNewSceneScript_triggered()
@@ -1461,6 +1416,52 @@ void MainWindow::on_actionNewUIScript_triggered()
     mWorkspace->SaveResource(resource);
 
     auto* widget = new ScriptWidget(mWorkspace.get(), resource);
+
+    OpenNewWidget(widget);
+}
+
+void MainWindow::on_actionNewAnimatorScript_triggered()
+{
+    if (!mWorkspace)
+        return;
+
+    app::Script script;
+    // use the script ID as the file name so that we can
+    // avoid naming clashes and always find the correct lua
+    // file even if the entity is later renamed.
+    const auto& uri  = app::toString("ws://lua/%1.lua", script.GetId());
+    const auto& file = mWorkspace->MapFileToFilesystem(uri);
+    if (app::FileExists(file))
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Question);
+        msg.setWindowTitle(tr("File Exists"));
+        msg.setText(tr("Overwrite existing script file?\n%1").arg(file));
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+        if (msg.exec() == QMessageBox::Cancel)
+            return;
+    }
+
+    QString source = GenerateAnimatorScriptSource();
+
+    QFile::FileError err_val = QFile::FileError::NoError;
+    QString err_str;
+    if (!app::WriteTextFile(file, source, &err_val, &err_str))
+    {
+        ERROR("Failed to write file. [file='%1', err_val=%2, err_str='%3']", file, err_val, err_str);
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setWindowTitle("Error Occurred");
+        msg.setText(tr("Failed to write the script file. [%1]").arg(err_str));
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.exec();
+        return;
+    }
+
+    script.SetFileURI(uri);
+    app::ScriptResource resource(script, "Entity/Animator Script");
+    mWorkspace->SaveResource(resource);
+    auto widget = new ScriptWidget(mWorkspace.get(), resource);
 
     OpenNewWidget(widget);
 }
@@ -2132,6 +2133,7 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     script.addAction(mUI.actionNewEntityScript);
     script.addAction(mUI.actionNewSceneScript);
     script.addAction(mUI.actionNewUIScript);
+    script.addAction(mUI.actionNewAnimatorScript);
 
     QMenu import;
     import.setIcon(QIcon("icons:import.png"));
