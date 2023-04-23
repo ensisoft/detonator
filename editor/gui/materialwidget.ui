@@ -447,7 +447,7 @@
              </sizepolicy>
             </property>
             <property name="suffix">
-             <string/>
+             <string> fps</string>
             </property>
             <property name="maximum">
              <double>100.000000000000000</double>
