@@ -412,12 +412,12 @@ void DlgTileImport::on_btnImport_clicked()
             if (cutting == TextureCutting::UseOriginal)
             {
                 texture.SetFileName(mFileUri);
-                texture.SetName(mFileName);
+                texture.SetName(app::ToUtf8(name));
             }
             else if (cutting == TextureCutting::CutNewTexture)
             {
                 texture.SetFileName(texture_uris[index]);
-                texture.SetName("Tile");
+                texture.SetName(app::ToUtf8(name));
             } else BUG("Missing texture cut case.");
 
             gfx::TextureMap2DClass klass;
@@ -425,6 +425,7 @@ void DlgTileImport::on_btnImport_clicked()
             klass.SetTexture(texture.Copy());
             klass.SetTextureMinFilter(GetValue(mUI.minFilter));
             klass.SetTextureMagFilter(GetValue(mUI.magFilter));
+            klass.SetName(GetValue(mUI.materialName));
             klass.SetFlag(gfx::TextureMap2DClass::Flags::PremultipliedAlpha, premul_alpha_blend);
 
             if (cutting == TextureCutting::UseOriginal)
@@ -441,7 +442,7 @@ void DlgTileImport::on_btnImport_clicked()
                 klass.SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
             } else BUG("Missing texture cut case.");
 
-            app::MaterialResource res(klass, name);
+            app::MaterialResource res(klass, GetValue(mUI.materialName));
             mWorkspace->SaveResource(res);
 
             if (!Increment(mUI.progressBar) % 10)
@@ -455,7 +456,9 @@ void DlgTileImport::on_btnImport_clicked()
         klass.SetTextureMinFilter(GetValue(mUI.minFilter));
         klass.SetTextureMagFilter(GetValue(mUI.magFilter));
         klass.SetFlag(gfx::TextureMap2DClass::Flags::PremultipliedAlpha, premul_alpha_blend);
-        klass.SetName(GetValue(mUI.spriteName));
+        klass.SetName(GetValue(mUI.materialName));
+        klass.SetBlendFrames(GetValue(mUI.chkBlendFrames));
+        klass.SetFps(GetValue(mUI.spriteFps));
 
         SetValue(mUI.progressBar, "Making sprite ... %p% ");
 
@@ -473,7 +476,7 @@ void DlgTileImport::on_btnImport_clicked()
             if (cutting == TextureCutting::UseOriginal)
             {
                 texture.SetFileName(mFileUri);
-                texture.SetName(mFileName);
+                texture.SetName(app::ToUtf8(name));
                 const auto rect = gfx::FRect(
                     float(img.xpos + tile_margin_left) / img_width,
                     float(img.ypos + tile_margin_top) / img_height,
@@ -491,7 +494,7 @@ void DlgTileImport::on_btnImport_clicked()
                 footgun.processEvents();
         }
 
-        app::MaterialResource res(klass, GetValue(mUI.spriteName));
+        app::MaterialResource res(klass, GetValue(mUI.materialName));
         mWorkspace->SaveResource(res);
 
     } else BUG("Missing material type handling.");
@@ -575,11 +578,13 @@ void DlgTileImport::on_materialType_currentIndexChanged(int)
     const MaterialType type = GetValue(mUI.materialType);
     if(type == MaterialType::Sprite)
     {
-        SetEnabled(mUI.spriteName, true);
+        SetEnabled(mUI.chkBlendFrames, true);
+        SetEnabled(mUI.spriteFps, true);
     }
     else
     {
-        SetEnabled(mUI.spriteName, false);
+        SetEnabled(mUI.chkBlendFrames, false);
+        SetEnabled(mUI.spriteFps, false);
     }
 }
 
@@ -733,7 +738,8 @@ void DlgTileImport::LoadState()
     GetUserProperty(*mWorkspace, "dlg-tile-import-color", mUI.widget);
     GetUserProperty(*mWorkspace, "dlg-tile-import-material-type", mUI.materialType);
     GetUserProperty(*mWorkspace, "dlg-tile-import-material-surface", mUI.surfaceType);
-    SetUserProperty(*mWorkspace, "dlg-tile-import-sprite-name", mUI.spriteName);
+    GetUserProperty(*mWorkspace, "dlg-tile-import-material-name", mUI.materialName);
+    GetUserProperty(*mWorkspace, "dlg-tile-import-sprite-fps", mUI.spriteFps);
     GetUserProperty(*mWorkspace, "dlg-tile-import-import-min-filter", mUI.minFilter);
     GetUserProperty(*mWorkspace, "dlg-tile-import-import-mag-filter", mUI.magFilter);
     GetUserProperty(*mWorkspace, "dlg-tile-import-view-min-filter", mUI.cmbMinFilter);
@@ -744,6 +750,7 @@ void DlgTileImport::LoadState()
     GetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-bottom", mUI.tileMarginBottom);
     GetUserProperty(*mWorkspace, "dlg-tile-import-premul-alpha", mUI.chkPremulAlpha);
     GetUserProperty(*mWorkspace, "dlg-tile-import-premul-alpha-blend", mUI.chkPremulAlphaBlend);
+    GetUserProperty(*mWorkspace, "dlg-tile-import-blend-frames", mUI.chkBlendFrames);
     GetUserProperty(*mWorkspace, "dlg-tile-import-cut-texture", mUI.cmbCutting);
     GetUserProperty(*mWorkspace, "dlg-tile-import-img-format", mUI.cmbImageFormat);
     GetUserProperty(*mWorkspace, "dlg-tile-import-img-quality", mUI.imageQuality);
@@ -773,7 +780,8 @@ void DlgTileImport::SaveState()
     SetUserProperty(*mWorkspace, "dlg-tile-import-color", mUI.widget);
     SetUserProperty(*mWorkspace, "dlg-tile-import-material-type", mUI.materialType);
     SetUserProperty(*mWorkspace, "dlg-tile-import-material-surface", mUI.surfaceType);
-    SetUserProperty(*mWorkspace, "dlg-tile-import-sprite-name", mUI.spriteName);
+    SetUserProperty(*mWorkspace, "dlg-tile-import-material-name", mUI.materialName);
+    SetUserProperty(*mWorkspace, "dlg-tile-import-sprite-fps", mUI.spriteFps);
     SetUserProperty(*mWorkspace, "dlg-tile-import-import-min-filter", mUI.minFilter);
     SetUserProperty(*mWorkspace, "dlg-tile-import-import-mag-filter", mUI.magFilter);
     SetUserProperty(*mWorkspace, "dlg-tile-import-view-min-filter", mUI.cmbMinFilter);
@@ -784,6 +792,7 @@ void DlgTileImport::SaveState()
     SetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-bottom", mUI.tileMarginBottom);
     SetUserProperty(*mWorkspace, "dlg-tile-import-premul-alpha", mUI.chkPremulAlpha);
     SetUserProperty(*mWorkspace, "dlg-tile-import-premul-alpha-blend", mUI.chkPremulAlphaBlend);
+    SetUserProperty(*mWorkspace, "dlg-tile-import-blend-frames", mUI.chkBlendFrames);
     SetUserProperty(*mWorkspace, "dlg-tile-import-cut-texture", mUI.cmbCutting);
     SetUserProperty(*mWorkspace, "dlg-tile-import-img-format", mUI.cmbImageFormat);
     SetUserProperty(*mWorkspace, "dlg-tile-import-img-quality", mUI.imageQuality);
