@@ -52,42 +52,51 @@
       "id": "yTsaLXKonJ",
       "name": "Top Secret",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "yTsaLXKonJ",
       "resource_name": "Top Secret",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "buffer": {
-          "height": 512,
-          "horizontal_alignment": "AlignCenter",
-          "texts": [
-            {
-              "font_file": "app://fonts/Top_Secret.ttf",
-              "font_size": 78,
-              "line_height": 1.0,
-              "string": "top\nsecret",
-              "underline": false
-            }
-          ],
-          "vertical_alignment": "AlignCenter",
-          "width": 512
-        },
-        "effects": {
-          "Blur": false
-        },
-        "id": "Kni3liNI6b",
-        "name": "TextBuffer",
-        "type": "TextBuffer"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "buffer": {
+              "height": 512,
+              "horizontal_alignment": "AlignCenter",
+              "texts": [
+                {
+                  "font_file": "app://fonts/Top_Secret.ttf",
+                  "font_size": 78,
+                  "line_height": 1.0,
+                  "string": "top\nsecret",
+                  "underline": false
+                }
+              ],
+              "vertical_alignment": "AlignCenter",
+              "width": 512
+            },
+            "effects": {
+              "Blur": false
+            },
+            "id": "Kni3liNI6b",
+            "name": "TextBuffer",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "TextBuffer"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": -0.593411922454834,
       "texture_scale": {

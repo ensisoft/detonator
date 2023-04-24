@@ -300,6 +300,7 @@
         "comment_REyT7HYYhL": ""
     },
     "SX0ABkBEq9": {
+        "checked_for_packing": 1,
         "comment_6hZs8iMUZy": "",
         "comment_AdZCosqgbx": "",
         "comment_H20g2RPrlS": "",
@@ -309,6 +310,7 @@
         "checked_for_packing": 1
     },
     "UEHaD6hTOe": {
+        "checked_for_packing": 1,
         "comment_EFLTpOBTxf": "",
         "comment_N2fp3IHYEM": "",
         "comment_bidH6CXYrb": "",
@@ -332,6 +334,7 @@
         "checked_for_packing": 1
     },
     "ZnvR8kE3vD": {
+        "checked_for_packing": 1,
         "comment_7hGhRTTZC5": ""
     },
     "bBESp9pEw3": {
@@ -412,6 +415,7 @@
         "use_lifetime": 1
     },
     "om7tHo4XiA": {
+        "checked_for_packing": 1,
         "comment_ZUCdMli3MR": "",
         "comment_pfkeOSHYlD": ""
     },
@@ -577,7 +581,7 @@
         "packing_param_combine_textures": true,
         "packing_param_copy_html5": true,
         "packing_param_copy_native": true,
-        "packing_param_delete_prev": false,
+        "packing_param_delete_prev": true,
         "packing_param_generate_html5": true,
         "packing_param_generate_html5_filesys": true,
         "packing_param_max_tex_height": "1024",

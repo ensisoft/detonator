@@ -490,6 +490,7 @@
           },
           "spatial_node": {
             "flags": {
+              "Enabled": true,
               "ReportOverlap": false
             },
             "shape": "AABB"
@@ -980,6 +981,7 @@
           },
           "spatial_node": {
             "flags": {
+              "Enabled": true,
               "ReportOverlap": false
             },
             "shape": "AABB"

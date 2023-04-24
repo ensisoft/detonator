@@ -3257,34 +3257,43 @@
       "id": "vSs0xqS3fS",
       "name": "Blue Ball",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "vSs0xqS3fS",
       "resource_name": "Blue Ball",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/ballBlue_05.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "5f3tOBj0bR",
-        "name": "ballBlue_05",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/ballBlue_05.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "5f3tOBj0bR",
+            "name": "ballBlue_05",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -3314,34 +3323,43 @@
       "id": "4zi9n5RIXq",
       "name": "Blue Brick",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "4zi9n5RIXq",
       "resource_name": "Blue Brick",
-      "sampler_name": "",
       "static": false,
       "surface": "Opaque",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/element_blue_rectangle_glossy.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "IfPXOd3Ckr",
-        "name": "element_blue_rectangle_glossy",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/element_blue_rectangle_glossy.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "IfPXOd3Ckr",
+            "name": "element_blue_rectangle_glossy",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -3371,34 +3389,43 @@
       "id": "KeITJIrx1I",
       "name": "Red Brick",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "KeITJIrx1I",
       "resource_name": "Red Brick",
-      "sampler_name": "",
       "static": false,
       "surface": "Opaque",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/element_red_rectangle_glossy.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "UadbRD19J6",
-        "name": "element_red_rectangle_glossy",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/element_red_rectangle_glossy.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "UadbRD19J6",
+            "name": "element_red_rectangle_glossy",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -3428,34 +3455,43 @@
       "id": "EtyRugQve2",
       "name": "Green Brick",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "EtyRugQve2",
       "resource_name": "Green Brick",
-      "sampler_name": "",
       "static": false,
       "surface": "Opaque",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/element_green_rectangle_glossy.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "3iYjIJvA3e",
-        "name": "element_green_rectangle_glossy",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/element_green_rectangle_glossy.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "3iYjIJvA3e",
+            "name": "element_green_rectangle_glossy",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -3485,34 +3521,43 @@
       "id": "MUQDA03a25",
       "name": "Purple Brick",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "MUQDA03a25",
       "resource_name": "Purple Brick",
-      "sampler_name": "",
       "static": false,
       "surface": "Opaque",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/element_purple_rectangle_glossy.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "IPwfsHtC5k",
-        "name": "element_purple_rectangle_glossy",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/element_purple_rectangle_glossy.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "IPwfsHtC5k",
+            "name": "element_purple_rectangle_glossy",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -3542,34 +3587,43 @@
       "id": "gRY0JNbDCj",
       "name": "Yellow Brick",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "gRY0JNbDCj",
       "resource_name": "Yellow Brick",
-      "sampler_name": "",
       "static": false,
       "surface": "Opaque",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/element_yellow_rectangle_glossy.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "zyuF1qAgw6",
-        "name": "element_yellow_rectangle_glossy",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/element_yellow_rectangle_glossy.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "zyuF1qAgw6",
+            "name": "element_yellow_rectangle_glossy",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -3599,34 +3653,43 @@
       "id": "9wG7A0qhYE",
       "name": "Gray Brick",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "9wG7A0qhYE",
       "resource_name": "Gray Brick",
-      "sampler_name": "",
       "static": false,
       "surface": "Opaque",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/element_grey_rectangle_glossy.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "6epMauMCop",
-        "name": "element_grey_rectangle_glossy",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/element_grey_rectangle_glossy.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "6epMauMCop",
+            "name": "element_grey_rectangle_glossy",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -3656,34 +3719,43 @@
       "id": "OgRnbBquEI",
       "name": "Background",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "OgRnbBquEI",
       "resource_name": "Background",
-      "sampler_name": "",
       "static": false,
       "surface": "Opaque",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://backgrounds/22.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "FHJhKbDHyr",
-        "name": "22",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://backgrounds/22.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "FHJhKbDHyr",
+            "name": "22",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -3771,34 +3843,43 @@
       "id": "xAdKk03Llg",
       "name": "Brick Wall",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "xAdKk03Llg",
       "resource_name": "Brick Wall",
-      "sampler_name": "",
       "static": false,
       "surface": "Opaque",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/element_grey_rectangle_glossy.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "wtHbvenkBH",
-        "name": "element_grey_rectangle_glossy",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/element_grey_rectangle_glossy.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "wtHbvenkBH",
+            "name": "element_grey_rectangle_glossy",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -3828,34 +3909,43 @@
       "id": "AdiJbNNuTp",
       "name": "Gray Ball",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "AdiJbNNuTp",
       "resource_name": "Gray Ball",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/ballGrey_05.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "FejzO6Dm1j",
-        "name": "ballGrey_05",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/ballGrey_05.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "FejzO6Dm1j",
+            "name": "ballGrey_05",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -3885,34 +3975,43 @@
       "id": "mJ0wHRoy15",
       "name": "Paddle Green",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "mJ0wHRoy15",
       "resource_name": "Paddle Green",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/paddle_09.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "LjSIC7inqd",
-        "name": "paddle_09",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/paddle_09.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "LjSIC7inqd",
+            "name": "paddle_09",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -3942,34 +4041,43 @@
       "id": "hhgetGS5Y3",
       "name": "Paddle Red",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "hhgetGS5Y3",
       "resource_name": "Paddle Red",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/paddle_01.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "Ote1UvsQfW",
-        "name": "paddle_01",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/paddle_01.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "Ote1UvsQfW",
+            "name": "paddle_01",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -3999,34 +4107,43 @@
       "id": "10togPdjU7",
       "name": "Paddle Blue",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "10togPdjU7",
       "resource_name": "Paddle Blue",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/paddle_05.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "QFaarwEuoY",
-        "name": "paddle_05",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/paddle_05.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "QFaarwEuoY",
+            "name": "paddle_05",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {

@@ -42,6 +42,7 @@
         "checked_for_packing": 1
     },
     "7kkLq83FnE": {
+        "checked_for_packing": 1
     },
     "847gBr2NKv": {
         "checked_for_packing": 1
@@ -72,6 +73,7 @@
         "comment_0f03OL4uHi": ""
     },
     "EjfqiKs7A1": {
+        "checked_for_packing": 1
     },
     "EtyRugQve2": {
         "checked_for_packing": 1
@@ -118,6 +120,7 @@
         "mapping_count": 0
     },
     "UThqytvfHf": {
+        "checked_for_packing": 1,
         "elem_iaIUp48Qzz_pos_x": -147,
         "elem_iaIUp48Qzz_pos_y": -63,
         "elem_rkXAwUrIp1_pos_x": -373,
@@ -274,6 +277,7 @@
         }
     },
     "mCZ77Xsgvh": {
+        "checked_for_packing": 1,
         "elem_lI3HDnTgut_pos_x": 1,
         "elem_lI3HDnTgut_pos_y": 2,
         "mapping_count": 0
@@ -286,6 +290,7 @@
         "comment_S9juUdy3La": ""
     },
     "noUSSIDS18": {
+        "checked_for_packing": 1,
         "elem_0qj7loZ69Z_pos_x": -144,
         "elem_0qj7loZ69Z_pos_y": -112,
         "elem_TyEDHgeYYH_pos_x": -403,
@@ -377,11 +382,13 @@
         "working_folder": "${workspace}"
     },
     "q9wPieFpP5": {
+        "checked_for_packing": 1
     },
     "rAn0G88CKj": {
         "checked_for_packing": 1
     },
     "vH008bpGRC": {
+        "checked_for_packing": 1,
         "elem_CgaDam1DdH_pos_x": -524,
         "elem_CgaDam1DdH_pos_y": -112,
         "elem_dDQXZTtI14_pos_x": -268,
@@ -423,8 +430,10 @@
         "checked_for_packing": 1
     },
     "xZLaeqWePM": {
+        "checked_for_packing": 1
     },
     "xttv1jSmTp": {
+        "checked_for_packing": 1,
         "comment_C4PXv84PoK": "",
         "comment_IOAkT7MOY2": "",
         "comment_Udp7gxZBCi": "",

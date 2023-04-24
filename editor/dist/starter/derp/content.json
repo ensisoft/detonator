@@ -820,34 +820,43 @@
       "id": "LPH6tgo9eN",
       "name": "Background",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "LPH6tgo9eN",
       "resource_name": "Background",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/Background/full_background.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": false,
-          "PremulAlpha": false
-        },
-        "id": "szhPHqYeqg",
-        "name": "full_background",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/Background/full_background.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": false,
+              "PremulAlpha": false
+            },
+            "id": "szhPHqYeqg",
+            "name": "full_background",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -962,34 +971,43 @@
       "id": "8UZOHE5ijx",
       "name": "Spike",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "8UZOHE5ijx",
       "resource_name": "Spike",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/Spikes/sharp wood.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "wJ2fqkub2J",
-        "name": "sharp wood",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/Spikes/sharp wood.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "wJ2fqkub2J",
+            "name": "sharp wood",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -1011,12 +1029,6 @@
       "dense_grid_cols": 4,
       "dense_grid_rows": 4,
       "dynamic_spatial_index": "DenseGrid",
-      "dynamic_spatial_rect": {
-        "h": 0.0,
-        "w": 0.0,
-        "x": 0.0,
-        "y": 0.0
-      },
       "id": "iiKBwhkDbI",
       "name": "My Scene",
       "nodes": [

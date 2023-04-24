@@ -5926,34 +5926,43 @@
       "id": "gzjp7PwMQd",
       "name": "StoneBlock",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "gzjp7PwMQd",
       "resource_name": "StoneBlock",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Objects/StoneBlock.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "TjsZJr2sQ7",
-        "name": "StoneBlock",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Objects/StoneBlock.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "TjsZJr2sQ7",
+            "name": "StoneBlock",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -5983,34 +5992,43 @@
       "id": "ezvBTHxrAX",
       "name": "tile1",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "ezvBTHxrAX",
       "resource_name": "tile1",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Tile/tile1.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "UW1bHwIOYN",
-        "name": "tile1",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Tile/tile1.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "UW1bHwIOYN",
+            "name": "tile1",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -6040,34 +6058,43 @@
       "id": "tdYbKt5I5Q",
       "name": "tile2",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "tdYbKt5I5Q",
       "resource_name": "tile2",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Tile/tile2.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "1L0NLDlohh",
-        "name": "tile2",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Tile/tile2.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "1L0NLDlohh",
+            "name": "tile2",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -6097,34 +6124,43 @@
       "id": "WTNfneUmHx",
       "name": "tile3",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "WTNfneUmHx",
       "resource_name": "tile3",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Tile/tile3.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "opPOu5Zxym",
-        "name": "tile3",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Tile/tile3.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "opPOu5Zxym",
+            "name": "tile3",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -6154,34 +6190,43 @@
       "id": "NY4Of7DfnI",
       "name": "tile4",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "NY4Of7DfnI",
       "resource_name": "tile4",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Tile/tile4.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "bf9vvUkU8z",
-        "name": "tile4",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Tile/tile4.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "bf9vvUkU8z",
+            "name": "tile4",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -6211,34 +6256,43 @@
       "id": "PiCFlSf9Gm",
       "name": "tile5",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "PiCFlSf9Gm",
       "resource_name": "tile5",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Tile/tile5.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "nGBPZqmLjP",
-        "name": "tile5",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Tile/tile5.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "nGBPZqmLjP",
+            "name": "tile5",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -6268,34 +6322,43 @@
       "id": "5GPKkIzzUf",
       "name": "tile6",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "5GPKkIzzUf",
       "resource_name": "tile6",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Tile/tile6.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "k0Sk1nBWdT",
-        "name": "tile6",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Tile/tile6.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "k0Sk1nBWdT",
+            "name": "tile6",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -6325,34 +6388,43 @@
       "id": "uLZlHEU5XW",
       "name": "tile7",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "uLZlHEU5XW",
       "resource_name": "tile7",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Tile/tile7.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "j72PHAGAdY",
-        "name": "tile7",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Tile/tile7.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "j72PHAGAdY",
+            "name": "tile7",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -6382,34 +6454,43 @@
       "id": "7uTDp9S0mt",
       "name": "tile8",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "7uTDp9S0mt",
       "resource_name": "tile8",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Tile/tile8.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "JYj1uzo5dM",
-        "name": "tile8",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Tile/tile8.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "JYj1uzo5dM",
+            "name": "tile8",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -6439,34 +6520,43 @@
       "id": "kyLTH2YAJY",
       "name": "tile9",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "kyLTH2YAJY",
       "resource_name": "tile9",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Tile/tile9.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "MTJR3MwqeH",
-        "name": "tile9",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Tile/tile9.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "MTJR3MwqeH",
+            "name": "tile9",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -6496,34 +6586,43 @@
       "id": "FW5N4w5d3Z",
       "name": "tile10",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "FW5N4w5d3Z",
       "resource_name": "tile10",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Tile/tile10.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "uTPJbltI6X",
-        "name": "tile10",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Tile/tile10.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "uTPJbltI6X",
+            "name": "tile10",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -6553,34 +6652,43 @@
       "id": "jqIuU0kASH",
       "name": "tile11",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "jqIuU0kASH",
       "resource_name": "tile11",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Tile/tile11.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "QuEr4UqFv8",
-        "name": "tile11",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Tile/tile11.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "QuEr4UqFv8",
+            "name": "tile11",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -6610,34 +6718,43 @@
       "id": "sX94tG9WhR",
       "name": "tile12",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "sX94tG9WhR",
       "resource_name": "tile12",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Tile/tile12.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "3abTOlTyNg",
-        "name": "tile12",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Tile/tile12.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "3abTOlTyNg",
+            "name": "tile12",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -6667,34 +6784,43 @@
       "id": "MBEoxQ9SGX",
       "name": "tile13",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "MBEoxQ9SGX",
       "resource_name": "tile13",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Tile/tile13.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "iRCZftM09d",
-        "name": "tile13",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Tile/tile13.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "iRCZftM09d",
+            "name": "tile13",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -6724,34 +6850,43 @@
       "id": "UJKQNRymuO",
       "name": "tile14",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "UJKQNRymuO",
       "resource_name": "tile14",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Tile/tile14.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "8vzY1g1hNE",
-        "name": "tile14",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Tile/tile14.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "8vzY1g1hNE",
+            "name": "tile14",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -6781,34 +6916,43 @@
       "id": "UTfmL76ml0",
       "name": "tile15",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "UTfmL76ml0",
       "resource_name": "tile15",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Tile/tile15.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "aU4MmT5Ijz",
-        "name": "tile15",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Tile/tile15.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "aU4MmT5Ijz",
+            "name": "tile15",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -6838,34 +6982,43 @@
       "id": "QCvtiZTp3b",
       "name": "tile16",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "QCvtiZTp3b",
       "resource_name": "tile16",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Tile/tile16.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "OJ1iQ6oOYo",
-        "name": "tile16",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Tile/tile16.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "OJ1iQ6oOYo",
+            "name": "tile16",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -6895,34 +7048,43 @@
       "id": "zgwqXHtABU",
       "name": "Bush (1)",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "zgwqXHtABU",
       "resource_name": "Bush (1)",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Objects/Bush (1).png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "nw0nj0q6rr",
-        "name": "Bush (1)",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Objects/Bush (1).png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "nw0nj0q6rr",
+            "name": "Bush (1)",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -6952,34 +7114,43 @@
       "id": "MYaj1na7M4",
       "name": "Bush (2)",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "MYaj1na7M4",
       "resource_name": "Bush (2)",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Objects/Bush (2).png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "dqweGyyY7y",
-        "name": "Bush (2)",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Objects/Bush (2).png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "dqweGyyY7y",
+            "name": "Bush (2)",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -7009,34 +7180,43 @@
       "id": "wrSRezqUfj",
       "name": "Cactus (1)",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "wrSRezqUfj",
       "resource_name": "Cactus (1)",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Objects/Cactus (1).png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "e5hYa8gAem",
-        "name": "Cactus (1)",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Objects/Cactus (1).png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "e5hYa8gAem",
+            "name": "Cactus (1)",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -7066,34 +7246,43 @@
       "id": "QR14nEb7T3",
       "name": "Cactus (2)",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "QR14nEb7T3",
       "resource_name": "Cactus (2)",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Objects/Cactus (2).png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "hihoJpZg1t",
-        "name": "Cactus (2)",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Objects/Cactus (2).png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "hihoJpZg1t",
+            "name": "Cactus (2)",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -7123,34 +7312,43 @@
       "id": "IPqp1SooOX",
       "name": "Cactus (3)",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "IPqp1SooOX",
       "resource_name": "Cactus (3)",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Objects/Cactus (3).png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "yd4fOCuEbL",
-        "name": "Cactus (3)",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Objects/Cactus (3).png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "yd4fOCuEbL",
+            "name": "Cactus (3)",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -7180,34 +7378,43 @@
       "id": "RhslGRtQQR",
       "name": "Crate",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "RhslGRtQQR",
       "resource_name": "Crate",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Objects/Crate.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "pvUC2KetOE",
-        "name": "Crate",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Objects/Crate.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "pvUC2KetOE",
+            "name": "Crate",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -7237,34 +7444,43 @@
       "id": "bvJqe9fGu5",
       "name": "Grass (1)",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "bvJqe9fGu5",
       "resource_name": "Grass (1)",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Objects/Grass (1).png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "Xa2UuFmZoJ",
-        "name": "Grass (1)",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Objects/Grass (1).png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "Xa2UuFmZoJ",
+            "name": "Grass (1)",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -7294,34 +7510,43 @@
       "id": "IM3dwFG7wS",
       "name": "Grass (2)",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "IM3dwFG7wS",
       "resource_name": "Grass (2)",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Objects/Grass (2).png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "5Fp5rlwNuS",
-        "name": "Grass (2)",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Objects/Grass (2).png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "5Fp5rlwNuS",
+            "name": "Grass (2)",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -7351,34 +7576,43 @@
       "id": "bBSpmT5CN0",
       "name": "Sign",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "bBSpmT5CN0",
       "resource_name": "Sign",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Objects/Sign.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "l1TbCYb4HB",
-        "name": "Sign",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Objects/Sign.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "l1TbCYb4HB",
+            "name": "Sign",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -7408,34 +7642,43 @@
       "id": "MDomkaGQRL",
       "name": "SignArrow",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "MDomkaGQRL",
       "resource_name": "SignArrow",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Objects/SignArrow.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "zwS5KQkPF0",
-        "name": "SignArrow",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Objects/SignArrow.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "zwS5KQkPF0",
+            "name": "SignArrow",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -7465,34 +7708,43 @@
       "id": "Ca4GgRWjP2",
       "name": "Skeleton",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "Ca4GgRWjP2",
       "resource_name": "Skeleton",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Objects/Skeleton.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "G9qKL2EODD",
-        "name": "Skeleton",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Objects/Skeleton.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "G9qKL2EODD",
+            "name": "Skeleton",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -7522,34 +7774,43 @@
       "id": "xrUzM3pdBZ",
       "name": "Stone",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "xrUzM3pdBZ",
       "resource_name": "Stone",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Objects/Stone.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "nPrpJjXUg5",
-        "name": "Stone",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Objects/Stone.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "nPrpJjXUg5",
+            "name": "Stone",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -7579,34 +7840,43 @@
       "id": "pQ2O7Ekypd",
       "name": "Tree",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "pQ2O7Ekypd",
       "resource_name": "Tree",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/Objects/Tree.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "9NfwzTr3yN",
-        "name": "Tree",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/Objects/Tree.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "9NfwzTr3yN",
+            "name": "Tree",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -7636,34 +7906,43 @@
       "id": "AgxrO05Kqg",
       "name": "BG_Layer_0",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "AgxrO05Kqg",
       "resource_name": "BG_Layer_0",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/BG_layer_0.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": false,
-          "PremulAlpha": false
-        },
-        "id": "aEYiykIEUb",
-        "name": "BG_layer_0",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/BG_layer_0.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": false,
+              "PremulAlpha": false
+            },
+            "id": "aEYiykIEUb",
+            "name": "BG_layer_0",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -9254,34 +9533,43 @@
       "id": "l6vR7abMmW",
       "name": "BG_Layer_1",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "l6vR7abMmW",
       "resource_name": "BG_Layer_1",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/BG_layer_1.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": false,
-          "PremulAlpha": false
-        },
-        "id": "3KLuHOjPOz",
-        "name": "BG_layer_1",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/BG_layer_1.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": false,
+              "PremulAlpha": false
+            },
+            "id": "3KLuHOjPOz",
+            "name": "BG_layer_1",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -9311,34 +9599,43 @@
       "id": "X6Q2aN3uWm",
       "name": "BG_Layer_2",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "X6Q2aN3uWm",
       "resource_name": "BG_Layer_2",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/BG_layer_2.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": false,
-          "PremulAlpha": false
-        },
-        "id": "sBOmW38aFS",
-        "name": "BG_layer_2",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/BG_layer_2.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": false,
+              "PremulAlpha": false
+            },
+            "id": "sBOmW38aFS",
+            "name": "BG_layer_2",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -9537,34 +9834,43 @@
       "id": "nLUoQRjXrg",
       "name": "Violet Diamond",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "nLUoQRjXrg",
       "resource_name": "Violet Diamond",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/diamond/diamond violet.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "TEHRh9lQ2Z",
-        "name": "diamond violet",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/diamond/diamond violet.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "TEHRh9lQ2Z",
+            "name": "diamond violet",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -9594,34 +9900,43 @@
       "id": "oTLKJxJ07d",
       "name": "Background",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "oTLKJxJ07d",
       "resource_name": "Background",
-      "sampler_name": "",
       "static": false,
       "surface": "Opaque",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/desert tile set/BG.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "18h836YA43",
-        "name": "BG",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/desert tile set/BG.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "18h836YA43",
+            "name": "BG",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
