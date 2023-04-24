@@ -434,7 +434,7 @@ public:
             wdk::WindowEventResize resize;
             resize.width  = canvas_render_with;
             resize.height = canvas_render_height;
-            mEventQueue.push(resize);
+            mEventQueue.push_back(resize);
         }
         return EM_TRUE;
     }
@@ -497,9 +497,8 @@ public:
 
         TRACE_ENTER(EventDispatch);
         // dispatch the pending user input events.
-        while (!mEventQueue.empty())
+        for (const auto& event : mEventQueue)
         {
-            const auto& event = mEventQueue.front();
             if (const auto* ptr = std::get_if<wdk::WindowEventMousePress>(&event))
                 mListener->OnMousePress(*ptr);
             else if (const auto* ptr = std::get_if<wdk::WindowEventMouseRelease>(&event))
@@ -535,8 +534,8 @@ public:
                       mCanvasDisplayWidth, mCanvasDisplayHeight);
             }
             else BUG("Unhandled window event.");
-            mEventQueue.pop();
         }
+        mEventQueue.clear();
         TRACE_LEAVE(EventDispatch);
 
         bool quit = false;
@@ -700,7 +699,7 @@ public:
         wdk::WindowEventResize resize;
         resize.width  = canvas_render_with;
         resize.height = canvas_render_height;
-        mEventQueue.push(resize);
+        mEventQueue.push_back(resize);
     }
     void HandleEngineRequest(const engine::Engine::ShowDeveloperUI& devui)
     {
@@ -811,7 +810,7 @@ public:
             event.global_y  = emsc_event->screenY;
             event.modifiers = mods;
             event.btn       = btn;
-            mEventQueue.push(event);
+            mEventQueue.push_back(event);
             DEBUG("Mouse down event. [x=%1, y=%2]", event.window_x, event.window_y);
         }
         else if (emsc_type == EMSCRIPTEN_EVENT_MOUSEUP)
@@ -823,7 +822,7 @@ public:
             event.global_y  = emsc_event->screenY;
             event.modifiers = mods;
             event.btn       = btn;
-            mEventQueue.push(event);
+            mEventQueue.push_back(event);
         }
         else if (emsc_type == EMSCRIPTEN_EVENT_MOUSEMOVE)
         {
@@ -834,7 +833,7 @@ public:
             event.global_y  = emsc_event->screenY;
             event.modifiers = mods;
             event.btn       = btn;
-            mEventQueue.push(event);
+            mEventQueue.push_back(event);
         } else WARN("Unhandled mouse event.[emsc_type=%1]", emsc_type);
         return EM_TRUE;
     }
@@ -935,21 +934,21 @@ public:
         {
             wdk::WindowEventChar character;
             std::memcpy(character.utf8, emsc_event->key, sizeof(character.utf8));
-            mEventQueue.push(character);
+            mEventQueue.push_back(character);
         }
         else if (emsc_type == EMSCRIPTEN_EVENT_KEYDOWN)
         {
             wdk::WindowEventKeyDown key;
             key.modifiers = mods;
             key.symbol    = symbol;
-            mEventQueue.push(key);
+            mEventQueue.push_back(key);
         }
         else if (emsc_type == EMSCRIPTEN_EVENT_KEYUP)
         {
             wdk::WindowEventKeyUp key;
             key.modifiers = mods;
             key.symbol    = symbol;
-            mEventQueue.push(key);
+            mEventQueue.push_back(key);
         }
         return EM_TRUE;
     }
@@ -975,7 +974,7 @@ private:
         wdk::WindowEventMouseMove,
         wdk::WindowEventMousePress,
         wdk::WindowEventMouseRelease>;
-    std::queue<WindowEvent> mEventQueue;
+    std::vector<WindowEvent> mEventQueue;
     // current engine debug options.
     engine::Engine::DebugOptions mDebugOptions;
     // flag to indicate whether currently in soft fullscreen or not
