@@ -554,7 +554,7 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
             }
             else if (auto* texture = texture_map->AsTextureMap2D())
             {
-                auto* texture_source = texture->GetTextureSource();
+                auto* texture_source = texture->GetTextureSource(0);
                 if (auto* text_source = dynamic_cast<gfx::detail::TextureTextBufferSource*>(texture_source))
                 {
                     auto& text_buffer = text_source->GetTextBuffer();

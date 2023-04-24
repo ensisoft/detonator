@@ -1939,7 +1939,8 @@ void main() {
 })";
         {
             gfx::TextureMap2D map;
-            map.SetTexture(gfx::LoadTextureFromFile("textures/alpha-cutout.png"));
+            map.SetNumTextures(1);
+            map.SetTextureSource(0, gfx::LoadTextureFromFile("textures/alpha-cutout.png"));
             map.SetSamplerName("kTexture");
             gfx::CustomMaterialClass material;
             material.SetShaderSrc(src);
@@ -1952,7 +1953,8 @@ void main() {
             gfx::TextureMap2D map;
             auto tex = gfx::LoadTextureFromFile("textures/alpha-cutout.png");
             tex->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, true);
-            map.SetTexture(std::move(tex));
+            map.SetNumTextures(1);
+            map.SetTextureSource(0, std::move(tex));
             map.SetSamplerName("kTexture");
             gfx::CustomMaterialClass material;
             material.SetShaderSrc(src);
