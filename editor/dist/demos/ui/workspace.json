@@ -84,6 +84,7 @@
         "working_folder": "${workspace}"
     },
     "qNrtwb1b52": {
+        "checked_for_packing": 1
     },
     "workspace": {
         "packing_param_combine_textures": true,
@@ -109,6 +110,7 @@
         "checked_for_packing": 1
     },
     "zNOWw04fYZ": {
+        "checked_for_packing": 1,
         "elem_0sroSvwwzT_pos_x": -292,
         "elem_0sroSvwwzT_pos_y": -134,
         "elem_GhszDt2nDm_pos_x": -560,

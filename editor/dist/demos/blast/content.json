@@ -632,6 +632,7 @@
           },
           "spatial_node": {
             "flags": {
+              "Enabled": true,
               "ReportOverlap": false
             },
             "shape": "AABB"
@@ -1274,6 +1275,7 @@
           },
           "spatial_node": {
             "flags": {
+              "Enabled": true,
               "ReportOverlap": false
             },
             "shape": "AABB"
@@ -1586,6 +1588,7 @@
           },
           "spatial_node": {
             "flags": {
+              "Enabled": true,
               "ReportOverlap": false
             },
             "shape": "AABB"
@@ -2820,34 +2823,43 @@
       "id": "4IluygNgeR",
       "name": "RedBullet",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "4IluygNgeR",
       "resource_name": "RedBullet",
-      "sampler_name": "",
       "static": true,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/Red/bullet.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": true
-        },
-        "id": "Uq1XErPGt9",
-        "name": "bullet",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/Red/bullet.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": true
+            },
+            "id": "Uq1XErPGt9",
+            "name": "bullet",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -2877,34 +2889,43 @@
       "id": "nQUmTOnClw",
       "name": "Ship2",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "nQUmTOnClw",
       "resource_name": "Ship2",
-      "sampler_name": "",
       "static": true,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/Blue/Ship2/0.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": true
-        },
-        "id": "wDtHYRHN35",
-        "name": "0",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Linear",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/Blue/Ship2/0.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": true
+            },
+            "id": "wDtHYRHN35",
+            "name": "0",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Trilinear",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -2934,34 +2955,43 @@
       "id": "lOfMr3YBtI",
       "name": "Asteroid",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "lOfMr3YBtI",
       "resource_name": "Asteroid",
-      "sampler_name": "",
       "static": true,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/Asteroids/asteroid_dark.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": true
-        },
-        "id": "7ozeiqjW51",
-        "name": "asteroid_dark",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/Asteroids/asteroid_dark.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": true
+            },
+            "id": "7ozeiqjW51",
+            "name": "asteroid_dark",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -3791,34 +3821,43 @@
       "id": "s4zt0bFnAL",
       "name": "BlueBullet",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "s4zt0bFnAL",
       "resource_name": "BlueBullet",
-      "sampler_name": "",
       "static": true,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/Blue/bullet.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "KEKTLLkPjy",
-        "name": "bullet",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/Blue/bullet.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "KEKTLLkPjy",
+            "name": "bullet",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -3934,30 +3973,36 @@
       "surface": "Transparent",
       "texture_maps": [
         {
+          "fps": 0.0,
+          "looping": true,
           "name": "kTexture0",
-          "rect": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rect_name": "kTextureRect",
-          "sampler_name": "kTexture0",
-          "texture": {
-            "colorspace": "Linear",
-            "effects": {
-              "Blur": false
-            },
-            "file": "ws://textures/ParticlePack/spark_06.png",
-            "flags": {
-              "AllowPacking": true,
-              "AllowResizing": true,
-              "PremulAlpha": false
-            },
-            "id": "n0vn2swGKX",
-            "name": "spark_06",
-            "type": "Filesystem"
-          },
+          "rect_name0": "kTextureRect",
+          "rect_name1": "",
+          "sampler_name0": "kTexture0",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/ParticlePack/spark_06.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "n0vn2swGKX",
+              "name": "spark_06",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
           "type": "Texture2D"
         }
       ],
@@ -4004,34 +4049,40 @@
       "surface": "Transparent",
       "texture_maps": [
         {
+          "fps": 0.0,
+          "looping": true,
           "name": "kTexture0",
-          "rect": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rect_name": "kTextureRect",
-          "sampler_name": "kTexture0",
-          "texture": {
-            "function": "Noise",
-            "generator": {
-              "height": 30,
-              "layers": [
-                {
-                  "amplitude": 42.0,
-                  "frequency": 26.0,
-                  "prime0": 2659,
-                  "prime1": 743,
-                  "prime2": 7873
-                }
-              ],
-              "width": 30
-            },
-            "id": "LDWnZ2fuen",
-            "name": "Noise",
-            "type": "BitmapGenerator"
-          },
+          "rect_name0": "kTextureRect",
+          "rect_name1": "",
+          "sampler_name0": "kTexture0",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "function": "Noise",
+              "generator": {
+                "height": 30,
+                "layers": [
+                  {
+                    "amplitude": 42.0,
+                    "frequency": 26.0,
+                    "prime0": 2659,
+                    "prime1": 743,
+                    "prime2": 7873
+                  }
+                ],
+                "width": 30
+              },
+              "id": "LDWnZ2fuen",
+              "name": "Noise",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "BitmapGenerator"
+            }
+          ],
           "type": "Texture2D"
         }
       ],
@@ -4077,34 +4128,43 @@
       "id": "CopZZzjQd4",
       "name": "Stars",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "CopZZzjQd4",
       "resource_name": "Stars",
-      "sampler_name": "",
       "static": true,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/Background/bg_1_1.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "NjsRA8HdkH",
-        "name": "bg_1_1",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/Background/bg_1_1.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "NjsRA8HdkH",
+            "name": "bg_1_1",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -4191,38 +4251,44 @@
       "surface": "Emissive",
       "texture_maps": [
         {
+          "fps": 0.0,
+          "looping": true,
           "name": "kTexture0",
-          "rect": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rect_name": "kTexture0Rect",
-          "sampler_name": "kTexture0",
-          "texture": {
-            "buffer": {
-              "height": 118,
-              "horizontal_alignment": "AlignCenter",
-              "texts": [
-                {
-                  "font_file": "ws://fonts/MAXI_L_S.TTF",
-                  "font_size": 78,
-                  "line_height": 1.5,
-                  "string": "BLAST!",
-                  "underline": false
-                }
-              ],
-              "vertical_alignment": "AlignCenter",
-              "width": 635
-            },
-            "effects": {
-              "Blur": false
-            },
-            "id": "JQw78NDo0F",
-            "name": "TextBuffer",
-            "type": "TextBuffer"
-          },
+          "rect_name0": "kTexture0Rect",
+          "rect_name1": "",
+          "sampler_name0": "kTexture0",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "buffer": {
+                "height": 118,
+                "horizontal_alignment": "AlignCenter",
+                "texts": [
+                  {
+                    "font_file": "ws://fonts/MAXI_L_S.TTF",
+                    "font_size": 78,
+                    "line_height": 1.5,
+                    "string": "BLAST!",
+                    "underline": false
+                  }
+                ],
+                "vertical_alignment": "AlignCenter",
+                "width": 635
+              },
+              "effects": {
+                "Blur": false
+              },
+              "id": "JQw78NDo0F",
+              "name": "TextBuffer",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "TextBuffer"
+            }
+          ],
           "type": "Texture2D"
         }
       ],
@@ -4259,34 +4325,43 @@
       "id": "OFJHLiHeaP",
       "name": "Options Button Moused",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "OFJHLiHeaP",
       "resource_name": "Options Button Moused",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/Menu Screen/optionst_buttons.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": true
-        },
-        "id": "i1mArtd5tU",
-        "name": "optionst_buttons",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/Menu Screen/optionst_buttons.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": true
+            },
+            "id": "i1mArtd5tU",
+            "name": "optionst_buttons",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -4316,34 +4391,43 @@
       "id": "AuNZPvQDrI",
       "name": "Credits Button Moused",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "AuNZPvQDrI",
       "resource_name": "Credits Button Moused",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/Menu Screen/Creditst_buttons.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": true
-        },
-        "id": "sxHrljrhni",
-        "name": "Creditst_buttons",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/Menu Screen/Creditst_buttons.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": true
+            },
+            "id": "sxHrljrhni",
+            "name": "Creditst_buttons",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -4373,34 +4457,43 @@
       "id": "RKmQZx8H1s",
       "name": "Play Button Moused",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "RKmQZx8H1s",
       "resource_name": "Play Button Moused",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/Menu Screen/play_buttons.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": true
-        },
-        "id": "LFMiq02vEK",
-        "name": "play_buttons",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/Menu Screen/play_buttons.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": true
+            },
+            "id": "LFMiq02vEK",
+            "name": "play_buttons",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -4430,34 +4523,43 @@
       "id": "M0ePA9uzA5",
       "name": "Exit Button Moused",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "M0ePA9uzA5",
       "resource_name": "Exit Button Moused",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/Menu Screen/exit_buttons.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": true
-        },
-        "id": "Xk7ul0CO91",
-        "name": "exit_buttons",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/Menu Screen/exit_buttons.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": true
+            },
+            "id": "Xk7ul0CO91",
+            "name": "exit_buttons",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -4487,34 +4589,43 @@
       "id": "pGHzP0FH33",
       "name": "Cursor",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "pGHzP0FH33",
       "resource_name": "Cursor",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/cursor/crosshair158.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "rtMnrhrbtN",
-        "name": "crosshair158",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/cursor/crosshair158.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "rtMnrhrbtN",
+            "name": "crosshair158",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -4545,30 +4656,36 @@
       "surface": "Transparent",
       "texture_maps": [
         {
+          "fps": 0.0,
+          "looping": true,
           "name": "kTexture",
-          "rect": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rect_name": "kTextureRect",
-          "sampler_name": "kTexture",
-          "texture": {
-            "colorspace": "Linear",
-            "effects": {
-              "Blur": false
-            },
-            "file": "ws://textures/Menu Screen/Creditst_buttons.png",
-            "flags": {
-              "AllowPacking": true,
-              "AllowResizing": true,
-              "PremulAlpha": true
-            },
-            "id": "9sBNbuo9j9",
-            "name": "Creditst_buttons",
-            "type": "Filesystem"
-          },
+          "rect_name0": "kTextureRect",
+          "rect_name1": "",
+          "sampler_name0": "kTexture",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/Menu Screen/Creditst_buttons.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": true
+              },
+              "id": "9sBNbuo9j9",
+              "name": "Creditst_buttons",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
           "type": "Texture2D"
         }
       ],
@@ -4591,30 +4708,36 @@
       "surface": "Transparent",
       "texture_maps": [
         {
+          "fps": 0.0,
+          "looping": true,
           "name": "kTexture",
-          "rect": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rect_name": "kTextureRect",
-          "sampler_name": "kTexture",
-          "texture": {
-            "colorspace": "Linear",
-            "effects": {
-              "Blur": false
-            },
-            "file": "ws://textures/Menu Screen/optionst_buttons.png",
-            "flags": {
-              "AllowPacking": true,
-              "AllowResizing": true,
-              "PremulAlpha": true
-            },
-            "id": "KyLn5d0Z7B",
-            "name": "optionst_buttons",
-            "type": "Filesystem"
-          },
+          "rect_name0": "kTextureRect",
+          "rect_name1": "",
+          "sampler_name0": "kTexture",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/Menu Screen/optionst_buttons.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": true
+              },
+              "id": "KyLn5d0Z7B",
+              "name": "optionst_buttons",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
           "type": "Texture2D"
         }
       ],
@@ -4637,30 +4760,36 @@
       "surface": "Transparent",
       "texture_maps": [
         {
+          "fps": 0.0,
+          "looping": true,
           "name": "kTexture",
-          "rect": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rect_name": "kTextureRect",
-          "sampler_name": "kTexture",
-          "texture": {
-            "colorspace": "Linear",
-            "effects": {
-              "Blur": false
-            },
-            "file": "ws://textures/Menu Screen/exit_buttons.png",
-            "flags": {
-              "AllowPacking": true,
-              "AllowResizing": true,
-              "PremulAlpha": true
-            },
-            "id": "2MFvJwTS9Y",
-            "name": "exit_buttons",
-            "type": "Filesystem"
-          },
+          "rect_name0": "kTextureRect",
+          "rect_name1": "",
+          "sampler_name0": "kTexture",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/Menu Screen/exit_buttons.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": true
+              },
+              "id": "2MFvJwTS9Y",
+              "name": "exit_buttons",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
           "type": "Texture2D"
         }
       ],
@@ -4683,30 +4812,36 @@
       "surface": "Transparent",
       "texture_maps": [
         {
+          "fps": 0.0,
+          "looping": true,
           "name": "kTexture",
-          "rect": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rect_name": "kTextureRect",
-          "sampler_name": "kTexture",
-          "texture": {
-            "colorspace": "Linear",
-            "effects": {
-              "Blur": false
-            },
-            "file": "ws://textures/Menu Screen/play_buttons.png",
-            "flags": {
-              "AllowPacking": true,
-              "AllowResizing": true,
-              "PremulAlpha": true
-            },
-            "id": "8qTZM3yPRi",
-            "name": "play_buttons",
-            "type": "Filesystem"
-          },
+          "rect_name0": "kTextureRect",
+          "rect_name1": "",
+          "sampler_name0": "kTexture",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/Menu Screen/play_buttons.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": true
+              },
+              "id": "8qTZM3yPRi",
+              "name": "play_buttons",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
           "type": "Texture2D"
         }
       ],
@@ -4728,34 +4863,43 @@
       "id": "HyJsrevpdz",
       "name": "Smoke Particle",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "HyJsrevpdz",
       "resource_name": "Smoke Particle",
-      "sampler_name": "",
       "static": false,
       "surface": "Emissive",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/SmokeParticle.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "mn29S3i6zn",
-        "name": "SmokeParticle",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/SmokeParticle.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "mn29S3i6zn",
+            "name": "SmokeParticle",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -4785,34 +4929,43 @@
       "id": "5YQ8ZqObX7",
       "name": "Round Particle",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "5YQ8ZqObX7",
       "resource_name": "Round Particle",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/RoundParticle.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "Y6tN5Yy5IM",
-        "name": "RoundParticle",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/RoundParticle.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "Y6tN5Yy5IM",
+            "name": "RoundParticle",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -4861,34 +5014,43 @@
       "id": "kqbXBoi7yD",
       "name": "Red Laser",
       "particle_action": "None",
-      "rect": {
-        "h": 1.0,
-        "w": 1.0,
-        "x": 0.0,
-        "y": 0.0
-      },
-      "rect_name": "",
       "resource_id": "kqbXBoi7yD",
       "resource_name": "Red Laser",
-      "sampler_name": "",
       "static": false,
       "surface": "Transparent",
-      "texture": {
-        "colorspace": "Linear",
-        "effects": {
-          "Blur": false
-        },
-        "file": "ws://textures/Lasers/02.png",
-        "flags": {
-          "AllowPacking": true,
-          "AllowResizing": true,
-          "PremulAlpha": false
-        },
-        "id": "J2M9Sam3oM",
-        "name": "02",
-        "type": "Filesystem"
-      },
       "texture_mag_filter": "Default",
+      "texture_map": {
+        "fps": 0.0,
+        "looping": true,
+        "rect_name0": "",
+        "rect_name1": "",
+        "sampler_name0": "",
+        "sampler_name1": "",
+        "textures": [
+          {
+            "colorspace": "Linear",
+            "effects": {
+              "Blur": false
+            },
+            "file": "ws://textures/Lasers/02.png",
+            "flags": {
+              "AllowPacking": true,
+              "AllowResizing": true,
+              "PremulAlpha": false
+            },
+            "id": "J2M9Sam3oM",
+            "name": "02",
+            "rect": {
+              "h": 1.0,
+              "w": 1.0,
+              "x": 0.0,
+              "y": 0.0
+            },
+            "type": "Filesystem"
+          }
+        ],
+        "type": "Texture2D"
+      },
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
