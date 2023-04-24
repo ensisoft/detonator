@@ -534,10 +534,6 @@ namespace gfx
         return std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(gen));
     }
 
-
-    class SpriteMap;
-    class TextureMap2D;
-
     // Interface for binding texture map(s) to texture sampler(s) in the material shader.
     class TextureMap
     {
@@ -577,214 +573,121 @@ namespace gfx
             // as configured in the texture map.
             std::string rect_names[2];
         };
+        TextureMap() = default;
+        TextureMap(const TextureMap& other, bool copy);
+        TextureMap(const TextureMap& other) : TextureMap(other, true) {}
 
-        virtual ~TextureMap() = default;
         // Get the type of the texture map.
-        virtual Type GetType() const = 0;
+        inline Type GetType() const noexcept
+        { return mType; }
+        inline float GetFps() const noexcept
+        { return mFps; }
+        inline bool IsLooping() const noexcept
+        { return mLooping; }
+
+        // Reset all texture objects. After this the texture map contains no textures.
+        inline void ResetTextures() noexcept
+        { mTextures.clear(); }
+        inline void SetType(Type type) noexcept
+        { mType = type; }
+        inline void SetNumTextures(size_t num)
+        { mTextures.resize(num); }
+        // Get the number of textures.
+        inline size_t GetNumTextures() const noexcept
+        { return mTextures.size(); }
+        inline void SetFps(float fps) noexcept
+        { mFps = fps; }
+        inline void SetLooping(bool looping) noexcept
+        { mLooping = looping; }
+        inline void SetSamplerName(std::string name, size_t index = 0) noexcept
+        { mSamplerName[index] = std::move(name); }
+        inline void SetRectUniformName(std::string name, size_t index = 0) noexcept
+        { mRectUniformName[index] = std::move(name); }
+        // Get the texture source object at the given index.
+        inline const TextureSource* GetTextureSource(size_t index) const noexcept
+        { return base::SafeIndex(mTextures, index).source.get(); }
+        // Get the texture source object at the given index.
+        inline TextureSource* GetTextureSource(size_t index) noexcept
+        { return base::SafeIndex(mTextures, index).source.get(); }
+        // Get the texture source rectangle at the given index.
+        inline FRect GetTextureRect(size_t index) const noexcept
+        { return base::SafeIndex(mTextures, index).rect; }
+        // Set a new texture source rectangle for using a sub-rect of a texture.
+        inline void SetTextureRect(size_t index, const FRect& rect) noexcept
+        { base::SafeIndex(mTextures, index).rect = rect; }
+        inline void ResetTextureSource(size_t index) noexcept
+        { base::SafeIndex(mTextures, index).source.reset(); }
+        // Set a new texture source object at the given index.
+        inline void SetTextureSource(size_t index, std::unique_ptr<TextureSource> source) noexcept
+        { base::SafeIndex(mTextures, index).source = std::move(source); }
+        // Delete the texture source and the texture rect at the given index.
+        inline void DeleteTexture(size_t index) noexcept
+        { base::SafeErase(mTextures, index); }
+        inline std::string GetSamplerName(size_t index) const noexcept
+        { return mSamplerName[index]; }
+        inline std::string GetRectUniformName(size_t index) const noexcept
+        { return mRectUniformName[index]; }
         // Get the hash value based on the current state of the material map.
-        virtual std::size_t GetHash() const = 0;
-        // Create a similar clone of this texture map but with a new unique id.
-        virtual std::unique_ptr<TextureMap> Clone() const = 0;
-        // Create an exact bit-wise copy of this texture map.
-        virtual std::unique_ptr<TextureMap> Copy() const = 0;
+        std::size_t GetHash() const noexcept;
         // Select texture objects for sampling based on the current binding state.
         // If the texture objects don't yet exist on the device they're created.
         // The resulting BoundState expresses which textures should currently be
         // used and which are the sampler/uniform names that should be used when
         // binding the textures to the program's state before drawing.
         // Returns true if successful, otherwise false on error.
-        virtual bool BindTextures(const BindingState& state, Device& device, BoundState& result) const = 0;
+        bool BindTextures(const BindingState& state, Device& device, BoundState& result) const;
         // Serialize into JSON object.
-        virtual void IntoJson(data::Writer& data) const = 0;
+        void IntoJson(data::Writer& data) const;
         // Load state from JSON object. Returns true if successful.
-        virtual bool FromJson(const data::Reader& data) = 0;
+        bool FromJson(const data::Reader& data);
+        bool FromLegacyJsonTexture2D(const data::Reader& data);
+
         // Find a specific texture source based on the texture source id.
         // Returns nullptr if no matching texture source was found.
-        virtual TextureSource* FindTextureSourceById(const std::string& id) = 0;
+        TextureSource* FindTextureSourceById(const std::string& id);
         // Find a texture source based on its name. Note that the names are not
         // necessarily unique. In such case it's unspecified which texture source
         // object is returned. Returns nullptr if no matching texture source was found.
-        virtual TextureSource* FindTextureSourceByName(const std::string& name) = 0;
+        TextureSource* FindTextureSourceByName(const std::string& name);
         // Find a specific texture source based on the texture source id.
         // Returns nullptr if no matching texture source was found.
-        virtual const TextureSource* FindTextureSourceById(const std::string& id) const = 0;
+        const TextureSource* FindTextureSourceById(const std::string& id) const;
         // Find a texture source based on its name. Note that the names are not
         // necessarily unique. In such case it's unspecified which texture source
         // object is returned. Returns nullptr if no matching texture source was found.
-        virtual const TextureSource* FindTextureSourceByName(const std::string& name) const = 0;
-        // Find the texture rectangle set for the texture source. Returns false if no such
-        // source was found in this texture map and rect remains unmodified.
-        virtual bool FindTextureRect(const TextureSource* source, FRect* rect) const = 0;
-        // Set the texture rect for the given texture source. Returns false if no such
-        // source was found in this texture map.
-        virtual bool SetTextureRect(const TextureSource* source, const FRect& rect) = 0;
-        // Delete the ive texture source. Returns true if source was found and deleted.
-        virtual bool DeleteTexture(const TextureSource* source) = 0;
-        // Reset all texture objects. After this the texture map contains no textures.
-        virtual void ResetTextures() = 0;
+        const TextureSource* FindTextureSourceByName(const std::string& name) const;
+        // Delete a texture and the texture rect by the texture source ID.
+        // Returns true if source was found and deleted, otherwise returns false and no
+        // deletion was done.
+        bool DeleteTextureById(const std::string& id);
 
         // down cast helpers.
-        SpriteMap* AsSpriteMap();
-        TextureMap2D* AsTextureMap2D();
-        const SpriteMap* AsSpriteMap() const;
-        const TextureMap2D* AsTextureMap2D() const;
-    private:
-    };
+        TextureMap* AsSpriteMap();
+        TextureMap* AsTextureMap2D();
+        const TextureMap* AsSpriteMap() const;
+        const TextureMap* AsTextureMap2D() const;
 
-    // Implements texture mapping by cycling through a series of textures
-    // based on the current time, the number of textures and the speed at
-    // which the textures are cycled through.
-    class SpriteMap : public TextureMap
-    {
-    public:
-        SpriteMap() = default;
-        SpriteMap(const SpriteMap& other, bool copy);
-        SpriteMap(const SpriteMap& other) : SpriteMap(other, true) {}
+        std::unique_ptr<TextureMap> Copy() const
+        { return std::make_unique<TextureMap>(*this, true); }
+        std::unique_ptr<TextureMap> Clone() const
+        { return std::make_unique<TextureMap>(*this, false); }
 
-        TextureSource& AddTexture(std::unique_ptr<TextureSource> source)
-        {
-            mSprites.emplace_back();
-            mSprites.back().source = std::move(source);
-            return *mSprites.back().source;
-        }
-        TextureSource& AddTexture(std::unique_ptr<TextureSource> source, const FRect& rect)
-        {
-            mSprites.emplace_back();
-            mSprites.back().source = std::move(source);
-            mSprites.back().rect = rect;
-            return *mSprites.back().source;
-        }
-        void DeleteTexture(size_t index)
-        { base::SafeErase(mSprites, index); }
-        void DeleteTextureById(const std::string& id);
-        const TextureSource* GetTextureSource(size_t index) const
-        { return base::SafeIndex(mSprites, index).source.get(); }
-        TextureSource* GetTextureSource(size_t index)
-        { return base::SafeIndex(mSprites, index).source.get(); }
-        void SetSamplerName(const std::string& name, size_t index)
-        { mSamplerName[index] = name; }
-        void SetRectUniformName(const std::string& name, size_t index)
-        { mRectUniformName[index] = name; }
-        void SetTextureRect(std::size_t index, const FRect& rect)
-        { base::SafeIndex(mSprites, index).rect = rect; }
-        void SetTextureSource(std::size_t index, std::unique_ptr<TextureSource> source)
-        { base::SafeIndex(mSprites, index).source = std::move(source); }
-        void SetFps(float fps)
-        { mFps = fps; }
-        void SetLooping(bool looping)
-        { mLooping = looping; }
-        std::string GetSamplerName(size_t index) const
-        { return mSamplerName[index]; }
-        std::string GetRectUniformName(size_t index) const
-        { return mRectUniformName[index]; }
-        float GetFps() const
-        { return mFps; }
-        FRect GetTextureRect(size_t index) const
-        { return base::SafeIndex(mSprites, index).rect; }
-        size_t GetNumTextures() const
-        { return mSprites.size(); }
-        bool IsLooping() const
-        { return mLooping; }
-        // TextureMap implementation.
-        virtual Type GetType() const override
-        { return Type::Sprite; }
-        virtual std::size_t GetHash() const override;
-        virtual std::unique_ptr<TextureMap> Copy() const override
-        { return std::make_unique<SpriteMap>(*this, true); }
-        virtual std::unique_ptr<TextureMap> Clone() const override
-        { return std::make_unique<SpriteMap>(*this, false); }
-        virtual bool BindTextures(const BindingState& state, Device& device, BoundState& result) const override;
-        virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson(const data::Reader& data) override;
-        virtual TextureSource* FindTextureSourceById(const std::string& id) override;
-        virtual TextureSource* FindTextureSourceByName(const std::string& name) override;
-        virtual const TextureSource* FindTextureSourceById(const std::string& id) const override;
-        virtual const TextureSource* FindTextureSourceByName(const std::string& name) const override;
-        virtual bool FindTextureRect(const TextureSource* source, FRect* rect) const override;
-        virtual bool SetTextureRect(const TextureSource* source, const FRect& rect) override;
-        virtual bool DeleteTexture(const TextureSource* source) override;
-        virtual void ResetTextures() override
-        { mSprites.clear(); }
-        SpriteMap& operator=(const SpriteMap& other);
+        TextureMap& operator=(const TextureMap& other);
     private:
+        Type mType = Type::Texture2D;
         float mFps = 0.0f;
-        struct Sprite {
+        struct Texture {
             FRect rect = FRect(0.0f, 0.0f, 1.0f, 1.0f);
             std::unique_ptr<TextureSource> source;
         };
-        std::vector<Sprite> mSprites;
+        std::vector<Texture> mTextures;
         std::string mSamplerName[2];
         std::string mRectUniformName[2];
         bool mLooping = true;
     };
 
-    // Implements texture mapping by always mapping a single 2D texture object
-    // onto to the same texture sampler on every single bind.
-    class TextureMap2D : public TextureMap
-    {
-    public:
-        TextureMap2D() = default;
-        TextureMap2D(const TextureMap2D& other, bool copy);
-        TextureMap2D(const TextureMap2D& other) : TextureMap2D(other, true){}
-        TextureSource& SetTexture(std::unique_ptr<TextureSource> source)
-        {
-            mSource = std::move(source);
-            return *mSource;
-        }
-        TextureSource& SetTexture(std::unique_ptr<TextureSource> source, const FRect& rect)
-        {
-            mSource = std::move(source);
-            mRect   = rect;
-            return *mSource;
-        }
-        void SetTextureRect(const FRect& rect)
-        { mRect = rect; }
-        void ResetTexture()
-        {
-            mSource.reset();
-            mRect = FRect(0.0f, 0.0f, 1.0f, 1.0f);
-        }
-        void SetSamplerName(const std::string& name)
-        { mSamplerName = name; }
-        void SetRectUniformName(const std::string& name)
-        { mRectUniformName = name; }
-        std::string GetSamplerName() const
-        { return mSamplerName; }
-        std::string GetRectUniformName() const
-        { return mRectUniformName; }
-        gfx::FRect GetTextureRect() const
-        { return mRect; }
-        TextureSource* GetTextureSource()
-        { return mSource.get(); }
-        const TextureSource* GetTextureSource() const
-        { return mSource.get(); }
-        // TextureMap implementation.
-        virtual Type GetType() const override
-        { return Type::Texture2D; }
-        virtual std::unique_ptr<TextureMap> Copy() const override
-        { return std::make_unique<TextureMap2D>(*this, true); }
-        virtual std::unique_ptr<TextureMap> Clone() const override
-        { return std::make_unique<TextureMap2D>(*this, false); }
-        virtual std::size_t GetHash() const override;
-        virtual bool BindTextures(const BindingState& state, Device& device, BoundState& result) const override;
-        virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson(const data::Reader& data) override;
-        virtual TextureSource* FindTextureSourceById(const std::string& id) override;
-        virtual TextureSource* FindTextureSourceByName(const std::string& name) override;
-        virtual const TextureSource* FindTextureSourceById(const std::string& id) const override;
-        virtual const TextureSource* FindTextureSourceByName(const std::string& name) const override;
-        virtual bool FindTextureRect(const TextureSource* source, FRect* rect) const override;
-        virtual bool SetTextureRect(const TextureSource* source, const FRect& rect) override;
-        virtual bool DeleteTexture(const TextureSource* source) override;
-        virtual void ResetTextures() override { ResetTexture(); }
-        TextureMap2D& operator=(const TextureMap2D& other);
-    private:
-        std::unique_ptr<TextureSource> mSource;
-        gfx::FRect mRect {0.0f, 0.0f, 1.0f, 1.0f};
-        std::string mSamplerName;
-        std::string mRectUniformName;
-    };
-
+    using TextureMap2D = TextureMap;
+    using SpriteMap = TextureMap;
 
     class BuiltInMaterialClass;
     class ColorClass;
@@ -1146,16 +1049,30 @@ namespace gfx
     class SpriteClass : public BuiltInMaterialClass
     {
     public:
-        SpriteClass() = default;
+        SpriteClass()
+        {
+            mSprite.SetType(TextureMap::Type::Sprite);
+        }
         SpriteClass(const SpriteClass& other, bool copy);
         SpriteClass(const SpriteClass& other) : SpriteClass(other, true)
         {}
         void ResetTextures()
         { mSprite.ResetTextures(); }
         TextureSource& AddTexture(std::unique_ptr<TextureSource> source)
-        { return mSprite.AddTexture(std::move(source)); }
+        {
+            auto textures = mSprite.GetNumTextures();
+            mSprite.SetNumTextures(textures + 1);
+            mSprite.SetTextureSource(textures, std::move(source));
+            return *mSprite.GetTextureSource(textures);
+        }
         TextureSource& AddTexture(std::unique_ptr<TextureSource> source, const FRect& rect)
-        { return mSprite.AddTexture(std::move(source), rect); }
+        {
+            auto textures = mSprite.GetNumTextures();
+            mSprite.SetNumTextures(textures + 1);
+            mSprite.SetTextureSource(textures, std::move(source));
+            mSprite.SetTextureRect(textures, rect);
+            return *mSprite.GetTextureSource(textures);
+        }
         void DeleteTexture(size_t index)
         { mSprite.DeleteTexture(index); }
         void DeleteTextureById(const std::string& id)
@@ -1270,7 +1187,7 @@ namespace gfx
         TextureWrapping mWrapX = TextureWrapping::Clamp;
         TextureWrapping mWrapY = TextureWrapping::Clamp;
         ParticleAction mParticleAction = ParticleAction::None;
-        SpriteMap mSprite;
+        TextureMap mSprite;
     };
 
     // Shade surfaces by sampling a single static texture
@@ -1281,16 +1198,27 @@ namespace gfx
     class TextureMap2DClass : public BuiltInMaterialClass
     {
     public:
-        TextureMap2DClass() = default;
+        TextureMap2DClass()
+        {
+            mTexture.SetNumTextures(1);
+            mTexture.SetType(TextureMap::Type::Texture2D);
+        }
         TextureMap2DClass(const TextureMap2DClass& other, bool copy);
         TextureMap2DClass(const TextureMap2DClass& other) : TextureMap2DClass(other, true)
         {}
         TextureSource& SetTexture(std::unique_ptr<TextureSource> source)
-        { return mTexture.SetTexture(std::move(source)); }
+        {
+            mTexture.SetTextureSource(0, std::move(source));
+            return *mTexture.GetTextureSource(0);
+        }
         TextureSource& SetTexture(std::unique_ptr<TextureSource> source, const FRect& rect)
-        { return mTexture.SetTexture(std::move(source), rect); }
+        {
+            mTexture.SetTextureSource(0, std::move(source));
+            mTexture.SetTextureRect(0, rect);
+            return *mTexture.GetTextureSource(0);
+        }
         void SetTextureRect(const FRect& rect)
-        { mTexture.SetTextureRect(rect); }
+        { mTexture.SetTextureRect(0, rect); }
         void SetTextureMinFilter(MinTextureFilter filter)
         { mMinFilter = filter; }
         void SetTextureMagFilter(MagTextureFilter filter)
@@ -1320,13 +1248,13 @@ namespace gfx
         void SetParticleAction(ParticleAction action)
         { mParticleAction = action; }
         void ResetTexture()
-        { mTexture.ResetTexture(); }
+        { mTexture.ResetTextureSource(0); }
         gfx::FRect GetTextureRect() const
-        { return mTexture.GetTextureRect(); }
+        { return mTexture.GetTextureRect(0); }
         TextureSource* GetTextureSource()
-        { return mTexture.GetTextureSource(); }
+        { return mTexture.GetTextureSource(0); }
         const TextureSource* GetTextureSource() const
-        { return mTexture.GetTextureSource(); }
+        { return mTexture.GetTextureSource(0); }
         float GetTextureScaleX() const
         { return mTextureScale.x; }
         float GetTextureScaleY() const
@@ -1374,7 +1302,7 @@ namespace gfx
         TextureWrapping mWrapX = TextureWrapping::Clamp;
         TextureWrapping mWrapY = TextureWrapping::Clamp;
         ParticleAction mParticleAction = ParticleAction::None;
-        TextureMap2D mTexture;
+        TextureMap mTexture;
     };
 
     // Shade surfaces using an arbitrary user defined shading

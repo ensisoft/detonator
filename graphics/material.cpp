@@ -531,205 +531,128 @@ bool detail::TextureTextBufferSource::FromJson(const data::Reader& data)
     return ok;
 }
 
-SpriteMap* TextureMap::AsSpriteMap()
-{ return dynamic_cast<SpriteMap*>(this); }
-TextureMap2D* TextureMap::AsTextureMap2D()
-{ return dynamic_cast<TextureMap2D*>(this); }
-const SpriteMap* TextureMap::AsSpriteMap() const
-{ return dynamic_cast<const SpriteMap*>(this); }
-const TextureMap2D* TextureMap::AsTextureMap2D() const
-{ return dynamic_cast<const TextureMap2D*>(this); }
-
-SpriteMap::SpriteMap(const SpriteMap& other, bool copy)
+TextureMap::TextureMap(const TextureMap& other, bool copy)
 {
-    mFps = other.mFps;
+    mType               = other.mType;
+    mFps                = other.mFps;
+    mLooping            = other.mLooping;
+    mSamplerName[0]     = other.mSamplerName[0];
+    mSamplerName[1]     = other.mSamplerName[1];
     mRectUniformName[0] = other.mRectUniformName[0];
     mRectUniformName[1] = other.mRectUniformName[1];
-    mSamplerName[0] = other.mSamplerName[0];
-    mSamplerName[1] = other.mSamplerName[1];
-    mLooping = other.mLooping;
-    for (const auto& sprite : other.mSprites)
+    for (const auto& texture : other.mTextures)
     {
-        Sprite s;
-        if (sprite.source && copy)
-            s.source = sprite.source->Copy();
-        else if (sprite.source)
-            s.source = sprite.source->Clone();
-        s.rect = sprite.rect;
-        mSprites.push_back(std::move(s));
+        Texture dupe;
+        dupe.rect = texture.rect;
+        if (texture.source)
+            dupe.source = copy ? texture.source->Copy() : texture.source->Clone();
+        mTextures.push_back(std::move(dupe));
     }
 }
 
-void SpriteMap::DeleteTextureById(const std::string& id)
-{
-    for (auto it = mSprites.begin(); it != mSprites.end(); ++it)
-    {
-        if (it->source && it->source->GetId() == id)
-        {
-            mSprites.erase(it);
-            return;
-        }
-    }
-}
-const TextureSource* SpriteMap::FindTextureSourceById(const std::string& id) const
-{
-    for (const auto& it : mSprites)
-    {
-        if (it.source->GetId() == id)
-            return it.source.get();
-    }
-    return nullptr;
-}
-const TextureSource* SpriteMap::FindTextureSourceByName(const std::string& name) const
-{
-    for (const auto& it : mSprites)
-    {
-        if (it.source->GetName() == name)
-            return it.source.get();
-    }
-    return nullptr;
-}
-
-TextureSource* SpriteMap::FindTextureSourceById(const std::string& id)
-{
-    for (const auto& it : mSprites)
-    {
-        if (it.source->GetId() == id)
-            return it.source.get();
-    }
-    return nullptr;
-}
-TextureSource* SpriteMap::FindTextureSourceByName(const std::string& name)
-{
-    for (const auto& it : mSprites)
-    {
-        if (it.source->GetName() == name)
-            return it.source.get();
-    }
-    return nullptr;
-}
-
-bool SpriteMap::FindTextureRect(const TextureSource* source, FRect* rect) const
-{
-    for (const auto& it : mSprites)
-    {
-        if (it.source.get() == source)
-        {
-            *rect = it.rect;
-            return true;
-        }
-    }
-    return false;
-}
-
-bool SpriteMap::SetTextureRect(const TextureSource* source, const FRect& rect)
-{
-    for (auto& it : mSprites)
-    {
-        if (it.source.get() == source)
-        {
-            it.rect = rect;
-            return true;
-        }
-    }
-    return false;
-}
-
-bool SpriteMap::DeleteTexture(const TextureSource* source)
-{
-    for (auto it = mSprites.begin(); it != mSprites.end();)
-    {
-        if (it->source.get() == source)
-        {
-            mSprites.erase(it);
-            return true;
-        } else ++it;
-    }
-    return false;
-}
-
-std::size_t SpriteMap::GetHash() const
+size_t TextureMap::GetHash() const noexcept
 {
     size_t hash = 0;
+    hash = base::hash_combine(hash, mType);
     hash = base::hash_combine(hash, mFps);
     hash = base::hash_combine(hash, mSamplerName[0]);
     hash = base::hash_combine(hash, mSamplerName[1]);
     hash = base::hash_combine(hash, mRectUniformName[0]);
     hash = base::hash_combine(hash, mRectUniformName[1]);
     hash = base::hash_combine(hash, mLooping);
-    for (const auto& sprite : mSprites)
+    for (const auto& texture : mTextures)
     {
-        const auto* source = sprite.source.get();
+        const auto* source = texture.source.get();
         hash = base::hash_combine(hash, source ? source->GetHash() : 0);
-        hash = base::hash_combine(hash, sprite.rect);
+        hash = base::hash_combine(hash, texture.rect);
     }
     return hash;
 }
 
-bool SpriteMap::BindTextures(const BindingState& state, Device& device, BoundState& result) const
+bool TextureMap::BindTextures(const BindingState& state, Device& device, BoundState& result) const
 {
-    if (mSprites.empty())
+    if (mTextures.empty())
         return false;
-    const auto frame_interval = 1.0f / std::max(mFps, 0.001f);
-    const auto frame_fraction = std::fmod(state.current_time, frame_interval);
-    const auto blend_coeff = frame_fraction/frame_interval;
-    const auto first_index = (unsigned)(state.current_time/frame_interval);
-    const auto frame_count = (unsigned)mSprites.size();
-    const auto max_index = frame_count - 1;
-    const auto texture_count = std::min(frame_count, 2u);
-    const auto first_frame  = mLooping
-            ? ((first_index + 0) % frame_count)
-            : math::clamp(0u, max_index, first_index+0);
-    const auto second_frame = mLooping
-            ? ((first_index + 1) % frame_count)
-            : math::clamp(0u, max_index, first_index+1);
-    const unsigned frame_index[2] = {
-        first_frame, second_frame
-    };
 
-    TextureSource::Environment texture_source_env;
-    texture_source_env.dynamic_content = state.dynamic_content;
-
-    for (unsigned i=0; i<2; ++i)
+    if (mType == Type::Sprite)
     {
-        const auto& sprite  = mSprites[frame_index[i]];
-        const auto& source  = sprite.source;
-        if (auto* texture = source->Upload(texture_source_env, device))
+        const auto frame_interval = 1.0f / std::max(mFps, 0.001f);
+        const auto frame_fraction = std::fmod(state.current_time, frame_interval);
+        const auto blend_coeff = frame_fraction/frame_interval;
+        const auto first_index = (unsigned)(state.current_time/frame_interval);
+        const auto frame_count = (unsigned)mTextures.size();
+        const auto max_index = frame_count - 1;
+        const auto texture_count = std::min(frame_count, 2u);
+        const auto first_frame  = mLooping
+                                  ? ((first_index + 0) % frame_count)
+                                  : math::clamp(0u, max_index, first_index+0);
+        const auto second_frame = mLooping
+                                  ? ((first_index + 1) % frame_count)
+                                  : math::clamp(0u, max_index, first_index+1);
+        const unsigned frame_index[2] = {
+                first_frame, second_frame
+        };
+
+        TextureSource::Environment texture_source_env;
+        texture_source_env.dynamic_content = state.dynamic_content;
+
+        for (unsigned i=0; i<2; ++i)
         {
-            result.textures[i]      = texture;
-            result.rects[i]         = sprite.rect;
-            result.sampler_names[i] = mSamplerName[i];
-            result.rect_names[i]    = mRectUniformName[i];
-        } else return false;
+            const auto& sprite  = mTextures[frame_index[i]];
+            const auto& source  = sprite.source;
+            if (auto* texture = source->Upload(texture_source_env, device))
+            {
+                result.textures[i]      = texture;
+                result.rects[i]         = sprite.rect;
+                result.sampler_names[i] = mSamplerName[i];
+                result.rect_names[i]    = mRectUniformName[i];
+            } else return false;
+        }
+        result.blend_coefficient = blend_coeff;
     }
-    result.blend_coefficient = blend_coeff;
+    else if (mType == Type::Texture2D)
+    {
+        TextureSource::Environment texture_source_env;
+        texture_source_env.dynamic_content = state.dynamic_content;
+
+        if (auto* texture = mTextures[0].source->Upload(texture_source_env, device))
+        {
+            result.textures[0]       = texture;
+            result.rects[0]          = mTextures[0].rect;
+            result.sampler_names[0]  = mSamplerName[0];
+            result.rect_names[0]     = mRectUniformName[0];
+            result.blend_coefficient = 0;
+        } else  return false;
+    }
     return true;
 }
 
-void SpriteMap::IntoJson(data::Writer& data) const
+void TextureMap::IntoJson(data::Writer& data) const
 {
-    data.Write("fps", mFps);
+    data.Write("type",          mType);
+    data.Write("fps",           mFps);
     data.Write("sampler_name0", mSamplerName[0]);
     data.Write("sampler_name1", mSamplerName[1]);
-    data.Write("rect_name0", mRectUniformName[0]);
-    data.Write("rect_name1", mRectUniformName[1]);
-    data.Write("looping", mLooping);
-
-    for (const auto& sprite : mSprites)
+    data.Write("rect_name0",    mRectUniformName[0]);
+    data.Write("rect_name1",    mRectUniformName[1]);
+    data.Write("looping",       mLooping);
+    for (const auto& texture : mTextures)
     {
         auto chunk = data.NewWriteChunk();
-        if (sprite.source)
-            sprite.source->IntoJson(*chunk);
+        if (texture.source)
+            texture.source->IntoJson(*chunk);
         ASSERT(!chunk->HasValue("type"));
         ASSERT(!chunk->HasValue("box"));
-        chunk->Write("type", sprite.source->GetSourceType());
-        chunk->Write("rect",  sprite.rect);
+        chunk->Write("type",  texture.source->GetSourceType());
+        chunk->Write("rect",  texture.rect);
         data.AppendChunk("textures", std::move(chunk));
     }
 }
-bool SpriteMap::FromJson(const data::Reader& data)
+
+bool TextureMap::FromJson(const data::Reader& data)
 {
     bool ok = true;
+    ok &= data.Read("type",          &mType);
     ok &= data.Read("fps",           &mFps);
     ok &= data.Read("sampler_name0", &mSamplerName[0]);
     ok &= data.Read("sampler_name1", &mSamplerName[1]);
@@ -756,88 +679,23 @@ bool SpriteMap::FromJson(const data::Reader& data)
                 source = std::make_unique<detail::TextureTextureSource>();
             else BUG("Unhandled texture source type.");
 
-            Sprite sprite;
+            Texture texture;
             ok &= source->FromJson(*chunk);
-            ok &= chunk->Read("rect", &sprite.rect);
-            sprite.source = std::move(source);
-            mSprites.push_back(std::move(sprite));
+            ok &= chunk->Read("rect", &texture.rect);
+            texture.source = std::move(source);
+            mTextures.push_back(std::move(texture));
         }
     }
     return ok;
 }
 
-SpriteMap& SpriteMap::operator=(const SpriteMap& other)
-{
-    if (this == &other)
-        return *this;
-    SpriteMap tmp(other, true);
-    std::swap(mFps,     tmp.mFps);
-    std::swap(mSprites, tmp.mSprites);
-    std::swap(mSamplerName[0], tmp.mSamplerName[0]);
-    std::swap(mSamplerName[1], tmp.mSamplerName[1]);
-    std::swap(mRectUniformName[0], tmp.mRectUniformName[0]);
-    std::swap(mRectUniformName[1], tmp.mRectUniformName[1]);
-    std::swap(mLooping, tmp.mLooping);
-    return *this;
-}
-
-TextureMap2D::TextureMap2D(const TextureMap2D& other, bool copy)
-{
-    if (other.mSource)
-        mSource = copy ? other.mSource->Copy() : other.mSource->Clone();
-    mRect = other.mRect;
-    mSamplerName = other.mSamplerName;
-    mRectUniformName = other.mRectUniformName;
-}
-
-std::size_t TextureMap2D::GetHash() const
-{
-    size_t hash = 0;
-    hash = base::hash_combine(hash, mRect);
-    hash = base::hash_combine(hash, mSamplerName);
-    hash = base::hash_combine(hash, mRectUniformName);
-    hash = base::hash_combine(hash, mSource ? mSource->GetHash() : 0);
-    return hash;
-}
-bool TextureMap2D::BindTextures(const BindingState& state, Device& device, BoundState& result) const
-{
-    if (!mSource)
-        return false;
-
-    TextureSource::Environment texture_source_env;
-    texture_source_env.dynamic_content = state.dynamic_content;
-
-    if (auto* texture = mSource->Upload(texture_source_env, device))
-    {
-        result.textures[0]       = texture;
-        result.rects[0]          = mRect;
-        result.sampler_names[0]  = mSamplerName;
-        result.rect_names[0]     = mRectUniformName;
-        result.blend_coefficient = 0;
-        return true;
-    }
-    return false;
-}
-void TextureMap2D::IntoJson(data::Writer& data) const
-{
-    data.Write("rect", mRect);
-    data.Write("sampler_name", mSamplerName);
-    data.Write("rect_name", mRectUniformName);
-    if  (mSource)
-    {
-        auto chunk = data.NewWriteChunk();
-        mSource->IntoJson(*chunk);
-        ASSERT(!chunk->HasValue("type"));
-        chunk->Write("type", mSource->GetSourceType());
-        data.Write("texture", std::move(chunk));
-    }
-}
-bool TextureMap2D::FromJson(const data::Reader& data)
+bool TextureMap::FromLegacyJsonTexture2D(const data::Reader& data)
 {
     bool ok = true;
-    ok &= data.Read("rect",         &mRect);
-    ok &= data.Read("sampler_name", &mSamplerName);
-    ok &= data.Read("rect_name",    &mRectUniformName);
+    FRect rect;
+    ok &= data.Read("rect",         &rect);
+    ok &= data.Read("sampler_name", &mSamplerName[0]);
+    ok &= data.Read("rect_name",    &mRectUniformName[0]);
 
     const auto& texture = data.GetReadChunk("texture");
     if (!texture)
@@ -862,67 +720,112 @@ bool TextureMap2D::FromJson(const data::Reader& data)
 
     if (!source->FromJson(*texture))
         return false;
-    mSource = std::move(source);
+
+    if (mTextures.empty())
+        mTextures.resize(1);
+    mTextures[0].source = std::move(source);
+    mTextures[0].rect   = rect;
     return ok;
 }
 
-TextureSource* TextureMap2D::FindTextureSourceById(const std::string& id)
+
+TextureSource* TextureMap::FindTextureSourceById(const std::string& id)
 {
-    if (mSource && mSource->GetId() == id)
-        return mSource.get();
-    return nullptr;
-}
-TextureSource* TextureMap2D::FindTextureSourceByName(const std::string& name)
-{
-    if (mSource && mSource->GetName() == name)
-        return mSource.get();
-    return nullptr;
-}
-const TextureSource* TextureMap2D::FindTextureSourceById(const std::string& id) const
-{
-    if (mSource && mSource->GetId() == id)
-        return mSource.get();
-    return nullptr;
-}
-const TextureSource* TextureMap2D::FindTextureSourceByName(const std::string& name) const
-{
-    if (mSource && mSource->GetName() == name)
-        return mSource.get();
+    for (size_t i=0; i<GetNumTextures(); ++i)
+    {
+        auto* source = GetTextureSource(i);
+        if (source->GetId() == id)
+            return source;
+    }
     return nullptr;
 }
 
-bool TextureMap2D::FindTextureRect(const TextureSource* source, FRect* rect) const
+TextureSource* TextureMap::FindTextureSourceByName(const std::string& name)
 {
-    if (mSource.get() != source)
-        return false;
-    *rect = mRect;
-    return true;
+    for (size_t i=0; i<GetNumTextures(); ++i)
+    {
+        auto* source = GetTextureSource(i);
+        if (source->GetName() == name)
+            return source;
+    }
+    return nullptr;
 }
 
-bool TextureMap2D::SetTextureRect(const TextureSource* source, const FRect& rect)
+const TextureSource* TextureMap::FindTextureSourceById(const std::string& id) const
 {
-    if (mSource.get() != source)
-        return false;
-    mRect = rect;
-    return true;
-}
-bool TextureMap2D::DeleteTexture(const TextureSource* source)
-{
-    if (mSource.get() != source)
-        return false;
-    mSource.reset();
-    return true;
+    for (size_t i=0; i<GetNumTextures(); ++i)
+    {
+        auto* source = GetTextureSource(i);
+        if (source->GetId() == id)
+            return source;
+    }
+    return nullptr;
 }
 
-TextureMap2D& TextureMap2D::operator=(const TextureMap2D& other)
+const TextureSource* TextureMap::FindTextureSourceByName(const std::string& name) const
+{
+    for (size_t i=0; i<GetNumTextures(); ++i)
+    {
+        auto* source = GetTextureSource(i);
+        if (source->GetName() == name)
+            return source;
+    }
+    return nullptr;
+}
+
+bool TextureMap::DeleteTextureById(const std::string& id)
+{
+    for (size_t i=0; i<GetNumTextures(); ++i)
+    {
+        auto* src = GetTextureSource(i);
+        if (src->GetId() == id)
+        {
+            DeleteTexture(i);
+            return true;
+        }
+    }
+    return false;
+}
+
+TextureMap* TextureMap::AsSpriteMap()
+{
+    if (mType == Type::Sprite)
+        return this;
+    return nullptr;
+}
+TextureMap* TextureMap::AsTextureMap2D()
+{
+    if (mType == Type::Texture2D)
+        return this;
+    return nullptr;
+}
+
+const TextureMap* TextureMap::AsSpriteMap() const
+{
+    if (mType == Type::Sprite)
+        return this;
+    return nullptr;
+}
+const TextureMap* TextureMap::AsTextureMap2D() const
+{
+    if (mType == Type::Texture2D)
+        return this;
+    return nullptr;
+}
+
+TextureMap& TextureMap::operator=(const TextureMap& other)
 {
     if (this == &other)
         return *this;
-    TextureMap2D tmp(other, true);
-    std::swap(mSource, tmp.mSource);
-    std::swap(mRect,   tmp.mRect);
-    std::swap(mRectUniformName, tmp.mRectUniformName);
-    std::swap(mSamplerName, tmp.mSamplerName);
+    TextureMap tmp(other, true);
+    std::swap(mType,               tmp.mType);
+    std::swap(mFps,                tmp.mFps);
+    std::swap(mTextures,           tmp.mTextures);
+    std::swap(mSamplerName[0],     tmp.mSamplerName[0]);
+    std::swap(mSamplerName[1],     tmp.mSamplerName[1]);
+    std::swap(mRectUniformName[0], tmp.mRectUniformName[0]);
+    std::swap(mRectUniformName[1], tmp.mRectUniformName[1]);
+    std::swap(mLooping,            tmp.mLooping);
     return *this;
 }
 
@@ -1785,7 +1688,7 @@ void main()
 }
 std::size_t TextureMap2DClass::GetHash() const
 {
-    size_t hash = 0;
+    size_t hash = mTexture.GetHash();
     hash = base::hash_combine(hash, mClassId);
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mSurfaceType);
@@ -1801,7 +1704,6 @@ std::size_t TextureMap2DClass::GetHash() const
     hash = base::hash_combine(hash, mWrapY);
     hash = base::hash_combine(hash, mParticleAction);
     hash = base::hash_combine(hash, mFlags);
-    hash = base::hash_combine(hash, mTexture.GetHash());
     return hash;
 }
 std::string TextureMap2DClass::GetProgramId(const State& state) const
@@ -1919,7 +1821,9 @@ void TextureMap2DClass::IntoJson(data::Writer& data) const
     data.Write("texture_rotation",   mTextureRotation);
     data.Write("particle_action",    mParticleAction);
     data.Write("flags",              mFlags);
-    mTexture.IntoJson(data);
+    auto chunk = data.NewWriteChunk();
+    mTexture.IntoJson(*chunk);
+    data.Write("texture_map", std::move(chunk));
 }
 
 bool TextureMap2DClass::FromJson(const data::Reader& data)
@@ -1940,19 +1844,33 @@ bool TextureMap2DClass::FromJson(const data::Reader& data)
     ok &= data.Read("texture_rotation",   &mTextureRotation);
     ok &= data.Read("particle_action",    &mParticleAction);
     ok &= data.Read("flags",              &mFlags);
-    ok &= mTexture.FromJson(data);
+
+    mTexture.ResetTextures();
+
+    if (data.HasChunk("texture_map"))
+    {
+        const auto& chunk = data.GetReadChunk("texture_map");
+        ok &= mTexture.FromJson(*chunk);
+    }
+    else
+    {
+        ok &= mTexture.FromLegacyJsonTexture2D(data);
+    }
+    if (mTexture.GetNumTextures() != 1)
+        mTexture.SetNumTextures(1);
     return ok;
 }
 
 void TextureMap2DClass::BeginPacking(TexturePacker* packer) const
 {
-    auto* source = mTexture.GetTextureSource();
-    if (!source) return;
+    auto* source = mTexture.GetTextureSource(0);
+    if (!source)
+        return;
 
     source->BeginPacking(packer);
 
     const TexturePacker::ObjectHandle handle = source;
-    packer->SetTextureBox(handle, mTexture.GetTextureRect());
+    packer->SetTextureBox(handle, mTexture.GetTextureRect(0));
 
     // when texture rects are used to address a sub rect within the
     // texture wrapping on texture coordinates must be done "manually"
@@ -1964,7 +1882,7 @@ void TextureMap2DClass::BeginPacking(TexturePacker* packer) const
     // is done depending on the current filter being used.
     bool can_combine = true;
 
-    const auto& rect = mTexture.GetTextureRect();
+    const auto& rect = mTexture.GetTextureRect(0);
     const auto x = rect.GetX();
     const auto y = rect.GetY();
     const auto w = rect.GetWidth();
@@ -2003,12 +1921,13 @@ void TextureMap2DClass::BeginPacking(TexturePacker* packer) const
 }
 void TextureMap2DClass::FinishPacking(const TexturePacker* packer)
 {
-    auto* source = mTexture.GetTextureSource();
-    if (!source) return;
+    auto* source = mTexture.GetTextureSource(0);
+    if (!source)
+        return;
 
     const TexturePacker::ObjectHandle handle = source;
     source->FinishPacking(packer);
-    mTexture.SetTextureRect(packer->GetPackedTextureBox(handle));
+    mTexture.SetTextureRect(0, packer->GetPackedTextureBox(handle));
 }
 
 TextureMap2DClass& TextureMap2DClass::operator=(const TextureMap2DClass& other)
@@ -2102,8 +2021,12 @@ gfx::FRect CustomMaterialClass::FindTextureSourceRect(const TextureSource* sourc
     for (const auto& pair : mTextureMaps)
     {
         const auto& map = pair.second;
-        if (map->FindTextureRect(source, &rect))
-            return rect;
+        for (size_t i=0; i<map->GetNumTextures(); ++i)
+        {
+            const auto& src = map->GetTextureSource(i);
+            if (src == source)
+                return map->GetTextureRect(i);
+        }
     }
     return rect;
 }
@@ -2113,8 +2036,15 @@ void CustomMaterialClass::SetTextureSourceRect(const TextureSource* source, cons
     for (auto& pair : mTextureMaps)
     {
         auto& map = pair.second;
-        if (map->SetTextureRect(source, rect))
-            return;
+        for (size_t i=0; i<map->GetNumTextures(); ++i)
+        {
+            const auto* src = map->GetTextureSource(i);
+            if (src == source)
+            {
+                map->SetTextureRect(i, rect);
+                return;
+            }
+        }
     }
 }
 
@@ -2123,8 +2053,15 @@ void CustomMaterialClass::DeleteTextureSource(const TextureSource* source)
     for (auto& pair : mTextureMaps)
     {
         auto& map = pair.second;
-        if (map->DeleteTexture(source))
-            return;
+        for (size_t i=0; i<map->GetNumTextures(); ++i)
+        {
+            const auto* src = map->GetTextureSource(i);
+            if (src == source)
+            {
+                map->DeleteTexture(i);
+                return;
+            }
+        }
     }
 }
 
@@ -2301,7 +2238,7 @@ void CustomMaterialClass::ApplyStaticState(const State& state, Device& device, P
 }
 void CustomMaterialClass::IntoJson(data::Writer& data) const
 {
-    data.Write("type",  Type::Custom);
+    data.Write("type",       Type::Custom);
     data.Write("id",          mClassId);
     data.Write("name",        mName);
     data.Write("shader_uri",  mShaderUri);
@@ -2342,9 +2279,9 @@ void CustomMaterialClass::IntoJson(data::Writer& data) const
         auto chunk = data.NewWriteChunk();
         map->IntoJson(*chunk);
         ASSERT(chunk->HasValue("name") == false);
-        ASSERT(chunk->HasValue("type") == false);
+        ASSERT(chunk->HasValue("type")); // moved into TextureMap::IntoJson
         chunk->Write("name", key);
-        chunk->Write("type", map->GetType());
+        //chunk->Write("type", map->GetType());
         data.AppendChunk("texture_maps", std::move(chunk));
     }
 }
@@ -2387,7 +2324,16 @@ bool CustomMaterialClass::FromJson(const data::Reader& data)
                 map.reset(new SpriteMap);
             else BUG("Unhandled texture map type.");
 
-            ok &= map->FromJson(*chunk);
+            if (type == TextureMap::Type::Texture2D)
+            {
+                if (!chunk->HasValue("sampler_name0"))
+                    ok &= map->FromLegacyJsonTexture2D(*chunk);
+                else ok &= map->FromJson(*chunk);
+            }
+            else
+            {
+                ok &= map->FromJson(*chunk);
+            }
             mTextureMaps[name] = std::move(map);
         } else ok = false;
     }
@@ -2400,24 +2346,13 @@ void CustomMaterialClass::BeginPacking(TexturePacker* packer) const
     for (const auto& pair : mTextureMaps)
     {
         auto& map = pair.second;
-        if (auto* sprite = map->AsSpriteMap())
+        for (size_t i=0; i<map->GetNumTextures(); ++i)
         {
-            for (size_t i=0; i<sprite->GetNumTextures(); ++i)
-            {
-                const auto& rect   = sprite->GetTextureRect(i);
-                const auto* source = sprite->GetTextureSource(i);
-                const TexturePacker::ObjectHandle handle = source;
-                source->BeginPacking(packer);
-                packer->SetTextureBox(handle, rect);
-            }
-        }
-        else if (auto* texture = map->AsTextureMap2D())
-        {
-            if (auto* source = texture->GetTextureSource())
-            {
-                source->BeginPacking(packer);
-                packer->SetTextureBox(source, texture->GetTextureRect());
-            }
+            const auto& rect   = map->GetTextureRect(i);
+            const auto* source = map->GetTextureSource(i);
+            const TexturePacker::ObjectHandle handle = source;
+            source->BeginPacking(packer);
+            packer->SetTextureBox(handle, rect);
         }
     }
 }
@@ -2426,23 +2361,11 @@ void CustomMaterialClass::FinishPacking(const TexturePacker* packer)
     for (auto& pair : mTextureMaps)
     {
         auto& map = pair.second;
-        if (auto* sprite = map->AsSpriteMap())
+        for (size_t i=0; i<map->GetNumTextures(); ++i)
         {
-            for (size_t i=0; i<sprite->GetNumTextures(); ++i)
-            {
-                auto* source = sprite->GetTextureSource(i);
-                source->FinishPacking(packer);
-                sprite->SetTextureRect(i, packer->GetPackedTextureBox(source));
-            }
-        }
-        else if (auto* texture = map->AsTextureMap2D())
-        {
-            auto* source = texture->GetTextureSource();
-            if (source)
-            {
-                source->FinishPacking(packer);
-                texture->SetTextureRect(packer->GetPackedTextureBox(source));
-            }
+            auto* source = map->GetTextureSource(i);
+            source->FinishPacking(packer);
+            map->SetTextureRect(i, packer->GetPackedTextureBox(source));
         }
     }
 }

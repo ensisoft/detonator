@@ -1626,10 +1626,11 @@ void unit_test_export_import_basic()
         texture_source.SetName("test-texture");
 
         gfx::TextureMap2D texture;
+        texture.SetNumTextures(1);
         texture.SetSamplerName("kTexture");
         texture.SetRectUniformName("kTextureRect");
-        texture.SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
-        texture.SetTexture(texture_source.Copy());
+        texture.SetTextureRect(0, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+        texture.SetTextureSource(0, texture_source.Copy());
 
         gfx::CustomMaterialClass material;
         material.SetTextureMap("texture", std::move(texture));

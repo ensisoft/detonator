@@ -547,7 +547,8 @@ constexpr auto json = R"(
         tex->SetName("Noise");
 
         gfx::TextureMap2D map;
-        map.SetTexture(std::move(tex));
+        map.SetNumTextures(1);
+        map.SetTextureSource(0, std::move(tex));
         map.SetRectUniformName("kNoiseRect");
         map.SetSamplerName("kNoise");
         custom->SetShaderUri(app::ToUtf8(glsl_uri));
@@ -883,8 +884,7 @@ void MaterialWidget::AddNewTextureMapFromFile()
             auto source = std::make_unique<gfx::detail::TextureFileSource>(app::ToUtf8(file));
 
             source->SetName(app::ToUtf8(name));
-            sprite->AddTexture(std::move(source));
-            sprite->SetTextureRect(0,gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+            sprite->AddTexture(std::move(source), gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
         }
     }
     else if (auto* custom = mMaterial->AsCustom())
@@ -904,8 +904,9 @@ void MaterialWidget::AddNewTextureMapFromFile()
             auto source = std::make_unique<gfx::detail::TextureFileSource>(app::ToUtf8(file));
 
             source->SetName(app::ToUtf8(name));
-            texture->SetTexture(std::move(source));
-            texture->SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+            texture->SetNumTextures(1);
+            texture->SetTextureSource(0, std::move(source));
+            texture->SetTextureRect(0, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
         }
         else if (auto* sprite = map->AsSpriteMap())
         {
@@ -922,8 +923,10 @@ void MaterialWidget::AddNewTextureMapFromFile()
                 auto source = std::make_unique<gfx::detail::TextureFileSource>(app::ToUtf8(file));
 
                 source->SetName(app::ToUtf8(name));
-                sprite->AddTexture(std::move(source));
-                sprite->SetTextureRect(size_t(0), gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+                auto textures = sprite->GetNumTextures();
+                sprite->SetNumTextures(textures + 1);
+                sprite->SetTextureSource(textures, std::move(source));
+                sprite->SetTextureRect(textures, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
             }
         }
     }
@@ -956,11 +959,17 @@ void MaterialWidget::AddNewTextureMapFromText()
         auto* widget = qobject_cast<Sampler*>(sender());
         auto* map = custom->FindTextureMap(app::ToUtf8(widget->GetName()));
         if (auto* texture = map->AsTextureMap2D())
-            texture->SetTexture(std::move(source));
+        {
+            texture->SetNumTextures(1);
+            texture->SetTextureSource(0, std::move(source));
+        }
         else if (auto* sprite = map->AsSpriteMap())
-            sprite->AddTexture(std::move(source));
+        {
+            auto textures = sprite->GetNumTextures();
+            sprite->SetNumTextures(textures + 1);
+            sprite->SetTextureSource(textures, std::move(source));
+        }
     }
-
     GetMaterialProperties();
 }
 void MaterialWidget::AddNewTextureMapFromBitmap()
@@ -985,9 +994,16 @@ void MaterialWidget::AddNewTextureMapFromBitmap()
         auto* widget = qobject_cast<Sampler*>(sender());
         auto* map = custom->FindTextureMap(app::ToUtf8(widget->GetName()));
         if (auto* texture = map->AsTextureMap2D())
-            texture->SetTexture(std::move(source));
+        {
+            texture->SetNumTextures(1);
+            texture->SetTextureSource(0, std::move(source));
+        }
         else if (auto* sprite = map->AsSpriteMap())
-            sprite->AddTexture(std::move(source));
+        {
+            auto textures = sprite->GetNumTextures();
+            sprite->SetNumTextures(textures + 1);
+            sprite->SetTextureSource(textures, std::move(source));
+        }
     }
 
     GetMaterialProperties();
@@ -1581,7 +1597,7 @@ void MaterialWidget::GetMaterialProperties()
             }
             else if (const auto* texture = map->AsTextureMap2D())
             {
-                if (const auto* source = texture->GetTextureSource())
+                if (const auto* source = texture->GetTextureSource(0))
                 {
                     ResourceListItem item;
                     item.id   = app::FromUtf8(source->GetId());
@@ -1871,7 +1887,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
             const auto* map = custom->FindTextureMap(name);
             if (const auto* texture = map->AsTextureMap2D())
             {
-                if (!texture->GetTextureSource())
+                if (!texture->GetTextureSource(0))
                 {
                     message = base::FormatString("Texture map '%1' is not set.", name);
                     success = false;

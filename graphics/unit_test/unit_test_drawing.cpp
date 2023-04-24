@@ -1261,7 +1261,8 @@ void unit_test_material_textures_bind_fail()
     {
         gfx::CustomMaterialClass test;
         gfx::SpriteMap sprite;
-        sprite.AddTexture(gfx::LoadTextureFromFile("no-such-file.png"));
+        sprite.SetNumTextures(1);
+        sprite.SetTextureSource(0, gfx::LoadTextureFromFile("no-such-file.png"));
 
         test.SetTextureMap("huhu", sprite);
 
@@ -1432,11 +1433,13 @@ void unit_test_custom_textures()
         gfx::RgbBitmap bitmap;
         bitmap.Resize(10, 10);
 
-        gfx::TextureMap2D texture;
-        texture.SetTexture(gfx::CreateTextureFromBitmap(bitmap));
+        gfx::TextureMap texture;
+        texture.SetType(gfx::TextureMap::Type::Texture2D);
+        texture.SetNumTextures(1);
+        texture.SetTextureSource(0, gfx::CreateTextureFromBitmap(bitmap));
+        texture.SetTextureRect(0, gfx::FRect(0.5f, 0.6f, 0.7f, 0.8f));
         texture.SetSamplerName("kFoobar");
         texture.SetRectUniformName("kFoobarRect");
-        texture.SetTextureRect(gfx::FRect(0.5f, 0.6f, 0.7f, 0.8f));
         klass.SetTextureMap("texture", texture);
     }
 
@@ -1445,16 +1448,18 @@ void unit_test_custom_textures()
         frame0.Resize(20, 20);
         frame1.Resize(30, 30);
 
-        gfx::SpriteMap sprite;
+        gfx::TextureMap sprite;
+        sprite.SetType(gfx::TextureMap::Type::Sprite);
         sprite.SetFps(10.0f);
-        sprite.AddTexture(gfx::CreateTextureFromBitmap(frame0));
-        sprite.AddTexture(gfx::CreateTextureFromBitmap(frame1));
+        sprite.SetNumTextures(2);
+        sprite.SetTextureSource(0, gfx::CreateTextureFromBitmap(frame0));
+        sprite.SetTextureSource(1, gfx::CreateTextureFromBitmap(frame1));
+        sprite.SetTextureRect(size_t(0), gfx::FRect(1.0f, 2.0f, 3.0f, 4.0f));
+        sprite.SetTextureRect(size_t(1), gfx::FRect(4.0f, 3.0f, 2.0f, 1.0f));
         sprite.SetSamplerName("kTexture0", 0);
         sprite.SetSamplerName("kTexture1", 1);
         sprite.SetRectUniformName("kTextureRect0", 0);
         sprite.SetRectUniformName("kTextureRect1", 1);
-        sprite.SetTextureRect(size_t(0), gfx::FRect(1.0f, 2.0f, 3.0f, 4.0f));
-        sprite.SetTextureRect(size_t(1), gfx::FRect(4.0f, 3.0f, 2.0f, 1.0f));
         klass.SetTextureMap("sprite", sprite);
     }
 
