@@ -1639,18 +1639,16 @@ void EntityWidget::on_btnResetScript_clicked()
 
 void EntityWidget::on_btnEditAnimator_clicked()
 {
-    if (!mAnimator)
-    {
-        const auto& animator = mState.entity->GetAnimator(0);
+    if (mState.entity->GetNumAnimators() == 0)
+        return;
+    const auto& animator = mState.entity->GetAnimator(0);
 
-        QVariantMap props;
-        if (const auto* ptr = base::SafeFind(mAnimatorProperties, animator.GetId()))
-            props = *ptr;
-        mAnimator = std::make_unique<DlgAnimator>(nullptr, *mState.entity, animator, props);
-        mAnimator->SetEntityWidget(this);
-    }
-    mAnimator->show();
-    mAnimator->activateWindow();
+    QVariantMap props;
+    if (const auto* ptr = base::SafeFind(mAnimatorProperties, animator.GetId()))
+        props = *ptr;
+    DlgAnimator dlg(this, *mState.entity, animator, props);
+    dlg.SetEntityWidget(this);
+    dlg.exec();
 }
 
 void EntityWidget::on_btnViewPlus90_clicked()
@@ -2598,15 +2596,12 @@ void EntityWidget::on_animator_toggled(bool on)
 {
     if (on)
     {
-        ASSERT(mAnimator == nullptr);
         game::AnimatorClass animator;
         animator.SetName("My Animator");
         mState.entity->AddAnimator(std::move(animator));
     }
     else
     {
-        if (mAnimator)
-            mAnimator.reset();
         ASSERT(mState.entity->GetNumAnimators() == 1);
         mState.entity->DeleteAnimator(0);
     }
