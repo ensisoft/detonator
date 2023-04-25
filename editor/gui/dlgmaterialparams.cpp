@@ -85,9 +85,9 @@ DlgMaterialParams::DlgMaterialParams(QWidget* parent, game::DrawableItemClass* i
 
 void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gfx::MaterialClass* material)
 {
-    if (auto* builtin = material->AsBuiltIn())
+    if (material->GetType() != gfx::MaterialClass::Type::Custom)
     {
-        if (builtin->IsStatic())
+        if (material->IsStatic())
         {
             SetVisible(mUI.grpMessage,     true);
             SetVisible(mUI.builtInParams,  false);
@@ -96,7 +96,6 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
         }
         else
         {
-
             if (mActuator)
             {
                 if (mItem->HasMaterialParam("kGamma"))
@@ -173,13 +172,13 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
             }
         }
     }
-    else if(auto* custom = material->AsCustom())
+    else if(material->GetType() == gfx::MaterialClass::Type::Custom)
     {
         SetVisible(mUI.customUniforms, false);
 
         // try to load the .json file that should contain the meta information
         // about the shader input parameters.
-        auto uri = custom->GetShaderUri();
+        auto uri = material->GetShaderUri();
         if (uri.empty())
         {
             SetValue(mUI.lblMessage, "Material doesn't have shader (.glsl file) URI set.");
@@ -202,8 +201,6 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
             SetVisible(mUI.grpMessage, true);
             return;
         }
-
-
 
         mUI.customUniforms->setLayout(new QGridLayout);
         auto* layout = qobject_cast<QGridLayout*>(mUI.customUniforms->layout());

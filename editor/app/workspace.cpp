@@ -1353,20 +1353,21 @@ Workspace::Workspace(const QString& dir)
     // It is used as the initial material when user hasn't selected
     // anything or when the material referenced by some object is deleted
     // the material reference can be updated to Checkerboard.
-    auto checkerboard = gfx::CreateMaterialClassFromImage("app://textures/Checkerboard.png");
-    checkerboard.SetId("_checkerboard");
-    mResources.emplace_back(new MaterialResource(std::move(checkerboard), "Checkerboard"));
+    auto checkerboard = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Texture, std::string("_checkerboard"));
+    checkerboard->SetTexture(gfx::LoadTextureFromFile("app://textures/Checkerboard.png"));
+    checkerboard->SetName("Checkerboard");
+    mResources.emplace_back(new MaterialResource(checkerboard, "Checkerboard"));
 
     // add some primitive colors.
     constexpr auto& values = magic_enum::enum_values<gfx::Color>();
     for (const auto& val : values)
     {
         const std::string color_name(magic_enum::enum_name(val));
-        auto color = gfx::CreateMaterialClassFromColor(gfx::Color4f(val));
-        color.SetId("_" + color_name);
-        color.SetName("_" + color_name);
-        color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-        mResources.emplace_back(new MaterialResource(std::move(color), FromUtf8(color_name)));
+        auto color = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color, "_" + color_name);
+        color->SetBaseColor(val);
+        color->SetName("_" + color_name);
+        color->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+        mResources.emplace_back(new MaterialResource(color, color_name));
     }
 
     // setup primitive drawables with known/fixed class IDs
@@ -3104,7 +3105,7 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
             texture.SetFileName(ToUtf8(uri));
             texture.SetName(ToUtf8(name));
 
-            gfx::TextureMap2DClass klass;
+            gfx::TextureMap2DClass klass(gfx::MaterialClass::Type::Texture, base::RandomString(10));
             klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
             klass.SetTexture(texture.Copy());
             klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Default);

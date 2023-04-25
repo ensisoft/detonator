@@ -60,6 +60,8 @@
 #include "wdk/keys.h"
 #include "wdk/system.h"
 
+#include "base/snafu.h"
+
 #if defined(WINDOWS_OS)
 #  define OS_NAME "WIN32"
 #elif defined(LINUX_OS)

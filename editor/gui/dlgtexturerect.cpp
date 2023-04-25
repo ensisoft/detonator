@@ -71,7 +71,7 @@ DlgTextureRect::DlgTextureRect(QWidget* parent, app::Workspace* workspace,
         mWidth  = bitmap->GetWidth();
         mHeight = bitmap->GetHeight();
     }
-    gfx::TextureMap2DClass klass;
+    gfx::TextureMap2DClass klass(gfx::MaterialClass::Type::Texture);
     klass.SetTexture(std::move(texture));
     klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     mMaterial = gfx::CreateMaterialInstance(klass);

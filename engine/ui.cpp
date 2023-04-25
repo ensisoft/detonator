@@ -57,7 +57,7 @@ namespace detail {
 
 UIMaterial::MaterialClass UIGradient::GetClass(const ClassLibrary& classlib, const Loader& loader) const
 {
-    auto material = std::make_shared<gfx::GradientClass>();
+    auto material = std::make_shared<gfx::GradientClass>(gfx::MaterialClass::Type::Gradient);
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material->SetColor(mColorMap[0], ColorIndex::TopLeft);
     material->SetColor(mColorMap[1], ColorIndex::TopRight);
@@ -92,7 +92,7 @@ void UIGradient::IntoJson(nlohmann::json& json) const
 
 UIMaterial::MaterialClass UIColor::GetClass(const ClassLibrary& classlib, const Loader& loader) const
 {
-    auto material = std::make_shared<gfx::ColorClass>();
+    auto material = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color);
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material->SetBaseColor(mColor);
     material->SetName("UIColor");
@@ -140,7 +140,7 @@ bool UIMaterialReference::IsAvailable(const ClassLibrary& loader) const
 
 UIMaterial::MaterialClass UITexture::GetClass(const ClassLibrary& classlib, const Loader& loader) const
 {
-    auto material = std::make_shared<gfx::TextureMap2DClass>();
+    auto material = std::make_shared<gfx::TextureMap2DClass>(gfx::MaterialClass::Type::Texture);
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material->SetTexture(gfx::LoadTextureFromFile(mTextureUri));
     material->SetName("UITexture");

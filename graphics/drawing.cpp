@@ -35,7 +35,7 @@ gfx::MaterialClassInst MakeMaterial(const gfx::Color4f& color)
 {
     static std::shared_ptr<gfx::ColorClass> klass;
     if (!klass)
-        klass = std::make_shared<gfx::ColorClass>();
+        klass = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color);
 
     const auto alpha = color.Alpha();
     klass->SetBaseColor(color);

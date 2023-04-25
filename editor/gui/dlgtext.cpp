@@ -155,13 +155,14 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
     }
     if (mMaterial == nullptr)
     {
-        mClass = std::make_shared<gfx::TextureMap2DClass>();
+        mClass = std::make_shared<gfx::TextureMap2DClass>(gfx::MaterialClass::Type::Texture);
         mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         mClass->SetBaseColor(gfx::Color::White);
-        mClass->SetTexture(gfx::CreateTextureFromText(mText)).SetName("DlgTextTexture");
+        mClass->SetTexture(gfx::CreateTextureFromText(mText));
+        mClass->GetTextureMap(0)->GetTextureSource(0)->SetName("DlgTextTexture");
         mMaterial = gfx::CreateMaterialInstance(mClass);
     }
-    auto* source = mClass->AsTexture()->GetTextureSource();
+    auto* source = mClass->GetTextureMap(0)->GetTextureSource(0);
     auto* bitmap = dynamic_cast<gfx::detail::TextureTextBufferSource*>(source);
     bitmap->SetTextBuffer(mText);
 

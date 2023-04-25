@@ -34,11 +34,6 @@ namespace gfx
     class Loader;
     class Resource;
     class Framebuffer;
-    class TextureMap2DClass;
-    class ColorClass;
-    class GradientClass;
-    class SpriteClass;
-    class CustomMaterialClass;
     class BuiltInMaterialClass;
 
 } // namespace

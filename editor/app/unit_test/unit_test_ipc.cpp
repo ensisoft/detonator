@@ -108,7 +108,7 @@ void unit_test_ipc_send_recv()
         std::string id;
         std::size_t hash = 0;
         {
-            gfx::ColorClass test;
+            gfx::ColorClass test(gfx::MaterialClass::Type::Color);
             test.SetBaseColor(gfx::Color::DarkGreen);
             test.SetGamma(4.0f);
             test.SetName("foobar1234");
