@@ -779,6 +779,12 @@ void MaterialWidget::on_chkBlendFrames_stateChanged(int)
 { SetMaterialProperties(); }
 void MaterialWidget::on_chkLooping_stateChanged(int)
 { SetMaterialProperties(); }
+void MaterialWidget::on_spriteCols_valueChanged(int)
+{ SetMaterialProperties(); }
+void MaterialWidget::on_spriteRows_valueChanged(int)
+{ SetMaterialProperties(); }
+void MaterialWidget::on_spriteSheet_toggled(bool)
+{ SetMaterialProperties(); }
 void MaterialWidget::on_colorMap0_colorChanged(QColor)
 { SetMaterialProperties(); }
 void MaterialWidget::on_colorMap1_colorChanged(QColor)
@@ -1427,6 +1433,17 @@ void MaterialWidget::SetMaterialProperties()
         ptr->SetFps(GetValue(mUI.spriteFps));
         ptr->SetBlendFrames(GetValue(mUI.chkBlendFrames));
         ptr->SetLooping(GetValue(mUI.chkLooping));
+        if (GetValue(mUI.spriteSheet))
+        {
+            gfx::SpriteClass::SpriteSheet sheet;
+            sheet.cols = GetValue(mUI.spriteCols);
+            sheet.rows = GetValue(mUI.spriteRows);
+            ptr->SetSpriteSheet(sheet);
+        }
+        else
+        {
+            ptr->ResetSpriteSheet();
+        }
     }
 }
 
@@ -1443,6 +1460,7 @@ void MaterialWidget::GetMaterialProperties()
     SetEnabled(mUI.chkStaticInstance, false);
     SetEnabled(mUI.chkBlendFrames,    false);
     SetEnabled(mUI.chkLooping,        false);
+    SetEnabled(mUI.spriteSheet,       false);
     SetEnabled(mUI.gradientMap,       false);
     SetEnabled(mUI.textureCoords,     false);
     SetEnabled(mUI.textureFilters,    false);
@@ -1457,6 +1475,7 @@ void MaterialWidget::GetMaterialProperties()
     SetVisible(mUI.textureFilters,    false);
     SetVisible(mUI.customUniforms,    false);
     SetVisible(mUI.customSamplers,    false);
+    SetVisible(mUI.spriteSheet,       false);
 
     // hide built-in properties and then show only the ones that apply
     SetVisible(mUI.baseColor,         false);
@@ -1470,6 +1489,7 @@ void MaterialWidget::GetMaterialProperties()
     SetVisible(mUI.btnDelTextureMap,  false);
     SetVisible(mUI.btnAddTextureMap,  false);
     SetVisible(mUI.chkBlendFrames,    false);
+    SetVisible(mUI.chkLooping,        false);
 
     SetValue(mUI.materialType, mMaterial->GetType());
     SetValue(mUI.materialID, mMaterial->GetId());
@@ -1481,6 +1501,7 @@ void MaterialWidget::GetMaterialProperties()
     SetValue(mUI.chkBlendFrames, false);
     SetValue(mUI.chkStaticInstance, false);
     SetValue(mUI.chkBlendFrames,    false);
+    SetValue(mUI.spriteSheet,       false);
     SetValue(mUI.colorMap0, gfx::Color::White);
     SetValue(mUI.colorMap1, gfx::Color::White);
     SetValue(mUI.colorMap2, gfx::Color::White);
@@ -1621,7 +1642,6 @@ void MaterialWidget::GetMaterialProperties()
         SetVisible(mUI.baseColor,    true);
         SetVisible(mUI.lblBaseColor, true);
         SetValue(mUI.baseColor, ptr->GetBaseColor());
-
     }
     else if (auto* ptr = mMaterial->AsGradient())
     {
@@ -1638,7 +1658,6 @@ void MaterialWidget::GetMaterialProperties()
         SetValue(mUI.colorMap3, ptr->GetColor(gfx::GradientClass::ColorIndex::BottomRight));
         SetValue(mUI.gradientOffsetY, NormalizedFloat(offset.y));
         SetValue(mUI.gradientOffsetX, NormalizedFloat(offset.x));
-
     }
     else if (auto* ptr = mMaterial->AsTexture())
     {
@@ -1675,10 +1694,12 @@ void MaterialWidget::GetMaterialProperties()
         if (auto* source = ptr->GetTextureSource())
         {
             ResourceListItem item;
-            item.id   = app::FromUtf8(source->GetId());
-            item.name = app::FromUtf8(source->GetName());
+            item.id   = source->GetId();
+            item.name = source->GetName();
             textures.push_back(item);
-            SetValue(mUI.textureName, source->GetName());
+            if (const auto* ptr = dynamic_cast<const gfx::detail::TextureFileSource*>(source))
+                SetValue(mUI.textureName, ptr->GetFilename());
+            else SetValue(mUI.textureName, source->GetName());
             SetEnabled(mUI.btnDelTextureMap, true);
         }
         SetList(mUI.textures, textures);
@@ -1701,47 +1722,64 @@ void MaterialWidget::GetMaterialProperties()
         SetVisible(mUI.textureCoords,     true);
         SetVisible(mUI.textureFilters,    true);
         SetVisible(mUI.chkBlendFrames,    true);
-        SetVisible(mUI.chkLooping, true);
-        SetEnabled(mUI.baseColor,        true);
-        SetEnabled(mUI.spriteFps,        true);
-        SetEnabled(mUI.particleAction,   true);
-        SetEnabled(mUI.textureCoords,    true);
-        SetEnabled(mUI.textureFilters,   true);
-        SetEnabled(mUI.textureMaps,      true);
-        SetEnabled(mUI.chkBlendFrames,   true);
-        SetEnabled(mUI.chkLooping, true);
-        SetEnabled(mUI.btnAddTextureMap, true);
+        SetVisible(mUI.chkLooping,        true);
+        SetVisible(mUI.spriteSheet,       true);
+        SetEnabled(mUI.baseColor,         true);
+        SetEnabled(mUI.spriteFps,         true);
+        SetEnabled(mUI.particleAction,    true);
+        SetEnabled(mUI.textureCoords,     true);
+        SetEnabled(mUI.textureFilters,    true);
+        SetEnabled(mUI.textureMaps,       true);
+        SetEnabled(mUI.chkBlendFrames,    true);
+        SetEnabled(mUI.chkLooping,        true);
+        SetEnabled(mUI.btnAddTextureMap,  true);
+        SetEnabled(mUI.spriteSheet,       true);
 
-        SetValue(mUI.baseColor, ptr->GetBaseColor());
-        SetValue(mUI.minFilter, ptr->GetTextureMinFilter());
-        SetValue(mUI.magFilter, ptr->GetTextureMagFilter());
-        SetValue(mUI.scaleX,    ptr->GetTextureScaleX());
-        SetValue(mUI.scaleY,    ptr->GetTextureScaleY());
-        SetAngle(mUI.rotation,  ptr->GetTextureRotation());
-        SetValue(mUI.wrapX,     ptr->GetTextureWrapX());
-        SetValue(mUI.wrapY,     ptr->GetTextureWrapY());
-        SetValue(mUI.velocityX, ptr->GetTextureVelocityX());
-        SetValue(mUI.velocityY, ptr->GetTextureVelocityY());
-        SetValue(mUI.velocityZ, ptr->GetTextureVelocityZ());
-        SetValue(mUI.spriteFps, ptr->GetFps());
+        SetValue(mUI.baseColor,      ptr->GetBaseColor());
+        SetValue(mUI.minFilter,      ptr->GetTextureMinFilter());
+        SetValue(mUI.magFilter,      ptr->GetTextureMagFilter());
+        SetValue(mUI.scaleX,         ptr->GetTextureScaleX());
+        SetValue(mUI.scaleY,         ptr->GetTextureScaleY());
+        SetAngle(mUI.rotation,       ptr->GetTextureRotation());
+        SetValue(mUI.wrapX,          ptr->GetTextureWrapX());
+        SetValue(mUI.wrapY,          ptr->GetTextureWrapY());
+        SetValue(mUI.velocityX,      ptr->GetTextureVelocityX());
+        SetValue(mUI.velocityY,      ptr->GetTextureVelocityY());
+        SetValue(mUI.velocityZ,      ptr->GetTextureVelocityZ());
+        SetValue(mUI.spriteFps,      ptr->GetFps());
         SetValue(mUI.chkBlendFrames, ptr->GetBlendFrames());
-        SetValue(mUI.chkLooping, ptr->IsLooping());
+        SetValue(mUI.chkLooping,     ptr->IsLooping());
+        if (const auto* spritesheet = ptr->GetSpriteSheet())
+        {
+            SetValue(mUI.spriteSheet, true);
+            SetValue(mUI.spriteRows, spritesheet->rows);
+            SetValue(mUI.spriteCols, spritesheet->cols);
+        }
+        else
+        {
+            SetValue(mUI.spriteSheet, false);
+            SetValue(mUI.spriteRows, 1);
+            SetValue(mUI.spriteCols, 1);
+        }
 
         std::vector<ResourceListItem> textures;
         for (size_t i=0; i<ptr->GetNumTextures(); ++i)
         {
             const auto* source = ptr->GetTextureSource(i);
             ResourceListItem item;
-            item.id   = app::FromUtf8(source->GetId());
-            item.name = app::FromUtf8(source->GetName());
+            item.id   = source->GetId();
+            item.name = source->GetName();
             textures.push_back(item);
             SetEnabled(mUI.btnDelTextureMap, true);
+            if (const auto* ptr = dynamic_cast<const gfx::detail::TextureFileSource*>(source))
+                SetValue(mUI.textureName, ptr->GetFilename());
+            else SetValue(mUI.textureName, source->GetName());
         }
         SetList(mUI.textures, textures);
         if (!textures.empty() && mUI.textures->currentRow() == -1)
             mUI.textures->setCurrentRow(0);
 
-        if (!textures.empty())
+        if (textures.size() > 1)
             SetValue(mUI.textureName, QString("%1 texture(s)").arg(textures.size()));
 
         GetTextureProperties();
