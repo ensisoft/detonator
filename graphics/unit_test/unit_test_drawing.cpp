@@ -1261,10 +1261,10 @@ void unit_test_material_textures_bind_fail()
     {
         gfx::CustomMaterialClass test;
         gfx::SpriteMap sprite;
+        sprite.SetName("huhu");
         sprite.SetNumTextures(1);
         sprite.SetTextureSource(0, gfx::LoadTextureFromFile("no-such-file.png"));
-
-        test.SetTextureMap("huhu", sprite);
+        test.SetTextureMap(sprite);
 
         gfx::detail::GenericShaderPass pass;
         gfx::MaterialClass::State env;
@@ -1434,13 +1434,14 @@ void unit_test_custom_textures()
         bitmap.Resize(10, 10);
 
         gfx::TextureMap texture;
+        texture.SetName("texture");
         texture.SetType(gfx::TextureMap::Type::Texture2D);
         texture.SetNumTextures(1);
         texture.SetTextureSource(0, gfx::CreateTextureFromBitmap(bitmap));
         texture.SetTextureRect(0, gfx::FRect(0.5f, 0.6f, 0.7f, 0.8f));
         texture.SetSamplerName("kFoobar");
         texture.SetRectUniformName("kFoobarRect");
-        klass.SetTextureMap("texture", texture);
+        klass.SetTextureMap(texture);
     }
 
     {
@@ -1449,6 +1450,7 @@ void unit_test_custom_textures()
         frame1.Resize(30, 30);
 
         gfx::TextureMap sprite;
+        sprite.SetName("sprite");
         sprite.SetType(gfx::TextureMap::Type::Sprite);
         sprite.SetFps(10.0f);
         sprite.SetNumTextures(2);
@@ -1460,7 +1462,7 @@ void unit_test_custom_textures()
         sprite.SetSamplerName("kTexture1", 1);
         sprite.SetRectUniformName("kTextureRect0", 0);
         sprite.SetRectUniformName("kTextureRect1", 1);
-        klass.SetTextureMap("sprite", sprite);
+        klass.SetTextureMap(sprite);
     }
 
     TestDevice device;
@@ -1922,6 +1924,7 @@ void unit_test_packed_texture_bug()
     }
 }
 
+EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     unit_test_material_uniforms();
@@ -1939,3 +1942,4 @@ int test_main(int argc, char* argv[])
     unit_test_packed_texture_bug();
     return 0;
 }
+) // TEST_MAIN

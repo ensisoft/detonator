@@ -1626,6 +1626,7 @@ void unit_test_export_import_basic()
         texture_source.SetName("test-texture");
 
         gfx::TextureMap2D texture;
+        texture.SetName("texture");
         texture.SetNumTextures(1);
         texture.SetSamplerName("kTexture");
         texture.SetRectUniformName("kTextureRect");
@@ -1633,7 +1634,7 @@ void unit_test_export_import_basic()
         texture.SetTextureSource(0, texture_source.Copy());
 
         gfx::CustomMaterialClass material;
-        material.SetTextureMap("texture", std::move(texture));
+        material.SetTextureMap(std::move(texture));
         material.SetShaderUri(workspace.MapFileToWorkspace(std::string("TestWorkspace/shaders/es2/my_material.glsl")));
         app::MaterialResource material_resource(material, "material");
 

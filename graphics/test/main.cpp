@@ -2044,10 +2044,12 @@ void main() {
             map.SetNumTextures(1);
             map.SetTextureSource(0, gfx::LoadTextureFromFile("textures/alpha-cutout.png"));
             map.SetSamplerName("kTexture");
+            map.SetName("kTexture");
+
             gfx::CustomMaterialClass material;
             material.SetShaderSrc(src);
             material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-            material.SetTextureMap("kTexture", std::move(map));
+            material.SetTextureMap(std::move(map));
             material.SetTextureMagFilter(gfx::TextureMap2DClass::MagTextureFilter::Linear);
             mMaterialStraightAlpha = gfx::CreateMaterialInstance(material);
         }
@@ -2058,10 +2060,12 @@ void main() {
             map.SetNumTextures(1);
             map.SetTextureSource(0, std::move(tex));
             map.SetSamplerName("kTexture");
+            map.SetName("kTexture");
+
             gfx::CustomMaterialClass material;
             material.SetShaderSrc(src);
             material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-            material.SetTextureMap("kTexture", std::move(map));
+            material.SetTextureMap(std::move(map));
             material.SetTextureMagFilter(gfx::TextureMap2DClass::MagTextureFilter::Linear);
             material.SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, true);
             mMaterialPremultAlpha = gfx::CreateMaterialInstance(material);

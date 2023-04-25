@@ -578,7 +578,10 @@ namespace gfx
             unsigned rows = 0;
         };
 
-        TextureMap() = default;
+        TextureMap(std::string id = base::RandomString(10))
+          : mId(id)
+          , mName("Default")
+        {}
         TextureMap(const TextureMap& other, bool copy);
         TextureMap(const TextureMap& other) : TextureMap(other, true) {}
 
@@ -591,12 +594,18 @@ namespace gfx
         { return mLooping; }
         inline bool HasSpriteSheet() const noexcept
         { return mSpriteSheet.has_value(); }
+        inline std::string GetId() const noexcept
+        { return mId; }
+        inline std::string GetName() const noexcept
+        { return mName; }
 
         // Reset all texture objects. After this the texture map contains no textures.
         inline void ResetTextures() noexcept
         { mTextures.clear(); }
         inline void SetType(Type type) noexcept
         { mType = type; }
+        inline void SetName(std::string name) noexcept
+        { mName = std::move(name); }
         inline void SetNumTextures(size_t num)
         { mTextures.resize(num); }
         // Get the number of textures.
@@ -689,6 +698,9 @@ namespace gfx
 
         TextureMap& operator=(const TextureMap& other);
     private:
+        std::string mName;
+        std::string mId;
+
         Type mType = Type::Texture2D;
         float mFps = 0.0f;
         struct Texture {
@@ -843,6 +855,7 @@ namespace gfx
         virtual bool TestFlag(Flags flag) const = 0;
         // Set a material flag to on or off.
         virtual void SetFlag(Flags flag, bool on_off) = 0;
+
         // Helpers
         bool PremultipliedAlpha() const
         { return TestFlag(Flags::PremultipliedAlpha); }
@@ -1405,10 +1418,10 @@ namespace gfx
         { return mWrapX; }
         TextureWrapping GetTextureWrapY() const
         { return mWrapY; }
-        void SetTextureMap(const std::string& name, std::unique_ptr<TextureMap> map)
-        { mTextureMaps[name] = std::move(map); }
-        void SetTextureMap(const std::string& name, const TextureMap& map)
-        { mTextureMaps[name] = map.Copy(); }
+        void SetTextureMap(std::unique_ptr<TextureMap> map)
+        { mTextureMaps[map->GetName()] = std::move(map); }
+        void SetTextureMap(const TextureMap& map)
+        { mTextureMaps[map.GetName()] = map.Copy(); }
         void DeleteTextureMaps()
         { mTextureMaps.clear(); }
         void DeleteTextureMap(const std::string& name)

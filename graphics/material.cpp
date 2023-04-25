@@ -533,6 +533,8 @@ bool detail::TextureTextBufferSource::FromJson(const data::Reader& data)
 
 TextureMap::TextureMap(const TextureMap& other, bool copy)
 {
+    mId = copy ? other.mId : base::RandomString(10);
+    mName               = other.mName;
     mType               = other.mType;
     mFps                = other.mFps;
     mLooping            = other.mLooping;
@@ -554,6 +556,8 @@ TextureMap::TextureMap(const TextureMap& other, bool copy)
 size_t TextureMap::GetHash() const noexcept
 {
     size_t hash = 0;
+    hash = base::hash_combine(hash, mId);
+    hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mType);
     hash = base::hash_combine(hash, mFps);
     hash = base::hash_combine(hash, mSamplerName[0]);
@@ -665,6 +669,8 @@ bool TextureMap::BindTextures(const BindingState& state, Device& device, BoundSt
 
 void TextureMap::IntoJson(data::Writer& data) const
 {
+    data.Write("id",            mId);
+    data.Write("name",          mName);
     data.Write("type",          mType);
     data.Write("fps",           mFps);
     data.Write("sampler_name0", mSamplerName[0]);
@@ -694,6 +700,11 @@ void TextureMap::IntoJson(data::Writer& data) const
 bool TextureMap::FromJson(const data::Reader& data)
 {
     bool ok = true;
+    if (data.HasValue("id"))
+        ok &= data.Read("id", &mId);
+    if (data.HasValue("name"))
+        ok &= data.Read("name", &mName);
+
     ok &= data.Read("type",          &mType);
     ok &= data.Read("fps",           &mFps);
     ok &= data.Read("sampler_name0", &mSamplerName[0]);
@@ -880,6 +891,8 @@ TextureMap& TextureMap::operator=(const TextureMap& other)
     if (this == &other)
         return *this;
     TextureMap tmp(other, true);
+    std::swap(mId,                 tmp.mId);
+    std::swap(mName,               tmp.mName);
     std::swap(mType,               tmp.mType);
     std::swap(mFps,                tmp.mFps);
     std::swap(mTextures,           tmp.mTextures);
@@ -1478,7 +1491,10 @@ void SpriteClass::IntoJson(data::Writer& data) const
     data.Write("texture_rotation",   mTextureRotation);
     data.Write("particle_action",    mParticleAction);
     data.Write("flags",              mFlags);
-    mSprite.IntoJson(data);
+
+    auto chunk = data.NewWriteChunk();
+    mSprite.IntoJson(*chunk);
+    data.AppendChunk("sprites", std::move(chunk));
 }
 
 bool SpriteClass::FromJson(const data::Reader& data)
@@ -1500,7 +1516,17 @@ bool SpriteClass::FromJson(const data::Reader& data)
     ok &= data.Read("texture_rotation",   &mTextureRotation);
     ok &= data.Read("particle_action",    &mParticleAction);
     ok &= data.Read("flags",              &mFlags);
-    ok &= mSprite.FromJson(data);
+
+    if (data.GetNumChunks("sprites") == 0)
+    {
+        ok &= mSprite.FromJson(data);
+    }
+    else
+    {
+        const auto& chunk = data.GetReadChunk("sprites", 0);
+        ok &= mSprite.FromJson(*chunk);
+    }
+
     return ok;
 }
 
@@ -2341,9 +2367,10 @@ void CustomMaterialClass::IntoJson(data::Writer& data) const
         const auto& map = SafeFind(mTextureMaps, key);
         auto chunk = data.NewWriteChunk();
         map->IntoJson(*chunk);
-        ASSERT(chunk->HasValue("name") == false);
+        ASSERT(chunk->HasValue("name")); // moved into TextureMap::IntoJson
         ASSERT(chunk->HasValue("type")); // moved into TextureMap::IntoJson
-        chunk->Write("name", key);
+        ASSERT(map->GetName() == key);
+        //chunk->Write("name", key);
         //chunk->Write("type", map->GetType());
         data.AppendChunk("texture_maps", std::move(chunk));
     }
