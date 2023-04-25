@@ -1418,20 +1418,16 @@ namespace gfx
         { return mWrapX; }
         TextureWrapping GetTextureWrapY() const
         { return mWrapY; }
-        void SetTextureMap(std::unique_ptr<TextureMap> map)
-        { mTextureMaps[map->GetName()] = std::move(map); }
-        void SetTextureMap(const TextureMap& map)
-        { mTextureMaps[map.GetName()] = map.Copy(); }
+
         void DeleteTextureMaps()
         { mTextureMaps.clear(); }
-        void DeleteTextureMap(const std::string& name)
-        { mTextureMaps.erase(name); }
-        bool HasTextureMap(const std::string& name) const
-        { return base::SafeFind(mTextureMaps, name) != nullptr; }
-        TextureMap* FindTextureMap(const std::string& name)
-        { return base::SafeFind(mTextureMaps, name); }
-        const TextureMap* FindTextureMap(const std::string& name) const
-        { return base::SafeFind(mTextureMaps, name); }
+        void SetTextureMap(std::unique_ptr<TextureMap> map);
+        void SetTextureMap(const TextureMap& map);
+        void DeleteTextureMap(const std::string& name);
+        bool HasTextureMap(const std::string& name) const;
+        TextureMap* FindTextureMap(const std::string& name);
+        const TextureMap* FindTextureMap(const std::string& name) const;
+
         // helper functions to access the texture sources directly.
         TextureSource* FindTextureSourceById(const std::string& id);
         TextureSource* FindTextureSourceByName(const std::string& name);
@@ -1479,7 +1475,7 @@ namespace gfx
         MagTextureFilter mMagFilter = MagTextureFilter::Default;
         TextureWrapping mWrapX = TextureWrapping::Clamp;
         TextureWrapping mWrapY = TextureWrapping::Clamp;
-        std::unordered_map<std::string, std::unique_ptr<TextureMap>> mTextureMaps;
+        std::vector<std::unique_ptr<TextureMap>> mTextureMaps;
         base::bitflag<Flags> mFlags;
     };
 
