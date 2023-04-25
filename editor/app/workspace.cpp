@@ -143,7 +143,7 @@ bool LoadResources(const char* type,
             success = false;
         }
 
-        vector.push_back(std::make_unique<app::GameResource<ClassType>>(std::move(ret), app::FromUtf8(name)));
+        vector.push_back(std::make_unique<app::GameResource<ClassType>>(std::move(ret), name));
         DEBUG("Loaded workspace resource. [name='%1']", name);
     }
     return success;
@@ -176,9 +176,10 @@ bool LoadMaterials(const char* type,
         {
             WARN("Incomplete resource load from JSON. [type='%1', name='%2']", type, name);
             success = false;
+            continue;
         }
 
-        vector.push_back(std::make_unique<app::MaterialResource>(std::move(ret), app::FromUtf8(name)));
+        vector.push_back(std::make_unique<app::MaterialResource>(std::move(ret), name));
         DEBUG("Loaded workspace resource. [name='%1']", name);
     }
     return success;
