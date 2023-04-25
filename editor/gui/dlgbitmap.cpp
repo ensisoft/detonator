@@ -196,13 +196,13 @@ void DlgBitmap::PaintScene(gfx::Painter &painter, double secs)
 
     if (mMaterial == nullptr)
     {
-        mClass = std::make_shared<gfx::TextureMap2DClass>();
+        mClass = std::make_shared<gfx::TextureMap2DClass>(gfx::MaterialClass::Type::Texture);
         mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         mClass->SetBaseColor(gfx::Color::White);
         mClass->SetTexture(gfx::GenerateNoiseTexture(*mNoise));
         mMaterial = gfx::CreateMaterialInstance(mClass);
     }
-    auto* source = mClass->AsTexture()->GetTextureSource();
+    auto* source = mClass->GetTextureMap(0)->GetTextureSource(0);
     auto* bitmap = dynamic_cast<gfx::detail::TextureBitmapGeneratorSource*>(source);
     bitmap->SetGenerator(mGenerator->Clone());
 

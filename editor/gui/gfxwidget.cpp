@@ -249,7 +249,7 @@ void GfxWindow::paintGL()
         static std::shared_ptr<gfx::ColorClass> material;
         if (!material)
         {
-            material = std::make_shared<gfx::ColorClass>();
+            material = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color);
             // okay, so we've got a QWindow which means it doesn't get the normal
             // QWidget functionality out of the box. For example the Focus rectangle
             // doesn't simply just work.
@@ -275,7 +275,7 @@ void GfxWindow::paintGL()
         static std::shared_ptr<gfx::ColorClass> cursor_material;
         if (!cursor_material)
         {
-            cursor_material = std::make_shared<gfx::ColorClass>();
+            cursor_material = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color);
             cursor_material->SetBaseColor(gfx::Color::Silver);
         }
 

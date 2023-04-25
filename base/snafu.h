@@ -11,3 +11,4 @@
 #undef RGB
 #undef GetClassName
 #undef CopyFile
+#undef GetCurrentTime

@@ -473,7 +473,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
 
     // draw the polygon we're working on
     const auto alpha = GetValue(mUI.alpha);
-    static gfx::ColorClass color;
+    static gfx::ColorClass color(gfx::MaterialClass::Type::Color);
     color.SetBaseColor(gfx::Color4f(gfx::Color::LightGray, alpha));
     color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     painter.Draw(gfx::Polygon(mPolygon), view, gfx::MaterialClassInst(color));

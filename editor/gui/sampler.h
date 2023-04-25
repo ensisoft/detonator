@@ -24,6 +24,9 @@
 #  include <glm/glm.hpp>
 #include "warnpop.h"
 
+#include <string>
+
+#include "editor/app/types.h"
 #include "editor/gui/utility.h"
 #include "graphics/fwd.h"
 
@@ -56,12 +59,16 @@ namespace gui
         {
             SetVisible(mUI.chkLooping, on_off);
         }
-        void SetText(QString text)
+        void SetText(const app::AnyString& text)
         { SetValue(mUI.textureName, text); }
-        void SetName(QString name)
+        void SetName(const app::AnyString& name)
         { mName = name; }
-        QString GetName() const
+        void SetId(const app::AnyString& id)
+        { mId = id; }
+        app::AnyString GetName() const
         { return mName; }
+        app::AnyString GetId() const
+        { return mId; }
         float GetSpriteFps() const
         { return GetValue(mUI.spriteFps); }
         void SetSpriteFps(float fps)
@@ -82,6 +89,7 @@ namespace gui
     private:
         Ui::Sampler mUI;
     private:
-        QString mName;
+        app::AnyString mName;
+        app::AnyString mId;
     };
 } // namespace

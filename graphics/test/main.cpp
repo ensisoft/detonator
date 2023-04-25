@@ -320,7 +320,7 @@ public:
         transform.Resize(500, 500);
         transform.MoveTo(200, 200);
 
-        gfx::GradientClass material;
+        gfx::GradientClass material(gfx::MaterialClass::Type::Gradient);
         material.SetColor(gfx::Color::Yellow, gfx::GradientClass::ColorIndex::TopLeft);
         material.SetColor(gfx::Color::Yellow, gfx::GradientClass::ColorIndex::TopRight);
         material.SetColor(gfx::Color::Black,  gfx::GradientClass::ColorIndex::BottomLeft);
@@ -460,7 +460,7 @@ public:
     {
         // draw a gradient in the background
         {
-            gfx::GradientClass material;
+            gfx::GradientClass material(gfx::MaterialClass::Type::Gradient);
             material.SetColor(gfx::Color::Red,   gfx::GradientClass::ColorIndex::TopLeft);
             material.SetColor(gfx::Color::Green, gfx::GradientClass::ColorIndex::BottomLeft);
             material.SetColor(gfx::Color::Blue,  gfx::GradientClass::ColorIndex::BottomRight);
@@ -472,7 +472,7 @@ public:
         }
 
         {
-            gfx::TextureMap2DClass material;
+            gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
             material.SetTexture(gfx::LoadTextureFromFile("textures/Checkerboard.png"));
             gfx::Transform mask;
             mask.Resize(400, 400);
@@ -509,7 +509,7 @@ class TextureBlurTest : public GraphicsTest
 public:
     TextureBlurTest()
     {
-        gfx::TextureMap2DClass material;
+        gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
         material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
 
         {
@@ -589,7 +589,7 @@ class GradientTest : public GraphicsTest
 public:
     virtual void Render(gfx::Painter& painter) override
     {
-        gfx::GradientClass material;
+        gfx::GradientClass material(gfx::MaterialClass::Type::Gradient);
         material.SetColor(gfx::Color::Red,   gfx::GradientClass::ColorIndex::TopLeft);
         material.SetColor(gfx::Color::Green, gfx::GradientClass::ColorIndex::BottomLeft);
         material.SetColor(gfx::Color::Blue,  gfx::GradientClass::ColorIndex::BottomRight);
@@ -604,10 +604,10 @@ public:
         material.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::TopRight);
         gfx::FillRect(painter, gfx::FRect(500, 20, 400, 100), gfx::MaterialClassInst(material));
 
-        material.SetOffset(glm::vec2(0.75, 0.0f));
+        material.SetColorWeight(glm::vec2(0.75, 0.0f));
         gfx::FillRect(painter, gfx::FRect(500, 140, 400, 100), gfx::MaterialClassInst(material));
 
-        material.SetOffset(glm::vec2(0.25, 0.0f));
+        material.SetColorWeight(glm::vec2(0.25, 0.0f));
         gfx::FillRect(painter, gfx::FRect(500, 260, 400, 100), gfx::MaterialClassInst(material));
     }
     virtual std::string GetName() const override
@@ -622,9 +622,9 @@ public:
     {
         // whole texture (box = 1.0f)
         {
-            gfx::TextureMap2DClass material;
+            gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
             material.SetTexture(gfx::LoadTextureFromFile("textures/uv_test_512.png"));
-            material.SetTextureRect( gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+            material.SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
             gfx::FillRect(painter, gfx::FRect(0, 0, 128, 128), gfx::MaterialClassInst(material));
 
             material.SetTextureScaleX(2.0);
@@ -648,9 +648,9 @@ public:
         // todo: maybe just limit the box to 0.0, 1.0 range and dismiss this case ?
         {
             // clamp
-            gfx::TextureMap2DClass material;
+            gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
             material.SetTexture(gfx::LoadTextureFromFile("textures/uv_test_512.png"));
-            material.SetTextureRect(gfx::FRect(0.0, 0.0, 2.0, 1.0));
+            material.SetTextureRect(0, 0, gfx::FRect(0.0, 0.0, 2.0, 1.0));
             material.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
             material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
             gfx::FillRect(painter, gfx::FRect(0, 150, 128, 128), gfx::MaterialClassInst(material));
@@ -670,7 +670,7 @@ public:
         // texture box < 1.0
         {
             // basic case. sampling within the box.
-            gfx::TextureMap2DClass material;
+            gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
             material.SetTexture(gfx::LoadTextureFromFile("textures/uv_test_512.png"));
             material.SetTextureRect(gfx::FRect(0.5, 0.5, 0.5, 0.5));
             gfx::FillRect(painter, gfx::FRect(0, 300, 128, 128), gfx::MaterialClassInst(material));
@@ -719,7 +719,7 @@ public:
 
         // texture velocity + rotation
         {
-            gfx::TextureMap2DClass material;
+            gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
             material.SetTexture(gfx::LoadTextureFromFile("textures/uv_test_512.png"));
             material.SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
             material.SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
@@ -777,18 +777,18 @@ class SpriteTest : public GraphicsTest
 public:
     SpriteTest()
     {
-        mMaterial = std::make_shared<gfx::SpriteClass>();
+        mMaterial = std::make_shared<gfx::SpriteClass>(gfx::MaterialClass::Type::Sprite);
         mMaterial->SetSurfaceType(gfx::MaterialClass::SurfaceType::Opaque);
-        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-1.png")).SetName("frame-1.png");
-        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-2.png")).SetName("frame-2.png");
-        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-3.png")).SetName("frame-3.png");
-        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-4.png")).SetName("frame-4.png");
-        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-5.png")).SetName("frame-5.png");
-        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-6.png")).SetName("frame-6.png");
-        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-7.png")).SetName("frame-7.png");
-        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-8.png")).SetName("frame-8.png");
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-1.png"));
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-2.png"));
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-3.png"));
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-4.png"));
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-5.png"));
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-6.png"));
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-7.png"));
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/bird/frame-8.png"));
         mMaterial->SetBlendFrames(false);
-        mMaterial->SetFps(10.0f);
+        mMaterial->GetTextureMap(0)->SetFps(10.0f);
     }
 
     virtual void Render(gfx::Painter& painter) override
@@ -964,8 +964,9 @@ public:
 private:
     void SetRect(const gfx::FRect& rect)
     {
-        for (size_t i=0; i<mMaterial->GetNumTextures(); ++i)
-            mMaterial->SetTextureRect(i, rect);
+        auto* map = mMaterial->GetTextureMap(0);
+        for (size_t i=0; i<map->GetNumTextures(); ++i)
+            map->SetTextureRect(i, rect);
     }
 
 private:
@@ -978,9 +979,10 @@ class SpriteSheetTest : public GraphicsTest
 public:
     SpriteSheetTest()
     {
-        mMaterial = std::make_shared<gfx::SpriteClass>();
+        mMaterial = std::make_shared<gfx::SpriteClass>(gfx::MaterialClass::Type::Sprite);
         mMaterial->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/IdleSheet.png")).SetName("IdleSheet");
+        mMaterial->SetBlendFrames(false);
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/IdleSheet.png"));
         // the sheet has 32x32 pixel frames.
         // we're taking the idle animation from the middle of the sheet
         // with the character facing south.
@@ -993,15 +995,15 @@ public:
         rect.SetWidth(1.0f);
         rect.SetHeight(tile_height_px / img_height_px);
 
-        gfx::SpriteClass::SpriteSheet sheet;
+        gfx::TextureMap::SpriteSheet sheet;
         sheet.rows = 1;
         sheet.cols = 8;
 
-        mMaterial->SetTextureRect(0, rect);
-        mMaterial->SetSpriteSheet(sheet);
-        mMaterial->SetLooping(true);
-        mMaterial->SetBlendFrames(false);
-        mMaterial->SetFps(15.0f);
+        auto* map = mMaterial->GetTextureMap(0);
+        map->SetTextureRect(0, rect);
+        map->SetSpriteSheet(sheet);
+        map->SetLooping(true);
+        map->SetFps(15.0f);
     }
 
     virtual void Render(gfx::Painter& painter) override
@@ -1430,7 +1432,7 @@ public:
         model.Rotate(math::Pi);
         model.Translate(150 + 100, 150 + 300);
 
-        gfx::TextureMap2DClass material;
+        gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
         material.SetTexture(gfx::LoadTextureFromFile("textures/BlackSmoke.png"));
         material.SetBaseColor(gfx::Color4f(35, 35, 35, 20));
         material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
@@ -1854,7 +1856,7 @@ class sRGBColorGradientTest : public GraphicsTest
 public:
     virtual void Render(gfx::Painter& painter) override
     {
-        static gfx::CustomMaterialClass material;
+        static gfx::CustomMaterialClass material(gfx::MaterialClass::Type::Custom);
         material.SetShaderSrc(
                 R"(
 #version 100
@@ -1991,7 +1993,7 @@ public:
         }
 
         {
-            gfx::TextureMap2DClass material;
+            gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
             auto source = std::make_unique<gfx::detail::TextureFileSource>();
             source->SetFileName("textures/black-gray-white.png");
             source->SetColorSpace(gfx::TextureSource::ColorSpace::sRGB);
@@ -2001,7 +2003,7 @@ public:
         }
 
         {
-            gfx::TextureMap2DClass material;
+            gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
             auto source = std::make_unique<gfx::detail::TextureFileSource>();
             source->SetFileName("textures/black-gray-white.png");
             source->SetColorSpace(gfx::TextureSource::ColorSpace::Linear);
@@ -2046,10 +2048,11 @@ void main() {
             map.SetSamplerName("kTexture");
             map.SetName("kTexture");
 
-            gfx::CustomMaterialClass material;
+            gfx::CustomMaterialClass material(gfx::MaterialClass::Type::Custom);
             material.SetShaderSrc(src);
             material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-            material.SetTextureMap(std::move(map));
+            material.SetNumTextureMaps(1);
+            material.SetTextureMap(0, map);
             material.SetTextureMagFilter(gfx::TextureMap2DClass::MagTextureFilter::Linear);
             mMaterialStraightAlpha = gfx::CreateMaterialInstance(material);
         }
@@ -2062,12 +2065,13 @@ void main() {
             map.SetSamplerName("kTexture");
             map.SetName("kTexture");
 
-            gfx::CustomMaterialClass material;
+            gfx::CustomMaterialClass material(gfx::MaterialClass::Type::Custom);
             material.SetShaderSrc(src);
             material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-            material.SetTextureMap(std::move(map));
             material.SetTextureMagFilter(gfx::TextureMap2DClass::MagTextureFilter::Linear);
             material.SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, true);
+            material.SetNumTextureMaps(1);
+            material.SetTextureMap(0, std::move(map));
             mMaterialPremultAlpha = gfx::CreateMaterialInstance(material);
         }
     }

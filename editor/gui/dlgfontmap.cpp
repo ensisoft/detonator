@@ -100,7 +100,7 @@ void DlgFontMap::LoadImage(const QString& file)
                                 (float)height/(float)img_height);
     mWidth  = img_width;
     mHeight = img_height;
-    mClass = std::make_shared<gfx::TextureMap2DClass>();
+    mClass = std::make_shared<gfx::TextureMap2DClass>(gfx::MaterialClass::Type::Texture);
     mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     mClass->SetTexture(std::move(source));
     mClass->SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
@@ -117,8 +117,9 @@ void DlgFontMap::on_cmbColorSpace_currentIndexChanged(int)
 {
     if (!mClass)
         return;
-    auto* source = mClass->GetTextureSource();
-    auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(source);
+    auto* map = mClass->GetTextureMap(0);
+    auto* src = map->GetTextureSource(0);
+    auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(src);
     file_source->SetColorSpace(GetValue(mUI.cmbColorSpace));
 }
 

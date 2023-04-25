@@ -326,7 +326,8 @@ void DlgTileImport::on_btnImport_clicked()
         SetValue(mUI.progressBar, "Cutting textures ... %p% ");
 
         QImage source_img;
-        auto* src = mClass->GetTextureSource();
+        auto* map = mClass->GetTextureMap(0);
+        auto* src = map->GetTextureSource(0);
         // the bitmap must outlive the QImage object that is constructed
         // QImage will not take ownership / copy the data!
         auto bitmap = src->GetData();
@@ -435,7 +436,7 @@ void DlgTileImport::on_btnImport_clicked()
                 texture.SetName(app::ToUtf8(name));
             } else BUG("Missing texture cut case.");
 
-            gfx::TextureMap2DClass klass;
+            gfx::TextureMap2DClass klass(gfx::MaterialClass::Type::Texture, base::RandomString(10));
             klass.SetSurfaceType(GetValue(mUI.surfaceType));
             klass.SetTexture(texture.Copy());
             klass.SetTextureMinFilter(GetValue(mUI.minFilter));
@@ -457,7 +458,7 @@ void DlgTileImport::on_btnImport_clicked()
                 klass.SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
             } else BUG("Missing texture cut case.");
 
-            app::MaterialResource res(klass, img.name);
+            app::MaterialResource res(klass, name);
             mWorkspace->SaveResource(res);
 
             if (!Increment(mUI.progressBar) % 10)
@@ -466,14 +467,20 @@ void DlgTileImport::on_btnImport_clicked()
     }
     else if (type == MaterialType::Sprite)
     {
-        gfx::SpriteClass klass;
+        auto map = std::make_unique<gfx::TextureMap>();
+        map->SetName("Sprite");
+        map->SetType(gfx::TextureMap::Type::Sprite);
+        map->SetFps(GetValue(mUI.spriteFps));
+
+        gfx::SpriteClass klass(gfx::MaterialClass::Type::Sprite, base::RandomString(10));
         klass.SetSurfaceType(GetValue(mUI.surfaceType));
         klass.SetTextureMinFilter(GetValue(mUI.minFilter));
         klass.SetTextureMagFilter(GetValue(mUI.magFilter));
         klass.SetFlag(gfx::TextureMap2DClass::Flags::PremultipliedAlpha, premul_alpha_blend);
         klass.SetName(GetValue(mUI.spriteName));
         klass.SetBlendFrames(GetValue(mUI.chkBlendFrames));
-        klass.SetFps(GetValue(mUI.spriteFps));
+        klass.SetNumTextureMaps(1);
+        klass.SetTextureMap(0, std::move(map));
 
         SetValue(mUI.progressBar, "Making sprite ... %p% ");
 
@@ -545,7 +552,7 @@ void DlgTileImport::on_btnImport_clicked()
             if (!irregular_size && !disjoint_selection)
             {
                 ASSERT(tile_width && tile_height);
-                gfx::SpriteClass::SpriteSheet sprite;
+                gfx::TextureMap::SpriteSheet sprite;
                 sprite.cols = rect.GetWidth() / tile_width;
                 sprite.rows = rect.GetHeight() / tile_height;
                 ASSERT(sprite.cols && sprite.rows);
@@ -562,13 +569,15 @@ void DlgTileImport::on_btnImport_clicked()
                 texture->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, premul_alpha);
                 texture->SetFileName(mFileUri);
                 texture->SetName("Spritesheet");
-                klass.AddTexture(std::move(texture));
-                klass.SetTextureRect(0, rect.Normalize(base::FSize(mWidth, mHeight)));
-                klass.SetSpriteSheet(sprite);
+
+                klass.GetTextureMap(0)->SetSpriteSheet(sprite);
+                klass.GetTextureMap(0)->SetNumTextures(1);
+                klass.GetTextureMap(0)->SetTextureSource(0, std::move(texture));
+                klass.GetTextureMap(0)->SetTextureRect(0, rect.Normalize(base::FSize(mWidth, mHeight)));
             }
         }
 
-        if (klass.GetNumTextures() == 0)
+        if (klass.GetTextureMap(0)->GetNumTextures() == 0)
         {
             for (size_t index = 0; index < mImages.size(); ++index)
             {
@@ -578,26 +587,32 @@ void DlgTileImport::on_btnImport_clicked()
 
                 const auto& name = img.widget->GetName();
 
-                gfx::detail::TextureFileSource texture;
-                texture.SetColorSpace(GetValue(mUI.cmbColorSpace));
-                texture.SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, premul_alpha);
+                gfx::FRect rect;
+                auto texture = std::make_unique<gfx::detail::TextureFileSource>();
+                texture->SetColorSpace(GetValue(mUI.cmbColorSpace));
+                texture->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, premul_alpha);
                 if (cutting == TextureCutting::UseOriginal)
                 {
-                    texture.SetFileName(mFileUri);
-                    texture.SetName(app::ToUtf8(name));
-                    const auto rect = gfx::FRect(
-                            float(img.xpos + tile_margin_left) / img_width,
-                            float(img.ypos + tile_margin_top) / img_height,
-                            float(img.width - tile_margin_left - tile_margin_right) / img_width,
-                            float(img.height - tile_margin_top - tile_margin_bottom) / img_height);
-                    klass.AddTexture(texture.Copy(), rect);
+                    texture->SetFileName(mFileUri);
+                    texture->SetName(app::ToUtf8(name));
+                    rect.Move(img.xpos, img.ypos);
+                    rect.Translate(tile_margin_left, tile_margin_top);
+                    rect.SetWidth(img.width - tile_margin_left - tile_margin_right);
+                    rect.SetHeight(img.height - tile_margin_top - tile_margin_bottom);
+                    rect = rect.Normalize(base::FSize(mWidth, mHeight));
                 }
                 else if (cutting == TextureCutting::CutNewTexture)
                 {
-                    texture.SetFileName(texture_uris[index]);
-                    texture.SetName("Tile");
-                    klass.AddTexture(texture.Copy(), gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+                    texture->SetFileName(texture_uris[index]);
+                    texture->SetName("Tile");
+                    rect = gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f);
                 } else BUG("Missing texture cut case.");
+
+                auto* map = klass.GetTextureMap(0);
+                auto count = map->GetNumTextures();
+                map->SetNumTextures(count+1);
+                map->SetTextureSource(count, std::move(texture));
+                map->SetTextureRect(count, rect);
 
                 if (!(Increment(mUI.progressBar) % 10))
                     footgun.processEvents();
@@ -619,7 +634,8 @@ void DlgTileImport::on_tabWidget_currentChanged(int tab)
 
     QPixmap pixmap;
 
-    auto* src = mClass->GetTextureSource();
+    auto* map = mClass->GetTextureMap(0);
+    auto* src = map->GetTextureSource(0);
 
     if (auto bitmap = src->GetData())
     {
@@ -704,8 +720,9 @@ void DlgTileImport::on_cmbColorSpace_currentIndexChanged(int)
 {
     if (!mClass)
         return;
-    auto* source = mClass->GetTextureSource();
-    auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(source);
+    auto* map = mClass->GetTextureMap(0);
+    auto* src = map->GetTextureSource(0);
+    auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(src);
     file_source->SetColorSpace(GetValue(mUI.cmbColorSpace));
 }
 
@@ -807,7 +824,7 @@ void DlgTileImport::LoadImageFile(const QString& ret)
     source->SetFileName(file_uri);
     source->SetName(file_name);
     source->SetColorSpace(GetValue(mUI.cmbColorSpace));
-    auto bitmap = source->GetData();
+    const auto& bitmap = source->GetData();
     if (!bitmap)
     {
         QMessageBox msg(this);
@@ -830,12 +847,13 @@ void DlgTileImport::LoadImageFile(const QString& ret)
     mFileName = std::move(file_name);
     mTrackingOffset = QPoint(0, 0);
 
-    mClass = std::make_shared<gfx::TextureMap2DClass>();
+    mClass = std::make_shared<gfx::TextureMap2DClass>(gfx::MaterialClass::Type::Texture);
     mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     mClass->SetTexture(std::move(source));
     mClass->SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
     mClass->SetGamma(1.0f);
     mClass->SetTextureMinFilter(GetValue(mUI.cmbMinFilter));
+    mClass->SetTextureMagFilter(GetValue(mUI.cmbMagFilter));
     mMaterial = gfx::CreateMaterialInstance(mClass);
     SetValue(mUI.imageFile, info.absoluteFilePath());
     SetValue(mUI.zoom, scale);

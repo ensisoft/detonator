@@ -489,19 +489,20 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
 
 void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
 {
-    if (auto* sprite = material.AsSprite())
+    for (size_t i=0; i<material.GetNumTextureMaps(); ++i)
     {
-        for (size_t i=0; i<sprite->GetNumTextures(); ++i)
+        auto* map = material.GetTextureMap(i);
+        for (size_t j=0; j<map->GetNumTextures(); ++j)
         {
-            auto* texture_source = sprite->GetTextureSource(i);
-            if (auto* text_source = dynamic_cast<gfx::detail::TextureTextBufferSource*>(texture_source))
+            auto* src = map->GetTextureSource(j);
+            if (auto* text_source = dynamic_cast<gfx::detail::TextureTextBufferSource*>(src))
             {
                 auto& text_buffer = text_source->GetTextBuffer();
                 auto& text_chunk  = text_buffer.GetText();
                 packer.CopyFile(text_chunk.font, "fonts/");
                 text_chunk.font = packer.MapUri(text_chunk.font);
             }
-            else if (auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(texture_source))
+            else if (auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(src))
             {
                 const auto& uri = file_source->GetFilename();
                 packer.CopyFile(uri, "textures/");
@@ -509,78 +510,17 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
             }
         }
     }
-    else if (auto* texture = material.AsTexture())
-    {
-        auto* texture_source = texture->GetTextureSource();
-        if (auto* text_source = dynamic_cast<gfx::detail::TextureTextBufferSource*>(texture_source))
-        {
-            auto& text_buffer = text_source->GetTextBuffer();
-            auto& text_chunk  = text_buffer.GetText();
-            packer.CopyFile(text_chunk.font, "fonts/");
-            text_chunk.font = packer.MapUri(text_chunk.font);
-        }
-        else if (auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(texture_source))
-        {
-            const auto& uri = file_source->GetFilename();
-            packer.CopyFile(uri, "textures/");
-            file_source->SetFileName(packer.MapUri(uri));
-        }
-    }
-    else if (auto* custom = material.AsCustom())
-    {
-        auto texture_maps = custom->GetTextureMapNames();
-        for (const auto& name : texture_maps)
-        {
-            auto* texture_map = custom->FindTextureMap(name);
-            if (auto* sprite = texture_map->AsSpriteMap())
-            {
-                for (size_t i=0; i<sprite->GetNumTextures(); ++i)
-                {
-                    auto* texture_source = sprite->GetTextureSource(i);
-                    if (auto* text_source = dynamic_cast<gfx::detail::TextureTextBufferSource*>(texture_source))
-                    {
-                        auto& text_buffer = text_source->GetTextBuffer();
-                        auto& text_chunk  = text_buffer.GetText();
-                        packer.CopyFile(text_chunk.font, "fonts/");
-                        text_chunk.font  = packer.MapUri(text_chunk.font);
-                    }
-                    else if (auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(texture_source))
-                    {
-                        const auto& uri = file_source->GetFilename();
-                        packer.CopyFile(uri, "textures/");
-                        file_source->SetFileName(packer.MapUri(uri));
-                    }
-                }
-            }
-            else if (auto* texture = texture_map->AsTextureMap2D())
-            {
-                auto* texture_source = texture->GetTextureSource(0);
-                if (auto* text_source = dynamic_cast<gfx::detail::TextureTextBufferSource*>(texture_source))
-                {
-                    auto& text_buffer = text_source->GetTextBuffer();
-                    auto& text_chunk  = text_buffer.GetText();
-                    packer.CopyFile(text_chunk.font, "fonts/");
-                    text_chunk.font = packer.MapUri(text_chunk.font);
-                }
-                else if (auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(texture_source))
-                {
-                    const auto& uri = file_source->GetFilename();
-                    packer.CopyFile(uri, "textures/");
-                    file_source->SetFileName(packer.MapUri(uri));
-                }
-            }
-        }
-        const auto& shader_glsl_uri = custom->GetShaderUri();
-        if (shader_glsl_uri.empty())
-            return;
-        const auto& shader_desc_uri = boost::replace_all_copy(shader_glsl_uri, ".glsl", ".json");
-        // this only has significance when exporting/importing
-        // a resource archive.
-        packer.CopyFile(shader_desc_uri, "shaders/es2/");
-        // copy the actual shader glsl
-        packer.CopyFile(shader_glsl_uri, "shaders/es2/");
-        custom->SetShaderUri(packer.MapUri(shader_glsl_uri));
-    }
+
+    const auto& shader_glsl_uri = material.GetShaderUri();
+    if (shader_glsl_uri.empty())
+        return;
+    const auto& shader_desc_uri = boost::replace_all_copy(shader_glsl_uri, ".glsl", ".json");
+    // this only has significance when exporting/importing
+    // a resource archive.
+    packer.CopyFile(shader_desc_uri, "shaders/es2/");
+    // copy the actual shader glsl
+    packer.CopyFile(shader_glsl_uri, "shaders/es2/");
+    material.SetShaderUri(packer.MapUri(shader_glsl_uri));
 }
 
 void MigrateResource(uik::Window& window, app::MigrationLog* log)

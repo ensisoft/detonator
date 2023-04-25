@@ -155,15 +155,13 @@ public:
             src.SetName("bitmap");
             src.SetBitmap(std::move(bmp));
 
-            gfx::TextureMap2DClass klass;
+            gfx::TextureMap2DClass klass(gfx::MaterialClass::Type::Texture);
             klass.SetTexture(src.Copy());
             return std::make_shared<gfx::TextureMap2DClass>(klass);
         }
         else if (id == "red-green-sprite")
         {
-            gfx::SpriteClass sprite;
-            sprite.SetFps(1.0f);
-            sprite.SetBlendFrames(false);
+            gfx::SpriteClass sprite(gfx::MaterialClass::Type::Sprite);
 
             gfx::RgbBitmap red;
             red.Resize(4, 4);
@@ -180,6 +178,9 @@ public:
             green_bitmap_src.SetName("green");
             green_bitmap_src.SetBitmap(green);
             sprite.AddTexture(green_bitmap_src.Copy());
+
+            sprite.GetTextureMap(0)->SetFps(1.0f);
+            sprite.SetBlendFrames(false);
             return std::make_shared<gfx::SpriteClass>(sprite);
         }
         else if (id == "custom")
@@ -192,7 +193,7 @@ void main() {
   gl_FragColor = kColor;
 }
 )";
-            gfx::CustomMaterialClass klass;
+            gfx::CustomMaterialClass klass(gfx::MaterialClass::Type::Custom);
             klass.SetShaderSrc(src);
             klass.SetUniform("kColor", gfx::Color::HotPink);
             return std::make_shared<gfx::CustomMaterialClass>(klass);

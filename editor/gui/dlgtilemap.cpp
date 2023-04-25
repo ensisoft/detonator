@@ -104,7 +104,7 @@ void DlgTilemap::LoadImage(const QString& file)
     mTrackingOffset = QPoint(0, 0);
     mWidth  = img_width;
     mHeight = img_height;
-    mClass = std::make_shared<gfx::TextureMap2DClass>();
+    mClass = std::make_shared<gfx::TextureMap2DClass>(gfx::MaterialClass::Type::Texture);
     mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     mClass->SetTexture(std::move(source));
     mClass->SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
@@ -305,7 +305,9 @@ void DlgTilemap::OnPaintScene(gfx::Painter& painter, double secs)
     mClass->SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, GetValue(mUI.chkPremulAlphaBlend));
     mClass->SetTextureMinFilter(GetValue(mUI.cmbMinFilter));
     mClass->SetTextureMagFilter(GetValue(mUI.cmbMagFilter));
-    auto* texture_source = dynamic_cast<gfx::detail::TextureFileSource*>(mClass->GetTextureSource());
+    auto* map = mClass->GetTextureMap(0);
+    auto* src = map->GetTextureSource(0);
+    auto* texture_source = dynamic_cast<gfx::detail::TextureFileSource*>(src);
     texture_source->SetColorSpace(GetValue(mUI.cmbColorSpace));
     texture_source->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, GetValue(mUI.chkPremulAlpha));
 

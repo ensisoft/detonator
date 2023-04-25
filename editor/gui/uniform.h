@@ -24,6 +24,7 @@
 #include "warnpop.h"
 
 #include "base/color4f.h"
+#include "editor/app/types.h"
 
 namespace Ui {
     class Uniform;
@@ -60,9 +61,9 @@ namespace gui
         glm::vec4 GetAsVec4() const;
         QColor GetAsColor() const;
         QString GetAsString() const;
-        void SetName(QString name)
+        void SetName(const app::AnyString& name)
         { mName = name; }
-        QString GetName() const
+        app::AnyString GetName() const
         { return mName; }
         Type GetType() const
         { return mType;}
@@ -89,7 +90,7 @@ namespace gui
     private:
         Ui::Uniform* mUI = nullptr;
     private:
-        QString mName;
+        app::AnyString mName;
         Type mType = Type::Int;
     };
 } // namespace

@@ -224,6 +224,20 @@ inline bool SetImage(QLabel* label, const gfx::IBitmap& bitmap)
     return true;
 }
 
+inline QList<QListWidgetItem*> GetSelection(const QListWidget* list)
+{
+    return list->selectedItems();
+}
+
+inline QListWidgetItem* GetSelectedItem(const QListWidget* list)
+{
+    const auto& selection = GetSelection(list);
+    if (selection.isEmpty())
+        return nullptr;
+
+    return selection[0];
+}
+
 // Get the selection index list mapped to the source
 inline QModelIndexList GetSelection(const QTableView* view)
 {
@@ -459,6 +473,30 @@ inline void ClearList(QListWidget* list)
 {
     QSignalBlocker s(list);
     list->clear();
+}
+
+inline void SelectItem(QListWidget* list,  const ListItemId& id)
+{
+    QSignalBlocker s(list);
+    for (int i=0; i<list->count(); ++i)
+    {
+        auto* item = list->item(i);
+        const auto& data = item->data(Qt::UserRole);
+        if (data.toString() == id.id)
+            item->setSelected(true);
+        else item->setSelected(false);
+    }
+}
+
+inline void SelectLastItem(QListWidget* list)
+{
+    QSignalBlocker s(list);
+    const auto count = list->count();
+    if (count == 0)
+        return;
+    for (int i=0; i<count; ++i)
+        list->item(i)->setSelected(false);
+    list->item(count-1)->setSelected(true);
 }
 
 inline void SetCurrentRow(QListWidget* list, int row)

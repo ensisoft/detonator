@@ -80,16 +80,15 @@ namespace gui
         void on_actionReloadShaders_triggered();
         void on_actionReloadTextures_triggered();
         void on_actionRemoveTexture_triggered();
-        void on_btnReloadShader_clicked();
         void on_btnSelectShader_clicked();
         void on_btnCreateShader_clicked();
         void on_btnEditShader_clicked();
         void on_btnAddTextureMap_clicked();
-        void on_btnDelTextureMap_clicked();
+        void on_btnResetTextureMap_clicked();
         void on_btnEditTexture_clicked();
         void on_btnResetTextureRect_clicked();
         void on_btnSelectTextureRect_clicked();
-        void on_textures_currentRowChanged(int row);
+        void on_textures_itemSelectionChanged();
         void on_textures_customContextMenuRequested(const QPoint&);
         void on_materialName_textChanged(const QString& text);
         void on_materialType_currentIndexChanged(int);
@@ -97,7 +96,7 @@ namespace gui
         void on_gamma_valueChanged(double value);
         void on_baseColor_colorChanged(QColor color);
         void on_particleAction_currentIndexChanged(int);
-        void on_spriteFps_valueChanged(double);
+        void on_textureMapFps_valueChanged(double);
         void on_chkBlendPreMulAlpha_stateChanged(int);
         void on_chkStaticInstance_stateChanged(int);
         void on_chkBlendFrames_stateChanged(int);
@@ -129,6 +128,7 @@ namespace gui
         void on_chkAllowResizing_stateChanged(int);
         void on_chkPreMulAlpha_stateChanged(int);
         void on_chkBlurTexture_stateChanged(int);
+        void on_textureMapName_textChanged(const QString& text);
         void on_textureSourceName_textChanged(const QString& text);
         void AddNewTextureMapFromFile();
         void AddNewTextureMapFromText();
@@ -142,8 +142,10 @@ namespace gui
         void SetMaterialProperties();
         void GetMaterialProperties();
         void GetTextureProperties();
+        void GetTextureMapProperties();
         void PaintScene(gfx::Painter& painter, double sec);
-
+        gfx::TextureMap* GetSelectedTextureMap();
+        gfx::TextureSource* GetSelectedTextureSrc();
     private:
         Ui::MaterialWidget mUI;
     private:

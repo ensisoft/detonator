@@ -665,23 +665,12 @@ namespace gfx
         bool FromLegacyJsonTexture2D(const data::Reader& data);
 
         // Find a specific texture source based on the texture source id.
-        // Returns nullptr if no matching texture source was found.
-        TextureSource* FindTextureSourceById(const std::string& id);
+        // Returns end index if no matching texture source was found.
+        size_t FindTextureSourceIndexById(const std::string& id) const;
         // Find a texture source based on its name. Note that the names are not
         // necessarily unique. In such case it's unspecified which texture source
-        // object is returned. Returns nullptr if no matching texture source was found.
-        TextureSource* FindTextureSourceByName(const std::string& name);
-        // Find a specific texture source based on the texture source id.
-        // Returns nullptr if no matching texture source was found.
-        const TextureSource* FindTextureSourceById(const std::string& id) const;
-        // Find a texture source based on its name. Note that the names are not
-        // necessarily unique. In such case it's unspecified which texture source
-        // object is returned. Returns nullptr if no matching texture source was found.
-        const TextureSource* FindTextureSourceByName(const std::string& name) const;
-        // Delete a texture and the texture rect by the texture source ID.
-        // Returns true if source was found and deleted, otherwise returns false and no
-        // deletion was done.
-        bool DeleteTextureById(const std::string& id);
+        // object is returned. Returns end index if no matching texture source was found.
+        size_t FindTextureSourceIndexByName(const std::string& name) const;
 
         // down cast helpers.
         TextureMap* AsSpriteMap();
@@ -717,13 +706,6 @@ namespace gfx
     using TextureMap2D = TextureMap;
     using SpriteMap = TextureMap;
 
-    class BuiltInMaterialClass;
-    class ColorClass;
-    class GradientClass;
-    class SpriteClass;
-    class TextureMap2DClass;
-    class CustomMaterialClass;
-
     // Interface for classes of materials. Each material class implements
     // some type of shading algorithm expressed using the OpenGL (ES)
     // shading language and provides means for setting the properties
@@ -734,6 +716,17 @@ namespace gfx
         using MinTextureFilter = Texture::MinFilter;
         using MagTextureFilter = Texture::MagFilter;
         using TextureWrapping  = Texture::Wrapping;
+
+        // The four supported colors are all identified by
+        // a color index that maps to the 4 quadrants of the
+        // texture coordinate space.
+        enum ColorIndex {
+            BaseColor   = 0,
+            TopLeft     = 0,
+            TopRight    = 1,
+            BottomLeft  = 2,
+            BottomRight = 3
+        };
 
         // Control the rasterizer blending operation and how the
         // output from this material's material shader is combined
@@ -766,11 +759,30 @@ namespace gfx
         };
 
         enum class Flags {
+            // When set indicates that the material class is static and
+            // Uniforms are folded into constants in the shader source or
+            // set only at once when the program is created.
+            Static,
+            // When set indicates that the sprite animation frames are
+            // blended together to create "tween" frames.
+            BlendFrames,
             // When set, change the transparent blending equation
             // to expect alpha values to be premultiplied in the
             // RGB values.
             PremultipliedAlpha
         };
+
+        // Action to take on per particle random value. This can
+        // be used when applying the material onto particle
+        // system and to add some variation to the rendered output
+        // in order to make the result visually more appealing.
+        enum class ParticleAction {
+            // Do nothing
+            None,
+            // Rotate the texture coordinates
+            Rotate
+        };
+
 
         // Material/Shader uniform.
         using Uniform = std::variant<float, int,
@@ -805,95 +817,254 @@ namespace gfx
             const ShaderPass* shader_pass = nullptr;
         };
 
-        virtual ~MaterialClass() = default;
-        // Get the material class id.
-        virtual std::string GetId() const = 0;
-        // Get the human readable material class name.
-        virtual std::string GetName() const = 0;
-        // Get the program ID for the material that is used to map the
-        // material to a device specific program object.
-        virtual std::string GetProgramId(const State& state) const = 0;
-        // Get the material class hash value based on the current properties
-        // of the class.
-        virtual std::size_t GetHash() const = 0;
-        // Get the actual implementation type of the material.
-        virtual Type GetType() const = 0;
-        // Get the surface type of the material.
-        virtual SurfaceType GetSurfaceType() const = 0;
+
+        MaterialClass(Type type, std::string id = base::RandomString(10))
+          : mClassId(id)
+          , mType(type)
+        {
+            mFlags.set(Flags::BlendFrames, true);
+        }
+        MaterialClass(const MaterialClass& other, bool copy=true);
+
+
+        inline void SetBaseColor(const Color4f& color) noexcept
+        { mColorMap[ColorIndex::BaseColor] = color; }
+        inline void SetColor(const Color4f& color, ColorIndex index) noexcept
+        { mColorMap[index] = color; }
         // Set the surface type of the material.
-        virtual void SetSurfaceType(SurfaceType surface) = 0;
+        inline void SetSurfaceType(SurfaceType surface) noexcept
+        { mSurfaceType = surface; }
+        inline void SetParticleAction(ParticleAction action) noexcept
+        { mParticleAction = action; }
         // Set the material class id. Used when creating specific materials with
         // fixed static ids. Todo: refactor away and use constructor.
-        virtual void SetId(const std::string& id) = 0;
+        inline void SetId(std::string& id) noexcept
+        { mClassId = std::move(id); }
         // Set the human-readable material class name.
-        virtual void SetName(const std::string& name) = 0;
+        inline void SetName(std::string name) noexcept
+        { mName = std::move(name); }
+        inline void SetGamma(float gamma) noexcept
+        { mGamma = gamma; }
+        inline void SetStatic(bool on_off) noexcept
+        { mFlags.set(Flags::Static, on_off); }
+        inline void SetBlendFrames(bool on_off) noexcept
+        { mFlags.set(Flags::BlendFrames, on_off); }
+        inline void SetColorWeight(glm::vec2 weight) noexcept
+        { mColorWeight = weight; }
+        inline void SetTextureMinFilter(MinTextureFilter filter) noexcept
+        { mTextureMinFilter = filter; }
+        inline void SetTextureMagFilter(MagTextureFilter filter) noexcept
+        { mTextureMagFilter = filter; }
+        inline void SetTextureWrapX(TextureWrapping wrap) noexcept
+        { mTextureWrapX = wrap; }
+        inline void SetTextureWrapY(TextureWrapping wrap) noexcept
+        { mTextureWrapY = wrap; }
+        inline void SetTextureScaleX(float scale) noexcept
+        { mTextureScale.x = scale; }
+        inline void SetTextureScaleY(float scale) noexcept
+        { mTextureScale.y = scale; }
+        inline void SetTextureScale(const glm::vec2& scale) noexcept
+        { mTextureScale = scale; }
+        inline void SetTextureVelocityX(float x) noexcept
+        { mTextureVelocity.x = x; }
+        inline void SetTextureVelocityY(float y) noexcept
+        { mTextureVelocity.y = y; }
+        inline void SetTextureVelocityZ(float angle_radians) noexcept
+        { mTextureVelocity.z = angle_radians; }
+        inline void SetTextureRotation(float angle_radians) noexcept
+        { mTextureRotation = angle_radians; }
+        inline void SetTextureVelocity(const glm::vec2 linear, float radial) noexcept
+        { mTextureVelocity = glm::vec3(linear, radial); }
+        // Set a material flag to on or off.
+        inline void SetFlag(Flags flag, bool on_off) noexcept
+        { mFlags.set(flag, on_off); }
+        inline void SetShaderUri(std::string uri) noexcept
+        { mShaderUri = std::move(uri); }
+        inline void SetShaderSrc(std::string src) noexcept
+        { mShaderSrc = std::move(src); }
+
+        inline float GetGamma() const noexcept
+        { return mGamma; }
+        inline Color4f GetColor(ColorIndex index) const noexcept
+        { return mColorMap[index]; }
+        inline Color4f GetBaseColor() const noexcept
+        { return mColorMap[ColorIndex::BaseColor]; }
+        // Get the material class id.
+        inline std::string GetId() const noexcept
+        { return mClassId; }
+        // Get the human readable material class name.
+        inline std::string GetName() const noexcept
+        { return mName; }
+        inline std::string GetShaderUri() const noexcept
+        { return mShaderUri; }
+        inline std::string GetShaderSrc() const noexcept
+        { return mShaderSrc; }
+        // Get the actual implementation type of the material.
+        inline Type GetType() const noexcept
+        { return mType; }
+        // Get the surface type of the material.
+        inline SurfaceType GetSurfaceType() const noexcept
+        { return mSurfaceType; }
+        // Test a material flag. Returns true if the flag is set, otherwise false.
+        inline bool TestFlag(Flags flag) const noexcept
+        { return mFlags.test(flag); }
+
+
+        inline bool PremultipliedAlpha() const noexcept
+        { return TestFlag(Flags::PremultipliedAlpha); }
+        inline bool IsStatic() const noexcept
+        { return TestFlag(Flags::Static); }
+        inline bool BlendFrames() const noexcept
+        { return TestFlag(Flags::BlendFrames); }
+
+        inline glm::vec2 GetColorWeight() const noexcept
+        { return mColorWeight; }
+        inline float GetTextureScaleX() const noexcept
+        { return mTextureScale.x; }
+        inline float GetTextureScaleY() const noexcept
+        { return mTextureScale.y; }
+        inline float GetTextureVelocityX() const noexcept
+        { return mTextureVelocity.x; }
+        inline float GetTextureVelocityY() const noexcept
+        { return mTextureVelocity.y; }
+        inline float GetTextureVelocityZ() const noexcept
+        { return mTextureVelocity.z; }
+        inline float GetTextureRotation() const noexcept
+        { return mTextureRotation; }
+        inline MinTextureFilter GetTextureMinFilter() const noexcept
+        { return mTextureMinFilter; }
+        inline MagTextureFilter GetTextureMagFilter() const noexcept
+        { return mTextureMagFilter; }
+        inline TextureWrapping  GetTextureWrapX() const noexcept
+        { return mTextureWrapX; }
+        inline TextureWrapping GetTextureWrapY() const noexcept
+        { return mTextureWrapY; }
+        inline ParticleAction GetParticleAction() const noexcept
+        { return mParticleAction; }
+
+        inline void SetUniform(const std::string& name, const Uniform& value) noexcept
+        { mUniforms[name] = value; }
+        inline void SetUniform(const std::string& name, Uniform&& value) noexcept
+        { mUniforms[name] = std::move(value); }
+        inline Uniform* FindUniform(const std::string& name) noexcept
+        { return base::SafeFind(mUniforms, name); }
+        inline const Uniform* FindUniform(const std::string& name) const noexcept
+        { return base::SafeFind(mUniforms, name); }
+        template<typename T>
+        T* GetUniformValue(const std::string& name) noexcept
+        {
+            if (auto* ptr = base::SafeFind(mUniforms, name))
+                return std::get_if<T>(ptr);
+            return nullptr;
+        }
+        template<typename T>
+        const T* GetUniformValue(const std::string& name) const noexcept
+        {
+            if (auto* ptr = base::SafeFind(mUniforms, name))
+                return std::get_if<T>(ptr);
+            return nullptr;
+        }
+        inline void DeleteUniforms() noexcept
+        { mUniforms.clear(); }
+        inline void DeleteUniform(const std::string& name) noexcept
+        { mUniforms.erase(name); }
+        inline bool HasUniform(const std::string& name) const noexcept
+        { return base::SafeFind(mUniforms, name) != nullptr; }
+        template<typename T>
+        bool HasUniform(const std::string& name) const noexcept
+        {
+            if (const auto* ptr = base::SafeFind(mUniforms, name))
+                return std::get_if<T>(ptr) != nullptr;
+            return false;
+        }
+        UniformMap GetUniforms() const
+        { return mUniforms; }
+
+        // Get the number of material maps in the material class.
+        inline unsigned GetNumTextureMaps() const  noexcept
+        { return mTextureMaps.size(); }
+        // Get a texture map at the given index.
+        const TextureMap* GetTextureMap(unsigned index) const noexcept
+        { return base::SafeIndex(mTextureMaps, index).get(); }
+        // Get a texture map at the given index.
+        inline TextureMap* GetTextureMap(unsigned index) noexcept
+        { return base::SafeIndex(mTextureMaps, index).get(); }
+        // Delete the texture map at the given index.
+        inline void DeleteTextureMap(unsigned index) noexcept
+        { base::SafeErase(mTextureMaps, index); }
+        inline void SetNumTextureMaps(unsigned count)
+        { mTextureMaps.resize(count); }
+        inline void SetTextureMap(unsigned index, std::unique_ptr<TextureMap> map) noexcept
+        { mTextureMaps[index] = std::move(map); }
+        inline void SetTextureMap(unsigned index, TextureMap map) noexcept
+        { mTextureMaps[index] = std::make_unique<TextureMap>(std::move(map)); }
+
+        // Get the program ID for the material that is used to map the
+        // material to a device specific program object.
+        std::string GetProgramId(const State& state) const noexcept;
+        // Get the material class hash value based on the current properties
+        // of the class.
+        std::size_t GetHash() const noexcept;
         // Create the shader for this material on the given device.
         // Returns the new shader object or nullptr if the shader fails to compile.
-        virtual Shader* GetShader(const State& state, Device& device) const = 0;
+        Shader* GetShader(const State& state, Device& device) const noexcept;
         // Apply the material properties onto the given program object based
         // on the material class and the material instance state.
-        virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const = 0;
+        void ApplyDynamicState(const State& state, Device& device, Program& program) const noexcept;
         // Apply the static state, i.e. the material state that doesn't change
         // during the material's lifetime and need to be only set once.
-        virtual void ApplyStaticState(const State& state, Device& device, Program& program) const = 0;
+        void ApplyStaticState(const State& state, Device& device, Program& program) const noexcept;
         // Serialize the class into JSON.
-        virtual void IntoJson(data::Writer& data) const = 0;
+        void IntoJson(data::Writer& data) const;
         // Load the class from JSON. Returns true on success.
-        virtual bool FromJson(const data::Reader& data) = 0;
+        bool FromJson(const data::Reader& data);
         // Create an exact bitwise copy of this material class.
-        virtual std::unique_ptr<MaterialClass> Copy() const = 0;
+        std::unique_ptr<MaterialClass> Copy() const;
         // Create a similar clone of this material class but with unique id.
-        virtual std::unique_ptr<MaterialClass> Clone() const = 0;
+        std::unique_ptr<MaterialClass> Clone() const;
         // Begin the packing process by going over the associated resources
         // in the material and invoking the packer methods to pack
         // those resources.
-        virtual void BeginPacking(TexturePacker* packer) const = 0;
+        void BeginPacking(TexturePacker* packer) const;
         // Finish the packing process by retrieving the new updated resource
         // information the packer and updating the material's state.
-        virtual void FinishPacking(const TexturePacker* packer) = 0;
-        // Test a material flag. Returns true if the flag is set, otherwise false.
-        virtual bool TestFlag(Flags flag) const = 0;
-        // Set a material flag to on or off.
-        virtual void SetFlag(Flags flag, bool on_off) = 0;
+        void FinishPacking(const TexturePacker* packer) ;
 
         // Helpers
-        bool PremultipliedAlpha() const
-        { return TestFlag(Flags::PremultipliedAlpha); }
+        unsigned FindTextureMapIndexByName(const std::string& name) const;
+        unsigned FindTextureMapIndexById(const std::string& id) const;
 
-        inline BuiltInMaterialClass* AsBuiltIn()
-        { return MaterialCast<BuiltInMaterialClass>(this); }
-        inline SpriteClass* AsSprite()
-        { return MaterialCast<SpriteClass>(this); }
-        inline TextureMap2DClass* AsTexture()
-        { return MaterialCast<TextureMap2DClass>(this); }
-        inline ColorClass* AsColor()
-        { return MaterialCast<ColorClass>(this); }
-        inline GradientClass* AsGradient()
-        { return MaterialCast<GradientClass>(this); }
-        inline CustomMaterialClass* AsCustom()
-        { return MaterialCast<CustomMaterialClass>(this); }
-        inline const BuiltInMaterialClass* AsBuiltIn() const
-        { return MaterialCast<const BuiltInMaterialClass>(this); }
-        inline const SpriteClass* AsSprite() const
-        { return MaterialCast<const SpriteClass>(this); }
-        inline const TextureMap2DClass* AsTexture() const
-        { return MaterialCast<const TextureMap2DClass>(this); }
-        inline const ColorClass* AsColor() const
-        { return MaterialCast<const ColorClass>(this); }
-        inline const GradientClass* AsGradient() const
-        { return MaterialCast<const GradientClass>(this); }
-        inline const CustomMaterialClass* AsCustom() const
-        { return MaterialCast<const CustomMaterialClass>(this); }
+        TextureMap* FindTextureMapByName(const std::string& name);
+        TextureMap* FindTextureMapById(const std::string& id);
+        const TextureMap* FindTextureMapByName(const std::string& name) const;
+        const TextureMap* FindTextureMapById(const std::string& id) const;
+
+
+        // Legacy / migration API
+        void SetTexture(std::unique_ptr<TextureSource> source);
+        void AddTexture(std::unique_ptr<TextureSource> source);
+        void DeleteTextureSrc(const std::string& id) noexcept;
+        void DeleteTextureMap(const std::string& id) noexcept;
+        TextureSource* FindTextureSource(const std::string& id) noexcept;
+        const TextureSource* FindTextureSource(const std::string& id) const noexcept;
+
+        FRect FindTextureRect(const std::string& id) const noexcept;
+        void SetTextureRect(const std::string& id, const gfx::FRect& rect) noexcept;
+
+        inline void SetTextureRect(size_t map, size_t texture, const gfx::FRect& rect) noexcept
+        { base::SafeIndex(mTextureMaps, map)->SetTextureRect(texture, rect); }
+        inline void SetTextureRect(const gfx::FRect& rect)noexcept
+        { SetTextureRect(0, 0, rect); }
+        inline void SetTextureSource(size_t map, size_t texture, std::unique_ptr<TextureSource> source) noexcept
+        { base::SafeIndex(mTextureMaps, map)->SetTextureSource(texture, std::move(source)); }
+        inline void SetTextureSource(std::unique_ptr<TextureSource> source) noexcept
+        { SetTextureSource(0, 0, std::move(source)); }
 
         static std::unique_ptr<MaterialClass> ClassFromJson(const data::Reader& data);
-    protected:
-        MaterialClass() = default;
-        MaterialClass& operator=(const MaterialClass&) = default;
 
-        template<typename T, typename F>
-        T* MaterialCast(F* self) const
-        { return dynamic_cast<T*>(self); }
+        MaterialClass& operator=(const MaterialClass& other);
 
+    private:
         template<typename T>
         static bool SetUniform(const char* name, const UniformMap* uniforms, const T& backup, Program& program)
         {
@@ -914,570 +1085,44 @@ namespace gfx
             return false;
         }
     private:
-    };
+        Shader* GetColorShader(const State& state, Device& device) const noexcept;
+        Shader* GetGradientShader(const State& state, Device& device) const noexcept;
+        Shader* GetSpriteShader(const State& state, Device& device) const noexcept;
+        Shader* GetCustomShader(const State& state, Device& device) const noexcept;
+        Shader* GetTextureShader(const State& state, Device& device) const noexcept;
+        void ApplySpriteDynamicState(const State& state, Device& device, Program& program) const noexcept;
+        void ApplyCustomDynamicState(const State& state, Device& device, Program& program) const noexcept;
+        void ApplyTextureDynamicState(const State& state, Device& device, Program& program) const noexcept;
 
-    // Base class to support function shared between various
-    // built-in material classes.
-    class BuiltInMaterialClass : public MaterialClass
-    {
-    public:
-        using MinTextureFilter = Texture::MinFilter;
-        using MagTextureFilter = Texture::MagFilter;
-        using TextureWrapping  = Texture::Wrapping;
-        // Action to take on per particle random value. This can
-        // be used when applying the material onto particle
-        // system and to add some variation to the rendered output
-        // in order to make the result visually more appealing.
-        enum class ParticleAction {
-            // Do nothing
-            None,
-            // Rotate the texture coordinates
-            Rotate
-        };
-        BuiltInMaterialClass()
-        { mClassId = base::RandomString(10); }
-        void SetGamma(float gamma)
-        { mGamma = gamma; }
-        void SetStatic(bool on_off)
-        { mStatic = on_off; }
-        bool IsStatic() const
-        { return mStatic; }
-        float GetGamma() const
-        { return mGamma; }
-        virtual std::string GetId() const override
-        { return mClassId; }
-        virtual std::string GetName() const override
-        { return mName; }
-        virtual void SetId(const std::string& id) override
-        { mClassId = id; }
-        virtual void SetName(const std::string& name) override
-        { mName = name; }
-        virtual void SetSurfaceType(SurfaceType surface) override
-        { mSurfaceType = surface; }
-        virtual SurfaceType GetSurfaceType() const override
-        { return mSurfaceType; }
-        virtual void BeginPacking(TexturePacker* packer) const override
-        { /* empty */ }
-        virtual void FinishPacking(const TexturePacker* packer) override
-        { /*empty */ }
-        virtual bool TestFlag(Flags flag) const override
-        { return mFlags.test(flag); }
-        virtual void SetFlag(Flags flag, bool on_off) override
-        { mFlags.set(flag, on_off); }
-    protected:
-        std::string mClassId;
-        std::string mName;
-        SurfaceType mSurfaceType = SurfaceType::Opaque;
-        float mGamma  = 1.0f;
-        bool mStatic = false;
-        base::bitflag<Flags> mFlags;
-    };
-
-    // Shade surfaces using a simple solid color shader only.
-    class ColorClass : public BuiltInMaterialClass
-    {
-    public:
-        ColorClass() = default;
-        ColorClass(const Color4f& color)
-          : mColor(color)
-        {}
-        void SetBaseColor(const Color4f& color)
-        { mColor = color; }
-        void SetBaseAlpha(float alpha)
-        { mColor.SetAlpha(alpha); }
-        float GetBaseAlpha() const
-        { return mColor.Alpha(); }
-        const Color4f& GetBaseColor() const
-        { return mColor; }
-        virtual Type GetType() const override { return Type::Color; }
-        virtual Shader* GetShader(const State& state, Device& device) const override;
-        virtual std::size_t GetHash() const override;
-        virtual std::string GetProgramId(const State& state) const override;
-        virtual std::unique_ptr<MaterialClass> Copy() const override
-        { return std::make_unique<ColorClass>(*this); }
-        virtual std::unique_ptr<MaterialClass> Clone() const override
-        {
-            auto ret = std::make_unique<ColorClass>(*this);
-            ret->mClassId = base::RandomString(10);
-            return ret;
-        }
-        virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
-        virtual void ApplyStaticState(const State& state, Device& device, Program& program) const override;
-        virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson(const data::Reader& data) override;
-    private:
-        Color4f mColor = gfx::Color::White;
-    };
-
-    // Shade surfaces using a color gradient that smoothly
-    // interpolates between multiple colors.
-    class GradientClass : public BuiltInMaterialClass
-    {
-    public:
-        // The four supported colors are all identified by
-        // a color index that maps to the 4 quadrants of the
-        // texture coordinate space.
-        enum class ColorIndex {
-            TopLeft,    TopRight,
-            BottomLeft, BottomRight
-        };
-        void SetColor(const Color4f& color, ColorIndex index)
-        {
-            if (index == ColorIndex::TopLeft)
-                mColorMap[0] = color;
-            else if (index == ColorIndex::TopRight)
-                mColorMap[1] = color;
-            else if (index == ColorIndex::BottomLeft)
-                mColorMap[2] = color;
-            else if (index == ColorIndex::BottomRight)
-                mColorMap[3] = color;
-            else BUG("incorrect color index");
-        }
-        Color4f GetColor(ColorIndex index) const
-        {
-            if (index == ColorIndex::TopLeft)
-                return mColorMap[0];
-            else if (index == ColorIndex::TopRight)
-                return mColorMap[1];
-            else if (index == ColorIndex::BottomLeft)
-                return mColorMap[2];
-            else if (index == ColorIndex::BottomRight)
-                return mColorMap[3];
-            else BUG("incorrect color index");
-            return Color4f();
-        }
-        glm::vec2 GetOffset() const
-        { return mOffset; }
-        void SetOffset(const glm::vec2& offset)
-        { mOffset = offset; }
-        virtual Type GetType() const override { return Type::Gradient; }
-        virtual Shader* GetShader(const State& state, Device& device) const override;
-        virtual std::size_t GetHash() const override;
-        virtual std::string GetProgramId(const State&) const override;
-        virtual std::unique_ptr<MaterialClass> Copy() const override
-        { return std::make_unique<GradientClass>(*this); }
-        virtual std::unique_ptr<MaterialClass> Clone() const override
-        {
-            auto ret = std::make_unique<GradientClass>(*this);
-            ret->mClassId = base::RandomString(10);
-            return ret;
-        }
-        virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
-        virtual void ApplyStaticState(const State& state, Device& device, Program& program) const override;
-        virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson(const data::Reader& data) override;
-    private:
-        Color4f mColorMap[4] = {gfx::Color::White, gfx::Color::White,
-                                gfx::Color::White, gfx::Color::White};
-        glm::vec2 mOffset = {0.5f, 0.5f};
-    };
-
-    // Shade surfaces using a sprite animation, i.e. by cycling through
-    // a series of textures which are sampled and blended together
-    // in order to create a smoothed animation.
-    class SpriteClass : public BuiltInMaterialClass
-    {
-    public:
-        using SpriteSheet = TextureMap::SpriteSheet;
-
-        SpriteClass()
-        {
-            mSprite.SetType(TextureMap::Type::Sprite);
-        }
-        SpriteClass(const SpriteClass& other, bool copy);
-        SpriteClass(const SpriteClass& other) : SpriteClass(other, true)
-        {}
-        inline void ResetSpriteSheet() noexcept
-        { mSprite.ResetSpriteSheet(); }
-        inline void SetSpriteSheet(const SpriteSheet& sheet) noexcept
-        { mSprite.SetSpriteSheet(sheet); }
-        inline const SpriteSheet* GetSpriteSheet() const noexcept
-        { return mSprite.GetSpriteSheet(); }
-        inline bool HasSpriteSheet() const noexcept
-        {return mSprite.HasSpriteSheet(); }
-        inline void ResetTextures() noexcept
-        { mSprite.ResetTextures(); }
-
-        TextureSource& AddTexture(std::unique_ptr<TextureSource> source)
-        {
-            auto textures = mSprite.GetNumTextures();
-            mSprite.SetNumTextures(textures + 1);
-            mSprite.SetTextureSource(textures, std::move(source));
-            return *mSprite.GetTextureSource(textures);
-        }
-        TextureSource& AddTexture(std::unique_ptr<TextureSource> source, const FRect& rect)
-        {
-            auto textures = mSprite.GetNumTextures();
-            mSprite.SetNumTextures(textures + 1);
-            mSprite.SetTextureSource(textures, std::move(source));
-            mSprite.SetTextureRect(textures, rect);
-            return *mSprite.GetTextureSource(textures);
-        }
-        void DeleteTexture(size_t index)
-        { mSprite.DeleteTexture(index); }
-        void DeleteTextureById(const std::string& id)
-        { mSprite.DeleteTextureById(id); }
-        const TextureSource* GetTextureSource(size_t index) const
-        { return mSprite.GetTextureSource(index); }
-        const TextureSource * FindTextureSourceById(const std::string& id) const
-        { return mSprite.FindTextureSourceById(id); }
-        const TextureSource* FindTextureSourceByName(const std::string& name) const
-        { return mSprite.FindTextureSourceByName(name); }
-        TextureSource* GetTextureSource(size_t index)
-        { return mSprite.GetTextureSource(index); }
-        TextureSource* FindTextureSourceById(const std::string& id)
-        { return mSprite.FindTextureSourceById(id); }
-        TextureSource* FindTextureSourceByName(const std::string& name)
-        { return mSprite.FindTextureSourceByName(name); }
-
-        void SetBaseColor(const Color4f& color)
-        { mBaseColor = color; }
-        void SetTextureRect(std::size_t index, const FRect& rect)
-        { mSprite.SetTextureRect(index, rect); }
-        void SetTextureSource(std::size_t index, std::unique_ptr<TextureSource> source)
-        {  mSprite.SetTextureSource(index, std::move(source)); }
-        void SetTextureMinFilter(MinTextureFilter filter)
-        { mMinFilter = filter; }
-        void SetTextureMagFilter(MagTextureFilter filter)
-        { mMagFilter = filter; }
-        void SetTextureWrapX(TextureWrapping wrap)
-        { mWrapX = wrap; }
-        void SetTextureWrapY(TextureWrapping wrap)
-        { mWrapY = wrap; }
-        void SetTextureScaleX(float scale)
-        { mTextureScale.x = scale; }
-        void SetTextureScaleY(float scale)
-        { mTextureScale.y = scale; }
-        void SetTextureScale(const glm::vec2& scale)
-        { mTextureScale = scale; }
-        void SetTextureVelocityX(float x)
-        { mTextureVelocity.x = x; }
-        void SetTextureVelocityY(float y)
-        { mTextureVelocity.y = y; }
-        void SetTextureVelocityZ(float angle_radians)
-        { mTextureVelocity.z = angle_radians; }
-        void SetTextureRotation(float angle_radians)
-        { mTextureRotation = angle_radians; }
-        void SetTextureVelocity(const glm::vec2 linear, float radial)
-        { mTextureVelocity = glm::vec3(linear, radial); }
-        void SetFps(float fps)
-        { mSprite.SetFps(fps); }
-        void SetBlendFrames(float on_off)
-        { mBlendFrames = on_off; }
-        void SetLooping(bool on_off)
-        { mSprite.SetLooping(on_off); }
-        void SetParticleAction(ParticleAction action)
-        { mParticleAction = action; }
-        gfx::Color4f GetBaseColor() const
-        { return mBaseColor; }
-        gfx::FRect GetTextureRect(size_t index) const
-        { return mSprite.GetTextureRect(index); }
-        size_t GetNumTextures() const
-        { return mSprite.GetNumTextures(); }
-        bool GetBlendFrames() const
-        { return mBlendFrames; }
-        bool IsLooping() const
-        { return mSprite.IsLooping(); }
-        float GetFps() const
-        { return mSprite.GetFps(); }
-        float GetTextureScaleX() const
-        { return mTextureScale.x; }
-        float GetTextureScaleY() const
-        { return mTextureScale.y; }
-        float GetTextureVelocityX() const
-        { return mTextureVelocity.x; }
-        float GetTextureVelocityY() const
-        { return mTextureVelocity.y; }
-        float GetTextureVelocityZ() const
-        { return mTextureVelocity.z; }
-        float GetTextureRotation() const
-        { return mTextureRotation; }
-        MinTextureFilter GetTextureMinFilter() const
-        { return mMinFilter; }
-        MagTextureFilter GetTextureMagFilter() const
-        { return mMagFilter; }
-        TextureWrapping  GetTextureWrapX() const
-        { return mWrapX; }
-        TextureWrapping GetTextureWrapY() const
-        { return mWrapY; }
-        ParticleAction GetParticleAction() const
-        { return mParticleAction; }
-
-        virtual Type GetType() const override { return Type::Sprite; }
-        virtual Shader* GetShader(const State& state, Device& device) const override;
-        virtual std::size_t GetHash() const override;
-        virtual std::string GetProgramId(const State&) const override;
-        virtual std::unique_ptr<MaterialClass> Copy() const override;
-        virtual std::unique_ptr<MaterialClass> Clone() const override;
-        virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
-        virtual void ApplyStaticState(const State& state, Device& device, Program& program) const override;
-        virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson(const data::Reader& data) override;
-        virtual void BeginPacking(TexturePacker* packer) const override;
-        virtual void FinishPacking(const TexturePacker* packer) override;
-        SpriteClass& operator=(const SpriteClass&);
-    private:
-        bool mBlendFrames = true;
-        gfx::Color4f mBaseColor = gfx::Color::White;
-        glm::vec2 mTextureScale = {1.0f, 1.0f};
-        glm::vec3 mTextureVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
-        float mTextureRotation = 0.0f;
-        MinTextureFilter mMinFilter = MinTextureFilter::Default;
-        MagTextureFilter mMagFilter = MagTextureFilter::Default;
-        TextureWrapping mWrapX = TextureWrapping::Clamp;
-        TextureWrapping mWrapY = TextureWrapping::Clamp;
-        ParticleAction mParticleAction = ParticleAction::None;
-        TextureMap mSprite;
-    };
-
-    // Shade surfaces by sampling a single static texture
-    // and optionally modulate the output by a base color.
-    // Supports also alpha masks (i.e. 8bit textures with
-    // alpha channel only), so thus can be used with e.g.
-    // noise and text textures.
-    class TextureMap2DClass : public BuiltInMaterialClass
-    {
-    public:
-        TextureMap2DClass()
-        {
-            mTexture.SetNumTextures(1);
-            mTexture.SetType(TextureMap::Type::Texture2D);
-        }
-        TextureMap2DClass(const TextureMap2DClass& other, bool copy);
-        TextureMap2DClass(const TextureMap2DClass& other) : TextureMap2DClass(other, true)
-        {}
-        TextureSource& SetTexture(std::unique_ptr<TextureSource> source)
-        {
-            mTexture.SetTextureSource(0, std::move(source));
-            return *mTexture.GetTextureSource(0);
-        }
-        TextureSource& SetTexture(std::unique_ptr<TextureSource> source, const FRect& rect)
-        {
-            mTexture.SetTextureSource(0, std::move(source));
-            mTexture.SetTextureRect(0, rect);
-            return *mTexture.GetTextureSource(0);
-        }
-        void SetTextureRect(const FRect& rect)
-        { mTexture.SetTextureRect(0, rect); }
-        void SetTextureMinFilter(MinTextureFilter filter)
-        { mMinFilter = filter; }
-        void SetTextureMagFilter(MagTextureFilter filter)
-        { mMagFilter = filter; }
-        void SetTextureWrapX(TextureWrapping wrap)
-        { mWrapX = wrap; }
-        void SetTextureWrapY(TextureWrapping wrap)
-        { mWrapY = wrap; }
-        void SetTextureScaleX(float scale)
-        { mTextureScale.x = scale; }
-        void SetTextureScaleY(float scale)
-        { mTextureScale.y = scale; }
-        void SetTextureScale(const glm::vec2& scale)
-        { mTextureScale = scale; }
-        void SetTextureVelocityX(float x)
-        { mTextureVelocity.x = x; }
-        void SetTextureVelocityY(float y)
-        { mTextureVelocity.y = y; }
-        void SetTextureVelocityZ(float angle_radians)
-        { mTextureVelocity.z = angle_radians; }
-        void SetTextureRotation(float angle_radians)
-        { mTextureRotation = angle_radians; }
-        void SetTextureVelocity(const glm::vec2 linear, float radial)
-        { mTextureVelocity = glm::vec3(linear, radial); }
-        void SetBaseColor(const Color4f& color)
-        { mBaseColor = color; }
-        void SetParticleAction(ParticleAction action)
-        { mParticleAction = action; }
-        void ResetTexture()
-        { mTexture.ResetTextureSource(0); }
-        gfx::FRect GetTextureRect() const
-        { return mTexture.GetTextureRect(0); }
-        TextureSource* GetTextureSource()
-        { return mTexture.GetTextureSource(0); }
-        const TextureSource* GetTextureSource() const
-        { return mTexture.GetTextureSource(0); }
-        float GetTextureScaleX() const
-        { return mTextureScale.x; }
-        float GetTextureScaleY() const
-        { return mTextureScale.y; }
-        float GetTextureVelocityX() const
-        { return mTextureVelocity.x; }
-        float GetTextureVelocityY() const
-        { return mTextureVelocity.y; }
-        float GetTextureVelocityZ() const
-        { return mTextureVelocity.z; }
-        float GetTextureRotation() const
-        { return mTextureRotation; }
-        MinTextureFilter GetTextureMinFilter() const
-        { return mMinFilter; }
-        MagTextureFilter GetTextureMagFilter() const
-        { return mMagFilter; }
-        TextureWrapping  GetTextureWrapX() const
-        { return mWrapX; }
-        TextureWrapping GetTextureWrapY() const
-        { return mWrapY; }
-        Color4f GetBaseColor() const
-        { return mBaseColor; }
-        ParticleAction GetParticleAction() const
-        { return mParticleAction; }
-        virtual Type GetType() const override { return Type::Texture; }
-        virtual Shader* GetShader(const State& state, Device& device) const override;
-        virtual std::size_t GetHash() const override;
-        virtual std::string GetProgramId(const State&) const override;
-        virtual std::unique_ptr<MaterialClass> Copy() const override;
-        virtual std::unique_ptr<MaterialClass> Clone() const override;
-        virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
-        virtual void ApplyStaticState(const State&, Device& device, Program& program) const override;
-        virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson(const data::Reader& data) override;
-        virtual void BeginPacking(TexturePacker* packer) const override;
-        virtual void FinishPacking(const TexturePacker* packer) override;
-        TextureMap2DClass& operator=(const TextureMap2DClass&);
-    private:
-        gfx::Color4f mBaseColor;
-        glm::vec2 mTextureScale = {1.0f, 1.0f};
-        glm::vec3 mTextureVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
-        float mTextureRotation = 0.0f;
-        MinTextureFilter mMinFilter = MinTextureFilter::Default;
-        MagTextureFilter mMagFilter = MagTextureFilter::Default;
-        TextureWrapping mWrapX = TextureWrapping::Clamp;
-        TextureWrapping mWrapY = TextureWrapping::Clamp;
-        ParticleAction mParticleAction = ParticleAction::None;
-        TextureMap mTexture;
-    };
-
-    // Shade surfaces using an arbitrary user defined shading
-    // algorithm. The material can be configured with the
-    // shader URI that defines the shader GLSL file and with
-    // an arbitrary set of uniforms and texture maps.
-    class CustomMaterialClass : public MaterialClass
-    {
-    public:
-        CustomMaterialClass()
-        { mClassId = base::RandomString(10); }
-        CustomMaterialClass(const CustomMaterialClass& other, bool copy);
-        CustomMaterialClass(const CustomMaterialClass& other) : CustomMaterialClass(other, true) {}
-
-        void SetTextureMinFilter(MinTextureFilter filter)
-        { mMinFilter = filter; }
-        void SetTextureMagFilter(MagTextureFilter filter)
-        { mMagFilter = filter; }
-        void SetTextureWrapX(TextureWrapping wrap)
-        { mWrapX = wrap; }
-        void SetTextureWrapY(TextureWrapping wrap)
-        { mWrapY = wrap; }
-        void SetShaderUri(const std::string& uri)
-        { mShaderUri = uri; }
-        void SetShaderSrc(const std::string& src)
-        { mShaderSrc = src; }
-        void SetUniform(const std::string& name, const Uniform& value)
-        { mUniforms[name] = value; }
-        void SetUniform(const std::string& name, Uniform&& value)
-        { mUniforms[name] = std::move(value); }
-        Uniform* FindUniform(const std::string& name)
-        { return base::SafeFind(mUniforms, name); }
-        const Uniform* FindUniform(const std::string& name) const
-        { return base::SafeFind(mUniforms, name); }
-        template<typename T>
-        T* GetUniformValue(const std::string& name)
-        {
-            if (auto* ptr = base::SafeFind(mUniforms, name))
-                return std::get_if<T>(ptr);
-            return nullptr;
-        }
-        template<typename T>
-        const T* GetUniformValue(const std::string& name) const
-        {
-            if (auto* ptr = base::SafeFind(mUniforms, name))
-                return std::get_if<T>(ptr);
-            return nullptr;
-        }
-        void DeleteUniforms()
-        { mUniforms.clear(); }
-        void DeleteUniform(const std::string& name)
-        { mUniforms.erase(name); }
-        bool HasUniform(const std::string& name) const
-        { return base::SafeFind(mUniforms, name) != nullptr; }
-        template<typename T>
-        bool HasUniform(const std::string& name) const
-        {
-            if (const auto* ptr = base::SafeFind(mUniforms, name))
-                return std::get_if<T>(ptr) != nullptr;
-            return false;
-        }
-        UniformMap GetUniforms() const
-        { return mUniforms; }
-        std::string GetShaderUri() const
-        { return mShaderUri; }
-        std::string GetShaderSrc() const
-        { return mShaderSrc; }
-        MinTextureFilter GetTextureMinFilter() const
-        { return mMinFilter; }
-        MagTextureFilter GetTextureMagFilter() const
-        { return mMagFilter; }
-        TextureWrapping  GetTextureWrapX() const
-        { return mWrapX; }
-        TextureWrapping GetTextureWrapY() const
-        { return mWrapY; }
-
-        void DeleteTextureMaps()
-        { mTextureMaps.clear(); }
-        void SetTextureMap(std::unique_ptr<TextureMap> map);
-        void SetTextureMap(const TextureMap& map);
-        void DeleteTextureMap(const std::string& name);
-        bool HasTextureMap(const std::string& name) const;
-        TextureMap* FindTextureMap(const std::string& name);
-        const TextureMap* FindTextureMap(const std::string& name) const;
-
-        // helper functions to access the texture sources directly.
-        TextureSource* FindTextureSourceById(const std::string& id);
-        TextureSource* FindTextureSourceByName(const std::string& name);
-        const TextureSource* FindTextureSourceById(const std::string& id) const;
-        const TextureSource* FindTextureSourceByName(const std::string& name) const;
-        gfx::FRect FindTextureSourceRect(const TextureSource* source) const;
-        void SetTextureSourceRect(const TextureSource* source, const FRect& rect);
-        void DeleteTextureSource(const TextureSource* source);
-
-        std::unordered_set<std::string> GetTextureMapNames() const;
-        virtual void SetSurfaceType(SurfaceType surface) override
-        { mSurfaceType = surface; }
-        virtual void SetId(const std::string& id) override
-        { mClassId = id; }
-        virtual void SetName(const std::string& name) override
-        { mName = name; }
-        virtual Type GetType() const override { return Type::Custom; }
-        virtual SurfaceType GetSurfaceType() const override { return mSurfaceType; }
-        virtual Shader* GetShader(const State& state, Device& device) const override;
-        virtual std::size_t GetHash() const override;
-        virtual std::string GetId() const override { return mClassId; }
-        virtual std::string GetName() const override { return mName; }
-        virtual std::string GetProgramId(const State&) const override;
-        virtual std::unique_ptr<MaterialClass> Copy() const override;
-        virtual std::unique_ptr<MaterialClass> Clone() const override;
-        virtual void ApplyDynamicState(const State& state, Device& device, Program& program) const override;
-        virtual void ApplyStaticState(const State&, Device& device, Program& program) const override;
-        virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson(const data::Reader& data) override;
-        virtual void BeginPacking(TexturePacker* packer) const override;
-        virtual void FinishPacking(const TexturePacker* packer) override;
-        virtual bool TestFlag(Flags flag) const override
-        { return mFlags.test(flag); }
-        virtual void SetFlag(Flags flag, bool on_off) override
-        { mFlags.set(flag, on_off); }
-        CustomMaterialClass& operator=(const CustomMaterialClass& other);
     private:
         std::string mClassId;
         std::string mName;
         std::string mShaderUri;
         std::string mShaderSrc;
-        std::unordered_map<std::string, Uniform> mUniforms;
+        Type mType = Type::Color;
+        ParticleAction mParticleAction = ParticleAction::None;
         SurfaceType mSurfaceType = SurfaceType::Opaque;
-        MinTextureFilter mMinFilter = MinTextureFilter::Default;
-        MagTextureFilter mMagFilter = MagTextureFilter::Default;
-        TextureWrapping mWrapX = TextureWrapping::Clamp;
-        TextureWrapping mWrapY = TextureWrapping::Clamp;
-        std::vector<std::unique_ptr<TextureMap>> mTextureMaps;
+        float mGamma = 1.0f;
+        float mTextureRotation = 0.0f;
+        Color4f mColorMap[4] = {gfx::Color::White, gfx::Color::White,
+                                gfx::Color::White, gfx::Color::White};
+        glm::vec2 mColorWeight = {0.5f, 0.5f};
+        glm::vec2 mTextureScale = {1.0f, 1.0f};
+        glm::vec3 mTextureVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
+        MinTextureFilter mTextureMinFilter = MinTextureFilter::Default;
+        MagTextureFilter mTextureMagFilter = MagTextureFilter::Default;
+        TextureWrapping mTextureWrapX = TextureWrapping::Clamp;
+        TextureWrapping mTextureWrapY = TextureWrapping::Clamp;
         base::bitflag<Flags> mFlags;
+        std::unordered_map<std::string, Uniform> mUniforms;
+        std::vector<std::unique_ptr<TextureMap>> mTextureMaps;
     };
+
+    using ColorClass = MaterialClass;
+    using GradientClass = MaterialClass;
+    using SpriteClass = MaterialClass;
+    using TextureMap2DClass = MaterialClass;
+    using CustomMaterialClass = MaterialClass;
 
     // Material instance. Each instance can contain and alter the
     // instance specific state even between instances that refer
