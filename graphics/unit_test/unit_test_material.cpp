@@ -33,8 +33,11 @@ const To* SameCast(const From* from, const To* to)
 
 void unit_test_maps()
 {
+    TEST_CASE(test::Type::Feature)
+
     {
         gfx::TextureMap texture;
+        texture.SetName("hehe");
         texture.SetType(gfx::TextureMap::Type::Texture2D);
         texture.SetNumTextures(1);
         texture.SetTextureSource(0, gfx::LoadTextureFromFile("file.png"));
@@ -48,18 +51,21 @@ void unit_test_maps()
         gfx::TextureMap other;
         other.FromJson(json);
         TEST_REQUIRE(other.GetHash() == texture.GetHash());
+        TEST_REQUIRE(other.GetName() == "hehe");
         TEST_REQUIRE(other.GetSamplerName(0) == "kFoobar");
         TEST_REQUIRE(other.GetRectUniformName(0) == "kFoobarRect");
         TEST_REQUIRE(other.GetTextureRect(0) == gfx::FRect(0.5f, 0.6f, 0.7f, 0.8f));
 
         gfx::TextureMap copy(other);
         TEST_REQUIRE(copy.GetHash() == texture.GetHash());
+        TEST_REQUIRE(copy.GetName() == "hehe");
         TEST_REQUIRE(copy.GetSamplerName(0) == "kFoobar");
         TEST_REQUIRE(copy.GetRectUniformName(0) == "kFoobarRect");
         TEST_REQUIRE(copy.GetTextureRect(0) == gfx::FRect(0.5f, 0.6f, 0.7f, 0.8f));
 
         copy = texture;
         TEST_REQUIRE(copy.GetHash() == texture.GetHash());
+        TEST_REQUIRE(copy.GetName() == "hehe");
         TEST_REQUIRE(copy.GetSamplerName(0) == "kFoobar");
         TEST_REQUIRE(copy.GetRectUniformName(0) == "kFoobarRect");
         TEST_REQUIRE(copy.GetTextureRect(0) == gfx::FRect(0.5f, 0.6f, 0.7f, 0.8f));
@@ -67,6 +73,7 @@ void unit_test_maps()
 
     {
         gfx::TextureMap sprite;
+        sprite.SetName("sprite0");
         sprite.SetType(gfx::TextureMap::Type::Sprite);
         sprite.SetNumTextures(2);
         sprite.SetTextureSource(0, gfx::LoadTextureFromFile("frame_0.png"));
@@ -82,6 +89,7 @@ void unit_test_maps()
 
         gfx::TextureMap other;
         TEST_REQUIRE(other.FromJson(json));
+        TEST_REQUIRE(other.GetName() == "sprite0");
         TEST_REQUIRE(other.GetHash() == sprite.GetHash());
         TEST_REQUIRE(other.GetFps() == real::float32(10.0f));
         TEST_REQUIRE(other.GetSamplerName(0) == "kTexture0");
@@ -131,6 +139,8 @@ void unit_test_maps()
 
 void unit_test_color()
 {
+    TEST_CASE(test::Type::Feature)
+
     gfx::ColorClass klass;
     klass.SetGamma(1.5f);
     klass.SetStatic(false);
@@ -181,6 +191,8 @@ void unit_test_color()
 
 void unit_test_gradient()
 {
+    TEST_CASE(test::Type::Feature)
+
     gfx::GradientClass klass;
     klass.SetGamma(1.5f);
     klass.SetStatic(false);
@@ -241,6 +253,8 @@ void unit_test_gradient()
 
 void unit_test_texture()
 {
+    TEST_CASE(test::Type::Feature)
+
     gfx::detail::TextureFileSource texture;
     texture.SetFileName("file.png");
     texture.SetName("file");
@@ -335,6 +349,8 @@ void unit_test_texture()
 }
 void unit_test_sprite()
 {
+    TEST_CASE(test::Type::Feature)
+
     gfx::SpriteClass klass;
     klass.SetGamma(1.5f);
     klass.SetStatic(false);
@@ -504,6 +520,8 @@ void unit_test_sprite()
 
 void unit_test_custom()
 {
+    TEST_CASE(test::Type::Feature)
+
     gfx::CustomMaterialClass klass;
     klass.SetShaderUri("my_shader.glsl");
     klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Emissive);
@@ -522,17 +540,20 @@ void unit_test_custom()
 
     {
         gfx::TextureMap texture;
+        texture.SetName("texture");
         texture.SetType(gfx::TextureMap::Type::Texture2D);
         texture.SetNumTextures(1);
         texture.SetTextureSource(0, gfx::LoadTextureFromFile("file.png"));
         texture.SetTextureRect(0, gfx::FRect(0.5f, 0.6f, 0.7f, 0.8f));
         texture.SetSamplerName("kFoobar");
         texture.SetRectUniformName("kFoobarRect");
-        klass.SetTextureMap("texture", texture);
+
+        klass.SetTextureMap(texture);
     }
 
     {
         gfx::TextureMap sprite;
+        sprite.SetName("sprite");
         sprite.SetType(gfx::TextureMap::Type::Sprite);
         sprite.SetFps(10.0f);
         sprite.SetNumTextures(2);
@@ -542,9 +563,8 @@ void unit_test_custom()
         sprite.SetSamplerName("kTexture1", 1);
         sprite.SetRectUniformName("kTextureRect0", 0);
         sprite.SetRectUniformName("kTextureRect1", 1);
-        klass.SetTextureMap("sprite", sprite);
+        klass.SetTextureMap(sprite);
     }
-
 
     {
         data::JsonObject json;
@@ -616,6 +636,7 @@ void unit_test_custom()
     }
 }
 
+EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     unit_test_maps();
@@ -626,3 +647,4 @@ int test_main(int argc, char* argv[])
     unit_test_custom();
     return 0;
 }
+) // TEST_MAIN

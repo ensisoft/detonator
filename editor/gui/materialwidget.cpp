@@ -547,12 +547,13 @@ constexpr auto json = R"(
         tex->SetName("Noise");
 
         gfx::TextureMap2D map;
+        map.SetName("kNoise");
         map.SetNumTextures(1);
         map.SetTextureSource(0, std::move(tex));
         map.SetRectUniformName("kNoiseRect");
         map.SetSamplerName("kNoise");
         custom->SetShaderUri(app::ToUtf8(glsl_uri));
-        custom->SetTextureMap("kNoise", std::move(map));
+        custom->SetTextureMap(std::move(map));
 
         ApplyShaderDescription();
         ReloadShaders();
@@ -1232,7 +1233,8 @@ void MaterialWidget::ApplyShaderDescription()
                 {
                     auto map = std::make_unique<gfx::TextureMap2D>();
                     texture = map.get();
-                    material->SetTextureMap(name, std::move(map));
+                    texture->SetName(name);
+                    material->SetTextureMap(std::move(map));
                 }
                 texture->SetRectUniformName(std::move(texture_rect_uniform_name));
                 texture->SetSamplerName(std::move(sampler_name));
@@ -1261,7 +1263,8 @@ void MaterialWidget::ApplyShaderDescription()
                 {
                     auto map = std::make_unique<gfx::SpriteMap>();
                     sprite = map.get();
-                    material->SetTextureMap(name, std::move(map));
+                    sprite->SetName(name);
+                    material->SetTextureMap(std::move(map));
                 }
                 sprite->SetSamplerName(sampler_name0, 0);
                 sprite->SetSamplerName(sampler_name1, 1);
