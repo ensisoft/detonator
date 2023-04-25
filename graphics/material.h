@@ -544,7 +544,7 @@ namespace gfx
             // to a single texture sampler.
             Texture2D,
             // Sprite texture map cycles over a series of textures over time
-            // and chooses 2 textures closes to the current point in time
+            // and chooses 2 textures closest to the current point in time
             // based on the sprite's fps setting.
             Sprite
         };
@@ -573,6 +573,11 @@ namespace gfx
             // as configured in the texture map.
             std::string rect_names[2];
         };
+        struct SpriteSheet {
+            unsigned cols = 0;
+            unsigned rows = 0;
+        };
+
         TextureMap() = default;
         TextureMap(const TextureMap& other, bool copy);
         TextureMap(const TextureMap& other) : TextureMap(other, true) {}
@@ -584,6 +589,8 @@ namespace gfx
         { return mFps; }
         inline bool IsLooping() const noexcept
         { return mLooping; }
+        inline bool HasSpriteSheet() const noexcept
+        { return mSpriteSheet.has_value(); }
 
         // Reset all texture objects. After this the texture map contains no textures.
         inline void ResetTextures() noexcept
@@ -599,6 +606,12 @@ namespace gfx
         { mFps = fps; }
         inline void SetLooping(bool looping) noexcept
         { mLooping = looping; }
+        inline void SetSpriteSheet(const SpriteSheet& sheet) noexcept
+        { mSpriteSheet = sheet; }
+        inline void ResetSpriteSheet() noexcept
+        { mSpriteSheet.reset(); }
+        inline const SpriteSheet* GetSpriteSheet() const noexcept
+        { return base::GetOpt(mSpriteSheet); }
         inline void SetSamplerName(std::string name, size_t index = 0) noexcept
         { mSamplerName[index] = std::move(name); }
         inline void SetRectUniformName(std::string name, size_t index = 0) noexcept
@@ -672,6 +685,8 @@ namespace gfx
         std::unique_ptr<TextureMap> Clone() const
         { return std::make_unique<TextureMap>(*this, false); }
 
+        unsigned GetSpriteSpriteFrameCount() const;
+
         TextureMap& operator=(const TextureMap& other);
     private:
         Type mType = Type::Texture2D;
@@ -683,6 +698,7 @@ namespace gfx
         std::vector<Texture> mTextures;
         std::string mSamplerName[2];
         std::string mRectUniformName[2];
+        std::optional<SpriteSheet> mSpriteSheet;
         bool mLooping = true;
     };
 
@@ -1049,6 +1065,8 @@ namespace gfx
     class SpriteClass : public BuiltInMaterialClass
     {
     public:
+        using SpriteSheet = TextureMap::SpriteSheet;
+
         SpriteClass()
         {
             mSprite.SetType(TextureMap::Type::Sprite);
@@ -1056,8 +1074,17 @@ namespace gfx
         SpriteClass(const SpriteClass& other, bool copy);
         SpriteClass(const SpriteClass& other) : SpriteClass(other, true)
         {}
-        void ResetTextures()
+        inline void ResetSpriteSheet() noexcept
+        { mSprite.ResetSpriteSheet(); }
+        inline void SetSpriteSheet(const SpriteSheet& sheet) noexcept
+        { mSprite.SetSpriteSheet(sheet); }
+        inline const SpriteSheet* GetSpriteSheet() const noexcept
+        { return mSprite.GetSpriteSheet(); }
+        inline bool HasSpriteSheet() const noexcept
+        {return mSprite.HasSpriteSheet(); }
+        inline void ResetTextures() noexcept
         { mSprite.ResetTextures(); }
+
         TextureSource& AddTexture(std::unique_ptr<TextureSource> source)
         {
             auto textures = mSprite.GetNumTextures();
