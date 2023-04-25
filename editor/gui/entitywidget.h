@@ -322,8 +322,6 @@ namespace gui
         std::unordered_map<std::string, QString> mComments;
         // the entity preview window if any.
         std::unique_ptr<PlayWindow> mPreview;
-        // the animator dialog if any.
-        std::unique_ptr<DlgAnimator> mAnimator;
     };
 
     QString GenerateEntityScriptSource(QString entity);
