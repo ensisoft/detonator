@@ -2059,15 +2059,70 @@ CustomMaterialClass::CustomMaterialClass(const CustomMaterialClass& other, bool 
     mFlags       = other.mFlags;
     for (const auto& map : other.mTextureMaps)
     {
-        mTextureMaps[map.first] = copy ? map.second->Copy() : map.second->Clone();
+        mTextureMaps.push_back( copy ? map->Copy() : map->Clone());
     }
+}
+
+void CustomMaterialClass::SetTextureMap(std::unique_ptr<TextureMap> map)
+{
+    // todo: use the ID here =
+    for (size_t i=0; i<mTextureMaps.size(); ++i)
+    {
+        if (mTextureMaps[i]->GetName() == map->GetName())
+        {
+            mTextureMaps[i] = std::move(map);
+            return;
+        }
+    }
+    mTextureMaps.push_back(std::move(map));
+}
+
+void CustomMaterialClass::SetTextureMap(const TextureMap& map)
+{
+    SetTextureMap(std::make_unique<TextureMap>(map, true));
+}
+
+void CustomMaterialClass::DeleteTextureMap(const std::string& name)
+{
+    base::EraseRemove(mTextureMaps, [&name](const auto& map) {
+        return map->GetName() == name;
+    });
+}
+
+bool CustomMaterialClass::HasTextureMap(const std::string& name) const
+{
+    for (const auto& map : mTextureMaps)
+    {
+        if (map->GetName() == name)
+            return true;
+    }
+    return false;
+}
+
+const TextureMap* CustomMaterialClass::FindTextureMap(const std::string& name) const
+{
+    for (const auto& map : mTextureMaps)
+    {
+        if (map->GetName() == name)
+            return map.get();
+    }
+    return nullptr;
+}
+
+TextureMap* CustomMaterialClass::FindTextureMap(const std::string& name)
+{
+    for (const auto& map : mTextureMaps)
+    {
+        if (map->GetName() == name)
+            return map.get();
+    }
+    return nullptr;
 }
 
 TextureSource* CustomMaterialClass::FindTextureSourceById(const std::string& id)
 {
-    for (const auto& pair : mTextureMaps)
+    for (const auto& map : mTextureMaps)
     {
-        auto& map = pair.second;
         if (auto* source = map->FindTextureSourceById(id))
             return source;
     }
@@ -2075,9 +2130,8 @@ TextureSource* CustomMaterialClass::FindTextureSourceById(const std::string& id)
 }
 TextureSource* CustomMaterialClass::FindTextureSourceByName(const std::string& name)
 {
-    for (const auto& pair : mTextureMaps)
+    for (const auto& map : mTextureMaps)
     {
-        auto& map = pair.second;
         if (auto* source = map->FindTextureSourceByName(name))
             return source;
     }
@@ -2085,9 +2139,8 @@ TextureSource* CustomMaterialClass::FindTextureSourceByName(const std::string& n
 }
 const TextureSource* CustomMaterialClass::FindTextureSourceById(const std::string& id) const
 {
-    for (const auto& pair : mTextureMaps)
+    for (const auto& map : mTextureMaps)
     {
-        const auto& map = pair.second;
         if (const auto* source = map->FindTextureSourceById(id))
             return source;
     }
@@ -2095,9 +2148,8 @@ const TextureSource* CustomMaterialClass::FindTextureSourceById(const std::strin
 }
 const TextureSource* CustomMaterialClass::FindTextureSourceByName(const std::string& name) const
 {
-    for (const auto& pair : mTextureMaps)
+    for (const auto& map : mTextureMaps)
     {
-        auto& map = pair.second;
         if (auto* source = map->FindTextureSourceByName(name))
             return source;
     }
@@ -2107,9 +2159,8 @@ const TextureSource* CustomMaterialClass::FindTextureSourceByName(const std::str
 gfx::FRect CustomMaterialClass::FindTextureSourceRect(const TextureSource* source) const
 {
     FRect rect;
-    for (const auto& pair : mTextureMaps)
+    for (const auto& map : mTextureMaps)
     {
-        const auto& map = pair.second;
         for (size_t i=0; i<map->GetNumTextures(); ++i)
         {
             const auto& src = map->GetTextureSource(i);
@@ -2122,9 +2173,8 @@ gfx::FRect CustomMaterialClass::FindTextureSourceRect(const TextureSource* sourc
 
 void CustomMaterialClass::SetTextureSourceRect(const TextureSource* source, const FRect& rect)
 {
-    for (auto& pair : mTextureMaps)
+    for (auto& map : mTextureMaps)
     {
-        auto& map = pair.second;
         for (size_t i=0; i<map->GetNumTextures(); ++i)
         {
             const auto* src = map->GetTextureSource(i);
@@ -2139,9 +2189,8 @@ void CustomMaterialClass::SetTextureSourceRect(const TextureSource* source, cons
 
 void CustomMaterialClass::DeleteTextureSource(const TextureSource* source)
 {
-    for (auto& pair : mTextureMaps)
+    for (auto& map : mTextureMaps)
     {
-        auto& map = pair.second;
         for (size_t i=0; i<map->GetNumTextures(); ++i)
         {
             const auto* src = map->GetTextureSource(i);
@@ -2157,8 +2206,8 @@ void CustomMaterialClass::DeleteTextureSource(const TextureSource* source)
 std::unordered_set<std::string> CustomMaterialClass::GetTextureMapNames() const
 {
     std::unordered_set<std::string> set;
-    for (const auto& p : mTextureMaps)
-        set.insert(p.first);
+    for (const auto& map : mTextureMaps)
+        set.insert(map->GetName());
     return set;
 }
 
@@ -2232,14 +2281,8 @@ std::size_t CustomMaterialClass::GetHash() const
         hash = base::hash_combine(hash, *uniform);
     }
 
-    keys.clear();
     for (const auto& map : mTextureMaps)
-        keys.insert(map.first);
-
-    for (const auto& key : keys)
     {
-        const auto* map = base::SafeFind(mTextureMaps, key);
-        hash = base::hash_combine(hash, key);
         hash = base::hash_combine(hash, map->GetHash());
     }
     return hash;
@@ -2291,7 +2334,7 @@ void CustomMaterialClass::ApplyDynamicState(const State& state, Device& device, 
         ts.current_time    = state.material_time;
         ts.group_tag       = mClassId;
         TextureMap::BoundState binds;
-        if (!map.second->BindTextures(ts, device, binds))
+        if (!map->BindTextures(ts, device, binds))
             return;
         for (unsigned i=0; i<2; ++i)
         {
@@ -2348,10 +2391,6 @@ void CustomMaterialClass::IntoJson(data::Writer& data) const
     for (const auto& uniform : mUniforms)
         uniform_keys.insert(uniform.first);
 
-    std::set<std::string> texture_keys;
-    for (const auto& map : mTextureMaps)
-        texture_keys.insert(map.first);
-
     for (const auto& key : uniform_keys)
     {
         const auto& uniform = *base::SafeFind(mUniforms, key);
@@ -2362,14 +2401,12 @@ void CustomMaterialClass::IntoJson(data::Writer& data) const
         }, uniform);
         data.AppendChunk("uniforms", std::move(chunk));
     }
-    for (const auto& key : texture_keys)
+    for (const auto& map : mTextureMaps)
     {
-        const auto& map = SafeFind(mTextureMaps, key);
         auto chunk = data.NewWriteChunk();
         map->IntoJson(*chunk);
         ASSERT(chunk->HasValue("name")); // moved into TextureMap::IntoJson
         ASSERT(chunk->HasValue("type")); // moved into TextureMap::IntoJson
-        ASSERT(map->GetName() == key);
         //chunk->Write("name", key);
         //chunk->Write("type", map->GetType());
         data.AppendChunk("texture_maps", std::move(chunk));
@@ -2424,7 +2461,7 @@ bool CustomMaterialClass::FromJson(const data::Reader& data)
             {
                 ok &= map->FromJson(*chunk);
             }
-            mTextureMaps[name] = std::move(map);
+            mTextureMaps.push_back(std::move(map));
         } else ok = false;
     }
     return ok;
@@ -2433,9 +2470,8 @@ void CustomMaterialClass::BeginPacking(TexturePacker* packer) const
 {
     // todo: rethink this packing stuff.
 
-    for (const auto& pair : mTextureMaps)
+    for (const auto& map : mTextureMaps)
     {
-        auto& map = pair.second;
         for (size_t i=0; i<map->GetNumTextures(); ++i)
         {
             const auto& rect   = map->GetTextureRect(i);
@@ -2448,9 +2484,8 @@ void CustomMaterialClass::BeginPacking(TexturePacker* packer) const
 }
 void CustomMaterialClass::FinishPacking(const TexturePacker* packer)
 {
-    for (auto& pair : mTextureMaps)
+    for (auto& map : mTextureMaps)
     {
-        auto& map = pair.second;
         for (size_t i=0; i<map->GetNumTextures(); ++i)
         {
             auto* source = map->GetTextureSource(i);
