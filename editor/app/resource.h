@@ -584,35 +584,35 @@ namespace app
     public:
         static constexpr auto TypeValue = detail::ResourceTypeTraits<BaseType>::Type;
 
-        GameResource(const Content& content, const QString& name)
+        GameResource(const Content& content, const AnyString& name)
         {
             mContent = std::make_shared<Content>(content);
             SetName(name);
         }
-        GameResource(Content&& content, const QString& name)
+        GameResource(Content&& content, const AnyString& name)
         {
             mContent = std::make_shared<Content>(std::move(content));
             SetName(name);
         }
-        GameResource(std::shared_ptr<Content> content, const QString& name)
+        GameResource(std::shared_ptr<Content> content, const AnyString& name)
         {
             mContent = content;
             SetName(name);
         }
         template<typename T>
-        GameResource(std::unique_ptr<T> content, const QString& name)
+        GameResource(std::unique_ptr<T> content, const AnyString& name)
         {
             std::shared_ptr<T> shared(std::move(content));
             mContent = std::static_pointer_cast<Content>(shared);
             SetName(name);
         }
         template<typename T>
-        GameResource(std::shared_ptr<T> content, const QString& name)
+        GameResource(std::shared_ptr<T> content, const AnyString& name)
         {
             mContent = std::static_pointer_cast<Content>(content);
             SetName(name);
         }
-        GameResource(const QString& name)
+        GameResource(const AnyString& name)
         {
             mContent = std::make_shared<Content>();
             SetName(name);
@@ -765,17 +765,17 @@ namespace app
     {
     public:
         MaterialResource() = default;
-        MaterialResource(const gfx::MaterialClass& klass, const QString& name)
+        MaterialResource(const gfx::MaterialClass& klass, const AnyString& name)
         {
             mClass = klass.Copy();
             SetName(name);
         }
-        MaterialResource(std::shared_ptr<gfx::MaterialClass> klass, const QString& name)
+        MaterialResource(std::shared_ptr<gfx::MaterialClass> klass, const AnyString& name)
         {
             mClass = klass;
             SetName(name);
         }
-        MaterialResource(std::unique_ptr<gfx::MaterialClass> klass, const QString& name)
+        MaterialResource(std::unique_ptr<gfx::MaterialClass> klass, const AnyString& name)
         {
             mClass = std::move(klass);
             SetName(name);
