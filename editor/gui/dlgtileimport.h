@@ -50,7 +50,7 @@ namespace gui
 
         QString GetName() const;
         void SetName(const QString& name);
-
+        void InstallEventFilter(QObject* receiver);
     private:
         Ui::ImportedTile mUI;
     private:
@@ -95,6 +95,8 @@ namespace gui
         void finished();
         void timer();
     private:
+        virtual void keyPressEvent(QKeyEvent* event) override;
+        virtual bool eventFilter(QObject* destination, QEvent* event) override;
         void ToggleSelection();
         void LoadImageFile(const QString& file);
         void LoadJsonFile(const QString& file);
@@ -103,6 +105,7 @@ namespace gui
         void OnMousePress(QMouseEvent* mickey);
         void OnMouseMove(QMouseEvent* mickey);
         void OnMouseRelease(QMouseEvent* mickey);
+        bool OnKeyPress(QKeyEvent* key);
     private:
         Ui::DlgTileImport mUI;
     private:
