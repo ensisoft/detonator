@@ -973,6 +973,108 @@ private:
     float mTime = 0.0f;
 };
 
+class SpriteSheetTest : public GraphicsTest
+{
+public:
+    SpriteSheetTest()
+    {
+        mMaterial = std::make_shared<gfx::SpriteClass>();
+        mMaterial->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+        mMaterial->AddTexture(gfx::LoadTextureFromFile("textures/IdleSheet.png")).SetName("IdleSheet");
+        // the sheet has 32x32 pixel frames.
+        // we're taking the idle animation from the middle of the sheet
+        // with the character facing south.
+        const float tile_size_px = 32;
+        const float tile_height_px = 32;
+        const float img_width_px = 256;
+        const float img_height_px = 256;
+        gfx::FRect rect;
+        rect.Translate(0.0f, 4*tile_height_px / img_height_px);
+        rect.SetWidth(1.0f);
+        rect.SetHeight(tile_height_px / img_height_px);
+
+        gfx::SpriteClass::SpriteSheet sheet;
+        sheet.rows = 1;
+        sheet.cols = 8;
+
+        mMaterial->SetTextureRect(0, rect);
+        mMaterial->SetSpriteSheet(sheet);
+        mMaterial->SetLooping(true);
+        mMaterial->SetBlendFrames(false);
+        mMaterial->SetFps(15.0f);
+    }
+
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::MaterialClassInst material(mMaterial);
+        material.SetRuntime(mTime);
+
+        // whole texture
+        {
+            mMaterial->SetTextureScaleX(1.0);
+            mMaterial->SetTextureScaleY(1.0);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
+            gfx::FillRect(painter, gfx::FRect(128, 128, 128, 128), material);
+
+            mMaterial->SetTextureScaleX(2.0);
+            mMaterial->SetTextureScaleY(2.0);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
+            gfx::FillRect(painter, gfx::FRect(128+150, 128, 128, 128), material);
+
+            mMaterial->SetTextureScaleX(2.0);
+            mMaterial->SetTextureScaleY(2.0);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
+            gfx::FillRect(painter, gfx::FRect(128+300, 128, 128, 128), material);
+
+            mMaterial->SetTextureScaleX(-2.0);
+            mMaterial->SetTextureScaleY(-2.0);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
+            gfx::FillRect(painter, gfx::FRect(128+450, 128, 128, 128), material);
+        }
+
+        // texture velocity + rotation
+        {
+            mMaterial->SetTextureScaleX(1.0f);
+            mMaterial->SetTextureScaleY(1.0f);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
+            mMaterial->SetTextureVelocityX(0.2);
+            mMaterial->SetTextureVelocityY(0.0f);
+            gfx::FillRect(painter, gfx::FRect(128, 350, 128, 128), material);
+
+            mMaterial->SetTextureVelocityX(0.0);
+            mMaterial->SetTextureVelocityY(0.2);
+            gfx::FillRect(painter, gfx::FRect(128+150, 350, 128, 128), material);
+
+            mMaterial->SetTextureVelocityX(0.0f);
+            mMaterial->SetTextureVelocityY(0.0f);
+            mMaterial->SetTextureVelocityZ(3.134);
+            mMaterial->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Clamp);
+            mMaterial->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Clamp);
+            gfx::FillRect(painter, gfx::FRect(128+450, 350, 128, 128), material);
+        }
+
+        mMaterial->SetTextureVelocityX(0.0f);
+        mMaterial->SetTextureVelocityY(0.0f);
+        mMaterial->SetTextureVelocityZ(0.0f);
+        mMaterial->SetTextureScaleX(1.0f);
+        mMaterial->SetTextureScaleY(1.0f);
+        mMaterial->SetTextureRotation(0.0f);
+    }
+
+    virtual void Update(float dt) override
+    { mTime += dt; }
+    virtual std::string GetName() const override
+    { return "SpriteSheetTest"; }
+private:
+    std::shared_ptr<gfx::SpriteClass> mMaterial;
+    float mTime = 0.0f;
+};
+
 class TransformTest : public GraphicsTest
 {
 public:
@@ -2166,6 +2268,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new TextureBlurTest);
     tests.emplace_back(new GradientTest);
     tests.emplace_back(new SpriteTest);
+    tests.emplace_back(new SpriteSheetTest);
     tests.emplace_back(new StencilTest);
     tests.emplace_back(new PolygonTest);
     tests.emplace_back(new TileBatchTest);

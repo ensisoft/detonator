@@ -540,6 +540,7 @@ TextureMap::TextureMap(const TextureMap& other, bool copy)
     mSamplerName[1]     = other.mSamplerName[1];
     mRectUniformName[0] = other.mRectUniformName[0];
     mRectUniformName[1] = other.mRectUniformName[1];
+    mSpriteSheet        = other.mSpriteSheet;
     for (const auto& texture : other.mTextures)
     {
         Texture dupe;
@@ -560,6 +561,7 @@ size_t TextureMap::GetHash() const noexcept
     hash = base::hash_combine(hash, mRectUniformName[0]);
     hash = base::hash_combine(hash, mRectUniformName[1]);
     hash = base::hash_combine(hash, mLooping);
+    hash = base::hash_combine(hash, mSpriteSheet);
     for (const auto& texture : mTextures)
     {
         const auto* source = texture.source.get();
@@ -580,7 +582,7 @@ bool TextureMap::BindTextures(const BindingState& state, Device& device, BoundSt
         const auto frame_fraction = std::fmod(state.current_time, frame_interval);
         const auto blend_coeff = frame_fraction/frame_interval;
         const auto first_index = (unsigned)(state.current_time/frame_interval);
-        const auto frame_count = (unsigned)mTextures.size();
+        const auto frame_count =  GetSpriteSpriteFrameCount();
         const auto max_index = frame_count - 1;
         const auto texture_count = std::min(frame_count, 2u);
         const auto first_frame  = mLooping
@@ -596,17 +598,51 @@ bool TextureMap::BindTextures(const BindingState& state, Device& device, BoundSt
         TextureSource::Environment texture_source_env;
         texture_source_env.dynamic_content = state.dynamic_content;
 
-        for (unsigned i=0; i<2; ++i)
+        // if we're using a single sprite sheet then the sprite frames
+        // are sub-rects inside the first texture rect.
+        if (const auto* spritesheet = GetSpriteSheet())
         {
-            const auto& sprite  = mTextures[frame_index[i]];
-            const auto& source  = sprite.source;
+            const auto& sprite = mTextures[0];
+            const auto& source = sprite.source;
+            const auto& rect   = sprite.rect;
+            const auto tile_width = rect.GetWidth() / spritesheet->cols;
+            const auto tile_height = rect.GetHeight() / spritesheet->rows;
+            const auto tile_xpos = rect.GetX();
+            const auto tile_ypos = rect.GetY();
+
             if (auto* texture = source->Upload(texture_source_env, device))
             {
-                result.textures[i]      = texture;
-                result.rects[i]         = sprite.rect;
-                result.sampler_names[i] = mSamplerName[i];
-                result.rect_names[i]    = mRectUniformName[i];
+                for (unsigned i = 0; i < 2; ++i)
+                {
+                    const auto tile_index = frame_index[i];
+                    const auto tile_row = tile_index / spritesheet->cols;
+                    const auto tile_col = tile_index % spritesheet->cols;
+                    FRect tile_rect;
+                    tile_rect.Resize(tile_width, tile_height);
+                    tile_rect.Move(tile_xpos, tile_ypos);
+                    tile_rect.Translate(tile_col * tile_width, tile_row * tile_height);
+
+                    result.textures[i]      = texture;
+                    result.rects[i]         = tile_rect;
+                    result.sampler_names[i] = mSamplerName[i];
+                    result.rect_names[i]    = mRectUniformName[i];
+                }
             } else return false;
+        }
+        else
+        {
+            for (unsigned i = 0; i < 2; ++i)
+            {
+                const auto& sprite = mTextures[frame_index[i]];
+                const auto& source = sprite.source;
+                if (auto* texture = source->Upload(texture_source_env, device))
+                {
+                    result.textures[i]      = texture;
+                    result.rects[i]         = sprite.rect;
+                    result.sampler_names[i] = mSamplerName[i];
+                    result.rect_names[i]    = mRectUniformName[i];
+                } else return false;
+            }
         }
         result.blend_coefficient = blend_coeff;
     }
@@ -636,6 +672,12 @@ void TextureMap::IntoJson(data::Writer& data) const
     data.Write("rect_name0",    mRectUniformName[0]);
     data.Write("rect_name1",    mRectUniformName[1]);
     data.Write("looping",       mLooping);
+    if (const auto* spritesheet = GetSpriteSheet())
+    {
+        data.Write("spritesheet_rows", spritesheet->rows);
+        data.Write("spritesheet_cols", spritesheet->cols);
+    }
+
     for (const auto& texture : mTextures)
     {
         auto chunk = data.NewWriteChunk();
@@ -659,6 +701,15 @@ bool TextureMap::FromJson(const data::Reader& data)
     ok &= data.Read("rect_name0",    &mRectUniformName[0]);
     ok &= data.Read("rect_name1",    &mRectUniformName[1]);
     ok &= data.Read("looping",       &mLooping);
+
+    SpriteSheet spritesheet;
+    if (data.HasValue("spritesheet_rows") &&
+        data.HasValue("spritesheet_cols"))
+    {
+        ok &= data.Read("spritesheet_rows", &spritesheet.rows);
+        ok &= data.Read("spritesheet_cols", &spritesheet.cols);
+        mSpriteSheet = spritesheet;
+    }
 
     for (unsigned i=0; i<data.GetNumChunks("textures"); ++i)
     {
@@ -813,6 +864,17 @@ const TextureMap* TextureMap::AsTextureMap2D() const
     return nullptr;
 }
 
+unsigned TextureMap::GetSpriteSpriteFrameCount() const
+{
+    if (mType != Type::Sprite)
+        return 0;
+
+    if (const auto* ptr = GetSpriteSheet())
+        return ptr->cols * ptr->rows;
+
+    return mTextures.size();
+}
+
 TextureMap& TextureMap::operator=(const TextureMap& other)
 {
     if (this == &other)
@@ -826,6 +888,7 @@ TextureMap& TextureMap::operator=(const TextureMap& other)
     std::swap(mRectUniformName[0], tmp.mRectUniformName[0]);
     std::swap(mRectUniformName[1], tmp.mRectUniformName[1]);
     std::swap(mLooping,            tmp.mLooping);
+    std::swap(mSpriteSheet,        tmp.mSpriteSheet);
     return *this;
 }
 

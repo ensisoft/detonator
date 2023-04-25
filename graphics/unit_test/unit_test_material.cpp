@@ -354,6 +354,10 @@ void unit_test_sprite()
     klass.SetTextureRotation(2.5f);
     klass.SetParticleAction(gfx::TextureMap2DClass::ParticleAction::Rotate);
     klass.SetName("my sprite");
+    gfx::SpriteClass::SpriteSheet sheet;
+    sheet.cols = 4;
+    sheet.rows = 1;
+    klass.SetSpriteSheet(sheet);
 
     gfx::detail::TextureFileSource texture;
     texture.SetFileName("file.png");
@@ -405,6 +409,9 @@ void unit_test_sprite()
         TEST_REQUIRE(ret->GetHash() == klass.GetHash());
         TEST_REQUIRE(ret->GetSurfaceType() == gfx::MaterialClass::SurfaceType::Emissive);
         TEST_REQUIRE(ret->PremultipliedAlpha());
+        TEST_REQUIRE(ret->AsSprite()->HasSpriteSheet());
+        TEST_REQUIRE(ret->AsSprite()->GetSpriteSheet()->rows == 1);
+        TEST_REQUIRE(ret->AsSprite()->GetSpriteSheet()->cols == 4);
         TEST_REQUIRE(ret->AsSprite()->GetGamma() == real::float32(1.5f));
         TEST_REQUIRE(ret->AsSprite()->GetBaseColor() == gfx::Color::Blue);
         TEST_REQUIRE(ret->AsSprite()->IsStatic() == false);
