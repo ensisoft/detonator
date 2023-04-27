@@ -3767,21 +3767,53 @@
   ],
   "materials": [
     {
-      "flags": {
-        "PremultipliedAlpha": false
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
       },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
       "id": "N5AZXzLO89",
-      "mag_filter": "Default",
-      "min_filter": "Default",
       "name": "Star Particle",
+      "particle_action": "None",
       "resource_id": "N5AZXzLO89",
       "resource_name": "Star Particle",
       "shader_src": "",
       "shader_uri": "app://shaders/es2/basic_particle.glsl",
       "surface": "Transparent",
+      "texture_mag_filter": "Default",
       "texture_maps": [
         {
           "fps": 0.0,
+          "id": "rdHY5lvyKq",
           "looping": true,
           "name": "kMask",
           "rect_name0": "kMaskRect",
@@ -3814,6 +3846,19 @@
           "type": "Texture2D"
         }
       ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
       "type": "Custom",
       "uniforms": [
         {
@@ -3846,26 +3891,56 @@
             "r": 1.0
           }
         }
-      ],
-      "wrap_x": "Clamp",
-      "wrap_y": "Clamp"
+      ]
     },
     {
-      "flags": {
-        "PremultipliedAlpha": false
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
       },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
       "id": "0xydhM7UqW",
-      "mag_filter": "Default",
-      "min_filter": "Default",
       "name": "Lightning Particle",
+      "particle_action": "None",
       "resource_id": "0xydhM7UqW",
       "resource_name": "Lightning Particle",
       "shader_src": "",
       "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
+      "texture_mag_filter": "Default",
       "texture_maps": [
         {
           "fps": 0.0,
+          "id": "21n3e31PFK",
           "looping": true,
           "name": "kMask",
           "rect_name0": "kMaskRect",
@@ -3898,6 +3973,19 @@
           "type": "Texture2D"
         }
       ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
       "type": "Custom",
       "uniforms": [
         {
@@ -3930,26 +4018,56 @@
             "r": 0.7024185657501221
           }
         }
-      ],
-      "wrap_x": "Clamp",
-      "wrap_y": "Clamp"
+      ]
     },
     {
-      "flags": {
-        "PremultipliedAlpha": false
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
       },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
       "id": "bBESp9pEw3",
-      "mag_filter": "Default",
-      "min_filter": "Default",
       "name": "Rain Particle",
+      "particle_action": "None",
       "resource_id": "bBESp9pEw3",
       "resource_name": "Rain Particle",
       "shader_src": "",
       "shader_uri": "app://shaders/es2/basic_particle.glsl",
       "surface": "Transparent",
+      "texture_mag_filter": "Default",
       "texture_maps": [
         {
           "fps": 0.0,
+          "id": "KpOQ19eszk",
           "looping": true,
           "name": "kMask",
           "rect_name0": "kMaskRect",
@@ -3982,6 +4100,19 @@
           "type": "Texture2D"
         }
       ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
       "type": "Custom",
       "uniforms": [
         {
@@ -4014,26 +4145,56 @@
             "r": 0.6085145473480225
           }
         }
-      ],
-      "wrap_x": "Clamp",
-      "wrap_y": "Clamp"
+      ]
     },
     {
-      "flags": {
-        "PremultipliedAlpha": false
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
       },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
       "id": "eySa2QEq4I",
-      "mag_filter": "Default",
-      "min_filter": "Default",
       "name": "Magic Particle",
+      "particle_action": "None",
       "resource_id": "eySa2QEq4I",
       "resource_name": "Magic Particle",
       "shader_src": "",
       "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
+      "texture_mag_filter": "Default",
       "texture_maps": [
         {
           "fps": 0.0,
+          "id": "w2bm9pw6xr",
           "looping": true,
           "name": "kMask",
           "rect_name0": "kMaskRect",
@@ -4066,6 +4227,19 @@
           "type": "Texture2D"
         }
       ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
       "type": "Custom",
       "uniforms": [
         {
@@ -4098,26 +4272,56 @@
             "r": 0.7921263575553894
           }
         }
-      ],
-      "wrap_x": "Clamp",
-      "wrap_y": "Clamp"
+      ]
     },
     {
-      "flags": {
-        "PremultipliedAlpha": false
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
       },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
       "id": "EJtsMLLYa9",
-      "mag_filter": "Default",
-      "min_filter": "Default",
       "name": "Energy Particle",
+      "particle_action": "None",
       "resource_id": "EJtsMLLYa9",
       "resource_name": "Energy Particle",
       "shader_src": "",
       "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
+      "texture_mag_filter": "Default",
       "texture_maps": [
         {
           "fps": 0.0,
+          "id": "TosMEeZuhp",
           "looping": true,
           "name": "kMask",
           "rect_name0": "kMaskRect",
@@ -4150,6 +4354,19 @@
           "type": "Texture2D"
         }
       ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
       "type": "Custom",
       "uniforms": [
         {
@@ -4182,26 +4399,56 @@
             "r": 1.0
           }
         }
-      ],
-      "wrap_x": "Clamp",
-      "wrap_y": "Clamp"
+      ]
     },
     {
-      "flags": {
-        "PremultipliedAlpha": false
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
       },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
       "id": "J8J3JM8rC8",
-      "mag_filter": "Default",
-      "min_filter": "Default",
       "name": "Water Particle",
+      "particle_action": "None",
       "resource_id": "J8J3JM8rC8",
       "resource_name": "Water Particle",
       "shader_src": "",
       "shader_uri": "app://shaders/es2/basic_particle.glsl",
       "surface": "Transparent",
+      "texture_mag_filter": "Default",
       "texture_maps": [
         {
           "fps": 0.0,
+          "id": "7zWymX4eUU",
           "looping": true,
           "name": "kMask",
           "rect_name0": "kMaskRect",
@@ -4234,6 +4481,19 @@
           "type": "Texture2D"
         }
       ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
       "type": "Custom",
       "uniforms": [
         {
@@ -4266,26 +4526,56 @@
             "r": 0.5306172370910645
           }
         }
-      ],
-      "wrap_x": "Clamp",
-      "wrap_y": "Clamp"
+      ]
     },
     {
-      "flags": {
-        "PremultipliedAlpha": false
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
       },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
       "id": "8qJeAKQFtw",
-      "mag_filter": "Default",
-      "min_filter": "Default",
       "name": "Smoke Particle",
+      "particle_action": "None",
       "resource_id": "8qJeAKQFtw",
       "resource_name": "Smoke Particle",
       "shader_src": "",
       "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
+      "texture_mag_filter": "Default",
       "texture_maps": [
         {
           "fps": 0.0,
+          "id": "KUoYx1Yl7U",
           "looping": true,
           "name": "kMask",
           "rect_name0": "kMaskRect",
@@ -4318,6 +4608,19 @@
           "type": "Texture2D"
         }
       ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
       "type": "Custom",
       "uniforms": [
         {
@@ -4350,26 +4653,56 @@
             "r": 0.13333334028720856
           }
         }
-      ],
-      "wrap_x": "Clamp",
-      "wrap_y": "Clamp"
+      ]
     },
     {
-      "flags": {
-        "PremultipliedAlpha": false
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
       },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
       "id": "SXaZ6dfqlS",
-      "mag_filter": "Default",
-      "min_filter": "Default",
       "name": "Blocky Particle",
+      "particle_action": "None",
       "resource_id": "SXaZ6dfqlS",
       "resource_name": "Blocky Particle",
       "shader_src": "",
       "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
+      "texture_mag_filter": "Default",
       "texture_maps": [
         {
           "fps": 0.0,
+          "id": "eyXJN5gw9t",
           "looping": true,
           "name": "kMask",
           "rect_name0": "kMaskRect",
@@ -4402,6 +4735,19 @@
           "type": "Texture2D"
         }
       ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
       "type": "Custom",
       "uniforms": [
         {
@@ -4434,26 +4780,56 @@
             "r": 0.8406347632408142
           }
         }
-      ],
-      "wrap_x": "Clamp",
-      "wrap_y": "Clamp"
+      ]
     },
     {
-      "flags": {
-        "PremultipliedAlpha": false
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
       },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
       "id": "dZDA63fz8X",
-      "mag_filter": "Default",
-      "min_filter": "Default",
       "name": "Round Particle",
+      "particle_action": "None",
       "resource_id": "dZDA63fz8X",
       "resource_name": "Round Particle",
       "shader_src": "",
       "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
+      "texture_mag_filter": "Default",
       "texture_maps": [
         {
           "fps": 0.0,
+          "id": "l0zWPdkNCw",
           "looping": true,
           "name": "kMask",
           "rect_name0": "kMaskRect",
@@ -4486,6 +4862,19 @@
           "type": "Texture2D"
         }
       ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
       "type": "Custom",
       "uniforms": [
         {
@@ -4518,19 +4907,41 @@
             "r": 0.8406347632408142
           }
         }
-      ],
-      "wrap_x": "Clamp",
-      "wrap_y": "Clamp"
+      ]
     },
     {
-      "color": {
+      "color_map0": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
       "flags": {
-        "PremultipliedAlpha": false
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
       },
       "gamma": 1.0,
       "id": "y6vxOLdMaI",
@@ -4538,41 +4949,46 @@
       "particle_action": "None",
       "resource_id": "y6vxOLdMaI",
       "resource_name": "Background",
-      "static": false,
+      "shader_src": "",
+      "shader_uri": "",
       "surface": "Opaque",
       "texture_mag_filter": "Default",
-      "texture_map": {
-        "fps": 0.0,
-        "looping": true,
-        "rect_name0": "",
-        "rect_name1": "",
-        "sampler_name0": "",
-        "sampler_name1": "",
-        "textures": [
-          {
-            "colorspace": "Linear",
-            "effects": {
-              "Blur": false
-            },
-            "file": "ws://textures/wallpaperflare.com_wallpaper.jpg",
-            "flags": {
-              "AllowPacking": true,
-              "AllowResizing": true,
-              "PremulAlpha": false
-            },
-            "id": "ahxidE7ZOU",
-            "name": "wallpaperflare",
-            "rect": {
-              "h": 1.0,
-              "w": 1.0,
-              "x": 0.0,
-              "y": 0.0
-            },
-            "type": "Filesystem"
-          }
-        ],
-        "type": "Texture2D"
-      },
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "9GKYPtjwHZ",
+          "looping": true,
+          "name": "Default",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/wallpaperflare.com_wallpaper.jpg",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "ahxidE7ZOU",
+              "name": "wallpaperflare",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -4589,14 +5005,38 @@
       "type": "Texture"
     },
     {
-      "color": {
+      "color_map0": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
       "flags": {
-        "PremultipliedAlpha": false
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
       },
       "gamma": 1.0,
       "id": "sv05U2SGGE",
@@ -4604,41 +5044,46 @@
       "particle_action": "Rotate",
       "resource_id": "sv05U2SGGE",
       "resource_name": "Snowflake",
-      "static": false,
+      "shader_src": "",
+      "shader_uri": "",
       "surface": "Transparent",
       "texture_mag_filter": "Default",
-      "texture_map": {
-        "fps": 0.0,
-        "looping": true,
-        "rect_name0": "",
-        "rect_name1": "",
-        "sampler_name0": "",
-        "sampler_name1": "",
-        "textures": [
-          {
-            "colorspace": "Linear",
-            "effects": {
-              "Blur": false
-            },
-            "file": "ws://textures/snowflake.png",
-            "flags": {
-              "AllowPacking": true,
-              "AllowResizing": true,
-              "PremulAlpha": true
-            },
-            "id": "CbYri99zbr",
-            "name": "snowflake",
-            "rect": {
-              "h": 1.0,
-              "w": 1.0,
-              "x": 0.0,
-              "y": 0.0
-            },
-            "type": "Filesystem"
-          }
-        ],
-        "type": "Texture2D"
-      },
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "w5Ddxdddt7",
+          "looping": true,
+          "name": "Default",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/snowflake.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": true
+              },
+              "id": "CbYri99zbr",
+              "name": "snowflake",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -4655,21 +5100,53 @@
       "type": "Texture"
     },
     {
-      "flags": {
-        "PremultipliedAlpha": false
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
       },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
       "id": "HA5M7RGQpK",
-      "mag_filter": "Nearest",
-      "min_filter": "Default",
       "name": "Summoning Circle",
+      "particle_action": "None",
       "resource_id": "HA5M7RGQpK",
       "resource_name": "Summoning Circle",
       "shader_src": "",
       "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
+      "texture_mag_filter": "Default",
       "texture_maps": [
         {
           "fps": 0.0,
+          "id": "Dp1O4UmvUE",
           "looping": true,
           "name": "kMask",
           "rect_name0": "kMaskRect",
@@ -4702,6 +5179,19 @@
           "type": "Texture2D"
         }
       ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
       "type": "Custom",
       "uniforms": [
         {
@@ -4734,19 +5224,41 @@
             "r": 1.0
           }
         }
-      ],
-      "wrap_x": "Clamp",
-      "wrap_y": "Clamp"
+      ]
     },
     {
-      "color": {
+      "color_map0": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
       "flags": {
-        "PremultipliedAlpha": false
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
       },
       "gamma": 1.0,
       "id": "K9D27CRUwq",
@@ -4754,41 +5266,46 @@
       "particle_action": "None",
       "resource_id": "K9D27CRUwq",
       "resource_name": "Blood Splatter",
-      "static": false,
+      "shader_src": "",
+      "shader_uri": "",
       "surface": "Transparent",
       "texture_mag_filter": "Default",
-      "texture_map": {
-        "fps": 0.0,
-        "looping": true,
-        "rect_name0": "",
-        "rect_name1": "",
-        "sampler_name0": "",
-        "sampler_name1": "",
-        "textures": [
-          {
-            "colorspace": "Linear",
-            "effects": {
-              "Blur": false
-            },
-            "file": "ws://textures/blood-splatter-png-14061.png",
-            "flags": {
-              "AllowPacking": true,
-              "AllowResizing": true,
-              "PremulAlpha": false
-            },
-            "id": "LwFJ9fmS9O",
-            "name": "blood-splatter-png-14061",
-            "rect": {
-              "h": 1.0,
-              "w": 1.0,
-              "x": 0.0,
-              "y": 0.0
-            },
-            "type": "Filesystem"
-          }
-        ],
-        "type": "Texture2D"
-      },
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "uDy3rMK6ZK",
+          "looping": true,
+          "name": "Default",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/blood-splatter-png-14061.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "LwFJ9fmS9O",
+              "name": "blood-splatter-png-14061",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -4805,14 +5322,38 @@
       "type": "Texture"
     },
     {
-      "color": {
+      "color_map0": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
       "flags": {
-        "PremultipliedAlpha": false
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
       },
       "gamma": 1.0,
       "id": "pEBDeuBGgb",
@@ -4820,41 +5361,46 @@
       "particle_action": "None",
       "resource_id": "pEBDeuBGgb",
       "resource_name": "Spaceship",
-      "static": false,
+      "shader_src": "",
+      "shader_uri": "",
       "surface": "Transparent",
       "texture_mag_filter": "Default",
-      "texture_map": {
-        "fps": 0.0,
-        "looping": true,
-        "rect_name0": "",
-        "rect_name1": "",
-        "sampler_name0": "",
-        "sampler_name1": "",
-        "textures": [
-          {
-            "colorspace": "Linear",
-            "effects": {
-              "Blur": false
-            },
-            "file": "ws://textures/TM_1.png",
-            "flags": {
-              "AllowPacking": true,
-              "AllowResizing": true,
-              "PremulAlpha": false
-            },
-            "id": "AxFYHkjCan",
-            "name": "TM_1",
-            "rect": {
-              "h": 1.0,
-              "w": 1.0,
-              "x": 0.0,
-              "y": 0.0
-            },
-            "type": "Filesystem"
-          }
-        ],
-        "type": "Texture2D"
-      },
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "aTJ3n0lhty",
+          "looping": true,
+          "name": "Default",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/TM_1.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "AxFYHkjCan",
+              "name": "TM_1",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
