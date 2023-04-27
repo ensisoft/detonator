@@ -496,15 +496,17 @@
     },
     "qklhbbEm10": {
         "checked_for_packing": 1,
+        "local_emitter_h": 0,
+        "local_emitter_w": 0,
+        "local_emitter_x": 0.5,
+        "local_emitter_y": 0.5,
         "material": "5YQ8ZqObX7",
         "transform_height": 500,
         "transform_rotation": 0,
         "transform_width": 500,
-        "use_alpha_derivatives": 1,
-        "use_direction_sector": 1,
-        "use_init_rect": 1,
-        "use_lifetime": 1,
-        "use_size_derivatives": 0
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_lifetime": 1
     },
     "r9CF1o27zZ": {
         "checked_for_packing": 1

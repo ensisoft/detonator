@@ -596,31 +596,232 @@
   ],
   "materials": [
     {
-      "blending": true,
-      "color": {
+      "color_map0": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "flags": {
-        "PremultipliedAlpha": false
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
       },
-      "fps": 10.0,
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
       "gamma": 1.0,
       "id": "Fj66N4PDUG",
-      "looping": true,
       "name": "FlappyBird Flying",
       "particle_action": "None",
-      "rect_name0": "",
-      "rect_name1": "",
       "resource_id": "Fj66N4PDUG",
       "resource_name": "FlappyBird Flying",
-      "sampler_name0": "",
-      "sampler_name1": "",
-      "static": false,
+      "shader_src": "",
+      "shader_uri": "",
       "surface": "Transparent",
       "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "Fj66N4PDUG",
+          "looping": true,
+          "name": "FlappyBird Flying",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-1.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "Co5k1txT4A",
+              "name": "frame-1",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-2.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "ZQ9hjH0jrY",
+              "name": "frame-2",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-3.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "JOpHaH1Pd9",
+              "name": "frame-3",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-4.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "TyAai2iMIa",
+              "name": "frame-4",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-5.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "iC2CbjCCZB",
+              "name": "frame-5",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-6.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "Bo8rzdihtz",
+              "name": "frame-6",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-7.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "0pSTZodGsq",
+              "name": "frame-7",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-8.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "833XmLF5lN",
+              "name": "frame-8",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -634,187 +835,41 @@
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "textures": [
-        {
-          "colorspace": "Linear",
-          "effects": {
-            "Blur": false
-          },
-          "file": "ws://textures/FlappyBird/Flying/frame-1.png",
-          "flags": {
-            "AllowPacking": true,
-            "AllowResizing": true,
-            "PremulAlpha": false
-          },
-          "id": "Co5k1txT4A",
-          "name": "frame-1",
-          "rect": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "type": "Filesystem"
-        },
-        {
-          "colorspace": "Linear",
-          "effects": {
-            "Blur": false
-          },
-          "file": "ws://textures/FlappyBird/Flying/frame-2.png",
-          "flags": {
-            "AllowPacking": true,
-            "AllowResizing": true,
-            "PremulAlpha": false
-          },
-          "id": "ZQ9hjH0jrY",
-          "name": "frame-2",
-          "rect": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "type": "Filesystem"
-        },
-        {
-          "colorspace": "Linear",
-          "effects": {
-            "Blur": false
-          },
-          "file": "ws://textures/FlappyBird/Flying/frame-3.png",
-          "flags": {
-            "AllowPacking": true,
-            "AllowResizing": true,
-            "PremulAlpha": false
-          },
-          "id": "JOpHaH1Pd9",
-          "name": "frame-3",
-          "rect": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "type": "Filesystem"
-        },
-        {
-          "colorspace": "Linear",
-          "effects": {
-            "Blur": false
-          },
-          "file": "ws://textures/FlappyBird/Flying/frame-4.png",
-          "flags": {
-            "AllowPacking": true,
-            "AllowResizing": true,
-            "PremulAlpha": false
-          },
-          "id": "TyAai2iMIa",
-          "name": "frame-4",
-          "rect": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "type": "Filesystem"
-        },
-        {
-          "colorspace": "Linear",
-          "effects": {
-            "Blur": false
-          },
-          "file": "ws://textures/FlappyBird/Flying/frame-5.png",
-          "flags": {
-            "AllowPacking": true,
-            "AllowResizing": true,
-            "PremulAlpha": false
-          },
-          "id": "iC2CbjCCZB",
-          "name": "frame-5",
-          "rect": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "type": "Filesystem"
-        },
-        {
-          "colorspace": "Linear",
-          "effects": {
-            "Blur": false
-          },
-          "file": "ws://textures/FlappyBird/Flying/frame-6.png",
-          "flags": {
-            "AllowPacking": true,
-            "AllowResizing": true,
-            "PremulAlpha": false
-          },
-          "id": "Bo8rzdihtz",
-          "name": "frame-6",
-          "rect": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "type": "Filesystem"
-        },
-        {
-          "colorspace": "Linear",
-          "effects": {
-            "Blur": false
-          },
-          "file": "ws://textures/FlappyBird/Flying/frame-7.png",
-          "flags": {
-            "AllowPacking": true,
-            "AllowResizing": true,
-            "PremulAlpha": false
-          },
-          "id": "0pSTZodGsq",
-          "name": "frame-7",
-          "rect": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "type": "Filesystem"
-        },
-        {
-          "colorspace": "Linear",
-          "effects": {
-            "Blur": false
-          },
-          "file": "ws://textures/FlappyBird/Flying/frame-8.png",
-          "flags": {
-            "AllowPacking": true,
-            "AllowResizing": true,
-            "PremulAlpha": false
-          },
-          "id": "833XmLF5lN",
-          "name": "frame-8",
-          "rect": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "type": "Filesystem"
-        }
-      ],
       "type": "Sprite"
     },
     {
-      "color": {
+      "color_map0": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
       "flags": {
-        "PremultipliedAlpha": false
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
       },
       "gamma": 1.0,
       "id": "LPH6tgo9eN",
@@ -822,41 +877,46 @@
       "particle_action": "None",
       "resource_id": "LPH6tgo9eN",
       "resource_name": "Background",
-      "static": false,
+      "shader_src": "",
+      "shader_uri": "",
       "surface": "Transparent",
       "texture_mag_filter": "Default",
-      "texture_map": {
-        "fps": 0.0,
-        "looping": true,
-        "rect_name0": "",
-        "rect_name1": "",
-        "sampler_name0": "",
-        "sampler_name1": "",
-        "textures": [
-          {
-            "colorspace": "Linear",
-            "effects": {
-              "Blur": false
-            },
-            "file": "ws://textures/Background/full_background.png",
-            "flags": {
-              "AllowPacking": true,
-              "AllowResizing": false,
-              "PremulAlpha": false
-            },
-            "id": "szhPHqYeqg",
-            "name": "full_background",
-            "rect": {
-              "h": 1.0,
-              "w": 1.0,
-              "x": 0.0,
-              "y": 0.0
-            },
-            "type": "Filesystem"
-          }
-        ],
-        "type": "Texture2D"
-      },
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "OzeFupRbZK",
+          "looping": true,
+          "name": "Default",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/Background/full_background.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": false,
+                "PremulAlpha": false
+              },
+              "id": "szhPHqYeqg",
+              "name": "full_background",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -873,31 +933,106 @@
       "type": "Texture"
     },
     {
-      "blending": false,
-      "color": {
+      "color_map0": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
-      "flags": {
-        "PremultipliedAlpha": false
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
       },
-      "fps": 2.0,
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
       "gamma": 1.0,
       "id": "sUAHqYkAPp",
-      "looping": true,
       "name": "FlappyBird Hurt",
       "particle_action": "None",
-      "rect_name0": "",
-      "rect_name1": "",
       "resource_id": "sUAHqYkAPp",
       "resource_name": "FlappyBird Hurt",
-      "sampler_name0": "",
-      "sampler_name1": "",
-      "static": false,
+      "shader_src": "",
+      "shader_uri": "",
       "surface": "Transparent",
       "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 2.0,
+          "id": "sUAHqYkAPp",
+          "looping": true,
+          "name": "FlappyBird Hurt",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/FlappyBird/Hurt/frame-1.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "QPWkqRqYkY",
+              "name": "frame-1",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/FlappyBird/Hurt/frame-2.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "L1mEfJMq1o",
+              "name": "frame-2",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {
@@ -911,61 +1046,41 @@
       },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "textures": [
-        {
-          "colorspace": "Linear",
-          "effects": {
-            "Blur": false
-          },
-          "file": "ws://textures/FlappyBird/Hurt/frame-1.png",
-          "flags": {
-            "AllowPacking": true,
-            "AllowResizing": true,
-            "PremulAlpha": false
-          },
-          "id": "QPWkqRqYkY",
-          "name": "frame-1",
-          "rect": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "type": "Filesystem"
-        },
-        {
-          "colorspace": "Linear",
-          "effects": {
-            "Blur": false
-          },
-          "file": "ws://textures/FlappyBird/Hurt/frame-2.png",
-          "flags": {
-            "AllowPacking": true,
-            "AllowResizing": true,
-            "PremulAlpha": false
-          },
-          "id": "L1mEfJMq1o",
-          "name": "frame-2",
-          "rect": {
-            "h": 1.0,
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0
-          },
-          "type": "Filesystem"
-        }
-      ],
       "type": "Sprite"
     },
     {
-      "color": {
+      "color_map0": {
         "a": 1.0,
         "b": 1.0,
         "g": 1.0,
         "r": 1.0
       },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
       "flags": {
-        "PremultipliedAlpha": false
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
       },
       "gamma": 1.0,
       "id": "8UZOHE5ijx",
@@ -973,41 +1088,46 @@
       "particle_action": "None",
       "resource_id": "8UZOHE5ijx",
       "resource_name": "Spike",
-      "static": false,
+      "shader_src": "",
+      "shader_uri": "",
       "surface": "Transparent",
       "texture_mag_filter": "Default",
-      "texture_map": {
-        "fps": 0.0,
-        "looping": true,
-        "rect_name0": "",
-        "rect_name1": "",
-        "sampler_name0": "",
-        "sampler_name1": "",
-        "textures": [
-          {
-            "colorspace": "Linear",
-            "effects": {
-              "Blur": false
-            },
-            "file": "ws://textures/Spikes/sharp wood.png",
-            "flags": {
-              "AllowPacking": true,
-              "AllowResizing": true,
-              "PremulAlpha": false
-            },
-            "id": "wJ2fqkub2J",
-            "name": "sharp wood",
-            "rect": {
-              "h": 1.0,
-              "w": 1.0,
-              "x": 0.0,
-              "y": 0.0
-            },
-            "type": "Filesystem"
-          }
-        ],
-        "type": "Texture2D"
-      },
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "maq5SRRYzY",
+          "looping": true,
+          "name": "Default",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://textures/Spikes/sharp wood.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "wJ2fqkub2J",
+              "name": "sharp wood",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
       "texture_min_filter": "Default",
       "texture_rotation": 0.0,
       "texture_scale": {

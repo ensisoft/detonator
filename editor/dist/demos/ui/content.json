@@ -39,14 +39,38 @@
   ],
   "materials": [
     {
-      "color": {
+      "color_map0": {
         "a": 1.0,
         "b": 0.10824750363826752,
         "g": 0.1902189701795578,
         "r": 0.7007858157157898
       },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
       "flags": {
-        "PremultipliedAlpha": false
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
       },
       "gamma": 1.0,
       "id": "yTsaLXKonJ",
@@ -54,49 +78,54 @@
       "particle_action": "None",
       "resource_id": "yTsaLXKonJ",
       "resource_name": "Top Secret",
-      "static": false,
+      "shader_src": "",
+      "shader_uri": "",
       "surface": "Transparent",
       "texture_mag_filter": "Default",
-      "texture_map": {
-        "fps": 0.0,
-        "looping": true,
-        "rect_name0": "",
-        "rect_name1": "",
-        "sampler_name0": "",
-        "sampler_name1": "",
-        "textures": [
-          {
-            "buffer": {
-              "height": 512,
-              "horizontal_alignment": "AlignCenter",
-              "texts": [
-                {
-                  "font_file": "app://fonts/Top_Secret.ttf",
-                  "font_size": 78,
-                  "line_height": 1.0,
-                  "string": "top\nsecret",
-                  "underline": false
-                }
-              ],
-              "vertical_alignment": "AlignCenter",
-              "width": 512
-            },
-            "effects": {
-              "Blur": false
-            },
-            "id": "Kni3liNI6b",
-            "name": "TextBuffer",
-            "rect": {
-              "h": 1.0,
-              "w": 1.0,
-              "x": 0.0,
-              "y": 0.0
-            },
-            "type": "TextBuffer"
-          }
-        ],
-        "type": "Texture2D"
-      },
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "HTWzGoXXey",
+          "looping": true,
+          "name": "Default",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "buffer": {
+                "height": 512,
+                "horizontal_alignment": "AlignCenter",
+                "texts": [
+                  {
+                    "font_file": "app://fonts/Top_Secret.ttf",
+                    "font_size": 78,
+                    "line_height": 1.0,
+                    "string": "top\nsecret",
+                    "underline": false
+                  }
+                ],
+                "vertical_alignment": "AlignCenter",
+                "width": 512
+              },
+              "effects": {
+                "Blur": false
+              },
+              "id": "Kni3liNI6b",
+              "name": "TextBuffer",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "TextBuffer"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
       "texture_min_filter": "Default",
       "texture_rotation": -0.593411922454834,
       "texture_scale": {
@@ -832,7 +861,7 @@
                     "h": 50.0,
                     "w": 150.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"f3pExwKO8T/mouse-over/button-background\",\"type\":\"Null\"},{\"key\":\"f3pExwKO8T/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"glassPanel.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"f3pExwKO8T/pressed/button-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"f3pExwKO8T/text-color\",\"value\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.9372549057006836,\"r\":0.9686274528503418}}]}",
+                  "style": "{\"materials\":[{\"key\":\"f3pExwKO8T/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"glassPanel.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"f3pExwKO8T/mouse-over/button-background\",\"type\":\"Null\"},{\"key\":\"f3pExwKO8T/pressed/button-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"f3pExwKO8T/text-color\",\"value\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.9372549057006836,\"r\":0.9686274528503418}}]}",
                   "tab_index": 0,
                   "text": "YES",
                   "type": "PushButton"
@@ -853,7 +882,7 @@
                     "h": 50.0,
                     "w": 150.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"WdZs5kkUvt/pressed/button-background\",\"type\":\"Null\"},{\"key\":\"WdZs5kkUvt/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"glassPanel.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"WdZs5kkUvt/mouse-over/button-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"WdZs5kkUvt/text-color\",\"value\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.9372549057006836,\"r\":0.9686274528503418}}]}",
+                  "style": "{\"materials\":[{\"key\":\"WdZs5kkUvt/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"glassPanel.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"WdZs5kkUvt/pressed/button-background\",\"type\":\"Null\"},{\"key\":\"WdZs5kkUvt/mouse-over/button-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"WdZs5kkUvt/text-color\",\"value\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.9372549057006836,\"r\":0.9686274528503418}}]}",
                   "tab_index": 1,
                   "text": "NOPE",
                   "type": "PushButton"
@@ -964,7 +993,7 @@
                         "h": 40.0,
                         "w": 340.0
                       },
-                      "style": "{\"materials\":[{\"key\":\"b6uiNuwOYp/check-mark-unchecked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotRed.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"b6uiNuwOYp/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotGreen.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"b6uiNuwOYp/check-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"b6uiNuwOYp/text-horizontal-align\",\"value\":\"Right\"}]}",
+                      "style": "{\"materials\":[{\"key\":\"b6uiNuwOYp/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotGreen.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"b6uiNuwOYp/check-mark-unchecked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotRed.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"b6uiNuwOYp/check-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"b6uiNuwOYp/text-horizontal-align\",\"value\":\"Right\"}]}",
                       "tab_index": 2,
                       "text": "engine",
                       "type": "CheckBox"
@@ -1010,7 +1039,7 @@
                         "h": 40.0,
                         "w": 340.0
                       },
-                      "style": "{\"materials\":[{\"key\":\"aUfAqhyOsT/check-background\",\"type\":\"Null\"},{\"key\":\"aUfAqhyOsT/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotGreen.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"aUfAqhyOsT/check-mark-unchecked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotRed.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"}],\"properties\":[{\"key\":\"aUfAqhyOsT/text-horizontal-align\",\"value\":\"Right\"}]}",
+                      "style": "{\"materials\":[{\"key\":\"aUfAqhyOsT/check-mark-unchecked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotRed.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"aUfAqhyOsT/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotGreen.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"aUfAqhyOsT/check-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"aUfAqhyOsT/text-horizontal-align\",\"value\":\"Right\"}]}",
                       "tab_index": 4,
                       "text": "flux capacitor",
                       "type": "CheckBox"
