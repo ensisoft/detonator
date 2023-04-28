@@ -396,7 +396,7 @@ void DlgTileImport::on_btnImport_clicked()
                 texture_uris.resize(index + 1);
             texture_uris[index] = app::ToUtf8(uri);
 
-            if (!(Increment(mUI.progressBar) % 10))
+            if (Increment(mUI.progressBar))
                 footgun.processEvents();
         }
 
@@ -461,7 +461,7 @@ void DlgTileImport::on_btnImport_clicked()
             app::MaterialResource res(klass, name);
             mWorkspace->SaveResource(res);
 
-            if (!Increment(mUI.progressBar) % 10)
+            if (Increment(mUI.progressBar))
                 footgun.processEvents();
         }
     }
@@ -614,7 +614,7 @@ void DlgTileImport::on_btnImport_clicked()
                 map->SetTextureSource(count, std::move(texture));
                 map->SetTextureRect(count, rect);
 
-                if (!(Increment(mUI.progressBar) % 10))
+                if (Increment(mUI.progressBar))
                     footgun.processEvents();
             }
         }
