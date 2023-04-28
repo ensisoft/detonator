@@ -139,12 +139,15 @@ inline QColor FromGfx(const gfx::Color4f& color)
     return QColor::fromRgbF(color.Red(), color.Green(), color.Blue(), color.Alpha());
 }
 
-inline int Increment(QProgressBar* bar, int value = 1)
+inline bool Increment(QProgressBar* bar, int value = 1)
 {
     QSignalBlocker s(bar);
     int val = bar->value() + value;
     bar->setValue(val);
-    return val;
+    if (val % 10)
+        return false;
+
+    return true;
 }
 
 inline void Increment(QSpinBox* spin, int value = 1)
