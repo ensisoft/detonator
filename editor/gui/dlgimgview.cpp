@@ -22,6 +22,8 @@
 #  include <QPixmap>
 #  include <QMessageBox>
 #  include <QFile>
+#  include <QImageWriter>
+#  include <QEventLoop>
 #  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
@@ -30,6 +32,7 @@
 #include "base/json.h"
 #include "graphics/painter.h"
 #include "graphics/drawing.h"
+#include "editor/app/utility.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/workspace.h"
 #include "editor/gui/dlgimgview.h"
@@ -66,6 +69,7 @@ namespace {
                 gui::DlgImgView::Image img;
                 std::string name;
                 std::string character;
+                std::string tag;
                 unsigned width = 0;
                 unsigned height = 0;
                 unsigned index = 0;
@@ -80,6 +84,8 @@ namespace {
                     img.height = height;
                 if (base::JsonReadSafe(obj, "index", &index))
                     img.index = index;
+                if (base::JsonReadSafe(obj, "tag", &tag))
+                    img.tag = app::FromUtf8(tag);
                 if (!base::JsonReadSafe(obj, "xpos", &img.xpos))
                     WARN("Image is missing 'xpos' attribute. [file='%1']", file);
                 if (!base::JsonReadSafe(obj, "ypos", &img.ypos))
@@ -134,7 +140,7 @@ namespace {
         }
 
         // finally, sort based on the image index.
-        std::sort(std::begin(*out), std::end(*out), [&](const auto& a, const auto& b) {
+        std::stable_sort(std::begin(*out), std::end(*out), [&](const auto& a, const auto& b) {
             return a.index < b.index;
         });
 
@@ -174,7 +180,9 @@ DlgImgView::DlgImgView(QWidget* parent) : QDialog(parent)
 
     SetVisible(mUI.btnCancel, false);
     SetVisible(mUI.btnAccept, false);
+    SetVisible(mUI.progressBar, false);
     SetValue(mUI.zoom, 1.0f);
+
 }
 
 void DlgImgView::LoadImage(const QString& file)
@@ -208,7 +216,6 @@ void DlgImgView::LoadImage(const QString& file)
     mClass->SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
     mClass->SetGamma(1.0f);
     mMaterial = gfx::CreateMaterialInstance(mClass);
-    mSelectedIndex = mList.size(); // clear selection from image.
     SetValue(mUI.imageFile, file);
     SetValue(mUI.zoom, scale);
 }
@@ -236,21 +243,16 @@ void DlgImgView::LoadJson(const QString& file)
         const auto& img = image_list[row];
         SetTableItem(mUI.listWidget, row, 0, img.name);
         SetTableItem(mUI.listWidget, row, 1, img.character);
-
-        if (img.width.has_value())
-            SetTableItem(mUI.listWidget, row, 2, img.width.value());
-        if (img.height.has_value())
-            SetTableItem(mUI.listWidget, row, 3, img.height.value());
-
+        SetTableItem(mUI.listWidget, row, 2, img.width);
+        SetTableItem(mUI.listWidget, row, 3, img.height);
         SetTableItem(mUI.listWidget, row, 4, img.xpos);
         SetTableItem(mUI.listWidget, row, 5, img.ypos);
-
         if (img.index.has_value())
             SetTableItem(mUI.listWidget, row, 6, img.index.value());
+        else SetTableItem(mUI.listWidget, row, 6, QString(""));
     }
 
     mList = std::move(image_list);
-    mSelectedIndex = mList.size();
     SetValue(mUI.jsonFile, file);
 }
 void DlgImgView::SetDialogMode(app::Workspace* workspace)
@@ -259,6 +261,10 @@ void DlgImgView::SetDialogMode(app::Workspace* workspace)
     SetVisible(mUI.btnAccept, true);
     SetVisible(mUI.btnCancel, true);
     SetEnabled(mUI.btnAccept, false);
+    QSignalBlocker s(mUI.tabWidget);
+    mUI.tabWidget->removeTab(2); // cutter tab
+
+
     mDialogMode = true;
     mWorkspace  = workspace;
     if (mWorkspace)
@@ -268,6 +274,8 @@ void DlgImgView::SetDialogMode(app::Workspace* workspace)
             restoreGeometry(geometry);
         GetUserProperty(*mWorkspace, "dlg_img_view_widget", mUI.widget);
     }
+
+    mUI.listWidget->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
 }
 
 QString DlgImgView::GetImageFileName() const
@@ -280,18 +288,11 @@ QString DlgImgView::GetJsonFileName() const
 }
 QString DlgImgView::GetImageName() const
 {
-    if (mUI.tabWidget->currentIndex() == 0)
+    for (auto& img : mList)
     {
-        if (mSelectedIndex < mList.size())
-            return mList[mSelectedIndex].name;
+        if (img.selected)
+            return img.name;
     }
-    else
-    {
-        const auto row = mUI.listWidget->currentRow();
-        if (row > 0 && row < mList.size())
-            return mList[row].name;
-    }
-    BUG("Image index is not properly set.");
     return "";
 }
 
@@ -333,27 +334,23 @@ void DlgImgView::on_btnClose_clicked()
 
 void DlgImgView::on_btnAccept_clicked()
 {
-    if (!FileExists(mUI.imageFile))
-    {
-        mUI.imageFile->setFocus();
+    if (!MustHaveInput(mUI.imageFile))
         return;
-    }
-    if (!FileExists(mUI.jsonFile))
-    {
-        mUI.jsonFile->setFocus();
+
+    if (!MustHaveInput(mUI.jsonFile))
         return;
-    }
-    if (mUI.tabWidget->currentIndex() == 0)
+
+    bool have_selection = false;
+    for (auto& img : mList)
     {
-        if (mSelectedIndex == mList.size())
-            return;
+        if (img.selected)
+        {
+            have_selection = true;
+            break;
+        }
     }
-    else
-    {
-        const auto row = mUI.listWidget->currentRow();
-        if (row == -1)
-            return;
-    }
+    if (!have_selection)
+        return;
 
      if (mWorkspace)
      {
@@ -374,6 +371,145 @@ void DlgImgView::on_btnCancel_clicked()
     reject();
 }
 
+void DlgImgView::on_btnCutImages_clicked()
+{
+    if (!MustHaveInput(mUI.imageFile))
+        return;
+    if (!MustHaveInput(mUI.nameTemplate))
+        return;
+    if (!MustHaveInput(mUI.outputFolder))
+        return;
+
+    QString out_path = GetValue(mUI.outputFolder);
+    if (!app::MakePath(out_path))
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setText(tr("Failed to create folder. [%1]").arg(out_path));
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.exec();
+        return;
+    }
+
+    QPixmap source_image;
+    if (!source_image.load(GetValue(mUI.imageFile)) || source_image.isNull())
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setText(tr("Failed to load image file. [%1]").arg(GetValue(mUI.imageFile)));
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.exec();
+        return;
+    }
+
+    SetValue(mUI.progressBar, 0);
+    SetRange(mUI.progressBar, 0, mList.size());
+    AutoHider hider(mUI.progressBar);
+    QEventLoop footgun;
+
+    const unsigned left_padding  = GetValue(mUI.leftPadding);
+    const unsigned right_padding = GetValue(mUI.rightPadding);
+    const unsigned top_padding   = GetValue(mUI.topPadding);
+    const unsigned bottom_padding = GetValue(mUI.bottomPadding);
+    const bool power_of_two = GetValue(mUI.chkPOT);
+    const bool overwrite    = GetValue(mUI.chkOverwrite);
+    const QString selection = GetValue(mUI.cmbSelection);
+    const bool all_images   = selection == QString("All images");
+    unsigned counter = 0;
+    for (unsigned i=0; i<mList.size(); ++i)
+    {
+        if (Increment(mUI.progressBar))
+            footgun.processEvents();
+
+        const auto& img = mList[i];
+        if (!img.selected && !all_images)
+            continue;
+
+        if (img.width == 0 || img.height == 0)
+        {
+            WARN("Image has no size specified. Skipping image cutting. [name=%1]", img.name);
+            continue;
+        }
+        const QPixmap& copy = source_image.copy(img.xpos, img.ypos, img.width, img.height);
+        if (copy.isNull())
+        {
+            WARN("Source image copy failed.");
+            continue;
+        }
+        QString img_name = img.name;
+        // hack here, we might have the .file extension in the image name.
+        // don't want to repeat that in the output name.
+        if (img_name.endsWith(".png", Qt::CaseInsensitive))
+            img_name.chop(4);
+        else if (img_name.endsWith(".jpg", Qt::CaseInsensitive))
+            img_name.chop(4);
+        else if (img_name.endsWith(".jpeg", Qt::CaseInsensitive))
+            img_name.chop(5);
+        else if (img_name.endsWith(".bmp", Qt::CaseInsensitive))
+            img_name.chop(4);
+
+        QString out_name = GetValue(mUI.nameTemplate);
+        out_name.replace("%c", QString::number(counter++));
+        out_name.replace("%i", QString::number(img.index.value_or(0)));
+        out_name.replace("%w", QString::number(img.width));
+        out_name.replace("%h", QString::number(img.height));
+        out_name.replace("%x", QString::number(img.xpos));
+        out_name.replace("%h", QString::number(img.height));
+        out_name.replace("%n", img_name);
+        out_name.replace("%t", img.tag);
+        if (out_name.isEmpty())
+            continue;
+        out_name.append(".");
+        out_name.append(mUI.cmbImageFormat->currentText().toLower());
+        QString out_file = app::JoinPath(out_path, out_name);
+        if (app::FileExists(out_file) && !overwrite)
+        {
+            DEBUG("Skipping output file since it already exists. [file='%1']", out_file);
+            continue;
+        }
+
+        const auto total_width = img.width  + left_padding + right_padding;
+        const auto total_height = img.height + top_padding + bottom_padding;
+        const auto buffer_width = power_of_two ?  base::NextPOT(total_width) : total_width;
+        const auto buffer_height = power_of_two ? base::NextPOT(total_height) : total_height;
+        const auto buffer_offset_x = (buffer_width - total_width) / 2;
+        const auto buffer_offset_y = (buffer_height - total_height) / 2;
+        QImage buffer(buffer_width, buffer_height, QImage::Format_ARGB32);
+        buffer.fill(QColor(0x00, 0x00, 0x00, 0x00)); // transparent
+
+        QPainter painter(&buffer);
+        painter.setCompositionMode(QPainter::CompositionMode_Source);
+        painter.drawPixmap(buffer_offset_x,
+                           buffer_offset_y,
+                           total_width,
+                           total_height,
+                           copy);
+        QImageWriter writer;
+        writer.setFileName(out_file);
+        writer.setQuality(GetValue(mUI.imageQuality));
+        writer.setFormat(mUI.cmbImageFormat->currentText().toLocal8Bit());
+        if (!writer.write(buffer))
+        {
+            ERROR("Failed to write image file. [file='%1', error='%2']", out_file, writer.errorString());
+        } else DEBUG("Wrote new image files. [file='%1']", out_file);
+    }
+
+    QMessageBox msg(this);
+    msg.setIcon(QMessageBox::Information);
+    msg.setText(tr("All done!"));
+    msg.setWindowTitle("Image Cutting");
+    msg.exec();
+}
+
+void DlgImgView::on_btnSelectOut_clicked()
+{
+    const auto& dir = QFileDialog::getExistingDirectory(this,
+        tr("Select Output Directory"), GetValue(mUI.outputFolder));
+    if (dir.isEmpty())
+        return;
+    SetValue(mUI.outputFolder, dir);
+}
+
 void DlgImgView::on_cmbColorSpace_currentIndexChanged(int)
 {
     if (!mClass)
@@ -390,22 +526,40 @@ void DlgImgView::on_widgetColor_colorChanged(QColor color)
 
 void DlgImgView::on_listWidget_itemSelectionChanged()
 {
-    const auto row = mUI.listWidget->currentRow();
-    SetEnabled(mUI.btnAccept, row != -1);
+    for (auto& img : mList)
+        img.selected = false;
+
+    const auto& selection = GetSelection(mUI.listWidget);
+    for (int i=0; i<selection.size(); ++i)
+    {
+        const auto item = selection[i];
+        const auto index = static_cast<size_t>(item.row());
+        base::SafeIndex(mList, index).selected = true;
+    }
+
+    SetEnabled(mUI.btnAccept, false);
+
+    if (mDialogMode)
+    {
+        for (const auto& img : mList)
+        {
+            if (img.selected)
+            {
+                SetEnabled(mUI.btnAccept, true);
+                break;
+            }
+        }
+    }
 }
 
 void DlgImgView::on_tabWidget_currentChanged(int)
 {
-    if (mUI.tabWidget->currentIndex() == 0)
+    if (mUI.tabWidget->currentIndex() == 1)
     {
-        if (mSelectedIndex == mList.size())
-            SetEnabled(mUI.btnAccept, false);
-        else SetEnabled(mUI.btnAccept, true);
-    }
-    else
-    {
-        const auto row = mUI.listWidget->currentRow();
-        SetEnabled(mUI.btnAccept, row != -1);
+        for (size_t i = 0; i < mList.size(); ++i)
+        {
+            SelectTableRow(mUI.listWidget, i, mList[i].selected);
+        }
     }
 }
 
@@ -450,65 +604,95 @@ void DlgImgView::OnPaintScene(gfx::Painter& painter, double secs)
     img_rect.Translate(mTrackingOffset.x(), mTrackingOffset.y());
     gfx::FillRect(painter, img_rect, *mMaterial);
 
-    if (mList.empty() || mSelectedIndex == mList.size())
+    if (mList.empty())
         return;
 
-    const auto& img = mList[mSelectedIndex];
+    static auto selection_material_class = gfx::CreateMaterialClassFromImage("app://textures/accept_icon.png");
+    selection_material_class.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+    selection_material_class.SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
+    static auto selection_material = gfx::MaterialClassInst(selection_material_class);
 
-    gfx::FRect sel_rect(0.0f, 0.0f, img.width.value_or(0.0f)*zoom, img.height.value_or(0.0f)*zoom);
-    sel_rect.Translate(xpos, ypos);
-    sel_rect.Translate(mTrackingOffset.x(), mTrackingOffset.y());
-    sel_rect.Translate(img.xpos*zoom, img.ypos*zoom);
-    gfx::DrawRectOutline(painter, sel_rect, gfx::CreateMaterialFromColor(gfx::Color::Green));
+    for (size_t index=0; index<mList.size(); ++index)
+    {
+        const auto& img = mList[index];
+        if (!img.selected && index != mIndexUnderMouse)
+            continue;
+
+        gfx::FRect rect(0.0f, 0.0f, img.width*zoom, img.height*zoom);
+        rect.Translate(xpos, ypos);
+        rect.Translate(mTrackingOffset.x(), mTrackingOffset.y());
+        rect.Translate(img.xpos * zoom, img.ypos * zoom);
+
+        if (index == mIndexUnderMouse)
+        {
+            gfx::DrawRectOutline(painter, rect, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+        }
+        if (img.selected)
+        {
+            rect.SetWidth(32.0f);
+            rect.SetHeight(32.0f);
+            gfx::FillShape(painter, rect, gfx::Circle(), selection_material);
+        }
+    }
 }
+
 void DlgImgView::OnMousePress(QMouseEvent* mickey)
 {
     mStartPoint = mickey->pos();
 
     if (mickey->button() == Qt::RightButton)
-        mTracking = true;
+        mMode = Mode::Tracking;
     else if (mickey->button() == Qt::LeftButton)
     {
-        if (mList.empty() || !mMaterial)
-            return;
-        const float width = mUI.widget->width();
-        const float height = mUI.widget->height();
-        const float zoom   = GetValue(mUI.zoom);
-        const float img_width = mWidth * zoom;
-        const float img_height = mHeight * zoom;
-        const auto xpos = (width - img_width) * 0.5f;
-        const auto ypos = (height - img_height) * 0.5f;
-        const int mouse_posx = (mCurrentPoint.x() - mTrackingOffset.x() - xpos) / zoom;
-        const int mouse_posy = (mCurrentPoint.y() - mTrackingOffset.y() - ypos) / zoom;
-
-        for (mSelectedIndex=0; mSelectedIndex<mList.size(); ++mSelectedIndex)
-        {
-            const auto& img = mList[mSelectedIndex];
-            if (mouse_posx < img.xpos || mouse_posx > img.xpos+img.width.value_or(0.0f))
-                continue;
-            if (mouse_posy < img.ypos || mouse_posy > img.ypos+img.height.value_or(0.0f))
-                continue;
-
-            break;
-        }
-        if (mSelectedIndex == mList.size())
-            SetEnabled(mUI.btnAccept, false);
-        else SetEnabled(mUI.btnAccept, true);
+        mMode = Mode::Selecting;
+        ToggleMouseSelection();
     }
 }
+
 void DlgImgView::OnMouseMove(QMouseEvent* mickey)
 {
     mCurrentPoint = mickey->pos();
 
-    if (!mTracking)
+    if (mMode == Mode::Tracking)
+    {
+        mTrackingOffset += (mCurrentPoint - mStartPoint);
+        mStartPoint = mCurrentPoint;
+    }
+
+    mIndexUnderMouse = mList.size();
+    if (mList.empty() || !mMaterial)
         return;
 
-    mTrackingOffset += (mCurrentPoint - mStartPoint);
-    mStartPoint = mCurrentPoint;
+    const float width = mUI.widget->width();
+    const float height = mUI.widget->height();
+    const float zoom   = GetValue(mUI.zoom);
+    const float img_width = mWidth * zoom;
+    const float img_height = mHeight * zoom;
+    const auto xpos = (width - img_width) * 0.5f;
+    const auto ypos = (height - img_height) * 0.5f;
+    const int mouse_posx = (mCurrentPoint.x() - mTrackingOffset.x() - xpos) / zoom;
+    const int mouse_posy = (mCurrentPoint.y() - mTrackingOffset.y() - ypos) / zoom;
+
+    for (mIndexUnderMouse=0; mIndexUnderMouse<mList.size(); ++mIndexUnderMouse)
+    {
+        const auto& img = mList[mIndexUnderMouse];
+        if (mouse_posx < img.xpos || mouse_posx > img.xpos+img.width)
+            continue;
+        if (mouse_posy < img.ypos || mouse_posy > img.ypos+img.height)
+            continue;
+        break;
+    }
+
+    if (mMode == Mode::Selecting)
+    {
+        ToggleMouseSelection();
+    }
 }
+
 void DlgImgView::OnMouseRelease(QMouseEvent* mickey)
 {
-    mTracking = false;
+    mMode = Mode::Nada;
+    mTilesTouched.clear();
 }
 
 void DlgImgView::OnMouseDoubleClick(QMouseEvent* mickey)
@@ -517,13 +701,51 @@ void DlgImgView::OnMouseDoubleClick(QMouseEvent* mickey)
         return;
 
     OnMousePress(mickey);
-    if (mSelectedIndex < mList.size())
-        accept();
+    for (auto& img : mList)
+    {
+        if (img.selected)
+        {
+            accept();
+            return;
+        }
+    }
 }
 
 bool DlgImgView::OnKeyPress(QKeyEvent* event)
 {
     return false;
+}
+
+void DlgImgView::ToggleMouseSelection()
+{
+    if (mIndexUnderMouse >= mList.size())
+        return;
+
+    if (base::Contains(mTilesTouched, mIndexUnderMouse))
+        return;
+
+    if (mDialogMode)
+    {
+        for (auto& img : mList)
+            img.selected = false;
+
+        SetEnabled(mUI.btnAccept, false);
+    }
+
+    mList[mIndexUnderMouse].selected = !mList[mIndexUnderMouse].selected;
+    mTilesTouched.insert(mIndexUnderMouse);
+
+    if (mDialogMode)
+    {
+        for (const auto& img : mList)
+        {
+            if (img.selected)
+            {
+                SetEnabled(mUI.btnAccept, true);
+                break;
+            }
+        }
+    }
 }
 
 } // namespace

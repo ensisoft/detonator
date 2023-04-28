@@ -28,6 +28,7 @@
 
 #include <memory>
 #include <optional>
+#include <set>
 
 #include "graphics/fwd.h"
 
@@ -45,11 +46,13 @@ namespace gui
         struct Image {
             QString name;
             QString character;
+            QString tag;
             unsigned xpos   = 0;
             unsigned ypos   = 0;
+            unsigned width  = 0;
+            unsigned height = 0;
             std::optional<unsigned> index;
-            std::optional<unsigned> width;
-            std::optional<unsigned> height;
+            bool selected = false;
         };
 
         DlgImgView(QWidget* parent);
@@ -71,6 +74,8 @@ namespace gui
         void on_btnClose_clicked();
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
+        void on_btnCutImages_clicked();
+        void on_btnSelectOut_clicked();
         void on_cmbColorSpace_currentIndexChanged(int);
         void on_widgetColor_colorChanged(QColor color);
         void on_listWidget_itemSelectionChanged();
@@ -84,23 +89,28 @@ namespace gui
         void OnMouseRelease(QMouseEvent* mickey);
         void OnMouseDoubleClick(QMouseEvent* mickey);
         bool OnKeyPress(QKeyEvent* event);
+        void ToggleMouseSelection();
     private:
         Ui::DlgImgView mUI;
     private:
         app::Workspace* mWorkspace = nullptr;
-        std::vector<Image> mList;
-        std::size_t mSelectedIndex = 0;
         std::shared_ptr<gfx::TextureMap2DClass> mClass;
         std::unique_ptr<gfx::Material> mMaterial;
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
-        QPixmap mImage;
         QTimer mTimer;
         QPoint mTrackingOffset;
         QPoint mCurrentPoint;
         QPoint mStartPoint;
-        bool mTracking = false;
         bool mDialogMode = false;
         bool mClosed = false;
+
+        std::vector<Image> mList;
+        std::size_t mIndexUnderMouse = 0;
+        enum class Mode {
+            Nada, Tracking, Selecting
+        };
+        Mode mMode = Mode::Nada;
+        std::set<size_t> mTilesTouched;
     };
 } // namespace
