@@ -39,116 +39,6 @@
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
 
-namespace {
-    bool ReadTexturePack(const QString& file, std::vector<gui::DlgImgView::Image>* out)
-    {
-        QString err_str;
-        QFile::FileError err_val = QFile::FileError::NoError;
-        const auto& buff = app::ReadBinaryFile(file, &err_val, &err_str);
-        if (err_val != QFile::FileError::NoError)
-        {
-            ERROR("Failed to read file. [file='%1', error='%2']", file, err_str);
-            return false;
-        }
-
-        const auto* beg  = buff.data();
-        const auto* end  = buff.data() + buff.size();
-        const auto& json = nlohmann::json::parse(beg, end, nullptr, false);
-        if (json.is_discarded())
-        {
-            ERROR("Failed to parse JSON file. [file='%1']", file);
-            return false;
-        }
-
-        if (json.contains("images") && json["images"].is_array())
-        {
-            for (const auto& img_json: json["images"].items())
-            {
-                const auto& obj = img_json.value();
-
-                gui::DlgImgView::Image img;
-                std::string name;
-                std::string character;
-                std::string tag;
-                unsigned width = 0;
-                unsigned height = 0;
-                unsigned index = 0;
-
-                if (base::JsonReadSafe(obj, "name", &name))
-                    img.name = app::FromUtf8(name);
-                if (base::JsonReadSafe(obj, "char", &character))
-                    img.character = app::FromUtf8(character);
-                if (base::JsonReadSafe(obj, "width", &width))
-                    img.width = width;
-                if (base::JsonReadSafe(obj, "height", &height))
-                    img.height = height;
-                if (base::JsonReadSafe(obj, "index", &index))
-                    img.index = index;
-                if (base::JsonReadSafe(obj, "tag", &tag))
-                    img.tag = app::FromUtf8(tag);
-                if (!base::JsonReadSafe(obj, "xpos", &img.xpos))
-                    WARN("Image is missing 'xpos' attribute. [file='%1']", file);
-                if (!base::JsonReadSafe(obj, "ypos", &img.ypos))
-                    WARN("Image is missing 'ypos' attribute. [file='%1']", file);
-
-                out->push_back(std::move(img));
-            }
-        }
-        else
-        {
-            unsigned image_width  = 0;
-            unsigned image_height = 0;
-            unsigned tile_width  = 0;
-            unsigned tile_height = 0;
-            unsigned xoffset = 0;
-            unsigned yoffset = 0;
-            bool error = true;
-
-            if (!base::JsonReadSafe(json, "image_width", &image_width))
-                ERROR("Missing image_width property. [file='%1']", file);
-            else if (!base::JsonReadSafe(json, "image_height", &image_height))
-                ERROR("Missing image_height property. [file='%1']", file);
-            else if (!base::JsonReadSafe(json, "tile_width", &tile_width))
-                ERROR("Missing tile_width property. [file='%1']", file);
-            else if (!base::JsonReadSafe(json, "tile_height", &tile_height))
-                ERROR("Missing tile_height property. [file='%1']", file);
-            else if (!base::JsonReadSafe(json, "xoffset", &xoffset))
-                ERROR("Missing xoffset property.[file='%1']", file);
-            else if (!base::JsonReadSafe(json, "yoffset", &yoffset))
-                ERROR("Missing yoffset property. [file='%1']", file);
-            else error = false;
-            if (error) return false;
-
-            const auto max_rows = (image_height - yoffset) / tile_height;
-            const auto max_cols = (image_width - xoffset) / tile_width;
-            for (unsigned row=0; row<max_rows; ++row)
-            {
-                for (unsigned col=0; col<max_cols; ++col)
-                {
-                    const auto index = row * max_cols + col;
-                    const auto tile_xpos = xoffset + col * tile_width;
-                    const auto tile_ypos = yoffset + row * tile_height;
-
-                    gui::DlgImgView::Image img;
-                    img.width  = tile_width;
-                    img.height = tile_height;
-                    img.xpos   = tile_xpos;
-                    img.ypos   = tile_ypos;
-                    out->push_back(std::move(img));
-                }
-            }
-        }
-
-        // finally, sort based on the image index.
-        std::stable_sort(std::begin(*out), std::end(*out), [&](const auto& a, const auto& b) {
-            return a.index < b.index;
-        });
-
-        INFO("Successfully parsed '%1'. %2 images found.", file, out->size());
-        return true;
-    }
-} // namespace
-
 namespace gui
 {
 
@@ -177,12 +67,30 @@ DlgImgView::DlgImgView(QWidget* parent) : QDialog(parent)
     connect(this, &QDialog::finished, this, &DlgImgView::finished);
     connect(&mTimer, &QTimer::timeout, this, &DlgImgView::timer);
     PopulateFromEnum<gfx::detail::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
+    PopulateFromEnum<gfx::MaterialClass::MinTextureFilter>(mUI.cmbMinFilter);
+    PopulateFromEnum<gfx::MaterialClass::MagTextureFilter>(mUI.cmbMagFilter);
 
     SetVisible(mUI.btnCancel, false);
     SetVisible(mUI.btnAccept, false);
     SetVisible(mUI.progressBar, false);
     SetValue(mUI.zoom, 1.0f);
 
+    mUI.zoom->installEventFilter(this);
+    mUI.cmbColorSpace->installEventFilter(this);
+    mUI.cmbMinFilter->installEventFilter(this);
+    mUI.cmbMagFilter->installEventFilter(this);
+    mUI.listWidget->installEventFilter(this);
+    mUI.renameTemplate->installEventFilter(this);
+    mUI.tagTemplate->installEventFilter(this);
+    mUI.cmbSelection->installEventFilter(this);
+    mUI.cmbImageFormat->installEventFilter(this);
+    mUI.imageQuality->installEventFilter(this);
+    mUI.topPadding->installEventFilter(this);
+    mUI.leftPadding->installEventFilter(this);
+    mUI.rightPadding->installEventFilter(this);
+    mUI.bottomPadding->installEventFilter(this);
+    mUI.nameTemplate->installEventFilter(this);
+    mUI.outputFolder->installEventFilter(this);
 }
 
 void DlgImgView::LoadImage(const QString& file)
@@ -190,7 +98,7 @@ void DlgImgView::LoadImage(const QString& file)
     auto source = std::make_unique<gfx::detail::TextureFileSource>();
     source->SetFileName(app::ToUtf8(file));
     source->SetName(app::ToUtf8(file));
-    auto bitmap = source->GetData();
+    const auto& bitmap = source->GetData();
     if (!bitmap)
     {
         QMessageBox msg(this);
@@ -201,29 +109,23 @@ void DlgImgView::LoadImage(const QString& file)
         return;
     }
 
-    const auto img_width = bitmap->GetWidth();
-    const auto img_height = bitmap->GetHeight();
-    const auto width  = mUI.widget->width();
-    const auto height = mUI.widget->height();
-    const auto scale = std::min((float)width/(float)img_width,
-                                (float)height/(float)img_height);
-
-    mWidth    = img_width;
-    mHeight   = img_height;
+    mWidth    = bitmap->GetWidth();
+    mHeight   = bitmap->GetHeight();
     mClass = std::make_shared<gfx::TextureMap2DClass>(gfx::MaterialClass::Type::Texture);
     mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     mClass->SetTexture(std::move(source));
     mClass->SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
     mClass->SetGamma(1.0f);
+    mClass->SetTextureMinFilter(GetValue(mUI.cmbMinFilter));
+    mClass->SetTextureMagFilter(GetValue(mUI.cmbMagFilter));
     mMaterial = gfx::CreateMaterialInstance(mClass);
     SetValue(mUI.imageFile, file);
-    SetValue(mUI.zoom, scale);
 }
 
 void DlgImgView::LoadJson(const QString& file)
 {
-    std::vector<Image> image_list;
-    if (!ReadTexturePack(file, &image_list))
+    ImagePack pack;
+    if (!ReadImagePack(file, &pack))
     {
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Ok);
@@ -235,47 +137,132 @@ void DlgImgView::LoadJson(const QString& file)
         return;
     }
     ClearTable(mUI.listWidget);
-    ResizeTable(mUI.listWidget, image_list.size(), 7);
-    mUI.listWidget->setHorizontalHeaderLabels({"Name", "Char", "Width", "Height", "X Pos", "Y Pos", "Index"});
+    ResizeTable(mUI.listWidget, pack.images.size(), 8);
+    mUI.listWidget->setHorizontalHeaderLabels({"Name", "Char", "Tag", "Width", "Height", "X Pos", "Y Pos", "Index"});
 
-    for (unsigned row=0; row<image_list.size(); ++row)
+    for (unsigned row=0; row<pack.images.size(); ++row)
     {
-        const auto& img = image_list[row];
+        const auto& img = pack.images[row];
         SetTableItem(mUI.listWidget, row, 0, img.name);
         SetTableItem(mUI.listWidget, row, 1, img.character);
-        SetTableItem(mUI.listWidget, row, 2, img.width);
-        SetTableItem(mUI.listWidget, row, 3, img.height);
-        SetTableItem(mUI.listWidget, row, 4, img.xpos);
-        SetTableItem(mUI.listWidget, row, 5, img.ypos);
-        if (img.index.has_value())
-            SetTableItem(mUI.listWidget, row, 6, img.index.value());
-        else SetTableItem(mUI.listWidget, row, 6, QString(""));
+        SetTableItem(mUI.listWidget, row, 2, img.tag);
+        SetTableItem(mUI.listWidget, row, 3, img.width);
+        SetTableItem(mUI.listWidget, row, 4, img.height);
+        SetTableItem(mUI.listWidget, row, 5, img.xpos);
+        SetTableItem(mUI.listWidget, row, 6, img.ypos);
+        SetTableItem(mUI.listWidget, row, 7, img.index);
     }
-
-    mList = std::move(image_list);
+    mPack = std::move(pack);
     SetValue(mUI.jsonFile, file);
+    SetEnabled(mUI.btnSave, false);
+
+    SetValue(mUI.cmbColorSpace, mPack.color_space);
+    // this setting applies to the visualization on the main tab.
+    SetValue(mUI.cmbMagFilter, mPack.mag_filter);
+    SetValue(mUI.cmbMinFilter, mPack.min_filter);
+    // apply the values to the material class if it exists.
+    // ignore the combo box selection indices.
+    on_cmbColorSpace_currentIndexChanged(0);
+    on_cmbMinFilter_currentIndexChanged(0);
+    on_cmbMagFilter_currentIndexChanged(0);
 }
-void DlgImgView::SetDialogMode(app::Workspace* workspace)
+void DlgImgView::SetDialogMode()
 {
     SetVisible(mUI.btnClose, false);
     SetVisible(mUI.btnAccept, true);
     SetVisible(mUI.btnCancel, true);
     SetEnabled(mUI.btnAccept, false);
+    SetVisible(mUI.btnSave, false);
+    SetVisible(mUI.rename, false);
+    SetVisible(mUI.retag,  false);
+
     QSignalBlocker s(mUI.tabWidget);
     mUI.tabWidget->removeTab(2); // cutter tab
 
-
-    mDialogMode = true;
-    mWorkspace  = workspace;
-    if (mWorkspace)
-    {
-        QByteArray geometry;
-        if (GetUserProperty(*mWorkspace, "dlg_img_view_geometry", &geometry))
-            restoreGeometry(geometry);
-        GetUserProperty(*mWorkspace, "dlg_img_view_widget", mUI.widget);
-    }
-
     mUI.listWidget->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
+    mDialogMode = true;
+}
+
+void DlgImgView::LoadState()
+{
+    if (!mWorkspace)
+        return;
+
+    int xpos = 0;
+    int ypos = 0;
+
+    // The order in which data is loaded matters here. First load the previous
+    // image and the JSON files (if any). Then we load the rest of the state
+    // which can then override some of the colorspace / texture filtering settings
+    // that were initially loaded from the JSON.
+    QString imagefile;
+    QString jsonfile;
+    GetUserProperty(*mWorkspace, "dlg-img-view-image-file", &imagefile);
+    GetUserProperty(*mWorkspace, "dlg-img-view-json-file",  &jsonfile);
+    if (!imagefile.isEmpty())
+        LoadImage(imagefile);
+    if (!jsonfile.isEmpty())
+        LoadJson(jsonfile);
+
+    GetUserProperty(*mWorkspace, "dlg-img-view-image-file", mUI.imageFile);
+    GetUserProperty(*mWorkspace, "dlg-img-view-json-file", mUI.jsonFile);
+    GetUserProperty(*mWorkspace, "dlg-img-view-widget", mUI.widget);
+    GetUserProperty(*mWorkspace, "dlg-img-view-color-space", mUI.cmbColorSpace);
+    GetUserProperty(*mWorkspace, "dlg-img-view-min-filter", mUI.cmbMinFilter);
+    GetUserProperty(*mWorkspace, "dlg-img-view-mag-filter", mUI.cmbMagFilter);
+    GetUserProperty(*mWorkspace, "dlg-img-view-zoom", mUI.zoom);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-format", mUI.cmbImageFormat);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-quality", mUI.imageQuality);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-top-padding", mUI.topPadding);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-left-padding", mUI.leftPadding);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-right-padding", mUI.rightPadding);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-bottom-padding", mUI.bottomPadding);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-out-folder", mUI.outputFolder);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-overwrite", mUI.chkOverwrite);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-pot", mUI.chkPOT);
+    GetUserProperty(*mWorkspace, "dlg-img-view-xpos", &xpos);
+    GetUserProperty(*mWorkspace, "dlg-img-view-ypos", &ypos);
+    mTrackingOffset = QPoint(xpos, ypos);
+
+    on_cmbColorSpace_currentIndexChanged(0);
+    on_cmbMinFilter_currentIndexChanged(0);
+    on_cmbMagFilter_currentIndexChanged(0);
+}
+
+void DlgImgView::LoadGeometry()
+{
+    if (!mWorkspace)
+        return;
+
+    QByteArray geometry;
+    if (GetUserProperty(*mWorkspace, "dlg-img-view-geometry", &geometry))
+        restoreGeometry(geometry);
+}
+
+void DlgImgView::SaveState() const
+{
+    if (!mWorkspace)
+        return;
+
+    SetUserProperty(*mWorkspace, "dlg-img-view-geometry", saveGeometry());
+    SetUserProperty(*mWorkspace, "dlg-img-view-image-file", mUI.imageFile);
+    SetUserProperty(*mWorkspace, "dlg-img-view-json-file", mUI.jsonFile);
+    SetUserProperty(*mWorkspace, "dlg-img-view-widget", mUI.widget);
+    SetUserProperty(*mWorkspace, "dlg-img-view-color-space", mUI.cmbColorSpace);
+    SetUserProperty(*mWorkspace, "dlg-img-view-min-filter", mUI.cmbMinFilter);
+    SetUserProperty(*mWorkspace, "dlg-img-view-mag-filter", mUI.cmbMagFilter);
+    SetUserProperty(*mWorkspace, "dlg-img-view-zoom", mUI.zoom);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-format", mUI.cmbImageFormat);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-quality", mUI.imageQuality);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-top-padding", mUI.topPadding);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-left-padding", mUI.leftPadding);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-right-padding", mUI.rightPadding);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-bottom-padding", mUI.bottomPadding);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-out-folder", mUI.outputFolder);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-overwrite", mUI.chkOverwrite);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-pot", mUI.chkPOT);
+    SetUserProperty(*mWorkspace, "dlg-img-view-xpos", mTrackingOffset.x());
+    SetUserProperty(*mWorkspace, "dlg-img-view-ypos", mTrackingOffset.y());
 }
 
 QString DlgImgView::GetImageFileName() const
@@ -288,12 +275,25 @@ QString DlgImgView::GetJsonFileName() const
 }
 QString DlgImgView::GetImageName() const
 {
-    for (auto& img : mList)
+    for (auto& img : mPack.images)
     {
         if (img.selected)
             return img.name;
     }
     return "";
+}
+
+void DlgImgView::ResetTransform()
+{
+    if (mWidth == 0 || mHeight == 0)
+        return;
+
+    const auto width  = mUI.widget->width();
+    const auto height = mUI.widget->height();
+    const auto scale = std::min((float)width/(float)mWidth,
+                                (float)height/(float)mHeight);
+    mTrackingOffset = QPoint(0, 0);
+    SetValue(mUI.zoom, scale);
 }
 
 void DlgImgView::on_btnSelectImage_clicked()
@@ -305,6 +305,7 @@ void DlgImgView::on_btnSelectImage_clicked()
         return;
 
     LoadImage(file);
+    ResetTransform();
 
     QString json = app::FindImageJsonFile(file);
     if (!json.isEmpty())
@@ -323,12 +324,40 @@ void DlgImgView::on_btnSelectJson_clicked()
 
     QString img =  app::FindJsonImageFile(file);
     if (!img.isEmpty())
+    {
         LoadImage(img);
+        ResetTransform();
+    }
 }
 
 void DlgImgView::on_btnClose_clicked()
 {
+    if (mUI.btnSave->isEnabled())
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Question);
+        msg.setText(tr("Save changes?"));
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+        const auto ret = msg.exec();
+        if (ret == QMessageBox::Cancel)
+            return;
+        else if (ret == QMessageBox::Yes)
+        {
+            if (!WriteImagePack(GetValue(mUI.jsonFile), mPack))
+            {
+                QMessageBox msg(this);
+                msg.setStandardButtons(QMessageBox::Ok);
+                msg.setIcon(QMessageBox::Critical);
+                msg.setText(tr("There was a problem saving the file.\n"
+                               "Please see the log for details."));
+                msg.exec();
+                return;
+            }
+        }
+    }
+
     mClosed =  true;
+    SaveState();
     close();
 }
 
@@ -336,12 +365,11 @@ void DlgImgView::on_btnAccept_clicked()
 {
     if (!MustHaveInput(mUI.imageFile))
         return;
-
     if (!MustHaveInput(mUI.jsonFile))
         return;
 
     bool have_selection = false;
-    for (auto& img : mList)
+    for (auto& img : mPack.images)
     {
         if (img.selected)
         {
@@ -352,23 +380,32 @@ void DlgImgView::on_btnAccept_clicked()
     if (!have_selection)
         return;
 
-     if (mWorkspace)
-     {
-         SetUserProperty(*mWorkspace, "dlg_img_view_geometry", saveGeometry());
-         SetUserProperty(*mWorkspace, "dlg_img_view_widget", mUI.widget);
-     }
-
+    SaveState();
     accept();
 }
 void DlgImgView::on_btnCancel_clicked()
 {
-    if (mWorkspace)
-    {
-        SetUserProperty(*mWorkspace, "dlg_img_view_geometry", saveGeometry());
-        SetUserProperty(*mWorkspace, "dlg_img_view_widget", mUI.widget);
-    }
-
+    SaveState();
     reject();
+}
+
+void DlgImgView::on_btnSave_clicked()
+{
+    if (!MustHaveInput(mUI.imageFile))
+        return;
+    if (!MustHaveInput(mUI.jsonFile))
+        return;
+    if (!WriteImagePack(GetValue(mUI.jsonFile), mPack))
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setText(tr("There was a problem saving the file.\n"
+                       "Please see the log for details."));
+        msg.exec();
+        return;
+    }
+    SetEnabled(mUI.btnSave, false);
 }
 
 void DlgImgView::on_btnCutImages_clicked()
@@ -403,7 +440,7 @@ void DlgImgView::on_btnCutImages_clicked()
     }
 
     SetValue(mUI.progressBar, 0);
-    SetRange(mUI.progressBar, 0, mList.size());
+    SetRange(mUI.progressBar, 0, mPack.images.size());
     AutoHider hider(mUI.progressBar);
     QEventLoop footgun;
 
@@ -416,12 +453,12 @@ void DlgImgView::on_btnCutImages_clicked()
     const QString selection = GetValue(mUI.cmbSelection);
     const bool all_images   = selection == QString("All images");
     unsigned counter = 0;
-    for (unsigned i=0; i<mList.size(); ++i)
+    for (unsigned i=0; i<mPack.images.size(); ++i)
     {
         if (Increment(mUI.progressBar))
             footgun.processEvents();
 
-        const auto& img = mList[i];
+        const auto& img = mPack.images[i];
         if (!img.selected && !all_images)
             continue;
 
@@ -450,11 +487,11 @@ void DlgImgView::on_btnCutImages_clicked()
 
         QString out_name = GetValue(mUI.nameTemplate);
         out_name.replace("%c", QString::number(counter++));
-        out_name.replace("%i", QString::number(img.index.value_or(0)));
+        out_name.replace("%i", QString::number(img.index));
         out_name.replace("%w", QString::number(img.width));
         out_name.replace("%h", QString::number(img.height));
         out_name.replace("%x", QString::number(img.xpos));
-        out_name.replace("%h", QString::number(img.height));
+        out_name.replace("%y", QString::number(img.ypos));
         out_name.replace("%n", img_name);
         out_name.replace("%t", img.tag);
         if (out_name.isEmpty())
@@ -519,6 +556,21 @@ void DlgImgView::on_cmbColorSpace_currentIndexChanged(int)
     file_source->SetColorSpace(GetValue(mUI.cmbColorSpace));
 }
 
+void DlgImgView::on_cmbMinFilter_currentIndexChanged(int)
+{
+    if (!mClass)
+        return;
+
+    mClass->SetTextureMinFilter(GetValue(mUI.cmbMinFilter));
+}
+void DlgImgView::on_cmbMagFilter_currentIndexChanged(int)
+{
+    if (!mClass)
+        return;
+
+    mClass->SetTextureMagFilter(GetValue(mUI.cmbMagFilter));
+}
+
 void DlgImgView::on_widgetColor_colorChanged(QColor color)
 {
     mUI.widget->SetClearColor(ToGfx(color));
@@ -526,7 +578,7 @@ void DlgImgView::on_widgetColor_colorChanged(QColor color)
 
 void DlgImgView::on_listWidget_itemSelectionChanged()
 {
-    for (auto& img : mList)
+    for (auto& img : mPack.images)
         img.selected = false;
 
     const auto& selection = GetSelection(mUI.listWidget);
@@ -534,14 +586,14 @@ void DlgImgView::on_listWidget_itemSelectionChanged()
     {
         const auto item = selection[i];
         const auto index = static_cast<size_t>(item.row());
-        base::SafeIndex(mList, index).selected = true;
+        base::SafeIndex(mPack.images, index).selected = true;
     }
 
     SetEnabled(mUI.btnAccept, false);
 
     if (mDialogMode)
     {
-        for (const auto& img : mList)
+        for (const auto& img : mPack.images)
         {
             if (img.selected)
             {
@@ -556,11 +608,126 @@ void DlgImgView::on_tabWidget_currentChanged(int)
 {
     if (mUI.tabWidget->currentIndex() == 1)
     {
-        for (size_t i = 0; i < mList.size(); ++i)
+        for (size_t i = 0; i < mPack.images.size(); ++i)
         {
-            SelectTableRow(mUI.listWidget, i, mList[i].selected);
+            SelectTableRow(mUI.listWidget, i, mPack.images[i].selected);
         }
     }
+   const auto& index = GetSelectedIndex(mUI.listWidget);
+    if (index.isValid())
+        mUI.listWidget->scrollTo(index);
+}
+
+void DlgImgView::on_renameTemplate_returnPressed()
+{
+    std::vector<QString> original_names;
+    for (const auto& img : mPack.images)
+        original_names.push_back(img.name);
+
+    const auto& selection = GetSelection(mUI.listWidget);
+    if (selection.isEmpty())
+    {
+        QMessageBox msg(this);
+        msg.setText("You have nothing selected!");
+        msg.setIcon(QMessageBox::Information);
+        msg.exec();
+        return;
+    }
+
+    unsigned counter = 0;
+    for (int i=0; i<selection.size(); ++i)
+    {
+        QString out_name = GetValue(mUI.renameTemplate);
+
+        const auto item = selection[i];
+        const auto index = static_cast<size_t>(item.row());
+        auto& img = mPack.images[index];
+
+        out_name.replace("%c", QString::number(counter++));
+        out_name.replace("%i", QString::number(img.index));
+        out_name.replace("%w", QString::number(img.width));
+        out_name.replace("%h", QString::number(img.height));
+        out_name.replace("%x", QString::number(img.xpos));
+        out_name.replace("%y", QString::number(img.ypos));
+        out_name.replace("%t", img.tag);
+        img.name = out_name;
+        SetTableItem(mUI.listWidget, item.row(), 0, out_name);
+    }
+
+    QMessageBox msg(this);
+    msg.setWindowTitle("Confirm Rename");
+    msg.setText("Do you want to keep these changes?");
+    msg.setIcon(QMessageBox::Question);
+    msg.setStandardButtons(QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
+    if (msg.exec() == QMessageBox::StandardButton::Yes)
+    {
+        SetEnabled(mUI.btnSave, true);
+        return;
+    }
+
+    ASSERT(mPack.images.size() == original_names.size());
+    for (size_t i=0; i<original_names.size(); ++i)
+    {
+        mPack.images[i].name = original_names[i];
+        SetTableItem(mUI.listWidget, i, 0, original_names[i]);
+    }
+    SetValue(mUI.renameTemplate, QString(""));
+}
+
+void DlgImgView::on_tagTemplate_returnPressed()
+{
+    std::vector<QString> original_tags;
+    for (const auto& img: mPack.images)
+        original_tags.push_back(img.tag);
+
+    const auto& selection = GetSelection(mUI.listWidget);
+    if (selection.isEmpty())
+    {
+        QMessageBox msg(this);
+        msg.setText("You have nothing selected!");
+        msg.setIcon(QMessageBox::Information);
+        msg.exec();
+        return;
+    }
+
+    unsigned counter = 0;
+    for (int i=0; i<selection.size(); ++i)
+    {
+        QString out_tag = GetValue(mUI.tagTemplate);
+
+        const auto item = selection[i];
+        const auto index = static_cast<size_t>(item.row());
+        auto& img = mPack.images[index];
+
+        out_tag.replace("%c", QString::number(counter++));
+        out_tag.replace("%i", QString::number(img.index));
+        out_tag.replace("%w", QString::number(img.width));
+        out_tag.replace("%h", QString::number(img.height));
+        out_tag.replace("%x", QString::number(img.xpos));
+        out_tag.replace("%y", QString::number(img.ypos));
+        out_tag.replace("%t", img.tag);
+        img.tag = out_tag;
+        SetTableItem(mUI.listWidget, item.row(), 2, out_tag);
+    }
+
+    QMessageBox msg(this);
+    msg.setWindowTitle("Confirm Rename");
+    msg.setText("Do you want to keep these changes?");
+    msg.setIcon(QMessageBox::Question);
+    msg.setStandardButtons(QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
+    if (msg.exec() == QMessageBox::StandardButton::Yes)
+    {
+        SetEnabled(mUI.btnSave, true);
+        return;
+    }
+
+    ASSERT(mPack.images.size() == original_tags.size());
+    for (size_t i=0; i<original_tags.size(); ++i)
+    {
+        mPack.images[i].name = original_tags[i];
+        SetTableItem(mUI.listWidget, i, 2, original_tags[i]);
+    }
+    SetValue(mUI.tagTemplate, QString(""));
 }
 
 void DlgImgView::finished()
@@ -571,6 +738,32 @@ void DlgImgView::finished()
 void DlgImgView::timer()
 {
     mUI.widget->triggerPaint();
+}
+
+void DlgImgView::keyPressEvent(QKeyEvent* event)
+{
+    if (!OnKeyPress(event))
+        QDialog::keyPressEvent(event);
+}
+
+bool DlgImgView::eventFilter(QObject* destination, QEvent* event)
+{
+    if (event->type() != QEvent::KeyPress)
+        return false;
+
+    const auto* key = static_cast<const QKeyEvent*>(event);
+    const bool ctrl = key->modifiers() & Qt::ControlModifier;
+    const bool alt  = key->modifiers() & Qt::AltModifier;
+
+    if (alt && key->key() == Qt::Key_1)
+        mUI.tabWidget->setCurrentIndex(0);
+    else if (alt && key->key() == Qt::Key_2)
+        mUI.tabWidget->setCurrentIndex(1);
+    else if (alt && key->key() == Qt::Key_3)
+        mUI.tabWidget->setCurrentIndex(2);
+    else return false;
+
+    return true;
 }
 
 void DlgImgView::OnPaintScene(gfx::Painter& painter, double secs)
@@ -604,7 +797,7 @@ void DlgImgView::OnPaintScene(gfx::Painter& painter, double secs)
     img_rect.Translate(mTrackingOffset.x(), mTrackingOffset.y());
     gfx::FillRect(painter, img_rect, *mMaterial);
 
-    if (mList.empty())
+    if (mPack.images.empty())
         return;
 
     static auto selection_material_class = gfx::CreateMaterialClassFromImage("app://textures/accept_icon.png");
@@ -612,9 +805,9 @@ void DlgImgView::OnPaintScene(gfx::Painter& painter, double secs)
     selection_material_class.SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
     static auto selection_material = gfx::MaterialClassInst(selection_material_class);
 
-    for (size_t index=0; index<mList.size(); ++index)
+    for (size_t index=0; index<mPack.images.size(); ++index)
     {
-        const auto& img = mList[index];
+        const auto& img = mPack.images[index];
         if (!img.selected && index != mIndexUnderMouse)
             continue;
 
@@ -659,8 +852,8 @@ void DlgImgView::OnMouseMove(QMouseEvent* mickey)
         mStartPoint = mCurrentPoint;
     }
 
-    mIndexUnderMouse = mList.size();
-    if (mList.empty() || !mMaterial)
+    mIndexUnderMouse = mPack.images.size();
+    if (mPack.images.empty() || !mMaterial)
         return;
 
     const float width = mUI.widget->width();
@@ -673,9 +866,9 @@ void DlgImgView::OnMouseMove(QMouseEvent* mickey)
     const int mouse_posx = (mCurrentPoint.x() - mTrackingOffset.x() - xpos) / zoom;
     const int mouse_posy = (mCurrentPoint.y() - mTrackingOffset.y() - ypos) / zoom;
 
-    for (mIndexUnderMouse=0; mIndexUnderMouse<mList.size(); ++mIndexUnderMouse)
+    for (mIndexUnderMouse=0; mIndexUnderMouse<mPack.images.size(); ++mIndexUnderMouse)
     {
-        const auto& img = mList[mIndexUnderMouse];
+        const auto& img = mPack.images[mIndexUnderMouse];
         if (mouse_posx < img.xpos || mouse_posx > img.xpos+img.width)
             continue;
         if (mouse_posy < img.ypos || mouse_posy > img.ypos+img.height)
@@ -701,7 +894,7 @@ void DlgImgView::OnMouseDoubleClick(QMouseEvent* mickey)
         return;
 
     OnMousePress(mickey);
-    for (auto& img : mList)
+    for (auto& img : mPack.images)
     {
         if (img.selected)
         {
@@ -711,14 +904,37 @@ void DlgImgView::OnMouseDoubleClick(QMouseEvent* mickey)
     }
 }
 
-bool DlgImgView::OnKeyPress(QKeyEvent* event)
+bool DlgImgView::OnKeyPress(QKeyEvent* key)
 {
-    return false;
+    const bool ctrl = key->modifiers() & Qt::ControlModifier;
+    const bool alt  = key->modifiers() & Qt::AltModifier;
+
+    if (alt && key->key() == Qt::Key_1)
+        mUI.tabWidget->setCurrentIndex(0);
+    else if (alt && key->key() == Qt::Key_2)
+        mUI.tabWidget->setCurrentIndex(1);
+    else if (alt && key->key() == Qt::Key_3)
+        mUI.tabWidget->setCurrentIndex(2);
+    else if (ctrl && key->key() == Qt::Key_W)
+        on_btnClose_clicked();
+    else if (key->key() == Qt::Key_Escape)
+    {
+        bool had_selection = false;
+        for (auto& image : mPack.images)
+        {
+            had_selection = had_selection || image.selected;
+            image.selected = false;
+        }
+        return had_selection;
+    }
+    else return false;
+
+    return true;
 }
 
 void DlgImgView::ToggleMouseSelection()
 {
-    if (mIndexUnderMouse >= mList.size())
+    if (mIndexUnderMouse >= mPack.images.size())
         return;
 
     if (base::Contains(mTilesTouched, mIndexUnderMouse))
@@ -726,18 +942,18 @@ void DlgImgView::ToggleMouseSelection()
 
     if (mDialogMode)
     {
-        for (auto& img : mList)
+        for (auto& img : mPack.images)
             img.selected = false;
 
         SetEnabled(mUI.btnAccept, false);
     }
 
-    mList[mIndexUnderMouse].selected = !mList[mIndexUnderMouse].selected;
+    mPack.images[mIndexUnderMouse].selected = !mPack.images[mIndexUnderMouse].selected;
     mTilesTouched.insert(mIndexUnderMouse);
 
     if (mDialogMode)
     {
-        for (const auto& img : mList)
+        for (const auto& img : mPack.images)
         {
             if (img.selected)
             {
@@ -747,5 +963,7 @@ void DlgImgView::ToggleMouseSelection()
         }
     }
 }
+
+
 
 } // namespace

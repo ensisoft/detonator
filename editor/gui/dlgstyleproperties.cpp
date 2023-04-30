@@ -540,20 +540,20 @@ void DlgWidgetStyleProperties::SetWidget(const uik::Widget* widget)
 
 void DlgWidgetStyleProperties::ShowPropertyValue()
 {
-    SetVisible(mUI.widgetFontName, false);
-    SetVisible(mUI.btnOpenFontFile, false);
-    SetVisible(mUI.btnSelectFont, false);
+    SetVisible(mUI.widgetFontName,    false);
+    SetVisible(mUI.btnOpenFontFile,   false);
+    SetVisible(mUI.btnSelectFont,     false);
     SetVisible(mUI.btnSelectMaterial, false);
-    SetVisible(mUI.widgetMaterial, false);
-    SetVisible(mUI.widgetFontSize, false);
-    SetVisible(mUI.widgetTextVAlign, false);
-    SetVisible(mUI.widgetTextHAlign, false);
-    SetVisible(mUI.widgetColor, false);
-    SetVisible(mUI.widgetFloat, false);
-    SetVisible(mUI.widgetFlag, false);
-    SetVisible(mUI.widgetShape, false);
-    SetEnabled(mUI.btnResetProperty, false);
-    SetEnabled(mUI.cmbSelector, false);
+    SetVisible(mUI.widgetMaterial,    false);
+    SetVisible(mUI.widgetFontSize,    false);
+    SetVisible(mUI.widgetTextVAlign,  false);
+    SetVisible(mUI.widgetTextHAlign,  false);
+    SetVisible(mUI.widgetColor,       false);
+    SetVisible(mUI.widgetFloat,       false);
+    SetVisible(mUI.widgetFlag,        false);
+    SetVisible(mUI.widgetShape,       false);
+    SetEnabled(mUI.btnResetProperty,  false);
+    SetEnabled(mUI.cmbSelector,       false);
 
     SetValue(mUI.widgetFontName, -1);
     SetValue(mUI.widgetFontSize, -1);
@@ -748,7 +748,8 @@ void DlgWidgetStyleProperties::on_btnOpenFontFile_clicked()
     if (indices.empty())
         return;
     const auto& list = QFileDialog::getOpenFileName(this,
-        tr("Select Font File"), "", tr("Font (*.ttf *.otf *.json)"));
+        tr("Select Font File"), "",
+        tr("Font (*.ttf *.otf *.json)"));
     if (list.isEmpty())
         return;
     const auto& file = mWorkspace->MapFileToWorkspace(list);
@@ -982,10 +983,11 @@ void DlgWidgetStyleProperties::SetWidgetImage()
     if (FileExists(json_file))
     {
         DlgImgView dlg(this);
-        dlg.SetDialogMode(mWorkspace);
+        dlg.SetDialogMode();
         dlg.show();
         dlg.LoadImage(image_file);
         dlg.LoadJson(json_file);
+        dlg.ResetTransform();
         if (dlg.exec() == QDialog::Rejected)
             return;
         image_file = dlg.GetImageFileName();
@@ -997,8 +999,8 @@ void DlgWidgetStyleProperties::SetWidgetImage()
     const auto& json_uri  = mWorkspace->MapFileToWorkspace(json_file);
 
     engine::detail::UITexture texture;
-    texture.SetTextureUri(app::ToUtf8(image_uri));
-    texture.SetMetafileUri(app::ToUtf8(json_uri));
+    texture.SetTextureUri(image_uri);
+    texture.SetMetafileUri(json_uri);
     texture.SetTextureName(app::ToUtf8(image_name));
     mStyle->SetMaterial(property_key, std::move(texture));
 

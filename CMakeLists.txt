@@ -522,6 +522,7 @@ add_executable(Detonator
     editor/gui/utility.cpp
     editor/gui/svg/svgview.h
     editor/gui/svg/svgview.cpp
+    editor/gui/imgpack.cpp
     editor/resource/resource.qrc
     editor/welcome.qrc
 )
