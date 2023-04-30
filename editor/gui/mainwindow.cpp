@@ -818,6 +818,13 @@ void MainWindow::CloseWorkspace()
     SetValue(mUI.grpHelp, QString("Welcome to %1").arg(APP_TITLE));
     setWindowTitle(APP_TITLE);
 
+    if (mDlgImgView && mDlgImgView->HasWorkspace())
+    {
+        mDlgImgView->SaveState();
+        mDlgImgView->close();
+        mDlgImgView.reset();
+    }
+
     mWorkspaceProxy.SetModel(nullptr);
     mWorkspaceProxy.setSourceModel(nullptr);
     mWorkspace.reset();
@@ -1934,10 +1941,18 @@ void MainWindow::on_actionImagePacker_triggered()
 void MainWindow::on_actionImageViewer_triggered()
 {
     if (!mDlgImgView)
+    {
         mDlgImgView = std::make_unique<DlgImgView>(nullptr);
-
-    mDlgImgView->show();
-    mDlgImgView->activateWindow();
+        mDlgImgView->SetWorkspace(mWorkspace.get());
+        mDlgImgView->LoadGeometry();
+        mDlgImgView->show();
+        mDlgImgView->LoadState();
+    }
+    else
+    {
+        mDlgImgView->show();
+        mDlgImgView->activateWindow();
+    }
 }
 
 void MainWindow::on_actionSvgViewer_triggered()

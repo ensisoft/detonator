@@ -539,10 +539,11 @@ void WidgetStyleWidget::SetMaterialImage(const char* key)
         if (FileExists(json_file))
         {
             DlgImgView dlg(this);
-            dlg.SetDialogMode(mWorkspace);
+            dlg.SetDialogMode();
             dlg.show();
             dlg.LoadImage(image_file);
             dlg.LoadJson(json_file);
+            dlg.ResetTransform();
             if (dlg.exec() == QDialog::Rejected)
                 return;
             image_file = dlg.GetImageFileName();
@@ -553,8 +554,8 @@ void WidgetStyleWidget::SetMaterialImage(const char* key)
         const auto& json_uri  = mWorkspace->MapFileToWorkspace(json_file);
 
         engine::detail::UITexture texture;
-        texture.SetTextureUri(app::ToUtf8(image_uri));
-        texture.SetMetafileUri(app::ToUtf8(json_uri));
+        texture.SetTextureUri(image_uri);
+        texture.SetMetafileUri(json_uri);
         texture.SetTextureName(app::ToUtf8(image_name));
         mStyle->SetMaterial(MapProperty(key), std::move(texture));
 
