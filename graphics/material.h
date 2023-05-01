@@ -784,8 +784,9 @@ namespace gfx
         };
 
 
-        // Material/Shader uniform.
+        // Material/Shader uniform/params
         using Uniform = std::variant<float, int,
+                std::string,
                 gfx::Color4f,
                 glm::vec2, glm::vec3, glm::vec4>;
         using UniformMap = std::unordered_map<std::string, Uniform>;
@@ -836,10 +837,8 @@ namespace gfx
         { mSurfaceType = surface; }
         inline void SetParticleAction(ParticleAction action) noexcept
         { mParticleAction = action; }
-        // Set the material class id. Used when creating specific materials with
-        // fixed static ids. Todo: refactor away and use constructor.
-        inline void SetId(std::string& id) noexcept
-        { mClassId = std::move(id); }
+        inline void SetActiveTextureMap(std::string id) noexcept
+        { mActiveTextureMap = id; }
         // Set the human-readable material class name.
         inline void SetName(std::string name) noexcept
         { mName = std::move(name); }
@@ -889,6 +888,8 @@ namespace gfx
         { return mColorMap[index]; }
         inline Color4f GetBaseColor() const noexcept
         { return mColorMap[ColorIndex::BaseColor]; }
+        inline std::string GetActiveTextureMap() const noexcept
+        { return mActiveTextureMap; }
         // Get the material class id.
         inline std::string GetId() const noexcept
         { return mClassId; }
@@ -1085,6 +1086,7 @@ namespace gfx
             return false;
         }
     private:
+        TextureMap* SelectTextureMap(const State& state) const noexcept;
         Shader* GetColorShader(const State& state, Device& device) const noexcept;
         Shader* GetGradientShader(const State& state, Device& device) const noexcept;
         Shader* GetSpriteShader(const State& state, Device& device) const noexcept;
@@ -1099,6 +1101,7 @@ namespace gfx
         std::string mName;
         std::string mShaderUri;
         std::string mShaderSrc;
+        std::string mActiveTextureMap;
         Type mType = Type::Color;
         ParticleAction mParticleAction = ParticleAction::None;
         SurfaceType mSurfaceType = SurfaceType::Opaque;

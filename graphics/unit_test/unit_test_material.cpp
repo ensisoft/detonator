@@ -164,7 +164,7 @@ void unit_test_material_class()
     klass.SetUniform("vec3", glm::vec3(1.0f, 2.0f, 3.0f));
     klass.SetUniform("vec4", glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
     klass.SetUniform("color", gfx::Color::DarkCyan);
-
+    klass.SetActiveTextureMap("123abc");
 
     auto texture_file_source = std::make_unique<gfx::detail::TextureFileSource>();
     texture_file_source->SetFileName("file.png");
@@ -207,6 +207,7 @@ void unit_test_material_class()
         TEST_REQUIRE(ret->GetTextureRotation()  == real::float32(2.5f));
         TEST_REQUIRE(ret->GetShaderUri() == "my_shader.glsl");
         TEST_REQUIRE(ret->GetShaderSrc() == "some shader source");
+        TEST_REQUIRE(ret->GetActiveTextureMap() == "123abc");
         TEST_REQUIRE(*ret->GetUniformValue<int>("int")            == 123);
         TEST_REQUIRE(*ret->GetUniformValue<float>("float")        == real::float32(56.0f));
         TEST_REQUIRE(*ret->GetUniformValue<glm::vec2>("vec2")     == glm::vec2(1.0f, 2.0f));
