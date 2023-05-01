@@ -400,6 +400,13 @@ struct ListItemId {
     {}
 };
 
+struct ListItemTag {
+    ListItemTag(const app::AnyString& tag)
+      : tag(tag)
+    {}
+    app::AnyString tag;
+};
+
 inline void SetValue(QFontComboBox* cmb, const QFont& font)
 {
     QSignalBlocker s(cmb);
@@ -477,6 +484,11 @@ inline void ClearList(QListWidget* list)
     QSignalBlocker s(list);
     list->clear();
 }
+inline void ClearList(QComboBox* cmb)
+{
+    QSignalBlocker s(cmb);
+    cmb->clear();
+}
 
 inline void SelectItem(QListWidget* list,  const ListItemId& id)
 {
@@ -530,8 +542,17 @@ inline void ResizeTable(QTableWidget* table, unsigned rows, unsigned cols)
 inline QTableWidgetItem* SetTableItem(QTableWidget* table, unsigned row, unsigned col, QString text)
 {
     QSignalBlocker s(table);
-    QTableWidgetItem* item = new QTableWidgetItem(text);
-    table->setItem(row, col, item);
+    QTableWidgetItem* item = table->item(row, col);
+    if (item == nullptr)
+    {
+        item = new QTableWidgetItem(text);
+        table->setItem(row, col, item);
+    }
+    else
+    {
+        item->setText(text);
+    }
+
     return item;
 }
 
@@ -539,9 +560,30 @@ template<typename T>
 inline QTableWidgetItem* SetTableItem(QTableWidget* table, unsigned row, unsigned col, T value)
 {
     QSignalBlocker s(table);
-    QTableWidgetItem* item = new QTableWidgetItem(app::toString(value));
-    table->setItem(row, col, item);
+    QTableWidgetItem* item = table->item(row, col);
+    if (item == nullptr)
+    {
+        item = new QTableWidgetItem(app::toString(value));
+        table->setItem(row, col, item);
+    }
+    else
+    {
+        item->setText(app::toString(value));
+    }
     return item;
+}
+
+inline void SelectTableRow(QTableWidget* table, unsigned row, bool selected)
+{
+    ASSERT(row < table->rowCount());
+    QSignalBlocker s(table);
+    for (int i=0; i<table->columnCount(); ++i)
+    {
+        QTableWidgetItem* item = table->item(static_cast<int>(row), i);
+        if (!item)
+            continue;
+        item->setSelected(selected);
+    }
 }
 
 
@@ -559,7 +601,7 @@ inline void SetList(QListWidget* list, const ResourceList& items)
     // maintain the current/previous selections
     std::unordered_set<QString> selected;
     for (const auto* item : list->selectedItems())
-        selected.insert(item->data(Qt::UserRole).toString());
+        selected.insert(item->data(Qt::UserRole+0).toString());
 
     QSignalBlocker s(list);
     list->clear();
@@ -568,7 +610,8 @@ inline void SetList(QListWidget* list, const ResourceList& items)
     {
         QListWidgetItem* li = new QListWidgetItem;
         li->setText(item.name);
-        li->setData(Qt::UserRole, item.id);
+        li->setData(Qt::UserRole+0, item.id);
+        li->setData(Qt::UserRole+1, item.tag);
         li->setIcon(item.icon);
         list->addItem(li);
         // ffs, the selection must be *done* after adding the
@@ -901,23 +944,47 @@ struct ListWidgetItemIdGetter
     operator std::string() const
     {
         if (item)
-            return app::ToUtf8(item->data(Qt::UserRole).toString());
+            return app::ToUtf8(item->data(Qt::UserRole+0).toString());
         return "";
     }
     operator QString() const
     {
         if (item)
-            return item->data(Qt::UserRole).toString();
+            return item->data(Qt::UserRole+0).toString();
         return QString("");
     }
     operator app::AnyString() const
     {
         if (item)
-            return item->data(Qt::UserRole).toString();
+            return item->data(Qt::UserRole+0).toString();
         return QString("");
     }
     const QListWidgetItem* item = nullptr;
 };
+
+struct ListWidgetItemTagGetter
+{
+    operator std::string() const
+    {
+        if (item)
+            return app::ToUtf8(item->data(Qt::UserRole+1).toString());
+        return "";
+    }
+    operator QString() const
+    {
+        if (item)
+            return item->data(Qt::UserRole+1).toString();
+        return QString("");
+    }
+    operator app::AnyString() const
+    {
+        if (item)
+            return item->data(Qt::UserRole+1).toString();
+        return QString("");
+    }
+    const QListWidgetItem* item = nullptr;
+};
+
 
 struct FontComboValueGetter
 {
@@ -1091,9 +1158,13 @@ inline ComboBoxValueGetter GetValue(const QComboBox* cmb)
 inline ComboBoxItemIdGetter GetItemId(const QComboBox* cmb)
 { return ComboBoxItemIdGetter { cmb }; }
 inline ListWidgetItemIdGetter GetItemId(const QListWidget* list)
-{ return ListWidgetItemIdGetter { list->currentItem() }; }
+{ return ListWidgetItemIdGetter { GetSelectedItem(list) }; }
 inline ListWidgetItemIdGetter GetItemId(const QListWidgetItem* item)
 { return ListWidgetItemIdGetter { item }; }
+inline ListWidgetItemTagGetter GetItemTag(const QListWidget* list)
+{ return ListWidgetItemTagGetter { GetSelectedItem(list) }; }
+inline ListWidgetItemTagGetter GetItemTag(const QListWidgetItem* item)
+{ return ListWidgetItemTagGetter { item }; }
 inline LineEditValueGetter GetValue(const QLineEdit* edit)
 { return LineEditValueGetter { edit }; }
 inline PlainTextEditValueGetter GetValue(const QPlainTextEdit* edit)

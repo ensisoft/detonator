@@ -923,6 +923,7 @@ namespace app
     struct ResourceListItem {
         AnyString name;
         AnyString id;
+        AnyString tag;
         QIcon icon;
         const Resource* resource = nullptr;
         boost::tribool selected = boost::indeterminate;
