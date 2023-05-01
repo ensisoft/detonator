@@ -31,7 +31,7 @@
 #include <set>
 
 #include "graphics/fwd.h"
-
+#include "editor/gui/imgpack.h"
 
 namespace app {
     class Workspace;
@@ -48,8 +48,10 @@ namespace gui
 
         void SetPreview(const QPixmap& pix);
 
-        QString GetName() const;
-        void SetName(const QString& name);
+        app::AnyString GetName() const;
+        app::AnyString GetTag() const;
+        void SetName(const app::AnyString& name);
+        void SetTag(const app::AnyString& name);
         void InstallEventFilter(QObject* receiver);
     private:
         Ui::ImportedTile mUI;
@@ -76,6 +78,7 @@ namespace gui
        ~DlgTileImport();
 
         void LoadState();
+        void LoadGeometry();
 
     private slots:
         void on_btnSelectImage_clicked();
@@ -85,13 +88,12 @@ namespace gui
         void on_btnClose_clicked();
         void on_btnImport_clicked();
         void on_tabWidget_currentChanged(int);
-        void on_renameTiles_textChanged(const QString& name);
+        void on_renameTemplate_returnPressed();
         void on_widgetColor_colorChanged(QColor color);
         void on_materialType_currentIndexChanged(int);
         void on_cmbColorSpace_currentIndexChanged(int);
         void on_cmbMinFilter_currentIndexChanged(int);
         void on_cmbMagFilter_currentIndexChanged(int);
-        void on_cmbCutting_currentIndexChanged(int);
         void finished();
         void timer();
     private:
@@ -100,6 +102,7 @@ namespace gui
         void ToggleSelection();
         void LoadImageFile(const QString& file);
         void LoadJsonFile(const QString& file);
+        void ResetTransform();
         void SaveState();
         void OnPaintScene(gfx::Painter& painter, double secs);
         void OnMousePress(QMouseEvent* mickey);
@@ -121,13 +124,15 @@ namespace gui
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
 
-        std::vector<Image> mImages;
+        ImagePack mPack;
+
         std::size_t mIndexUnderMouse = 0;
         enum class Mode {
             Nada, Tracking, Selecting
         };
         Mode mMode = Mode::Nada;
         std::set<size_t> mTilesTouched;
+
     };
 
 } // namespace

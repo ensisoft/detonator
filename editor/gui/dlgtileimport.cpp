@@ -45,113 +45,6 @@ namespace {
     enum class MaterialType {
         Texture, Sprite
     };
-    enum class TextureCutting {
-        UseOriginal,
-        CutNewTexture
-    };
-
-    enum class ImageFormat {
-        PNG, JPG
-    };
-
-    // this is copy/paste from DlgImgView. refactor to a single place since the
-    // functionality is the same.
-    bool ReadTexturePack(const QString& file, std::vector<gui::DlgTileImport::Image>* out)
-    {
-        QString err_str;
-        QFile::FileError err_val = QFile::FileError::NoError;
-        const auto& buff = app::ReadBinaryFile(file, &err_val, &err_str);
-        if (err_val != QFile::FileError::NoError)
-        {
-            ERROR("Failed to read file. [file='%1', error='%2']", file, err_str);
-            return false;
-        }
-
-        const auto* beg  = buff.data();
-        const auto* end  = buff.data() + buff.size();
-        const auto& json = nlohmann::json::parse(beg, end, nullptr, false);
-        if (json.is_discarded())
-        {
-            ERROR("Failed to parse JSON file. [file='%1']", file);
-            return false;
-        }
-
-        if (json.contains("images") && json["images"].is_array())
-        {
-            for (const auto& img_json: json["images"].items())
-            {
-                const auto& obj = img_json.value();
-
-                gui::DlgTileImport::Image img;
-                std::string name;
-                std::string character;
-                unsigned width = 0;
-                unsigned height = 0;
-
-                // optional
-                base::JsonReadSafe(obj, "name", &name);
-                base::JsonReadSafe(obj, "index", &img.index);
-
-                if (!base::JsonReadSafe(obj, "width", &img.width))
-                    WARN("Image is missing 'width' attribute. [file='%1']", file);
-                if (!base::JsonReadSafe(obj, "height", &img.height))
-                    WARN("Image is missing 'height' attribute. [file='%1']", file);
-                if (!base::JsonReadSafe(obj, "xpos", &img.xpos))
-                    WARN("Image is missing 'xpos' attribute. [file='%1']", file);
-                if (!base::JsonReadSafe(obj, "ypos", &img.ypos))
-                    WARN("Image is missing 'ypos' attribute. [file='%1']", file);
-
-                out->push_back(std::move(img));
-            }
-        }
-        else
-        {
-            unsigned image_width  = 0;
-            unsigned image_height = 0;
-            unsigned tile_width  = 0;
-            unsigned tile_height = 0;
-            unsigned xoffset = 0;
-            unsigned yoffset = 0;
-            bool error = true;
-
-            if (!base::JsonReadSafe(json, "image_width", &image_width))
-                ERROR("Missing image_width property. [file='%1']", file);
-            else if (!base::JsonReadSafe(json, "image_height", &image_height))
-                ERROR("Missing image_height property. [file='%1']", file);
-            else if (!base::JsonReadSafe(json, "tile_width", &tile_width))
-                ERROR("Missing tile_width property. [file='%1']", file);
-            else if (!base::JsonReadSafe(json, "tile_height", &tile_height))
-                ERROR("Missing tile_height property. [file='%1']", file);
-            else if (!base::JsonReadSafe(json, "xoffset", &xoffset))
-                ERROR("Missing xoffset property.[file='%1']", file);
-            else if (!base::JsonReadSafe(json, "yoffset", &yoffset))
-                ERROR("Missing yoffset property. [file='%1']", file);
-            else error = false;
-            if (error) return false;
-
-            const auto max_rows = (image_height - yoffset) / tile_height;
-            const auto max_cols = (image_width - xoffset) / tile_width;
-            for (unsigned row=0; row<max_rows; ++row)
-            {
-                for (unsigned col=0; col<max_cols; ++col)
-                {
-                    const auto index = row * max_cols + col;
-                    const auto tile_xpos = xoffset + col * tile_width;
-                    const auto tile_ypos = yoffset + row * tile_height;
-
-                    gui::DlgTileImport::Image img;
-                    img.width  = tile_width;
-                    img.height = tile_height;
-                    img.xpos   = tile_xpos;
-                    img.ypos   = tile_ypos;
-                    out->push_back(std::move(img));
-                }
-            }
-        }
-        INFO("Successfully parsed '%1'. %2 images found.", file, out->size());
-        return true;
-    }
-
 }// namespace
 
 namespace gui
@@ -167,19 +60,30 @@ void ImportedTile::SetPreview(const QPixmap& pix)
     mUI.preview->setPixmap(pix);
 }
 
-QString ImportedTile::GetName() const
+app::AnyString ImportedTile::GetName() const
 {
     return GetValue(mUI.name);
 }
 
-void ImportedTile::SetName(const QString& name)
+app::AnyString ImportedTile::GetTag() const
+{
+    return GetValue(mUI.tag);
+}
+
+void ImportedTile::SetName(const app::AnyString& name)
 {
     SetValue(mUI.name, name);
+}
+
+void ImportedTile::SetTag(const app::AnyString& tag)
+{
+    SetValue(mUI.tag, tag);
 }
 
 void ImportedTile::InstallEventFilter(QObject* receiver)
 {
     mUI.name->installEventFilter(receiver);
+    mUI.tag->installEventFilter(receiver);
 }
 
 DlgTileImport::DlgTileImport(QWidget* parent, app::Workspace* workspace)
@@ -214,22 +118,16 @@ DlgTileImport::DlgTileImport(QWidget* parent, app::Workspace* workspace)
     PopulateFromEnum<gfx::MaterialClass::MinTextureFilter>(mUI.cmbMinFilter);
     PopulateFromEnum<gfx::MaterialClass::MagTextureFilter>(mUI.cmbMagFilter);
     PopulateFromEnum<MaterialType>(mUI.materialType);
-    PopulateFromEnum<TextureCutting>(mUI.cmbCutting);
-    PopulateFromEnum<ImageFormat>(mUI.cmbImageFormat);
-    SetVisible(mUI.progressBar, false);
     SetValue(mUI.zoom, 1.0f);
 
-    on_cmbCutting_currentIndexChanged(0);
     on_materialType_currentIndexChanged(0);
-
-    mUI.renameTiles->installEventFilter(this);
+    mUI.renameTemplate->installEventFilter(this);
     mUI.spriteName->installEventFilter(this);
-    mUI.textureFolder->installEventFilter(this);
 }
 
 DlgTileImport::~DlgTileImport()
 {
-    for (auto& tile : mImages)
+    for (auto& tile : mPack.images)
     {
         delete tile.widget;
     }
@@ -243,6 +141,7 @@ void DlgTileImport::on_btnSelectImage_clicked()
     if (file.isEmpty()) return;
 
     LoadImageFile(file);
+    ResetTransform();
 
     QString json = file;
     json.replace(".png", ".json", Qt::CaseInsensitive);
@@ -263,18 +162,21 @@ void DlgTileImport::on_btnSelectJson_clicked()
     QString img = file;
     img.replace(".json", ".png", Qt::CaseInsensitive);
     if (app::FileExists(img))
+    {
         LoadImageFile(img);
+        ResetTransform();
+    }
 }
 
 void DlgTileImport::on_btnSelectAll_clicked()
 {
-    for (auto& tile : mImages)
+    for (auto& tile : mPack.images)
         tile.selected = true;
 }
 
 void DlgTileImport::on_btnSelectNone_clicked()
 {
-    for (auto& tile : mImages)
+    for (auto& tile : mPack.images)
         tile.selected = false;
 }
 
@@ -287,192 +189,90 @@ void DlgTileImport::on_btnClose_clicked()
 
 void DlgTileImport::on_btnImport_clicked()
 {
-    const auto tile_margin_top  = (unsigned)GetValue(mUI.tileMarginTop);
-    const auto tile_margin_left = (unsigned)GetValue(mUI.tileMarginLeft);
-    const auto tile_margin_right = (unsigned)GetValue(mUI.tileMarginRight);
-    const auto tile_margin_bottom = (unsigned)GetValue(mUI.tileMarginBottom);
+    bool have_selection = false;
+    for (const auto& img : mPack.images)
+    {
+        if (img.selected) {
+            have_selection = true;
+            break;
+        }
+    }
+    if (!have_selection)
+    {
+        QMessageBox msg(this);
+        msg.setText("You haven't selected any tiles!");
+        msg.setIcon(QMessageBox::Information);
+        msg.exec();
+        return;
+    }
+
+    const auto tile_margin_top  = (unsigned)GetValue(mUI.topMargin);
+    const auto tile_margin_left = (unsigned)GetValue(mUI.leftMargin);
+    const auto tile_margin_right = (unsigned)GetValue(mUI.rightMargin);
+    const auto tile_margin_bottom = (unsigned)GetValue(mUI.bottomMargin);
     const auto premul_alpha = (bool)GetValue(mUI.chkPremulAlpha);
     const auto premul_alpha_blend = (bool)GetValue(mUI.chkPremulAlphaBlend);
     const float img_height = mHeight;
     const float img_width = mWidth;
 
-    std::vector<std::string> texture_uris;
-
     const MaterialType type  = GetValue(mUI.materialType);
-    const ImageFormat format = GetValue(mUI.cmbImageFormat);
-    const TextureCutting cutting = GetValue(mUI.cmbCutting);
 
-    AutoHider hider(mUI.progressBar);
     AutoEnabler close(mUI.btnClose);
     AutoEnabler import(mUI.btnImport);
-    QEventLoop footgun;
-
-    // compute how much work there's to do
-    int work_tasks = 0;
-    for (auto& tile : mImages)
-    {
-        if (tile.selected)
-            ++work_tasks;
-    }
-    if (work_tasks == 0)
-        return;
-
-    SetValue(mUI.progressBar, 0);
-    SetRange(mUI.progressBar, 0, work_tasks);
-
-    if (cutting == TextureCutting::CutNewTexture)
-    {
-        SetRange(mUI.progressBar, 0, work_tasks * 2);
-        SetValue(mUI.progressBar, "Cutting textures ... %p% ");
-
-        QImage source_img;
-        auto* map = mClass->GetTextureMap(0);
-        auto* src = map->GetTextureSource(0);
-        // the bitmap must outlive the QImage object that is constructed
-        // QImage will not take ownership / copy the data!
-        auto bitmap = src->GetData();
-
-        if (bitmap)
-        {
-            const auto width  = bitmap->GetWidth();
-            const auto height = bitmap->GetHeight();
-            const auto depth  = bitmap->GetDepthBits();
-            if (depth == 0) source_img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width, QImage::Format_Grayscale8);
-            else if (depth == 24) source_img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width * 3, QImage::Format_RGB888);
-            else if (depth == 32) source_img = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width * 4, QImage::Format_RGBA8888);
-            else ERROR("Failed to load texture into QImage. Unexpected bit depth. depth=[%1']", depth);
-        }
-
-        if (source_img.isNull())
-        {
-            QMessageBox msg(this);
-            msg.setIcon(QMessageBox::Critical);
-            msg.setStandardButtons(QMessageBox::StandardButton::Ok);
-            msg.setText("Failed to load the source texture.");
-            msg.exec();
-            return;
-        }
-        QString folder = GetValue(mUI.textureFolder);
-        if (folder.isEmpty())
-            folder = "textures";
-        QString dir = mWorkspace->GetSubDir(folder);
-        QString ext;
-        if (format == ImageFormat::PNG)
-            ext = ".png";
-        else if (format == ImageFormat::JPG)
-            ext = ".jpg";
-        else BUG("Missing image format case.");
-
-        bool errors = false;
-        for (size_t index=0; index<mImages.size(); ++index)
-        {
-            const auto& img = mImages[index];
-            if (!img.selected)
-                continue;
-
-            QString name = img.widget->GetName();
-            QString filename = app::toString("%1_%2x%3", name, img.width, img.height);
-            QString filepath = app::JoinPath(dir, filename);
-            filepath += ext;
-            QString uri = mWorkspace->MapFileToWorkspace(filepath);
-
-            QImage tile = source_img.copy(img.xpos, img.ypos, img.width, img.height);
-            QImageWriter writer;
-            writer.setFileName(filepath);
-            writer.setQuality(GetValue(mUI.imageQuality));
-            if (format == ImageFormat::PNG)
-                writer.setFormat("PNG");
-            else if (format == ImageFormat::JPG)
-                writer.setFormat("JPG");
-            else BUG("Missing image format case.");
-
-            if (!writer.write(tile))
-            {
-                ERROR("Failed to write image file. [file='%1', error='%2']", filepath, writer.errorString());
-                errors = true;
-                break;
-            }
-            if (texture_uris.size() <= index)
-                texture_uris.resize(index + 1);
-            texture_uris[index] = app::ToUtf8(uri);
-
-            if (Increment(mUI.progressBar))
-                footgun.processEvents();
-        }
-
-        if (errors)
-        {
-            QMessageBox msg(this);
-            msg.setIcon(QMessageBox::Critical);
-            msg.setStandardButtons(QMessageBox::Ok);
-            msg.setText("There were errors while writing the tile image files.");
-            msg.exec();
-            return;
-        }
-    }
 
     if (type == MaterialType::Texture)
     {
-        SetValue(mUI.progressBar, "Making materials ... %p% ");
-
-        for (size_t index=0; index<mImages.size(); ++index)
+        for (size_t index=0; index<mPack.images.size(); ++index)
         {
-            const auto& img  = mImages[index];
+            const auto& img  = mPack.images[index];
             if (!img.selected)
                 continue;
 
             const auto& name = img.widget->GetName();
-            gfx::detail::TextureFileSource texture;
-            texture.SetColorSpace(GetValue(mUI.cmbColorSpace));
-            texture.SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, premul_alpha);
-            if (cutting == TextureCutting::UseOriginal)
-            {
-                texture.SetFileName(mFileUri);
-                texture.SetName(app::ToUtf8(name));
-            }
-            else if (cutting == TextureCutting::CutNewTexture)
-            {
-                texture.SetFileName(texture_uris[index]);
-                texture.SetName(app::ToUtf8(name));
-            } else BUG("Missing texture cut case.");
+            auto texture = std::make_unique<gfx::detail::TextureFileSource>();
+            texture->SetColorSpace(GetValue(mUI.cmbColorSpace));
+            texture->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, premul_alpha);
+            texture->SetFileName(mFileUri);
+            texture->SetName(name);
+
+            gfx::FRect rect;
+            rect.Move(img.xpos, img.ypos);
+            rect.Translate(tile_margin_left, tile_margin_top);
+            rect.SetWidth(img.width - tile_margin_left - tile_margin_right);
+            rect.SetHeight(img.height - tile_margin_top - tile_margin_bottom);
+            rect = rect.Normalize(base::FSize(mWidth, mHeight));
+
+            auto map = std::make_unique<gfx::TextureMap>();
+            map->SetType(gfx::TextureMap::Type::Texture2D);
+            map->SetName("Texture");
+            map->SetNumTextures(1);
+            map->SetTextureSource(0, std::move(texture));
+            map->SetTextureRect(0, rect);
 
             gfx::TextureMap2DClass klass(gfx::MaterialClass::Type::Texture, base::RandomString(10));
             klass.SetSurfaceType(GetValue(mUI.surfaceType));
-            klass.SetTexture(texture.Copy());
             klass.SetTextureMinFilter(GetValue(mUI.minFilter));
             klass.SetTextureMagFilter(GetValue(mUI.magFilter));
+            klass.SetNumTextureMaps(1);
+            klass.SetTextureMap(0, std::move(map));
             klass.SetName(app::ToUtf8(img.name));
             klass.SetFlag(gfx::TextureMap2DClass::Flags::PremultipliedAlpha, premul_alpha_blend);
 
-            if (cutting == TextureCutting::UseOriginal)
-            {
-                const auto rect = gfx::FRect(
-                  float(img.xpos + tile_margin_left) / img_width,
-                  float(img.ypos + tile_margin_top) / img_height,
-                  float(img.width - tile_margin_left - tile_margin_right) / img_width,
-                  float(img.height - tile_margin_top - tile_margin_bottom) / img_height);
-                klass.SetTextureRect(rect);
-            }
-            else if (cutting == TextureCutting::CutNewTexture)
-            {
-                klass.SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
-            } else BUG("Missing texture cut case.");
-
             app::MaterialResource res(klass, name);
             mWorkspace->SaveResource(res);
-
-            if (Increment(mUI.progressBar))
-                footgun.processEvents();
         }
     }
     else if (type == MaterialType::Sprite)
     {
+        if (!MustHaveInput(mUI.spriteName))
+            return;
+
         auto map = std::make_unique<gfx::TextureMap>();
         map->SetName("Sprite");
         map->SetType(gfx::TextureMap::Type::Sprite);
         map->SetFps(GetValue(mUI.spriteFps));
 
-        gfx::SpriteClass klass(gfx::MaterialClass::Type::Sprite, base::RandomString(10));
+        gfx::MaterialClass klass(gfx::MaterialClass::Type::Sprite, base::RandomString(10));
         klass.SetSurfaceType(GetValue(mUI.surfaceType));
         klass.SetTextureMinFilter(GetValue(mUI.minFilter));
         klass.SetTextureMagFilter(GetValue(mUI.magFilter));
@@ -482,141 +282,126 @@ void DlgTileImport::on_btnImport_clicked()
         klass.SetNumTextureMaps(1);
         klass.SetTextureMap(0, std::move(map));
 
-        SetValue(mUI.progressBar, "Making sprite ... %p% ");
-
         // if the selected images / tiles are in one contiguous region
         // with regular size then the sprite can be optimized to use a single
         // sprite sheet instead of multiple different images, but only if
         // texture cutting is not being done.  Texture cutting forces the use
         // of separate image source files.
-        if (cutting == TextureCutting::UseOriginal)
+        unsigned tile_width  = 0;
+        unsigned tile_height = 0;
+        unsigned tile_xpos   = 0;
+        unsigned tile_ypos   = 0;
+        unsigned tile_count  = 0;
+        bool irregular_size  = false;
+        bool disjoint_selection = false;
+        base::URect rect;
+
+        for (size_t index=0; index<mPack.images.size(); ++index)
         {
-            unsigned tile_width  = 0;
-            unsigned tile_height = 0;
-            unsigned tile_xpos   = 0;
-            unsigned tile_ypos   = 0;
-            unsigned tile_count  = 0;
-            bool irregular_size  = false;
-            bool disjoint_selection = false;
-            base::URect rect;
+            const auto& img = mPack.images[index];
+            if (!img.selected)
+                continue;
 
-            for (size_t index=0; index<mImages.size(); ++index)
+            base::URect tile;
+            tile.Resize(img.width, img.height);
+            tile.Translate(img.xpos, img.ypos);
+            rect = base::Union(rect, tile);
+
+            if (tile_width == 0 && tile_height == 0)
             {
-                const auto& img = mImages[index];
-                if (!img.selected)
-                    continue;
-
-                base::URect tile;
-                tile.Resize(img.width, img.height);
-                tile.Translate(img.xpos, img.ypos);
-                rect = base::Union(rect, tile);
-
-                if (tile_width == 0 && tile_height == 0)
-                {
-                    tile_width  = img.width;
-                    tile_height = img.height;
-                    tile_xpos   = img.xpos;
-                    tile_ypos   = img.ypos;
-                    rect        = tile;
-                    ++tile_count;
-                    continue;
-                }
-                if ((img.width != tile_width) || (img.height != tile_height))
-                {
-                    irregular_size = true;
-                    break;
-                }
-                if ((img.xpos != tile_xpos) && (img.ypos != tile_ypos))
+                tile_width  = img.width;
+                tile_height = img.height;
+                tile_xpos   = img.xpos;
+                tile_ypos   = img.ypos;
+                rect        = tile;
+                ++tile_count;
+                continue;
+            }
+            if ((img.width != tile_width) || (img.height != tile_height))
+            {
+                irregular_size = true;
+                break;
+            }
+            if ((img.xpos != tile_xpos) && (img.ypos != tile_ypos))
+            {
+                disjoint_selection = true;
+                break;
+            }
+            if (img.xpos == tile_xpos)
+            {
+                if (img.ypos != tile_height * tile_count)
                 {
                     disjoint_selection = true;
                     break;
                 }
-                if (img.xpos == tile_xpos)
-                {
-                    if (img.ypos != tile_height * tile_count)
-                    {
-                        disjoint_selection = true;
-                        break;
-                    }
-                }
-                if (img.ypos == tile_ypos)
-                {
-                    if (img.xpos != tile_width * tile_count)
-                    {
-                        disjoint_selection = true;
-                        break;
-                    }
-                }
-                ++tile_count;
             }
-            if (!irregular_size && !disjoint_selection)
+            if (img.ypos == tile_ypos)
             {
-                ASSERT(tile_width && tile_height);
-                gfx::TextureMap::SpriteSheet sprite;
-                sprite.cols = rect.GetWidth() / tile_width;
-                sprite.rows = rect.GetHeight() / tile_height;
-                ASSERT(sprite.cols && sprite.rows);
-                DEBUG("Using optimized single spritesheet with regular tile size %1x%2", tile_width, tile_height);
-
-                const auto width  = rect.GetWidth();
-                const auto height = rect.GetHeight();
-                rect.Translate(tile_margin_left, tile_margin_top);
-                rect.SetWidth(width - tile_margin_left - tile_margin_right);
-                rect.SetHeight(height - tile_margin_top - tile_margin_bottom);
-
-                auto texture = std::make_unique<gfx::detail::TextureFileSource>();
-                texture->SetColorSpace(GetValue(mUI.cmbColorSpace));
-                texture->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, premul_alpha);
-                texture->SetFileName(mFileUri);
-                texture->SetName("Spritesheet");
-
-                klass.GetTextureMap(0)->SetSpriteSheet(sprite);
-                klass.GetTextureMap(0)->SetNumTextures(1);
-                klass.GetTextureMap(0)->SetTextureSource(0, std::move(texture));
-                klass.GetTextureMap(0)->SetTextureRect(0, rect.Normalize(base::FSize(mWidth, mHeight)));
+                if (img.xpos != tile_width * tile_count)
+                {
+                    disjoint_selection = true;
+                    break;
+                }
             }
+            ++tile_count;
         }
 
-        if (klass.GetTextureMap(0)->GetNumTextures() == 0)
+        if (irregular_size || disjoint_selection)
         {
-            for (size_t index = 0; index < mImages.size(); ++index)
+            for (size_t index = 0; index < mPack.images.size(); ++index)
             {
-                const auto& img = mImages[index];
+                const auto& img = mPack.images[index];
                 if (!img.selected)
                     continue;
 
                 const auto& name = img.widget->GetName();
 
-                gfx::FRect rect;
                 auto texture = std::make_unique<gfx::detail::TextureFileSource>();
                 texture->SetColorSpace(GetValue(mUI.cmbColorSpace));
                 texture->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, premul_alpha);
-                if (cutting == TextureCutting::UseOriginal)
-                {
-                    texture->SetFileName(mFileUri);
-                    texture->SetName(app::ToUtf8(name));
-                    rect.Move(img.xpos, img.ypos);
-                    rect.Translate(tile_margin_left, tile_margin_top);
-                    rect.SetWidth(img.width - tile_margin_left - tile_margin_right);
-                    rect.SetHeight(img.height - tile_margin_top - tile_margin_bottom);
-                    rect = rect.Normalize(base::FSize(mWidth, mHeight));
-                }
-                else if (cutting == TextureCutting::CutNewTexture)
-                {
-                    texture->SetFileName(texture_uris[index]);
-                    texture->SetName("Tile");
-                    rect = gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f);
-                } else BUG("Missing texture cut case.");
+                texture->SetFileName(mFileUri);
+                texture->SetName(name);
+
+                gfx::FRect rect;
+                rect.Move(img.xpos, img.ypos);
+                rect.Translate(tile_margin_left, tile_margin_top);
+                rect.SetWidth(img.width - tile_margin_left - tile_margin_right);
+                rect.SetHeight(img.height - tile_margin_top - tile_margin_bottom);
+                rect = rect.Normalize(base::FSize(mWidth, mHeight));
 
                 auto* map = klass.GetTextureMap(0);
                 auto count = map->GetNumTextures();
                 map->SetNumTextures(count+1);
                 map->SetTextureSource(count, std::move(texture));
                 map->SetTextureRect(count, rect);
-
-                if (Increment(mUI.progressBar))
-                    footgun.processEvents();
             }
+        }
+        else
+        {
+            ASSERT(tile_width && tile_height);
+            gfx::TextureMap::SpriteSheet sprite;
+            sprite.cols = rect.GetWidth() / tile_width;
+            sprite.rows = rect.GetHeight() / tile_height;
+            ASSERT(sprite.cols && sprite.rows);
+            DEBUG("Using optimized single spritesheet with regular tile size %1x%2", tile_width, tile_height);
+
+            const auto width  = rect.GetWidth();
+            const auto height = rect.GetHeight();
+            rect.Translate(tile_margin_left, tile_margin_top);
+            rect.SetWidth(width - tile_margin_left - tile_margin_right);
+            rect.SetHeight(height - tile_margin_top - tile_margin_bottom);
+
+            auto texture = std::make_unique<gfx::detail::TextureFileSource>();
+            texture->SetColorSpace(GetValue(mUI.cmbColorSpace));
+            texture->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, premul_alpha);
+            texture->SetFileName(mFileUri);
+            texture->SetName("Spritesheet");
+
+            klass.GetTextureMap(0)->SetSpriteSheet(sprite);
+            klass.GetTextureMap(0)->SetNumTextures(1);
+            klass.GetTextureMap(0)->SetTextureSource(0, std::move(texture));
+            klass.GetTextureMap(0)->SetTextureRect(0, rect.Normalize(base::FSize(mWidth, mHeight)));
+
         }
         app::MaterialResource res(klass, GetValue(mUI.spriteName));
         mWorkspace->SaveResource(res);
@@ -626,6 +411,8 @@ void DlgTileImport::on_btnImport_clicked()
 
 void DlgTileImport::on_tabWidget_currentChanged(int tab)
 {
+    SetEnabled(mUI.btnImport, false);
+
     if (tab != 1)
         return;
 
@@ -637,7 +424,7 @@ void DlgTileImport::on_tabWidget_currentChanged(int tab)
     auto* map = mClass->GetTextureMap(0);
     auto* src = map->GetTextureSource(0);
 
-    if (auto bitmap = src->GetData())
+    if (const auto& bitmap = src->GetData())
     {
         const auto width  = bitmap->GetWidth();
         const auto height = bitmap->GetHeight();
@@ -654,44 +441,89 @@ void DlgTileImport::on_tabWidget_currentChanged(int tab)
     }
 
     unsigned counter = 0;
-    for (auto& img : mImages)
+    for (auto& img : mPack.images)
     {
-        if (img.widget)
-        {
-            delete img.widget;
-            img.widget = nullptr;
-        }
         if (!img.selected)
             continue;
+
+        if (img.widget)
+            delete img.widget;
 
         img.widget = new ImportedTile(this);
         img.widget->InstallEventFilter(this);
         img.widget->SetPreview(pixmap.copy(img.xpos, img.ypos, img.width, img.height));
+
         if (img.name.isEmpty())
             img.widget->SetName(app::toString("Tile %1", counter));
         else img.widget->SetName(img.name);
+        img.widget->SetTag(img.tag);
+
         mUI.layout->addWidget(img.widget);
         ++counter;
+        SetEnabled(mUI.btnImport, true);
     }
-    SetValue(mUI.renameTiles, QString(""));
+    SetValue(mUI.renameTemplate, QString(""));
 }
 
-void DlgTileImport::on_renameTiles_textChanged(const QString& name)
+void DlgTileImport::on_renameTemplate_returnPressed()
 {
-    size_t counter = 0;
-
-    for (auto& tile : mImages)
+    bool have_selection = false;
+    std::vector<QString> original_names;
+    for (const auto& img : mPack.images)
     {
-        if (!tile.widget)
+        if (img.widget)
+            original_names.push_back(img.widget->GetName());
+        else original_names.push_back(QString(""));
+        if (img.selected)
+            have_selection = true;
+    }
+
+    if (!have_selection)
+    {
+        QMessageBox msg(this);
+        msg.setText("You haven't selected any tiles!");
+        msg.setIcon(QMessageBox::Information);
+        msg.exec();
+        return;
+    }
+
+    size_t counter = 0;
+    for (auto& img : mPack.images)
+    {
+        if (!img.widget)
             continue;
 
-        QString str = name;
-        str.replace("$c", QString::number(counter));
-        str.replace("$i", QString::number(tile.index));
-        str.replace("$n", tile.name);
-        tile.widget->SetName(str);
+        QString out_name = GetValue(mUI.renameTemplate);
+        out_name.replace("%c", QString::number(counter++));
+        out_name.replace("%i", QString::number(img.index));
+        out_name.replace("%w", QString::number(img.width));
+        out_name.replace("%h", QString::number(img.height));
+        out_name.replace("%x", QString::number(img.xpos));
+        out_name.replace("%y", QString::number(img.ypos));
+        out_name.replace("%n", img.name);
+        out_name.replace("%t", img.tag);
+        img.widget->SetName(out_name);
         counter++;
     }
+
+    QMessageBox msg(this);
+    msg.setWindowTitle("Confirm Rename");
+    msg.setText("Do you want to keep these changes?");
+    msg.setIcon(QMessageBox::Question);
+    msg.setStandardButtons(QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
+    if (msg.exec() == QMessageBox::StandardButton::Yes)
+    {
+        return;
+    }
+
+    ASSERT(mPack.images.size() == original_names.size());
+    for (size_t i=0; i<original_names.size(); ++i)
+    {
+        mPack.images[i].name = original_names[i];
+        if (mPack.images[i].widget)
+            mPack.images[i].widget->SetName(original_names[i]);
+    }
+    SetValue(mUI.renameTemplate, QString(""));
 }
 
 void DlgTileImport::on_widgetColor_colorChanged(QColor color)
@@ -707,12 +539,16 @@ void DlgTileImport::on_materialType_currentIndexChanged(int)
         SetEnabled(mUI.chkBlendFrames, true);
         SetEnabled(mUI.spriteFps, true);
         SetEnabled(mUI.spriteName, true);
+        SetValue(mUI.spriteName, QString(""));
+        SetPlaceholderText(mUI.spriteName, QString(""));
     }
     else
     {
         SetEnabled(mUI.chkBlendFrames, false);
         SetEnabled(mUI.spriteFps, false);
         SetEnabled(mUI.spriteName, false);
+        SetValue(mUI.spriteName, QString(""));
+        SetPlaceholderText(mUI.spriteName, QString("From tilename"));
     }
 }
 
@@ -740,31 +576,6 @@ void DlgTileImport::on_cmbMagFilter_currentIndexChanged(int)
         return;
 
     mClass->SetTextureMagFilter(GetValue(mUI.cmbMagFilter));
-}
-
-void DlgTileImport::on_cmbCutting_currentIndexChanged(int)
-{
-    const TextureCutting cutting = GetValue(mUI.cmbCutting);
-    if (cutting == TextureCutting::UseOriginal)
-    {
-        SetEnabled(mUI.cmbImageFormat,   false);
-        SetEnabled(mUI.imageQuality,     false);
-        SetEnabled(mUI.textureFolder,    false);
-        SetEnabled(mUI.tileMarginTop,    true);
-        SetEnabled(mUI.tileMarginLeft,   true);
-        SetEnabled(mUI.tileMarginRight,  true);
-        SetEnabled(mUI.tileMarginBottom, true);
-    }
-    else
-    {
-        SetEnabled(mUI.cmbImageFormat,   true);
-        SetEnabled(mUI.imageQuality,     true);
-        SetEnabled(mUI.textureFolder,    true);
-        SetEnabled(mUI.tileMarginTop,    false);
-        SetEnabled(mUI.tileMarginLeft,   false);
-        SetEnabled(mUI.tileMarginRight,  false);
-        SetEnabled(mUI.tileMarginBottom, false);
-    }
 }
 
 void DlgTileImport::finished()
@@ -802,13 +613,13 @@ bool DlgTileImport::eventFilter(QObject* destination, QEvent* event)
 
 void DlgTileImport::ToggleSelection()
 {
-    if (mIndexUnderMouse >= mImages.size())
+    if (mIndexUnderMouse >= mPack.images.size())
         return;
 
     if (base::Contains(mTilesTouched, mIndexUnderMouse))
         return;
 
-    mImages[mIndexUnderMouse].selected = !mImages[mIndexUnderMouse].selected;
+    mPack.images[mIndexUnderMouse].selected = !mPack.images[mIndexUnderMouse].selected;
     mTilesTouched.insert(mIndexUnderMouse);
 }
 
@@ -835,17 +646,10 @@ void DlgTileImport::LoadImageFile(const QString& ret)
         return;
     }
 
-    const auto img_width = bitmap->GetWidth();
-    const auto img_height = bitmap->GetHeight();
-    const auto width  = mUI.widget->width();
-    const auto height = mUI.widget->height();
-    const auto scale = std::min((float)width/(float)img_width,
-                                (float)height/(float)img_height);
-    mWidth    = img_width;
-    mHeight   = img_height;
+    mWidth    = bitmap->GetWidth();
+    mHeight   = bitmap->GetHeight();
     mFileUri  = std::move(file_uri);
     mFileName = std::move(file_name);
-    mTrackingOffset = QPoint(0, 0);
 
     mClass = std::make_shared<gfx::TextureMap2DClass>(gfx::MaterialClass::Type::Texture);
     mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
@@ -856,13 +660,12 @@ void DlgTileImport::LoadImageFile(const QString& ret)
     mClass->SetTextureMagFilter(GetValue(mUI.cmbMagFilter));
     mMaterial = gfx::CreateMaterialInstance(mClass);
     SetValue(mUI.imageFile, info.absoluteFilePath());
-    SetValue(mUI.zoom, scale);
 }
 
 void DlgTileImport::LoadJsonFile(const QString& file)
 {
-    std::vector<Image> image_list;
-    if (!ReadTexturePack(file, &image_list))
+    ImagePack pack;
+    if (!ReadImagePack(file, &pack))
     {
         QMessageBox msg(this);
         msg.setStandardButtons(QMessageBox::Ok);
@@ -873,20 +676,55 @@ void DlgTileImport::LoadJsonFile(const QString& file)
         msg.exec();
         return;
     }
-    mImages = std::move(image_list);
+    mPack = std::move(pack);
     SetValue(mUI.jsonFile, file);
+    SetValue(mUI.cmbColorSpace, mPack.color_space);
+    // this setting applies to the visualization on the main tab.
+    SetValue(mUI.cmbMagFilter, mPack.mag_filter);
+    SetValue(mUI.cmbMinFilter, mPack.min_filter);
+    // this setting applies to the new materials when importing
+    SetValue(mUI.minFilter, mPack.min_filter);
+    SetValue(mUI.magFilter, mPack.mag_filter);
+
+    // apply the values to the material class if it exists.
+    // ignore the combo box selection indices.
+    on_cmbColorSpace_currentIndexChanged(0);
+    on_cmbMinFilter_currentIndexChanged(0);
+    on_cmbMagFilter_currentIndexChanged(0);
+}
+
+void DlgTileImport::ResetTransform()
+{
+    if (mWidth == 0 || mHeight == 0)
+        return;
+
+    const auto width  = mUI.widget->width();
+    const auto height = mUI.widget->height();
+    const auto scale = std::min((float)width/(float)mWidth,
+                                (float)height/(float)mHeight);
+    mTrackingOffset = QPoint(0, 0);
+    SetValue(mUI.zoom, scale);
 }
 
 void DlgTileImport::LoadState()
 {
-    QByteArray geometry;
-    if (GetUserProperty(*mWorkspace, "dlg-tile-import-geometry", &geometry))
-        restoreGeometry(geometry);
-
     int xpos = 0;
     int ypos = 0;
+
+    // The order in which data is loaded matters here. First load the previous
+    // image and the JSON files (if any). Then we load the rest of the state
+    // which can then override some of the colorspace / texture filtering settings
+    // that were initially loaded from the JSON.
+
     QString imagefile;
     QString jsonfile;
+    GetUserProperty(*mWorkspace, "dlg-tile-import-image-file", &imagefile);
+    GetUserProperty(*mWorkspace, "dlg-tile-import-json-file", &jsonfile);
+    if (!imagefile.isEmpty())
+        LoadImageFile(imagefile);
+    if (!jsonfile.isEmpty())
+        LoadJsonFile(jsonfile);
+
     GetUserProperty(*mWorkspace, "dlg-tile-import-color-space", mUI.cmbColorSpace);
     GetUserProperty(*mWorkspace, "dlg-tile-import-zoom", mUI.zoom);
     GetUserProperty(*mWorkspace, "dlg-tile-import-color", mUI.widget);
@@ -898,31 +736,30 @@ void DlgTileImport::LoadState()
     GetUserProperty(*mWorkspace, "dlg-tile-import-import-mag-filter", mUI.magFilter);
     GetUserProperty(*mWorkspace, "dlg-tile-import-view-min-filter", mUI.cmbMinFilter);
     GetUserProperty(*mWorkspace, "dlg-tile-import-view-mag-filter", mUI.cmbMagFilter);
-    GetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-top", mUI.tileMarginTop);
-    GetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-left", mUI.tileMarginLeft);
-    GetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-right", mUI.tileMarginRight);
-    GetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-bottom", mUI.tileMarginBottom);
+    GetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-top", mUI.topMargin);
+    GetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-left", mUI.leftMargin);
+    GetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-right", mUI.rightMargin);
+    GetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-bottom", mUI.bottomMargin);
     GetUserProperty(*mWorkspace, "dlg-tile-import-premul-alpha", mUI.chkPremulAlpha);
     GetUserProperty(*mWorkspace, "dlg-tile-import-premul-alpha-blend", mUI.chkPremulAlphaBlend);
     GetUserProperty(*mWorkspace, "dlg-tile-import-blend-frames", mUI.chkBlendFrames);
-    GetUserProperty(*mWorkspace, "dlg-tile-import-cut-texture", mUI.cmbCutting);
-    GetUserProperty(*mWorkspace, "dlg-tile-import-img-format", mUI.cmbImageFormat);
-    GetUserProperty(*mWorkspace, "dlg-tile-import-img-quality", mUI.imageQuality);
-    GetUserProperty(*mWorkspace, "dlg-tile-import-img-folder", mUI.textureFolder);
     GetUserProperty(*mWorkspace, "dlg-tile-import-xpos", &xpos);
     GetUserProperty(*mWorkspace, "dlg-tile-import-ypos", &ypos);
-    GetUserProperty(*mWorkspace, "dlg-tile-import-image-file", &imagefile);
-    GetUserProperty(*mWorkspace, "dlg-tile-import-json-file", &jsonfile);
-    if (!imagefile.isEmpty())
-        LoadImageFile(imagefile);
-    if (!jsonfile.isEmpty())
-        LoadJsonFile(jsonfile);
-
     mTrackingOffset = QPoint(xpos, ypos);
 
-    on_cmbCutting_currentIndexChanged(0);
     on_materialType_currentIndexChanged(0);
+    on_cmbMinFilter_currentIndexChanged(0);
+    on_cmbMagFilter_currentIndexChanged(0);
+    on_cmbColorSpace_currentIndexChanged(0);
 }
+
+void DlgTileImport::LoadGeometry()
+{
+    QByteArray geometry;
+    if (GetUserProperty(*mWorkspace, "dlg-tile-import-geometry", &geometry))
+        restoreGeometry(geometry);
+}
+
 void DlgTileImport::SaveState()
 {
     QString imagefile = GetValue(mUI.imageFile);
@@ -940,17 +777,13 @@ void DlgTileImport::SaveState()
     SetUserProperty(*mWorkspace, "dlg-tile-import-import-mag-filter", mUI.magFilter);
     SetUserProperty(*mWorkspace, "dlg-tile-import-view-min-filter", mUI.cmbMinFilter);
     SetUserProperty(*mWorkspace, "dlg-tile-import-view-mag-filter", mUI.cmbMagFilter);
-    SetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-top", mUI.tileMarginTop);
-    SetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-left", mUI.tileMarginLeft);
-    SetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-right", mUI.tileMarginRight);
-    SetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-bottom", mUI.tileMarginBottom);
+    SetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-top", mUI.topMargin);
+    SetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-left", mUI.leftMargin);
+    SetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-right", mUI.rightMargin);
+    SetUserProperty(*mWorkspace, "dlg-tile-import-tile-margin-bottom", mUI.bottomMargin);
     SetUserProperty(*mWorkspace, "dlg-tile-import-premul-alpha", mUI.chkPremulAlpha);
     SetUserProperty(*mWorkspace, "dlg-tile-import-premul-alpha-blend", mUI.chkPremulAlphaBlend);
     SetUserProperty(*mWorkspace, "dlg-tile-import-blend-frames", mUI.chkBlendFrames);
-    SetUserProperty(*mWorkspace, "dlg-tile-import-cut-texture", mUI.cmbCutting);
-    SetUserProperty(*mWorkspace, "dlg-tile-import-img-format", mUI.cmbImageFormat);
-    SetUserProperty(*mWorkspace, "dlg-tile-import-img-quality", mUI.imageQuality);
-    SetUserProperty(*mWorkspace, "dlg-tile-import-img-folder", mUI.textureFolder);
     SetUserProperty(*mWorkspace, "dlg-tile-import-xpos", mTrackingOffset.x());
     SetUserProperty(*mWorkspace, "dlg-tile-import-ypos", mTrackingOffset.y());
     SetUserProperty(*mWorkspace, "dlg-tile-import-image-file", imagefile);
@@ -989,7 +822,7 @@ void DlgTileImport::OnPaintScene(gfx::Painter& painter, double secs)
     img_rect.Translate(mTrackingOffset.x(), mTrackingOffset.y());
     gfx::FillRect(painter, img_rect, *mMaterial);
 
-    if (mImages.empty())
+    if (mPack.images.empty())
         return;
 
     static auto selection_material_class = gfx::CreateMaterialClassFromImage("app://textures/accept_icon.png");
@@ -997,9 +830,9 @@ void DlgTileImport::OnPaintScene(gfx::Painter& painter, double secs)
     selection_material_class.SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
     static auto selection_material = gfx::MaterialClassInst(selection_material_class);
 
-    for (size_t index=0; index<mImages.size(); ++index)
+    for (size_t index=0; index<mPack.images.size(); ++index)
     {
-        const auto& img = mImages[index];
+        const auto& img = mPack.images[index];
         if (!img.selected && index != mIndexUnderMouse)
             continue;
 
@@ -1043,8 +876,8 @@ void DlgTileImport::OnMouseMove(QMouseEvent* mickey)
         mStartPoint = mCurrentPoint;
     }
 
-    mIndexUnderMouse = mImages.size();
-    if (mImages.empty() || !mMaterial)
+    mIndexUnderMouse = mPack.images.size();
+    if (mPack.images.empty() || !mMaterial)
         return;
 
     const float width = mUI.widget->width();
@@ -1057,9 +890,9 @@ void DlgTileImport::OnMouseMove(QMouseEvent* mickey)
     const int mouse_posx = (mCurrentPoint.x() - mTrackingOffset.x() - xpos) / zoom;
     const int mouse_posy = (mCurrentPoint.y() - mTrackingOffset.y() - ypos) / zoom;
 
-    for (mIndexUnderMouse=0; mIndexUnderMouse<mImages.size(); ++mIndexUnderMouse)
+    for (mIndexUnderMouse=0; mIndexUnderMouse<mPack.images.size(); ++mIndexUnderMouse)
     {
-        const auto& img = mImages[mIndexUnderMouse];
+        const auto& img = mPack.images[mIndexUnderMouse];
         if (mouse_posx < img.xpos || mouse_posx > img.xpos+img.width)
             continue;
         if (mouse_posy < img.ypos || mouse_posy > img.ypos+img.height)
@@ -1093,15 +926,13 @@ bool DlgTileImport::OnKeyPress(QKeyEvent* key)
     else if (key->key() == Qt::Key_Escape)
     {
         bool had_selection = false;
-        for (auto& tile : mImages)
+        for (auto& tile : mPack.images)
         {
             had_selection = had_selection || tile.selected;
             tile.selected = false;
         }
         return had_selection;
-    }
-
-    else return false;
+    } else return false;
 
     return true;
 }
