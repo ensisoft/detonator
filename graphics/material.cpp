@@ -252,7 +252,7 @@ Texture* detail::TextureFileSource::Upload(const Environment& env, Device& devic
                 texture->SetFilter(Texture::MagFilter::Linear);
                 algo::ApplyBlur(gpu_id, texture, &device);
                 texture->GenerateMips();
-            } //else WARN("Texture blur is not supported on texture format. [file='%1', format='%2']", mFile, format);
+            } else WARN("Texture blur is not supported on texture format. [file='%1', format='%2']", mFile, format);
         }
         return texture;
     }
@@ -496,7 +496,7 @@ Texture* detail::TextureTextBufferSource::Upload(const Environment& env, Device&
                 const auto format = texture->GetFormat();
                 if (format == gfx::Texture::Format::RGBA || format == gfx::Texture::Format::sRGBA)
                     algo::ApplyBlur(mId, texture, &device);
-                //else WARN("Texture blur is not supported on texture format. [name='%1', format=%2]", mName, format);
+                else WARN("Texture blur is not supported on texture format. [name='%1', format=%2]", mName, format);
             }
             texture->GenerateMips();
             return texture;
@@ -879,6 +879,7 @@ MaterialClass::MaterialClass(const MaterialClass& other, bool copy)
     mFlags            = other.mFlags;
     mShaderUri        = other.mShaderUri;
     mShaderSrc        = other.mShaderSrc;
+    mActiveTextureMap = other.mActiveTextureMap;
     mParticleAction   = other.mParticleAction;
     mSurfaceType      = other.mSurfaceType;
     mTextureRotation  = other.mTextureRotation;
@@ -963,6 +964,7 @@ std::size_t MaterialClass::GetHash() const noexcept
     hash = base::hash_combine(hash, mType);
     hash = base::hash_combine(hash, mShaderUri);
     hash = base::hash_combine(hash, mShaderSrc);
+    hash = base::hash_combine(hash, mActiveTextureMap);
     hash = base::hash_combine(hash, mParticleAction);
     hash = base::hash_combine(hash, mSurfaceType);
     hash = base::hash_combine(hash, mGamma);
@@ -1106,6 +1108,7 @@ void MaterialClass::IntoJson(data::Writer& data) const
     data.Write("name",               mName);
     data.Write("shader_uri",         mShaderUri);
     data.Write("shader_src",         mShaderSrc);
+    data.Write("active_texture_map", mActiveTextureMap);
     data.Write("surface",            mSurfaceType);
     data.Write("particle_action",    mParticleAction);
     data.Write("gamma",              mGamma);
@@ -1163,6 +1166,7 @@ bool MaterialClass::FromJson(const data::Reader& data)
     ok &= data.Read("name",               &mName);
     ok &= data.Read("shader_uri",         &mShaderUri);
     ok &= data.Read("shader_src",         &mShaderSrc);
+    ok &= data.Read("active_texture_map", &mActiveTextureMap);
     ok &= data.Read("surface",            &mSurfaceType);
     ok &= data.Read("particle_action",    &mParticleAction);
     ok &= data.Read("gamma",              &mGamma);
@@ -1563,6 +1567,7 @@ MaterialClass& MaterialClass::operator=(const MaterialClass& other)
     std::swap(mFlags           , tmp.mFlags);
     std::swap(mShaderUri       , tmp.mShaderUri);
     std::swap(mShaderSrc       , tmp.mShaderSrc);
+    std::swap(mActiveTextureMap, tmp.mActiveTextureMap);
     std::swap(mParticleAction  , tmp.mParticleAction);
     std::swap(mSurfaceType     , tmp.mSurfaceType);
     std::swap(mTextureRotation , tmp.mTextureRotation);
@@ -1580,6 +1585,35 @@ MaterialClass& MaterialClass::operator=(const MaterialClass& other)
     std::swap(mUniforms        , tmp.mUniforms);
     std::swap(mTextureMaps     , tmp.mTextureMaps);
     return *this;
+}
+
+TextureMap* MaterialClass::SelectTextureMap(const State& state) const noexcept
+{
+    if (mTextureMaps.empty())
+        return nullptr;
+
+    std::string active_texture_map = mActiveTextureMap;
+
+    if (state.uniforms)
+    {
+        if (const auto* active_texture = base::SafeFind(*state.uniforms, std::string("active_texture_map")))
+        {
+            if (const auto* active_texture_id = std::get_if<std::string>(active_texture))
+                active_texture_map = *active_texture_id;
+        }
+    }
+
+    // keep previous semantics, so default to the first map for the
+    // material and sprite maps.
+    if (active_texture_map.empty())
+        return mTextureMaps[0].get();
+
+    for (auto& map : mTextureMaps)
+    {
+        if (map->GetId() == active_texture_map)
+            return map.get();
+    }
+    return nullptr;
 }
 
 Shader* MaterialClass::GetColorShader(const State& state, Device& device) const noexcept
@@ -1812,7 +1846,8 @@ void main()
 
 void MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, Program& program) const noexcept
 {
-    if (mTextureMaps.empty())
+    auto* map = SelectTextureMap(state);
+    if (map == nullptr)
         return;
 
     TextureMap::BindingState ts;
@@ -1821,7 +1856,7 @@ void MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
     ts.group_tag       = mClassId;
 
     TextureMap::BoundState binds;
-    if (!mTextureMaps[0]->BindTextures(ts, device,  binds))
+    if (!map->BindTextures(ts, device,  binds))
         return;
 
     glm::vec2 alpha_mask;
@@ -2017,7 +2052,8 @@ void main()
 
 void MaterialClass::ApplyTextureDynamicState(const State& state, Device& device, Program& program) const noexcept
 {
-    if (mTextureMaps.empty())
+    auto* map = SelectTextureMap(state);
+    if (map == nullptr)
         return;
 
     TextureMap::BindingState ts;
@@ -2025,7 +2061,7 @@ void MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
     ts.current_time    = 0.0;
 
     TextureMap::BoundState binds;
-    if (!mTextureMaps[0]->BindTextures(ts, device, binds))
+    if (!map->BindTextures(ts, device, binds))
         return;
 
     auto* texture = binds.textures[0];
@@ -2135,7 +2171,10 @@ void MaterialClass::ApplyCustomDynamicState(const State& state, Device& device, 
             MaterialClass::SetUniform(name, state.uniforms, *ptr, program);
         else if (const auto* ptr = std::get_if<Color4f>(&uniform.second))
             MaterialClass::SetUniform(name, state.uniforms, *ptr, program);
-        else BUG("Unhandled uniform type.");
+        else if (const auto* ptr = std::get_if<std::string>(&uniform.second)) {
+            // ignored right now, no use for this type. we're (ab)using the uniforms
+            // to change the active texture map in some other material types.
+        } else BUG("Unhandled uniform type.");
     }
 
     unsigned texture_unit = 0;
