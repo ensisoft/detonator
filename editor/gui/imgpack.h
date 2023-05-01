@@ -30,6 +30,8 @@
 
 namespace gui
 {
+    class ImportedTile;
+
     struct ImagePack
     {
         QString app_version = APP_VERSION;
@@ -57,6 +59,7 @@ namespace gui
             unsigned height = 0;
             unsigned index  = 0;
             bool selected   = false;
+            ImportedTile* widget = nullptr;
         };
         struct Tilemap {
             unsigned tile_width  = 0;
