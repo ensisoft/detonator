@@ -181,19 +181,7 @@ std::size_t DrawableItemClass::GetHash() const
     {
         const auto* param = base::SafeFind(mMaterialParams, key);
         hash = base::hash_combine(hash, key);
-        if (const auto* ptr = std::get_if<float>(param))
-            hash = base::hash_combine(hash, *ptr);
-        else if (const auto* ptr = std::get_if<int>(param))
-            hash = base::hash_combine(hash, *ptr);
-        else if (const auto* ptr = std::get_if<glm::vec2>(param))
-            hash = base::hash_combine(hash, *ptr);
-        else if (const auto* ptr = std::get_if<glm::vec3>(param))
-            hash = base::hash_combine(hash, *ptr);
-        else if (const auto* ptr = std::get_if<glm::vec4>(param))
-            hash = base::hash_combine(hash, *ptr);
-        else if (const auto* ptr = std::get_if<Color4f>(param))
-            hash = base::hash_combine(hash, *ptr);
-        else BUG("Unhandled material param type.");
+        hash = base::hash_combine(hash, *param);
     }
     return hash;
 }

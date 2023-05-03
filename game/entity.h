@@ -307,8 +307,12 @@ namespace game
     {
     public:
         // Variant of material params that can be set
-        // on this drawable item.
+        // on this drawable item. This actually needs to match
+        // the Uniform definition in the gfx::MaterialClass.
+        // But because we don't want to add a dependency to gfx:: here
+        // the definition is repeated instead.
         using MaterialParam = std::variant<float, int,
+                std::string,
                 Color4f,
                 glm::vec2, glm::vec3, glm::vec4>;
         // Key-value map of material params.
@@ -416,6 +420,19 @@ namespace game
         { mMaterialParams.erase(name); }
         void ClearMaterialParams() noexcept
         { mMaterialParams.clear(); }
+        void SetActiveTextureMap(std::string id) noexcept
+        { mMaterialParams["active_texture_map"] = std::move(id); }
+        void ResetActiveTextureMap() noexcept
+        { mMaterialParams.erase("active_texture_map"); }
+        std::string GetActiveTextureMap() const noexcept
+        {
+            if (const auto* str = GetMaterialParamValue<std::string>("active_texture_map"))
+                return *str;
+            return "";
+        }
+        bool HasActiveTextureMap() const noexcept
+        { return HasMaterialParam("active_texture_map"); }
+
         void IntoJson(data::Writer& data) const;
 
         bool FromJson(const data::Reader& data);
@@ -623,6 +640,10 @@ namespace game
         }
         void DeleteMaterialParam(const std::string& name) noexcept
         { mMaterialParams.erase(name); }
+        void SetActiveTextureMap(std::string id) noexcept
+        { mMaterialParams["active_texture_map"] = std::move(id); }
+        void ResetActiveTextureMap() noexcept
+        { mMaterialParams.erase("active_texture_map"); }
 
         const DrawableItemClass& GetClass() const noexcept
         { return *mClass.get(); }

@@ -2990,6 +2990,23 @@ void BindGameLib(sol::state& L)
             item.SetMaterialId(ret->GetId());
         else WARN("No such material class. [name='%1']", name);
     };
+    drawable["SetActiveTextureMap"] = [](DrawableItem& item, const std::string& name, sol::this_state this_state) {
+        sol::state_view L(this_state);
+        ClassLibrary* lib = L["ClassLib"];
+        const auto ret = lib->FindMaterialClassById(item.GetMaterialId());
+        if (!ret)
+            return;
+
+        for (unsigned i=0; i<ret->GetNumTextureMaps(); ++i) {
+            const auto* map = ret->GetTextureMap(i);
+            if (map->GetName() == name)
+            {
+                item.SetActiveTextureMap(map->GetId());
+                return;
+            }
+        }
+        WARN("No such texture map. [name='%1']", name);
+    };
     drawable["SetMaterialId"] = &DrawableItem::SetMaterialId;
     drawable["GetMaterialId"] = &DrawableItem::GetMaterialId;
     drawable["GetDrawableId"] = &DrawableItem::GetDrawableId;

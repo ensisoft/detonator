@@ -718,23 +718,25 @@ void MaterialActuator::Apply(EntityNode& node, float t)
 {
     if (auto* draw = node.GetDrawable())
     {
-        for (const auto& [key, beg] : mStartValues)
+        for (const auto& [key, beg_value] : mStartValues)
         {
-            const auto end = *mClass->FindMaterialParam(key);
+            const auto end_value = *mClass->FindMaterialParam(key);
 
-            if (std::holds_alternative<int>(end))
-                draw->SetMaterialParam(key, Interpolate<int>(beg, end, t));
-            else if (std::holds_alternative<float>(end))
-                draw->SetMaterialParam(key, Interpolate<float>(beg, end, t));
-            else if (std::holds_alternative<glm::vec2>(end))
-                draw->SetMaterialParam(key, Interpolate<glm::vec2>(beg, end, t));
-            else if (std::holds_alternative<glm::vec3>(end))
-                draw->SetMaterialParam(key, Interpolate<glm::vec3>(beg, end, t));
-            else if (std::holds_alternative<glm::vec4>(end))
-                draw->SetMaterialParam(key, Interpolate<glm::vec4>(beg, end, t));
-            else if (std::holds_alternative<Color4f>(end))
-                draw->SetMaterialParam(key, Interpolate<Color4f>(beg, end, t));
-            else  BUG("Unhandled material parameter type.");
+            if (std::holds_alternative<int>(end_value))
+                draw->SetMaterialParam(key, Interpolate<int>(beg_value, end_value, t));
+            else if (std::holds_alternative<float>(end_value))
+                draw->SetMaterialParam(key, Interpolate<float>(beg_value, end_value, t));
+            else if (std::holds_alternative<glm::vec2>(end_value))
+                draw->SetMaterialParam(key, Interpolate<glm::vec2>(beg_value, end_value, t));
+            else if (std::holds_alternative<glm::vec3>(end_value))
+                draw->SetMaterialParam(key, Interpolate<glm::vec3>(beg_value, end_value, t));
+            else if (std::holds_alternative<glm::vec4>(end_value))
+                draw->SetMaterialParam(key, Interpolate<glm::vec4>(beg_value, end_value, t));
+            else if (std::holds_alternative<Color4f>(end_value))
+                draw->SetMaterialParam(key, Interpolate<Color4f>(beg_value, end_value, t));
+            else if (std::holds_alternative<std::string>(end_value)) {
+                // intentionally empty, can't interpolate
+            } else  BUG("Unhandled material parameter type.");
         }
     }
 }

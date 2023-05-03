@@ -360,6 +360,7 @@ namespace game
     public:
         using Interpolation = math::Interpolation;
         using MaterialParam = std::variant<float, int,
+            std::string,
             Color4f,
             glm::vec2, glm::vec3, glm::vec4>;
         using MaterialParamMap = std::unordered_map<std::string, MaterialParam>;
