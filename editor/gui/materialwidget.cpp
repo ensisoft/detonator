@@ -102,6 +102,8 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     GetTextureProperties();
 
     SetValue(mUI.zoom, 1.0f);
+
+    mUI.scrollAreaWidgetContents->setMinimumSize(mUI.scrollAreaWidgetContents->sizeHint());
 }
 
 MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& resource) : MaterialWidget(workspace)
@@ -354,6 +356,58 @@ void MaterialWidget::on_actionSave_triggered()
 
     mWorkspace->SaveResource(resource);
     mOriginalHash = mMaterial->GetHash();
+}
+
+void MaterialWidget::on_actionNewMap_triggered()
+{
+    auto map = std::make_unique<gfx::TextureMap>();
+    if (mMaterial->GetType() == gfx::MaterialClass::Type::Sprite) {
+        map->SetType(gfx::TextureMap::Type::Sprite);
+        map->SetName("Sprite");
+    } else if (mMaterial->GetType() == gfx::MaterialClass::Type::Texture) {
+        map->SetType(gfx::TextureMap::Type::Texture2D);
+        map->SetName("Texture");
+    } else return;
+
+    const auto maps = mMaterial->GetNumTextureMaps();
+    mMaterial->SetNumTextureMaps(maps + 1);
+    mMaterial->SetTextureMap(maps, std::move(map));
+    GetMaterialProperties();
+    SelectLastItem(mUI.textures);
+    GetTextureMapProperties();
+    GetTextureProperties();
+}
+
+void MaterialWidget::on_actionDelMap_triggered()
+{
+    if (const auto* map = GetSelectedTextureMap())
+    {
+        const auto index = mMaterial->FindTextureMapIndexById(map->GetId());
+        if (index < mMaterial->GetNumTextureMaps())
+            mMaterial->DeleteTextureMap(index);
+
+        GetMaterialProperties();
+        SelectLastItem(mUI.textures);
+        GetTextureMapProperties();
+        GetTextureProperties();
+    }
+}
+
+void MaterialWidget::on_actionAddFile_triggered()
+{
+    AddNewTextureMapFromFile();
+}
+void MaterialWidget::on_actionAddText_triggered()
+{
+    AddNewTextureMapFromText();
+}
+void MaterialWidget::on_actionAddBitmap_triggered()
+{
+    AddNewTextureMapFromBitmap();
+}
+void MaterialWidget::on_actionEditTexture_triggered()
+{
+    on_btnEditTexture_clicked();
 }
 
 void MaterialWidget::on_actionRemoveTexture_triggered()
@@ -666,10 +720,25 @@ void MaterialWidget::on_textures_itemSelectionChanged()
 
 void MaterialWidget::on_textures_customContextMenuRequested(const QPoint&)
 {
-    const auto& items = mUI.textures->selectedItems();
-    SetEnabled(mUI.actionRemoveTexture, !items.isEmpty());
+    const auto* item = GetSelectedItem(mUI.textures);
+    const auto& tag  = (QString)GetItemTag(item);
+    SetEnabled(mUI.actionNewMap,    tag == "");
+    SetEnabled(mUI.actionDelMap,    tag == "map");
+    SetEnabled(mUI.actionAddFile,   tag == "map");
+    SetEnabled(mUI.actionAddText,   tag == "map");
+    SetEnabled(mUI.actionAddBitmap, tag == "map");
+    SetEnabled(mUI.actionRemoveTexture, tag == "texture");
+    SetEnabled(mUI.actionEditTexture,   tag == "texture");
 
     QMenu menu(this);
+    menu.addAction(mUI.actionNewMap);
+    menu.addAction(mUI.actionDelMap);
+    menu.addSeparator();
+    menu.addAction(mUI.actionAddFile);
+    menu.addAction(mUI.actionAddText);
+    menu.addAction(mUI.actionAddBitmap);
+    menu.addSeparator();
+    menu.addAction(mUI.actionEditTexture);
     menu.addAction(mUI.actionRemoveTexture);
     menu.exec(QCursor::pos());
 }
@@ -691,6 +760,7 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
         auto map = std::make_unique<gfx::TextureMap>();
         map->SetType(gfx::TextureMap::Type::Texture2D);
         map->SetName("Texture");
+        other.SetActiveTextureMap(map->GetId());
         other.SetNumTextureMaps(1);
         other.SetTextureMap(0, std::move(map));
     }
@@ -700,6 +770,7 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
         map->SetType(gfx::TextureMap::Type::Sprite);
         map->SetName("Sprite");
         map->SetFps(10.0f);
+        other.SetActiveTextureMap(map->GetId());
         other.SetNumTextureMaps(1);
         other.SetTextureMap(0, std::move(map));
     }
@@ -711,21 +782,9 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
     GetTextureProperties();
 }
 void MaterialWidget::on_surfaceType_currentIndexChanged(int)
-{
-    const gfx::MaterialClass::SurfaceType type = GetValue(mUI.surfaceType);
-    if (type == gfx::MaterialClass::SurfaceType::Transparent)
-    {
-        SetEnabled(mUI.chkBlendPreMulAlpha, true);
-        SetValue(mUI.chkBlendPreMulAlpha, false);
-    }
-    else
-    {
-        SetValue(mUI.chkBlendPreMulAlpha, false);
-        SetEnabled(mUI.chkBlendPreMulAlpha, false);
-    }
-
-    SetMaterialProperties();
-}
+{ SetMaterialProperties(); }
+void MaterialWidget::on_activeMap_currentIndexChanged(int)
+{ SetMaterialProperties(); }
 void MaterialWidget::on_gamma_valueChanged(double)
 { SetMaterialProperties(); }
 void MaterialWidget::on_baseColor_colorChanged(QColor color)
@@ -805,6 +864,8 @@ void MaterialWidget::on_textureMapName_textChanged(const QString& text)
         {
             map->SetName(GetValue(mUI.textureMapName));
             item->setText(GetValue(mUI.textureMapName));
+
+            GetMaterialProperties();
         }
     }
 }
@@ -817,6 +878,26 @@ void MaterialWidget::on_textureSourceName_textChanged(const QString& text)
         {
             source->SetName(GetValue(mUI.textureSourceName));
             item->setText("    " + GetValue(mUI.textureSourceName));
+        }
+    }
+}
+
+void MaterialWidget::on_findMap_textChanged(const QString& needle)
+{
+    const auto current = GetCurrentRow(mUI.textures);
+    const auto count   = GetCount(mUI.textures);
+    for (unsigned i=0; i<count; ++i)
+    {
+        const auto index = (current + i) % count;
+        const auto* item = mUI.textures->item(index);
+        const auto& haystack = (QString) GetItemText(item);
+        if (haystack.contains(needle, Qt::CaseInsensitive))
+        {
+            SelectItem(mUI.textures, index);
+            GetTextureMapProperties();
+            GetTextureProperties();
+            mUI.textures->scrollToItem(item);
+            return;
         }
     }
 }
@@ -1231,6 +1312,7 @@ void MaterialWidget::SetMaterialProperties()
     mMaterial->SetTextureVelocityY(GetValue(mUI.velocityY));
     mMaterial->SetTextureVelocityZ(GetValue(mUI.velocityZ));
     mMaterial->SetBlendFrames(GetValue(mUI.chkBlendFrames));
+    mMaterial->SetActiveTextureMap(GetItemId(mUI.activeMap));
 
     if (mMaterial->GetType() == gfx::MaterialClass::Type::Gradient)
     {
@@ -1286,6 +1368,7 @@ void MaterialWidget::GetMaterialProperties()
     SetEnabled(mUI.btnEditShader,      false);
     SetEnabled(mUI.baseColor,          false);
     SetEnabled(mUI.particleAction,     false);
+    SetEnabled(mUI.activeMap,          false);
     SetEnabled(mUI.textureMaps,        false);
     SetEnabled(mUI.textureMap,         false);
     SetEnabled(mUI.textureProp,        false);
@@ -1320,6 +1403,7 @@ void MaterialWidget::GetMaterialProperties()
     SetValue(mUI.magFilter,           mMaterial->GetTextureMagFilter());
     SetValue(mUI.wrapX,               mMaterial->GetTextureWrapX());
     SetValue(mUI.wrapY,               mMaterial->GetTextureWrapY());
+    ClearList(mUI.activeMap);
 
     if (mMaterial->GetType() == gfx::MaterialClass::Type::Custom)
     {
@@ -1350,7 +1434,10 @@ void MaterialWidget::GetMaterialProperties()
             SetEnabled(mUI.baseColor, true);
             if (mMaterial->GetType() == gfx::MaterialClass::Type::Texture ||
                 mMaterial->GetType() == gfx::MaterialClass::Type::Sprite)
+            {
                 SetEnabled(mUI.particleAction, true);
+                SetEnabled(mUI.activeMap,      true);
+            }
         }
     }
 
@@ -1388,7 +1475,8 @@ void MaterialWidget::GetMaterialProperties()
         SetVisible(mUI.textureFilters, true);
         SetEnabled(mUI.textureMaps,    true);
 
-        std::vector<ResourceListItem> textures;
+        std::vector<ResourceListItem> maps;
+        std::vector<ResourceListItem> items;
         for (unsigned i=0; i<mMaterial->GetNumTextureMaps(); ++i)
         {
             const auto* map = mMaterial->GetTextureMap(i);
@@ -1398,7 +1486,9 @@ void MaterialWidget::GetMaterialProperties()
             ResourceListItem item;
             item.id   = map->GetId();
             item.name = map->GetName();
-            textures.push_back(item);
+            item.tag  = "map";
+            maps.push_back(item);
+            items.push_back(item);
 
             for (unsigned j=0; j<map->GetNumTextures(); ++j)
             {
@@ -1406,10 +1496,13 @@ void MaterialWidget::GetMaterialProperties()
                 ResourceListItem item;
                 item.id   = source->GetId();
                 item.name = "    " + source->GetName();
-                textures.push_back(item);
+                item.tag  = "texture";
+                items.push_back(item);
             }
         }
-        SetList(mUI.textures,  textures);
+        SetList(mUI.textures,  items);
+        SetList(mUI.activeMap, maps);
+        SetValue(mUI.activeMap, ListItemId(mMaterial->GetActiveTextureMap()));
     }
 }
 
@@ -1479,20 +1572,20 @@ void MaterialWidget::GetTextureProperties()
 void MaterialWidget::GetTextureMapProperties()
 {
     SetEnabled(mUI.textureMap, false);
-    SetValue(mUI.textureMapID, QString(""));
-    SetValue(mUI.textureMapName, QString(""));
-    SetValue(mUI.textureMapType, gfx::TextureMap::Type::Texture2D);
+    SetValue(mUI.textureMapID,       QString(""));
+    SetValue(mUI.textureMapName,     QString(""));
+    SetValue(mUI.textureMapType,     gfx::TextureMap::Type::Texture2D);
     SetValue(mUI.textureMapTextures, QString(""));
-    SetValue(mUI.textureMapFps, 0.0f);
-    SetValue(mUI.spriteRows, 1);
-    SetValue(mUI.spriteSheet, 1);
-    SetValue(mUI.spriteSheet, false);
-    SetValue(mUI.chkLooping, false);
+    SetValue(mUI.textureMapFps,      0.0f);
+    SetValue(mUI.spriteRows,         1);
+    SetValue(mUI.spriteSheet,        1);
+    SetValue(mUI.spriteSheet,  false);
+    SetValue(mUI.chkLooping,   false);
     SetVisible(mUI.chkLooping, false);
     SetEnabled(mUI.textureMapFps, false);
-    SetEnabled(mUI.spriteSheet, false);
-    SetVisible(mUI.spriteSheet, false);
-    SetVisible(mUI.lblFps, false);
+    SetEnabled(mUI.spriteSheet,   false);
+    SetVisible(mUI.spriteSheet,   false);
+    SetVisible(mUI.lblFps,        false);
     SetVisible(mUI.textureMapFps, false);
 
     const auto* map = GetSelectedTextureMap();
@@ -1500,25 +1593,25 @@ void MaterialWidget::GetTextureMapProperties()
         return;
 
     SetEnabled(mUI.textureMap, true);
-    SetValue(mUI.textureMapID, map->GetId());
+    SetValue(mUI.textureMapID,   map->GetId());
     SetValue(mUI.textureMapName, map->GetName());
     SetValue(mUI.textureMapType, map->GetType());
-    SetValue(mUI.textureMapFps, map->GetFps());
-    SetValue(mUI.chkLooping, map->IsLooping());
+    SetValue(mUI.textureMapFps,  map->GetFps());
+    SetValue(mUI.chkLooping,     map->IsLooping());
 
     if (map->GetType() == gfx::TextureMap::Type::Sprite)
     {
         SetEnabled(mUI.textureMapFps, true);
-        SetEnabled(mUI.spriteSheet, true);
-        SetVisible(mUI.chkLooping, true);
-        SetVisible(mUI.lblFps, true);
+        SetEnabled(mUI.spriteSheet,   true);
+        SetVisible(mUI.chkLooping,    true);
+        SetVisible(mUI.lblFps,        true);
         SetVisible(mUI.textureMapFps, true);
-        SetVisible(mUI.spriteSheet, true);
+        SetVisible(mUI.spriteSheet,   true);
     }
 
     if (const auto* sheet = map->GetSpriteSheet())
     {
-        SetValue(mUI.spriteSheet, true);
+        SetValue(mUI.spriteSheet,  true);
         SetEnabled(mUI.spriteCols, true);
         SetEnabled(mUI.spriteRows, true);
         SetValue(mUI.spriteRows, sheet->rows);

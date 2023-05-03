@@ -168,6 +168,27 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
                     if (const auto* color = std::get_if<game::Color4f>(param))
                         SetValue(mUI.baseColor, *color);
                 }
+
+                std::vector<ResourceListItem> maps;
+                for (unsigned i=0; i<material->GetNumTextureMaps(); ++i)
+                {
+                    const auto* map = material->GetTextureMap(i);
+                    ResourceListItem item;
+                    item.id   = map->GetId();
+                    item.name = map->GetName();
+                    maps.push_back(item);
+                }
+                SetList(mUI.textureMaps, maps);
+                if (mItem->HasActiveTextureMap())
+                    SetValue(mUI.textureMaps, ListItemId(mItem->GetActiveTextureMap()));
+
+                if (maps.empty())
+                {
+                    SetVisible(mUI.textureMaps, false);
+                    SetVisible(mUI.lblTextureMap, false);
+                    SetVisible(mUI.btnResetActiveMap, false);
+                }
+
                 SetVisible(mUI.builtInParams, true);
             }
         }
@@ -325,11 +346,36 @@ void DlgMaterialParams::on_btnResetBaseColor_clicked()
     }
 }
 
+void DlgMaterialParams::on_btnResetActiveMap_clicked()
+{
+    SetValue(mUI.textureMaps, -1);
+    if (mActuator)
+    {
+        // todo
+    }
+    else
+    {
+        mItem->ResetActiveTextureMap();
+    }
+}
+
 void DlgMaterialParams::on_gamma_valueChanged(double)
 {
     if (mActuator)
         mActuator->SetMaterialParam("kGamma", GetValue(mUI.gamma));
     else mItem->SetMaterialParam("kGamma", GetValue(mUI.gamma));
+}
+
+void DlgMaterialParams::on_textureMaps_currentIndexChanged(int)
+{
+    if (mActuator)
+    {
+
+    }
+    else
+    {
+        mItem->SetActiveTextureMap(GetItemId(mUI.textureMaps));
+    }
 }
 
 void DlgMaterialParams::on_baseColor_colorChanged(QColor color)
