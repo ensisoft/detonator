@@ -906,6 +906,9 @@ void InitLuaDoc()
     DOC_TABLE("game.Drawable");
     DOC_METHOD_1("void", "SetMaterial", "Set material to a material specified by its name. If no such material exists no change is done.",
                  "string", "name");
+    DOC_METHOD_1("void", "SetActiveTextureMap", "Set the currently active texture map on this drawable item's material to the one identified by its name."
+                                                "If no such material map exists no change is done",
+                 "string", "name");
     DOC_METHOD_0("string", "GetMaterialId", "Get the graphics subsystem material ID.");
     DOC_METHOD_0("string", "GetDrawableId", "Get the graphics subsystem drawable ID.");
     DOC_METHOD_0("int", "GetLayer", "Get the render layer index.");
