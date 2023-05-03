@@ -392,7 +392,7 @@ inline void SetRange(QProgressBar* bar, int min, int max)
 
 struct ListItemId {
     QString id;
-    ListItemId(QString id) : id(id)
+    ListItemId(const QString& id) : id(id)
     {}
     ListItemId(const std::string& str) : id(app::FromUtf8(str))
     {}
@@ -488,6 +488,16 @@ inline void ClearList(QComboBox* cmb)
 {
     QSignalBlocker s(cmb);
     cmb->clear();
+}
+
+inline void SelectItem(QListWidget* list, unsigned row)
+{
+    QSignalBlocker s(list);
+    for (int i=0; i<list->count(); ++i)
+    {
+        auto* item = list->item(i);
+        item->setSelected(i == row);
+    }
 }
 
 inline void SelectItem(QListWidget* list,  const ListItemId& id)
@@ -939,6 +949,30 @@ struct ComboBoxItemIdGetter
     const QComboBox* cmb = nullptr;
 };
 
+struct ListWidgetItemTextGetter
+{
+    operator std::string() const
+    {
+        if (item)
+            return app::ToUtf8(item->text());
+        return "";
+    }
+    operator QString() const
+    {
+        if (item)
+            return item->text();
+        return QString("");
+    }
+    operator app::AnyString() const
+    {
+        if (item)
+            return item->text();
+        return QString("");
+    }
+    const QListWidgetItem* item = nullptr;
+};
+
+
 struct ListWidgetItemIdGetter
 {
     operator std::string() const
@@ -1161,6 +1195,8 @@ inline ListWidgetItemIdGetter GetItemId(const QListWidget* list)
 { return ListWidgetItemIdGetter { GetSelectedItem(list) }; }
 inline ListWidgetItemIdGetter GetItemId(const QListWidgetItem* item)
 { return ListWidgetItemIdGetter { item }; }
+inline ListWidgetItemTextGetter GetItemText(const QListWidgetItem* item)
+{ return ListWidgetItemTextGetter { item }; }
 inline ListWidgetItemTagGetter GetItemTag(const QListWidget* list)
 { return ListWidgetItemTagGetter { GetSelectedItem(list) }; }
 inline ListWidgetItemTagGetter GetItemTag(const QListWidgetItem* item)

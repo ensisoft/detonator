@@ -79,6 +79,12 @@ namespace gui
         void on_actionSave_triggered();
         void on_actionReloadShaders_triggered();
         void on_actionReloadTextures_triggered();
+        void on_actionNewMap_triggered();
+        void on_actionDelMap_triggered();
+        void on_actionAddFile_triggered();
+        void on_actionAddText_triggered();
+        void on_actionAddBitmap_triggered();
+        void on_actionEditTexture_triggered();
         void on_actionRemoveTexture_triggered();
         void on_btnSelectShader_clicked();
         void on_btnCreateShader_clicked();
@@ -93,6 +99,7 @@ namespace gui
         void on_materialName_textChanged(const QString& text);
         void on_materialType_currentIndexChanged(int);
         void on_surfaceType_currentIndexChanged(int);
+        void on_activeMap_currentIndexChanged(int);
         void on_gamma_valueChanged(double value);
         void on_baseColor_colorChanged(QColor color);
         void on_particleAction_currentIndexChanged(int);
@@ -130,6 +137,7 @@ namespace gui
         void on_chkBlurTexture_stateChanged(int);
         void on_textureMapName_textChanged(const QString& text);
         void on_textureSourceName_textChanged(const QString& text);
+        void on_findMap_textChanged(const QString& text);
         void AddNewTextureMapFromFile();
         void AddNewTextureMapFromText();
         void AddNewTextureMapFromBitmap();
