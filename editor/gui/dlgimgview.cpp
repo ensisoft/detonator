@@ -606,14 +606,7 @@ void DlgImgView::on_listWidget_itemSelectionChanged()
 
 void DlgImgView::on_tabWidget_currentChanged(int)
 {
-    if (mUI.tabWidget->currentIndex() == 1)
-    {
-        for (size_t i = 0; i < mPack.images.size(); ++i)
-        {
-            SelectTableRow(mUI.listWidget, i, mPack.images[i].selected);
-        }
-    }
-   const auto& index = GetSelectedIndex(mUI.listWidget);
+    const auto& index = GetSelectedIndex(mUI.listWidget);
     if (index.isValid())
         mUI.listWidget->scrollTo(index);
 }
@@ -671,7 +664,6 @@ void DlgImgView::on_renameTemplate_returnPressed()
         mPack.images[i].name = original_names[i];
         SetTableItem(mUI.listWidget, i, 0, original_names[i]);
     }
-    SetValue(mUI.renameTemplate, QString(""));
 }
 
 void DlgImgView::on_tagTemplate_returnPressed()
@@ -727,7 +719,6 @@ void DlgImgView::on_tagTemplate_returnPressed()
         mPack.images[i].name = original_tags[i];
         SetTableItem(mUI.listWidget, i, 2, original_tags[i]);
     }
-    SetValue(mUI.tagTemplate, QString(""));
 }
 
 void DlgImgView::finished()
@@ -961,6 +952,11 @@ void DlgImgView::ToggleMouseSelection()
                 break;
             }
         }
+    }
+
+    for (size_t i = 0; i < mPack.images.size(); ++i)
+    {
+        SelectTableRow(mUI.listWidget, i, mPack.images[i].selected);
     }
 }
 
