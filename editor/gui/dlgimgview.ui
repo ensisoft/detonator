@@ -128,6 +128,9 @@
               <height>400</height>
              </size>
             </property>
+            <property name="focusPolicy">
+             <enum>Qt::StrongFocus</enum>
+            </property>
            </widget>
           </item>
           <item>
@@ -242,57 +245,6 @@
             <attribute name="verticalHeaderDefaultSectionSize">
              <number>24</number>
             </attribute>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="rename">
-            <property name="title">
-             <string>Rename selected images</string>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_6">
-             <item>
-              <widget class="QLineEdit" name="renameTemplate">
-               <property name="placeholderText">
-                <string>%c = counter %i = index %n =  name %t = tag %w = width %h = height  %x = x %y = y</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="retag">
-            <property name="title">
-             <string>Tag selected images</string>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_8">
-             <item>
-              <widget class="QLineEdit" name="tagTemplate">
-               <property name="placeholderText">
-                <string>%c = counter %i = index %n =  name %t = tag %w = width %h = height  %x = x %y = y</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnSave">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>Save Changes</string>
-            </property>
-            <property name="autoDefault">
-             <bool>false</bool>
-            </property>
            </widget>
           </item>
          </layout>
@@ -661,6 +613,69 @@
         </widget>
        </widget>
       </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox_8">
+        <property name="title">
+         <string>Quick Actions</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_12">
+         <item>
+          <widget class="QGroupBox" name="rename">
+           <property name="title">
+            <string>Rename selected images</string>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <item>
+             <widget class="QLineEdit" name="renameTemplate">
+              <property name="placeholderText">
+               <string>%c = counter %i = index %n =  name %t = tag %w = width %h = height  %x = x %y = y</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="retag">
+           <property name="title">
+            <string>Tag selected images</string>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_8">
+            <item>
+             <widget class="QLineEdit" name="tagTemplate">
+              <property name="placeholderText">
+               <string>%c = counter %i = index %n =  name %t = tag %w = width %h = height  %x = x %y = y</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnSave">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Save Changes</string>
+           </property>
+           <property name="autoDefault">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -728,15 +743,16 @@
   <tabstop>jsonFile</tabstop>
   <tabstop>btnSelectJson</tabstop>
   <tabstop>tabWidget</tabstop>
+  <tabstop>widget</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbColorSpace</tabstop>
   <tabstop>cmbMinFilter</tabstop>
   <tabstop>cmbMagFilter</tabstop>
   <tabstop>widgetColor</tabstop>
-  <tabstop>listWidget</tabstop>
   <tabstop>renameTemplate</tabstop>
   <tabstop>tagTemplate</tabstop>
   <tabstop>btnSave</tabstop>
+  <tabstop>listWidget</tabstop>
   <tabstop>cmbSelection</tabstop>
   <tabstop>cmbImageFormat</tabstop>
   <tabstop>imageQuality</tabstop>
