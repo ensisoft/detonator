@@ -600,14 +600,15 @@ GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
             ShowColorDialog();
         else if (key->modifiers() == Qt::ShiftModifier && key->key() == Qt::Key_F3)
             mWindow->ResetClearColor();
-        // disable the use of VSYNC setting for now since it doesn't scale well
-        // when having multiple GfxWindows open.
-        //else if (key->key() == Qt::Key_F3)
-        //    toggleVSync();
-
-        if (mWindow && onKeyPress)
+        else if (key->key() == Qt::Key_Tab)
+            FocusNextPrev(WidgetFocus::FocusNextWidget);
+        else if (key->key() == Qt::Key_Backtab)
+            FocusNextPrev(WidgetFocus::FocusPrevWidget);
+        else if (mWindow && onKeyPress)
             return onKeyPress(key);
-        return false;
+        else return false;
+
+        return true;
     };
     mWindow->onKeyRelease = [&](QKeyEvent* key) {
         if (mWindow && onKeyRelease)
@@ -615,7 +616,7 @@ GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
         return false;
     };
     mWindow->onMouseWheel = [&](QWheelEvent* wheel) {
-        translateZoomInOut(wheel);
+        TranslateZoomInOut(wheel);
         if (mWindow && onMouseWheel)
             onMouseWheel(wheel);
     };
@@ -711,7 +712,7 @@ void GfxWidget::ShowColorDialog()
     mWindow->SetClearColor(ToGfx(dlg.color()));
 }
 
-void GfxWidget::translateZoomInOut(QWheelEvent* wheel)
+void GfxWidget::TranslateZoomInOut(QWheelEvent* wheel)
 {
     const auto mods = wheel->modifiers();
     if (mods != Qt::ControlModifier)
@@ -736,10 +737,138 @@ void GfxWidget::translateZoomInOut(QWheelEvent* wheel)
     }
 }
 
-void GfxWidget::toggleVSync()
+void GfxWidget::ToggleVSync()
 {
     should_have_vsync = !should_have_vsync;
     DEBUG("VSYNC set to %1", should_have_vsync);
+}
+
+void GfxWidget::FocusNextPrev(WidgetFocus which)
+{
+    // Trying to play nice-nice with the focus movement. The goal is to move the
+    // focus to next/prev widget as one might expect based on the tab list order set
+    // in the designer. Seems simple enough, right.. but in reality this is really
+    // f***n confusing. There seem to be so many brain farts here...
+    //
+    // Summary some of the weirdness here:
+    //
+    // - focusNextChild, focusPrevChild are non-virtual protected members of QWidget.
+    //   This means that we can't call those on the *parent* (or any other widget for
+    //   that matter). We can call them on *this* widget but the results are junk,
+    //   random focus movement. BOO!
+    //
+    // - focusNextPrevChild seems to be a function for moving the focus onto a child
+    //   inside a "container" widget. Maybe relevant, not sure really.
+    //   The documentation seems to have some brain farts.
+    //
+    //   <snip>
+    //     Sometimes, you will want to reimplement this function. For example,
+    //     a web browser might reimplement it to move its "current active link"
+    //     forward or backward, and call focusNextPrevChild() only when it reaches
+    //     the last or first link on the "page".
+    //   </snip>
+    //
+    // Ok, seems sensible enough, but WTF!? is this then:
+    //
+    //   <snip>
+    //     Child widgets call focusNextPrevChild() on their parent widgets, but only
+    //     the window that contains the child widgets decides where to redirect focus.
+    //     By reimplementing this function for an object, you thus gain control of focus
+    //     traversal for all child widgets.
+    //   </snip>
+    //
+    // How does the child widget call this on their parent when the function is a
+    // protected function?? And why would the child call this? It would seem to make
+    // more sense if the parent called this on the child????
+    //
+    // So none of the above seem to make any sense for setting the focus. Let's focus
+    // (pun intended) on nextInFocusChain and previousInFocusChain. Maybe these would
+    // produce a tablist similar to what the designer produces (see any .ui file source)
+    // But Alas, the results are unpredictable since the focus chain is full of widgets
+    // that don't even take focus such as labels and also there's a bunch of crap such
+    // as qt_spinbox_lineedit etc which seem some sort of Qt internal widgets.
+    // Also the "chain" seems to be a looping data structure. Hey maybe it's a looping
+    // linked list and there's finally a use case for the "find whether this linked list
+    // contains a loop" CS trivia algo!
+
+    {
+        // these are junk.
+        //auto* next = nextInFocusChain();
+        //auto* prev = previousInFocusChain();
+        //DEBUG("GfxWidget '%1' focus chain next = '%2' prev = '%3'.", objectName(),
+        //      next ? next->objectName() : "null",
+        //      prev ? prev->objectName() : "null");
+
+        // build a list of widgets in the focus list. note that this will also list
+        // widgets such as qt_spinbox_lineedit, ScrollLeftButton, ScrollRightButton
+        // which seem to be Qt's internal widgets.
+        //
+        // watch out of for the infinite loop! \o/
+        //
+        std::vector<QWidget*> widgets;
+        QWidget* iterator = this;
+        do
+        {
+            // filter out obvious stuff that should not focus..
+            if (iterator->focusPolicy() == Qt::NoFocus)
+                continue;
+
+            //DEBUG("Next focus chain widget = '%1'", iterator ? iterator->objectName() : "null");
+            widgets.push_back(iterator);
+        }
+        while ((iterator = iterator->nextInFocusChain()) && iterator != this);
+
+        size_t this_index = 0;
+        for (this_index=0; this_index<widgets.size(); ++this_index) {
+            if (widgets[this_index] == this)
+                break;
+        }
+        if (this_index == widgets.size())
+            return;
+
+        if (which == WidgetFocus::FocusNextWidget)
+        {
+            // try to set the focus to previous widgets in the focus list until
+            // a widget finally takes the focus.
+            auto next_index = this_index + 1;
+            for (size_t i=0; i<widgets.size(); ++i)
+            {
+                if (next_index >= widgets.size())
+                    next_index = 0;
+
+                widgets[next_index]->setFocus();
+                if (widgets[next_index]->hasFocus())
+                    break;
+                ++next_index;
+            }
+            //DEBUG("Next widget is '%1'", widgets[next_index]->objectName());
+        }
+        else if (which == WidgetFocus::FocusPrevWidget)
+        {
+            // try to set the focus to previous widgets in the focus list until
+            // a widget finally takes the focus.
+            auto prev_index = this_index - 1;
+            for (size_t i=0; i<widgets.size(); ++i)
+            {
+                if (prev_index >= widgets.size())
+                    prev_index = widgets.size() -1;
+
+                widgets[prev_index]->setFocus();
+                if (widgets[prev_index]->hasFocus())
+                    break;
+                --prev_index;
+            }
+            //DEBUG("Prev widget is '%1'", widgets[prev_index]->objectName());
+        }
+
+        // this is garbage and won't work as expected.
+        /*
+        if (which == WidgetFocus::FocusNextWidget && next)
+            next->setFocus();
+        else if (which == WidgetFocus::FocusPrevWidget && prev)
+            prev->setFocus();
+            */
+    }
 }
 
 } // namespace
