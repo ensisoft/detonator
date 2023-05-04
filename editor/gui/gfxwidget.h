@@ -256,8 +256,13 @@ namespace gui
         void reloadTextures();
         void triggerPaint();
     private:
-        void translateZoomInOut(QWheelEvent* event);
-        void toggleVSync();
+        void TranslateZoomInOut(QWheelEvent* event);
+        void ToggleVSync();
+        enum class WidgetFocus {
+            FocusNextWidget,
+            FocusPrevWidget
+        };
+        void FocusNextPrev(WidgetFocus which);
 
     private:
         virtual void resizeEvent(QResizeEvent* event) override;
