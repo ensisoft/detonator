@@ -258,6 +258,12 @@ void DlgTileImport::on_btnImport_clicked()
             klass.SetName(app::ToUtf8(img.name));
             klass.SetFlag(gfx::TextureMap2DClass::Flags::PremultipliedAlpha, premul_alpha_blend);
 
+            ASSERT(klass.GetNumTextureMaps());
+            for (unsigned i=0; i<klass.GetNumTextureMaps(); ++i)
+                ASSERT(klass.GetTextureMap(i)->GetNumTextures());
+
+            klass.SetActiveTextureMap(klass.GetTextureMap(0)->GetId());
+
             app::MaterialResource res(klass, name);
             mWorkspace->SaveResource(res);
         }
@@ -267,10 +273,24 @@ void DlgTileImport::on_btnImport_clicked()
         if (!MustHaveInput(mUI.spriteName))
             return;
 
-        auto map = std::make_unique<gfx::TextureMap>();
-        map->SetName("Sprite");
-        map->SetType(gfx::TextureMap::Type::Sprite);
-        map->SetFps(GetValue(mUI.spriteFps));
+        // group selected items under texture map name while keeping
+        // the order of items the same. then loop over all texture maps
+        // and create new maps.
+        using ImageList = std::vector<const ImagePack::Image*>;
+        using TextureMapImageList = std::unordered_map<QString, ImageList>;
+
+        TextureMapImageList mapping;
+        for (const auto& img : mPack.images)
+        {
+            if (!img.selected)
+                continue;
+
+            QString texture_map_name;
+            texture_map_name = img.widget->GetTag();
+            if (texture_map_name.isEmpty())
+                texture_map_name = "Sprite";
+            mapping[texture_map_name].push_back(&img);
+        }
 
         gfx::MaterialClass klass(gfx::MaterialClass::Type::Sprite, base::RandomString(10));
         klass.SetSurfaceType(GetValue(mUI.surfaceType));
@@ -279,130 +299,139 @@ void DlgTileImport::on_btnImport_clicked()
         klass.SetFlag(gfx::TextureMap2DClass::Flags::PremultipliedAlpha, premul_alpha_blend);
         klass.SetName(GetValue(mUI.spriteName));
         klass.SetBlendFrames(GetValue(mUI.chkBlendFrames));
-        klass.SetNumTextureMaps(1);
-        klass.SetTextureMap(0, std::move(map));
 
-        // if the selected images / tiles are in one contiguous region
-        // with regular size then the sprite can be optimized to use a single
-        // sprite sheet instead of multiple different images, but only if
-        // texture cutting is not being done.  Texture cutting forces the use
-        // of separate image source files.
-        unsigned tile_width  = 0;
-        unsigned tile_height = 0;
-        unsigned tile_xpos   = 0;
-        unsigned tile_ypos   = 0;
-        unsigned tile_count  = 0;
-        bool irregular_size  = false;
-        bool disjoint_selection = false;
-        base::URect rect;
-
-        for (size_t index=0; index<mPack.images.size(); ++index)
+        for (const auto& [texture_map_name, image_list] : mapping)
         {
-            const auto& img = mPack.images[index];
-            if (!img.selected)
-                continue;
+            auto map = std::make_unique<gfx::TextureMap>();
+            map->SetName(app::ToUtf8(texture_map_name));
+            map->SetType(gfx::TextureMap::Type::Sprite);
+            map->SetFps(GetValue(mUI.spriteFps));
 
-            base::URect tile;
-            tile.Resize(img.width, img.height);
-            tile.Translate(img.xpos, img.ypos);
-            rect = base::Union(rect, tile);
+            // if the selected images / tiles are in one contiguous region
+            // with regular size then the sprite can be optimized to use a single
+            // sprite sheet instead of multiple different images, but only if
+            // texture cutting is not being done.  Texture cutting forces the use
+            // of separate image source files.
+            unsigned tile_width = 0;
+            unsigned tile_height = 0;
+            unsigned tile_xpos = 0;
+            unsigned tile_ypos = 0;
+            unsigned tile_count = 0;
+            bool irregular_size = false;
+            bool disjoint_selection = false;
+            base::URect rect;
 
-            if (tile_width == 0 && tile_height == 0)
+            for (size_t index = 0; index < image_list.size(); ++index)
             {
-                tile_width  = img.width;
-                tile_height = img.height;
-                tile_xpos   = img.xpos;
-                tile_ypos   = img.ypos;
-                rect        = tile;
-                ++tile_count;
-                continue;
-            }
-            if ((img.width != tile_width) || (img.height != tile_height))
-            {
-                irregular_size = true;
-                break;
-            }
-            if ((img.xpos != tile_xpos) && (img.ypos != tile_ypos))
-            {
-                disjoint_selection = true;
-                break;
-            }
-            if (img.xpos == tile_xpos)
-            {
-                if (img.ypos != tile_height * tile_count)
+                const auto& img = *image_list[index];
+
+                base::URect tile;
+                tile.Resize(img.width, img.height);
+                tile.Translate(img.xpos, img.ypos);
+                rect = base::Union(rect, tile);
+
+                if (tile_width == 0 && tile_height == 0)
                 {
-                    disjoint_selection = true;
-                    break;
-                }
-            }
-            if (img.ypos == tile_ypos)
-            {
-                if (img.xpos != tile_width * tile_count)
-                {
-                    disjoint_selection = true;
-                    break;
-                }
-            }
-            ++tile_count;
-        }
-
-        if (irregular_size || disjoint_selection)
-        {
-            for (size_t index = 0; index < mPack.images.size(); ++index)
-            {
-                const auto& img = mPack.images[index];
-                if (!img.selected)
+                    tile_width = img.width;
+                    tile_height = img.height;
+                    tile_xpos = img.xpos;
+                    tile_ypos = img.ypos;
+                    rect = tile;
+                    ++tile_count;
                     continue;
+                }
+                if ((img.width != tile_width) || (img.height != tile_height))
+                {
+                    irregular_size = true;
+                    break;
+                }
+                if ((img.xpos != tile_xpos) && (img.ypos != tile_ypos))
+                {
+                    disjoint_selection = true;
+                    break;
+                }
+                if (img.xpos == tile_xpos)
+                {
+                    if (img.ypos != tile_height * tile_count)
+                    {
+                        disjoint_selection = true;
+                        break;
+                    }
+                }
+                if (img.ypos == tile_ypos)
+                {
+                    if (img.xpos != tile_width * tile_count)
+                    {
+                        disjoint_selection = true;
+                        break;
+                    }
+                }
+                ++tile_count;
+            }
 
-                const auto& name = img.widget->GetName();
+            if (irregular_size || disjoint_selection)
+            {
+                for (size_t index = 0; index < image_list.size(); ++index)
+                {
+                    const auto& img = *image_list[index];
+                    const auto& name = img.widget->GetName();
+
+                    auto texture = std::make_unique<gfx::detail::TextureFileSource>();
+                    texture->SetColorSpace(GetValue(mUI.cmbColorSpace));
+                    texture->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, premul_alpha);
+                    texture->SetFileName(mFileUri);
+                    texture->SetName(name);
+
+                    gfx::FRect rect;
+                    rect.Move(img.xpos, img.ypos);
+                    rect.Translate(tile_margin_left, tile_margin_top);
+                    rect.SetWidth(img.width - tile_margin_left - tile_margin_right);
+                    rect.SetHeight(img.height - tile_margin_top - tile_margin_bottom);
+                    rect = rect.Normalize(base::FSize(mWidth, mHeight));
+
+                    const auto texture_count = map->GetNumTextures();
+                    map->SetNumTextures(texture_count + 1);
+                    map->SetTextureSource(texture_count, std::move(texture));
+                    map->SetTextureRect(texture_count, rect);
+                }
+            }
+            else
+            {
+                ASSERT(tile_width && tile_height);
+                gfx::TextureMap::SpriteSheet sprite;
+                sprite.cols = rect.GetWidth() / tile_width;
+                sprite.rows = rect.GetHeight() / tile_height;
+                ASSERT(sprite.cols && sprite.rows);
+                DEBUG("Using optimized single spritesheet with regular tile size %1x%2", tile_width, tile_height);
+
+                const auto width = rect.GetWidth();
+                const auto height = rect.GetHeight();
+                rect.Translate(tile_margin_left, tile_margin_top);
+                rect.SetWidth(width - tile_margin_left - tile_margin_right);
+                rect.SetHeight(height - tile_margin_top - tile_margin_bottom);
 
                 auto texture = std::make_unique<gfx::detail::TextureFileSource>();
                 texture->SetColorSpace(GetValue(mUI.cmbColorSpace));
                 texture->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, premul_alpha);
                 texture->SetFileName(mFileUri);
-                texture->SetName(name);
+                texture->SetName("Spritesheet");
 
-                gfx::FRect rect;
-                rect.Move(img.xpos, img.ypos);
-                rect.Translate(tile_margin_left, tile_margin_top);
-                rect.SetWidth(img.width - tile_margin_left - tile_margin_right);
-                rect.SetHeight(img.height - tile_margin_top - tile_margin_bottom);
-                rect = rect.Normalize(base::FSize(mWidth, mHeight));
-
-                auto* map = klass.GetTextureMap(0);
-                auto count = map->GetNumTextures();
-                map->SetNumTextures(count+1);
-                map->SetTextureSource(count, std::move(texture));
-                map->SetTextureRect(count, rect);
+                map->SetSpriteSheet(sprite);
+                map->SetNumTextures(1);
+                map->SetTextureSource(0, std::move(texture));
+                map->SetTextureRect(0, rect.Normalize(base::FSize(mWidth, mHeight)));
             }
+
+            const auto texture_map_count = klass.GetNumTextureMaps();
+            klass.SetNumTextureMaps(texture_map_count+1);
+            klass.SetTextureMap(texture_map_count, std::move(map));
         }
-        else
-        {
-            ASSERT(tile_width && tile_height);
-            gfx::TextureMap::SpriteSheet sprite;
-            sprite.cols = rect.GetWidth() / tile_width;
-            sprite.rows = rect.GetHeight() / tile_height;
-            ASSERT(sprite.cols && sprite.rows);
-            DEBUG("Using optimized single spritesheet with regular tile size %1x%2", tile_width, tile_height);
+        ASSERT(klass.GetNumTextureMaps());
+        for (unsigned i=0; i<klass.GetNumTextureMaps(); ++i)
+            ASSERT(klass.GetTextureMap(i)->GetNumTextures());
 
-            const auto width  = rect.GetWidth();
-            const auto height = rect.GetHeight();
-            rect.Translate(tile_margin_left, tile_margin_top);
-            rect.SetWidth(width - tile_margin_left - tile_margin_right);
-            rect.SetHeight(height - tile_margin_top - tile_margin_bottom);
+        klass.SetActiveTextureMap(klass.GetTextureMap(0)->GetId());
 
-            auto texture = std::make_unique<gfx::detail::TextureFileSource>();
-            texture->SetColorSpace(GetValue(mUI.cmbColorSpace));
-            texture->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, premul_alpha);
-            texture->SetFileName(mFileUri);
-            texture->SetName("Spritesheet");
-
-            klass.GetTextureMap(0)->SetSpriteSheet(sprite);
-            klass.GetTextureMap(0)->SetNumTextures(1);
-            klass.GetTextureMap(0)->SetTextureSource(0, std::move(texture));
-            klass.GetTextureMap(0)->SetTextureRect(0, rect.Normalize(base::FSize(mWidth, mHeight)));
-
-        }
         app::MaterialResource res(klass, GetValue(mUI.spriteName));
         mWorkspace->SaveResource(res);
 
