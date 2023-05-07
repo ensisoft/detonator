@@ -539,12 +539,16 @@ public:
                   stats.current_fps, stats.total_wall_time, stats.num_frames_rendered);
         }
 
-        for (auto it = mDebugPrints.begin(); it != mDebugPrints.end();)
+        if (!mDebug.debug_pause)
         {
-            auto& print = *it;
-            if (--print.lifetime < 0) {
-                it = mDebugPrints.erase(it);
-            } else ++it;
+            for (auto it = mDebugPrints.begin(); it != mDebugPrints.end();)
+            {
+                auto& print = *it;
+                if (--print.lifetime < 0)
+                {
+                    it = mDebugPrints.erase(it);
+                } else ++it;
+            }
         }
     }
     virtual bool GetStats(Stats* stats) const override
