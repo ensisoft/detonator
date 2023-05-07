@@ -23,6 +23,7 @@
 #include "warnpop.h"
 
 #include "base/math.h"
+#include "editor/app/workspace.h"
 #include "editor/gui/dlgentity.h"
 #include "editor/gui/dlgscriptvar.h"
 #include "editor/gui/utility.h"
@@ -33,8 +34,10 @@ namespace gui
 class DlgEntity::ScriptVarModel : public QAbstractTableModel
 {
 public:
-    ScriptVarModel(const game::EntityClass& entity, game::SceneNodeClass& node)
-      : mEntity(entity)
+    ScriptVarModel(const app::Workspace* workspace,
+            const game::EntityClass& entity, game::SceneNodeClass& node)
+      : mWorkspace(workspace)
+      , mEntity(entity)
       , mNode(node)
     {}
     virtual QVariant data(const QModelIndex& index, int role) const override
@@ -162,26 +165,39 @@ private:
                     return name;
                 return QString("[0]=%1 ...").arg(name);
             }
+            case game::ScriptVar::Type::MaterialReference: {
+                const auto& array = std::get<std::vector<game::ScriptVar::MaterialReference>>(value.value);
+                const auto& id = array[0].id;
+                QString name = "Nil";
+                if (const auto& material = mWorkspace->FindMaterialClassById(id))
+                    name = app::FromUtf8(material->GetName());
+                if (array.size() == 1)
+                    return name;
+                return QString("[0]=%1 ...").arg(name);
+            }
         }
         BUG("Unknown ScriptVar type.");
         return QVariant();
     }
 private:
+    const app::Workspace* mWorkspace = nullptr;
     const game::EntityClass& mEntity;
     game::SceneNodeClass& mNode;
 };
 
-DlgEntity::DlgEntity(QWidget* parent, const game::EntityClass& klass, game::SceneNodeClass& node)
+DlgEntity::DlgEntity(QWidget* parent, const app::Workspace* workspace,
+                     const game::EntityClass& klass, game::SceneNodeClass& node)
     : QDialog(parent)
+    , mWorkspace(workspace)
     , mEntityClass(klass)
     , mNodeClass(node)
 {
-    mScriptVars.reset(new ScriptVarModel(klass, node));
+    mScriptVars.reset(new ScriptVarModel(workspace, klass, node));
 
     mUI.setupUi(this);
     mUI.tableView->setModel(mScriptVars.get());
 
-    SetValue(mUI.grpEntity, tr("Entity instance - '%1'").arg(app::FromUtf8(node.GetName())));
+    SetValue(mUI.grpEntity, app::toString("Entity instance - %1", node.GetName()));
     SetValue(mUI.entityLifetime, 0.0f);
     SetValue(mUI.chkKillAtLifetime, Qt::PartiallyChecked);
     SetValue(mUI.chkKillAtBoundary, Qt::PartiallyChecked);
@@ -302,12 +318,13 @@ void DlgEntity::on_btnEditVar_clicked()
     {
         const auto& node = mEntityClass.GetNode(i);
         ResourceListItem item;
-        item.name = app::FromUtf8(node.GetName());
-        item.id   = app::FromUtf8(node.GetId());
+        item.name = node.GetName();
+        item.id   = node.GetId();
         nodes.push_back(std::move(item));
     }
 
-    DlgScriptVal dlg(nodes, entities, this, value.value, var.IsArray());
+    DlgScriptVal dlg(nodes, entities, mWorkspace->ListAllMaterials(),
+                     this, value.value, var.IsArray());
     if (dlg.exec() == QDialog::Rejected)
         return;
 

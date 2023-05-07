@@ -656,6 +656,33 @@ sol::object ResolveNodeReferences(game::Entity& entity, const ScriptVar& var, so
 }
 
 template<typename Type>
+sol::object ResolveMaterialReferences(Type& object, const ScriptVar& var, sol::state_view& state)
+{
+    engine::ClassLibrary* lib = state["ClassLib"];
+
+    if (var.IsArray())
+    {
+        using MaterialClassHandle = engine::ClassLibrary::ClassHandle<const gfx::MaterialClass>;
+
+        using ArrayType = ArrayInterface<MaterialClassHandle, ArrayDataObject>;
+
+        const auto& refs = var.GetArray<ScriptVar::MaterialReference>();
+
+        std::vector<MaterialClassHandle> objects;
+        for (const auto& ref : refs)
+        {
+            objects.push_back(lib->FindMaterialClassById(ref.id));
+        }
+
+        return sol::make_object(state, ArrayType(true, std::move(objects)));
+    }
+
+    const auto& ref = var.GetValue<ScriptVar::MaterialReference>();
+
+    return sol::make_object(state, lib->FindMaterialClassById(ref.id));
+}
+
+template<typename Type>
 sol::object GetScriptVar(Type& object, const char* key, sol::this_state state, sol::this_environment this_env)
 {
     using namespace engine;
@@ -684,6 +711,11 @@ sol::object GetScriptVar(Type& object, const char* key, sol::this_state state, s
     {
         return ResolveNodeReferences(object, *var, lua);
     }
+    else if (var->GetType() == game::ScriptVar::Type::MaterialReference)
+    {
+        return ResolveMaterialReferences(object, *var, lua);
+    }
+
     else return ObjectFromScriptVarValue(*var, state);
 }
 template<typename Type>
@@ -2359,6 +2391,9 @@ void BindUtil(sol::state& L)
 
     BindArrayInterface<Entity*,     ArrayObjectReference>(util, "EntityRefArray");
     BindArrayInterface<EntityNode*, ArrayObjectReference>(util, "EntityNodeRefArray");
+
+    using MaterialClassHandle = engine::ClassLibrary::ClassHandle<const gfx::MaterialClass>;
+    BindArrayInterface<MaterialClassHandle, ArrayDataObject>(util, "MaterialRefArray");
 
     util["Join"] = [](const ArrayInterface<std::string>& array, const std::string& separator) {
         std::string ret;

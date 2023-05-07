@@ -209,11 +209,11 @@ bool DlgFindEntity::eventFilter(QObject* destination, QEvent* event)
 class SceneWidget::ScriptVarModel : public QAbstractTableModel
 {
 public:
-    ScriptVarModel(game::SceneClass& klass) : mClass(klass)
+    ScriptVarModel(SceneWidget::State& state) : mState(state)
     {}
     virtual QVariant data(const QModelIndex& index, int role) const override
     {
-        const auto& var = mClass.GetScriptVar(index.row());
+        const auto& var = mState.scene->GetScriptVar(index.row());
         if (role == Qt::DisplayRole)
         {
             switch (index.column()) {
@@ -240,7 +240,7 @@ public:
     }
     virtual int rowCount(const QModelIndex&) const override
     {
-        return static_cast<int>(mClass.GetNumScriptVars());
+        return static_cast<int>(mState.scene->GetNumScriptVars());
     }
     virtual int columnCount(const QModelIndex&) const override
     {
@@ -249,20 +249,20 @@ public:
     }
     void AddVariable(game::ScriptVar&& var)
     {
-        const auto count = static_cast<int>(mClass.GetNumScriptVars());
+        const auto count = static_cast<int>(mState.scene->GetNumScriptVars());
         beginInsertRows(QModelIndex(), count, count);
-        mClass.AddScriptVar(std::move(var));
+        mState.scene->AddScriptVar(std::move(var));
         endInsertRows();
     }
     void EditVariable(size_t row, game::ScriptVar&& var)
     {
-        mClass.SetScriptVar(row, std::move(var));
+        mState.scene->SetScriptVar(row, std::move(var));
         emit dataChanged(index(row, 0), index(row, 3));
     }
     void DeleteVariable(size_t row)
     {
         beginRemoveRows(QModelIndex(), row, row);
-        mClass.DeleteScriptVar(row);
+        mState.scene->DeleteScriptVar(row);
         endRemoveRows();
     }
     void Reset()
@@ -274,6 +274,8 @@ public:
 private:
     QVariant GetScriptVarData(const game::ScriptVar& var) const
     {
+        using app::toString;
+
         switch (var.GetType())
         {
             case game::ScriptVar::Type::Boolean:
@@ -315,13 +317,26 @@ private:
             case game::ScriptVar::Type::EntityReference:
                 if (!var.IsArray()) {
                     const auto& val = var.GetValue<game::ScriptVar::EntityReference>();
-                    if (const auto* node = mClass.FindNodeById(val.id))
+                    if (const auto* node = mState.scene->FindNodeById(val.id))
                         return app::FromUtf8(node->GetName());
                     return "Nil";
                 } else {
                     const auto& val = var.GetArray<game::ScriptVar::EntityReference>()[0];
-                    if (const auto* node = mClass.FindNodeById(val.id))
+                    if (const auto* node = mState.scene->FindNodeById(val.id))
                         return QString("[0]=%1 ...").arg(app::FromUtf8(node->GetName()));
+                    return "[0]=Nil ...";
+                }
+                break;
+            case game::ScriptVar::Type::MaterialReference:
+                if (!var.IsArray()) {
+                    const auto& val = var.GetValue<game::ScriptVar::MaterialReference>();
+                    if (const auto& material = mState.workspace->FindMaterialClassById(val.id))
+                        return toString(material->GetName());
+                    return "Nil";
+                } else {
+                    const auto& val = var.GetArray<game::ScriptVar::MaterialReference>()[0];
+                    if (const auto& material = mState.workspace->FindMaterialClassById(val.id))
+                        return toString("[0]=%1 ...", material->GetName());
                     return "[0]=Nil ...";
                 }
                 break;
@@ -330,7 +345,7 @@ private:
         return QVariant();
     }
 private:
-    game::SceneClass& mClass;
+    SceneWidget::State& mState;
 };
 
 class SceneWidget::PlaceEntityTool : public MouseTool
@@ -483,7 +498,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     mState.scene = std::make_shared<game::SceneClass>();
 
     mRenderTree.reset(new TreeModel(*mState.scene));
-    mScriptVarModel.reset(new ScriptVarModel(*mState.scene));
+    mScriptVarModel.reset(new ScriptVarModel(mState));
 
     mUI.setupUi(this);
     mUI.scriptVarList->setModel(mScriptVarModel.get());
@@ -1264,7 +1279,7 @@ void SceneWidget::on_actionNodeEdit_triggered()
         if (!klass)
             return;
 
-        DlgEntity dlg(this, *klass, *node);
+        DlgEntity dlg(this, mState.workspace, *klass, *node);
         dlg.exec();
     }
 }
@@ -1372,7 +1387,8 @@ void SceneWidget::on_actionEntityVarRef_triggered()
 
         game::ScriptVar var(app::ToUtf8(name), ref);
         var.SetPrivate(true);
-        DlgScriptVar dlg(nodes, entities, this, var);
+        DlgScriptVar dlg(nodes, entities, mState.workspace->ListAllMaterials(),
+                         this, var);
         if (dlg.exec() == QDialog::Rejected)
             return;
 
@@ -1552,7 +1568,8 @@ void SceneWidget::on_btnNewScriptVar_clicked()
 
     game::ScriptVar var("My_Var", std::string(""));
     var.SetPrivate(true);
-    DlgScriptVar dlg(nodes, entities, this, var);
+    DlgScriptVar dlg(nodes, entities, mState.workspace->ListAllMaterials(),
+                     this, var);
     if (dlg.exec() == QDialog::Rejected)
         return;
 
@@ -1580,7 +1597,8 @@ void SceneWidget::on_btnEditScriptVar_clicked()
     // single selection for now.
     const auto index = items[0];
     game::ScriptVar var = mState.scene->GetScriptVar(index.row());
-    DlgScriptVar dlg(nodes, entities, this, var);
+    DlgScriptVar dlg(nodes, entities, mState.workspace->ListAllMaterials(),
+                     this, var);
     if (dlg.exec() == QDialog::Rejected)
         return;
 
@@ -1760,7 +1778,7 @@ void SceneWidget::on_btnEntityParams_clicked()
         if (!klass)
             return;
 
-        DlgEntity dlg(this, *klass, *node);
+        DlgEntity dlg(this, mState.workspace, *klass, *node);
         dlg.exec();
     }
 }
@@ -2118,7 +2136,7 @@ void SceneWidget::MouseDoubleClick(QMouseEvent* mickey)
     if (!entity_klass)
         return;
 
-    DlgEntity dlg(this, *entity_klass, *scene_node);
+    DlgEntity dlg(this, mState.workspace, *entity_klass, *scene_node);
     dlg.exec();
 }
 

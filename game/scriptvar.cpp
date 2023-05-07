@@ -240,6 +240,8 @@ size_t ScriptVar::GetHash(const VariantType& variant)
                 hash = base::hash_combine(hash, tmp.id);
             else if constexpr (std::is_same<ValueType, EntityNodeReference>::value)
                 hash = base::hash_combine(hash, tmp.id);
+            else if constexpr (std::is_same<ValueType, MaterialReference>::value)
+                hash = base::hash_combine(hash, tmp.id);
             else hash = base::hash_combine(hash, tmp);
         }
     }, variant);
@@ -277,6 +279,8 @@ void ScriptVar::IntoJson(const VariantType& variant, data::Writer& writer)
         write_reference_array<EntityReference>("entity_refs", variant, writer);
     else if (type == Type::EntityNodeReference)
         write_reference_array<EntityNodeReference>("entity_node_refs", variant, writer);
+    else if (type == Type::MaterialReference)
+        write_reference_array<MaterialReference>("material_refs", variant, writer);
     else BUG("Unhandled script variable type.");
 }
 // static
@@ -315,6 +319,8 @@ bool ScriptVar::FromJson(const data::Reader& reader, VariantType* variant)
             return read_reference_array<EntityReference>("entity_refs", reader, variant);
         else if (reader.HasArray("entity_node_refs"))
             return read_reference_array<EntityNodeReference>("entity_node_refs", reader, variant);
+        else if (reader.HasArray("material_refs"))
+            return read_reference_array<MaterialReference >("material_refs", reader, variant);
         else return false;
     }
     return true;
@@ -338,6 +344,8 @@ ScriptVar::Type ScriptVar::GetTypeFromVariant(const VariantType& variant)
         return Type::EntityNodeReference;
     else if (std::holds_alternative<std::vector<EntityReference>>(variant))
         return Type::EntityReference;
+    else if (std::holds_alternative<std::vector<MaterialReference>>(variant))
+        return Type::MaterialReference;
     else BUG("Unknown ScriptVar type!");
 }
 
