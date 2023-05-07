@@ -2705,7 +2705,15 @@ void BindGLM(sol::state& L)
 
 void BindGFX(sol::state& L)
 {
+    // todo: add more stuff here if/when needed.
 
+    auto table = L["gfx"].get_or_create<sol::table>();
+
+    auto material_class = table.new_usertype<gfx::MaterialClass>("MaterialClass");
+    material_class["GetName"] = &gfx::MaterialClass::GetName;
+    material_class["GetId"]   = &gfx::MaterialClass::GetId;
+
+    auto material = table.new_usertype<gfx::Material>("Material");
 }
 
 void BindWDK(sol::state& L)
@@ -2982,14 +2990,21 @@ void BindGameLib(sol::state& L)
     classlib["FindAudioGraphClassById"]   = &ClassLibrary::FindAudioGraphClassById;
 
     auto drawable = table.new_usertype<DrawableItem>("Drawable");
-    drawable["SetMaterial"] = [](DrawableItem& item, const std::string& name, sol::this_state this_state) {
-        sol::state_view L(this_state);
-        ClassLibrary* lib = L["ClassLib"];
-        const auto ret = lib->FindMaterialClassByName(name);
-        if (ret)
-            item.SetMaterialId(ret->GetId());
-        else WARN("No such material class. [name='%1']", name);
-    };
+    drawable["SetMaterial"] = sol::overload(
+        [](DrawableItem& item, const std::string& name, sol::this_state this_state) {
+            sol::state_view L(this_state);
+            ClassLibrary* lib = L["ClassLib"];
+            const auto ret = lib->FindMaterialClassByName(name);
+            if (ret)
+                item.SetMaterialId(ret->GetId());
+            else WARN("No such material class. [name='%1']", name);
+        },
+        [](DrawableItem& item, const std::shared_ptr<const gfx::MaterialClass>& klass) {
+            if (!klass)
+                throw GameError("Nil material class in SetMaterial.");
+            item.SetMaterialId(klass->GetId());
+        });
+
     drawable["SetActiveTextureMap"] = [](DrawableItem& item, const std::string& name, sol::this_state this_state) {
         sol::state_view L(this_state);
         ClassLibrary* lib = L["ClassLib"];

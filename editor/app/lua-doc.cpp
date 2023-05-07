@@ -254,6 +254,12 @@ void InitLuaDoc()
                    "...", "...");
     DOC_TABLE_PROPERTY("string", "_VERSION", "The Lua version number.");
 
+    DOC_TABLE("gfx");
+    DOC_TABLE("gfx.MaterialClass");
+    DOC_FUNCTION_0("string", "GetName", "Get the material class name.");
+    DOC_FUNCTION_0("string", "GetId", "Get the material class ID.");
+
+    DOC_TABLE("gfx.Material");
 
     DOC_TABLE("util");
     DOC_FUNCTION_1("float", "GetRotationFromMatrix", "Get the rotational component from the given matrix.",
@@ -904,8 +910,10 @@ void InitLuaDoc()
                                                "Returns nil if no such window object could be found.","string", "id");
 
     DOC_TABLE("game.Drawable");
-    DOC_METHOD_1("void", "SetMaterial", "Set material to a material specified by its name. If no such material exists no change is done.",
+    DOC_METHOD_1("void", "SetMaterial", "Set drawable material to a material specified by its name. If no such material exists no change is done.",
                  "string", "name");
+    DOC_METHOD_1("void", "SetMaterial", "Set drawable item material to a new material class. The class object must be a valid object.",
+                 "gfx.MaterialClass", "material");
     DOC_METHOD_1("void", "SetActiveTextureMap", "Set the currently active texture map on this drawable item's material to the one identified by its name."
                                                 "If no such material map exists no change is done",
                  "string", "name");
