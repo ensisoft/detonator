@@ -64,6 +64,7 @@ namespace game
         };
         using EntityReference = ObjectReference<0>;
         using EntityNodeReference = ObjectReference<1>;
+        using MaterialReference = ObjectReference<2>;
 
         // So instead of holding a single variant
         // we want to have possibility to store an "array"
@@ -78,7 +79,8 @@ namespace game
                 std::vector<std::string>,
                 std::vector<glm::vec2>,
                 std::vector<EntityReference>,
-                std::vector<EntityNodeReference>>;
+                std::vector<EntityNodeReference>,
+                std::vector<MaterialReference>>;
 
         // The types of values supported by the ScriptVar.
         enum class Type {
@@ -88,7 +90,8 @@ namespace game
             Vec2,
             Boolean,
             EntityReference,
-            EntityNodeReference
+            EntityNodeReference,
+            MaterialReference
         };
         template<typename T>
         ScriptVar(std::string name, T value, bool read_only = true)

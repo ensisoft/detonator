@@ -28,13 +28,18 @@
 #include "game/entity.h"
 #include "game/scene.h"
 
+namespace app{
+    class Workspace;
+}
+
 namespace gui
 {
     class DlgEntity : public QDialog
     {
         Q_OBJECT
     public:
-        DlgEntity(QWidget* parent, const game::EntityClass& klass, game::SceneNodeClass& node);
+        DlgEntity(QWidget* parent,  const app::Workspace* workspace,
+                  const game::EntityClass& klass, game::SceneNodeClass& node);
        ~DlgEntity();
 
     private slots:
@@ -54,6 +59,7 @@ namespace gui
     private:
         Ui::DlgEntity mUI;
     private:
+        const app::Workspace* mWorkspace = nullptr;
         class ScriptVarModel;
         const game::EntityClass& mEntityClass;
         game::SceneNodeClass& mNodeClass;

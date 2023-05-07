@@ -36,6 +36,7 @@ namespace gui
     public:
         DlgScriptVar(const std::vector<ResourceListItem>& nodes,
                      const std::vector<ResourceListItem>& entities,
+                     const std::vector<ResourceListItem>& materials,
                      QWidget* parent, game::ScriptVar& variable);
     private slots:
         void on_btnAccept_clicked();
@@ -44,6 +45,7 @@ namespace gui
         void on_btnDel_clicked();
         void on_btnResetNodeRef_clicked();
         void on_btnResetEntityRef_clicked();
+        void on_btnResetMaterialRef_clicked();
         void on_chkArray_stateChanged(int);
         void on_varType_currentIndexChanged(int);
         void on_strValue_textChanged(const QString& text);
@@ -56,6 +58,7 @@ namespace gui
         void on_index_valueChanged(int);
         void on_cmbEntityRef_currentIndexChanged(int);
         void on_cmbEntityNodeRef_currentIndexChanged(int);
+        void on_cmbMaterialRef_currentIndexChanged(int);
     private:
         void UpdateArrayIndex();
         void UpdateArrayType();
@@ -76,12 +79,14 @@ namespace gui
     public:
         DlgScriptVal(const std::vector<ResourceListItem>& nodes,
                      const std::vector<ResourceListItem>& entities,
+                     const std::vector<ResourceListItem>& materials,
                      QWidget* parent, game::ScriptVar::VariantType& value, bool array);
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_btnResetNodeRef_clicked();
         void on_btnResetEntityRef_clicked();
+        void on_btnResetMaterialRef_clicked();
         void on_index_valueChanged(int);
         void on_strValue_textChanged(const QString& text);
         void on_intValue_valueChanged(int value);
@@ -92,6 +97,7 @@ namespace gui
         void on_boolValueFalse_clicked(bool checked);
         void on_cmbEntityRef_currentIndexChanged(int);
         void on_cmbEntityNodeRef_currentIndexChanged(int);
+        void on_cmbMaterialRef_currentIndexChanged(int);
     private:
         void SetArrayValue(unsigned index);
         void ShowArrayValue(unsigned index);

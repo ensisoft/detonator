@@ -208,6 +208,8 @@ public:
 private:
     QVariant GetScriptVarData(const game::ScriptVar& var) const
     {
+        using app::toString;
+
         switch (var.GetType())
         {
             case game::ScriptVar::Type::Boolean:
@@ -256,6 +258,20 @@ private:
                 if (!var.IsArray()) {
                     return "Nil";
                 } else {
+                    return "[0]=Nil ...";
+                }
+                break;
+
+            case game::ScriptVar::Type::MaterialReference:
+                if (!var.IsArray()) {
+                    const auto& val = var.GetValue<game::ScriptVar::MaterialReference>();
+                    if (const auto& material = mState.workspace->FindMaterialClassById(val.id))
+                        return toString(material->GetName());
+                    return "Nil";
+                } else {
+                    const auto& val = var.GetArray<game::ScriptVar::MaterialReference>()[0];
+                    if (const auto& material = mState.workspace->FindMaterialClassById(val.id))
+                        return toString("[0]=%1 ...", material->GetName());
                     return "[0]=Nil ...";
                 }
                 break;
@@ -1373,7 +1389,8 @@ void EntityWidget::on_actionNodeVarRef_triggered()
 
         game::ScriptVar var(app::ToUtf8(name), ref);
         var.SetPrivate(true);
-        DlgScriptVar dlg(nodes, entities, this, var);
+        DlgScriptVar dlg(nodes, entities, mState.workspace->ListAllMaterials(),
+                         this, var);
         if (dlg.exec() == QDialog::Rejected)
             return;
 
@@ -1768,7 +1785,8 @@ void EntityWidget::on_btnNewScriptVar_clicked()
     }
     game::ScriptVar var("My_Var", std::string(""));
     var.SetPrivate(true);
-    DlgScriptVar dlg(nodes, entities, this, var);
+    DlgScriptVar dlg(nodes, entities, mState.workspace->ListAllMaterials(),
+                     this, var);
     if (dlg.exec() == QDialog::Rejected)
         return;
 
@@ -1796,7 +1814,8 @@ void EntityWidget::on_btnEditScriptVar_clicked()
     // single selection for now.
     const auto index = items[0];
     game::ScriptVar var = mState.entity->GetScriptVar(index.row());
-    DlgScriptVar dlg(nodes, entities, this, var);
+    DlgScriptVar dlg(nodes, entities, mState.workspace->ListAllMaterials(),
+                     this, var);
     if (dlg.exec() == QDialog::Rejected)
         return;
 
