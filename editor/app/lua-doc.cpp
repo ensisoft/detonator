@@ -925,8 +925,8 @@ void InitLuaDoc()
                  "string", "name");
     DOC_METHOD_1("void", "SetMaterial", "Set drawable item material to a new material class. The class object must be a valid object.",
                  "gfx.MaterialClass", "material");
-    DOC_METHOD_1("void", "SetActiveTextureMap", "Set the currently active texture map on this drawable item's material to the one identified by its name."
-                                                "If no such material map exists no change is done",
+    DOC_METHOD_1("bool", "SetActiveTextureMap", "Set the currently active texture map on this drawable item's material to the one identified by its name."
+                                                "If no such material map exists no change is done. Returns true on success or false on failure.",
                  "string", "name");
     DOC_METHOD_0("string", "GetMaterialId", "Get the graphics subsystem material ID.");
     DOC_METHOD_0("string", "GetDrawableId", "Get the graphics subsystem drawable ID.");
