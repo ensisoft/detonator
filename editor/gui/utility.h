@@ -466,6 +466,21 @@ inline void SetValue(QComboBox* combo, int index)
         combo->clearEditText();
 }
 
+inline void SetText(QComboBox* combo, const ListItemId& id, const QString& text)
+{
+    QSignalBlocker s(combo);
+    for (int i=0; i<combo->count(); ++i)
+    {
+        const QVariant& data = combo->itemData(i);
+        if (data.toString() == id.id)
+        {
+            combo->setItemText(i, text);
+            return;
+        }
+    }
+}
+
+
 // type moved from here to app/utility.h
 // so that the workspace can also use this type.
 using ResourceListItem = app::ResourceListItem;

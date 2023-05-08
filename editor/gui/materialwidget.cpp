@@ -864,8 +864,7 @@ void MaterialWidget::on_textureMapName_textChanged(const QString& text)
         {
             map->SetName(GetValue(mUI.textureMapName));
             item->setText(GetValue(mUI.textureMapName));
-
-            GetMaterialProperties();
+            SetText(mUI.activeMap, ListItemId((QString)GetItemId(item)), GetValue(mUI.textureMapName));
         }
     }
 }
