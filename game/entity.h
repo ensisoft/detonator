@@ -1382,6 +1382,8 @@ namespace game
         EntityNodeClass* AddNode(EntityNodeClass&& node);
         EntityNodeClass* AddNode(std::unique_ptr<EntityNodeClass> node);
 
+        void MoveNode(size_t src_index, size_t dst_index);
+
         // PhysicsJoint lifetimes.
         // For any API function returning a PhysicsJoint* (or const PhysicsJoint*) it's
         // safe to assume that the returned object pointer is valid only
@@ -1558,6 +1560,8 @@ namespace game
         FRect FindNodeBoundingRect(const EntityNodeClass* node) const;
         // Compute the oriented bounding box (OOB) for the given entity node.
         FBox FindNodeBoundingBox(const EntityNodeClass* node) const;
+
+        size_t FindNodeIndex(const EntityNodeClass* node) const;
 
         // todo:
         glm::mat4 FindNodeTransform(const EntityNodeClass* node) const;

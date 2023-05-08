@@ -2093,6 +2093,23 @@ void EntityWidget::on_nodeComment_textChanged(const QString& text)
     }
 }
 
+void EntityWidget::on_nodeIndex_valueChanged(int)
+{
+    if (const auto* node = GetCurrentNode())
+    {
+        const size_t src_index = mState.entity->FindNodeIndex(node);
+        ASSERT(src_index < mState.entity->GetNumNodes());
+
+        const size_t dst_index = GetValue(mUI.nodeIndex);
+        if (dst_index >= mState.entity->GetNumNodes())
+        {
+            SetValue(mUI.nodeIndex, src_index);
+            return;
+        }
+        mState.entity->MoveNode(src_index, dst_index);
+    }
+}
+
 void EntityWidget::on_nodeSizeX_valueChanged(double value)
 {
     UpdateCurrentNodeProperties();
@@ -3153,6 +3170,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.nodeID, QString(""));
     SetValue(mUI.nodeName, QString(""));
     SetValue(mUI.nodeComment, QString(""));
+    SetValue(mUI.nodeIndex, 0);
     SetValue(mUI.nodeTranslateX, 0.0f);
     SetValue(mUI.nodeTranslateY, 0.0f);
     SetValue(mUI.nodeSizeX, 0.0f);
@@ -3222,6 +3240,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
         const auto& scale = node->GetScale();
         SetValue(mUI.nodeID, node->GetId());
         SetValue(mUI.nodeName, node->GetName());
+        SetValue(mUI.nodeIndex, mState.entity->FindNodeIndex(node));
         SetValue(mUI.nodeTranslateX, translate.x);
         SetValue(mUI.nodeTranslateY, translate.y);
         SetValue(mUI.nodeSizeX, size.x);

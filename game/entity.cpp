@@ -749,6 +749,13 @@ EntityNodeClass* EntityClass::AddNode(std::unique_ptr<EntityNodeClass> node)
     return mNodes.back().get();
 }
 
+void EntityClass::MoveNode(size_t src_index, size_t dst_index)
+{
+    ASSERT(src_index < mNodes.size());
+    ASSERT(dst_index < mNodes.size());
+    std::swap(mNodes[src_index], mNodes[dst_index]);
+}
+
 EntityClass::PhysicsJoint* EntityClass::AddJoint(const PhysicsJoint& joint)
 {
     mJoints.push_back(std::make_shared<PhysicsJoint>(joint));
@@ -1100,6 +1107,16 @@ FRect EntityClass::GetBoundingRect() const
 FBox EntityClass::FindNodeBoundingBox(const EntityNodeClass* node) const
 {
     return game::FindBoundingBox(mRenderTree, node);
+}
+
+size_t EntityClass::FindNodeIndex(const EntityNodeClass* node) const
+{
+    for (size_t i=0; i<mNodes.size(); ++i)
+    {
+        if (mNodes[i].get() == node)
+            return i;
+    }
+    return mNodes.size();
 }
 
 glm::mat4 EntityClass::FindNodeTransform(const EntityNodeClass* node) const
