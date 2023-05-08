@@ -434,6 +434,7 @@ void DlgTileImport::on_btnImport_clicked()
 
         app::MaterialResource res(klass, GetValue(mUI.spriteName));
         mWorkspace->SaveResource(res);
+        mSpriteName = GetValue(mUI.spriteName);
 
     } else BUG("Missing material type handling.");
 }
@@ -568,11 +569,12 @@ void DlgTileImport::on_materialType_currentIndexChanged(int)
         SetEnabled(mUI.chkBlendFrames, true);
         SetEnabled(mUI.spriteFps, true);
         SetEnabled(mUI.spriteName, true);
-        SetValue(mUI.spriteName, QString(""));
+        SetValue(mUI.spriteName, mSpriteName);
         SetPlaceholderText(mUI.spriteName, QString(""));
     }
     else
     {
+        mSpriteName = GetValue(mUI.spriteName);
         SetEnabled(mUI.chkBlendFrames, false);
         SetEnabled(mUI.spriteFps, false);
         SetEnabled(mUI.spriteName, false);
@@ -774,6 +776,7 @@ void DlgTileImport::LoadState()
     GetUserProperty(*mWorkspace, "dlg-tile-import-blend-frames", mUI.chkBlendFrames);
     GetUserProperty(*mWorkspace, "dlg-tile-import-xpos", &xpos);
     GetUserProperty(*mWorkspace, "dlg-tile-import-ypos", &ypos);
+    GetUserProperty(*mWorkspace, "dlg-tile-import-sprite-name-str", &mSpriteName);
     mTrackingOffset = QPoint(xpos, ypos);
 
     on_materialType_currentIndexChanged(0);
@@ -817,6 +820,7 @@ void DlgTileImport::SaveState()
     SetUserProperty(*mWorkspace, "dlg-tile-import-ypos", mTrackingOffset.y());
     SetUserProperty(*mWorkspace, "dlg-tile-import-image-file", imagefile);
     SetUserProperty(*mWorkspace, "dlg-tile-import-json-file", jsonfile);
+    SetUserProperty(*mWorkspace, "dlg-tile-import-sprite-name-str", mSpriteName);
 }
 
 void DlgTileImport::OnPaintScene(gfx::Painter& painter, double secs)
