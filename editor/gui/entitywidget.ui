@@ -1414,19 +1414,6 @@
        <layout class="QVBoxLayout" name="verticalLayout_9">
         <item>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_14">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Node ID</string>
-            </property>
-           </widget>
-          </item>
           <item row="2" column="1">
            <widget class="QLineEdit" name="nodeComment">
             <property name="sizePolicy">
@@ -1437,6 +1424,19 @@
             </property>
             <property name="clearButtonEnabled">
              <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_53">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Comment</string>
             </property>
            </widget>
           </item>
@@ -1463,6 +1463,19 @@
             </property>
            </widget>
           </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_14">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Node ID</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="1">
            <widget class="QLineEdit" name="nodeID">
             <property name="sizePolicy">
@@ -1476,16 +1489,17 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_53">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_59">
             <property name="text">
-             <string>Comment</string>
+             <string>Index</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="nodeIndex">
+            <property name="toolTip">
+             <string>Index of the node in the entity's node array</string>
             </property>
            </widget>
           </item>
@@ -3621,6 +3635,7 @@
   <tabstop>nodeID</tabstop>
   <tabstop>nodeName</tabstop>
   <tabstop>nodeComment</tabstop>
+  <tabstop>nodeIndex</tabstop>
   <tabstop>nodeTranslateX</tabstop>
   <tabstop>nodeTranslateY</tabstop>
   <tabstop>nodeSizeX</tabstop>
