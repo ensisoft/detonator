@@ -2451,7 +2451,7 @@ std::string TextMaterial::GetClassId() const
 { return {}; }
 void TextMaterial::Update(float dt)
 {}
-void TextMaterial::SetRuntime(float runtime)
+void TextMaterial::SetRuntime(double runtime)
 {}
 void TextMaterial::SetUniform(const std::string& name, const Uniform& value)
 {}
