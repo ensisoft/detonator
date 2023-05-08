@@ -121,6 +121,7 @@ namespace gui
         QPoint mStartPoint;
         QPoint mCurrentPoint;
         QPoint mTrackingOffset;
+        QString mSpriteName;
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
 
