@@ -1699,13 +1699,18 @@ void LuaRuntime::BeginPlay(Scene* scene)
         if (mSceneEnv)
             CallLua((*mSceneEnv)["SpawnEntity"], scene, entity);
 
-        const auto& klass   = entity->GetClass();
-        const auto& klassId = klass.GetId();
-        auto it = mEntityEnvs.find(klassId);
-        if (it == mEntityEnvs.end())
-            continue;
-        auto& env = it->second;
-        CallLua((*env)["BeginPlay"], entity, scene);
+        if (auto* env = GetTypeEnv(entity->GetClass()))
+        {
+            CallLua((*env)["BeginPlay"], entity, scene);
+        }
+
+        if (auto* animator = entity->GetAnimator())
+        {
+            if (auto* env = GetTypeEnv(animator->GetClass()))
+            {
+                CallLua((*env)["Init"], animator, entity);
+            }
+        }
     }
 }
 
@@ -1860,6 +1865,14 @@ void LuaRuntime::BeginLoop()
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
             CallLua((*env)["BeginPlay"], entity, mScene);
+        }
+
+        if (auto* animator = entity->GetAnimator())
+        {
+            if (auto* env = GetTypeEnv(animator->GetClass()))
+            {
+                CallLua((*env)["Init"], animator, entity);
+            }
         }
     }
 }
