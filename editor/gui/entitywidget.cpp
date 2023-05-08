@@ -3803,6 +3803,14 @@ QString GenerateAnimatorScriptSource()
 -- You're free to delete functions you don't need.
 --
 
+-- Called once when the animator is first created.
+-- This is the place where you can set the initial entity and animator
+-- state to a known/desired first state.
+function Init(animator, entity)
+
+end
+
+
 -- Called once when the entity enters a new animation state at the end
 -- of a transition.
 function EnterState(animator, state, entity)
