@@ -86,7 +86,7 @@ namespace gui
         detail::StateLink* GetSelectedLink();
 
     private slots:
-        void on_btnClose_clicked();
+        void on_btnCancel_clicked();
         void on_btnAccept_clicked();
         void on_stateView_customContextMenuRequested(QPoint pos);
         void on_stateList_itemSelectionChanged();

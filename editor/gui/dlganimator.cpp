@@ -638,9 +638,9 @@ detail::StateLink* DlgAnimator::GetSelectedLink()
     return dynamic_cast<detail::StateLink*>(selected[0]);
 }
 
-void DlgAnimator::on_btnClose_clicked()
+void DlgAnimator::on_btnCancel_clicked()
 {
-    close();
+    reject();
 }
 
 void DlgAnimator::on_btnAccept_clicked()
@@ -656,6 +656,8 @@ void DlgAnimator::on_btnAccept_clicked()
     mScene->SaveGraphProperties(properties);
 
     mEntityWidget->SaveAnimator(mAnimator, properties);
+
+    accept();
 }
 
 void DlgAnimator::on_stateView_customContextMenuRequested(QPoint pos)
