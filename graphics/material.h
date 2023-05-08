@@ -1170,7 +1170,7 @@ namespace gfx
         // Update material time by a delta value (in seconds).
         virtual void Update(float dt) = 0;
         // Set the material instance time to a specific time value.
-        virtual void SetRuntime(float runtime) = 0;
+        virtual void SetRuntime(double runtime) = 0;
         // Set material instance uniform.
         virtual void SetUniform(const std::string& name, const Uniform& value) = 0;
         // Set material instance uniform.
@@ -1179,6 +1179,8 @@ namespace gfx
         virtual void SetUniforms(const UniformMap& uniforms) = 0;
         // Clear away all material instance uniforms.
         virtual void ResetUniforms() = 0;
+        // Get the current material time.
+        virtual double GetRuntime() const = 0;
     private:
     };
 
@@ -1207,7 +1209,7 @@ namespace gfx
         { return mClass->GetId(); }
         virtual void Update(float dt) override
         { mRuntime += dt; }
-        virtual void SetRuntime(float runtime) override
+        virtual void SetRuntime(double runtime) override
         { mRuntime = runtime; }
         virtual void SetUniform(const std::string& name, const Uniform& value) override
         { mUniforms[name] = value; }
@@ -1217,8 +1219,7 @@ namespace gfx
         { mUniforms.clear(); }
         virtual void SetUniforms(const UniformMap& uniforms) override
         { mUniforms = uniforms; }
-
-        double GetRuntime() const
+        virtual double GetRuntime() const override
         { return mRuntime; }
 
         // Get the material class object instance.
@@ -1250,11 +1251,14 @@ namespace gfx
         virtual std::string GetProgramId(const Environment&) const override;
         virtual std::string GetClassId() const override;
         virtual void Update(float dt) override;
-        virtual void SetRuntime(float runtime) override;
+        virtual void SetRuntime(double runtime) override;
         virtual void SetUniform(const std::string& name, const Uniform& value) override;
         virtual void SetUniform(const std::string& name, Uniform&& value) override;
         virtual void ResetUniforms()  override;
         virtual void SetUniforms(const UniformMap& uniforms) override;
+        virtual double GetRuntime() const override
+        { return 0.0f; }
+
         void SetColor(const Color4f& color)
         { mColor = color; }
         // Set point sampling to true in order to use a fast filtering
