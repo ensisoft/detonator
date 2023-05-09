@@ -411,6 +411,21 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
         const auto time_scale = item->GetTimeScale();
         if (item->TestFlag(DrawableItemType::Flags::UpdateMaterial))
             paint_node.item_material->Update(dt * time_scale);
+
+        if constexpr (std::is_same_v<EntityNodeType, game::EntityNode>)
+        {
+            if (item->HasMaterialTimeAdjustment())
+            {
+                const float adjusted_time = item->GetMaterialTimeAdjustment();
+                paint_node.item_material->SetRuntime(adjusted_time);
+                item->ClearMaterialTimeAdjustment();
+            }
+        }
+
+        if constexpr (std::is_same_v<EntityNodeType, game::EntityNode>)
+        {
+            item->SetCurrentMaterialTime(paint_node.item_material->GetRuntime());
+        }
     }
     if (item && paint_node.item_drawable)
     {

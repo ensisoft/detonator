@@ -950,6 +950,10 @@ void InitLuaDoc()
     DOC_METHOD_1("void", "DeleteUniform", "Delete the given material parameter (shader uniform) value.<br>"
                                           "After the value has been removed the parameter will use the default value defined in the material.",
                  "string", "name");
+    DOC_METHOD_0("bool", "HasMaterialTimeAdjustment", "Check whether the drawable item has a pending material time adjustment.");
+    DOC_METHOD_1("void", "AdjustMaterialTime", "Adjust the material time to the given value on the next renderer update.",
+                 "float", "time");
+    DOC_METHOD_0("float", "GetMaterialTime", "Get the current material time based on the renderer's material time for this drawable item.");
 
     DOC_TABLE("game.RigidBody");
     DOC_METHOD_0("bool", "IsEnabled", "Check whether the body is enabled in the physics simulation or not.");

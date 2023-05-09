@@ -586,6 +586,14 @@ namespace game
           , mInstanceFlags(mClass->GetFlags())
           , mMaterialParams(mClass->GetMaterialParams())
         {}
+        bool HasMaterialTimeAdjustment() const noexcept
+        { return mTimeAdjustment.has_value(); }
+        double GetMaterialTimeAdjustment() const noexcept
+        { return mTimeAdjustment.value_or(0.0); }
+        void ClearMaterialTimeAdjustment() const noexcept
+        { mTimeAdjustment.reset(); }
+        void AdjustMaterialTime(double time) noexcept
+        { mTimeAdjustment = time; }
         const std::string& GetMaterialId() const noexcept
         { return mMaterialId; }
         const std::string& GetDrawableId() const noexcept
@@ -645,6 +653,11 @@ namespace game
         void ResetActiveTextureMap() noexcept
         { mMaterialParams.erase("active_texture_map"); }
 
+        void SetCurrentMaterialTime(double time) const noexcept
+        { mMaterialTime = time; }
+        double GetCurrentMaterialTime() const noexcept
+        { return mMaterialTime; }
+
         const DrawableItemClass& GetClass() const noexcept
         { return *mClass.get(); }
         const DrawableItemClass* operator->() const noexcept
@@ -652,8 +665,10 @@ namespace game
     private:
         std::shared_ptr<const DrawableItemClass> mClass;
         std::string mMaterialId;
+        mutable std::optional<double> mTimeAdjustment;
         base::bitflag<Flags> mInstanceFlags;
         float mInstanceTimeScale = 1.0f;
+        mutable double mMaterialTime = 0.0f;
         MaterialParamMap mMaterialParams;
     };
 
