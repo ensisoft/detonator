@@ -144,6 +144,7 @@ namespace gui
         void UniformValueChanged(const Uniform* uniform);
 
     private:
+        void ClearCustomUniforms();
         void ApplyShaderDescription();
         void SetTextureRect();
         void SetTextureFlags();
