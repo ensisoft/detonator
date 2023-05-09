@@ -996,9 +996,9 @@ namespace gfx
         inline void SetNumTextureMaps(unsigned count)
         { mTextureMaps.resize(count); }
         inline void SetTextureMap(unsigned index, std::unique_ptr<TextureMap> map) noexcept
-        { mTextureMaps[index] = std::move(map); }
+        { base::SafeIndex(mTextureMaps, index) = std::move(map); }
         inline void SetTextureMap(unsigned index, TextureMap map) noexcept
-        { mTextureMaps[index] = std::make_unique<TextureMap>(std::move(map)); }
+        { base::SafeIndex(mTextureMaps, index) = std::make_unique<TextureMap>(std::move(map)); }
 
         // Get the program ID for the material that is used to map the
         // material to a device specific program object.
