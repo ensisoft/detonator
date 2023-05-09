@@ -3108,6 +3108,9 @@ void BindGameLib(sol::state& L)
     };
     drawable["HasUniform"]    = &DrawableItem::HasMaterialParam;
     drawable["DeleteUniform"] = &DrawableItem::DeleteMaterialParam;
+    drawable["AdjustMaterialTime"]        = &DrawableItem::AdjustMaterialTime;
+    drawable["HasMaterialTimeAdjustment"] = &DrawableItem::HasMaterialTimeAdjustment;
+    drawable["GetMaterialTime"]    = &DrawableItem::GetCurrentMaterialTime;
 
     auto body = table.new_usertype<RigidBodyItem>("RigidBody");
     body["IsEnabled"]             = &RigidBodyItem::IsEnabled;
