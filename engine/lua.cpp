@@ -3403,6 +3403,12 @@ void BindGameLib(sol::state& L)
             else throw GameError("Unsupported event event value type.");
             entity->PostEvent(std::move(event));
         },
+        [](Entity* entity, const std::string& message, const std::string& sender) {
+            Entity::PostedEvent event;
+            event.message = message;
+            event.sender  = sender,
+            entity->PostEvent(std::move(event));
+        },
         [](Entity* entity, const Entity::PostedEvent& event) {
             entity->PostEvent(event);
         });
