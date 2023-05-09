@@ -493,7 +493,7 @@ void MaterialWidget::on_btnCreateShader_clicked()
             if (msg.exec() == QMessageBox::No)
                 return;
         }
-        const auto& path = mWorkspace->MapFileToFilesystem(QString("ws://"));
+        const auto& path = mWorkspace->MapFileToFilesystem(QString("ws://shaders/es2"));
         if (!app::MakePath(path))
         {
             ERROR("Failed to create path. [path='%1']", path);
@@ -574,7 +574,7 @@ constexpr auto json = R"(
         for (int i=0; i<2; ++i)
         {
             QString error_str;
-            QFile::FileError err_val;
+            QFile::FileError err_val = QFile::FileError::NoError;
             if (!app::WriteTextFile(files[i], content[i], &err_val, &error_str))
             {
                 ERROR("Failed to write shader glsl file. [file='%1', error=%2]", files[i], error_str);
@@ -776,7 +776,7 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
     }
     *mMaterial = other;
 
-    ApplyShaderDescription();
+    ClearCustomUniforms();
     GetMaterialProperties();
     GetTextureMapProperties();
     GetTextureProperties();
@@ -806,7 +806,19 @@ void MaterialWidget::on_spriteCols_valueChanged(int)
 void MaterialWidget::on_spriteRows_valueChanged(int)
 { SetMaterialProperties(); }
 void MaterialWidget::on_spriteSheet_toggled(bool)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+    if (GetValue(mUI.spriteSheet))
+    {
+        SetEnabled(mUI.spriteRows, true);
+        SetEnabled(mUI.spriteCols, true);
+    }
+    else
+    {
+        SetEnabled(mUI.spriteRows, false);
+        SetEnabled(mUI.spriteCols, false);
+    }
+}
 void MaterialWidget::on_colorMap0_colorChanged(QColor)
 { SetMaterialProperties(); }
 void MaterialWidget::on_colorMap1_colorChanged(QColor)
@@ -1027,7 +1039,7 @@ void MaterialWidget::UniformValueChanged(const Uniform* uniform)
     SetMaterialProperties();
 }
 
-void MaterialWidget::ApplyShaderDescription()
+void MaterialWidget::ClearCustomUniforms()
 {
     // sometimes Qt just f*n hates you. There's no simple/easy way to
     // just recreate a layout with a bunch of widgets! You cannot set a
@@ -1043,6 +1055,12 @@ void MaterialWidget::ApplyShaderDescription()
         }
     }
     mUniforms.clear();
+}
+
+
+void MaterialWidget::ApplyShaderDescription()
+{
+    ClearCustomUniforms();
 
     if (mMaterial->GetType() != gfx::MaterialClass::Type::Custom)
         return;
@@ -1057,7 +1075,7 @@ void MaterialWidget::ApplyShaderDescription()
     }
 
     boost::replace_all(uri, ".glsl", ".json");
-    const auto [parse_success, json, error] = base::JsonParseFile(app::ToUtf8(mWorkspace->MapFileToFilesystem(uri)));
+    const auto [parse_success, json, error] = base::JsonParseFile(mWorkspace->MapFileToFilesystem(uri));
     if (!parse_success)
     {
         ERROR("Failed to parse the shader description file '%1' %2", uri, error);
@@ -1202,7 +1220,7 @@ void MaterialWidget::ApplyShaderDescription()
                 {
                     auto new_map = std::make_unique<gfx::TextureMap2D>();
                     mMaterial->SetNumTextureMaps(map_index + 1);
-                    mMaterial->SetTextureMap(map_index + 1, std::move(new_map));
+                    mMaterial->SetTextureMap(map_index, std::move(new_map));
                     map = mMaterial->GetTextureMap(map_index);
                     DEBUG("Added material texture map. [type=%1, name='%2']", type, name);
                 }
@@ -1234,7 +1252,7 @@ void MaterialWidget::ApplyShaderDescription()
                 {
                     auto new_map = std::make_unique<gfx::TextureMap2D>();
                     mMaterial->SetNumTextureMaps(map_index + 1);
-                    mMaterial->SetTextureMap(map_index + 1, std::move(new_map));
+                    mMaterial->SetTextureMap(map_index, std::move(new_map));
                     map = mMaterial->GetTextureMap(map_index);
                     DEBUG("Added material texture map. [type=%1, name='%2']", type, name);
                 }
