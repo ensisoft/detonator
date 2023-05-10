@@ -21,14 +21,15 @@
 #include "warnpush.h"
 #include "warnpop.h"
 
-#include "base/assert.h"
-
+#include <algorithm>
 #include <type_traits>
 #include <random>
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
 #include <cstring>
+
+#include "base/assert.h"
 
 namespace math
 {
@@ -351,7 +352,21 @@ namespace math
         return FindConvexHull(&verts[0], verts.size());
     }
 
-    static bool CheckRectCircleIntersection(float left, float right, float top, float bottom, float x, float y, float radius)
+    // Check whether the given point is inside the given rectangle or not.
+    static bool CheckRectPointIntersection(float left, float right, float top, float bottom, // rectangle
+                                           float x, float y) // point
+    {
+        if (x < left || x > right)
+            return false;
+        else if (y < top || y > bottom)
+            return false;
+        return true;
+    }
+
+
+    static bool CheckRectCircleIntersection(float left, float right, float top, float bottom, // rectangle
+                                            float x, float y, float radius)// circle
+
     {
         ASSERT(right >= left);
         ASSERT(bottom >= top);
@@ -375,5 +390,98 @@ namespace math
         return collision;
     }
 
+    static bool CheckRectLineIntersection(float minX, float maxX, float minY, float maxY, // rectangle
+                                          float x1, float y1, float x2, float y2) // line
+    {
+        ASSERT(maxX >= minX);
+        ASSERT(maxY >= minY);
+        //ASSERT(x2 >= x1);
+        if (x2 < x1) {
+            std::swap(x1, x2);
+            std::swap(y1, y2);
+        }
+
+        const auto line_maxY = std::max(y1, y2);
+        const auto line_minY = std::min(y1, y2);
+        const auto line_minX = std::min(x1, x2);
+        const auto line_maxX = std::max(x1, x2);
+
+        // simple rejection criteria. when the line is completely in
+        // some region such as left, right, above or above the
+        // rectangle (i.e. both end points) then it cannot intersect
+        // with the rectangle.
+
+        if (line_maxX < minX) // left check
+            return false;
+        else if (line_minX > maxX) // right check
+            return false;
+        else if (line_maxY < minY) // above check
+            return false;
+        else if (line_minY > maxY) // below check
+            return false;
+
+        const auto dx = x2 - x1;
+        const auto dy = y2 - y1;
+
+        // simple cases for nearly vertical or horizontal lines.  lines
+        // that are nearly vertical or horizontal are quickly discarded
+        // in the above check. if they aren't then they must intersect
+        // with the rect. also keep in mind that when the line is vertical
+        // the slope cannot be computed, so this special condition must be
+        // avoided.
+        if (fabs(dx <= 0.001) || fabs(dy) <= 0.001)
+            return true;
+
+        // the rest of the code here deals with sloping lines. a sloping
+        // line must then cut through at least one of the edges of the rect.
+
+
+        // simple case if either end point is inside the rectangle then
+        // the line and the rectangle intersect.
+        if (CheckRectPointIntersection(minX, maxX, minY, maxY, x1, y1) ||
+            CheckRectPointIntersection(minX, maxX, minY, maxY, x2, y2))
+            return true;
+
+        // difficult case remains, both line end points are outside the rectangle.
+        // if the intersects with either the left or right edge of the rect then
+        // intersection takes place.
+
+        // compute line slope
+        const auto m = dy / dx;
+        // compute line Y-intercept
+        const auto b = y1 - m * x1;
+
+        // check the Y intercept at minX rect boundary
+        {
+            const auto y_intercept = y1 + m*(minX-x1);
+            if (y_intercept >= minY && y_intercept <= maxY)
+                return true;
+        }
+        // check the Y intercept at maxX rect boundary
+        {
+            const auto y_intercept = y1 + m*(maxX-x1);
+            if (y_intercept >= minY && y_intercept <= maxY)
+                return true;
+        }
+
+        // remember the line equation with slope-intercept form
+        // y = mx + b, where m is the slope and b is the y-intercept.
+        // re-arranging this can be solved for x, x = (y - b)/m
+
+        // check the X intercept on minY rect boundary
+        {
+            const auto x_intercept = (minY - b)/m;
+            if (x_intercept >= minX && x_intercept <= maxX)
+                return true;
+        }
+        // check the X intercept on maxY rect boundary
+        {
+            const auto x_intercept = (maxY - b)/m;
+            if (x_intercept >= minX && x_intercept <= maxX)
+                return true;
+        }
+
+        return false;
+    }
 
 } // namespace
