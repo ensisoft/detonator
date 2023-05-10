@@ -108,12 +108,92 @@ void unit_test_rect_circle_intersection()
     TEST_REQUIRE(math::CheckRectCircleIntersection(0.0f, 100.0f, 0.0f, 100.0f, 50.0f, 50.0f, 10.0f));
 }
 
+void unit_test_rect_line_intersection()
+{
+    // testing rectangle is 100x50 units, centered around the origin.
+    auto test = [](float x1, float y1, float x2, float y2) {
+        return math::CheckRectLineIntersection(-50.0f, // left
+                                                50.0f, // right
+                                               -25.0f, // top
+                                                25.0f, // bottom
+                                               x1, y1, x2, y2);
+    };
+
+    // vertical lines. special because of vertical lines have no slope.
+    // to the left of the rect
+    TEST_REQUIRE(!test(-51.0f, -10.0f, -51.0f, 10.0f));
+    // to the right of the rect
+    TEST_REQUIRE(!test(51.0f, -10.0f, 51.0f, 10.0f));
+    // above the rect
+    TEST_REQUIRE(!test(0.0f, -30.0f, 0.0f, -50.0f));
+    // below the rect
+    TEST_REQUIRE(!test(0.0f, 30.0f, 0.0f, 50.0f));
+    // goes through the rect vertically
+    TEST_REQUIRE(test(0.0f, -30.0f, 0.0f, 30.0f));
+    // begins inside the rect and extends above
+    TEST_REQUIRE(test(0.0f, 0.0f, 0.0f, -30.0f));
+    // begins inside the rect and extends below
+    TEST_REQUIRE(test(0.0f, 0.0f, 0.0f, 30.0f));
+    // begins above the rect and extends inside the rect
+    TEST_REQUIRE(test(0.0f, -70.0f, 0.0f, 0.0f));
+    // begins below the rect and extends inside the rect
+    TEST_REQUIRE(test(0.0f, 70.0f, 0.0f, 0.0f));
+    // completely inside the rect
+    TEST_REQUIRE(test(0.0f, -10.0f, 0.0f, 10.0f));
+
+    // horizontal lines
+    // to the left of the rect
+    TEST_REQUIRE(!test(-70.0f, 0.0f, -60.0f, 0.0f));
+    // to the right of the rect
+    TEST_REQUIRE(!test(70.0f, 0.0f, 90.0f, 0.0f));
+    // above the rect
+    TEST_REQUIRE(!test(-20.0f, -30.0f, 40.0f, -30.0f));
+    // below the rect
+    TEST_REQUIRE(!test(-20.0f, 30.0f, 20.0f, 30.0f));
+    // goes through the rect horizontally
+    TEST_REQUIRE(test(-70.0f, 0.0f, 70.0f, 0.0f));
+    // begins inside the rect and extends to the right
+    TEST_REQUIRE(test(0.0f, 0.0f, 70.0f, 0.0f));
+    // begins outside the rect and extends inside
+    TEST_REQUIRE(test(-70.0f, 0.0f, 0.0f, 0.0f));
+    // completely inside the rect
+    TEST_REQUIRE(test(-30.0f, 0.0f, 30.0f, 0.0f));
+
+    // sloping cases. one point inside the rect
+    // ends inside the rect, positive slope
+    TEST_REQUIRE(test(-30.0f, -30.0f, -0.0f, -10.0f));
+    TEST_REQUIRE(test(-70.0f,  10.0f, -40.0f, 20.0f));
+    // ends inside the rect, negative slope
+    TEST_REQUIRE(test(-30.0f, 40.0f, 10.0f, 10.0f));
+    // begins inside the rect, positive slope
+    TEST_REQUIRE(test(30.0f, 20.0f, 60.0f, 40.0f));
+    // begins inside the rect, negative slope
+    TEST_REQUIRE(test(30.0f, 20.0f, 60.0f, -40.0f));
+
+    // sloping cases. both points outside the rect.
+    // negative slope, intersects with the left edge
+    TEST_REQUIRE(test(-70.0f, 0.0f, -10.0f, 30.0f));
+    // positive slope, intersects with the right edge
+    TEST_REQUIRE(test(10.0f, 40.0f, 60.0f, 0.0f));
+
+    // positive slope, intersects with the top and bottom edge
+    TEST_REQUIRE(test(-30.0f, -45.0f, 20.0f, 50.0f));
+    // negative slope
+    TEST_REQUIRE(test(-30.0f, 40.0f, 80.0f, -50.0f));
+
+    // sloping but above the rect
+    TEST_REQUIRE(!test(-10.0f, -30.0f, 10.0f, -50.0f));
+    // sloping but below the rect
+    TEST_REQUIRE(!test(-30.0f, 30.0f, 10.0f, 50.0f));
+}
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     unit_test_triangle_winding_order();
     unit_test_convex_hull();
     unit_test_rect_circle_intersection();
+    unit_test_rect_line_intersection();
     return 0;
 }
 ) // TEST_MAIN
