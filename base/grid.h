@@ -207,6 +207,16 @@ namespace base
         inline void Find(const FPoint& point, float radius, std::unordered_set<RetObject>* result, FindMode mode = FindMode::All) const
         { find_objects_by_point_radius(point, radius, result, mode); }
 
+        template<typename RetObject>
+        inline void Find(const FPoint& a, const FPoint& b, std::vector<RetObject>* result, FindMode mode = FindMode::All) const
+        { find_objects_by_line(a, b, result, mode); }
+        template<typename RetObject>
+        inline void Find(const FPoint& a, const FPoint& b, std::set<RetObject>* result, FindMode mode = FindMode::All) const
+        { find_objects_by_line(a, b, result, mode); }
+        template<typename RetObject>
+        inline void Find(const FPoint& a, const FPoint& b, std::unordered_set<RetObject>* result, FindMode mode = FindMode::All) const
+        { find_objects_by_line(a, b, result, mode); }
+
         Object& GetObject(unsigned row, unsigned col, unsigned item) noexcept
         { return base::SafeIndex(base::SafeIndex(mGrid, row*mCols+col), item).object; }
         const Object& GetObject(unsigned row, unsigned col, unsigned item) const noexcept
@@ -302,6 +312,68 @@ namespace base
             else return GetODenseGridbjectRect(item.object);
         }
         template<typename Container>
+        void find_objects_by_line(const FPoint& a, const FPoint& b, Container* result, FindMode mode) const
+        {
+            const FLine line(a, b);
+
+            const auto& sub_rect = Intersect(mRect, line.Inscribe());
+            if (sub_rect.IsEmpty())
+                return;
+
+            if (mode == FindMode::All)
+            {
+                for_each_cell(sub_rect, [&line, result](const auto& items) {
+                    for (const auto& item : items)
+                    {
+                        const auto& item_rect = GetItemRect(item);
+                        if (DoesIntersect(item_rect, line))
+                            store_result(item.object, result);
+                    }
+                    return true;
+                });
+            }
+            else if (mode == FindMode::First)
+            {
+                for_each_cell(sub_rect, [&line, result](const auto& items) {
+                    for (const auto& item : items)
+                    {
+                        const auto& item_rect = GetItemRect(item);
+                        if (!DoesIntersect(item_rect, line))
+                            continue;
+
+                        store_result(item.object, result);
+                        return false;
+                    }
+                    return true;
+                });
+            }
+            else if (mode == FindMode::Closest)
+            {
+                float best_dist = std::numeric_limits<float>::max();
+                std::optional<Object> best_found;
+
+                for_each_cell(sub_rect, [&line, &best_found, &best_dist](const auto& items) {
+                    for (const auto& item : items)
+                    {
+                        const auto& item_rect = GetItemRect(item);
+                        if (!DoesIntersect(item_rect, line))
+                            continue;
+                        const float dist = SquareDistance(line.GetPointA(), item_rect.GetCenter());
+                        if (dist < best_dist)
+                        {
+                            best_found = item.object;
+                            best_dist  = dist;
+                        }
+                    }
+                    return true;
+                });
+                if (best_found)
+                    store_result(best_found.value(), result);
+
+            } else BUG("Missing FindMode implementation.");
+        }
+
+        template<typename Container>
         void find_objects_by_rect(const FRect& rect, Container* result) const
         {
             const auto& sub_rect = Intersect(mRect, rect);
@@ -382,6 +454,11 @@ namespace base
         {
             const FCircle circle(point, radius);
 
+            // todo: this is sub-optimal since we're going to check all the cells
+            // that are within the rectangle that contains the line segment completely.
+            // this means that for a diagonal line we're going to end up checking cells
+            // that are not actually intersecting with the  line proper.
+            // Better algorithm would consider less grid cells in the first place.
             const auto& sub_rect = Intersect(mRect, circle.Inscribe());
             if (sub_rect.IsEmpty())
                 return;
