@@ -110,6 +110,13 @@ namespace engine
         Color4f color;
         float width = 1.0f;
     };
+    struct DebugDrawCircle {
+        FPoint center;
+        float radius;
+        Color4f color;
+        float width = 1.0f;
+    };
+
     struct DebugPauseAction {
         bool pause = true;
     };
@@ -132,6 +139,7 @@ namespace engine
             DebugClearAction,
             DebugDrawLine,
             DebugDrawRect,
+            DebugDrawCircle,
             DebugPauseAction,
             DelayAction,
             ShowDebugAction,

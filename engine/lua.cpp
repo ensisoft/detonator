@@ -1372,6 +1372,23 @@ void LuaRuntime::Init()
         action.message = std::move(message);
         self.mActionQueue.push(std::move(action));
     };
+    engine["DebugDrawCircle"] = sol::overload(
+        [](LuaRuntime& self, const glm::vec2& center, float radius, const base::Color4f& color, float width) {
+            DebugDrawCircle draw;
+            draw.center = FPoint(center.x, center.y);
+            draw.radius = radius;
+            draw.color  = color;
+            draw.width   = width;
+            self.mActionQueue.push(draw);
+        },
+        [](LuaRuntime& self, const base::FPoint& center, float radius, const base::Color4f& color, float width) {
+            DebugDrawCircle draw;
+            draw.center = center;
+            draw.radius = radius;
+            draw.color  = color;
+            draw.width  = width;
+            self.mActionQueue.push(draw);
+        });
     engine["DebugDrawLine"] = sol::overload(
         [](LuaRuntime& self, const glm::vec2&  a, const glm::vec2& b, const base::Color4f& color, float width) {
             DebugDrawLine draw;
