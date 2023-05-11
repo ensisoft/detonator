@@ -120,4 +120,7 @@ void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Color4f&
 // Like above but instead use a material for rasterizing the line fragments.
 void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Material& material, float line_width = 1.0f);
 
+void DrawCircle(Painter& painter, const FCircle& circle, const Color4f& color, float line_width = 1.0f);
+void DrawCircle(Painter& painter, const FCircle& circle, const Material& material, float line_width = 1.0f);
+
 } // namespace
