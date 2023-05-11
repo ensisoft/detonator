@@ -234,25 +234,33 @@ namespace base
             mHeight = size.GetHeight();
         }
 
-        T GetHeight() const noexcept
+        inline T GetHeight() const noexcept
         { return mHeight; }
-        T GetWidth() const noexcept
+        inline T GetWidth() const noexcept
         { return mWidth; }
-        T GetX() const noexcept
+        inline T GetX() const noexcept
         { return mX; }
-        T GetY() const noexcept
+        inline T GetY() const noexcept
         { return mY; }
-        Point<T> GetPosition() const noexcept
+        inline T GetMinX() const noexcept
+        { return mX; }
+        inline T GetMaxX() const noexcept
+        { return mX + mWidth; }
+        inline T GetMinY() const noexcept
+        { return mY; }
+        inline T GetMaxY() const noexcept
+        { return mY + mHeight; }
+        inline Point<T> GetPosition() const noexcept
         { return {mX, mY}; }
-        Size<T> GetSize() const noexcept
+        inline Size<T> GetSize() const noexcept
         { return {mWidth, mHeight}; }
-        void SetX(T value) noexcept
+        inline void SetX(T value) noexcept
         { mX = value; }
-        void SetY(T value) noexcept
+        inline void SetY(T value) noexcept
         { mY = value; }
-        void SetWidth(T width) noexcept
+        inline void SetWidth(T width) noexcept
         { mWidth = width; }
-        void SetHeight(T height) noexcept
+        inline void SetHeight(T height) noexcept
         { mHeight = height; }
         void Resize(T width, T height) noexcept
         {
@@ -417,6 +425,35 @@ namespace base
         T mHeight = 0;
     };
 
+    using URect = Rect<unsigned>;
+    using FRect = Rect<float>;
+    using IRect = Rect<int>;
+
+    inline bool operator==(const URect& lhs, const URect& rhs) noexcept
+    {
+        return lhs.GetX() == rhs.GetX() &&
+               lhs.GetY() == rhs.GetY() &&
+               lhs.GetWidth() == rhs.GetWidth() &&
+               lhs.GetHeight() == rhs.GetHeight();
+    }
+    inline bool operator!=(const URect& lhs, const URect& rhs) noexcept
+    {
+        return !(lhs == rhs);
+    }
+
+    inline bool operator==(const IRect& lhs, const IRect& rhs) noexcept
+    {
+        return lhs.GetX() == rhs.GetX() &&
+               lhs.GetY() == rhs.GetY() &&
+               lhs.GetWidth() == rhs.GetWidth() &&
+               lhs.GetHeight() == rhs.GetHeight();
+    }
+    inline bool operator!=(const IRect& lhs, const IRect& rhs) noexcept
+    {
+        return !(lhs == rhs);
+    }
+
+
     template<typename T>
     class Circle
     {
@@ -541,26 +578,26 @@ namespace base
         if (lhs.IsEmpty() || rhs.IsEmpty())
             return R();
 
-        const auto lhs_top    = lhs.GetY();
-        const auto lhs_left   = lhs.GetX();
-        const auto lhs_right  = lhs_left + lhs.GetWidth();
-        const auto lhs_bottom = lhs_top + lhs.GetHeight();
-        const auto rhs_top    = rhs.GetY();
-        const auto rhs_left   = rhs.GetX();
-        const auto rhs_right  = rhs_left + rhs.GetWidth();
-        const auto rhs_bottom = rhs_top + rhs.GetHeight();
+        const auto lhs_minY = lhs.GetMinY();
+        const auto lhs_minX = lhs.GetMinX();
+        const auto lhs_maxX = lhs.GetMaxX();
+        const auto lhs_maxY = lhs.GetMaxY();
+        const auto rhs_minY = rhs.GetMinY();
+        const auto rhs_minX = rhs.GetMinX();
+        const auto rhs_maxX = rhs.GetMaxX();
+        const auto rhs_maxY = rhs.GetMaxY();
         // no intersection conditions
-        if (lhs_right < rhs_left  ||
-            lhs_left > rhs_right ||
-            lhs_top > rhs_bottom ||
-            lhs_bottom < rhs_top)
+        if (lhs_maxX < rhs_minX  ||
+            lhs_minX > rhs_maxX ||
+            lhs_minY > rhs_maxY ||
+            lhs_maxY < rhs_minY)
             return R();
 
-        const auto right  = std::min(lhs_right, rhs_right);
-        const auto left   = std::max(lhs_left, rhs_left);
-        const auto top    = std::max(lhs_top, rhs_top);
-        const auto bottom = std::min(lhs_bottom, rhs_bottom);
-        return R(left, top, right - left, bottom - top);
+        const auto maxX = std::min(lhs_maxX, rhs_maxX);
+        const auto minX = std::max(lhs_minX, rhs_minX);
+        const auto minY = std::max(lhs_minY, rhs_minY);
+        const auto maxY = std::min(lhs_maxY, rhs_maxY);
+        return R(minX, minY, maxX - minX, maxY - minY);
     }
 
     template<typename T>
@@ -570,19 +607,19 @@ namespace base
         if (lhs.IsEmpty() || rhs.IsEmpty())
             return false;
 
-        const auto lhs_top    = lhs.GetY();
-        const auto lhs_left   = lhs.GetX();
-        const auto lhs_right  = lhs_left + lhs.GetWidth();
-        const auto lhs_bottom = lhs_top + lhs.GetHeight();
-        const auto rhs_top    = rhs.GetY();
-        const auto rhs_left   = rhs.GetX();
-        const auto rhs_right  = rhs_left + rhs.GetWidth();
-        const auto rhs_bottom = rhs_top + rhs.GetHeight();
+        const auto lhs_minY = lhs.GetMinY();
+        const auto lhs_minX = lhs.GetMinX();
+        const auto lhs_maxX = lhs.GetMaxX();
+        const auto lhs_maxY = lhs.GetMaxY();
+        const auto rhs_minY = rhs.GetMinY();
+        const auto rhs_minX = rhs.GetMinX();
+        const auto rhs_maxX = rhs.GetMaxX();
+        const auto rhs_maxY = rhs.GetMaxY();
         // no intersection conditions
-        if ((lhs_right < rhs_left) ||
-            (lhs_left > rhs_right) ||
-            (lhs_top > rhs_bottom) ||
-            (lhs_bottom < rhs_top))
+        if (lhs_maxX < rhs_minX  ||
+            lhs_minX > rhs_maxX ||
+            lhs_minY > rhs_maxY ||
+            lhs_maxY < rhs_minY)
             return false;
         return true;
     }
@@ -591,8 +628,8 @@ namespace base
     bool DoesIntersect(const Rect<T>& rect, const Circle<T>& circle) noexcept
     {
         return math::CheckRectCircleIntersection(
-                rect.GetX(), rect.GetX() + rect.GetWidth(),
-                rect.GetY(), rect.GetY() + rect.GetHeight(),
+                rect.GetMinX(), rect.GetMaxX(),
+                rect.GetMinY(), rect.GetMaxY(),
                 circle.GetX(), circle.GetY(), circle.GetRadius());
     }
     template<typename T>
@@ -608,20 +645,20 @@ namespace base
         else if (rhs.IsEmpty())
             return lhs;
 
-        const auto lhs_top    = lhs.GetY();
-        const auto lhs_left   = lhs.GetX();
-        const auto lhs_right  = lhs_left + lhs.GetWidth();
-        const auto lhs_bottom = lhs_top + lhs.GetHeight();
-        const auto rhs_top    = rhs.GetY();
-        const auto rhs_left   = rhs.GetX();
-        const auto rhs_right  = rhs_left + rhs.GetWidth();
-        const auto rhs_bottom = rhs_top + rhs.GetHeight();
+        const auto lhs_minY = lhs.GetMinY();
+        const auto lhs_minX = lhs.GetMinX();
+        const auto lhs_maxX = lhs.GetMaxX();
+        const auto lhs_maxY = lhs.GetMaxY();
+        const auto rhs_minY = rhs.GetMinY();
+        const auto rhs_minX = rhs.GetMinX();
+        const auto rhs_maxX = rhs.GetMaxX();
+        const auto rhs_maxY = rhs.GetMaxY();
 
-        const auto left   = std::min(lhs_left, rhs_left);
-        const auto right  = std::max(lhs_right, rhs_right);
-        const auto top    = std::min(lhs_top, rhs_top);
-        const auto bottom = std::max(lhs_bottom, rhs_bottom);
-        return R(left, top, right - left, bottom - top);
+        const auto maxX = std::max(lhs_maxX, rhs_maxX);
+        const auto minX = std::min(lhs_minX, rhs_minX);
+        const auto minY = std::min(lhs_minY, rhs_minY);
+        const auto maxY = std::max(lhs_maxY, rhs_maxY);
+        return R(minX, minY, maxX - minX, maxY - minY);
     }
 
 } // namespace
