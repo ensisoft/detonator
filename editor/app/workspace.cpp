@@ -1400,6 +1400,8 @@ Workspace::~Workspace()
 
 QVariant Workspace::data(const QModelIndex& index, int role) const
 {
+    ASSERT(index.model() == this);
+    ASSERT(index.row() < mResources.size());
     const auto& res = mResources[index.row()];
 
     if (role == Qt::SizeHintRole)
@@ -1714,7 +1716,7 @@ engine::EngineDataHandle Workspace::LoadEngineDataFile(const std::string& filena
 }
 engine::EngineDataHandle Workspace::LoadEngineDataId(const std::string& id) const
 {
-    for (size_t i=0; i<mVisibleCount; ++i)
+    for (size_t i=0; i < mUserResourceCount; ++i)
     {
         const auto& resource = mResources[i];
         if (resource->GetIdUtf8() != id)
@@ -1961,7 +1963,7 @@ bool Workspace::LoadContent(const QString& filename, MigrationLog* log)
         [](const auto& resource)  {
             return resource->IsPrimitive() == false;
         });
-    mVisibleCount = std::distance(mResources.begin(), primitives_start);
+    mUserResourceCount = std::distance(mResources.begin(), primitives_start);
 
     // Invoke resource migration hook that allows us to perform one-off
     // activities when the underlying data has changed between different
@@ -2372,7 +2374,7 @@ ResourceList Workspace::ListDependencies(const QModelIndexList& list) const
 ResourceList Workspace::ListDependencies(std::vector<size_t> indices) const
 {
     std::unordered_map<QString, Resource*> resource_map;
-    for (size_t i=0; i<mVisibleCount; ++i)
+    for (size_t i=0; i < mUserResourceCount; ++i)
     {
         auto& res = mResources[i];
         resource_map[res->GetId()] = res.get();
@@ -2537,18 +2539,18 @@ void Workspace::SaveResource(const Resource& resource)
     }
     // if we're here no such resource exists yet.
     // Create a new resource and add it to the list of resources.
-    beginInsertRows(QModelIndex(), mVisibleCount, mVisibleCount);
-    // insert at the end of the visible range which is from [0, mVisibleCount)
-    mResources.insert(mResources.begin() + mVisibleCount, resource.Copy());
+    beginInsertRows(QModelIndex(), mUserResourceCount, mUserResourceCount);
+    // insert at the end of the visible range which is from [0, mUserResourceCount)
+    mResources.insert(mResources.begin() + mUserResourceCount, resource.Copy());
 
     // careful! endInsertRows will trigger the view proxy to re-fetch the contents.
     // make sure to update this property before endInsertRows otherwise
-    // we'll hit ASSERT incorrectly in GetUserDefinedProperty.
-    mVisibleCount++;
+    // we'll hit ASSERT incorrectly in GetUserDefinedMaterial
+    mUserResourceCount++;
 
     endInsertRows();
 
-    auto& back = mResources[mVisibleCount-1];
+    auto& back = mResources[mUserResourceCount - 1];
     ASSERT(back->GetId() == resource.GetId());
     ASSERT(back->GetName() == resource.GetName());
     emit NewResourceAvailable(back.get());
@@ -2644,17 +2646,25 @@ Resource& Workspace::GetResource(size_t index)
     ASSERT(index < mResources.size());
     return *mResources[index];
 }
+
+Resource& Workspace::GetResource(const QModelIndex& index)
+{
+    ASSERT(index.model() == this);
+    ASSERT(index.row() < mResources.size());
+    return *mResources[index.row()];
+}
+
 Resource& Workspace::GetPrimitiveResource(size_t index)
 {
-    const auto num_primitives = mResources.size() - mVisibleCount;
+    const auto num_primitives = mResources.size() - mUserResourceCount;
 
     ASSERT(index < num_primitives);
-    return *mResources[mVisibleCount + index];
+    return *mResources[mUserResourceCount + index];
 }
 
 Resource& Workspace::GetUserDefinedResource(size_t index)
 {
-    ASSERT(index < mVisibleCount);
+    ASSERT(index < mUserResourceCount);
 
     return *mResources[index];
 }
@@ -2734,17 +2744,24 @@ const Resource& Workspace::GetResource(size_t index) const
     return *mResources[index];
 }
 
+const Resource& Workspace::GetResource(const QModelIndex& index) const
+{
+    ASSERT(index.model() == this);
+    ASSERT(index.row() < mResources.size());
+    return *mResources[index.row()];
+}
+
 const Resource& Workspace::GetUserDefinedResource(size_t index) const
 {
-    ASSERT(index < mVisibleCount);
+    ASSERT(index < mUserResourceCount);
     return *mResources[index];
 }
 const Resource& Workspace::GetPrimitiveResource(size_t index) const
 {
-    const auto num_primitives = mResources.size() - mVisibleCount;
+    const auto num_primitives = mResources.size() - mUserResourceCount;
 
     ASSERT(index < num_primitives);
-    return *mResources[mVisibleCount + index];
+    return *mResources[mUserResourceCount + index];
 }
 
 void Workspace::DeleteResources(const QModelIndexList& list)
@@ -2780,7 +2797,7 @@ void Workspace::DeleteResources(std::vector<size_t> indices)
             for (unsigned i = 0; i < map->GetNumLayers(); ++i)
             {
                 const auto& layer = map->GetLayer(i);
-                for (size_t j = 0; j < mVisibleCount; ++j)
+                for (size_t j = 0; j < mUserResourceCount; ++j)
                 {
                     const auto& res = mResources[j];
                     if (!res->IsDataFile())
@@ -2829,7 +2846,7 @@ void Workspace::DeleteResources(std::vector<size_t> indices)
         std::advance(it, row);
         graveyard.push_back(std::move(*it));
         mResources.erase(it);
-        mVisibleCount--;
+        mUserResourceCount--;
 
         endRemoveRows();
     }
@@ -2973,7 +2990,7 @@ void Workspace::DuplicateResources(std::vector<size_t> indices)
 
         auto* dupe_ptr = dupes[i].get();
         mResources.insert(mResources.begin() + index, std::move(dupes[i]));
-        mVisibleCount++;
+        mUserResourceCount++;
         endInsertRows();
 
         emit NewResourceAvailable(dupe_ptr);
@@ -3613,5 +3630,70 @@ void Workspace::UpdateUserProperty(const QString& name, const QVariant& data)
 {
     mUserProperties[name] = data;
 }
+
+void WorkspaceProxy::DebugPrint() const
+{
+    DEBUG("Sorted resource order:");
+
+    for (int i=0; i<rowCount(); ++i)
+    {
+        const auto foo_index = this->index(i, 0);
+        const auto src_index = this->mapToSource(foo_index);
+        const auto& res = mWorkspace->GetResource(src_index);
+        DEBUG("%1 %2", res.GetType(), res.GetName());
+    }
+
+    DEBUG("");
+}
+
+bool WorkspaceProxy::filterAcceptsRow(int row, const QModelIndex& parent) const
+{
+    if (!mWorkspace)
+        return false;
+    const auto& resource = mWorkspace->GetUserDefinedResource(row);
+    if (!mBits.test(resource.GetType()))
+        return false;
+    if (mFilterString.isEmpty())
+        return true;
+    const auto& name = resource.GetName();
+    return name.contains(mFilterString, Qt::CaseInsensitive);
+}
+
+void WorkspaceProxy::sort(int column, Qt::SortOrder order)
+{
+    DEBUG("Sort workspace resources. [column=%1, order=%2]", column, order);
+    QSortFilterProxyModel::sort(column, order);
+}
+
+bool WorkspaceProxy::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const
+{
+    const auto& lhs_res = mWorkspace->GetResource(lhs);
+    const auto& rhs_res = mWorkspace->GetResource(rhs);
+
+    const auto& lhs_type_val = toString(lhs_res.GetType());
+    const auto& rhs_type_val = toString(rhs_res.GetType());
+    const auto& lhs_name = lhs_res.GetName();
+    const auto& rhs_name = rhs_res.GetName();
+
+    if (lhs.column() == 0 && rhs.column() == 0)
+    {
+        if (lhs_type_val < rhs_type_val)
+            return true;
+        else if (lhs_type_val == rhs_type_val)
+            return lhs_name < rhs_name;
+        return false;
+    }
+    else if (lhs.column() == 1 && rhs.column() == 1)
+    {
+        if (lhs_name < rhs_name)
+            return true;
+        else if (lhs_name == rhs_name)
+            return lhs_type_val < rhs_type_val;
+        return false;
+    }
+    else BUG("Unknown sorting column combination!");
+    return false;
+}
+
 
 } // namespace
