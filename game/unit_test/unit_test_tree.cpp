@@ -791,6 +791,56 @@ void unit_test_quadtree_erase()
     }
 }
 
+void unit_test_quadtree_query()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // GetQuadrants
+    // _____________
+    // |  0  |  2  |
+    // |_____|_____|
+    // |  1  |  3  |
+    // |_____|_____|
+    //
+
+    game::QuadTree<Entity*> tree(100.0f, 100.0f, 1);
+
+    std::vector<Entity> objects;
+    objects.resize(4);
+    objects[0].name = "e0";
+    objects[1].name = "e1";
+    objects[2].name = "e2";
+    objects[3].name = "e3";
+
+    base::FRect rect(0.0f, 0.0f, 10.0f, 10.0f);
+
+    rect.Move(10.0f, 10.0f);
+    tree.Insert(rect, &objects[0]);
+
+    rect.Move(10.0f, 60.0f);
+    tree.Insert(rect, &objects[1]);
+
+    rect.Move(60.0f, 0.0f);
+    tree.Insert(rect, &objects[2]);
+
+    rect.Move(60.0f, 60.0f);
+    tree.Insert(rect, &objects[3]);
+
+    // line query
+    {
+        // outside the space.
+        std::vector<Entity*> result;
+        game::QueryQuadTree(base::FPoint(10.0f, -10.0f), base::FPoint(10.0f, -50.0f), tree, &result);
+        TEST_REQUIRE(result.empty());
+
+        game::QueryQuadTree(base::FPoint(15.0f, 15.0f), base::FPoint(20.0f, 20.0f), tree, &result);
+        TEST_REQUIRE(result.size() == 1);
+        TEST_REQUIRE(result[0] = &objects[0]);
+
+    }
+}
+
+
 void measure_quadtree_even_grid_perf(unsigned max_items, unsigned max_levels)
 {
     TEST_CASE(test::Type::Other)
@@ -874,6 +924,7 @@ int test_main(int argc, char* argv[])
     unit_test_render_tree_op();
     unit_test_quadtree_insert_query();
     unit_test_quadtree_erase();
+    unit_test_quadtree_query();
 
     const unsigned num_items  = game::QuadTree<Entity>::DefaultMaxItems;
     const unsigned max_levels = game::QuadTree<Entity>::DefaultMaxLevels;
