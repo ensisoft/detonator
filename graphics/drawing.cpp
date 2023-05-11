@@ -236,4 +236,20 @@ void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Material
     painter.Draw(Line(line_width), trans, material);
 }
 
+void DrawCircle(Painter& painter, const FCircle& circle, const Color4f& color, float line_width)
+{
+    DrawCircle(painter, circle, MakeMaterial(color), line_width);
+}
+
+void DrawCircle(Painter& painter, const FCircle & circle, const Material& material, float line_width)
+{
+    const auto radius = circle.GetRadius();
+
+    Transform trans;
+    trans.Resize(circle.Inscribe());
+    trans.Translate(circle.GetCenter());
+    trans.Translate(-radius, -radius);
+    painter.Draw(Circle(Drawable::Style::Outline, line_width), trans, material);
+}
+
 } // namespace

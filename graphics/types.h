@@ -37,6 +37,7 @@ namespace gfx
     using FRect  = base::FRect;
     using IRect  = base::IRect;
     using URect  = base::URect;
+    using FCircle = base::FCircle;
 
     struct Quad {
         glm::vec4 top_left;
