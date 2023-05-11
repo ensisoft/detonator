@@ -353,27 +353,27 @@ namespace math
     }
 
     // Check whether the given point is inside the given rectangle or not.
-    static bool CheckRectPointIntersection(float left, float right, float top, float bottom, // rectangle
+    static bool CheckRectPointIntersection(float minX, float maxX, float minY, float maxY, // rectangle
                                            float x, float y) // point
     {
-        if (x < left || x > right)
+        if (x < minX || x > maxX)
             return false;
-        else if (y < top || y > bottom)
+        else if (y < minY || y > maxY)
             return false;
         return true;
     }
 
 
-    static bool CheckRectCircleIntersection(float left, float right, float top, float bottom, // rectangle
+    static bool CheckRectCircleIntersection(float minX, float maxX, float minY, float maxY, // rectangle
                                             float x, float y, float radius)// circle
 
     {
-        ASSERT(right >= left);
-        ASSERT(bottom >= top);
+        ASSERT(maxX >= minX);
+        ASSERT(maxY >= minY);
 
         // find the point closest to the center of the circle inside the rectangle
-        const auto pointX = clamp(left, right, x);
-        const auto pointY = clamp(top, bottom, y);
+        const auto pointX = clamp(minX, maxX, x);
+        const auto pointY = clamp(minY, maxY, y);
 
         // if the distance from the center of the circle to the closest
         // point inside the rectangle is less than the radius of the circle
