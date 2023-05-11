@@ -271,10 +271,10 @@ namespace base
         {
             Resize(size.GetWidth(), size.GetHeight());
         }
-        void Grow(T some_width, T some_height) noexcept
+        void Grow(T dw, T dh) noexcept
         {
-            mWidth += some_width;
-            mHeight += some_height;
+            mWidth  += dw;
+            mHeight += dh;
         }
         void Grow(const Size<T>& some_size) noexcept
         {
@@ -500,10 +500,10 @@ namespace base
             mX += p.GetX();
             mY += p.GetY();
         }
-        void Translate(T x, T y) noexcept
+        void Translate(T dx, T dy) noexcept
         {
-            mX += x;
-            mY += y;
+            mX += dx;
+            mY += dy;
         }
         void Move(T x, T y) noexcept
         {
