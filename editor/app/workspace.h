@@ -118,7 +118,7 @@ namespace app
         virtual QVariant data(const QModelIndex& index, int role) const override;
         virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
         virtual int rowCount(const QModelIndex&) const override
-        { return static_cast<int>(mVisibleCount); }
+        { return static_cast<int>(mUserResourceCount); }
         virtual int columnCount(const QModelIndex&) const override
         { return 2; }
         // QAbstractFileEngineHandler implementation
@@ -289,13 +289,14 @@ namespace app
         size_t GetNumResources() const
         { return mResources.size(); }
         size_t GetNumPrimitiveResources() const
-        { return mResources.size() - mVisibleCount; }
+        { return mResources.size() - mUserResourceCount; }
         size_t GetNumUserDefinedResources() const
-        { return mVisibleCount; }
+        { return mUserResourceCount; }
 
         // Get resource at a specific index in the list of all resources.
         // This will get any resource regardless user defined or not.
-        Resource& GetResource(size_t i);
+        Resource& GetResource(size_t index);
+        Resource& GetResource(const QModelIndex& index);
         // Get a user defined resource.
         Resource& GetUserDefinedResource(size_t index);
         // Get a primitive (built-in) resource.
@@ -317,7 +318,8 @@ namespace app
         const Resource* FindResourceByName(const QString& name, Resource::Type type) const;
         // Get resource at a specific index in the list of all resources.
         // This will get any resource regardless user defined or not.
-        const Resource& GetResource(size_t i) const;
+        const Resource& GetResource(size_t index) const;
+        const Resource& GetResource(const QModelIndex& index) const;
         // Get a user defined resource.
         const Resource& GetUserDefinedResource(size_t index) const;
         // Get a primitive (built-in) resource.
@@ -773,7 +775,10 @@ namespace app
         // from the workspace data files. these are created
         // and edited by the user through the editor.
         std::vector<std::unique_ptr<Resource>> mResources;
-        std::size_t mVisibleCount = 0;
+        // Number of user defined resources. In the list of resources
+        // the user defined resources come first and then the primitive
+        // resources follow.
+        std::size_t mUserResourceCount = 0;
     private:
         const QString mWorkspaceDir;
         // workspace specific properties
@@ -806,24 +811,16 @@ namespace app
         { mFilterString = string; }
         const QString& GetFilterString() const
         { return mFilterString; }
+
+        void DebugPrint() const;
     protected:
-        bool filterAcceptsRow(int row, const QModelIndex& parent) const override
-        {
-            if (!mWorkspace)
-                return false;
-            const auto& resource = mWorkspace->GetUserDefinedResource(row);
-            if (!mBits.test(resource.GetType()))
-                return false;
-            if (mFilterString.isEmpty())
-                return true;
-            const auto& name = resource.GetName();
-            return name.contains(mFilterString, Qt::CaseInsensitive);
-        }
+        virtual bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
+        virtual void sort(int column, Qt::SortOrder order) override;
+        virtual bool lessThan(const QModelIndex& lhs, const QModelIndex& rhs) const override;
     private:
         base::bitflag<Show> mBits;
         QString mFilterString;
         const Workspace* mWorkspace = nullptr;
     };
-
 
 } // namespace
