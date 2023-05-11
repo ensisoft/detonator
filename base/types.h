@@ -526,34 +526,68 @@ namespace base
         T mRadius = 0;
     };
 
-    using URect = Rect<unsigned>;
-    using FRect = Rect<float>;
-    using IRect = Rect<int>;
+    template<typename T>
+    class Line
+    {
+    public:
+        Line() = default;
+        Line(float x1, float y1, float x2, float y2)
+          : mPointA(x1, y1)
+          , mPointB(x2, y2)
+        {}
+        Line(const Point<T>& a, const Point<T>& b)
+          : mPointA(a)
+          , mPointB(b)
+        {}
+        const Point<T>& GetPointA() const noexcept
+        { return mPointA; }
+        const Point<T>& GetPointB() const noexcept
+        { return mPointB; }
+
+        void SetPointA(T x, T y) noexcept
+        { mPointA = Point<T>(x, y); }
+        void SetPointB(T x, T y) noexcept
+        { mPointB = Point<T>(x, y); }
+        void SetPointA(const Point<T>& point) noexcept
+        { mPointA = point; }
+        void SetPointB(const Point<T>& point) noexcept
+        { mPointB = point; }
+
+        void Translate(T dx, T dy) noexcept
+        {
+            mPointA += Point<T>(dx, dy);
+            mPointB += Point<T>(dx, dy);
+        }
+        T GetLength() const noexcept
+        {
+            const auto a = GetDx();
+            const auto b = GetDy();
+            return std::sqrt(a*a + b*b);
+        }
+        T GetDx() const noexcept
+        {
+            return mPointB.GetX()-mPointA.GetX();
+        }
+        T GetDy() const noexcept
+        {
+            return mPointB.GetY()-mPointA.GetY();
+        }
+        Rect<T> Inscribe() const noexcept
+        {
+            const auto minX = std::min(mPointA.GetX(), mPointB.GetX());
+            const auto minY = std::min(mPointA.GetY(), mPointB.GetY());
+            const auto maxX = std::max(mPointA.GetX(), mPointB.GetX());
+            const auto maxY = std::max(mPointA.GetY(), mPointB.GetY());
+            return {minX, minY, maxX-minX, maxY-minY};
+        }
+
+    private:
+        Point<T> mPointA;
+        Point<T> mPointB;
+    };
+
+    using FLine = Line<float>;
     using FCircle = Circle<float>;
-
-    inline bool operator==(const URect& lhs, const URect& rhs) noexcept
-    {
-        return lhs.GetX() == rhs.GetX() &&
-               lhs.GetY() == rhs.GetY() &&
-               lhs.GetWidth() == rhs.GetWidth() &&
-               lhs.GetHeight() == rhs.GetHeight();
-    }
-    inline bool operator!=(const URect& lhs, const URect& rhs) noexcept
-    {
-        return !(lhs == rhs);
-    }
-
-    inline bool operator==(const IRect& lhs, const IRect& rhs) noexcept
-    {
-        return lhs.GetX() == rhs.GetX() &&
-               lhs.GetY() == rhs.GetY() &&
-               lhs.GetWidth() == rhs.GetWidth() &&
-               lhs.GetHeight() == rhs.GetHeight();
-    }
-    inline bool operator!=(const IRect& lhs, const IRect& rhs) noexcept
-    {
-        return !(lhs == rhs);
-    }
 
 
     // Test whether the rectangle A contains rectangle B completely.
@@ -635,6 +669,18 @@ namespace base
     template<typename T>
     bool DoesIntersect(const Circle<T>& circle, const Rect<T>& rect) noexcept
     { return DoesIntersect(rect, circle); }
+
+    template<typename T>
+    bool DoesIntersect(const Rect<T>& rect, const Line<T>& line) noexcept
+    {
+        const auto& a = line.GetPointA();
+        const auto& b = line.GetPointB();
+        return math::CheckRectLineIntersection(
+                rect.GetMinX(), rect.GetMaxX(),
+                rect.GetMinY(), rect.GetMaxY(),
+                a.GetX(), a.GetY(), b.GetX(), b.GetY());
+    }
+
 
     template<typename T>
     Rect<T> Union(const Rect<T>& lhs, const Rect<T>& rhs) noexcept
