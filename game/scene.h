@@ -721,6 +721,15 @@ namespace game
         inline void QuerySpatialNodes(const FPoint& point, float radius, std::vector<const EntityNode*>* result, SpatialQueryMode mode = SpatialQueryMode::All) const
         { query_spatial_nodes_by_point_radius(point, radius, result, mode); }
 
+        inline void QuerySpatialNodes(const FPoint& a, const FPoint& b, std::set<EntityNode*>* result, SpatialQueryMode mode = SpatialQueryMode::All)
+        { query_spatial_nodes_by_line(a, b, result, mode); }
+        inline void QuerySpatialNodes(const FPoint& a, const FPoint& b, std::set<const EntityNode*>* result, SpatialQueryMode mode = SpatialQueryMode::All) const
+        { query_spatial_nodes_by_line(a, b, result, mode); }
+        inline void QuerySpatialNodes(const FPoint& a, const FPoint& b, std::vector<EntityNode*>* result, SpatialQueryMode mode = SpatialQueryMode::All)
+        { query_spatial_nodes_by_line(a, b, result, mode); }
+        inline void QuerySpatialNodes(const FPoint& a, const FPoint& b, std::vector<const EntityNode*>* result, SpatialQueryMode mode = SpatialQueryMode::All) const
+        { query_spatial_nodes_by_line(a, b, result, mode); }
+
         const SpatialIndex* GetSpatialIndex() const noexcept
         { return mSpatialIndex.get(); }
         // Get the scene's render tree (scene graph). The render tree defines
@@ -777,7 +786,12 @@ namespace game
             if (mSpatialIndex)
                 mSpatialIndex->Query(rect, result);
         }
-
+        template<typename ResultContainer>
+        void query_spatial_nodes_by_line(const FPoint& a, const FPoint& b, ResultContainer* result, SpatialQueryMode mode) const
+        {
+            if (mSpatialIndex)
+                mSpatialIndex->Query(a, b, result, mode);
+        }
 
     private:
         // the class object.

@@ -1395,6 +1395,9 @@ void InitLuaDoc()
     DOC_METHOD_0("string", "GetClassName", "Get the name of the scene's class.");
     DOC_METHOD_0("string", "GetClassId", "Get the ID of the scene's class.");
     DOC_METHOD_0("game.SceneClass", "GetClass", "Get the scene's class object.");
+    DOC_METHOD_3("game.SpatialQueryResultSet", "QuerySpatialNodes", "Query the scene for entity nodes that have a spatial node attachment and "
+                                                                    "whose spatial nodes intersect with the given line between point A and point B.",
+                 "base.FPoint|glm.vec2", "a", "base.FPoint|glm.vec2", "b", "string", "mode");
     DOC_METHOD_1("game.SpatialQueryResultSet", "QuerySpatialNodes", "Query the scene for entity nodes that have a spatial node attachment and "
                                                                     "whose spatial nodes intersect with the given search rectangle.",
                  "base.FRect", "area_of_interest");

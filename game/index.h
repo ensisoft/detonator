@@ -83,6 +83,17 @@ namespace game
         { ExecuteQuery(PointRadiusQuery<std::vector<T*>>(point, radius, mode, result)); }
         inline void Query(const FPoint& point, float radius, std::vector<const T*>* result, QueryMode mode) const
         { ExecuteQuery(PointRadiusQuery<std::vector<const T*>>(point, radius, mode, result)); }
+
+        // Query by line segment from point A to point B
+        inline void Query(const FPoint& a, const FPoint& b, std::set<T*>* result, QueryMode mode)
+        { ExecuteQuery(LineQuery<std::set<T*>>(a, b, mode, result)); }
+        inline void Query(const FPoint& a, const FPoint& b, std::set<const T*>* result, QueryMode mode)
+        { ExecuteQuery(LineQuery<std::set<const T*>>(a, b, mode, result)); }
+        inline void Query(const FPoint& a, const FPoint& b, std::vector<T*>* result, QueryMode mode)
+        { ExecuteQuery(LineQuery<std::vector<T*>>(a, b, mode, result)); }
+        inline void Query(const FPoint& a, const FPoint& b, std::vector<const T*>* result, QueryMode mode)
+        { ExecuteQuery(LineQuery<std::vector<const T*>>(a, b, mode, result)); }
+
     protected:
         class SpatialQuery {
         public:
@@ -106,6 +117,41 @@ namespace game
             const FRect mRect;
             ResultContainer* mResult;
         };
+        template<typename ResultContainer>
+        class LineQuery final : public SpatialQuery {
+        public:
+            LineQuery(const FPoint& a, const FPoint& b, QueryMode mode, ResultContainer* result)
+              : mPointA(a)
+              , mPointB(b)
+              , mMode(mode)
+              , mResult(result)
+            {}
+            virtual void Execute(const base::QuadTree<T*>& tree) const override
+            {
+                if (mMode == QueryMode::Closest)
+                    QueryQuadTree(mPointA, mPointB, tree, mResult, base::QuadTreeQueryMode::Closest);
+                else if (mMode == QueryMode::All)
+                    QueryQuadTree(mPointA, mPointB, tree, mResult, base::QuadTreeQueryMode::All);
+                else if (mMode == QueryMode::First)
+                    QueryQuadTree(mPointA, mPointB, tree, mResult, base::QuadTreeQueryMode::First);
+            }
+            virtual void Execute(const base::DenseSpatialGrid<T*>& grid) const override
+            {
+                if (mMode == QueryMode::Closest)
+                    grid.Find(mPointA, mPointB, mResult, base::DenseSpatialGrid<T*>::FindMode::Closest);
+                else if (mMode == QueryMode::All)
+                    grid.Find(mPointA, mPointB, mResult, base::DenseSpatialGrid<T*>::FindMode::All);
+                else if (mMode == QueryMode::First)
+                    grid.Find(mPointA, mPointB, mResult, base::DenseSpatialGrid<T*>::FindMode::First);
+            }
+        private:
+            const FPoint mPointA;
+            const FPoint mPointB;
+            const QueryMode mMode;
+            ResultContainer* mResult;
+        };
+
+
         template<typename ResultContainer>
         class PointQuery final : public SpatialQuery {
         public:
