@@ -871,6 +871,8 @@ void InitLuaDoc()
                  "bool", "block");
     DOC_METHOD_1("void", "DebugPause", "Initiate a debug pause or leave previous debug pause.", "bool", "pause");
     DOC_METHOD_1("void", "DebugPrint", "Print a debug message in the game window.", "string", "message");
+    DOC_METHOD_4("void", "DebugDrawCircle", "Draw a debug circle with the given radius around the center point in game space.",
+                 "glm.vec2|base.FPoint", "center", "float", "radius", "base.Color4f", "color", "float", "line_width");
     DOC_METHOD_4("void", "DebugDrawLine", "Draw a debug line from point A to point B in game space.",
                  "glm.vec2|base.FPoint", "a", "glm.vec2|base.FPoint", "b", "base.Color4f", "color", "float", "line_width");
     DOC_METHOD_6("void", "DebugDrawLine", "Draw a debug line from point x0,y0 to x1,y1 in game space.",
