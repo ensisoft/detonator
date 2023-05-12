@@ -199,7 +199,7 @@ namespace game
                 else if (mMode == QueryMode::All)
                     QueryQuadTree(mPoint, mRadius, tree, mResult, base::QuadTreeQueryMode::All);
                 else if (mMode == QueryMode::First)
-                    QueryQuadTree(mPoint, tree, mResult, base::QuadTreeQueryMode::First);
+                    QueryQuadTree(mPoint, mRadius, tree, mResult, base::QuadTreeQueryMode::First);
 
             }
             virtual void Execute(const base::DenseSpatialGrid<T*>& grid) const override
