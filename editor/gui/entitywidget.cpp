@@ -1083,6 +1083,11 @@ void EntityWidget::Refresh()
     // edited.
     if (mUI.nodeName->hasFocus())
         return;
+    else if (mUI.nodeComment->hasFocus())
+        return;
+    else if (mUI.nodeTag->hasFocus())
+        return;
+
     // don't take undo snapshot while continuous edits to text props
     if (mUI.tiTextColor->isDialogOpen() || mUI.tiText->hasFocus())
         return;
@@ -2090,6 +2095,14 @@ void EntityWidget::on_nodeComment_textChanged(const QString& text)
         if (text.isEmpty())
             mComments.erase(node->GetId());
         else mComments[node->GetId()] = text;
+    }
+}
+
+void EntityWidget::on_nodeTag_textChanged(const QString& text)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        node->SetTag(GetValue(mUI.nodeTag));
     }
 }
 
@@ -3169,6 +3182,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
 {
     SetValue(mUI.nodeID, QString(""));
     SetValue(mUI.nodeName, QString(""));
+    SetValue(mUI.nodeTag, QString(""));
     SetValue(mUI.nodeComment, QString(""));
     SetValue(mUI.nodeIndex, 0);
     SetValue(mUI.nodeTranslateX, 0.0f);
@@ -3240,6 +3254,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
         const auto& scale = node->GetScale();
         SetValue(mUI.nodeID, node->GetId());
         SetValue(mUI.nodeName, node->GetName());
+        SetValue(mUI.nodeTag, node->GetTag());
         SetValue(mUI.nodeIndex, mState.entity->FindNodeIndex(node));
         SetValue(mUI.nodeTranslateX, translate.x);
         SetValue(mUI.nodeTranslateY, translate.y);
