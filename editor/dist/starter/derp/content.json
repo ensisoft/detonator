@@ -160,7 +160,8 @@
           "size": {
             "x": 65.0,
             "y": 65.0
-          }
+          },
+          "tag": ""
         },
         {
           "class": "mqxbWFGIg9",
@@ -198,7 +199,8 @@
           "size": {
             "x": 100.0,
             "y": 100.0
-          }
+          },
+          "tag": ""
         },
         {
           "class": "2qZDXrpOrX",
@@ -236,7 +238,8 @@
           "size": {
             "x": 100.0,
             "y": 100.0
-          }
+          },
+          "tag": ""
         }
       ],
       "render_tree": {
@@ -390,7 +393,8 @@
           "size": {
             "x": 58.52046203613281,
             "y": 219.220703125
-          }
+          },
+          "tag": ""
         },
         {
           "class": "Bft0bWhpnE",
@@ -427,7 +431,8 @@
           "size": {
             "x": 58.29808044433594,
             "y": 67.99427795410156
-          }
+          },
+          "tag": ""
         }
       ],
       "render_tree": {
@@ -505,7 +510,8 @@
           "size": {
             "x": 1000.0,
             "y": 800.0
-          }
+          },
+          "tag": ""
         }
       ],
       "render_tree": {
@@ -575,7 +581,8 @@
           "size": {
             "x": 935.0,
             "y": 40.0
-          }
+          },
+          "tag": ""
         }
       ],
       "render_tree": {
@@ -596,6 +603,7 @@
   ],
   "materials": [
     {
+      "active_texture_map": "",
       "color_map0": {
         "a": 1.0,
         "b": 1.0,
@@ -838,6 +846,7 @@
       "type": "Sprite"
     },
     {
+      "active_texture_map": "",
       "color_map0": {
         "a": 1.0,
         "b": 1.0,
@@ -933,6 +942,7 @@
       "type": "Texture"
     },
     {
+      "active_texture_map": "",
       "color_map0": {
         "a": 1.0,
         "b": 1.0,
@@ -1049,6 +1059,7 @@
       "type": "Sprite"
     },
     {
+      "active_texture_map": "",
       "color_map0": {
         "a": 1.0,
         "b": 1.0,
