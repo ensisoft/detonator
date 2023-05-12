@@ -953,6 +953,9 @@ namespace game
         // Get the human-readable name for this class.
         const std::string& GetName() const noexcept
         { return mName; }
+        // Get the human readable tag string for this node class.
+        const std::string& GetTag() const noexcept
+        { return mTag; }
         // Get the hash value based on the class object properties.
         std::size_t GetHash() const;
 
@@ -970,8 +973,11 @@ namespace game
         float GetRotation() const noexcept
         { return mRotation; }
         // Set the human-readable node name.
-        void SetName(const std::string& name)
-        { mName = name; }
+        void SetName(std::string name)
+        { mName = std::move(name); }
+        // Set the entity node tag string.
+        void SetTag(std::string tag)
+        { mTag = std::move(tag); }
         // Set the node's scale. The scale applies to all
         // the subsequent hierarchy, i.e. all the nodes that
         // are in the tree under this node.
@@ -1130,6 +1136,8 @@ namespace game
         std::string mClassId;
         // human-readable name of the class.
         std::string mName;
+        // The node tag string.
+        std::string mTag;
         // translation of the node relative to its parent.
         glm::vec2 mPosition = {0.0f, 0.0f};
         // Nodes scaling factor. applies to all children.
@@ -1199,6 +1207,8 @@ namespace game
         { return mInstId; }
         const std::string& GetName() const noexcept
         { return mName; }
+        const std::string& GetTag() const noexcept
+        { return mClass->GetTag(); }
         const glm::vec2& GetTranslation() const noexcept
         { return mPosition; }
         const glm::vec2& GetScale() const noexcept
@@ -1258,6 +1268,8 @@ namespace game
         { return mClass->GetId(); }
         const std::string& GetClassName() const noexcept
         { return mClass->GetName(); }
+        const std::string& GetClassTag() const noexcept
+        { return mClass->GetTag(); }
         int GetLayer() const noexcept
         { return mClass->GetLayer(); }
 

@@ -3191,8 +3191,10 @@ void BindGameLib(sol::state& L)
     auto entity_node = table.new_usertype<EntityNode>("EntityNode");
     entity_node["GetId"]          = &EntityNode::GetId;
     entity_node["GetName"]        = &EntityNode::GetName;
+    entity_node["GetTag"]         = &EntityNode::GetTag;
     entity_node["GetClassId"]     = &EntityNode::GetClassId;
     entity_node["GetClassName"]   = &EntityNode::GetClassName;
+    entity_node["GetClassTag"]    = &EntityNode::GetClassTag;
     entity_node["GetTranslation"] = &EntityNode::GetTranslation;
     entity_node["GetSize"]        = &EntityNode::GetSize;
     entity_node["GetScale"]       = &EntityNode::GetScale;

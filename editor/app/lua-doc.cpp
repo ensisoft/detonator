@@ -1030,8 +1030,10 @@ void InitLuaDoc()
     DOC_TABLE("game.EntityNode");
     DOC_METHOD_0("string", "GetName", "Get the entity node's human readable instance name.");
     DOC_METHOD_0("string", "GetId", "Get the entity node instance ID.");
+    DOC_METHOD_0("string", "GetTag", "Get the node's instance tag string.");
     DOC_METHOD_0("string", "GetClassName", "Get the entity node class name.");
     DOC_METHOD_0("string", "GetClassId", "Get the entity node class ID.");
+    DOC_METHOD_0("string", "GetClassTag", "Get the entity node class tag string.");
     DOC_METHOD_0("glm.vec2", "GetTranslation", "Get the node's translation relative to its parent.");
     DOC_METHOD_0("glm.vec2", "GetSize", "Get the node's size. Remember that this might not be the same as the node's world size "
                                         "because there might be a scaling transform at some point.");

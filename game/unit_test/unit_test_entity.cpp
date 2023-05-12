@@ -118,6 +118,7 @@ void unit_test_entity_node()
 
     game::EntityNodeClass node;
     node.SetName("root");
+    node.SetTag("#tag");
     node.SetSize(glm::vec2(100.0f, 100.0f));
     node.SetTranslation(glm::vec2(150.0f, -150.0f));
     node.SetScale(glm::vec2(4.0f, 5.0f));

@@ -164,6 +164,7 @@ namespace gui
         void on_animatorScript_currentIndexChanged(int);
         void on_nodeName_textChanged(const QString& text);
         void on_nodeComment_textChanged(const QString& text);
+        void on_nodeTag_textChanged(const QString& text);
         void on_nodeIndex_valueChanged(int);
         void on_nodeSizeX_valueChanged(double value);
         void on_nodeSizeY_valueChanged(double value);

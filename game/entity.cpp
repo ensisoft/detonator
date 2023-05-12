@@ -315,6 +315,7 @@ EntityNodeClass::EntityNodeClass(const EntityNodeClass& other)
 {
     mClassId  = other.mClassId;
     mName     = other.mName;
+    mTag      = other.mTag;
     mPosition = other.mPosition;
     mScale    = other.mScale;
     mSize     = other.mSize;
@@ -336,6 +337,7 @@ EntityNodeClass::EntityNodeClass(EntityNodeClass&& other)
 {
     mClassId   = std::move(other.mClassId);
     mName      = std::move(other.mName);
+    mTag       = std::move(other.mTag);
     mPosition  = std::move(other.mPosition);
     mScale     = std::move(other.mScale);
     mSize      = std::move(other.mSize);
@@ -353,6 +355,7 @@ std::size_t EntityNodeClass::GetHash() const
     std::size_t hash = 0;
     hash = base::hash_combine(hash, mClassId);
     hash = base::hash_combine(hash, mName);
+    hash = base::hash_combine(hash, mTag);
     hash = base::hash_combine(hash, mPosition);
     hash = base::hash_combine(hash, mScale);
     hash = base::hash_combine(hash, mSize);
@@ -447,6 +450,7 @@ void EntityNodeClass::IntoJson(data::Writer& data) const
 {
     data.Write("class",    mClassId);
     data.Write("name",     mName);
+    data.Write("tag",      mTag);
     data.Write("position", mPosition);
     data.Write("scale",    mScale);
     data.Write("size",     mSize);
@@ -504,6 +508,7 @@ bool EntityNodeClass::FromJson(const data::Reader& data)
     bool ok = true;
     ok &= data.Read("class",    &mClassId);
     ok &= data.Read("name",     &mName);
+    ok &= data.Read("tag",      &mTag);
     ok &= data.Read("position", &mPosition);
     ok &= data.Read("scale",    &mScale);
     ok &= data.Read("size",     &mSize);
@@ -531,6 +536,7 @@ EntityNodeClass& EntityNodeClass::operator=(const EntityNodeClass& other)
     EntityNodeClass tmp(other);
     mClassId     = std::move(tmp.mClassId);
     mName        = std::move(tmp.mName);
+    mTag         = std::move(tmp.mTag);
     mPosition    = std::move(tmp.mPosition);
     mScale       = std::move(tmp.mScale);
     mSize        = std::move(tmp.mSize);
