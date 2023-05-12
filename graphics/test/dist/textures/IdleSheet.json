@@ -1,0 +1,17 @@
+{
+  "color_space": "Linear",
+  "image_file": "IdleSheet.png",
+  "image_height": 256,
+  "image_width": 256,
+  "json_version": 1,
+  "made_with_app": "DETONATOR 2D",
+  "made_with_ver": "rel-???",
+  "mag_filter": "Default",
+  "min_filter": "Default",
+  "premulalpha_blend": false,
+  "premultiply_alpha": false,
+  "tile_height": 32,
+  "tile_width": 32,
+  "xoffset": 0,
+  "yoffset": 0
+}
