@@ -39,6 +39,7 @@
   ],
   "materials": [
     {
+      "active_texture_map": "",
       "color_map0": {
         "a": 1.0,
         "b": 0.10824750363826752,
