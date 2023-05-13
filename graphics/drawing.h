@@ -123,4 +123,7 @@ void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Material
 void DrawCircle(Painter& painter, const FCircle& circle, const Color4f& color, float line_width = 1.0f);
 void DrawCircle(Painter& painter, const FCircle& circle, const Material& material, float line_width = 1.0f);
 
+void DrawRect(Painter& painter, const FRect& rect, const Color4f& color, float line_width = 1.0f);
+void DrawRect(Painter& painter, const FRect& rect, const Material& material, float line_width = 1.0f);
+
 } // namespace

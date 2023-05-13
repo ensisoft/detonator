@@ -252,4 +252,18 @@ void DrawCircle(Painter& painter, const FCircle & circle, const Material& materi
     painter.Draw(Circle(Drawable::Style::Outline, line_width), trans, material);
 }
 
+void DrawRect(Painter& painter, const FRect& rect, const Color4f& color, float line_width)
+{
+    DrawRect(painter, rect, MakeMaterial(color), line_width);
+}
+void DrawRect(Painter& painter, const FRect& rect, const Material& material, float line_width)
+{
+    const auto [c0, c1, c2, c3] = rect.GetCorners();
+    gfx::DrawLine(painter, c0, c1, material, line_width);
+    gfx::DrawLine(painter, c1, c3, material, line_width);
+    gfx::DrawLine(painter, c3, c2, material, line_width);
+    gfx::DrawLine(painter, c2, c0, material, line_width);
+}
+
+
 } // namespace
