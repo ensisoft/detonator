@@ -277,9 +277,12 @@ protected:
         arrow << QPointF(-5.0f,  5.0f);
         arrow << QPointF(-5.0f, -5.0f);
 
-        QPointF center = line.center();
+        const auto length = line.length();
+        const auto arrow_size = 10.0 / length;
+
+        QPointF arrow_pos = src + (dst-src)*(0.5+arrow_size); //line.center();
         QTransform transform;
-        transform.translate(center.x(), center.y());
+        transform.translate(arrow_pos.x(), arrow_pos.y());
         transform.rotate(-line.angle());
 
         painter->setTransform(transform, true);
@@ -334,10 +337,18 @@ QGraphicsItem* AnimatorGraphScene::FindItem(const QString& id)
 }
 
 
+void AnimatorGraphScene::DeleteLink(detail::StateLink* link)
+{
+
+    delete link;
+}
+
 void AnimatorGraphScene::DeleteState(detail::StateItem* state)
 {
     const auto& list = this->items();
-    for (const auto& item : list) {
+    // delete the links that are linked to this state.
+    for (const auto& item : list)
+    {
         if (auto* ptr = dynamic_cast<detail::StateLink*>(item))
         {
             if (ptr->GetSrcNodeId() == state->GetId() ||
@@ -532,6 +543,7 @@ DlgAnimator::DlgAnimator(QWidget* parent,
     ShowProperties((detail::StateItem*)nullptr);
     ShowProperties((detail::StateLink*)nullptr);
     UpdateStateList();
+    SetValue(mUI.cmbInitState, ListItemId(mAnimator.GetInitialStateId()));
 }
 
 DlgAnimator::~DlgAnimator()
@@ -662,9 +674,16 @@ void DlgAnimator::on_btnAccept_clicked()
 
 void DlgAnimator::on_stateView_customContextMenuRequested(QPoint pos)
 {
+    auto* state = GetSelectedState();
+    auto* link  = GetSelectedLink();
+    SetEnabled(mUI.actionStateDel, state!= nullptr);
+    SetEnabled(mUI.actionLinkDel, link!=nullptr);
+
     QMenu menu(this);
     menu.addAction(mUI.actionStateNew);
     menu.addAction(mUI.actionStateDel);
+    menu.addSeparator();
+    menu.addAction(mUI.actionLinkDel);
     menu.exec(QCursor::pos());
 }
 
@@ -710,7 +729,32 @@ void DlgAnimator::on_actionStateDel_triggered()
 {
     if (auto* selected = GetSelectedState())
     {
+        bool was_initial_state = mAnimator.GetInitialStateId() == selected->GetId();
+
+        mAnimator.DeleteStateById(selected->GetId());
         mScene->DeleteState(selected);
+        UpdateStateList();
+        ShowProperties(GetSelectedState());
+        ShowProperties(GetSelectedLink());
+
+        if (was_initial_state)
+        {
+            mAnimator.SetInitialStateId("");
+            if (mAnimator.GetNumStates())
+                mAnimator.SetInitialStateId(mAnimator.GetState(0).GetId());
+
+            SetValue(mUI.cmbInitState, ListItemId(mAnimator.GetInitialStateId()));
+        }
+    }
+}
+
+void DlgAnimator::on_actionLinkDel_triggered()
+{
+    if (auto* selected = GetSelectedLink())
+    {
+        mAnimator.DeleteTransitionById(selected->GetId());
+        mScene->DeleteLink(selected);
+
         UpdateStateList();
         ShowProperties(GetSelectedState());
         ShowProperties(GetSelectedLink());

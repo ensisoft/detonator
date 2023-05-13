@@ -50,6 +50,7 @@ namespace gui
         detail::StateLink* FindLink(const QString& id);
         QGraphicsItem* FindItem(const QString& id);
 
+        void DeleteLink(detail::StateLink* link);
         void DeleteState(detail::StateItem* state);
         void ApplyGraphState(game::AnimatorClass& klass) const;
         void SaveGraphProperties(QVariantMap& props) const;
@@ -92,6 +93,7 @@ namespace gui
         void on_stateList_itemSelectionChanged();
         void on_actionStateNew_triggered();
         void on_actionStateDel_triggered();
+        void on_actionLinkDel_triggered();
         void on_stateName_textChanged(const QString&);
         void on_linkName_textChanged(const QString&);
 
