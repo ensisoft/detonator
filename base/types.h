@@ -207,12 +207,11 @@ namespace base
         {}
         template<typename F> explicit
         Rect(const Rect<F>& other) noexcept
-        {
-            mX = static_cast<T>(other.GetX());
-            mY = static_cast<T>(other.GetY());
-            mWidth = static_cast<T>(other.GetWidth());
-            mHeight = static_cast<T>(other.GetHeight());
-        }
+          : mX(static_cast<T>(other.GetX()))
+          , mY(static_cast<T>(other.GetY()))
+          , mWidth(static_cast<T>(other.GetWidth()))
+          , mHeight(static_cast<T>(other.GetHeight()))
+        {}
         Rect(T x, T y, const Size<T>& size) noexcept
           : mX(x)
           , mY(y)
@@ -220,19 +219,23 @@ namespace base
           , mHeight(size.GetHeight())
         {}
         Rect(const Point<T>& pos, T width, T height) noexcept
-        {
-            mX = pos.GetX();
-            mY = pos.GetY();
-            mWidth = width;
-            mHeight = height;
-        }
+          : mX(pos.GetX())
+          , mY(pos.GetY())
+          , mWidth(width)
+          , mHeight(height)
+        {}
         Rect(const Point<T>& pos, const Size<T>& size) noexcept
-        {
-            mX = pos.GetX();
-            mY = pos.GetY();
-            mWidth  = size.GetWidth();
-            mHeight = size.GetHeight();
-        }
+          : mX(pos.GetX())
+          , mY(pos.GetY())
+          , mWidth(size.GetWidth())
+          , mHeight(size.GetHeight())
+        {}
+        Rect(const Point<T>& min, const Point<T>& max) noexcept
+          : mX(min.GetX())
+          , mY(min.GetY())
+          , mWidth(max.GetX() - min.GetX())
+          , mHeight(max.GetY() -min.GetY())
+        {}
 
         inline T GetHeight() const noexcept
         { return mHeight; }
