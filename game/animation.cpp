@@ -440,6 +440,24 @@ AnimatorClass::AnimatorClass(std::string id)
   : mId(std::move(id))
 {}
 
+void AnimatorClass::DeleteTransitionById(const std::string& id)
+{
+    base::EraseRemove(mTransitions, [&id](const auto& trans) {
+        return trans.GetId() == id;
+    });
+}
+
+void AnimatorClass::DeleteStateById(const std::string& id)
+{
+    base::EraseRemove(mStates, [&id](const auto& state) {
+        return state.GetId() == id;
+    });
+    base::EraseRemove(mTransitions, [&id](const auto& trans) {
+        return trans.GetDstStateId() == id ||
+               trans.GetSrcStateId() == id;
+    });
+}
+
 const AnimationStateClass* AnimatorClass::FindStateById(const std::string& id) const noexcept
 {
     return base::SafeFind(mStates, [&id](const auto& state) {

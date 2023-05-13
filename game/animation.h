@@ -338,6 +338,8 @@ namespace game
         inline void ClearTransitions() noexcept
         { mTransitions.clear(); }
 
+        void DeleteTransitionById(const std::string& id);
+        void DeleteStateById(const std::string& id);
         const AnimationStateClass* FindStateById(const std::string& id) const noexcept;
         const AnimationStateClass* FindStateByName(const std::string& name) const noexcept;
         const AnimationStateTransitionClass* FindTransitionByName(const std::string& name) const noexcept;
