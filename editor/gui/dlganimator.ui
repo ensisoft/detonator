@@ -387,6 +387,18 @@
     <string>Delete selected state</string>
    </property>
   </action>
+  <action name="actionLinkDel">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Transition</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete transition between states</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>animName</tabstop>
