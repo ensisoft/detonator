@@ -52,6 +52,8 @@
 namespace app
 {
 
+QString GenerateScriptVarName(QString suggestion);
+
 // Find the json file associated with an image file (if any)
 QString FindImageJsonFile(const QString& image_file);
 // Find the image file associated with a json file (if any)

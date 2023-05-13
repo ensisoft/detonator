@@ -3698,15 +3698,7 @@ size_t EntityWidget::ComputeHash() const
 
 QString GenerateEntityScriptSource(QString entity)
 {
-    QString tmp;
-    for (int i=0; i<entity.size(); ++i)
-    {
-         if (entity[i].isLetterOrNumber())
-             tmp += entity[i];
-         else if (entity[i].isSpace())
-             tmp += '_';
-    }
-    entity = tmp.toLower();
+    entity = app::GenerateScriptVarName(entity);
 
 QString source(R"(
 --
