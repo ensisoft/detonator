@@ -77,6 +77,27 @@ Rect center_rect_on_target(const Rect& target, const Rect& source)
 namespace app
 {
 
+QString GenerateScriptVarName(QString suggestion)
+{
+    if (auto pos = suggestion.lastIndexOf('/'); pos != -1)
+        suggestion = suggestion.mid(pos+1);
+    else if (auto pos = suggestion.lastIndexOf('\\'); pos != -1)
+        suggestion = suggestion.mid(pos+1);
+
+    if (suggestion.isEmpty())
+        return "var";
+
+    QString tmp;
+    for (int i=0; i<suggestion.size(); ++i)
+    {
+        if (suggestion[i].isLetterOrNumber())
+            tmp += suggestion[i];
+        else if (suggestion[i].isSpace())
+            tmp += '_';
+    }
+    return tmp.toLower();
+}
+
 QString FindImageJsonFile(const QString& image_file)
 {
     // foo.png -> foo.png.json
