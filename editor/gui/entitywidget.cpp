@@ -627,7 +627,7 @@ void EntityWidget::SetViewerMode()
     SetVisible(mUI.chkSnap,        false);
     SetVisible(mUI.chkShowOrigin,  false);
 
-    QTimer::singleShot(10, this, &EntityWidget::on_btnResetTransform_clicked);
+    QTimer::singleShot(10, this, &EntityWidget::on_btnViewReset_clicked);
     on_actionPlay_triggered();
 }
 
@@ -1129,9 +1129,13 @@ bool EntityWidget::OnEscape()
         mCurrentTool.reset();
         UncheckPlacementActions();
     }
-    else
+    else if (mUI.tree->GetSelectedItem())
     {
         mUI.tree->ClearSelection();
+    }
+    else
+    {
+        on_btnViewReset_clicked();
     }
     return true;
 }
@@ -1678,7 +1682,7 @@ void EntityWidget::on_btnViewPlus90_clicked()
     const float value = GetValue(mUI.rotation);
     mUI.rotation->setValue(math::clamp(-180.0f, 180.0f, value + 90.0f));
     mViewTransformRotation  = value;
-    mViewTransformStartTime = mCurrentTime;
+    mViewRotationStartTime = mCurrentTime;
 }
 
 void EntityWidget::on_btnViewMinus90_clicked()
@@ -1686,24 +1690,27 @@ void EntityWidget::on_btnViewMinus90_clicked()
     const float value = GetValue(mUI.rotation);
     mUI.rotation->setValue(math::clamp(-180.0f, 180.0f, value - 90.0f));
     mViewTransformRotation  = value;
-    mViewTransformStartTime = mCurrentTime;
+    mViewRotationStartTime = mCurrentTime;
 }
 
-void EntityWidget::on_btnResetTransform_clicked()
+void EntityWidget::on_btnViewReset_clicked()
 {
     const auto width = mUI.widget->width();
     const auto height = mUI.widget->height();
     const auto rotation = mUI.rotation->value();
-    mState.camera_offset_x = width * 0.5f;
-    mState.camera_offset_y = height * 0.5f;
-    mViewTransformRotation = rotation;
-    mViewTransformStartTime = mCurrentTime;
+    mViewRotationStartTime    = mCurrentTime;
+    mViewTranslationStartTime = mCurrentTime;
+    mViewTranslationStart     = glm::vec2(mState.camera_offset_x, mState.camera_offset_y);
+    mViewTransformRotation    = rotation;
+    mState.camera_offset_x    = width * 0.5f;
+    mState.camera_offset_y    = height * 0.5f;
+
     // set new camera offset to the center of the widget.
-    mUI.translateX->setValue(0);
-    mUI.translateY->setValue(0);
-    mUI.scaleX->setValue(1.0f);
-    mUI.scaleY->setValue(1.0f);
-    mUI.rotation->setValue(0);
+    SetValue(mUI.translateX, 0.0f);
+    SetValue(mUI.translateY, 0.0f);
+    SetValue(mUI.scaleX,     1.0f);
+    SetValue(mUI.scaleY,     1.0f);
+    SetValue(mUI.rotation,   0.0f);
 }
 
 void EntityWidget::on_btnNewTrack_clicked()
@@ -2816,9 +2823,12 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     const auto xs     = (float)GetValue(mUI.scaleX);
     const auto ys     = (float)GetValue(mUI.scaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
-    const auto view_rotation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTransformStartTime);
+    const auto view_rotation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewRotationStartTime);
     const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.rotation->value(),
-        view_rotation_time, math::Interpolation::Cosine);
+                                                       view_rotation_time, math::Interpolation::Cosine);
+    const auto view_translation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTranslationStartTime);
+    const auto view_translation = math::interpolate(mViewTranslationStart, glm::vec2(mState.camera_offset_x, mState.camera_offset_y),
+                                                    view_translation_time, math::Interpolation::Cosine);
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
@@ -2826,7 +2836,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     view.Scale(xs, ys);
     view.Scale(zoom, zoom);
     view.Rotate(qDegreesToRadians(view_rotation_angle));
-    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+    view.Translate(view_translation);
 
     painter.SetViewport(0, 0, width, height);
     painter.SetPixelRatio(glm::vec2(xs*zoom, ys*zoom));

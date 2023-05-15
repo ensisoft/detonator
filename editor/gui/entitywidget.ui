@@ -136,13 +136,6 @@
           </property>
          </widget>
         </item>
-        <item row="10" column="1">
-         <widget class="QCheckBox" name="chkKillAtBoundary">
-          <property name="text">
-           <string>Kill at scene boundary</string>
-          </property>
-         </widget>
-        </item>
         <item row="3" column="5">
          <widget class="QToolButton" name="btnResetScript">
           <property name="toolTip">
@@ -193,13 +186,6 @@
           </property>
           <property name="arrowType">
            <enum>Qt::NoArrow</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="1">
-         <widget class="QCheckBox" name="chkKillAtLifetime">
-          <property name="text">
-           <string>Kill at lifetime</string>
           </property>
          </widget>
         </item>
@@ -331,6 +317,20 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item row="10" column="1" colspan="5">
+         <widget class="QCheckBox" name="chkKillAtBoundary">
+          <property name="text">
+           <string>Kill at scene boundary</string>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="1" colspan="5">
+         <widget class="QCheckBox" name="chkKillAtLifetime">
+          <property name="text">
+           <string>Kill at lifetime</string>
           </property>
          </widget>
         </item>
@@ -1168,7 +1168,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QPushButton" name="btnResetTransform">
+         <widget class="QPushButton" name="btnViewReset">
           <property name="text">
            <string>Reset</string>
           </property>
@@ -3665,7 +3665,7 @@
   <tabstop>rotation</tabstop>
   <tabstop>btnViewPlus90</tabstop>
   <tabstop>btnViewMinus90</tabstop>
-  <tabstop>btnResetTransform</tabstop>
+  <tabstop>btnViewReset</tabstop>
   <tabstop>widget</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbGrid</tabstop>
