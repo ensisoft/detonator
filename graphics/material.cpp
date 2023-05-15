@@ -1592,30 +1592,42 @@ MaterialClass& MaterialClass::operator=(const MaterialClass& other)
 TextureMap* MaterialClass::SelectTextureMap(const State& state) const noexcept
 {
     if (mTextureMaps.empty())
+    {
+        if (state.first_render)
+            WARN("Material has no texture maps. [name='%1'", mName);
         return nullptr;
-
-    std::string active_texture_map = mActiveTextureMap;
+    }
 
     if (state.uniforms)
     {
         if (const auto* active_texture = base::SafeFind(*state.uniforms, std::string("active_texture_map")))
         {
-            if (const auto* active_texture_id = std::get_if<std::string>(active_texture))
-                active_texture_map = *active_texture_id;
+            const auto* map_id = std::get_if<std::string>(active_texture);
+            ASSERT(map_id  && "Active texture map selection has wrong (non-string) uniform type.");
+            for (auto& map : mTextureMaps)
+            {
+                if (map->GetId() == *map_id)
+                    return map.get();
+            }
+            if (state.first_render)
+                WARN("No such texture map found in material. Falling back on default. [name='%1', map=%2]", mName, *map_id);
         }
     }
 
     // keep previous semantics, so default to the first map for the
     // material and sprite maps.
-    if (active_texture_map.empty())
+    if (mActiveTextureMap.empty())
         return mTextureMaps[0].get();
 
     for (auto& map : mTextureMaps)
     {
-        if (map->GetId() == active_texture_map)
+        if (map->GetId() == mActiveTextureMap)
             return map.get();
     }
-    return nullptr;
+    if (state.first_render)
+        WARN("No such texture map found in material. Using first map. [name='%1', map=%2]", mName, mActiveTextureMap);
+
+    return mTextureMaps[0].get();
 }
 
 Shader* MaterialClass::GetColorShader(const State& state, Device& device) const noexcept
@@ -2231,6 +2243,10 @@ bool MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device
     state.shader_pass   = env.render_pass;
     state.material_time = mRuntime;
     state.uniforms      = &mUniforms;
+    state.first_render  = mFirstRender;
+
+    mFirstRender = false;
+
     if (!mClass->ApplyDynamicState(state, device, program))
         return false;
 
