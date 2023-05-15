@@ -799,6 +799,9 @@ namespace gfx
         // instances of a single material type called they might still
         // have a different state.
         struct State {
+            // First render flag to indicate whether this is the first time
+            // this material instance renders.
+            bool first_render = false;
             // true if running in an "editing mode", which means that even
             // content marked static might have changed and should be checked
             // in case it has been modified and should be re-uploaded.
@@ -1196,10 +1199,9 @@ namespace gfx
             , mRuntime(time)
         {}
         MaterialClassInst(const MaterialClass& klass, double time = 0.0)
-        {
-            mClass   = klass.Copy();
-            mRuntime = time;
-        }
+           : mClass(klass.Copy())
+           , mRuntime(time)
+        {}
 
         // Apply the material properties to the given program object and set the rasterizer state.
         virtual bool ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const override;
@@ -1237,6 +1239,11 @@ namespace gfx
         double mRuntime = 0.0f;
         // material properties (uniforms) specific to this instance.
         UniformMap mUniforms;
+        // I don't like this flag but when trying to make it easier for the
+        // game developer to figure out what's wrong we need logging
+        // but it'd be nice if the problem was logged only once instead
+        // of spamming the log continuously.
+        mutable bool mFirstRender = true;
     };
 
     // material specialized for rendering text using
