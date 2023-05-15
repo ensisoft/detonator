@@ -147,7 +147,8 @@ public:
                 continue;
 
             Material::RasterState material_raster_state;
-            shape.material->ApplyDynamicState(material_env, *mDevice, *program, material_raster_state);
+            if (!shape.material->ApplyDynamicState(material_env, *mDevice, *program, material_raster_state))
+                continue;
             device_state.blending    = material_raster_state.blending;
             device_state.premulalpha = material_raster_state.premultiplied_alpha;
 

@@ -1027,7 +1027,7 @@ Shader* MaterialClass::GetShader(const State& state, Device& device) const noexc
     return nullptr;
 }
 
-void MaterialClass::ApplyDynamicState(const State& state, Device& device, Program& program) const noexcept
+bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Program& program) const noexcept
 {
     if (mType == Type::Color)
     {
@@ -1051,12 +1051,14 @@ void MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
         }
     }
     else if (mType == Type::Sprite)
-        ApplySpriteDynamicState(state, device, program);
+        return ApplySpriteDynamicState(state, device, program);
     else if (mType == Type::Texture)
-        ApplyTextureDynamicState(state, device, program);
+        return ApplyTextureDynamicState(state, device, program);
     else if (mType == Type::Custom)
-        ApplyCustomDynamicState(state, device, program);
+        return ApplyCustomDynamicState(state, device, program);
     else BUG("Unknown material type.");
+
+    return true;
 }
 
 void MaterialClass::ApplyStaticState(const State& state, Device& device, Program& program) const noexcept
@@ -1844,11 +1846,11 @@ void main()
     return shader;
 }
 
-void MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, Program& program) const noexcept
+bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, Program& program) const noexcept
 {
     auto* map = SelectTextureMap(state);
     if (map == nullptr)
-        return;
+        return false;
 
     TextureMap::BindingState ts;
     ts.dynamic_content = state.editing_mode || !IsStatic();
@@ -1857,7 +1859,7 @@ void MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
 
     TextureMap::BoundState binds;
     if (!map->BindTextures(ts, device,  binds))
-        return;
+        return false;
 
     glm::vec2 alpha_mask;
 
@@ -1927,6 +1929,7 @@ void MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
         SetUniform("kTextureVelocityZ",  state.uniforms, mTextureVelocity.z, program);
         SetUniform("kTextureRotation",   state.uniforms, mTextureRotation, program);
     }
+    return true;
 }
 
 Shader* MaterialClass::GetTextureShader(const State& state, Device& device) const noexcept
@@ -2050,11 +2053,11 @@ void main()
     return shader;
 }
 
-void MaterialClass::ApplyTextureDynamicState(const State& state, Device& device, Program& program) const noexcept
+bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device, Program& program) const noexcept
 {
     auto* map = SelectTextureMap(state);
     if (map == nullptr)
-        return;
+        return false;
 
     TextureMap::BindingState ts;
     ts.dynamic_content = state.editing_mode || !IsStatic();
@@ -2062,7 +2065,7 @@ void MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
 
     TextureMap::BoundState binds;
     if (!map->BindTextures(ts, device, binds))
-        return;
+        return false;
 
     auto* texture = binds.textures[0];
     texture->SetFilter(mTextureMinFilter);
@@ -2117,6 +2120,7 @@ void MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
         SetUniform("kTextureVelocityZ",  state.uniforms, mTextureVelocity.z, program);
         SetUniform("kTextureRotation",   state.uniforms, mTextureRotation, program);
     }
+    return true;
 }
 
 Shader* MaterialClass::GetCustomShader(const State& state, Device& device) const noexcept
@@ -2154,7 +2158,7 @@ Shader* MaterialClass::GetCustomShader(const State& state, Device& device) const
     return shader;
 }
 
-void MaterialClass::ApplyCustomDynamicState(const State& state, Device& device, Program& program) const noexcept
+bool MaterialClass::ApplyCustomDynamicState(const State& state, Device& device, Program& program) const noexcept
 {
     for (const auto& uniform : mUniforms)
     {
@@ -2187,7 +2191,7 @@ void MaterialClass::ApplyCustomDynamicState(const State& state, Device& device, 
         ts.group_tag       = mClassId;
         TextureMap::BoundState binds;
         if (!map->BindTextures(ts, device, binds))
-            return;
+            return false;
         for (unsigned i=0; i<2; ++i)
         {
             auto* texture = binds.textures[i];
@@ -2213,12 +2217,13 @@ void MaterialClass::ApplyCustomDynamicState(const State& state, Device& device, 
     program.SetUniform("kTime", (float)state.material_time);
     program.SetUniform("kRenderPoints", state.render_points ? 1.0f : 0.0f);
     program.SetTextureCount(texture_unit);
+    return true;
 }
 
-void MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const
+bool MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const
 {
     if (env.render_pass->GetType() == ShaderPass::Type::Stencil)
-        return;
+        return true;
 
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
@@ -2226,7 +2231,8 @@ void MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device
     state.shader_pass   = env.render_pass;
     state.material_time = mRuntime;
     state.uniforms      = &mUniforms;
-    mClass->ApplyDynamicState(state, device, program);
+    if (!mClass->ApplyDynamicState(state, device, program))
+        return false;
 
     const auto surface = mClass->GetSurfaceType();
     if (surface == MaterialClass::SurfaceType::Opaque)
@@ -2237,6 +2243,7 @@ void MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device
         raster.blending = RasterState::Blending::Additive;
 
     raster.premultiplied_alpha = mClass->PremultipliedAlpha();
+    return true;
 }
 
 void MaterialClassInst::ApplyStaticState(const Environment& env, Device& device, Program& program) const
@@ -2313,7 +2320,7 @@ TextMaterial::TextMaterial(const TextBuffer& text)  : mText(text)
 TextMaterial::TextMaterial(TextBuffer&& text)
   : mText(std::move(text))
 {}
-void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const
+bool TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const
 {
     raster.blending = RasterState::Blending::Transparent;
 
@@ -2342,7 +2349,7 @@ void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
 
             auto bitmap = mText.RasterizeBitmap();
             if (!bitmap)
-                return;
+                return false;
             const auto width = bitmap->GetWidth();
             const auto height = bitmap->GetHeight();
             texture->Upload(bitmap->GetDataPtr(), width, height, gfx::Texture::Format::Grayscale, mips);
@@ -2351,12 +2358,12 @@ void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
         {
             texture = mText.RasterizeTexture(gpu_id, "TextMaterialTexture", device);
             if (!texture)
-                return;
+                return false;
             texture->SetTransient(true);
             texture->SetName("TextMaterialTexture");
             // texture->GenerateMips(); << this would be the place to generate mips if needed.
         } else if (format == TextBuffer::RasterFormat::None)
-            return;
+            return false;
         else BUG("Unhandled texture raster format.");
 
         texture->SetContentHash(hash);
@@ -2377,6 +2384,7 @@ void TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
     }
     program.SetTexture("kTexture", 0, *texture);
     program.SetUniform("kColor", mColor);
+    return true;
 }
 void TextMaterial::ApplyStaticState(const Environment& env, Device& device, gfx::Program& program) const
 {}

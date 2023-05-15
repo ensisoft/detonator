@@ -1011,7 +1011,7 @@ namespace gfx
         Shader* GetShader(const State& state, Device& device) const noexcept;
         // Apply the material properties onto the given program object based
         // on the material class and the material instance state.
-        void ApplyDynamicState(const State& state, Device& device, Program& program) const noexcept;
+        bool ApplyDynamicState(const State& state, Device& device, Program& program) const noexcept;
         // Apply the static state, i.e. the material state that doesn't change
         // during the material's lifetime and need to be only set once.
         void ApplyStaticState(const State& state, Device& device, Program& program) const noexcept;
@@ -1092,9 +1092,9 @@ namespace gfx
         Shader* GetSpriteShader(const State& state, Device& device) const noexcept;
         Shader* GetCustomShader(const State& state, Device& device) const noexcept;
         Shader* GetTextureShader(const State& state, Device& device) const noexcept;
-        void ApplySpriteDynamicState(const State& state, Device& device, Program& program) const noexcept;
-        void ApplyCustomDynamicState(const State& state, Device& device, Program& program) const noexcept;
-        void ApplyTextureDynamicState(const State& state, Device& device, Program& program) const noexcept;
+        bool ApplySpriteDynamicState(const State& state, Device& device, Program& program) const noexcept;
+        bool ApplyCustomDynamicState(const State& state, Device& device, Program& program) const noexcept;
+        bool ApplyTextureDynamicState(const State& state, Device& device, Program& program) const noexcept;
 
     private:
         std::string mClassId;
@@ -1151,11 +1151,13 @@ namespace gfx
             bool premultiplied_alpha = false;
         };
         // Apply the dynamic material properties to the given program object
-        // and set the rasterizer state.
-        // Dynamic properties are the properties that can change between
-        // one material instance to another even when the underlying
-        // type/material class is the same.
-        virtual void ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const = 0;
+        // and set the rasterizer state. Dynamic properties are the properties
+        // that can change between one material instance to another even when
+        // the underlying material type is the same. For example two instances
+        // of material "marble" have the same underlying static type "marble"
+        // but both instances have their own instance state as well.
+        // Returns true if the state is applied correctly and drawing can proceed.
+        virtual bool ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const = 0;
         // Apply the static state, i.e. the material state that doesn't change
         // during the material's lifetime and need to be only set once.
         virtual void ApplyStaticState(const Environment& env, Device& device, Program& program) const = 0;
@@ -1200,7 +1202,7 @@ namespace gfx
         }
 
         // Apply the material properties to the given program object and set the rasterizer state.
-        virtual void ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const override;
+        virtual bool ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const override;
         virtual Shader* GetShader(const Environment& env, Device& device) const override;
         virtual void ApplyStaticState(const Environment& env, Device& device, Program& program) const override;
         virtual std::string GetProgramId(const Environment& env) const override;
@@ -1245,7 +1247,7 @@ namespace gfx
     public:
         TextMaterial(const TextBuffer& text);
         TextMaterial(TextBuffer&& text);
-        virtual void ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const override;
+        virtual bool ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const override;
         virtual void ApplyStaticState(const Environment& env, Device& device, Program& program) const override;
         virtual Shader* GetShader(const Environment& env, Device& device) const override;
         virtual std::string GetProgramId(const Environment&) const override;
