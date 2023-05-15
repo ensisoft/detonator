@@ -283,36 +283,8 @@ public:
 
             TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mPainter, &cull));
             TRACE_CALL("Renderer::EndFrame", mRenderer.EndFrame());
-            if (mDebug.debug_draw && mPhysics.HaveWorld())
-            {
-                TRACE_CALL("Physics::DebugDraw", mPhysics.DebugDrawObjects(*mPainter , transform));
-            }
 
-            TRACE_BLOCK("DebugDraw",
-                for (const auto& draw : mDebugDraws)
-                {
-                    if (const auto* ptr = std::get_if<engine::DebugDrawLine>(&draw))
-                    {
-                        gfx::DrawLine(*mPainter, ptr->a, ptr->b, ptr->color, ptr->width);
-                    }
-                    else if (const auto* ptr = std::get_if<engine::DebugDrawRect>(&draw))
-                    {
-                        const auto& top_left  = ptr->top_left;
-                        const auto& bot_right = ptr->bottom_right;
-                        const auto& top_right = base::FPoint(bot_right.GetX(), top_left.GetY());
-                        const auto& bot_left  = base::FPoint(top_left.GetX(), bot_right.GetY());
-                        gfx::DrawLine(*mPainter, top_left, top_right, ptr->color, ptr->width);
-                        gfx::DrawLine(*mPainter, bot_left, bot_right, ptr->color, ptr->width);
-                        gfx::DrawLine(*mPainter, top_left, bot_left, ptr->color, ptr->width);
-                        gfx::DrawLine(*mPainter, top_right, bot_right, ptr->color, ptr->width);
-                    }
-                    else if (const auto* ptr = std::get_if<engine::DebugDrawCircle>(&draw))
-                    {
-                        gfx::DrawCircle(*mPainter, gfx::FCircle(ptr->center, ptr->radius), ptr->color, ptr->width);
-                    }
-                }
-            );
-            mDebugDraws.clear();
+            TRACE_CALL("DebugDraw", DrawDebugObjects());
         }
 
         if (auto* ui = GetUI())
@@ -1172,6 +1144,63 @@ private:
         else
         {
             mRenderer.EnableEffect(engine::Renderer::Effects::Bloom, false);
+        }
+    }
+
+
+    void DrawDebugObjects()
+    {
+         TRACE_BLOCK("DebugDrawLines",
+            for (const auto& draw : mDebugDraws)
+            {
+                if (const auto* ptr = std::get_if<engine::DebugDrawLine>(&draw))
+                    gfx::DrawLine(*mPainter, ptr->a, ptr->b, ptr->color, ptr->width);
+                else if (const auto* ptr = std::get_if<engine::DebugDrawRect>(&draw))
+                    gfx::DrawRect(*mPainter, gfx::FRect(ptr->top_left, ptr->bottom_right), ptr->color, ptr->width);
+                else if (const auto* ptr = std::get_if<engine::DebugDrawCircle>(&draw))
+                    gfx::DrawCircle(*mPainter, gfx::FCircle(ptr->center, ptr->radius), ptr->color, ptr->width);
+                else BUG("Missing debug draw implementation");
+            }
+        );
+        mDebugDraws.clear();
+
+        if (!mDebug.debug_draw)
+            return;
+
+        if (mPhysics.HaveWorld())
+        {
+            gfx::Transform transform;
+            TRACE_CALL("DebugDrawPhysics", mPhysics.DebugDrawObjects(*mPainter, transform));
+        }
+
+        TRACE_CALL("DebugDrawScene", DebugDrawScene());
+    }
+
+    void DebugDrawScene() const
+    {
+        if (!mScene || !mScene->HasSpatialIndex())
+            return;
+
+        // this debug drawing is provided for the game developer to help them
+        // see where the spatial nodes are, not for the engine developer to
+        // debug the engine code. So this means that we assume that the engine
+        // code is correct and the spatial index correctly reflects the nodes
+        // and their positions. Thus the debug drawing can be based on the
+        // entity/node iteration instead of iterating over the items in the
+        // spatial index. (Which is a function that doesn't event exist yet).
+
+        for (size_t i=0; i<mScene->GetNumEntities(); ++i)
+        {
+            const auto& entity = mScene->GetEntity(i);
+            for (size_t j=0; j<entity.GetNumNodes(); ++j)
+            {
+                const auto& node = entity.GetNode(j);
+                if (!node.HasSpatialNode())
+                    continue;
+
+                const auto& aabb = mScene->FindEntityNodeBoundingRect(&entity, &node);
+                gfx::DrawRect(*mPainter, aabb, gfx::Color::HotPink, 1.0f);
+            }
         }
     }
 
