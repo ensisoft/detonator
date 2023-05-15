@@ -3063,6 +3063,7 @@ void BindGameLib(sol::state& L)
             if (ret)
                 item.SetMaterialId(ret->GetId());
             else WARN("No such material class. [name='%1']", name);
+            return !!ret;
         },
         [](DrawableItem& item, const std::shared_ptr<const gfx::MaterialClass>& klass) {
             if (!klass)
