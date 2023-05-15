@@ -82,17 +82,44 @@ public:
         const auto key = event->key();
         if (key == Qt::Key_Period || key == Qt::Key_Colon)
         {
-            QTextCursor tc = cursor;
-            tc.select(QTextCursor::WordUnderCursor);
-            QString word = tc.selectedText();
+
+            // the problem with this simple code here is that WordUnderCursor
+            // returns a word that is a combination of the characters before
+            // and after the cursor. For example if user is editing "some|thing"
+            // and | is the cursor WordUnderCursor will be "something".
+            // In our use-case however we only want the prefix string that
+            // immediately precedes the current cursor position, so in the above
+            // example we'd only want "some".
+
+            //QTextCursor tc = cursor;
+            //tc.select(QTextCursor::WordUnderCursor);
+            //QString word = tc.selectedText();
+
+            // Take the current cursor position in the document and read backwards
+            // until space is encountered (or start of document happens).
+            QString word;
+            int pos = cursor.position();
+            while (--pos >= 0)
+            {
+                auto cha = document.characterAt(pos);
+                if (cha.isSpace())
+                    break;
+                word.prepend(cha);
+            }
 
             if (word.isEmpty())
                 return false;
 
             const auto size = word.size();
             // simple case, if we're editing a digit like 123.0 then don't
-            // open the completion window.
+            // open the completion window. the regexp is trying to distinguish
+            // between a case like 123.0 and abc123, the latter is a valid identifier
+            // name in Lua.
             if (word[size-1].isDigit() && !word.contains(QRegExp("[a-z]")) && !word.contains(QRegExp("[A-Z]")))
+                return false;
+
+            // string concatenation operator is .. in Lua.
+            if (word[size-1] == '.')
                 return false;
 
             if (const auto* block = mParser.FindBlock(cursor.position()))
