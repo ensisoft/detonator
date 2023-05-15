@@ -923,7 +923,12 @@ void InitLuaDoc()
                                                "Returns nil if no such window object could be found.","string", "id");
 
     DOC_TABLE("game.Drawable");
-    DOC_METHOD_1("void", "SetMaterial", "Set drawable material to a material specified by its name. If no such material exists no change is done.",
+    DOC_METHOD_1("void", "SetMaterialId", "Set drawable material to a material specified by its class ID.<br>"
+                                          "Remember that you most likely also want to reset the material time, active texture map and clear any previous uniforms.",
+                 "string", "id");
+    DOC_METHOD_1("bool", "SetMaterial", "Set drawable material to a material specified by its name. If no such material exists no change is done."
+                                        "Returns true on success or false on failure."
+                                        "Remember that you most likely also want to reset the material time, active texture map and clear any previous uniforms.",
                  "string", "name");
     DOC_METHOD_1("void", "SetMaterial", "Set drawable item material to a new material class. The class object must be a valid object.",
                  "gfx.MaterialClass", "material");
@@ -952,6 +957,8 @@ void InitLuaDoc()
     DOC_METHOD_1("void", "DeleteUniform", "Delete the given material parameter (shader uniform) value.<br>"
                                           "After the value has been removed the parameter will use the default value defined in the material.",
                  "string", "name");
+    DOC_METHOD_0("void", "ClearUniforms", "Clear all previously set uniforms from the drawable item.<br>"
+                                          "You likely want to do this after having change the material ID.");
     DOC_METHOD_0("bool", "HasMaterialTimeAdjustment", "Check whether the drawable item has a pending material time adjustment.");
     DOC_METHOD_1("void", "AdjustMaterialTime", "Adjust the material time to the given value on the next renderer update.",
                  "float", "time");
