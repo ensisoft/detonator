@@ -1335,7 +1335,7 @@ bool EntityClass::FromJson(const data::Reader& data)
         auto klass = std::make_shared<EntityNodeClass>();
         mNodes.push_back(klass);
         if (!klass->FromJson(*chunk)) {
-            WARN("Failed to load entity class node. [entity=%1', node='%1']", mName, klass->GetName());
+            WARN("Failed to load entity class node completely. [entity=%1', node='%1']", mName, klass->GetName());
             ok = false;
         }
     }
@@ -1345,7 +1345,7 @@ bool EntityClass::FromJson(const data::Reader& data)
         auto klass = std::make_shared<AnimationClass>();
         mAnimations.push_back(klass);
         if (!klass->FromJson(*chunk)) {
-            WARN("Failed to load entity animation track. [entity='%1', animation='%2']", mName, klass->GetName());
+            WARN("Failed to load entity animation track completely. [entity='%1', animation='%2']", mName, klass->GetName());
             ok = false;
         }
     }
@@ -1354,7 +1354,7 @@ bool EntityClass::FromJson(const data::Reader& data)
         const auto& chunk = data.GetReadChunk("vars", i);
         auto var = std::make_shared<ScriptVar>();
         if (!var->FromJson(*chunk)) {
-            WARN("Failed to load entity script variable. [entity='%1', var='%2']", mName, var->GetName());
+            WARN("Failed to load entity script variable completely. [entity='%1', var='%2']", mName, var->GetName());
             ok = false;
         } else mScriptVars.push_back(var);
     }
