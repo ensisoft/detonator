@@ -28,6 +28,12 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="maximumSize">
+        <size>
+         <width>350</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="title">
         <string>Base properties</string>
        </property>
@@ -236,6 +242,12 @@
      </item>
      <item>
       <widget class="QGroupBox" name="groupBox_4">
+       <property name="maximumSize">
+        <size>
+         <width>350</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="title">
         <string>Scene properties</string>
        </property>
@@ -265,8 +277,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>340</width>
-             <height>814</height>
+             <width>334</width>
+             <height>841</height>
             </rect>
            </property>
            <property name="maximumSize">
@@ -982,6 +994,12 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>350</width>
+         <height>16777215</height>
+        </size>
        </property>
        <property name="title">
         <string>View transform</string>
