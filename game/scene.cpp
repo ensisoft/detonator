@@ -1612,10 +1612,16 @@ void Scene::Rebuild()
         {
             if (mIndex)
             {
-                const auto xpos   = mLeft;
-                const auto ypos   = mTop;
-                const auto width  = mRight - mLeft;
-                const auto height = mBottom - mTop;
+                // because of numerical stability with floats (precision loss)
+                // we're going to artificially enlarge the spatial rectangle little
+                // bit to make sure that all the spatial node rects will be enclosed
+                // inside the main rect.
+                // Todo: using a hard coded value here, the scale of the adjustment
+                // should depend on scale of the floats min/max themselves.
+                const auto xpos   = mLeft - 1.0;
+                const auto ypos   = mTop -1.0;
+                const auto width  = mRight - mLeft + 2.0f;
+                const auto height = mBottom - mTop + 2.0f;
                 mIndex->Insert(FRect(xpos, ypos, width, height), mItems);
             }
         }
