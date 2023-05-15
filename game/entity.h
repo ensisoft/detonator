@@ -655,6 +655,8 @@ namespace game
                 return std::get_if<T>(ptr);
             return nullptr;
         }
+        void ClearMaterialParams() noexcept
+        { mMaterialParams.clear(); }
         void DeleteMaterialParam(const std::string& name) noexcept
         { mMaterialParams.erase(name); }
         void SetActiveTextureMap(std::string id) noexcept
