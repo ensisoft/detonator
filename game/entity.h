@@ -618,6 +618,15 @@ namespace game
         { mInstanceFlags.set(flag, on_off); }
         void SetTimeScale(float scale) noexcept
         { mInstanceTimeScale = scale; }
+        // When you set the material ID to another material remember
+        // to consider whether you should also
+        // - clear the material uniforms (parameters)
+        // - reset the material time
+        // - reset the active texture map ID.
+        // You likely should do all of the above and the reason why they
+        // aren't done automatically is because then doing things in a
+        // different order would create another bug setting material ID
+        // would accidentally destroy other previsouly set state.
         void SetMaterialId(std::string id) noexcept
         { mMaterialId = std::move(id); }
         void SetMaterialParam(const std::string& name, const MaterialParam& value)
