@@ -3125,6 +3125,7 @@ void BindGameLib(sol::state& L)
     };
     drawable["HasUniform"]    = &DrawableItem::HasMaterialParam;
     drawable["DeleteUniform"] = &DrawableItem::DeleteMaterialParam;
+    drawable["ClearUniforms"]  = &DrawableItem::ClearMaterialParams;
     drawable["AdjustMaterialTime"]        = &DrawableItem::AdjustMaterialTime;
     drawable["HasMaterialTimeAdjustment"] = &DrawableItem::HasMaterialTimeAdjustment;
     drawable["GetMaterialTime"]    = &DrawableItem::GetCurrentMaterialTime;
