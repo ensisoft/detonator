@@ -140,7 +140,7 @@ namespace gui
         void on_btnEditAnimator_clicked();
         void on_btnViewPlus90_clicked();
         void on_btnViewMinus90_clicked();
-        void on_btnResetTransform_clicked();
+        void on_btnViewReset_clicked();
         void on_btnNewTrack_clicked();
         void on_btnEditTrack_clicked();
         void on_btnDeleteTrack_clicked();
@@ -310,8 +310,10 @@ namespace gui
         PlayState mPlayState = PlayState::Stopped;
         double mCurrentTime = 0.0;
         double mEntityTime   = 0.0;
-        double mViewTransformStartTime = 0.0;
+        double mViewRotationStartTime = 0.0;
+        double mViewTranslationStartTime = 0.0;
         float mViewTransformRotation = 0.0f;
+        glm::vec2 mViewTranslationStart = {0.0f, 0.0f};
         bool mCameraWasLoaded = false;
         // map animator to some properties
         std::unordered_map<std::string, QVariantMap> mAnimatorProperties;
