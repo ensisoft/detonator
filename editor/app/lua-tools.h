@@ -104,6 +104,9 @@ namespace app
         const CodeBlock& GetBlock(size_t index) const
         { return mBlocks[index]; }
 
+        const bool HasParseState() const noexcept
+        { return mTree != nullptr; }
+
         LuaParser& operator=(const LuaParser&) = delete;
     private:
         void ConsumeTree(TSTree* ast);

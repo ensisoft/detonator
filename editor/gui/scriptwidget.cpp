@@ -281,6 +281,12 @@ public:
     }
     void EditSource(QTextDocument& document, uint32_t position, uint32_t chars_removed, uint32_t chars_added)
     {
+        if (!mParser.HasParseState())
+        {
+            ParseSource(document);
+            return;
+        }
+
         QString current = document.toPlainText();
         app::LuaParser::Edit edit;
         edit.position = position;
