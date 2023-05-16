@@ -127,7 +127,7 @@ LuaParser::~LuaParser()
         ts_parser_delete(mParser);
 }
 
-const LuaParser::CodeBlock* LuaParser::FindBlock(uint32_t position) const noexcept
+const LuaParser::SyntaxBlock* LuaParser::FindBlock(uint32_t position) const noexcept
 {
     // find first highlight with starting position equal or greater than position
     auto it = std::lower_bound(mBlocks.begin(), mBlocks.end(), position,
@@ -215,7 +215,7 @@ bool LuaParser::ParseSource(const QString& source)
     if (tree == nullptr)
         return false;
 
-    ConsumeTree(tree);
+    ConsumeTree(source, tree);
     FindBuiltins(source);
 
     if (mTree)
@@ -269,7 +269,7 @@ void LuaParser::EditSource(const Edit& edit)
     ts_tree_edit(mTree, &ts_edit);
 }
 
-void LuaParser::ConsumeTree(TSTree* ast)
+void LuaParser::ConsumeTree(const QString& source, TSTree* ast)
 {
     // S expressions
 
@@ -456,39 +456,44 @@ void LuaParser::ConsumeTree(TSTree* ast)
         //const auto bleh = narrow.substr(start, length);
         //printf("%-20s pattern=%d\tcapture=%d\tstart=%d\tlen=%d\n", bleh.c_str(), pattern, capture_index, start, length);
 
-        CodeBlock block;
-        block.type   = BlockType::Keyword;
+        SyntaxBlock block;
+        block.type   = LuaSyntax::Keyword;
         block.start  = start;
         block.length = length;
         if (pattern == 0 || pattern == 1 || pattern == 12)
-            block.type = BlockType::Keyword;
+            block.type = LuaSyntax::Keyword;
         else if (pattern == 2)
-            block.type = BlockType::Comment;
+            block.type = LuaSyntax::Comment;
         else if (pattern == 3)
-            block.type = BlockType::FunctionCall;
+            block.type = LuaSyntax::FunctionCall;
         else if (pattern == 4)
-            block.type = BlockType::FunctionCall;
+            block.type = LuaSyntax::FunctionCall;
         else if (pattern == 5)
-            block.type = BlockType ::MethodCall;
+            block.type = LuaSyntax ::MethodCall;
         else if (pattern == 6)
-            block.type = BlockType::Property;
+        {
+            // kludge for not matching table.Function() as a property
+            if (end < source.size() && source[end] == '(')
+                continue;
+            block.type = LuaSyntax::Property;
+        }
         else if (pattern == 7)
-            block.type = BlockType::FunctionBody;
+            block.type = LuaSyntax::FunctionBody;
         else if (pattern == 8)
-            block.type = BlockType::Literal;
+            block.type = LuaSyntax::Literal;
         else if (pattern == 9)
-            block.type = BlockType::Punctuation;
+            block.type = LuaSyntax::Punctuation;
         else if (pattern == 10)
-            block.type = BlockType::Bracket;
+            block.type = LuaSyntax::Bracket;
         else if (pattern == 11)
-            block.type = BlockType::Operator;
+            block.type = LuaSyntax::Operator;
         else BUG("Missing capture branch.");
 
         // lower bound returns an iterator pointing to a first value in the range
         // such that the contained value is equal or greater than searched value
         // or end() when no such value is found.
         auto it = std::lower_bound(mBlocks.begin(), mBlocks.end(), start,
-             [](const CodeBlock& other, uint32_t start) {
+             [](const SyntaxBlock& other, uint32_t start) {
                  return other.start < start;
         });
         mBlocks.insert(it, block);
@@ -511,11 +516,11 @@ void LuaParser::FindBuiltins(const QString& source)
     };
     for (auto& block : mBlocks)
     {
-        if (block.type != BlockType::FunctionCall)
+        if (block.type != LuaSyntax::FunctionCall)
             continue;
         const auto& name = source.mid((int)block.start, (int)block.length);
         if (base::Contains(builtin_functions, name))
-            block.type = BlockType::BuiltIn;
+            block.type = LuaSyntax::BuiltIn;
     }
 }
 

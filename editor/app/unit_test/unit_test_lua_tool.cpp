@@ -51,13 +51,25 @@ const char* Str(app::LuaTheme::Key key) {
     return "???";
 }
 
+const app::LuaParser::SyntaxBlock* FindBlock(const app::LuaParser& p, const QString& code, const QString& key)
+{
+    for (size_t i=0; i<p.GetNumBlocks(); ++i)
+    {
+        const auto& block = p.GetBlock(i);
+        const auto& tmp = code.mid(block.start, block.length);
+        if (tmp == key)
+            return &block;
+    }
+    static app::LuaParser::SyntaxBlock fallback;
+    fallback.type = app::LuaSyntax::Other;
+    return &fallback;
+}
+
 void unit_test_keywords()
 {
-    QTextDocument doc;
-
     app::LuaParser p;
 
-    const char* code = R"(
+    const QString code = R"(
 require('kek')
 
 -- comment line
@@ -76,8 +88,8 @@ function SomeFunction()
    local meh = foo.property
    local huh = foo.other.property
 
-   foo.property = 123
-   foo.other.property = 333
+   foo.property = 45
+   foo.other_prop.property2 = 333
 
    if a and b then
       print('a+b')
@@ -118,15 +130,64 @@ end
     )";
     p.ParseSource(code);
 
-    for (unsigned i=0; i<p.GetNumBlocks(); ++i)
+    // debug
+    /*
     {
-        const auto& hilight = p.GetBlock(i);
-        const char* beg = code + hilight.start;
-        const char* end = code + hilight.start + hilight.length;
-        const std::string str(beg, end);
-        printf("%-20s %-20s start=%d\tlen=%d\n", Str(hilight.type), str.c_str(), hilight.start, hilight.length);
-    }
+        const auto& str = code.toStdString();
+        const auto* ptr = str.c_str();
 
+        for (unsigned i = 0; i < p.GetNumBlocks(); ++i)
+        {
+            const auto& hilight = p.GetBlock(i);
+            const char* beg = ptr + hilight.start;
+            const char* end = ptr + hilight.start + hilight.length;
+            const std::string str(beg, end);
+            printf("%-20s %-20s start=%d\tlen=%d\n", Str(hilight.type), str.c_str(), hilight.start, hilight.length);
+        }
+    }
+     */
+
+    TEST_CHECK(FindBlock(p, code, "require")->type == app::LuaSyntax::BuiltIn);
+    TEST_CHECK(FindBlock(p, code, "'kek'")->type == app::LuaSyntax::Literal);
+    TEST_CHECK(FindBlock(p, code, "-- comment line")->type == app::LuaSyntax::Comment);
+    TEST_CHECK(FindBlock(p, code, "--[[ a comment ]]")->type == app::LuaSyntax::Comment);
+    TEST_CHECK(FindBlock(p, code, "SomeFunction")->type == app::LuaSyntax::FunctionBody);
+    TEST_CHECK(FindBlock(p, code, "local")->type == app::LuaSyntax::Keyword); // multiple
+    TEST_CHECK(FindBlock(p, code, "123")->type == app::LuaSyntax::Literal);
+    TEST_CHECK(FindBlock(p, code, "'jeesus ajaa mopolla'")->type == app::LuaSyntax::Literal);
+    TEST_CHECK(FindBlock(p, code, "1.0")->type == app::LuaSyntax::Literal);
+    TEST_CHECK(FindBlock(p, code, "true")->type == app::LuaSyntax::Literal);
+    TEST_CHECK(FindBlock(p, code, "nil")->type == app::LuaSyntax::Literal);
+    TEST_CHECK(FindBlock(p, code, "property")->type == app::LuaSyntax::Property);
+    TEST_CHECK(FindBlock(p, code, "45")->type == app::LuaSyntax::Literal);
+    TEST_CHECK(FindBlock(p, code, "other_prop")->type == app::LuaSyntax::Property);
+    // todo fix this
+    //TEST_REQUIRE(FindBlock(p, code, "property2")->type == app::LuaSyntax::Property);
+    TEST_CHECK(FindBlock(p, code, "if")->type == app::LuaSyntax::Keyword);
+    TEST_CHECK(FindBlock(p, code, "and")->type == app::LuaSyntax::Keyword);
+    TEST_CHECK(FindBlock(p, code, "then")->type == app::LuaSyntax::Keyword);
+    TEST_CHECK(FindBlock(p, code, "print")->type == app::LuaSyntax::BuiltIn);
+    TEST_CHECK(FindBlock(p, code, "'a+b'")->type == app::LuaSyntax::Literal);
+    TEST_CHECK(FindBlock(p, code, "elseif")->type == app::LuaSyntax::Keyword);
+    TEST_CHECK(FindBlock(p, code, "else")->type == app::LuaSyntax::Keyword);
+    TEST_CHECK(FindBlock(p, code, "end")->type == app::LuaSyntax::Keyword);
+    TEST_CHECK(FindBlock(p, code, "while")->type == app::LuaSyntax::Keyword);
+    TEST_CHECK(FindBlock(p, code, "do")->type == app::LuaSyntax::Keyword);
+    TEST_CHECK(FindBlock(p, code, "break")->type == app::LuaSyntax::Keyword);
+    TEST_CHECK(FindBlock(p, code, "for")->type == app::LuaSyntax::Keyword);
+    TEST_CHECK(FindBlock(p, code, "assert")->type == app::LuaSyntax::BuiltIn);
+    TEST_CHECK(FindBlock(p, code, "MyFunction1")->type == app::LuaSyntax::FunctionCall);
+    TEST_CHECK(FindBlock(p, code, "MyFunction2")->type == app::LuaSyntax::FunctionCall);
+    TEST_CHECK(FindBlock(p, code, "MyTableMethod3")->type == app::LuaSyntax::FunctionCall);
+    TEST_CHECK(FindBlock(p, code, "MyTableMethod4")->type == app::LuaSyntax::FunctionCall);
+    TEST_CHECK(FindBlock(p, code, "333")->type == app::LuaSyntax::Literal);
+    TEST_CHECK(FindBlock(p, code, "Method5_1")->type == app::LuaSyntax::FunctionCall);
+    TEST_CHECK(FindBlock(p, code, "Method5_2")->type == app::LuaSyntax::FunctionCall);
+    TEST_CHECK(FindBlock(p, code, "Method6_1")->type == app::LuaSyntax::MethodCall);
+    TEST_CHECK(FindBlock(p, code, "Method6_2")->type == app::LuaSyntax::MethodCall);
+    TEST_CHECK(FindBlock(p, code, "MyObjectMethod7")->type == app::LuaSyntax::MethodCall);
+    TEST_CHECK(FindBlock(p, code, "MyObjectMethod8")->type == app::LuaSyntax::MethodCall);
+    TEST_CHECK(FindBlock(p, code, "return")->type == app::LuaSyntax::Keyword);
 }
 
 int test_main(int argc, char* argv[])

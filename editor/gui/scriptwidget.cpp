@@ -124,8 +124,8 @@ public:
 
             if (const auto* block = mParser.FindBlock(cursor.position()))
             {
-                if (block->type == app::LuaCodeBlockType::Comment ||
-                    block->type == app::LuaCodeBlockType::Literal)
+                if (block->type == app::LuaSyntax::Comment ||
+                    block->type == app::LuaSyntax::Literal)
                     return false;
             }
 
