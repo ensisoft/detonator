@@ -31,7 +31,7 @@
 
 namespace app
 {
-    enum class LuaCodeBlockType {
+    enum class LuaSyntax {
         Keyword,
         Literal,
         BuiltIn,
@@ -53,7 +53,7 @@ namespace app
         enum class Theme {
             Monokai
         };
-        using Key = LuaCodeBlockType;
+        using Key = LuaSyntax;
 
         void SetTheme(Theme theme);
 
@@ -65,10 +65,10 @@ namespace app
     class LuaParser
     {
     public:
-        using BlockType = LuaCodeBlockType;
+        using LuaSyntax = app::LuaSyntax;
 
-        struct CodeBlock {
-            BlockType type = BlockType::Other;
+        struct SyntaxBlock {
+            LuaSyntax type = LuaSyntax::Other;
             // character position of the highlight in the current document.
             uint32_t start = 0;
             // length of the highlight in characters
@@ -93,26 +93,26 @@ namespace app
 
         void EditSource(const Edit& edit);
 
-        const CodeBlock* FindBlock(uint32_t text_position) const noexcept;
+        const SyntaxBlock* FindBlock(uint32_t text_position) const noexcept;
 
-        using BlockList = std::vector<CodeBlock>;
+        using BlockList = std::vector<SyntaxBlock>;
 
         BlockList FindBlocks(uint32_t text_position, uint32_t text_length) const noexcept;
 
-        size_t GetNumBlocks() const
+        inline size_t GetNumBlocks() const noexcept
         { return mBlocks.size(); }
-        const CodeBlock& GetBlock(size_t index) const
-        { return mBlocks[index]; }
+        inline const SyntaxBlock& GetBlock(size_t index) const noexcept
+        { return base::SafeIndex(mBlocks, index); }
 
-        const bool HasParseState() const noexcept
+        inline const bool HasParseState() const noexcept
         { return mTree != nullptr; }
 
         LuaParser& operator=(const LuaParser&) = delete;
     private:
-        void ConsumeTree(TSTree* ast);
+        void ConsumeTree(const QString& source, TSTree* ast);
         void FindBuiltins(const QString& source);
     private:
-        std::vector<CodeBlock> mBlocks;
+        std::vector<SyntaxBlock> mBlocks;
     private:
         TSParser* mParser = nullptr;
         TSQuery* mQuery = nullptr;

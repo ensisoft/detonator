@@ -77,6 +77,13 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # in case of using something like Ninja we need this explicitly.
     # https://medium.com/@alasher/colored-c-compiler-output-with-ninja-clang-gcc-10bfe7f2b949
     add_compile_options(-fdiagnostics-color=always)
+    # globally enable address sanitizing here
+    #add_link_options(-fsanitize=address)
+
+    # iterator debugging. otherwise it's also possible to use the debug containers
+    # https://gcc.gnu.org/onlinedocs/libstdc++/manual/debug_mode_using.html#debug_mode.using.specific
+    #add_compile_definitions(-D_GLIBCXX_DEBUG)
+
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     message(STATUS "Building with MSVC")
     # /wd4251 Qt dll interface crap
