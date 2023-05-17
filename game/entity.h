@@ -1683,6 +1683,8 @@ namespace game
         { return mIdleTrackId; }
         const std::string& GetName() const noexcept
         { return mName; }
+        const std::string& GetClassName() const noexcept
+        { return mName; }
         const std::string& GetTag() const noexcept
         { return mTag; }
         const std::string& GetScriptFileId() const noexcept

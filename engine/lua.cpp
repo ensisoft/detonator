@@ -689,7 +689,7 @@ sol::object GetScriptVar(Type& object, const char* key, sol::this_state state, s
     sol::state_view lua(state);
     const ScriptVar* var = object.FindScriptVarByName(key);
     if (!var)
-        throw GameError(base::FormatString("No such variable: '%1'", key));
+        throw GameError(base::FormatString("No such variable: '%1' in '%2'", key, object.GetClassName()));
     if (var->IsPrivate())
     {
         // looks like a sol2 bug. this_env is sometimes nullopt!
@@ -699,7 +699,7 @@ sol::object GetScriptVar(Type& object, const char* key, sol::this_state state, s
             sol::environment& environment(this_env);
             const std::string script_id = environment["__script_id__"];
             if (object.GetScriptFileId() != script_id)
-                throw GameError(base::FormatString("Trying to access private variable: '%1'", key));
+                throw GameError(base::FormatString("Trying to access private variable: '%1' in '%2'", key, object.GetClassName()));
         }
     }
 
@@ -724,7 +724,7 @@ void SetScriptVar(Type& object, const char* key, sol::object value, sol::this_st
     using namespace engine;
     const ScriptVar* var = object.FindScriptVarByName(key);
     if (var == nullptr)
-        throw GameError(base::FormatString("No such variable: '%1'", key));
+        throw GameError(base::FormatString("No such variable '%1' in '%2' ", key, object.GetClassName()));
     else if (var->IsReadOnly())
         throw GameError(base::FormatString("Trying to write to a read only variable: '%1'", key));
     else if (var->IsPrivate())
@@ -736,7 +736,7 @@ void SetScriptVar(Type& object, const char* key, sol::object value, sol::this_st
             sol::environment& environment(this_env);
             const std::string script_id = environment["__script_id__"];
             if (object.GetScriptFileId() != script_id)
-                throw GameError(base::FormatString("Trying to access private variable: '%1'", key));
+                throw GameError(base::FormatString("Trying to access private variable: '%1' in '%2'", key, object.GetClassName()));
         }
     }
 
@@ -2180,7 +2180,7 @@ sol::object LuaRuntime::CallCrossEnvMethod(sol::object object, const std::string
     if (!result.valid())
     {
         const sol::error err = result;
-        throw GameError(base::FormatString("CallMethod method '%1' failed. %2", method, err.what()));
+        throw GameError(base::FormatString("CallMethod '%1' failed. %2", method, err.what()));
     }
     // todo: how to return any number of return values ?
     if (result.return_count() == 1)
