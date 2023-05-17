@@ -419,6 +419,8 @@ namespace game
         // Get the human-readable name of the class.
         const std::string& GetName() const noexcept
         { return mName; }
+        const std::string& GetClassName() const noexcept
+        { return mName; }
         // Get the associated script file ID.
         const std::string& GetScriptFileId() const noexcept
         { return mScriptFile; }
