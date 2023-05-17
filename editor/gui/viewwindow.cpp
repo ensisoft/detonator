@@ -174,6 +174,10 @@ void ViewWindow::on_btnDemoDerp_clicked()
 {
     LoadDemoWorkspace("starter/derp/workspace.json");
 }
+void ViewWindow::on_btnDemoCharacter_clicked()
+{
+    LoadDemoWorkspace("demos/character/workspace.json");
+}
 
 void ViewWindow::on_btnSelectFile_clicked()
 {

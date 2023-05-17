@@ -1,0 +1,23 @@
+
+{
+  "uniforms": [
+     {
+        "type": "Float",
+        "name": "kValue",
+        "desc": "Value",
+        "value": 0.5
+     },
+     {
+        "type": "Color",
+        "name": "kFColor",
+        "desc": "Foreground Color"
+     },
+     {
+        "type": "Color",
+        "name": "kBColor",
+        "desc": "Background Color"
+     }
+  ],
+  "maps": [
+  ]
+}

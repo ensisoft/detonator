@@ -168,6 +168,7 @@ namespace gui
         void on_btnDemoPlayground_clicked();
         void on_btnDemoUI_clicked();
         void on_btnDemoDerp_clicked();
+        void on_btnDemoCharacter_clicked();
         void on_btnMaterial_clicked();
         void on_btnParticle_clicked();
         void on_btnShape_clicked();
