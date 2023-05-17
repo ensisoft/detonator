@@ -1,0 +1,17 @@
+{
+  "color_space": "Linear",
+  "image_file": "BODY_animation.png",
+  "image_height": 64,
+  "image_width": 512,
+  "json_version": 1,
+  "made_with_app": "DETONATOR 2D",
+  "made_with_ver": "rel-???",
+  "mag_filter": "Nearest",
+  "min_filter": "Default",
+  "premulalpha_blend": false,
+  "premultiply_alpha": false,
+  "tile_height": 64,
+  "tile_width": 64,
+  "xoffset": 0,
+  "yoffset": 0
+}

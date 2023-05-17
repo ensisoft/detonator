@@ -1,0 +1,6066 @@
+{
+  "entities": [
+    {
+      "animators": [
+        {
+          "id": "LLpPNnW7Up",
+          "initial_state": "NyoiMIp6ms",
+          "name": "My Animator",
+          "script_id": "DFRO8f967k",
+          "states": [
+            {
+              "id": "NDKGyBbExx",
+              "name": "Running"
+            },
+            {
+              "id": "NyoiMIp6ms",
+              "name": "Idle"
+            }
+          ],
+          "transitions": [
+            {
+              "dst_state_id": "NyoiMIp6ms",
+              "duration": 0.0,
+              "id": "U99KpBiEUN",
+              "name": "",
+              "src_state_id": "NDKGyBbExx"
+            },
+            {
+              "dst_state_id": "NDKGyBbExx",
+              "duration": 0.0,
+              "id": "wBJXvKbIiQ",
+              "name": "",
+              "src_state_id": "NyoiMIp6ms"
+            }
+          ]
+        }
+      ],
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": true,
+        "WantsMouseEvents": false
+      },
+      "id": "UdhtSlNfiN",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "8-dir-char-template/Dummy",
+      "nodes": [
+        {
+          "class": "bRJsbUq08P",
+          "drawable_item": {
+            "drawable": "_rect",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "t1YfjyevnO",
+            "material_params": [
+              {
+                "name": "active_texture_map",
+                "value": "9MbuYRL6P9"
+              }
+            ],
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": -50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 100.0,
+            "y": 100.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "jDW6aXJ5PZ",
+          "drawable_item": {
+            "drawable": "ZOW84mNSWm",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "_Red",
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Arrow",
+          "position": {
+            "x": 29.444744110107422,
+            "y": 1.052642822265625
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 63.2599983215332,
+            "y": 31.8799991607666
+          },
+          "tag": ""
+        },
+        {
+          "class": "SG6PkNuB9h",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Pointer",
+          "position": {
+            "x": 1.5,
+            "y": 62.5
+          },
+          "rotation": 1.5707963705062866,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 30.0,
+            "y": 30.0
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "node": {
+                      "id": "jDW6aXJ5PZ"
+                    }
+                  }
+                ],
+                "node": {
+                  "id": "SG6PkNuB9h"
+                }
+              }
+            ],
+            "node": {
+              "id": "bRJsbUq08P"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "UdhtSlNfiN",
+      "resource_name": "8-dir-char-template/Dummy",
+      "script_file": "KHnqtB85vy",
+      "tag": ""
+    },
+    {
+      "animators": [
+        {
+          "id": "ZgT9qKps6b",
+          "initial_state": "Zqve6DOvh1",
+          "name": "My Animator",
+          "script_id": "7lLEJ9i9vM",
+          "states": [
+            {
+              "id": "6FJhzdZKS3",
+              "name": "Dead"
+            },
+            {
+              "id": "EWkuBJIenK",
+              "name": "Attack"
+            },
+            {
+              "id": "QshKX68fjT",
+              "name": "Walking"
+            },
+            {
+              "id": "Zqve6DOvh1",
+              "name": "Idle"
+            }
+          ],
+          "transitions": [
+            {
+              "dst_state_id": "6FJhzdZKS3",
+              "duration": 0.0,
+              "id": "iSRBkUNaPz",
+              "name": "",
+              "src_state_id": "Zqve6DOvh1"
+            },
+            {
+              "dst_state_id": "Zqve6DOvh1",
+              "duration": 0.0,
+              "id": "2WCte8hltO",
+              "name": "",
+              "src_state_id": "EWkuBJIenK"
+            },
+            {
+              "dst_state_id": "EWkuBJIenK",
+              "duration": 0.0,
+              "id": "ZYrJiUu1GJ",
+              "name": "",
+              "src_state_id": "Zqve6DOvh1"
+            },
+            {
+              "dst_state_id": "QshKX68fjT",
+              "duration": 0.0,
+              "id": "uLqRIQOx46",
+              "name": "",
+              "src_state_id": "Zqve6DOvh1"
+            },
+            {
+              "dst_state_id": "Zqve6DOvh1",
+              "duration": 0.0,
+              "id": "ZhsaCTXewp",
+              "name": "",
+              "src_state_id": "QshKX68fjT"
+            }
+          ]
+        }
+      ],
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": true,
+        "WantsMouseEvents": true
+      },
+      "id": "69nkia7uBG",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "LPC/Character/Human",
+      "nodes": [
+        {
+          "class": "s6vk1lnag9",
+          "drawable_item": {
+            "drawable": "_circle",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "_Black",
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Entity",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 63.579246520996094,
+            "y": 18.591659545898438
+          },
+          "tag": "#prop"
+        },
+        {
+          "class": "twJ4I5Q7kK",
+          "drawable_item": {
+            "drawable": "_rect",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "f85ZCt9KqW",
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 3.5,
+            "y": -57.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 128.0,
+            "y": 128.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "eg9rhBamyt",
+          "drawable_item": {
+            "drawable": "_rect",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "2ohLK3pIux",
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Garb",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 128.0,
+            "y": 128.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "LWhWAOSjyx",
+          "drawable_item": {
+            "drawable": "_rect",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 2,
+            "linewidth": 1.0,
+            "material": "LLq889I6UO",
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Weapon",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 128.0,
+            "y": 128.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "0hLkkYFQPJ",
+          "drawable_item": {
+            "drawable": "_capsule",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "_Black",
+            "material_params": [
+              {
+                "name": "kBaseColor",
+                "value": {
+                  "a": 0.3843137323856354,
+                  "b": 0.0,
+                  "g": 0.0,
+                  "r": 0.04080262407660484
+                }
+              }
+            ],
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Hello",
+          "position": {
+            "x": 195.2354736328125,
+            "y": -215.92538452148438
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 418.7599792480469,
+            "y": 322.6199951171875
+          },
+          "tag": "#prop",
+          "text_item": {
+            "flags": {
+              "BlinkText": false,
+              "PP_EnableBloom": true,
+              "StaticContent": false,
+              "UnderlineText": false,
+              "VisibleInGame": true
+            },
+            "font_name": "app://fonts/Schoolbell.ttf",
+            "font_size": 36,
+            "horizontal_align": "Center",
+            "layer": 1,
+            "line_height": 1.0,
+            "raster_height": 0,
+            "raster_width": 0,
+            "text": "Hello,\nclick somewhere to walk\n",
+            "text_color": {
+              "a": 1.0,
+              "b": 0.330495148897171,
+              "g": 0.38727396726608276,
+              "r": 0.920851469039917
+            },
+            "vertical_align": "Center"
+          }
+        },
+        {
+          "class": "sXZ285TbuM",
+          "drawable_item": {
+            "drawable": "_rect",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "r7XlZHD5We",
+            "material_params": [
+              {
+                "name": "kValue",
+                "value": 1.0
+              }
+            ],
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Health",
+          "position": {
+            "x": 2.8846092224121094,
+            "y": -111.88461303710938
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 89.70220947265625,
+            "y": 9.8958740234375
+          },
+          "tag": "#prop"
+        },
+        {
+          "class": "EDSEr5TLWp",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "HitBody",
+          "position": {
+            "x": 1.9999961853027344,
+            "y": -46.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 32.90999984741211,
+            "y": 82.91999816894531
+          },
+          "spatial_node": {
+            "flags": {
+              "Enabled": true,
+              "ReportOverlap": false
+            },
+            "shape": "AABB"
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "node": {
+                      "id": "eg9rhBamyt"
+                    }
+                  },
+                  {
+                    "node": {
+                      "id": "LWhWAOSjyx"
+                    }
+                  }
+                ],
+                "node": {
+                  "id": "twJ4I5Q7kK"
+                }
+              },
+              {
+                "node": {
+                  "id": "0hLkkYFQPJ"
+                }
+              },
+              {
+                "node": {
+                  "id": "sXZ285TbuM"
+                }
+              },
+              {
+                "node": {
+                  "id": "EDSEr5TLWp"
+                }
+              }
+            ],
+            "node": {
+              "id": "s6vk1lnag9"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "69nkia7uBG",
+      "resource_name": "LPC/Character/Human",
+      "script_file": "J4xx3ThJjX",
+      "tag": "",
+      "vars": [
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
+          "id": "xbU25loyhE",
+          "name": "direction",
+          "vec2s": [
+            {
+              "object": {
+                "x": 0.0,
+                "y": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": true
+          },
+          "id": "kgd335Th7p",
+          "name": "garb",
+          "strings": [
+            "Shirt+Pants"
+          ]
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": true
+          },
+          "id": "Y3QrnnKayi",
+          "name": "race",
+          "strings": [
+            "Human"
+          ]
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
+          "id": "CztweeoJ1d",
+          "name": "weapon",
+          "strings": [
+            "Spear"
+          ]
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
+          "id": "dyXnsSl2Wv",
+          "name": "velocity",
+          "vec2s": [
+            {
+              "object": {
+                "x": 0.0,
+                "y": 0.0
+              }
+            }
+          ]
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
+          "id": "9HzkTXr6rB",
+          "name": "walk_vector",
+          "vec2s": [
+            {
+              "object": {
+                "x": 0.0,
+                "y": 0.0
+              }
+            }
+          ]
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
+          "id": "pv8827u6k1",
+          "name": "walk_distance",
+          "vec2s": [
+            {
+              "object": {
+                "x": 0.0,
+                "y": 0.0
+              }
+            }
+          ]
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": true
+          },
+          "floats": [
+            200.0
+          ],
+          "id": "sl8SASTvib",
+          "name": "walk_speed"
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
+          "floats": [
+            1.0
+          ],
+          "id": "oWPAKrtuZu",
+          "name": "health"
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "AWExQiuWgf",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "LPC/Prop/Arrow",
+      "nodes": [
+        {
+          "class": "lp3EsUUTsk",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 50.0,
+            "y": 10.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "r9FDrnBXL1",
+          "drawable_item": {
+            "drawable": "_capsule",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "57djXhQN4Z",
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Arrow",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 52.25,
+            "y": 30.989999771118164
+          },
+          "tag": ""
+        },
+        {
+          "class": "l3DH0ryh1Q",
+          "drawable_item": {
+            "drawable": "_capsule",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "_Black",
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Shadow",
+          "position": {
+            "x": -0.6896514892578125,
+            "y": 46.89654541015625
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 52.120304107666016,
+            "y": 7.749683380126953
+          },
+          "tag": ""
+        },
+        {
+          "class": "jmPXbaRGqI",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Tip",
+          "position": {
+            "x": 21.010000228881836,
+            "y": 0.5099999904632568
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 5.0,
+            "y": 5.0
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "node": {
+                      "id": "jmPXbaRGqI"
+                    }
+                  }
+                ],
+                "node": {
+                  "id": "r9FDrnBXL1"
+                }
+              },
+              {
+                "node": {
+                  "id": "l3DH0ryh1Q"
+                }
+              }
+            ],
+            "node": {
+              "id": "lp3EsUUTsk"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "AWExQiuWgf",
+      "resource_name": "LPC/Prop/Arrow",
+      "script_file": "Agn7Ll853d",
+      "tag": "",
+      "vars": [
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
+          "id": "PyoyaMARRM",
+          "name": "direction",
+          "vec2s": [
+            {
+              "object": {
+                "x": 0.0,
+                "y": 0.0
+              }
+            }
+          ]
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": false
+          },
+          "floats": [
+            0.0
+          ],
+          "id": "RxuhW8iuOZ",
+          "name": "distance"
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "5FdaYIIRiM",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "LPC/Character/Combat Dummy",
+      "nodes": [
+        {
+          "class": "4RPa0LW6RA",
+          "drawable_item": {
+            "drawable": "_circle",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": -1,
+            "linewidth": 1.0,
+            "material": "_Black",
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Shadow",
+          "position": {
+            "x": -2.5,
+            "y": 51.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 87.36000061035156,
+            "y": 32.36000061035156
+          },
+          "tag": ""
+        },
+        {
+          "class": "X3GTqzIPkk",
+          "drawable_item": {
+            "drawable": "_rect",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "wrQHZ3iizg",
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 2.0,
+            "y": -65.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 128.0,
+            "y": 128.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "2YG2JES08A",
+          "drawable_item": {
+            "drawable": "_rect",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "r7XlZHD5We",
+            "material_params": [
+              {
+                "name": "kValue",
+                "value": 1.0
+              }
+            ],
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Health",
+          "position": {
+            "x": -1.5,
+            "y": -84.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 89.70220947265625,
+            "y": 9.8958740234375
+          },
+          "tag": ""
+        },
+        {
+          "class": "qH6wMtLDgr",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "HitBody",
+          "position": {
+            "x": -1.1699999570846558,
+            "y": 6.829999923706055
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 32.90999984741211,
+            "y": 82.91999816894531
+          },
+          "spatial_node": {
+            "flags": {
+              "Enabled": true,
+              "ReportOverlap": false
+            },
+            "shape": "AABB"
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "4RPa0LW6RA"
+                }
+              },
+              {
+                "node": {
+                  "id": "2YG2JES08A"
+                }
+              },
+              {
+                "node": {
+                  "id": "qH6wMtLDgr"
+                }
+              }
+            ],
+            "node": {
+              "id": "X3GTqzIPkk"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "5FdaYIIRiM",
+      "resource_name": "LPC/Character/Combat Dummy",
+      "script_file": "oaRCIQk650",
+      "tag": "",
+      "vars": [
+        {
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": false
+          },
+          "floats": [
+            1.0
+          ],
+          "id": "pu1YwjybMx",
+          "name": "health"
+        }
+      ]
+    },
+    {
+      "animators": [
+        {
+          "id": "ACiqyjSOBK",
+          "initial_state": "DTu0oujhw2",
+          "name": "My Animator",
+          "script_id": "7lLEJ9i9vM",
+          "states": [
+            {
+              "id": "DTu0oujhw2",
+              "name": "Idle"
+            },
+            {
+              "id": "QjRnk93rkS",
+              "name": "Walking"
+            },
+            {
+              "id": "90UJ2AsZsy",
+              "name": "Attack"
+            },
+            {
+              "id": "W8i3KO2bSA",
+              "name": "Dead"
+            }
+          ],
+          "transitions": [
+            {
+              "dst_state_id": "W8i3KO2bSA",
+              "duration": 0.0,
+              "id": "2WpliK9A1M",
+              "name": "",
+              "src_state_id": "90UJ2AsZsy"
+            },
+            {
+              "dst_state_id": "QjRnk93rkS",
+              "duration": 0.0,
+              "id": "othAlfk1Wr",
+              "name": "",
+              "src_state_id": "DTu0oujhw2"
+            },
+            {
+              "dst_state_id": "DTu0oujhw2",
+              "duration": 0.0,
+              "id": "39w6Uf2TZt",
+              "name": "",
+              "src_state_id": "QjRnk93rkS"
+            },
+            {
+              "dst_state_id": "90UJ2AsZsy",
+              "duration": 0.0,
+              "id": "ugX6hSA45a",
+              "name": "",
+              "src_state_id": "DTu0oujhw2"
+            },
+            {
+              "dst_state_id": "DTu0oujhw2",
+              "duration": 0.0,
+              "id": "Waaru00eg6",
+              "name": "",
+              "src_state_id": "90UJ2AsZsy"
+            },
+            {
+              "dst_state_id": "W8i3KO2bSA",
+              "duration": 0.0,
+              "id": "M5i0r7W94n",
+              "name": "",
+              "src_state_id": "QjRnk93rkS"
+            },
+            {
+              "dst_state_id": "W8i3KO2bSA",
+              "duration": 0.0,
+              "id": "htYyfiff30",
+              "name": "",
+              "src_state_id": "DTu0oujhw2"
+            }
+          ]
+        }
+      ],
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "U1XmAR70Dj",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "LPC/Character/Skeleton",
+      "nodes": [
+        {
+          "class": "gIxo4Tn7Q0",
+          "drawable_item": {
+            "drawable": "_circle",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "_Black",
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Entity",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 86.73999786376953,
+            "y": 18.8799991607666
+          },
+          "tag": "#prop"
+        },
+        {
+          "class": "Ev2HUk2eXz",
+          "drawable_item": {
+            "drawable": "_rect",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "rDpZrE3UuD",
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": -60.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 128.0,
+            "y": 128.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "pqNFaHvqyI",
+          "drawable_item": {
+            "drawable": "_rect",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "r7XlZHD5We",
+            "material_params": [
+              {
+                "name": "kValue",
+                "value": 1.0
+              }
+            ],
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Health",
+          "position": {
+            "x": -1.0,
+            "y": -113.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 89.70220947265625,
+            "y": 9.8958740234375
+          },
+          "tag": "#prop"
+        },
+        {
+          "class": "7Crfe3nh27",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "HitBody",
+          "position": {
+            "x": 0.0,
+            "y": -44.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 32.90758514404297,
+            "y": 82.92311096191406
+          },
+          "spatial_node": {
+            "flags": {
+              "Enabled": true,
+              "ReportOverlap": false
+            },
+            "shape": "AABB"
+          },
+          "tag": ""
+        },
+        {
+          "class": "I5uXgDruJd",
+          "drawable_item": {
+            "drawable": "_rect",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 2,
+            "linewidth": 1.0,
+            "material": "KnPvBZqDs4",
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Weapon",
+          "position": {
+            "x": 0.0,
+            "y": -60.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 128.0,
+            "y": 128.0
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "Ev2HUk2eXz"
+                }
+              },
+              {
+                "node": {
+                  "id": "pqNFaHvqyI"
+                }
+              },
+              {
+                "node": {
+                  "id": "7Crfe3nh27"
+                }
+              },
+              {
+                "node": {
+                  "id": "I5uXgDruJd"
+                }
+              }
+            ],
+            "node": {
+              "id": "gIxo4Tn7Q0"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "U1XmAR70Dj",
+      "resource_name": "LPC/Character/Skeleton",
+      "script_file": "JuKilpgDfP",
+      "tag": "",
+      "vars": [
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
+          "id": "2YistOLkpi",
+          "name": "velocity",
+          "vec2s": [
+            {
+              "object": {
+                "x": 0.0,
+                "y": 0.0
+              }
+            }
+          ]
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": true
+          },
+          "id": "CGzSs9TGFg",
+          "name": "race",
+          "strings": [
+            "Skeleton"
+          ]
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
+          "id": "CGT4OvtCAh",
+          "name": "direction",
+          "vec2s": [
+            {
+              "object": {
+                "x": 0.0,
+                "y": 1.0
+              }
+            }
+          ]
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
+          "id": "yEDe6gK5M3",
+          "name": "walk_vector",
+          "vec2s": [
+            {
+              "object": {
+                "x": 0.0,
+                "y": 0.0
+              }
+            }
+          ]
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
+          "id": "bFTqA9RJeW",
+          "name": "walk_distance",
+          "vec2s": [
+            {
+              "object": {
+                "x": 0.0,
+                "y": 0.0
+              }
+            }
+          ]
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": true
+          },
+          "floats": [
+            50.0
+          ],
+          "id": "WLq3tjlu1j",
+          "name": "walk_speed"
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": false
+          },
+          "floats": [
+            1.0
+          ],
+          "id": "TU4se8kSxv",
+          "name": "health"
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": false,
+            "ReadOnly": true
+          },
+          "id": "yH2PhOMBP8",
+          "name": "weapon",
+          "strings": [
+            "Dagger"
+          ]
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "HBSEmKKuug",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "LPC/Background",
+      "nodes": [
+        {
+          "class": "1deYiyAPoI",
+          "drawable_item": {
+            "drawable": "_rect",
+            "flags": {
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "jS7kGm3IkK",
+            "renderpass": "DrawColor",
+            "renderstyle": "Solid",
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 1000.0,
+            "y": 1000.0
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "1deYiyAPoI"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "HBSEmKKuug",
+      "resource_name": "LPC/Background",
+      "script_file": "",
+      "tag": ""
+    }
+  ],
+  "materials": [
+    {
+      "active_texture_map": "xyuebfaxkB",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "t1YfjyevnO",
+      "name": "8-dir-char-template/Dummy/Idle",
+      "particle_action": "None",
+      "resource_id": "t1YfjyevnO",
+      "resource_name": "8-dir-char-template/Dummy/Idle",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Nearest",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "xyuebfaxkB",
+          "looping": true,
+          "name": "West",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://8-directional-character-template/textures/IdleSheet.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "p76KQdhhim",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.125,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.75
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "kIQkqqxgwC",
+          "looping": true,
+          "name": "NorthWest",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://8-directional-character-template/textures/IdleSheet.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "FbhvxSvdKN",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.125,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.875
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "ihZsC3USHu",
+          "looping": true,
+          "name": "SouthWest",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://8-directional-character-template/textures/IdleSheet.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "6I9RBe7TNW",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.125,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.625
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "9MbuYRL6P9",
+          "looping": true,
+          "name": "South",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://8-directional-character-template/textures/IdleSheet.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "txI29n5NoE",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.125,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.5
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "sezG6d71My",
+          "looping": true,
+          "name": "SouthEast",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://8-directional-character-template/textures/IdleSheet.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "DiJe8q0oii",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.125,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.375
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "Dw4XlCPsUi",
+          "looping": true,
+          "name": "NorthEast",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://8-directional-character-template/textures/IdleSheet.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "Cb5LTAGSC9",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.125,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.125
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "gpkqv3fkUY",
+          "looping": true,
+          "name": "East",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://8-directional-character-template/textures/IdleSheet.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "LqMrQPSj4f",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.125,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.25
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "E6o4WzZk0s",
+          "looping": true,
+          "name": "North",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://8-directional-character-template/textures/IdleSheet.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "vuBgAGnNUH",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.125,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "fHy7hHWCnH",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "6UXWgkX59N",
+      "name": "8-dir-char-template/Dummy/Run",
+      "particle_action": "None",
+      "resource_id": "6UXWgkX59N",
+      "resource_name": "8-dir-char-template/Dummy/Run",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Nearest",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "sW8dXiA4q3",
+          "looping": true,
+          "name": "West",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://8-directional-character-template/textures/RunSheet.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "R66y2Klvv1",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.125,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.75
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "W7FjD2BD0M",
+          "looping": true,
+          "name": "NorthWest",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://8-directional-character-template/textures/RunSheet.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "ZXiuKBwoE0",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.125,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.875
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "yeozIu5MHg",
+          "looping": true,
+          "name": "SouthWest",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://8-directional-character-template/textures/RunSheet.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "9FAr7qfO09",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.125,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.625
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "fHy7hHWCnH",
+          "looping": true,
+          "name": "South",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://8-directional-character-template/textures/RunSheet.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "5wb6uCSKyo",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.125,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.5
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "svxNB6wI0o",
+          "looping": true,
+          "name": "SouthEast",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://8-directional-character-template/textures/RunSheet.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "uzUGfjKQDH",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.125,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.375
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "o1IqRj3Ggl",
+          "looping": true,
+          "name": "NorthEast",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://8-directional-character-template/textures/RunSheet.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "1C73RZqRsi",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.125,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.125
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "PFLMSq7dZm",
+          "looping": true,
+          "name": "East",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://8-directional-character-template/textures/RunSheet.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "y5BKIrDeDn",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.125,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.25
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "Llj6TuLTLW",
+          "looping": true,
+          "name": "North",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://8-directional-character-template/textures/RunSheet.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "fHq8z0rRay",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.125,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "MH7gkhKawG",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "f85ZCt9KqW",
+      "name": "LPC/Character/Human/Walk",
+      "particle_action": "None",
+      "resource_id": "f85ZCt9KqW",
+      "resource_name": "LPC/Character/Human/Walk",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Nearest",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "oCJfzBvvz5",
+          "looping": true,
+          "name": "East",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 9,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/human/BODY_male.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "qidYwqiHU8",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.692307710647583,
+                "x": 0.0,
+                "y": 0.523809552192688
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "MH7gkhKawG",
+          "looping": true,
+          "name": "South",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 9,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/human/BODY_male.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "4d0nmknnwe",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.692307710647583,
+                "x": 0.0,
+                "y": 0.4761904776096344
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "bEMYFsz5Be",
+          "looping": true,
+          "name": "West",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 9,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/human/BODY_male.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "IA0RWySnIU",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.692307710647583,
+                "x": 0.0,
+                "y": 0.4285714328289032
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "GxDPFpOjgo",
+          "looping": true,
+          "name": "North",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 9,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/human/BODY_male.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "ofz4tHmtEX",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.692307710647583,
+                "x": 0.0,
+                "y": 0.380952388048172
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "f6pzYOObhk",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "qiYGxNXLTv",
+      "name": "LPC/Character/Human/Slash",
+      "particle_action": "None",
+      "resource_id": "qiYGxNXLTv",
+      "resource_name": "LPC/Character/Human/Slash",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Nearest",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "42Fuf0Igro",
+          "looping": true,
+          "name": "East",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 6,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/human/BODY_male.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "riob0gsOit",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.4615384638309479,
+                "x": 0.0,
+                "y": 0.7142857313156128
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "f6pzYOObhk",
+          "looping": true,
+          "name": "South",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 6,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/human/BODY_male.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "St0JhTrBap",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.4615384638309479,
+                "x": 0.0,
+                "y": 0.6666666865348816
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "Xpro5Soqb3",
+          "looping": true,
+          "name": "West",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 6,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/human/BODY_male.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "TJvBBsMytH",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.4615384638309479,
+                "x": 0.0,
+                "y": 0.6190476417541504
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "GLaUTBnXhg",
+          "looping": true,
+          "name": "North",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 6,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/human/BODY_male.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "7O1s3Mf2D8",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.4615384638309479,
+                "x": 0.0,
+                "y": 0.5714285969734192
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "ryWzEOkGdZ",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "FSj7l9Dgwl",
+      "name": "LPC/Character/Human/Shoot",
+      "particle_action": "None",
+      "resource_id": "FSj7l9Dgwl",
+      "resource_name": "LPC/Character/Human/Shoot",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Nearest",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "8efY4kySA4",
+          "looping": true,
+          "name": "East",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 13,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/human/BODY_male.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "t2lL5AQKNx",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.9047619104385376
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "ryWzEOkGdZ",
+          "looping": true,
+          "name": "South",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 13,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/human/BODY_male.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "TaODHRQHxf",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.8571428656578064
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "EOhIQHIM02",
+          "looping": true,
+          "name": "West",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 13,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/human/BODY_male.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "mtpgf4TUMJ",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.8095238208770752
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "ehDn8dboKt",
+          "looping": true,
+          "name": "North",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 13,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/human/BODY_male.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "nOJ3iOkzua",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.761904776096344
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "jSq46irBNp",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "XOtk86rK7p",
+      "name": "LPC/Character/Human/Thrust",
+      "particle_action": "None",
+      "resource_id": "XOtk86rK7p",
+      "resource_name": "LPC/Character/Human/Thrust",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Nearest",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "hSdO1Z00ME",
+          "looping": true,
+          "name": "East",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/human/BODY_male.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "B6lrQuJhI3",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.6153846383094788,
+                "x": 0.0,
+                "y": 0.3333333432674408
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "jSq46irBNp",
+          "looping": true,
+          "name": "South",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/human/BODY_male.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "sZDEsuh23X",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.6153846383094788,
+                "x": 0.0,
+                "y": 0.2857142984867096
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "qi2qyk0sIx",
+          "looping": true,
+          "name": "West",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/human/BODY_male.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "XnJq0dMzpt",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.6153846383094788,
+                "x": 0.0,
+                "y": 0.2380952388048172
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "oBAxDr9gLy",
+          "looping": true,
+          "name": "North",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/human/BODY_male.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "jQjxFXxMfG",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.6153846383094788,
+                "x": 0.0,
+                "y": 0.190476194024086
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "5D0zYN7Fnx",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "vSNBrbf7Uu",
+      "name": "LPC/Clothing/Shirt+Pants/Thrust",
+      "particle_action": "None",
+      "resource_id": "vSNBrbf7Uu",
+      "resource_name": "LPC/Clothing/Shirt+Pants/Thrust",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Nearest",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "LtSGdiIAME",
+          "looping": true,
+          "name": "East",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/clothing/shirt_pants.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "9u6HL5JQ0Q",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.6153846383094788,
+                "x": 0.0,
+                "y": 0.3333333432674408
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "5D0zYN7Fnx",
+          "looping": true,
+          "name": "South",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/clothing/shirt_pants.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "1EbtSKaPNu",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.6153846383094788,
+                "x": 0.0,
+                "y": 0.2857142984867096
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "YHu6qqdU0K",
+          "looping": true,
+          "name": "West",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/clothing/shirt_pants.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "v3bJLnmvSk",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.6153846383094788,
+                "x": 0.0,
+                "y": 0.2380952388048172
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "YTP5sW7Plw",
+          "looping": true,
+          "name": "North",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/clothing/shirt_pants.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "omBUAujXjX",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.6153846383094788,
+                "x": 0.0,
+                "y": 0.190476194024086
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "ikpGbSFoJW",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "2ohLK3pIux",
+      "name": "LPC/Clothing/Shirt+Pants/Walk",
+      "particle_action": "None",
+      "resource_id": "2ohLK3pIux",
+      "resource_name": "LPC/Clothing/Shirt+Pants/Walk",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Nearest",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "iW99vnxMyg",
+          "looping": true,
+          "name": "East",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 9,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/clothing/shirt_pants.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "fUae3O3s6g",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.692307710647583,
+                "x": 0.0,
+                "y": 0.523809552192688
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "ikpGbSFoJW",
+          "looping": true,
+          "name": "South",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 9,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/clothing/shirt_pants.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "fp7CM0hJYm",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.692307710647583,
+                "x": 0.0,
+                "y": 0.4761904776096344
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "0oIY7WybTn",
+          "looping": true,
+          "name": "West",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 9,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/clothing/shirt_pants.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "Ho8gZq9Ifq",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.692307710647583,
+                "x": 0.0,
+                "y": 0.4285714328289032
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "0zxa1yGrE2",
+          "looping": true,
+          "name": "North",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 9,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/clothing/shirt_pants.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "WEk96au9X6",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.692307710647583,
+                "x": 0.0,
+                "y": 0.380952388048172
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "4gaKnzG07O",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "LLq889I6UO",
+      "name": "LPC/Weapon/Spear/Thrust",
+      "particle_action": "None",
+      "resource_id": "LLq889I6UO",
+      "resource_name": "LPC/Weapon/Spear/Thrust",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Nearest",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "4gaKnzG07O",
+          "looping": false,
+          "name": "South",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/weapon/spear.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "AkANb63OUs",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.25,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.5
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "QzrJ9heOYg",
+          "looping": false,
+          "name": "West",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/weapon/spear.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "f4H6gwko3o",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.25,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.25
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "xjGxJHPdgw",
+          "looping": false,
+          "name": "East",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/weapon/spear.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "kHEgJxWxET",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.25,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.75
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "3sglJ2IWUu",
+          "looping": false,
+          "name": "North",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/weapon/spear.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "Cb8MejRm3D",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.25,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "uFGOGQfDKQ",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "MaeqFLv5eg",
+      "name": "LPC/Clothing/Shirt+Pants/Shoot",
+      "particle_action": "None",
+      "resource_id": "MaeqFLv5eg",
+      "resource_name": "LPC/Clothing/Shirt+Pants/Shoot",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Nearest",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "rR0NO4ma3i",
+          "looping": true,
+          "name": "East",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 13,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/clothing/shirt_pants.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "kLMz2MwhhL",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.9047619104385376
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "uFGOGQfDKQ",
+          "looping": true,
+          "name": "South",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 13,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/clothing/shirt_pants.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "llF93iTnY5",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.8571428656578064
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "18mCbihQT9",
+          "looping": true,
+          "name": "West",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 13,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/clothing/shirt_pants.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "ESYxFf58dR",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.8095238208770752
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "OgWJUKsrk4",
+          "looping": true,
+          "name": "North",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 13,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/clothing/shirt_pants.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "uF1fvLCl2x",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.761904776096344
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "oC36R4rqTk",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "u9p9Izh8rv",
+      "name": "LPC/Weapon/Bow+Arrow/Shoot",
+      "particle_action": "None",
+      "resource_id": "u9p9Izh8rv",
+      "resource_name": "LPC/Weapon/Bow+Arrow/Shoot",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Nearest",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "oC36R4rqTk",
+          "looping": true,
+          "name": "South",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 13,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/weapon/bow_arrow.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "6vD3MFX80Z",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.25,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.5
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "7j8aZQgQHM",
+          "looping": true,
+          "name": "West",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 13,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/weapon/bow_arrow.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "L4pJOvFNtZ",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.25,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.25
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "SNLIoAxKP7",
+          "looping": true,
+          "name": "East",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 13,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/weapon/bow_arrow.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "Pg3tKFhlR5",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.25,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.75
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "fDQf74gA1G",
+          "looping": true,
+          "name": "North",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 13,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/weapon/bow_arrow.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "mSEIZAy75D",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.25,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "gQgxUd0ZLR",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "57djXhQN4Z",
+      "name": "LPC/Prop/Arrow",
+      "particle_action": "None",
+      "resource_id": "57djXhQN4Z",
+      "resource_name": "LPC/Prop/Arrow",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Nearest",
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "gQgxUd0ZLR",
+          "looping": true,
+          "name": "Texture",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/weapon/arrow.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "LHZG6CYoBO",
+              "name": "arrow",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "active_texture_map": "Nem6Fa5aKa",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "wrQHZ3iizg",
+      "name": "LPC/Character/CombatDummy/Spin",
+      "particle_action": "None",
+      "resource_id": "wrQHZ3iizg",
+      "resource_name": "LPC/Character/CombatDummy/Spin",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "Nem6Fa5aKa",
+          "looping": true,
+          "name": "Sprite",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 8,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/dummy/BODY_spin.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "usQMIq88xu",
+              "name": "BODY_spin",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "r7XlZHD5We",
+      "name": "LPC/Health Bar",
+      "particle_action": "None",
+      "resource_id": "r7XlZHD5We",
+      "resource_name": "LPC/Health Bar",
+      "shader_src": "",
+      "shader_uri": "ws://shaders/es2/My_Material.glsl",
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Custom",
+      "uniforms": [
+        {
+          "name": "kBColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.2825360596179962,
+            "g": 1.0,
+            "r": 0.5125963091850281
+          }
+        },
+        {
+          "name": "kFColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.03776608034968376,
+            "g": 0.921187162399292,
+            "r": 0.03643854334950447
+          }
+        },
+        {
+          "name": "kValue",
+          "value": 0.5
+        }
+      ]
+    },
+    {
+      "active_texture_map": "JKTEmX6bBn",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "Ne7xKkxWtm",
+      "name": "LPC/Character/CombatDummy/Die",
+      "particle_action": "None",
+      "resource_id": "Ne7xKkxWtm",
+      "resource_name": "LPC/Character/CombatDummy/Die",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "JKTEmX6bBn",
+          "looping": false,
+          "name": "Sprite",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 6,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/dummy/BODY_die.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "3UWk2wfHhP",
+              "name": "BODY_die",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "UYj0YPJwEa",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "rDpZrE3UuD",
+      "name": "LPC/Character/Skeleton/Walk",
+      "particle_action": "None",
+      "resource_id": "rDpZrE3UuD",
+      "resource_name": "LPC/Character/Skeleton/Walk",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Nearest",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "UYj0YPJwEa",
+          "looping": true,
+          "name": "South",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 9,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/skeleton/skeleton.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "AdaqBHHinr",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.07692307978868484,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.1538461595773697
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "m8PNQUdg9w",
+          "looping": true,
+          "name": "West",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 9,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/skeleton/skeleton.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "Feq3444rpU",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.07692307978868484,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.07692307978868484
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "dvtUMPOgTL",
+          "looping": true,
+          "name": "East",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 9,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/skeleton/skeleton.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "YxueoqCMxC",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.07692307978868484,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.23076923191547394
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "f92ttMGphT",
+          "looping": true,
+          "name": "North",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 9,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/skeleton/skeleton.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "vnLm4K9L5G",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.07692307978868484,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "AQSm7oi13f",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "kYDARs1JwJ",
+      "name": "LPC/Character/Skeleton/Slash",
+      "particle_action": "None",
+      "resource_id": "kYDARs1JwJ",
+      "resource_name": "LPC/Character/Skeleton/Slash",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Nearest",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "AQSm7oi13f",
+          "looping": true,
+          "name": "South",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 6,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/skeleton/skeleton.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "oGz2jYQQxw",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.07692307978868484,
+                "w": 0.6666666865348816,
+                "x": 0.0,
+                "y": 0.4615384638309479
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "uPhpJ8H4k8",
+          "looping": true,
+          "name": "West",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 6,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/skeleton/skeleton.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "yCXuTxSFNK",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.07692307978868484,
+                "w": 0.6666666865348816,
+                "x": 0.0,
+                "y": 0.38461539149284363
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "tnP8ut3Lta",
+          "looping": true,
+          "name": "East",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 6,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/skeleton/skeleton.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "K1a5p6brTK",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.07692307978868484,
+                "w": 0.6666666865348816,
+                "x": 0.0,
+                "y": 0.5384615659713745
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "UDrPm1Bk4f",
+          "looping": true,
+          "name": "North",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 6,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/skeleton/skeleton.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "uIGOdho3AJ",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.07692307978868484,
+                "w": 0.6666666865348816,
+                "x": 0.0,
+                "y": 0.3076923191547394
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "firqpC6DFh",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "NaRoLPQ4E5",
+      "name": "LPC/Character/Skeleton/Die",
+      "particle_action": "None",
+      "resource_id": "NaRoLPQ4E5",
+      "resource_name": "LPC/Character/Skeleton/Die",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Nearest",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "firqpC6DFh",
+          "looping": false,
+          "name": "South",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 6,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/skeleton/skeleton.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "3C0684XJvj",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.07692307978868484,
+                "w": 0.6666666865348816,
+                "x": 0.0,
+                "y": 0.9230769276618958
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "ptvNulNEql",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "KnPvBZqDs4",
+      "name": "LPC/Weapon/Dagger/Slash",
+      "particle_action": "None",
+      "resource_id": "KnPvBZqDs4",
+      "resource_name": "LPC/Weapon/Dagger/Slash",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Nearest",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "ptvNulNEql",
+          "looping": true,
+          "name": "South",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 6,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/weapon/dagger.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "nHq7PM68Y0",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.25,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.5
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "ZUiO8msGtQ",
+          "looping": true,
+          "name": "West",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 6,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/weapon/dagger.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "SkYX2EWb3N",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.25,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.25
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "xMjsAyDKoB",
+          "looping": true,
+          "name": "East",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 6,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/weapon/dagger.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "lr0HETuEeb",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.25,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.75
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "LDX0fo7sf6",
+          "looping": true,
+          "name": "North",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 6,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/weapon/dagger.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "aidyl9512d",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.25,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "Xg8fKWdzdD",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": false,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "528LJjXXAA",
+      "name": "LPC/Clothing/Shirt+Pants/Slash",
+      "particle_action": "None",
+      "resource_id": "528LJjXXAA",
+      "resource_name": "LPC/Clothing/Shirt+Pants/Slash",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Nearest",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "Xg8fKWdzdD",
+          "looping": true,
+          "name": "South",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 6,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/clothing/shirt_pants.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "8mZ2OKEvAS",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.4615384638309479,
+                "x": 0.0,
+                "y": 0.6666666865348816
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "RYN7l30Q1u",
+          "looping": true,
+          "name": "West",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 6,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/clothing/shirt_pants.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "kZB1Gjjd1o",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.4615384638309479,
+                "x": 0.0,
+                "y": 0.6190476417541504
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "CnB79TL1qw",
+          "looping": true,
+          "name": "East",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 6,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/clothing/shirt_pants.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "wCoprBrkdJ",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.4615384638309479,
+                "x": 0.0,
+                "y": 0.7142857313156128
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "dIrXLtkE5P",
+          "looping": true,
+          "name": "North",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "spritesheet_cols": 6,
+          "spritesheet_rows": 1,
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false
+              },
+              "file": "ws://LPC/wulax/clothing/shirt_pants.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "Czofuu5fLW",
+              "name": "Spritesheet",
+              "rect": {
+                "h": 0.0476190485060215,
+                "w": 0.4615384638309479,
+                "x": 0.0,
+                "y": 0.5714285969734192
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "WHnBa6udtT",
+      "color_map0": {
+        "a": 1.0,
+        "b": 0.21960784494876862,
+        "g": 0.43529412150382996,
+        "r": 0.2549172341823578
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "jS7kGm3IkK",
+      "name": "LPC/Grass",
+      "particle_action": "None",
+      "resource_id": "jS7kGm3IkK",
+      "resource_name": "LPC/Grass",
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "WHnBa6udtT",
+          "looping": true,
+          "name": "Texture",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "function": "Noise",
+              "generator": {
+                "height": 1000,
+                "layers": [
+                  {
+                    "amplitude": 226.5652313232422,
+                    "frequency": 3.196460723876953,
+                    "prime0": 89,
+                    "prime1": 743,
+                    "prime2": 7873
+                  },
+                  {
+                    "amplitude": 18.589679718017578,
+                    "frequency": 49.64924240112305,
+                    "prime0": 6917,
+                    "prime1": 743,
+                    "prime2": 7873
+                  },
+                  {
+                    "amplitude": 232.14500427246094,
+                    "frequency": 89.77373504638672,
+                    "prime0": 3529,
+                    "prime1": 743,
+                    "prime2": 7873
+                  }
+                ],
+                "width": 1000
+              },
+              "id": "B8bLxpi00E",
+              "name": "Noise",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "BitmapGenerator"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Repeat",
+      "texture_wrap_y": "Repeat",
+      "type": "Texture"
+    }
+  ],
+  "scenes": [
+    {
+      "dynamic_spatial_index": "QuadTree",
+      "id": "s89fX2XxBH",
+      "name": "LPC",
+      "nodes": [
+        {
+          "entity": "69nkia7uBG",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "ZrkWdYJwiz",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Player",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "5FdaYIIRiM",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "8O0OK6vIMm",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Dummy_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -250.0,
+            "y": 350.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "5FdaYIIRiM",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "NpCnGmbnCU",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Dummy_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 250.0,
+            "y": 350.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "U1XmAR70Dj",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "uRPW6H6MpE",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Skeleton_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -400.0,
+            "y": -100.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "HBSEmKKuug",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "zZIuNiqRzL",
+          "idle_animation_id": "",
+          "layer": -1,
+          "name": "My Entity_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        }
+      ],
+      "quadtree_max_items": 4,
+      "quadtree_max_levels": 4,
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "ZrkWdYJwiz"
+            }
+          },
+          {
+            "node": {
+              "id": "8O0OK6vIMm"
+            }
+          },
+          {
+            "node": {
+              "id": "NpCnGmbnCU"
+            }
+          },
+          {
+            "node": {
+              "id": "uRPW6H6MpE"
+            }
+          },
+          {
+            "node": {
+              "id": "zZIuNiqRzL"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "s89fX2XxBH",
+      "resource_name": "LPC",
+      "script_file": "",
+      "tilemap": ""
+    }
+  ],
+  "scripts": [
+    {
+      "id": "Xg0GdRiaQU",
+      "name": "game",
+      "owner": "",
+      "resource_id": "Xg0GdRiaQU",
+      "resource_name": "game",
+      "type": "Unspecified",
+      "uri": "ws://lua/game.lua"
+    },
+    {
+      "id": "KHnqtB85vy",
+      "name": "8-dir-char-template/Dummy",
+      "owner": "",
+      "resource_id": "KHnqtB85vy",
+      "resource_name": "8-dir-char-template/Dummy",
+      "type": "Unspecified",
+      "uri": "ws://8-directional-character-template/lua/KHnqtB85vy.lua"
+    },
+    {
+      "id": "DFRO8f967k",
+      "name": "8-dir-char-template/Dummy/Animator",
+      "owner": "",
+      "resource_id": "DFRO8f967k",
+      "resource_name": "8-dir-char-template/Dummy/Animator",
+      "type": "Unspecified",
+      "uri": "ws://8-directional-character-template/lua/DFRO8f967k.lua"
+    },
+    {
+      "id": "J4xx3ThJjX",
+      "name": "LPC/Entity/Player",
+      "owner": "",
+      "resource_id": "J4xx3ThJjX",
+      "resource_name": "LPC/Entity/Player",
+      "type": "Unspecified",
+      "uri": "ws://lua/J4xx3ThJjX.lua"
+    },
+    {
+      "id": "7lLEJ9i9vM",
+      "name": "LPC/Entity/Animator",
+      "owner": "",
+      "resource_id": "7lLEJ9i9vM",
+      "resource_name": "LPC/Entity/Animator",
+      "type": "Unspecified",
+      "uri": "ws://lua/7lLEJ9i9vM.lua"
+    },
+    {
+      "id": "Agn7Ll853d",
+      "name": "LPC/Prop/Arrow",
+      "owner": "",
+      "resource_id": "Agn7Ll853d",
+      "resource_name": "LPC/Prop/Arrow",
+      "type": "Unspecified",
+      "uri": "ws://lua/Agn7Ll853d.lua"
+    },
+    {
+      "id": "oaRCIQk650",
+      "name": "LPC/Entity/Combat Dummy",
+      "owner": "",
+      "resource_id": "oaRCIQk650",
+      "resource_name": "LPC/Entity/Combat Dummy",
+      "type": "Unspecified",
+      "uri": "ws://lua/oaRCIQk650.lua"
+    },
+    {
+      "id": "JuKilpgDfP",
+      "name": "LPC/Character/Skeleton",
+      "owner": "",
+      "resource_id": "JuKilpgDfP",
+      "resource_name": "LPC/Character/Skeleton",
+      "type": "Unspecified",
+      "uri": "ws://lua/JuKilpgDfP.lua"
+    },
+    {
+      "id": "1AKD9P4vQ6",
+      "name": "LPC/walking",
+      "owner": "",
+      "resource_id": "1AKD9P4vQ6",
+      "resource_name": "LPC/walking",
+      "type": "ScriptData",
+      "uri": "ws://lua/walking.lua"
+    },
+    {
+      "id": "HJ2GwxRGzv",
+      "name": "LPC/utility",
+      "owner": "",
+      "resource_id": "HJ2GwxRGzv",
+      "resource_name": "LPC/utility",
+      "type": "ScriptData",
+      "uri": "ws://lua/utility.lua"
+    },
+    {
+      "id": "TWDXebwTRx",
+      "name": "LPC/weapon",
+      "owner": "",
+      "resource_id": "TWDXebwTRx",
+      "resource_name": "LPC/weapon",
+      "type": "ScriptData",
+      "uri": "ws://lua/weapon.lua"
+    },
+    {
+      "id": "kYIT5fZnX8",
+      "name": "LPC/damage",
+      "owner": "",
+      "resource_id": "kYIT5fZnX8",
+      "resource_name": "LPC/damage",
+      "type": "ScriptData",
+      "uri": "ws://lua/damage.lua"
+    }
+  ],
+  "shapes": [
+    {
+      "draws": [
+        {
+          "count": 4,
+          "offset": 0,
+          "type": "TriangleFan"
+        },
+        {
+          "count": 3,
+          "offset": 4,
+          "type": "TriangleFan"
+        }
+      ],
+      "id": "ZOW84mNSWm",
+      "name": "8-dir-char-template/Pointer",
+      "resource_id": "ZOW84mNSWm",
+      "resource_name": "8-dir-char-template/Pointer",
+      "static": true,
+      "vertices": [
+        {
+          "s": 0.7000000476837158,
+          "t": 0.4000000059604645,
+          "x": 0.7000000476837158,
+          "y": -0.4000000059604645
+        },
+        {
+          "s": 0.0,
+          "t": 0.3500000238418579,
+          "x": 0.0,
+          "y": -0.3500000238418579
+        },
+        {
+          "s": 0.0,
+          "t": 0.6494845151901245,
+          "x": 0.0,
+          "y": -0.6494845151901245
+        },
+        {
+          "s": 0.7000000476837158,
+          "t": 0.6000000238418579,
+          "x": 0.7000000476837158,
+          "y": -0.6000000238418579
+        },
+        {
+          "s": 1.0,
+          "t": 0.5,
+          "x": 1.0,
+          "y": -0.5
+        },
+        {
+          "s": 0.6995581984519958,
+          "t": 0.09941089898347855,
+          "x": 0.6995581984519958,
+          "y": -0.09941089898347855
+        },
+        {
+          "s": 0.699999988079071,
+          "t": 0.8999999761581421,
+          "x": 0.699999988079071,
+          "y": -0.8999999761581421
+        }
+      ]
+    }
+  ]
+}

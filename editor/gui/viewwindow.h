@@ -70,6 +70,7 @@ namespace gui
         void on_btnDemoPlayground_clicked();
         void on_btnDemoUI_clicked();
         void on_btnDemoDerp_clicked();
+        void on_btnDemoCharacter_clicked();
         void on_btnSelectFile_clicked();
         void on_btnClose_clicked();
         void on_btnExport_clicked();

@@ -2488,6 +2488,10 @@ void MainWindow::on_btnDemoDerp_clicked()
 {
     LoadDemoWorkspace("starter/derp");
 }
+void MainWindow::on_btnDemoCharacter_clicked()
+{
+    LoadDemoWorkspace("demos/character");
+}
 
 void MainWindow::on_btnMaterial_clicked()
 {
