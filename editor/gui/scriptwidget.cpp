@@ -50,6 +50,13 @@
 
 namespace {
 std::set<gui::ScriptWidget*> all_script_widgets;
+
+struct JumpPosition {
+    QString WidgetId;
+    int position = 0;
+};
+std::vector<JumpPosition> JumpStack;
+
 } // namespace
 
 namespace gui
@@ -62,6 +69,8 @@ class ScriptWidget::LuaParser : public app::CodeCompleter,
                                 public app::CodeHighlighter
 {
 public:
+    using Symbol = app::LuaParser::Symbol;
+
     LuaParser(app::Workspace* workspace)
       : mWorkspace(workspace)
     {
@@ -73,6 +82,11 @@ public:
     {
         DEBUG("Destroy ScriptWidget::LuaParser");
         delete mHilight;
+    }
+
+    const Symbol* FindSymbol(const QString& name) const
+    {
+        return mParser.FindSymbol(name);
     }
 
     virtual bool StartCompletion(const QKeyEvent* event,
@@ -642,6 +656,9 @@ ScriptWidget::~ScriptWidget()
     mUI.code->SetCompleter(nullptr);
     mLuaParser.reset();
     all_script_widgets.erase(this);
+
+    if (all_script_widgets.empty())
+        JumpStack.clear();
 }
 
 QString ScriptWidget::GetId() const
@@ -680,10 +697,13 @@ void ScriptWidget::AddActions(QToolBar& bar)
     bar.addSeparator();
     bar.addAction(mUI.actionFindText);
     bar.addAction(mUI.actionReplaceText);
+    bar.addAction(mUI.actionGotoSymbol);
+    bar.addAction(mUI.actionGoBack);
     bar.addSeparator();
     bar.addAction(mUI.actionFindHelp);
     bar.addSeparator();
     bar.addAction(mUI.actionSettings);
+    bar.addSeparator();
 }
 void ScriptWidget::AddActions(QMenu& menu)
 {
@@ -693,6 +713,8 @@ void ScriptWidget::AddActions(QMenu& menu)
     menu.addSeparator();
     menu.addAction(mUI.actionFindText);
     menu.addAction(mUI.actionReplaceText);
+    menu.addAction(mUI.actionGotoSymbol);
+    menu.addAction(mUI.actionGoBack);
     menu.addSeparator();
     menu.addAction(mUI.actionFindHelp);
     menu.addSeparator();
@@ -1068,6 +1090,58 @@ void ScriptWidget::on_actionSettings_triggered()
 {
     SetVisible(mUI.settings, true);
     SetEnabled(mUI.actionSettings, false);
+}
+
+void ScriptWidget::on_actionGotoSymbol_triggered()
+{
+    const auto& word = mUI.code->GetCurrentWord();
+    if (word.isEmpty())
+    {
+        NOTE("Current word is empty. Nothing to go to.");
+        return;
+    }
+
+    // remember, widget could be an alias for this, thus
+    // better to record our current position here.
+    const auto position = mUI.code->GetCursorPosition();
+
+    for (auto*  widget : all_script_widgets)
+    {
+        if (const auto* symbol = widget->mLuaParser->FindSymbol(word))
+        {
+            widget->mUI.code->SetCursorPosition(symbol->start);
+
+            // record where we came from to the symbol
+            JumpPosition jump;
+            jump.WidgetId = this->GetId();
+            jump.position = position;
+            JumpStack.push_back(jump);
+
+            emit FocusWidget(widget->GetId());
+            return;
+        }
+    }
+    NOTE(tr("No such symbol found. '%1'").arg(word));
+}
+
+void ScriptWidget::on_actionGoBack_triggered()
+{
+    if (JumpStack.empty())
+        return;
+
+    auto jump = JumpStack.back();
+
+    JumpStack.pop_back();
+
+    for (auto* widget : all_script_widgets)
+    {
+        if (widget->GetId() == jump.WidgetId)
+        {
+            widget->mUI.code->SetCursorPosition(jump.position);
+            emit FocusWidget(widget->GetId());
+            return;
+        }
+    }
 }
 
 void ScriptWidget::on_btnFindNext_clicked()

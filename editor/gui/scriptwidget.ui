@@ -591,6 +591,36 @@ p, li { white-space: pre-wrap; }
     <string>F6</string>
    </property>
   </action>
+  <action name="actionGotoSymbol">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/arrow-forward.png</normaloff>:/32x32_ico_png/arrow-forward.png</iconset>
+   </property>
+   <property name="text">
+    <string>Goto Symbol</string>
+   </property>
+   <property name="toolTip">
+    <string>Goto to the symbol under the cursor</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+N</string>
+   </property>
+  </action>
+  <action name="actionGoBack">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/arrow-back.png</normaloff>:/32x32_ico_png/arrow-back.png</iconset>
+   </property>
+   <property name="text">
+    <string>Go Back</string>
+   </property>
+   <property name="toolTip">
+    <string>Jump back to previous position</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+P</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

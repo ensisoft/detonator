@@ -274,6 +274,8 @@ namespace gui
         void OpenResource(const QString& id);
 
         void RequestScriptLaunch(const QString& id);
+
+        void FocusWidget(const QString& id);
     private:
         QString mId;
     };

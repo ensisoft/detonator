@@ -3150,6 +3150,7 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
         connect(widget, &MainWidget::OpenResource,        this, &MainWindow::OpenResource);
         connect(widget, &MainWidget::RequestScriptLaunch, this, &MainWindow::LaunchScript);
         connect(widget, &MainWidget::RefreshActions,      this, &MainWindow::RefreshWidgetActions);
+        connect(widget, &MainWidget::FocusWidget,         this, &MainWindow::FocusWidget);
         widget->setProperty("_main_window_connected_", true);
     }
 

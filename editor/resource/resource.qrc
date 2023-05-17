@@ -88,6 +88,8 @@
     <file>16x16_ico_png/transmit_error.png</file>
     <file>16x16_ico_png/transmit_go.png</file>
 
+    <file>32x32_ico_png/arrow-forward.png</file>
+    <file>32x32_ico_png/arrow-back.png</file>
     <file>32x32_ico_png/save.png</file>
     <file>32x32_ico_png/play.png</file>
     <file>32x32_ico_png/stop.png</file>

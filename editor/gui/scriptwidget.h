@@ -84,6 +84,8 @@ namespace gui
         void on_actionFindText_triggered();
         void on_actionReplaceText_triggered();
         void on_actionSettings_triggered();
+        void on_actionGotoSymbol_triggered();
+        void on_actionGoBack_triggered();
         void on_btnFindNext_clicked();
         void on_btnFindClose_clicked();
         void on_btnReplaceNext_clicked();

@@ -185,6 +185,7 @@ namespace gui
         void OpenExternalScript(const QString& file);
         void OpenExternalAudio(const QString& file);
         void OpenNewWidget(gui::MainWidget* widget);
+        bool FocusWidget(const QString& id);
         void RefreshWidget();
         void RefreshWidgetActions();
         void LaunchScript(const QString& id);
@@ -205,7 +206,6 @@ namespace gui
         bool SaveWorkspace();
         void CloseWorkspace();
         void EditResources(bool open_new_window);
-        bool FocusWidget(const QString& id);
         void ShowHelpWidget();
         void ImportFiles(const QStringList& files);
         void UpdateStats();
