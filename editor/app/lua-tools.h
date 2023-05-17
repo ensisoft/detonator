@@ -46,6 +46,10 @@ namespace app
         Other
     };
 
+    enum class LuaSymbol {
+        Function,
+        LocalVariable
+    };
 
     class LuaTheme
     {
@@ -66,12 +70,21 @@ namespace app
     {
     public:
         using LuaSyntax = app::LuaSyntax;
+        using LuaSymbol = app::LuaSymbol;
 
         struct SyntaxBlock {
             LuaSyntax type = LuaSyntax::Other;
-            // character position of the highlight in the current document.
+            // character position of the syntax highlight in the current document.
             uint32_t start = 0;
-            // length of the highlight in characters
+            // length of the syntax highlight in characters
+            uint32_t length = 0;
+        };
+
+        struct Symbol {
+            LuaSymbol type = LuaSymbol::Function;
+            // character position of the highlight in the current document.
+            uint32_t start  = 0;
+            // length of the symbol name in characters
             uint32_t length = 0;
         };
 
@@ -95,6 +108,9 @@ namespace app
 
         const SyntaxBlock* FindBlock(uint32_t text_position) const noexcept;
 
+        const Symbol* FindSymbol(const QString& key) const noexcept
+        { return base::SafeFind(mSymbols, key); }
+
         using BlockList = std::vector<SyntaxBlock>;
 
         BlockList FindBlocks(uint32_t text_position, uint32_t text_length) const noexcept;
@@ -103,19 +119,21 @@ namespace app
         { return mBlocks.size(); }
         inline const SyntaxBlock& GetBlock(size_t index) const noexcept
         { return base::SafeIndex(mBlocks, index); }
-
         inline const bool HasParseState() const noexcept
         { return mTree != nullptr; }
 
         LuaParser& operator=(const LuaParser&) = delete;
     private:
-        void ConsumeTree(const QString& source, TSTree* ast);
-        void FindBuiltins(const QString& source);
+        void QuerySyntax(const QByteArray& source, TSTree* ast);
+        void QuerySymbols(const QByteArray& source, TSTree* ast);
+        void FindBuiltins(const QByteArray& source);
     private:
         std::vector<SyntaxBlock> mBlocks;
+        std::unordered_map<QString, Symbol> mSymbols;
     private:
         TSParser* mParser = nullptr;
-        TSQuery* mQuery = nullptr;
+        TSQuery* mSyntaxQuery = nullptr;
+        TSQuery* mSymbolQuery = nullptr;
         TSTree* mTree = nullptr;
     };
 

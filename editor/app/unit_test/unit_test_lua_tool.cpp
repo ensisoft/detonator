@@ -65,7 +65,7 @@ const app::LuaParser::SyntaxBlock* FindBlock(const app::LuaParser& p, const QStr
     return &fallback;
 }
 
-void unit_test_keywords()
+void unit_test_syntax()
 {
     app::LuaParser p;
 
@@ -190,9 +190,35 @@ end
     TEST_CHECK(FindBlock(p, code, "return")->type == app::LuaSyntax::Keyword);
 }
 
+void unit_test_symbols()
+{
+const QString code = R"(
+local bleh = true
+
+function SomeFunction()
+   local something = true
+   local foo = 'balla'
+end
+    )";
+
+    app::LuaParser p;
+    p.ParseSource(code);
+
+    TEST_CHECK(p.FindSymbol("bleh"));
+    TEST_CHECK(p.FindSymbol("something"));
+    TEST_CHECK(p.FindSymbol("foo"));
+
+    if (const auto* s = p.FindSymbol("bleh"))
+        TEST_REQUIRE(s->type == app::LuaSymbol::LocalVariable);
+    if (const auto* s = p.FindSymbol("something"))
+        TEST_REQUIRE(s->type == app::LuaSymbol::LocalVariable);
+    if (const auto* s = p.FindSymbol("foo"))
+        TEST_REQUIRE(s->type == app::LuaSymbol::LocalVariable);
+}
+
 int test_main(int argc, char* argv[])
 {
-    unit_test_keywords();
-
+    unit_test_syntax();
+    unit_test_symbols();
     return 0;
 } //

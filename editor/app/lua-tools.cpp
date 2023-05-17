@@ -121,8 +121,10 @@ LuaParser::~LuaParser()
 {
     if (mTree)
         ts_tree_delete(mTree);
-    if (mQuery)
-        ts_query_delete(mQuery);
+    if (mSyntaxQuery)
+        ts_query_delete(mSyntaxQuery);
+    if (mSymbolQuery)
+        ts_query_delete(mSymbolQuery);
     if (mParser)
         ts_parser_delete(mParser);
 }
@@ -178,6 +180,7 @@ LuaParser::BlockList LuaParser::FindBlocks(uint32_t position, uint32_t text_leng
 void LuaParser::ClearParseState()
 {
     mBlocks.clear();
+    mSymbols.clear();
     if (mTree)
         ts_tree_delete(mTree);
 
@@ -215,8 +218,9 @@ bool LuaParser::ParseSource(const QString& source)
     if (tree == nullptr)
         return false;
 
-    ConsumeTree(source, tree);
-    FindBuiltins(source);
+    QuerySyntax(buffer, tree);
+    QuerySymbols(buffer, tree);
+    FindBuiltins(buffer);
 
     if (mTree)
         ts_tree_delete(mTree);
@@ -269,7 +273,7 @@ void LuaParser::EditSource(const Edit& edit)
     ts_tree_edit(mTree, &ts_edit);
 }
 
-void LuaParser::ConsumeTree(const QString& source, TSTree* ast)
+void LuaParser::QuerySyntax(const QByteArray& source, TSTree* ast)
 {
     // S expressions
 
@@ -286,7 +290,7 @@ void LuaParser::ConsumeTree(const QString& source, TSTree* ast)
     // '_' is a wildcard
     // ;; is a comment
 
-    if (!mQuery)
+    if (!mSyntaxQuery)
     {
         // not working
         // "require"
@@ -425,21 +429,21 @@ void LuaParser::ConsumeTree(const QString& source, TSTree* ast)
 )foo";
         uint32_t error_offset;
         TSQueryError error_type;
-        mQuery = ts_query_new(tree_sitter_lua(), q, strlen(q), &error_offset, &error_type);
+        mSyntaxQuery = ts_query_new(tree_sitter_lua(), q, strlen(q), &error_offset, &error_type);
         // for debugging/unit tests
         //if (mQuery == nullptr)
         //{
         //    printf("query = %p err at %d, type=%d\n", mQuery, error_offset, error_type);
         //    printf("error = %s\n", q + error_offset);
         //}
-        ASSERT(mQuery);
+        ASSERT(mSyntaxQuery);
     }
 
     mBlocks.clear();
 
     TSNode root = ts_tree_root_node(ast);
     TSQueryCursor* cursor = ts_query_cursor_new();
-    ts_query_cursor_exec(cursor, mQuery, root);
+    ts_query_cursor_exec(cursor, mSyntaxQuery, root);
 
     TSQueryMatch match;
     uint32_t capture_index = 0;
@@ -500,10 +504,67 @@ void LuaParser::ConsumeTree(const QString& source, TSTree* ast)
     }
 
     ts_query_cursor_delete(cursor);
-    //ts_tree_delete(ast);
 }
 
-void LuaParser::FindBuiltins(const QString& source)
+void LuaParser::QuerySymbols(const QByteArray& source, TSTree* ast)
+{
+    if (mSymbolQuery == nullptr)
+    {
+const char* q = R"foo(
+;; pattern 0
+(local_variable_declaration
+    (variable_list (variable name: (identifier) @var_name ))
+    (expression_list)
+)
+;; pattern 1
+(function_definition_statement name: (identifier) @function_def_name)
+
+)foo";
+        uint32_t error_offset;
+        TSQueryError error_type;
+        mSymbolQuery = ts_query_new(tree_sitter_lua(), q, strlen(q), &error_offset, &error_type);
+        // for debugging/unit tests
+        if (mSymbolQuery == nullptr)
+        {
+            printf("query = %p err at %d, type=%d\n", mSymbolQuery, error_offset, error_type);
+            printf("error = %s\n", q + error_offset);
+        }
+        ASSERT(mSymbolQuery);
+    }
+
+    mSymbols.clear();
+
+    TSNode root = ts_tree_root_node(ast);
+    TSQueryCursor* cursor = ts_query_cursor_new();
+    ts_query_cursor_exec(cursor, mSymbolQuery, root);
+
+    TSQueryMatch match;
+    uint32_t capture_index = 0;
+    while (ts_query_cursor_next_capture(cursor, &match, &capture_index))
+    {
+        const TSQueryCapture& capture = match.captures[capture_index];
+        const TSNode& node = capture.node;
+        const auto start   = ts_node_start_byte(node);
+        const auto end     = ts_node_end_byte(node);
+        const auto length  = end - start;
+        const auto pattern = match.pattern_index;
+
+        Symbol s;
+        s.start  = start;
+        s.length = length;
+        if (pattern == 0)
+            s.type = LuaSymbol::LocalVariable;
+        else if (pattern == 1)
+            s.type = LuaSymbol ::Function;
+
+        const auto tmp = QString::fromUtf8(source.mid(start, length));
+        mSymbols[tmp] = s;
+    }
+
+    ts_query_cursor_delete(cursor);
+}
+
+void LuaParser::FindBuiltins(const QByteArray& source)
 {
     static std::unordered_set<QString> builtin_functions = {
         "assert", "collectgarbage", "dofile", "error", "getfenv", "getmetatable", "ipairs",
@@ -519,7 +580,7 @@ void LuaParser::FindBuiltins(const QString& source)
         if (block.type != LuaSyntax::FunctionCall)
             continue;
         const auto& name = source.mid((int)block.start, (int)block.length);
-        if (base::Contains(builtin_functions, name))
+        if (base::Contains(builtin_functions, QString::fromUtf8(name)))
             block.type = LuaSyntax::BuiltIn;
     }
 }
