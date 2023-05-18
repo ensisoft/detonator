@@ -328,10 +328,10 @@ namespace app
         // The list can contain multiple items and can be discontinuous
         // and unsorted. Afterwards it will be sorted (ascending) based
         // on the item row numbers.
-        void DeleteResources(const QModelIndexList& list);
-        void DeleteResources(std::vector<size_t> indices);
-        void DeleteResource(size_t index);
-        void DeleteResource(const AnyString& id);
+        void DeleteResources(const QModelIndexList& list, std::vector<QString>* dead_files = nullptr);
+        void DeleteResources(std::vector<size_t> indices, std::vector<QString>* dead_files = nullptr);
+        void DeleteResource(const AnyString& id, std::vector<QString>* dead_files = nullptr);
+        void DeleteResource(size_t index, std::vector<QString>* dead_files = nullptr);
 
         // Create duplicate copies of the selected resources.
         void DuplicateResources(const QModelIndexList& list);
