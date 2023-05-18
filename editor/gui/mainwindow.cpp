@@ -1675,7 +1675,33 @@ void MainWindow::on_actionDeleteResource_triggered()
     if (msg.exec() == QMessageBox::No)
         return;
     const auto& selected = GetSelection(mUI.workspace);
-    mWorkspace->DeleteResources(selected);
+
+    std::vector<QString> dead_files;
+    mWorkspace->DeleteResources(selected, &dead_files);
+
+    bool confirm_delete = true;
+
+    for (const auto& dead_file : dead_files)
+    {
+        if (confirm_delete)
+        {
+            QMessageBox msg(this);
+            msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel | QMessageBox::No | QMessageBox::YesAll);
+            msg.setWindowTitle("Delete File?");
+            msg.setText(tr("Do you want to delete the ile? [%1]").arg(dead_file));
+            msg.setIcon(QMessageBox::Icon::Warning);
+            const auto ret = msg.exec();
+            if (ret == QMessageBox::Cancel)
+                return;
+            else if (ret == QMessageBox::No)
+                continue;
+            else if (ret == QMessageBox::YesAll)
+                confirm_delete = false;
+        }
+        if (!QFile::remove(dead_file))
+            ERROR("Failed to delete file. [file='%1']", dead_file);
+        else INFO("Deleted file '%1.'", dead_file);
+    }
 }
 
 void MainWindow::on_actionRenameResource_triggered()

@@ -2764,20 +2764,20 @@ const Resource& Workspace::GetPrimitiveResource(size_t index) const
     return *mResources[mUserResourceCount + index];
 }
 
-void Workspace::DeleteResources(const QModelIndexList& list)
+void Workspace::DeleteResources(const QModelIndexList& list, std::vector<QString>* dead_files)
 {
     std::vector<size_t> indices;
     for (const auto& i : list)
         indices.push_back(i.row());
 
-    DeleteResources(indices);
+    DeleteResources(indices, dead_files);
 }
-void Workspace::DeleteResource(size_t index)
+void Workspace::DeleteResource(size_t index, std::vector<QString>* dead_files)
 {
-    DeleteResources(std::vector<size_t>{index});
+    DeleteResources(std::vector<size_t>{index}, dead_files);
 }
 
-void Workspace::DeleteResources(std::vector<size_t> indices)
+void Workspace::DeleteResources(std::vector<size_t> indices, std::vector<QString>* dead_files)
 {
     RECURSION_GUARD(this, "ResourceList");
 
@@ -2871,7 +2871,9 @@ void Workspace::DeleteResources(std::vector<size_t> indices)
             // going to delete the underlying filesystem file as well.
             Script* script = nullptr;
             carcass->GetContent(&script);
-            dead_file = MapFileToFilesystem(script->GetFileURI());
+            if (dead_files)
+                dead_files->push_back(MapFileToFilesystem(script->GetFileURI()));
+            else dead_file = MapFileToFilesystem(script->GetFileURI());
         }
         else if (carcass->IsDataFile())
         {
@@ -2897,14 +2899,14 @@ void Workspace::DeleteResources(std::vector<size_t> indices)
     }
 }
 
-void Workspace::DeleteResource(const AnyString& id)
+void Workspace::DeleteResource(const AnyString& id, std::vector<QString>* dead_files)
 {
     for (size_t i=0; i<GetNumUserDefinedResources(); ++i)
     {
         const auto& res = GetUserDefinedResource(i);
         if (res.GetId() == id)
         {
-            DeleteResource(i);
+            DeleteResource(i, dead_files);
             return;
         }
     }
