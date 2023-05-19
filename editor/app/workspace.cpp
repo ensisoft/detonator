@@ -195,7 +195,7 @@ public:
        , mWorkspaceDir(workspace_dir)
        , mZip(zip)
     {}
-    virtual void CopyFile(const std::string& uri, const std::string& dir) override
+    virtual void CopyFile(const app::AnyString& uri, const std::string& dir) override
     {
         if (base::StartsWith(uri, "app://"))
             return;
@@ -206,9 +206,9 @@ public:
 
         if (CopyFile(src_file, dir, &dst_name))
         {
-            auto mapping = base::FormatString("ws://%1/%2", app::ToUtf8(mZipDir), app::ToUtf8(dst_name));
+            auto mapping = app::toString("ws://%1/%2", mZipDir, dst_name);
             DEBUG("New zip URI mapping. [uri='%1', mapping='%2']", uri, mapping);
-            mUriMapping[uri] = std::move(mapping);
+            mUriMapping[uri] = mapping;
         }
 
         // hack for now to copy the bitmap font image.
@@ -217,14 +217,14 @@ public:
         // - the file name is same as the .json file base name
         if (base::Contains(dir, "fonts/") && base::EndsWith(uri, ".json"))
         {
-            const auto& src_png_uri  = boost::replace_all_copy(uri, ".json", ".png");
+            const auto& src_png_uri  = app::ReplaceAll(uri, ".json", ".png");
             const auto& src_png_file = MapUriToZipFile(src_png_uri);
 
             QString dst_png_name;
             CopyFile(src_png_file, dir, &dst_png_name);
         }
     }
-    virtual void WriteFile(const std::string& uri, const std::string& dir, const void* data, size_t len) override
+    virtual void WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) override
     {
         // write the file contents into the workspace directory.
 
@@ -260,7 +260,7 @@ public:
         mUriMapping[uri] = std::move(mapping);
     }
 
-    virtual bool ReadFile(const std::string& uri, QByteArray* array) const override
+    virtual bool ReadFile(const app::AnyString& uri, QByteArray* array) const override
     {
         const auto& src_file = MapUriToZipFile(uri);
         if (!FindZipFile(src_file))
@@ -271,7 +271,7 @@ public:
         zip_file.close();
         return true;
     }
-    virtual std::string MapUri(const std::string& uri) const override
+    virtual app::AnyString MapUri(const app::AnyString& uri) const override
     {
         if (base::StartsWith(uri, "app://"))
             return uri;
@@ -280,7 +280,7 @@ public:
         ASSERT(mapping);
         return *mapping;
     }
-    virtual bool HasMapping(const std::string& uri) const override
+    virtual bool HasMapping(const app::AnyString& uri) const override
     {
         if (mUriMapping.find(uri) != mUriMapping.end())
             return true;
@@ -359,7 +359,7 @@ private:
     const QString mZipDir;
     const QString mWorkspaceDir;
     QuaZip& mZip;
-    std::unordered_map<std::string, std::string> mUriMapping;
+    std::unordered_map<app::AnyString, app::AnyString> mUriMapping;
 };
 
 
@@ -375,7 +375,7 @@ public:
         mZip.setUtf8Enabled(true);
         mZip.setZip64Enabled(true);
     }
-    virtual void CopyFile(const std::string& uri, const std::string& dir) override
+    virtual void CopyFile(const app::AnyString& uri, const std::string& dir) override
     {
         // don't package resources that are part of the editor.
         // todo: this would need some kind of versioning in order to
@@ -422,14 +422,14 @@ public:
         // - the file name is same as the .json file base name
         if (base::Contains(dir, "fonts/") && base::EndsWith(uri, ".json"))
         {
-            const auto& src_png_uri  = boost::replace_all_copy(uri, ".json", ".png");
+            const auto& src_png_uri  = app::ReplaceAll(uri, ".json", ".png");
             const auto& src_png_file = MapFileToFilesystem(src_png_uri);
             auto png_name = src_name;
             png_name.replace(".json", ".png");
             CopyFile(src_png_file, app::JoinPath(dst_dir, png_name));
         }
     }
-    virtual void WriteFile(const std::string& uri, const std::string& dir, const void* data, size_t len) override
+    virtual void WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) override
     {
         if (const auto* dupe = base::SafeFind(mUriMapping, uri))
         {
@@ -456,12 +456,12 @@ public:
         DEBUG("Wrote new file into zip archive. [file='%1']", dst_name);
     }
 
-    virtual bool ReadFile(const std::string& uri, QByteArray* bytes) const override
+    virtual bool ReadFile(const app::AnyString& uri, QByteArray* bytes) const override
     {
         const auto& file = MapFileToFilesystem(uri);
         return app::detail::LoadArrayBuffer(file, bytes);
     }
-    virtual std::string MapUri(const std::string& uri) const override
+    virtual app::AnyString MapUri(const app::AnyString& uri) const override
     {
         if (base::StartsWith(uri, "app://"))
             return uri;
@@ -470,7 +470,7 @@ public:
         ASSERT(mapping);
         return *mapping;
     }
-    virtual bool HasMapping(const std::string& uri) const override
+    virtual bool HasMapping(const app::AnyString& uri) const override
     {
         if (mUriMapping.find(uri) != mUriMapping.end())
             return true;
@@ -540,7 +540,7 @@ private:
     const QString mZipFile;
     const QString mWorkspaceDir;
     std::unordered_set<QString> mFileNames;
-    std::unordered_map<std::string, std::string> mUriMapping;
+    std::unordered_map<app::AnyString, app::AnyString> mUriMapping;
     QFile mFile;
     QuaZip mZip;
 };
@@ -552,7 +552,7 @@ public:
       : mPackageDir(package_dir)
       , mWorkspaceDir(workspace_dir)
     {}
-    virtual void CopyFile(const std::string& uri, const std::string& dir) override
+    virtual void CopyFile(const app::AnyString& uri, const std::string& dir) override
     {
         // sort of hack here, probe the uri and skip the copy of a
         // custom shader .json descriptor. it's not needed in the
@@ -585,12 +585,12 @@ public:
         // if the font is a .json+.png font then copy the .png file too!
         if (base::Contains(uri, "fonts/") && base::EndsWith(uri, ".json"))
         {
-            const auto& png_uri = boost::replace_all_copy(uri, ".json", ".png");
-            const auto& png_file = MapFileToFilesystem(app::FromUtf8(png_uri));
+            const auto& png_uri = app::ReplaceAll(uri, ".json", ".png");
+            const auto& png_file = MapFileToFilesystem(png_uri);
             CopyFile(png_file, app::FromUtf8(dir));
         }
     }
-    virtual void WriteFile(const std::string& uri, const std::string& dir, const void* data, size_t len) override
+    virtual void WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) override
     {
         if (const auto* dupe = base::SafeFind(mUriMapping, uri))
         {
@@ -602,18 +602,18 @@ public:
         const auto& dst_uri  = MapFileToPackage(dst_file);
         mUriMapping[uri] = app::ToUtf8(dst_uri);
     }
-    virtual bool ReadFile(const std::string& uri, QByteArray* bytes) const override
+    virtual bool ReadFile(const app::AnyString& uri, QByteArray* bytes) const override
     {
         const auto& file = MapFileToFilesystem(app::FromUtf8(uri));
         return app::detail::LoadArrayBuffer(file, bytes);
     }
-    virtual std::string MapUri(const std::string& uri) const override
+    virtual app::AnyString MapUri(const app::AnyString& uri) const override
     {
         const auto* mapping = base::SafeFind(mUriMapping, uri);
         ASSERT(mapping);
         return *mapping;
     }
-    virtual bool HasMapping(const std::string& uri) const override
+    virtual bool HasMapping(const app::AnyString& uri) const override
     {
         if (mUriMapping.find(uri) != mUriMapping.end())
             return true;
@@ -752,7 +752,7 @@ private:
     unsigned mNumCopies = 0;
     std::unordered_map<QString, QString> mFileMap;
     std::unordered_set<QString> mFileNames;
-    std::unordered_map<std::string, std::string> mUriMapping;
+    std::unordered_map<app::AnyString, app::AnyString> mUriMapping;
 };
 
 class GfxTexturePacker : public gfx::TexturePacker
@@ -2456,32 +2456,32 @@ QStringList Workspace::ListFileResources(std::vector<size_t> indices) const
           : mWorkspaceDir(workspace)
         {}
 
-        virtual void CopyFile(const std::string& uri, const std::string& dir) override
+        virtual void CopyFile(const app::AnyString& uri, const std::string& dir) override
         {
             RecordURI(uri);
         }
 
-        virtual void WriteFile(const std::string& uri, const std::string& dir, const void* data, size_t len) override
+        virtual void WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) override
         {
             RecordURI(uri);
         }
-        virtual bool ReadFile(const std::string& uri, QByteArray* bytes) const override
+        virtual bool ReadFile(const app::AnyString& uri, QByteArray* bytes) const override
         {
             return app::detail::LoadArrayBuffer(MapWorkspaceUri(uri, mWorkspaceDir), bytes);
         }
-        virtual std::string MapUri(const std::string& uri) const override
+        virtual app::AnyString MapUri(const app::AnyString& uri) const override
         { return uri; }
-        virtual bool HasMapping(const std::string& uri) const override
+        virtual bool HasMapping(const app::AnyString& uri) const override
         { return true; }
 
         QStringList ListUris() const
         {
             QStringList ret;
             for (const auto& uri : mURIs)
-                ret.push_back(FromUtf8(uri));
+                ret.push_back(uri);
             return ret;
         }
-        void RecordURI(const std::string& uri)
+        void RecordURI(const app::AnyString& uri)
         {
             // hack for now to copy the bitmap font image.
             // this will not work if:
@@ -2489,7 +2489,7 @@ QStringList Workspace::ListFileResources(std::vector<size_t> indices) const
             // - the file name is same as the .json file base name
             if (base::Contains(uri, "fonts/") && base::EndsWith(uri, ".json"))
             {
-                const auto& src_png_uri = boost::replace_all_copy(uri, ".json", ".png");
+                const auto& src_png_uri = app::ReplaceAll(uri, ".json", ".png");
                 mURIs.insert(src_png_uri);
             }
             mURIs.insert(uri); // keep track of the URIs we're seeing
@@ -2498,7 +2498,7 @@ QStringList Workspace::ListFileResources(std::vector<size_t> indices) const
     private:
         const QString mWorkspaceDir;
     private:
-        mutable std::unordered_set<std::string> mURIs;
+        mutable std::unordered_set<app::AnyString> mURIs;
 
     } packer(mWorkspaceDir);
 
