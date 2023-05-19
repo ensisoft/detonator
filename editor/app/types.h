@@ -21,7 +21,9 @@
 #include "warnpop.h"
 
 #include <string>
+#include <functional>
 
+#include "base/json.h"
 #include "editor/app/format.h"
 #include "editor/app/utility.h"
 
@@ -88,6 +90,9 @@ namespace app
         const std::string GetUtf8() const
         { return app::ToUtf8(mStr); }
 
+        const quint64 GetHash() const
+        { return qHash(mStr); }
+
         AnyString& operator=(const QString& str)
         {
             mStr = str;
@@ -151,5 +156,26 @@ namespace app
     private:
         const QMap<Key, Value>& mMap;
     };
+
+    inline AnyString ReplaceAll(const AnyString& str, const AnyString& dis, const AnyString& dat)
+    {
+        QString s = str.GetWide();
+        s.replace(dis, dat);
+        return s;
+    }
+
 } // namespace
 
+namespace std {
+    template<>
+    struct hash<app::AnyString> {
+        size_t operator()(const app::AnyString& str) const {
+            return str.GetHash();
+        }
+    };
+} // namespace std
+
+namespace base {
+    inline void JsonWrite(nlohmann::json& json, const char* name, const app::AnyString& str)
+    { base::JsonWrite(json, name, str.GetUtf8()); }
+} // base

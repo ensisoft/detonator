@@ -51,17 +51,11 @@ namespace app
     {
     public:
         virtual ~ResourcePacker() = default;
-        virtual void CopyFile(const std::string& uri, const std::string& dir) = 0;
-        virtual void WriteFile(const std::string& uri, const std::string& dir, const void* data, size_t len) = 0;
-        virtual bool ReadFile(const std::string& uri, QByteArray* bytes) const = 0;
-        virtual std::string MapUri(const std::string& uri) const = 0;
-        virtual bool HasMapping(const std::string& uri) const = 0;
-
-        inline bool HasMapping(const QString& uri) const
-        { return HasMapping(ToUtf8(uri)); }
-        virtual std::string MapUri(const QString& uri) const
-        { return MapUri(ToUtf8(uri)); }
-
+        virtual void CopyFile(const app::AnyString& uri, const std::string& dir) = 0;
+        virtual void WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) = 0;
+        virtual bool ReadFile(const app::AnyString& uri, QByteArray* bytes) const = 0;
+        virtual bool HasMapping(const app::AnyString& uri) const = 0;
+        virtual app::AnyString MapUri(const app::AnyString& uri) const = 0;
     private:
     };
 
