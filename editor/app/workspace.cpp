@@ -577,10 +577,10 @@ public:
             return;
         }
 
-        const auto& src_file = MapFileToFilesystem(app::FromUtf8(uri));
+        const auto& src_file = MapFileToFilesystem(uri);
         const auto& dst_file = CopyFile(src_file, app::FromUtf8(dir));
         const auto& dst_uri  = MapFileToPackage(dst_file);
-        mUriMapping[uri] = app::ToUtf8(dst_uri);
+        mUriMapping[uri] = dst_uri;
 
         // if the font is a .json+.png font then copy the .png file too!
         if (base::Contains(uri, "fonts/") && base::EndsWith(uri, ".json"))
@@ -597,14 +597,14 @@ public:
             DEBUG("Skipping duplicate file replace. [file='%1']", uri);
             return;
         }
-        const auto& src_file = MapFileToFilesystem(app::FromUtf8(uri));
+        const auto& src_file = MapFileToFilesystem(uri);
         const auto& dst_file = WriteFile(src_file, app::FromUtf8(dir), data, len);
         const auto& dst_uri  = MapFileToPackage(dst_file);
-        mUriMapping[uri] = app::ToUtf8(dst_uri);
+        mUriMapping[uri] = dst_uri;
     }
     virtual bool ReadFile(const app::AnyString& uri, QByteArray* bytes) const override
     {
-        const auto& file = MapFileToFilesystem(app::FromUtf8(uri));
+        const auto& file = MapFileToFilesystem(uri);
         return app::detail::LoadArrayBuffer(file, bytes);
     }
     virtual app::AnyString MapUri(const app::AnyString& uri) const override
@@ -708,7 +708,7 @@ public:
         }
         return dst_file;
     }
-    QString MapFileToFilesystem(const QString& uri) const
+    QString MapFileToFilesystem(const app::AnyString& uri) const
     {
         return MapWorkspaceUri(uri, mWorkspaceDir);
     }
