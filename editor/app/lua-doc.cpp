@@ -1631,6 +1631,37 @@ void InitLuaDoc()
     DOC_TABLE_PROPERTY("number", "pi", "The value of pi.");
     DOC_TABLE_PROPERTY("number", "huge", "The value HUGE_VAL, a value larger than or equal to any other numerical value.");
 
+    // Lua scripts that are packaged with the editor.
+
+    // Keyboard script
+    DOC_TABLE2("KB", "Keyboard utilities for common keyboard handling functionality.<br>"
+                     "If you want to use this pre-built functionality you should include this in your own script with<br>"
+                     "require('app://scripts/utility/keyboard.lua')<br>"
+                     "Then you need to make sure that you call KB.KeyUp and KB.KeyDown on any key event your script receives.");
+    DOC_FUNCTION_1("bool", "TestKeyDown", "Test whether the logical game action key is currently active or not, i.e. down or not.",
+                   "unsigned", "key");
+    DOC_FUNCTION_3("void", "KeyDown", "Receive native keyboard key down event and convert it to a logical action key based on the key map.",
+                   "unsigned", "symbol", "unsigned", "modifier_bits", "table", "map");
+    DOC_FUNCTION_3("void", "KeyUp", "Receive native keyboard key up event nad convert it to a logical action key.",
+                   "unsigned", "symbol", "unsigned", "modifier_bits", "table", "map");
+
+    DOC_TABLE2("KB.Keys", "This table defines logical game action keys such as Up, Down etc. "
+                          "You can use these for logical actions in your game instead of relying on "
+                          "key press events directly. This allows the use of an intermediate mapping table "
+                          "to establish a key binding for performing actions in the game.");
+    DOC_TABLE_PROPERTY("unsigned", "Left", "Logical game action key for 'Left'.");
+    DOC_TABLE_PROPERTY("unsigned", "Right", "Logical game action key for 'Right'.");
+    DOC_TABLE_PROPERTY("unsigned", "Up", "Logical game action key for 'Up'.");
+    DOC_TABLE_PROPERTY("unsigned", "Down", "Logical game action key for 'Down'.");
+    DOC_TABLE_PROPERTY("unsigned", "Fire", "Logical game action key for 'Fire'.");
+
+    DOC_TABLE2("KB.WASD", "A logical key binding for binding WASD keys to logical game action keys.<br>"
+                          "W = Up, A = Left, S = Down, D = Right, Space = Fire");
+    DOC_TABLE2("KB.ARROW", "A logical key binding for binding  arrow keys to logical game action keys.<br>"
+                           "Up arrow = Up, Left Arrow = Left, Right Arrow = Right, Down Arrow = Down and Space = Fire");
+
+
+
     std::sort(g_method_docs.begin(), g_method_docs.end(),
         [](const auto& left, const auto& right) {
             if (left.table < right.table)
