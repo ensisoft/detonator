@@ -1242,27 +1242,30 @@ void LuaRuntime::Init()
     mLuaState->open_libraries();
     mLuaState->clear_package_loaders();
 
-    // todo: improve the package loading so that we can realize
-    // other locations for the Lua scripts as well. This might
-    // happen for instance when an exported Lua script is imported
-    // into another project under some folder under the workspace.
-    // In this case the imported Lua script file would not be in
-    // workspace/lua but something like workspace/blabla/lua/
     mLuaState->add_package_loader([this](std::string module) {
         ASSERT(mDataLoader);
         if (!base::EndsWith(module, ".lua"))
             module += ".lua";
 
         DEBUG("Loading Lua module. [module=%1]", module);
-        const auto& file = base::JoinPath(mLuaPath, module);
-        const auto& buff = mDataLoader->LoadEngineDataFile(file);
-        if (!buff)
-            throw std::runtime_error("can't find lua module: " + module);
-        auto ret = mLuaState->load_buffer((const char*)buff->GetData(), buff->GetSize());
+
+        engine::Loader::EngineDataHandle buffer;
+
+        if (base::StartsWith(module, "app://") ||
+            base::StartsWith(module, "pck://") ||
+            base::StartsWith(module, "ws://") ||
+            base::StartsWith(module, "fs://"))
+            buffer = mDataLoader->LoadEngineDataUri(module);
+        else buffer = mDataLoader->LoadEngineDataFile(base::JoinPath(mLuaPath, module));
+
+        if (!buffer)
+            throw GameError("Can't find lua module: " + module);
+
+        auto ret = mLuaState->load_buffer((const char*)buffer->GetData(), buffer->GetSize());
         if (!ret.valid())
         {
             sol::error err = ret;
-            throw std::runtime_error(err.what());
+            throw GameError(base::FormatString("Lua error in '%1'\n%2", module, err.what()));
         }
         return ret.get<sol::function>(); // hmm??
     });

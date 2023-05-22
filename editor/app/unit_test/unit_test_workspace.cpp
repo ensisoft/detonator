@@ -1338,6 +1338,57 @@ void unit_test_packing_texture_name_collision_resample_bug()
     gfx::SetResourceLoader(nullptr);
 }
 
+// try packing scripts that depend on other scripts identified by URI.
+void unit_test_packing_dependent_scripts()
+{
+    DeleteDir("TestWorkspace");
+    DeleteDir("TestPackage");
+
+    // setup a dummy Lua script that is outside the workspace path.
+    QDir d;
+    TEST_REQUIRE(d.mkpath("lua"));
+    TEST_REQUIRE(app::WriteTextFile("lua/foo.lua", "foo.lua"));
+
+
+    // setup a dummy game workspace script that refers to the foo script via URI
+    MakeDir("TestWorkspace");
+    MakeDir("TestWorkspace/lua");
+    TEST_REQUIRE(app::WriteTextFile("TestWorkspace/lua/my_script.lua",
+                                    "\n"
+                                    "require('fs://lua/foo.lua')\n"
+                                    "function Meh()\n"
+                                    "  print('hello')\n"
+                                    "end\n"));
+
+    app::Workspace workspace("TestWorkspace");
+
+    // setup the game content.
+    app::Script  script;
+    script.SetFileURI(workspace.MapFileToWorkspace("TestWorkspace/lua/my_script.lua"));
+    app::ScriptResource  resource(script, "MyScript");
+
+    workspace.SaveResource(resource);
+
+    app::Workspace::ContentPackingOptions options;
+    options.directory          = "TestPackage";
+    options.package_name       = "test";
+    options.write_content_file = true;
+    options.write_config_file  = true;
+    options.combine_textures   = false;
+    options.resize_textures    = false;
+    std::vector<const app::Resource*> resources;
+    resources.push_back(&workspace.GetUserDefinedResource(0));
+
+    TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/lua/foo.lua") == "foo.lua");
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/lua/my_script.lua") ==
+        "\n"
+        "require('pck://lua/foo.lua')\n"
+        "function Meh()\n"
+        "  print('hello')\n"
+        "end\n");
+}
+
 void unit_test_json_export_import()
 {
     DeleteDir("TestWorkspace");
@@ -1946,6 +1997,7 @@ int test_main(int argc, char* argv[])
     unit_test_packing_texture_name_collision();
     unit_test_packing_ui_style_resources();
     unit_test_packing_texture_name_collision_resample_bug();
+    unit_test_packing_dependent_scripts();
     unit_test_json_export_import();
     unit_test_list_deps();
     unit_test_export_import_basic();

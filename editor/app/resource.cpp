@@ -21,6 +21,8 @@
 #include "warnpush.h"
 #  include <boost/algorithm/string/erase.hpp>
 #  include <nlohmann/json.hpp>
+#  include <QRegularExpression>
+#  include <QRegularExpressionMatch>
 #include "warnpop.h"
 
 #include <unordered_map>
@@ -83,6 +85,89 @@ namespace {
             dst_texture_uri = packer.MapUri(src_texture_uri);
             texture->SetMetafileUri(dst_texture_uri);
         }
+    }
+
+    // pack script with dependencies by recursively reading
+    // the script files and looking for other scripts via require
+    void PackScriptRecursive(const app::AnyString& uri, app::ResourcePacker& packer)
+    {
+        // Read the contents of the Lua script file and look for dependent scripts
+        // somehow we need to resolve those dependent scripts in order to package
+        // everything properly.
+        QByteArray src_buffer;
+        if (!packer.ReadFile(uri, &src_buffer))
+        {
+            ERROR("Failed to read script file. [uri='%1']", uri);
+            return;
+        }
+
+        QByteArray dst_buffer;
+        QTextStream dst_stream(&dst_buffer);
+        dst_stream.setCodec("UTF-8");
+
+        class MyStream {
+        public:
+            MyStream(QByteArray& array) : mArray(array)
+            {}
+            QString ReadLine()
+            {
+                QByteArray tmp;
+                for (;mPosition<mArray.size(); ++mPosition)
+                {
+                    tmp.append(mArray[mPosition]);
+                    if (mArray[mPosition] == '\n')
+                    {
+                        ++mPosition;
+                        break;
+                    }
+                }
+                return QString::fromUtf8(tmp);
+            }
+            bool AtEnd() const
+            { return mPosition == mArray.size(); }
+        private:
+            const QByteArray& mArray;
+            int mPosition = 0;
+        } src_stream(src_buffer);
+
+        while (!src_stream.AtEnd())
+        {
+            QString line = src_stream.ReadLine();
+            QRegularExpression require;
+            // \s* matches any number of empty space
+            // [^']* matches any number of any characters except for '
+            // (foo) is a capture group in Qt regex
+            require.setPattern(R"(\s*require\('([^']*)'\)\s*)");
+            ASSERT(require.isValid());
+            QRegularExpressionMatch match = require.match(line);
+            if (!match.hasMatch())
+            {
+                dst_stream << line;
+                continue;
+            }
+            ASSERT(require.captureCount() == 1);
+            // cap(0) is the whole regex
+            const QString& module = match.captured(1);
+            if (module.startsWith("app://") ||
+                module.startsWith("fs://")  ||
+                module.startsWith("ws://"))
+            {
+                DEBUG("Found dependent script. %1 depends on %2", uri, module);
+
+                // big recursive call here. maybe this should be postponed
+                // and we should just explore the requires first and then
+                // visit the files instead of keeping all the current state
+                // and then recursing.?
+                PackScriptRecursive(module, packer);
+
+                packer.CopyFile(module, "lua/");
+                line.replace(module, packer.MapUri(module));
+            }
+            dst_stream << line;
+        }
+        dst_stream.flush();
+
+        packer.WriteFile(uri, "lua/", dst_buffer.constData(), dst_buffer.length());
     }
 
 } // namespace
@@ -345,7 +430,10 @@ QStringList ListResourceDependencies(const uik::Window& window, const QVariantMa
 void PackResource(app::Script& script, ResourcePacker& packer)
 {
     const auto& uri = script.GetFileURI();
-    packer.CopyFile(uri, "lua/");
+
+    PackScriptRecursive(uri, packer);
+    //packer.CopyFile(uri, "lua/");
+
     script.SetFileURI(packer.MapUri(uri));
 }
 
