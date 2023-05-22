@@ -106,6 +106,8 @@ namespace gui
         void TableSelectionChanged(const QItemSelection&, const QItemSelection&);
         void SetInitialFocus();
         void DocumentEdited(int position, int chars_removed, int chars_added);
+
+        void ResourceRemoved(const app::Resource* resource);
     private:
         virtual void keyPressEvent(QKeyEvent* key) override;
         virtual bool eventFilter(QObject* destination, QEvent* event) override;
