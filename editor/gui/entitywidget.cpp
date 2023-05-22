@@ -482,9 +482,9 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     connect(mUI.tree, &TreeWidget::dragEvent,  this, &EntityWidget::TreeDragEvent);
     connect(mUI.tree, &TreeWidget::clickEvent, this, &EntityWidget::TreeClickEvent);
     // connect workspace signals for resource management
-    connect(workspace, &app::Workspace::NewResourceAvailable, this, &EntityWidget::NewResourceAvailable);
-    connect(workspace, &app::Workspace::ResourceToBeDeleted,  this, &EntityWidget::ResourceToBeDeleted);
-    connect(workspace, &app::Workspace::ResourceUpdated,      this, &EntityWidget::ResourceUpdated);
+    connect(workspace, &app::Workspace::ResourceAdded,   this, &EntityWidget::ResourceAdded);
+    connect(workspace, &app::Workspace::ResourceRemoved, this, &EntityWidget::ResourceRemoved);
+    connect(workspace, &app::Workspace::ResourceUpdated, this, &EntityWidget::ResourceUpdated);
 
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     PopulateFromEnum<game::DrawableItemClass::RenderPass>(mUI.dsRenderPass);
@@ -2747,14 +2747,14 @@ void EntityWidget::TreeClickEvent(TreeWidget::TreeItem* item)
     mUI.tree->Update();
 }
 
-void EntityWidget::NewResourceAvailable(const app::Resource* resource)
+void EntityWidget::ResourceAdded(const app::Resource* resource)
 {
     RebuildCombos();
     RebuildMenus();
     DisplayEntityProperties();
     DisplayCurrentNodeProperties();
 }
-void EntityWidget::ResourceToBeDeleted(const app::Resource* resource)
+void EntityWidget::ResourceRemoved(const app::Resource* resource)
 {
     UpdateDeletedResourceReferences();
     RebuildCombos();
