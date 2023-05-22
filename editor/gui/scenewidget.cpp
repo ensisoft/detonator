@@ -1904,6 +1904,8 @@ void SceneWidget::ResourceToBeDeleted(const app::Resource* resource)
 }
 void SceneWidget::ResourceUpdated(const app::Resource* resource)
 {
+    mState.renderer.ClearPaintState();
+
     RebuildCombos();
     RebuildMenus();
 
@@ -2472,6 +2474,8 @@ void SceneWidget::UpdateResourceReferences()
         // resolve the runtime entity klass object reference.
         node.SetEntity(klass);
     }
+    mState.renderer.ClearPaintState();
+
     if (mState.scene->HasScriptFile())
     {
         const auto& scriptId = mState.scene->GetScriptFileId();
