@@ -594,6 +594,8 @@ ScriptWidget::ScriptWidget(app::Workspace* workspace)
     connect(&mWatcher, &QFileSystemWatcher::fileChanged, this, &ScriptWidget::FileWasChanged);
     connect(&mDocument, &QTextDocument::contentsChange, this, &ScriptWidget::DocumentEdited);
 
+    connect(mWorkspace, &app::Workspace::ResourceRemoved, this, &ScriptWidget::ResourceRemoved);
+
     QTimer::singleShot(0, this, &ScriptWidget::SetInitialFocus);
 }
 
@@ -1490,6 +1492,14 @@ void ScriptWidget::DocumentEdited(int position, int chars_removed, int chars_add
     }
     else if (chars_removed || chars_added)
         mLuaParser->EditSource(mDocument, (uint32_t)position, (uint32_t)chars_removed, (uint32_t)chars_added);
+}
+
+void ScriptWidget::ResourceRemoved(const app::Resource* resource)
+{
+    if (resource->GetId() == mResourceID)
+    {
+        mResourceID.clear();
+    }
 }
 
 // static
