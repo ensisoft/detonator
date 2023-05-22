@@ -98,10 +98,8 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
     setWindowTitle(GetValue(mUI.name));
     setFocusPolicy(Qt::StrongFocus);
 
-    connect(workspace, &app::Workspace::NewResourceAvailable,
-        this, &ShapeWidget::NewResourceAvailable);
-    connect(workspace, &app::Workspace::ResourceToBeDeleted,
-        this, &ShapeWidget::ResourceToBeDeleted);
+    connect(workspace, &app::Workspace::ResourceAdded,   this, &ShapeWidget::ResourceAdded);
+    connect(workspace, &app::Workspace::ResourceRemoved, this, &ShapeWidget::ResourceRemoved);
 
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid20x20);
@@ -414,7 +412,7 @@ void ShapeWidget::on_staticInstance_stateChanged(int)
     mPolygon.SetStatic(GetValue(mUI.staticInstance));
 }
 
-void ShapeWidget::NewResourceAvailable(const app::Resource* resource)
+void ShapeWidget::ResourceAdded(const app::Resource* resource)
 {
     if (resource->GetType() != app::Resource::Type::Material)
         return;
@@ -422,7 +420,7 @@ void ShapeWidget::NewResourceAvailable(const app::Resource* resource)
     SetList(mUI.blueprints, mWorkspace->ListUserDefinedMaterials());
 }
 
-void ShapeWidget::ResourceToBeDeleted(const app::Resource* resource)
+void ShapeWidget::ResourceRemoved(const app::Resource* resource)
 {
     if (resource->GetType() != app::Resource::Type::Material)
         return;

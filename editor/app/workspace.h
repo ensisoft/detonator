@@ -741,19 +741,19 @@ namespace app
 
         // this signal is emitted *after* a new resource has been
         // added to the list of resources.
-        void NewResourceAvailable(const Resource* resource);
+        void ResourceAdded(const Resource* resource);
         // this signal is emitted after an existing resource has been updated
         // i.e. saved. The resource object is the *new* resource object
         // that replaces a previous resource of the same type and name.
         void ResourceUpdated(const Resource* resource);
 
         // This signal is emitted after a resource object has been
-        // removed from the list of resources but before it is's
-        // deleted. The pointer to the resource is provided for
-        // convenience for accessing any wanted properties as
-        // long as you don't hold on to the object. After your
-        // signal handler returns the pointer is no longer valid!
-        void ResourceToBeDeleted(const Resource* resource);
+        // removed from the list of resources but before it is deleted.
+        // The pointer to the resource is provided for convenience for
+        // accessing any wanted properties as long as you don't hold on
+        // to the object. After your signal handler returns the pointer
+        // is no longer valid!
+        void ResourceRemoved(const Resource* resource);
 
         // This signal is emitted intermittently during  the
         // execution of BuildReleasePackage.

@@ -131,9 +131,9 @@ namespace gui
         void LifetimeChanged(float min, float max);
         void PointsizeChanged(float min, float max);
         void AlphaChanged(float min, float max);
-        void NewResourceAvailable(const app::Resource* resource);
+        void ResourceAdded(const app::Resource* resource);
         void ResourceUpdated(const app::Resource* resource);
-        void ResourceToBeDeleted(const app::Resource* resource);
+        void ResourceRemoved(const app::Resource* resource);
     private:
         void SetParams();
         void ShowParams();

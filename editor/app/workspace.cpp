@@ -2553,7 +2553,7 @@ void Workspace::SaveResource(const Resource& resource)
     auto& back = mResources[mUserResourceCount - 1];
     ASSERT(back->GetId() == resource.GetId());
     ASSERT(back->GetName() == resource.GetName());
-    emit NewResourceAvailable(back.get());
+    emit ResourceAdded(back.get());
 
     INFO("Saved new resource '%1'", resource.GetName());
     NOTE("Saved new resource '%1'", resource.GetName());
@@ -2854,7 +2854,7 @@ void Workspace::DeleteResources(std::vector<size_t> indices, std::vector<QString
     // by iterating over the separate container. (avoids broken iteration)
     for (const auto& carcass : graveyard)
     {
-        emit ResourceToBeDeleted(carcass.get());
+        emit ResourceRemoved(carcass.get());
     }
 
     // script and tilemap layer data resources are special in the sense that
@@ -2995,7 +2995,7 @@ void Workspace::DuplicateResources(std::vector<size_t> indices)
         mUserResourceCount++;
         endInsertRows();
 
-        emit NewResourceAvailable(dupe_ptr);
+        emit ResourceAdded(dupe_ptr);
     }
 }
 

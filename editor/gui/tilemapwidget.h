@@ -112,8 +112,8 @@ namespace gui
         void on_tileValue_valueChanged(int);
 
         void StartTool();
-        void NewResourceAvailable(const app::Resource* resource);
-        void ResourceToBeDeleted(const app::Resource* resource);
+        void ResourceAdded(const app::Resource* resource);
+        void ResourceRemoved(const app::Resource* resource);
         void ResourceUpdated(const app::Resource* resource);
         void LayerSelectionChanged(const QItemSelection, const QItemSelection);
         void PaletteMaterialChanged(const PaletteMaterial* material);

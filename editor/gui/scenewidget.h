@@ -187,8 +187,8 @@ namespace gui
         void TreeCurrentNodeChangedEvent();
         void TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target);
         void TreeClickEvent(TreeWidget::TreeItem* item);
-        void NewResourceAvailable(const app::Resource* resource);
-        void ResourceToBeDeleted(const app::Resource* resource);
+        void ResourceAdded(const app::Resource* resource);
+        void ResourceRemoved(const app::Resource* resource);
         void ResourceUpdated(const app::Resource* resource);
     private:
         void InitScene(unsigned width, unsigned height);

@@ -456,7 +456,7 @@ bool MainWindow::LoadWorkspace(const QString& dir)
 
     mWorkspace = std::move(workspace);
     connect(mWorkspace.get(), &app::Workspace::ResourceUpdated, this, &MainWindow::ResourceUpdated);
-    connect(mWorkspace.get(), &app::Workspace::NewResourceAvailable, this, &MainWindow::ResourceAvailable);
+    connect(mWorkspace.get(), &app::Workspace::ResourceAdded,   this, &MainWindow::ResourceAdded);
 
     gfx::SetResourceLoader(mWorkspace.get());
 
@@ -2921,9 +2921,9 @@ void MainWindow::CleanGarbage()
 void MainWindow::ResourceUpdated(const app::Resource* resource)
 {
     // forward to one function for now
-    ResourceAvailable(resource);
+    ResourceAdded(resource);
 }
-void MainWindow::ResourceAvailable(const app::Resource* resource)
+void MainWindow::ResourceAdded(const app::Resource* resource)
 {
     for (int i=0; i< GetCount(mUI.mainTab); ++i)
     {
