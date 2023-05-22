@@ -41,9 +41,12 @@ namespace {
 using namespace app;
 QString table_name;
 std::vector<LuaMemberDoc> g_method_docs;
+std::unordered_map<QString, QString> g_table_docs;
 
-void SetTable(const QString& name)
+void SetTable(const QString& name, const QString& doc = QString())
 {
+    g_table_docs[name] = doc;
+
     table_name = name;
 
     if (const auto i = name.indexOf("."); i != -1)
@@ -188,6 +191,7 @@ void AddProperty(LuaMemberType type, const QString& ret, const QString& name, co
 } // namespace
 
 #define DOC_TABLE(name) SetTable(name)
+#define DOC_TABLE2(name, doc) SetTable(name, doc)
 #define DOC_METHOD_0(ret, name, desc) AddMethod(LuaMemberType::Method, ret, name, desc)
 #define DOC_METHOD_1(ret, name, desc, a0type, a0name) AddMethod(LuaMemberType::Method, ret, name, desc, a0type, a0name)
 #define DOC_METHOD_2(ret, name, desc, a0type, a0name, a1type, a1name) AddMethod(LuaMemberType::Method, ret, name, desc, a0type, a0name, a1type, a1name)
@@ -221,7 +225,7 @@ void InitLuaDoc()
     if (done == true) return;
 
     // global objects
-    DOC_TABLE("_G");
+    DOC_TABLE2("_G", "Lua's built-in global data table.");
     DOC_TABLE_PROPERTY("game.Audio", "Audio", "Global audio engine instance.");
     DOC_TABLE_PROPERTY("game.Physics", "Physics", "Global physics engine instance.");
     DOC_TABLE_PROPERTY("game.ClassLibrary", "ClassLib", "Global class library instance.");
@@ -498,8 +502,8 @@ void InitLuaDoc()
     DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.", "base.FPoint", "point");
     DOC_FUNCTION_2("float", "Distance", "Compute the actual distance between two points.", "base.FPoint", "a", "base.FPoint", "b");
     DOC_FUNCTION_2("float", "SquareDistance", "Compute the square distance between two points. This function offers better performance when "
-                                              "the actual distance is not needed but only a value that can be compared when for example finding "
-                                              "the object closest to any other object.",
+                                              "the actual distance is not needed but only a value that can be compared to other squared distances. "
+                                              "This is sufficient when for example finding the object closest to any other object and the actual distance is irrelevant.",
                    "base.FPoint", "a", "base.FPoint", "b");
 
     DOC_TABLE("base.Colors");
@@ -1698,7 +1702,7 @@ QString FormatArgHelp(const LuaMemberDoc& doc, LuaHelpStyle style, LuaHelpFormat
     return "";
 }
 
-QString FormatHelp(const LuaMemberDoc& doc, LuaHelpFormat format)
+QString FormatHelp(const LuaMemberDoc& doc, LuaHelpFormat forat)
 {
     QString str = doc.desc;
     return str.replace("<br>", "\n");
@@ -1828,11 +1832,15 @@ QString GenerateLuaDocHtml()
        font-weight: bold;
        color: DarkRed;
     }
-    span.table {
+    span.table_name {
        font-size: 20px;
        font-weight: bold;
        font-style: italic;
     }
+    span.table_desc {
+        font-size: 18px;
+    }
+
   </style>
   </head>
   <body>
@@ -1842,17 +1850,12 @@ QString GenerateLuaDocHtml()
     stream << "<ul>\n";
     for (const auto& [table, methods] : table_methods)
     {
-        stream << QString("<li id=\"%1\">%1</li>\n").arg(table);
+        stream << toString("<li id=\"%1\">%1</li>\n", table);
         stream << QString("<ul>\n");
-        for (const auto& m : methods)
+        for (const auto& method_name : methods)
         {
-            const auto& method_name   = m;
-            const auto& method_anchor = QString("%1_%2")
-                    .arg(table)
-                    .arg(method_name);
-            stream << QString(R"(<li><a href="#%1">%2</a></li>)")
-                    .arg(method_anchor)
-                    .arg(method_name);
+            const auto& method_anchor = toString("%1_%2", table, method_name);
+            stream << toString(R"(<li><a href="#%1">%2</a></li>)", method_anchor, method_name);
             stream << "\n";
         }
         stream << QString("</ul>\n");
@@ -1867,8 +1870,14 @@ QString GenerateLuaDocHtml()
         const auto& member = app::GetLuaMethodDoc(i);
         if (member.table != current_table)
         {
-            stream << QString("<br><span class=\"table\">%1</span><hr>").arg(member.table);
-            current_table = member.table;
+            QString table_desc;
+            QString table_name = member.table;
+            if (const auto* str = base::SafeFind(g_table_docs, member.table))
+                table_desc = *str;
+            stream << toString("<br><span class=\"table_name\">%1</span>", table_name);
+            stream << toString("<br><span class=\"table_desc\">%1</span>", table_desc);
+            stream << "<hr>";
+            current_table = table_name;
         }
 
         if (member.type == app::LuaMemberType::Function ||
@@ -1923,6 +1932,8 @@ R"(<div class="method" name="%1" id="%2">
         {
             QString name;
             if (member.type == app::LuaMemberType::TableProperty)
+                name = member.table + "." + member.name;
+            else if (member.type == app::LuaMemberType::Table)
                 name = member.table + "." + member.name;
             else name = "obj." + member.name;
 
