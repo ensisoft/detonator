@@ -46,6 +46,7 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings,
     mUI.setupUi(this);
     PopulateFromEnum<MainWidget::GridDensity>(mUI.cmbGrid);
     PopulateFromEnum<GfxWindow::MouseCursor>(mUI.cmbMouseCursor);
+    PopulateFromEnum<QTabWidget::TabPosition>(mUI.cmbTabPosition);
     PopulateFontSizes(mUI.editorFontSize);
     PopulateQtStyles(mUI.cmbStyle);
 
@@ -64,6 +65,7 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings,
     SetUIValue(mUI.cmbStyle,                    settings.style_name);
     SetUIValue(mUI.spinFrameDelay,              settings.frame_delay);
     SetUIValue(mUI.cmbMouseCursor,              settings.mouse_cursor);
+    SetUIValue(mUI.cmbTabPosition,              settings.main_tab_position);
     SetUIValue(mUI.chkSaveAutomatically,        settings.save_automatically_on_play);
     SetUIValue(mUI.chkVSYNC,                    settings.vsync);
     SetUIValue(mUI.edtPythonExecutable,         settings.python_executable);
@@ -114,6 +116,7 @@ void DlgSettings::on_btnAccept_clicked()
     GetUIValue(mUI.chkSaveAutomatically,        &mSettings.save_automatically_on_play);
     GetUIValue(mUI.spinFrameDelay,              &mSettings.frame_delay);
     GetUIValue(mUI.cmbMouseCursor,              &mSettings.mouse_cursor);
+    GetUIValue(mUI.cmbTabPosition,              &mSettings.main_tab_position);
     GetUIValue(mUI.chkVSYNC,                    &mSettings.vsync);
     GetUIValue(mUI.edtPythonExecutable,         &mSettings.python_executable);
     GetUIValue(mUI.edtEmscriptenPath,           &mSettings.emsdk);

@@ -21,6 +21,7 @@
 #include "warnpush.h"
 #  include <QString>
 #  include <QColor>
+#  include <QTabWidget>
 #include "warnpop.h"
 
 #include "editor/gui/gfxwidget.h"
@@ -107,6 +108,8 @@ namespace gui
         QString vcs_cmd_commit_file;
         // List of (file) names to ignore when scanning for VCS files.
         QString vcs_ignore_list;
+        // Main tab tab position.
+        QTabWidget::TabPosition main_tab_position = QTabWidget::TabPosition::North;
     };
 
 } // namespace
