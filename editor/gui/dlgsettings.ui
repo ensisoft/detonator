@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>645</height>
+    <height>660</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -49,29 +49,6 @@
           <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>Style Name</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="cmbStyle"/>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>Open resources</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="1">
            <widget class="QComboBox" name="cmbWinOrTab">
             <item>
@@ -86,6 +63,29 @@
             </item>
            </widget>
           </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Open resources</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="cmbMouseCursor"/>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Style Name</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_21">
             <property name="text">
@@ -96,8 +96,18 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="cmbMouseCursor"/>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="cmbStyle"/>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="cmbTabPosition"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Tab position</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -1185,6 +1195,7 @@
   <tabstop>cmbStyle</tabstop>
   <tabstop>cmbWinOrTab</tabstop>
   <tabstop>cmbMouseCursor</tabstop>
+  <tabstop>cmbTabPosition</tabstop>
   <tabstop>spinFrameDelay</tabstop>
   <tabstop>chkVSYNC</tabstop>
   <tabstop>chkSaveAutomatically</tabstop>
@@ -1234,7 +1245,6 @@
   <tabstop>chkUseCodeHeuristics</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
-  <tabstop>checkBox</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

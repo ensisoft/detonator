@@ -295,6 +295,7 @@ void MainWindow::LoadSettings()
     settings.GetValue("Settings", "vcs_cmd_del_file",           &mSettings.vcs_cmd_del_file);
     settings.GetValue("Settings", "vcs_cmd_commit_file",        &mSettings.vcs_cmd_commit_file);
     settings.GetValue("Settings", "vcs_ignore_list",            &mSettings.vcs_ignore_list);
+    settings.GetValue("Settings", "main_tab_position",          &mSettings.main_tab_position);
     GfxWindow::SetDefaultClearColor(ToGfx(mSettings.clear_color));
     // disabling the VSYNC setting for now since there are just too many problems
     // making it scale nicely when having multiple windows.
@@ -315,6 +316,8 @@ void MainWindow::LoadSettings()
     settings.GetValue("ScriptWidget", "editor_replace_tab_with_spaces", &script_widget_settings.editor_settings.replace_tabs_with_spaces);
     settings.GetValue("ScriptWidget", "editor_num_tab_spaces",          &script_widget_settings.editor_settings.tab_spaces);
     ScriptWidget::SetDefaultSettings(script_widget_settings);
+
+    mUI.mainTab->setTabPosition(mSettings.main_tab_position);
 
     if (!mSettings.style_name.isEmpty())
     {
@@ -1932,6 +1935,8 @@ void MainWindow::on_actionSettings_triggered()
     GfxWindow::SetMouseCursor(mSettings.mouse_cursor);
     gui::SetGridColor(ToGfx(mSettings.grid_color));
 
+    mUI.mainTab->setTabPosition(mSettings.main_tab_position);
+
     if (current_style == mSettings.style_name)
         return;
 
@@ -3125,6 +3130,7 @@ void MainWindow::SaveSettings()
     settings.SetValue("Settings", "vcs_cmd_del_file",           mSettings.vcs_cmd_del_file);
     settings.SetValue("Settings", "vcs_cmd_commit_file",        mSettings.vcs_cmd_commit_file);
     settings.SetValue("Settings", "vcs_ignore_list",            mSettings.vcs_ignore_list);
+    settings.SetValue("Settings", "main_tab_position",          mSettings.main_tab_position);
 
     ScriptWidget::Settings script_widget_settings;
     ScriptWidget::GetDefaultSettings(&script_widget_settings);
