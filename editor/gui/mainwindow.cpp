@@ -2852,9 +2852,17 @@ void MainWindow::OpenResource(const QString& id)
         const auto open_new_window = mSettings.default_open_win_or_tab == "Window";
 
         if (!FocusWidget(id))
-            ShowWidget(MakeWidget(resource->GetType(), resource), open_new_window);
+        {
+            if (auto* child = ShowWidget(MakeWidget(resource->GetType(), resource), open_new_window))
+            {
+                child->ActivateWindow();
+            }
+            else
+            {
+                this->activateWindow();
+            }
+        }
     }
-
 }
 
 void MainWindow::OpenRecentWorkspace()
@@ -3322,6 +3330,7 @@ bool MainWindow::FocusWidget(const QString& id)
         if (widget->GetId() == id)
         {
             mUI.mainTab->setCurrentIndex(i);
+            this->activateWindow();
             return true;
         }
     }
