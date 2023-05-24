@@ -84,6 +84,9 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # https://gcc.gnu.org/onlinedocs/libstdc++/manual/debug_mode_using.html#debug_mode.using.specific
     #add_compile_definitions(-D_GLIBCXX_DEBUG)
 
+    # and just like so, suddenly GCC no longer compiles the project after a Linux upgrade!
+    add_compile_options(-Wno-changes-meaning)
+
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     message(STATUS "Building with MSVC")
     # /wd4251 Qt dll interface crap
