@@ -722,7 +722,6 @@ void MaterialWidget::on_textures_customContextMenuRequested(const QPoint&)
 {
     const auto* item = GetSelectedItem(mUI.textures);
     const auto& tag  = (QString)GetItemTag(item);
-    SetEnabled(mUI.actionNewMap,    tag == "");
     SetEnabled(mUI.actionDelMap,    tag == "map");
     SetEnabled(mUI.actionAddFile,   tag == "map");
     SetEnabled(mUI.actionAddText,   tag == "map");
