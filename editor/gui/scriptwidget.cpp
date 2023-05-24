@@ -116,7 +116,7 @@ public:
             while (--pos >= 0)
             {
                 auto cha = document.characterAt(pos);
-                if (cha.isSpace())
+                if (cha.isSpace()  || cha == '(' || cha == '[')
                     break;
                 word.prepend(cha);
             }
