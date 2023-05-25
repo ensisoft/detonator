@@ -269,6 +269,7 @@ struct OpenGLFunctions
     PFNGLDEPTHFUNCPROC               glDepthFunc;
     PFNGLVIEWPORTPROC                glViewport;
     PFNGLDRAWARRAYSPROC              glDrawArrays;
+    PFNGLDRAWELEMENTSPROC            glDrawElements;
     PFNGLGETATTRIBLOCATIONPROC       glGetAttribLocation;
     PFNGLVERTEXATTRIBPOINTERPROC     glVertexAttribPointer;
     PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
@@ -363,6 +364,7 @@ public:
         RESOLVE(glDepthFunc);
         RESOLVE(glViewport);
         RESOLVE(glDrawArrays);
+        RESOLVE(glDrawElements);
         RESOLVE(glGetAttribLocation);
         RESOLVE(glVertexAttribPointer);
         RESOLVE(glEnableVertexAttribArray);
@@ -513,18 +515,22 @@ public:
    ~OpenGLES2GraphicsDevice()
     {
         DEBUG("~OpenGLES2GraphicsDevice");
-       // make sure our cleanup order is specific so that the
-       // resources are deleted before the context is deleted.
-       mFBOs.clear();
-       mTextures.clear();
-       mShaders.clear();
-       mPrograms.clear();
-       mGeoms.clear();
+        // make sure our cleanup order is specific so that the
+        // resources are deleted before the context is deleted.
+        mFBOs.clear();
+        mTextures.clear();
+        mShaders.clear();
+        mPrograms.clear();
+        mGeoms.clear();
 
-       for (auto& buffer : mBuffers)
-       {
-           GL_CALL(glDeleteBuffers(1, &buffer.name));
-       }
+        for (auto& buffer : mBuffers[0])
+        {
+            GL_CALL(glDeleteBuffers(1, &buffer.name));
+        }
+        for (auto& buffer : mBuffers[1])
+        {
+            GL_CALL(glDeleteBuffers(1, &buffer.name));
+        }
     }
 
     virtual void ClearColor(const gfx::Color4f& color) override
@@ -782,14 +788,23 @@ public:
         // clear pending uniform state after everything has been set.
         myprog->ClearPendingUniforms();
 
-        const auto buffer_byte_size = mygeom->GetByteSize();
-        if (buffer_byte_size == 0)
+        // this check is fine for any draw case because even when drawing with
+        // indices there should be vertex data. if there isn't that means the
+        // geometry is dummy, i.e. contains not vertex data.
+        // todo: is this a BUG actually??
+        const auto vertex_buffer_byte_size = mygeom->GetVertexBufferByteSize();
+        if (vertex_buffer_byte_size == 0)
             return;
+
+        const auto index_buffer_type = mygeom->GetIndexBufferType();
+        const auto index_byte_size = gfx::Geometry::GetIndexByteSize(index_buffer_type);
+        const auto index_buffer_byte_size = mygeom->GetIndexBufferByteSize();
+        const auto buffer_index_count = index_buffer_byte_size / index_byte_size;
 
         const auto& vertex_layout = mygeom->GetVertexLayout();
         ASSERT(vertex_layout.vertex_struct_size && "Vertex layout has not been set.");
 
-        const auto buffer_vertex_count = buffer_byte_size / vertex_layout.vertex_struct_size;
+        const auto buffer_vertex_count = vertex_buffer_byte_size / vertex_layout.vertex_struct_size;
 
         TRACE_ENTER(SetState);
         GL_CALL(glLineWidth(state.line_width));
@@ -1075,14 +1090,23 @@ public:
         // start drawing geometry.
 
         // the brain-damaged API goes like this... when using DrawArrays with a client side
-        // data pointer the argument is actually a pointer to the data.
-        // When using a VBO the pointer is not a pointer but an offset to the VBO.
-        const uint8_t* base_ptr =  (const uint8_t*)mygeom->GetByteOffset();
+        // data pointer the glVertexAttribPointer 'pointer' argument is actually a pointer
+        // to the vertex data. But when using a VBO the pointer is not a pointer but an offset
+        // into the contents of the VBO.
+        const uint8_t* vertex_base_ptr = (const uint8_t*)mygeom->GetVertexBufferByteOffset();
+        // When an element array (i.e. an index buffer) is used the pointer argument in the
+        // glDrawElements call changes from being pointer to the client side index data to
+        // an offset into the element/index buffer.
+        const void* index_buffer_offset = (const void*)mygeom->GetIndexBufferByteOffset();
 
-        const auto& buffer = mBuffers[mygeom->GetBufferIndex()];
+        const auto* vertex_buffer = &mBuffers[0][mygeom->GetVertexBufferIndex()];
+        const auto* index_buffer = mygeom->UsesIndexBuffer() ? &mBuffers[1][mygeom->GetIndexBufferIndex()] : nullptr;
 
         TRACE_ENTER(BindBuffers);
-        GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer.name));
+        GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer->name));
+
+        if (index_buffer)
+            GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer->name));
 
         // first enable the vertex attributes.
         for (const auto& attr : vertex_layout.attributes)
@@ -1092,7 +1116,7 @@ public:
                 continue;
             const auto size   = attr.num_vector_components;
             const auto stride = vertex_layout.vertex_struct_size;
-            const auto attr_ptr = base_ptr + attr.offset;
+            const auto attr_ptr = vertex_base_ptr + attr.offset;
             GL_CALL(glVertexAttribPointer(location, size, GL_FLOAT, GL_FALSE, stride, attr_ptr));
             GL_CALL(glEnableVertexAttribArray(location));
         }
@@ -1103,22 +1127,43 @@ public:
         const auto& cmds = mygeom->GetNumDrawCmds();
         for (size_t i=0; i<cmds; ++i)
         {
+            // the number of buffer elements to draw by default if the draw doesn't specify
+            // any actual number of elements. if we're using index buffer then consider the
+            // number of index elements, otherwise consider the number of vertices.
+            const auto buffer_element_count = index_buffer ? buffer_index_count : buffer_vertex_count;
+
             const auto& draw  = mygeom->GetDrawCommand(i);
-            const auto count  = draw.count == std::numeric_limits<std::size_t>::max() ? buffer_vertex_count : draw.count;
+            const auto count  = draw.count == std::numeric_limits<std::size_t>::max() ? buffer_element_count : draw.count;
             const auto type   = draw.type;
             const auto offset = draw.offset;
 
+            GLenum draw_mode;
             if (type == gfx::Geometry::DrawType::Triangles)
-                GL_CALL(glDrawArrays(GL_TRIANGLES, offset, count));
+                draw_mode = GL_TRIANGLES;
             else if (type == gfx::Geometry::DrawType::Points)
-                GL_CALL(glDrawArrays(GL_POINTS, offset, count));
+                draw_mode = GL_POINTS;
             else if (type == gfx::Geometry::DrawType::TriangleFan)
-                GL_CALL(glDrawArrays(GL_TRIANGLE_FAN, offset, count));
+                draw_mode = GL_TRIANGLE_FAN;
             else if (type == gfx::Geometry::DrawType::Lines)
-                GL_CALL(glDrawArrays(GL_LINES, offset, count));
+                draw_mode = GL_LINES;
             else if (type == gfx::Geometry::DrawType::LineLoop)
-                GL_CALL(glDrawArrays(GL_LINE_LOOP, offset, count));
+                draw_mode = GL_LINE_LOOP;
             else BUG("Unknown draw primitive type.");
+
+            if (index_buffer)
+            {
+                GLenum index_type;
+                if (index_buffer_type == gfx::Geometry::IndexType::Index16)
+                    index_type = GL_UNSIGNED_SHORT;
+                else if (index_buffer_type == gfx::Geometry::IndexType::Index32)
+                    index_type = GL_UNSIGNED_INT;
+                else BUG("missing index type");
+                GL_CALL(glDrawElements(draw_mode, count, index_type, index_buffer_offset));
+            }
+            else
+            {
+                GL_CALL(glDrawArrays(draw_mode, offset, count));
+            }
         }
         TRACE_LEAVE(DrawGeometry);
     }
@@ -1207,12 +1252,24 @@ public:
         // vertex buffers. this is achieved by re-specifying the contents of the
         // buffer by using nullptr data upload.
         // https://www.khronos.org/opengl/wiki/Buffer_Object_Streaming
-        for (auto& buff : mBuffers)
+
+        // vertex buffers
+        for (auto& buff : mBuffers[0])
         {
             if (buff.usage == gfx::Geometry::Usage::Stream)
             {
                 GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buff.name));
                 GL_CALL(glBufferData(GL_ARRAY_BUFFER, buff.capacity, nullptr, GL_STREAM_DRAW));
+                buff.offset = 0;
+            }
+        }
+        // index buffers
+        for (auto& buff : mBuffers[1])
+        {
+            if (buff.usage == gfx::Geometry::Usage::Stream)
+            {
+                GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buff.name));
+                GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, buff.capacity, nullptr, GL_STREAM_DRAW));
                 buff.offset = 0;
             }
         }
@@ -1273,7 +1330,7 @@ public:
     virtual void GetResourceStats(ResourceStats* stats) const override
     {
         std::memset(stats, 0, sizeof(*stats));
-        for (const auto& buffer : mBuffers)
+        for (const auto& buffer : mBuffers[0])
         {
             if (buffer.usage == gfx::Geometry::Usage::Static)
             {
@@ -1289,6 +1346,24 @@ public:
             {
                 stats->streaming_vbo_mem_alloc += buffer.capacity;
                 stats->streaming_vbo_mem_use   += buffer.offset;
+            }
+        }
+        for (const auto& buffer : mBuffers[1])
+        {
+            if (buffer.usage == gfx::Geometry::Usage::Static)
+            {
+                stats->static_ibo_mem_alloc += buffer.capacity;
+                stats->static_ibo_mem_use   += buffer.offset;
+            }
+            else if (buffer.usage == gfx::Geometry::Usage::Dynamic)
+            {
+                stats->dynamic_ibo_mem_alloc += buffer.capacity;
+                stats->dynamic_ibo_mem_use   += buffer.offset;
+            }
+            else if (buffer.usage == gfx::Geometry::Usage::Stream)
+            {
+                stats->streaming_ibo_mem_alloc += buffer.capacity;
+                stats->streaming_ibo_mem_use   += buffer.offset;
             }
         }
     }
@@ -1312,7 +1387,12 @@ public:
     virtual std::shared_ptr<gfx::Device> GetSharedGraphicsDevice() override
     { return shared_from_this(); }
 
-    std::tuple<size_t ,size_t> AllocateBuffer(size_t bytes, gfx::Geometry::Usage usage)
+    enum class BufferType {
+        VertexBuffer = GL_ARRAY_BUFFER,
+        IndexBuffer  = GL_ELEMENT_ARRAY_BUFFER
+    };
+
+    std::tuple<size_t ,size_t> AllocateBuffer(size_t bytes, gfx::Geometry::Usage usage, BufferType type)
     {
         // there are 3 different types of buffers and each have their
         // own allocation strategy:
@@ -1366,9 +1446,11 @@ public:
         }
         else BUG("Unsupported vertex buffer type.");
 
-        for (size_t i=0; i<mBuffers.size(); ++i)
+        auto& buffers = type == BufferType::VertexBuffer ? mBuffers[0] : mBuffers[1];
+
+        for (size_t i=0; i<buffers.size(); ++i)
         {
-            auto& buffer = mBuffers[i];
+            auto& buffer = buffers[i];
             const auto available = buffer.capacity - buffer.offset;
             if ((available >= bytes) && (buffer.usage == usage))
             {
@@ -1379,22 +1461,25 @@ public:
             }
         }
 
-        VertexBuffer buffer;
+        BufferObject buffer;
         buffer.usage    = usage;
         buffer.offset   = bytes;
         buffer.capacity = capacity;
         buffer.refcount = 1;
         GL_CALL(glGenBuffers(1, &buffer.name));
-        GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer.name));
-        GL_CALL(glBufferData(GL_ARRAY_BUFFER, buffer.capacity, nullptr, flag));
-        mBuffers.push_back(buffer);
-        DEBUG("Allocated new vertex buffer. [vbo=%1, size=%2, type=%3]", buffer.name, buffer.capacity, usage);
-        return {mBuffers.size()-1, 0};
+        GL_CALL(glBindBuffer(static_cast<GLenum>(type), buffer.name));
+        GL_CALL(glBufferData(static_cast<GLenum>(type), buffer.capacity, nullptr, flag));
+        buffers.push_back(buffer);
+        DEBUG("Allocated new buffer object. [bo=%1, size=%2, type=%3, type=%4]", buffer.name, buffer.capacity, usage,
+              GLEnumToStr(static_cast<GLenum>(type)));
+        return {buffers.size()-1, 0};
     }
-    void FreeBuffer(size_t index, size_t offset, size_t bytes, gfx::Geometry::Usage usage)
+    void FreeBuffer(size_t index, size_t offset, size_t bytes, gfx::Geometry::Usage usage, BufferType type)
     {
-        ASSERT(index < mBuffers.size());
-        auto& buffer = mBuffers[index];
+        auto& buffers = type == BufferType::VertexBuffer ? mBuffers[0] : mBuffers[1];
+
+        ASSERT(index < buffers.size());
+        auto& buffer = buffers[index];
         ASSERT(buffer.refcount > 0);
         buffer.refcount--;
 
@@ -1403,24 +1488,27 @@ public:
             if (buffer.refcount == 0)
                 buffer.offset = 0;
         }
-        if (usage == gfx::Geometry::Usage::Static)
-            DEBUG("Free vertex data. [vbo=%1, bytes=%2, offset=%3, type=%4, refs=%5]", buffer.name,
-                  bytes, offset, buffer.usage, buffer.refcount);
+        if (usage == gfx::Geometry::Usage::Static) {
+            DEBUG("Free buffer data. [bo=%1, bytes=%2, offset=%3, type=%4, refs=%5, type=%6]",
+                  buffer.name, bytes, offset, buffer.usage, buffer.refcount, GLEnumToStr(static_cast<GLenum>(type)));
+        }
     }
 
-    void UploadBuffer(size_t index, size_t offset, const void* data, size_t bytes, gfx::Geometry::Usage usage)
+    void UploadBuffer(size_t index, size_t offset, const void* data, size_t bytes, gfx::Geometry::Usage usage, BufferType type)
     {
-        ASSERT(index < mBuffers.size());
-        auto& buffer = mBuffers[index];
+        auto& buffers = type == BufferType::VertexBuffer ? mBuffers[0] : mBuffers[1];
+
+        ASSERT(index < buffers.size());
+        auto& buffer = buffers[index];
         ASSERT(offset + bytes <= buffer.capacity);
-        GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, buffer.name));
-        GL_CALL(glBufferSubData(GL_ARRAY_BUFFER, offset, bytes, data));
+        GL_CALL(glBindBuffer(static_cast<GLenum>(type), buffer.name));
+        GL_CALL(glBufferSubData(static_cast<GLenum>(type), offset, bytes, data));
 
         if (buffer.usage == gfx::Geometry::Usage::Static)
         {
             const int percent_full = 100 * (double)buffer.offset / (double)buffer.capacity;
-            DEBUG("Uploaded vertex data. [vbo=%1, bytes=%2, offset=%3, full=%4%, type=%5]", buffer.name,
-                  bytes, offset, percent_full, buffer.usage);
+            DEBUG("Uploaded buffer data. [bo=%1, bytes=%2, offset=%3, full=%4%, usage=%5, type=%6]",
+                  buffer.name, bytes, offset, percent_full, buffer.usage, GLEnumToStr(static_cast<GLenum>(type)));
         }
     }
     bool SetupFBO()
@@ -1798,13 +1886,19 @@ private:
     class GeomImpl : public gfx::Geometry
     {
     public:
+        using BufferType = OpenGLES2GraphicsDevice::BufferType;
+
         GeomImpl(OpenGLES2GraphicsDevice* device) : mDevice(device)
         {}
        ~GeomImpl()
         {
-            if (mBufferSize)
+            if (mVertexBufferSize)
             {
-                mDevice->FreeBuffer(mBufferIndex, mBufferOffset, mBufferSize, mBufferUsage);
+                mDevice->FreeBuffer(mVertexBufferIndex, mVertexBufferOffset, mVertexBufferSize, mVertexBufferUsage, BufferType::VertexBuffer);
+            }
+            if (mIndexBufferSize)
+            {
+                mDevice->FreeBuffer(mIndexBufferIndex, mIndexBufferOffset, mIndexBufferSize, mIndexBufferUsage, BufferType::IndexBuffer);
             }
         }
         virtual void ClearDraws() override
@@ -1831,28 +1925,52 @@ private:
         virtual void SetVertexLayout(const gfx::VertexLayout& layout) override
         { mLayout = layout; }
 
-        virtual void Upload(const void* data, size_t bytes, Usage usage) override
+        virtual void UploadVertices(const void* data, size_t bytes, Usage usage) override
         {
             if (data == nullptr || bytes == 0)
             {
-                if (mBufferSize)
-                    mDevice->FreeBuffer(mBufferIndex, mBufferOffset, mBufferSize, mBufferUsage);
+                if (mVertexBufferSize)
+                    mDevice->FreeBuffer(mVertexBufferIndex, mVertexBufferOffset, mVertexBufferSize, mVertexBufferUsage, BufferType::VertexBuffer);
 
-                mBufferSize  = 0;
-                mBufferUsage = usage;
+                mVertexBufferSize  = 0;
+                mVertexBufferUsage = usage;
                 return;
             }
 
-            if ((usage != mBufferUsage) || (bytes > mBufferSize))
+            if ((usage != mVertexBufferUsage) || (bytes > mVertexBufferSize))
             {
-                if (mBufferSize)
-                    mDevice->FreeBuffer(mBufferIndex, mBufferOffset, mBufferSize, mBufferUsage);
+                if (mVertexBufferSize)
+                    mDevice->FreeBuffer(mVertexBufferIndex, mVertexBufferOffset, mVertexBufferSize, mVertexBufferUsage, BufferType::VertexBuffer);
 
-                std::tie(mBufferIndex, mBufferOffset) = mDevice->AllocateBuffer(bytes, usage);
+                std::tie(mVertexBufferIndex, mVertexBufferOffset) = mDevice->AllocateBuffer(bytes, usage, BufferType::VertexBuffer);
             }
-            mDevice->UploadBuffer(mBufferIndex, mBufferOffset, data, bytes, usage);
-            mBufferSize  = bytes;
-            mBufferUsage = usage;
+            mDevice->UploadBuffer(mVertexBufferIndex, mVertexBufferOffset, data, bytes, usage, BufferType::VertexBuffer);
+            mVertexBufferSize  = bytes;
+            mVertexBufferUsage = usage;
+        }
+        virtual void UploadIndices(const void* data, size_t bytes, IndexType type, Usage usage) override
+        {
+            if (data == nullptr || bytes == 0)
+            {
+                if (mIndexBufferSize)
+                    mDevice->FreeBuffer(mIndexBufferIndex, mIndexBufferOffset, mIndexBufferSize, mIndexBufferUsage, BufferType::IndexBuffer);
+
+                mIndexBufferSize  = 0;
+                mIndexBufferUsage = usage;
+                return;
+            }
+
+            if ((usage != mIndexBufferUsage) || (bytes > mIndexBufferSize))
+            {
+                if (mIndexBufferSize)
+                    mDevice->FreeBuffer(mIndexBufferIndex, mIndexBufferOffset, mIndexBufferSize, mIndexBufferUsage, BufferType::IndexBuffer);
+
+                std::tie(mIndexBufferIndex, mIndexBufferOffset) = mDevice->AllocateBuffer(bytes, usage, BufferType::IndexBuffer);
+            }
+            mDevice->UploadBuffer(mIndexBufferIndex, mIndexBufferOffset, data, bytes, usage, BufferType::IndexBuffer);
+            mIndexBufferSize  = bytes;
+            mIndexBufferUsage = usage;
+            mIndexBufferType  = type;
         }
 
         virtual void SetDataHash(size_t hash) override
@@ -1860,7 +1978,7 @@ private:
         virtual size_t GetDataHash() const  override
         { return mHash; }
 
-        void SetFrameStamp(size_t frame_number) const
+        inline void SetFrameStamp(size_t frame_number) const noexcept
         { mFrameNumber = frame_number; }
 
         struct DrawCommand {
@@ -1868,30 +1986,46 @@ private:
             size_t count  = 0;
             size_t offset = 0;
         };
-        size_t GetFrameStamp() const
+        inline size_t GetFrameStamp() const noexcept
         { return mFrameNumber; }
-        size_t GetBufferIndex() const
-        { return mBufferIndex; }
-        size_t GetByteOffset() const
-        { return mBufferOffset; }
-        size_t GetByteSize() const
-        { return mBufferSize; }
-        size_t GetNumDrawCmds() const
+        inline size_t GetVertexBufferIndex() const noexcept
+        { return mVertexBufferIndex; }
+        inline size_t GetIndexBufferIndex() const noexcept
+        { return mIndexBufferIndex; }
+        inline size_t GetVertexBufferByteOffset() const noexcept
+        { return mVertexBufferOffset; }
+        inline size_t GetIndexBufferByteOffset() const noexcept
+        { return mIndexBufferOffset; }
+        inline size_t GetVertexBufferByteSize() const noexcept
+        { return mVertexBufferSize; }
+        inline size_t GetIndexBufferByteSize() const noexcept
+        { return mIndexBufferSize; }
+        inline IndexType GetIndexBufferType() const noexcept
+        { return mIndexBufferType; }
+        inline bool UsesIndexBuffer() const noexcept
+        { return mIndexBufferSize != 0; }
+
+        inline size_t GetNumDrawCmds() const noexcept
         { return mDrawCommands.size(); }
-        const DrawCommand& GetDrawCommand(size_t index) const
+        inline const DrawCommand& GetDrawCommand(size_t index) const noexcept
         { return mDrawCommands[index]; }
-        const gfx::VertexLayout& GetVertexLayout() const
+        inline const gfx::VertexLayout& GetVertexLayout() const noexcept
         { return mLayout; }
     private:
         OpenGLES2GraphicsDevice* mDevice = nullptr;
 
         mutable std::size_t mFrameNumber = 0;
         std::vector<DrawCommand> mDrawCommands;
-        std::size_t mBufferSize   = 0;
-        std::size_t mBufferOffset = 0;
-        std::size_t mBufferIndex  = 0;
+        std::size_t mVertexBufferSize   = 0;
+        std::size_t mVertexBufferOffset = 0;
+        std::size_t mVertexBufferIndex  = 0;
+        std::size_t mIndexBufferSize   = 0;
+        std::size_t mIndexBufferOffset = 0;
+        std::size_t mIndexBufferIndex  = 0;
         std::size_t mHash = 0;
-        Usage mBufferUsage = Usage::Static;
+        Usage mVertexBufferUsage = Usage::Static;
+        Usage mIndexBufferUsage  = Usage::Static;
+        IndexType mIndexBufferType = IndexType::Index16;
         gfx::VertexLayout mLayout;
     };
 
@@ -2621,14 +2755,15 @@ private:
     // texture units and their current settings.
     TextureUnits mTextureUnits;
 
-    struct VertexBuffer {
+    struct BufferObject {
         gfx::Geometry::Usage usage = gfx::Geometry::Usage::Static;
         GLuint name     = 0;
         size_t capacity = 0;
         size_t offset   = 0;
         size_t refcount = 0;
     };
-    std::vector<VertexBuffer> mBuffers;
+    // vertex buffers at index 0 and index buffers at index 1
+    std::vector<BufferObject> mBuffers[2];
     struct Extensions {
         bool EXT_sRGB = false;
         bool OES_packed_depth_stencil = false;
