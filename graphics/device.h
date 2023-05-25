@@ -222,12 +222,20 @@ namespace gfx
         virtual Bitmap<RGBA> ReadColorBuffer(unsigned x, unsigned y, unsigned width, unsigned height) const = 0;
 
         struct ResourceStats {
-            std::size_t dynamic_vbo_mem_use   = 0;
-            std::size_t dynamic_vbo_mem_alloc = 0;
-            std::size_t static_vbo_mem_use    = 0;
-            std::size_t static_vbo_mem_alloc  = 0;
-            std::size_t streaming_vbo_mem_use = 0;
+            // vertex buffer objects
+            std::size_t dynamic_vbo_mem_use     = 0;
+            std::size_t dynamic_vbo_mem_alloc   = 0;
+            std::size_t static_vbo_mem_use      = 0;
+            std::size_t static_vbo_mem_alloc    = 0;
+            std::size_t streaming_vbo_mem_use   = 0;
             std::size_t streaming_vbo_mem_alloc = 0;
+            // index buffer objects
+            std::size_t dynamic_ibo_mem_use     = 0;
+            std::size_t dynamic_ibo_mem_alloc   = 0;
+            std::size_t static_ibo_mem_use      = 0;
+            std::size_t static_ibo_mem_alloc    = 0;
+            std::size_t streaming_ibo_mem_use   = 0;
+            std::size_t streaming_ibo_mem_alloc = 0;
         };
         virtual void GetResourceStats(ResourceStats* stats) const = 0;
 

@@ -489,58 +489,79 @@ void unit_test_render_color_only()
 
     auto dev = CreateDevice();
 
-    dev->BeginFrame();
-    dev->ClearColor(gfx::Color::Red);
-
-    auto* geom = dev->MakeGeometry("geom");
-    const gfx::Vertex verts[] = {
-        { {-1,  1}, {0, 1} },
-        { {-1, -1}, {0, 0} },
-        { { 1, -1}, {1, 0} },
-
-        { {-1,  1}, {0, 1} },
-        { { 1, -1}, {1, 0} },
-        { { 1,  1}, {1, 1} }
-    };
-    geom->SetVertexBuffer(verts, 6);
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
-
-    const std::string& fssrc =
+    constexpr const char* fragment_src =
 R"(#version 100
 precision mediump float;
 void main() {
   gl_FragColor = vec4(1.0);
 })";
 
-    const std::string& vssrc =
+    constexpr const char* vertex_src =
 R"(#version 100
 attribute vec2 aPosition;
 void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
-    auto* vs = dev->MakeShader("vert");
-    auto* fs = dev->MakeShader("frag");
-    TEST_REQUIRE(vs->CompileSource(vssrc));
-    TEST_REQUIRE(fs->CompileSource(fssrc));
-    std::vector<const gfx::Shader*> shaders;
-    shaders.push_back(vs);
-    shaders.push_back(fs);
 
-    auto* prog = dev->MakeProgram("prog");
-    TEST_REQUIRE(prog->Build(shaders));
+    auto* prog = MakeTestProgram(*dev, vertex_src, fragment_src);
 
     gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
-    state.bWriteColor = true;
-    state.viewport = gfx::IRect(0, 0, 10, 10);
+    state.bWriteColor  = true;
+    state.blending     = gfx::Device::State::BlendOp::None;
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+    state.viewport     = gfx::IRect(0, 0, 10, 10);
 
-    dev->Draw(*prog, *geom, state);
-    dev->EndFrame();
+    // draw using vertex buffer only
+    {
+        auto* geom = dev->MakeGeometry("geom");
+        constexpr const gfx::Vertex vertices[] = {
+            { {-1,  1}, {0, 1} },
+            { {-1, -1}, {0, 0} },
+            { { 1, -1}, {1, 0} },
 
-    // this has alpha in it.
-    const auto& bmp = dev->ReadColorBuffer(10, 10);
-    TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+            { {-1,  1}, {0, 1} },
+            { { 1, -1}, {1, 0} },
+            { { 1,  1}, {1, 1} }
+        };
+        geom->SetVertexBuffer(vertices, 6);
+        geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+
+        dev->BeginFrame();
+          dev->ClearColor(gfx::Color::Red);
+          dev->Draw(*prog, *geom, state);
+        dev->EndFrame();
+
+        // this has alpha in it.
+        const auto& bmp = dev->ReadColorBuffer(10, 10);
+        TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+    }
+
+    // draw using vertex and index buffer
+    {
+        auto* geom =  dev->MakeGeometry("geom");
+        constexpr const gfx::Vertex vertices[] = {
+            { {-1,  1}, {0, 1} },
+            { {-1, -1}, {0, 0} },
+            { { 1, -1}, {1, 0} },
+            { { 1,  1}, {1, 1} }
+        };
+        constexpr const gfx::Index16 indices[] = {
+            0, 1, 2, // bottom triangle
+            0, 2, 3  // top triangle
+        };
+        geom->SetVertexBuffer(vertices, 4);
+        geom->SetIndexBuffer(indices, 6);
+        geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+
+        dev->BeginFrame();
+            dev->ClearColor(gfx::Color::Red);
+            dev->Draw(*prog, *geom, state);
+        dev->EndFrame();
+
+        // this has alpha in it.
+        const auto& bmp = dev->ReadColorBuffer(10, 10);
+        TEST_REQUIRE(bmp.Compare(gfx::Color::White));
+    }
 }
 
 void unit_test_render_with_single_texture()
@@ -1468,7 +1489,7 @@ void main() {
     }
 }
 
-void unit_test_buffer_allocation()
+void unit_test_vbo_allocation()
 {
     TEST_CASE(test::Type::Feature)
 
@@ -1479,7 +1500,7 @@ void unit_test_buffer_allocation()
     // static
     {
         auto* foo = dev->MakeGeometry("foo");
-        foo->Upload(junk_data, sizeof(junk_data), gfx::Geometry::Usage::Static);
+        foo->UploadVertices(junk_data, sizeof(junk_data), gfx::Geometry::Usage::Static);
 
         gfx::Device::ResourceStats stats;
 
@@ -1501,7 +1522,7 @@ void unit_test_buffer_allocation()
         TEST_REQUIRE(stats.static_vbo_mem_use == sizeof(junk_data));
 
         // should reuse the same buffer since the data is the same.
-        foo->Upload(junk_data, sizeof(junk_data), gfx::Geometry::Usage::Static);
+        foo->UploadVertices(junk_data, sizeof(junk_data), gfx::Geometry::Usage::Static);
 
         dev->GetResourceStats(&stats);
         TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
@@ -1511,7 +1532,7 @@ void unit_test_buffer_allocation()
         TEST_REQUIRE(stats.static_vbo_mem_use == sizeof(junk_data));
 
         // should reuse the same buffer since the data is less
-        foo->Upload(junk_data, sizeof(junk_data)/2, gfx::Geometry::Usage::Static);
+        foo->UploadVertices(junk_data, sizeof(junk_data) / 2, gfx::Geometry::Usage::Static);
 
         dev->GetResourceStats(&stats);
         TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
@@ -1521,7 +1542,7 @@ void unit_test_buffer_allocation()
         TEST_REQUIRE(stats.static_vbo_mem_use == sizeof(junk_data)); // no decrease here.
 
         auto* bar = dev->MakeGeometry("bar");
-        bar->Upload(junk_data, sizeof(junk_data)/2, gfx::Geometry::Usage::Static);
+        bar->UploadVertices(junk_data, sizeof(junk_data) / 2, gfx::Geometry::Usage::Static);
         dev->GetResourceStats(&stats);
         TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
         TEST_REQUIRE(stats.streaming_vbo_mem_alloc == 0);
@@ -1535,7 +1556,7 @@ void unit_test_buffer_allocation()
     // streaming. cleared after every frame, allocations remain.
     {
         auto* foo = dev->MakeGeometry("foo");
-        foo->Upload(junk_data, sizeof(junk_data), gfx::Geometry::Usage::Stream);
+        foo->UploadVertices(junk_data, sizeof(junk_data), gfx::Geometry::Usage::Stream);
 
         gfx::Device::ResourceStats stats;
 
@@ -1563,7 +1584,7 @@ void unit_test_buffer_allocation()
     // dynamic
     {
         auto* foo = dev->MakeGeometry("foo");
-        foo->Upload(junk_data, sizeof(junk_data), gfx::Geometry::Usage::Dynamic);
+        foo->UploadVertices(junk_data, sizeof(junk_data), gfx::Geometry::Usage::Dynamic);
 
         gfx::Device::ResourceStats stats;
 
@@ -1576,7 +1597,7 @@ void unit_test_buffer_allocation()
         TEST_REQUIRE(stats.static_vbo_mem_alloc > 0 );
 
         // should reuse the same buffer since the amount of data is the same.
-        foo->Upload(junk_data, sizeof(junk_data), gfx::Geometry::Usage::Dynamic);
+        foo->UploadVertices(junk_data, sizeof(junk_data), gfx::Geometry::Usage::Dynamic);
 
         dev->GetResourceStats(&stats);
         TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
@@ -1587,7 +1608,7 @@ void unit_test_buffer_allocation()
         TEST_REQUIRE(stats.static_vbo_mem_alloc > 0);
 
         // should reuse the same buffer since the amount of data is less.
-        foo->Upload(junk_data, sizeof(junk_data)-1, gfx::Geometry::Usage::Dynamic);
+        foo->UploadVertices(junk_data, sizeof(junk_data) - 1, gfx::Geometry::Usage::Dynamic);
 
         dev->GetResourceStats(&stats);
         TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
@@ -1599,7 +1620,7 @@ void unit_test_buffer_allocation()
 
         // grow dynamic buffer.
         char more_junk[1024] = {0};
-        foo->Upload(more_junk, sizeof(more_junk), gfx::Geometry::Usage::Dynamic);
+        foo->UploadVertices(more_junk, sizeof(more_junk), gfx::Geometry::Usage::Dynamic);
 
         dev->GetResourceStats(&stats);
         TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
@@ -1612,7 +1633,7 @@ void unit_test_buffer_allocation()
         // second geometry should be able to re-use the dynamic buffer that should
         // be unused.
         auto* bar = dev->MakeGeometry("bar");
-        bar->Upload(junk_data, sizeof(junk_data), gfx::Geometry::Usage::Dynamic);
+        bar->UploadVertices(junk_data, sizeof(junk_data), gfx::Geometry::Usage::Dynamic);
 
         dev->GetResourceStats(&stats);
         TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
@@ -1622,6 +1643,161 @@ void unit_test_buffer_allocation()
         TEST_REQUIRE(stats.static_vbo_mem_use == 0);
         TEST_REQUIRE(stats.static_vbo_mem_alloc > 0);
 
+    }
+}
+
+void unit_test_ibo_allocation()
+{
+    TEST_CASE(test::Type::Feature)
+
+    auto dev = CreateDevice();
+
+    char junk_data[512] = {0};
+
+    // static
+    {
+        auto* foo = dev->MakeGeometry("foo");
+        foo->UploadIndices(junk_data, sizeof(junk_data), gfx::Geometry::IndexType::Index16, gfx::Geometry::Usage::Static);
+
+        gfx::Device::ResourceStats stats;
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_ibo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.static_ibo_mem_use == sizeof(junk_data));
+
+        dev->BeginFrame();
+        dev->EndFrame();
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_ibo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.static_ibo_mem_use == sizeof(junk_data));
+
+        // should reuse the same buffer since the data is the same.
+        foo->UploadIndices(junk_data, sizeof(junk_data), gfx::Geometry::IndexType::Index16, gfx::Geometry::Usage::Static);
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_ibo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.static_ibo_mem_use == sizeof(junk_data));
+
+        // should reuse the same buffer since the data is less
+        foo->UploadIndices(junk_data, sizeof(junk_data)/2, gfx::Geometry::IndexType::Index16, gfx::Geometry::Usage::Static);
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_ibo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.static_ibo_mem_use == sizeof(junk_data)); // no decrease here.
+
+        auto* bar = dev->MakeGeometry("bar");
+        bar->UploadIndices(junk_data, sizeof(junk_data) / 2, gfx::Geometry::IndexType::Index16, gfx::Geometry::Usage::Static);
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_ibo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.static_ibo_mem_use == sizeof(junk_data) + sizeof(junk_data)/2);
+    }
+    dev->DeleteGeometries();
+
+    // streaming. cleared after every frame, allocations remain.
+    {
+        auto* foo = dev->MakeGeometry("foo");
+        foo->UploadIndices(junk_data, sizeof(junk_data), gfx::Geometry::IndexType::Index16, gfx::Geometry::Usage::Stream);
+
+        gfx::Device::ResourceStats stats;
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_ibo_mem_use == sizeof(junk_data));
+        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.static_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.static_ibo_mem_alloc > 0); // from static geometry testing above
+
+        dev->BeginFrame();
+        dev->EndFrame();
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_ibo_mem_alloc > 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.static_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.static_ibo_mem_alloc > 0);
+    }
+
+    dev->DeleteGeometries();
+
+    // dynamic
+    {
+        auto* foo = dev->MakeGeometry("foo");
+        foo->UploadIndices(junk_data, sizeof(junk_data), gfx::Geometry::IndexType::Index16, gfx::Geometry::Usage::Dynamic);
+
+        gfx::Device::ResourceStats stats;
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_ibo_mem_alloc > 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc > 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_use == sizeof(junk_data));
+        TEST_REQUIRE(stats.static_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.static_ibo_mem_alloc > 0 );
+
+        // should reuse the same buffer since the amount of data is the same.
+        foo->UploadIndices(junk_data, sizeof(junk_data), gfx::Geometry::IndexType::Index16, gfx::Geometry::Usage::Dynamic);
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_ibo_mem_alloc > 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == sizeof(junk_data));
+        TEST_REQUIRE(stats.dynamic_ibo_mem_use == sizeof(junk_data));
+        TEST_REQUIRE(stats.static_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.static_ibo_mem_alloc > 0);
+
+        // should reuse the same buffer since the amount of data is less.
+        foo->UploadIndices(junk_data, sizeof(junk_data) - 1, gfx::Geometry::IndexType::Index16, gfx::Geometry::Usage::Dynamic);
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_ibo_mem_alloc > 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == sizeof(junk_data));
+        TEST_REQUIRE(stats.dynamic_ibo_mem_use == sizeof(junk_data));
+        TEST_REQUIRE(stats.static_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.static_ibo_mem_alloc > 0);
+
+        // grow dynamic buffer.
+        char more_junk[1024] = {0};
+        foo->UploadIndices(more_junk, sizeof(more_junk), gfx::Geometry::IndexType::Index16, gfx::Geometry::Usage::Dynamic);
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_ibo_mem_alloc > 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == sizeof(more_junk) + sizeof(junk_data));
+        TEST_REQUIRE(stats.dynamic_ibo_mem_use == sizeof(more_junk));
+        TEST_REQUIRE(stats.static_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.static_ibo_mem_alloc > 0);
+
+        // second geometry should be able to re-use the dynamic buffer that should
+        // be unused.
+        auto* bar = dev->MakeGeometry("bar");
+        bar->UploadIndices(junk_data, sizeof(junk_data), gfx::Geometry::IndexType::Index16, gfx::Geometry::Usage::Dynamic);
+
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_ibo_mem_alloc > 0);
+        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == sizeof(more_junk) + sizeof(junk_data));
+        TEST_REQUIRE(stats.dynamic_ibo_mem_use == sizeof(more_junk) + sizeof(junk_data));
+        TEST_REQUIRE(stats.static_ibo_mem_use == 0);
+        TEST_REQUIRE(stats.static_ibo_mem_alloc > 0);
     }
 }
 
@@ -2248,7 +2424,8 @@ int test_main(int argc, char* argv[])
     unit_test_uniform_sampler_optimize_bug();
     unit_test_render_dynamic();
     unit_test_clean_textures();
-    unit_test_buffer_allocation();
+    unit_test_vbo_allocation();
+    unit_test_ibo_allocation();
     unit_test_max_texture_units_single_texture();
     unit_test_max_texture_units_many_textures();
     unit_test_algo_texture_copy();

@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -27,6 +28,11 @@
 
 namespace gfx
 {
+    // 16bit vertex index for indexed drawing.
+    using Index16 = std::uint16_t;
+    // 32bit vertex index for indexed drawing.
+    using Index32 = std::uint32_t;
+
     // 2 float vector data object. Use glm::vec2 for math.
     struct Vec2 {
         float x = 0.0f;
@@ -113,11 +119,10 @@ namespace gfx
         return layout;
     }
 
-    // Encapsulate information about a particular geometry
-    // and how how that geometry is to be rendered and
-    // rasterized. A geometry object contains a set of vertex
-    // data and then multiple draw commands each command
-    // addressing some subset of the vertices.
+    // Encapsulate information about a particular geometry and how
+    // that geometry is to be rendered and rasterized. A geometry
+    // object contains a set of vertex data and then multiple draw
+    // commands each command addressing some subset of the vertices.
     class Geometry
     {
     public:
@@ -151,6 +156,9 @@ namespace gfx
             // The buffer is updated multiple times and drawn multiple times.
             Dynamic
         };
+        enum class IndexType {
+            Index16, Index32
+        };
 
         virtual ~Geometry() = default;
         // Clear previous draw commands.
@@ -164,7 +172,9 @@ namespace gfx
         // Set the layout object that describes the contents of the vertex buffer vertices.
         virtual void SetVertexLayout(const VertexLayout& layout) = 0;
         // Upload the vertex data that defines the geometry.
-        virtual void Upload(const void* data, size_t bytes, Usage usage = Usage::Static) = 0;
+        virtual void UploadVertices(const void* data, size_t bytes, Usage usage = Usage::Static) = 0;
+        // Upload 16bit index data for indexed drawing.
+        virtual void UploadIndices(const void* data, size_t bytes, IndexType type, Usage usage = Usage::Static) = 0;
         // Set the hash value that identifies the data.
         virtual void SetDataHash(size_t hash) = 0;
         // Get the hash value that was used in the latest data upload.
@@ -174,7 +184,7 @@ namespace gfx
         template<typename Vertex>
         void SetVertexBuffer(const Vertex* vertices, std::size_t count, Usage usage = Usage::Static)
         {
-            Upload(vertices, count*sizeof(Vertex), usage);
+            UploadVertices(vertices, count * sizeof(Vertex), usage);
             // for compatibility sakes set the vertex layout here.
             if constexpr (std::is_same_v<Vertex, gfx::Vertex>)
                 SetVertexLayout(GetVertexLayout<Vertex>());
@@ -184,6 +194,25 @@ namespace gfx
         void SetVertexBuffer(const std::vector<Vertex>& vertices, Usage usage = Usage::Static)
         { SetVertexBuffer(vertices.data(), vertices.size(), usage); }
 
+        void SetIndexBuffer(const Index16* indices, size_t count, Usage usage = Usage::Static)
+        { UploadIndices(indices, count * sizeof(Index16), IndexType::Index16, usage); }
+        void SetIndexBuffer(const Index32* indices, size_t count, Usage usage = Usage::Static)
+        { UploadIndices(indices, count * sizeof(Index32), IndexType::Index32, usage); }
+        void SetIndexBuffer(const std::vector<Index16>& indices, Usage usage = Usage::Static)
+        { SetIndexBuffer(indices.data(), indices.size(), usage); }
+        void SetIndexBuffer(const std::vector<Index32>& indices, Usage usage = Usage::Static)
+        { SetIndexBuffer(indices.data(), indices.size(), usage); }
+
+        // Map the type of the index to index size in bytes.
+        static size_t GetIndexByteSize(IndexType type)
+        {
+            if (type == IndexType::Index16)
+                return 2;
+            else if (type == IndexType::Index32)
+                return 4;
+            else BUG("Missing index type.");
+            return 0;
+        }
     private:
     };
 } // namespace

@@ -284,13 +284,18 @@ public:
     {
         mLayout = layout;
     }
-    virtual void Upload(const void* data, size_t bytes, Usage usage) override
+    virtual void UploadVertices(const void* data, size_t bytes, Usage usage) override
     {
-        mUsage = usage;
-        mData.resize(bytes);
-        mBytes =bytes;
-        mUploaded = true;
-        std::memcpy(&mData[0], data, bytes);
+
+        mVertexUploaded = true;
+        mVertexUsage = usage;
+        mVertexBytes = bytes;
+        mVertexData.resize(bytes);
+        std::memcpy(&mVertexData[0], data, bytes);
+    }
+    virtual void UploadIndices(const void* data, size_t bytes, IndexType type, Usage usage) override
+    {
+
     }
     // Set the hash value that identifies the data.
     virtual void SetDataHash(size_t hash) override
@@ -300,31 +305,31 @@ public:
     { return mHash; }
 
     template<typename T>
-    const T* AsArray() const
+    const T* AsVertexArray() const
     {
-        TEST_REQUIRE(!mData.empty());
-        return reinterpret_cast<const T*>(mData.data());
+        TEST_REQUIRE(!mVertexData.empty());
+        return reinterpret_cast<const T*>(mVertexData.data());
     }
     template<typename T>
-    size_t Count() const
+    size_t VertexCount() const
     {
-        const auto bytes = mData.size();
+        const auto bytes = mVertexData.size();
         return bytes / sizeof(T);
     }
     template<typename T>
-    const T& GetAt(size_t index) const
+    const T& GetVertexAt(size_t index) const
     {
         const auto offset = sizeof(T) * index;
-        TEST_REQUIRE(offset < mData.size());
-        const void* ptr = &mData[offset];
+        TEST_REQUIRE(offset < mVertexData.size());
+        const void* ptr = &mVertexData[offset];
         return *static_cast<const T*>(ptr);
     }
 
 
-    bool mUploaded = false;
-    gfx::Geometry::Usage mUsage;
-    std::vector<char> mData;
-    std::size_t mBytes = 0;
+    bool mVertexUploaded = false;
+    gfx::Geometry::Usage mVertexUsage;
+    std::vector<char> mVertexData;
+    std::size_t mVertexBytes = 0;
     std::size_t mHash = 0;
 private:
 };
@@ -1529,21 +1534,21 @@ void unit_test_static_poly()
     auto* geom = (TestGeometry*)poly.Upload(env, device);
 
     TEST_REQUIRE(geom);
-    TEST_REQUIRE(geom->mUploaded == true);
-    TEST_REQUIRE(geom->mBytes == sizeof(verts));
+    TEST_REQUIRE(geom->mVertexUploaded == true);
+    TEST_REQUIRE(geom->mVertexBytes == sizeof(verts));
     TEST_REQUIRE(geom->mDrawCmds.size() == 1);
     TEST_REQUIRE(geom->mDrawCmds[0].offset == 0);
     TEST_REQUIRE(geom->mDrawCmds[0].count == 3);
     TEST_REQUIRE(geom->mDrawCmds[0].type == gfx::Geometry::DrawType::TriangleFan);
 
-    geom->mUploaded = false;
+    geom->mVertexUploaded = false;
 
     {
         auto* g = (TestGeometry*)poly.Upload(env, device);
         TEST_REQUIRE(g == geom);
     }
-    TEST_REQUIRE(geom->mUploaded == false);
-    TEST_REQUIRE(geom->mBytes == sizeof(verts));
+    TEST_REQUIRE(geom->mVertexUploaded == false);
+    TEST_REQUIRE(geom->mVertexBytes == sizeof(verts));
 
     // change the content (simulate editing)
     poly.AddVertices(verts, 3);
@@ -1553,11 +1558,10 @@ void unit_test_static_poly()
         auto* g = (TestGeometry*)poly.Upload(env, device);
         TEST_REQUIRE(g == geom);
     }
-    TEST_REQUIRE(geom->mUploaded == true);
-    TEST_REQUIRE(geom->mBytes == sizeof(verts) + sizeof(verts));
+    TEST_REQUIRE(geom->mVertexUploaded == true);
+    TEST_REQUIRE(geom->mVertexBytes == sizeof(verts) + sizeof(verts));
 
-    geom->mUploaded = false;
-
+    geom->mVertexUploaded = false;
 
     // change the content (simulate editing)
     poly.AddVertices(verts, 3);
@@ -1570,8 +1574,8 @@ void unit_test_static_poly()
         auto g = (TestGeometry*)poly.Upload(env, device);
         TEST_REQUIRE(g == geom);
     }
-    TEST_REQUIRE(geom->mUploaded == false);
-    TEST_REQUIRE(geom->mBytes == sizeof(verts) + sizeof(verts));
+    TEST_REQUIRE(geom->mVertexUploaded == false);
+    TEST_REQUIRE(geom->mVertexBytes == sizeof(verts) + sizeof(verts));
 }
 
 void unit_test_local_particles()
@@ -1608,11 +1612,11 @@ void unit_test_local_particles()
         env.shader_pass = &pass;
         eng.Restart(env);
         auto* geom = (TestGeometry*)eng.Upload(env, dev);
-        TEST_REQUIRE(geom->Count<ParticleVertex>() == p.num_particles);
+        TEST_REQUIRE(geom->VertexCount<ParticleVertex>() == p.num_particles);
 
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = geom->GetAt<ParticleVertex>(i);
+            const auto& v = geom->GetVertexAt<ParticleVertex>(i);
             TEST_REQUIRE(v.aPosition.x >= 0.25f);
             TEST_REQUIRE(v.aPosition.y >= 0.25f);
             TEST_REQUIRE(v.aPosition.x <= 0.25f + 0.5f);
@@ -1641,11 +1645,11 @@ void unit_test_local_particles()
         env.shader_pass = &pass;
         eng.Restart(env);
         auto* geom = (TestGeometry*)eng.Upload(env, dev);
-        TEST_REQUIRE(geom->Count<ParticleVertex>() == p.num_particles);
+        TEST_REQUIRE(geom->VertexCount<ParticleVertex>() == p.num_particles);
 
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = geom->GetAt<ParticleVertex>(i);
+            const auto& v = geom->GetVertexAt<ParticleVertex>(i);
             const bool inside_box = (v.aPosition.x > 0.25f && v.aPosition.x < 0.75f) &&
                                     (v.aPosition.y > 0.25f && v.aPosition.y < 0.75f);
             TEST_REQUIRE(!inside_box);
@@ -1674,11 +1678,11 @@ void unit_test_local_particles()
         env.shader_pass = &pass;
         eng.Restart(env);
         auto* geom = (TestGeometry*)eng.Upload(env, dev);
-        TEST_REQUIRE(geom->Count<ParticleVertex>() == p.num_particles);
+        TEST_REQUIRE(geom->VertexCount<ParticleVertex>() == p.num_particles);
 
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = geom->GetAt<ParticleVertex>(i);
+            const auto& v = geom->GetVertexAt<ParticleVertex>(i);
             const auto on_left_edge   = math::equals(v.aPosition.x, 0.25f)   && v.aPosition.y >= 0.25f && v.aPosition.y <= 0.75f;
             const auto on_right_edge  = math::equals(v.aPosition.x, 0.75f)  && v.aPosition.y >= 0.25f && v.aPosition.y <= 0.75f;
             const auto on_top_edge    = math::equals(v.aPosition.y, 0.25f)    && v.aPosition.x >= 0.25f && v.aPosition.x <= 0.75f;
@@ -1709,11 +1713,11 @@ void unit_test_local_particles()
         env.shader_pass = &pass;
         eng.Restart(env);
         auto* geom = (TestGeometry*)eng.Upload(env, dev);
-        TEST_REQUIRE(geom->Count<ParticleVertex>() == p.num_particles);
+        TEST_REQUIRE(geom->VertexCount<ParticleVertex>() == p.num_particles);
 
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = geom->GetAt<ParticleVertex>(i);
+            const auto& v = geom->GetVertexAt<ParticleVertex>(i);
             TEST_REQUIRE(math::equals(v.aPosition.x, 0.5f));
             TEST_REQUIRE(math::equals(v.aPosition.y, 0.5f));
         }
@@ -1749,11 +1753,11 @@ void unit_test_local_particles()
             env.shader_pass = &pass;
             eng.Restart(env);
             auto* geom = (TestGeometry*) eng.Upload(env, dev);
-            TEST_REQUIRE(geom->Count<ParticleVertex>() == p.num_particles);
+            TEST_REQUIRE(geom->VertexCount<ParticleVertex>() == p.num_particles);
 
             for (size_t i=0; i<p.num_particles; ++i)
             {
-                const auto& v = geom->GetAt<ParticleVertex>(i);
+                const auto& v = geom->GetVertexAt<ParticleVertex>(i);
                 const auto r = glm::length(glm::vec2(0.5f, 0.5f) - glm::vec2(v.aPosition.x, v.aPosition.y));
                 if (placement == K::Placement::Inside)
                     TEST_REQUIRE(math::equals(r, 0.25f) || r < 0.25f);
@@ -1793,11 +1797,11 @@ void unit_test_local_particles()
         eng.Restart(env);
         eng.Update(env, 1.0/60.0f);
         auto* geom = (TestGeometry*) eng.Upload(env, dev);
-        TEST_REQUIRE(geom->Count<ParticleVertex>() == p.num_particles);
+        TEST_REQUIRE(geom->VertexCount<ParticleVertex>() == p.num_particles);
 
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = geom->GetAt<ParticleVertex>(i);
+            const auto& v = geom->GetVertexAt<ParticleVertex>(i);
             const auto r = glm::length(glm::vec2(0.5f, 0.5f) - glm::vec2(v.aPosition.x, v.aPosition.y));
             TEST_REQUIRE( r > 0.25f);
         }
@@ -1829,11 +1833,11 @@ void unit_test_local_particles()
         eng.Restart(env);
         eng.Update(env, 1.0/60.0f);
         auto* geom = (TestGeometry*) eng.Upload(env, dev);
-        TEST_REQUIRE(geom->Count<ParticleVertex>() == p.num_particles);
+        TEST_REQUIRE(geom->VertexCount<ParticleVertex>() == p.num_particles);
 
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = geom->GetAt<ParticleVertex>(i);
+            const auto& v = geom->GetVertexAt<ParticleVertex>(i);
             const auto r = glm::length(glm::vec2(0.5f, 0.5f) - glm::vec2(v.aPosition.x, v.aPosition.y));
             TEST_REQUIRE( r < 0.25f);
         }
