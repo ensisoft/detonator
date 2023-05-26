@@ -107,7 +107,7 @@ gfx::Program* MakeTestProgram(gfx::Device& dev, const char* vssrc, const char* f
 gfx::Geometry* MakeQuad(gfx::Device& dev)
 {
     auto* geom = dev.MakeGeometry("quad");
-    const gfx::Vertex verts[] = {
+    const gfx::Vertex2D verts[] = {
         { {-1,  1}, {0, 1} },
         { {-1, -1}, {0, 0} },
         { { 1, -1}, {1, 0} },
@@ -345,7 +345,7 @@ void unit_test_render_fbo(gfx::Framebuffer::Format format)
     TEST_REQUIRE(dev->GetCurrentFramebuffer() == nullptr);
 
     auto* geom = dev->MakeGeometry("geom");
-    const gfx::Vertex verts[] = {
+    const gfx::Vertex2D verts[] = {
         { {-1,  1}, {0, 1} },
         { {-1, -1}, {0, 0} },
         { { 1, -1}, {1, 0} },
@@ -514,7 +514,7 @@ void main() {
     // draw using vertex buffer only
     {
         auto* geom = dev->MakeGeometry("geom");
-        constexpr const gfx::Vertex vertices[] = {
+        constexpr const gfx::Vertex2D vertices[] = {
             { {-1,  1}, {0, 1} },
             { {-1, -1}, {0, 0} },
             { { 1, -1}, {1, 0} },
@@ -539,7 +539,7 @@ void main() {
     // draw using vertex and index buffer
     {
         auto* geom =  dev->MakeGeometry("geom");
-        constexpr const gfx::Vertex vertices[] = {
+        constexpr const gfx::Vertex2D vertices[] = {
             { {-1,  1}, {0, 1} },
             { {-1, -1}, {0, 0} },
             { { 1, -1}, {1, 0} },
@@ -592,7 +592,7 @@ void unit_test_render_with_single_texture()
     dev->ClearColor(gfx::Color::White);
 
     auto* geom = dev->MakeGeometry("geom");
-    const gfx::Vertex verts[] = {
+    const gfx::Vertex2D verts[] = {
         { {-1,  1}, {0, 0} },
         { {-1, -1}, {0, 1} },
         { { 1, -1}, {1, 1} },
@@ -673,7 +673,7 @@ void unit_test_render_with_multiple_textures()
     dev->ClearColor(gfx::Color::White);
 
     auto* geom = dev->MakeGeometry("geom");
-    const gfx::Vertex verts[] = {
+    const gfx::Vertex2D verts[] = {
         { {-1,  1}, {0, 0} },
         { {-1, -1}, {0, 1} },
         { { 1, -1}, {1, 1} },
@@ -752,7 +752,7 @@ void unit_test_render_set_float_uniforms()
     auto dev = CreateDevice();
 
     auto* geom = dev->MakeGeometry("geom");
-    const gfx::Vertex verts[] = {
+    const gfx::Vertex2D verts[] = {
             { {-1,  1}, {0, 1} },
             { {-1, -1}, {0, 0} },
             { { 1, -1}, {1, 0} },
@@ -875,7 +875,7 @@ void unit_test_render_set_int_uniforms()
     auto dev = CreateDevice();
 
     auto *geom = dev->MakeGeometry("geom");
-    const gfx::Vertex verts[] = {
+    const gfx::Vertex2D verts[] = {
             {{-1, 1},  {0, 1}},
             {{-1, -1}, {0, 0}},
             {{1,  -1}, {1, 0}},
@@ -962,7 +962,7 @@ void unit_test_render_set_matrix2x2_uniform()
     auto dev = CreateDevice();
 
     auto* geom = dev->MakeGeometry("geom");
-    const gfx::Vertex verts[] = {
+    const gfx::Vertex2D verts[] = {
             { {-1,  1}, {0, 1} },
             { {-1, -1}, {0, 0} },
             { { 1, -1}, {1, 0} },
@@ -1030,7 +1030,7 @@ void unit_test_render_set_matrix3x3_uniform()
     auto dev = CreateDevice();
 
     auto* geom = dev->MakeGeometry("geom");
-    const gfx::Vertex verts[] = {
+    const gfx::Vertex2D verts[] = {
             { {-1,  1}, {0, 1} },
             { {-1, -1}, {0, 0} },
             { { 1, -1}, {1, 0} },
@@ -1098,7 +1098,7 @@ void unit_test_render_set_matrix4x4_uniform()
     auto dev = CreateDevice();
 
     auto* geom = dev->MakeGeometry("geom");
-    const gfx::Vertex verts[] = {
+    const gfx::Vertex2D verts[] = {
             { {-1,  1}, {0, 1} },
             { {-1, -1}, {0, 0} },
             { { 1, -1}, {1, 0} },
@@ -1181,7 +1181,7 @@ void unit_test_uniform_sampler_optimize_bug()
     texture->Upload(pixels, 2, 3, gfx::Texture::Format::RGB);
 
     auto* geom = dev->MakeGeometry("geom");
-    const gfx::Vertex verts[] = {
+    const gfx::Vertex2D verts[] = {
             { {-1,  1}, {0, 1} },
             { {-1, -1}, {0, 0} },
             { { 1, -1}, {1, 0} },
@@ -1249,7 +1249,7 @@ void unit_test_clean_textures()
         gfx::Color::Red, gfx::Color::Red,
         gfx::Color::Blue, gfx::Color::Blue
     };
-    const gfx::Vertex verts[] = {
+    const gfx::Vertex2D verts[] = {
         { {-1,  1}, {0, 1} },
         { {-1, -1}, {0, 0} },
         { { 1, -1}, {1, 0} },
@@ -1398,7 +1398,7 @@ void unit_test_render_dynamic()
     dev->ClearColor(gfx::Color::Red);
 
     auto* geom = dev->MakeGeometry("geom");
-    const gfx::Vertex verts1[] = {
+    const gfx::Vertex2D verts1[] = {
         { {-1,  1}, {0, 1} },
         { {-1,  0}, {0, 0} },
         { { 0,  0}, {1, 0} },
@@ -1407,7 +1407,7 @@ void unit_test_render_dynamic()
         { { 0,  0}, {1, 0} },
         { { 0,  1}, {1, 1} }
     };
-    const gfx::Vertex verts2[] = {
+    const gfx::Vertex2D verts2[] = {
         { {0,  1}, {0, 1} },
         { {0,  0}, {0, 0} },
         { {1,  0}, {1, 0} },
@@ -1851,7 +1851,7 @@ void main() {
     dev->EndFrame();
 
     // now set the actual vertex geometry
-    const gfx::Vertex verts[] = {
+    const gfx::Vertex2D verts[] = {
             { {-1,  1}, {0, 1} },
             { {-1, -1}, {0, 0} },
             { { 1, -1}, {1, 0} },
@@ -1892,7 +1892,7 @@ void unit_test_max_texture_units_single_texture()
     dev->GetDeviceCaps(&caps);
 
     auto* geom = dev->MakeGeometry("geom");
-    const gfx::Vertex verts[] = {
+    const gfx::Vertex2D verts[] = {
         { {-1,  1}, {0, 0} },
         { {-1, -1}, {0, 1} },
         { { 1, -1}, {1, 1} },
@@ -1989,7 +1989,7 @@ void unit_test_max_texture_units_many_textures()
     dev->GetDeviceCaps(&caps);
 
     auto* geom = dev->MakeGeometry("geom");
-    const gfx::Vertex verts[] = {
+    const gfx::Vertex2D verts[] = {
         { {-1,  1}, {0, 0} },
         { {-1, -1}, {0, 1} },
         { { 1, -1}, {1, 1} },
@@ -2221,7 +2221,7 @@ void unit_test_repeated_uniform_bug()
     dev->ClearColor(gfx::Color::Red);
 
     auto* geom = dev->MakeGeometry("geom");
-    const gfx::Vertex verts[] = {
+    const gfx::Vertex2D verts[] = {
       { {-1,  1}, {0, 1} },
       { {-1, -1}, {0, 0} },
       { { 1, -1}, {1, 0} },

@@ -893,7 +893,7 @@ void main() {
     quad.bottom_right = {1.0f,  1.0f, 0.0f, 1.0f};
     quad.top_right    = {1.0f,  0.0f, 0.0f, 1.0f};
 
-    std::vector<Vertex> verts;
+    std::vector<Vertex2D> verts;
     for (const auto& glyph : glyphs)
     {
         gfx::Transform t;
@@ -902,7 +902,7 @@ void main() {
 
         const auto& q = TransformQuad(quad, ortho * t.GetAsMatrix());
 
-        Vertex v0, v1, v2, v3;
+        Vertex2D v0, v1, v2, v3;
         v0.aPosition = Vec2 {q.top_left.x, q.top_left.y };
         v0.aTexCoord = Vec2 { glyph.texture_xpos, glyph.texture_ypos };
 

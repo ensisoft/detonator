@@ -53,7 +53,7 @@ namespace gfx
     };
 
     // Vertex for 2D drawing on the XY plane.
-    struct Vertex {
+    struct Vertex2D {
         // Coordinate / position of the vertex in the model space.
         // Model space is a 2D space on XY plane where X varies from
         // 0.0f to 1.0f (left to right when mapped onto render target)
@@ -106,15 +106,15 @@ namespace gfx
     const VertexLayout& GetVertexLayout();
 
     template<> inline
-    const VertexLayout& GetVertexLayout<Vertex>()
+    const VertexLayout& GetVertexLayout<Vertex2D>()
     {
         // todo: if using GLSL layout bindings then need to
         // specify the vertex attribute indices properly.
         // todo: if using instanced rendering then need to specify
         // the divisors properly.
-        static const VertexLayout layout(sizeof(Vertex), {
-            {"aPosition", 0, 2, 0, offsetof(Vertex, aPosition)},
-            {"aTexCoord", 0, 2, 0, offsetof(Vertex, aTexCoord)}
+        static const VertexLayout layout(sizeof(Vertex2D), {
+            {"aPosition", 0, 2, 0, offsetof(Vertex2D, aPosition)},
+            {"aTexCoord", 0, 2, 0, offsetof(Vertex2D, aTexCoord)}
         });
         return layout;
     }
@@ -186,7 +186,7 @@ namespace gfx
         {
             UploadVertices(vertices, count * sizeof(Vertex), usage);
             // for compatibility sakes set the vertex layout here.
-            if constexpr (std::is_same_v<Vertex, gfx::Vertex>)
+            if constexpr (std::is_same_v<Vertex, gfx::Vertex2D>)
                 SetVertexLayout(GetVertexLayout<Vertex>());
         }
 
