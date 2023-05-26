@@ -651,7 +651,7 @@ namespace gfx
             size_t count  = 0;
         };
 
-        using Vertex = gfx::Vertex;
+        using Vertex = gfx::Vertex2D;
 
         PolygonClass() : BaseClass()
         {}

@@ -1515,7 +1515,7 @@ void unit_test_static_poly()
     // contents should get re-uploaded as needed.
     poly.SetStatic(true);
 
-    const gfx::Vertex verts[3] = {
+    const gfx::Vertex2D verts[3] = {
        {{10.0f, 10.0f}, {0.5f, 1.0f}},
        {{-10.0f, -10.0f}, {0.0f, 0.0f}},
        {{10.0f, 10.0f}, {1.0f, 0.0f}}

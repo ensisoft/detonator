@@ -53,7 +53,7 @@ Geometry* MakeFullscreenQuad(Device& device)
         return geometry;
 
     auto* geometry = device.MakeGeometry("FullscreenQuad");
-    const gfx::Vertex verts[] = {
+    const gfx::Vertex2D verts[] = {
         { {-1,  1}, {0, 1} },
         { {-1, -1}, {0, 0} },
         { { 1, -1}, {1, 0} },

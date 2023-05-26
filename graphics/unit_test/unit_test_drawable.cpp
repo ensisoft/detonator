@@ -21,7 +21,7 @@
 #include "data/json.h"
 #include "graphics/drawable.h"
 
-bool operator==(const gfx::Vertex& lhs, const gfx::Vertex& rhs)
+bool operator==(const gfx::Vertex2D& lhs, const gfx::Vertex2D& rhs)
 {
     return real::equals(lhs.aPosition.x, rhs.aPosition.x) &&
            real::equals(lhs.aPosition.y, rhs.aPosition.y) &&
@@ -31,8 +31,8 @@ bool operator==(const gfx::Vertex& lhs, const gfx::Vertex& rhs)
 
 void unit_test_polygon_data()
 {
-    std::vector<gfx::Vertex> verts;
-    gfx::Vertex v0;
+    std::vector<gfx::Vertex2D> verts;
+    gfx::Vertex2D v0;
     v0.aPosition.x = 1.0f;
     v0.aPosition.y = 2.0f;
     v0.aTexCoord.x = -1.0f;
@@ -120,7 +120,7 @@ void unit_test_polygon_vertex_operations()
         cmd.count  = 6;
         poly.AddDrawCommand(cmd);
 
-        gfx::Vertex v;
+        gfx::Vertex2D v;
         v.aPosition.x = 6.0f;
         poly.InsertVertex(v, 0, 6);
         TEST_REQUIRE(poly.GetDrawCommand(0).offset == 0);

@@ -66,13 +66,13 @@ std::string NameAspectRatio(float width, float height, RoundFunc Round, const ch
     return ret;
 }
 
-gfx::Shader* MakeVertexArrayShader(gfx::Device& device)
+gfx::Shader* MakeGeneric2DVertexShader(gfx::Device& device)
 {
-    auto* shader = device.FindShader("vertex-array-shader");
+    auto* shader = device.FindShader("vertex-array-2D-shader");
     if (shader)
         return shader;
 
-    shader = device.MakeShader("vertex-array-shader");
+    shader = device.MakeShader("vertex-array-2D-shader");
     // the varyings vParticleRandomValue, vParticleAlpha and vParticleTime
     // are used to support per particle features.
     // This shader doesn't provide that data but writes these varyings
@@ -107,7 +107,7 @@ void main()
     gl_Position  = kProjectionMatrix * kModelViewMatrix * vertex;
 }
 )";
-    shader->SetName("GenericVertexShader");
+    shader->SetName("Generic2DVertexShader");
     shader->CompileSource(src);
     return shader;
 }
@@ -117,9 +117,9 @@ namespace gfx {
 namespace detail {
 // static
 Shader* GeometryBase::GetShader(Device& device)
-{ return MakeVertexArrayShader(device); }
+{ return MakeGeneric2DVertexShader(device); }
 std::string GeometryBase::GetProgramId()
-{ return "generic-vertex-program"; }
+{ return "generic-2D-vertex-program"; }
 // static
 Geometry* ArrowGeometry::Generate(const Environment& env, Style style, Device& device)
 {
@@ -133,13 +133,13 @@ Geometry* ArrowGeometry::Generate(const Environment& env, Style style, Device& d
         geom = device.FindGeometry("ArrowOutline");
         if (!geom)
         {
-            const Vertex verts[] = {
+            const Vertex2D verts[] = {
                 {{0.0f, -0.25f}, {0.0f, 0.25f}},
                 {{0.0f, -0.75f}, {0.0f, 0.75f}},
                 {{0.7f, -0.75f}, {0.7f, 0.75f}},
-                {{0.7f, -1.0f}, {0.7f, 1.0f}},
-                {{1.0f, -0.5f}, {1.0f, 0.5f}},
-                {{0.7f, -0.0f}, {0.7f, 0.0f}},
+                {{0.7f, -1.0f},  {0.7f, 1.0f}},
+                {{1.0f, -0.5f},  {1.0f, 0.5f}},
+                {{0.7f, -0.0f},  {0.7f, 0.0f}},
                 {{0.7f, -0.25f}, {0.7f, 0.25f}},
             };
             geom = device.MakeGeometry("ArrowOutline");
@@ -152,7 +152,7 @@ Geometry* ArrowGeometry::Generate(const Environment& env, Style style, Device& d
         geom = device.FindGeometry("Arrow");
         if (!geom)
         {
-            const Vertex verts[] = {
+            const Vertex2D verts[] = {
                 // body
                 {{0.0f, -0.25f}, {0.0f, 0.25f}},
                 {{0.0f, -0.75f}, {0.0f, 0.75f}},
@@ -177,7 +177,7 @@ Geometry* ArrowGeometry::Generate(const Environment& env, Style style, Device& d
         geom = device.FindGeometry("ArrowWireframe");
         if (!geom)
         {
-            const Vertex verts[] = {
+            const Vertex2D verts[] = {
                 // body
                 {{0.0f, -0.25f}, {0.0f, 0.25f}},
                 {{0.0f, -0.75f}, {0.0f, 0.75f}},
@@ -215,7 +215,7 @@ Geometry* LineGeometry::Generate(const Environment& env, Style style, Device& de
     if (geom == nullptr)
     {
         // horizontal line.
-        const gfx::Vertex verts[2] = {
+        const gfx::Vertex2D verts[2] = {
                 {{0.0f,  -0.5f}, {0.0f, 0.5f}},
                 {{1.0f,  -0.5f}, {1.0f, 0.5f}}
         };
@@ -266,11 +266,11 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
     {
         geom = device.MakeGeometry(name);
 
-        std::vector<Vertex> vs;
+        std::vector<Vertex2D> vs;
         auto offset = 0;
 
         // semi-circle at the left end.
-        Vertex left_center;
+        Vertex2D left_center;
         left_center.aPosition.x =  w;
         left_center.aPosition.y = -0.5f;
         left_center.aTexCoord.x =  w;
@@ -283,7 +283,7 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
         {
             const auto x = std::cos(left_angle) * w;
             const auto y = std::sin(left_angle) * h;
-            Vertex v;
+            Vertex2D v;
             v.aPosition.x =  w + x;
             v.aPosition.y = -0.5f + y;
             v.aTexCoord.x =  w + x;
@@ -296,7 +296,7 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
             {
                 const auto x = std::cos(left_angle) * w;
                 const auto y = std::sin(left_angle) * h;
-                Vertex v;
+                Vertex2D v;
                 v.aPosition.x =  w + x;
                 v.aPosition.y = -0.5f + y;
                 v.aTexCoord.x =  w + x;
@@ -313,7 +313,7 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
         if (style != Style::Outline)
         {
             // center box.
-            const Vertex box[6] = {
+            const Vertex2D box[6] = {
                 {{     w, -0.5f+h}, {     w, 0.5f-h}},
                 {{     w, -0.5f-h}, {     w, 0.5f+h}},
                 {{1.0f-w, -0.5f-h}, {1.0f-w, 0.5f+h}},
@@ -343,7 +343,7 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
         offset = vs.size();
 
         // semi circle at the right end
-        Vertex right_center;
+        Vertex2D right_center;
         right_center.aPosition.x =  1.0f - w;
         right_center.aPosition.y = -0.5f;
         right_center.aTexCoord.x =  1.0f - w;
@@ -357,7 +357,7 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
         {
             const auto x = std::cos(right_angle) * w;
             const auto y = std::sin(right_angle) * h;
-            Vertex v;
+            Vertex2D v;
             v.aPosition.x =  1.0f - w + x;
             v.aPosition.y = -0.5f + y;
             v.aTexCoord.x =  1.0f - w + x;
@@ -370,7 +370,7 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
             {
                 const auto x = std::cos(right_angle) * w;
                 const auto y = std::sin(right_angle) * h;
-                Vertex v;
+                Vertex2D v;
                 v.aPosition.x =  1.0f - w + x;
                 v.aPosition.y = -0.5f + y;
                 v.aTexCoord.x =  1.0f - w + x;
@@ -408,10 +408,10 @@ Geometry* SemiCircleGeometry::Generate(const Environment& env, Style style, Devi
     Geometry* geom = device.FindGeometry(name);
     if (!geom)
     {
-        std::vector<Vertex> vs;
+        std::vector<Vertex2D> vs;
 
         // center point for triangle fan.
-        Vertex center;
+        Vertex2D center;
         center.aPosition.x =  0.5;
         center.aPosition.y = -0.5;
         center.aTexCoord.x =  0.5;
@@ -429,7 +429,7 @@ Geometry* SemiCircleGeometry::Generate(const Environment& env, Style style, Devi
         {
             const auto x = std::cos(angle) * 0.5f;
             const auto y = std::sin(angle) * 0.5f;
-            Vertex v;
+            Vertex2D v;
             v.aPosition.x = x + 0.5f;
             v.aPosition.y = y - 0.5f;
             v.aTexCoord.x = x + 0.5f;
@@ -442,7 +442,7 @@ Geometry* SemiCircleGeometry::Generate(const Environment& env, Style style, Devi
             {
                 const auto x = std::cos(angle) * 0.5f;
                 const auto y = std::sin(angle) * 0.5f;
-                Vertex v;
+                Vertex2D v;
                 v.aPosition.x = x + 0.5f;
                 v.aPosition.y = y - 0.5f;
                 v.aTexCoord.x = x + 0.5f;
@@ -482,10 +482,10 @@ Geometry* CircleGeometry::Generate(const Environment& env, Style style, Device& 
     Geometry* geom = device.FindGeometry(name);
     if (!geom)
     {
-        std::vector<Vertex> vs;
+        std::vector<Vertex2D> vs;
 
         // center point for triangle fan.
-        Vertex center;
+        Vertex2D center;
         center.aPosition.x =  0.5;
         center.aPosition.y = -0.5;
         center.aTexCoord.x = 0.5;
@@ -502,7 +502,7 @@ Geometry* CircleGeometry::Generate(const Environment& env, Style style, Device& 
         {
             const auto x = std::cos(angle) * 0.5f;
             const auto y = std::sin(angle) * 0.5f;
-            Vertex v;
+            Vertex2D v;
             v.aPosition.x = x + 0.5f;
             v.aPosition.y = y - 0.5f;
             v.aTexCoord.x = x + 0.5f;
@@ -515,7 +515,7 @@ Geometry* CircleGeometry::Generate(const Environment& env, Style style, Device& 
             {
                 const auto x = std::cos(angle) * 0.5f;
                 const auto y = std::sin(angle) * 0.5f;
-                Vertex v;
+                Vertex2D v;
                 v.aPosition.x = x + 0.5f;
                 v.aPosition.y = y - 0.5f;
                 v.aTexCoord.x = x + 0.5f;
@@ -552,7 +552,7 @@ Geometry* RectangleGeometry::Generate(const Environment& env, Style style, Devic
         geom = device.FindGeometry("RectangleOutline");
         if (geom == nullptr)
         {
-            const Vertex verts[] = {
+            const Vertex2D verts[] = {
                 { {0.0f,  0.0f}, {0.0f, 0.0f} },
                 { {0.0f, -1.0f}, {0.0f, 1.0f} },
                 { {1.0f, -1.0f}, {1.0f, 1.0f} },
@@ -568,7 +568,7 @@ Geometry* RectangleGeometry::Generate(const Environment& env, Style style, Devic
         geom = device.FindGeometry("Rectangle");
         if (geom == nullptr)
         {
-            const Vertex verts[6] = {
+            const Vertex2D verts[6] = {
                 { {0.0f,  0.0f}, {0.0f, 0.0f} },
                 { {0.0f, -1.0f}, {0.0f, 1.0f} },
                 { {1.0f, -1.0f}, {1.0f, 1.0f} },
@@ -598,7 +598,7 @@ Geometry* IsoscelesTriangleGeometry::Generate(const Environment& env, Style styl
     Geometry* geom = device.FindGeometry("IsoscelesTriangle");
     if (!geom)
     {
-        const Vertex verts[3] = {
+        const Vertex2D verts[3] = {
                 { {0.5f,  0.0f}, {0.5f, 0.0f} },
                 { {0.0f, -1.0f}, {0.0f, 1.0f} },
                 { {1.0f, -1.0f}, {1.0f, 1.0f} }
@@ -625,7 +625,7 @@ Geometry* RightTriangleGeometry::Generate(const Environment& env, Style style, D
     Geometry* geom = device.FindGeometry("RightTriangle");
     if (!geom)
     {
-        const Vertex verts[3] = {
+        const Vertex2D verts[3] = {
                 { {0.0f,  0.0f}, {0.0f, 0.0f} },
                 { {0.0f, -1.0f}, {0.0f, 1.0f} },
                 { {1.0f, -1.0f}, {1.0f, 1.0f} }
@@ -655,7 +655,7 @@ Geometry* TrapezoidGeometry::Generate(const Environment& env, Style style, Devic
         geom = device.FindGeometry("TrapezoidOutline");
         if (!geom)
         {
-            const Vertex verts[] = {
+            const Vertex2D verts[] = {
                     { {0.2f,  0.0f}, {0.2f, 0.0f} },
                     { {0.0f, -1.0f}, {0.0f, 1.0f} },
                     { {1.0f, -1.0f}, {1.0f, 1.0f} },
@@ -672,7 +672,7 @@ Geometry* TrapezoidGeometry::Generate(const Environment& env, Style style, Devic
         geom = device.FindGeometry("Trapezoid");
         if (!geom)
         {
-            const Vertex verts[] = {
+            const Vertex2D verts[] = {
                     {{0.2f,  0.0f}, {0.2f, 0.0f}},
                     {{0.0f, -1.0f}, {0.0f, 1.0f}},
                     {{0.2f, -1.0f}, {0.2f, 1.0f}},
@@ -718,7 +718,7 @@ Geometry* ParallelogramGeometry::Generate(const Environment& env, Style style, D
         geom = device.FindGeometry("ParallelogramOutline");
         if (!geom)
         {
-            const Vertex verts[] = {
+            const Vertex2D verts[] = {
                     { {0.2f,  0.0f}, {0.2f, 0.0f} },
                     { {0.0f, -1.0f}, {0.0f, 1.0f} },
                     { {0.8f, -1.0f}, {0.8f, 1.0f} },
@@ -734,7 +734,7 @@ Geometry* ParallelogramGeometry::Generate(const Environment& env, Style style, D
         geom = device.FindGeometry("Parallelogram");
         if (!geom)
         {
-            const Vertex verts[] = {
+            const Vertex2D verts[] = {
                     {{0.2f,  0.0f}, {0.2f, 0.0f}},
                     {{0.0f, -1.0f}, {0.0f, 1.0f}},
                     {{0.8f, -1.0f}, {0.8f, 1.0f}},
@@ -762,12 +762,12 @@ Geometry* ParallelogramGeometry::Generate(const Environment& env, Style style, D
 
 std::string SectorClass::GetProgramId(const Environment&) const
 {
-    return "generic-vertex-program";
+    return "generic-2D-vertex-program";
 }
 
 Shader* SectorClass::GetShader(const  Environment&, Device& device) const
 {
-    return MakeVertexArrayShader(device);
+    return MakeGeneric2DVertexShader(device);
 }
 Geometry* SectorClass::Upload(const Environment& environment, Style style, Device& device) const
 {
@@ -779,10 +779,10 @@ Geometry* SectorClass::Upload(const Environment& environment, Style style, Devic
     Geometry* geom = device.FindGeometry(name);
     if (!geom)
     {
-        std::vector<Vertex> vs;
+        std::vector<Vertex2D> vs;
 
         // center point for triangle fan.
-        Vertex center;
+        Vertex2D center;
         center.aPosition.x =  0.5;
         center.aPosition.y = -0.5;
         center.aTexCoord.x =  0.5;
@@ -801,7 +801,7 @@ Geometry* SectorClass::Upload(const Environment& environment, Style style, Devic
         {
             const auto x = std::cos(angle) * 0.5f;
             const auto y = std::sin(angle) * 0.5f;
-            Vertex v;
+            Vertex2D v;
             v.aPosition.x = x + 0.5f;
             v.aPosition.y = y - 0.5f;
             v.aTexCoord.x = x + 0.5f;
@@ -814,7 +814,7 @@ Geometry* SectorClass::Upload(const Environment& environment, Style style, Devic
             {
                 const auto x = std::cos(angle) * 0.5f;
                 const auto y = std::sin(angle) * 0.5f;
-                Vertex v;
+                Vertex2D v;
                 v.aPosition.x = x + 0.5f;
                 v.aPosition.y = y - 0.5f;
                 v.aTexCoord.x = x + 0.5f;
@@ -862,10 +862,10 @@ bool SectorClass::FromJson(const data::Reader& data)
 }
 
 std::string RoundRectangleClass::GetProgramId(const Environment&) const
-{ return "generic-vertex-program"; }
+{ return "generic-2D-vertex-program"; }
 
 Shader* RoundRectangleClass::GetShader(const Environment& env, Device& device) const
-{ return MakeVertexArrayShader(device); }
+{ return MakeGeneric2DVertexShader(device); }
 
 Geometry* RoundRectangleClass::Upload(const Environment& env, Drawable::Style style, Device& device) const
 {
@@ -922,7 +922,7 @@ Geometry* RoundRectangleClass::Upload(const Environment& env, Drawable::Style st
         if (geom == nullptr)
         {
             // outline of the box body
-            std::vector<Vertex> vs = {
+            std::vector<Vertex2D> vs = {
                 // left box
                 {{0.0f,      -h}, {0.0f,      h}},
                 {{0.0f, -1.0f+h}, {0.0f, 1.0f-h}},
@@ -944,7 +944,7 @@ Geometry* RoundRectangleClass::Upload(const Environment& env, Drawable::Style st
                 {
                     const auto x0 = std::cos(angle) * w;
                     const auto y0 = std::sin(angle) * h;
-                    Vertex v0, v1;
+                    Vertex2D v0, v1;
                     v0.aPosition.x = corners[i].x + x0;
                     v0.aPosition.y = corners[i].y + y0;
                     v0.aTexCoord.x = corners[i].x + x0;
@@ -976,7 +976,7 @@ Geometry* RoundRectangleClass::Upload(const Environment& env, Drawable::Style st
             geom = device.MakeGeometry(name);
 
             // center body
-            std::vector<Vertex> vs = {
+            std::vector<Vertex2D> vs = {
                 // left box
                 {{0.0f,      -h}, {0.0f,      h}},
                 {{0.0f, -1.0f+h}, {0.0f, 1.0f-h}},
@@ -1021,7 +1021,7 @@ Geometry* RoundRectangleClass::Upload(const Environment& env, Drawable::Style st
             {
                 const auto offset = vs.size();
 
-                Vertex center;
+                Vertex2D center;
                 center.aPosition.x = corners[i].x;
                 center.aPosition.y = corners[i].y;
                 center.aTexCoord.x = corners[i].x;
@@ -1038,7 +1038,7 @@ Geometry* RoundRectangleClass::Upload(const Environment& env, Drawable::Style st
                 {
                     const auto x = std::cos(angle) * w;
                     const auto y = std::sin(angle) * h;
-                    Vertex v;
+                    Vertex2D v;
                     v.aPosition.x = corners[i].x + x;
                     v.aPosition.y = corners[i].y + y;
                     v.aTexCoord.x = corners[i].x + x;
@@ -1050,7 +1050,7 @@ Geometry* RoundRectangleClass::Upload(const Environment& env, Drawable::Style st
                     {
                         const auto x = std::cos(angle) * w;
                         const auto y = std::sin(angle) * h;
-                        Vertex v;
+                        Vertex2D v;
                         v.aPosition.x = corners[i].x + x;
                         v.aPosition.y = corners[i].y + y;
                         v.aTexCoord.x = corners[i].x + x;
@@ -1101,10 +1101,10 @@ bool RoundRectangleClass::FromJson(const data::Reader& data)
 }
 
 std::string GridClass::GetProgramId(const Environment&) const
-{ return "generic-vertex-program"; }
+{ return "generic-2D-vertex-program"; }
 
 Shader* GridClass::GetShader(const Environment&, Device& device) const
-{ return MakeVertexArrayShader(device); }
+{ return MakeGeneric2DVertexShader(device); }
 
 Geometry* GridClass::Upload(const Environment&, Device& device) const
 {
@@ -1119,14 +1119,14 @@ Geometry* GridClass::Upload(const Environment&, Device& device) const
     Geometry* geom = device.FindGeometry(name);
     if (!geom)
     {
-        std::vector<Vertex> verts;
+        std::vector<Vertex2D> verts;
 
         const float yadvance = 1.0f / (mNumHorizontalLines + 1);
         const float xadvance = 1.0f / (mNumVerticalLines + 1);
         for (unsigned i=1; i<=mNumVerticalLines; ++i)
         {
             const float x = i * xadvance;
-            const Vertex line[2] = {
+            const Vertex2D line[2] = {
                 {{x,  0.0f}, {x, 0.0f}},
                 {{x, -1.0f}, {x, 1.0f}}
             };
@@ -1136,7 +1136,7 @@ Geometry* GridClass::Upload(const Environment&, Device& device) const
         for (unsigned i=1; i<=mNumHorizontalLines; ++i)
         {
             const float y = i * yadvance;
-            const Vertex line[2] = {
+            const Vertex2D line[2] = {
                 {{0.0f, y*-1.0f}, {0.0f, y}},
                 {{1.0f, y*-1.0f}, {1.0f, y}},
             };
@@ -1145,7 +1145,7 @@ Geometry* GridClass::Upload(const Environment&, Device& device) const
         }
         if (mBorderLines)
         {
-            const Vertex corners[4] = {
+            const Vertex2D corners[4] = {
                 // top left
                 {{0.0f, 0.0f}, {0.0f, 0.0f}},
                 // top right
@@ -1235,10 +1235,10 @@ void PolygonClass::AddDrawCommand(const DrawCommand& cmd)
 }
 
 std::string PolygonClass::GetProgramId(const Environment&) const
-{ return "generic-vertex-program"; }
+{ return "generic-2D-vertex-program"; }
 
 Shader* PolygonClass::GetShader(const Environment&, Device& device) const
-{ return MakeVertexArrayShader(device); }
+{ return MakeGeneric2DVertexShader(device); }
 
 Geometry* PolygonClass::Upload(const Environment& env, Device& device) const
 {
@@ -1485,10 +1485,10 @@ bool CursorClass::FromJson(const data::Reader& data)
 }
 
 std::string Cursor::GetProgramId(const Environment& env) const
-{ return "generic-vertex-program"; }
+{ return "generic-2D-vertex-program"; }
 
 Shader* Cursor::GetShader(const Environment& env, Device& device) const
-{ return MakeVertexArrayShader(device); }
+{ return MakeGeneric2DVertexShader(device); }
 Geometry* Cursor::Upload(const Environment& env, Device& device) const
 {
     if (GetShape() == Shape::Arrow)
@@ -1496,7 +1496,7 @@ Geometry* Cursor::Upload(const Environment& env, Device& device) const
         Geometry* geom = device.FindGeometry("ArrowCursor");
         if (!geom)
         {
-            const Vertex verts[] = {
+            const Vertex2D verts[] = {
                 {{0.0f,  0.0f}, {0.0f, 0.0f}},
                 {{0.0f, -0.6f}, {0.0f, 0.6f}},
                 {{0.6f, 0.0f}, {0.6f, 0.0f}},
@@ -1520,7 +1520,7 @@ Geometry* Cursor::Upload(const Environment& env, Device& device) const
         Geometry* geom = device.FindGeometry("BlockCursor");
         if (!geom)
         {
-            const Vertex verts[] = {
+            const Vertex2D verts[] = {
                 { {0.0f,  0.0f}, {0.0f, 0.0f} },
                 { {0.0f, -1.0f}, {0.0f, 1.0f} },
                 { {1.0f, -1.0f}, {1.0f, 1.0f} },
