@@ -233,7 +233,7 @@ void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Material
     trans.Translate(a);
 
     // Draw the shape (line)
-    painter.Draw(Line(line_width), trans, material);
+    painter.Draw(StaticLine(line_width), trans, material);
 }
 
 void DrawCircle(Painter& painter, const FCircle& circle, const Color4f& color, float line_width)

@@ -49,7 +49,7 @@ namespace gfx
     class ShaderPass;
 
     // DrawableClass defines a new type of drawable.
-     class DrawableClass
+    class DrawableClass
     {
     public:
         using Culling = Device::State::Culling;
@@ -64,7 +64,7 @@ namespace gfx
             Grid,
             IsoscelesTriangle,
             KinematicsParticleEngine,
-            Line,
+            StaticLine,
             Parallelogram,
             Polygon,
             Rectangle,
@@ -218,11 +218,8 @@ namespace gfx
             virtual std::unique_ptr<DrawableClass> Copy() const override
             { return std::make_unique<Class>(*static_cast<const Class*>(this)); }
         protected:
-            DrawableClassBase()
-              : mId(base::RandomString(10))
-            {}
-            DrawableClassBase(const std::string& id)
-              : mId(id)
+            DrawableClassBase(std::string id = base::RandomString(10))
+              : mId(std::move(id))
             {}
         protected:
             std::string mId;
@@ -235,11 +232,8 @@ namespace gfx
         class GenericDrawableClass : public DrawableClass
         {
         public:
-            GenericDrawableClass()
-              : mId(base::RandomString(10))
-            {}
-            GenericDrawableClass(const std::string& id)
-              : mId(id)
+            GenericDrawableClass(std::string id = base::RandomString(10))
+              : mId(std::move(id))
             {}
             virtual Type GetType() const override
             { return DrawableType; }
@@ -337,7 +331,7 @@ namespace gfx
         struct ArrowGeometry : public GeometryBase {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct LineGeometry : public GeometryBase {
+        struct StaticLineGeometry : public GeometryBase {
             static constexpr Culling InitialCulling = Culling::None;
             static constexpr Style   InitialStyle   = Style::Outline;
             static Geometry* Generate(const Environment& env, Style style, Device& device);
@@ -375,7 +369,7 @@ namespace gfx
     using SemiCircleClass        = detail::GenericDrawableClass<DrawableClass::Type::SemiCircle>;
     using CircleClass            = detail::GenericDrawableClass<DrawableClass::Type::Circle>;
     using IsoscelesTriangleClass = detail::GenericDrawableClass<DrawableClass::Type::IsoscelesTriangle>;
-    using LineClass              = detail::GenericDrawableClass<DrawableClass::Type::Line>;
+    using StaticLineClass        = detail::GenericDrawableClass<DrawableClass::Type::StaticLine>;
     using ParallelogramClass     = detail::GenericDrawableClass<DrawableClass::Type::Parallelogram>;
     using RectangleClass         = detail::GenericDrawableClass<DrawableClass::Type::Rectangle>;
     using RightTriangleClass     = detail::GenericDrawableClass<DrawableClass::Type::RightTriangle>;
@@ -388,7 +382,7 @@ namespace gfx
     using SemiCircle        = detail::GenericDrawable<detail::SemiCircleGeometry>;
     using Circle            = detail::GenericDrawable<detail::CircleGeometry>;
     using IsoscelesTriangle = detail::GenericDrawable<detail::IsoscelesTriangleGeometry>;
-    using Line              = detail::GenericDrawable<detail::LineGeometry>;
+    using StaticLine        = detail::GenericDrawable<detail::StaticLineGeometry>;
     using Parallelogram     = detail::GenericDrawable<detail::ParallelogramGeometry>;
     using Rectangle         = detail::GenericDrawable<detail::RectangleGeometry>;
     using RightTriangle     = detail::GenericDrawable<detail::RightTriangleGeometry>;
@@ -1205,6 +1199,29 @@ namespace gfx
         float mTileWidth  = 0.0f;
         float mTileHeight = 0.0f;
     };
+
+    class DynamicLine3D : public Drawable
+    {
+    public:
+        DynamicLine3D(const glm::vec3& a, const glm::vec3& b, float line_width=1.0f)
+            : mPointA(a)
+            , mPointB(b)
+            , mLineWidth(line_width)
+        {}
+        virtual void ApplyDynamicState(const Environment& environment, Program& program, RasterState& state) const override;
+        virtual Shader* GetShader(const Environment& environment, Device& device) const override;
+        virtual Geometry* Upload(const Environment& environment, Device& device) const override;
+        virtual void SetLineWidth(float width) override
+        { mLineWidth = width; }
+        virtual Style GetStyle() const override
+        { return Style::Outline; }
+        virtual std::string GetProgramId(const Environment& environment) const override;
+    private:
+        glm::vec3 mPointA;
+        glm::vec3 mPointB;
+        float mLineWidth = 1.0f;
+    };
+
 
     std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const DrawableClass>& klass);
 
