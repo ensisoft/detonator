@@ -72,7 +72,6 @@ gfx::Shader* MakeGeneric2DVertexShader(gfx::Device& device)
     if (shader)
         return shader;
 
-    shader = device.MakeShader("vertex-array-2D-shader");
     // the varyings vParticleRandomValue, vParticleAlpha and vParticleTime
     // are used to support per particle features.
     // This shader doesn't provide that data but writes these varyings
@@ -107,10 +106,41 @@ void main()
     gl_Position  = kProjectionMatrix * kModelViewMatrix * vertex;
 }
 )";
+    shader = device.MakeShader("vertex-array-2D-shader");
     shader->SetName("Generic2DVertexShader");
     shader->CompileSource(src);
     return shader;
 }
+
+gfx::Shader* MakeGeneric3DVertexShader(gfx::Device& device)
+{
+    auto* shader = device.FindShader("vertex-array-3D-shader");
+    if (shader)
+        return shader;
+
+constexpr const auto* src = R"(
+#version 100
+attribute vec3 aPosition;
+attribute vec2 aTexCoord;
+
+uniform mat4 kProjectionMatrix;
+uniform mat4 kModelViewMatrix;
+
+varying vec2 vTexCoord;
+
+void main()
+{
+    vTexCoord = aTexCoord;
+    gl_Position = kProjectionMatrix * kModelViewMatrix * vec4(aPosition.xyz, 1.0);
+}
+
+)";
+    shader = device.MakeShader("vertex-array-3D-shader");
+    shader->SetName("Generic3DVertexShader");
+    shader->CompileSource(src);
+    return shader;
+}
+
 } // namespace
 
 namespace gfx {
@@ -209,15 +239,15 @@ Geometry* ArrowGeometry::Generate(const Environment& env, Style style, Device& d
 }
 
 // static
-Geometry* LineGeometry::Generate(const Environment& env, Style style, Device& device)
+Geometry* StaticLineGeometry::Generate(const Environment& env, Style style, Device& device)
 {
     Geometry* geom = device.FindGeometry("LineSegment");
     if (geom == nullptr)
     {
         // horizontal line.
-        const gfx::Vertex2D verts[2] = {
-                {{0.0f,  -0.5f}, {0.0f, 0.5f}},
-                {{1.0f,  -0.5f}, {1.0f, 0.5f}}
+        constexpr const gfx::Vertex2D verts[2] = {
+            {{0.0f,  -0.5f}, {0.0f, 0.5f}},
+            {{1.0f,  -0.5f}, {1.0f, 0.5f}}
         };
         geom = device.MakeGeometry("LineSegment");
         geom->SetVertexBuffer(verts, 2);
@@ -2283,6 +2313,49 @@ std::string TileBatch::GetProgramId(const Environment& env) const
     return "tile-batch-program";
 }
 
+void DynamicLine3D::ApplyDynamicState(const Environment& environment, Program& program, RasterState& state) const
+{
+    program.SetUniform("kProjectionMatrix",  *environment.proj_matrix);
+    program.SetUniform("kModelViewMatrix", *environment.view_matrix * *environment.model_matrix);
+}
+
+Shader* DynamicLine3D::GetShader(const Environment& environment, Device& device) const
+{
+    return MakeGeneric3DVertexShader(device);
+}
+
+Geometry* DynamicLine3D::Upload(const Environment& environment, Device& device) const
+{
+    // it's also possible to draw without generating geometry by simply having
+    // the two line end points as uniforms in the vertex shader and then using
+    // gl_VertexID (which is not available in GL ES2) to distinguish the vertex
+    // invocation and use that ID to choose the right vertex end point.
+
+    Geometry* geom = device.FindGeometry("line-buffer");
+    if (!geom)
+        geom = device.MakeGeometry("line-buffer");
+
+    std::vector<Vertex3D> vertices;
+    Vertex3D a;
+    a.aPosition = Vec3 { mPointA.x, mPointA.y, mPointA.z };
+    Vertex3D b;
+    b.aPosition = Vec3 { mPointB.x, mPointB.y, mPointB.z };
+
+    vertices.push_back(a);
+    vertices.push_back(b);
+
+    geom->SetVertexBuffer(vertices, Geometry::Usage::Stream);
+    geom->SetVertexLayout(GetVertexLayout<Vertex3D>());
+    geom->ClearDraws();
+    geom->AddDrawCmd(Geometry::DrawType::Lines);
+    return geom;
+}
+
+std::string DynamicLine3D::GetProgramId(const Environment& environment) const
+{
+    return "generic-3D-vertex-program";
+}
+
 std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const DrawableClass>& klass)
 {
     // factory function based on type switching.
@@ -2297,8 +2370,8 @@ std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const Dra
     {
         case DrawableClass::Type::Arrow:
             return std::make_unique<Arrow>();
-        case DrawableClass::Type::Line:
-            return std::make_unique<Line>();
+        case DrawableClass::Type::StaticLine:
+            return std::make_unique<StaticLine>();
         case DrawableClass::Type::Capsule:
             return std::make_unique<Capsule>();
         case DrawableClass::Type::Circle:
