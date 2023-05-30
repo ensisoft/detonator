@@ -52,23 +52,45 @@ namespace gfx
         float w = 0.0f;
     };
 
+    // About texture coordinates.
+    // In OpenGL the Y axis for texture coordinates goes so that
+    // 0.0 is the first scan-row and 1.0 is the last scan-row of
+    // the image. In other words st=0.0,0.0 is the first pixel
+    // element of the texture and st=1.0,1.0 is the last pixel.
+    // This is also reflected in the scan row memory order in
+    // the call glTexImage2D which assumes that the first element
+    // (pixel in the memory buffer) is the lower left corner.
+    // This however is of course not the same order than what most
+    // image loaders produce, they produce data chunks where the
+    // first element is the first pixel of the first scan row which
+    // is the "top" of the image. So this means that y=1.0f is then
+    // the bottom of the image and y=0.0f is the top of the image.
+    //
+    // Currently all the 2D geometry shapes have "inversed" their
+    // texture coordinates so that they use y=0.0f for the top
+    // of the shape and y=1.0 for the bottom of the shape which then
+    // produces the expected rendering.
+    //
+    // Complete solution requires making sure that both parts of the
+    // system, i.e. the geometry part (drawables) and the material
+    // part (which produces the texturing) understand and agree on
+    // this.
+
     // Vertex for 2D drawing on the XY plane.
     struct Vertex2D {
         // Coordinate / position of the vertex in the model space.
-        // Model space is a 2D space on XY plane where X varies from
-        // 0.0f to 1.0f (left to right when mapped onto render target)
-        // and Y varies from 0.0f to -1.0f ( from top to bottom when
-        // mapped onto render target).
         Vec2 aPosition;
-        // Texture coordinate for the vertex. Texture coordinates
-        // are normalized and can vary beyond 0.0f-1.0f range in
-        // which case they either get clamped or wrapped.
-        // Texture coordinates on the X axis vary from 0.0f to 1.0f
-        // i.e. from left to right on horizontal axis.
-        // Texture coordinates on the Y axis vary from 0.0f to 1.0f
-        // i.e. from top to bottom on the vertical axis. (0.0f is
-        // the *top* row of pixels and 1.0f is the *bottom* row of
-        // pixels).
+        // Texture coordinate for the vertex.
+        Vec2 aTexCoord;
+    };
+
+    // Vertex for #D drawing in the XYZ space.
+    struct Vertex3D {
+        // Coordinate / position of the vertex in the model space.
+        Vec3 aPosition;
+        // Vertex normal
+        Vec3 aNormal;
+        // Texture coordinate for the vertex.
         Vec2 aTexCoord;
     };
 
@@ -115,6 +137,17 @@ namespace gfx
         static const VertexLayout layout(sizeof(Vertex2D), {
             {"aPosition", 0, 2, 0, offsetof(Vertex2D, aPosition)},
             {"aTexCoord", 0, 2, 0, offsetof(Vertex2D, aTexCoord)}
+        });
+        return layout;
+    }
+
+    template<> inline
+    const VertexLayout& GetVertexLayout<Vertex3D>()
+    {
+        static const VertexLayout layout(sizeof(Vertex3D), {
+            {"aPosition", 0, 3, 0, offsetof(Vertex3D, aPosition)},
+            {"aNormal",   0, 3, 0, offsetof(Vertex3D, aNormal)},
+            {"aTexCoord", 0, 2, 0, offsetof(Vertex3D, aTexCoord)}
         });
         return layout;
     }
