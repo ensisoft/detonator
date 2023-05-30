@@ -22,6 +22,10 @@
 #  include <glm/vec2.hpp>
 #  include <glm/vec3.hpp>
 #  include <glm/vec4.hpp>
+#  include <glm/mat4x4.hpp>
+#  include <glm/mat3x3.hpp>
+#  include <glm/mat2x2.hpp>
+#  include <glm/gtc/type_ptr.hpp>
 #include "warnpop.h"
 
 #include <vector>
@@ -114,14 +118,21 @@ namespace gfx
         virtual size_t GetPendingUniformCount() const = 0;
 
         // helpers
-        inline void SetUniform(const char* name, const glm::vec2& vec)
+        inline void SetUniform(const char* name, const glm::vec2& vec) noexcept
         { SetUniform(name, vec.x, vec.y); }
-        inline void SetUniform(const char* name, const glm::vec3& vec)
+        inline void SetUniform(const char* name, const glm::vec3& vec) noexcept
         { SetUniform(name, vec.x, vec.y, vec.z); }
-        inline void SetUniform(const char* name, const glm::vec4& vec)
+        inline void SetUniform(const char* name, const glm::vec4& vec) noexcept
         { SetUniform(name, vec.x, vec.y, vec.z, vec.w); }
 
-        inline bool Build(const Shader* vertex, const Shader* fragment)
+        inline void SetUniform(const char* name, const glm::mat4& mat) noexcept
+        { SetUniform(name, *(const Matrix4x4*)glm::value_ptr(mat)); }
+        inline void SetUniform(const char* name, const glm::mat3& mat) noexcept
+        { SetUniform(name, *(const Matrix3x3*)glm::value_ptr(mat)); }
+        inline void SetUniform(const char* name, const glm::mat2& mat) noexcept
+        { SetUniform(name, *(const Matrix2x2*)glm::value_ptr(mat)); }
+
+        inline bool Build(const Shader* vertex, const Shader* fragment) noexcept
         {  return Build( std::vector<const Shader*> {vertex, fragment }); }
     private:
     };
