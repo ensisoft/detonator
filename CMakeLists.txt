@@ -717,6 +717,13 @@ target_link_libraries(lua-test PRIVATE Lua ${CONAN_LIBS})
 add_executable(glm-test tools/test/glmtest.cpp)
 target_include_directories(glm-test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/glm")
 
+# 3D/2D isometric projection test app.
+add_executable(3d tools/test/3d/main.cpp)
+target_link_libraries(3d PRIVATE  wdk_system wdk_desktop_gl EngineLib GfxLib UiLib DataLib BaseLib ${CONAN_LIBS})
+target_include_directories(3d PRIVATE "${CMAKE_CURRENT_LIST_DIR}/tools/test/3d")
+target_include_directories(3d PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_party/glm")
+install(TARGETS 3d DESTINATION "${CMAKE_CURRENT_LIST_DIR}/tools/test/3d/dist")
+
 # unit tests
 enable_testing()
 
