@@ -1,0 +1,313 @@
+{
+  "properties": [
+    {
+      "key": "widget/shape",
+      "value": "RoundRect"
+    },
+    {
+      "key": "widget/border-width",
+      "value": 1.0
+    },
+
+    {
+      "key": "widget/text-color",
+      "value": "LightGray"
+    },
+    {
+      "key": "widget/text-blink",
+      "value": false
+    },
+    {
+      "key": "widget/text-underline",
+      "value": false
+    },
+    {
+      "key": "widget/text-font",
+      "value": "app://fonts/orbitron-medium.otf"
+    },
+    {
+      "key": "widget/text-size",
+      "value": 16
+    },
+    {
+      "key": "widget/text-vertical-align",
+      "value": "Center"
+    },
+    {
+      "key": "widget/text-horizontal-align",
+      "value": "Center"
+    },
+
+
+    {
+      "key": "widget/edit-text-font",
+      "value": "app://fonts/orbitron-medium.otf"
+    },
+    {
+      "key": "widget/edit-text-size",
+      "value": 16
+    },
+    {
+      "key": "widget/edit-text-color",
+      "value": "LightGray"
+    },
+
+    {
+      "key": "form/shape",
+      "value": "Rect"
+    },
+
+    {
+      "key": "form/border-width",
+      "value": 0.0
+    },
+
+    {
+      "key": "widget/disabled/text-color",
+      "value": "Gray"
+    },
+    {
+      "key": "widget/disabled/text-font",
+      "value": "app://fonts/orbitron-light.otf"
+    }
+  ],
+
+  "materials": [
+    {
+      "key": "widget/background",
+      "type": "Color",
+      "color":  {"r": 0.1, "g": 0.1, "b": 0.1, "a": 0.1 }
+    },
+    {
+      "key": "widget/border",
+      "type": "Null"
+    },
+    {
+      "key": "widget/focus-rect",
+      "type": "Color",
+      "color": "Silver"
+    },
+
+    {
+      "key": "widget/button-icon",
+      "type": "Color",
+      "color": "LightGray"
+    },
+    {
+      "key": "widget/button-background",
+      "type": "Gradient",
+      "color0": "Gray",
+      "color1": "Gray",
+      "color2": "Black",
+      "color3": "Black",
+      "gamma": 2.2
+    },
+    {
+      "key": "widget/pressed/button-background",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Black",
+      "color3": "Black",
+      "gamma": 2.2
+    },
+    {
+      "key": "widget/mouse-over/button-background",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Black",
+      "color3": "Black",
+      "gamma": 2.2
+    },
+    {
+      "key": "widget/pressed/button-border",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Gray",
+      "color3": "Gray",
+      "gamma": 2.2
+    },
+    {
+      "key": "widget/text-edit-background",
+      "type": "Gradient",
+      "color0": "Black",
+      "color1": "Black",
+      "color2": "LightGray",
+      "color3": "LightGray",
+      "gamma": 2.2
+    },
+
+
+    {
+      "key": "togglebox/toggle-background-on",
+      "type": "Gradient",
+      "color0": "Black",
+      "color1": "Black",
+      "color2": "LightGray",
+      "color3": "LightGray",
+      "gamma": 2.2
+    },
+    {
+      "key": "togglebox/toggle-background-off",
+      "type": "Gradient",
+      "color0": "Black",
+      "color1": "Black",
+      "color2": "LightGray",
+      "color3": "LightGray",
+      "gamma": 2.2
+    },
+    {
+      "key": "togglebox/toggle-knob-on",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Black",
+      "color3": "Black",
+      "gamma": 2.2
+    },
+    {
+      "key": "togglebox/toggle-knob-off",
+      "type": "Gradient",
+      "color0": "Gray",
+      "color1": "Gray",
+      "color2": "Black",
+      "color3": "Black",
+      "gamma": 2.2
+    },
+
+
+
+    {
+      "key": "slider/slider-background",
+      "type": "Gradient",
+      "color0": "Black",
+      "color1": "Black",
+      "color2": "LightGray",
+      "color3": "LightGray",
+      "gamma": 2.2
+    },
+
+    {
+      "key": "slider/slider-knob",
+      "type": "Gradient",
+      "color0": "Gray",
+      "color1": "Gray",
+      "color2": "Black",
+      "color3": "Black",
+      "gamma": 2.2
+    },
+    {
+      "key": "slider/mouse-over/slider-knob",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Black",
+      "color3": "Black",
+      "gamma": 2.2
+    },
+    {
+      "key": "slider/pressed/slider-knob",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Black",
+      "color3": "Black",
+      "gamma": 2.2
+
+    },
+    {
+      "key": "slider/pressed/slider-knob-border",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Gray",
+      "color3": "Gray",
+      "gamma": 2.0
+    },
+
+    {
+      "key": "form/background",
+      "type": "Color",
+      "color":  {"r": 0.1, "g": 0.1, "b": 0.1,"a": 0.5}
+    },
+    {
+      "key": "form/border",
+      "type": "Color",
+      "color": "Gray"
+    },
+
+    {
+      "key": "checkbox/check-background",
+      "type": "Gradient",
+      "color0": "Black",
+      "color1": "Black",
+      "color2": "LightGray",
+      "color3": "LightGray",
+      "gamma": 2.2
+    },
+    {
+      "key": "checkbox/check-border",
+      "type": "Color",
+      "color": "Gray"
+    },
+    {
+      "key": "checkbox/check-mark-checked",
+      "type": "Color",
+      "color": "LightGray"
+    },
+
+    {
+      "key": "radiobutton/check-background",
+      "type": "Gradient",
+      "color0": "Black",
+      "color1": "Black",
+      "color2": "LightGray",
+      "color3": "LightGray",
+      "gamma": 2.2
+    },
+    {
+      "key": "radiobutton/check-border",
+      "type": "Color",
+      "color": "Gray"
+    },
+    {
+      "key": "radiobutton/check-mark-checked",
+      "type": "Color",
+      "color": "LightGray"
+    },
+
+    {
+      "key": "progress-bar/progress-bar-background",
+      "type": "Gradient",
+      "color0": "Black",
+      "color1": "Black",
+      "color2": "LightGray",
+      "color3": "LightGray",
+      "gamma": 2.2
+    },
+    {
+      "key": "progress-bar/progress-bar-fill",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Black",
+      "color3": "Black",
+      "gamma": 2.2
+    },
+
+
+    {
+      "key": "groupbox/background",
+      "type": "Color",
+      "color":  {"r": 0.1, "g": 0.1, "b": 0.1,"a": 1.0}
+    },
+    {
+      "key": "groupbox/border",
+      "type": "Color",
+      "color": "White"
+    }
+
+  ]
+}
