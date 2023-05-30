@@ -172,6 +172,12 @@ namespace gfx
         // Similar to the legacy draw except that allows the device state to be
         // changed through state and shader pass objects.
         void Draw(const Drawable& shape,
+                  const glm::mat4& model_to_world,
+                  const Material& material,
+                  const RenderPassState& render_pass,
+                  const ShaderPass& shader_pass);
+
+        void Draw(const Drawable& shape,
                   const Transform& transform,
                   const Material& material,
                   const RenderPassState& render_pass,
