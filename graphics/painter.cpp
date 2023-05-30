@@ -299,19 +299,26 @@ void Painter::SetSurfaceSize(unsigned width, unsigned height)
 }
 
 void Painter::Draw(const Drawable& shape,
+                   const glm::mat4& model_to_world,
+                   const Material& material,
+                   const RenderPassState& render_pass,
+                   const ShaderPass& shader_pass)
+{
+    std::vector<DrawShape> shapes;
+    shapes.resize(1);
+    shapes[0].drawable  = &shape;
+    shapes[0].material  = &material;
+    shapes[0].transform = &model_to_world;
+    Draw(shapes, render_pass, shader_pass);
+}
+
+void Painter::Draw(const Drawable& shape,
                    const Transform& transform,
                    const Material& material,
                    const RenderPassState& render_pass,
                    const ShaderPass& shader_pass)
 {
-    const auto& mat = transform.GetAsMatrix();
-
-    std::vector<DrawShape> shapes;
-    shapes.resize(1);
-    shapes[0].drawable  = &shape;
-    shapes[0].material  = &material;
-    shapes[0].transform = &mat;
-    Draw(shapes, render_pass, shader_pass);
+    Draw(shape, transform.GetAsMatrix(), material, render_pass, shader_pass);
 }
 
 void Painter::Draw(const Drawable& drawable, const Transform& transform, const Material& material)
