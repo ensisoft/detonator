@@ -239,26 +239,6 @@ private:
 };
 
 // static
-glm::mat4 Painter::MakeOrthographicProjection(const FRect& rect)
-{
-    const auto left   = rect.GetX();
-    const auto right  = rect.GetWidth() + left;
-    const auto top    = rect.GetY();
-    const auto bottom = rect.GetHeight() + top;
-    return glm::ortho(left , right , bottom , top);
-}
-
-// static
-glm::mat4 Painter::MakeOrthographicProjection(float left, float top, float width, float height)
-{
-    return glm::ortho(left, left + width, top + height, top);
-}
-glm::mat4 Painter::MakeOrthographicProjection(float width, float height)
-{
-    return glm::ortho(0.0f, width, height, 0.0f);
-}
-
-// static
 std::unique_ptr<Painter> Painter::Create(std::shared_ptr<Device> device)
 {
     return std::make_unique<StandardPainter>(device);
@@ -267,22 +247,6 @@ std::unique_ptr<Painter> Painter::Create(std::shared_ptr<Device> device)
 std::unique_ptr<Painter> Painter::Create(Device* device)
 {
     return std::make_unique<StandardPainter>(device);
-}
-
-void Painter::SetOrthographicProjection(const FRect& view)
-{
-    SetProjectionMatrix(MakeOrthographicProjection(view));
-}
-void Painter::SetOrthographicProjection(float left, float top, float width, float height)
-{
-    const FRect view(left, top, width, height);
-    SetProjectionMatrix(MakeOrthographicProjection(view));
-}
-// Set the logical viewport for "top left" origin based drawing.
-void Painter::SetOrthographicProjection(float width, float height)
-{
-    const FRect view(0.0f, 0.0f, width, height);
-    SetProjectionMatrix(MakeOrthographicProjection(view));
 }
 
 void Painter::SetViewport(int x, int y, unsigned int width, unsigned int height)

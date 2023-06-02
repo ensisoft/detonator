@@ -52,6 +52,7 @@
 #include "editor/gui/uiwidget.h"
 #include "editor/gui/utility.h"
 #include "graphics/drawing.h"
+#include "graphics/utility.h"
 #include "uikit/op.h"
 #include "uikit/state.h"
 #include "uikit/widget.h"
@@ -2008,7 +2009,7 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
         mCurrentTool->Render(painter, view);
     }
 
-    painter.SetOrthographicProjection(0.0f , 0.0f , surface_width , surface_height);
+    painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(surface_width , surface_height));
     painter.ResetViewMatrix();
 
     if (mPlayState == PlayState::Stopped)
