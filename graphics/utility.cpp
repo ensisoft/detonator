@@ -16,6 +16,11 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <glm/gtc/matrix_transform.hpp>
+#include "warnpop.h"
+
+#include "base/assert.h"
 #include "graphics/utility.h"
 #include "graphics/device.h"
 #include "graphics/shader.h"
@@ -65,6 +70,28 @@ Geometry* MakeFullscreenQuad(Device& device)
     geometry->SetVertexBuffer(verts, 6, gfx::Geometry::Usage::Static);
     geometry->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
     return geometry;
+}
+
+glm::mat4 MakeOrthographicProjection(const FRect& rect)
+{
+    const auto left   = rect.GetX();
+    const auto right  = rect.GetWidth() + left;
+    const auto top    = rect.GetY();
+    const auto bottom = rect.GetHeight() + top;
+    return glm::ortho(left , right , bottom , top);
+}
+
+glm::mat4 MakeOrthographicProjection(float left, float top, float width, float height)
+{
+    return glm::ortho(left, left + width, top + height, top);
+}
+glm::mat4 MakeOrthographicProjection(float width, float height)
+{
+    return glm::ortho(0.0f, width, height, 0.0f);
+}
+glm::mat4 MakeOrthographicProjection(float left, float right, float top, float bottom, float near, float far)
+{
+    return glm::ortho(left, right, bottom, top, near, far);
 }
 
 

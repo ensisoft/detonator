@@ -42,6 +42,7 @@
 #include "graphics/transform.h"
 #include "graphics/resource.h"
 #include "graphics/material.h"
+#include "graphics/utility.h"
 #include "engine/main/interface.h"
 #include "engine/audio.h"
 #include "engine/classlib.h"
@@ -264,7 +265,7 @@ public:
             // and is centered in the middle of the rendering surface.
             mPainter->SetViewport(GetViewport());
             // set the projection transform based on the game's logical viewport size.
-            mPainter->SetOrthographicProjection(0.0f, 0.0f, game_view_width, game_view_height);
+            mPainter->SetProjectionMatrix(gfx::MakeOrthographicProjection(0.0f, 0.0f, game_view_width, game_view_height));
             // set the pixel ratio for mapping game units to rendering surface units.
             mPainter->SetPixelRatio(glm::vec2(game_scale, game_scale));
             // set the view matrix
@@ -299,7 +300,7 @@ public:
             const float device_viewport_height = height * scale;
 
             mPainter->SetPixelRatio(glm::vec2(1.0f, 1.0f));
-            mPainter->SetOrthographicProjection(0, 0, width, height);
+            mPainter->SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, width, height));
             // Set the actual device viewport for rendering into the window surface.
             // the viewport retains the UI's aspect ratio and is centered in the middle
             // of the rendering surface.
@@ -314,7 +315,7 @@ public:
         if (mDebug.debug_show_fps || mDebug.debug_show_msg || mDebug.debug_draw || mFlags.test(Flags::ShowMouseCursor))
         {
             mPainter->SetPixelRatio(glm::vec2(1.0f, 1.0f));
-            mPainter->SetOrthographicProjection(0, 0, surf_width, surf_height);
+            mPainter->SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, surf_width, surf_height));
             mPainter->SetViewport(0, 0, surf_width, surf_height);
             mPainter->ResetViewMatrix();
         }
@@ -705,7 +706,7 @@ private:
         const auto& point  = viewport.MapToLocal(mickey.window_x, mickey.window_y);
         const auto point_norm_x  =  (point.GetX() / width) * 2.0 - 1.0f;
         const auto point_norm_y  =  (point.GetY() / height) * -2.0 + 1.0f;
-        const auto& projection   = gfx::Painter::MakeOrthographicProjection(mRuntime->GetViewport());
+        const auto& projection   = gfx::MakeOrthographicProjection(mRuntime->GetViewport());
         const auto& point_scene  = glm::inverse(projection) * glm::vec4(point_norm_x,
                                                                         point_norm_y, 1.0f, 1.0f);
         engine::MouseEvent event;

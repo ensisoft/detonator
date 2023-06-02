@@ -29,6 +29,7 @@
 #include "device/device.h"
 #include "graphics/drawing.h"
 #include "graphics/transform.h"
+#include "graphics/utility.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/gfxwidget.h"
@@ -222,14 +223,14 @@ void GfxWindow::paintGL()
         const auto surface_width  = (float)width();
         const auto surface_height = (float)height();
 
-        mCustomGraphicsPainter->SetOrthographicProjection(surface_width, surface_height);
+        mCustomGraphicsPainter->SetProjectionMatrix(gfx::MakeOrthographicProjection(surface_width, surface_height));
         mCustomGraphicsPainter->SetViewport(0, 0, surface_width, surface_height);
         mCustomGraphicsPainter->SetSurfaceSize(surface_width, surface_height);
         onPaintScene(*mCustomGraphicsPainter, 0.0);
 
         // reset these for subsequent drawing (below) since the widget's paint function
         // might have changed these unexpectedly.
-        mCustomGraphicsPainter->SetOrthographicProjection(surface_width, surface_height);
+        mCustomGraphicsPainter->SetProjectionMatrix(gfx::MakeOrthographicProjection(surface_width, surface_height));
         mCustomGraphicsPainter->SetViewport(0, 0, surface_width, surface_height);
         mCustomGraphicsPainter->SetSurfaceSize(surface_width, surface_height);
     }

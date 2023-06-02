@@ -139,29 +139,7 @@ namespace gfx
         static std::unique_ptr<Painter> Create(std::shared_ptr<Device> device);
         static std::unique_ptr<Painter> Create(Device* device);
 
-        // convenience and helper functions.
-
-        static glm::mat4 MakeOrthographicProjection(const FRect& rect);
-        static glm::mat4 MakeOrthographicProjection(float left, float top, float width, float height);
-        static glm::mat4 MakeOrthographicProjection(float width, float height);
-        // Set the projection matrix of the painter to an orthographic
-        // projection matrix. Essentially this creates a logical viewport
-        // (and coordinate transformation) into the scene to be rendered
-        // such that objects that are placed within the rectangle defined
-        // by the top left and bottom right coordinates are visible in the
-        // rendered scene.
-        // For example if left = 0.0f and width = 10.0f an object A that is
-        // 5.0f in width and is at coordinate -5.0f would not be shown.
-        // While an object B that is at 1.0f and is 2.0f units wide would be
-        // visible in the scene.
-        // Do not confuse this with SetViewport which defines the viewport
-        // in terms of device/render target coordinate space. I.e. the area
-        // of the rendering surface where the pixels of the rendered scene are
-        // placed in the surface.
-        void SetOrthographicProjection(const FRect& view);
-        void SetOrthographicProjection(float left, float top, float width, float height);
-        void SetOrthographicProjection(float width, float height);
-
+        // Utility helpers
         void SetViewport(int x, int y, unsigned width, unsigned height);
         void SetScissor(int x, int y, unsigned width, unsigned height);
         void SetSurfaceSize(unsigned width, unsigned height);

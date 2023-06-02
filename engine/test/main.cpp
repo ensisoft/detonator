@@ -42,6 +42,7 @@
 #include "graphics/drawable.h"
 #include "graphics/transform.h"
 #include "graphics/resource.h"
+#include "graphics/utility.h"
 #include "uikit/window.h"
 #include "uikit/widget.h"
 #include "uikit/state.h"
@@ -440,7 +441,7 @@ public:
         // set the actual viewport for proper clipping.
         painter.SetViewport(device_viewport_x, device_viewport_y, device_viewport_width, device_viewport_height);
         // set the logical game view
-        painter.SetOrthographicProjection(mViewport);
+        painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(mViewport));
 
         //gfx::FRect test(0.0f, 0.0f, 100.0f, 100.0f);
         //gfx::FillRect(painter, test, gfx::Color::Yellow);
@@ -993,7 +994,7 @@ public:
         mDevice->BeginFrame();
         mDevice->ClearColor(gfx::Color4f(0.2, 0.3, 0.4, 1.0f));
         mPainter->SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
-        mPainter->SetOrthographicProjection(mSurfaceWidth , mSurfaceHeight);
+        mPainter->SetProjectionMatrix(gfx::MakeOrthographicProjection(mSurfaceWidth , mSurfaceHeight));
         mTestList[mTestIndex]->SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
         mTestList[mTestIndex]->Render(*mPainter);
         mDevice->EndFrame(true);

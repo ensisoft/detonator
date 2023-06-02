@@ -26,6 +26,7 @@
 #include "graphics/material.h"
 #include "graphics/painter.h"
 #include "graphics/transform.h"
+#include "graphics/utility.h"
 #include "game/entity.h"
 #include "game/scene.h"
 #include "game/util.h"
@@ -237,7 +238,7 @@ void unit_test_drawable_item()
     auto device = CreateDevice();
     auto painter = gfx::Painter::Create(device);
     painter->SetEditingMode(false);
-    painter->SetOrthographicProjection(256, 256);
+    painter->SetProjectionMatrix(gfx::MakeOrthographicProjection(256, 256));
     painter->SetViewport(0, 0, 256, 256);
     painter->SetSurfaceSize(256, 256);
 
@@ -491,7 +492,7 @@ void unit_test_entity_layering()
     auto device = CreateDevice();
     auto painter = gfx::Painter::Create(device);
     painter->SetEditingMode(false);
-    painter->SetOrthographicProjection(256, 256);
+    painter->SetProjectionMatrix(gfx::MakeOrthographicProjection(256, 256));
     painter->SetViewport(0, 0, 256, 256);
     painter->SetSurfaceSize(256, 256);
 
@@ -582,7 +583,7 @@ void unit_test_entity_lifecycle()
     auto device = CreateDevice();
     auto painter = gfx::Painter::Create(device);
     painter->SetEditingMode(false);
-    painter->SetOrthographicProjection(256, 256);
+    painter->SetProjectionMatrix(gfx::MakeOrthographicProjection(256, 256));
     painter->SetViewport(0, 0, 256, 256);
     painter->SetSurfaceSize(256, 256);
 
@@ -700,7 +701,7 @@ void unit_test_transform_precision()
     auto device = CreateDevice(1024, 1024);
     auto painter = gfx::Painter::Create(device);
     painter->SetEditingMode(false);
-    painter->SetOrthographicProjection(1024, 1024);
+    painter->SetProjectionMatrix(gfx::MakeOrthographicProjection(1024, 1024));
     painter->SetViewport(0, 0, 1024, 1024);
     painter->SetSurfaceSize(1024, 1024);
 
