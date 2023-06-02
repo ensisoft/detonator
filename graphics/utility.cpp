@@ -16,7 +16,7 @@
 
 #include "config.h"
 
-#include "graphics/help.h"
+#include "graphics/utility.h"
 #include "graphics/device.h"
 #include "graphics/shader.h"
 #include "graphics/program.h"

@@ -180,7 +180,7 @@ add_library(DataLib
 add_library(GfxLib
     device/opengles.cpp
     graphics/algo.cpp
-    graphics/help.cpp
+    graphics/utility.cpp
     graphics/bitmap.cpp
     graphics/drawing.cpp
     graphics/drawable.cpp
@@ -215,7 +215,7 @@ add_library(GfxLibTesting
     device/opengles.cpp
     graphics/algo.cpp
     graphics/bitmap.cpp
-    graphics/help.cpp
+    graphics/utility.cpp
     graphics/drawing.cpp
     graphics/drawable.cpp
     graphics/material.cpp
@@ -633,7 +633,7 @@ install(TARGETS audio_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/audio/test/")
 add_executable(graphics_test
     device/opengles.cpp
     graphics/algo.cpp
-    graphics/help.cpp
+    graphics/utility.cpp
     graphics/bitmap.cpp
     graphics/material.cpp
     graphics/shaderpass.cpp

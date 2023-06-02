@@ -29,7 +29,7 @@
 #include "graphics/program.h"
 #include "graphics/texture.h"
 #include "graphics/framebuffer.h"
-#include "graphics/help.h"
+#include "graphics/utility.h"
 
 namespace gfx {
 namespace algo {
