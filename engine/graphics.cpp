@@ -25,7 +25,7 @@
 #include "graphics/program.h"
 #include "graphics/renderpass.h"
 #include "graphics/shaderpass.h"
-#include "graphics/help.h"
+#include "graphics/utility.h"
 #include "graphics/algo.h"
 
 namespace {
