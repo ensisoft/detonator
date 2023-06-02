@@ -57,6 +57,7 @@ namespace gfx
         enum class Type {
             Arrow,
             Capsule,
+            Cube,
             SemiCircle,
             Sector,
             Cursor,
@@ -294,10 +295,8 @@ namespace gfx
                 state.culling    = mCulling;
                 const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
                 const auto& kProjectionMatrix = *env.proj_matrix;
-                program.SetUniform("kProjectionMatrix",
-                    *(const Program::Matrix4x4 *) glm::value_ptr(kProjectionMatrix));
-                program.SetUniform("kModelViewMatrix",
-                   *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
+                program.SetUniform("kProjectionMatrix", kProjectionMatrix);
+                program.SetUniform("kModelViewMatrix", kModelViewMatrix);
             }
             virtual Shader* GetShader(const Environment& env, Device& device) const override
             { return DrawableGeometry::GetShader(device); }
@@ -319,7 +318,7 @@ namespace gfx
             float mLineWidth = 1.0f;
         };
 
-        struct GeometryBase {
+        struct GeometryBase2D {
             using Environment = Drawable::Environment;
             using Style       = Drawable::Style;
             using Culling     = Drawable::Culling ;
@@ -328,37 +327,54 @@ namespace gfx
             static Shader* GetShader(Device& device);
             static std::string GetProgramId();
         };
-        struct ArrowGeometry : public GeometryBase {
+        struct GeometryBase3D {
+            using Environment = Drawable::Environment;
+            using Style       = Drawable::Style;
+            using Culling     = Drawable::Culling ;
+            static constexpr Culling InitialCulling = Culling::Back;
+            static constexpr Style   InitialStyle   = Style::Solid;
+            static Shader* GetShader(Device& device);
+            static std::string GetProgramId();
+        };
+
+        struct ArrowGeometry : public GeometryBase2D {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct StaticLineGeometry : public GeometryBase {
+        struct StaticLineGeometry : public GeometryBase2D {
             static constexpr Culling InitialCulling = Culling::None;
             static constexpr Style   InitialStyle   = Style::Outline;
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct CapsuleGeometry : public GeometryBase {
+        struct CapsuleGeometry : public GeometryBase2D {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct SemiCircleGeometry : public GeometryBase {
+        struct SemiCircleGeometry : public GeometryBase2D {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct CircleGeometry : public GeometryBase {
+        struct CircleGeometry : public GeometryBase2D {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct RectangleGeometry : public GeometryBase {
+        struct RectangleGeometry : public GeometryBase2D {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct IsoscelesTriangleGeometry : public GeometryBase {
+        struct IsoscelesTriangleGeometry : public GeometryBase2D {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct RightTriangleGeometry : public GeometryBase {
+        struct RightTriangleGeometry : public GeometryBase2D {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct TrapezoidGeometry : public GeometryBase {
+        struct TrapezoidGeometry : public GeometryBase2D {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct ParallelogramGeometry : public GeometryBase {
+        struct ParallelogramGeometry : public GeometryBase2D {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
+        };
+
+        struct CubeGeometry : public GeometryBase3D {
+            static Geometry* Generate(const Environment& env, Style style, Device& device);
+            static void MakeFace(size_t vertex_offset, Index16* indices, Vertex3D* vertices,
+                                 const Vec3& v0, const Vec3& v1, const Vec3& v2, const Vec3& v3,
+                                 const Vec3& normal);
         };
     } // namespace
 
@@ -374,6 +390,7 @@ namespace gfx
     using RectangleClass         = detail::GenericDrawableClass<DrawableClass::Type::Rectangle>;
     using RightTriangleClass     = detail::GenericDrawableClass<DrawableClass::Type::RightTriangle>;
     using TrapezoidClass         = detail::GenericDrawableClass<DrawableClass::Type::Trapezoid>;
+    using CubeClass              = detail::GenericDrawableClass<DrawableClass::Type::Cube>;
 
     // generic drawable definitions for drawables that don't need special
     // behaviour at runtime.
@@ -387,6 +404,7 @@ namespace gfx
     using Rectangle         = detail::GenericDrawable<detail::RectangleGeometry>;
     using RightTriangle     = detail::GenericDrawable<detail::RightTriangleGeometry>;
     using Trapezoid         = detail::GenericDrawable<detail::TrapezoidGeometry>;
+    using Cube              = detail::GenericDrawable<detail::CubeGeometry>;
 
     class SectorClass : public detail::DrawableClassBase<SectorClass>
     {
