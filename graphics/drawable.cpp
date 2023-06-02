@@ -146,11 +146,17 @@ void main()
 namespace gfx {
 namespace detail {
 // static
-Shader* GeometryBase::GetShader(Device& device)
+Shader* GeometryBase2D::GetShader(Device& device)
 { return MakeGeneric2DVertexShader(device); }
-std::string GeometryBase::GetProgramId()
+std::string GeometryBase2D::GetProgramId()
 { return "generic-2D-vertex-program"; }
 // static
+
+Shader* GeometryBase3D::GetShader(Device& device)
+{ return MakeGeneric3DVertexShader(device); }
+std::string GeometryBase3D::GetProgramId()
+{ return "generic-3D-vertex-program"; }
+
 Geometry* ArrowGeometry::Generate(const Environment& env, Style style, Device& device)
 {
     if (style == Style::Points)
@@ -786,6 +792,82 @@ Geometry* ParallelogramGeometry::Generate(const Environment& env, Style style, D
         }
     }
     return geom;
+}
+
+// static
+Geometry* CubeGeometry::Generate(const Environment& env, Style style, Device& device)
+{
+    // all corners of the cube.
+    constexpr const Vec3 FrontTopLeft =  {-0.5f,  0.5f,  0.5f};
+    constexpr const Vec3 FrontBotLeft =  {-0.5f, -0.5f,  0.5f};
+    constexpr const Vec3 FrontBotRight = { 0.5f, -0.5f,  0.5f};
+    constexpr const Vec3 FrontTopRight = { 0.5f,  0.5f,  0.5f};
+    constexpr const Vec3 BackTopLeft   = {-0.5f,  0.5f, -0.5f};
+    constexpr const Vec3 BackBotLeft   = {-0.5f, -0.5f, -0.5f};
+    constexpr const Vec3 BackBotRight  = { 0.5f, -0.5f, -0.5f};
+    constexpr const Vec3 BackTopRight  = { 0.5f,  0.5f, -0.5f};
+
+    if (style == Style::Solid)
+    {
+        Geometry* geom = device.FindGeometry("SolidCube");
+        if (geom == nullptr)
+        {
+            geom = device.MakeGeometry("SolidCube");
+
+            Vertex3D vertices[4 * 6];
+            Index16 indices[6 * 6];
+
+            // front face
+            MakeFace(0, &indices[0], &vertices[0], FrontTopLeft, FrontBotLeft, FrontBotRight, FrontTopRight, Vec3 {0.0, 0.0, 1.0} );
+            // left face
+            MakeFace(4, &indices[6], &vertices[4], BackTopLeft, BackBotLeft, FrontBotLeft, FrontTopLeft, Vec3 {-1.0, 0.0, 0.0});
+            // right face
+            MakeFace(8, &indices[12], &vertices[8], FrontTopRight, FrontBotRight, BackBotRight, BackTopRight, Vec3 {1.0, 0.0, 0.0});
+            // top face
+            MakeFace(12, &indices[18], &vertices[12], BackTopLeft, FrontTopLeft, FrontTopRight, BackTopRight, Vec3 {0.0, 1.0, 0.0});
+            // bottom face
+            MakeFace(16, &indices[24], &vertices[16], FrontBotLeft, BackBotLeft, BackBotRight, FrontBotRight, Vec3{0.0, -1.0, 0.0});
+            // back face
+            MakeFace(20, &indices[30], &vertices[20], BackTopRight, BackBotRight, BackBotLeft, BackTopLeft, Vec3{0.0, 0.0, -1.0});
+
+            geom->UploadVertices(vertices, sizeof(vertices), Geometry::Usage::Static);
+            geom->UploadIndices(indices, sizeof(indices), Geometry::IndexType::Index16, Geometry::Usage::Static);
+            geom->SetVertexLayout(GetVertexLayout<Vertex3D>());
+            geom->AddDrawCmd(Geometry::DrawType::Triangles);
+        }
+        return geom;
+    }
+    return nullptr;
+}
+// static
+void CubeGeometry::MakeFace(size_t vertex_offset, Index16* indices, Vertex3D* vertices,
+                            const Vec3& v0, const Vec3& v1, const Vec3& v2, const Vec3& v3,
+                            const Vec3& normal)
+{
+    constexpr const Vec2 TexBotLeft  = {0.0, 0.0};
+    constexpr const Vec2 TexTopLeft  = {0.0, 1.0};
+    constexpr const Vec2 TexTopRight = {1.0, 1.0};
+    constexpr const Vec2 TexBotRight = {1.0, 0.0};
+
+    vertices[0].aPosition = v0;
+    vertices[1].aPosition = v1;
+    vertices[2].aPosition = v2;
+    vertices[3].aPosition = v3;
+    vertices[0].aTexCoord = TexTopLeft;
+    vertices[1].aTexCoord = TexBotLeft;
+    vertices[2].aTexCoord = TexBotRight;
+    vertices[3].aTexCoord = TexTopRight;
+    vertices[0].aNormal   = normal;
+    vertices[1].aNormal   = normal;
+    vertices[2].aNormal   = normal;
+    vertices[3].aNormal   = normal;
+
+    indices[0] = gfx::Index16(vertex_offset + 0);
+    indices[1] = gfx::Index16(vertex_offset + 1);
+    indices[2] = gfx::Index16(vertex_offset + 2);
+    indices[3] = gfx::Index16(vertex_offset + 2);
+    indices[4] = gfx::Index16(vertex_offset + 3);
+    indices[5] = gfx::Index16(vertex_offset + 0);
 }
 
 } // detail
@@ -2376,6 +2458,8 @@ std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const Dra
             return std::make_unique<Capsule>();
         case DrawableClass::Type::Circle:
             return std::make_unique<Circle>();
+        case DrawableClass::Type::Cube:
+            return std::make_unique<Cube>();
         case DrawableClass::Type::SemiCircle:
             return std::make_unique<SemiCircle>();
         case DrawableClass::Type::Rectangle:
