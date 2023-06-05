@@ -137,9 +137,11 @@ namespace uik
         Widget& GetWidget(size_t index)
         { return *base::SafeIndex(mWidgets, index); }
 
-        // Perform hit testing based on the given window coordinates. Returns
-        // the first widget whose rectangle contains the test point.
-        Widget* HitTest(const FPoint& window, FPoint* widget_coord = nullptr, bool consider_flags = false);
+        // Perform widget hit testing and find widget that contains the given window point
+        // inside its the widget rect.
+        // if widget_point is not null the point is transformed into widget coordinates
+        // and stored in widget_point.
+        Widget* HitTest(const FPoint& window_point, FPoint* widget_point = nullptr, bool consider_flags = false);
 
         // Find the first widget (if any) that satisfies the given predicate.
         // The predicate should return true to indicate a match. If no widget
@@ -165,10 +167,11 @@ namespace uik
         const Widget& GetWidget(size_t index) const
         { return *base::SafeIndex(mWidgets, index); }
 
-        // Find the first widget (if any) that satisfies the given predicate.
-        // The predicate should return true to indicate a match. If no widget
-        // matches the predicate then nullptr is returned.
-        const Widget* HitTest(const FPoint& window, FPoint* widget_coord = nullptr, bool consider_flags = false) const;
+        // Perform widget hit testing and find widget that contains the given window point
+        // inside its the widget rect.
+        // if widget_point is not null the point is transformed into widget coordinates
+        // and stored in widget_point.
+        const Widget* HitTest(const FPoint& window_point, FPoint* widget_point = nullptr, bool consider_flags = false) const;
 
         // Paint the window and its widgets.
         void Paint(State& state, Painter& painter, double time = 0.0, PaintHook* hook = nullptr) const;
