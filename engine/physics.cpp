@@ -655,7 +655,7 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view
         const b2Vec2& pos = world_body->GetPosition();
 
         view.Push();
-        view.Rotate(angle);
+        view.RotateAroundZ(angle);
         view.Translate(pos.x, pos.y);
 
         // visualize each fixture attached to the body.
@@ -676,7 +676,7 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view
             view.Push();
             view.Scale(fixture_data->shape_size);
             view.Translate(fixture_data->shape_size * -0.5f);
-            view.Rotate(fixture_data->shape_rotation);
+            view.RotateAroundZ(fixture_data->shape_rotation);
             view.Translate(fixture_data->shape_offset);
 
             if (shape == RigidBodyItemClass::CollisionShape::Box)
@@ -864,7 +864,7 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& entity
             // relative to its parent node.
             glm::mat4 mat;
             Transform transform;
-            transform.Rotate(physics_world_angle);
+            transform.RotateAroundZ(physics_world_angle);
             transform.Translate(physics_world_pos.x, physics_world_pos.y);
             transform.Push();
                 transform.Scale(phys_node->world_extents);
@@ -1120,7 +1120,7 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
             // the fixture (collision shape) needs to be expressed
             // relative to the physics rigid body.
             Transform transform;
-            transform.Rotate(world_body_rotation);
+            transform.RotateAroundZ(world_body_rotation);
             transform.Translate(world_body_position);
             // transformation for transforming vertices from the physics
             // world to the rigid body.

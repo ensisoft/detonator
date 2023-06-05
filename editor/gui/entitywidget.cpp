@@ -933,7 +933,7 @@ void EntityWidget::Paste(const Clipboard& clipboard)
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.Rotate(qDegreesToRadians((float)GetValue(mUI.rotation)));
+    view.RotateAroundZ(qDegreesToRadians((float) GetValue(mUI.rotation)));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
     const auto& view_to_scene   = glm::inverse(view.GetAsMatrix());
     const auto& mouse_pos_view  = ToVec4(mickey);
@@ -2835,7 +2835,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     gfx::Transform view;
     view.Scale(xs, ys);
     view.Scale(zoom, zoom);
-    view.Rotate(qDegreesToRadians(view_rotation_angle));
+    view.RotateAroundZ(qDegreesToRadians(view_rotation_angle));
     view.Translate(view_translation);
 
     painter.SetViewport(0, 0, width, height);
@@ -2930,7 +2930,7 @@ void EntityWidget::MouseZoom(std::function<void(void)> zoom_function)
         gfx::Transform view;
         view.Scale(GetValue(mUI.scaleX) , GetValue(mUI.scaleY));
         view.Scale(GetValue(mUI.zoom) , GetValue(mUI.zoom));
-        view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+        view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
         view.Translate(mState.camera_offset_x , mState.camera_offset_y);
         const auto& mat = glm::inverse(view.GetAsMatrix());
         mickey_pos_in_entity = mat * glm::vec4(mickey.x() , mickey.y() , 1.0f , 1.0f);
@@ -2942,7 +2942,7 @@ void EntityWidget::MouseZoom(std::function<void(void)> zoom_function)
         gfx::Transform view;
         view.Scale(GetValue(mUI.scaleX) , GetValue(mUI.scaleY));
         view.Scale(GetValue(mUI.zoom) , GetValue(mUI.zoom));
-        view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+        view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
         view.Translate(mState.camera_offset_x , mState.camera_offset_y);
         const auto& mat = view.GetAsMatrix();
         mickey_pos_in_widget = mat * mickey_pos_in_entity;
@@ -2959,7 +2959,7 @@ void EntityWidget::MouseMove(QMouseEvent* mickey)
         gfx::Transform view;
         view.Scale(GetValue(mUI.scaleX) , GetValue(mUI.scaleY));
         view.Scale(GetValue(mUI.zoom) , GetValue(mUI.zoom));
-        view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+        view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
         view.Translate(mState.camera_offset_x , mState.camera_offset_y);
         mCurrentTool->MouseMove(mickey , view);
 
@@ -2978,7 +2978,7 @@ void EntityWidget::MousePress(QMouseEvent* mickey)
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.Rotate((float)qDegreesToRadians(mUI.rotation->value()));
+    view.RotateAroundZ((float) qDegreesToRadians(mUI.rotation->value()));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
     if (!mCurrentTool && (mickey->button() == Qt::LeftButton))
@@ -3031,7 +3031,7 @@ void EntityWidget::MouseRelease(QMouseEvent* mickey)
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+    view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
     if (mCurrentTool->MouseRelease(mickey, view))
@@ -3055,7 +3055,7 @@ void EntityWidget::MouseDoubleClick(QMouseEvent* mickey)
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.Rotate((float)qDegreesToRadians(mUI.rotation->value()));
+    view.RotateAroundZ((float) qDegreesToRadians(mUI.rotation->value()));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
     auto [hitnode, hitpos] = SelectNode(mickey->pos(), view, *mState.entity, GetCurrentNode());

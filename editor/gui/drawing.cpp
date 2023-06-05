@@ -171,7 +171,7 @@ void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans)
     trans.Push();
         trans.Scale(100.0f, 5.0f);
         trans.Translate(-50.0f, -2.5f);
-        trans.Rotate(math::Pi * 0.5f);
+        trans.RotateAroundZ(math::Pi * 0.5f);
         trans.Translate(0.0f, 50.0f);
         painter.Draw(gfx::Arrow(), trans, gfx::CreateMaterialFromColor(gfx::Color::Red));
     trans.Pop();
@@ -207,7 +207,7 @@ void DrawBasisVectors(gfx::Transform& view, std::vector<engine::DrawPacket>& pac
     view.Push();
         view.Scale(100.0f, 5.0f);
         view.Translate(-50.0f, -2.5f);
-        view.Rotate(math::Pi * 0.5f);
+        view.RotateAroundZ(math::Pi * 0.5f);
         view.Translate(0.0f, 50.0f);
         engine::DrawPacket y;
         y.transform = view.GetAsMatrix();

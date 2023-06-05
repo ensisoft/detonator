@@ -1514,7 +1514,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     view.Push();
     view.Scale(xs, ys);
     view.Scale(zoom, zoom);
-    view.Rotate(qDegreesToRadians(view_rotation_angle));
+    view.RotateAroundZ(qDegreesToRadians(view_rotation_angle));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
     // render endless background grid.
@@ -1577,7 +1577,7 @@ void AnimationTrackWidget::MouseZoom(std::function<void(void)> zoom_function)
         gfx::Transform view;
         view.Scale(GetValue(mUI.viewScaleX) , GetValue(mUI.viewScaleY));
         view.Scale(GetValue(mUI.zoom) , GetValue(mUI.zoom));
-        view.Rotate(qDegreesToRadians(mUI.viewRotation->value()));
+        view.RotateAroundZ(qDegreesToRadians(mUI.viewRotation->value()));
         view.Translate(mState.camera_offset_x , mState.camera_offset_y);
         const auto& mat = glm::inverse(view.GetAsMatrix());
         mickey_pos_in_entity = mat * glm::vec4(mickey.x() , mickey.y() , 1.0f , 1.0f);
@@ -1589,7 +1589,7 @@ void AnimationTrackWidget::MouseZoom(std::function<void(void)> zoom_function)
         gfx::Transform view;
         view.Scale(GetValue(mUI.viewScaleX) , GetValue(mUI.viewScaleY));
         view.Scale(GetValue(mUI.zoom) , GetValue(mUI.zoom));
-        view.Rotate(qDegreesToRadians(mUI.viewRotation->value()));
+        view.RotateAroundZ(qDegreesToRadians(mUI.viewRotation->value()));
         view.Translate(mState.camera_offset_x , mState.camera_offset_y);
         const auto& mat = view.GetAsMatrix();
         mickey_pos_in_widget = mat * mickey_pos_in_entity;
@@ -1606,7 +1606,7 @@ void AnimationTrackWidget::MouseMove(QMouseEvent* mickey)
         gfx::Transform view;
         view.Scale(GetValue(mUI.viewScaleX), GetValue(mUI.viewScaleY));
         view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-        view.Rotate(qDegreesToRadians(mUI.viewRotation->value()));
+        view.RotateAroundZ(qDegreesToRadians(mUI.viewRotation->value()));
         view.Translate(mState.camera_offset_x, mState.camera_offset_y);
         mCurrentTool->MouseMove(mickey, view);
 
@@ -1622,7 +1622,7 @@ void AnimationTrackWidget::MousePress(QMouseEvent* mickey)
     gfx::Transform view;
     view.Scale(GetValue(mUI.viewScaleX), GetValue(mUI.viewScaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.Rotate(qDegreesToRadians(mUI.viewRotation->value()));
+    view.RotateAroundZ(qDegreesToRadians(mUI.viewRotation->value()));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
     if (!mCurrentTool &&
@@ -1679,7 +1679,7 @@ void AnimationTrackWidget::MouseRelease(QMouseEvent* mickey)
     gfx::Transform view;
     view.Scale(GetValue(mUI.viewScaleX), GetValue(mUI.viewScaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.Rotate(qDegreesToRadians(mUI.viewRotation->value()));
+    view.RotateAroundZ(qDegreesToRadians(mUI.viewRotation->value()));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
     if (mCurrentTool->MouseRelease(mickey, view))

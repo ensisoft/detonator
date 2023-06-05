@@ -397,7 +397,7 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
 
     gfx::Transform transform;
     transform.Scale(paint_node.world_scale);
-    transform.Rotate(paint_node.world_rotation);
+    transform.RotateAroundZ(paint_node.world_rotation);
     transform.Translate(paint_node.world_pos);
 
     transform.Push(node.GetModelTransform());
@@ -630,7 +630,7 @@ void Renderer::CreateDrawResources(PaintNode& paint_node)
             {
                 gfx::Transform transform;
                 transform.Scale(paint_node.world_scale);
-                transform.Rotate(paint_node.world_rotation);
+                transform.RotateAroundZ(paint_node.world_rotation);
                 transform.Translate(paint_node.world_pos);
 
                 transform.Push(node.GetModelTransform());
@@ -683,7 +683,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
 
     gfx::Transform transform;
     transform.Scale(paint_node.world_scale);
-    transform.Rotate(paint_node.world_rotation);
+    transform.RotateAroundZ(paint_node.world_rotation);
     transform.Translate(paint_node.world_pos);
 
     transform.Push(node.GetModelTransform());
