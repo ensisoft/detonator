@@ -321,7 +321,7 @@ public:
 
         view.Push();
             view.Scale(movement.x, movement.y);
-            view.MoveTo(mMouseStartPos);
+            view.MoveTo(mMouseStartPos.x, mMouseStartPos.y);
             painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), view,
                          gfx::CreateMaterialFromColor(gfx::Color::Green));
         view.Pop();

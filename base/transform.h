@@ -54,32 +54,35 @@ namespace base
 
         // Set absolute position. This will override any previously
         // accumulated translation.
-        void MoveTo(float x, float y)
+        inline void MoveTo(float x, float y) noexcept
         { mTransform.back()[3] = glm::vec4(x, y, 0.0f, 1.0f); }
-        void MoveTo(const glm::vec2& pos)
+        inline void MoveTo(float x, float y, float z) noexcept
+        { mTransform.back()[3] = glm::vec4(x, y, z, 1.0f); }
+        inline void MoveTo(const glm::vec2& pos) noexcept
         { MoveTo(pos.x, pos.y); }
-        void MoveTo(const FPoint& point)
+        inline void MoveTo(const glm::vec3& pos) noexcept
+        { MoveTo(pos.x, pos.y, pos.z); }
+        inline void MoveTo(const FPoint& point) noexcept
         { MoveTo(point.GetX(), point.GetY()); }
-        void MoveTo(const FRect& rect)
+        inline void MoveTo(const FRect& rect) noexcept
         { MoveTo(rect.GetX(), rect.GetY()); }
 
         // Accumulate a translation to the current transform, i.e.
         // the movement is relative to the current position.
-        void Translate(float x, float y)
-        {
-            // note that since we're using identity matrix here as the basis transformation
-            // the translation is always relative to the untransformed basis, i.e.
-            // the global coordinate system.
-            Accumulate(glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f)));
-        }
-        void Translate(const FPoint& point)
+        inline void Translate(float x, float y) noexcept
+        { Accumulate(glm::translate(glm::mat4(1.0f), {x, y, 0.0f})); }
+        inline void Translate(float x, float y, float z) noexcept
+        { Accumulate(glm::translate(glm::mat4(1.0f), {x, y, z})); }
+        inline void Translate(const FPoint& point) noexcept
         { Translate(point.GetX(), point.GetY()); }
-        void Translate(const glm::vec2& offset)
+        inline void Translate(const glm::vec2& offset) noexcept
         { Translate(offset.x, offset.y); }
+        inline void Translate(const glm::vec3& offset) noexcept
+        { Translate(offset.x, offset.y, offset.z); }
 
         // Set absolute resize. This will override any previously
         // accumulated scaling.
-        void Resize(float sx, float sy)
+        void Resize(float sx, float sy) noexcept
         {
             const auto& x = glm::normalize(mTransform.back()[0]);
             const auto& y = glm::normalize(mTransform.back()[1]);
@@ -90,21 +93,38 @@ namespace base
             mTransform.back()[2] = z;
             mTransform.back()[3] = t;
         }
+        void Resize(float sx, float sy, float sz) noexcept
+        {
+            const auto& x = glm::normalize(mTransform.back()[0]);
+            const auto& y = glm::normalize(mTransform.back()[1]);
+            const auto& z = glm::normalize(mTransform.back()[2]);
+            const auto& t = mTransform.back()[3];
+            mTransform.back()[0] = x * sx;
+            mTransform.back()[1] = y * sy;
+            mTransform.back()[2] = z * sz;
+            mTransform.back()[3] = t;
+        }
 
-        void Resize(const FSize& size)
+        inline void Resize(const FSize& size) noexcept
         { Resize(size.GetWidth(), size.GetHeight()); }
-        void Resize(const FRect& rect)
+        inline void Resize(const FRect& rect) noexcept
         { Resize(rect.GetWidth(), rect.GetHeight()); }
-        void Resize(const glm::vec2& size)
+        inline void Resize(const glm::vec2& size) noexcept
         { Resize(size.x, size.y); }
+        inline void Resize(const glm::vec3& size) noexcept
+        { Resize(size.x, size.y, size.z); }
 
         // Accumulate a scaling operation to the current transform, i.e.
         // the scaling is relative to the current transform.
-        void Scale(float sx, float sy)
-        { Accumulate(glm::scale(glm::mat4(1.0f), glm::vec3(sx, sy, 1.0f))); }
-        void Scale(const glm::vec2& scale)
+        inline void Scale(float sx, float sy) noexcept
+        { Accumulate(glm::scale(glm::mat4(1.0f), {sx, sy, 1.0f})); }
+        inline void Scale(float sx, float sy, float sz) noexcept
+        { Accumulate(glm::scale(glm::mat4(1.0f), {sx, sy, sz})); }
+        inline void Scale(const glm::vec2& scale) noexcept
         { Scale(scale.x, scale.y); }
-        void Scale(const FSize& size)
+        inline void Scale(const glm::vec3& scale) noexcept
+        { Scale(scale.x, scale.y, scale.z); }
+        inline void Scale(const FSize& size) noexcept
         { Scale(size.GetWidth(), size.GetHeight()); }
 
         // Accumulate rotation to the current transformation
