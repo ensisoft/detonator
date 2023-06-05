@@ -65,7 +65,7 @@ namespace engine
         };
         virtual ~UIMaterial() = default;
         // Load/generate the actual material class.
-        virtual MaterialClass GetClass(const ClassLibrary& classlib, const Loader& loader) const = 0;
+        virtual MaterialClass GetClass(const ClassLibrary* classlib, const Loader* loader) const = 0;
         // Get the type of the UI material.
         virtual Type GetType() const = 0;
         // Load state from JSON. Returns true if successful.
@@ -87,7 +87,7 @@ namespace engine
         class UINullMaterial : public UIMaterial
         {
         public:
-            virtual MaterialClass GetClass(const ClassLibrary&, const Loader& loader) const override
+            virtual MaterialClass GetClass(const ClassLibrary*, const Loader*) const override
             { return nullptr; }
             virtual Type GetType() const override
             { return Type::Null; }
@@ -105,7 +105,7 @@ namespace engine
             UITexture(std::string uri)
               : mTextureUri(std::move(uri))
             {}
-            virtual MaterialClass GetClass(const ClassLibrary&, const Loader& loader) const override;
+            virtual MaterialClass GetClass(const ClassLibrary*, const Loader* loader) const override;
             virtual Type GetType() const override
             { return Type::Texture; }
             virtual bool FromJson(const nlohmann::json&) override;
@@ -145,7 +145,7 @@ namespace engine
                 SetColor(bottom_right, ColorIndex::BottomRight);
             }
 
-            virtual MaterialClass GetClass(const ClassLibrary& classlib, const Loader& loader) const override;
+            virtual MaterialClass GetClass(const ClassLibrary*, const Loader* ) const override;
             virtual Type GetType() const override
             { return Type::Gradient; }
             virtual bool FromJson(const nlohmann::json& json) override;
@@ -196,7 +196,7 @@ namespace engine
             UIColor() = default;
             UIColor(const gfx::Color4f& color) : mColor(color)
             {}
-            virtual MaterialClass GetClass(const ClassLibrary& classlib, const Loader& loader) const override;
+            virtual MaterialClass GetClass(const ClassLibrary*, const Loader*) const override;
             virtual Type GetType() const override
             { return Type::Color; }
             virtual bool FromJson(const nlohmann::json& json) override;
@@ -217,7 +217,7 @@ namespace engine
               : mMaterialId(std::move(id))
             {}
             UIMaterialReference() = default;
-            virtual MaterialClass GetClass(const ClassLibrary& classlib, const Loader& loader) const override;
+            virtual MaterialClass GetClass(const ClassLibrary* classlib, const Loader*) const override;
             virtual bool FromJson(const nlohmann::json& json) override;
             virtual void IntoJson(nlohmann::json& json) const override;
             virtual Type GetType() const override

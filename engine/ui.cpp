@@ -55,7 +55,7 @@ namespace engine
 {
 namespace detail {
 
-UIMaterial::MaterialClass UIGradient::GetClass(const ClassLibrary& classlib, const Loader& loader) const
+UIMaterial::MaterialClass UIGradient::GetClass(const ClassLibrary*, const Loader*) const
 {
     auto material = std::make_shared<gfx::GradientClass>(gfx::MaterialClass::Type::Gradient);
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
@@ -90,7 +90,7 @@ void UIGradient::IntoJson(nlohmann::json& json) const
         base::JsonWrite(json, "gamma", mGamma.value());
 }
 
-UIMaterial::MaterialClass UIColor::GetClass(const ClassLibrary& classlib, const Loader& loader) const
+UIMaterial::MaterialClass UIColor::GetClass(const ClassLibrary*, const Loader*) const
 {
     auto material = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color);
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
@@ -109,13 +109,13 @@ void UIColor::IntoJson(nlohmann::json& json) const
     base::JsonWrite(json, "color", mColor);
 }
 
-UIMaterial::MaterialClass UIMaterialReference::GetClass(const ClassLibrary& classlib, const Loader& loader) const
+UIMaterial::MaterialClass UIMaterialReference::GetClass(const ClassLibrary* classlib, const Loader*) const
 {
-    auto klass = classlib.FindMaterialClassById(mMaterialId);
+    auto klass = classlib->FindMaterialClassById(mMaterialId);
     // currently, the material style that is associated with a paint struct
     // can use class names too. so also try to find with the name.
     if (klass == nullptr)
-        klass = classlib.FindMaterialClassByName(mMaterialId);
+        klass = classlib->FindMaterialClassByName(mMaterialId);
     if (klass == nullptr)
         WARN("Unresolved UI material. [material='%1']", mMaterialId);
     return klass;
@@ -138,8 +138,10 @@ bool UIMaterialReference::IsAvailable(const ClassLibrary& loader) const
     return klass != nullptr;
 }
 
-UIMaterial::MaterialClass UITexture::GetClass(const ClassLibrary& classlib, const Loader& loader) const
+UIMaterial::MaterialClass UITexture::GetClass(const ClassLibrary*, const Loader* loader) const
 {
+    ASSERT(loader);
+
     auto material = std::make_shared<gfx::TextureMap2DClass>(gfx::MaterialClass::Type::Texture);
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material->SetTexture(gfx::LoadTextureFromFile(mTextureUri));
@@ -148,7 +150,7 @@ UIMaterial::MaterialClass UITexture::GetClass(const ClassLibrary& classlib, cons
     if (mMetafileUri.empty() || mTextureName.empty())
         return material;
 
-    const auto& data = loader.LoadEngineDataUri(mMetafileUri);
+    const auto& data = loader->LoadEngineDataUri(mMetafileUri);
     if (!data)
     {
         WARN("Failed to load packed UITexture texture descriptor meta file. [uri='%1']", mMetafileUri);
@@ -256,16 +258,15 @@ UIStyle::MaterialClass UIStyle::MakeMaterial(const std::string& str) const
         WARN("Failed to parse UI style material string.");
         return nullptr;
     }
-    return factory->GetClass(*mClassLib, *mLoader);
+    return factory->GetClass(mClassLib, mLoader);
 }
 
 std::optional<UIStyle::MaterialClass> UIStyle::GetMaterial(const std::string& key) const
 {
-    ASSERT(mClassLib);
     auto it = mMaterials.find(key);
     if (it == mMaterials.end())
         return std::nullopt;
-    return it->second->GetClass(*mClassLib, *mLoader);
+    return it->second->GetClass(mClassLib, mLoader);
 }
 
 UIProperty UIStyle::GetProperty(const std::string& key) const
