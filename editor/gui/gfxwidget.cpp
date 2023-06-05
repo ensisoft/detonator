@@ -216,6 +216,7 @@ void GfxWindow::paintGL()
 
     mCustomGraphicsDevice->BeginFrame();
     mCustomGraphicsDevice->ClearColor(mClearColor.value_or(GfxWindow::ClearColor));
+    mCustomGraphicsDevice->ClearDepth(1.0f);
     mCustomGraphicsDevice->SetDefaultTextureFilter(DefaultMagFilter);
     mCustomGraphicsDevice->SetDefaultTextureFilter(DefaultMinFilter);
     if (onPaintScene)
