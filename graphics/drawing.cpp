@@ -229,7 +229,7 @@ void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Material
     // offset by half the line width so that the vertical center of the
     // line aligns with the point. important when using line widths > 1.0f
     trans.Translate(0, -0.5*line_width);
-    trans.Rotate(angle);
+    trans.RotateAroundZ(angle);
     trans.Translate(a);
 
     // Draw the shape (line)

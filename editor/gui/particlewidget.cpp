@@ -72,7 +72,7 @@ public:
         view.Push();
         view.Scale(viz_width, viz_height);
         view.Translate(-viz_width*0.5, -viz_height*0.5);
-        view.Rotate(viz_rot);
+        view.RotateAroundZ(viz_rot);
 
         const auto& local_to_view  = view.GetAsMatrix();
         const auto& view_to_local  = glm::inverse(local_to_view);
@@ -94,7 +94,7 @@ public:
         view.Push();
         view.Scale(viz_width, viz_height);
         view.Translate(-viz_width*0.5, -viz_height*0.5);
-        view.Rotate(viz_rot);
+        view.RotateAroundZ(viz_rot);
 
         const auto& local_to_view  = view.GetAsMatrix();
         const auto& view_to_local  = glm::inverse(local_to_view);
@@ -123,7 +123,7 @@ public:
         view.Push();
         view.Scale(viz_width, viz_height);
         view.Translate(-viz_width*0.5, -viz_height*0.5);
-        view.Rotate(viz_rot);
+        view.RotateAroundZ(viz_rot);
 
         const auto& local_to_view  = view.GetAsMatrix();
         const auto& view_to_local  = glm::inverse(local_to_view);
@@ -146,7 +146,7 @@ public:
         view.Push();
         view.Scale(viz_width, viz_height);
         view.Translate(-viz_width*0.5, -viz_height*0.5);
-        view.Rotate(viz_rot);
+        view.RotateAroundZ(viz_rot);
 
         const auto& local_to_view  = view.GetAsMatrix();
         const auto& view_to_local  = glm::inverse(local_to_view);
@@ -528,7 +528,7 @@ void ParticleEditorWidget::Update(double secs)
         gfx::Transform model;
         model.Scale(viz_width, viz_height);
         model.Translate(-viz_width*0.5, -viz_height*0.5);
-        model.Rotate(viz_rot);
+        model.RotateAroundZ(viz_rot);
         model.Translate(viz_xpos, viz_ypos);
         const auto& model_matrix = model.GetAsMatrix();
 
@@ -784,7 +784,7 @@ void ParticleEditorWidget::on_actionPlay_triggered()
     gfx::Transform model;
     model.Scale(viz_width, viz_height);
     model.Translate(-viz_width*0.5, -viz_height*0.5);
-    model.Rotate(viz_rot);
+    model.RotateAroundZ(viz_rot);
     model.Translate(viz_xpos, viz_ypos);
     const auto& model_matrix = model.GetAsMatrix();
 
@@ -1183,7 +1183,7 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
     gfx::Transform model;
     model.Scale(viz_width, viz_height);
     model.Translate(-viz_width*0.5, -viz_height*0.5);
-    model.Rotate(viz_rot);
+    model.RotateAroundZ(viz_rot);
     model.Translate(viz_xpos, viz_ypos);
 
     if (GetValue(mUI.chkShowBounds))
@@ -1257,11 +1257,11 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
                          gfx::CreateMaterialFromColor(gfx::Color4f(gfx::Color::Black, 0.6f)));
         transform.Pop();
         transform.Push();
-            transform.Rotate(qDegreesToRadians(dir_angle_start));
+        transform.RotateAroundZ(qDegreesToRadians(dir_angle_start));
             transform.Push();
                 transform.Scale(50.0f, 5.0f);
                 transform.Translate(0.0f, -2.5f);
-                transform.Rotate(qDegreesToRadians(dir_angle_size));
+                transform.RotateAroundZ(qDegreesToRadians(dir_angle_size));
                 painter.Draw(gfx::Rectangle(), transform,
                              gfx::CreateMaterialFromColor(gfx::Color::Yellow));
             transform.Pop();
@@ -1337,7 +1337,7 @@ void ParticleEditorWidget::MousePress(QMouseEvent* mickey)
         view.Push();
             view.Scale(viz_width, viz_height);
             view.Translate(-viz_width*0.5, -viz_height*0.5);
-            view.Rotate(viz_rot);
+            view.RotateAroundZ(viz_rot);
             view.Translate(viz_xpos, viz_ypos);
 
         const auto& local_to_view  = view.GetAsMatrix();

@@ -1736,7 +1736,7 @@ void MakeViewTransform(const UI& ui, const State& state, gfx::Transform& view)
 {
     view.Scale(GetValue(ui.scaleX), GetValue(ui.scaleY));
     view.Scale(GetValue(ui.zoom), GetValue(ui.zoom));
-    view.Rotate(qDegreesToRadians(ui.rotation->value()));
+    view.RotateAroundZ(qDegreesToRadians(ui.rotation->value()));
     view.Translate(state.camera_offset_x, state.camera_offset_y);
 }
 
@@ -1745,7 +1745,7 @@ void MakeViewTransform(const UI& ui, const State& state, gfx::Transform& view, f
 {
     view.Scale(GetValue(ui.scaleX), GetValue(ui.scaleY));
     view.Scale(GetValue(ui.zoom), GetValue(ui.zoom));
-    view.Rotate(qDegreesToRadians(rotation));
+    view.RotateAroundZ(qDegreesToRadians(rotation));
     view.Translate(state.camera_offset_x, state.camera_offset_y);
 }
 

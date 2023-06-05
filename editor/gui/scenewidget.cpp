@@ -851,7 +851,7 @@ void SceneWidget::Paste(const Clipboard& clipboard)
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.Rotate(qDegreesToRadians((float)GetValue(mUI.rotation)));
+    view.RotateAroundZ(qDegreesToRadians((float) GetValue(mUI.rotation)));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
     const auto& view_to_scene   = glm::inverse(view.GetAsMatrix());
     const auto& mouse_pos_view  = ToVec4(mickey);
@@ -1956,7 +1956,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     gfx::Transform view;
     view.Scale(xs, ys);
     view.Scale(zoom, zoom);
-    view.Rotate(qDegreesToRadians(view_rotation_angle));
+    view.RotateAroundZ(qDegreesToRadians(view_rotation_angle));
     view.Translate(view_translation);
 
     painter.SetViewport(0, 0, width, height);
@@ -2046,7 +2046,7 @@ void SceneWidget::MouseMove(QMouseEvent* mickey)
         gfx::Transform view;
         view.Scale(GetValue(mUI.scaleX) , GetValue(mUI.scaleY));
         view.Scale(GetValue(mUI.zoom) , GetValue(mUI.zoom));
-        view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+        view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
         view.Translate(mState.camera_offset_x , mState.camera_offset_y);
         mCurrentTool->MouseMove(mickey , view);
         // update the properties that might have changed as the result of application
@@ -2060,7 +2060,7 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.Rotate((float)qDegreesToRadians(mUI.rotation->value()));
+    view.RotateAroundZ((float) qDegreesToRadians(mUI.rotation->value()));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
     if (!mCurrentTool && (mickey->button() == Qt::LeftButton))
@@ -2117,7 +2117,7 @@ void SceneWidget::MouseRelease(QMouseEvent* mickey)
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+    view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
     if (mCurrentTool->MouseRelease(mickey, view))
@@ -2551,7 +2551,7 @@ void SceneWidget::FindNode(const game::SceneNodeClass* node)
     base::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+    view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
     // this is the info that needs to be found. offset_x = ?? offset_y = ??
     // view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
@@ -2574,7 +2574,7 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+    view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
     const auto& view_to_scene     = glm::inverse(view.GetAsMatrix());

@@ -128,7 +128,7 @@ namespace base
         { Scale(size.GetWidth(), size.GetHeight()); }
 
         // Accumulate rotation to the current transformation
-        void Rotate(float radians)
+        inline void RotateAroundZ(float radians) noexcept
         { Accumulate(glm::eulerAngleZ(radians)); }
 
         // Reset any transformation to identity, i.e. no transformation.

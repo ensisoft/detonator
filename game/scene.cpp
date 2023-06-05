@@ -173,7 +173,7 @@ glm::mat4 SceneNodeClass::GetNodeTransform() const
 {
     Transform transform;
     transform.Scale(mScale);
-    transform.Rotate(mRotation);
+    transform.RotateAroundZ(mRotation);
     transform.Translate(mPosition);
     return transform.GetAsMatrix();
 }

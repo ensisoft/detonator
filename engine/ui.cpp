@@ -834,7 +834,7 @@ void UIPainter::DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon
         gfx::Transform icon;
         icon.Resize(ico_size, ico_size);
         icon.Translate(ico_size*-0.5, ico_size*-0.5);
-        icon.Rotate(rotation);
+        icon.RotateAroundZ(rotation);
         icon.Translate(ico_size*0.5, ico_size*0.5);
         icon.Translate(ps.rect.GetPosition());
         icon.Translate(btn_width*0.5, btn_height*0.5);

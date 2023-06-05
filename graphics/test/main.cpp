@@ -1138,7 +1138,7 @@ public:
             // in this scope first translate then rotate.
             // this transformation applies to rectangle A and B
             tr.Translate(-50.0f, -50.0f);
-            tr.Rotate(math::Pi * 2.0f * angle);
+            tr.RotateAroundZ(math::Pi * 2.0f * angle);
 
             // begin transformation scope for rectangle A
             tr.Push();
@@ -1155,7 +1155,7 @@ public:
             tr.Push();
                 // first translate then rotate
                 tr.Translate(30.0f, 30.0f);
-                tr.Rotate(math::Pi * 2.0f * angle);
+                tr.RotateAroundZ(math::Pi * 2.0f * angle);
                 tr.Push();
                     tr.Scale(20.0f, 20.0f);
                     painter.Draw(gfx::Rectangle(), tr, gfx::CreateMaterialFromColor(gfx::Color::Yellow));
@@ -1215,7 +1215,7 @@ private:
 
             trans.Push();
             trans.Scale(mSx, mSy);
-            trans.Rotate(mRotation + ROM * angle);
+            trans.RotateAroundZ(mRotation + ROM * angle);
             trans.Translate(mX, mY);
 
             trans.Push();
@@ -1430,7 +1430,7 @@ public:
         gfx::Transform model;
         model.Resize(300, 300);
         model.Translate(-150, -150);
-        model.Rotate(math::Pi);
+        model.RotateAroundZ(math::Pi);
         model.Translate(150 + 100, 150 + 300);
 
         gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
@@ -1747,7 +1747,7 @@ public:
             gfx::Transform transform;
             transform.Resize(300, 200);
             transform.MoveTo(-150, -100);
-            transform.Rotate(angle);
+            transform.RotateAroundZ(angle);
             transform.Translate(150, 300);
 
             gfx::TextBuffer buff(300, 200);
@@ -2110,7 +2110,7 @@ public:
             gfx::Transform t;
             t.Resize(200.0f, 200.0f);
             t.Translate(-100.0f, -100.0f);
-            t.Rotate(math::Pi);
+            t.RotateAroundZ(math::Pi);
             t.Translate(100.0f, 100.0f);
             t.Translate(300.0f, 300.0f);
             painter.Draw(gfx::Rectangle(), t, gfx::CreateMaterialFromColor(gfx::Color::Green));

@@ -428,7 +428,7 @@ glm::mat4 EntityNodeClass::GetNodeTransform() const
 {
     Transform transform;
     transform.Scale(mScale);
-    transform.Rotate(mRotation);
+    transform.RotateAroundZ(mRotation);
     transform.Translate(mPosition);
     return transform.GetAsMatrix();
 }
@@ -661,7 +661,7 @@ glm::mat4 EntityNode::GetNodeTransform() const
 {
     Transform transform;
     transform.Scale(mScale);
-    transform.Rotate(mRotation);
+    transform.RotateAroundZ(mRotation);
     transform.Translate(mPosition);
     return transform.GetAsMatrix();
 }

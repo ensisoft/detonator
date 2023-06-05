@@ -747,7 +747,7 @@ void unit_test_transform_precision()
     gfx::Transform view;
     view.Scale(1.0f, 1.0f); // scaling
     view.Scale(1.0f, 1.0f); // zoom
-    view.Rotate(0.0f);
+    view.RotateAroundZ(0.0f);
     view.Translate(512.0f, 512.0f);
     painter->SetViewMatrix(view.GetAsMatrix());
 

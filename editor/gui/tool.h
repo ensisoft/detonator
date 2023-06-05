@@ -216,7 +216,7 @@ namespace gui
             const auto& tree = mModel.GetRenderTree();
             const auto& mouse_pos = mickey->pos();
             trans.Push();
-                trans.Rotate(mNode->GetRotation());
+            trans.RotateAroundZ(mNode->GetRotation());
                 trans.Translate(mNode->GetTranslation());
                 const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
                 const auto& new_mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
@@ -231,7 +231,7 @@ namespace gui
             const auto& tree = mModel.GetRenderTree();
             const auto& mouse_pos = mickey->pos();
             trans.Push();
-                trans.Rotate(mNode->GetRotation());
+            trans.RotateAroundZ(mNode->GetRotation());
                 trans.Translate(mNode->GetTranslation());
                 const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
                 const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);

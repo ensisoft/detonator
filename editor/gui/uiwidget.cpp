@@ -831,7 +831,7 @@ void UIWidget::Paste(const Clipboard& clipboard)
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.Rotate(qDegreesToRadians((float)GetValue(mUI.rotation)));
+    view.RotateAroundZ(qDegreesToRadians((float) GetValue(mUI.rotation)));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
     const auto& mickey = mUI.widget->mapFromGlobal(QCursor::pos());
@@ -1917,7 +1917,7 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
     gfx::Transform view;
     view.Scale(xs, ys);
     view.Scale(zoom, zoom);
-    view.Rotate(qDegreesToRadians(view_rotation_angle));
+    view.RotateAroundZ(qDegreesToRadians(view_rotation_angle));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
     if (GetValue(mUI.chkShowGrid) && mPlayState == PlayState::Stopped)
@@ -2021,7 +2021,7 @@ void UIWidget::MouseMove(QMouseEvent* mickey)
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+    view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
     if (mPlayState == PlayState::Playing)
@@ -2062,7 +2062,7 @@ void UIWidget::MousePress(QMouseEvent* mickey)
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+    view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
     if (mPlayState == PlayState::Playing)
@@ -2133,7 +2133,7 @@ void UIWidget::MouseRelease(QMouseEvent* mickey)
     gfx::Transform view;
     view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
     view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+    view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
     view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
     if (mPlayState == PlayState::Playing)
@@ -2586,7 +2586,7 @@ void UIWidget::PlaceNewWidget(unsigned int index)
         gfx::Transform view;
         view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
         view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-        view.Rotate(qDegreesToRadians(mUI.rotation->value()));
+        view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
         view.Translate(mState.camera_offset_x, mState.camera_offset_y);
         tool->UpdateMousePosition(mickey, view);
     }
