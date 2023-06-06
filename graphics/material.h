@@ -1141,7 +1141,7 @@ namespace gfx
         virtual ~Material() = default;
 
         struct Environment {
-            const ShaderPass* render_pass = nullptr;
+            const ShaderPass* shader_pass = nullptr;
             // true if running in an "editing mode", which means that even
             // content marked static might have changed and should be checked
             // in case it has been modified and should be re-uploaded.

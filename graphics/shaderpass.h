@@ -44,6 +44,7 @@ namespace gfx
         // computation can be skipped.
         enum class Type {
             Color,
+            DepthTexture,
             Stencil,
             Custom
         };
@@ -95,6 +96,22 @@ namespace gfx
             virtual Type GetType() const override
             { return Type::Stencil; }
         private:
+        };
+
+        // With OpenGL ES2 there's no direct access to FBO data.
+        // The only way is to render the scene separately for the depth
+        // extraction by writing the depth values into a color buffer
+        // (typically this would be a texture fbo color attachment)
+        // This technique is also known as depth Pre-pass, depth to texture, depth-peeling
+        class DepthTextureShaderPass : public ShaderPass
+        {
+        public:
+            virtual std::size_t GetHash() const override
+            { return base::hash_combine(0, "depth-texture-shader-pass"); }
+            virtual std::string GetName() const override
+            { return "DepthTextureShaderPass"; }
+            virtual Type GetType() const override
+            { return Type::DepthTexture; }
         };
 
     } // namespace
