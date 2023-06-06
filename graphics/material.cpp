@@ -2234,13 +2234,13 @@ bool MaterialClass::ApplyCustomDynamicState(const State& state, Device& device, 
 
 bool MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const
 {
-    if (env.render_pass->GetType() == ShaderPass::Type::Stencil)
+    if (env.shader_pass->GetType() == ShaderPass::Type::Stencil)
         return true;
 
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
     state.render_points = env.render_points;
-    state.shader_pass   = env.render_pass;
+    state.shader_pass   = env.shader_pass;
     state.material_time = mRuntime;
     state.uniforms      = &mUniforms;
     state.first_render  = mFirstRender;
@@ -2264,68 +2264,99 @@ bool MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device
 
 void MaterialClassInst::ApplyStaticState(const Environment& env, Device& device, Program& program) const
 {
-    if (env.render_pass->GetType() == ShaderPass::Type::Stencil)
+    if (env.shader_pass->GetType() == ShaderPass::Type::Stencil)
         return;
 
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
     state.render_points = env.render_points;
-    state.shader_pass   = env.render_pass;
+    state.shader_pass   = env.shader_pass;
     return mClass->ApplyStaticState(state, device, program);
 }
 
 std::string MaterialClassInst::GetProgramId(const Environment& env) const
 {
-    if (env.render_pass->GetType() == ShaderPass::Type::Stencil)
+    if (env.shader_pass->GetType() == ShaderPass::Type::Stencil)
         return "stencil-shader";
 
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
     state.render_points = env.render_points;
-    state.shader_pass   = env.render_pass;
+    state.shader_pass   = env.shader_pass;
     return mClass->GetProgramId(state);
 }
 
 Shader* MaterialClassInst::GetShader(const Environment& env, Device& device) const
 {
-    if (env.render_pass->GetType() == ShaderPass::Type::Stencil)
-    {
-        // if the render pass is a stenciling pass we can replace the material
-        // shader by a simple fragment shader that doesn't do any expensive
-        // operations. It could be desirable to use the texture alpha to write
-        // to the stencil buffer (by discarding fragments) to create a way to
-        // use the texture as a stencil mask. This would then need to be implemented
-        // in the Sprite and TextureMap classes separately.
-        size_t hash = 0;
-        hash = base::hash_combine(hash, "stencil-shader");
-        hash = base::hash_combine(hash, env.render_pass->GetHash());
-        const auto id = std::to_string(hash);
+    // two ways to replace a shader when doing a stencil or depth pass.
+    // a) replace the shader source completely and ignore the "real" shader source.
+    // b) combine the shader source from "real" shader and "pass" shader.
+    //
+    // Currently we're doing a) here but this means that stencil and depth
+    // passes are not fine grained but consider only the fragments that are
+    // being rasterized. For example if we're rendering a cut-out sprite using
+    // a rectangle geometry a stencil pass using option a) will write stencil
+    // values to the stencil buffer for the whole rectangle. But with option b)
+    // the stencil pass shader could inspect the incoming vec4 value and then
+    // decide to write or discard the shader.
+    //
+    // However doing option b) means that the shader pass ID must contribute
+    // to the shader object GPU ID so that 'base shader S + pass0' map to a
+    // different GPU shader object than 'base shader S + pass1'.
+    // Moving to option b) would also let the caller (shader pass) to control
+    // which type of behaviour to do. Downside would be more shader objects!
 
-        auto* shader = device.FindShader(id);
+    if (env.shader_pass->GetType() == ShaderPass::Type::Stencil)
+    {
+        auto* shader = device.FindShader("simple-stencil-shader");
         if (shader)
             return shader;
 
-        std::string source(R"(
+        constexpr const auto* simple_stencil_source = R"(
 #version 100
 precision mediump float;
-
-vec4 ShaderPass(vec4);
+void main() {
+   gl_FragColor = vec4(1.0);
+}
+)";
+        shader = device.MakeShader("simple-stencil-shader");
+        shader->SetName("SimpleStencilShader");
+        shader->CompileSource(simple_stencil_source);
+        return shader;
+    }
+    else if (env.shader_pass->GetType() == ShaderPass::Type::DepthTexture)
+    {
+        // this shader maps the interpolated fragment depth (the .z component)
+        // to a color value linearly. (important to keep this in mind when using
+        // the output values, if rendering to a texture if the sRGB encoding happens
+        // then the depth values are no longer linear!)
+        //
+        // Remember that in the OpenGL pipeline by default the NDC values (-1.0 to 1.0 on all axis)
+        // are mapped to depth values so that -1.0 is least depth and 1.0 is maximum depth.
+        // (OpenGL and ES3 have glDepthRange for modifying this mapping.)
+        constexpr const auto* depth_to_color = R"(
+#version 100
+precision highp float;
 
 void main() {
-   gl_FragColor = ShaderPass(vec4(1.0));
+   gl_FragColor.rgb = vec3(gl_FragCoord.z);
+   gl_FragColor.a = 1.0;
 }
-)");
-        source = env.render_pass->ModifyFragmentSource(device, std::move(source));
-        shader = device.MakeShader(id);
-        shader->SetName("StencilShader");
-        shader->CompileSource(source);
+)";
+
+        auto* shader = device.FindShader("simple-depth-texture-shader");
+        if (shader)
+            return shader;
+        shader = device.MakeShader("simple-depth-texture-shader");
+        shader->SetName("SimpleDepthTextureShader");
+        shader->CompileSource(depth_to_color);
         return shader;
     }
 
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
     state.render_points = env.render_points;
-    state.shader_pass   = env.render_pass;
+    state.shader_pass   = env.shader_pass;
     state.material_time = mRuntime;
     state.uniforms      = &mUniforms;
     return mClass->GetShader(state, device);
@@ -2435,7 +2466,7 @@ void main() {
     gl_FragColor = ShaderPass(color);
 }
     )";
-    const auto* pass = env.render_pass;
+    const auto* pass = env.shader_pass;
 
     const auto format = mText.GetRasterFormat();
     if (format == TextBuffer::RasterFormat::Bitmap)
@@ -2459,7 +2490,7 @@ void main() {
 std::string TextMaterial::GetProgramId(const Environment& env) const
 {
     size_t hash = 0;
-    hash = base::hash_combine(hash, env.render_pass->GetHash());
+    hash = base::hash_combine(hash, env.shader_pass->GetHash());
 
     const auto format = mText.GetRasterFormat();
     if (format == TextBuffer::RasterFormat::Bitmap)

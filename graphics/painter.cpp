@@ -141,7 +141,7 @@ public:
             Material::Environment material_env;
             material_env.editing_mode  = mEditingMode;
             material_env.render_points = shape.drawable->GetStyle() == Drawable::Style::Points;
-            material_env.render_pass   = &pass;
+            material_env.shader_pass   = &pass;
             Program* program = GetProgram(*shape.drawable, *shape.material, drawable_env, material_env);
             if (program == nullptr)
                 continue;
