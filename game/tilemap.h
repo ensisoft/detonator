@@ -35,6 +35,7 @@
 #include "base/utility.h"
 #include "base/bitflag.h"
 #include "data/fwd.h"
+#include "game/enum.h"
 #include "game/types.h"
 
 namespace game
@@ -753,6 +754,8 @@ namespace game
     class TilemapClass
     {
     public:
+        using Perspective = game::Perspective;
+
         TilemapClass();
         TilemapClass(const TilemapClass& other);
 
@@ -768,6 +771,8 @@ namespace game
         { mTileWidth = width; }
         void SetTileHeight(float height)
         { mTileHeight = height; }
+        void SetPerspective(Perspective perspective)
+        { mPerspective = perspective; }
 
         std::size_t GetNumLayers() const
         { return mLayers.size(); }
@@ -785,6 +790,8 @@ namespace game
         { return mTileWidth; }
         float GetTileHeight() const
         { return mTileHeight; }
+        Perspective GetPerspective() const
+        { return mPerspective; }
 
         void AddLayer(const TilemapLayerClass& layer);
         void AddLayer(TilemapLayerClass&& layer);
@@ -820,6 +827,7 @@ namespace game
         unsigned mHeight = 0;
         float mTileWidth = 1.0f;
         float mTileHeight = 1.0f;
+        Perspective mPerspective = Perspective::AxisAligned;
         std::vector<std::shared_ptr<TilemapLayerClass>> mLayers;
     };
 
