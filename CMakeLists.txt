@@ -201,6 +201,7 @@ add_library(EngineLib
     game/scene.cpp
     game/tilemap.cpp
     engine/audio.cpp
+    engine/camera.cpp
     engine/renderer.cpp
     engine/physics.cpp
     engine/graphics.cpp
@@ -839,6 +840,7 @@ add_library(EngineLibTesting
     engine/audio.cpp
     engine/physics.cpp
     engine/renderer.cpp
+    engine/camera.cpp
     engine/graphics.cpp
     engine/lua.cpp
     engine/state.cpp)
