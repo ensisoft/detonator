@@ -24,6 +24,9 @@
 #include <algorithm>
 #include <cstdio>
 
+#include "base/math.h"
+#include "engine/camera.h"
+#include "game/types.h"
 #include "editor/app/utility.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/utility.h"
@@ -32,8 +35,6 @@
 #include "graphics/material.h"
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
-#include "game/types.h"
-#include "base/math.h"
 
 namespace {
     gfx::Color4f DefaultGridColor = gfx::Color::LightGray;
@@ -164,7 +165,7 @@ void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans)
     trans.Push();
         trans.Scale(100.0f, 5.0f);
         trans.Translate(0.0f, -2.5f);
-        painter.Draw(gfx::Arrow(), trans, gfx::CreateMaterialFromColor(gfx::Color::Green));
+        painter.Draw(gfx::Arrow(gfx::Drawable::Culling::None), trans, gfx::CreateMaterialFromColor(gfx::Color::Green));
     trans.Pop();
 
     // draw the Y vector
@@ -173,7 +174,7 @@ void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans)
         trans.Translate(-50.0f, -2.5f);
         trans.RotateAroundZ(math::Pi * 0.5f);
         trans.Translate(0.0f, 50.0f);
-        painter.Draw(gfx::Arrow(), trans, gfx::CreateMaterialFromColor(gfx::Color::Red));
+        painter.Draw(gfx::Arrow(gfx::Drawable::Culling::None), trans, gfx::CreateMaterialFromColor(gfx::Color::Red));
     trans.Pop();
 
     trans.Push();
@@ -312,8 +313,10 @@ void SetGridColor(const gfx::Color4f& color)
 void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
     GridDensity grid,
     float zoom,
-    float xs, float ys,
-    unsigned width, unsigned height)
+    float xs,
+    float ys,
+    unsigned width,
+    unsigned height)
 {
     view.Push();
 
@@ -328,9 +331,9 @@ void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
 
     // figure out what is the current coordinate of the center of the window/viewport in
     // view transformation's coordinate space. (In other words figure out which combination
-    // of view basis axis puts me in the middle of the window in window space.)
-    auto world_to_model = glm::inverse(view.GetAsMatrix());
-    auto world_origin_in_model = world_to_model * glm::vec4(width / 2.0f, height / 2.0, 1.0f, 1.0f);
+    // of view basis axis puts us in the middle of the window in window space.)
+    auto view_to_model = glm::inverse(view.GetAsMatrix());
+    auto view_origin_in_model = view_to_model * glm::vec4(width / 2.0f, height / 2.0, 1.0f, 1.0f);
 
     view.Scale(cell_scale_factor, cell_scale_factor);
 
@@ -338,8 +341,8 @@ void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
     // the grid in each quadrant of the coordinate space aligned around the center
     // point of the viewport. Then it doesn't matter if the view transformation
     // includes rotation or not.
-    const auto grid_origin_x = (int)world_origin_in_model.x / cell_size_units * cell_size_units;
-    const auto grid_origin_y = (int)world_origin_in_model.y / cell_size_units * cell_size_units;
+    const auto grid_origin_x = (int)view_origin_in_model.x / cell_size_units * cell_size_units;
+    const auto grid_origin_y = (int)view_origin_in_model.y / cell_size_units * cell_size_units;
     const auto grid_width  = cell_size_units * num_cells;
     const auto grid_height = cell_size_units * num_cells;
 
@@ -363,11 +366,56 @@ void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
     view.Pop();
 }
 
-void DrawViewport(gfx::Painter& painter, gfx::Transform& view,
-                         float game_viewport_width,
-                         float game_viewport_height,
-                         unsigned widget_width,
-                         unsigned widget_height)
+void DrawCoordinateGrid(gfx::Painter& painter,
+    GridDensity grid,
+    float zoom,
+    float xs,
+    float ys,
+    unsigned width,
+    unsigned height,
+    float camera_offset_x,
+    float camera_offset_y,
+    game::Perspective perspective)
+{
+    const int grid_size = std::max(width/xs, height/ys) / zoom * 2.0f;
+
+    const auto cell_size_units = static_cast<int>(grid);
+    const auto num_grid_lines = (grid_size / cell_size_units) - 1;
+    const auto num_cells = num_grid_lines + 1;
+    const auto cell_size_normalized = 1.0f / num_cells;
+    const auto cell_scale_factor = cell_size_units / cell_size_normalized;
+    const auto grid_width = cell_size_units * num_cells;
+    const auto grid_height = cell_size_units * num_cells;
+
+    const gfx::Grid grid_0(num_grid_lines, num_grid_lines, true);
+    const gfx::Grid grid_1(num_grid_lines, num_grid_lines, false);
+    const auto material = gfx::CreateMaterialFromColor(DefaultGridColor);
+
+    const float grid_origin_x = (int)camera_offset_x / cell_size_units * cell_size_units;
+    const float grid_origin_y = (int)camera_offset_y / cell_size_units * cell_size_units;
+
+    gfx::Transform transform;
+    transform.Scale(cell_scale_factor, cell_scale_factor);
+
+    transform.Translate(grid_origin_x, grid_origin_y);
+    painter.Draw(grid_0, transform, material);
+
+    transform.Translate(-grid_width, 0.0f, 0.0f);
+    painter.Draw(grid_1, transform, material);
+
+    transform.Translate(0.0f, -grid_height, 0.0f);
+    painter.Draw(grid_0, transform, material);
+
+    transform.Translate(grid_width, 0.0f, 0.0f);
+    painter.Draw(grid_1, transform, material);
+}
+
+void DrawViewport(gfx::Painter& painter,
+                  gfx::Transform& view,
+                  float game_viewport_width,
+                  float game_viewport_height,
+                  unsigned widget_width,
+                  unsigned widget_height)
 {
     game::FBox viewport(game_viewport_width, game_viewport_height);
     viewport.Transform(view.GetAsMatrix());
@@ -378,7 +426,7 @@ void DrawViewport(gfx::Painter& painter, gfx::Transform& view,
     const auto game_viewport_y_in_window = (widget_height - game_viewport_height_in_window) / 2;
 
     const gfx::FRect rect(game_viewport_x_in_window, game_viewport_y_in_window,
-                    game_viewport_width_in_window, game_viewport_height_in_window);
+                          game_viewport_width_in_window, game_viewport_height_in_window);
     gfx::DrawRectOutline(painter, rect, gfx::Color::HotPink, 2.0f);
 }
 
@@ -434,6 +482,33 @@ void PrintMousePos(const gfx::Transform& view, gfx::Painter& painter, QWidget* w
     std::snprintf(hallelujah, sizeof(hallelujah), "%.2f, %.2f", mouse_in_scene.x, mouse_in_scene.y);
     ShowMessage(hallelujah, painter);
 }
+
+void PrintWorldPlanePos(const glm::mat4& projection,
+                        const glm::mat4& world_to_view,
+                        gfx::Painter& painter,
+                        QWidget* widget)
+
+{
+    const auto width = widget->width();
+    const auto height = widget->height();
+
+    // where's the mouse in the widget
+    const auto& mickey = widget->mapFromGlobal(QCursor::pos());
+    // can't use underMouse here because of the way the gfx widget
+    // is constructed i.e. QWindow and Widget as container
+    if (mickey.x() < 0 || mickey.y() < 0 ||
+        mickey.x() > width || mickey.y() > height)
+        return;
+
+    const auto& world_pos = engine::MapToWorldPlane(projection,
+                                                    world_to_view,
+                                                    glm::vec2{mickey.x(), mickey.y()},
+                                                    glm::vec2{width, height});
+    char hallelujah[128] = {};
+    std::snprintf(hallelujah, sizeof(hallelujah), "%.2f, %.2f", world_pos.x, world_pos.y);
+    ShowMessage(hallelujah, painter);
+}
+
 
 void ShowInstruction(const std::string& msg, const gfx::FRect& rect, gfx::Painter& painter)
 {

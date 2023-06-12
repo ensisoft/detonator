@@ -30,11 +30,14 @@
 
 #include "base/bitflag.h"
 #include "graphics/fwd.h"
+#include "graphics/drawable.h"
+#include "game/enum.h"
 #include "game/tilemap.h"
 #include "game/entity.h"
 #include "game/scene.h"
 #include "game/tree.h"
 #include "engine/graphics.h"
+#include "engine/types.h"
 
 namespace engine
 {
@@ -87,21 +90,39 @@ namespace engine
             float blue  = 0.0f;
         };
 
+        struct Camera {
+            glm::vec2 position;
+            glm::vec2 scale;
+            game::Perspective perspective;
+            game::FRect viewport;
+        };
+
+        // The rendering window/surface details.
+        struct Surface {
+            // Device viewport in which part of the surface to render.
+            IRect viewport;
+            // Rendering surface size in pixels.
+            USize size;
+        };
+
         Renderer(const ClassLibrary* classlib = nullptr);
 
-        void SetBloom(const BloomParams& bloom)
+        inline void SetBloom(const BloomParams& bloom) noexcept
         { mBloom = bloom; }
-        void SetClassLibrary(const ClassLibrary* classlib)
+        inline void SetClassLibrary(const ClassLibrary* classlib) noexcept
         { mClassLib = classlib; }
-        void SetEditingMode(bool on_off)
+        inline void SetEditingMode(bool on_off) noexcept
         { mEditingMode = on_off; }
-        void SetName(const std::string& name)
-        { mRendererName = name; }
-        void EnableEffect(Effects effect, bool enabled)
+        inline void SetName(std::string name) noexcept
+        { mRendererName = std::move(name); }
+        inline void EnableEffect(Effects effect, bool enabled) noexcept
         { mEffects.set(effect, enabled); }
-
-        bool IsEnabled(Effects effect) const
+        inline bool IsEnabled(Effects effect) const noexcept
         { return mEffects.test(effect); }
+        inline void SetCamera(const Camera& camera) noexcept
+        { mCamera = camera; }
+        inline void SetSurface(const Surface& surface) noexcept
+        { mSurface = surface; }
 
         void BeginFrame();
 
@@ -126,15 +147,7 @@ namespace engine
                   EntityClassDrawHook* hook = nullptr);
 
         void Draw(const game::Tilemap& map,
-                  const game::FRect& viewport,
                   gfx::Painter& painter,
-                  gfx::Transform& transform);
-        void Draw(const game::Tilemap& map,
-                  const game::TilemapLayer& layer,
-                  const game::FRect& viewport,
-                  gfx::Painter& painter,
-                  gfx::Transform& transform,
-                  std::size_t layer_index,
                   bool draw_render_layer,
                   bool draw_data_layer);
 
@@ -177,21 +190,26 @@ namespace engine
 
         void DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packets);
 
+        struct TileBatch;
+
         template<typename LayerType>
-        void DrawRenderLayer(const game::Tilemap& map,
-                             const game::TilemapLayer& layer,
-                             const game::URect& tile_rect,
-                             const game::FSize& tile_size,
-                             gfx::Painter& painter,
-                             gfx::Transform& transform,
-                             std::size_t layer_index);
+        void PrepareTileBatches(const game::Tilemap& map,
+                                const game::TilemapLayer& layer,
+                                const game::URect& visible_region,
+                                std::vector<TileBatch>& batches,
+                                std::uint16_t layer_index);
+
+        void DrawTileBatches(const game::Tilemap& map,
+                             std::vector<TileBatch>& batches,
+                             gfx::Painter& painter);
+
+
         template<typename LayerType>
         void DrawDataLayer(const game::Tilemap& map,
                            const game::TilemapLayer& layer,
                            const game::URect& tile_rect,
                            const game::FSize& tile_size,
-                           gfx::Painter& painter,
-                           gfx::Transform& transform);
+                           gfx::Painter& painter);
 
     private:
         const ClassLibrary* mClassLib = nullptr;
@@ -222,17 +240,26 @@ namespace engine
         };
         std::unordered_map<std::string, PaintNode> mPaintNodes;
 
-        struct TilemapNode {
+        struct TilemapLayerPaletteEntry {
             std::string material_id;
             std::shared_ptr<gfx::Material> material;
-            std::shared_ptr<gfx::Drawable> drawable;
         };
-        using LayerPalette = std::vector<TilemapNode>;
+        struct TileBatch {
+            gfx::TileBatch tiles;
+            std::uint16_t material_index;
+            std::uint16_t layer_index;
+            std::uint32_t row_index;
+            glm::vec2 tile_size;
+        };
+        using TilemapLayerPalette = std::vector<TilemapLayerPaletteEntry>;
+        std::vector<TilemapLayerPalette> mTilemapPalette;
+
         std::string mRendererName;
-        std::vector<LayerPalette> mTilemapPalette;
         base::bitflag<Effects> mEffects;
         bool mEditingMode = false;
         BloomParams mBloom;
+        Camera mCamera;
+        Surface mSurface;
     };
 
 } // namespace

@@ -69,9 +69,12 @@ namespace gui
         virtual void Refresh() override;
     private slots:
         void on_mapName_textChanged();
+        void on_cmbPerspective_currentIndexChanged(int);
         void on_mapTileSize_valueChanged(int);
         void on_mapHeight_valueChanged(int);
         void on_mapWidth_valueChanged(int);
+        void on_tileScaleX_valueChanged(double);
+        void on_tileScaleY_valueChanged(double);
         void on_btnApplyMapSize_clicked();
         void on_actionSave_triggered();
         void on_actionPalette_triggered();

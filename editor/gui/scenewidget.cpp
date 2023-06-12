@@ -1996,7 +1996,8 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
 
     if (mTilemap)
     {
-        mState.renderer.Draw(*mTilemap, viewport, painter, scene);
+        // todo: reimplement tilemap support
+        //mState.renderer.Draw(*mTilemap, viewport, painter, scene);
     }
 
     mState.renderer.Draw(*mState.scene, painter, scene, &hook, &hook);

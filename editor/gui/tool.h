@@ -30,10 +30,14 @@
 #include <tuple>
 #include <cmath>
 
+#include "game/enum.h"
+#include "engine/camera.h"
 #include "graphics/painter.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
 #include "graphics/transform.h"
+
+#include "editor/gui/utility.h"
 
 namespace gui
 {
@@ -65,12 +69,12 @@ namespace gui
     };
 
     // Move/translate the camera.
+    // TODO: remove this class and use the new version
     template<typename CameraState>
     class MoveCameraTool : public MouseTool
     {
     public:
-        explicit
-        MoveCameraTool(CameraState& state)
+        explicit MoveCameraTool(CameraState& state)
           : mState(state)
         {}
         virtual void Render(gfx::Painter& painter, gfx::Transform&) const override
@@ -81,6 +85,12 @@ namespace gui
             const auto& delta = pos - mMousePos;
             const float x = delta.x();
             const float y = delta.y();
+            // this is actually semi-incorrect here, we're essentially expressing
+            // the world-camera offset using "world offset from the origin"
+            // instead of "camera offset from the world origin". Which produces
+            // the same result but uses incorrect names here. In fact we're later
+            // using the camera_offset directly as the view transformation and
+            // those instances should use the *inverse* of the camera translation
             mState.camera_offset_x += x;
             mState.camera_offset_y += y;
             mMousePos = pos;
@@ -98,6 +108,53 @@ namespace gui
         CameraState& mState;
         QPoint mMousePos;
     };
+
+    template<typename CameraState>
+    class PerspectiveCorrectCameraTool : public MouseTool
+    {
+    public:
+        explicit PerspectiveCorrectCameraTool(const glm::mat4& view_to_clip,
+                                              const glm::mat4& world_to_view,
+                                              const glm::vec2& window_size,
+                                              CameraState& state)
+            : mViewToClip(view_to_clip)
+            , mWorldToView(world_to_view)
+            , mWindowSize(window_size)
+            , mState(state)
+        {}
+        virtual void Render(gfx::Painter& painter, gfx::Transform&) const override
+        {}
+        virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& ) override
+        {
+            const auto world_pos = engine::MapToWorldPlane(mViewToClip,
+                                                           mWorldToView,
+                                                           ToVec2(mickey->pos()),
+                                                           mWindowSize);
+            const auto world_delta = world_pos - mWorldPos;
+            mState.camera_offset_x -= world_delta.x;
+            mState.camera_offset_y -= world_delta.y;
+            mWorldPos = world_pos;
+        }
+        virtual void MousePress(QMouseEvent* mickey, gfx::Transform& ) override
+        {
+            mWorldPos = engine::MapToWorldPlane(mViewToClip,
+                                                mWorldToView,
+                                                ToVec2(mickey->pos()),
+                                                mWindowSize);
+        }
+        virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform&) override
+        {
+            // done on mouse release
+            return true;
+        }
+    private:
+        const glm::mat4 mViewToClip;
+        const glm::mat4 mWorldToView;
+        const glm::vec2 mWindowSize;
+        CameraState& mState;
+        glm::vec2 mWorldPos;
+    };
+
 
     template<typename TreeModel, typename TreeNode>
     class MoveRenderTreeNodeTool : public MouseTool

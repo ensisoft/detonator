@@ -275,7 +275,8 @@ public:
             TRACE_CALL("Renderer::BeginFrame", mRenderer.BeginFrame());
             if (mTilemap)
             {
-                TRACE_CALL("Renderer::DrawMap", mRenderer.Draw(*mTilemap, viewport, *mPainter, transform));
+                // todo: reimplement tilemap support
+                //TRACE_CALL("Renderer::DrawMap", mRenderer.Draw(*mTilemap, viewport, *mPainter, transform));
             }
             if (mFlags.test(Flags::EditingMode))
             {

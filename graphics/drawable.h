@@ -1202,13 +1202,16 @@ namespace gfx
     class TileBatch : public Drawable
     {
     public:
+        enum class TileShape {
+            Automatic, Square, Rectangle
+        };
+        enum class Projection {
+            Dimetric, AxisAligned
+        };
+
         struct Tile {
             Vec2 pos;
         };
-        TileBatch(float tile_width, float tile_height)
-          : mTileWidth(tile_width)
-          , mTileHeight(tile_height)
-        {}
         TileBatch() = default;
 
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& raster) const override;
@@ -1217,21 +1220,54 @@ namespace gfx
         virtual Style GetStyle() const override;
         virtual std::string GetProgramId(const Environment& env) const override;
 
-        void AddTile(const Tile& tile)
+        inline void AddTile(const Tile& tile)
         { mTiles.push_back(tile); }
-        void AddTile(Tile&& tile)
+        inline void AddTile(Tile&& tile) noexcept
         { mTiles.push_back(std::move(tile));}
-        void ClearTiles()
+        inline void ClearTiles() noexcept
         { mTiles.clear(); }
+        inline size_t GetNumTiles() const noexcept
+        { return mTiles.size(); }
+        inline const Tile& GetTile(size_t index) const noexcept
+        { return mTiles[index]; }
+        inline Tile& GetTile(size_t index) noexcept
+        { return mTiles[index]; }
 
-        void SetTileWidth(float width)
-        { mTileWidth = width; }
-        void SetTileHeight(float height)
-        { mTileWidth = height; }
+        // Set the tile width in tile world units.
+        inline void SetTileWorldWidth(float width) noexcept
+        { mTileWorldSize.x = width; }
+        inline void SetTileWorldHeight(float height) noexcept
+        { mTileWorldSize.y = height; }
+        inline void SetTileWorldSize(const glm::vec2& size) noexcept
+        { mTileWorldSize = size; }
+        inline void SetTileRenderWidth(float width) noexcept
+        { mTileRenderSize.x = width; }
+        inline void SetTileRenderHeight(float height) noexcept
+        { mTileRenderSize.y = height; }
+        inline void SetTileRenderSize(const glm::vec2& size) noexcept
+        { mTileRenderSize = size; }
+        inline void SetProjection(Projection projection) noexcept
+        { mProjection = projection; }
+
+        TileShape ResolveTileShape() const noexcept
+        {
+            if (mShape == TileShape::Automatic) {
+                if (math::equals(mTileRenderSize.x, mTileRenderSize.y))
+                    return TileShape::Square;
+                else return TileShape::Rectangle;
+            }
+            return mShape;
+        }
+        inline TileShape GetTileShape() const noexcept
+        { return mShape; }
+        inline void SetTileShape(TileShape shape) noexcept
+        { mShape = shape; }
     private:
+        Projection mProjection = Projection::AxisAligned;
+        TileShape mShape = TileShape::Automatic;
         std::vector<Tile> mTiles;
-        float mTileWidth  = 0.0f;
-        float mTileHeight = 0.0f;
+        glm::vec2 mTileWorldSize = {0.0f, 0.0f};
+        glm::vec2 mTileRenderSize = {0.0f, 0.0f};
     };
 
     class DynamicLine3D : public Drawable

@@ -216,6 +216,9 @@ namespace engine
                                             dst_view_to_clip, dst_world_to_view) * glm::vec4{src_world_point, 1.0f};
     }
 
+    glm::vec2 ComputeTileRenderSize(const glm::mat4& tile_to_render,
+                                    const glm::vec2& tile_size,
+                                    game::Perspective perspective);
 
 
 } // namespace

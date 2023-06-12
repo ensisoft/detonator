@@ -285,15 +285,18 @@ void Painter::Draw(const Drawable& shape,
     Draw(shape, transform.GetAsMatrix(), material, render_pass, shader_pass);
 }
 
-void Painter::Draw(const Drawable& drawable, const Transform& transform, const Material& material)
+void Painter::Draw(const Drawable& drawable, const Transform& model_to_world, const Material& material)
+{
+    Draw(drawable, model_to_world.GetAsMatrix(), material);
+}
+void Painter::Draw(const Drawable& drawable, const glm::mat4& model_to_world, const Material& material)
 {
     RenderPassState state;
     state.write_color  = true;
     state.stencil_func = StencilFunc::Disabled;
     state.depth_test   = DepthTest::Disabled;
     detail::GenericShaderPass pass;
-    Draw(drawable, transform, material, state, pass);
+    Draw(drawable, model_to_world, material, state, pass);
 }
-
 
 } // namespace
