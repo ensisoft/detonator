@@ -21,10 +21,8 @@
 #  include <glm/gtc/matrix_transform.hpp>
 #include "warnpop.h"
 
-#include <optional>
-
-#include "base/utility.h"
 #include "game/enum.h"
+#include "game/types.h"
 
 namespace engine
 {
@@ -32,6 +30,13 @@ namespace engine
     {
     public:
         using Perspective = game::Perspective;
+
+        Camera() = default;
+        explicit Camera(game::Perspective perspective)
+        {
+            SetFromPerspective(perspective);
+            Update();
+        }
 
         // Set camera position and view direction vector from a predefined
         // perspective setting. However keep in mind that setting the camera
@@ -154,4 +159,63 @@ namespace engine
         // Aka tilt, camera rotation around the horizontal axis.
         float mPitch = 0.0f;
     };
+
+    glm::mat4 CreateProjectionMatrix(game::Perspective perspective, const glm::vec2& surface_size);
+    glm::mat4 CreateProjectionMatrix(game::Perspective perspective, const game::FRect& viewport);
+    glm::mat4 CreateProjectionMatrix(game::Perspective perspective, float surface_width, float surface_height);
+
+    // Create view transformation matrix for a certain type of game perspective.
+    // This returns matrix that is only the general camera transform without
+    // any world scale or camera translation.
+    glm::mat4 CreateViewMatrix(game::Perspective perspective);
+
+    // Create view transformation matrix for a certain type of game perspective
+    // assuming a world translation and world scale. In other words this matrix
+    // transforms the world space objects into "view/eye/camera" space.
+    glm::mat4 CreateViewMatrix(const glm::vec2& camera_pos,
+                               const glm::vec2& world_scale,
+                               game::Perspective perspective);
+
+    inline glm::mat4 CreateViewMatrix(float camera_pos_x,
+                                      float camera_pos_y,
+                                      float world_scale_x,
+                                      float world_scale_y,
+                                      game::Perspective perspective)
+    {
+        return CreateViewMatrix(glm::vec2{camera_pos_x, camera_pos_y},
+                                glm::vec2{world_scale_x, world_scale_y},
+                                perspective);
+    }
+
+    // Map a window (2D projection surface coordinate) to a "world plane".
+    // i.e. our 2D tile plane which represents the "ground" level.
+    glm::vec2 MapToWorldPlane(const glm::mat4& view_to_clip, // aka projection matrix/transform
+                              const glm::mat4& world_to_view, // aka view/camera matrix/transform
+                              const glm::vec2& window_coord,
+                              const glm::vec2& window_size);
+
+    inline glm::mat4 GetProjectionTransformMatrix(const glm::mat4& src_view_to_clip,
+                                                  const glm::mat4& src_world_to_view,
+                                                  const glm::mat4& dst_view_to_clip,
+                                                  const glm::mat4& dst_world_to_view)
+    {
+        return glm::inverse(dst_view_to_clip * dst_world_to_view) * src_view_to_clip * src_world_to_view;
+    }
+
+    // Project a point in one world coordinate space one space to another space.
+    // For example let's assume that we have some world coordinate in "isometric"
+    // space and wish to know where this point maps in the 2D axis aligned space.
+    // The solution can be found by applying these transformations.
+    inline glm::vec3 ProjectPoint(const glm::mat4& src_view_to_clip, // aka projection matrix
+                                  const glm::mat4& src_world_to_view, // aka view/camera matrix
+                                  const glm::mat4& dst_view_to_clip, // aka projection matrix
+                                  const glm::mat4& dst_world_to_view, // aka view/camera matrix
+                                  const glm::vec3& src_world_point)
+    {
+        return GetProjectionTransformMatrix(src_view_to_clip, src_world_to_view,
+                                            dst_view_to_clip, dst_world_to_view) * glm::vec4{src_world_point, 1.0f};
+    }
+
+
+
 } // namespace
