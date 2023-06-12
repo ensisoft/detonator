@@ -21,10 +21,13 @@
 #include "warnpush.h"
 #  include <glm/glm.hpp>
 #  include <glm/gtx/matrix_decompose.hpp>
+#  include <QtMath>
 #include "warnpop.h"
 
+#include "engine/camera.h"
 #include "engine/renderer.h"
 #include "game/treeop.h"
+#include "game/enum.h"
 #include "graphics/material.h"
 #include "graphics/painter.h"
 #include "graphics/transform.h"
@@ -67,8 +70,23 @@ void SetGridColor(const gfx::Color4f& color);
 void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
     GridDensity grid,   // grid density setting.
     float zoom,         // overall zoom level
-    float xs, float ys, // scaling factors for the axis
-    unsigned width, unsigned height); // viewport (widget) size
+    float xs,
+    float ys, // scaling factors for the axis
+    unsigned width, // viewport (widget) size
+    unsigned height // viewport (widget) size
+    );
+
+void DrawCoordinateGrid(gfx::Painter& painter,
+    GridDensity grid,   // grid density setting.
+    float zoom,         // overall zoom level
+    float xs,
+    float ys, // scaling factors for the axis
+    unsigned width, // viewport (widget) size
+    unsigned height, // viewport (widget) size
+    float camera_offset_x,
+    float camera_offset_y,
+    game::Perspective perspective
+    );
 
 // Draw an overlay of viewport illustration. The viewport is the logical
 // game viewport that the game can adjust in order to define the view
@@ -86,6 +104,53 @@ void ShowError(const std::string& msg, const gfx::FPoint& pos, gfx::Painter& pai
 void ShowInstruction(const std::string& msg, const gfx::FRect& rect, gfx::Painter& painter);
 
 void PrintMousePos(const gfx::Transform& view, gfx::Painter& painter, QWidget* widget);
+
+// Print current mouse position inside the widget's viewport mapped
+// into the game plane world coordinate.
+void PrintWorldPlanePos(const glm::mat4& projection,
+                        const glm::mat4& world_to_view,
+                        gfx::Painter& painter,
+                        QWidget* widget);
+
+
+template<typename UI, typename State>
+void MakeViewTransform(const UI& ui, const State& state, gfx::Transform& view)
+{
+    view.Scale(GetValue(ui.scaleX), GetValue(ui.scaleY));
+    view.Scale(GetValue(ui.zoom), GetValue(ui.zoom));
+    view.RotateAroundZ(qDegreesToRadians(ui.rotation->value()));
+    view.Translate(state.camera_offset_x, state.camera_offset_y);
+}
+
+template<typename UI, typename State>
+void MakeViewTransform(const UI& ui, const State& state, gfx::Transform& view, float rotation)
+{
+    view.Scale(GetValue(ui.scaleX), GetValue(ui.scaleY));
+    view.Scale(GetValue(ui.zoom), GetValue(ui.zoom));
+    view.RotateAroundZ(qDegreesToRadians(rotation));
+    view.Translate(state.camera_offset_x, state.camera_offset_y);
+}
+
+
+template<typename UI, typename State>
+glm::mat4 CreatePerspectiveCorrectViewMatrix(const UI& ui, const State& state, game::Perspective perspective)
+{
+    const float zoom = GetValue(ui.zoom);
+    const float xs = GetValue(ui.scaleX);
+    const float ys = GetValue(ui.scaleY);
+    return engine::CreateViewMatrix(state.camera_offset_x,
+                                    state.camera_offset_y,
+                                    zoom*xs, zoom*ys, perspective);
+}
+
+template<typename UI>
+glm::mat4 CreatePerspectiveCorrectProjMatrix(const UI& ui, game::Perspective perspective)
+{
+    const auto width  = ui.widget->width();
+    const auto height = ui.widget->height();
+    return engine::CreateProjectionMatrix(perspective, width, height);
+}
+
 
 // generic draw hook implementation for embellishing some nodes
 // with things such as selection rectangle in order to visually

@@ -30,4 +30,5 @@ namespace engine {
     using FPoint = base::FPoint;
     using FSize = base::FSize;
     using ISize = base::ISize;
+    using USize = base::USize;
 }

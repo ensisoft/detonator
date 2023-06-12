@@ -968,8 +968,8 @@ TilemapClass::TilemapClass(const TilemapClass& other)
     mName        = other.mName;
     mWidth       = other.mWidth;
     mHeight      = other.mHeight;
-    mTileWidth   = other.mTileWidth;
-    mTileHeight  = other.mTileHeight;
+    mTileWorldSize = other.mTileWorldSize;
+    mTileRenderScale = other.mTileRenderScale;
     mScriptFile  = other.mScriptFile;
     mPerspective = other.mPerspective;
     for (auto& layer : other.mLayers)
@@ -1055,8 +1055,8 @@ size_t TilemapClass::GetHash() const
     hash = base::hash_combine(hash, mScriptFile);
     hash = base::hash_combine(hash, mWidth);
     hash = base::hash_combine(hash, mHeight);
-    hash = base::hash_combine(hash, mTileWidth);
-    hash = base::hash_combine(hash, mTileHeight);
+    hash = base::hash_combine(hash, mTileWorldSize),
+    hash = base::hash_combine(hash, mTileRenderScale);
     hash = base::hash_combine(hash, mPerspective);
     for (const auto& layer : mLayers)
     {
@@ -1101,8 +1101,8 @@ TilemapClass TilemapClass::Clone() const
     ret.mWidth       = mWidth;
     ret.mHeight      = mHeight;
     ret.mName        = mName;
-    ret.mTileWidth   = mTileWidth;
-    ret.mTileHeight  = mTileHeight;
+    ret.mTileWorldSize   = mTileWorldSize;
+    ret.mTileRenderScale = mTileRenderScale;
     ret.mScriptFile  = mScriptFile;
     ret.mPerspective = mPerspective;
     for (const auto& layer : mLayers)
@@ -1126,9 +1126,9 @@ TilemapClass& TilemapClass::operator=(const TilemapClass& other)
     std::swap(mName,        tmp.mName);
     std::swap(mScriptFile,  tmp.mScriptFile);
     std::swap(mLayers,      tmp.mLayers);
-    std::swap(mTileWidth,   tmp.mTileWidth);
-    std::swap(mTileHeight,  tmp.mTileHeight);
-    std::swap(mPerspective, tmp.mPerspective);
+    std::swap(mTileWorldSize,   tmp.mTileWorldSize);
+    std::swap(mTileRenderScale, tmp.mTileRenderScale);
+    std::swap(mPerspective,  tmp.mPerspective);
     return *this;
 }
 
@@ -1139,8 +1139,8 @@ void TilemapClass::IntoJson(data::Writer& data) const
     data.Write("script",       mScriptFile);
     data.Write("width",        mWidth);
     data.Write("height",       mHeight);
-    data.Write("tile_width",   mTileWidth);
-    data.Write("tile_height",  mTileHeight);
+    data.Write("tile_world_size",   mTileWorldSize);
+    data.Write("tile_render_scale", mTileRenderScale);
     data.Write("perspective",  mPerspective);
 
     for (const auto& layer : mLayers)
@@ -1159,8 +1159,8 @@ bool TilemapClass::FromJson(const data::Reader& data)
     ok &= data.Read("script",       &mScriptFile);
     ok &= data.Read("width",        &mWidth);
     ok &= data.Read("height",       &mHeight);
-    ok &= data.Read("tile_width",   &mTileWidth);
-    ok &= data.Read("tile_height",  &mTileHeight);
+    ok &= data.Read("tile_world_size",   &mTileWorldSize);
+    ok &= data.Read("tile_render_scale",  &mTileRenderScale);
     ok &= data.Read("perspective",  &mPerspective);
 
     for (unsigned i=0; i<data.GetNumChunks("layers"); ++i)

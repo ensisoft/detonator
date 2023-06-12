@@ -84,6 +84,8 @@ private:
 
 void test_details()
 {
+    TEST_CASE(test::Type::Feature)
+
     namespace det = game::detail;
 
     {
@@ -108,9 +110,9 @@ void test_details()
         TEST_REQUIRE(index == 15);
         TEST_REQUIRE(value == 15);
 
-        TEST_REQUIRE(det::NormalizeValue(t) == 1.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 1.0f);
         TEST_REQUIRE(det::SetTileValue(t, 0));
-        TEST_REQUIRE(det::NormalizeValue(t) == 0.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 0.0f);
     }
 
     // sint4 positive
@@ -125,7 +127,7 @@ void test_details()
         TEST_REQUIRE(det::GetTileValue(t, &value));
         TEST_REQUIRE(index == 15);
         TEST_REQUIRE(value == 7);
-        TEST_REQUIRE(det::NormalizeValue(t) == 1.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 1.0f);
     }
 
     // sint4 negative
@@ -140,7 +142,7 @@ void test_details()
         TEST_REQUIRE(det::GetTileValue(t, &value));
         TEST_REQUIRE(index == 15);
         TEST_REQUIRE(value == -8);
-        TEST_REQUIRE(det::NormalizeValue(t) == 0.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 0.0f);
     }
 
     // uint8
@@ -155,9 +157,9 @@ void test_details()
         TEST_REQUIRE(det::GetTileValue(t, &value));
         TEST_REQUIRE(index == 123);
         TEST_REQUIRE(value == 255);
-        TEST_REQUIRE(det::NormalizeValue(t) == 1.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 1.0f);
         TEST_REQUIRE(det::SetTileValue(t, 0));
-        TEST_REQUIRE(det::NormalizeValue(t) == 0.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 0.0f);
 
     }
 
@@ -173,7 +175,7 @@ void test_details()
         TEST_REQUIRE(det::GetTileValue(t, &value));
         TEST_REQUIRE(index == 123);
         TEST_REQUIRE(value == 127);
-        TEST_REQUIRE(det::NormalizeValue(t) == 1.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 1.0f);
     }
 
     // sint8
@@ -188,7 +190,7 @@ void test_details()
         TEST_REQUIRE(det::GetTileValue(t, &value));
         TEST_REQUIRE(index == 123);
         TEST_REQUIRE(value == -128);
-        TEST_REQUIRE(det::NormalizeValue(t) == 0.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 0.0f);
     }
 
     // uint24
@@ -203,10 +205,10 @@ void test_details()
         TEST_REQUIRE(det::GetTileValue(t, &value));
         TEST_REQUIRE(index == 123);
         TEST_REQUIRE(value == 0xffffff);
-        TEST_REQUIRE(det::NormalizeValue(t) == 1.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 1.0f);
 
         TEST_REQUIRE(det::SetTileValue(t, 0));
-        TEST_REQUIRE(det::NormalizeValue(t) == 0.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 0.0f);
     }
 
     // sint24
@@ -221,7 +223,7 @@ void test_details()
         TEST_REQUIRE(det::GetTileValue(t, &value));
         TEST_REQUIRE(index == 123);
         TEST_REQUIRE(value == 0x7fffff);
-        TEST_REQUIRE(det::NormalizeValue(t) == 1.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 1.0f);
     }
 
     // sint24
@@ -236,7 +238,7 @@ void test_details()
         TEST_REQUIRE(det::GetTileValue(t, &value));
         TEST_REQUIRE(index == 123);
         TEST_REQUIRE(value == -0x800000);
-        TEST_REQUIRE(det::NormalizeValue(t) == 0.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 0.0f);
     }
 
 
@@ -246,12 +248,12 @@ void test_details()
         int32_t value;
         TEST_REQUIRE(det::GetTileValue(t, &value));
         TEST_REQUIRE(value == 127);
-        TEST_REQUIRE(det::NormalizeValue(t) == 1.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 1.0f);
 
         TEST_REQUIRE(det::SetTileValue(t, -128));
         TEST_REQUIRE(det::GetTileValue(t, &value));
         TEST_REQUIRE(value == -128);
-        TEST_REQUIRE(det::NormalizeValue(t) == 0.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 0.0f);
     }
 
     {
@@ -260,12 +262,12 @@ void test_details()
         int32_t value;
         TEST_REQUIRE(det::GetTileValue(t, &value));
         TEST_REQUIRE(value == 255);
-        TEST_REQUIRE(det::NormalizeValue(t) == 1.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 1.0f);
 
         TEST_REQUIRE(det::SetTileValue(t, 0));
         TEST_REQUIRE(det::GetTileValue(t, &value));
         TEST_REQUIRE(value == 0);
-        TEST_REQUIRE(det::NormalizeValue(t) == 0.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 0.0f);
     }
 
     {
@@ -274,12 +276,12 @@ void test_details()
         int32_t value;
         TEST_REQUIRE(det::GetTileValue(t, &value));
         TEST_REQUIRE(value == 0x7fff);
-        TEST_REQUIRE(det::NormalizeValue(t) == 1.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 1.0f);
 
         TEST_REQUIRE(det::SetTileValue(t, -0x8000));
         TEST_REQUIRE(det::GetTileValue(t, &value));
         TEST_REQUIRE(value == -0x8000);
-        TEST_REQUIRE(det::NormalizeValue(t) == 0.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 0.0f);
     }
 
     {
@@ -288,15 +290,17 @@ void test_details()
         int32_t value;
         TEST_REQUIRE(det::GetTileValue(t, &value));
         TEST_REQUIRE(value == 0xffff);
-        TEST_REQUIRE(det::NormalizeValue(t) == 1.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 1.0f);
         TEST_REQUIRE(det::SetTileValue(t, 0));
-        TEST_REQUIRE(det::NormalizeValue(t) == 0.0f);
+        TEST_REQUIRE(det::NormalizeTileDataValue(t) == 0.0f);
     }
 }
 
 
 void test_tilemap_layer()
 {
+    TEST_CASE(test::Type::Feature)
+
     game::TilemapLayerClass klass;
     klass.SetName("foobar");
     klass.SetId("1231xxx");
@@ -383,12 +387,15 @@ void test_tilemap_layer()
 
 void test_tilemap_class()
 {
+    TEST_CASE(test::Type::Feature)
+
     game::TilemapClass klass;
     klass.SetName("foobar");
     klass.SetTileWidth(5.0f);
     klass.SetTileHeight(8.0f);
     klass.SetMapWidth(200);
     klass.SetMapHeight(240);
+    klass.SetTileRenderScale({2.0f, 3.0f});
     klass.SetScriptFile("foobar.lua");
 
     game::TilemapLayerClass layer0;
@@ -413,6 +420,7 @@ void test_tilemap_class()
         TEST_REQUIRE(ret.GetMapHeight() == 240);
         TEST_REQUIRE(ret.GetTileWidth() == 5.0f);
         TEST_REQUIRE(ret.GetTileHeight() == 8.0f);
+        TEST_REQUIRE(ret.GetTileRenderScale() == glm::vec2(2.0f, 3.0f));
     }
 
     {
@@ -429,6 +437,7 @@ void test_tilemap_class()
         TEST_REQUIRE(clone.GetMapHeight() == 240);
         TEST_REQUIRE(clone.GetTileWidth() == 5.0f);
         TEST_REQUIRE(clone.GetTileHeight() == 8.0f);
+        TEST_REQUIRE(clone.GetTileRenderScale() == glm::vec2(2.0f, 3.0f));
     }
 
     // assignment
@@ -441,6 +450,8 @@ void test_tilemap_class()
 
 void test_tile_access_basic(game::TilemapLayerClass::Storage storage)
 {
+    TEST_CASE(test::Type::Feature)
+
     auto klass = std::make_shared<game::TilemapLayerClass>();
     klass->SetStorage(storage);
     klass->SetResolution(game::TilemapLayerClass::Resolution::Original);
@@ -483,6 +494,8 @@ void test_tile_access_basic(game::TilemapLayerClass::Storage storage)
 template<typename TileType>
 void test_tile_access_sparse()
 {
+    TEST_CASE(test::Type::Feature)
+
     const auto type = game::detail::TilemapLayerTraits<TileType>::LayerType;
 
     auto klass = std::make_shared<game::TilemapLayerClass>();
@@ -546,6 +559,8 @@ void test_tile_access_sparse()
 template<typename TileType>
 void test_tile_access_combinations(game::TilemapLayerClass::Storage storage)
 {
+    TEST_CASE(test::Type::Feature)
+
     const auto type = game::detail::TilemapLayerTraits<TileType>::LayerType;
 
     using Cache = game::TilemapLayerClass::Cache;
@@ -623,6 +638,8 @@ void test_tile_access_combinations(game::TilemapLayerClass::Storage storage)
 template<typename TileType>
 void test_layer_save_load(game::TilemapLayerClass::Storage storage)
 {
+    TEST_CASE(test::Type::Feature)
+
     auto type = game::detail::TilemapLayerTraits<TileType>::LayerType;
 
     auto klass = std::make_shared<game::TilemapLayerClass>();
@@ -676,6 +693,8 @@ void test_layer_save_load(game::TilemapLayerClass::Storage storage)
 template<typename TileType>
 void test_layer_resize(game::TilemapLayerClass::Storage storage)
 {
+    TEST_CASE(test::Type::Feature)
+
     auto type = game::detail::TilemapLayerTraits<TileType>::LayerType;
 
     auto klass = std::make_shared<game::TilemapLayerClass>();
@@ -783,6 +802,8 @@ void test_layer_resize(game::TilemapLayerClass::Storage storage)
 template<typename Type>
 void test_tilemaplayer_class_default_serialize(const Type& def)
 {
+    TEST_CASE(test::Type::Feature)
+
     const auto type = game::detail::TilemapLayerTraits<Type>::LayerType;
 
     game::TilemapLayerClass klass;
@@ -800,6 +821,7 @@ void test_tilemaplayer_class_default_serialize(const Type& def)
     }
 }
 
+EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
 
@@ -889,3 +911,4 @@ int test_main(int argc, char* argv[])
 
     return 0;
 }
+) //

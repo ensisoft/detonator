@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1689</width>
+    <width>1702</width>
     <height>1099</height>
    </rect>
   </property>
@@ -44,31 +44,44 @@
         <string>Base  properties</string>
        </property>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="4" column="1">
-         <widget class="QSpinBox" name="mapWidth">
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_13">
+          <property name="text">
+           <string>ID</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="mapName">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QSpinBox" name="mapTileSize">
           <property name="suffix">
-           <string> tiles</string>
+           <string> units</string>
           </property>
           <property name="minimum">
            <number>1</number>
           </property>
           <property name="maximum">
-           <number>100000</number>
+           <number>250</number>
           </property>
           <property name="value">
-           <number>512</number>
+           <number>10</number>
           </property>
          </widget>
         </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Map width</string>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="mapSize">
+          <property name="enabled">
+           <bool>false</bool>
           </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="mapID">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -77,6 +90,23 @@
           </property>
           <property name="readOnly">
            <bool>true</bool>
+          </property>
+          <property name="placeholderText">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Map height</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Map width</string>
           </property>
          </widget>
         </item>
@@ -100,27 +130,6 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_13">
-          <property name="text">
-           <string>ID</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_27">
-          <property name="text">
-           <string>Total size</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_3">
-          <property name="text">
-           <string>Map height</string>
-          </property>
-         </widget>
-        </item>
         <item row="5" column="1">
          <widget class="QSpinBox" name="mapHeight">
           <property name="suffix">
@@ -137,32 +146,26 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="mapName">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+        <item row="4" column="1">
+         <widget class="QSpinBox" name="mapWidth">
+          <property name="suffix">
+           <string> tiles</string>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>100000</number>
+          </property>
+          <property name="value">
+           <number>512</number>
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
-         <widget class="QLineEdit" name="mapSize">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-          <property name="placeholderText">
-           <string/>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_27">
+          <property name="text">
+           <string>Total size</string>
           </property>
          </widget>
         </item>
@@ -176,21 +179,89 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="1">
-         <widget class="QSpinBox" name="mapTileSize">
-          <property name="suffix">
-           <string> units</string>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="mapID">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
-          <property name="minimum">
-           <number>1</number>
-          </property>
-          <property name="maximum">
-           <number>250</number>
-          </property>
-          <property name="value">
-           <number>10</number>
+          <property name="readOnly">
+           <bool>true</bool>
           </property>
          </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox_4">
+       <property name="title">
+        <string>Rendering</string>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_6">
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_32">
+          <property name="text">
+           <string>Tile scale</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="cmbPerspective"/>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_9">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Perspective</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <item>
+           <widget class="QDoubleSpinBox" name="tileScaleX">
+            <property name="prefix">
+             <string/>
+            </property>
+            <property name="suffix">
+             <string> x</string>
+            </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="tileScaleY">
+            <property name="prefix">
+             <string/>
+            </property>
+            <property name="suffix">
+             <string> x</string>
+            </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -1276,7 +1347,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>308</width>
-                 <height>400</height>
+                 <height>384</height>
                 </rect>
                </property>
                <property name="sizePolicy">
@@ -1488,6 +1559,9 @@
   <tabstop>mapWidth</tabstop>
   <tabstop>mapHeight</tabstop>
   <tabstop>btnApplyMapSize</tabstop>
+  <tabstop>cmbPerspective</tabstop>
+  <tabstop>tileScaleX</tabstop>
+  <tabstop>tileScaleY</tabstop>
   <tabstop>cmbTool</tabstop>
   <tabstop>btnAddTool</tabstop>
   <tabstop>btnDelTool</tabstop>

@@ -423,8 +423,10 @@ public:
 
         {
             gfx::TileBatch tiles;
-            tiles.SetTileWidth(tile_size);
-            tiles.SetTileHeight(tile_size);
+            tiles.SetTileWorldWidth(tile_size);
+            tiles.SetTileWorldHeight(tile_size);
+            tiles.SetTileRenderWidth(tile_size);
+            tiles.SetTileRenderHeight(tile_size);
             for (unsigned row=0; row<10; ++row)
             {
                 for (unsigned col=0; col<10; ++col)

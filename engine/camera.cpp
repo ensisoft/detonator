@@ -150,4 +150,31 @@ glm::vec2 MapToWorldPlane(const glm::mat4& view_to_clip,
     return {intersection_point_world.x, intersection_point_world.y};
 }
 
+glm::vec2 ComputeTileRenderSize(const glm::mat4& tile_to_render,
+                                const glm::vec2& tile_size,
+                                game::Perspective perspective)
+{
+    const auto tile_width_units  = tile_size.x;
+    const auto tile_height_units = tile_size.y;
+
+    const auto tile_left_bottom  = tile_to_render * glm::vec4{0.0f, tile_height_units, 0.0f, 1.0f};
+    const auto tile_right_top    = tile_to_render * glm::vec4{tile_width_units, 0.0f, 0.0f, 1.0f};
+    const auto tile_left_top     = tile_to_render * glm::vec4{0.0f, 0.0f, 0.0f, 1.0f};
+    const auto tile_right_bottom = tile_to_render * glm::vec4{tile_width_units, tile_height_units, 0.0f, 1.0f};
+
+    if (perspective == game::Perspective::Dimetric)
+    {
+        const auto tile_width_render_units  = glm::length(tile_left_bottom - tile_right_top);
+        const auto tile_height_render_units = glm::length(tile_left_top - tile_right_bottom);
+        return {tile_width_render_units, tile_height_render_units};
+    }
+    else if (perspective == game::Perspective::AxisAligned)
+    {
+        const auto tile_width_render_units  = glm::length(tile_left_top - tile_right_top);
+        const auto tile_height_render_units = glm::length(tile_left_top - tile_left_bottom);
+        return {tile_width_render_units, tile_height_render_units};
+    } else BUG("Unknown perspective");
+    return {0.0f, 0.0f};
+}
+
 } // namespace

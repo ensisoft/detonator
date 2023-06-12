@@ -156,7 +156,7 @@ namespace gfx
                   const ShaderPass& shader_pass);
 
         void Draw(const Drawable& shape,
-                  const Transform& transform,
+                  const Transform& model_to_world,
                   const Material& material,
                   const RenderPassState& render_pass,
                   const ShaderPass& shader_pass);
@@ -174,7 +174,8 @@ namespace gfx
         // function is not efficient since the device state is changed on every draw
         // to the required state. If possible prefer the vector format which allows
         // to draw multiple objects at once.
-        void Draw(const Drawable& shape, const Transform& transform, const Material& mat);
+        void Draw(const Drawable& drawable, const Transform& model_to_world, const Material& material);
+        void Draw(const Drawable& drawable, const glm::mat4& model_to_world, const Material& material);
     private:
     };
 

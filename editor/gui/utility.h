@@ -114,6 +114,8 @@ inline glm::vec4 ToVec4(const QPoint& point)
 { return glm::vec4(point.x(), point.y(), 1.0f, 1.0f); }
 inline glm::vec2 ToVec2(const QPoint& point)
 { return glm::vec2(point.x(), point.y()); }
+inline glm::vec2 ToVec2(const QSize& size)
+{ return glm::vec2(size.width(), size.height()); }
 inline glm::vec2 ToVec2(const QPointF& point)
 { return glm::vec2(point.x(), point.y()); }
 
@@ -1731,23 +1733,7 @@ inline bool MustHaveNumber(QComboBox* box)
     return ok;
 }
 
-template<typename UI, typename State>
-void MakeViewTransform(const UI& ui, const State& state, gfx::Transform& view)
-{
-    view.Scale(GetValue(ui.scaleX), GetValue(ui.scaleY));
-    view.Scale(GetValue(ui.zoom), GetValue(ui.zoom));
-    view.RotateAroundZ(qDegreesToRadians(ui.rotation->value()));
-    view.Translate(state.camera_offset_x, state.camera_offset_y);
-}
 
-template<typename UI, typename State>
-void MakeViewTransform(const UI& ui, const State& state, gfx::Transform& view, float rotation)
-{
-    view.Scale(GetValue(ui.scaleX), GetValue(ui.scaleY));
-    view.Scale(GetValue(ui.zoom), GetValue(ui.zoom));
-    view.RotateAroundZ(qDegreesToRadians(rotation));
-    view.Translate(state.camera_offset_x, state.camera_offset_y);
-}
 
 QPixmap ToGrayscale(QPixmap pixmap);
 

@@ -285,7 +285,7 @@ namespace game
         { return false; }
 
         template<typename TileType> inline
-        float NormalizeValue(const TileType& tile)
+        float NormalizeTileDataValue(const TileType& tile)
         {
             using Traits = TilemapLayerTraits<TileType>;
             constexpr float max_val = Traits::MaxValue;
@@ -759,39 +759,55 @@ namespace game
         TilemapClass();
         TilemapClass(const TilemapClass& other);
 
-        void SetName(const std::string& name)
-        { mName = name;}
-        void SetScriptFile(const std::string& file)
-        { mScriptFile = file; }
-        void SetMapWidth(unsigned width)
+        inline void SetName(std::string name) noexcept
+        { mName = std::move(name);}
+        inline void SetScriptFile(std::string file) noexcept
+        { mScriptFile = std::move(file); }
+        inline void SetMapWidth(unsigned width) noexcept
         { mWidth = width; }
-        void SetMapHeight(unsigned height)
+        inline void SetMapHeight(unsigned height) noexcept
         { mHeight = height;}
-        void SetTileWidth(float width)
-        { mTileWidth = width; }
-        void SetTileHeight(float height)
-        { mTileHeight = height; }
-        void SetPerspective(Perspective perspective)
+        inline void SetTileWidth(float width) noexcept
+        { mTileWorldSize.x = width; }
+        inline void SetTileHeight(float height) noexcept
+        { mTileWorldSize.y = height; }
+        inline void SetPerspective(Perspective perspective) noexcept
         { mPerspective = perspective; }
+        inline void SetTileRenderScale(glm::vec2 scale) noexcept
+        { mTileRenderScale = scale; }
+        inline void SetTileSize(glm::vec2 size) noexcept
+        { mTileWorldSize = size; }
+        inline void SetTileRenderWidthScale(float scale) noexcept
+        { mTileRenderScale.x = scale; }
+        inline void SetTileRenderHeightScale(float scale) noexcept
+        { mTileRenderScale.y = scale; }
 
-        std::size_t GetNumLayers() const
+        inline std::size_t GetNumLayers() const noexcept
         { return mLayers.size(); }
-        std::string GetId() const
+        inline std::string GetId() const noexcept
         { return mId; }
-        std::string GetName() const
+        inline std::string GetName() const noexcept
         { return mName; }
-        std::string GetScriptFile() const
+        inline std::string GetScriptFile() const noexcept
         { return mScriptFile;}
-        unsigned GetMapWidth() const
+        inline unsigned GetMapWidth() const noexcept
         { return mWidth; }
-        unsigned GetMapHeight() const
+        inline unsigned GetMapHeight() const noexcept
         { return mHeight;}
-        float GetTileWidth() const
-        { return mTileWidth; }
-        float GetTileHeight() const
-        { return mTileHeight; }
-        Perspective GetPerspective() const
+        inline float GetTileWidth() const noexcept
+        { return mTileWorldSize.x; }
+        inline float GetTileHeight() const noexcept
+        { return mTileWorldSize.y; }
+        inline Perspective GetPerspective() const noexcept
         { return mPerspective; }
+        inline glm::vec2 GetTileSize() const noexcept
+        { return mTileWorldSize; }
+        inline glm::vec2 GetTileRenderScale() const noexcept
+        { return mTileRenderScale; }
+        inline float GetTileRenderWidthScale() const noexcept
+        { return mTileRenderScale.x; }
+        inline float GetTileRenderHeightScale() const noexcept
+        { return mTileRenderScale.y; }
 
         void AddLayer(const TilemapLayerClass& layer);
         void AddLayer(TilemapLayerClass&& layer);
@@ -825,8 +841,8 @@ namespace game
         std::string mScriptFile;
         unsigned mWidth = 0;
         unsigned mHeight = 0;
-        float mTileWidth = 1.0f;
-        float mTileHeight = 1.0f;
+        glm::vec2 mTileWorldSize = {0.0f, 0.0f};
+        glm::vec2 mTileRenderScale = {1.0f, 1.0f};
         Perspective mPerspective = Perspective::AxisAligned;
         std::vector<std::shared_ptr<TilemapLayerClass>> mLayers;
     };

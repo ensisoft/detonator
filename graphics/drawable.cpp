@@ -2316,29 +2316,50 @@ void TileBatch::ApplyDynamicState(const Environment& env, Program& program, Rast
 {
     const auto pixel_scale = std::min(env.pixel_ratio.x, env.pixel_ratio.y);
 
-    program.SetUniform("kTileSize",       mTileWidth);
-    program.SetUniform("kTileRasterSize", mTileWidth * pixel_scale);
-    program.SetUniform("kProjectionMatrix",
-        *(const Program::Matrix4x4*)glm::value_ptr(*env.proj_matrix));
-    program.SetUniform("kModelViewMatrix",
-        *(const Program::Matrix4x4*)glm::value_ptr(*env.view_matrix * *env.model_matrix));
+    const auto shape = ResolveTileShape();
+
+    // if the tile shape is square we're rendering point sprites which
+    // are always centered around the point vertex. So we have 2 cases.
+    //  * square + dimetric
+    //    In this case the tile's top left corner maps directly to the
+    //    center of the square tile when rendered.
+    //
+    //  * square + dimetric.
+    //    In this case the center of the tile yields the center of the
+    //    square when projected.
+    glm::vec2 tile_offset = {0.0f, 0.0f};
+    if (mProjection == Projection::AxisAligned && shape == TileShape::Square)
+        tile_offset = mTileWorldSize * 0.5f;
+    else if (mProjection == Projection::Dimetric && shape == TileShape::Rectangle)
+        tile_offset = mTileWorldSize; // bottom right corner is the basis for the billboard
+    else if (mProjection == Projection::AxisAligned && shape == TileShape::Rectangle)
+        tile_offset = glm::vec2{mTileWorldSize.x*0.5f, mTileWorldSize.y*1.0f}; // middle of the bottom edge
+
+    program.SetUniform("kTileWorldSize", mTileWorldSize);
+    program.SetUniform("kTileWorldOffset", tile_offset);
+    program.SetUniform("kTileRenderSize", mTileRenderSize * pixel_scale);
+    program.SetUniform("kTileTransform", *env.proj_matrix * *env.view_matrix);
+    program.SetUniform("kTileCoordinateSpaceTransform", *env.model_matrix);
 }
 Shader* TileBatch::GetShader(const Environment& env, Device& device) const
 {
     // the shader uses dummy varyings vParticleAlpha, vParticleRandomValue
-    // and vTexCoord. Even though we're now rendering GL_POINTS this isnt
+    // and vTexCoord. Even though we're now rendering GL_POINTS this isn't
     // a particle vertex shader. However, if a material shader refers to those
-    // varyings we might get GLSL program build errors on some platforms. 
-    constexpr auto*  src = R"(
+    // varyings we might get GLSL program build errors on some platforms.
+
+    const auto shape = ResolveTileShape();
+
+    constexpr const auto*  square_tile_source = R"(
 #version 100
 attribute vec2 aTilePosition;
 
-uniform mat4 kProjectionMatrix;
-uniform mat4 kModelViewMatrix;
+uniform mat4 kTileTransform;
+uniform mat4 kTileCoordinateSpaceTransform;
 
-uniform vec2  kBasePosition;
-uniform float kTileSize;
-uniform float kTileRasterSize;
+uniform vec2 kTileWorldSize;
+uniform vec2 kTileWorldOffset;
+uniform vec2 kTileRenderSize;
 
 varying float vParticleAlpha;
 varying float vParticleRandomValue;
@@ -2346,17 +2367,68 @@ varying vec2 vTexCoord;
 
 void main()
 {
-  vec2 tile = aTilePosition*kTileSize + vec2(0.5)*kTileSize;
+  // transform tile row,col index into a tile position in units in the x,y plane,
+  vec2 tile = aTilePosition * kTileWorldSize + kTileWorldOffset;
 
-  vec4 vertex = vec4(tile.xy, 0.0, 1.0);
-  gl_Position = kProjectionMatrix * kModelViewMatrix * vertex;
-  gl_PointSize = kTileRasterSize;
+  vec4 vertex = kTileCoordinateSpaceTransform * vec4(tile.xy, 0.0, 1.0);
+
+  gl_Position = kTileTransform * vertex;
+
+  gl_PointSize = kTileRenderSize.x;
+
+  // dummy out.
   vParticleAlpha = 1.0;
   vParticleRandomValue = 1.0;
 }
 )";
-    constexpr auto* name = "TileBatchShader";
 
+
+    constexpr const auto* rectangle_tile_source = R"(
+#version 100
+attribute vec2 aTilePosition;
+attribute vec2 aTileCorner;
+
+uniform mat4 kTileTransform;
+uniform mat4 kTileCoordinateSpaceTransform;
+
+uniform vec2 kTileWorldSize;
+uniform vec2 kTileWorldOffset;
+uniform vec2 kTileRenderSize;
+
+varying float vParticleAlpha;
+varying float vParticleRandomValue;
+varying vec2 vTexCoord;
+
+void main()
+{
+  // transform tile col,row index into a tile position in tile world units in the tile x,y plane
+  vec2 tile = aTilePosition * kTileWorldSize + kTileWorldOffset;
+
+  // transform the tile from tile space to rendering space
+  vec4 vertex = kTileCoordinateSpaceTransform * vec4(tile.xy, 0.0, 1.0);
+
+  // pull the corner vertices apart by adding a corner offset
+  // for each vertex towards some corner/direction away from the
+  // center point
+  vertex.xy += (aTileCorner * kTileRenderSize);
+
+  gl_Position = kTileTransform * vertex;
+
+  vTexCoord = aTileCorner + vec2(0.5, 1.0);
+
+  // dummy out
+  vParticleAlpha = 1.0;
+  vParticleRandomValue = 1.0;
+}
+)";
+
+
+    const auto* name = shape == TileShape::Square
+                       ? "SquareTileBatchShader"
+                       : "RectangleTileBatchShader";
+    const auto* src = shape == TileShape::Square
+            ? square_tile_source
+            : rectangle_tile_source;
     auto* shader = device.FindShader(name);
     if (!shader)
     {
@@ -2373,26 +2445,73 @@ Geometry* TileBatch::Upload(const Environment& env, Device& device) const
     if (!geom)
         geom = device.MakeGeometry("tile-buffer");
 
-    using TileVertex = Tile;
+    const auto shape = ResolveTileShape();
+    if (shape == TileShape::Square)
+    {
+        using TileVertex = Tile;
+        static const VertexLayout layout(sizeof(TileVertex), {
+            {"aTilePosition", 0, 2, 0, offsetof(TileVertex, pos)},
+        });
 
-    static const VertexLayout layout(sizeof(TileVertex), {
-        {"aTilePosition", 0, 2, 0, offsetof(TileVertex, pos)},
-    });
+        geom->SetVertexBuffer(mTiles, Geometry::Usage::Stream);
+        geom->SetVertexLayout(layout);
+        geom->ClearDraws();
+        geom->AddDrawCmd(Geometry::DrawType::Points);
+    }
+    else if (shape == TileShape::Rectangle)
+    {
+        struct TileVertex {
+            Vec2 position;
+            Vec2 corner;
+        };
+        static const VertexLayout layout(sizeof(TileVertex), {
+            {"aTilePosition", 0, 2, 0, offsetof(TileVertex, position)},
+            {"aTileCorner",   0, 2, 0, offsetof(TileVertex, corner)}
+        });
+        std::vector<TileVertex> vertices;
+        vertices.reserve(6 * mTiles.size());
+        for (const auto& tile : mTiles)
+        {
+            const TileVertex top_left  = {tile.pos, {-0.5f, -1.0f}};
+            const TileVertex top_right = {tile.pos, { 0.5f, -1.0f}};
+            const TileVertex bot_left  = {tile.pos, {-0.5f,  0.0f}};
+            const TileVertex bot_right = {tile.pos, { 0.5f,  0.0f}};
+            vertices.push_back(top_left);
+            vertices.push_back(bot_left);
+            vertices.push_back(bot_right);
 
-    geom->SetVertexBuffer(mTiles.data(), mTiles.size(), Geometry::Usage::Stream);
-    geom->SetVertexLayout(layout);
-    geom->ClearDraws();
-    geom->AddDrawCmd(Geometry::DrawType::Points);
+            vertices.push_back(top_left);
+            vertices.push_back(bot_right);
+            vertices.push_back(top_right);
+        }
+        geom->ClearDraws();
+        geom->SetVertexBuffer(vertices, Geometry::Usage::Stream);
+        geom->SetVertexLayout(layout);
+        geom->AddDrawCmd(Geometry::DrawType::Triangles);
+    }
+    else BUG("Unknown tile shape!");
     return geom;
 
 }
 Drawable::Style TileBatch::GetStyle() const
 {
+    const auto shape = ResolveTileShape();
+    if (shape == TileShape::Square)
+        return Style::Points;
+    else if (shape == TileShape::Rectangle)
+        return Style::Solid;
+    else BUG("Unknown tile shape");
     return Style::Points;
 }
 std::string TileBatch::GetProgramId(const Environment& env) const
 {
-    return "tile-batch-program";
+    const auto shape = ResolveTileShape();
+    if (shape == TileShape::Square)
+        return "square-tile-batch-program";
+    else if (shape == TileShape::Rectangle)
+        return "rectangle-tile-batch-program";
+    else BUG("Unknown tile shape");
+    return "";
 }
 
 void DynamicLine3D::ApplyDynamicState(const Environment& environment, Program& program, RasterState& state) const
