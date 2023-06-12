@@ -224,9 +224,11 @@ void GfxWindow::paintGL()
         const auto surface_width  = (float)width();
         const auto surface_height = (float)height();
 
+        // set to defaults, the paint can then change these if needed.
         mCustomGraphicsPainter->SetProjectionMatrix(gfx::MakeOrthographicProjection(surface_width, surface_height));
         mCustomGraphicsPainter->SetViewport(0, 0, surface_width, surface_height);
         mCustomGraphicsPainter->SetSurfaceSize(surface_width, surface_height);
+        mCustomGraphicsPainter->ResetViewMatrix();
         onPaintScene(*mCustomGraphicsPainter, 0.0);
 
         // reset these for subsequent drawing (below) since the widget's paint function
@@ -234,6 +236,7 @@ void GfxWindow::paintGL()
         mCustomGraphicsPainter->SetProjectionMatrix(gfx::MakeOrthographicProjection(surface_width, surface_height));
         mCustomGraphicsPainter->SetViewport(0, 0, surface_width, surface_height);
         mCustomGraphicsPainter->SetSurfaceSize(surface_width, surface_height);
+        mCustomGraphicsPainter->ResetViewMatrix();
     }
 
     mNumFrames++;
