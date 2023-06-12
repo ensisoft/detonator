@@ -278,17 +278,33 @@ namespace gfx
         class GenericDrawable : public Drawable
         {
         public:
+            using Style   = typename DrawableGeometry::Style;
+            using Culling = typename DrawableGeometry::Culling;
+
             GenericDrawable() = default;
-            GenericDrawable(Style style, float linewidth)
-              : mStyle(style)
-              , mLineWidth(linewidth)
-            {}
-            GenericDrawable(Style style)
+            explicit GenericDrawable(Style style)
               : mStyle(style)
             {}
-            GenericDrawable(float linewidth)
-              : mLineWidth(linewidth)
+            GenericDrawable(Style style, float line_width)
+              : mStyle(style)
+              , mLineWidth(line_width)
             {}
+            GenericDrawable(Style style, Culling culling)
+              : mStyle(style)
+              , mCulling(culling)
+            {}
+            GenericDrawable(Style style, Culling culling, float line_width)
+                : mStyle(style)
+                , mCulling(culling)
+                , mLineWidth(line_width)
+            {}
+            explicit GenericDrawable(float line_width)
+              : mLineWidth(line_width)
+            {}
+            explicit GenericDrawable(Culling culling)
+              : mCulling(culling)
+            {}
+
             virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
             {
                 state.line_width = mLineWidth;
