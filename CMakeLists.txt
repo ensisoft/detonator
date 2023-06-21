@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.2)
 
+# some cmake yak yak about msvc CRT libs
+cmake_policy(SET CMP0091 NEW)
+
 project(DETONATOR2D)
 
 option(USE_MOLD_LINKER "Use mold linker. https://github.com/rui314/mold" OFF)
@@ -16,8 +19,24 @@ https://github.com/ensisoft/detonator
 
 ")
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(ZLIB REQUIRED)
+find_package(HARFBUZZ REQUIRED)
+find_package(MPG123 REQUIRED)
+find_package(Boost REQUIRED)
+
+# conan2 doesn't provide CONAN_LIBS anymore, so we'll setup our own array var
+# for the same purpose
+set(CONAN_LIBS)
+list(APPEND CONAN_LIBS "harfbuzz::harfbuzz")
+list(APPEND CONAN_LIBS "Freetype::Freetype")
+list(APPEND CONAN_LIBS "mpg123::mpg123")
+list(APPEND CONAN_LIBS "ZLIB::ZLIB")
+
+# play  stupid games, win stupid prices.  shove this shit here to make the headers
+# found same like before conan -> conan2 upgrade
+include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${harfbuzz_INCLUDE_DIRS})
+include_directories(${freetype_INCLUDE_DIRS})
 
 # https://cmake.org/cmake/help/latest/module/FetchContent.html#examples
 # https://jonathanhamberg.com/post/cmake-embedding-git-hash/
@@ -211,7 +230,6 @@ add_library(UiLib
     uikit/layout.cpp
     uikit/widget.cpp
     uikit/window.cpp)
-
 add_library(GfxLibTesting
     device/opengles.cpp
     graphics/algo.cpp
@@ -260,6 +278,14 @@ if (MSVC)
 endif()
 
 target_link_libraries(EngineLib INTERFACE box2d)
+# somehow this shit is now needed with conan2 deps...
+target_link_libraries(AudioLib      PUBLIC ${CONAN_LIBS})
+target_link_libraries(DataLib       PUBLIC ${CONAN_LIBS})
+target_link_libraries(BaseLib       PUBLIC ${CONAN_LIBS})
+target_link_libraries(GfxLib        PUBLIC ${CONAN_LIBS})
+target_link_libraries(GfxLibTesting PUBLIC ${CONAN_LIBS})
+target_link_libraries(EngineLib     PUBLIC ${CONAN_LIBS})
+target_link_libraries(UiLib         PUBLIC ${CONAN_LIBS})
 
 add_library(QuaZip
     third_party/quazip/quazip/unzip.c
@@ -277,7 +303,7 @@ add_library(QuaZip
     third_party/quazip/quazip/quazipfileinfo.cpp
     third_party/quazip/quazip/quazipnewinfo.cpp)
 target_compile_definitions(QuaZip PUBLIC QUAZIP_STATIC)
-target_link_libraries(QuaZip Qt5::Core)
+target_link_libraries(QuaZip Qt5::Core ZLIB::ZLIB)
 
 add_library(QtColorWidgets
         third_party/Qt-Color-Widgets/src/abstract_widget_list.cpp
