@@ -1,9 +1,10 @@
 [requires]
-zlib/1.2.12
-harfbuzz/2.7.2
-freetype/2.10.4
+zlib/1.2.13
+harfbuzz/7.3.0
+freetype/2.13.0
 mpg123/1.26.4
 boost/1.79.0
 
 [generators]
-cmake
+CMakeDeps
+CMakeToolchain

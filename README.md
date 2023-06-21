@@ -214,7 +214,8 @@ Install these packages:
 - GCC (or Clang) compiler suite
 - CMake build tool
 - Boost C++ libraries
-- Conan package manager
+- Conan package manager (VERSION 2)
+  - *On Archlinux you can use 'yay' to install conan + its dependencies from AUR*  
 - Git version control system
 - Qt5 application framework
   
@@ -228,8 +229,8 @@ Install these packages:
   $ git submodule update --init --recursive
   $ mkdir build
   $ cd build
-  $ conan install .. --build missing
-  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Release
+  $ conan install .. --output-folder=conan --build missing
+  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
   $ make -j16 install
   $ ctest -j16
 ```
@@ -243,8 +244,8 @@ Install these packages:
   $ git submodule update --init --recursive
   $ mkdir build_d
   $ cd build_d
-  $ conan install .. --build missing
-  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Debug
+  $ conan install .. --output-folder=conan --build missing -s build_type=Debug
+  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
   $ make -j16 install
   $ ctest -j16
 ```
@@ -336,7 +337,7 @@ http://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-
 - Install prebuilt Boost 1.72
 https://sourceforge.net/projects/boost/files/boost-binaries/1.72.0_b1/
 
-- Install Conan package manager
+- Install Conan package manager (VERSION 2)
 https://docs.conan.io/en/latest/installation.html
 
 - Install CMake build tool
@@ -355,8 +356,8 @@ https://cmake.org/install/
   $ git submodule update --init --recursive
   $ mkdir build
   $ cd build
-  $ conan install .. --build missing
-  $ cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=Release ..
+  $ conan install .. --output-folder=conan --build missing
+  $ cmake -G "Visual Studio 16 2019" .. -DCMAKE_BUILD_TYPE=Release  -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
   $ cmake --build   . --config Release
   $ cmake --install . --config Release
 ```
@@ -376,8 +377,8 @@ This means that in order to link to 3rd party libraries the debug versions of th
   $ git submodule update --init --recursive
   $ mkdir build_d
   $ cd build_d
-  $ conan install .. --build missing -s build_type=Debug
-  $ cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=Debug ..
+  $ conan install .. --output-folder=conan --build missing -s build_type=Debug
+  $ cmake -G "Visual Studio 16 2019" .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
   $ cmake --build   . --config Debug
   $ cmake --install . --config Debug
 ```
