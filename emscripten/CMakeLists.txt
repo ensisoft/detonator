@@ -101,7 +101,7 @@ add_executable(GameEngine
     ../graphics/drawing.cpp
     ../graphics/bitmap.cpp
     ../graphics/text.cpp
-    ../graphics/help.cpp
+    ../graphics/utility.cpp
     ../wdk/wdk/keys.cpp
     ../uikit/window.cpp
     ../uikit/widget.cpp
