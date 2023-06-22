@@ -91,10 +91,11 @@ namespace engine
         };
 
         struct Camera {
-            glm::vec2 position;
-            glm::vec2 scale;
-            game::Perspective perspective;
+            glm::vec2 position = {0.0f, 0.0f};
+            glm::vec2 scale    = {1.0f, 1.0f};
+            game::Perspective perspective = game::Perspective::AxisAligned;
             game::FRect viewport;
+            float rotation = 0.0f;
         };
 
         // The rendering window/surface details.
