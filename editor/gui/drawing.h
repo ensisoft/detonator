@@ -138,9 +138,13 @@ glm::mat4 CreatePerspectiveCorrectViewMatrix(const UI& ui, const State& state, g
     const float zoom = GetValue(ui.zoom);
     const float xs = GetValue(ui.scaleX);
     const float ys = GetValue(ui.scaleY);
+    const float rotation = GetValue(ui.rotation);
+
     return engine::CreateViewMatrix(state.camera_offset_x,
                                     state.camera_offset_y,
-                                    zoom*xs, zoom*ys, perspective);
+                                    zoom*xs, zoom*ys,
+                                    perspective,
+                                    rotation);
 }
 
 template<typename UI>
