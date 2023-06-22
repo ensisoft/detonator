@@ -593,7 +593,6 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
     mUI.widget->onMouseWheel   = std::bind(&TilemapWidget::MouseWheel,   this, std::placeholders::_1);
     mUI.widget->onKeyPress     = std::bind(&TilemapWidget::KeyPress,     this, std::placeholders::_1);
     mUI.widget->onPaintScene   = std::bind(&TilemapWidget::PaintScene,   this, std::placeholders::_1, std::placeholders::_2);
-    mUI.widget->onInitScene    = std::bind(&TilemapWidget::InitScene,    this, std::placeholders::_1, std::placeholders::_2);
     mUI.widget->onZoomIn       = [this]() { MouseZoom(std::bind(&TilemapWidget::ZoomIn, this)); };
     mUI.widget->onZoomOut      = [this]() { MouseZoom(std::bind(&TilemapWidget::ZoomOut, this)); };
 
@@ -714,7 +713,6 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace, const app::Resource& res
         mTools.push_back(std::move(tool));
     }
 
-    mCameraWasLoaded= true;
     mModel->Reset();
     SelectRow(mUI.layers, current_layer);
     ReplaceDeletedResources();
@@ -896,7 +894,6 @@ bool TilemapWidget::LoadState(const Settings& settings)
         layer.SetFlags(layer.GetClass().GetFlags());
     }
 
-    mCameraWasLoaded = true;
     mModel->Reset();
     SelectRow(mUI.layers, current_layer);
     UpdateToolCombo();
@@ -954,10 +951,10 @@ void TilemapWidget::Update(double dt)
 {
     mCurrentTime += dt;
 
-    const auto time_diff = mCurrentTime - mViewTransformStartTime;
-    if (time_diff > 1.0f)
+    if (!mTransformView)
         return;
 
+    const auto time_diff = mCurrentTime - mViewTransformStartTime;
     const auto view_transform_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTransformStartTime);
     const auto view_rotation_angle = math::interpolate(mViewTransformRotationStart, mViewTransformRotationStop,
                                                        view_transform_time, math::Interpolation::Cosine);
@@ -969,6 +966,7 @@ void TilemapWidget::Update(double dt)
     SetValue(mUI.translateX, mState.camera_offset_x);
     SetValue(mUI.translateY, mState.camera_offset_y);
     SetValue(mUI.rotation, view_rotation_angle);
+    mTransformView = view_transform_time != 1.0f;
 }
 void TilemapWidget::Render()
 {
@@ -1284,7 +1282,8 @@ void TilemapWidget::on_btnViewReset_clicked()
     mViewTransformRotationStop   = 0.0f;
     mViewTransformTranslateStart = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
     mViewTransformTranslateStop  = glm::vec2{0.0f, 0.0f};
-    mViewTransformStartTime = mCurrentTime;
+    mViewTransformStartTime      = mCurrentTime;
+    mTransformView = true;
 
     // the rest of the view properties are updated in Update since they're animated/interpolated
     SetValue(mUI.scaleX, 1.0f);
@@ -1299,6 +1298,7 @@ void TilemapWidget::on_btnViewMinus90_clicked()
     mViewTransformTranslateStop  = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
     mViewTransformTranslateStart = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
     mViewTransformStartTime = mCurrentTime;
+    mTransformView = true;
 }
 void TilemapWidget::on_btnViewPlus90_clicked()
 {
@@ -1308,6 +1308,7 @@ void TilemapWidget::on_btnViewPlus90_clicked()
     mViewTransformTranslateStop  = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
     mViewTransformTranslateStart = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
     mViewTransformStartTime = mCurrentTime;
+    mTransformView = true;
 }
 
 void TilemapWidget::on_widgetColor_colorChanged(QColor color)
@@ -1962,20 +1963,6 @@ void TilemapWidget::UpdateLayerPalette()
             }
         }
     }
-}
-
-void TilemapWidget::InitScene(unsigned int width, unsigned int height)
-{
-    if (!mCameraWasLoaded)
-    {
-        const auto& settings = mState.workspace->GetProjectSettings();
-        const float zoom = GetValue(mUI.zoom);
-        const auto scaled_game_viewport_width  = settings.viewport_width * zoom;
-        const auto scaled_game_viewport_height = settings.viewport_height * zoom;
-        mState.camera_offset_x = 0.0f;//(mUI.widget->width() - scaled_game_viewport_width) * 0.5;
-        mState.camera_offset_y = 0.0f;//(mUI.widget->height() - scaled_game_viewport_height) * 0.5;
-    }
-    DisplayCurrentCameraLocation();
 }
 
 void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)

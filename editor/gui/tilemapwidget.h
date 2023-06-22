@@ -128,7 +128,6 @@ namespace gui
         void DisplayLayerProperties();
         void DisplaySelection();
         void UpdateLayerPalette();
-        void InitScene(unsigned width, unsigned height);
         void PaintScene(gfx::Painter& painter, double sec);
         void MouseMove(QMouseEvent* mickey);
         void MousePress(QMouseEvent* mickey);
@@ -217,9 +216,9 @@ namespace gui
         double mCurrentTime = 0.0;
         double mViewTransformStartTime = 0.0;
         float mViewTransformRotationStart = 0.0f;
-        float mViewTransformRotationStop = 0.0f;
+        float mViewTransformRotationStop  = 0.0f;
         glm::vec2 mViewTransformTranslateStart = glm::vec2{0.0f, 0.0f};
         glm::vec2 mViewTransformTranslateStop  = glm::vec2{0.0f, 0.0f};
-        bool mCameraWasLoaded = false;
+        bool mTransformView = false;
     };
 } // namespace
