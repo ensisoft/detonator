@@ -81,9 +81,18 @@ glm::mat4 CreateViewMatrix(game::Perspective perspective)
 
 glm::mat4 CreateViewMatrix(const glm::vec2& camera_pos,
                            const glm::vec2& world_scale,
-                           game::Perspective perspective)
+                           game::Perspective perspective,
+                           float rotation)
 {
-    glm::mat4 mat(CreateViewMatrix(perspective));
+    // hack because of the orthographic projection matrix axis setup.
+    rotation = (perspective == game::Perspective::Dimetric) ? -rotation : rotation;
+
+    // this is the last thing we do in the series of transformations combined
+    // in the transformation matrix. used only in the editor now but could also
+    // be used by the game
+    glm::mat4 mat = glm::rotate(glm::mat4(1.0f), glm::radians(rotation), glm::vec3{0.0f, 0.0f, 1.0f});
+
+    mat *= CreateViewMatrix(perspective);
 
     if (perspective == game::Perspective::Dimetric)
     {

@@ -174,17 +174,19 @@ namespace engine
     // transforms the world space objects into "view/eye/camera" space.
     glm::mat4 CreateViewMatrix(const glm::vec2& camera_pos,
                                const glm::vec2& world_scale,
-                               game::Perspective perspective);
+                               game::Perspective perspective,
+                               float rotation = 0.0f); // rotation around the Z axis in degrees
 
     inline glm::mat4 CreateViewMatrix(float camera_pos_x,
                                       float camera_pos_y,
                                       float world_scale_x,
                                       float world_scale_y,
-                                      game::Perspective perspective)
+                                      game::Perspective perspective,
+                                      float rotation = 0.0f)
     {
         return CreateViewMatrix(glm::vec2{camera_pos_x, camera_pos_y},
                                 glm::vec2{world_scale_x, world_scale_y},
-                                perspective);
+                                perspective, rotation);
     }
 
     // Map a window (2D projection surface coordinate) to a "world plane".

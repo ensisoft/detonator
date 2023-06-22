@@ -935,7 +935,7 @@ void Renderer::DrawTileBatches(const game::Tilemap& map,
     painter.SetPixelRatio(glm::vec2{1.0f, 1.0f});
 
     const auto& src_view_to_clip = CreateProjectionMatrix(mCamera.perspective, mCamera.viewport);
-    const auto& src_world_to_view = CreateViewMatrix(mCamera.position, mCamera.scale, mCamera.perspective);
+    const auto& src_world_to_view = CreateViewMatrix(mCamera.position, mCamera.scale, mCamera.perspective, mCamera.rotation);
 
     const auto& dst_view_to_clip = painter.GetProjMatrix();
     const auto& dst_world_to_view = painter.GetViewMatrix();
@@ -1043,7 +1043,7 @@ void Renderer::DrawDataLayer(const game::Tilemap& map,
 
     painter.SetPixelRatio({glm::vec2{1.0f, 1.0f}});
     painter.SetViewport(gfx::IRect(0, 0, viewport_width, viewport_height));
-    painter.SetViewMatrix(CreateViewMatrix(mCamera.position, mCamera.scale, mCamera.perspective));
+    painter.SetViewMatrix(CreateViewMatrix(mCamera.position, mCamera.scale, mCamera.perspective, mCamera.rotation));
     painter.SetProjectionMatrix(CreateProjectionMatrix(mCamera.perspective, mCamera.viewport));
 
     const auto tile_width = tile_size.GetWidth();
