@@ -953,6 +953,22 @@ void TilemapWidget::Shutdown()
 void TilemapWidget::Update(double dt)
 {
     mCurrentTime += dt;
+
+    const auto time_diff = mCurrentTime - mViewTransformStartTime;
+    if (time_diff > 1.0f)
+        return;
+
+    const auto view_transform_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTransformStartTime);
+    const auto view_rotation_angle = math::interpolate(mViewTransformRotationStart, mViewTransformRotationStop,
+                                                       view_transform_time, math::Interpolation::Cosine);
+    const auto view_translation = math::interpolate(mViewTransformTranslateStart, mViewTransformTranslateStop,
+                                                    view_transform_time, math::Interpolation::Cosine);
+
+    mState.camera_offset_x = view_translation.x;
+    mState.camera_offset_y = view_translation.y;
+    SetValue(mUI.translateX, mState.camera_offset_x);
+    SetValue(mUI.translateY, mState.camera_offset_y);
+    SetValue(mUI.rotation, view_rotation_angle);
 }
 void TilemapWidget::Render()
 {
@@ -1264,34 +1280,33 @@ void TilemapWidget::on_btnEditLayer_clicked()
 
 void TilemapWidget::on_btnViewReset_clicked()
 {
-    const float zoom = GetValue(mUI.zoom);
-    const auto& settings = mState.workspace->GetProjectSettings();
-    const auto scaled_game_viewport_width  = settings.viewport_width * zoom;
-    const auto scaled_game_viewport_height = settings.viewport_height * zoom;
-    mState.camera_offset_x = 0.0f; //(mUI.widget->width() - scaled_game_viewport_width) * 0.5;
-    mState.camera_offset_y = 0.0f; //(mUI.widget->height() - scaled_game_viewport_height) * 0.5;
-    mViewTransformRotation = GetValue(mUI.rotation);
+    mViewTransformRotationStart  = GetValue(mUI.rotation);
+    mViewTransformRotationStop   = 0.0f;
+    mViewTransformTranslateStart = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
+    mViewTransformTranslateStop  = glm::vec2{0.0f, 0.0f};
     mViewTransformStartTime = mCurrentTime;
-    // set new camera offset to the center of the widget.
-    SetValue(mUI.translateX, 0.0f);
-    SetValue(mUI.translateY, 0.0f);
+
+    // the rest of the view properties are updated in Update since they're animated/interpolated
     SetValue(mUI.scaleX, 1.0f);
     SetValue(mUI.scaleY, 1.0f);
-    SetValue(mUI.rotation, 0.0f);
 }
 
 void TilemapWidget::on_btnViewMinus90_clicked()
 {
     const float value = GetValue(mUI.rotation);
-    SetValue(mUI.rotation, math::clamp(-180.0f, 180.0f, value - 90.0f));
-    mViewTransformRotation  = value;
+    mViewTransformRotationStart  = value;
+    mViewTransformRotationStop   = math::clamp(-180.0f, 180.0f, value - 90.0f);
+    mViewTransformTranslateStop  = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
+    mViewTransformTranslateStart = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
     mViewTransformStartTime = mCurrentTime;
 }
 void TilemapWidget::on_btnViewPlus90_clicked()
 {
     const float value = GetValue(mUI.rotation);
-    SetValue(mUI.rotation, math::clamp(-180.0f, 180.0f, value + 90.0f));
-    mViewTransformRotation  = value;
+    mViewTransformRotationStart  = value;
+    mViewTransformRotationStop   = math::clamp(-180.0f, 180.0f, value + 90.0f);
+    mViewTransformTranslateStop  = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
+    mViewTransformTranslateStart = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
     mViewTransformStartTime = mCurrentTime;
 }
 
@@ -1971,9 +1986,6 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
     const auto xs     = (float)GetValue(mUI.scaleX);
     const auto ys     = (float)GetValue(mUI.scaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
-    const auto view_rotation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTransformStartTime);
-    const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.rotation->value(),
-                                                       view_rotation_time, math::Interpolation::Cosine);
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
@@ -2021,6 +2033,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         engine::Renderer::Camera camera;
         camera.position.x = mState.camera_offset_x;
         camera.position.y = mState.camera_offset_y;
+        camera.rotation   = GetValue(mUI.rotation);
         camera.scale.x    = xs * zoom;
         camera.scale.y    = ys * zoom;
         camera.viewport   = game::FRect(-width*0.5f, -height*0.5f, width, height);

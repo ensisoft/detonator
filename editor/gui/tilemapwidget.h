@@ -216,7 +216,10 @@ namespace gui
         engine::Renderer mRenderer;
         double mCurrentTime = 0.0;
         double mViewTransformStartTime = 0.0;
-        float mViewTransformRotation = 0.0f;
+        float mViewTransformRotationStart = 0.0f;
+        float mViewTransformRotationStop = 0.0f;
+        glm::vec2 mViewTransformTranslateStart = glm::vec2{0.0f, 0.0f};
+        glm::vec2 mViewTransformTranslateStop  = glm::vec2{0.0f, 0.0f};
         bool mCameraWasLoaded = false;
     };
 } // namespace
