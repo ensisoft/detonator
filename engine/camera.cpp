@@ -116,7 +116,7 @@ glm::vec2 MapToWorldPlane(const glm::mat4& view_to_clip,
     constexpr const auto plane_origin_world = glm::vec4 {0.0f, 0.0f, 0.0f, 1.0f};
     constexpr const auto plane_normal_world = glm::vec4 {0.0f, 0.0f, 1.0f, 0.0f};
     const auto plane_origin_view = world_to_view * plane_origin_world;
-    const auto plane_normal_view = glm::normalize(world_to_view * plane_normal_world);
+    const auto plane_normal_view = glm::normalize(glm::transpose(glm::inverse(world_to_view)) * plane_normal_world);
 
     // normalize the window coordinate. remember to flip the Y axis.
     glm::vec2 norm;
