@@ -65,6 +65,29 @@ namespace gui
         virtual bool KeyPress(QKeyEvent* key) { return false; }
         // Return true if the tool was cancelled as a result of some input action.
         virtual bool IsCancelled() const { return false; }
+
+        // Dummy migration shims. Plan is to get rid of the transform param
+        // but it can't be done until every caller has been refactored!
+        inline void Render(gfx::Painter& painter) const
+        {
+            gfx::Transform dummy;
+            Render(painter, dummy);
+        }
+        inline void MouseMove(QMouseEvent* mickey)
+        {
+            gfx::Transform  dummy;
+            MouseMove(mickey, dummy);
+        }
+        inline void MousePress(QMouseEvent* mickey)
+        {
+            gfx::Transform dummy;
+            MousePress(mickey, dummy);
+        }
+        inline bool MouseRelease(QMouseEvent* mickey)
+        {
+            gfx::Transform dummy;
+            return MouseRelease(mickey, dummy);
+        }
     private:
     };
 

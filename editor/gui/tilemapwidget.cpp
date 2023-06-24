@@ -482,7 +482,7 @@ public:
         if (mActive)
             ApplyTool();
     }
-    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MousePress(QMouseEvent* mickey, gfx::Transform&) override
     {
         if (mickey->button() != Qt::LeftButton)
             return;
@@ -509,7 +509,7 @@ public:
         // the mouse is edited as expected
         ApplyTool();
     }
-    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform&)  override
     {
         if (mickey->button() == Qt::LeftButton)
             mActive = false;
@@ -1999,8 +1999,8 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
     // draw the origin vectors in tilespace
     if (GetValue(mUI.chkShowOrigin))
     {
-        gfx::Transform transform;
-        DrawBasisVectors(painter, transform);
+        gfx::Transform model_to_world;
+        DrawBasisVectors(painter, model_to_world);
     }
 
     // set to window space.
@@ -2104,8 +2104,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
 
     if (mCurrentTool)
     {
-        gfx::Transform view;
-        mCurrentTool->Render(painter, view);
+        mCurrentTool->Render(painter);
     }
 
     // draw stuff that is not part of the tilemap
@@ -2160,11 +2159,9 @@ void TilemapWidget::MouseMove(QMouseEvent* mickey)
     if (!mCurrentTool && !mCameraTool)
         return;
 
-    gfx::Transform dummy;
-
     if (mCameraTool)
     {
-        mCameraTool->MouseMove(mickey, dummy);
+        mCameraTool->MouseMove(mickey);
         DisplayCurrentCameraLocation();
 
         if (mCurrentTool)
@@ -2183,7 +2180,7 @@ void TilemapWidget::MouseMove(QMouseEvent* mickey)
     }
 
     if (mCurrentTool)
-        mCurrentTool->MouseMove(mickey, dummy);
+        mCurrentTool->MouseMove(mickey);
 }
 
 void TilemapWidget::MousePress(QMouseEvent* mickey)
@@ -2217,14 +2214,13 @@ void TilemapWidget::MousePress(QMouseEvent* mickey)
                 UncheckTools();
             }
         }
-        gfx::Transform view;
-        mCurrentTool->MousePress(mickey, view);
+
+        mCurrentTool->MousePress(mickey);
         UpdateLayerPalette();
     }
     if (mCameraTool && mickey->button() == Qt::RightButton)
     {
-        gfx::Transform view;
-        mCameraTool->MousePress(mickey, view);
+        mCameraTool->MousePress(mickey);
     }
 }
 void TilemapWidget::MouseRelease(QMouseEvent* mickey)
@@ -2232,12 +2228,9 @@ void TilemapWidget::MouseRelease(QMouseEvent* mickey)
     if (!mCurrentTool && !mCameraTool)
         return;
 
-    gfx::Transform view;
-    MakeViewTransform(mUI, mState, view);
-
     if (mickey->button() == Qt::LeftButton)
     {
-        if (mCurrentTool->MouseRelease(mickey, view))
+        if (mCurrentTool->MouseRelease(mickey))
         {
             mCurrentTool.reset();
             DisplaySelection();
@@ -2247,7 +2240,7 @@ void TilemapWidget::MouseRelease(QMouseEvent* mickey)
     }
     else if (mickey->button() == Qt::RightButton)
     {
-        if (mCameraTool->MouseRelease(mickey, view))
+        if (mCameraTool->MouseRelease(mickey))
         {
             mCameraTool.reset();
         }
