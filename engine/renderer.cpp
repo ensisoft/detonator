@@ -131,19 +131,18 @@ void Renderer::Draw(gfx::Painter& painter, EntityInstanceDrawHook* hook)
 
 void Renderer::Draw(const Entity& entity,
                     gfx::Painter& painter,
-                    gfx::Transform& transform,
                     EntityInstanceDrawHook* hook)
 {
 
+    gfx::Transform transform;
     DrawEntity<Entity, EntityNode>(entity, painter, transform, hook);
 }
 
 void Renderer::Draw(const EntityClass& entity,
                     gfx::Painter& painter,
-                    gfx::Transform& transform,
                     EntityClassDrawHook* hook)
 {
-
+    gfx::Transform transform;
     DrawEntity<EntityClass, EntityNodeClass>(entity, painter, transform, hook);
 }
 

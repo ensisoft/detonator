@@ -262,7 +262,6 @@ void unit_test_drawable_item()
 
     engine::Renderer renderer(&classloader);
     renderer.SetEditingMode(true);
-    gfx::Transform transform;
 
     // test visibility flag
     {
@@ -273,7 +272,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter, transform);
+                renderer.Draw(*entity, *painter);
             }
             renderer.EndFrame();
         }
@@ -288,7 +287,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter, transform);
+                renderer.Draw(*entity, *painter);
             }
             renderer.EndFrame();
         }
@@ -309,7 +308,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter, transform);
+                renderer.Draw(*entity, *painter);
             }
             renderer.EndFrame();
         }
@@ -327,7 +326,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter, transform);
+                renderer.Draw(*entity, *painter);
             }
             renderer.EndFrame();
         }
@@ -352,7 +351,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter, transform);
+                renderer.Draw(*entity, *painter);
             }
             renderer.EndFrame();
         }
@@ -369,7 +368,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter, transform);
+                renderer.Draw(*entity, *painter);
             }
             renderer.EndFrame();
         }
@@ -386,7 +385,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter, transform);
+                renderer.Draw(*entity, *painter);
             }
             renderer.EndFrame();
         }
@@ -405,7 +404,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter, transform);
+                renderer.Draw(*entity, *painter);
             }
             renderer.EndFrame();
         }
@@ -420,7 +419,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter, transform);
+                renderer.Draw(*entity, *painter);
             }
             renderer.EndFrame();
         }
@@ -440,7 +439,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter, transform);
+                renderer.Draw(*entity, *painter);
             }
             renderer.EndFrame();
             device->EndFrame(true);
@@ -453,7 +452,7 @@ void unit_test_drawable_item()
             renderer.BeginFrame();
             {
                 renderer.Update(*entity, 0.0f, 1.0f / 60.0f);
-                renderer.Draw(*entity, *painter, transform);
+                renderer.Draw(*entity, *painter);
             }
             renderer.EndFrame();
         }
@@ -467,7 +466,7 @@ void unit_test_drawable_item()
              renderer.BeginFrame();
             {
                 renderer.Update(*entity, 0.0f, 1.0f / 60.0f);
-                renderer.Draw(*entity, *painter, transform);
+                renderer.Draw(*entity, *painter);
             }
             renderer.EndFrame();
         }
@@ -530,8 +529,6 @@ void unit_test_entity_layering()
     engine::Renderer renderer(&classloader);
     renderer.SetEditingMode(true);
 
-    gfx::Transform transform;
-
     // green should be on top
     {
         device->BeginFrame();
@@ -539,7 +536,7 @@ void unit_test_entity_layering()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter, transform);
+                renderer.Draw(*entity, *painter);
             }
             renderer.EndFrame();
         }
@@ -558,7 +555,7 @@ void unit_test_entity_layering()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter, transform);
+                renderer.Draw(*entity, *painter);
             }
             renderer.EndFrame();
         }
@@ -770,13 +767,11 @@ void unit_test_transform_precision()
             std::vector<engine::DrawPacket> mPackets;
         } hook;
 
-        gfx::Transform t;
-
         device->BeginFrame();
         device->ClearColor(gfx::Color::Black);
 
         renderer.BeginFrame();
-            renderer.Draw(entity, *painter, t, &hook);
+            renderer.Draw(entity, *painter, &hook);
         renderer.EndFrame();
 
         hook.Test();

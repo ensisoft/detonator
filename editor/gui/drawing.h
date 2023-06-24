@@ -38,9 +38,7 @@ class QWidget;
 namespace gui
 {
 
-void DrawLine(const gfx::Transform& view,
-              const glm::vec2& src, const glm::vec2& dst,
-              gfx::Painter& painter);
+void DrawLine(gfx::Painter& painter, const glm::vec2& src, const glm::vec2& dst);
 
 enum class ToolHotspot {
     None,

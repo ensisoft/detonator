@@ -606,7 +606,8 @@ public:
     {
         gfx::Transform transform;
         transform.MoveTo(400, 400);
-        mRenderer.Draw(*mEntity, painter, transform);
+        painter.SetViewMatrix(transform.GetAsMatrix());
+        mRenderer.Draw(*mEntity, painter);
 
         for (size_t i=0; i<mEntity->GetNumNodes(); ++i)
         {
@@ -614,7 +615,6 @@ public:
             if (mDrawBoundingBoxes)
             {
                 auto box = mEntity->FindNodeBoundingBox(&node);
-                box.Transform(transform.GetAsMatrix());
                 gfx::DrawLine(painter, ToPoint(box.GetTopLeft()), ToPoint(box.GetTopRight()), gfx::Color::HotPink);
                 gfx::DrawLine(painter, ToPoint(box.GetTopRight()), ToPoint(box.GetBotRight()), gfx::Color::HotPink);
                 gfx::DrawLine(painter, ToPoint(box.GetBotRight()), ToPoint(box.GetBotLeft()), gfx::Color::HotPink);
@@ -623,7 +623,6 @@ public:
             if (mDrawBoundingRects)
             {
                 auto rect = mEntity->FindNodeBoundingRect(&node);
-                rect.Translate(400, 400);
                 gfx::DrawRectOutline(painter, rect, gfx::CreateMaterialFromColor(gfx::Color::Yellow), 1.0f);
             }
         }

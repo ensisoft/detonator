@@ -2855,9 +2855,8 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     // Draw entity
     painter.SetViewMatrix(view.GetAsMatrix());
 
-    gfx::Transform entity;
     mState.renderer.BeginFrame();
-    mState.renderer.Draw(*mState.entity, painter, entity, &hook);
+    mState.renderer.Draw(*mState.entity, painter, &hook);
     mState.renderer.EndFrame();
     // Draw joints, drawn in the entity space.
     for (size_t i=0; i<mState.entity->GetNumJoints(); ++i)
@@ -2871,7 +2870,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
             const auto& dst_anchor_point = dst_node->GetSize() * 0.5f + joint.dst_node_anchor_point;
             const auto& src_point = mState.entity->MapCoordsFromNodeBox(src_anchor_point, src_node);
             const auto& dst_point = mState.entity->MapCoordsFromNodeBox(dst_anchor_point, dst_node);
-            DrawLine(entity, src_point, dst_point, painter);
+            DrawLine(painter, src_point, dst_point);
         }
     }
     // Draw comments if any
