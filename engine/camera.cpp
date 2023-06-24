@@ -79,39 +79,51 @@ glm::mat4 CreateViewMatrix(game::Perspective perspective)
     return glm::mat4(1.0f);
 }
 
-glm::mat4 CreateViewMatrix(const glm::vec2& camera_pos,
+glm::mat4 CreateViewMatrix(game::Perspective perspective,
+                           const glm::vec2& camera_pos,
                            const glm::vec2& world_scale,
-                           game::Perspective perspective,
                            float rotation)
 {
-    // hack because of the orthographic projection matrix axis setup.
-    rotation = (perspective == game::Perspective::Dimetric) ? -rotation : rotation;
+    // remember that if you use operator *= as in a *= b; it's the same as
+    // a = a * b;
+    // this means that multiple statements such as
+    // mat *= foo;
+    // mat *= bar;
+    // will be the same as mat = foo * bar. This means that when this matrix
+    // is used to transform the vertices the bar operation will take place
+    // first, then followed by foo.
 
-    // this is the last thing we do in the series of transformations combined
-    // in the transformation matrix. used only in the editor now but could also
-    // be used by the game
-    glm::mat4 mat = glm::rotate(glm::mat4(1.0f), glm::radians(rotation), glm::vec3{0.0f, 0.0f, 1.0f});
-
-    mat *= CreateViewMatrix(perspective);
-
+    glm::mat4 mat(1.0f);
     if (perspective == game::Perspective::Dimetric)
     {
-        mat = glm::scale(mat, glm::vec3{world_scale.x, 1.0f, world_scale.y});
-        mat = glm::translate(mat, glm::vec3{-camera_pos.x, 0.0f, -camera_pos.y});
-        mat = glm::rotate(mat, glm::radians(90.0f), glm::vec3{1.0f, 0.0f, 0.0f});
+        mat = glm::scale(mat, glm::vec3{world_scale.x, world_scale.y, 1.0f});
+        mat = glm::translate(mat, glm::vec3{-camera_pos.x, camera_pos.y, 0.0f});
+        mat = glm::rotate(mat, glm::radians(-rotation), glm::vec3{0.0f, 0.0f, 1.0f});
     }
     else if (perspective == game::Perspective::AxisAligned)
     {
         mat = glm::scale(mat, glm::vec3{world_scale.x, world_scale.y, 1.0f});
         mat = glm::translate(mat, glm::vec3{-camera_pos.x, -camera_pos.y, 0.0f});
+        mat = glm::rotate(mat, glm::radians(rotation), glm::vec3{0.0f, 0.0f, 1.0f});
+    }
+
+    mat *= CreateViewMatrix(perspective);
+
+    if (perspective == game::Perspective::Dimetric)
+    {
+        mat = glm::rotate(mat, glm::radians(90.0f), glm::vec3{1.0f, 0.0f, 0.0f});
+    }
+    else if (perspective == game::Perspective::AxisAligned)
+    {
+
     }
     return mat;
 }
 
-glm::vec2 MapToWorldPlane(const glm::mat4& view_to_clip,
-                          const glm::mat4& world_to_view,
-                          const glm::vec2& window_coord,
-                          const glm::vec2& window_size)
+glm::vec2 WindowToWorldPlane(const glm::mat4& view_to_clip,
+                             const glm::mat4& world_to_view,
+                             const glm::vec2& window_coord,
+                             const glm::vec2& window_size)
 {
     constexpr const auto plane_origin_world = glm::vec4 {0.0f, 0.0f, 0.0f, 1.0f};
     constexpr const auto plane_normal_world = glm::vec4 {0.0f, 0.0f, 1.0f, 0.0f};
@@ -157,6 +169,30 @@ glm::vec2 MapToWorldPlane(const glm::mat4& view_to_clip,
     const auto& intersection_point_view  = ray_origin + ray_direction * intersection_distance;
     const auto& intersection_point_world = view_to_world * intersection_point_view;
     return {intersection_point_world.x, intersection_point_world.y};
+}
+
+glm::vec2 WindowToWorld(const glm::mat4& view_to_clip,
+                        const glm::mat4& world_to_view,
+                        const glm::vec2& window_coord,
+                        const glm::vec2& window_size)
+{
+// normalize the window coordinate. remember to flip the Y axis.
+    glm::vec2 norm;
+    norm.x = window_coord.x / (window_size.x*0.5) - 1.0f;
+    norm.y = 1.0f - (window_coord.y / (window_size.y*0.5));
+
+    constexpr auto depth_value = -1.0f; // maps to view volume near plane
+    // remember this is in the NDC, so on z axis -1.0 is less depth
+    // i.e. closer to the viewer and 1.0 is more depth, farther away
+    const auto ndc = glm::vec4 {norm.x, norm.y, depth_value, 1.0f};
+    // transform into clip space. remember that when the clip space
+    // coordinate is transformed into NDC (by OpenGL) the clip space
+    // vectors are divided by the w component to yield normalized
+    // coordinates.
+    constexpr auto w = 1.0f;
+    const auto clip = ndc * w;
+
+    return glm::inverse(view_to_clip * world_to_view) * clip;
 }
 
 glm::vec2 ComputeTileRenderSize(const glm::mat4& tile_to_render,

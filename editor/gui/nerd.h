@@ -57,22 +57,23 @@ void MakeViewTransform(const UI& ui, const State& state, gfx::Transform& view, f
 
 
 template<typename UI, typename State>
-glm::mat4 CreatePerspectiveCorrectViewMatrix(const UI& ui, const State& state, game::Perspective perspective)
+glm::mat4 CreateViewMatrix(const UI& ui, const State& state,
+                           game::Perspective perspective = game::Perspective::AxisAligned)
 {
     const float zoom = GetValue(ui.zoom);
     const float xs = GetValue(ui.scaleX);
     const float ys = GetValue(ui.scaleY);
     const float rotation = GetValue(ui.rotation);
 
-    return engine::CreateViewMatrix(state.camera_offset_x,
+    return engine::CreateViewMatrix(perspective,
+                                    state.camera_offset_x,
                                     state.camera_offset_y,
                                     zoom*xs, zoom*ys,
-                                    perspective,
                                     rotation);
 }
 
 template<typename UI>
-glm::mat4 CreatePerspectiveCorrectProjMatrix(const UI& ui, game::Perspective perspective)
+glm::mat4 CreateProjectionMatrix(const UI& ui, game::Perspective perspective = game::Perspective::AxisAligned)
 {
     const auto width  = ui.widget->width();
     const auto height = ui.widget->height();
@@ -84,13 +85,21 @@ Point2Df MapWindowCoordinateToWorld(const UI& ui,
                                    const State& state,
                                    const Point2Df& window_point,
                                    const Size2Df& window_size,
-                                   game::Perspective perspective)
+                                   game::Perspective perspective = game::Perspective::AxisAligned)
 {
-    const auto& proj_matrix = CreatePerspectiveCorrectProjMatrix(ui, perspective);
-    const auto& view_matrix = CreatePerspectiveCorrectViewMatrix(ui, state, perspective);
-    const auto pos = engine::MapToWorldPlane(proj_matrix, view_matrix, window_point, window_size);
+    const auto& proj_matrix = CreateProjectionMatrix(ui, perspective);
+    const auto& view_matrix = CreateViewMatrix(ui, state, perspective);
+    const auto pos = engine::WindowToWorldPlane(proj_matrix, view_matrix, window_point, window_size);
     return pos;
 }
 
+inline Point2Df MapWindowCoordinateToWorld(const glm::mat4& view_to_clip,
+                                           const glm::mat4& world_to_view,
+                                           const Point2Df& window_point,
+                                           const Size2Df& window_size,
+                                           game::Perspective perspective = game::Perspective::AxisAligned)
+{
+    return engine::WindowToWorldPlane(view_to_clip, world_to_view, window_point, window_size);
+}
 
 } // namespace

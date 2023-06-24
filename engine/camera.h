@@ -172,29 +172,35 @@ namespace engine
     // Create view transformation matrix for a certain type of game perspective
     // assuming a world translation and world scale. In other words this matrix
     // transforms the world space objects into "view/eye/camera" space.
-    glm::mat4 CreateViewMatrix(const glm::vec2& camera_pos,
+    glm::mat4 CreateViewMatrix(game::Perspective perspective,
+                               const glm::vec2& camera_pos,
                                const glm::vec2& world_scale,
-                               game::Perspective perspective,
                                float rotation = 0.0f); // rotation around the Z axis in degrees
 
-    inline glm::mat4 CreateViewMatrix(float camera_pos_x,
+    inline glm::mat4 CreateViewMatrix(game::Perspective perspective,
+                                      float camera_pos_x,
                                       float camera_pos_y,
                                       float world_scale_x,
                                       float world_scale_y,
-                                      game::Perspective perspective,
                                       float rotation = 0.0f)
     {
-        return CreateViewMatrix(glm::vec2{camera_pos_x, camera_pos_y},
+        return CreateViewMatrix(perspective,
+                                glm::vec2{camera_pos_x, camera_pos_y},
                                 glm::vec2{world_scale_x, world_scale_y},
-                                perspective, rotation);
+                                rotation);
     }
 
-    // Map a window (2D projection surface coordinate) to a "world plane".
-    // i.e. our 2D tile plane which represents the "ground" level.
-    glm::vec2 MapToWorldPlane(const glm::mat4& view_to_clip, // aka projection matrix/transform
-                              const glm::mat4& world_to_view, // aka view/camera matrix/transform
-                              const glm::vec2& window_coord,
-                              const glm::vec2& window_size);
+    // Map a window (2D projection surface coordinate) to game plane
+    glm::vec2 WindowToWorldPlane(const glm::mat4& view_to_clip, // aka projection matrix/transform
+                                 const glm::mat4& world_to_view, // aka view/camera matrix/transform
+                                 const glm::vec2& window_coord,
+                                 const glm::vec2& window_size);
+
+    // Map a window (2D projection surface coordinate) to world space.
+    glm::vec2 WindowToWorld(const glm::mat4& view_to_clip,
+                            const glm::mat4& world_to_view,
+                            const glm::vec2& window_coord,
+                            const glm::vec2& window_size);
 
     inline glm::mat4 GetProjectionTransformMatrix(const glm::mat4& src_view_to_clip,
                                                   const glm::mat4& src_world_to_view,

@@ -136,23 +136,32 @@ namespace gui
     class PerspectiveCorrectCameraTool : public MouseTool
     {
     public:
-        explicit PerspectiveCorrectCameraTool(const glm::mat4& view_to_clip,
-                                              const glm::mat4& world_to_view,
-                                              const glm::vec2& window_size,
-                                              CameraState& state)
-            : mViewToClip(view_to_clip)
-            , mWorldToView(world_to_view)
-            , mWindowSize(window_size)
-            , mState(state)
-        {}
+        template<typename UI>
+        PerspectiveCorrectCameraTool(const UI& ui, CameraState& state)
+          : mState(state)
+        {
+            const auto width  = ui.widget->width();
+            const auto height = ui.widget->height();
+            const float zoom   = GetValue(ui.zoom);
+            const float xs     = GetValue(ui.scaleX);
+            const float ys     = GetValue(ui.scaleY);
+            const float rotation = 0.0f; // ignored so that the camera movement stays
+            // irrespective of the camera rotation
+
+            mViewToClip  = engine::CreateProjectionMatrix(game::Perspective::AxisAligned, width, height);
+            mWorldToView = engine::CreateViewMatrix(game::Perspective::AxisAligned,
+                                                    mState.camera_offset_x, mState.camera_offset_y,
+                                                    zoom*xs, zoom*ys, rotation);
+            mWindowSize = glm::vec2{width, height};
+        }
         virtual void Render(gfx::Painter& painter, gfx::Transform&) const override
         {}
         virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& ) override
         {
-            const auto world_pos = engine::MapToWorldPlane(mViewToClip,
-                                                           mWorldToView,
-                                                           ToVec2(mickey->pos()),
-                                                           mWindowSize);
+            const auto world_pos = engine::WindowToWorld(mViewToClip,
+                                                       mWorldToView,
+                                                       ToVec2(mickey->pos()),
+                                                       mWindowSize);
             const auto world_delta = world_pos - mWorldPos;
             mState.camera_offset_x -= world_delta.x;
             mState.camera_offset_y -= world_delta.y;
@@ -160,10 +169,10 @@ namespace gui
         }
         virtual void MousePress(QMouseEvent* mickey, gfx::Transform& ) override
         {
-            mWorldPos = engine::MapToWorldPlane(mViewToClip,
-                                                mWorldToView,
-                                                ToVec2(mickey->pos()),
-                                                mWindowSize);
+            mWorldPos = engine::WindowToWorld(mViewToClip,
+                                            mWorldToView,
+                                            ToVec2(mickey->pos()),
+                                            mWindowSize);
         }
         virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform&) override
         {
@@ -171,9 +180,9 @@ namespace gui
             return true;
         }
     private:
-        const glm::mat4 mViewToClip;
-        const glm::mat4 mWorldToView;
-        const glm::vec2 mWindowSize;
+        glm::mat4 mViewToClip;
+        glm::mat4 mWorldToView;
+        glm::vec2 mWindowSize;
         CameraState& mState;
         glm::vec2 mWorldPos;
     };

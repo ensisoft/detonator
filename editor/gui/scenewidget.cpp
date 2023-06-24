@@ -384,8 +384,6 @@ public:
     }
     virtual void Render(gfx::Painter& painter, gfx::Transform& view) const override
     {
-        DrawHook hook;
-
         const auto& rect = mClass->GetBoundingRect();
         const auto width = rect.GetWidth();
         const auto height = rect.GetHeight();
@@ -2005,7 +2003,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     if (mTilemap)
     {
         // todo: reimplement tilemap support
-        //mState.renderer.Draw(*mTilemap, viewport, painter, scene);
+//        mState.renderer.Draw(*mTilemap, viewport, painter);
     }
 
     mState.renderer.Draw(*mState.scene, painter, &hook, &hook);
