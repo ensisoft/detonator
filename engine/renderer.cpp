@@ -186,22 +186,18 @@ void Renderer::Draw(const EntityClass& entity,
 
 void Renderer::Draw(const Scene& scene,
                     gfx::Painter& painter,
-                    gfx::Transform& transform,
                     SceneInstanceDrawHook* scene_hook,
                     EntityInstanceDrawHook* entity_hook)
 {
-    DrawScene<Scene, Entity, EntityNode>(scene,
-        painter, transform, scene_hook, entity_hook);
+    DrawScene<Scene, Entity, EntityNode>(scene, painter, scene_hook, entity_hook);
 }
 
 void Renderer::Draw(const SceneClass& scene,
                     gfx::Painter& painter,
-                    gfx::Transform& transform,
                     SceneClassDrawHook* scene_hook,
                     EntityClassDrawHook* entity_hook)
 {
-    DrawScene<SceneClass, SceneNodeClass, EntityNodeClass>(scene,
-        painter, transform, scene_hook, entity_hook);
+    DrawScene<SceneClass, SceneNodeClass, EntityNodeClass>(scene, painter, scene_hook, entity_hook);
 }
 
 void Renderer::Draw(const game::Tilemap& map,
@@ -435,7 +431,6 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
 template<typename SceneType, typename EntityType, typename NodeType>
 void Renderer::DrawScene(const SceneType& scene,
                          gfx::Painter& painter,
-                         gfx::Transform& transform,
                          SceneDrawHook<EntityType>* scene_hook,
                          EntityDrawHook<NodeType>* entity_hook)
 {
@@ -449,7 +444,8 @@ void Renderer::DrawScene(const SceneType& scene,
     TRACE_SCOPE("Renderer::DrawEntities", "entities=%u", nodes.size());
     for (const auto& p : nodes)
     {
-        transform.Push(p.node_to_scene);
+        // this is the model, aka model_to_world transform
+        gfx::Transform transform(p.node_to_scene);
 
         // draw when there's no scene hook or when the scene hook returns
         // true for the filtering operation.
@@ -466,8 +462,6 @@ void Renderer::DrawScene(const SceneType& scene,
             if (scene_hook)
                 scene_hook->EndDrawEntity(*p.entity_object, painter, transform);
         }
-
-        transform.Pop();
     }
 }
 

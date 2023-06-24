@@ -227,12 +227,13 @@ public:
 
         gfx::Transform transform;
         transform.Translate(50.0f, 50.0f);
+        engine.graphics_painter->SetViewMatrix(transform.GetAsMatrix());
         engine.graphics_device->BeginFrame();
         engine.graphics_device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));
 
         TRACE_CALL("Update",     engine.renderer->Update(*mScene, 0.0f, 0.0f));
         TRACE_CALL("BeginFrame", engine.renderer->BeginFrame());
-        TRACE_CALL("Draw",       engine.renderer->Draw(*mScene, *engine.graphics_painter, transform));
+        TRACE_CALL("Draw",       engine.renderer->Draw(*mScene, *engine.graphics_painter));
         TRACE_CALL("EndFrame",   engine.renderer->EndFrame());
 
         engine.graphics_device->EndFrame();
@@ -279,12 +280,13 @@ public:
 
         gfx::Transform transform;
         transform.Translate(50.0f, 50.0f);
+        engine.graphics_painter->SetViewMatrix(transform.GetAsMatrix());
         engine.graphics_device->BeginFrame();
         engine.graphics_device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));
 
         TRACE_CALL("Update",     engine.renderer->Update(*mScene, 0.0f, 0.0f));
         TRACE_CALL("BeginFrame", engine.renderer->BeginFrame());
-        TRACE_CALL("Draw",       engine.renderer->Draw(*mScene, *engine.graphics_painter, transform));
+        TRACE_CALL("Draw",       engine.renderer->Draw(*mScene, *engine.graphics_painter));
         TRACE_CALL("EndFrame",   engine.renderer->EndFrame());
 
         engine.graphics_device->EndFrame();

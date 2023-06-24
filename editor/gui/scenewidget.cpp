@@ -1992,7 +1992,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     }
 
     painter.SetViewMatrix(view.GetAsMatrix());
-    gfx::Transform scene;
+
     mState.renderer.BeginFrame();
 
     if (mTilemap)
@@ -2001,7 +2001,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         //mState.renderer.Draw(*mTilemap, viewport, painter, scene);
     }
 
-    mState.renderer.Draw(*mState.scene, painter, scene, &hook, &hook);
+    mState.renderer.Draw(*mState.scene, painter, &hook, &hook);
 
     for (size_t i=0; i<mState.scene->GetNumNodes(); ++i)
     {
@@ -2645,8 +2645,10 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
 
     auto* painter = mUI.widget->GetPainter();
     auto* device = mUI.widget->GetDevice();
+    painter->SetViewMatrix(view.GetAsMatrix());
+
     DrawHook hook(hit_nodes);
-    mState.renderer.Draw(*mState.scene, *painter, view, &hook, &hook);
+    mState.renderer.Draw(*mState.scene, *painter, &hook, &hook);
 
     {
         // for debugging.

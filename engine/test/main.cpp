@@ -315,7 +315,7 @@ public:
     virtual void Render(gfx::Painter& painter) override
     {
         gfx::Transform transform;
-        mRenderer.Draw(*mScene, painter, transform);
+        mRenderer.Draw(*mScene, painter);
         mPhysics.DebugDrawObjects(painter, transform);
     }
     virtual void Update(float dt) override
@@ -420,8 +420,7 @@ public:
         //gfx::FRect test(0.0f, 0.0f, 100.0f, 100.0f);
         //gfx::FillRect(painter, test, gfx::Color::Yellow);
 
-        gfx::Transform transform;
-        mRenderer.Draw(*mScene, painter, transform);
+        mRenderer.Draw(*mScene, painter);
     }
     virtual void Update(float dt) override
     {
@@ -511,7 +510,9 @@ public:
     {
         gfx::Transform transform;
         transform.Translate(300.0f, 400.0f);
-        mRenderer.Draw(*mScene, painter, transform);
+        painter.SetViewMatrix(transform.GetAsMatrix());
+
+        mRenderer.Draw(*mScene, painter);
 
         for (size_t i=0; i<mScene->GetNumEntities(); ++i)
         {
@@ -519,7 +520,6 @@ public:
             if (mDrawEntityBoundingRects)
             {
                 auto rect = mScene->FindEntityBoundingRect(&entity);
-                rect.Translate(300.0f, 400.0f);
                 gfx::DrawRectOutline(painter, rect, gfx::CreateMaterialFromColor(gfx::Color::Yellow), 1.0f);
             }
 
@@ -529,13 +529,11 @@ public:
                 if (mDrawEntityNodeBoundingRects)
                 {
                     auto rect = mScene->FindEntityNodeBoundingRect(&entity, &node);
-                    rect.Translate(300.0f, 400.0f);
                     gfx::DrawRectOutline(painter, rect, gfx::CreateMaterialFromColor(gfx::Color::Yellow), 1.0f);
                 }
                 if (mDrawEntityNodeBoundingBoxes)
                 {
                     auto box = mScene->FindEntityNodeBoundingBox(&entity, &node);
-                    box.Transform(transform.GetAsMatrix());
                     gfx::DrawLine(painter, ToPoint(box.GetTopLeft()), ToPoint(box.GetTopRight()), gfx::Color::HotPink);
                     gfx::DrawLine(painter, ToPoint(box.GetTopRight()), ToPoint(box.GetBotRight()), gfx::Color::HotPink);
                     gfx::DrawLine(painter, ToPoint(box.GetBotRight()), ToPoint(box.GetBotLeft()), gfx::Color::HotPink);
@@ -968,6 +966,7 @@ public:
         mDevice->ClearColor(gfx::Color4f(0.2, 0.3, 0.4, 1.0f));
         mPainter->SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
         mPainter->SetProjectionMatrix(gfx::MakeOrthographicProjection(mSurfaceWidth , mSurfaceHeight));
+        mPainter->ResetViewMatrix();
         mTestList[mTestIndex]->SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
         mTestList[mTestIndex]->Render(*mPainter);
         mDevice->EndFrame(true);
