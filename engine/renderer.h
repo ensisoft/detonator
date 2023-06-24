@@ -178,6 +178,12 @@ namespace engine
         template<typename EntityType, typename NodeType>
         void MapEntity(const EntityType& entity, gfx::Transform& transform);
 
+        template<typename EntityType, typename NodeType>
+        void DrawEntity(const EntityType& entity,
+                        gfx::Painter& painter,
+                        gfx::Transform& transform,
+                        EntityDrawHook<NodeType>* hook);
+
         struct PaintNode;
         template<typename EntityNodeType>
         void UpdateNode(PaintNode& paint_node, float time, float dt);

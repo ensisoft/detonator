@@ -134,26 +134,8 @@ void Renderer::Draw(const Entity& entity,
                     gfx::Transform& transform,
                     EntityInstanceDrawHook* hook)
 {
-    MapEntity<Entity, EntityNode>(entity, transform);
 
-    std::vector<DrawPacket> packets;
-
-    for (size_t i=0; i<entity.GetNumNodes(); ++i)
-    {
-        const auto& node = entity.GetNode(i);
-        if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
-        {
-            CreateDrawResources<Entity, EntityNode>(*paint);
-            GenerateDrawPackets<Entity, EntityNode>(*paint, packets, hook);
-        }
-        else if (hook)
-        {
-            transform.Push(entity.FindNodeTransform(&node));
-                hook->AppendPackets(&node, transform, packets);
-            transform.Pop();
-        }
-    }
-    DrawPackets(painter, packets);
+    DrawEntity<Entity, EntityNode>(entity, painter, transform, hook);
 }
 
 void Renderer::Draw(const EntityClass& entity,
@@ -162,26 +144,7 @@ void Renderer::Draw(const EntityClass& entity,
                     EntityClassDrawHook* hook)
 {
 
-    MapEntity<EntityClass, EntityNodeClass>(entity, transform);
-
-    std::vector<DrawPacket> packets;
-
-    for (size_t i=0; i<entity.GetNumNodes(); ++i)
-    {
-        const auto& node = entity.GetNode(i);
-        if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
-        {
-            CreateDrawResources<EntityClass, EntityNodeClass>(*paint);
-            GenerateDrawPackets<EntityClass, EntityNodeClass>(*paint, packets, hook);
-        }
-        else if (hook)
-        {
-            transform.Push(entity.FindNodeTransform(&node));
-                hook->AppendPackets(&node, transform, packets);
-            transform.Pop();
-        }
-    }
-    DrawPackets(painter, packets);
+    DrawEntity<EntityClass, EntityNodeClass>(entity, painter, transform, hook);
 }
 
 void Renderer::Draw(const Scene& scene,
@@ -457,7 +420,7 @@ void Renderer::DrawScene(const SceneType& scene,
                 scene_hook->BeginDrawEntity(*p.entity_object, painter, transform);
 
             if (p.visual_entity && p.entity_object->TestFlag(EntityType::Flags::VisibleInGame))
-                Draw(*p.visual_entity, painter, transform, entity_hook);
+                DrawEntity(*p.visual_entity, painter, transform, entity_hook);
 
             if (scene_hook)
                 scene_hook->EndDrawEntity(*p.entity_object, painter, transform);
@@ -519,6 +482,35 @@ void Renderer::MapEntity(const EntityType& entity, gfx::Transform& transform)
     const auto& tree = entity.GetRenderTree();
     tree.PreOrderTraverse(visitor);
 }
+
+template<typename EntityType, typename NodeType>
+void Renderer::DrawEntity(const EntityType& entity,
+                          gfx::Painter& painter,
+                          gfx::Transform& transform,
+                          EntityDrawHook<NodeType>* hook)
+{
+    MapEntity<EntityType, NodeType>(entity, transform);
+
+    std::vector<DrawPacket> packets;
+
+    for (size_t i=0; i<entity.GetNumNodes(); ++i)
+    {
+        const auto& node = entity.GetNode(i);
+        if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
+        {
+            CreateDrawResources<EntityType, NodeType>(*paint);
+            GenerateDrawPackets<EntityType, NodeType>(*paint, packets, hook);
+        }
+        else if (hook)
+        {
+            transform.Push(entity.FindNodeTransform(&node));
+                hook->AppendPackets(&node, transform, packets);
+            transform.Pop();
+        }
+    }
+    DrawPackets(painter, packets);
+}
+
 
 template<typename EntityType, typename EntityNodeType>
 void Renderer::CreateDrawResources(PaintNode& paint_node)
