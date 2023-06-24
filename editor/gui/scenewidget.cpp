@@ -51,6 +51,7 @@
 #include "editor/gui/settings.h"
 #include "editor/gui/treewidget.h"
 #include "editor/gui/treemodel.h"
+#include "editor/gui/nerd.h"
 #include "editor/gui/tool.h"
 #include "editor/gui/scenewidget.h"
 #include "editor/gui/scriptwidget.h"
