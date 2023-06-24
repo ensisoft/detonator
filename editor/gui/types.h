@@ -20,9 +20,15 @@
 
 #include "warnpush.h"
 #  include <QEvent>
+#  include <QPoint>
+#  include <QPointF>
+#  include <glm/glm.hpp>
 #include "warnpop.h"
 
 #include <atomic>
+#include <tuple>
+
+#include "base/types.h"
 
 namespace gui
 {
@@ -57,4 +63,88 @@ namespace gui
         }
     private:
     };
+
+
+    // silly wrapper class to facilitate automatic conversions from
+    // various different "point/coord/vec2" types to a single point
+    // type and then back automatically.
+    // Intention is not to use this for computation per se but just
+    // for carrying data into and out of different functions that
+    // then perform some computations.
+    class Point2Df
+    {
+    public:
+        using Tuple = std::tuple<float, float>;
+
+        Point2Df(float x, float y) noexcept
+          : mX(x)
+          , mY(y)
+        {}
+        Point2Df(const QPointF& point) noexcept
+          : mX(point.x())
+          , mY(point.y())
+        {}
+        Point2Df(const QPoint& point) noexcept
+          : mX(point.x())
+          , mY(point.y())
+        {}
+        Point2Df(const glm::vec2& point) noexcept
+          : mX(point.x)
+          , mY(point.y)
+        {}
+        Point2Df(const base::FPoint& point) noexcept
+          : mX(point.GetX())
+          , mY(point.GetY())
+        {}
+        operator QPointF () const noexcept
+        { return {mX, mY}; }
+        operator glm::vec2 () const noexcept
+        { return {mX, mY}; }
+        operator base::FPoint () const noexcept
+        { return {mX, mY}; }
+        operator Tuple () const noexcept
+        { return {mX, mY}; }
+    private:
+        float mX = 0.0f;
+        float mY = 0.0f;
+    };
+
+    class Size2Df
+    {
+    public:
+        using Tuple = std::tuple<float, float>;
+
+        Size2Df(float width, float height) noexcept
+          : mW(width)
+          , mH(height)
+        {}
+        Size2Df(const QSizeF& size) noexcept
+          : mW(size.width())
+          , mH(size.height())
+        {}
+        Size2Df(const QSize& size) noexcept
+          : mW(size.width())
+          , mH(size.height())
+        {}
+        Size2Df(const glm::vec2& size) noexcept
+          : mW(size.x)
+          , mH(size.y)
+        {}
+        Size2Df(const base::FSize& size) noexcept
+          : mW(size.GetWidth())
+          , mH(size.GetHeight())
+        {}
+        operator QSizeF () const noexcept
+        { return {mW, mH}; }
+        operator glm::vec2 () const noexcept
+        { return {mW, mH}; }
+        operator base::FSize () const noexcept
+        { return {mW, mH}; }
+        operator Tuple () const noexcept
+        { return {mW, mH}; }
+    private:
+        float mW = 0.0f;
+        float mH = 0.0f;
+    };
+
 } // namespace
