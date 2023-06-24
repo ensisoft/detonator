@@ -133,10 +133,10 @@ namespace engine
         void Update(float time, float dt);
 
         void Draw(const game::Entity& entity,
-                  gfx::Painter& painter, gfx::Transform& transform,
+                  gfx::Painter& painter,
                   EntityInstanceDrawHook* hook = nullptr);
         void Draw(const game::EntityClass& entity,
-                  gfx::Painter& painter, gfx::Transform& transform,
+                  gfx::Painter& painter,
                   EntityClassDrawHook* hook = nullptr);
 
         void Draw(const game::Scene& scene,

@@ -386,13 +386,20 @@ public:
     {
         DrawHook hook;
 
+        const auto& rect = mClass->GetBoundingRect();
+        const auto width = rect.GetWidth();
+        const auto height = rect.GetHeight();
+
         view.Push();
             view.Translate(mWorldPos.x, mWorldPos.y);
-            mState.renderer.Draw(*mClass, painter, view, &hook);
+            painter.SetViewMatrix(view.GetAsMatrix());
+            mState.renderer.Draw(*mClass, painter, nullptr);
+        view.Push();
+            view.Translate(width*0.5f, height*0.5f);
+            painter.SetViewMatrix(view.GetAsMatrix());
+            ShowMessage(mClass->GetName(), gfx::FRect(0.0f, 0.0f, 200.0f, 20.0f), painter);
         view.Pop();
-
-        ShowMessage(mClass->GetName(), gfx::FRect(40 + mMousePos.x(),
-                                                  40 + mMousePos.y(), 200, 20), painter);
+        view.Pop();
     }
     virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
     {
@@ -2023,6 +2030,8 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     // resources are lost in EndFrame and the tool's render call will
     // end up recreating them again.
     mState.renderer.EndFrame();
+
+    painter.ResetViewMatrix();
 
     // right arrow
     if (GetValue(mUI.chkShowOrigin))

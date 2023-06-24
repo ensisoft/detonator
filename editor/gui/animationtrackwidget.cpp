@@ -1509,6 +1509,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
 
     painter.SetViewport(0, 0, width, height);
     painter.SetPixelRatio(glm::vec2(xs*zoom, ys*zoom));
+    painter.ResetViewMatrix();
 
     gfx::Transform view;
     view.Push();
@@ -1523,22 +1524,25 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
         DrawCoordinateGrid(painter, view, grid, zoom, xs, ys, width, height);
     }
 
-    // begin the animation transformation space
-    view.Push();
-        mRenderer.BeginFrame();
-        if (mPlaybackAnimation)
-        {
-            mRenderer.Draw(*mPlaybackAnimation, painter, view, nullptr);
-        }
-        else
-        {
-            DrawHook hook(GetCurrentEntityNode());
-            hook.SetIsPlaying(mPlayState == PlayState::Playing);
-            hook.SetDrawVectors(false);
-            mRenderer.Draw(*mEntity, painter, view, &hook);
-        }
-        mRenderer.EndFrame();
-    view.Pop();
+
+    painter.SetViewMatrix(view.GetAsMatrix());
+
+    mRenderer.BeginFrame();
+    if (mPlaybackAnimation)
+    {
+        mRenderer.Draw(*mPlaybackAnimation, painter, nullptr);
+    }
+    else
+    {
+        DrawHook hook(GetCurrentEntityNode());
+        hook.SetIsPlaying(mPlayState == PlayState::Playing);
+        hook.SetDrawVectors(false);
+        mRenderer.Draw(*mEntity, painter, &hook);
+    }
+    mRenderer.EndFrame();
+
+    painter.ResetViewMatrix();
+
 
     if (GetValue(mUI.chkShowOrigin))
     {
