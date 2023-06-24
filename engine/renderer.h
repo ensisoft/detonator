@@ -138,12 +138,13 @@ namespace engine
         void Draw(const game::EntityClass& entity,
                   gfx::Painter& painter, gfx::Transform& transform,
                   EntityClassDrawHook* hook = nullptr);
+
         void Draw(const game::Scene& scene,
-                  gfx::Painter& painter, gfx::Transform& transform,
+                  gfx::Painter& painter,
                   SceneInstanceDrawHook* scene_hook = nullptr,
                   EntityInstanceDrawHook* entity_hook = nullptr);
         void Draw(const game::SceneClass& scene,
-                  gfx::Painter& painter, gfx::Transform& transform,
+                  gfx::Painter& painter,
                   SceneClassDrawHook* scene_hook = nullptr,
                   EntityClassDrawHook* hook = nullptr);
 
@@ -170,7 +171,7 @@ namespace engine
     private:
         template<typename SceneType, typename EntityType, typename NodeType>
         void DrawScene(const SceneType& scene,
-                       gfx::Painter& painter, gfx::Transform& transform,
+                       gfx::Painter& painter,
                        SceneDrawHook<EntityType>* scene_hook,
                        EntityDrawHook<NodeType>* entity_hook);
 
