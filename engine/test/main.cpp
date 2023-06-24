@@ -79,32 +79,6 @@ public:
 private:
 };
 
-class HelloWasmTest : public TestCase
-{
-public:
-    virtual void Render(gfx::Painter& painter) override
-    {
-        static auto klass =  gfx::CreateMaterialClassFromImage("assets/textures/Checkerboard.png");
-
-        gfx::FRect rect;
-        rect.Resize(200, 200);
-        rect.Move(20, 20);
-        //gfx::FillRect(*mPainter, rect, gfx::Color::Yellow);
-        gfx::FillRect(painter, rect, gfx::MaterialClassInst(klass));
-
-        rect.Translate(150, 150);
-
-        gfx::DrawTextRect(painter,
-           "hello wasm!",
-           "assets/fonts/orbitron-medium.otf", 18u,
-           rect, gfx::Color::HotPink);
-    }
-    virtual std::string GetName() const override
-    { return "HelloWasmTest"; }
-private:
-
-};
-
 class AudioMusicTest : public TestCase,
                        public audio::Loader
 {
@@ -974,7 +948,6 @@ public:
         mTestList.emplace_back(new EntityTest);
         mTestList.emplace_back(new SceneTest);
         mTestList.emplace_back(new UITest);
-        mTestList.emplace_back(new HelloWasmTest);
         mTestList[mTestIndex]->Start(&mClassLib);
         INFO("Test case: '%1'", mTestList[mTestIndex]->GetName());
     }
