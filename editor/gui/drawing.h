@@ -113,49 +113,6 @@ void PrintWorldPlanePos(const glm::mat4& projection,
                         QWidget* widget);
 
 
-template<typename UI, typename State>
-void MakeViewTransform(const UI& ui, const State& state, gfx::Transform& view)
-{
-    view.Scale(GetValue(ui.scaleX), GetValue(ui.scaleY));
-    view.Scale(GetValue(ui.zoom), GetValue(ui.zoom));
-    view.RotateAroundZ(qDegreesToRadians(ui.rotation->value()));
-    view.Translate(state.camera_offset_x, state.camera_offset_y);
-}
-
-template<typename UI, typename State>
-void MakeViewTransform(const UI& ui, const State& state, gfx::Transform& view, float rotation)
-{
-    view.Scale(GetValue(ui.scaleX), GetValue(ui.scaleY));
-    view.Scale(GetValue(ui.zoom), GetValue(ui.zoom));
-    view.RotateAroundZ(qDegreesToRadians(rotation));
-    view.Translate(state.camera_offset_x, state.camera_offset_y);
-}
-
-
-template<typename UI, typename State>
-glm::mat4 CreatePerspectiveCorrectViewMatrix(const UI& ui, const State& state, game::Perspective perspective)
-{
-    const float zoom = GetValue(ui.zoom);
-    const float xs = GetValue(ui.scaleX);
-    const float ys = GetValue(ui.scaleY);
-    const float rotation = GetValue(ui.rotation);
-
-    return engine::CreateViewMatrix(state.camera_offset_x,
-                                    state.camera_offset_y,
-                                    zoom*xs, zoom*ys,
-                                    perspective,
-                                    rotation);
-}
-
-template<typename UI>
-glm::mat4 CreatePerspectiveCorrectProjMatrix(const UI& ui, game::Perspective perspective)
-{
-    const auto width  = ui.widget->width();
-    const auto height = ui.widget->height();
-    return engine::CreateProjectionMatrix(perspective, width, height);
-}
-
-
 // generic draw hook implementation for embellishing some nodes
 // with things such as selection rectangle in order to visually
 // indicate the selected node when editing a scene/animation.

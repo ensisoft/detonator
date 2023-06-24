@@ -38,6 +38,7 @@
 #include "editor/app/resource.h"
 #include "editor/app/utility.h"
 #include "editor/gui/tool.h"
+#include "editor/gui/nerd.h"
 #include "editor/gui/tilemapwidget.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/settings.h"
