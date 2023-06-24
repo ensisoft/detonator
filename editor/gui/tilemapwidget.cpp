@@ -2325,28 +2325,20 @@ void TilemapWidget::MouseZoom(std::function<void()> zoom_function)
         mickey.y() > mUI.widget->height())
         return;
 
-    glm::vec4 mickey_pos_in_world;
-    glm::vec4 mickey_pos_in_widget;
+    const auto perspective = mState.klass->GetPerspective();
+    glm::vec2 mickey_pos_in_world_before_zoom;
+    glm::vec2 mickey_pos_in_world_after_zoom;
 
-    {
-        gfx::Transform view;
-        MakeViewTransform(mUI, mState, view);
-
-        const auto& mat = glm::inverse(view.GetAsMatrix());
-        mickey_pos_in_world = mat * glm::vec4(mickey.x() , mickey.y() , 1.0f , 1.0f);
-    }
+    mickey_pos_in_world_before_zoom = MapWindowCoordinateToWorld(mUI, mState, mickey, mUI.widget->size(), perspective);
 
     zoom_function();
 
-    {
-        gfx::Transform view;
-        MakeViewTransform(mUI, mState, view);
+    mickey_pos_in_world_after_zoom = MapWindowCoordinateToWorld(mUI, mState, mickey, mUI.widget->size(), perspective);
 
-        const auto& mat = view.GetAsMatrix();
-        mickey_pos_in_widget = mat * mickey_pos_in_world;
-    }
-    mState.camera_offset_x += (mickey.x() - mickey_pos_in_widget.x);
-    mState.camera_offset_y += (mickey.y() - mickey_pos_in_widget.y);
+    const auto camera_diff = mickey_pos_in_world_after_zoom - mickey_pos_in_world_before_zoom;
+
+    mState.camera_offset_x -= camera_diff.x;
+    mState.camera_offset_y -= camera_diff.y;
     DisplayCurrentCameraLocation();
 }
 

@@ -27,6 +27,7 @@
 
 #include "graphics/transform.h"
 #include "engine/camera.h"
+#include "editor/gui/types.h"
 
 // this header was originally named math.h but that caused a weird
 // conflict in Box2D. Can't be bothered to spend time solving such
@@ -77,5 +78,19 @@ glm::mat4 CreatePerspectiveCorrectProjMatrix(const UI& ui, game::Perspective per
     const auto height = ui.widget->height();
     return engine::CreateProjectionMatrix(perspective, width, height);
 }
+
+template<typename UI, typename State>
+Point2Df MapWindowCoordinateToWorld(const UI& ui,
+                                   const State& state,
+                                   const Point2Df& window_point,
+                                   const Size2Df& window_size,
+                                   game::Perspective perspective)
+{
+    const auto& proj_matrix = CreatePerspectiveCorrectProjMatrix(ui, perspective);
+    const auto& view_matrix = CreatePerspectiveCorrectViewMatrix(ui, state, perspective);
+    const auto pos = engine::MapToWorldPlane(proj_matrix, view_matrix, window_point, window_size);
+    return pos;
+}
+
 
 } // namespace
