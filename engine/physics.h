@@ -212,7 +212,7 @@ namespace engine
 
 #if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
         // Visualize the physics world object's by drawing OOBs around them.
-        void DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view) const;
+        void DebugDrawObjects(gfx::Painter& painter) const;
 #endif
     private:
         struct RigidBodyData;
