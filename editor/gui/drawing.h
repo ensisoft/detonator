@@ -32,6 +32,7 @@
 #include "graphics/painter.h"
 #include "graphics/transform.h"
 #include "graphics/drawable.h"
+#include "editor/gui/nerd.h"
 
 class QWidget;
 
@@ -80,11 +81,8 @@ void DrawCoordinateGrid(gfx::Painter& painter,
     float xs,
     float ys, // scaling factors for the axis
     unsigned width, // viewport (widget) size
-    unsigned height, // viewport (widget) size
-    float camera_offset_x,
-    float camera_offset_y,
-    game::Perspective perspective
-    );
+    unsigned height // viewport (widget) size
+);
 
 // Draw an overlay of viewport illustration. The viewport is the logical
 // game viewport that the game can adjust in order to define the view
@@ -105,11 +103,18 @@ void PrintMousePos(const gfx::Transform& view, gfx::Painter& painter, QWidget* w
 
 // Print current mouse position inside the widget's viewport mapped
 // into the game plane world coordinate.
-void PrintWorldPlanePos(const glm::mat4& projection,
-                        const glm::mat4& world_to_view,
-                        gfx::Painter& painter,
-                        QWidget* widget);
+void PrintMousePos(const glm::mat4& view_to_clip,
+                   const glm::mat4& world_to_view,
+                   gfx::Painter& painter,
+                   QWidget* widget);
 
+template<typename UI, typename State>
+void PrintMousePos(const UI& ui, const State& state, gfx::Painter& painter, game::Perspective perspective = game::Perspective::AxisAligned)
+{
+    PrintMousePos(CreateProjectionMatrix(ui, perspective),
+                  CreateViewMatrix(ui, state, perspective),
+                  painter, ui.widget);
+}
 
 // generic draw hook implementation for embellishing some nodes
 // with things such as selection rectangle in order to visually

@@ -367,10 +367,7 @@ void DrawCoordinateGrid(gfx::Painter& painter,
     float xs,
     float ys,
     unsigned width,
-    unsigned height,
-    float camera_offset_x,
-    float camera_offset_y,
-    game::Perspective perspective)
+    unsigned height)
 {
     const int grid_size = std::max(width/xs, height/ys) / zoom * 2.0f;
 
@@ -386,9 +383,20 @@ void DrawCoordinateGrid(gfx::Painter& painter,
     const gfx::Grid grid_1(num_grid_lines, num_grid_lines, false);
     const auto material = gfx::CreateMaterialFromColor(DefaultGridColor);
 
-    const float grid_origin_x = (int)camera_offset_x / cell_size_units * cell_size_units;
-    const float grid_origin_y = (int)camera_offset_y / cell_size_units * cell_size_units;
+    // map the center of the screen to a position on the world plane.
+    // basically this means that when we draw the grid at this position
+    // it is always visible in the viewport. (this world position maps
+    // to the center of the window!)
+    const auto world_pos = engine::WindowToWorldPlane(painter.GetProjMatrix(),
+                                                      painter.GetViewMatrix(),
+                                                      glm::vec2{width*0.5f, height*0.5f},
+                                                      glm::vec2{width, height});
+    // align the grid's world position on a coordinate that is a multiple of
+    // the grid cell on both axis.
+    const float grid_origin_x = (int)world_pos.x / cell_size_units * cell_size_units;
+    const float grid_origin_y = (int)world_pos.y / cell_size_units * cell_size_units;
 
+    // draw 4 quadrants of the grid around the grid origin
     gfx::Transform transform;
     transform.Scale(cell_scale_factor, cell_scale_factor);
 
@@ -403,6 +411,17 @@ void DrawCoordinateGrid(gfx::Painter& painter,
 
     transform.Translate(grid_width, 0.0f, 0.0f);
     painter.Draw(grid_1, transform, material);
+
+    // debug, draw a little dot to indicate the grid's world position
+#if 0
+    {
+        gfx::Transform transform;
+        transform.Scale(10.0f, 10.0f);
+        transform.Translate(grid_origin_x, grid_origin_y);
+        transform.Translate(-5.0f, -5.0f);
+        painter.Draw(gfx::Circle(), transform, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+    }
+#endif
 }
 
 void DrawViewport(gfx::Painter& painter,
@@ -478,10 +497,10 @@ void PrintMousePos(const gfx::Transform& view, gfx::Painter& painter, QWidget* w
     ShowMessage(hallelujah, painter);
 }
 
-void PrintWorldPlanePos(const glm::mat4& projection,
-                        const glm::mat4& world_to_view,
-                        gfx::Painter& painter,
-                        QWidget* widget)
+void PrintMousePos(const glm::mat4& view_to_clip,
+                   const glm::mat4& world_to_view,
+                   gfx::Painter& painter,
+                   QWidget* widget)
 
 {
     const auto width = widget->width();
@@ -495,10 +514,10 @@ void PrintWorldPlanePos(const glm::mat4& projection,
         mickey.x() > width || mickey.y() > height)
         return;
 
-    const auto& world_pos = engine::MapToWorldPlane(projection,
-                                                    world_to_view,
-                                                    glm::vec2{mickey.x(), mickey.y()},
-                                                    glm::vec2{width, height});
+    const auto& world_pos = engine::WindowToWorldPlane(view_to_clip,
+                                                       world_to_view,
+                                                       glm::vec2{mickey.x(), mickey.y()},
+                                                       glm::vec2{width, height});
     char hallelujah[128] = {};
     std::snprintf(hallelujah, sizeof(hallelujah), "%.2f, %.2f", world_pos.x, world_pos.y);
     ShowMessage(hallelujah, painter);
