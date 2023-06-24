@@ -634,12 +634,12 @@ std::tuple<bool, float> PhysicsEngine::FindMass(const std::string& node) const
 }
 
 #if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
-void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view) const
+void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter) const
 {
     static gfx::MaterialClassInst mat(gfx::CreateMaterialClassFromColor(gfx::Color4f(gfx::Color::HotPink, 0.6)));
 
-    view.Push();
-    view.Scale(mScale);
+    gfx::Transform model;
+    model.Scale(mScale);
 
     std::unordered_set<b2Joint*> joints;
 
@@ -654,9 +654,9 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view
         const float angle = world_body->GetAngle();
         const b2Vec2& pos = world_body->GetPosition();
 
-        view.Push();
-        view.RotateAroundZ(angle);
-        view.Translate(pos.x, pos.y);
+        model.Push();
+        model.RotateAroundZ(angle);
+        model.Translate(pos.x, pos.y);
 
         // visualize each fixture attached to the body.
         const b2Fixture* fixture = world_body->GetFixtureList();
@@ -673,26 +673,26 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view
                 polygon = ptr->GetPolygonShapeId();
             } else BUG("Unexpected fixture without node attachment.");
 
-            view.Push();
-            view.Scale(fixture_data->shape_size);
-            view.Translate(fixture_data->shape_size * -0.5f);
-            view.RotateAroundZ(fixture_data->shape_rotation);
-            view.Translate(fixture_data->shape_offset);
+            model.Push();
+            model.Scale(fixture_data->shape_size);
+            model.Translate(fixture_data->shape_size * -0.5f);
+            model.RotateAroundZ(fixture_data->shape_rotation);
+            model.Translate(fixture_data->shape_offset);
 
             if (shape == RigidBodyItemClass::CollisionShape::Box)
-                painter.Draw(gfx::Rectangle(), view, mat);
+                painter.Draw(gfx::Rectangle(), model, mat);
             else if (shape == RigidBodyItemClass::CollisionShape::Circle)
-                painter.Draw(gfx::Circle(), view, mat);
+                painter.Draw(gfx::Circle(), model, mat);
             else if (shape == RigidBodyItemClass::CollisionShape::SemiCircle)
-                painter.Draw(gfx::SemiCircle(), view, mat);
+                painter.Draw(gfx::SemiCircle(), model, mat);
             else if (shape == RigidBodyItemClass::CollisionShape::RightTriangle)
-                painter.Draw(gfx::RightTriangle(), view, mat);
+                painter.Draw(gfx::RightTriangle(), model, mat);
             else if (shape == RigidBodyItemClass::CollisionShape::IsoscelesTriangle)
-                painter.Draw(gfx::IsoscelesTriangle(), view, mat);
+                painter.Draw(gfx::IsoscelesTriangle(), model, mat);
             else if (shape == RigidBodyItemClass::CollisionShape::Trapezoid)
-                painter.Draw(gfx::Trapezoid(), view, mat);
+                painter.Draw(gfx::Trapezoid(), model, mat);
             else if (shape == RigidBodyItemClass::CollisionShape::Parallelogram)
-                painter.Draw(gfx::Parallelogram(), view, mat);
+                painter.Draw(gfx::Parallelogram(), model, mat);
             else if (shape == RigidBodyItemClass::CollisionShape::Polygon)
             {
                 const auto& klass = mClassLib->FindDrawableClassById(polygon);
@@ -700,11 +700,11 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view
                     WARN("No polygon class found for node '%1'", fixture_data->debug_name);
                 } else {
                     auto poly = gfx::CreateDrawableInstance(klass);
-                    painter.Draw(*poly, view, mat);
+                    painter.Draw(*poly, model, mat);
                 }
             } else BUG("Unhandled collision shape for debug drawing.");
 
-            view.Pop();
+            model.Pop();
             fixture = fixture->GetNext();
         }
 
@@ -731,9 +731,8 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter, gfx::Transform& view
             joint_list = joint_list->next;
         }
 
-        view.Pop();
+        model.Pop();
     }
-    view.Pop();
 }
 #endif // GAMESTUDIO_ENABLE_PHYSICS_DEBUG
 

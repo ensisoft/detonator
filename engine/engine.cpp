@@ -271,21 +271,13 @@ public:
             // set the view matrix
             mPainter->SetViewMatrix(view.GetAsMatrix());
 
-            gfx::Transform transform;
-            TRACE_CALL("Renderer::BeginFrame", mRenderer.BeginFrame());
-            if (mTilemap)
-            {
-                // todo: reimplement tilemap support
-                //TRACE_CALL("Renderer::DrawMap", mRenderer.Draw(*mTilemap, viewport, *mPainter, transform));
-            }
             if (mFlags.test(Flags::EditingMode))
             {
                 ConfigureRendererForScene();
             }
-
+            TRACE_CALL("Renderer::BeginFrame", mRenderer.BeginFrame());
             TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mPainter, &cull));
             TRACE_CALL("Renderer::EndFrame", mRenderer.EndFrame());
-
             TRACE_CALL("DebugDraw", DrawDebugObjects());
         }
 
@@ -1171,8 +1163,7 @@ private:
 
         if (mPhysics.HaveWorld())
         {
-            gfx::Transform transform;
-            TRACE_CALL("DebugDrawPhysics", mPhysics.DebugDrawObjects(*mPainter, transform));
+            TRACE_CALL("DebugDrawPhysics", mPhysics.DebugDrawObjects(*mPainter));
         }
 
         TRACE_CALL("DebugDrawScene", DebugDrawScene());

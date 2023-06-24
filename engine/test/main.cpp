@@ -314,9 +314,8 @@ class PhysicsTest : public TestCase
 public:
     virtual void Render(gfx::Painter& painter) override
     {
-        gfx::Transform transform;
         mRenderer.Draw(*mScene, painter);
-        mPhysics.DebugDrawObjects(painter, transform);
+        mPhysics.DebugDrawObjects(painter);
     }
     virtual void Update(float dt) override
     {
