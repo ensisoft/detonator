@@ -133,7 +133,7 @@ namespace gfx
         // which provides the geometrical information of the object to be drawn. A material
         // which provides the "look&feel" i.e. the surface properties for the shape
         // and finally a transform which defines the model-to-world transform.
-        virtual void Draw(const DrawList& shapes, const RenderPassState& render_pass, const ShaderPass& shader_pass) = 0;
+        virtual void Draw(const DrawList& shapes, const RenderPassState& renderp, const ShaderPass& shaderp) = 0;
 
         // Create new painter implementation using the given graphics device.
         static std::unique_ptr<Painter> Create(std::shared_ptr<Device> device);
@@ -150,16 +150,10 @@ namespace gfx
         // Similar to the legacy draw except that allows the device state to be
         // changed through state and shader pass objects.
         void Draw(const Drawable& shape,
-                  const glm::mat4& model_to_world,
+                  const glm::mat4& model,
                   const Material& material,
-                  const RenderPassState& render_pass,
-                  const ShaderPass& shader_pass);
-
-        void Draw(const Drawable& shape,
-                  const Transform& model_to_world,
-                  const Material& material,
-                  const RenderPassState& render_pass,
-                  const ShaderPass& shader_pass);
+                  const RenderPassState& renderp,
+                  const ShaderPass& shaderp);
 
         // legacy functions.
 
@@ -174,8 +168,7 @@ namespace gfx
         // function is not efficient since the device state is changed on every draw
         // to the required state. If possible prefer the vector format which allows
         // to draw multiple objects at once.
-        void Draw(const Drawable& drawable, const Transform& model_to_world, const Material& material);
-        void Draw(const Drawable& drawable, const glm::mat4& model_to_world, const Material& material);
+        void Draw(const Drawable& drawable, const glm::mat4& model, const Material& material);
     private:
     };
 

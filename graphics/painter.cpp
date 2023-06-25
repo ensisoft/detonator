@@ -263,40 +263,27 @@ void Painter::SetSurfaceSize(unsigned width, unsigned height)
 }
 
 void Painter::Draw(const Drawable& shape,
-                   const glm::mat4& model_to_world,
+                   const glm::mat4& model,
                    const Material& material,
-                   const RenderPassState& render_pass,
-                   const ShaderPass& shader_pass)
+                   const RenderPassState& renderp,
+                   const ShaderPass& shaderp)
 {
     std::vector<DrawShape> shapes;
     shapes.resize(1);
     shapes[0].drawable  = &shape;
     shapes[0].material  = &material;
-    shapes[0].transform = &model_to_world;
-    Draw(shapes, render_pass, shader_pass);
+    shapes[0].transform = &model;
+    Draw(shapes, renderp, shaderp);
 }
 
-void Painter::Draw(const Drawable& shape,
-                   const Transform& transform,
-                   const Material& material,
-                   const RenderPassState& render_pass,
-                   const ShaderPass& shader_pass)
-{
-    Draw(shape, transform.GetAsMatrix(), material, render_pass, shader_pass);
-}
-
-void Painter::Draw(const Drawable& drawable, const Transform& model_to_world, const Material& material)
-{
-    Draw(drawable, model_to_world.GetAsMatrix(), material);
-}
-void Painter::Draw(const Drawable& drawable, const glm::mat4& model_to_world, const Material& material)
+void Painter::Draw(const Drawable& drawable, const glm::mat4& model, const Material& material)
 {
     RenderPassState state;
     state.write_color  = true;
     state.stencil_func = StencilFunc::Disabled;
     state.depth_test   = DepthTest::Disabled;
     detail::GenericShaderPass pass;
-    Draw(drawable, model_to_world, material, state, pass);
+    Draw(drawable, model, material, state, pass);
 }
 
 } // namespace
