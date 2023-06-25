@@ -30,6 +30,8 @@
 #include "graphics/color4f.h"
 #include "graphics/transform.h"
 #include "graphics/device.h"
+#include "graphics/drawable.h"
+#include "graphics/material.h"
 
 namespace gfx
 {
@@ -44,28 +46,39 @@ namespace gfx
     class Painter
     {
     public:
-        virtual ~Painter() = default;
-        // Get the current graphics set on the painter.
-        virtual Device* GetDevice() = 0;
-        // Set flag that enables "editing" mode which indicates
-        // that even content marked "static" should be checked against
-        // modifications and possibly regenerated/reuploaded to the device.
-        // The default is false.
-        virtual void SetEditingMode(bool on_off) = 0;
-        // Set the ratio of rendering surface pixels to game units.
-        virtual void SetPixelRatio(const glm::vec2& ratio) = 0;
+        Painter() = default;
+        explicit Painter(std::shared_ptr<Device> device)
+          : mDeviceInst(device)
+          , mDevice(device.get())
+        {}
+        explicit Painter(Device* device)
+          : mDevice(device)
+        {}
+
+        // Set the current projection matrix for projecting the scene onto a 2D plane.
+        inline void SetProjectionMatrix(const glm::mat4& matrix) noexcept
+        { mProjMatrix = matrix; }
+        // Set the current view matrix for transforming the scene into camera space.
+        inline void SetViewMatrix(const glm::mat4& matrix) noexcept
+        { mViewMatrix = matrix;}
         // Set the size of the target rendering surface. (The surface that
         // is the backing surface of the device context).
         // The surface size is needed for viewport and scissor settings.
         // You should call this whenever the surface (for example the window)
         // has been resized. The setting will be kept until the next call
         // to surface size.
-        virtual void SetSurfaceSize(const USize& size) = 0;
+        inline void SetSurfaceSize(const USize& size) noexcept
+        { mSize = size; }
+        inline void SetSurfaceSize(unsigned width, unsigned height) noexcept
+        { mSize = USize(width, height); }
         // Set the current render target/device view port.
         // x and y are the top left coordinate (in pixels) of the
         // viewport's location wrt to the actual render target.
         // width and height are the dimensions of the viewport.
-        virtual void SetViewport(const IRect& viewport) = 0;
+        inline void SetViewport(const IRect& viewport) noexcept
+        { mViewport = viewport; }
+        inline void SetViewport(int x, int y, unsigned width, unsigned height) noexcept
+        { mViewport = IRect(x, y, width, height); }
         // Set the current clip (scissor) rect that will limit the rasterized
         // fragments inside the scissor rectangle only and discard any fragments
         // that would be rendered outside the scissor rect.
@@ -73,27 +86,54 @@ namespace gfx
         // (i.e window coordinates). X and Y are the top left corner of the
         // scissor rectangle with width extending to the right and height
         // extending towards the bottom.
-        virtual void SetScissor(const IRect& scissor) = 0;
-        // Clear any scissor setting.
-        virtual void ClearScissor() = 0;
-        // Set the current projection matrix for projecting the scene onto a 2D plane.
-        virtual void SetProjectionMatrix(const glm::mat4& proj) = 0;
-        // Set an additional view transformation matrix that gets multiplied into
-        // every view matrix/transform when doing any actual draw operations. This
-        // is useful when using some drawing system that doesn't support arbitrary
-        // transformations.
-        virtual void SetViewMatrix(const glm::mat4& view) = 0;
-        // Get the current view matrix if any (could be I)
-        virtual const glm::mat4& GetViewMatrix() const = 0;
-        // Get the current projection matrix.
-        virtual const glm::mat4& GetProjMatrix() const = 0;
-        // Get the current configured render surface size. See the comments in the
-        // SetSurfaceSize regarding the meaning of this setting.
-        virtual USize GetSurfaceSize() const = 0;
+        inline void SetScissor(const IRect& scissor) noexcept
+        { mScissor = scissor; }
+        inline void SetScissor(int x, int y, unsigned width, unsigned height) noexcept
+        { mScissor = IRect(x, y, width, height); }
+        // Clear the scissor rect to nothing, i.e. no scissor is set.
+        inline void ClearScissor() noexcept
+        { mScissor = IRect(0, 0, 0, 0); }
+        // Set the ratio of rendering surface pixels to game units.
+        inline void SetPixelRatio(const glm::vec2& ratio) noexcept
+        { mPixelRatio = ratio; }
+        // Reset the view matrix to identity matrix.
+        inline void ResetViewMatrix() noexcept
+        { mViewMatrix = glm::mat4{1.0f}; }
+        // Set flag that enables "editing" mode which indicates, that even
+        // content marked "static" should be checked against modifications
+        // and possibly regenerated/re-uploaded to the device. Set this to
+        // true in order to have live changes made to content take place
+        // dynamically on every render.
+        inline void SetEditingMode(bool on_off) noexcept
+        { mEditingMode = on_off; }
+        inline void SetDevice(std::shared_ptr<Device> device) noexcept
+        { mDeviceInst = device; mDevice = mDeviceInst.get(); }
+        inline void SetDevice(Device* device) noexcept
+        { mDevice = device; }
+
+        inline const glm::mat4& GetViewMatrix() const noexcept
+        { return mViewMatrix; }
+        inline const glm::mat4& GetProjMatrix() const noexcept
+        { return mProjMatrix; }
+        inline USize GetSurfaceSize() const noexcept
+        { return mSize; }
+        inline IRect GetViewport() const noexcept
+        { return mViewport; }
+        inline IRect GetScissor() const noexcept
+        { return mScissor; }
+        inline glm::vec2 GetPixelRatio() const noexcept
+        { return mPixelRatio; }
+        // Get the current graphics set on the painter.
+        inline Device* GetDevice() noexcept
+        { return mDevice; }
+        inline const Device* GetDevice() const noexcept
+        { return mDevice; }
+
+
         // Clear the current render target color buffer with the given clear color.
-        virtual void ClearColor(const Color4f& color) = 0;
+        void ClearColor(const Color4f& color);
         // Clear the current render target stencil buffer with the given stencil value.
-        virtual void ClearStencil(const StencilClearValue& stencil) = 0;
+        void ClearStencil(const StencilClearValue& stencil);
 
         using StencilFunc = Device::State::StencilFunc;
         using StencilOp   = Device::State::StencilOp;
@@ -129,23 +169,15 @@ namespace gfx
         };
         using DrawList = std::vector<DrawShape>;
 
-        // Draw multiple objects inside a render pass. Each object has a drawable shape
-        // which provides the geometrical information of the object to be drawn. A material
+        // Draw multiple objects inside a render pass. Each object has a drawable shape,
+        // which provides the geometrical information of the object to be drawn, a material,
         // which provides the "look&feel" i.e. the surface properties for the shape
         // and finally a transform which defines the model-to-world transform.
-        virtual void Draw(const DrawList& shapes, const RenderPassState& renderp, const ShaderPass& shaderp) = 0;
+        virtual void Draw(const DrawList& shapes,
+                          const RenderPassState& renderp,
+                          const ShaderPass& shaderp);
 
-        // Create new painter implementation using the given graphics device.
-        static std::unique_ptr<Painter> Create(std::shared_ptr<Device> device);
-        static std::unique_ptr<Painter> Create(Device* device);
-
-        // Utility helpers
-        void SetViewport(int x, int y, unsigned width, unsigned height);
-        void SetScissor(int x, int y, unsigned width, unsigned height);
-        void SetSurfaceSize(unsigned width, unsigned height);
-
-        inline void ResetViewMatrix()
-        { SetViewMatrix(glm::mat4(1.0f)); }
+        // legacy draw functions.
 
         // Similar to the legacy draw except that allows the device state to be
         // changed through state and shader pass objects.
@@ -154,9 +186,6 @@ namespace gfx
                   const Material& material,
                   const RenderPassState& renderp,
                   const ShaderPass& shaderp);
-
-        // legacy functions.
-
         // Legacy immediate mode draw function.
         // Draw the shape with the material and transformation immediately in the
         // current render target. The following default render target state is used:
@@ -168,8 +197,33 @@ namespace gfx
         // function is not efficient since the device state is changed on every draw
         // to the required state. If possible prefer the vector format which allows
         // to draw multiple objects at once.
-        void Draw(const Drawable& drawable, const glm::mat4& model, const Material& material);
+        void Draw(const Drawable& drawable,
+                  const glm::mat4& model,
+                  const Material& material);
+
+        // Create new painter implementation using the given graphics device.
+        static std::unique_ptr<Painter> Create(std::shared_ptr<Device> device);
+        static std::unique_ptr<Painter> Create(Device* device);
+
     private:
+        IRect MapToDevice(const IRect& rect) const noexcept;
+        Program* GetProgram(const Drawable& drawable,
+                            const Material& material,
+                            const Drawable::Environment& drawable_environment,
+                            const Material::Environment& material_environment);
+
+    private:
+        std::shared_ptr<Device> mDeviceInst;
+        Device* mDevice = nullptr;
+    private:
+        gfx::USize mSize;
+        gfx::IRect mViewport;
+        gfx::IRect mScissor;
+        glm::vec2 mPixelRatio {1.0f, 1.0f};
+        glm::mat4 mProjMatrix {1.0f};
+        glm::mat4 mViewMatrix {1.0f};
+    private:
+        bool mEditingMode = false;
     };
 
 } // namespace
