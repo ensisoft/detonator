@@ -136,15 +136,14 @@ namespace base
         { Accumulate(glm::eulerAngleZ(radians)); }
 
         // Reset any transformation to identity, i.e. no transformation.
-        void Reset()
+        void Reset() noexcept
         {
-            mTransform.clear();
             mTransform.resize(1);
             mTransform[0] = glm::mat4(1.0f);
         }
 
         // Get the transformation expressed as a matrix.
-        glm::mat4 GetAsMatrix() const
+        glm::mat4 GetAsMatrix() const noexcept
         {
             // remember that generally A*B != B*A but (A*B)*C = A*(B*C)
             // https://en.wikipedia.org/wiki/Matrix_(mathematics)#Basic_operations
@@ -157,6 +156,11 @@ namespace base
                 ret *= mTransform[i];
             }
             return ret;
+        }
+
+        operator glm::mat4 () const noexcept
+        {
+            return GetAsMatrix();
         }
 
         // Begin a new scope for the next transformation using an identity matrix.
