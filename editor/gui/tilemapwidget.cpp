@@ -2030,7 +2030,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         if (mickey.x() >= 0 && mickey.x() < width &&
             mickey.y() >= 0 && mickey.y() < height && !mCurrentTool)
         {
-            const glm::vec2 tile_coord = MapWindowCoordinateToWorld(mUI, mState, mickey, mUI.widget->size(), perspective);
+            const glm::vec2 tile_coord = MapWindowCoordinateToWorld(mUI, mState, mickey, perspective);
             const unsigned tile_col = tile_coord.x / layer_tile_width;
             const unsigned tile_row = tile_coord.y / layer_tile_height;
             if (tile_col < layer->GetWidth() && tile_row < layer->GetHeight())
@@ -2278,11 +2278,11 @@ void TilemapWidget::MouseZoom(std::function<void()> zoom_function)
     glm::vec2 mickey_pos_in_world_before_zoom;
     glm::vec2 mickey_pos_in_world_after_zoom;
 
-    mickey_pos_in_world_before_zoom = MapWindowCoordinateToWorld(mUI, mState, mickey, mUI.widget->size());
+    mickey_pos_in_world_before_zoom = MapWindowCoordinateToWorld(mUI, mState, mickey);
 
     zoom_function();
 
-    mickey_pos_in_world_after_zoom = MapWindowCoordinateToWorld(mUI, mState, mickey, mUI.widget->size());
+    mickey_pos_in_world_after_zoom = MapWindowCoordinateToWorld(mUI, mState, mickey);
 
     const auto camera_diff = mickey_pos_in_world_after_zoom - mickey_pos_in_world_before_zoom;
 
