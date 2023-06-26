@@ -133,9 +133,24 @@ namespace engine
 
         void Draw(const game::Entity& entity,
                   gfx::Painter& painter,
-                  EntityInstanceDrawHook* hook = nullptr);
+                  EntityInstanceDrawHook* hook = nullptr)
+        {
+            gfx::Transform model;
+            Draw(entity, painter, model, hook);
+        }
         void Draw(const game::EntityClass& entity,
                   gfx::Painter& painter,
+                  EntityClassDrawHook* hook = nullptr)
+        {
+            gfx::Transform model;
+            Draw(entity, painter, model, hook);
+        }
+
+        void Draw(const game::Entity& entity,
+                  gfx::Painter& painter, gfx::Transform& model,
+                  EntityInstanceDrawHook* hook = nullptr);
+        void Draw(const game::EntityClass& entity,
+                  gfx::Painter& painter, gfx::Transform& model,
                   EntityClassDrawHook* hook = nullptr);
 
         void Draw(const game::Scene& scene,

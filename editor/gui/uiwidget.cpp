@@ -266,7 +266,7 @@ public:
       , mSnapGrid(snap)
       , mGridSize(grid)
     {}
-    virtual void Render(gfx::Painter& painter, gfx::Transform& view) const override
+    virtual void Render(gfx::Painter&, gfx::Painter&) const override
     {
         uik::State state;
         uik::Widget::PaintEvent paint;
@@ -2006,7 +2006,7 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
 
     if (mCurrentTool)
     {
-        mCurrentTool->Render(painter, view);
+        mCurrentTool->Render(painter, painter);
     }
 
     painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(surface_width , surface_height));

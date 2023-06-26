@@ -382,22 +382,23 @@ public:
             }
         }
     }
-    virtual void Render(gfx::Painter& painter, gfx::Transform& view) const override
+
+    virtual void Render(gfx::Painter& window, gfx::Painter& scene_painter) const override
     {
         const auto& rect = mClass->GetBoundingRect();
         const auto width = rect.GetWidth();
         const auto height = rect.GetHeight();
 
-        view.Push();
-            view.Translate(mWorldPos.x, mWorldPos.y);
-            painter.SetViewMatrix(view.GetAsMatrix());
-            mState.renderer.Draw(*mClass, painter, nullptr);
-        view.Push();
-            view.Translate(width*0.5f, height*0.5f);
-            painter.SetViewMatrix(view.GetAsMatrix());
-            ShowMessage(mClass->GetName(), gfx::FRect(0.0f, 0.0f, 200.0f, 20.0f), painter);
-        view.Pop();
-        view.Pop();
+        gfx::Transform model;
+        model.Translate(mWorldPos.x, mWorldPos.y);
+        mState.renderer.Draw(*mClass, scene_painter, model, nullptr);
+
+        const auto& pos = engine::ProjectPoint(scene_painter.GetProjMatrix(),
+                                               scene_painter.GetViewMatrix(),
+                                               window.GetProjMatrix(),
+                                               window.GetViewMatrix(),
+                                               glm::vec3(mWorldPos.x, mWorldPos.y, 0.0f) + glm::vec3(width*0.5f, height*0.5f, 0.0f));
+        ShowMessage(mClass->GetName(), gfx::FRect(pos.x, pos.y, 200.0f, 20.0f), window);
     }
     virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
     {
@@ -1994,6 +1995,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
             mTilemap = game::CreateTilemap(klass);
             mTilemap->Load(*mState.workspace, 1024);
         }
+
     }
 
     painter.SetViewMatrix(view.GetAsMatrix());
@@ -2018,10 +2020,12 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         ShowError(base::FormatString("%1 Missing entity reference!", node.GetName()), gfx::FPoint(pos.x, pos.y), painter);
     }
 
-    painter.ResetViewMatrix();
-
     if (mCurrentTool)
-        mCurrentTool->Render(painter, view);
+    {
+        gfx::Painter window(painter);
+        window.ResetViewMatrix();
+        mCurrentTool->Render(window, painter);
+    }
 
     // Remember that the tool can also render using the renderer.
     // If that happens after the call to "EndFrame" the renderer
