@@ -47,59 +47,6 @@ void DrawLine(gfx::Painter& painter, const glm::vec2& src, const glm::vec2& dst)
     gfx::DrawLine(painter, gfx::FPoint(src.x, src.y), gfx::FPoint(dst.x, dst.y), gfx::Color::DarkYellow, 2.0f);
 }
 
-ToolHotspot TestToolHotspot(gfx::Transform& trans, const gfx::FRect& box, const glm::vec4& view_pos)
-{
-    // basic idea for tool hot spot testing (in the corners of some selection rectangle)
-    // is to take the incoming view coordinate and transform that by the inverse transform
-    // from view coord to model coord and then compare whether it's inside the box(es) or not.
-
-    // decompose the incoming transformation matrix
-    // in order to figure out the scaling factor. we'll use the inverse
-    // scale for the indicators in order to keep them a constant size
-    // regardless of the scene node's scaling.
-    glm::vec3 scale;
-    glm::vec3 translation;
-    glm::vec3 skew;
-    glm::vec4 perspective;
-    glm::quat orientation;
-    glm::decompose(trans.GetAsMatrix(), scale, orientation, translation, skew, perspective);
-
-    glm::vec4 rotate_hit_pos;
-    glm::vec4 resize_hit_pos;
-    glm::vec4 remove_hit_pos;
-
-    // rotation circle
-    trans.Push();
-        trans.Scale(10.0f/scale.x, 10.0f/scale.y);
-        trans.Translate(box.GetPosition());
-        rotate_hit_pos = glm::inverse(trans.GetAsMatrix()) * view_pos;
-    trans.Pop();
-
-    if (rotate_hit_pos.x >= 0.0f && rotate_hit_pos.x <= 1.0f &&
-        rotate_hit_pos.y >= 0.0f && rotate_hit_pos.y <= 1.0f)
-        return ToolHotspot::Rotate;
-
-    const auto [_0, _1, _2, bottom_right] = box.GetCorners();
-
-    // resize box
-    trans.Push();
-        trans.Scale(10.0f/scale.x, 10.0f/scale.y);
-        trans.Translate(bottom_right);
-        trans.Translate(-10.0f/scale.x, -10.0f/scale.y);
-        resize_hit_pos = glm::inverse(trans.GetAsMatrix()) * view_pos;
-    trans.Pop();
-
-    if (resize_hit_pos.x >= 0.0f && resize_hit_pos.x <= 1.0f &&
-        resize_hit_pos.y >= 0.0f && resize_hit_pos.y <= 1.0f)
-        return ToolHotspot::Resize;
-
-    remove_hit_pos = glm::inverse(trans.GetAsMatrix()) * view_pos;
-    if (box.TestPoint(remove_hit_pos.x, remove_hit_pos.y))
-        return ToolHotspot::Remove;
-
-    return ToolHotspot::None;
-}
-
 void DrawSelectionBox(gfx::Painter& painter, gfx::Transform& trans, const gfx::FRect& box)
 {
     // all the transformations below are relative to the scene node

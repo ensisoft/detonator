@@ -81,8 +81,8 @@ glm::mat4 CreateViewMatrix(game::Perspective perspective)
 
 glm::mat4 CreateViewMatrix(game::Perspective perspective,
                            const glm::vec2& camera_pos,
-                           const glm::vec2& world_scale,
-                           float rotation)
+                           const glm::vec2& camera_scale,
+                           float camera_rotation)
 {
     // remember that if you use operator *= as in a *= b; it's the same as
     // a = a * b;
@@ -96,15 +96,15 @@ glm::mat4 CreateViewMatrix(game::Perspective perspective,
     glm::mat4 mat(1.0f);
     if (perspective == game::Perspective::Dimetric)
     {
-        mat = glm::scale(mat, glm::vec3{world_scale.x, world_scale.y, 1.0f});
+        mat = glm::scale(mat, glm::vec3{camera_scale.x, camera_scale.y, 1.0f});
         mat = glm::translate(mat, glm::vec3{-camera_pos.x, camera_pos.y, 0.0f});
-        mat = glm::rotate(mat, glm::radians(-rotation), glm::vec3{0.0f, 0.0f, 1.0f});
+        mat = glm::rotate(mat, glm::radians(-camera_rotation), glm::vec3{0.0f, 0.0f, 1.0f});
     }
     else if (perspective == game::Perspective::AxisAligned)
     {
-        mat = glm::scale(mat, glm::vec3{world_scale.x, world_scale.y, 1.0f});
+        mat = glm::scale(mat, glm::vec3{camera_scale.x, camera_scale.y, 1.0f});
         mat = glm::translate(mat, glm::vec3{-camera_pos.x, -camera_pos.y, 0.0f});
-        mat = glm::rotate(mat, glm::radians(rotation), glm::vec3{0.0f, 0.0f, 1.0f});
+        mat = glm::rotate(mat, glm::radians(camera_rotation), glm::vec3{0.0f, 0.0f, 1.0f});
     }
 
     mat *= CreateViewMatrix(perspective);

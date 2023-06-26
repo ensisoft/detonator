@@ -47,6 +47,17 @@ namespace gui
     class UIAnimator
     {
     public:
+        template<typename UI, typename State>
+        void Jump(const UI& ui, const State& state, const glm::vec2& target)
+        {
+            mViewTransformRotationStart  = GetValue(ui.rotation);
+            mViewTransformRotationStop   = GetValue(ui.rotation);
+            mViewTransformTranslateStart = glm::vec2{state.camera_offset_x, state.camera_offset_y};
+            mViewTransformTranslateStop  = target;
+            mViewTransformStartTime      = base::GetTime();
+            mTransformView = true;
+        }
+
 
         template<typename UI, typename State>
         void Reset(const UI& ui, const State& state)
@@ -640,5 +651,88 @@ namespace gui
         }
         return std::make_tuple(hit, box);
     }
+
+    enum class ToolHotspot {
+        None,
+        Rotate,
+        Resize,
+        Remove
+    };
+
+    static ToolHotspot TestToolHotspot(const glm::mat4& view_to_clip,
+                                       const glm::mat4& world_to_view,
+                                       const glm::mat4& model_to_world,
+                                       const gfx::FRect& world_box,
+                                       const Point2Df& window_point,
+                                       const Size2Df& window_size)
+    {
+        const auto& world_pos = engine::WindowToWorldPlane(view_to_clip,
+                                                           world_to_view,
+                                                           window_point,
+                                                           window_size);
+
+        // decompose the incoming view transformation matrix
+        // in order to figure out the scaling factor. we'll use the inverse
+        // scale for the indicators in order to keep them a constant size
+        // regardless of the view's current scaling factors.
+        glm::vec3 scale;
+        glm::vec3 translation;
+        glm::vec3 skew;
+        glm::vec4 perspective;
+        glm::quat orientation;
+        glm::decompose(world_to_view, scale, orientation, translation, skew, perspective);
+
+        glm::vec4 rotate_hit_pos;
+        glm::vec4 resize_hit_pos;
+        glm::vec4 remove_hit_pos;
+
+        // the hotspots are relative to the base model transform.
+        // we transform the world position to the possible hotspot
+        // coordinate spaces and check if we're inside a hotspot box.
+        gfx::Transform hotspot(model_to_world);
+
+        // rotation circle
+        hotspot.Push();
+          hotspot.Scale(10.0f/scale.x, 10.0f/scale.y);
+          hotspot.Translate(world_box.GetPosition());
+          rotate_hit_pos = glm::inverse(hotspot.GetAsMatrix()) * world_pos;
+        hotspot.Pop();
+
+        if (rotate_hit_pos.x >= 0.0f && rotate_hit_pos.x <= 1.0f &&
+            rotate_hit_pos.y >= 0.0f && rotate_hit_pos.y <= 1.0f)
+            return ToolHotspot::Rotate;
+
+        const auto [_0, _1, _2, bottom_right] = world_box.GetCorners();
+
+        // resize box
+        hotspot.Push();
+          hotspot.Scale(10.0f/scale.x, 10.0f/scale.y);
+          hotspot.Translate(bottom_right);
+          hotspot.Translate(-10.0f/scale.x, -10.0f/scale.y);
+          resize_hit_pos = glm::inverse(hotspot.GetAsMatrix()) * world_pos;
+        hotspot.Pop();
+
+        if (resize_hit_pos.x >= 0.0f && resize_hit_pos.x <= 1.0f &&
+            resize_hit_pos.y >= 0.0f && resize_hit_pos.y <= 1.0f)
+            return ToolHotspot::Resize;
+
+        remove_hit_pos = glm::inverse(hotspot.GetAsMatrix()) * world_pos;
+        if (world_box.TestPoint(remove_hit_pos.x, remove_hit_pos.y))
+            return ToolHotspot::Remove;
+
+        return ToolHotspot::None;
+    }
+
+    template<typename UI, typename State>
+    ToolHotspot TestToolHotspot(const UI& ui, const State& state,
+                                const glm::mat4& model_to_world,
+                                const gfx::FRect& world_box,
+                                const Point2Df& window_point)
+    {
+        return TestToolHotspot(CreateProjectionMatrix(ui),
+                               CreateViewMatrix(ui, state),
+                               model_to_world, world_box, window_point, ui.widget->size());
+    }
+
 
 } // namespace

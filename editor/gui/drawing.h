@@ -41,14 +41,6 @@ namespace gui
 
 void DrawLine(gfx::Painter& painter, const glm::vec2& src, const glm::vec2& dst);
 
-enum class ToolHotspot {
-    None,
-    Rotate,
-    Resize,
-    Remove
-};
-ToolHotspot TestToolHotspot(gfx::Transform& trans, const gfx::FRect& rect, const glm::vec4& view_pos);
-
 void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans);
 void DrawSelectionBox(gfx::Painter& painter, gfx::Transform& trans, const gfx::FRect& rect);
 void DrawInvisibleItemBox(gfx::Painter& painter, gfx::Transform& trans, const gfx::FRect& rect);

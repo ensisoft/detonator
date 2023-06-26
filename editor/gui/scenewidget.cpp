@@ -382,12 +382,13 @@ public:
             }
         }
     }
-
     virtual void Render(gfx::Painter& window, gfx::Painter& scene_painter) const override
     {
         const auto& rect = mClass->GetBoundingRect();
         const auto width = rect.GetWidth();
         const auto height = rect.GetHeight();
+        const auto right = rect.GetX() + width;
+        const auto bottom = rect.GetY() + height;
 
         gfx::Transform model;
         model.Translate(mWorldPos.x, mWorldPos.y);
@@ -397,16 +398,12 @@ public:
                                                scene_painter.GetViewMatrix(),
                                                window.GetProjMatrix(),
                                                window.GetViewMatrix(),
-                                               glm::vec3(mWorldPos.x, mWorldPos.y, 0.0f) + glm::vec3(width*0.5f, height*0.5f, 0.0f));
-        ShowMessage(mClass->GetName(), gfx::FRect(pos.x, pos.y, 200.0f, 20.0f), window);
+                                               glm::vec3(right + 10.0f, bottom + 10.0f, 0.0f));
+        ShowMessage(mClass->GetName(), gfx::FRect(mWorldPos.x + pos.x, mWorldPos.y + pos.y, 200.0f, 20.0f), window);
     }
-    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
+    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
     {
-        const auto& view_to_scene   = glm::inverse(view.GetAsMatrix());
-        const auto& mouse_pos_view  = ToVec4(mickey->pos());
-        const auto& mouse_pos_scene = view_to_scene * mouse_pos_view;
-        mWorldPos = mouse_pos_scene;
-        mMousePos = mickey->pos();
+        mWorldPos = mickey.WorldPlanePos();
     }
     virtual void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
     {
@@ -460,13 +457,8 @@ public:
         mCurrentEntityIdIndex = mCurrentEntityIdIndex > 0 ? mCurrentEntityIdIndex - 1 : mEntityIds.size() - 1;
         mClass = mState.workspace->GetEntityClassById(mEntityIds[mCurrentEntityIdIndex]);
     }
-    void AdjustPlacementPosition(const QPoint& mouse_pos, gfx::Transform& view)
-    {
-        const auto& view_to_scene   = glm::inverse(view.GetAsMatrix());
-        const auto& mouse_pos_view  = ToVec4(mouse_pos);
-        const auto& mouse_pos_scene = view_to_scene * mouse_pos_view;
-        mWorldPos = mouse_pos_scene;
-    }
+    void SetWorldPos(const glm::vec2& pos)
+    { mWorldPos = pos; }
 private:
     std::string CreateName() const
     {
@@ -483,7 +475,7 @@ private:
     SceneWidget::State& mState;
     // the current entity position in scene coordinates of the placement
     // based on the mouse position at the time.
-    glm::vec4 mWorldPos;
+    glm::vec2 mWorldPos;
     // entity class for the item we're going to add to scene.
     std::shared_ptr<const game::EntityClass> mClass;
     // true if we want the x,y coords to be aligned on grid size units.
@@ -494,8 +486,6 @@ private:
     QStringList mEntityIds;
     // the current index into the mEntityIds list.
     unsigned mCurrentEntityIdIndex = 0;
-    // mouse position in window coordinates
-    QPoint mMousePos;
 };
 
 SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
@@ -526,8 +516,6 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     mUI.widget->onMouseDoubleClick = std::bind(&SceneWidget::MouseDoubleClick, this, std::placeholders::_1);
     mUI.widget->onKeyPress      = std::bind(&SceneWidget::KeyPress, this, std::placeholders::_1);
     mUI.widget->onPaintScene    = std::bind(&SceneWidget::PaintScene, this, std::placeholders::_1,
-                                            std::placeholders::_2);
-    mUI.widget->onInitScene     = std::bind(&SceneWidget::InitScene, this, std::placeholders::_1,
                                             std::placeholders::_2);
     // the menu for adding entities in the scene.
     mEntities = new QMenu(this);
@@ -606,7 +594,6 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "bloom_red",       &mBloom.red);
     GetUserProperty(resource, "bloom_green",     &mBloom.green);
     GetUserProperty(resource, "bloom_blue",      &mBloom.blue);
-    mCameraWasLoaded = true;
 
     UpdateResourceReferences();
     DisplayCurrentNodeProperties();
@@ -710,8 +697,6 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.GetValue("Scene", "bloom_red",   &mBloom.red);
     settings.GetValue("Scene", "bloom_green", &mBloom.green);
     settings.GetValue("Scene", "bloom_blue",  &mBloom.blue);
-    mCameraWasLoaded = true;
-
     settings.LoadWidget("Scene", mUI.scaleX);
     settings.LoadWidget("Scene", mUI.scaleY);
     settings.LoadWidget("Scene", mUI.rotation);
@@ -855,17 +840,10 @@ void SceneWidget::Paste(const Clipboard& clipboard)
         mickey.y() < 0 || mickey.y() > mUI.widget->height())
         mickey = QPoint(mUI.widget->width() * 0.5, mUI.widget->height() * 0.5);
 
-    gfx::Transform view;
-    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
-    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.RotateAroundZ(qDegreesToRadians((float) GetValue(mUI.rotation)));
-    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-    const auto& view_to_scene   = glm::inverse(view.GetAsMatrix());
-    const auto& mouse_pos_view  = ToVec4(mickey);
-    const auto& mouse_pos_scene = view_to_scene * mouse_pos_view;
+    const auto& world_pos = MapWindowCoordinateToWorld(mUI, mState, mickey);
 
     auto* paste_root = nodes[0].get();
-    paste_root->SetTranslation(glm::vec2(mouse_pos_scene.x, mouse_pos_scene.y));
+    paste_root->SetTranslation(world_pos);
     tree.LinkChild(nullptr, paste_root);
 
     // if we got this far, nodes should contain the nodes to be added
@@ -953,6 +931,9 @@ void SceneWidget::Update(double secs)
         mSceneTime += secs;
     }
     mCurrentTime += secs;
+
+    mAnimator.Update(mUI, mState);
+
 }
 void SceneWidget::Render()
 {
@@ -1326,11 +1307,7 @@ void SceneWidget::on_actionNodePlace_triggered()
     const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
     const auto grid_size = (unsigned)grid;
     auto tool = std::make_unique<PlaceEntityTool>(mState, snap, grid_size);
-
-    gfx::Transform view;
-    MakeViewTransform(mUI, mState, view);
-
-    tool->AdjustPlacementPosition(mUI.widget->mapFromGlobal(QCursor::pos()), view);
+    tool->SetWorldPos(MapWindowCoordinateToWorld(mUI, mState, mUI.widget->mapFromGlobal(QCursor::pos())));
 
     mCurrentTool = std::move(tool);
     mUI.actionNodePlace->setChecked(true);
@@ -1575,8 +1552,8 @@ void SceneWidget::on_btnNewScriptVar_clicked()
     {
         const auto& node = mState.scene->GetNode(i);
         ResourceListItem item;
-        item.name = app::FromUtf8(node.GetName());
-        item.id   = app::FromUtf8(node.GetId());
+        item.name = node.GetName();
+        item.id   = node.GetId();
         entities.push_back(std::move(item));
     }
 
@@ -1603,8 +1580,8 @@ void SceneWidget::on_btnEditScriptVar_clicked()
     {
         const auto& node = mState.scene->GetNode(i);
         ResourceListItem item;
-        item.name = app::FromUtf8(node.GetName());
-        item.id   = app::FromUtf8(node.GetId());
+        item.name = node.GetName();
+        item.id   = node.GetId();
         entities.push_back(std::move(item));
     }
 
@@ -1634,37 +1611,19 @@ void SceneWidget::on_btnDeleteScriptVar_clicked()
 
 void SceneWidget::on_btnViewPlus90_clicked()
 {
-    const float value = GetValue(mUI.rotation);
-    mUI.rotation->setValue(math::clamp(-180.0f, 180.0f, value + 90.0f));
-    mViewTransformRotation = value;
-    mViewRotationStartTime = mCurrentTime;
+    mAnimator.Plus90(mUI, mState);
 }
 
 void SceneWidget::on_btnViewMinus90_clicked()
 {
-    const float value = GetValue(mUI.rotation);
-    mUI.rotation->setValue(math::clamp(-180.0f, 180.0f, value - 90.0f));
-    mViewTransformRotation = value;
-    mViewRotationStartTime = mCurrentTime;
+    mAnimator.Minus90(mUI, mState);
 }
 
 void SceneWidget::on_btnViewReset_clicked()
 {
-    const auto width = mUI.widget->width();
-    const auto height = mUI.widget->height();
-    const auto rotation = mUI.rotation->value();
-    mViewRotationStartTime    = mCurrentTime;
-    mViewTranslationStartTime = mCurrentTime;
-    mViewTranslationStart     = glm::vec2(mState.camera_offset_x, mState.camera_offset_y);
-    mViewTransformRotation    = rotation;
-    mState.camera_offset_x    = width * 0.5f;
-    mState.camera_offset_y    = height * 0.5f;
-    // set new camera offset to the center of the widget.
-    SetValue(mUI.translateX, 0.0f);
-    SetValue(mUI.translateY, 0.0f);
+    mAnimator.Reset(mUI, mState);
     SetValue(mUI.scaleX,     1.0f);
     SetValue(mUI.scaleY,     1.0f);
-    SetValue(mUI.rotation,   0.0f);
 }
 
 void SceneWidget::on_widgetColor_colorChanged(QColor color)
@@ -1930,17 +1889,6 @@ void SceneWidget::ResourceUpdated(const app::Resource* resource)
     // then force a re-load by resetting the map object.
     mTilemap.reset();
 }
-void SceneWidget::InitScene(unsigned width, unsigned height)
-{
-    if (!mCameraWasLoaded)
-    {
-        // if the camera hasn't been loaded then compute now the
-        // initial position for the camera.
-        mState.camera_offset_x = mUI.widget->width() * 0.5;
-        mState.camera_offset_y = mUI.widget->height() * 0.5;
-    }
-    DisplayCurrentCameraLocation();
-}
 
 void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
 {
@@ -1950,65 +1898,65 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     const auto xs     = (float)GetValue(mUI.scaleX);
     const auto ys     = (float)GetValue(mUI.scaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
-    const auto view_rotation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewRotationStartTime);
-    const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.rotation->value(),
-        view_rotation_time, math::Interpolation::Cosine);
-    const auto view_translation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTranslationStartTime);
-    const auto view_translation = math::interpolate(mViewTranslationStart, glm::vec2(mState.camera_offset_x, mState.camera_offset_y),
-        view_translation_time, math::Interpolation::Cosine);
+    const auto perspective = game::Perspective::AxisAligned;
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
-    // setup the view transform.
-    gfx::Transform view;
-    view.Scale(xs, ys);
-    view.Scale(zoom, zoom);
-    view.RotateAroundZ(qDegreesToRadians(view_rotation_angle));
-    view.Translate(view_translation);
-
-    painter.SetViewport(0, 0, width, height);
-    painter.SetPixelRatio(glm::vec2(xs*zoom, ys*zoom));
-    painter.ResetViewMatrix();
+    gfx::Painter scene_painter(painter.GetDevice());
+    scene_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, perspective));
+    scene_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, perspective));
+    scene_painter.SetPixelRatio(glm::vec2{xs*zoom, ys*zoom});
+    scene_painter.SetViewport(0, 0, width, height);
+    scene_painter.SetSurfaceSize(width, height);
 
     // render endless background grid.
     if (GetValue(mUI.chkShowGrid))
     {
-        DrawCoordinateGrid(painter, view, grid, zoom, xs, ys, width, height);
+        DrawCoordinateGrid(scene_painter, grid, zoom, xs, ys, width, height);
     }
 
-    // setup a viewport rect for culling draw packets against
-    // draw packets which don't intersect with the viewrect are culled
-    // for improved perf.
-    const game::FRect viewport(0, 0, width, height);
-
-    DrawHook hook(GetCurrentNode(), viewport);
-    hook.SetIsPlaying(mPlayState == PlayState::Playing);
-    hook.SetDrawVectors(true);
-    hook.SetViewMatrix(view.GetAsMatrix());
-
-    if (mState.scene->HasTilemap())
+    // render the actual scene
     {
-        const auto& mapId = mState.scene->GetTilemapId();
-        if (!mTilemap || mTilemap->GetClassId() != mapId)
+        if (mState.scene->HasTilemap())
         {
-            auto klass = mState.workspace->GetTilemapClassById(mapId);
-            mTilemap = game::CreateTilemap(klass);
-            mTilemap->Load(*mState.workspace, 1024);
+            const auto& mapId = mState.scene->GetTilemapId();
+            if (!mTilemap || mTilemap->GetClassId() != mapId)
+            {
+                auto klass = mState.workspace->GetTilemapClassById(mapId);
+                mTilemap = game::CreateTilemap(klass);
+                mTilemap->Load(*mState.workspace, 1024);
+            }
         }
 
+
+        gfx::Painter p(scene_painter);
+
+        // setup a viewport rect for culling draw packets against
+        // draw packets which don't intersect with the viewrect are culled
+        // for improved perf.
+
+        //const game::FRect viewport(0, 0, width, height);
+
+        // todo: reimplement culling
+        const game::FRect viewport(0, 0, 0, 0);
+
+        DrawHook hook(GetCurrentNode() , viewport);
+        hook.SetIsPlaying(mPlayState == PlayState::Playing);
+        hook.SetDrawVectors(true);
+        hook.SetViewMatrix(p.GetViewMatrix());
+
+        mState.renderer.BeginFrame();
+        mState.renderer.Draw(*mState.scene, p, &hook, &hook);
+
+        if (mCurrentTool)
+            mCurrentTool->Render(painter, scene_painter);
+
+        // Remember that the tool can also render using the renderer.
+        // If that happens after the call to "EndFrame" the renderer
+        // resources are lost in EndFrame and the tool's render call will
+        // end up recreating them again.
+        mState.renderer.EndFrame();
     }
-
-    painter.SetViewMatrix(view.GetAsMatrix());
-
-    mState.renderer.BeginFrame();
-
-    if (mTilemap)
-    {
-        // todo: reimplement tilemap support
-//        mState.renderer.Draw(*mTilemap, viewport, painter);
-    }
-
-    mState.renderer.Draw(*mState.scene, painter, &hook, &hook);
 
     for (size_t i=0; i<mState.scene->GetNumNodes(); ++i)
     {
@@ -2017,51 +1965,32 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         if (entity_klass)
             continue;
         const auto& pos = mState.scene->MapCoordsFromNodeBox(0.0f, 0.0f, &node);
-        ShowError(base::FormatString("%1 Missing entity reference!", node.GetName()), gfx::FPoint(pos.x, pos.y), painter);
+        ShowError(base::FormatString("%1 Missing entity reference!", node.GetName()), gfx::FPoint(pos.x, pos.y), scene_painter);
     }
-
-    if (mCurrentTool)
-    {
-        gfx::Painter window(painter);
-        window.ResetViewMatrix();
-        mCurrentTool->Render(window, painter);
-    }
-
-    // Remember that the tool can also render using the renderer.
-    // If that happens after the call to "EndFrame" the renderer
-    // resources are lost in EndFrame and the tool's render call will
-    // end up recreating them again.
-    mState.renderer.EndFrame();
-
-    painter.ResetViewMatrix();
 
     // right arrow
     if (GetValue(mUI.chkShowOrigin))
     {
-        DrawBasisVectors(painter, view);
+        gfx::Transform view;
+        DrawBasisVectors(scene_painter, view);
     }
 
     if (GetValue(mUI.chkShowViewport))
     {
+        gfx::Transform view;
         const auto& settings = mState.workspace->GetProjectSettings();
         const float game_width = settings.viewport_width;
         const float game_height = settings.viewport_height;
         DrawViewport(painter, view, game_width, game_height, width, height);
     }
-
-    PrintMousePos(view, painter, mUI.widget);
+    PrintMousePos(mUI, mState, painter, perspective);
 }
 
 void SceneWidget::MouseMove(QMouseEvent* mickey)
 {
     if (mCurrentTool)
     {
-        gfx::Transform view;
-        view.Scale(GetValue(mUI.scaleX) , GetValue(mUI.scaleY));
-        view.Scale(GetValue(mUI.zoom) , GetValue(mUI.zoom));
-        view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
-        view.Translate(mState.camera_offset_x , mState.camera_offset_y);
-        mCurrentTool->MouseMove(mickey , view);
+        mCurrentTool->MouseMove(MouseEvent(mickey, mUI, mState));
         // update the properties that might have changed as the result of application
         // of the current tool.
         DisplayCurrentCameraLocation();
@@ -2070,12 +1999,6 @@ void SceneWidget::MouseMove(QMouseEvent* mickey)
 }
 void SceneWidget::MousePress(QMouseEvent* mickey)
 {
-    gfx::Transform view;
-    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
-    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.RotateAroundZ((float) qDegreesToRadians(mUI.rotation->value()));
-    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-
     if (!mCurrentTool && (mickey->button() == Qt::LeftButton))
     {
         const auto snap = (bool)GetValue(mUI.chkSnap);
@@ -2092,14 +2015,15 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
             if (!entity_klass)
                 return;
             const auto& box  = entity_klass->GetBoundingRect();
-            view.Push(mState.scene->FindNodeTransform(current));
 
-            const auto hotspot = TestToolHotspot(view, box, glm::vec4(click_point.x(), click_point.y(), 0.0f, 1.0));
+            const base::Transform model(mState.scene->FindNodeTransform(current));
+
+            const auto hotspot = TestToolHotspot(mUI, mState, model, box, click_point);
             if (hotspot == ToolHotspot::Resize)
                 mCurrentTool.reset(new ScaleRenderTreeNodeTool(*mState.scene, current));
             else if (hotspot == ToolHotspot::Rotate)
                 mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.scene, current));
-            view.Pop();
+            //DEBUG("hotspot %1", hotspot);
         }
         if (!mCurrentTool)
         {
@@ -2116,24 +2040,18 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
     }
     else if (!mCurrentTool && (mickey->button() == Qt::RightButton))
     {
-        mCurrentTool.reset(new MoveCameraTool(mState));
+        mCurrentTool.reset(new PerspectiveCorrectCameraTool(mUI, mState));
     }
 
     if (mCurrentTool)
-        mCurrentTool->MousePress(mickey, view);
+        mCurrentTool->MousePress(MouseEvent(mickey, mUI, mState));
 }
 void SceneWidget::MouseRelease(QMouseEvent* mickey)
 {
     if (!mCurrentTool)
         return;
 
-    gfx::Transform view;
-    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
-    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
-    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-
-    if (mCurrentTool->MouseRelease(mickey, view))
+    if (mCurrentTool->MouseRelease(MouseEvent(mickey, mUI, mState)))
     {
         mCurrentTool.reset();
         UncheckPlacementActions();
@@ -2410,12 +2328,8 @@ void SceneWidget::DisplaySceneProperties()
 
 void SceneWidget::DisplayCurrentCameraLocation()
 {
-    const auto width  = mUI.widget->width();
-    const auto height = mUI.widget->height();
-    const auto dist_x = mState.camera_offset_x - (width / 2.0f);
-    const auto dist_y = mState.camera_offset_y - (height / 2.0f);
-    SetValue(mUI.translateX, dist_x);
-    SetValue(mUI.translateY, dist_y);
+    SetValue(mUI.translateX, -mState.camera_offset_x);
+    SetValue(mUI.translateY, -mState.camera_offset_y);
 }
 
 void SceneWidget::UncheckPlacementActions()
@@ -2554,49 +2468,25 @@ void SceneWidget::FindNode(const game::SceneNodeClass* node)
     if (!entity_klass)
         return;
 
-    const float width  = mUI.widget->width();
-    const float height = mUI.widget->height();
+    const auto view = engine::CreateViewMatrix(game::Perspective::AxisAligned,
+                                               mState.camera_offset_x,
+                                               mState.camera_offset_y,
+                                               1.0f, 1.0f,
+                                               GetValue(mUI.rotation));
 
-    // need to find camera_offset x and y such that the transformation
-    // of the scene node center point maps to a window coord xy, such
-    // that x=width*0.5 and y=height*0.5
-
-    base::Transform view;
-    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
-    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
-    // this is the info that needs to be found. offset_x = ?? offset_y = ??
-    // view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-
-    // excluding the translation from the transformation matrix gives
-    // us the coordinate with other properties and the translation that
-    // would be needed is just the offset between the center xy and the
-    // mapped node center point vector.
-    const auto& pos_in_scene = mState.scene->MapCoordsFromNodeBox(0.0f, 0.0f, node);
-    const auto& pos_in_view  = view * glm::vec4(pos_in_scene.x, pos_in_scene.y, 0.0f, 1.0f);
-    const auto translation   = glm::vec4(width*0.5, height*0.5, 0.0f, 0.0f) - pos_in_view;
-    mViewTranslationStartTime = mCurrentTime;
-    mViewTranslationStart     = glm::vec2(mState.camera_offset_x, mState.camera_offset_y);
-    mState.camera_offset_x    = translation.x;
-    mState.camera_offset_y    = translation.y;
-    DisplayCurrentCameraLocation();
+    const auto& node_world_pos = mState.scene->MapCoordsFromNodeBox(0.0f, 0.0f, node);
+    const auto& node_view_pos  = view * glm::vec4(node_world_pos, 0.0f, 1.0f);
+    const auto cam_pos = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
+    mAnimator.Jump(mUI, mState, cam_pos + glm::vec2{node_view_pos});
 }
 
 game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
 {
-    gfx::Transform view;
-    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
-    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
-    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-
-    const auto& view_to_scene     = glm::inverse(view.GetAsMatrix());
-    const auto click_pos_in_view  = glm::vec4(click_point.x(), click_point.y(), 1.0f, 1.0f);
-    const auto click_pos_in_scene = view_to_scene * click_pos_in_view;
+    const glm::vec2 world_pos = MapWindowCoordinateToWorld(mUI, mState, click_point);
 
     std::vector<game::SceneNodeClass*> hit_nodes;
     std::vector<glm::vec2> hit_positions;
-    mState.scene->CoarseHitTest(click_pos_in_scene.x, click_pos_in_scene.y, &hit_nodes, &hit_positions);
+    mState.scene->CoarseHitTest(world_pos, &hit_nodes, &hit_positions);
     if (hit_nodes.empty())
         return nullptr;
 
@@ -2654,18 +2544,31 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
         std::size_t mColorIndex = 0;
     };
 
-    auto* painter = mUI.widget->GetPainter();
     auto* device = mUI.widget->GetDevice();
-    painter->SetViewMatrix(view.GetAsMatrix());
+
+    const auto zoom   = (float)GetValue(mUI.zoom);
+    const auto xs     = (float)GetValue(mUI.scaleX);
+    const auto ys     = (float)GetValue(mUI.scaleY);
+    const auto width  = mUI.widget->width();
+    const auto height = mUI.widget->height();
+    const auto perspective = game::Perspective::AxisAligned;
+
+    gfx::Painter scene_painter(device);
+    scene_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, perspective));
+    scene_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, perspective));
+    scene_painter.SetPixelRatio(glm::vec2{xs*zoom, ys*zoom});
+    scene_painter.SetViewport(0, 0, width, height);
+    scene_painter.SetSurfaceSize(width, height);
 
     DrawHook hook(hit_nodes);
-    mState.renderer.Draw(*mState.scene, *painter, &hook, &hook);
+    mState.renderer.Draw(*mState.scene, scene_painter, &hook, &hook);
 
     {
         // for debugging.
         //auto bitmap = device.ReadColorBuffer(mUI.widget->width(), mUI.widget->height());
         //gfx::WritePNG(bitmap, "/tmp/click-test-debug.png");
     }
+
     const auto surface_width  = mUI.widget->width();
     const auto surface_height = mUI.widget->height();
     const auto& bitmap = device->ReadColorBuffer(click_point.x(), surface_height - click_point.y(), 1, 1);
