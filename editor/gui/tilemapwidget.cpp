@@ -952,22 +952,8 @@ void TilemapWidget::Update(double dt)
 {
     mCurrentTime += dt;
 
-    if (!mTransformView)
-        return;
+    mAnimator.Update(mUI, mState);
 
-    const auto time_diff = mCurrentTime - mViewTransformStartTime;
-    const auto view_transform_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTransformStartTime);
-    const auto view_rotation_angle = math::interpolate(mViewTransformRotationStart, mViewTransformRotationStop,
-                                                       view_transform_time, math::Interpolation::Cosine);
-    const auto view_translation = math::interpolate(mViewTransformTranslateStart, mViewTransformTranslateStop,
-                                                    view_transform_time, math::Interpolation::Cosine);
-
-    mState.camera_offset_x = view_translation.x;
-    mState.camera_offset_y = view_translation.y;
-    SetValue(mUI.translateX, mState.camera_offset_x);
-    SetValue(mUI.translateY, mState.camera_offset_y);
-    SetValue(mUI.rotation, view_rotation_angle);
-    mTransformView = view_transform_time != 1.0f;
 }
 void TilemapWidget::Render()
 {
@@ -1279,12 +1265,7 @@ void TilemapWidget::on_btnEditLayer_clicked()
 
 void TilemapWidget::on_btnViewReset_clicked()
 {
-    mViewTransformRotationStart  = GetValue(mUI.rotation);
-    mViewTransformRotationStop   = 0.0f;
-    mViewTransformTranslateStart = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
-    mViewTransformTranslateStop  = glm::vec2{0.0f, 0.0f};
-    mViewTransformStartTime      = mCurrentTime;
-    mTransformView = true;
+    mAnimator.Reset(mUI, mState);
 
     // the rest of the view properties are updated in Update since they're animated/interpolated
     SetValue(mUI.scaleX, 1.0f);
@@ -1293,23 +1274,11 @@ void TilemapWidget::on_btnViewReset_clicked()
 
 void TilemapWidget::on_btnViewMinus90_clicked()
 {
-    const float value = GetValue(mUI.rotation);
-    mViewTransformRotationStart  = value;
-    mViewTransformRotationStop   = math::clamp(-180.0f, 180.0f, value - 90.0f);
-    mViewTransformTranslateStop  = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
-    mViewTransformTranslateStart = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
-    mViewTransformStartTime = mCurrentTime;
-    mTransformView = true;
+    mAnimator.Minus90(mUI, mState);
 }
 void TilemapWidget::on_btnViewPlus90_clicked()
 {
-    const float value = GetValue(mUI.rotation);
-    mViewTransformRotationStart  = value;
-    mViewTransformRotationStop   = math::clamp(-180.0f, 180.0f, value + 90.0f);
-    mViewTransformTranslateStop  = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
-    mViewTransformTranslateStart = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
-    mViewTransformStartTime = mCurrentTime;
-    mTransformView = true;
+    mAnimator.Plus90(mUI, mState);
 }
 
 void TilemapWidget::on_widgetColor_colorChanged(QColor color)
