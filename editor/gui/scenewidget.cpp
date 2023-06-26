@@ -399,7 +399,7 @@ public:
         view.Pop();
         view.Pop();
     }
-    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto& view_to_scene   = glm::inverse(view.GetAsMatrix());
         const auto& mouse_pos_view  = ToVec4(mickey->pos());
@@ -407,10 +407,10 @@ public:
         mWorldPos = mouse_pos_scene;
         mMousePos = mickey->pos();
     }
-    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
     {
     }
-    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto button = mickey->button();
         if (button != Qt::LeftButton)

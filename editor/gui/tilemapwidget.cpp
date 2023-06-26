@@ -339,14 +339,14 @@ public:
                      gfx::CreateMaterialFromColor(gfx::Color::Green));
 
     }
-    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform&) override
+    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
     {
         mWorldPos = engine::WindowToWorldPlane(mViewToClip,
                                                mWorldToView,
                                                ToVec2(mickey->pos()),
                                                mWindowSize);
     }
-    virtual void MousePress(QMouseEvent* mickey, gfx::Transform&) override
+    virtual void MousePress(const MouseEvent& mickey, gfx::Transform&) override
     {
         mWorldPos = engine::WindowToWorldPlane(mViewToClip,
                                                mWorldToView,
@@ -354,7 +354,7 @@ public:
                                                mWindowSize);
         mWorldStartPos = mWorldPos;
     }
-    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform&) override
+    virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
     {
         const auto movement = mWorldPos - mWorldStartPos;
         const auto selection_width  = movement.x;
@@ -467,7 +467,7 @@ public:
 
         painter.Draw(batch, tile_projection_transform_matrix, *mMaterial);
     }
-    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform&) override
+    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
     {
         const auto scaler = mLayer.GetTileSizeScaler();
         const auto tile_width = mState.klass->GetTileWidth() * scaler;
@@ -483,7 +483,7 @@ public:
         if (mActive)
             ApplyTool();
     }
-    virtual void MousePress(QMouseEvent* mickey, gfx::Transform&) override
+    virtual void MousePress(const MouseEvent& mickey, gfx::Transform&) override
     {
         if (mickey->button() != Qt::LeftButton)
             return;
@@ -510,7 +510,7 @@ public:
         // the mouse is edited as expected
         ApplyTool();
     }
-    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform&)  override
+    virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform&)  override
     {
         if (mickey->button() == Qt::LeftButton)
             mActive = false;
