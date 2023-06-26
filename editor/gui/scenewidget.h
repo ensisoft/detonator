@@ -35,6 +35,7 @@
 #include "engine/renderer.h"
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/treemodel.h"
+#include "editor/gui/tool.h"
 
 namespace gfx {
     class Painter;
@@ -191,7 +192,6 @@ namespace gui
         void ResourceRemoved(const app::Resource* resource);
         void ResourceUpdated(const app::Resource* resource);
     private:
-        void InitScene(unsigned width, unsigned height);
         void PaintScene(gfx::Painter& painter, double secs);
         void MouseMove(QMouseEvent* mickey);
         void MousePress(QMouseEvent* mickey);
@@ -219,6 +219,8 @@ namespace gui
         // there doesn't seem to be a way to do this in the designer
         // so we create our menu for Entities.
         QMenu* mEntities = nullptr;
+
+        UIAnimator mAnimator;
     private:
         class PlaceEntityTool;
         class ScriptVarModel;
@@ -245,11 +247,6 @@ namespace gui
         PlayState mPlayState = PlayState::Stopped;
         double mCurrentTime = 0.0;
         double mSceneTime   = 0.0;
-        double mViewRotationStartTime = 0.0;
-        double mViewTranslationStartTime = 0.0;
-        float mViewTransformRotation = 0.0f;
-        glm::vec2 mViewTranslationStart = {0.0f, 0.0f};
-        bool mCameraWasLoaded = false;
         std::unique_ptr<game::Tilemap> mTilemap;
         // Undo "stack" with fixed capacity that begins
         // overwrite old items when space is exceeded
@@ -258,5 +255,6 @@ namespace gui
         std::unique_ptr<PlayWindow> mPreview;
         // bloom values (if any)
         game::Scene::BloomFilter mBloom;
+
     };
 }
