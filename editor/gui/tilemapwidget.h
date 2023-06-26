@@ -28,6 +28,7 @@
 #include "game/tilemap.h"
 #include "engine/renderer.h"
 #include "editor/gui/mainwidget.h"
+#include "editor/gui/tool.h"
 
 namespace gui
 {
@@ -214,11 +215,7 @@ namespace gui
         std::size_t mHash = 0;
         engine::Renderer mRenderer;
         double mCurrentTime = 0.0;
-        double mViewTransformStartTime = 0.0;
-        float mViewTransformRotationStart = 0.0f;
-        float mViewTransformRotationStop  = 0.0f;
-        glm::vec2 mViewTransformTranslateStart = glm::vec2{0.0f, 0.0f};
-        glm::vec2 mViewTransformTranslateStop  = glm::vec2{0.0f, 0.0f};
-        bool mTransformView = false;
+
+        UIAnimator mAnimator;
     };
 } // namespace

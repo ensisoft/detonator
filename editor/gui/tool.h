@@ -30,6 +30,8 @@
 #include <tuple>
 #include <cmath>
 
+#include "base/math.h"
+#include "base/utility.h"
 #include "game/enum.h"
 #include "engine/camera.h"
 #include "graphics/painter.h"
@@ -41,6 +43,74 @@
 
 namespace gui
 {
+    class UIAnimator
+    {
+    public:
+
+        template<typename UI, typename State>
+        void Reset(const UI& ui, const State& state)
+        {
+            mViewTransformRotationStart  = GetValue(ui.rotation);
+            mViewTransformRotationStop   = 0.0f;
+            mViewTransformTranslateStart = glm::vec2{state.camera_offset_x, state.camera_offset_y};
+            mViewTransformTranslateStop  = glm::vec2{0.0f, 0.0f};
+            mViewTransformStartTime      = base::GetTime();
+            mTransformView = true;
+        }
+        template<typename UI, typename State>
+        void Minus90(const UI& ui, const State& state)
+        {
+            const float value = GetValue(ui.rotation);
+            mViewTransformRotationStart  = value;
+            mViewTransformRotationStop   = math::clamp(-180.0f, 180.0f, value - 90.0f);
+            mViewTransformTranslateStop  = glm::vec2{state.camera_offset_x, state.camera_offset_y};
+            mViewTransformTranslateStart = glm::vec2{state.camera_offset_x, state.camera_offset_y};
+            mViewTransformStartTime      = base::GetTime();
+            mTransformView = true;
+        }
+        template<typename UI, typename State>
+        void Plus90(const UI& ui, const State& state)
+        {
+            const float value = GetValue(ui.rotation);
+            mViewTransformRotationStart  = value;
+            mViewTransformRotationStop   = math::clamp(-180.0f, 180.0f, value + 90.0f);
+            mViewTransformTranslateStop  = glm::vec2{state.camera_offset_x, state.camera_offset_y};
+            mViewTransformTranslateStart = glm::vec2{state.camera_offset_x, state.camera_offset_y};
+            mViewTransformStartTime      = base::GetTime();
+            mTransformView = true;
+        }
+
+        template<typename UI, typename State>
+        void Update(UI& ui, State& state)
+        {
+            if (!mTransformView)
+                return;
+
+            const auto time = base::GetTime();
+            const auto time_diff = time - mViewTransformStartTime;
+            const auto view_transform_time = math::clamp(0.0, 1.0, time_diff);
+            const auto view_rotation_angle = math::interpolate(mViewTransformRotationStart, mViewTransformRotationStop,
+                                                               view_transform_time, math::Interpolation::Cosine);
+            const auto view_translation = math::interpolate(mViewTransformTranslateStart, mViewTransformTranslateStop,
+                                                            view_transform_time, math::Interpolation::Cosine);
+
+            state.camera_offset_x = view_translation.x;
+            state.camera_offset_y = view_translation.y;
+            SetValue(ui.translateX, state.camera_offset_x);
+            SetValue(ui.translateY, state.camera_offset_y);
+            SetValue(ui.rotation, view_rotation_angle);
+            mTransformView = view_transform_time != 1.0f;
+        }
+
+    private:
+        float mViewTransformRotationStart = 0.0f;
+        float mViewTransformRotationStop  = 0.0f;
+        glm::vec2 mViewTransformTranslateStart = {0.0f, 0.0f};
+        glm::vec2 mViewTransformTranslateStop  = {0.0f, 0.0f};
+        double mViewTransformStartTime = 0.0;
+        bool mTransformView = false;
+    };
+
     // Interface for transforming simple mouse actions
     // into actions that manipulate some state such as
     // animation/scene render tree.
