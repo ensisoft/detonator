@@ -133,11 +133,13 @@ namespace gui
         { return mMickey->pos(); }
         inline Point2Df WorldPos() const noexcept
         {
-            return engine::WindowToWorld(mViewToClip, mWorldToView, WindowPos(), mWindowSize);
+            const auto ret = engine::WindowToWorld(mViewToClip, mWorldToView, WindowPos(), mWindowSize);
+            return {ret.x, ret.y};
         }
         inline Point2Df WorldPlanePos() const noexcept
         {
-            return engine::WindowToWorldPlane(mViewToClip, mWorldToView, WindowPos(), mWindowSize);
+            const auto ret = engine::WindowToWorldPlane(mViewToClip, mWorldToView, WindowPos(), mWindowSize);
+            return {ret.x, ret.y};
         }
         inline bool CanTransform() const
         { return mCanTransform; }
@@ -291,7 +293,7 @@ namespace gui
         glm::mat4 mWorldToView;
         glm::vec2 mWindowSize;
         CameraState& mState;
-        glm::vec2 mWorldPos;
+        glm::vec4 mWorldPos;
     };
 
 

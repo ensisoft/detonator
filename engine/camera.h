@@ -191,13 +191,13 @@ namespace engine
     }
 
     // Map a window (2D projection surface coordinate) to game plane
-    glm::vec2 WindowToWorldPlane(const glm::mat4& view_to_clip, // aka projection matrix/transform
+    glm::vec4 WindowToWorldPlane(const glm::mat4& view_to_clip, // aka projection matrix/transform
                                  const glm::mat4& world_to_view, // aka view/camera matrix/transform
                                  const glm::vec2& window_coord,
                                  const glm::vec2& window_size);
 
     // Map a window (2D projection surface coordinate) to world space.
-    glm::vec2 WindowToWorld(const glm::mat4& view_to_clip,
+    glm::vec4 WindowToWorld(const glm::mat4& view_to_clip,
                             const glm::mat4& world_to_view,
                             const glm::vec2& window_coord,
                             const glm::vec2& window_size);

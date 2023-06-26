@@ -120,7 +120,7 @@ glm::mat4 CreateViewMatrix(game::Perspective perspective,
     return mat;
 }
 
-glm::vec2 WindowToWorldPlane(const glm::mat4& view_to_clip,
+glm::vec4 WindowToWorldPlane(const glm::mat4& view_to_clip,
                              const glm::mat4& world_to_view,
                              const glm::vec2& window_coord,
                              const glm::vec2& window_size)
@@ -168,10 +168,10 @@ glm::vec2 WindowToWorldPlane(const glm::mat4& view_to_clip,
 
     const auto& intersection_point_view  = ray_origin + ray_direction * intersection_distance;
     const auto& intersection_point_world = view_to_world * intersection_point_view;
-    return {intersection_point_world.x, intersection_point_world.y};
+    return intersection_point_world;
 }
 
-glm::vec2 WindowToWorld(const glm::mat4& view_to_clip,
+glm::vec4 WindowToWorld(const glm::mat4& view_to_clip,
                         const glm::mat4& world_to_view,
                         const glm::vec2& window_coord,
                         const glm::vec2& window_size)
