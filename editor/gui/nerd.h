@@ -84,9 +84,10 @@ template<typename UI, typename State>
 Point2Df MapWindowCoordinateToWorld(const UI& ui,
                                    const State& state,
                                    const Point2Df& window_point,
-                                   const Size2Df& window_size,
                                    game::Perspective perspective = game::Perspective::AxisAligned)
 {
+    const Size2Df window_size = ui.widget->size();
+
     const auto& proj_matrix = CreateProjectionMatrix(ui, perspective);
     const auto& view_matrix = CreateViewMatrix(ui, state, perspective);
     const auto pos = engine::WindowToWorldPlane(proj_matrix, view_matrix, window_point, window_size);
