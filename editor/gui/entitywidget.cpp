@@ -324,13 +324,13 @@ public:
         painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), model,
                      gfx::CreateMaterialFromColor(gfx::Color::Green));
     }
-    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto& view_to_model = glm::inverse(view.GetAsMatrix());
         mCurrent = view_to_model * ToVec4(mickey->pos());
         mAlwaysSquare = mickey->modifiers() & Qt::ControlModifier;
     }
-    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto button = mickey->button();
         if (button == Qt::LeftButton)
@@ -342,7 +342,7 @@ public:
             mEngaged = true;
         }
     }
-    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto button = mickey->button();
         if (button != Qt::LeftButton)

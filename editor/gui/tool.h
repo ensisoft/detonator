@@ -40,6 +40,7 @@
 #include "graphics/transform.h"
 
 #include "editor/gui/utility.h"
+#include "editor/gui/types.h"
 
 namespace gui
 {
@@ -111,6 +112,47 @@ namespace gui
         bool mTransformView = false;
     };
 
+    class MouseEvent
+    {
+    public:
+        MouseEvent(const QMouseEvent* mickey)
+          : mMickey(mickey)
+          , mViewToClip(1.0f)
+          , mWorldToView(1.0f)
+          , mWindowSize(0.0f, 0.0f)
+        {}
+        template<typename UI, typename State>
+        MouseEvent(const QMouseEvent* mickey, const UI& ui, const State& state, game::Perspective perspective = game::Perspective::AxisAligned)
+          : mMickey(mickey)
+          , mViewToClip(CreateProjectionMatrix(ui, perspective))
+          , mWorldToView(CreateViewMatrix(ui, state, perspective))
+          , mWindowSize(ToVec2(ui.widget->size()))
+          , mCanTransform(true)
+        {}
+        inline Point2Df WindowPos() const noexcept
+        { return mMickey->pos(); }
+        inline Point2Df WorldPos() const noexcept
+        {
+            return engine::WindowToWorld(mViewToClip, mWorldToView, WindowPos(), mWindowSize);
+        }
+        inline Point2Df WorldPlanePos() const noexcept
+        {
+            return engine::WindowToWorldPlane(mViewToClip, mWorldToView, WindowPos(), mWindowSize);
+        }
+        inline bool CanTransform() const
+        { return mCanTransform; }
+
+        const QMouseEvent* operator->() const
+        { return mMickey; }
+    private:
+        const QMouseEvent* mMickey = nullptr;
+        const glm::mat4 mViewToClip;
+        const glm::mat4 mWorldToView;
+        const glm::vec2 mWindowSize;
+        const bool mCanTransform = false;
+    };
+
+
     // Interface for transforming simple mouse actions
     // into actions that manipulate some state such as
     // animation/scene render tree.
@@ -122,14 +164,14 @@ namespace gui
         // being performed.
         virtual void Render(gfx::Painter& painter, gfx::Transform& view) const {}
         // Act on mouse move event.
-        virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) = 0;
+        virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& view) = 0;
         // Act on mouse press event.
-        virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) = 0;
+        virtual void MousePress(const MouseEvent& mickey, gfx::Transform& view) = 0;
         // Act on mouse release event. Typically this completes the tool i.e.
         // the use and application of this tool.
         // If the tool is now "done" returns true, otherwise returns false to
         // indicate that the tool can continue operation.
-        virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) = 0;
+        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) = 0;
         // Act on a key press. Returns true if the key was consumed otherwise false
         // an the key is passed on to the next handler.
         virtual bool KeyPress(QKeyEvent* key) { return false; }
@@ -143,17 +185,17 @@ namespace gui
             gfx::Transform dummy;
             Render(painter, dummy);
         }
-        inline void MouseMove(QMouseEvent* mickey)
+        inline void MouseMove(const MouseEvent& mickey)
         {
             gfx::Transform  dummy;
             MouseMove(mickey, dummy);
         }
-        inline void MousePress(QMouseEvent* mickey)
+        inline void MousePress(const MouseEvent& mickey)
         {
             gfx::Transform dummy;
             MousePress(mickey, dummy);
         }
-        inline bool MouseRelease(QMouseEvent* mickey)
+        inline bool MouseRelease(const MouseEvent& mickey)
         {
             gfx::Transform dummy;
             return MouseRelease(mickey, dummy);
@@ -172,7 +214,7 @@ namespace gui
         {}
         virtual void Render(gfx::Painter& painter, gfx::Transform&) const override
         {}
-        virtual void MouseMove(QMouseEvent* mickey, gfx::Transform&) override
+        virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
         {
             const auto& pos = mickey->pos();
             const auto& delta = pos - mMousePos;
@@ -188,11 +230,11 @@ namespace gui
             mState.camera_offset_y += y;
             mMousePos = pos;
         }
-        virtual void MousePress(QMouseEvent* mickey, gfx::Transform&) override
+        virtual void MousePress(const MouseEvent& mickey, gfx::Transform&) override
         {
             mMousePos = mickey->pos();
         }
-        virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform&) override
+        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
         {
             // done on mouse release
             return true;
@@ -226,7 +268,7 @@ namespace gui
         }
         virtual void Render(gfx::Painter& painter, gfx::Transform&) const override
         {}
-        virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& ) override
+        virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& ) override
         {
             const auto world_pos = engine::WindowToWorld(mViewToClip,
                                                        mWorldToView,
@@ -237,14 +279,14 @@ namespace gui
             mState.camera_offset_y -= world_delta.y;
             mWorldPos = world_pos;
         }
-        virtual void MousePress(QMouseEvent* mickey, gfx::Transform& ) override
+        virtual void MousePress(const MouseEvent& mickey, gfx::Transform& ) override
         {
             mWorldPos = engine::WindowToWorld(mViewToClip,
                                             mWorldToView,
                                             ToVec2(mickey->pos()),
                                             mWindowSize);
         }
-        virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform&) override
+        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
         {
             // done on mouse release
             return true;
@@ -268,7 +310,7 @@ namespace gui
             , mSnapToGrid(snap)
             , mGridSize(grid)
         {}
-        virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& trans) override
+        virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             const auto& mouse_pos = mickey->pos();
             const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
@@ -311,7 +353,7 @@ namespace gui
             // new place if snap to grid was on.
             mWasMoved = true;
         }
-        virtual void MousePress(QMouseEvent* mickey, gfx::Transform& trans) override
+        virtual void MousePress(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             const auto& mouse_pos = mickey->pos();
             const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
@@ -330,7 +372,7 @@ namespace gui
                 mPreviousMousePos = glm::vec2(mouse_pos_in_view.x, mouse_pos_in_view.y);
             }
         }
-        virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
+        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             if (!mWasMoved)
                 return true;
@@ -370,7 +412,7 @@ namespace gui
         {
             mScale = mNode->GetScale();
         }
-        virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& trans) override
+        virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             const auto& tree = mModel.GetRenderTree();
             const auto& mouse_pos = mickey->pos();
@@ -385,7 +427,7 @@ namespace gui
 
             mNode->SetScale(scale * mScale);
         }
-        virtual void MousePress(QMouseEvent* mickey, gfx::Transform& trans) override
+        virtual void MousePress(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             const auto& tree = mModel.GetRenderTree();
             const auto& mouse_pos = mickey->pos();
@@ -398,7 +440,7 @@ namespace gui
 
             mPreviousMousePos = glm::vec2(mouse_pos_in_view.x, mouse_pos_in_view.y);
         }
-        virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
+        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             // we're done
             return true;
@@ -420,7 +462,7 @@ namespace gui
           , mSnapToGrid(snap)
           , mGridSize(grid)
         {}
-        virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& trans) override
+        virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             const auto& mouse_pos = mickey->pos();
             const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
@@ -450,14 +492,14 @@ namespace gui
             mPreviousMousePos = mouse_pos_in_node;
             mWasMoved = true;
         }
-        virtual void MousePress(QMouseEvent* mickey, gfx::Transform& trans) override
+        virtual void MousePress(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             const auto& mouse_pos = mickey->pos();
             const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
             const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
             mPreviousMousePos = mModel.MapCoordsToNodeBox(mouse_pos_in_view.x, mouse_pos_in_view.y, mNode);
         }
-        virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
+        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             if (!mWasMoved)
                 return true;
@@ -510,7 +552,7 @@ namespace gui
                                               1.0f, 1.0f);
             }
         }
-        virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& trans) override
+        virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             const auto& mouse_pos = mickey->pos();
             const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
@@ -528,14 +570,14 @@ namespace gui
             mNode->SetRotation(angle);
             mPreviousMousePos = mouse_pos_in_view;
         }
-        virtual void MousePress(QMouseEvent* mickey, gfx::Transform& trans) override
+        virtual void MousePress(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             const auto& mouse_pos = mickey->pos();
             const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
             mPreviousMousePos = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
             mRadius = glm::length(mPreviousMousePos - mNodeCenterInView);
         }
-        virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& trans) override
+        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             return true;
         }

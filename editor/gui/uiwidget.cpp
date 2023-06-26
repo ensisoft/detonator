@@ -276,17 +276,17 @@ public:
         paint.rect.Translate(mWidgetPos.x, mWidgetPos.y);
         mWidget->Paint(paint, state, *mState.painter);
     }
-    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
     {
         UpdateMousePosition(mickey->pos(), view);
     }
 
-    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
     {
         // intentionally empty
     }
 
-    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto button = mickey->button();
         if (button != Qt::LeftButton)
@@ -361,7 +361,7 @@ public:
       , mSnapGrid(snap)
       , mGridSize(grid)
     {}
-    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto& mouse_pos_in_window = ToVec4(mickey->pos());
         const auto& window_to_scene = glm::inverse(view.GetAsMatrix());
@@ -375,14 +375,14 @@ public:
         // will then snap the widget into a new place if "snap to grid" was on.
         mWasMoved = true;
     }
-    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto& mouse_pos_in_window = ToVec4(mickey->pos());
         const auto& window_to_scene = glm::inverse(view.GetAsMatrix());
         const auto& mouse_pos_in_scene = window_to_scene * mouse_pos_in_window;
         mPrevMousePos = mouse_pos_in_scene;
     }
-    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
     {
         if (!mWasMoved)
             return true;
@@ -418,7 +418,7 @@ public:
       , mSnapGrid(snap)
       , mGridSize(grid)
     {}
-    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto& view_to_scene = glm::inverse(view.GetAsMatrix());
         const auto& mouse_pos_view = ToVec4(mickey->pos());
@@ -428,13 +428,13 @@ public:
         mMousePos = mouse_pos_scene;
         mWasSized = true;
     }
-    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto& view_to_scene = glm::inverse(view.GetAsMatrix());
         const auto& mouse_pos_view = ToVec4(mickey->pos());
         mMousePos = view_to_scene * mouse_pos_view;
     }
-    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
     {
         if (!mWasSized)
             return true;

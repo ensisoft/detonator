@@ -64,7 +64,7 @@ class ParticleEditorWidget::MoveEmitterTool : public MouseTool
 public:
     MoveEmitterTool(UIState& state) : mState(state)
     {}
-    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const float viz_width  = mState.visualization_width;
         const float viz_height = mState.visualization_height;
@@ -86,7 +86,7 @@ public:
         mMousePos = coord_in_local;
         view.Pop();
     }
-    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const float viz_width  = mState.visualization_width;
         const float viz_height = mState.visualization_height;
@@ -102,7 +102,7 @@ public:
         mMousePos = coord_in_local;
         view.Pop();
     }
-    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
     {
         return true;
     }
@@ -115,7 +115,7 @@ class ParticleEditorWidget::SizeEmitterTool : public MouseTool
 public:
     SizeEmitterTool(UIState& state) : mState(state)
     {}
-    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const float viz_width  = mState.visualization_width;
         const float viz_height = mState.visualization_height;
@@ -138,7 +138,7 @@ public:
         mMousePos = coord_in_local;
         view.Pop();
     }
-    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const float viz_width  = mState.visualization_width;
         const float viz_height = mState.visualization_height;
@@ -154,7 +154,7 @@ public:
         mMousePos = coord_in_local;
         view.Pop();
     }
-    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
     {
         return true;
     }
@@ -168,7 +168,7 @@ class ParticleEditorWidget::MoveVizTool : public MouseTool
 public:
     MoveVizTool(UIState& state) : mState(state)
     {}
-    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto& local_to_view  = view.GetAsMatrix();
         const auto& view_to_local  = glm::inverse(local_to_view);
@@ -178,14 +178,14 @@ public:
         mState.visualization_ypos += mouse_delta.y;
         mMousePos = coord_in_local;
     }
-    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto& local_to_view  = view.GetAsMatrix();
         const auto& view_to_local  = glm::inverse(local_to_view);
         const auto& coord_in_local = view_to_local * ToVec4(mickey->pos());
         mMousePos = coord_in_local;
     }
-    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
     {
         return true;
     }
@@ -199,7 +199,7 @@ class ParticleEditorWidget::SizeVizTool : public MouseTool
 public:
     SizeVizTool(UIState& state) : mState(state)
     {}
-    virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto& local_to_view  = view.GetAsMatrix();
         const auto& view_to_local  = glm::inverse(local_to_view);
@@ -209,14 +209,14 @@ public:
         mState.visualization_height += (mouse_delta.y * 2.0f);
         mMousePos = coord_in_local;
     }
-    virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
     {
         const auto& local_to_view  = view.GetAsMatrix();
         const auto& view_to_local  = glm::inverse(local_to_view);
         const auto& coord_in_local = view_to_local * ToVec4(mickey->pos());
         mMousePos = coord_in_local;
     }
-    virtual bool MouseRelease(QMouseEvent* mickey, gfx::Transform& view) override
+    virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& view) override
     {
         return true;
     }
