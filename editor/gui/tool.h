@@ -162,7 +162,7 @@ namespace gui
         virtual ~MouseTool() = default;
         // Render the visualization of the current tool and/or the action
         // being performed.
-        virtual void Render(gfx::Painter& painter, gfx::Transform& view) const {}
+        virtual void Render(gfx::Painter& window, gfx::Painter& world) const {}
         // Act on mouse move event.
         virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& view) = 0;
         // Act on mouse press event.
@@ -180,11 +180,6 @@ namespace gui
 
         // Dummy migration shims. Plan is to get rid of the transform param
         // but it can't be done until every caller has been refactored!
-        inline void Render(gfx::Painter& painter) const
-        {
-            gfx::Transform dummy;
-            Render(painter, dummy);
-        }
         inline void MouseMove(const MouseEvent& mickey)
         {
             gfx::Transform  dummy;
@@ -212,7 +207,7 @@ namespace gui
         explicit MoveCameraTool(CameraState& state)
           : mState(state)
         {}
-        virtual void Render(gfx::Painter& painter, gfx::Transform&) const override
+        virtual void Render(gfx::Painter& window, gfx::Painter&) const override
         {}
         virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
         {
@@ -266,7 +261,7 @@ namespace gui
                                                     zoom*xs, zoom*ys, rotation);
             mWindowSize = glm::vec2{width, height};
         }
-        virtual void Render(gfx::Painter& painter, gfx::Transform&) const override
+        virtual void Render(gfx::Painter& window, gfx::Painter&) const override
         {}
         virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& ) override
         {

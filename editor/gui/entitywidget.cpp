@@ -296,12 +296,12 @@ public:
         mMaterial = gfx::CreateMaterialInstance(mMaterialClass);
         mDrawable = gfx::CreateDrawableInstance(mDrawableClass);
     }
-    virtual void Render(gfx::Painter& painter, gfx::Transform&) const override
+    virtual void Render(gfx::Painter& window, gfx::Painter&) const override
     {
         if (!mEngaged)
         {
             ShowMessage("Click + hold to draw!",
-                        gfx::FRect(mCurrent.x+10.0f, mCurrent.y+10.0f, 200, 20), painter);
+                        gfx::FRect(mCurrent.x+10.0f, mCurrent.y+10.0f, 200, 20), window);
             return;
         }
 
@@ -318,11 +318,11 @@ public:
         gfx::Transform model;
         model.Scale(width, height);
         model.Translate(xpos, ypos);
-        painter.Draw(*mDrawable, model, *mMaterial);
+        window.Draw(*mDrawable, model, *mMaterial);
 
         // draw a selection rect around it.
-        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), model,
-                     gfx::CreateMaterialFromColor(gfx::Color::Green));
+        window.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), model,
+                    gfx::CreateMaterialFromColor(gfx::Color::Green));
     }
     virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
     {
@@ -2883,7 +2883,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     }
 
     if (mCurrentTool)
-        mCurrentTool->Render(painter, view);
+        mCurrentTool->Render(painter, painter);
 
     painter.ResetViewMatrix();
 

@@ -326,7 +326,7 @@ public:
       , mWindowSize(window_size)
       , mState(state)
     {}
-    virtual void Render(gfx::Painter& painter, gfx::Transform&) const override
+    virtual void Render(gfx::Painter& window, gfx::Painter& tile_painter) const override
     {
         const auto movement = mWorldPos - mWorldStartPos;
         if (movement.x <= 0.0f || movement.y <= 0.0f)
@@ -335,8 +335,8 @@ public:
         gfx::Transform model;
         model.Scale(movement.x, movement.y);
         model.MoveTo(mWorldStartPos.x, mWorldStartPos.y);
-        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), model,
-                     gfx::CreateMaterialFromColor(gfx::Color::Green));
+        tile_painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), model,
+                    gfx::CreateMaterialFromColor(gfx::Color::Green));
 
     }
     virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
@@ -418,15 +418,15 @@ public:
         auto klass = state.workspace->GetMaterialClassById(tool.material);
         mMaterial = gfx::CreateMaterialInstance(klass);
     }
-    virtual void Render(gfx::Painter& painter, gfx::Transform&) const override
+    virtual void Render(gfx::Painter& window, gfx::Painter& tile_painter) const override
     {
-        painter.ResetViewMatrix();
-        painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(mWindowSize.x, mWindowSize.y));
-        painter.SetViewport(gfx::IRect(0, 0, mWindowSize.x, mWindowSize.y));
-        painter.SetPixelRatio(glm::vec2{1.0f, 1.0f});
+        tile_painter.ResetViewMatrix();
+        tile_painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(mWindowSize.x, mWindowSize.y));
+        tile_painter.SetViewport(gfx::IRect(0, 0, mWindowSize.x, mWindowSize.y));
+        tile_painter.SetPixelRatio(glm::vec2{1.0f, 1.0f});
 
-        const auto& dst_view_to_clip = painter.GetProjMatrix();
-        const auto& dst_world_to_view = painter.GetViewMatrix();
+        const auto& dst_view_to_clip = window.GetProjMatrix();
+        const auto& dst_world_to_view = window.GetViewMatrix();
         // This matrix will project a coordinate in isometric tile world space into
         // 2D screen space/surface coordinate.
         const auto& tile_projection_transform_matrix = engine::GetProjectionTransformMatrix(mViewToClip,
@@ -465,7 +465,7 @@ public:
             batch.SetProjection(gfx::TileBatch::Projection::Dimetric);
         else BUG("missing tile projection.");
 
-        painter.Draw(batch, tile_projection_transform_matrix, *mMaterial);
+        tile_painter.Draw(batch, tile_projection_transform_matrix, *mMaterial);
     }
     virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
     {
@@ -2046,7 +2046,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
 
     if (mCurrentTool)
     {
-        mCurrentTool->Render(tile_painter);
+        mCurrentTool->Render(painter, tile_painter);
     }
 
 
@@ -2100,6 +2100,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
     if (!mState.klass->GetNumLayers())
     {
         ShowMessage("Map has no layers to visualize.", painter);
+        return;
     }
 
     PrintMousePos(mUI, mState, painter, perspective);
