@@ -296,13 +296,12 @@ public:
         mMaterial = gfx::CreateMaterialInstance(mMaterialClass);
         mDrawable = gfx::CreateDrawableInstance(mDrawableClass);
     }
-    virtual void Render(gfx::Painter& painter, gfx::Transform& view) const override
+    virtual void Render(gfx::Painter& painter, gfx::Transform&) const override
     {
         if (!mEngaged)
         {
             ShowMessage("Click + hold to draw!",
-                        gfx::FRect(40 + mMousePos.x(),
-                                   40 + mMousePos.y(), 200, 20), painter);
+                        gfx::FRect(mCurrent.x+10.0f, mCurrent.y+10.0f, 200, 20), painter);
             return;
         }
 
@@ -316,25 +315,19 @@ public:
         const float width  = mAlwaysSquare ? hypotenuse : diff.x;
         const float height = mAlwaysSquare ? hypotenuse : diff.y;
 
-        view.Push();
-        view.Scale(width, height);
-        view.Translate(xpos, ypos);
-        painter.Draw(*mDrawable, view, *mMaterial);
+        gfx::Transform model;
+        model.Scale(width, height);
+        model.Translate(xpos, ypos);
+        painter.Draw(*mDrawable, model, *mMaterial);
 
         // draw a selection rect around it.
-        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), view,
+        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), model,
                      gfx::CreateMaterialFromColor(gfx::Color::Green));
-        view.Pop();
     }
     virtual void MouseMove(QMouseEvent* mickey, gfx::Transform& view) override
     {
-        mMousePos =  mickey->pos();
-
-        if (!mEngaged)
-            return;
-
         const auto& view_to_model = glm::inverse(view.GetAsMatrix());
-        mCurrent = view_to_model * ToVec4(mMousePos);
+        mCurrent = view_to_model * ToVec4(mickey->pos());
         mAlwaysSquare = mickey->modifiers() & Qt::ControlModifier;
     }
     virtual void MousePress(QMouseEvent* mickey, gfx::Transform& view) override
@@ -2889,10 +2882,10 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         }
     }
 
-    painter.ResetViewMatrix();
-
     if (mCurrentTool)
         mCurrentTool->Render(painter, view);
+
+    painter.ResetViewMatrix();
 
     // right arrow
     if (GetValue(mUI.chkShowOrigin))
