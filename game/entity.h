@@ -1412,7 +1412,7 @@ namespace game
         // Add a new node to the entity.
         // Returns a pointer to the node that was added to the entity.
         // The returned EntityNodeClass object pointer is only guaranteed
-        // to be valid until the next call to AddNode/Delete. It is not
+        // to be valid until the next call to PlaceEntity/Delete. It is not
         // safe for the caller to hold on to it long term. Instead, the
         // assumed use of the pointer is to simplify for example calling
         // LinkChild for linking the node to the entity's render tree.
@@ -1546,7 +1546,7 @@ namespace game
         // to the render tree and belongs to this entity class object.
         // The child (and all of its children) that has been broken still
         // exists in the entity but is removed from the render tree.
-        // You can then either DeleteNode to completely delete it or
+        // You can then either DeletePlacement to completely delete it or
         // LinkChild to insert it into another part of the render tree.
         void BreakChild(EntityNodeClass* child, bool keep_world_transform = true);
 

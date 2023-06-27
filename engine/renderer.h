@@ -73,7 +73,7 @@ namespace engine
 
     using EntityClassDrawHook     = EntityDrawHook<game::EntityNodeClass>;
     using EntityInstanceDrawHook  = EntityDrawHook<game::EntityNode>;
-    using SceneClassDrawHook      = SceneDrawHook<game::SceneNodeClass>;
+    using SceneClassDrawHook      = SceneDrawHook<game::EntityPlacement>;
     using SceneInstanceDrawHook   = SceneDrawHook<game::Entity>;
 
     class Renderer

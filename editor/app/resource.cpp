@@ -369,8 +369,8 @@ QStringList ListResourceDependencies(const game::SceneClass& scene, const QVaria
     PushBack(ret, scene.GetTilemapId());
     for (size_t i=0; i<scene.GetNumNodes(); ++i)
     {
-        const auto& node = scene.GetNode(i);
-        PushBack(ret, node.GetEntityId());
+        const auto& placement = scene.GetPlacement(i);
+        PushBack(ret, placement.GetEntityId());
     }
 
     return ret;

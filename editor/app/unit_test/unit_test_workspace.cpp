@@ -1531,10 +1531,10 @@ void unit_test_list_deps()
         const auto* entity = workspace.FindResourceByName("entity", app::Resource::Type::Entity);
 
         {
-            game::SceneNodeClass node;
+            game::EntityPlacement node;
             node.SetName("node");
             node.SetEntityId(entity->GetIdUtf8());
-            scene.AddNode(node);
+            scene.PlaceEntity(node);
         }
         app::SceneResource  resource(scene, "scene");
         workspace.SaveResource(resource);

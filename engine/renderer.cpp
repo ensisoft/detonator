@@ -71,11 +71,11 @@ void Renderer::CreateRenderStateFromScene(const game::Scene& scene)
 
     for (const auto& p : nodes)
     {
-        const Entity* entity = p.entity_object;
+        const Entity* entity = p.entity;
         if (!entity->HasRenderableItems())
             continue;
         transform.Push(p.node_to_scene);
-            MapEntity<Entity, EntityNode>(*p.entity_object, transform);
+            MapEntity<Entity, EntityNode>(*p.entity, transform);
         transform.Pop();
     }
 
@@ -89,7 +89,7 @@ void Renderer::UpdateRenderStateFromScene(const game::Scene& scene)
 
     for (const auto& p : nodes)
     {
-        const Entity* entity = p.entity_object;
+        const Entity* entity = p.entity;
 
         // either delete dead entites here or create a "BeginLoop" type of function
         // and do the pruning there.
@@ -104,7 +104,7 @@ void Renderer::UpdateRenderStateFromScene(const game::Scene& scene)
         }
 
         transform.Push(p.node_to_scene);
-            MapEntity<Entity, EntityNode>(*p.entity_object, transform);
+            MapEntity<Entity, EntityNode>(*p.entity, transform);
         transform.Pop();
     }
 }
@@ -156,7 +156,7 @@ void Renderer::Draw(const SceneClass& scene,
                     SceneClassDrawHook* scene_hook,
                     EntityClassDrawHook* entity_hook)
 {
-    DrawScene<SceneClass, SceneNodeClass, EntityNodeClass>(scene, painter, scene_hook, entity_hook);
+    DrawScene<SceneClass, EntityPlacement, EntityNodeClass>(scene, painter, scene_hook, entity_hook);
 }
 
 void Renderer::Draw(const game::Tilemap& map,
@@ -288,7 +288,7 @@ void Renderer::Update(const SceneClass& scene, float time, float dt)
 
     for (size_t i=0; i<scene.GetNumNodes(); ++i)
     {
-        const auto& node = scene.GetNode(i);
+        const auto& node = scene.GetPlacement(i);
         const auto& klass = node.GetEntityClass();
         if (!klass)
             continue;
@@ -397,7 +397,7 @@ void Renderer::DrawScene(const SceneType& scene,
 
     // todo: use a faster sorting. (see the entity draw)
     std::sort(nodes.begin(), nodes.end(), [](const auto& a, const auto& b) {
-        return a.entity_object->GetLayer() < b.entity_object->GetLayer();
+        return a.placement->GetLayer() < b.placement->GetLayer();
     });
 
     TRACE_SCOPE("Renderer::DrawEntities", "entities=%u", nodes.size());
@@ -408,18 +408,18 @@ void Renderer::DrawScene(const SceneType& scene,
 
         // draw when there's no scene hook or when the scene hook returns
         // true for the filtering operation.
-        const bool should_draw = !scene_hook || (scene_hook && scene_hook->FilterEntity(*p.entity_object, painter, transform));
+        const bool should_draw = !scene_hook || (scene_hook && scene_hook->FilterEntity(*p.placement, painter, transform));
 
         if (should_draw)
         {
             if (scene_hook)
-                scene_hook->BeginDrawEntity(*p.entity_object, painter, transform);
+                scene_hook->BeginDrawEntity(*p.placement, painter, transform);
 
-            if (p.visual_entity && p.entity_object->TestFlag(EntityType::Flags::VisibleInGame))
-                DrawEntity(*p.visual_entity, painter, transform, entity_hook);
+            if (p.entity && p.placement->TestFlag(EntityType::Flags::VisibleInGame))
+                DrawEntity(*p.entity, painter, transform, entity_hook);
 
             if (scene_hook)
-                scene_hook->EndDrawEntity(*p.entity_object, painter, transform);
+                scene_hook->EndDrawEntity(*p.placement, painter, transform);
         }
     }
 }

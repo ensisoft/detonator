@@ -330,31 +330,31 @@ public:
         auto klass = std::make_shared<game::SceneClass>();
         // create ground.
         {
-            game::SceneNodeClass ground;
+            game::EntityPlacement ground;
             ground.SetTranslation(glm::vec2(400.0f, 500.0f));
             ground.SetRotation(0.1f);
             ground.SetEntity(loader->FindEntityClassByName("ground"));
-            klass->LinkChild(nullptr, klass->AddNode(std::move(ground)));
+            klass->LinkChild(nullptr, klass->PlaceEntity(std::move(ground)));
         }
         {
-            game::SceneNodeClass ground;
+            game::EntityPlacement ground;
             ground.SetTranslation(glm::vec2(400.0f, 500.0f));
             ground.SetRotation(-0.4f);
             ground.SetTranslation(glm::vec2(500.0f, 650.0f));
             ground.SetEntity(loader->FindEntityClassByName("ground"));
-            klass->LinkChild(nullptr, klass->AddNode(std::move(ground)));
+            klass->LinkChild(nullptr, klass->PlaceEntity(std::move(ground)));
         }
 
         // create some boxes.
         {
             for (int i=0; i<3; ++i)
             {
-                game::SceneNodeClass node;
+                game::EntityPlacement node;
                 const auto x = 400.0f + (i & 1) * 25.0f;
                 const auto y = 300 + i * 50.0f;
                 node.SetTranslation(glm::vec2(x, y));
                 node.SetEntity(loader->FindEntityClassByName("box"));
-                klass->LinkChild(nullptr, klass->AddNode(std::move(node)));
+                klass->LinkChild(nullptr, klass->PlaceEntity(std::move(node)));
             }
         }
 
@@ -362,12 +362,12 @@ public:
         {
             for (int i=0; i<3; ++i)
             {
-                game::SceneNodeClass node;
+                game::EntityPlacement node;
                 const auto x = 300.0f + (i & 1) * 25.0f;
                 const auto y = 300 + i * 50.0f;
                 node.SetTranslation(glm::vec2(x, y));
                 node.SetEntity(loader->FindEntityClassByName("circle"));
-                klass->LinkChild(nullptr, klass->AddNode(std::move(node)));
+                klass->LinkChild(nullptr, klass->PlaceEntity(std::move(node)));
             }
         }
 
@@ -430,34 +430,34 @@ public:
     {
         auto klass = std::make_shared<game::SceneClass>();
         {
-            game::SceneNodeClass robot;
+            game::EntityPlacement robot;
             robot.SetEntityId("robot");
             robot.SetTranslation(glm::vec2(100.0f, 100.0f));
             robot.SetScale(glm::vec2(0.8, 0.8));
             robot.SetName("robot 1");
             robot.SetEntity(loader->FindEntityClassByName("robot"));
-            klass->LinkChild(nullptr, klass->AddNode(robot));
+            klass->LinkChild(nullptr, klass->PlaceEntity(robot));
         }
 
         {
-            game::SceneNodeClass robot;
+            game::EntityPlacement robot;
             robot.SetEntityId("robot");
             robot.SetTranslation(glm::vec2(300.0f, 100.0f));
             robot.SetScale(glm::vec2(1.0, 1.0));
             robot.SetName("robot 2");
             robot.SetEntity(loader->FindEntityClassByName("robot"));
-            klass->LinkChild(nullptr, klass->AddNode(robot));
+            klass->LinkChild(nullptr, klass->PlaceEntity(robot));
         }
 
         // landmark box at 0,0
         {
-            game::SceneNodeClass box;
+            game::EntityPlacement box;
             box.SetEntityId("unit_box");
             box.SetTranslation(glm::vec2(50.0f, 50.0f));
             box.SetScale(glm::vec2(100.0f, 100.0f));
             box.SetName("unit_box");
             box.SetEntity(loader->FindEntityClassByName("unit_box"));
-            klass->LinkChild(nullptr, klass->AddNode(box));
+            klass->LinkChild(nullptr, klass->PlaceEntity(box));
         }
 
         mScene = game::CreateSceneInstance(klass);
@@ -553,23 +553,23 @@ public:
         auto klass = std::make_shared<game::SceneClass>();
 
         {
-            game::SceneNodeClass robot;
+            game::EntityPlacement robot;
             robot.SetEntityId("robot");
             robot.SetTranslation(glm::vec2(100.0f, 100.0f));
             robot.SetScale(glm::vec2(0.8, 0.8));
             robot.SetName("robot 1");
             robot.SetEntity(loader->FindEntityClassByName("robot"));
-            klass->LinkChild(nullptr, klass->AddNode(robot));
+            klass->LinkChild(nullptr, klass->PlaceEntity(robot));
         }
 
         {
-            game::SceneNodeClass robot;
+            game::EntityPlacement robot;
             robot.SetEntityId("robot");
             robot.SetTranslation(glm::vec2(300.0f, 100.0f));
             robot.SetScale(glm::vec2(1.0, 1.0));
             robot.SetName("robot 2");
             robot.SetEntity(loader->FindEntityClassByName("robot"));
-            klass->LinkChild(nullptr, klass->AddNode(robot));
+            klass->LinkChild(nullptr, klass->PlaceEntity(robot));
         }
 
         mScene = game::CreateSceneInstance(klass);

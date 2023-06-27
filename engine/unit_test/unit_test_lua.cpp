@@ -604,12 +604,12 @@ void unit_test_scene_interface()
 
     game::SceneClass scene;
     {
-        game::SceneNodeClass scene_node;
+        game::EntityPlacement scene_node;
         scene_node.SetName("test_entity_1");
         scene_node.SetLayer(4);
         scene_node.SetEntity(entity);
         scene_node.SetTranslation(glm::vec2(30.0f, 40.0f));
-        scene.LinkChild(nullptr, scene.AddNode(scene_node));
+        scene.LinkChild(nullptr, scene.PlaceEntity(scene_node));
 
         // add a reference to the entity
         game::ScriptVar::EntityReference  ref;
@@ -863,10 +863,10 @@ end
 
     game::SceneClass scene_class;
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("entity");
         node.SetEntity(entity);
-        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+        scene_class.LinkChild(nullptr, scene_class.PlaceEntity(node));
     }
     game::Scene scene(scene_class);
 
@@ -960,16 +960,16 @@ end
 
     game::SceneClass scene_class;
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("foo");
         node.SetEntity(foo);
-        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+        scene_class.LinkChild(nullptr, scene_class.PlaceEntity(node));
     }
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("bar");
         node.SetEntity(bar);
-        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+        scene_class.LinkChild(nullptr, scene_class.PlaceEntity(node));
     }
 
     TestLoader loader;
@@ -1133,10 +1133,10 @@ end
 
     game::SceneClass scene_class;
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("foo");
         node.SetEntity(foo);
-        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+        scene_class.LinkChild(nullptr, scene_class.PlaceEntity(node));
     }
 
     TestLoader loader;
@@ -1250,16 +1250,16 @@ end
 
     game::SceneClass scene_class;
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("foo");
         node.SetEntity(foo);
-        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+        scene_class.LinkChild(nullptr, scene_class.PlaceEntity(node));
     }
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("bar");
         node.SetEntity(bar);
-        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+        scene_class.LinkChild(nullptr, scene_class.PlaceEntity(node));
     }
 
     game::Scene instance(scene_class);
@@ -1361,16 +1361,16 @@ end
 
     game::SceneClass scene_class;
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("foo");
         node.SetEntity(foo);
-        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+        scene_class.LinkChild(nullptr, scene_class.PlaceEntity(node));
     }
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("bar");
         node.SetEntity(bar);
-        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+        scene_class.LinkChild(nullptr, scene_class.PlaceEntity(node));
     }
 
     game::Scene instance(scene_class);
@@ -1438,16 +1438,16 @@ end
 
     game::SceneClass scene_class;
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("foo");
         node.SetEntity(foo);
-        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+        scene_class.LinkChild(nullptr, scene_class.PlaceEntity(node));
     }
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("bar");
         node.SetEntity(bar);
-        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+        scene_class.LinkChild(nullptr, scene_class.PlaceEntity(node));
     }
 
     game::Scene instance(scene_class);
@@ -1509,16 +1509,16 @@ end
 
     game::SceneClass scene_class;
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("foo");
         node.SetEntity(foo);
-        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+        scene_class.LinkChild(nullptr, scene_class.PlaceEntity(node));
     }
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("bar");
         node.SetEntity(bar);
-        scene_class.LinkChild(nullptr, scene_class.AddNode(node));
+        scene_class.LinkChild(nullptr, scene_class.PlaceEntity(node));
     }
 
     game::Scene instance(scene_class);

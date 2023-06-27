@@ -124,7 +124,7 @@ public:
     DrawHook(const game::EntityNodeClass* selected)
       : mSelectedEntityClassNode(selected)
     {}
-    DrawHook(const game::SceneNodeClass* selected, const game::FRect& view)
+    DrawHook(const game::EntityPlacement* selected, const game::FRect& view)
       : mSelectedSceneNode(selected)
       , mViewRect(view)
       , mDrawScene(true)
@@ -165,9 +165,9 @@ public:
     }
 
     // SceneClassDrawHook
-    virtual bool FilterEntity(const game::SceneNodeClass& node, gfx::Painter& painter, gfx::Transform& trans) override
+    virtual bool FilterEntity(const game::EntityPlacement& node, gfx::Painter& painter, gfx::Transform& trans) override
     {
-        if (node.TestFlag(game::SceneNodeClass::Flags::VisibleInEditor))
+        if (node.TestFlag(game::EntityPlacement::Flags::VisibleInEditor))
             return true;
 
         // broken entity reference.
@@ -185,10 +185,10 @@ public:
         }
         return false;
     }
-    virtual void BeginDrawEntity(const game::SceneNodeClass& node, gfx::Painter& painter, gfx::Transform& trans) override
+    virtual void BeginDrawEntity(const game::EntityPlacement& node, gfx::Painter& painter, gfx::Transform& trans) override
     {
     }
-    virtual void EndDrawEntity(const game::SceneNodeClass& node, gfx::Painter& painter, gfx::Transform& trans) override
+    virtual void EndDrawEntity(const game::EntityPlacement& node, gfx::Painter& painter, gfx::Transform& trans) override
     {
         // broken entity reference.
         const auto& entity_klass = node.GetEntityClass();
@@ -202,7 +202,7 @@ public:
             if (mDrawVectors)
                 DrawBasisVectors(painter, trans);
         }
-        else if (!node.TestFlag(game::SceneNodeClass::Flags::VisibleInGame))
+        else if (!node.TestFlag(game::EntityPlacement::Flags::VisibleInGame))
         {
             const auto& box  = entity_klass->GetBoundingRect();
             DrawInvisibleItemBox(painter, trans, box);
@@ -285,7 +285,7 @@ private:
 private:
     const game::EntityNode* mSelectedEntityNode           = nullptr;
     const game::EntityNodeClass* mSelectedEntityClassNode = nullptr;
-    const game::SceneNodeClass* mSelectedSceneNode        = nullptr;
+    const game::EntityPlacement* mSelectedSceneNode        = nullptr;
     const game::FRect mViewRect;
     bool mPlaying        = false;
     bool mDrawVectors    = false;
