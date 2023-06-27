@@ -619,7 +619,7 @@ void unit_test_entity_lifecycle()
 
     engine::EntityInstanceDrawHook* hook = nullptr;
 
-    renderer.CreateScene(*scene);
+    renderer.CreateRenderStateFromScene(*scene);
     TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
 
     // start frame looping
@@ -628,7 +628,7 @@ void unit_test_entity_lifecycle()
         {
             scene->Update(dt, nullptr);
 
-            renderer.UpdateScene(*scene);
+            renderer.UpdateRenderStateFromScene(*scene);
             TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
             renderer.Update(0.0f, dt);
 
@@ -651,7 +651,7 @@ void unit_test_entity_lifecycle()
         {
             scene->Update(dt, nullptr);
 
-            renderer.UpdateScene(*scene);
+            renderer.UpdateRenderStateFromScene(*scene);
             TEST_REQUIRE(renderer.GetNumPaintNodes() == 0);
             renderer.Update(0.0f, dt);
 
@@ -677,7 +677,7 @@ void unit_test_entity_lifecycle()
         {
             scene->Update(dt, nullptr);
 
-            renderer.UpdateScene(*scene);
+            renderer.UpdateRenderStateFromScene(*scene);
             TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
             renderer.Update(0.0f, dt);
 

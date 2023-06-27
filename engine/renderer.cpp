@@ -61,7 +61,7 @@ void Renderer::BeginFrame()
     }
 }
 
-void Renderer::CreateScene(const game::Scene& scene)
+void Renderer::CreateRenderStateFromScene(const game::Scene& scene)
 {
     mPaintNodes.clear();
 
@@ -81,7 +81,7 @@ void Renderer::CreateScene(const game::Scene& scene)
 
 }
 
-void Renderer::UpdateScene(const game::Scene& scene)
+void Renderer::UpdateRenderStateFromScene(const game::Scene& scene)
 {
     const auto& nodes = scene.CollectNodes();
 

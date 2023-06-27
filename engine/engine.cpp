@@ -895,7 +895,7 @@ private:
             mPhysics.DeleteAll();
             mPhysics.CreateWorld(*mScene);
         }
-        mRenderer.CreateScene(*mScene);
+        mRenderer.CreateRenderStateFromScene(*mScene);
         ConfigureRendererForScene();
 
         const auto& klass = mScene->GetClass();
@@ -1070,7 +1070,7 @@ private:
             // Update renderers data structures from the scene.
             // This involves creating new render nodes for new entities
             // that have been spawned etc.
-            TRACE_CALL("Renderer::UpdateScene", mRenderer.UpdateScene(*mScene));
+            TRACE_CALL("Renderer::UpdateState", mRenderer.UpdateRenderStateFromScene(*mScene));
             // Update the rendering state, animate materials and drawables.
             TRACE_CALL("Renderer::Update", mRenderer.Update(game_time, dt));
         }

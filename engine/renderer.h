@@ -126,10 +126,21 @@ namespace engine
 
         void BeginFrame();
 
-        void CreateScene(const game::Scene& scene);
-        void UpdateScene(const game::Scene& scene);
+        // This the current *real* rendering API used by the engine.
+
+        // Create the internal renderer data structures for visually representing
+        // the contents of the given scene.
+        void CreateRenderStateFromScene(const game::Scene& scene);
+        // Create and update the internal renderer data structures for visually
+        // representing the contents of the given scene.
+        void UpdateRenderStateFromScene(const game::Scene& scene);
+        // Draw the current rendering state.
         void Draw(gfx::Painter& painter, EntityInstanceDrawHook* hook);
+        // Update the renderer state, i.e. update/animate materials etc.
         void Update(float time, float dt);
+
+        // The following API methods used by the editor to draw some
+        // edit time representations of things.
 
         void Draw(const game::Entity& entity,
                   gfx::Painter& painter,
