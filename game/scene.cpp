@@ -592,6 +592,41 @@ glm::mat4 SceneClass::FindNodeTransform(const SceneNodeClass* node) const
     return game::FindNodeTransform(mRenderTree, node);
 }
 
+FRect SceneClass::FindNodeBoundingRect(const SceneNodeClass* node) const
+{
+    FRect  ret;
+    Transform transform(FindNodeTransform(node));
+
+    const auto& entity = node->GetEntityClass();
+    ASSERT(entity);
+    for (size_t i=0; i<entity->GetNumNodes(); ++i)
+    {
+        const auto& node = entity->GetNode(i);
+        transform.Push(entity->FindNodeTransform(&node));
+          transform.Push(node.GetModelTransform());
+          ret = Union(ret, ComputeBoundingRect(transform));
+          transform.Pop();
+       transform.Pop();
+    }
+    return ret;
+}
+
+FBox SceneClass::FindNodeBoundingBox(const SceneNodeClass* node) const
+{
+    const auto& entity = node->GetEntityClass();
+    ASSERT(entity);
+
+    const auto& rect = entity->GetBoundingRect();
+
+    Transform transform(FindNodeTransform(node));
+      transform.Push();
+      transform.Resize(rect);
+      transform.MoveTo(rect);
+
+    return FBox(transform);
+}
+
+
 void SceneClass::AddScriptVar(const ScriptVar& var)
 {
     mScriptVars.push_back(var);

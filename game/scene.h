@@ -379,6 +379,10 @@ namespace game
 
         glm::mat4 FindNodeTransform(const SceneNodeClass* node) const;
 
+        FRect FindNodeBoundingRect(const SceneNodeClass* node) const;
+
+        FBox FindNodeBoundingBox(const SceneNodeClass* node) const;
+
         // Add a new scripting variable to the list of variables.
         // No checks are made to whether a variable by that name
         // already exists.
