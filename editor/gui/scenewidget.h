@@ -60,7 +60,7 @@ namespace gui
         DlgFindEntity(QWidget* parent, const game::SceneClass& klass);
        ~DlgFindEntity();
 
-        const game::SceneNodeClass* GetNode() const
+        const game::EntityPlacement* GetNode() const
         { return mNode; }
 
     private slots:
@@ -77,7 +77,7 @@ namespace gui
         const game::SceneClass& mScene;
         std::unique_ptr<TableModel> mModel;
         std::unique_ptr<TableProxy> mProxy;
-        const game::SceneNodeClass* mNode = nullptr;
+        const game::EntityPlacement* mNode = nullptr;
     };
 
 
@@ -210,10 +210,10 @@ namespace gui
         void UpdateResourceReferences();
         void SetSpatialIndexParams();
         void SetSceneBoundary();
-        void FindNode(const game::SceneNodeClass* node);
-        game::SceneNodeClass* SelectNode(const QPoint& click_point);
-        game::SceneNodeClass* GetCurrentNode();
-        const game::SceneNodeClass* GetCurrentNode() const;
+        void FindNode(const game::EntityPlacement* node);
+        game::EntityPlacement* SelectNode(const QPoint& click_point);
+        game::EntityPlacement* GetCurrentNode();
+        const game::EntityPlacement* GetCurrentNode() const;
     private:
         Ui::SceneWidget mUI;
         // there doesn't seem to be a way to do this in the designer

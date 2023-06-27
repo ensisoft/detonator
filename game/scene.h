@@ -45,13 +45,11 @@
 
 namespace game
 {
-    // SceneNodeClass holds the SceneClass node data.
-    // I.e. the nodes in the scene class act as the placeholders
-    // for the initial/static content in the scene. When a new
-    // scene instance is created the initial entities in the scene
-    // are created and positioned based on the SceneClass and its nodes.
-    // For each SceneNodeClass a new entity object is then created.
-    class SceneNodeClass
+    // EntityPlacement holds the information for placing an entity
+    // into the scene when the actual scene instance is created.
+    // In other words the EntityPlacement objects in the SceneClass
+    // become Entity objects in the Scene.
+    class EntityPlacement
     {
     public:
         using Flags = Entity::Flags;
@@ -61,7 +59,7 @@ namespace game
             ScriptVar::VariantType value;
         };
 
-        SceneNodeClass()
+        EntityPlacement()
         {
             mClassId = base::RandomString(10);
             SetFlag(Flags::VisibleInGame, true);
@@ -184,7 +182,7 @@ namespace game
 
         // Make a clone of this node. The cloned node will
         // have all the same property values but a unique id.
-        SceneNodeClass Clone() const;
+        EntityPlacement Clone() const;
 
         // Serialize node into JSON.
         void IntoJson(data::Writer& data) const;
@@ -235,9 +233,9 @@ namespace game
     class SceneClass
     {
     public:
-        using RenderTree      = game::RenderTree<SceneNodeClass>;
-        using RenderTreeNode  = SceneNodeClass;
-        using RenderTreeValue = SceneNodeClass;
+        using RenderTree      = game::RenderTree<EntityPlacement>;
+        using RenderTreeNode  = EntityPlacement;
+        using RenderTreeValue = EntityPlacement;
 
         struct BloomFilter {
             float threshold = 0.98f;
@@ -265,32 +263,32 @@ namespace game
         // Copy construct a deep copy of the scene.
         SceneClass(const SceneClass& other);
 
-        // Add a new node to the scene.
-        // Returns a pointer to the node that was added to the scene.
-        // Note that the node is not yet added to the scene graph
+        // Place a new entity into the scene.
+        // Returns a pointer to the placement that was added to the scene.
+        // Note that the entity is not yet added to the scene graph
         // and as such will not be considered for rendering etc.
         // You probably want to link the node to some other node.
         // See LinkChild.
-        SceneNodeClass* AddNode(const SceneNodeClass& node);
-        SceneNodeClass* AddNode(SceneNodeClass&& node);
-        SceneNodeClass* AddNode(std::unique_ptr<SceneNodeClass> node);
+        EntityPlacement* PlaceEntity(const EntityPlacement& placement);
+        EntityPlacement* PlaceEntity(EntityPlacement&& placement);
+        EntityPlacement* PlaceEntity(std::unique_ptr<EntityPlacement> placement);
 
-        // Get the node by index. The index must be valid.
-        SceneNodeClass& GetNode(size_t index);
+        // Get the entity placement by index. The index must be valid.
+        EntityPlacement& GetPlacement(size_t index);
         // Find scene node by name. Returns nullptr if
         // no such node could be found.
-        SceneNodeClass* FindNodeByName(const std::string& name);
+        EntityPlacement* FindPlacementByName(const std::string& name);
         // Find scene node by id. Returns nullptr if
         // no such node could be found.
-        SceneNodeClass* FindNodeById(const std::string& id);
-        // Get the scene node by index. The index must be valid.
-        const SceneNodeClass& GetNode(size_t index) const;
+        EntityPlacement* FindPlacementById(const std::string& id);
+        // Get the entity placement by index. The index must be valid.
+        const EntityPlacement& GetPlacement(size_t index) const;
         // Find scene node by class name. Returns nullptr if
         // no such node could be found.
-        const SceneNodeClass* FindNodeByName(const std::string& name) const;
+        const EntityPlacement* FindPlacementByName(const std::string& name) const;
         // Find scene node by class id. Returns nullptr if
         // no such node could be found.
-        const SceneNodeClass* FindNodeById(const std::string& id) const;
+        const EntityPlacement* FindPlacementById(const std::string& id) const;
 
         // Link the given child node with the parent.
         // The parent may be a nullptr in which case the child
@@ -298,15 +296,15 @@ namespace game
         // to be a valid node and needs to point to node that is not
         // yet any part of the render tree and is a node that belongs
         // to this entity class object.
-        void LinkChild(SceneNodeClass* parent, SceneNodeClass* child);
+        void LinkChild(EntityPlacement* parent, EntityPlacement* child);
         // Break a child node away from its parent. The child node needs
         // to be a valid node and needs to point to a node that is added
         // to the render tree and belongs to this scene class object.
         // The child (and all of its children) that has been broken still
         // exists in the entity but is removed from the render tree.
-        // You can then either DeleteNode to completely delete it or
+        // You can then either DeletePlacement to completely delete it or
         // LinkChild to insert it into another part of the render tree.
-        void BreakChild(SceneNodeClass* child, bool keep_world_transform = true);
+        void BreakChild(EntityPlacement* child, bool keep_world_transform = true);
         // Re-parent a child node from its current parent to another parent.
         // Both the child node and the parent node to be a valid nodes and
         // need to point to nodes that are part of the render tree and belong
@@ -315,16 +313,16 @@ namespace game
         // If keep_world_transform is true the child will be transformed such
         // that it's current world transformation remains the same. I.e  it's
         // position and rotation in the world don't change.
-        void ReparentChild(SceneNodeClass* parent, SceneNodeClass* child, bool keep_world_transform = true);
+        void ReparentChild(EntityPlacement* parent, EntityPlacement* child, bool keep_world_transform = true);
 
-        // Delete a node from the scene. The given node and all of its
+        // Delete a placement from the scene. The given placement and all of its
         // children will be removed from the scene graph and then deleted.
-        void DeleteNode(SceneNodeClass* node);
+        void DeletePlacement(EntityPlacement* placement);
 
-        // Duplicate an entire node hierarchy starting at the given node
+        // Duplicate an entire placement hierarchy starting at the given placement,
         // and add the resulting hierarchy to node's parent.
-        // Returns the root node of the new node hierarchy.
-        SceneNodeClass* DuplicateNode(const SceneNodeClass* node);
+        // Returns the root node of the new placement hierarchy.
+        EntityPlacement* DuplicatePlacement(const EntityPlacement* placement);
 
         // Value aggregate for scene nodes that represent placement
         // of entities in the scene.
@@ -333,9 +331,9 @@ namespace game
             // in order to transform it to the scene.
             glm::mat4 node_to_scene;
             // The entity representation in the scene.
-            std::shared_ptr<const EntityClass> visual_entity;
+            std::shared_ptr<const EntityClass> entity;
             // The entity object in the scene.
-            const SceneNodeClass* entity_object = nullptr;
+            const EntityPlacement* placement = nullptr;
         };
         // Collect nodes from the scene into a flat list.
         std::vector<ConstSceneNode> CollectNodes() const;
@@ -347,9 +345,9 @@ namespace game
             // in order to transform it to the scene.
             glm::mat4 node_to_scene;
             // The entity representation in the scene.
-            std::shared_ptr<const EntityClass> visual_entity;
+            std::shared_ptr<const EntityClass> entity;
             // The entity object in the scene.
-            SceneNodeClass* entity_object = nullptr;
+            EntityPlacement* placement = nullptr;
         };
         // Collect nodes from the scene into a flat list.
         std::vector<SceneNode> CollectNodes();
@@ -360,28 +358,28 @@ namespace game
         // size box only. The hit nodes are stored in the hits vector and the
         // positions with the nodes' hitboxes are (optionally) stored in the
         // hitbox_positions vector.
-        void CoarseHitTest(float x, float y, std::vector<SceneNodeClass*>* hits,
+        void CoarseHitTest(float x, float y, std::vector<EntityPlacement*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr);
-        void CoarseHitTest(const glm::vec2& pos, std::vector<SceneNodeClass*>* hits,
+        void CoarseHitTest(const glm::vec2& pos, std::vector<EntityPlacement*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr);
-        void CoarseHitTest(float x, float y, std::vector<const SceneNodeClass*>* hits,
+        void CoarseHitTest(float x, float y, std::vector<const EntityPlacement*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr) const;
-        void CoarseHitTest(const glm::vec2& pos, std::vector<const SceneNodeClass*>* hits,
+        void CoarseHitTest(const glm::vec2& pos, std::vector<const EntityPlacement*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr) const;
 
         // Map coordinates in node's OOB space into entity coordinate space. The origin of
         // the OOB space is relative to the "TopLeft" corner of the OOB of the node.
-        glm::vec2 MapCoordsFromNodeBox(float x, float y, const SceneNodeClass* node) const;
-        glm::vec2 MapCoordsFromNodeBox(const glm::vec2& pos, const SceneNodeClass* node) const;
+        glm::vec2 MapCoordsFromNodeBox(float x, float y, const EntityPlacement* node) const;
+        glm::vec2 MapCoordsFromNodeBox(const glm::vec2& pos, const EntityPlacement* node) const;
         // Map coordinates in scene coordinate space into node's OOB coordinate space.
-        glm::vec2 MapCoordsToNodeBox(float x, float y, const SceneNodeClass* node) const;
-        glm::vec2 MapCoordsToNodeBox(const glm::vec2& pos, const SceneNodeClass* node) const;
+        glm::vec2 MapCoordsToNodeBox(float x, float y, const EntityPlacement* node) const;
+        glm::vec2 MapCoordsToNodeBox(const glm::vec2& pos, const EntityPlacement* node) const;
 
-        glm::mat4 FindNodeTransform(const SceneNodeClass* node) const;
+        glm::mat4 FindEntityTransform(const EntityPlacement* placement) const;
 
-        FRect FindNodeBoundingRect(const SceneNodeClass* node) const;
+        FRect FindEntityBoundingRect(const EntityPlacement* placement) const;
 
-        FBox FindNodeBoundingBox(const SceneNodeClass* node) const;
+        FBox FindEntityBoundingBox(const EntityPlacement* placement) const;
 
         // Add a new scripting variable to the list of variables.
         // No checks are made to whether a variable by that name
@@ -525,7 +523,7 @@ namespace game
         // storing by unique ptr so that the pointers
         // given to the render tree don't become invalid
         // when new nodes are added to the scene.
-        std::vector<std::unique_ptr<SceneNodeClass>> mNodes;
+        std::vector<std::unique_ptr<EntityPlacement>> mNodes;
         // scene-graph / render tree for hierarchical traversal
         // and transformation of the scene nodes. the tree defines
         // the parent-child transformation hierarchy.
@@ -547,9 +545,9 @@ namespace game
 
     // Scene is the runtime representation of a scene based on some scene class
     // object instance. When a new Scene instance is created the scene class
-    // and its scene graph (render tree) is traversed. Each SceneNodeClass is
+    // and its scene graph (render tree) is traversed. Each EntityPlacement is
     // then used to as the initial data for a new Entity instance. I.e. Entities
-    // are created using the parameters of the corresponding SceneNodeClass.
+    // are created using the parameters of the corresponding EntityPlacement.
     // While the game runs entities can then be created/destroyed dynamically
     // as part of the game play.
     class Scene
@@ -620,9 +618,9 @@ namespace game
             glm::mat4 node_to_scene;
             // Visual representation object of the entity in the scene.
             union {
-                const Entity* visual_entity = nullptr;
+                const Entity* entity = nullptr;
                 // The entity object in the scene.x
-                const Entity* entity_object; // = nullptr;
+                const Entity* placement; // = nullptr;
             };
         };
         // Collect the entities in the scene into a flat list.
@@ -638,9 +636,9 @@ namespace game
             glm::mat4 node_to_scene;
             // Visual representation object of the entity in the scene.
             union {
-                Entity* visual_entity = nullptr;
+                Entity* entity = nullptr;
                 // The entity object in the scene.
-                Entity* entity_object; // = nullptr;
+                Entity* placement; // = nullptr;
             };
         };
         // Collect the entities in the scene into a flat list.

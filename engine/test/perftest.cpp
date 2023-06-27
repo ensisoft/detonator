@@ -209,13 +209,13 @@ public:
         {
             for (int col=0; col<10; ++col)
             {
-                game::SceneNodeClass node;
+                game::EntityPlacement node;
                 node.SetEntityId(std::to_string(row) + ":" + std::to_string(col));
                 node.SetName(std::to_string(row) + ":" + std::to_string(col));
                 node.SetTranslation(col * 60.0f, row * 75.0f);
                 node.SetScale(0.2f, 0.2f);
                 node.SetEntity(engine.classlib->FindEntityClassByName("robot"));
-                klass->LinkChild(nullptr, klass->AddNode(node));
+                klass->LinkChild(nullptr, klass->PlaceEntity(node));
             }
         }
         mScene = game::CreateSceneInstance(klass);
@@ -262,13 +262,13 @@ public:
         {
             for (int col=0; col<15; ++col)
             {
-                game::SceneNodeClass node;
+                game::EntityPlacement node;
                 node.SetEntityId(std::to_string(row * 15 + col));
                 node.SetTranslation(col * 50.0f, row * 50.0f);
                 node.SetName(std::to_string(row) + ":" + std::to_string(col));
                 node.SetScale(1.0f, 1.0f);
                 node.SetEntity(engine.classlib->FindEntityClassByName("M-6"));
-                klass->LinkChild(nullptr, klass->AddNode(node));
+                klass->LinkChild(nullptr, klass->PlaceEntity(node));
             }
         }
         mScene = game::CreateSceneInstance(klass);

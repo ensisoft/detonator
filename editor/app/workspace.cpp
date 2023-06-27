@@ -1646,19 +1646,17 @@ engine::ClassHandle<const game::SceneClass> Workspace::FindSceneClassByName(cons
     // resolve entity references.
     for (size_t i=0; i<ret->GetNumNodes(); ++i)
     {
-        auto& node = ret->GetNode(i);
-        auto klass = FindEntityClassById(node.GetEntityId());
+        auto& placement = ret->GetPlacement(i);
+        auto klass = FindEntityClassById(placement.GetEntityId());
         if (!klass)
         {
-            const auto& node_id    = node.GetId();
-            const auto& node_name  = node.GetName();
-            const auto& node_entity_id = node.GetEntityId();
-            WARN("Scene '%1' node '%2' ('%2') refers to entity '%3' that is not found.",
-                 name, node_id, node_name, node_entity_id);
+            WARN("Scene entity placement entity class not found. [scene='%1', placement='%2']", ret->GetName(), placement.GetName());
+            placement.ResetEntity();
+            placement.ResetEntityParams();
         }
         else
         {
-            node.SetEntity(klass);
+            placement.SetEntity(klass);
         }
     }
     return ret;
@@ -1680,19 +1678,17 @@ engine::ClassHandle<const game::SceneClass> Workspace::FindSceneClassById(const 
     // resolve entity references.
     for (size_t i=0; i<ret->GetNumNodes(); ++i)
     {
-        auto& node = ret->GetNode(i);
-        auto klass = FindEntityClassById(node.GetEntityId());
+        auto& placement = ret->GetPlacement(i);
+        auto klass = FindEntityClassById(placement.GetEntityId());
         if (!klass)
         {
-            const auto& node_id    = node.GetId();
-            const auto& node_name  = node.GetName();
-            const auto& node_entity_id = node.GetEntityId();
-            WARN("Scene '%1' node '%2' ('%3') refers to entity '%3' that is not found.",
-                 id, node_id, node_name, node_entity_id);
+            WARN("Scene entity placement entity class not found. [scene='%1', placement='%2']", ret->GetName(), placement.GetName());
+            placement.ResetEntity();
+            placement.ResetEntityParams();
         }
         else
         {
-            node.SetEntity(klass);
+            placement.SetEntity(klass);
         }
     }
     return ret;

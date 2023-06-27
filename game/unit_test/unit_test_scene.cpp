@@ -66,7 +66,7 @@ void unit_test_node()
 {
     TEST_CASE(test::Type::Feature)
 
-    game::SceneNodeClass node;
+    game::EntityPlacement node;
     node.SetName("root");
     node.SetTranslation(glm::vec2(150.0f, -150.0f));
     node.SetScale(glm::vec2(4.0f, 5.0f));
@@ -78,7 +78,7 @@ void unit_test_node()
     {
         data::JsonObject json;
         node.IntoJson(json);
-        game::SceneNodeClass ret;
+        game::EntityPlacement ret;
         TEST_REQUIRE(ret.FromJson(json));
         TEST_REQUIRE(ret.GetName()         == "root");
         TEST_REQUIRE(ret.HasTag());
@@ -153,25 +153,25 @@ void unit_test_scene_class()
     TEST_REQUIRE(klass.GetNumNodes() == 0);
 
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("root");
         node.SetEntity(entity);
         node.SetTranslation(glm::vec2(0.0f, 0.0f));
-        klass.AddNode(node);
+        klass.PlaceEntity(node);
     }
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("child_1");
         node.SetEntity(entity);
         node.SetTranslation(glm::vec2(100.0f, 100.0f));
-        klass.AddNode(node);
+        klass.PlaceEntity(node);
     }
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("child_2");
         node.SetEntity(entity);
         node.SetTranslation(glm::vec2(200.0f, 200.0f));
-        klass.AddNode(node);
+        klass.PlaceEntity(node);
     }
 
     {
@@ -190,13 +190,13 @@ void unit_test_scene_class()
     }
 
     TEST_REQUIRE(klass.GetNumNodes() == 3);
-    TEST_REQUIRE(klass.GetNode(0).GetName() == "root");
-    TEST_REQUIRE(klass.GetNode(1).GetName() == "child_1");
-    TEST_REQUIRE(klass.GetNode(2).GetName() == "child_2");
-    TEST_REQUIRE(klass.FindNodeByName("root"));
-    TEST_REQUIRE(klass.FindNodeById(klass.GetNode(0).GetId()));
-    TEST_REQUIRE(klass.FindNodeById("asgas") == nullptr);
-    TEST_REQUIRE(klass.FindNodeByName("foasg") == nullptr);
+    TEST_REQUIRE(klass.GetPlacement(0).GetName() == "root");
+    TEST_REQUIRE(klass.GetPlacement(1).GetName() == "child_1");
+    TEST_REQUIRE(klass.GetPlacement(2).GetName() == "child_2");
+    TEST_REQUIRE(klass.FindPlacementByName("root"));
+    TEST_REQUIRE(klass.FindPlacementById(klass.GetPlacement(0).GetId()));
+    TEST_REQUIRE(klass.FindPlacementById("asgas") == nullptr);
+    TEST_REQUIRE(klass.FindPlacementByName("foasg") == nullptr);
     TEST_REQUIRE(klass.GetNumScriptVars() == 3);
     TEST_REQUIRE(klass.GetScriptVar(0).GetName() == "foo");
     TEST_REQUIRE(klass.GetScriptVar(0).GetType() == game::ScriptVar::Type::Integer);
@@ -227,9 +227,9 @@ void unit_test_scene_class()
     TEST_REQUIRE(klass.GetBloom()->green     == real::float32(3.0f));
     TEST_REQUIRE(klass.GetBloom()->blue      == real::float32(4.0f));
 
-    klass.LinkChild(nullptr, klass.FindNodeByName("root"));
-    klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_1"));
-    klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_2"));
+    klass.LinkChild(nullptr, klass.FindPlacementByName("root"));
+    klass.LinkChild(klass.FindPlacementByName("root"), klass.FindPlacementByName("child_1"));
+    klass.LinkChild(klass.FindPlacementByName("root"), klass.FindPlacementByName("child_2"));
     TEST_REQUIRE(WalkTree(klass) == "root child_1 child_2");
 
     // to/from json
@@ -241,13 +241,13 @@ void unit_test_scene_class()
         TEST_REQUIRE(ret.GetName() == "my scene");
         TEST_REQUIRE(ret.GetTilemapId() == "map123");
         TEST_REQUIRE(ret.GetScriptFileId() == "script.lua");
-        TEST_REQUIRE(ret.GetNode(0).GetName() == "root");
-        TEST_REQUIRE(ret.GetNode(1).GetName() == "child_1");
-        TEST_REQUIRE(ret.GetNode(2).GetName() == "child_2");
-        TEST_REQUIRE(ret.FindNodeByName("root"));
-        TEST_REQUIRE(ret.FindNodeById(klass.GetNode(0).GetId()));
-        TEST_REQUIRE(ret.FindNodeById("asgas") == nullptr);
-        TEST_REQUIRE(ret.FindNodeByName("foasg") == nullptr);
+        TEST_REQUIRE(ret.GetPlacement(0).GetName() == "root");
+        TEST_REQUIRE(ret.GetPlacement(1).GetName() == "child_1");
+        TEST_REQUIRE(ret.GetPlacement(2).GetName() == "child_2");
+        TEST_REQUIRE(ret.FindPlacementByName("root"));
+        TEST_REQUIRE(ret.FindPlacementById(klass.GetPlacement(0).GetId()));
+        TEST_REQUIRE(ret.FindPlacementById("asgas") == nullptr);
+        TEST_REQUIRE(ret.FindPlacementByName("foasg") == nullptr);
         TEST_REQUIRE(ret.GetHash() == klass.GetHash());
         TEST_REQUIRE(ret.GetScriptVar(0).GetName() == "foo");
         TEST_REQUIRE(ret.GetScriptVar(0).GetType() == game::ScriptVar::Type::Integer);
@@ -298,41 +298,41 @@ void unit_test_scene_class()
         TEST_REQUIRE(clone.GetId() != klass.GetId());
         TEST_REQUIRE(clone.GetName() == klass.GetName());
         TEST_REQUIRE(clone.GetNumNodes() == 3);
-        TEST_REQUIRE(clone.GetNode(0).GetName() == "root");
-        TEST_REQUIRE(clone.GetNode(1).GetName() == "child_1");
-        TEST_REQUIRE(clone.GetNode(2).GetName() == "child_2");
+        TEST_REQUIRE(clone.GetPlacement(0).GetName() == "root");
+        TEST_REQUIRE(clone.GetPlacement(1).GetName() == "child_1");
+        TEST_REQUIRE(clone.GetPlacement(2).GetName() == "child_2");
         TEST_REQUIRE(WalkTree(clone) == "root child_1 child_2");
     }
 
     // test breaking node away from the render tree.
     {
-        klass.BreakChild(klass.FindNodeByName("root"), false);
-        klass.BreakChild(klass.FindNodeByName("child_1"), false);
-        klass.BreakChild(klass.FindNodeByName("child_2"), false);
+        klass.BreakChild(klass.FindPlacementByName("root"), false);
+        klass.BreakChild(klass.FindPlacementByName("child_1"), false);
+        klass.BreakChild(klass.FindPlacementByName("child_2"), false);
         TEST_REQUIRE(klass.GetNumNodes() == 3);
-        TEST_REQUIRE(klass.GetNode(0).GetName() == "root");
-        TEST_REQUIRE(klass.GetNode(1).GetName() == "child_1");
-        TEST_REQUIRE(klass.GetNode(2).GetName() == "child_2");
+        TEST_REQUIRE(klass.GetPlacement(0).GetName() == "root");
+        TEST_REQUIRE(klass.GetPlacement(1).GetName() == "child_1");
+        TEST_REQUIRE(klass.GetPlacement(2).GetName() == "child_2");
         TEST_REQUIRE(WalkTree(klass) == "");
 
-        klass.LinkChild(nullptr, klass.FindNodeByName("root"));
-        klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_1"));
-        klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_2"));
+        klass.LinkChild(nullptr, klass.FindPlacementByName("root"));
+        klass.LinkChild(klass.FindPlacementByName("root"), klass.FindPlacementByName("child_1"));
+        klass.LinkChild(klass.FindPlacementByName("root"), klass.FindPlacementByName("child_2"));
         TEST_REQUIRE(WalkTree(klass) == "root child_1 child_2");
 
     }
 
     // test duplicate node
     {
-        klass.DuplicateNode(klass.FindNodeByName("child_2"));
+        klass.DuplicatePlacement(klass.FindPlacementByName("child_2"));
         TEST_REQUIRE(klass.GetNumNodes() == 4);
-        TEST_REQUIRE(klass.GetNode(0).GetName() == "root");
-        TEST_REQUIRE(klass.GetNode(1).GetName() == "child_1");
-        TEST_REQUIRE(klass.GetNode(2).GetName() == "child_2");
-        TEST_REQUIRE(klass.GetNode(3).GetName() == "Copy of child_2");
-        klass.GetNode(3).SetName("child_3");
+        TEST_REQUIRE(klass.GetPlacement(0).GetName() == "root");
+        TEST_REQUIRE(klass.GetPlacement(1).GetName() == "child_1");
+        TEST_REQUIRE(klass.GetPlacement(2).GetName() == "child_2");
+        TEST_REQUIRE(klass.GetPlacement(3).GetName() == "Copy of child_2");
+        klass.GetPlacement(3).SetName("child_3");
         TEST_REQUIRE(WalkTree(klass) == "root child_1 child_2 child_3");
-        klass.ReparentChild(klass.FindNodeByName("child_1"), klass.FindNodeByName("child_3"));
+        klass.ReparentChild(klass.FindPlacementByName("child_1"), klass.FindPlacementByName("child_3"));
         TEST_REQUIRE(WalkTree(klass) == "root child_1 child_3 child_2");
     }
 
@@ -343,7 +343,7 @@ void unit_test_scene_class()
 
     // test hit testing
     {
-        std::vector<game::SceneNodeClass*> hits;
+        std::vector<game::EntityPlacement*> hits;
         std::vector<glm::vec2> hitpos;
         klass.CoarseHitTest(50.0f, 50.0f, &hits, &hitpos);
         TEST_REQUIRE(hits.empty());
@@ -361,7 +361,7 @@ void unit_test_scene_class()
 
     // test coordinate mapping
     {
-        const auto* node = klass.FindNodeByName("child_1");
+        const auto* node = klass.FindPlacementByName("child_1");
         auto vec = klass.MapCoordsFromNodeBox(0.0f, 0.0f, node);
         TEST_REQUIRE(math::equals(100.0f, vec.x));
         TEST_REQUIRE(math::equals(100.0f, vec.y));
@@ -374,12 +374,12 @@ void unit_test_scene_class()
 
     // test delete node
     {
-        klass.DeleteNode(klass.FindNodeByName(("child_3")));
+        klass.DeletePlacement(klass.FindPlacementByName(("child_3")));
         TEST_REQUIRE(klass.GetNumNodes() == 3);
-        klass.DeleteNode(klass.FindNodeByName("child_1"));
+        klass.DeletePlacement(klass.FindPlacementByName("child_1"));
         TEST_REQUIRE(klass.GetNumNodes() == 2);
-        TEST_REQUIRE(klass.GetNode(0).GetName() == "root");
-        TEST_REQUIRE(klass.GetNode(1).GetName() == "child_2");
+        TEST_REQUIRE(klass.GetPlacement(0).GetName() == "root");
+        TEST_REQUIRE(klass.GetPlacement(1).GetName() == "child_2");
     }
 }
 
@@ -400,34 +400,34 @@ void unit_test_scene_instance_create()
     game::SceneClass klass;
     // set some entity nodes in the scene class.
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("root");
         node.SetEntity(entity);
-        klass.AddNode(node);
+        klass.PlaceEntity(node);
     }
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("child_1");
         node.SetEntity(entity);
-        node.SetFlag(game::SceneNodeClass::Flags::TickEntity, false);
-        node.SetFlag(game::SceneNodeClass::Flags::UpdateEntity, true);
-        game::SceneNodeClass::ScriptVarValue val;
+        node.SetFlag(game::EntityPlacement::Flags::TickEntity, false);
+        node.SetFlag(game::EntityPlacement::Flags::UpdateEntity, true);
+        game::EntityPlacement::ScriptVarValue val;
         val.id = var0.GetId();
         val.value = std::vector<int>{70};
         node.AddScriptVarValue(val);
-        klass.AddNode(node);
+        klass.PlaceEntity(node);
     }
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("child_2");
         node.SetEntity(entity);
         node.SetLifetime(3.0f);
-        klass.AddNode(node);
+        klass.PlaceEntity(node);
     }
     // link to the scene graph
-    klass.LinkChild(nullptr, klass.FindNodeByName("root"));
-    klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_1"));
-    klass.LinkChild(klass.FindNodeByName("root"), klass.FindNodeByName("child_2"));
+    klass.LinkChild(nullptr, klass.FindPlacementByName("root"));
+    klass.LinkChild(klass.FindPlacementByName("root"), klass.FindPlacementByName("child_1"));
+    klass.LinkChild(klass.FindPlacementByName("root"), klass.FindPlacementByName("child_2"));
 
     // set class scripting variables.
     {
@@ -446,16 +446,16 @@ void unit_test_scene_instance_create()
     TEST_REQUIRE(instance.GetEntity(0).GetName() == "root");
     TEST_REQUIRE(instance.GetEntity(1).GetName() == "child_1");
     TEST_REQUIRE(instance.GetEntity(2).GetName() == "child_2");
-    TEST_REQUIRE(instance.GetEntity(0).GetId() == klass.GetNode(0).GetId());
-    TEST_REQUIRE(instance.GetEntity(1).GetId() == klass.GetNode(1).GetId());
-    TEST_REQUIRE(instance.GetEntity(2).GetId() == klass.GetNode(2).GetId());
+    TEST_REQUIRE(instance.GetEntity(0).GetId() == klass.GetPlacement(0).GetId());
+    TEST_REQUIRE(instance.GetEntity(1).GetId() == klass.GetPlacement(1).GetId());
+    TEST_REQUIRE(instance.GetEntity(2).GetId() == klass.GetPlacement(2).GetId());
     TEST_REQUIRE(instance.FindEntityByInstanceName("root"));
     TEST_REQUIRE(instance.FindEntityByInstanceName("child_1"));
     TEST_REQUIRE(instance.FindEntityByInstanceName("child_2"));
     TEST_REQUIRE(instance.FindEntityByInstanceName("blaal") == nullptr);
-    TEST_REQUIRE(instance.FindEntityByInstanceId(klass.GetNode(0).GetId()));
-    TEST_REQUIRE(instance.FindEntityByInstanceId(klass.GetNode(1).GetId()));
-    TEST_REQUIRE(instance.FindEntityByInstanceId(klass.GetNode(2).GetId()));
+    TEST_REQUIRE(instance.FindEntityByInstanceId(klass.GetPlacement(0).GetId()));
+    TEST_REQUIRE(instance.FindEntityByInstanceId(klass.GetPlacement(1).GetId()));
+    TEST_REQUIRE(instance.FindEntityByInstanceId(klass.GetPlacement(2).GetId()));
     TEST_REQUIRE(instance.FindEntityByInstanceId("asegsa") == nullptr);
     TEST_REQUIRE(WalkTree(instance) == "root child_1 child_2");
     TEST_REQUIRE(instance.FindEntityByInstanceName("child_1")->TestFlag(game::EntityClass::Flags::TickEntity) == false);
@@ -767,21 +767,21 @@ void unit_test_scene_instance_transform()
     // setup a scene with 2 entities where the second entity
     // is  linked to one of the nodes in the first entity
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("entity0");
         node.SetEntity(entity0);
         node.SetTranslation(glm::vec2(-10.0f, -10.0f));
-        klass.LinkChild(nullptr, klass.AddNode(node));
+        klass.LinkChild(nullptr, klass.PlaceEntity(node));
     }
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("entity1");
         node.SetEntity(entity1);
         // link this sucker to so that the nodes in entity1 are transformed relative
         // to child0 node in entity0
         node.SetParentRenderTreeNodeId(entity0->FindNodeByName("child0")->GetId());
         node.SetTranslation(glm::vec2(50.0f, 50.0f));
-        klass.LinkChild(klass.FindNodeByName("entity0"), klass.AddNode(node));
+        klass.LinkChild(klass.FindPlacementByName("entity0"), klass.PlaceEntity(node));
     }
 
     auto scene = game::CreateSceneInstance(klass);
@@ -912,7 +912,7 @@ void unit_test_scene_instance_kill_at_boundary()
         entity->LinkChild(nullptr, entity->AddNode(node));
     }
 
-    game::SceneNodeClass node;
+    game::EntityPlacement node;
     node.SetName("entity");
     node.SetEntity(entity);
     node.SetScale(glm::vec2(1.0f, 1.0f));
@@ -925,7 +925,7 @@ void unit_test_scene_instance_kill_at_boundary()
     klass.SetRightBoundary(100.0f);
     klass.SetTopBoundary(-100.0f);
     klass.SetBottomBoundary(100.0f);
-    klass.LinkChild(nullptr, klass.AddNode(node));
+    klass.LinkChild(nullptr, klass.PlaceEntity(node));
 
     // no killing, inside all boundaries
     {
@@ -1020,21 +1020,21 @@ void unit_test_scene_spatial_query(game::SceneClass::SpatialIndex index)
     // setup a scene with 2 entities where the second entity
     // is  linked to one of the nodes in the first entity
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("entity0");
         node.SetEntity(entity0);
         node.SetTranslation(glm::vec2(-50.0f, -50.0f));
-        klass.LinkChild(nullptr, klass.AddNode(node));
+        klass.LinkChild(nullptr, klass.PlaceEntity(node));
     }
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetName("entity1");
         node.SetEntity(entity1);
         // link this sucker to so that the nodes in entity1 are transformed relative
         // to child0 node in entity0
         node.SetParentRenderTreeNodeId(entity0->FindNodeByName("child0")->GetId());
         node.SetTranslation(glm::vec2(100.0f, 100.0f));
-        klass.LinkChild(klass.FindNodeByName("entity0"), klass.AddNode(node));
+        klass.LinkChild(klass.FindPlacementByName("entity0"), klass.PlaceEntity(node));
     }
 
     klass.SetDynamicSpatialIndex(index);

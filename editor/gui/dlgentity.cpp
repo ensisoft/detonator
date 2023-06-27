@@ -35,7 +35,7 @@ class DlgEntity::ScriptVarModel : public QAbstractTableModel
 {
 public:
     ScriptVarModel(const app::Workspace* workspace,
-            const game::EntityClass& entity, game::SceneNodeClass& node)
+            const game::EntityClass& entity, game::EntityPlacement& node)
       : mWorkspace(workspace)
       , mEntity(entity)
       , mNode(node)
@@ -76,14 +76,14 @@ public:
     virtual int columnCount(const QModelIndex&) const override
     { return 3; }
 
-    void SetValue(size_t row, const game::SceneNodeClass::ScriptVarValue& value)
+    void SetValue(size_t row, const game::EntityPlacement::ScriptVarValue& value)
     {
         ASSERT(mEntity.FindScriptVarById(value.id));
 
         mNode.SetScriptVarValue(value);
         emit dataChanged(index(row, 0), index(row, 3));
     }
-    void SetValue(size_t row, game::SceneNodeClass::ScriptVarValue&& value)
+    void SetValue(size_t row, game::EntityPlacement::ScriptVarValue&& value)
     {
         ASSERT(mEntity.FindScriptVarById(value.id));
 
@@ -103,7 +103,7 @@ public:
     }
 
 private:
-    QVariant GetScriptVarData(const game::SceneNodeClass::ScriptVarValue& value) const
+    QVariant GetScriptVarData(const game::EntityPlacement::ScriptVarValue& value) const
     {
         switch (game::ScriptVar::GetTypeFromVariant(value.value))
         {
@@ -182,11 +182,11 @@ private:
 private:
     const app::Workspace* mWorkspace = nullptr;
     const game::EntityClass& mEntity;
-    game::SceneNodeClass& mNode;
+    game::EntityPlacement& mNode;
 };
 
 DlgEntity::DlgEntity(QWidget* parent, const app::Workspace* workspace,
-                     const game::EntityClass& klass, game::SceneNodeClass& node)
+                     const game::EntityClass& klass, game::EntityPlacement& node)
     : QDialog(parent)
     , mWorkspace(workspace)
     , mEntityClass(klass)
@@ -237,12 +237,12 @@ DlgEntity::DlgEntity(QWidget* parent, const app::Workspace* workspace,
     if (mNodeClass.HasLifetimeSetting())
         SetValue(mUI.entityLifetime, mNodeClass.GetLifetime());
 
-    GetFlag(game::SceneNodeClass::Flags::KillAtLifetime, mUI.chkKillAtLifetime);
-    GetFlag(game::SceneNodeClass::Flags::KillAtBoundary, mUI.chkKillAtBoundary);
-    GetFlag(game::SceneNodeClass::Flags::UpdateEntity, mUI.chkUpdateEntity);
-    GetFlag(game::SceneNodeClass::Flags::TickEntity, mUI.chkTickEntity);
-    GetFlag(game::SceneNodeClass::Flags::WantsKeyEvents, mUI.chkKeyEvents);
-    GetFlag(game::SceneNodeClass::Flags::WantsMouseEvents, mUI.chkMouseEvents);
+    GetFlag(game::EntityPlacement::Flags::KillAtLifetime, mUI.chkKillAtLifetime);
+    GetFlag(game::EntityPlacement::Flags::KillAtBoundary, mUI.chkKillAtBoundary);
+    GetFlag(game::EntityPlacement::Flags::UpdateEntity, mUI.chkUpdateEntity);
+    GetFlag(game::EntityPlacement::Flags::TickEntity, mUI.chkTickEntity);
+    GetFlag(game::EntityPlacement::Flags::WantsKeyEvents, mUI.chkKeyEvents);
+    GetFlag(game::EntityPlacement::Flags::WantsMouseEvents, mUI.chkMouseEvents);
 
     connect(mUI.tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &DlgEntity::ScriptVariableSelectionChanged);
@@ -258,20 +258,20 @@ void DlgEntity::on_btnAccept_clicked()
     if (lifetime != 0.0)
     {
         mNodeClass.SetLifetime(lifetime);
-        mNodeClass.SetFlag(game::SceneNodeClass::Flags::LimitLifetime, true);
+        mNodeClass.SetFlag(game::EntityPlacement::Flags::LimitLifetime, true);
     }
     else
     {
         mNodeClass.ResetLifetime();
-        mNodeClass.SetFlag(game::SceneNodeClass::Flags::LimitLifetime, false);
+        mNodeClass.SetFlag(game::EntityPlacement::Flags::LimitLifetime, false);
     }
 
-    SetFlag(game::SceneNodeClass::Flags::KillAtLifetime, mUI.chkKillAtLifetime);
-    SetFlag(game::SceneNodeClass::Flags::KillAtBoundary, mUI.chkKillAtBoundary);
-    SetFlag(game::SceneNodeClass::Flags::UpdateEntity, mUI.chkUpdateEntity);
-    SetFlag(game::SceneNodeClass::Flags::TickEntity, mUI.chkTickEntity);
-    SetFlag(game::SceneNodeClass::Flags::WantsKeyEvents, mUI.chkKeyEvents);
-    SetFlag(game::SceneNodeClass::Flags::WantsMouseEvents, mUI.chkMouseEvents);
+    SetFlag(game::EntityPlacement::Flags::KillAtLifetime, mUI.chkKillAtLifetime);
+    SetFlag(game::EntityPlacement::Flags::KillAtBoundary, mUI.chkKillAtBoundary);
+    SetFlag(game::EntityPlacement::Flags::UpdateEntity, mUI.chkUpdateEntity);
+    SetFlag(game::EntityPlacement::Flags::TickEntity, mUI.chkTickEntity);
+    SetFlag(game::EntityPlacement::Flags::WantsKeyEvents, mUI.chkKeyEvents);
+    SetFlag(game::EntityPlacement::Flags::WantsMouseEvents, mUI.chkMouseEvents);
 
     accept();
 }
@@ -306,7 +306,7 @@ void DlgEntity::on_btnEditVar_clicked()
     const auto& var = mEntityClass.GetScriptVar(index.row());
     if (var.IsReadOnly())
         return;
-    game::SceneNodeClass::ScriptVarValue value;
+    game::EntityPlacement::ScriptVarValue value;
     value.id    = var.GetId();
     value.value = var.GetVariantValue();
     if (const auto* val = mNodeClass.FindScriptVarValueById(value.id))
@@ -374,14 +374,14 @@ void DlgEntity::ScriptVariableSelectionChanged(const QItemSelection&, const QIte
     SetEnabled(mUI.btnResetVar, true);
 }
 
-void DlgEntity::SetFlag(game::SceneNodeClass::Flags flag, QCheckBox* chk)
+void DlgEntity::SetFlag(game::EntityPlacement::Flags flag, QCheckBox* chk)
 {
     if (chk->checkState() == Qt::PartiallyChecked)
         mNodeClass.ClearFlagSetting(flag);
     else mNodeClass.SetFlag(flag, GetValue(chk));
 }
 
-void DlgEntity::GetFlag(game::SceneNodeClass::Flags flag, QCheckBox* chk)
+void DlgEntity::GetFlag(game::EntityPlacement::Flags flag, QCheckBox* chk)
 {
     SetValue(chk, Qt::PartiallyChecked);
     if (mNodeClass.HasFlagSetting(flag))

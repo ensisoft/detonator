@@ -74,14 +74,14 @@ public:
     {}
     virtual QVariant data(const QModelIndex& index, int role) const override
     {
-        const auto& node = mScene.GetNode(index.row());
-        const auto& entity_klass = node.GetEntityClass();
+        const auto& placement = mScene.GetPlacement(index.row());
+        const auto& entity = placement.GetEntityClass();
         if (role == Qt::DisplayRole)
         {
-            if (index.column() == 0) return app::toString(node.GetName());
+            if (index.column() == 0) return app::toString(placement.GetName());
             else if (index.column() == 1) {
-                if (entity_klass)
-                    return app::toString(entity_klass->GetName());
+                if (entity)
+                    return app::toString(entity->GetName());
                 else return "*Deleted Class*";
             }
         }
@@ -123,7 +123,7 @@ protected:
         if (mFilterString.isEmpty())
             return true;
 
-        const auto& node = mScene.GetNode(row);
+        const auto& node = mScene.GetPlacement(row);
         const auto& name = app::FromUtf8(node.GetName());
         if (name.contains(mFilterString, Qt::CaseInsensitive))
             return true;
@@ -159,7 +159,7 @@ void DlgFindEntity::on_btnAccept_clicked()
 {
     const auto current = GetSelectedIndex(mUI.tableView);
     if (current.isValid())
-        mNode = &mScene.GetNode(current.row());
+        mNode = &mScene.GetPlacement(current.row());
 
     accept();
 }
@@ -318,12 +318,12 @@ private:
             case game::ScriptVar::Type::EntityReference:
                 if (!var.IsArray()) {
                     const auto& val = var.GetValue<game::ScriptVar::EntityReference>();
-                    if (const auto* node = mState.scene->FindNodeById(val.id))
+                    if (const auto* node = mState.scene->FindPlacementById(val.id))
                         return app::FromUtf8(node->GetName());
                     return "Nil";
                 } else {
                     const auto& val = var.GetArray<game::ScriptVar::EntityReference>()[0];
-                    if (const auto* node = mState.scene->FindNodeById(val.id))
+                    if (const auto* node = mState.scene->FindPlacementById(val.id))
                         return QString("[0]=%1 ...").arg(app::FromUtf8(node->GetName()));
                     return "[0]=Nil ...";
                 }
@@ -428,14 +428,14 @@ public:
         }
 
         const auto name = CreateName();
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetEntity(mClass);
         node.SetName(name);
         node.SetScale(glm::vec2(1.0f, 1.0f));
         node.SetTranslation(glm::vec2(mWorldPos.x, mWorldPos.y));
         // leave this empty for the class default to take place.
         // node.SetIdleAnimationId(mClass->GetIdleTrackId());
-        auto* child = mState.scene->AddNode(std::move(node));
+        auto* child = mState.scene->PlaceEntity(std::move(node));
         mState.scene->LinkChild(nullptr, child);
         mState.view->Rebuild();
         mState.view->SelectItemById(child->GetId());
@@ -466,7 +466,7 @@ private:
         for (size_t i=0; i<10000; ++i)
         {
             QString suggestion = QString("%1_%2").arg(name).arg(i);
-            if (mState.scene->FindNodeByName(app::ToUtf8(suggestion)) == nullptr)
+            if (mState.scene->FindPlacementByName(app::ToUtf8(suggestion)) == nullptr)
                 return app::ToUtf8(suggestion);
         }
         return "???";
@@ -770,7 +770,7 @@ void SceneWidget::Cut(Clipboard& clipboard)
         clipboard.SetText(json.ToString());
         NOTE("Copied JSON to application clipboard.");
 
-        mState.scene->DeleteNode(node);
+        mState.scene->DeletePlacement(node);
         mUI.tree->Rebuild();
         mUI.tree->ClearSelection();
     }
@@ -813,19 +813,19 @@ void SceneWidget::Paste(const Clipboard& clipboard)
     }
 
     // use a temporary vector in case there's a problem
-    std::vector<std::unique_ptr<game::SceneNodeClass>> nodes;
+    std::vector<std::unique_ptr<game::EntityPlacement>> nodes;
     bool error = false;
     game::SceneClass::RenderTree tree;
     game::RenderTreeFromJson(tree, [&nodes, &error](const data::Reader& data) {
-        game::SceneNodeClass ret;
+        game::EntityPlacement ret;
         if (ret.FromJson(data)) {
-            auto node = std::make_unique<game::SceneNodeClass>(ret.Clone());
+            auto node = std::make_unique<game::EntityPlacement>(ret.Clone());
             node->SetName(base::FormatString("Copy of %1", ret.GetName()));
             nodes.push_back(std::move(node));
             return nodes.back().get();
         }
         error = true;
-        return (game::SceneNodeClass*)nullptr;
+        return (game::EntityPlacement*)nullptr;
     }, json);
     if (error || nodes.empty())
     {
@@ -853,11 +853,11 @@ void SceneWidget::Paste(const Clipboard& clipboard)
         // moving the unique ptr means that node address stays the same
         // thus the tree is still valid!
         node->SetEntity(mState.workspace->FindEntityClassById(node->GetEntityId()));
-        mState.scene->AddNode(std::move(node));
+        mState.scene->PlaceEntity(std::move(node));
     }
     nodes.clear();
     // walk the tree and link the nodes into the scene.
-    tree.PreOrderTraverseForEach([&nodes, this, &tree](game::SceneNodeClass* node) {
+    tree.PreOrderTraverseForEach([&nodes, this, &tree](game::EntityPlacement* node) {
         if (node == nullptr)
             return;
         auto* parent = tree.GetParent(node);
@@ -1283,7 +1283,7 @@ void SceneWidget::on_actionNodeDelete_triggered()
 {
     if (auto* node = GetCurrentNode())
     {
-        mState.scene->DeleteNode(node);
+        mState.scene->DeletePlacement(node);
 
         mUI.tree->Rebuild();
         mUI.tree->ClearSelection();
@@ -1317,7 +1317,7 @@ void SceneWidget::on_actionNodeDuplicate_triggered()
 {
     if (const auto* node = GetCurrentNode())
     {
-        auto* dupe = mState.scene->DuplicateNode(node);
+        auto* dupe = mState.scene->DuplicatePlacement(node);
         // update the translation for the parent of the new hierarchy
         // so that it's possible to tell it apart from the source of the copy.
         dupe->SetTranslation(node->GetTranslation() * 1.2f);
@@ -1364,10 +1364,10 @@ void SceneWidget::on_actionEntityVarRef_triggered()
         std::vector<ResourceListItem> nodes;
         for (size_t i = 0; i < mState.scene->GetNumNodes(); ++i)
         {
-            const auto& node = mState.scene->GetNode(i);
+            const auto& placement = mState.scene->GetPlacement(i);
             ResourceListItem item;
-            item.name = app::FromUtf8(node.GetName());
-            item.id   = app::FromUtf8(node.GetId());
+            item.name = placement.GetName();
+            item.id   = placement.GetId();
             entities.push_back(std::move(item));
         }
         QString name = app::FromUtf8(node->GetName());
@@ -1550,7 +1550,7 @@ void SceneWidget::on_btnNewScriptVar_clicked()
     std::vector<ResourceListItem> nodes;
     for (size_t i=0; i<mState.scene->GetNumNodes(); ++i)
     {
-        const auto& node = mState.scene->GetNode(i);
+        const auto& node = mState.scene->GetPlacement(i);
         ResourceListItem item;
         item.name = node.GetName();
         item.id   = node.GetId();
@@ -1578,7 +1578,7 @@ void SceneWidget::on_btnEditScriptVar_clicked()
     std::vector<ResourceListItem> nodes;
     for (size_t i=0; i<mState.scene->GetNumNodes(); ++i)
     {
-        const auto& node = mState.scene->GetNode(i);
+        const auto& node = mState.scene->GetPlacement(i);
         ResourceListItem item;
         item.name = node.GetName();
         item.id   = node.GetId();
@@ -1638,7 +1638,7 @@ void SceneWidget::on_nodeName_textChanged(const QString& text)
         return;
     else if (!item->GetUserData())
         return;
-    auto* node = static_cast<game::SceneNodeClass*>(item->GetUserData());
+    auto* node = static_cast<game::EntityPlacement*>(item->GetUserData());
     node->SetName(app::ToUtf8(text));
     item->SetText(text);
     mUI.tree->Update();
@@ -1651,14 +1651,14 @@ void SceneWidget::on_nodeEntity_currentIndexChanged(const QString& name)
         auto klass = mState.workspace->GetEntityClassById(GetItemId(mUI.nodeEntity));
         node->SetEntity(klass);
 
-        const auto visible_in_game = node->TestFlag(game::SceneNodeClass::Flags::VisibleInGame);
-        const auto visible_in_editor = node->TestFlag(game::SceneNodeClass::Flags::VisibleInEditor);
+        const auto visible_in_game = node->TestFlag(game::EntityPlacement::Flags::VisibleInGame);
+        const auto visible_in_editor = node->TestFlag(game::EntityPlacement::Flags::VisibleInEditor);
         // reset the entity instance parameters to defaults since the
         // entity class has changed. only save the flags that are changed
         // through this editor UI.
         node->ResetEntityParams();
-        node->SetFlag(game::SceneNodeClass::Flags::VisibleInGame, visible_in_game);
-        node->SetFlag(game::SceneNodeClass::Flags::VisibleInEditor, visible_in_editor);
+        node->SetFlag(game::EntityPlacement::Flags::VisibleInGame, visible_in_game);
+        node->SetFlag(game::EntityPlacement::Flags::VisibleInEditor, visible_in_editor);
         NOTE("Entity parameters were reset to default.");
     }
 }
@@ -1684,7 +1684,7 @@ void SceneWidget::on_nodeIsVisible_stateChanged(int)
 {
     if (auto* node = GetCurrentNode())
     {
-        node->SetFlag(game::SceneNodeClass::Flags::VisibleInGame, GetValue(mUI.nodeIsVisible));
+        node->SetFlag(game::EntityPlacement::Flags::VisibleInGame, GetValue(mUI.nodeIsVisible));
     }
 }
 void SceneWidget::on_nodeTranslateX_valueChanged(double value)
@@ -1831,8 +1831,8 @@ void SceneWidget::TreeCurrentNodeChangedEvent()
 void SceneWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target)
 {
     auto& tree = mState.scene->GetRenderTree();
-    auto* src_value = static_cast<game::SceneNodeClass*>(item->GetUserData());
-    auto* dst_value = static_cast<game::SceneNodeClass*>(target->GetUserData());
+    auto* src_value = static_cast<game::EntityPlacement*>(item->GetUserData());
+    auto* dst_value = static_cast<game::EntityPlacement*>(target->GetUserData());
 
     // check if we're trying to drag a parent onto its own child
     if (game::SearchChild(tree, dst_value, src_value))
@@ -1846,8 +1846,8 @@ void SceneWidget::TreeClickEvent(TreeWidget::TreeItem* item)
 {
     if (auto* node = GetCurrentNode())
     {
-        const bool visibility = !node->TestFlag(game::SceneNodeClass::Flags::VisibleInEditor);
-        node->SetFlag(game::SceneNodeClass::Flags::VisibleInEditor, visibility);
+        const bool visibility = !node->TestFlag(game::EntityPlacement::Flags::VisibleInEditor);
+        node->SetFlag(game::EntityPlacement::Flags::VisibleInEditor, visibility);
         item->SetIcon(visibility ? QIcon("icons:eye.png") : QIcon("icons:crossed_eye.png"));
         mUI.tree->Update();
     }
@@ -1960,7 +1960,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
 
     for (size_t i=0; i<mState.scene->GetNumNodes(); ++i)
     {
-        const auto& node = mState.scene->GetNode(i);
+        const auto& node = mState.scene->GetPlacement(i);
         const auto& entity_klass = node.GetEntityClass();
         if (entity_klass)
             continue;
@@ -2016,7 +2016,7 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
                 return;
             const auto& box  = entity_klass->GetBoundingRect();
 
-            const base::Transform model(mState.scene->FindNodeTransform(current));
+            const base::Transform model(mState.scene->FindEntityTransform(current));
 
             const auto hotspot = TestToolHotspot(mUI, mState, model, box, click_point);
             if (hotspot == ToolHotspot::Resize)
@@ -2175,7 +2175,7 @@ void SceneWidget::DisplayCurrentNodeProperties()
         SetValue(mUI.nodeName, node->GetName());
         SetValue(mUI.nodeEntity, ListItemId(node->GetEntityId()));
         SetValue(mUI.nodeLayer, node->GetLayer());
-        SetValue(mUI.nodeIsVisible, node->TestFlag(game::SceneNodeClass::Flags::VisibleInGame));
+        SetValue(mUI.nodeIsVisible, node->TestFlag(game::EntityPlacement::Flags::VisibleInGame));
         SetValue(mUI.nodeTranslateX, translate.x);
         SetValue(mUI.nodeTranslateY, translate.y);
         SetValue(mUI.nodeScaleX, scale.x);
@@ -2387,7 +2387,7 @@ void SceneWidget::UpdateResourceReferences()
 {
     for (size_t i=0; i<mState.scene->GetNumNodes(); ++i)
     {
-        auto& node = mState.scene->GetNode(i);
+        auto& node = mState.scene->GetPlacement(i);
         auto klass = mState.workspace->FindEntityClassById(node.GetEntityId());
         if (!klass)
         {
@@ -2462,7 +2462,7 @@ void SceneWidget::SetSceneBoundary()
         mState.scene->SetBottomBoundary(bottom.value());
 }
 
-void SceneWidget::FindNode(const game::SceneNodeClass* node)
+void SceneWidget::FindNode(const game::EntityPlacement* node)
 {
     const auto& entity_klass = node->GetEntityClass();
     if (!entity_klass)
@@ -2480,11 +2480,11 @@ void SceneWidget::FindNode(const game::SceneNodeClass* node)
     mAnimator.Jump(mUI, mState, cam_pos + glm::vec2{node_view_pos});
 }
 
-game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
+game::EntityPlacement* SceneWidget::SelectNode(const QPoint& click_point)
 {
     const glm::vec2 world_pos = MapWindowCoordinateToWorld(mUI, mState, click_point);
 
-    std::vector<game::SceneNodeClass*> hit_nodes;
+    std::vector<game::EntityPlacement*> hit_nodes;
     std::vector<glm::vec2> hit_positions;
     mState.scene->CoarseHitTest(world_pos, &hit_nodes, &hit_positions);
     if (hit_nodes.empty())
@@ -2498,7 +2498,7 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
                      public engine::EntityClassDrawHook
     {
     public:
-        DrawHook(const std::vector<game::SceneNodeClass*>& hits) : mHits(hits)
+        DrawHook(const std::vector<game::EntityPlacement*>& hits) : mHits(hits)
         {
             for (unsigned i=0; i<hits.size(); ++i)
             {
@@ -2509,18 +2509,18 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
                 mColors.push_back(gfx::Color4f(r, g, b, 0xff));
             }
         }
-        virtual bool FilterEntity(const game::SceneNodeClass& node, gfx::Painter&, gfx::Transform&) override
+        virtual bool FilterEntity(const game::EntityPlacement& node, gfx::Painter&, gfx::Transform&) override
         {
             // filter out nodes that are currently not visible.
             // probably don't want to select any of those.
-            if (!node.TestFlag(game::SceneNodeClass::Flags::VisibleInEditor))
+            if (!node.TestFlag(game::EntityPlacement::Flags::VisibleInEditor))
                 return false;
 
             for (const auto* n : mHits)
                 if (n == &node) return true;
             return false;
         }
-        virtual void BeginDrawEntity(const game::SceneNodeClass& node, gfx::Painter&, gfx::Transform&) override
+        virtual void BeginDrawEntity(const game::EntityPlacement& node, gfx::Painter&, gfx::Transform&) override
         {
             for (size_t i=0; i<mHits.size(); ++i)
             {
@@ -2539,7 +2539,7 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
         }
 
     private:
-        const std::vector<game::SceneNodeClass*>& mHits;
+        const std::vector<game::EntityPlacement*>& mHits;
         std::vector<gfx::Color4f> mColors;
         std::size_t mColorIndex = 0;
     };
@@ -2591,7 +2591,7 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
     int layer = hit->GetLayer();
     for (size_t i=1; i<hit_nodes.size(); ++i)
     {
-        if (hit_nodes[i]->TestFlag(game::SceneNodeClass::Flags::VisibleInEditor) &&
+        if (hit_nodes[i]->TestFlag(game::EntityPlacement::Flags::VisibleInEditor) &&
             hit_nodes[i]->GetLayer() >= layer)
         {
             hit = hit_nodes[i];
@@ -2599,29 +2599,29 @@ game::SceneNodeClass* SceneWidget::SelectNode(const QPoint& click_point)
             layer = hit->GetLayer();
         }
     }
-    if (!hit->TestFlag(game::SceneNodeClass::Flags::VisibleInEditor))
+    if (!hit->TestFlag(game::EntityPlacement::Flags::VisibleInEditor))
         return nullptr;
     return hit;
 }
 
-game::SceneNodeClass* SceneWidget::GetCurrentNode()
+game::EntityPlacement* SceneWidget::GetCurrentNode()
 {
     TreeWidget::TreeItem* item = mUI.tree->GetSelectedItem();
     if (item == nullptr)
         return nullptr;
     else if (!item->GetUserData())
         return nullptr;
-    return static_cast<game::SceneNodeClass*>(item->GetUserData());
+    return static_cast<game::EntityPlacement*>(item->GetUserData());
 }
 
-const game::SceneNodeClass* SceneWidget::GetCurrentNode() const
+const game::EntityPlacement* SceneWidget::GetCurrentNode() const
 {
     const TreeWidget::TreeItem* item = mUI.tree->GetSelectedItem();
     if (item == nullptr)
         return nullptr;
     else if (!item->GetUserData())
         return nullptr;
-    return static_cast<const game::SceneNodeClass*>(item->GetUserData());
+    return static_cast<const game::EntityPlacement*>(item->GetUserData());
 }
 
 } // bui

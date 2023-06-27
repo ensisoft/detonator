@@ -52,8 +52,8 @@ public:
         mTransform.Push(std::move(parent_node_transform));
         Result ret;
         ret.node_to_scene = mTransform.GetAsMatrix();
-        ret.visual_entity = node;
-        ret.entity_object = node;
+        ret.entity = node;
+        ret.placement = node;
         mResult.push_back(std::move(ret));
     }
     virtual void LeaveNode(Node* node) override
@@ -82,7 +82,7 @@ private:
 namespace game
 {
 
-SceneNodeClass::ScriptVarValue* SceneNodeClass::FindScriptVarValueById(const std::string& id)
+EntityPlacement::ScriptVarValue* EntityPlacement::FindScriptVarValueById(const std::string& id)
 {
     for (auto& value : mScriptVarValues)
     {
@@ -91,7 +91,7 @@ SceneNodeClass::ScriptVarValue* SceneNodeClass::FindScriptVarValueById(const std
     }
     return nullptr;
 }
-const SceneNodeClass::ScriptVarValue* SceneNodeClass::FindScriptVarValueById(const std::string& id) const
+const EntityPlacement::ScriptVarValue* EntityPlacement::FindScriptVarValueById(const std::string& id) const
 {
     for (auto& value : mScriptVarValues)
     {
@@ -101,7 +101,7 @@ const SceneNodeClass::ScriptVarValue* SceneNodeClass::FindScriptVarValueById(con
     return nullptr;
 }
 
-bool SceneNodeClass::DeleteScriptVarValueById(const std::string& id)
+bool EntityPlacement::DeleteScriptVarValueById(const std::string& id)
 {
     for (auto it=mScriptVarValues.begin(); it != mScriptVarValues.end(); ++it)
     {
@@ -115,7 +115,7 @@ bool SceneNodeClass::DeleteScriptVarValueById(const std::string& id)
     return false;
 }
 
-void SceneNodeClass::SetScriptVarValue(const ScriptVarValue& value)
+void EntityPlacement::SetScriptVarValue(const ScriptVarValue& value)
 {
     for (auto& val : mScriptVarValues)
     {
@@ -128,7 +128,7 @@ void SceneNodeClass::SetScriptVarValue(const ScriptVarValue& value)
     mScriptVarValues.push_back(value);
 }
 
-void SceneNodeClass::ClearStaleScriptValues(const EntityClass& klass)
+void EntityPlacement::ClearStaleScriptValues(const EntityClass& klass)
 {
     for (auto it=mScriptVarValues.begin(); it != mScriptVarValues.end();)
     {
@@ -144,7 +144,7 @@ void SceneNodeClass::ClearStaleScriptValues(const EntityClass& klass)
     }
 }
 
-std::size_t SceneNodeClass::GetHash() const
+std::size_t EntityPlacement::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mClassId);
@@ -169,7 +169,7 @@ std::size_t SceneNodeClass::GetHash() const
     return hash;
 }
 
-glm::mat4 SceneNodeClass::GetNodeTransform() const
+glm::mat4 EntityPlacement::GetNodeTransform() const
 {
     Transform transform;
     transform.Scale(mScale);
@@ -178,14 +178,14 @@ glm::mat4 SceneNodeClass::GetNodeTransform() const
     return transform.GetAsMatrix();
 }
 
-SceneNodeClass SceneNodeClass::Clone() const
+EntityPlacement EntityPlacement::Clone() const
 {
-    SceneNodeClass copy(*this);
+    EntityPlacement copy(*this);
     copy.mClassId = base::RandomString(10);
     return copy;
 }
 
-void SceneNodeClass::IntoJson(data::Writer& data) const
+void EntityPlacement::IntoJson(data::Writer& data) const
 {
     data.Write("id",                      mClassId);
     data.Write("entity",                  mEntityId);
@@ -210,7 +210,7 @@ void SceneNodeClass::IntoJson(data::Writer& data) const
     }
 }
 
-bool SceneNodeClass::FromJson(const data::Reader& data)
+bool EntityPlacement::FromJson(const data::Reader& data)
 {
     bool ok = true;
     ok &= data.Read("id",                      &mClassId);
@@ -245,7 +245,7 @@ SceneClass::SceneClass()
 
 SceneClass::SceneClass(const SceneClass& other)
 {
-    std::unordered_map<const SceneNodeClass*, const SceneNodeClass*> map;
+    std::unordered_map<const EntityPlacement*, const EntityPlacement*> map;
 
     mClassId                 = other.mClassId;
     mName                    = other.mName;
@@ -262,61 +262,61 @@ SceneClass::SceneClass(const SceneClass& other)
 
     for (const auto& node : other.mNodes)
     {
-        auto copy = std::make_unique<SceneNodeClass>(*node);
+        auto copy = std::make_unique<EntityPlacement>(*node);
         map[node.get()] = copy.get();
         mNodes.push_back(std::move(copy));
     }
-    mRenderTree.FromTree(other.mRenderTree, [&map](const SceneNodeClass* node) {
+    mRenderTree.FromTree(other.mRenderTree, [&map](const EntityPlacement* node) {
         return map[node];
     });
 }
-SceneNodeClass* SceneClass::AddNode(const SceneNodeClass& node)
+EntityPlacement* SceneClass::PlaceEntity(const EntityPlacement& placement)
 {
-    mNodes.emplace_back(new SceneNodeClass(node));
+    mNodes.emplace_back(new EntityPlacement(placement));
     return mNodes.back().get();
 }
-SceneNodeClass* SceneClass::AddNode(SceneNodeClass&& node)
+EntityPlacement* SceneClass::PlaceEntity(EntityPlacement&& placement)
 {
-    mNodes.emplace_back(new SceneNodeClass(std::move(node)));
+    mNodes.emplace_back(new EntityPlacement(std::move(placement)));
     return mNodes.back().get();
 }
-SceneNodeClass* SceneClass::AddNode(std::unique_ptr<SceneNodeClass> node)
+EntityPlacement* SceneClass::PlaceEntity(std::unique_ptr<EntityPlacement> placement)
 {
-    mNodes.push_back(std::move(node));
+    mNodes.push_back(std::move(placement));
     return mNodes.back().get();
 }
-SceneNodeClass& SceneClass::GetNode(size_t index)
+EntityPlacement& SceneClass::GetPlacement(size_t index)
 {
     ASSERT(index < mNodes.size());
     return *mNodes[index].get();
 }
-SceneNodeClass* SceneClass::FindNodeByName(const std::string& name)
+EntityPlacement* SceneClass::FindPlacementByName(const std::string& name)
 {
     for (const auto& node : mNodes)
         if (node->GetName() == name)
             return node.get();
     return nullptr;
 }
-SceneNodeClass* SceneClass::FindNodeById(const std::string& id)
+EntityPlacement* SceneClass::FindPlacementById(const std::string& id)
 {
     for (const auto& node : mNodes)
         if (node->GetId() == id)
             return node.get();
     return nullptr;
 }
-const SceneNodeClass& SceneClass::GetNode(size_t index) const
+const EntityPlacement& SceneClass::GetPlacement(size_t index) const
 {
     ASSERT(index < mNodes.size());
     return *mNodes[index].get();
 }
-const SceneNodeClass* SceneClass::FindNodeByName(const std::string& name) const
+const EntityPlacement* SceneClass::FindPlacementByName(const std::string& name) const
 {
     for (const auto& node : mNodes)
         if (node->GetName() == name)
             return node.get();
     return nullptr;
 }
-const SceneNodeClass* SceneClass::FindNodeById(const std::string& id) const
+const EntityPlacement* SceneClass::FindPlacementById(const std::string& id) const
 {
     for (const auto& node : mNodes)
         if (node->GetId() == id)
@@ -324,29 +324,29 @@ const SceneNodeClass* SceneClass::FindNodeById(const std::string& id) const
     return nullptr;
 }
 
-void SceneClass::LinkChild(SceneNodeClass* parent, SceneNodeClass* child)
+void SceneClass::LinkChild(EntityPlacement* parent, EntityPlacement* child)
 {
     game::LinkChild(mRenderTree, parent, child);
 }
 
-void SceneClass::BreakChild(SceneNodeClass* child, bool keep_world_transform)
+void SceneClass::BreakChild(EntityPlacement* child, bool keep_world_transform)
 {
     game::BreakChild(mRenderTree, child, keep_world_transform);
 }
 
-void SceneClass::ReparentChild(SceneNodeClass* parent, SceneNodeClass* child, bool keep_world_transform)
+void SceneClass::ReparentChild(EntityPlacement* parent, EntityPlacement* child, bool keep_world_transform)
 {
     game::ReparentChild(mRenderTree, parent, child, keep_world_transform);
 }
 
-void SceneClass::DeleteNode(SceneNodeClass* node)
+void SceneClass::DeletePlacement(EntityPlacement* placement)
 {
-    game::DeleteNode(mRenderTree, node, mNodes);
+    game::DeleteNode(mRenderTree, placement, mNodes);
 }
 
-SceneNodeClass* SceneClass::DuplicateNode(const SceneNodeClass* node)
+EntityPlacement* SceneClass::DuplicatePlacement(const EntityPlacement* placement)
 {
-    return game::DuplicateNode(mRenderTree, node, &mNodes);
+    return game::DuplicateNode(mRenderTree, placement, &mNodes);
 }
 
 std::vector<SceneClass::ConstSceneNode> SceneClass::CollectNodes() const
@@ -354,7 +354,7 @@ std::vector<SceneClass::ConstSceneNode> SceneClass::CollectNodes() const
     std::vector<SceneClass::ConstSceneNode> ret;
 
     // visit the entire render tree of the scene and transform every
-    // SceneNodeClass (which is basically a placement for an entity in the
+    // EntityPlacement (which is basically a placement for an entity in the
     // scene) into world.
     // todo: this needs some kind of space partitioning which allows the
     // collection to only consider some nodes that lie within some area
@@ -364,7 +364,7 @@ std::vector<SceneClass::ConstSceneNode> SceneClass::CollectNodes() const
     public:
         Visitor(std::vector<SceneClass::ConstSceneNode>& result) : mResult(result)
         {}
-        virtual void EnterNode(const SceneNodeClass* node) override
+        virtual void EnterNode(const EntityPlacement* node) override
         {
             if (!node)
                 return;
@@ -385,11 +385,11 @@ std::vector<SceneClass::ConstSceneNode> SceneClass::CollectNodes() const
             mTransform.Push(node->GetNodeTransform());
             ConstSceneNode entity;
             entity.node_to_scene = mTransform.GetAsMatrix();
-            entity.visual_entity = node->GetEntityClass();
-            entity.entity_object = node;
+            entity.entity = node->GetEntityClass();
+            entity.placement = node;
             mResult.push_back(std::move(entity));
         }
-        virtual void LeaveNode(const SceneNodeClass* node) override
+        virtual void LeaveNode(const EntityPlacement* node) override
         {
             if (!node)
                 return;
@@ -400,14 +400,14 @@ std::vector<SceneClass::ConstSceneNode> SceneClass::CollectNodes() const
             mParents.pop();
         }
     private:
-        const SceneNodeClass* GetParent() const
+        const EntityPlacement* GetParent() const
         {
             if (mParents.empty())
                 return nullptr;
             return mParents.top();
         }
     private:
-        std::stack<const SceneNodeClass*> mParents;
+        std::stack<const EntityPlacement*> mParents;
         std::vector<SceneClass::ConstSceneNode>& mResult;
         Transform mTransform;
     };
@@ -421,7 +421,7 @@ std::vector<SceneClass::SceneNode> SceneClass::CollectNodes()
     std::vector<SceneClass::SceneNode> ret;
 
     // visit the entire render tree of the scene and transform every
-    // SceneNodeClass (which is basically a placement for an entity in the
+    // EntityPlacement (which is basically a placement for an entity in the
     // scene) into world.
     // todo: this needs some kind of space partitioning which allows the
     // collection to only consider some nodes that lie within some area
@@ -431,7 +431,7 @@ std::vector<SceneClass::SceneNode> SceneClass::CollectNodes()
     public:
         Visitor(std::vector<SceneClass::SceneNode>& result) : mResult(result)
         {}
-        virtual void EnterNode(SceneNodeClass* node) override
+        virtual void EnterNode(EntityPlacement* node) override
         {
             if (!node)
                 return;
@@ -451,11 +451,11 @@ std::vector<SceneClass::SceneNode> SceneClass::CollectNodes()
             mTransform.Push(node->GetNodeTransform());
             SceneNode entity;
             entity.node_to_scene = mTransform.GetAsMatrix();
-            entity.visual_entity = node->GetEntityClass();
-            entity.entity_object = node;
+            entity.entity = node->GetEntityClass();
+            entity.placement = node;
             mResult.push_back(std::move(entity));
         }
-        virtual void LeaveNode(SceneNodeClass* node) override
+        virtual void LeaveNode(EntityPlacement* node) override
         {
             if (!node)
                 return;
@@ -464,14 +464,14 @@ std::vector<SceneClass::SceneNode> SceneClass::CollectNodes()
             mParents.pop();
         }
     private:
-        SceneNodeClass* GetParent() const
+        EntityPlacement* GetParent() const
         {
             if (mParents.empty())
                 return nullptr;
             return mParents.top();
         }
     private:
-        std::stack<SceneNodeClass*> mParents;
+        std::stack<EntityPlacement*> mParents;
         std::vector<SceneClass::SceneNode>& mResult;
         Transform mTransform;
     };
@@ -480,15 +480,15 @@ std::vector<SceneClass::SceneNode> SceneClass::CollectNodes()
     return ret;
 }
 
-void SceneClass::CoarseHitTest(float x, float y, std::vector<SceneNodeClass*>* hits,
+void SceneClass::CoarseHitTest(float x, float y, std::vector<EntityPlacement*>* hits,
                    std::vector<glm::vec2>* hitbox_positions)
 {
     const auto& entity_nodes = CollectNodes();
     for (const auto& entity_node : entity_nodes)
     {
-        if (!entity_node.visual_entity)
+        if (!entity_node.entity)
         {
-            WARN("Node '%1' has no entity class object!", entity_node.entity_object->GetName());
+            WARN("Node '%1' has no entity class object!", entity_node.placement->GetName());
             continue;
         }
         // transform the coordinate in the scene into the entity
@@ -498,31 +498,31 @@ void SceneClass::CoarseHitTest(float x, float y, std::vector<SceneNodeClass*>* h
         auto node_hit_pos  = scene_to_node * glm::vec4(x, y, 1.0f, 1.0f);
         // perform entity hit test.
         std::vector<const EntityNodeClass*> nodes;
-        entity_node.visual_entity->CoarseHitTest(node_hit_pos.x, node_hit_pos.y, &nodes);
+        entity_node.entity->CoarseHitTest(node_hit_pos.x, node_hit_pos.y, &nodes);
         if (nodes.empty())
             continue;
 
         // hit some nodes so the entity as a whole is hit.
-        hits->push_back(entity_node.entity_object);
+        hits->push_back(entity_node.placement);
         if (hitbox_positions)
             hitbox_positions->push_back(glm::vec2(node_hit_pos.x, node_hit_pos.y));
     }
 }
-void SceneClass::CoarseHitTest(const glm::vec2& pos, std::vector<SceneNodeClass*>* hits,
+void SceneClass::CoarseHitTest(const glm::vec2& pos, std::vector<EntityPlacement*>* hits,
                                std::vector<glm::vec2>* hitbox_positions)
 {
     CoarseHitTest(pos.x, pos.y, hits, hitbox_positions);
 }
 
-void SceneClass::CoarseHitTest(float x, float y, std::vector<const SceneNodeClass*>* hits,
+void SceneClass::CoarseHitTest(float x, float y, std::vector<const EntityPlacement*>* hits,
                        std::vector<glm::vec2>* hitbox_positions) const
 {
     const auto& entity_nodes = CollectNodes();
     for (const auto& entity_node : entity_nodes)
     {
-        if (!entity_node.visual_entity)
+        if (!entity_node.entity)
         {
-            WARN("Node '%1' has no entity class object!", entity_node.visual_entity->GetName());
+            WARN("Node '%1' has no entity class object!", entity_node.entity->GetName());
             continue;
         }
         // transform the coordinate in the scene into the entity
@@ -532,29 +532,29 @@ void SceneClass::CoarseHitTest(float x, float y, std::vector<const SceneNodeClas
         auto node_hit_pos  = scene_to_node * glm::vec4(x, y, 1.0f, 1.0f);
         // perform entity hit test.
         std::vector<const EntityNodeClass*> nodes;
-        entity_node.visual_entity->CoarseHitTest(node_hit_pos.x, node_hit_pos.y, &nodes);
+        entity_node.entity->CoarseHitTest(node_hit_pos.x, node_hit_pos.y, &nodes);
         if (nodes.empty())
             continue;
 
         // hit some nodes so the entity as a whole is hit.
-        hits->push_back(entity_node.entity_object);
+        hits->push_back(entity_node.placement);
         if (hitbox_positions)
             hitbox_positions->push_back(glm::vec2(node_hit_pos.x, node_hit_pos.y));
     }
 }
 
-void SceneClass::CoarseHitTest(const glm::vec2& pos, std::vector<const SceneNodeClass*>* hits,
+void SceneClass::CoarseHitTest(const glm::vec2& pos, std::vector<const EntityPlacement*>* hits,
                                std::vector<glm::vec2>* hitbox_positions) const
 {
     CoarseHitTest(pos.x, pos.y, hits, hitbox_positions);
 }
 
-glm::vec2 SceneClass::MapCoordsFromNodeBox(float x, float y, const SceneNodeClass* node) const
+glm::vec2 SceneClass::MapCoordsFromNodeBox(float x, float y, const EntityPlacement* node) const
 {
     const auto& entity_nodes = CollectNodes();
     for (const auto& entity_node : entity_nodes)
     {
-        if (entity_node.entity_object == node)
+        if (entity_node.placement == node)
         {
             const auto ret = entity_node.node_to_scene * glm::vec4(x, y, 1.0f, 1.0f);
             return glm::vec2(ret.x, ret.y);
@@ -563,17 +563,17 @@ glm::vec2 SceneClass::MapCoordsFromNodeBox(float x, float y, const SceneNodeClas
     // todo: should we return something else maybe ?
     return glm::vec2(0.0f, 0.0f);
 }
-glm::vec2 SceneClass::MapCoordsFromNodeBox(const glm::vec2& pos, const SceneNodeClass* node) const
+glm::vec2 SceneClass::MapCoordsFromNodeBox(const glm::vec2& pos, const EntityPlacement* node) const
 {
     return MapCoordsFromNodeBox(pos.x, pos.y, node);
 }
 
-glm::vec2 SceneClass::MapCoordsToNodeBox(float x, float y, const SceneNodeClass* node) const
+glm::vec2 SceneClass::MapCoordsToNodeBox(float x, float y, const EntityPlacement* node) const
 {
     const auto& entity_nodes = CollectNodes();
     for (const auto& entity_node : entity_nodes)
     {
-        if (entity_node.entity_object == node)
+        if (entity_node.placement == node)
         {
             const auto ret = glm::inverse(entity_node.node_to_scene) * glm::vec4(x, y, 1.0f, 1.0f);
             return glm::vec2(ret.x, ret.y);
@@ -582,22 +582,22 @@ glm::vec2 SceneClass::MapCoordsToNodeBox(float x, float y, const SceneNodeClass*
     // todo: should we return something else maybe ?
     return glm::vec2(0.0f, 0.0f);
 }
-glm::vec2 SceneClass::MapCoordsToNodeBox(const glm::vec2& pos, const SceneNodeClass* node) const
+glm::vec2 SceneClass::MapCoordsToNodeBox(const glm::vec2& pos, const EntityPlacement* node) const
 {
     return MapCoordsToNodeBox(pos.x, pos.y, node);
 }
 
-glm::mat4 SceneClass::FindNodeTransform(const SceneNodeClass* node) const
+glm::mat4 SceneClass::FindEntityTransform(const EntityPlacement* placement) const
 {
-    return game::FindNodeTransform(mRenderTree, node);
+    return game::FindNodeTransform(mRenderTree, placement);
 }
 
-FRect SceneClass::FindNodeBoundingRect(const SceneNodeClass* node) const
+FRect SceneClass::FindEntityBoundingRect(const EntityPlacement* placement) const
 {
     FRect  ret;
-    Transform transform(FindNodeTransform(node));
+    Transform transform(FindEntityTransform(placement));
 
-    const auto& entity = node->GetEntityClass();
+    const auto& entity = placement->GetEntityClass();
     ASSERT(entity);
     for (size_t i=0; i<entity->GetNumNodes(); ++i)
     {
@@ -611,14 +611,14 @@ FRect SceneClass::FindNodeBoundingRect(const SceneNodeClass* node) const
     return ret;
 }
 
-FBox SceneClass::FindNodeBoundingBox(const SceneNodeClass* node) const
+FBox SceneClass::FindEntityBoundingBox(const EntityPlacement* placement) const
 {
-    const auto& entity = node->GetEntityClass();
+    const auto& entity = placement->GetEntityClass();
     ASSERT(entity);
 
     const auto& rect = entity->GetBoundingRect();
 
-    Transform transform(FindNodeTransform(node));
+    Transform transform(FindEntityTransform(placement));
       transform.Push();
       transform.Resize(rect);
       transform.MoveTo(rect);
@@ -718,7 +718,7 @@ size_t SceneClass::GetHash() const
 
     // include the node hashes in the animation hash
     // this covers both the node values and their traversal order
-    mRenderTree.PreOrderTraverseForEach([&](const SceneNodeClass* node) {
+    mRenderTree.PreOrderTraverseForEach([&](const EntityPlacement* node) {
         if (node == nullptr)
             return;
         hash = base::hash_combine(hash, node->GetHash());
@@ -844,7 +844,7 @@ void SceneClass::IntoJson(data::Writer& data) const
         data.AppendChunk("vars", std::move(chunk));
     }
     auto chunk = data.NewWriteChunk();
-    RenderTreeIntoJson(mRenderTree, &game::TreeNodeToJson<SceneNodeClass>, *chunk);
+    RenderTreeIntoJson(mRenderTree, &game::TreeNodeToJson<EntityPlacement>, *chunk);
     data.Write("render_tree", std::move(chunk));
 }
 
@@ -893,7 +893,7 @@ bool SceneClass::FromJson(const data::Reader& data)
     for (unsigned i=0; i<data.GetNumChunks("nodes"); ++i)
     {
         const auto& chunk = data.GetReadChunk("nodes", i);
-        auto node = std::make_unique<SceneNodeClass>();
+        auto node = std::make_unique<EntityPlacement>();
         if (!node->FromJson(*chunk))
             WARN("Failed to load scene node. [scene='%1', node='%2']", mName, node->GetName());
 
@@ -918,12 +918,12 @@ SceneClass SceneClass::Clone() const
 {
     SceneClass ret;
 
-    std::unordered_map<const SceneNodeClass*, const SceneNodeClass*> map;
+    std::unordered_map<const EntityPlacement*, const EntityPlacement*> map;
 
     // make a deep copy of the nodes.
     for (const auto& node : mNodes)
     {
-        auto clone = std::make_unique<SceneNodeClass>(*node);
+        auto clone = std::make_unique<EntityPlacement>(*node);
         map[node.get()] = clone.get();
         ret.mNodes.push_back(std::move(clone));
     }
@@ -937,7 +937,7 @@ SceneClass SceneClass::Clone() const
             const auto& src_arr = var.GetArray<ScriptVar::EntityReference>();
             for (const auto& src_ref : src_arr)
             {
-                const auto* src_node = FindNodeById(src_ref.id);
+                const auto* src_node = FindPlacementById(src_ref.id);
                 const auto* dst_node = map[src_node];
                 ScriptVar::EntityReference ref;
                 ref.id = dst_node ? dst_node->GetId() : "";
@@ -963,7 +963,7 @@ SceneClass SceneClass::Clone() const
     ret.mTopBoundary             = mTopBoundary;
     ret.mBottomBoundary          = mBottomBoundary;
     ret.mBloomFilter             = mBloomFilter;
-    ret.mRenderTree.FromTree(mRenderTree, [&map](const SceneNodeClass* node) {
+    ret.mRenderTree.FromTree(mRenderTree, [&map](const EntityPlacement* node) {
         return map[node];
     });
     return ret;
@@ -995,7 +995,7 @@ SceneClass& SceneClass::operator=(const SceneClass& other)
 Scene::Scene(std::shared_ptr<const SceneClass> klass)
   : mClass(klass)
 {
-    std::unordered_map<const SceneNodeClass*, const Entity*> map;
+    std::unordered_map<const EntityPlacement*, const Entity*> map;
 
     bool spatial_nodes = false;
 
@@ -1003,7 +1003,7 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
     // in the scene class
     for (size_t i=0; i<klass->GetNumNodes(); ++i)
     {
-        const auto& node = klass->GetNode(i);
+        const auto& node = klass->GetPlacement(i);
         EntityArgs args;
         args.klass    = node.GetEntityClass();
         args.rotation = node.GetRotation();
@@ -1080,7 +1080,7 @@ Scene::Scene(std::shared_ptr<const SceneClass> klass)
         mNameMap[entity->GetName()] = entity.get();
         mEntities.push_back(std::move(entity));
     }
-    mRenderTree.FromTree(mClass->GetRenderTree(), [&map](const SceneNodeClass* node) {
+    mRenderTree.FromTree(mClass->GetRenderTree(), [&map](const EntityPlacement* node) {
         return map[node];
     });
 
@@ -1325,7 +1325,7 @@ std::vector<Scene::ConstSceneNode> Scene::CollectNodes() const
     {
         ConstSceneNode node;
         node.node_to_scene = FindEntityTransform(entity.get());
-        node.visual_entity = entity.get();
+        node.entity = entity.get();
         ret.push_back(std::move(node));
     }
     return ret;
@@ -1338,7 +1338,7 @@ std::vector<Scene::SceneNode> Scene::CollectNodes()
     {
         SceneNode node;
         node.node_to_scene = FindEntityTransform(entity.get());
-        node.visual_entity = entity.get();
+        node.entity = entity.get();
         ret.push_back(std::move(node));
     }
     return ret;

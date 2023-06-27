@@ -39,7 +39,7 @@ namespace gui
         Q_OBJECT
     public:
         DlgEntity(QWidget* parent,  const app::Workspace* workspace,
-                  const game::EntityClass& klass, game::SceneNodeClass& node);
+                  const game::EntityClass& klass, game::EntityPlacement& node);
        ~DlgEntity();
 
     private slots:
@@ -54,15 +54,15 @@ namespace gui
         void on_entityTag_textChanged(const QString& text);
         void ScriptVariableSelectionChanged(const QItemSelection&,  const QItemSelection&);
     private:
-        void SetFlag(game::SceneNodeClass::Flags flag, QCheckBox* chk);
-        void GetFlag(game::SceneNodeClass::Flags flag, QCheckBox* chk);
+        void SetFlag(game::EntityPlacement::Flags flag, QCheckBox* chk);
+        void GetFlag(game::EntityPlacement::Flags flag, QCheckBox* chk);
     private:
         Ui::DlgEntity mUI;
     private:
         const app::Workspace* mWorkspace = nullptr;
         class ScriptVarModel;
         const game::EntityClass& mEntityClass;
-        game::SceneNodeClass& mNodeClass;
+        game::EntityPlacement& mNodeClass;
         std::unique_ptr<ScriptVarModel> mScriptVars;
     };
 } // namespace

@@ -428,6 +428,7 @@ namespace gui
         }
         virtual void Render(gfx::Painter& window, gfx::Painter& world) const override
         {
+
         }
 
         virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
@@ -447,7 +448,7 @@ namespace gui
         {
             mMouseDown = mickey.WorldPlanePos();
 
-            const auto box = mModel.FindNodeBoundingBox(mNode);
+            const auto box = mModel.FindEntityBoundingBox(mNode);
             const auto size = box.GetSize() * 0.5f;
 
             // unscaled size of the bounding box, i.e. when the node's scaling
@@ -553,7 +554,7 @@ namespace gui
             : mModel(model)
             , mNode(selected)
         {
-            if constexpr (std::is_same_v<TreeNode, game::SceneNodeClass>)
+            if constexpr (std::is_same_v<TreeNode, game::EntityPlacement>)
             {
                 mNodeCenterInWorld = mModel.MapCoordsFromNodeBox(0.0f, 0.0f, mNode);
             }

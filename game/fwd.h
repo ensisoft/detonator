@@ -30,7 +30,7 @@ namespace game {
     class EntityNode;
     class EntityClass;
     class Entity;
-    class SceneNodeClass;
+    class EntityPlacement;
     class SceneClass;
     class Scene;
     class ScriptVar;

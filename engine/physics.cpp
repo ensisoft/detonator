@@ -256,7 +256,7 @@ void PhysicsEngine::UpdateWorld(const game::Scene& scene)
     const auto& nodes = scene.CollectNodes();
     for (const auto& node : nodes)
     {
-        const auto* entity = node.entity_object;
+        const auto* entity = node.entity;
         if (!entity->HasRigidBodies())
             continue;
         if (entity->HasBeenKilled())
@@ -307,7 +307,7 @@ void PhysicsEngine::UpdateScene(game::Scene& scene)
     const auto& nodes = scene.CollectNodes();
     for (const auto& node : nodes)
     {
-        auto* entity = node.entity_object;
+        auto* entity = node.entity;
         if (entity->HasBeenKilled() || !entity->HasRigidBodies())
             continue;
         transform.Push(node.node_to_scene);
@@ -563,12 +563,12 @@ void PhysicsEngine::CreateWorld(const Scene& scene)
     const auto& nodes = scene.CollectNodes();
     for (const auto& node : nodes)
     {
-        const auto* entity = node.entity_object;
+        const auto* entity = node.entity;
         if (!entity->HasRigidBodies())
             continue;
 
         transform.Push(node.node_to_scene);
-          AddEntity(transform.GetAsMatrix(), *node.entity_object);
+          AddEntity(transform.GetAsMatrix(), *node.entity);
         transform.Pop();
     }
 }

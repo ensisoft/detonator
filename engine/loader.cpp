@@ -880,7 +880,7 @@ bool ContentLoaderImpl::LoadClasses(const data::Reader& data)
         auto& scene = p.second;
         for (size_t i=0; i<scene->GetNumNodes(); ++i)
         {
-            auto& node = scene->GetNode(i);
+            auto& node = scene->GetPlacement(i);
             auto klass = FindEntityClassById(node.GetEntityId());
             if (!klass)
             {

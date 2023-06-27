@@ -603,10 +603,10 @@ void unit_test_entity_lifecycle()
 
     auto scene_class = std::make_shared<game::SceneClass>();
     {
-        game::SceneNodeClass node;
+        game::EntityPlacement node;
         node.SetEntity(entity_klass);
         node.SetName("1");
-        scene_class->LinkChild(nullptr, scene_class->AddNode(node));
+        scene_class->LinkChild(nullptr, scene_class->PlaceEntity(node));
         scene_class->SetName("scene");
     }
 
