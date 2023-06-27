@@ -144,6 +144,17 @@ namespace gui
         inline bool CanTransform() const
         { return mCanTransform; }
 
+        inline Point2Df MapMouse(const gfx::Transform& old_view_transform) const
+        {
+            if (mCanTransform)
+                return WorldPlanePos();
+
+            const auto& mouse_pos = mMickey->pos();
+            const auto& widget_to_view = glm::inverse(old_view_transform.GetAsMatrix());
+            const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
+            return {mouse_pos_in_view.x, mouse_pos_in_view.y};
+        }
+
         const QMouseEvent* operator->() const
         { return mMickey; }
     private:
@@ -255,7 +266,7 @@ namespace gui
             const float xs     = GetValue(ui.scaleX);
             const float ys     = GetValue(ui.scaleY);
             const float rotation = 0.0f; // ignored so that the camera movement stays
-            // irrespective of the camera rotation
+                                         // irrespective of the camera rotation
 
             mViewToClip  = engine::CreateProjectionMatrix(game::Perspective::AxisAligned, width, height);
             mWorldToView = engine::CreateViewMatrix(game::Perspective::AxisAligned,
@@ -309,9 +320,7 @@ namespace gui
         {}
         virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& trans) override
         {
-            const auto& mouse_pos = mickey->pos();
-            const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
-            const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
+            const glm::vec2 mouse_pos = mickey.MapMouse(trans);
 
             const auto& tree = mModel.GetRenderTree();
             // if the object we're moving has a parent we need to map the mouse movement
@@ -324,8 +333,7 @@ namespace gui
             if (tree.HasParent(mNode) && tree.GetParent(mNode))
             {
                 const auto* parent = tree.GetParent(mNode);
-                const auto& mouse_pos_in_node = mModel.MapCoordsToNodeBox(mouse_pos_in_view.x, mouse_pos_in_view.y,
-                                                                          parent);
+                const auto& mouse_pos_in_node = mModel.MapCoordsToNodeBox(mouse_pos, parent);
                 const auto& mouse_delta = mouse_pos_in_node - mPreviousMousePos;
 
                 glm::vec2 position = mNode->GetTranslation();
@@ -338,12 +346,12 @@ namespace gui
             {
                 // object doesn't have a parent, movement can be expressed using the animations
                 // coordinate space.
-                const auto& mouse_delta = mouse_pos_in_view - glm::vec4(mPreviousMousePos, 0.0f, 0.0f);
+                const auto& mouse_delta = mouse_pos - mPreviousMousePos;
                 glm::vec2 position = mNode->GetTranslation();
                 position.x += mouse_delta.x;
                 position.y += mouse_delta.y;
                 mNode->SetTranslation(position);
-                mPreviousMousePos = glm::vec2(mouse_pos_in_view.x, mouse_pos_in_view.y);
+                mPreviousMousePos = mouse_pos;
             }
             // set a flag that it was moved only if it actually was.
             // otherwise simply selecting a node will snap it to the
@@ -352,9 +360,7 @@ namespace gui
         }
         virtual void MousePress(const MouseEvent& mickey, gfx::Transform& trans) override
         {
-            const auto& mouse_pos = mickey->pos();
-            const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
-            const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
+            const auto& mouse_pos = mickey.MapMouse(trans);
 
             // see the comments in MouseMove about the branched logic.
             const auto& tree = mModel.GetRenderTree();
@@ -362,14 +368,14 @@ namespace gui
             if (tree.HasParent(mNode) && tree.GetParent(mNode))
             {
                 const auto* parent = tree.GetParent(mNode);
-                mPreviousMousePos = mModel.MapCoordsToNodeBox(mouse_pos_in_view.x, mouse_pos_in_view.y, parent);
+                mPreviousMousePos = mModel.MapCoordsToNodeBox(mouse_pos, parent);
             }
             else
             {
-                mPreviousMousePos = glm::vec2(mouse_pos_in_view.x, mouse_pos_in_view.y);
+                mPreviousMousePos = mouse_pos;
             }
         }
-        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& trans) override
+        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
         {
             if (!mWasMoved)
                 return true;
@@ -409,35 +415,37 @@ namespace gui
         {
             mScale = mNode->GetScale();
         }
-        virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& trans) override
+        virtual void Render(gfx::Painter& window, gfx::Painter& world) const override
         {
-            const auto& tree = mModel.GetRenderTree();
-            const auto& mouse_pos = mickey->pos();
-            trans.Push();
-            trans.RotateAroundZ(mNode->GetRotation());
-                trans.Translate(mNode->GetTranslation());
-                const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
-                const auto& new_mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
-            trans.Pop();
-
-            const auto scale = (glm::vec2(new_mouse_pos_in_view.x, new_mouse_pos_in_view.y)) / mPreviousMousePos;
-
-            mNode->SetScale(scale * mScale);
         }
-        virtual void MousePress(const MouseEvent& mickey, gfx::Transform& trans) override
+
+        virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
         {
-            const auto& tree = mModel.GetRenderTree();
-            const auto& mouse_pos = mickey->pos();
-            trans.Push();
-            trans.RotateAroundZ(mNode->GetRotation());
-                trans.Translate(mNode->GetTranslation());
-                const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
-                const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
-            trans.Pop();
+            const glm::vec2 mouse_pos = mickey.WorldPlanePos();
+            const glm::vec2 mouse_diff = mouse_pos - mMouseDown;
+            mViewSize += mouse_diff;
 
-            mPreviousMousePos = glm::vec2(mouse_pos_in_view.x, mouse_pos_in_view.y);
+            // compute new scaling factor needed to grow the original (real size)
+            // to the new view size.
+            const auto scale = mViewSize / mRealSize;
+
+            mNode->SetScale(scale);
+            mMouseDown = mouse_pos;
         }
-        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& trans) override
+        virtual void MousePress(const MouseEvent& mickey, gfx::Transform&) override
+        {
+            mMouseDown = mickey.WorldPlanePos();
+
+            const auto box = mModel.FindNodeBoundingBox(mNode);
+            const auto size = box.GetSize() * 0.5f;
+
+            // unscaled size of the bounding box, i.e. when the node's scaling
+            // factor is 1.0f
+            mRealSize = size / mScale;
+
+            mViewSize = size;
+        }
+        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
         {
             // we're done
             return true;
@@ -445,7 +453,9 @@ namespace gui
     private:
         TreeModel& mModel;
         TreeNode*  mNode = nullptr;
-        glm::vec2 mPreviousMousePos;
+        glm::vec2 mMouseDown;
+        glm::vec2 mRealSize;
+        glm::vec2 mViewSize;
         glm::vec2 mScale;
     };
 
@@ -461,11 +471,8 @@ namespace gui
         {}
         virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& trans) override
         {
-            const auto& mouse_pos = mickey->pos();
-            const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
-            const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
-            const auto& mouse_pos_in_node = mModel.MapCoordsToNodeBox(mouse_pos_in_view.x, mouse_pos_in_view.y,
-                                                                      mNode);
+            const auto& mouse_pos = mickey.MapMouse(trans);
+            const auto& mouse_pos_in_node = mModel.MapCoordsToNodeBox(mouse_pos, mNode);
             const auto& mouse_delta = (mouse_pos_in_node - mPreviousMousePos);
             const bool maintain_aspect_ratio = mickey->modifiers() & Qt::ShiftModifier;
 
@@ -491,12 +498,10 @@ namespace gui
         }
         virtual void MousePress(const MouseEvent& mickey, gfx::Transform& trans) override
         {
-            const auto& mouse_pos = mickey->pos();
-            const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
-            const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
-            mPreviousMousePos = mModel.MapCoordsToNodeBox(mouse_pos_in_view.x, mouse_pos_in_view.y, mNode);
+            const auto& mouse_pos = mickey.MapMouse(trans);
+            mPreviousMousePos = mModel.MapCoordsToNodeBox(mouse_pos, mNode);
         }
-        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& trans) override
+        virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
         {
             if (!mWasMoved)
                 return true;
@@ -539,25 +544,21 @@ namespace gui
         {
             if constexpr (std::is_same_v<TreeNode, game::SceneNodeClass>)
             {
-                mNodeCenterInView = glm::vec4(mModel.MapCoordsFromNodeBox(0.0f, 0.0f, mNode), 1.0f, 1.0f);
+                mNodeCenterInWorld = mModel.MapCoordsFromNodeBox(0.0f, 0.0f, mNode);
             }
             else
             {
                 const auto &node_size = mNode->GetSize();
-                mNodeCenterInView = glm::vec4(
-                        mModel.MapCoordsFromNodeBox(node_size.x * 0.5f, node_size.y * 0.5, mNode),
-                                              1.0f, 1.0f);
+                mNodeCenterInWorld = mModel.MapCoordsFromNodeBox(node_size.x * 0.5f, node_size.y * 0.5, mNode);
             }
         }
         virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& trans) override
         {
-            const auto& mouse_pos = mickey->pos();
-            const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
-            const auto& mouse_pos_in_view = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
+            const glm::vec2 world_mouse_pos = mickey.MapMouse(trans);
             // compute the delta between the current mouse position angle and the previous mouse position angle
             // wrt the node's center point. Then and add the angle delta increment to the node's rotation angle.
-            const auto previous_angle = GetAngleRadians(mPreviousMousePos - mNodeCenterInView);
-            const auto current_angle  = GetAngleRadians(mouse_pos_in_view - mNodeCenterInView);
+            const auto previous_angle = GetAngleRadians(mPreviousMousePos - mNodeCenterInWorld);
+            const auto current_angle  = GetAngleRadians(world_mouse_pos -mNodeCenterInWorld);
             const auto angle_delta = current_angle - previous_angle;
 
             double angle = mNode->GetRotation();
@@ -565,21 +566,18 @@ namespace gui
             // keep it in the -180 - 180 degrees [-Pi, Pi] range.
             angle = math::wrap(-math::Pi, math::Pi, angle);
             mNode->SetRotation(angle);
-            mPreviousMousePos = mouse_pos_in_view;
+            mPreviousMousePos = world_mouse_pos;
         }
         virtual void MousePress(const MouseEvent& mickey, gfx::Transform& trans) override
         {
-            const auto& mouse_pos = mickey->pos();
-            const auto& widget_to_view = glm::inverse(trans.GetAsMatrix());
-            mPreviousMousePos = widget_to_view * glm::vec4(mouse_pos.x(), mouse_pos.y(), 1.0f, 1.0f);
-            mRadius = glm::length(mPreviousMousePos - mNodeCenterInView);
+            mPreviousMousePos = mickey.MapMouse(trans);
         }
         virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform& trans) override
         {
             return true;
         }
     private:
-        float GetAngleRadians(const glm::vec4& p) const
+        float GetAngleRadians(const glm::vec2& p) const
         {
             const auto hypotenuse = std::sqrt(p.x*p.x + p.y*p.y);
             // acos returns principal angle range which is [0, Pi] radians
@@ -595,9 +593,8 @@ namespace gui
         TreeNode* mNode = nullptr;
         // previous mouse position, for each mouse move we update the object's
         // position by the delta between previous and current mouse pos.
-        glm::vec4 mPreviousMousePos;
-        glm::vec4 mNodeCenterInView;
-        float mRadius = 0.0f;
+        glm::vec2 mPreviousMousePos;
+        glm::vec2 mNodeCenterInWorld;
     };
 
     template<typename EntityType, typename NodeType>
