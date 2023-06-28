@@ -1559,6 +1559,7 @@ void PlayWindow::SetFullScreen(bool fullscreen)
 void PlayWindow::SetDebugOptions() const
 {
     engine::Engine::DebugOptions debug;
+    debug.debug_draw_flags.set_from_value(~0);
     debug.debug_pause     = GetValue(mUI.actionPause);
     debug.debug_draw      = GetValue(mUI.actionToggleDebugDraw);
     debug.debug_show_msg  = GetValue(mUI.actionToggleDebugMsg);

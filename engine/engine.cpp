@@ -1144,34 +1144,44 @@ private:
 
     void DrawDebugObjects()
     {
+        if (!mDebug.debug_draw)
+            goto beach;
+
          TRACE_BLOCK("DebugDrawLines",
-            for (const auto& draw : mDebugDraws)
+            if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::GameDebugDraw))
             {
-                if (const auto* ptr = std::get_if<engine::DebugDrawLine>(&draw))
-                    gfx::DrawLine(*mPainter, ptr->a, ptr->b, ptr->color, ptr->width);
-                else if (const auto* ptr = std::get_if<engine::DebugDrawRect>(&draw))
-                    gfx::DrawRect(*mPainter, gfx::FRect(ptr->top_left, ptr->bottom_right), ptr->color, ptr->width);
-                else if (const auto* ptr = std::get_if<engine::DebugDrawCircle>(&draw))
-                    gfx::DrawCircle(*mPainter, gfx::FCircle(ptr->center, ptr->radius), ptr->color, ptr->width);
-                else BUG("Missing debug draw implementation");
+                for (const auto& draw: mDebugDraws)
+                {
+                    if (const auto* ptr = std::get_if<engine::DebugDrawLine>(&draw))
+                        gfx::DrawLine(*mPainter, ptr->a, ptr->b, ptr->color, ptr->width);
+                    else if (const auto* ptr = std::get_if<engine::DebugDrawRect>(&draw))
+                        gfx::DrawRect(*mPainter, gfx::FRect(ptr->top_left, ptr->bottom_right), ptr->color, ptr->width);
+                    else if (const auto* ptr = std::get_if<engine::DebugDrawCircle>(&draw))
+                        gfx::DrawCircle(*mPainter, gfx::FCircle(ptr->center, ptr->radius), ptr->color, ptr->width);
+                    else BUG("Missing debug draw implementation");
+                }
             }
         );
-        mDebugDraws.clear();
 
-        if (!mDebug.debug_draw)
-            return;
-
-        if (mPhysics.HaveWorld())
-        {
-            TRACE_CALL("DebugDrawPhysics", mPhysics.DebugDrawObjects(*mPainter));
-        }
+        TRACE_BLOCK("DebugDrawPhysics",
+            if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::PhysicsBody))
+            {
+                if (mPhysics.HaveWorld())
+                {
+                    mPhysics.DebugDrawObjects(*mPainter);
+                }
+            }
+        );
 
         TRACE_CALL("DebugDrawScene", DebugDrawScene());
+
+        beach:
+            mDebugDraws.clear();
     }
 
     void DebugDrawScene() const
     {
-        if (!mScene || !mScene->HasSpatialIndex())
+        if (!mScene)
             return;
 
         // this debug drawing is provided for the game developer to help them
@@ -1181,18 +1191,29 @@ private:
         // and their positions. Thus the debug drawing can be based on the
         // entity/node iteration instead of iterating over the items in the
         // spatial index. (Which is a function that doesn't event exist yet).
-
-        for (size_t i=0; i<mScene->GetNumEntities(); ++i)
+        for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
         {
             const auto& entity = mScene->GetEntity(i);
-            for (size_t j=0; j<entity.GetNumNodes(); ++j)
+            for (size_t j = 0; j < entity.GetNumNodes(); ++j)
             {
                 const auto& node = entity.GetNode(j);
-                if (!node.HasSpatialNode())
-                    continue;
+                if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::SpatialIndex))
+                {
+                    if (!node.HasSpatialNode())
+                        continue;
 
-                const auto& aabb = mScene->FindEntityNodeBoundingRect(&entity, &node);
-                gfx::DrawRect(*mPainter, aabb, gfx::Color::HotPink, 1.0f);
+                    const auto& aabb = mScene->FindEntityNodeBoundingRect(&entity, &node);
+                    gfx::DrawRect(*mPainter, aabb, gfx::Color::Gray, 1.0f);
+                }
+            }
+            if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::BoundingRect))
+            {
+                const auto rect = mScene->FindEntityBoundingRect(&entity);
+                gfx::DrawRectOutline(*mPainter, rect, gfx::Color::Yellow, 1.0f);
+            }
+            if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::BoundingBox))
+            {
+                // todo: need to implement the minimum bounding box computation first
             }
         }
     }
