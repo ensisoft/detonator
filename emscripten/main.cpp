@@ -298,6 +298,7 @@ public:
         mDebugOptions.debug_show_fps  = false;
         mDebugOptions.debug_show_msg  = false;
         mDebugOptions.debug_print_fps = false;
+        mDebugOptions.debug_draw_flags.set_from_value(~0);
         if (json.contains("debug"))
         {
             const auto& debug_settings = json["debug"];

@@ -27,6 +27,7 @@
 #include <string>
 #include <queue>
 
+#include "base/bitflag.h"
 #include "base/platform.h"
 #include "base/logging.h"
 #include "base/trace.h"
@@ -141,6 +142,15 @@ namespace engine
         // Debugging options that might be set through some interface.
         // It's up to the engine whether any of these will be supported.
         struct DebugOptions {
+            // Control which debug draws take place.
+            enum class DebugDraw {
+                PhysicsBody,
+                SpatialIndex,
+                BoundingRect,
+                BoundingBox,
+                GameDebugDraw
+            };
+            base::bitflag<DebugDraw> debug_draw_flags;
             // Pause game play and sub-systems.
             bool debug_pause = false;
             // Add some debug drawing of objects in the scene.
