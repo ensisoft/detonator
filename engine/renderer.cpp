@@ -145,18 +145,16 @@ void Renderer::Draw(const EntityClass& entity,
 
 void Renderer::Draw(const Scene& scene,
                     gfx::Painter& painter,
-                    SceneInstanceDrawHook* scene_hook,
-                    EntityInstanceDrawHook* entity_hook)
+                    SceneInstanceDrawHook* scene_hook)
 {
-    DrawScene<Scene, Entity, EntityNode>(scene, painter, scene_hook, entity_hook);
+    DrawScene<Scene, Entity, Entity, EntityNode>(scene, painter, scene_hook);
 }
 
 void Renderer::Draw(const SceneClass& scene,
                     gfx::Painter& painter,
-                    SceneClassDrawHook* scene_hook,
-                    EntityClassDrawHook* entity_hook)
+                    SceneClassDrawHook* scene_hook)
 {
-    DrawScene<SceneClass, EntityPlacement, EntityNodeClass>(scene, painter, scene_hook, entity_hook);
+    DrawScene<SceneClass, EntityPlacement, EntityClass, EntityNodeClass>(scene, painter, scene_hook);
 }
 
 void Renderer::Draw(const game::Tilemap& map,
@@ -387,41 +385,69 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
     }
 }
 
-template<typename SceneType, typename EntityType, typename NodeType>
+template<typename SceneType,typename SceneNodeType,
+         typename EntityType, typename EntityNodeType>
 void Renderer::DrawScene(const SceneType& scene,
                          gfx::Painter& painter,
-                         SceneDrawHook<EntityType>* scene_hook,
-                         EntityDrawHook<NodeType>* entity_hook)
+                         SceneDrawHook<SceneNodeType>* scene_hook)
 {
-    auto nodes = scene.CollectNodes();
+    const auto& nodes = scene.CollectNodes();
 
-    // todo: use a faster sorting. (see the entity draw)
-    std::sort(nodes.begin(), nodes.end(), [](const auto& a, const auto& b) {
-        return a.placement->GetLayer() < b.placement->GetLayer();
-    });
+    std::vector<DrawPacket> scene_packets;
 
-    TRACE_SCOPE("Renderer::DrawEntities", "entities=%u", nodes.size());
-    for (const auto& p : nodes)
+    for (const auto& node : nodes)
     {
+        // When we're drawing SceneClass object the placement is a EntityPlacement*
+        // When we're drawing a Scene object the placement is n Entity* object
+        auto placement = node.placement;
+        // When we're drawing SceneClass object entity is shared_ptr<const EntityClass>
+        auto entity = node.entity;
+
         // this is the model, aka model_to_world transform
-        gfx::Transform transform(p.node_to_scene);
+        gfx::Transform transform(node.node_to_scene);
 
         // draw when there's no scene hook or when the scene hook returns
         // true for the filtering operation.
-        const bool should_draw = !scene_hook || (scene_hook && scene_hook->FilterEntity(*p.placement, painter, transform));
+        const bool should_draw = !scene_hook || (scene_hook && scene_hook->FilterEntity(*placement));
+        if (!should_draw)
+            continue;
 
-        if (should_draw)
+        if (scene_hook)
+            scene_hook->BeginDrawEntity(*placement);
+
+        if (placement->TestFlag(EntityType::Flags::VisibleInGame))
         {
-            if (scene_hook)
-                scene_hook->BeginDrawEntity(*p.placement, painter, transform);
+            MapEntity<EntityType, EntityNodeType>(*entity, transform);
 
-            if (p.entity && p.placement->TestFlag(EntityType::Flags::VisibleInGame))
-                DrawEntity(*p.entity, painter, transform, entity_hook);
-
+            std::vector<DrawPacket> entity_packets;
+            for (size_t i=0; i<entity->GetNumNodes(); ++i)
+            {
+                const auto& node = entity->GetNode(i);
+                if (auto* paint = base::SafeFind(mPaintNodes, node.GetId()))
+                {
+                    CreateDrawResources<EntityType, EntityNodeType>(*paint);
+                    GenerateDrawPackets<EntityType, EntityNodeType>(*paint, entity_packets, nullptr);
+                }
+            }
             if (scene_hook)
-                scene_hook->EndDrawEntity(*p.placement, painter, transform);
+            {
+                for (auto& packet : entity_packets)
+                {
+                    if (scene_hook->InspectPacket(*placement, packet))
+                        scene_packets.push_back(packet);
+                }
+
+            }
+            else base::AppendVector(scene_packets, entity_packets);
+        }
+
+        if (scene_hook)
+        {
+            scene_hook->AppendPackets(*placement, transform, scene_packets);
+            scene_hook->EndDrawEntity(*placement);
         }
     }
+    DrawPackets(painter, scene_packets);
 }
 
 template<typename EntityType, typename NodeType>
@@ -809,12 +835,53 @@ void Renderer::DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packe
 
 }
 
+void Renderer::PrepareTileBatches(const game::Tilemap& map, std::vector<TileBatch>& batches) const
+{
+    for (unsigned layer_index=0; layer_index<map.GetNumLayers(); ++layer_index)
+    {
+        const auto& layer = map.GetLayer(layer_index);
+        if (!layer.IsLoaded() || !layer.IsVisible() || !layer.IsLoaded() || !layer.HasRenderComponent())
+            continue;
+
+        // these are the tile sizes in units
+        const auto map_tile_width_units    = map.GetTileWidth();
+        const auto map_tile_height_units   = map.GetTileHeight();
+        const auto layer_tile_width_units  = map_tile_width_units * layer.GetTileSizeScaler();
+        const auto layer_tile_height_units = map_tile_height_units * layer.GetTileSizeScaler();
+
+        const unsigned layer_width_tiles  = layer.GetWidth();
+        const unsigned layer_height_tiles = layer.GetHeight();
+        const float layer_width_units  = layer_width_tiles  * layer_tile_width_units;
+        const float layer_height_units = layer_height_tiles * layer_tile_height_units;
+
+        const auto visible_region = game::URect(0, 0, layer_width_tiles, layer_height_tiles);
+
+        const auto type = layer.GetType();
+        if (type == game::TilemapLayer::Type::Render)
+            PrepareTileBatches<game::TilemapLayer_Render>(map, layer, visible_region, batches, layer_index);
+        else if (type == game::TilemapLayer::Type::Render_DataUInt4)
+            PrepareTileBatches<game::TilemapLayer_Render_DataUInt4>(map, layer, visible_region, batches, layer_index);
+        else if (type == game::TilemapLayer::Type::Render_DataSInt4)
+            PrepareTileBatches<game::TilemapLayer_Render_DataSInt4>(map, layer, visible_region, batches, layer_index);
+        else if (type == game::TilemapLayer::Type::Render_DataSInt8)
+            PrepareTileBatches<game::TilemapLayer_Render_DataSInt8>(map, layer, visible_region, batches, layer_index);
+        else if (type == game::TilemapLayer::Type::Render_DataUInt8)
+            PrepareTileBatches<game::TilemapLayer_Render_DataUInt8>(map, layer, visible_region, batches, layer_index);
+        else if (type == game::TilemapLayer::Type::Render_DataUInt24)
+            PrepareTileBatches<game::TilemapLayer_Render_DataUInt24>(map, layer,visible_region, batches, layer_index);
+        else if (type == game::TilemapLayer::Type::Render_DataSInt24)
+            PrepareTileBatches<game::TilemapLayer_Render_DataSInt24>(map, layer,visible_region, batches, layer_index);
+        else BUG("Unknown render layer type.");
+
+    }
+}
+
 template<typename LayerType>
 void Renderer::PrepareTileBatches(const game::Tilemap& map,
                                   const game::TilemapLayer& layer,
                                   const game::URect& visible_region,
                                   std::vector<TileBatch>& batches,
-                                  std::uint16_t layer_index)
+                                  std::uint16_t layer_index) const
 
 {
     using TileType = typename LayerType::TileType;
