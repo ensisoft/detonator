@@ -127,7 +127,6 @@ public:
     DrawHook(const game::EntityPlacement* selected, const game::FRect& view)
       : mSelectedSceneNode(selected)
       , mViewRect(view)
-      , mDrawScene(true)
     {}
 
     void SetDrawVectors(bool on_off)
@@ -145,9 +144,6 @@ public:
     virtual void AppendPackets(const game::EntityNode* node, gfx::Transform& trans,
                                std::vector<engine::DrawPacket>& packets) override
     {
-        if (mDrawScene)
-            return;
-
         GenericAppendEntityPackets(node, trans, packets);
     }
     // EntityNodeClass
@@ -155,59 +151,55 @@ public:
     {
         return GenericFilterEntityPacket(node, packet);
     }
-    virtual void AppendPackets(const game::EntityNodeClass* node, gfx::Transform& trans,
+    virtual void AppendPackets(const game::EntityNodeClass* node, gfx::Transform& model,
                                std::vector<engine::DrawPacket>& packets) override
     {
-        if (mDrawScene)
-            return;
-
-        GenericAppendEntityPackets(node, trans, packets);
+        GenericAppendEntityPackets(node, model, packets);
     }
 
     // SceneClassDrawHook
-    virtual bool FilterEntity(const game::EntityPlacement& node, gfx::Painter& painter, gfx::Transform& trans) override
+    virtual bool FilterEntity(const game::EntityPlacement& placement) override
     {
-        if (node.TestFlag(game::EntityPlacement::Flags::VisibleInEditor))
-            return true;
-
-        // broken entity reference.
-        const auto& klass = node.GetEntityClass();
-        if (!klass)
+        if (!placement.TestFlag(game::EntityPlacement::Flags::VisibleInEditor))
             return false;
+        else if (placement.IsBroken())
+            return false;
+        return true;
+    }
+    virtual void BeginDrawEntity(const game::EntityPlacement& placement) override
+    {
+    }
+    virtual void EndDrawEntity(const game::EntityPlacement& placement) override
+    {
+    }
 
-        if (&node == mSelectedSceneNode)
-        {
-            const auto& entity = node.GetEntityClass();
-            const auto& box    = entity->GetBoundingRect();
-            DrawSelectionBox(painter, trans, box);
-            if (mDrawVectors)
-                DrawBasisVectors(painter, trans);
-        }
-        return false;
-    }
-    virtual void BeginDrawEntity(const game::EntityPlacement& node, gfx::Painter& painter, gfx::Transform& trans) override
+    virtual void AppendPackets(const game::EntityPlacement& placement, gfx::Transform& model,
+                               std::vector<engine::DrawPacket>& packets)
     {
-    }
-    virtual void EndDrawEntity(const game::EntityPlacement& node, gfx::Painter& painter, gfx::Transform& trans) override
-    {
-        // broken entity reference.
-        const auto& entity_klass = node.GetEntityClass();
-        if (!entity_klass)
+        if (placement.IsBroken())
             return;
 
-        if (&node == mSelectedSceneNode)
+        const auto& entity = placement.GetEntityClass();
+        const auto& bounds =  entity->GetBoundingRect();
+
+        model.Push();
+        model.Translate(bounds.GetPosition());
+        model.Translate(bounds.GetWidth()*0.5f, bounds.GetHeight()*0.5f);
+
+        if (&placement == mSelectedSceneNode)
         {
-            const auto& box  = entity_klass->GetBoundingRect();
-            DrawSelectionBox(painter, trans, box);
+            DrawSelectionBox(model, packets, bounds, placement.GetLayer() + 1);
             if (mDrawVectors)
-                DrawBasisVectors(painter, trans);
+                DrawBasisVectors(model, packets, placement.GetLayer() + 1);
         }
-        else if (!node.TestFlag(game::EntityPlacement::Flags::VisibleInGame))
+        else if (!placement.TestFlag(game::EntityPlacement::Flags::VisibleInGame))
         {
-            const auto& box  = entity_klass->GetBoundingRect();
-            DrawInvisibleItemBox(painter, trans, box);
+            DrawInvisibleItemBox(model, packets, bounds, placement.GetLayer() + 1);
         }
+
+        model.Pop();
     }
+
 private:
     template<typename Node>
     bool GenericFilterEntityPacket(const Node* node, engine::DrawPacket& packet)
@@ -285,11 +277,10 @@ private:
 private:
     const game::EntityNode* mSelectedEntityNode           = nullptr;
     const game::EntityNodeClass* mSelectedEntityClassNode = nullptr;
-    const game::EntityPlacement* mSelectedSceneNode        = nullptr;
+    const game::EntityPlacement* mSelectedSceneNode       = nullptr;
     const game::FRect mViewRect;
     bool mPlaying        = false;
     bool mDrawVectors    = false;
-    bool mDrawScene      = false;
     glm::mat4 mView;
 };
 

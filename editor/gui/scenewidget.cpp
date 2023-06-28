@@ -1940,13 +1940,13 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         // todo: reimplement culling
         const game::FRect viewport(0, 0, 0, 0);
 
-        DrawHook hook(GetCurrentNode() , viewport);
+        DrawHook hook(GetCurrentNode(), viewport);
         hook.SetIsPlaying(mPlayState == PlayState::Playing);
         hook.SetDrawVectors(true);
         hook.SetViewMatrix(p.GetViewMatrix());
 
         mState.renderer.BeginFrame();
-        mState.renderer.Draw(*mState.scene, p, &hook, &hook);
+        mState.renderer.Draw(*mState.scene,  p, &hook);
 
         if (mCurrentTool)
             mCurrentTool->Render(painter, scene_painter);
@@ -2494,8 +2494,7 @@ game::EntityPlacement* SceneWidget::SelectNode(const QPoint& click_point)
     // objects returned by the coarse hit test with different colors
     // and then read back the color of the pixel under the click point
     // and see which object/node the color maps back to.
-    class DrawHook : public engine::SceneClassDrawHook,
-                     public engine::EntityClassDrawHook
+    class DrawHook : public engine::SceneClassDrawHook
     {
     public:
         DrawHook(const std::vector<game::EntityPlacement*>& hits) : mHits(hits)
@@ -2509,29 +2508,31 @@ game::EntityPlacement* SceneWidget::SelectNode(const QPoint& click_point)
                 mColors.push_back(gfx::Color4f(r, g, b, 0xff));
             }
         }
-        virtual bool FilterEntity(const game::EntityPlacement& node, gfx::Painter&, gfx::Transform&) override
+        virtual bool FilterEntity(const game::EntityPlacement& placement) override
         {
             // filter out nodes that are currently not visible.
             // probably don't want to select any of those.
-            if (!node.TestFlag(game::EntityPlacement::Flags::VisibleInEditor))
+            if (!placement.TestFlag(game::EntityPlacement::Flags::VisibleInEditor))
+                return false;
+            else if (placement.IsBroken())
                 return false;
 
             for (const auto* n : mHits)
-                if (n == &node) return true;
+                if (n == &placement) return true;
             return false;
         }
-        virtual void BeginDrawEntity(const game::EntityPlacement& node, gfx::Painter&, gfx::Transform&) override
+        virtual void BeginDrawEntity(const game::EntityPlacement& placement) override
         {
             for (size_t i=0; i<mHits.size(); ++i)
             {
-                if (mHits[i] == &node)
+                if (mHits[i] == &placement)
                 {
                     mColorIndex = i;
                     return;
                 }
             }
         }
-        virtual bool InspectPacket(const game::EntityNodeClass* node, engine::DrawPacket& draw) override
+        virtual bool InspectPacket(const game::EntityPlacement& placement, engine::DrawPacket& draw) override
         {
             ASSERT(mColorIndex < mColors.size());
             draw.material = gfx::CreateMaterialInstance(gfx::CreateMaterialClassFromColor(mColors[mColorIndex]));
@@ -2561,7 +2562,7 @@ game::EntityPlacement* SceneWidget::SelectNode(const QPoint& click_point)
     scene_painter.SetSurfaceSize(width, height);
 
     DrawHook hook(hit_nodes);
-    mState.renderer.Draw(*mState.scene, scene_painter, &hook, &hook);
+    mState.renderer.Draw(*mState.scene, scene_painter, &hook);
 
     {
         // for debugging.

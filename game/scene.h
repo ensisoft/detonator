@@ -119,6 +119,9 @@ namespace game
         { mTagString.reset(); }
 
         // class getters.
+        bool IsBroken() const noexcept
+        { return !mEntity; }
+
         const glm::vec2& GetTranslation() const noexcept
         { return mPosition; }
         const glm::vec2& GetScale() const noexcept
