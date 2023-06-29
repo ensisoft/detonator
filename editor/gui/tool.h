@@ -448,10 +448,12 @@ namespace gui
         {
             mMouseDown = mickey.WorldPlanePos();
 
-            const auto box = mModel.FindEntityBoundingBox(mNode);
-            const auto size = box.GetSize() * 0.5f;
+            const auto rect = mModel.FindEntityBoundingRect(mNode);
+            const auto width = rect.GetWidth();
+            const auto height = rect.GetHeight();
+            const auto size = glm::vec2{width*0.5f, height*0.5f};
 
-            // unscaled size of the bounding box, i.e. when the node's scaling
+            // unscaled size of the bounding rect, i.e. when the node's scaling
             // factor is 1.0f
             mRealSize = size / mScale;
 

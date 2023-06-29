@@ -611,22 +611,6 @@ FRect SceneClass::FindEntityBoundingRect(const EntityPlacement* placement) const
     return ret;
 }
 
-FBox SceneClass::FindEntityBoundingBox(const EntityPlacement* placement) const
-{
-    const auto& entity = placement->GetEntityClass();
-    ASSERT(entity);
-
-    const auto& rect = entity->GetBoundingRect();
-
-    Transform transform(FindEntityTransform(placement));
-      transform.Push();
-      transform.Resize(rect);
-      transform.MoveTo(rect);
-
-    return FBox(transform);
-}
-
-
 void SceneClass::AddScriptVar(const ScriptVar& var)
 {
     mScriptVars.push_back(var);
