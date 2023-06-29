@@ -196,6 +196,12 @@ namespace engine
                                  const glm::vec2& window_coord,
                                  const glm::vec2& window_size);
 
+    glm::vec4 SceneToWorldPlane(const glm::mat4& scene_view_to_clip,
+                                const glm::mat4& scene_world_to_view,
+                                const glm::mat4& plane_view_to_clip,
+                                const glm::mat4& plane_world_to_view,
+                                const glm::vec4& scene_pos);
+
     // Map a window (2D projection surface coordinate) to world space.
     glm::vec4 WindowToWorld(const glm::mat4& view_to_clip,
                             const glm::mat4& world_to_view,
@@ -227,6 +233,8 @@ namespace engine
     glm::vec2 ComputeTileRenderSize(const glm::mat4& tile_to_render,
                                     const glm::vec2& tile_size,
                                     game::Perspective perspective);
+
+
 
 
 } // namespace

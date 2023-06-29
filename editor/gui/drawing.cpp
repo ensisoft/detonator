@@ -142,7 +142,7 @@ void DrawBasisVectors(gfx::Transform& view, std::vector<engine::DrawPacket>& pac
         x.transform = view.GetAsMatrix();
         x.material  = green;
         x.drawable  = arrow;
-        x.entity_node_layer = layer;
+        x.entity_layer = layer;
         packets.push_back(std::move(x));
     view.Pop();
 
@@ -156,7 +156,7 @@ void DrawBasisVectors(gfx::Transform& view, std::vector<engine::DrawPacket>& pac
         y.transform = view.GetAsMatrix();
         y.material  = red;
         y.drawable  = arrow;
-        y.entity_node_layer = layer;
+        y.entity_layer = layer;
         packets.push_back(std::move(y));
     view.Pop();
 
@@ -184,7 +184,7 @@ void DrawSelectionBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& pa
         selection.transform = trans.GetAsMatrix();
         selection.material  = green;
         selection.drawable  = outline;
-        selection.entity_node_layer = layer;
+        selection.entity_layer = layer;
         packets.push_back(selection);
     trans.Pop();
 
@@ -208,7 +208,7 @@ void DrawSelectionBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& pa
         sizing_box.transform = trans.GetAsMatrix();
         sizing_box.material  = green;
         sizing_box.drawable  = outline;
-        sizing_box.entity_node_layer = layer;
+        sizing_box.entity_layer = layer;
         packets.push_back(sizing_box);
     trans.Pop();
 
@@ -220,7 +220,7 @@ void DrawSelectionBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& pa
         rotation_circle.transform = trans.GetAsMatrix();
         rotation_circle.material  = green;
         rotation_circle.drawable  = circle;
-        rotation_circle.entity_node_layer = layer;
+        rotation_circle.entity_layer = layer;
         packets.push_back(rotation_circle);
     trans.Pop();
 }
@@ -241,8 +241,8 @@ void DrawInvisibleItemBox(gfx::Transform& trans, std::vector<engine::DrawPacket>
         box.transform         = trans.GetAsMatrix();
         box.material          = yellow;
         box.drawable          = shape;
-        box.scene_node_layer  = 0;
-        box.entity_node_layer = layer;
+        box.scene_layer  = 0;
+        box.entity_layer = layer;
         packets.push_back(box);
     trans.Pop();
 }

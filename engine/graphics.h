@@ -46,8 +46,8 @@ namespace engine
         // transform that pertains to the draw.
         glm::mat4 transform;
         // the node layer this draw belongs to.
-        int entity_node_layer = 0;
-        int scene_node_layer = 0;
+        int entity_layer = 0;
+        int scene_layer = 0;
         // the render pass this draw belongs to.
         game::RenderPass pass = game::RenderPass::DrawColor;
     };

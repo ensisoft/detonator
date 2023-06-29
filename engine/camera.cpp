@@ -158,16 +158,48 @@ glm::vec4 WindowToWorldPlane(const glm::mat4& view_to_clip,
     constexpr const auto ray_direction = glm::vec4 {0.0f, 0.0f, -1.0f, 0.0f};
 
     float intersection_distance = 0.0f;
-    glm::intersectRayPlane(ray_origin,
-                           ray_direction,
-                           plane_origin_view,
-                           plane_normal_view,
-                           intersection_distance);
+    ASSERT(glm::intersectRayPlane(ray_origin,
+                                  ray_direction,
+                                  plane_origin_view,
+                                  plane_normal_view,
+                                  intersection_distance));
 
     const auto& view_to_world = glm::inverse(world_to_view);
 
     const auto& intersection_point_view  = ray_origin + ray_direction * intersection_distance;
     const auto& intersection_point_world = view_to_world * intersection_point_view;
+    return intersection_point_world;
+}
+
+glm::vec4 SceneToWorldPlane(const glm::mat4& scene_view_to_clip,
+                            const glm::mat4& scene_world_to_view,
+                            const glm::mat4& plane_view_to_clip,
+                            const glm::mat4& plane_world_to_view,
+                            const glm::vec4& scene_pos)
+{
+    constexpr const auto plane_origin_world = glm::vec4 {0.0f, 0.0f, 0.0f, 1.0f};
+    constexpr const auto plane_normal_world = glm::vec4 {0.0f, 0.0f, 1.0f, 0.0f};
+    const auto plane_origin_view = plane_world_to_view * plane_origin_world;
+    const auto plane_normal_view = glm::normalize(glm::transpose(glm::inverse(plane_world_to_view)) * plane_normal_world);
+
+    // scene position transformed from scene coordinate space into plane coordinate
+    // space relative to the camera
+    auto scene_pos_in_plane_space_view = glm::inverse(plane_view_to_clip) * scene_view_to_clip * scene_world_to_view * scene_pos;
+    scene_pos_in_plane_space_view.z = 100000.0f;
+
+    // do a ray cast from the view_pos towards the depth
+    // i.e. the ray is collinear with the -z vector
+    constexpr const auto ray_direction = glm::vec4 {0.0f, 0.0f, -1.0f, 0.0f};
+    const auto ray_origin = scene_pos_in_plane_space_view;
+
+    float intersection_distance = 0.0f;
+    ASSERT(glm::intersectRayPlane(ray_origin,
+                                  ray_direction,
+                                  plane_origin_view,
+                                  plane_normal_view,
+                                  intersection_distance));
+    const auto intersection_point_view = ray_origin + ray_direction * intersection_distance;
+    const auto intersection_point_world = glm::inverse(plane_world_to_view) * intersection_point_view;
     return intersection_point_world;
 }
 
