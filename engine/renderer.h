@@ -184,7 +184,7 @@ namespace engine
         void Draw(const game::Scene& scene,
                   gfx::Painter& painter,
                   SceneInstanceDrawHook* scene_hook = nullptr);
-        void Draw(const game::SceneClass& scene,
+        void Draw(const game::SceneClass& scene, const game::Tilemap* map,
                   gfx::Painter& painter,
                   SceneClassDrawHook* scene_hook = nullptr);
 
@@ -211,7 +211,7 @@ namespace engine
     private:
         template<typename SceneType, typename SceneNodeType,
                  typename EntityType, typename EntityNodeType>
-        void DrawScene(const SceneType& scene,
+        void DrawScene(const SceneType& scene, const game::Tilemap* map,
                        gfx::Painter& painter,
                        SceneDrawHook<SceneNodeType>* scene_hook);
 
@@ -236,7 +236,8 @@ namespace engine
                                  std::vector<DrawPacket>& packets,
                                  EntityDrawHook<EntityNodeType>* hook);
 
-        void DrawPackets(gfx::Painter& painter, std::vector<DrawPacket>& packets);
+        void OffsetPacketLayers(std::vector<DrawPacket>& packets) const;
+        void DrawPackets(gfx::Painter& painter, const std::vector<DrawPacket>& packets) const;
 
         struct TileBatch;
 
@@ -261,6 +262,8 @@ namespace engine
                            const game::URect& tile_rect,
                            const game::FSize& tile_size,
                            gfx::Painter& painter);
+
+        std::shared_ptr<const gfx::Material> GetTileMaterial(const game::Tilemap& map, const TileBatch& batch);
 
     private:
         const ClassLibrary* mClassLib = nullptr;
@@ -297,9 +300,10 @@ namespace engine
         };
         struct TileBatch {
             gfx::TileBatch tiles;
-            std::uint16_t material_index;
-            std::uint16_t layer_index;
-            std::uint32_t row_index;
+            std::uint16_t material;
+            std::uint16_t layer;
+            std::uint32_t row;
+            std::uint32_t col;
             glm::vec2 tile_size;
         };
         using TilemapLayerPalette = std::vector<TilemapLayerPaletteEntry>;

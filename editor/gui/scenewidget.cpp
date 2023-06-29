@@ -1945,8 +1945,22 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         hook.SetDrawVectors(true);
         hook.SetViewMatrix(p.GetViewMatrix());
 
+        engine::Renderer::Camera camera;
+        camera.position.x = mState.camera_offset_x;
+        camera.position.y = mState.camera_offset_y;
+        camera.rotation   = GetValue(mUI.rotation);
+        camera.scale.x    = xs * zoom;
+        camera.scale.y    = ys * zoom;
+        camera.viewport   = game::FRect(-width*0.5f, -height*0.5f, width, height);
+        mState.renderer.SetCamera(camera);
+
+        engine::Renderer::Surface surface;
+        surface.viewport = gfx::IRect(0, 0, width, height);
+        surface.size     = gfx::USize(width, height);
+        mState.renderer.SetSurface(surface);
+
         mState.renderer.BeginFrame();
-        mState.renderer.Draw(*mState.scene,  p, &hook);
+        mState.renderer.Draw(*mState.scene,  mTilemap.get(), p, &hook);
 
         if (mCurrentTool)
             mCurrentTool->Render(painter, scene_painter);
@@ -2561,8 +2575,22 @@ game::EntityPlacement* SceneWidget::SelectNode(const QPoint& click_point)
     scene_painter.SetViewport(0, 0, width, height);
     scene_painter.SetSurfaceSize(width, height);
 
+    engine::Renderer::Camera camera;
+    camera.position.x = mState.camera_offset_x;
+    camera.position.y = mState.camera_offset_y;
+    camera.rotation   = GetValue(mUI.rotation);
+    camera.scale.x    = xs * zoom;
+    camera.scale.y    = ys * zoom;
+    camera.viewport   = game::FRect(-width*0.5f, -height*0.5f, width, height);
+    mState.renderer.SetCamera(camera);
+
+    engine::Renderer::Surface surface;
+    surface.viewport = gfx::IRect(0, 0, width, height);
+    surface.size     = gfx::USize(width, height);
+    mState.renderer.SetSurface(surface);
+
     DrawHook hook(hit_nodes);
-    mState.renderer.Draw(*mState.scene, scene_painter, &hook);
+    mState.renderer.Draw(*mState.scene, nullptr, scene_painter, &hook);
 
     {
         // for debugging.

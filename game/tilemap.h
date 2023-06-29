@@ -872,24 +872,29 @@ namespace game
         TilemapLayer* FindLayerByClassName(const std::string& name);
         TilemapLayer* FindLayerByClassId(const std::string& id);
 
-        std::size_t GetNumLayers() const
+        inline std::size_t GetNumLayers() const noexcept
         { return mLayers.size(); }
-        std::string GetClassName() const
+        inline std::string GetClassName() const noexcept
         { return mClass->GetName(); }
-        std::string GetClassId() const
+        inline std::string GetClassId() const noexcept
         { return mClass->GetId(); }
-        unsigned GetMapWidth() const
+        inline unsigned GetMapWidth() const noexcept
         { return mClass->GetMapWidth(); }
-        unsigned GetMapHeight() const
+        inline unsigned GetMapHeight() const noexcept
         { return mClass->GetMapHeight(); }
-        inline float GetTileWidth() const
+        inline float GetTileWidth() const noexcept
         { return mClass->GetTileWidth(); }
-        inline float GetTileHeight() const
+        inline float GetTileHeight() const noexcept
         { return mClass->GetTileHeight(); }
-
-        const Class& GetClass() const
+        inline Perspective GetPerspective() const noexcept
+        { return mClass->GetPerspective();}
+        inline float GetTileRenderWidthScale() const noexcept
+        { return mClass->GetTileRenderWidthScale(); }
+        inline float GetTileRenderHeightScale() const noexcept
+        { return mClass->GetTileRenderHeightScale(); }
+        inline const Class& GetClass() const noexcept
         { return *mClass; }
-        const Class* operator->() const
+        inline const Class* operator->() const noexcept
         { return mClass.get(); }
     private:
         std::shared_ptr<const TilemapClass> mClass;
