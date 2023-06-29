@@ -379,8 +379,6 @@ namespace game
 
         FRect FindEntityBoundingRect(const EntityPlacement* placement) const;
 
-        FBox FindEntityBoundingBox(const EntityPlacement* placement) const;
-
         // Add a new scripting variable to the list of variables.
         // No checks are made to whether a variable by that name
         // already exists.
