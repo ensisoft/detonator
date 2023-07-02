@@ -168,14 +168,16 @@ void Renderer::Draw(const game::Tilemap& map,
     // this is the device viewport. not the logical game viewport.
     painter.SetViewport(mSurface.viewport);
     painter.SetSurfaceSize(mSurface.size);
-    painter.SetPixelRatio({1.0f, 1.0f});
+
     // The logical game world is mapped inside the device viewport
     // through projection and clip transformations. thus it should
     // be possible to map the viewport back to the world plane already
     // with WindowToWorldPlane.
     const auto device_viewport_rect = painter.MapToDevice(painter.GetViewport());
-    const auto window_size = glm::vec2{device_viewport_rect.GetWidth(),
-                                       device_viewport_rect.GetHeight()};
+    const auto window_size = glm::vec2{device_viewport_rect.GetWidth(), device_viewport_rect.GetHeight()};
+    const auto logical_viewport_width = mCamera.viewport.GetWidth();
+    const auto logical_viewport_height = mCamera.viewport.GetHeight();
+    painter.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
 
     const auto perspective = map.GetPerspective();
     const auto& view_to_clip = CreateProjectionMatrix(perspective, mCamera.viewport);
@@ -474,10 +476,17 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
     // the whole rendering surface. (i.e. game/logical viewport vs. device viewport)
     scene_painter.SetProjectionMatrix(CreateProjectionMatrix(game::Perspective::AxisAligned, mCamera.viewport));
     scene_painter.SetViewMatrix(CreateViewMatrix(game::Perspective::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
-    // Set device properties.
+    // Set device properties. Remember viewport can be a sub-rectangle targeting
+    // only certain pixels in the render target surface. So viewport size may be
+    // different from the surface size! Surface size is needed to map the viewport
+    // to a device viewport so it's also needed.
     scene_painter.SetViewport(mSurface.viewport);
     scene_painter.SetSurfaceSize(mSurface.size);
-    scene_painter.SetPixelRatio({1.0f, 1.0f});
+
+    const auto window_size = glm::vec2{mSurface.viewport.GetWidth(), mSurface.viewport.GetHeight()};
+    const auto logical_viewport_width = mCamera.viewport.GetWidth();
+    const auto logical_viewport_height = mCamera.viewport.GetHeight();
+    scene_painter.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
 
     const auto perspective = map ? map->GetPerspective() : game::Perspective::AxisAligned;
     const auto& map_view_to_clip  = CreateProjectionMatrix(perspective, mCamera.viewport);

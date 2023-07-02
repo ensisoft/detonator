@@ -2335,9 +2335,13 @@ void TileBatch::ApplyDynamicState(const Environment& env, Program& program, Rast
     else if (mProjection == Projection::AxisAligned && shape == TileShape::Rectangle)
         tile_offset = glm::vec2{mTileWorldSize.x*0.5f, mTileWorldSize.y*1.0f}; // middle of the bottom edge
 
+    glm::vec2 tile_render_size = mTileRenderSize;
+    if (shape == TileShape::Square)
+        tile_render_size *= pixel_scale;
+
     program.SetUniform("kTileWorldSize", mTileWorldSize);
     program.SetUniform("kTileWorldOffset", tile_offset);
-    program.SetUniform("kTileRenderSize", mTileRenderSize * pixel_scale);
+    program.SetUniform("kTileRenderSize", tile_render_size);
     program.SetUniform("kTileTransform", *env.proj_matrix * *env.view_matrix);
     program.SetUniform("kTileCoordinateSpaceTransform", *env.model_matrix);
 }
