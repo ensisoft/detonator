@@ -1327,5 +1327,6 @@ namespace gfx
     std::unique_ptr<Material> CreateMaterialInstance(const std::shared_ptr<const MaterialClass>& klass);
     std::unique_ptr<TextMaterial> CreateMaterialInstance(const TextBuffer& text);
     std::unique_ptr<TextMaterial> CreateMaterialInstance(TextBuffer&& text);
+    std::unique_ptr<Material> CreateMaterialInstance(const Color4f& color);
 
 } // namespace

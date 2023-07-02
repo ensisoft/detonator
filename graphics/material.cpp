@@ -2643,6 +2643,9 @@ std::unique_ptr<TextMaterial> CreateMaterialInstance(TextBuffer&& text)
 {
     return std::make_unique<TextMaterial>(std::move(text));
 }
-
+std::unique_ptr<Material> CreateMaterialInstance(const gfx::Color4f& color)
+{
+    return CreateMaterialInstance(CreateMaterialClassFromColor(color));
+}
 
 } // namespace

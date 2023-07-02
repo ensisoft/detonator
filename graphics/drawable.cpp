@@ -2319,14 +2319,18 @@ void TileBatch::ApplyDynamicState(const Environment& env, Program& program, Rast
     const auto shape = ResolveTileShape();
 
     // if the tile shape is square we're rendering point sprites which
-    // are always centered around the point vertex. So we have 2 cases.
-    //  * square + dimetric
+    // are always centered around the vertex when rasterized by OpenGL.
+    // This means that the projection plays a role when choosing the vertex
+    // around which to rasterize the point when using point sprites.
+    //
+    //  a) square + dimetric
     //    In this case the tile's top left corner maps directly to the
     //    center of the square tile when rendered.
     //
-    //  * square + dimetric.
+    //  b) square + axis aligned.
     //    In this case the center of the tile yields the center of the
     //    square when projected.
+    //
     glm::vec2 tile_offset = {0.0f, 0.0f};
     if (mProjection == Projection::AxisAligned && shape == TileShape::Square)
         tile_offset = mTileWorldSize * 0.5f;

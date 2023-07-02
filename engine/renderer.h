@@ -241,29 +241,30 @@ namespace engine
 
         struct TileBatch;
 
-        void PrepareTileBatches(const game::Tilemap& map,
-                                std::vector<TileBatch>& batches) const;
-
+        void PrepareMapTileBatches(const game::Tilemap& map,
+                                   std::vector<TileBatch>& batches,
+                                   bool draw_render_layer, bool draw_data_layer);
         template<typename LayerType>
-        void PrepareTileBatches(const game::Tilemap& map,
-                                const game::TilemapLayer& layer,
-                                const game::URect& visible_region,
-                                std::vector<TileBatch>& batches,
-                                std::uint16_t layer_index) const;
+        void PrepareDataLayerTileBatches(const game::Tilemap& map,
+                                         const game::TilemapLayer& layer,
+                                         const game::URect& visible_region,
+                                         std::vector<TileBatch>& batches,
+                                         std::uint16_t layer_index);
+        template<typename LayerType>
+        void PrepareRenderLayerTileBatches(const game::Tilemap& map,
+                                           const game::TilemapLayer& layer,
+                                           const game::URect& visible_region,
+                                           std::vector<TileBatch>& batches,
+                                           std::uint16_t layer_index);
 
         void DrawTileBatches(const game::Tilemap& map,
                              std::vector<TileBatch>& batches,
                              gfx::Painter& painter);
 
 
-        template<typename LayerType>
-        void DrawDataLayer(const game::Tilemap& map,
-                           const game::TilemapLayer& layer,
-                           const game::URect& tile_rect,
-                           const game::FSize& tile_size,
-                           gfx::Painter& painter);
-
-        std::shared_ptr<const gfx::Material> GetTileMaterial(const game::Tilemap& map, const TileBatch& batch);
+        std::shared_ptr<const gfx::Material> GetTileMaterial(const game::Tilemap& map,
+                                                             std::uint16_t layer_index,
+                                                             std::uint16_t material_index);
 
     private:
         const ClassLibrary* mClassLib = nullptr;
@@ -298,9 +299,15 @@ namespace engine
             std::string material_id;
             std::shared_ptr<gfx::Material> material;
         };
+
+        enum class TileBatchType {
+            Render, Data
+        };
+
         struct TileBatch {
-            gfx::TileBatch tiles;
-            std::uint16_t material;
+            TileBatchType type = TileBatchType::Render;
+            std::vector<gfx::TileBatch::Tile> tiles;
+            std::shared_ptr<const gfx::Material> material;
             std::uint16_t layer;
             std::uint32_t row;
             std::uint32_t col;
