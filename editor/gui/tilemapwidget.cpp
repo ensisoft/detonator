@@ -1988,7 +1988,6 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         mRenderer.EndFrame();
     }
 
-
     // render assistance when a layer is selected.
     if (const auto* layer = GetCurrentLayerInstance())
     {
@@ -2040,6 +2039,15 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                 model.MoveTo(layer_tile_width * tile_col, layer_tile_height * tile_row);
                 tile_painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline), model,
                                   gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+
+                const glm::vec2 corner = engine::ProjectPoint(tile_painter.GetProjMatrix(),
+                                                         tile_painter.GetViewMatrix(),
+                                                         painter.GetProjMatrix(),
+                                                         painter.GetViewMatrix(),
+                                                         glm::vec3 { layer_tile_width * (tile_col+1),
+                                                                     layer_tile_height * (tile_row+1), 0.0f });
+
+                ShowMessage(base::FormatString("%1, %2", tile_row, tile_col), corner + glm::vec2{10.0f, 10.0f}, painter);
             }
         }
     }
