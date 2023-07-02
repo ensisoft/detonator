@@ -260,16 +260,18 @@ public:
             const gfx::FRect viewport(0.0f, 0.0f, game_view_width, game_view_height);
             Culler cull(viewport, view.GetAsMatrix());
 
-            // set the actual device viewport for rendering into the window buffer.
-            // the device viewport retains the game's logical viewport aspect ratio
-            // and is centered in the middle of the rendering surface.
-            mPainter->SetViewport(GetViewport());
-            // set the projection transform based on the game's logical viewport size.
-            mPainter->SetProjectionMatrix(gfx::MakeOrthographicProjection(0.0f, 0.0f, game_view_width, game_view_height));
-            // set the pixel ratio for mapping game units to rendering surface units.
-            mPainter->SetPixelRatio(glm::vec2(game_scale, game_scale));
-            // set the view matrix
-            mPainter->SetViewMatrix(view.GetAsMatrix());
+            engine::Renderer::Surface surface;
+            surface.viewport = GetViewport();
+            surface.size     = base::USize(mSurfaceWidth, mSurfaceHeight);
+            mRenderer.SetSurface(surface);
+
+            engine::Renderer::Camera camera;
+            camera.viewport = viewport;
+            camera.rotation = 0.0f;
+            camera.scale    = glm::vec2{1.0f, 1.0f};
+            camera.position = glm::vec2{game_view.GetX(), game_view.GetY()};
+            mRenderer.SetCamera(camera);
+
 
             if (mFlags.test(Flags::EditingMode))
             {
