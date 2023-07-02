@@ -147,4 +147,44 @@ namespace gui
         float mH = 0.0f;
     };
 
+    class Rect2Df
+    {
+    public:
+        Rect2Df(float x, float y, float w, float h) noexcept
+          : mX(x)
+          , mY(y)
+          , mWidth(w)
+          , mHeight(h)
+        {}
+        Rect2Df(const QRect& rect) noexcept
+          : mX(rect.x())
+          , mY(rect.y())
+          , mWidth(rect.width())
+          , mHeight(rect.height())
+        {}
+        Rect2Df(const QRectF& rect) noexcept
+          : mX(rect.x())
+          , mY(rect.y())
+          , mWidth(rect.width())
+          , mHeight(rect.height())
+        {}
+        Rect2Df(const base::FRect& rect) noexcept
+          : mX(rect.GetX())
+          , mY(rect.GetY())
+          , mWidth(rect.GetWidth())
+          , mHeight(rect.GetHeight())
+        {}
+        operator QRectF () const noexcept
+        { return {mX, mY, mWidth, mHeight}; }
+        operator base::FRect () const noexcept
+        { return {mX, mY, mWidth, mHeight}; }
+
+    private:
+        float mX = 0.0f;
+        float mY = 0.0f;
+        float mWidth = 0.0f;
+        float mHeight = 0.0f;
+    };
+
+
 } // namespace

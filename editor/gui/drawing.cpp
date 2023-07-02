@@ -399,13 +399,13 @@ void ShowMessage(const std::string& msg, gfx::Painter& painter)
                       gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
 }
 
-void ShowMessage(const std::string& msg, const gfx::FRect& rect, gfx::Painter& painter)
+void ShowMessage(const std::string& msg, const Rect2Df& rect, gfx::Painter& painter)
 {
     gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", 14, rect,
                       gfx::Color::HotPink,
                       gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
 }
-void ShowMessage(const std::string& msg, const gfx::FPoint& pos, gfx::Painter& painter)
+void ShowMessage(const std::string& msg, const Point2Df& pos, gfx::Painter& painter)
 {
     // using 0 for rect width and height, this will create a raster buffer
     // with dimensions derived from the rasterized text extents.
@@ -415,7 +415,7 @@ void ShowMessage(const std::string& msg, const gfx::FPoint& pos, gfx::Painter& p
                       gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
 }
 
-void ShowError(const std::string& msg, const gfx::FPoint& pos, gfx::Painter& painter)
+void ShowError(const std::string& msg, const Point2Df& pos, gfx::Painter& painter)
 {
     // using 0 for rect width and height, this will create a raster buffer
     // with dimensions derived from the rasterized text extents.
@@ -425,6 +425,17 @@ void ShowError(const std::string& msg, const gfx::FPoint& pos, gfx::Painter& pai
                       gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter,
                       gfx::TextProp::Blinking);
 }
+
+void ShowInstruction(const std::string& msg, const Rect2Df& rect, gfx::Painter& painter)
+{
+    gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", 20,
+                      rect,
+                      gfx::Color::Silver,
+                      gfx::TextAlign::AlignVCenter | gfx::TextAlign::AlignHCenter,
+                      gfx::TextProp::None,
+                      2.0f);
+}
+
 
 void PrintMousePos(const gfx::Transform& view, gfx::Painter& painter, QWidget* widget)
 {
@@ -471,14 +482,6 @@ void PrintMousePos(const glm::mat4& view_to_clip,
 }
 
 
-void ShowInstruction(const std::string& msg, const gfx::FRect& rect, gfx::Painter& painter)
-{
-    gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", 20,
-                      rect,
-                      gfx::Color::Silver,
-                      gfx::TextAlign::AlignVCenter | gfx::TextAlign::AlignHCenter,
-                      gfx::TextProp::None,
-                      2.0f);
-}
+
 
 } // namespace
