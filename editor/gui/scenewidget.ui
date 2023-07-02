@@ -1351,6 +1351,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="chkShowMap">
+            <property name="text">
+             <string>Show map</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="color_widgets::ColorSelector" name="widgetColor">
             <property name="minimumSize">
              <size>
@@ -2140,6 +2150,7 @@
   <tabstop>chkShowViewport</tabstop>
   <tabstop>chkShowOrigin</tabstop>
   <tabstop>chkShowGrid</tabstop>
+  <tabstop>chkShowMap</tabstop>
   <tabstop>widgetColor</tabstop>
   <tabstop>tree</tabstop>
   <tabstop>nodeID</tabstop>
