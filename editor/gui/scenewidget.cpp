@@ -571,6 +571,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     GetUserProperty(resource, "show_viewport", mUI.chkShowViewport);
+    GetUserProperty(resource, "show_map", mUI.chkShowMap);
     GetUserProperty(resource, "widget", mUI.widget);
     GetUserProperty(resource, "camera_scale_x", mUI.scaleX);
     GetUserProperty(resource, "camera_scale_y", mUI.scaleY);
@@ -677,6 +678,7 @@ bool SceneWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Scene", mUI.chkShowViewport);
     settings.SaveWidget("Scene", mUI.chkSnap);
     settings.SaveWidget("Scene", mUI.cmbGrid);
+    settings.SaveWidget("Scene", mUI.chkShowMap);
     settings.SaveWidget("Scene", mUI.zoom);
     settings.SaveWidget("Scene", mUI.widget);
     settings.SaveWidget("Scene", mUI.sceneVariablesGroup);
@@ -705,6 +707,7 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Scene", mUI.chkShowViewport);
     settings.LoadWidget("Scene", mUI.chkSnap);
     settings.LoadWidget("Scene", mUI.cmbGrid);
+    settings.LoadWidget("Scene", mUI.chkShowMap);
     settings.LoadWidget("Scene", mUI.zoom);
     settings.LoadWidget("Scene", mUI.widget);
     settings.LoadWidget("Scene", mUI.sceneVariablesGroup);
@@ -1212,6 +1215,7 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     SetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     SetUserProperty(resource, "show_viewport", mUI.chkShowViewport);
+    SetUserProperty(resource, "show_map", mUI.chkShowMap);
     SetUserProperty(resource, "widget", mUI.widget);
     SetUserProperty(resource, "quadtree_max_items", mUI.spQuadMaxItems);
     SetUserProperty(resource, "quadtree_max_levels", mUI.spQuadMaxLevels);
@@ -1959,8 +1963,15 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         surface.size     = gfx::USize(width, height);
         mState.renderer.SetSurface(surface);
 
+        // we don't have an UI to control the individual map layers in the
+        // scene widget so only expose a "master" flag that controls the map
+        // visibility in the scene overall and then the layers are controlled
+        // by the map klass setting (which are available currently only in the
+        // map editor...)
+        const bool show_map = GetValue(mUI.chkShowMap);
+
         mState.renderer.BeginFrame();
-        mState.renderer.Draw(*mState.scene,  mTilemap.get(), p, &hook);
+        mState.renderer.Draw(*mState.scene,  mTilemap.get(), p, &hook, show_map, show_map);
 
         if (mCurrentTool)
             mCurrentTool->Render(painter, scene_painter);
