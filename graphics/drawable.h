@@ -1213,6 +1213,12 @@ namespace gfx
             Vec2 pos;
         };
         TileBatch() = default;
+        explicit TileBatch(const std::vector<Tile>& tiles)
+          : mTiles(tiles)
+        {}
+        explicit TileBatch(std::vector<Tile>&& tiles) noexcept
+          : mTiles(std::move(tiles))
+        {}
 
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& raster) const override;
         virtual Shader* GetShader(const Environment& env, Device& device) const override;
