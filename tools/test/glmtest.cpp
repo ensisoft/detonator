@@ -212,8 +212,8 @@ void orthographic_projection()
     // viewer. not sure what this means though...)
     const auto& proj = glm::ortho(left, right, bottom, top, near, far);
 
-    std::cout << "Orthographic projection.\n";
-    std::cout << "=======================\n";
+    std::cout << "Top Left Origin Orthographic Projection.\n";
+    std::cout << "========================================\n";
 
     struct Point {
         const char* name;
