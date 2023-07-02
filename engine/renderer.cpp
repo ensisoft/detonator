@@ -165,6 +165,40 @@ void Renderer::Draw(const game::Tilemap& map,
                     bool draw_data_layer)
 {
 
+    // this is the device viewport. not the logical game viewport.
+    painter.SetViewport(mSurface.viewport);
+    painter.SetSurfaceSize(mSurface.size);
+    painter.SetPixelRatio({1.0f, 1.0f});
+    // The logical game world is mapped inside the device viewport
+    // through projection and clip transformations. thus it should
+    // be possible to map the viewport back to the world plane already
+    // with WindowToWorldPlane.
+    const auto device_viewport_rect = painter.MapToDevice(painter.GetViewport());
+    const auto window_size = glm::vec2{device_viewport_rect.GetWidth(),
+                                       device_viewport_rect.GetHeight()};
+
+    const auto perspective = map.GetPerspective();
+    const auto& view_to_clip = CreateProjectionMatrix(perspective, mCamera.viewport);
+    const auto& world_to_view = CreateViewMatrix(perspective, mCamera.position, mCamera.scale, mCamera.rotation);
+
+    // map the corners of the viewport onto the map plane.
+    const auto corners = WindowToWorldPlane(view_to_clip, world_to_view, window_size,
+                                            { window_size * glm::vec2{0.0f, 0.0f}, // top left
+                                              window_size * glm::vec2{1.0f, 0.0f}, // top right
+                                              window_size * glm::vec2{0.0f, 1.0f}, // bottom left
+                                              window_size * glm::vec2{1.0f, 1.0f}  // bottom right
+                                            });
+    // if the map has dimetric projection then simply taking the top left
+    // and bottom right corners isn't enough. rather the top left gives the left,
+    // top right gives the top, bottom left gives the bottom and bottom right gives the right.
+    const auto left   = corners[0].x; // top left
+    const auto top    = corners[1].y; // top right
+    const auto bottom = corners[2].y; // bottom left
+    const auto right  = corners[3].x; // bottom right
+
+    const auto& top_left  = glm::vec2{left, top};
+    const auto& bot_right = glm::vec2{right, bottom};
+
     std::vector<TileBatch> batches;
 
     for (unsigned layer_index=0; layer_index<map.GetNumLayers(); ++layer_index)
@@ -189,7 +223,21 @@ void Renderer::Draw(const game::Tilemap& map,
         const float layer_width_units  = layer_width_tiles  * layer_tile_width_units;
         const float layer_height_units = layer_height_tiles * layer_tile_height_units;
 
-        const auto visible_region = game::URect(0, 0, layer_width_tiles, layer_height_tiles);
+        const auto layer_min = glm::vec2{0.0f,  0.0f};
+        const auto layer_max = glm::vec2{layer_width_units, layer_height_units};
+
+        const auto top_left_xy  = glm::clamp(glm::vec2{top_left},  layer_min, layer_max);
+        const auto bot_right_xy = glm::clamp(glm::vec2{bot_right}, layer_min, layer_max);
+
+        const auto top_left_tile_col = math::clamp(0u, layer_width_tiles, (unsigned)(top_left_xy.x / layer_tile_width_units));
+        const auto top_left_tile_row = math::clamp(0u, layer_height_tiles, (unsigned)(top_left_xy.y / layer_tile_height_units));
+        const auto bot_right_tile_col = math::clamp(0u, layer_width_tiles, (unsigned)(bot_right_xy.x / layer_tile_width_units));
+        const auto bot_right_tile_row = math::clamp(0u, layer_height_tiles, (unsigned)(bot_right_xy.y / layer_tile_height_units));
+
+        const auto max_col = std::min(layer_width_tiles, bot_right_tile_col+1);
+        const auto max_row = std::min(layer_height_tiles, bot_right_tile_row+1);
+        const auto visible_region = URect(top_left_tile_col, top_left_tile_row, max_col, max_row);
+        //DEBUG("top left  row = %1, col = %2,  max_rows = %3, max_cols = %4", top_left_tile_row, top_left_tile_col, max_row, max_col);
 
         const auto type = layer.GetType();
         if (draw_render_layer && layer->HasRenderComponent())
@@ -1122,23 +1170,20 @@ void Renderer::DrawTileBatches(const game::Tilemap& map,
 
     painter.SetProjectionMatrix(CreateProjectionMatrix(game::Perspective::AxisAligned, mCamera.viewport));
     painter.SetViewMatrix(CreateViewMatrix(game::Perspective::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
-    painter.SetViewport(mSurface.viewport);
-    painter.SetSurfaceSize(mSurface.size);
-    painter.SetPixelRatio({1.0f, 1.0f});
 
     const auto perspective = map->GetPerspective();
-    const auto& src_view_to_clip = CreateProjectionMatrix(perspective, mCamera.viewport);
-    const auto& src_world_to_view = CreateViewMatrix(perspective, mCamera.position, mCamera.scale, mCamera.rotation);
+    const auto& map_view_to_clip = CreateProjectionMatrix(perspective, mCamera.viewport);
+    const auto& map_world_to_view = CreateViewMatrix(perspective, mCamera.position, mCamera.scale, mCamera.rotation);
 
-    const auto& dst_view_to_clip = painter.GetProjMatrix();
-    const auto& dst_world_to_view = painter.GetViewMatrix();
+    const auto& view_to_clip = painter.GetProjMatrix();
+    const auto& world_to_view = painter.GetViewMatrix();
     // This matrix will project a coordinate in tilemap coordinate space into
     // axis aligned game/scene/entity world. (If map has axis aligned perspective then
     // this should actually reduce to an identify matrix... something to optimize for)
-    const auto& tile_projection_transform_matrix = GetProjectionTransformMatrix(src_view_to_clip,
-                                                                                src_world_to_view,
-                                                                                dst_view_to_clip,
-                                                                                dst_world_to_view);
+    const auto& tile_projection_transform_matrix = GetProjectionTransformMatrix(map_view_to_clip,
+                                                                                map_world_to_view,
+                                                                                view_to_clip,
+                                                                                world_to_view);
 
     std::sort(batches.begin(), batches.end(), [](const auto& lhs, const auto& rhs) {
         if (lhs.row < rhs.row)

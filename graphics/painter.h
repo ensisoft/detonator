@@ -205,8 +205,9 @@ namespace gfx
         static std::unique_ptr<Painter> Create(std::shared_ptr<Device> device);
         static std::unique_ptr<Painter> Create(Device* device);
 
-    private:
         IRect MapToDevice(const IRect& rect) const noexcept;
+
+    private:
         Program* GetProgram(const Drawable& drawable,
                             const Material& material,
                             const Drawable::Environment& drawable_environment,

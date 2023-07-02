@@ -125,50 +125,65 @@ glm::vec4 WindowToWorldPlane(const glm::mat4& view_to_clip,
                              const glm::vec2& window_coord,
                              const glm::vec2& window_size)
 {
+
+    return WindowToWorldPlane(view_to_clip, world_to_view, window_size, std::vector<glm::vec2>{window_coord})[0];
+}
+
+std::vector<glm::vec4> WindowToWorldPlane(const glm::mat4& view_to_clip,
+                                          const glm::mat4& world_to_view,
+                                          const glm::vec2& window_size,
+                                          const std::vector<glm::vec2>& coordinates)
+{
     constexpr const auto plane_origin_world = glm::vec4 {0.0f, 0.0f, 0.0f, 1.0f};
     constexpr const auto plane_normal_world = glm::vec4 {0.0f, 0.0f, 1.0f, 0.0f};
     const auto plane_origin_view = world_to_view * plane_origin_world;
     const auto plane_normal_view = glm::normalize(glm::transpose(glm::inverse(world_to_view)) * plane_normal_world);
 
-    // normalize the window coordinate. remember to flip the Y axis.
-    glm::vec2 norm;
-    norm.x = window_coord.x / (window_size.x*0.5) - 1.0f;
-    norm.y = 1.0f - (window_coord.y / (window_size.y*0.5));
+    std::vector<glm::vec4> ret;
 
-    constexpr auto depth_value = -1.0f; // maps to view volume near plane
-    // remember this is in the NDC, so on z axis -1.0 is less depth
-    // i.e. closer to the viewer and 1.0 is more depth, farther away
-    const auto ndc = glm::vec4 {norm.x, norm.y, depth_value, 1.0f};
-    // transform into clip space. remember that when the clip space
-    // coordinate is transformed into NDC (by OpenGL) the clip space
-    // vectors are divided by the w component to yield normalized
-    // coordinates.
-    constexpr auto w = 1.0f;
-    const auto clip = ndc * w;
+    for (const auto& window_coord : coordinates)
+    {
+        // normalize the window coordinate. remember to flip the Y axis.
+        glm::vec2 norm;
+        norm.x = window_coord.x / (window_size.x * 0.5) - 1.0f;
+        norm.y = 1.0f - (window_coord.y / (window_size.y * 0.5));
 
-    //const auto& view_to_clip = projection;
-    const auto& clip_to_view = glm::inverse(view_to_clip);
+        constexpr auto depth_value = -1.0f; // maps to view volume near plane
+        // remember this is in the NDC, so on z axis -1.0 is less depth
+        // i.e. closer to the viewer and 1.0 is more depth, farther away
+        const auto ndc = glm::vec4{norm.x, norm.y, depth_value, 1.0f};
+        // transform into clip space. remember that when the clip space
+        // coordinate is transformed into NDC (by OpenGL) the clip space
+        // vectors are divided by the w component to yield normalized
+        // coordinates.
+        constexpr auto w = 1.0f;
+        const auto clip = ndc * w;
 
-    // original window coordinate in view space on near plane.
-    const auto& view_pos = clip_to_view * clip;
+        //const auto& view_to_clip = projection;
+        const auto& clip_to_view = glm::inverse(view_to_clip);
 
-    const auto& ray_origin = view_pos;
-    // do a ray cast from the view_pos towards the depth
-    // i.e. the ray is collinear with the -z vector
-    constexpr const auto ray_direction = glm::vec4 {0.0f, 0.0f, -1.0f, 0.0f};
+        // original window coordinate in view space on near plane.
+        const auto& view_pos = clip_to_view * clip;
 
-    float intersection_distance = 0.0f;
-    ASSERT(glm::intersectRayPlane(ray_origin,
-                                  ray_direction,
-                                  plane_origin_view,
-                                  plane_normal_view,
-                                  intersection_distance));
+        const auto& ray_origin = view_pos;
+        // do a ray cast from the view_pos towards the depth
+        // i.e. the ray is collinear with the -z vector
+        constexpr const auto ray_direction = glm::vec4{0.0f, 0.0f, -1.0f, 0.0f};
 
-    const auto& view_to_world = glm::inverse(world_to_view);
+        float intersection_distance = 0.0f;
+        ASSERT(glm::intersectRayPlane(ray_origin,
+                                      ray_direction,
+                                      plane_origin_view,
+                                      plane_normal_view,
+                                      intersection_distance));
 
-    const auto& intersection_point_view  = ray_origin + ray_direction * intersection_distance;
-    const auto& intersection_point_world = view_to_world * intersection_point_view;
-    return intersection_point_world;
+        const auto& view_to_world = glm::inverse(world_to_view);
+
+        const auto& intersection_point_view = ray_origin + ray_direction * intersection_distance;
+        const auto& intersection_point_world = view_to_world * intersection_point_view;
+        ret.push_back(intersection_point_world);
+    }
+    return ret;
 }
 
 glm::vec4 SceneToWorldPlane(const glm::mat4& scene_view_to_clip,

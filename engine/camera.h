@@ -21,6 +21,8 @@
 #  include <glm/gtc/matrix_transform.hpp>
 #include "warnpop.h"
 
+#include <vector>
+
 #include "game/enum.h"
 #include "game/types.h"
 
@@ -195,6 +197,10 @@ namespace engine
                                  const glm::mat4& world_to_view, // aka view/camera matrix/transform
                                  const glm::vec2& window_coord,
                                  const glm::vec2& window_size);
+    std::vector<glm::vec4> WindowToWorldPlane(const glm::mat4& view_to_clip,
+                                              const glm::mat4& world_to_view,
+                                              const glm::vec2& window_size,
+                                              const std::vector<glm::vec2>& coordinates);
 
     glm::vec4 SceneToWorldPlane(const glm::mat4& scene_view_to_clip,
                                 const glm::mat4& scene_world_to_view,
