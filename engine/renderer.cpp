@@ -305,6 +305,26 @@ void Renderer::PrepareMapTileBatches(const game::Tilemap& map,
             else BUG("Unknown data layer type.");
         }
     }
+
+    std::sort(batches.begin(), batches.end(), [](const auto& lhs, const auto& rhs) {
+        if (lhs.row < rhs.row)
+            return true;
+        else if (lhs.row == rhs.row)
+        {
+            if (lhs.col < rhs.col)
+                return true;
+            else if (lhs.col == rhs.col)
+                return lhs.layer < rhs.layer;
+        }
+        return false;
+    });
+
+    if (draw_data_layer)
+    {
+        std::stable_partition(batches.begin(), batches.end(), [](const auto& batch) {
+            return batch.type == TileBatchType::Render;
+        });
+    }
 }
 
 void Renderer::Update(const EntityClass& entity, float time, float dt)
