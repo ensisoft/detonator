@@ -270,7 +270,7 @@
       <widget class="QGroupBox" name="groupBox_2">
        <property name="maximumSize">
         <size>
-         <width>370</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -991,7 +991,7 @@
        </property>
        <property name="maximumSize">
         <size>
-         <width>350</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -1009,6 +1009,9 @@
           </property>
           <property name="contextMenuPolicy">
            <enum>Qt::CustomContextMenu</enum>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
           </property>
           <property name="selectionMode">
            <enum>QAbstractItemView::SingleSelection</enum>
@@ -1032,22 +1035,6 @@
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
-          <item>
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Preferred</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
           <item>
            <widget class="QPushButton" name="btnNewLayer">
             <property name="text">
@@ -1346,8 +1333,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>92</width>
-                 <height>22</height>
+                 <width>308</width>
+                 <height>384</height>
                 </rect>
                </property>
                <property name="sizePolicy">
@@ -1530,6 +1517,66 @@
    </property>
    <property name="shortcut">
     <string>Space</string>
+   </property>
+  </action>
+  <action name="actionNewLayer">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Layer</string>
+   </property>
+   <property name="toolTip">
+    <string>Add a new layer</string>
+   </property>
+  </action>
+  <action name="actionDeleteLayer">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Layer</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete the selected layer</string>
+   </property>
+  </action>
+  <action name="actionEditLayer">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
+   </property>
+   <property name="text">
+    <string>Edit Layer</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit the selected layer</string>
+   </property>
+  </action>
+  <action name="actionMoveLayerUp">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/move_up.png</normaloff>:/16x16_ico_png/move_up.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move Up</string>
+   </property>
+   <property name="toolTip">
+    <string>Move layer up step</string>
+   </property>
+  </action>
+  <action name="actionMoveLayerDown">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/move_down.png</normaloff>:/16x16_ico_png/move_down.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move Down</string>
+   </property>
+   <property name="toolTip">
+    <string>Move layer down one step</string>
    </property>
   </action>
  </widget>

@@ -1212,6 +1212,49 @@ void TilemapWidget::on_actionPalette_triggered()
     OpenMaterialPaletteOnCurrentTool();
 }
 
+void TilemapWidget::on_actionMoveLayerUp_triggered()
+{
+    const auto index = GetSelectedIndex(mUI.layers);
+    if (index.isValid())
+    {
+        const auto row = index.row();
+        if (row == 0)
+            return;
+        mState.klass->SwapLayers(row, row-1);
+        mState.map->SwapLayers(row, row-1);
+        mModel->Refresh();
+        SelectRow(mUI.layers, row -1);
+    }
+}
+void TilemapWidget::on_actionMoveLayerDown_triggered()
+{
+    const auto index = GetSelectedIndex(mUI.layers);
+    if (index.isValid())
+    {
+        const auto row = index.row();
+        if (row == mState.klass->GetNumLayers() -1)
+            return;
+        mState.klass->SwapLayers(row, row + 1);
+        mState.map->SwapLayers(row, row + 1);
+        mModel->Refresh();
+        SelectRow(mUI.layers, row + 1);
+    }
+}
+
+void TilemapWidget::on_actionNewLayer_triggered()
+{
+    on_btnNewLayer_clicked();
+}
+void TilemapWidget::on_actionEditLayer_triggered()
+{
+    on_btnEditLayer_clicked();
+}
+void TilemapWidget::on_actionDeleteLayer_triggered()
+{
+    on_btnDeleteLayer_clicked();
+}
+
+
 void TilemapWidget::on_btnNewLayer_clicked()
 {
     const auto map_width  = mState.klass->GetMapWidth();
@@ -1648,6 +1691,38 @@ void TilemapWidget::on_tileValue_valueChanged(int)
             ASSERT(layer->SetTileValue(tile_value, tile_row, tile_col));
         }
     }
+}
+
+void TilemapWidget::on_layers_customContextMenuRequested(const QPoint& point)
+{
+    const auto index = GetSelectedIndex(mUI.layers);
+
+    SetEnabled(mUI.actionDeleteLayer, false);
+    SetEnabled(mUI.actionMoveLayerDown, false);
+    SetEnabled(mUI.actionMoveLayerUp, false);
+    SetEnabled(mUI.actionEditLayer, false); // not implemented yet.
+
+    if (index.isValid())
+    {
+        const auto layers = mState.klass->GetNumLayers();
+
+        SetEnabled(mUI.actionDeleteLayer, index.isValid());
+        const auto row = index.row();
+        if (row > 0)
+            SetEnabled(mUI.actionMoveLayerUp, true);
+        if (row < layers-1)
+            SetEnabled(mUI.actionMoveLayerDown, true);
+    }
+
+    QMenu menu(this);
+    menu.addAction(mUI.actionNewLayer);
+    menu.addAction(mUI.actionEditLayer);
+    menu.addSeparator();
+    menu.addAction(mUI.actionMoveLayerUp);
+    menu.addAction(mUI.actionMoveLayerDown);
+    menu.addSeparator();
+    menu.addAction(mUI.actionDeleteLayer);
+    menu.exec(QCursor::pos());
 }
 
 void TilemapWidget::StartToolAction()
