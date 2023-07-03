@@ -1346,8 +1346,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>308</width>
-                 <height>384</height>
+                 <width>92</width>
+                 <height>22</height>
                 </rect>
                </property>
                <property name="sizePolicy">
@@ -1523,10 +1523,10 @@
      <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
    </property>
    <property name="text">
-    <string>Palette</string>
+    <string>Brush Palette</string>
    </property>
    <property name="toolTip">
-    <string>Open material palette</string>
+    <string>Open material palette on the brush</string>
    </property>
    <property name="shortcut">
     <string>Space</string>
