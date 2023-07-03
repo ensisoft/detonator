@@ -40,6 +40,7 @@ void PaletteMaterial::UpdateMaterialList(const ResourceList& list)
 void PaletteMaterial::on_btnSelectMaterial_clicked()
 {
     DlgMaterial dlg(this, mWorkspace, GetValue(mUI.cmbMaterial));
+    dlg.SetPreviewScale(mPreviewScale);
     if (dlg.exec() == QDialog::Rejected)
         return;
     SetValue(mUI.cmbMaterial, ListItemId(dlg.GetSelectedMaterialId()));

@@ -48,6 +48,18 @@
 
 namespace{
     constexpr auto PaletteIndexAutomatic = -1;
+
+    gui::Size2Df GetMaterialPreviewScale(const game::TilemapClass& klass)
+    {
+        const auto perspective = klass.GetPerspective();
+        if (perspective == game::Perspective::AxisAligned)
+            return {1.0f, 1.0};
+        else if (perspective == game::Perspective::Dimetric)
+            return {1.0f, 2.0f};
+        else BUG("Unknown perspective");
+        return {1.0f, 1.0f};
+    }
+
 } // namespce
 
 namespace gui
@@ -627,6 +639,7 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
         auto* widget = new PaletteMaterial(mState.workspace, this);
         widget->SetIndex(i);
         widget->SetLabel(QString("#%1").arg(i));
+        widget->SetMaterialPreviewScale(Size2Df(1.0f, 1.0f));
         widget->setObjectName(QString::number(i));
         // FUCKING Qt layout is suddenly going all bonkers without this!
         // First it was working fine and then it's not working. like WTF!?
@@ -685,6 +698,13 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace, const app::Resource& res
         layer.Load(data, 1024 /*default cache size*/);
         layer.SetFlags(layer.GetClass().GetFlags());
     }
+
+    // Update material scale in palette widgets
+    for (auto& widget : mPaletteMaterialWidgets)
+    {
+        widget->SetMaterialPreviewScale(GetMaterialPreviewScale(*mState.klass));
+    }
+
 
     int current_layer = -1;
     GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x);
@@ -895,6 +915,12 @@ bool TilemapWidget::LoadState(const Settings& settings)
         layer.SetFlags(layer.GetClass().GetFlags());
     }
 
+    // Update material scale in palette widgets
+    for (auto& widget : mPaletteMaterialWidgets)
+    {
+        widget->SetMaterialPreviewScale(GetMaterialPreviewScale(*mState.klass));
+    }
+
     mModel->Reset();
     SelectRow(mUI.layers, current_layer);
     UpdateToolCombo();
@@ -1083,10 +1109,20 @@ void TilemapWidget::on_mapWidth_valueChanged(int)
 void TilemapWidget::on_tileScaleX_valueChanged(double)
 {
     mState.klass->SetTileRenderWidthScale(GetValue(mUI.tileScaleX));
+
+    for (auto& widget : mPaletteMaterialWidgets)
+    {
+        widget->SetMaterialPreviewScale(GetMaterialPreviewScale(*mState.klass));
+    }
 }
 void TilemapWidget::on_tileScaleY_valueChanged(double)
 {
     mState.klass->SetTileRenderHeightScale(GetValue(mUI.tileScaleY));
+
+    for (auto& widget : mPaletteMaterialWidgets)
+    {
+        widget->SetMaterialPreviewScale(GetMaterialPreviewScale(*mState.klass));
+    }
 }
 
 void TilemapWidget::on_btnApplyMapSize_clicked()
@@ -1349,7 +1385,8 @@ void TilemapWidget::on_btnSelectToolMaterial_clicked()
 {
     if (auto* tool = GetCurrentTool())
     {
-        DlgMaterial dlg(this, mState.workspace, app::FromUtf8(tool->material));
+        DlgMaterial dlg(this, mState.workspace, tool->material);
+        dlg.SetPreviewScale(GetMaterialPreviewScale(*mState.klass));
         if (dlg.exec() == QDialog::Rejected)
             return;
         tool->material = app::ToUtf8(dlg.GetSelectedMaterialId());
@@ -1508,6 +1545,7 @@ void TilemapWidget::on_btnSelectTileMaterial_clicked()
         return;
 
     DlgMaterial dlg(this, mState.workspace, "");
+    dlg.SetPreviewScale(GetMaterialPreviewScale(*mState.klass));
     if (dlg.exec() == QDialog::Rejected)
         return;
     const auto& material = app::ToUtf8(dlg.GetSelectedMaterialId());
@@ -2823,7 +2861,8 @@ bool TilemapWidget::OpenMaterialPaletteOnCurrentTool()
     {
         if (auto* tool = GetCurrentTool())
         {
-            DlgMaterial dlg(this, mState.workspace, app::FromUtf8(tool->material));
+            DlgMaterial dlg(this, mState.workspace, tool->material);
+            dlg.SetPreviewScale(GetMaterialPreviewScale(*mState.klass));
             if (dlg.exec() == QDialog::Rejected)
                 return false;
             SetValue(mUI.cmbToolMaterial, ListItemId(dlg.GetSelectedMaterialId()));
