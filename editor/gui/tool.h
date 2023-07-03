@@ -40,6 +40,7 @@
 #include "graphics/transform.h"
 
 #include "editor/gui/utility.h"
+#include "editor/gui/nerd.h"
 #include "editor/gui/types.h"
 
 namespace gui

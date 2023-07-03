@@ -327,18 +327,12 @@ class TilemapWidget::TileSelectTool : public MouseTool
 public:
     TileSelectTool(const game::Tilemap& map,
                    const game::TilemapLayer& layer,
-                   const glm::mat4& view_to_clip,
-                   const glm::mat4& world_to_view,
-                   const glm::vec2& window_size,
                    State& state)
       : mMap(map)
       , mLayer(layer)
-      , mViewToClip(view_to_clip)
-      , mWorldToView(world_to_view)
-      , mWindowSize(window_size)
       , mState(state)
     {}
-    virtual void Render(gfx::Painter& window, gfx::Painter& tile_painter) const override
+    virtual void Render(gfx::Painter&, gfx::Painter& tile_painter) const override
     {
         const auto movement = mWorldPos - mWorldStartPos;
         if (movement.x <= 0.0f || movement.y <= 0.0f)
@@ -353,17 +347,11 @@ public:
     }
     virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
     {
-        mWorldPos = engine::WindowToWorldPlane(mViewToClip,
-                                               mWorldToView,
-                                               ToVec2(mickey->pos()),
-                                               mWindowSize);
+        mWorldPos = mickey.WorldPlanePos();
     }
     virtual void MousePress(const MouseEvent& mickey, gfx::Transform&) override
     {
-        mWorldPos = engine::WindowToWorldPlane(mViewToClip,
-                                               mWorldToView,
-                                               ToVec2(mickey->pos()),
-                                               mWindowSize);
+        mWorldPos = mickey.WorldPlanePos();
         mWorldStartPos = mWorldPos;
     }
     virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
@@ -405,10 +393,8 @@ public:
 private:
     const game::Tilemap& mMap;
     const game::TilemapLayer& mLayer;
-    const glm::mat4 mViewToClip;
-    const glm::mat4 mWorldToView;
-    const glm::vec2 mWindowSize;
     TilemapWidget::State& mState;
+private:
     glm::vec2 mWorldStartPos;
     glm::vec2 mWorldPos;
 };
@@ -416,56 +402,58 @@ private:
 class TilemapWidget::TileBrushTool : public MouseTool
 {
 public:
-    TileBrushTool(const glm::mat4& view_to_clip,
-                  const glm::mat4& world_to_view,
-                  const glm::vec2& window_size,
-                  const Tool& tool, State& state, game::TilemapLayer& layer)
-      : mViewToClip(view_to_clip)
-      , mWorldToView(world_to_view)
-      , mWindowSize(window_size)
-      , mTool(tool)
+    TileBrushTool(const Tool& tool, State& state, game::TilemapLayer& layer)
+      : mTool(tool)
       , mState(state)
       , mLayer(layer)
     {
         auto klass = state.workspace->GetMaterialClassById(tool.material);
         mMaterial = gfx::CreateMaterialInstance(klass);
     }
-    virtual void Render(gfx::Painter& window, gfx::Painter& tile_painter) const override
+    virtual void Render(gfx::Painter& painter, gfx::Painter& tile_painter) const override
     {
-        tile_painter.ResetViewMatrix();
-        tile_painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(mWindowSize.x, mWindowSize.y));
-        tile_painter.SetViewport(gfx::IRect(0, 0, mWindowSize.x, mWindowSize.y));
-        tile_painter.SetPixelRatio(glm::vec2{1.0f, 1.0f});
+        painter.ResetViewMatrix();
+        painter.SetPixelRatio(glm::vec2{1.0f, 1.0f});
 
-        const auto& dst_view_to_clip = window.GetProjMatrix();
-        const auto& dst_world_to_view = window.GetViewMatrix();
         // This matrix will project a coordinate in isometric tile world space into
         // 2D screen space/surface coordinate.
-        const auto& tile_projection_transform_matrix = engine::GetProjectionTransformMatrix(mViewToClip,
-                                                                                            mWorldToView,
-                                                                                            dst_view_to_clip,
-                                                                                            dst_world_to_view);
-        const auto scaler = mLayer.GetTileSizeScaler();
-        const auto tile_width_units = mState.klass->GetTileWidth() * scaler;
-        const auto tile_height_units = mState.klass->GetTileHeight() * scaler;
+        const auto& tile_projection_transform_matrix = engine::GetProjectionTransformMatrix(tile_painter.GetProjMatrix(),
+                                                                                            tile_painter.GetViewMatrix(),
+                                                                                            painter.GetProjMatrix(),
+                                                                                            painter.GetViewMatrix());
+        const auto tile_scaler = mLayer.GetTileSizeScaler();
+        const auto tile_width_units = mState.klass->GetTileWidth() * tile_scaler;
+        const auto tile_height_units = mState.klass->GetTileHeight() * tile_scaler;
         const auto tile_render_width_scale = mState.klass->GetTileRenderWidthScale();
         const auto tile_render_height_scale = mState.klass->GetTileRenderHeightScale();
 
+        const auto perspective = mState.klass->GetPerspective();
+        const auto& render_size = engine::ComputeTileRenderSize(tile_projection_transform_matrix,
+                                                                {tile_width_units, tile_height_units},
+                                                                perspective);
+        gfx::FRect tool_bounds;
         gfx::TileBatch batch;
         for (unsigned row=0; row<mTool.height; ++row)
         {
             for (unsigned col=0; col<mTool.width; ++col)
             {
+                const auto tile_row = mTileRow + row - mTool.height / 2;
+                const auto tile_col = mTileCol + col - mTool.width / 2;
+                if (tile_row < 0 || tile_row >= mLayer.GetHeight()||
+                    tile_col < 0 || tile_col >= mLayer.GetWidth())
+                    continue;
+
                 gfx::TileBatch::Tile tile;
-                tile.pos.y = mTileRow + row - mTool.height / 2;
-                tile.pos.x = mTileCol + col - mTool.width / 2;
+                tile.pos.y = tile_row;
+                tile.pos.x = tile_col;
                 batch.AddTile(tile);
+
+                gfx::FRect rect;
+                rect.Resize(tile_width_units, tile_height_units);
+                rect.Translate(tile.pos.x * tile_width_units, tile.pos.y * tile_height_units);
+                tool_bounds = Union(tool_bounds, rect);
             }
         }
-        const auto perspective = mState.klass->GetPerspective();
-        const auto& render_size = engine::ComputeTileRenderSize(tile_projection_transform_matrix,
-                                                                {tile_width_units, tile_height_units},
-                                                                perspective);
         batch.SetTileWorldWidth(tile_width_units);
         batch.SetTileWorldHeight(tile_height_units);
         batch.SetTileRenderWidth(render_size.x * tile_render_width_scale);
@@ -477,18 +465,28 @@ public:
             batch.SetProjection(gfx::TileBatch::Projection::Dimetric);
         else BUG("missing tile projection.");
 
-        tile_painter.Draw(batch, tile_projection_transform_matrix, *mMaterial);
+        // draw the tilebatch
+        painter.Draw(batch, tile_projection_transform_matrix, *mMaterial);
+
+        // draw a rect around the tool on the tile plane
+        {
+            gfx::Transform model;
+            model.Resize(tool_bounds);
+            model.MoveTo(tool_bounds);
+            tile_painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline), model,
+                              gfx::CreateMaterialFromColor(gfx::Color4f(gfx::Color::HotPink, 0.8)));
+        }
+
+
     }
+
     virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
     {
-        const auto scaler = mLayer.GetTileSizeScaler();
-        const auto tile_width = mState.klass->GetTileWidth() * scaler;
-        const auto tile_height = mState.klass->GetTileHeight() * scaler;
+        const auto tile_scale  = mLayer.GetTileSizeScaler();
+        const auto tile_width  = mState.klass->GetTileWidth() * tile_scale;
+        const auto tile_height = mState.klass->GetTileHeight() * tile_scale;
 
-        const auto world_pos = engine::WindowToWorldPlane(mViewToClip,
-                                                          mWorldToView,
-                                                          ToVec2(mickey->pos()),
-                                                          mWindowSize);
+        const glm::vec2 world_pos = mickey.WorldPlanePos();
         mTileCol  = world_pos.x / tile_width;
         mTileRow  = world_pos.y / tile_height;
 
@@ -528,54 +526,42 @@ public:
             mActive = false;
         return false;
     }
+
     void ApplyTool()
     {
-        const auto type = mLayer.GetType();
         for (unsigned row=0; row<mTool.height; ++row)
         {
             for (unsigned col=0; col<mTool.width; ++col)
             {
                 const auto tile_row = mTileRow + row - mTool.height / 2;
                 const auto tile_col = mTileCol + col - mTool.width / 2;
+                // discard tiles outside of the actual tile area.
                 if (tile_row < 0 || tile_row >= mLayer.GetHeight()||
                     tile_col < 0 || tile_col >= mLayer.GetWidth())
                     continue;
+
+                // apply the material assigned to the tool onto the tiles
+                // in the current layer's render component.
                 if (mLayer->HasRenderComponent() && mTool.apply_material)
                     mLayer.SetTilePaletteIndex(mTool.palette_index, tile_row, tile_col);
+
+                // apply the data value assigned to the tool onto the tiles
+                // in the current layer's data component.
                 if (mLayer->HasDataComponent() && mTool.apply_value)
                     mLayer.SetTileValue(mTool.value, tile_row, tile_col);
             }
         }
 
     }
-
-    int GetTileRow() const
-    { return mTileRow; }
-    int GetTileCol() const
-    { return mTileCol; }
     void SetTileRow(int row)
     { mTileRow = row; }
     void SetTileCol(int col)
     { mTileCol = col; }
-    void SetToolIndex(size_t index)
-    { mToolIndex = index; }
-    size_t GetToolIndex() const
-    { return mToolIndex; }
-    void UpdateMatrices(const glm::mat4& view_to_clip,
-                        const glm::mat4& world_to_view)
-    {
-        mViewToClip = view_to_clip;
-        mWorldToView = world_to_view;
-    }
 private:
-    glm::mat4 mViewToClip;
-    glm::mat4 mWorldToView;
-    glm::vec2 mWindowSize;
     TilemapWidget::Tool mTool;
     TilemapWidget::State& mState;
     game::TilemapLayer& mLayer;
     std::unique_ptr<gfx::Material> mMaterial;
-    std::size_t mToolIndex = 0;
     int mTileRow = 0;
     int mTileCol =0;
     bool mActive = false;
@@ -1020,10 +1006,14 @@ bool TilemapWidget::OnEscape()
         mState.selection.reset();
         DisplaySelection();
     }
-    else
+    else if (GetCurrentLayer())
     {
         SelectRow(mUI.layers, -1);
         DisplayLayerProperties();
+    }
+    else
+    {
+        on_btnViewReset_clicked();
     }
     return false;
 }
@@ -1660,44 +1650,66 @@ void TilemapWidget::on_tileValue_valueChanged(int)
     }
 }
 
-void TilemapWidget::StartTool()
+void TilemapWidget::StartToolAction()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+
+    StartTool(action->data().toString());
+
+}
+
+void TilemapWidget::StartTool(const QString& id)
 {
     mCurrentTool.reset();
-    UncheckTools();
 
-    QAction* action = qobject_cast<QAction*>(sender());
-    action->setChecked(true);
-
-    size_t tool_index = 0;
-    SetCurrentTool(action->data().toString());
+    SetCurrentTool(id);
     ShowCurrentTool();
-    auto* tool  = GetCurrentTool(&tool_index);
+
+    auto* tool  = GetCurrentTool();
     auto* layer = GetCurrentLayerInstance();
     ASSERT(tool);
     ASSERT(layer);
 
+    const auto tile_width  = mState.klass->GetTileWidth();
+    const auto tile_height = mState.klass->GetTileHeight();
+    const auto tile_scaler = layer->GetTileSizeScaler();
+    const auto layer_tile_width = tile_width * tile_scaler;
+    const auto layer_tile_height = tile_height * tile_scaler;
+
+    int tile_row = 0;
+    int tile_col = 0;
+
+    const auto width  = mUI.widget->width();
+    const auto height = mUI.widget->height();
+    const auto& mickey = mUI.widget->mapFromGlobal(QCursor::pos());
+    if (mickey.x() >= 0 && mickey.x() < width &&
+        mickey.y() >= 0 && mickey.y() < height)
+    {
+        const glm::vec2 tile_coord = MapWindowCoordinateToWorld(mUI, mState, mickey, mState.klass->GetPerspective());
+        tile_col = tile_coord.x / layer_tile_width;
+        tile_row = tile_coord.y / layer_tile_height;
+    }
+
     if (tool->tool == ToolFunction::TileBrush)
     {
-        int tile_row = 0;
-        int tile_col = 0;
-        if (const auto* ptr = dynamic_cast<TileBrushTool*>(mCurrentTool.get()))
-        {
-            tile_row = ptr->GetTileRow();
-            tile_col = ptr->GetTileCol();
-        }
-        const auto perspective = mState.klass->GetPerspective();
-        // these are the matrices to transform and project the
-        // game onto the rendering surface.
-        const auto map_proj = CreateProjectionMatrix(mUI, perspective);
-        const auto map_view = CreateViewMatrix(mUI, mState, perspective);
-
-        auto mouse_tool = std::make_unique<TileBrushTool>(map_proj, map_view, ToVec2(mUI.widget->size()), *tool, mState, *layer);
+        auto mouse_tool = std::make_unique<TileBrushTool>(*tool, mState, *layer);
         mouse_tool->SetTileCol(tile_col);
         mouse_tool->SetTileRow(tile_row);
-        mouse_tool->SetToolIndex(tool_index);
         mCurrentTool = std::move(mouse_tool);
     }
     SetEnabled(mUI.actionPalette, true);
+
+    for (auto* action : mToolActions)
+    {
+        if (action->data().toString() == id)
+        {
+            action->setChecked(true);
+        }
+        else
+        {
+            action->setChecked(false);
+        }
+    }
 }
 
 void TilemapWidget::ResourceAdded(const app::Resource* resource)
@@ -2005,11 +2017,9 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         gfx::Painter p(painter.GetDevice());
 
         engine::Renderer::Camera camera;
-        camera.position.x = mState.camera_offset_x;
-        camera.position.y = mState.camera_offset_y;
+        camera.position   = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
+        camera.scale      = glm::vec2{xs * zoom, ys * zoom };
         camera.rotation   = GetValue(mUI.rotation);
-        camera.scale.x    = xs * zoom;
-        camera.scale.y    = ys * zoom;
         camera.viewport   = game::FRect(-width*0.5f, -height*0.5f, width, height);
         mRenderer.SetCamera(camera);
 
@@ -2029,7 +2039,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
     // render assistance when a layer is selected.
     if (const auto* layer = GetCurrentLayerInstance())
     {
-        const auto layer_index = GetCurrentLayerIndex();
+        //const auto layer_index = GetCurrentLayerIndex();
         const auto tile_width  = mState.klass->GetTileWidth();
         const auto tile_height = mState.klass->GetTileHeight();
         const auto tile_scaler = layer->GetTileSizeScaler();
@@ -2092,7 +2102,8 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
 
     if (mCurrentTool)
     {
-        mCurrentTool->Render(painter, tile_painter);
+        gfx::Painter p(painter);
+        mCurrentTool->Render(p, tile_painter);
     }
 
 
@@ -2152,46 +2163,33 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
     PrintMousePos(mUI, mState, painter, perspective);
 }
 
-void TilemapWidget::MouseMove(QMouseEvent* mickey)
+void TilemapWidget::MouseMove(QMouseEvent* event)
 {
     if (!mCurrentTool && !mCameraTool)
         return;
+
+    const MouseEvent mickey(event, mUI, mState, mState.klass->GetPerspective());
 
     if (mCameraTool)
     {
         mCameraTool->MouseMove(mickey);
         DisplayCurrentCameraLocation();
-
-        if (mCurrentTool)
-        {
-            const auto perspective = mState.klass->GetPerspective();
-            // these are the matrices to transform and project the
-            // game onto the rendering surface.
-            const auto map_proj = CreateProjectionMatrix(mUI, perspective);
-            const auto map_view = CreateViewMatrix(mUI, mState, perspective);
-
-            if (auto* brush = dynamic_cast<TileBrushTool*>(mCurrentTool.get()))
-            {
-                brush->UpdateMatrices(map_proj, map_view);
-            }
-        }
     }
 
     if (mCurrentTool)
         mCurrentTool->MouseMove(mickey);
 }
 
-void TilemapWidget::MousePress(QMouseEvent* mickey)
+void TilemapWidget::MousePress(QMouseEvent* event)
 {
+    const MouseEvent mickey(event, mUI, mState, mState.klass->GetPerspective());
+
     if (!mCurrentTool && mickey->button() == Qt::LeftButton)
     {
         mState.selection.reset();
         if (auto* layer = GetCurrentLayerInstance())
         {
-            const auto perspective = mState.klass->GetPerspective();
-            const auto map_proj = CreateProjectionMatrix(mUI, perspective);
-            const auto map_view = CreateViewMatrix(mUI, mState, perspective);
-            mCurrentTool.reset(new TileSelectTool(*mState.map, *layer, map_proj, map_view, ToVec2(mUI.widget->size()), mState));
+            mCurrentTool.reset(new TileSelectTool(*mState.map, *layer, mState));
         }
     }
     else if(!mCameraTool &&  (mickey->button() == Qt::RightButton))
@@ -2201,29 +2199,29 @@ void TilemapWidget::MousePress(QMouseEvent* mickey)
 
     if (mCurrentTool && mickey->button() == Qt::LeftButton)
     {
-        if (const auto* brush = dynamic_cast<const TileBrushTool*>(mCurrentTool.get()))
+        const auto* layer = GetCurrentLayerInstance();
+        const auto* tool  = GetCurrentTool();
+        if (!ValidateToolAgainstLayer(*tool, *layer))
         {
-            const auto* layer = GetCurrentLayerInstance();
-            const auto& tool = mTools[brush->GetToolIndex()];
-            if (!ValidateToolAgainstLayer(tool, *layer))
-            {
-                mCurrentTool.reset();
-                UncheckTools();
-            }
+            mCurrentTool.reset();
+            UncheckTools();
+            return;
         }
-
         mCurrentTool->MousePress(mickey);
         UpdateLayerPalette();
     }
+
     if (mCameraTool && mickey->button() == Qt::RightButton)
     {
         mCameraTool->MousePress(mickey);
     }
 }
-void TilemapWidget::MouseRelease(QMouseEvent* mickey)
+void TilemapWidget::MouseRelease(QMouseEvent* event)
 {
     if (!mCurrentTool && !mCameraTool)
         return;
+
+    const MouseEvent mickey(event, mUI, mState, mState.klass->GetPerspective());
 
     if (mickey->button() == Qt::LeftButton)
     {
@@ -2257,6 +2255,11 @@ void TilemapWidget::MouseWheel(QWheelEvent* wheel)
     if (!layer)
         return;
 
+    // a bit of a kludge but the GfxWidget transforms Ctrl+mouse wheel to
+    // zoom in/out events.
+    if (wheel->modifiers() == Qt::ControlModifier)
+        return;
+
     const QPoint& num_degrees = wheel->angleDelta() / 8;
     const QPoint& num_steps = num_degrees / 15;
     // only consider the wheel scroll steps on the vertical axis.
@@ -2264,49 +2267,30 @@ void TilemapWidget::MouseWheel(QWheelEvent* wheel)
     // and if steps are negative the wheel is scrolled towards the user.
     const int num_vertical_steps = num_steps.y();
 
-    if (auto* brush = dynamic_cast<TileBrushTool*>(mCurrentTool.get()))
+    size_t tool_index = 0;
+    auto* tool = GetCurrentTool(&tool_index);
+    ASSERT(tool);
+
+    // scroll over the tools using the mouse wheel.
+    if (wheel->modifiers() == Qt::ShiftModifier)
     {
-        if (wheel->modifiers() == Qt::SHIFT)
+        const int curr_tool_index = tool_index;
+        const int next_tool_index = math::wrap(0, (int)(mTools.size() - 1), curr_tool_index - num_vertical_steps);
+        StartTool(mTools[next_tool_index].id);
+    }
+    else
+    {
+        const auto& materials = mState.workspace->ListAllMaterials();
+        int index;
+        for (index=0; index<materials.size(); ++index)
         {
-            if (auto* tool = GetCurrentTool())
-            {
-                const auto& materials = mState.workspace->ListAllMaterials();
-                int index;
-                for (index=0; index<materials.size(); ++index)
-                {
-                    if (materials[index].id == app::FromUtf8(tool->material))
-                        break;
-                }
-                index = math::wrap(0, (int)materials.size()-1, index - num_vertical_steps);
-                SetValue(mUI.cmbToolMaterial, ListItemId(materials[index].id));
-                ModifyCurrentTool();
-            }
+            if (materials[index].id == tool->material)
+                break;
         }
-        else
-        {
-            UncheckTools();
-            const auto tile_col = brush->GetTileCol();
-            const auto tile_row = brush->GetTileRow();
-            const int curr_tool_index = brush->GetToolIndex();
-            const int next_tool_index = math::wrap(0, (int) (mTools.size() - 1), curr_tool_index - num_vertical_steps);
-
-            const auto perspective = mState.klass->GetPerspective();
-            // these are the matrices to transform and project the
-            // game onto the rendering surface.
-            const auto map_proj = CreateProjectionMatrix(mUI, perspective);
-            const auto map_view = CreateViewMatrix(mUI, mState, perspective);
-
-            auto tool = std::make_unique<TileBrushTool>(map_proj, map_view, ToVec2(mUI.widget->size()),
-                    mTools[next_tool_index], mState, *layer);
-            tool->SetToolIndex(next_tool_index);
-            tool->SetTileRow(tile_row);
-            tool->SetTileCol(tile_col);
-            mCurrentTool = std::move(tool);
-            mToolActions[next_tool_index]->setChecked(true);
-            SetCurrentTool(mTools[next_tool_index].id);
-            ShowCurrentTool();
-            SetEnabled(mUI.actionPalette, true);
-        }
+        index = math::wrap(0, (int)materials.size()-1, index - num_vertical_steps);
+        SetValue(mUI.cmbToolMaterial, ListItemId(materials[index].id));
+        ModifyCurrentTool();
+        StartTool(mTools[tool_index].id);
     }
 }
 
@@ -2341,23 +2325,7 @@ bool TilemapWidget::KeyPress(QKeyEvent* key)
 {
     if (key->key() == Qt::Key_Escape)
     {
-        mCameraTool.reset();
-
-        if (mCurrentTool)
-        {
-            mCurrentTool.reset();
-            UncheckTools();
-        }
-        else if (mState.selection.has_value())
-        {
-            mState.selection.reset();
-            DisplaySelection();
-        }
-        else
-        {
-            SelectRow(mUI.layers, -1);
-            DisplayLayerProperties();
-        }
+        OnEscape();
         return true;
     }
     else if (key->key() == Qt::Key_Delete)
@@ -2586,7 +2554,8 @@ void TilemapWidget::UpdateToolToolbar()
 
         if (tool.tool == ToolFunction::TileBrush)
             action->setIcon(QIcon("icons:brush.png"));
-        connect(action, &QAction::triggered,this, &TilemapWidget::StartTool);
+
+        connect(action, &QAction::triggered,this, &TilemapWidget::StartToolAction);
         mToolActions.push_back(action);
     }
 
@@ -2595,46 +2564,18 @@ void TilemapWidget::UpdateToolToolbar()
 
 void TilemapWidget::ModifyCurrentTool()
 {
-    size_t tool_index = 0;
-    if (auto* tool = GetCurrentTool(&tool_index))
+    if (auto* tool = GetCurrentTool())
     {
-        tool->name          = (const QString&)GetValue(mUI.cmbTool);
-        tool->tool          = GetValue(mUI.cmbToolFunction);
-        tool->width         = GetValue(mUI.toolWidth);
-        tool->height        = GetValue(mUI.toolHeight);
-        tool->shape         = GetValue(mUI.cmbToolShape);
-        tool->material      = GetItemId(mUI.cmbToolMaterial);
-        tool->palette_index = GetValue(mUI.toolPaletteIndex);
-        tool->value         = GetValue(mUI.toolValue);
+        tool->name           = (const QString&)GetValue(mUI.cmbTool);
+        tool->tool           = GetValue(mUI.cmbToolFunction);
+        tool->width          = GetValue(mUI.toolWidth);
+        tool->height         = GetValue(mUI.toolHeight);
+        tool->shape          = GetValue(mUI.cmbToolShape);
+        tool->material       = GetItemId(mUI.cmbToolMaterial);
+        tool->palette_index  = GetValue(mUI.toolPaletteIndex);
+        tool->value          = GetValue(mUI.toolValue);
         tool->apply_material = GetValue(mUI.chkToolMaterial);
         tool->apply_value    = GetValue(mUI.chkToolValue);
-
-        if (auto* ptr = dynamic_cast<TileBrushTool*>(mCurrentTool.get()))
-        {
-            if (tool_index == ptr->GetToolIndex())
-            {
-                auto* layer = GetCurrentLayerInstance();
-                ASSERT(layer != nullptr);
-                UncheckTools();
-
-                const auto tile_row = ptr->GetTileRow();
-                const auto tile_col = ptr->GetTileCol();
-
-                const auto perspective = mState.klass->GetPerspective();
-                // these are the matrices to transform and project the
-                // game onto the rendering surface.
-                const auto map_proj = CreateProjectionMatrix(mUI, perspective);
-                const auto map_view = CreateViewMatrix(mUI, mState, perspective);
-
-                auto mouse_tool = std::make_unique<TileBrushTool>(map_proj, map_view, ToVec2(mUI.widget->size()), *tool, mState, *layer);
-                mouse_tool->SetTileCol(tile_col);
-                mouse_tool->SetTileRow(tile_row);
-                mouse_tool->SetToolIndex(tool_index);
-                mCurrentTool = std::move(mouse_tool);
-                mToolActions[tool_index]->setChecked(true);
-                SetEnabled(mUI.actionPalette, true);
-            }
-        }
     }
 }
 
@@ -2662,11 +2603,11 @@ void TilemapWidget::ShowCurrentTool()
         SetEnabled(mUI.chkToolMaterial,          true);
         SetEnabled(mUI.chkToolValue,             true);
 
-        SetValue(mUI.cmbToolFunction, tool->tool);
-        SetValue(mUI.cmbToolShape,    tool->shape);
-        SetValue(mUI.toolWidth,       tool->width);
-        SetValue(mUI.toolHeight,      tool->height);
-        SetValue(mUI.cmbToolMaterial, ListItemId(tool->material));
+        SetValue(mUI.cmbToolMaterial,  ListItemId(tool->material));
+        SetValue(mUI.cmbToolFunction,  tool->tool);
+        SetValue(mUI.cmbToolShape,     tool->shape);
+        SetValue(mUI.toolWidth,        tool->width);
+        SetValue(mUI.toolHeight,       tool->height);
         SetValue(mUI.toolPaletteIndex, tool->palette_index);
         SetValue(mUI.toolValue,        tool->value);
         SetValue(mUI.chkToolMaterial,  tool->apply_material);
@@ -2857,18 +2798,19 @@ void TilemapWidget::ClearUnusedPaletteEntries()
 
 bool TilemapWidget::OpenMaterialPaletteOnCurrentTool()
 {
-    if (auto* brush = dynamic_cast<TileBrushTool*>(mCurrentTool.get()))
+    if (!mCurrentTool)
+        return false;
+
+    if (auto* tool = GetCurrentTool())
     {
-        if (auto* tool = GetCurrentTool())
-        {
-            DlgMaterial dlg(this, mState.workspace, tool->material);
-            dlg.SetPreviewScale(GetMaterialPreviewScale(*mState.klass));
-            if (dlg.exec() == QDialog::Rejected)
-                return false;
-            SetValue(mUI.cmbToolMaterial, ListItemId(dlg.GetSelectedMaterialId()));
-            ModifyCurrentTool();
-            return true;
-        }
+        DlgMaterial dlg(this, mState.workspace, tool->material);
+        dlg.SetPreviewScale(GetMaterialPreviewScale(*mState.klass));
+        if (dlg.exec() == QDialog::Rejected)
+            return false;
+        SetValue(mUI.cmbToolMaterial, ListItemId(dlg.GetSelectedMaterialId()));
+        ModifyCurrentTool();
+        StartTool(tool->id);
+        return true;
     }
     return false;
 }

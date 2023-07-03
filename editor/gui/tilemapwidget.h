@@ -115,13 +115,14 @@ namespace gui
         void on_btnEditTileMaterial_clicked();
         void on_tileValue_valueChanged(int);
 
-        void StartTool();
+        void StartToolAction();
         void ResourceAdded(const app::Resource* resource);
         void ResourceRemoved(const app::Resource* resource);
         void ResourceUpdated(const app::Resource* resource);
         void LayerSelectionChanged(const QItemSelection, const QItemSelection);
         void PaletteMaterialChanged(const PaletteMaterial* material);
     private:
+        void StartTool(const QString& id);
         void DisplayCurrentCameraLocation();
         void SetMapProperties();
         void SetLayerProperties();
