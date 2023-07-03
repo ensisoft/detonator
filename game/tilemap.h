@@ -814,6 +814,13 @@ namespace game
         void AddLayer(std::shared_ptr<TilemapLayerClass> klass);
         void DeleteLayer(size_t index);
 
+        void SwapLayers(size_t src, size_t dst)
+        {
+            ASSERT(src < mLayers.size());
+            ASSERT(dst < mLayers.size());
+            std::swap(mLayers[src], mLayers[dst]);
+        }
+
         TilemapLayerClass& GetLayer(size_t index);
         TilemapLayerClass* FindLayerById(const std::string& id);
         TilemapLayerClass* FindLayerByName(const std::string& name);
@@ -871,6 +878,13 @@ namespace game
         TilemapLayer& GetLayer(size_t index);
         TilemapLayer* FindLayerByClassName(const std::string& name);
         TilemapLayer* FindLayerByClassId(const std::string& id);
+
+        void SwapLayers(size_t src, size_t dst) noexcept
+        {
+            ASSERT(src < mLayers.size());
+            ASSERT(dst < mLayers.size());
+            std::swap(mLayers[src], mLayers[dst]);
+        }
 
         inline std::size_t GetNumLayers() const noexcept
         { return mLayers.size(); }

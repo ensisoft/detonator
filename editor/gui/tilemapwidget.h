@@ -79,6 +79,11 @@ namespace gui
         void on_btnApplyMapSize_clicked();
         void on_actionSave_triggered();
         void on_actionPalette_triggered();
+        void on_actionNewLayer_triggered();
+        void on_actionEditLayer_triggered();
+        void on_actionDeleteLayer_triggered();
+        void on_actionMoveLayerUp_triggered();
+        void on_actionMoveLayerDown_triggered();
         void on_btnNewLayer_clicked();
         void on_btnDeleteLayer_clicked();
         void on_btnEditLayer_clicked();
@@ -114,6 +119,7 @@ namespace gui
         void on_btnDeleteTileMaterial_clicked();
         void on_btnEditTileMaterial_clicked();
         void on_tileValue_valueChanged(int);
+        void on_layers_customContextMenuRequested(const QPoint&);
 
         void StartToolAction();
         void ResourceAdded(const app::Resource* resource);
