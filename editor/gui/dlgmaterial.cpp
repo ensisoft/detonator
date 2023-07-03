@@ -32,8 +32,12 @@
 #include "graphics/drawing.h"
 
 namespace {
-    constexpr unsigned BoxSize = 100;
     constexpr unsigned BoxMargin = 20;
+    inline unsigned GetBoxWidth(const glm::vec2& scale)
+    { return 100  * scale.x; }
+    inline unsigned GetBoxHeight(const glm::vec2& scale)
+    { return 100 * scale.y;}
+
 } // namespace
 
 namespace gui
@@ -43,6 +47,7 @@ DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace, const
   : QDialog(parent)
   , mSelectedMaterialId(material)
   , mWorkspace(workspace)
+  , mPreviewScale(1.0f, 1.0f)
 {
     mUI.setupUi(this);
 
@@ -99,8 +104,11 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double secs)
     const auto height = mUI.widget->height();
     painter.SetViewport(0, 0, width, height);
 
-    const auto num_visible_cols = width / (BoxSize + BoxMargin);
-    const auto num_visible_rows = height / (BoxSize + BoxMargin);
+    const auto BoxWidth = GetBoxWidth(mPreviewScale);
+    const auto BoxHeight = GetBoxHeight(mPreviewScale);
+
+    const auto num_visible_cols = width / (BoxWidth + BoxMargin);
+    const auto num_visible_rows = height / (BoxHeight + BoxMargin);
 
     if (mFirstPaint)
     {
@@ -116,7 +124,7 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double secs)
                 if (mMaterials[i].id == mSelectedMaterialId)
                     break;
             }
-            const auto row_height = BoxSize + BoxMargin;
+            const auto row_height = BoxHeight + BoxMargin;
             const auto row_ypos   = (selected_material_row + 1 ) * row_height;
             if (row_ypos > height)
             {
@@ -128,8 +136,8 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double secs)
         mFirstPaint = false;
     }
 
-    const auto xoffset  = (width - ((BoxSize + BoxMargin) * num_visible_cols)) / 2;
-    const auto yoffset  = -mScrollOffsetRow * (BoxSize + BoxMargin);
+    const auto xoffset  = (width - ((BoxWidth + BoxMargin) * num_visible_cols)) / 2;
+    const auto yoffset  = -mScrollOffsetRow * (BoxHeight + BoxMargin);
     unsigned index = 0;
 
     SetValue(mUI.groupBox, "Material Library");
@@ -142,11 +150,11 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double secs)
 
         const auto col = index % num_visible_cols;
         const auto row = index / num_visible_cols;
-        const auto xpos = xoffset + col * (BoxSize + BoxMargin);
-        const auto ypos = yoffset + row * (BoxSize + BoxMargin);
+        const auto xpos = xoffset + col * (BoxWidth + BoxMargin);
+        const auto ypos = yoffset + row * (BoxHeight + BoxMargin);
 
         gfx::FRect  rect;
-        rect.Resize(BoxSize, BoxSize);
+        rect.Resize(BoxWidth, BoxHeight);
         rect.Move(xpos, ypos);
         rect.Translate(BoxMargin*0.5f, BoxMargin*0.5f);
         if (!DoesIntersect(rect, gfx::FRect(0.0f, 0.0f, width, height)))
@@ -187,14 +195,17 @@ void DlgMaterial::MousePress(QMouseEvent* mickey)
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
 
-    const auto num_cols = width / (BoxSize + BoxMargin);
-    const auto xoffset  = (width - ((BoxSize + BoxMargin) * num_cols)) / 2;
-    const auto yoffset  = mScrollOffsetRow * (BoxSize + BoxMargin);
+    const auto BoxWidth = GetBoxWidth(mPreviewScale);
+    const auto BoxHeight = GetBoxHeight(mPreviewScale);
+
+    const auto num_cols = width / (BoxWidth + BoxMargin);
+    const auto xoffset  = (width - ((BoxWidth + BoxMargin) * num_cols)) / 2;
+    const auto yoffset  = mScrollOffsetRow * (BoxHeight + BoxMargin);
 
     const auto widget_xpos = mickey->pos().x();
     const auto widget_ypos = mickey->pos().y();
-    const auto col = (widget_xpos - xoffset) / (BoxSize + BoxMargin);
-    const auto row = (widget_ypos + yoffset) / (BoxSize + BoxMargin);
+    const auto col = (widget_xpos - xoffset) / (BoxWidth + BoxMargin);
+    const auto row = (widget_ypos + yoffset) / (BoxHeight + BoxMargin);
     const auto index = row * num_cols + col;
 
     if (index >= mMaterials.size())

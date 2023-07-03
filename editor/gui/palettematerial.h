@@ -25,7 +25,9 @@
 
 #include <string>
 
+#include "editor/app/types.h"
 #include "editor/gui/utility.h"
+#include "editor/gui/types.h"
 
 namespace app {
     class Workspace;
@@ -40,6 +42,9 @@ namespace gui
     public:
         PaletteMaterial(const app::Workspace* workspace, QWidget* parent);
 
+        void SetMaterialPreviewScale(const Size2Df& scale)
+        { mPreviewScale = scale; }
+
         void SetLabel(const QString& str)
         {
             SetValue(mUI.label, str);
@@ -51,19 +56,13 @@ namespace gui
             SetValue(mUI.cmbMaterial, -1);
             SetEnabled(mUI.btnResetMaterial, false);
         }
-        void SetMaterial(const QString& id)
+        void SetMaterial(const app::AnyString& id)
         {
             SetValue(mUI.cmbMaterial, ListItemId(id))
                 ? SetEnabled(mUI.btnResetMaterial, true)
                 : SetEnabled(mUI.btnResetMaterial, false);
         }
-        void SetMaterial(const std::string& id)
-        {
-            SetValue(mUI.cmbMaterial, ListItemId(id))
-            ? SetEnabled(mUI.btnResetMaterial, true)
-            : SetEnabled(mUI.btnResetMaterial, false);
-        }
-        std::string GetMaterialId() const
+        app::AnyString GetMaterialId() const
         {
             return GetItemId(mUI.cmbMaterial);
         }
@@ -84,5 +83,6 @@ namespace gui
     private:
         const app::Workspace* mWorkspace = nullptr;
         std::size_t mIndex = 0;
+        Size2Df mPreviewScale = {1.0f, 1.0f};
     };
 } // namespace
