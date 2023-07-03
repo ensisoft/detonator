@@ -47,11 +47,11 @@ DlgTextureRect::DlgTextureRect(QWidget* parent, app::Workspace* workspace,
     mUI.widget->onMouseRelease = std::bind(&DlgTextureRect::OnMouseRelease, this, std::placeholders::_1);
     mUI.widget->onZoomOut = [this]() {
         float zoom = GetValue(mUI.zoom);
-        SetValue(mUI.zoom, zoom - 0.1);
+        SetValue(mUI.zoom, zoom - 0.1f);
     };
     mUI.widget->onZoomIn = [this]() {
         float zoom = GetValue(mUI.zoom);
-        SetValue(mUI.zoom, zoom + 0.2);
+        SetValue(mUI.zoom, zoom + 0.1f);
     };
     mUI.widget->onInitScene = [&](unsigned, unsigned) {
         mTimer.setInterval(1000.0/60.0);
@@ -81,6 +81,8 @@ DlgTextureRect::DlgTextureRect(QWidget* parent, app::Workspace* workspace,
     SetValue(mUI.Y, rc.GetY());
     SetValue(mUI.W, rc.GetWidth());
     SetValue(mUI.H, rc.GetHeight());
+
+    SetValue(mUI.zoom, 1.0f);
 
     LoadState();
 }
