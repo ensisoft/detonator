@@ -97,6 +97,36 @@ void DlgMaterial::on_vScroll_valueChanged()
     mScrollOffsetRow = mUI.vScroll->value();
 }
 
+void DlgMaterial::on_filter_textChanged(const QString& text)
+{
+    mScrollOffsetRow = 0;
+    mNumVisibleRows  = 0;
+
+    if (text.isEmpty())
+    {
+        mMaterials = mWorkspace->ListAllMaterials();
+    }
+    else
+    {
+        mMaterials.clear();
+        auto materials = mWorkspace->ListAllMaterials();
+        for (const auto& material : materials)
+        {
+            const QString& name = material.name;
+            if (name.contains(text, Qt::CaseInsensitive))
+                mMaterials.push_back(material);
+        }
+    }
+
+    mFirstPaint = true;
+    for (size_t i=0; i<mMaterials.size(); ++i)
+    {
+        if (mMaterials[i].id == mSelectedMaterialId)
+            return;
+    }
+    mSelectedMaterialId.clear();
+}
+
 void DlgMaterial::PaintScene(gfx::Painter& painter, double secs)
 {
     const auto time_milliseconds = mElapsedTimer.elapsed();

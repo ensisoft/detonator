@@ -56,6 +56,7 @@ namespace gui
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_vScroll_valueChanged();
+        void on_filter_textChanged(const QString&);
     private:
         void PaintScene(gfx::Painter& painter, double secs);
         void MousePress(QMouseEvent* mickey);
