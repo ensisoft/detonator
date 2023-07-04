@@ -233,11 +233,14 @@ namespace gui
         void on_btnSelectFontFile_clicked();
         void on_btnResetTextRasterWidth_clicked();
         void on_btnResetTextRasterHeight_clicked();
+        void on_mnVCenter_valueChanged(double);
+        void on_mnHCenter_valueChanged(double);
         void on_drawableItem_toggled(bool on);
         void on_rigidBodyItem_toggled(bool on);
         void on_textItem_toggled(bool on);
         void on_spatialNode_toggled(bool on);
         void on_fixture_toggled(bool on);
+        void on_mapNode_toggled(bool on);
         void on_animator_toggled(bool on);
         void on_tree_customContextMenuRequested(QPoint);
         void on_scriptVarList_customContextMenuRequested(QPoint);

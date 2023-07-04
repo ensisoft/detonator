@@ -44,6 +44,24 @@ namespace {
 namespace game
 {
 
+size_t MapNodeClass::GetHash() const noexcept
+{
+    size_t hash = 0;
+    hash = base::hash_combine(0, mMapSortPoint);
+    return hash;
+}
+
+void MapNodeClass::IntoJson(data::Writer& data) const
+{
+    data.Write("map_sort_point", mMapSortPoint);
+}
+bool MapNodeClass::FromJson(const data::Reader& data)
+{
+    bool ok = true;
+    ok &= data.Read("map_sort_point", &mMapSortPoint);
+    return ok;
+}
+
 SpatialNodeClass::SpatialNodeClass()
 {
     mFlags.set(Flags::Enabled, true);
@@ -331,23 +349,26 @@ EntityNodeClass::EntityNodeClass(const EntityNodeClass& other)
         mSpatialNode = std::make_shared<SpatialNodeClass>(*other.mSpatialNode);
     if (other.mFixture)
         mFixture = std::make_shared<FixtureClass>(*other.mFixture);
+    if (other.mMapNode)
+        mMapNode = std::make_shared<MapNodeClass>(*other.mMapNode);
 }
 
 EntityNodeClass::EntityNodeClass(EntityNodeClass&& other)
 {
-    mClassId   = std::move(other.mClassId);
-    mName      = std::move(other.mName);
-    mTag       = std::move(other.mTag);
-    mPosition  = std::move(other.mPosition);
-    mScale     = std::move(other.mScale);
-    mSize      = std::move(other.mSize);
-    mRotation  = std::move(other.mRotation);
-    mRigidBody = std::move(other.mRigidBody);
-    mDrawable  = std::move(other.mDrawable);
-    mTextItem  = std::move(other.mTextItem);
-    mBitFlags  = std::move(other.mBitFlags);
+    mClassId     = std::move(other.mClassId);
+    mName        = std::move(other.mName);
+    mTag         = std::move(other.mTag);
+    mPosition    = std::move(other.mPosition);
+    mScale       = std::move(other.mScale);
+    mSize        = std::move(other.mSize);
+    mRotation    = std::move(other.mRotation);
+    mRigidBody   = std::move(other.mRigidBody);
+    mDrawable    = std::move(other.mDrawable);
+    mTextItem    = std::move(other.mTextItem);
+    mBitFlags    = std::move(other.mBitFlags);
     mSpatialNode = std::move(other.mSpatialNode);
-    mFixture = std::move(other.mFixture);
+    mFixture     = std::move(other.mFixture);
+    mMapNode     = std::move(other.mMapNode);
 }
 
 std::size_t EntityNodeClass::GetHash() const
@@ -371,6 +392,8 @@ std::size_t EntityNodeClass::GetHash() const
         hash = base::hash_combine(hash, mSpatialNode->GetHash());
     if (mFixture)
         hash = base::hash_combine(hash, mFixture->GetHash());
+    if (mMapNode)
+        hash = base::hash_combine(hash, mMapNode->GetHash());
     return hash;
 }
 
@@ -399,6 +422,11 @@ void EntityNodeClass::SetFixture(const FixtureClass& fixture)
     mFixture = std::make_shared<FixtureClass>(fixture);
 }
 
+void EntityNodeClass::SetMapNode(const MapNodeClass& map)
+{
+    mMapNode = std::make_shared<MapNodeClass>(map);
+}
+
 void EntityNodeClass::CreateRigidBody()
 {
     mRigidBody = std::make_shared<RigidBodyItemClass>();
@@ -422,6 +450,11 @@ void EntityNodeClass::CreateSpatialNode()
 void EntityNodeClass::CreateFixture()
 {
     mFixture = std::make_shared<FixtureClass>();
+}
+
+void EntityNodeClass::CreateMapNode()
+{
+    mMapNode = std::make_shared<MapNodeClass>();
 }
 
 glm::mat4 EntityNodeClass::GetNodeTransform() const
@@ -486,6 +519,12 @@ void EntityNodeClass::IntoJson(data::Writer& data) const
         mFixture->IntoJson(*chunk);
         data.Write("fixture", std::move(chunk));
     }
+    if (mMapNode)
+    {
+        auto chunk = data.NewWriteChunk();
+        mMapNode->IntoJson(*chunk);
+        data.Write("map_node", std::move(chunk));
+    }
 }
 
 template<typename T>
@@ -519,6 +558,7 @@ bool EntityNodeClass::FromJson(const data::Reader& data)
     ok &= ComponentClassFromJson(mName, "text_item",     data, mTextItem);
     ok &= ComponentClassFromJson(mName, "spatial_node",  data, mSpatialNode);
     ok &= ComponentClassFromJson(mName, "fixture",       data, mFixture);
+    ok &= ComponentClassFromJson(mName, "map_node",      data, mMapNode);
     return ok;
 }
 
@@ -546,6 +586,7 @@ EntityNodeClass& EntityNodeClass::operator=(const EntityNodeClass& other)
     mTextItem    = std::move(tmp.mTextItem);
     mSpatialNode = std::move(tmp.mSpatialNode);
     mFixture     = std::move(tmp.mFixture);
+    mMapNode     = std::move(tmp.mMapNode);
     mBitFlags    = std::move(tmp.mBitFlags);
     return *this;
 }
@@ -569,6 +610,8 @@ EntityNode::EntityNode(std::shared_ptr<const EntityNodeClass> klass)
         mSpatialNode = std::make_unique<SpatialNode>(mClass->GetSharedSpatialNode());
     if (mClass->HasFixture())
         mFixture = std::make_unique<Fixture>(mClass->GetSharedFixture());
+    if (mClass->HasMapNode())
+        mMapNode = std::make_unique<MapNode>(mClass->GetSharedMapNode());
 }
 
 EntityNode::EntityNode(const EntityNode& other)
@@ -590,6 +633,8 @@ EntityNode::EntityNode(const EntityNode& other)
         mSpatialNode = std::make_unique<SpatialNode>(*other.GetSpatialNode());
     if (other->HasFixture())
         mFixture = std::make_unique<Fixture>(*other.GetFixture());
+    if (other->HasMapNode())
+        mMapNode = std::make_unique<MapNode>(*other.GetMapNode());
 }
 
 EntityNode::EntityNode(EntityNode&& other)
@@ -606,6 +651,7 @@ EntityNode::EntityNode(EntityNode&& other)
     mTextItem    = std::move(other.mTextItem);
     mSpatialNode = std::move(other.mSpatialNode);
     mFixture     = std::move(other.mFixture);
+    mMapNode     = std::move(other.mMapNode);
 }
 
 EntityNode::EntityNode(const EntityNodeClass& klass)
@@ -624,6 +670,9 @@ TextItem* EntityNode::GetTextItem()
 Fixture* EntityNode::GetFixture()
 { return mFixture.get(); }
 
+MapNode* EntityNode::GetMapNode()
+{ return mMapNode.get(); }
+
 const DrawableItem* EntityNode::GetDrawable() const
 { return mDrawable.get(); }
 
@@ -638,6 +687,9 @@ const SpatialNode* EntityNode::GetSpatialNode() const
 
 const Fixture* EntityNode::GetFixture() const
 { return mFixture.get(); }
+
+const MapNode* EntityNode::GetMapNode() const
+{ return mMapNode.get(); }
 
 void EntityNode::Reset()
 {
@@ -655,6 +707,8 @@ void EntityNode::Reset()
         mSpatialNode = std::make_unique<SpatialNode>(mClass->GetSharedSpatialNode());
     if (mClass->HasFixture())
         mFixture = std::make_unique<Fixture>(mClass->GetSharedFixture());
+    if (mClass->HasMapNode())
+        mMapNode = std::make_unique<MapNode>(mClass->GetSharedMapNode());
 }
 
 glm::mat4 EntityNode::GetNodeTransform() const

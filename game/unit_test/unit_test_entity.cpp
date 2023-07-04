@@ -116,6 +116,9 @@ void unit_test_entity_node()
     fix.SetPolygonShapeId("123232ddd");
     fix.SetRigidBodyNodeId("81288");
 
+    game::MapNodeClass map;
+    map.SetMapSortPoint(glm::vec2{2.0f, 3.0f});
+
     game::EntityNodeClass node;
     node.SetName("root");
     node.SetTag("#tag");
@@ -128,12 +131,14 @@ void unit_test_entity_node()
     node.SetTextItem(text);
     node.SetSpatialNode(spatial);
     node.SetFixture(fix);
+    node.SetMapNode(map);
 
     TEST_REQUIRE(node.HasDrawable());
     TEST_REQUIRE(node.HasRigidBody());
     TEST_REQUIRE(node.HasTextItem());
     TEST_REQUIRE(node.HasSpatialNode());
     TEST_REQUIRE(node.HasFixture());
+    TEST_REQUIRE(node.HasMapNode());
     TEST_REQUIRE(node.GetName()         == "root");
     TEST_REQUIRE(node.GetSize()         == glm::vec2(100.0f, 100.0f));
     TEST_REQUIRE(node.GetTranslation()  == glm::vec2(150.0f, -150.0f));
@@ -172,6 +177,7 @@ void unit_test_entity_node()
     TEST_REQUIRE(*node.GetFixture()->GetRestitution() == real::float32(4.0f));
     TEST_REQUIRE(node.GetFixture()->GetPolygonShapeId() == "123232ddd");
     TEST_REQUIRE(node.GetFixture()->GetRigidBodyNodeId() == "81288");
+    TEST_REQUIRE(node.GetMapNode()->GetSortPoint() == glm::vec2(2.0f, 3.0f));
 
     // to/from json
     {
@@ -183,6 +189,7 @@ void unit_test_entity_node()
         TEST_REQUIRE(ret.HasRigidBody());
         TEST_REQUIRE(ret.HasTextItem());
         TEST_REQUIRE(ret.HasSpatialNode());
+        TEST_REQUIRE(ret.HasMapNode());
         TEST_REQUIRE(ret.GetName()         == "root");
         TEST_REQUIRE(ret.GetSize()         == glm::vec2(100.0f, 100.0f));
         TEST_REQUIRE(ret.GetTranslation()  == glm::vec2(150.0f, -150.0f));
@@ -216,6 +223,7 @@ void unit_test_entity_node()
         TEST_REQUIRE(*ret.GetFixture()->GetRestitution() == real::float32(4.0f));
         TEST_REQUIRE(ret.GetFixture()->GetPolygonShapeId() == "123232ddd");
         TEST_REQUIRE(ret.GetFixture()->GetRigidBodyNodeId() == "81288");
+        TEST_REQUIRE(ret.GetMapNode()->GetSortPoint() == glm::vec2(2.0f, 3.0f));
         TEST_REQUIRE(ret.GetHash() == node.GetHash());
     }
 
@@ -282,6 +290,7 @@ void unit_test_entity_node()
         TEST_REQUIRE(instance->GetSpatialNode()->TestFlag(game::SpatialNodeClass::Flags::ReportOverlap));
         TEST_REQUIRE(instance->GetSpatialNode()->GetShape() == game::SpatialNodeClass::Shape::AABB);
         TEST_REQUIRE(instance->GetFixture()->GetCollisionShape() == game::FixtureClass::CollisionShape::Circle);
+        TEST_REQUIRE(instance->GetMapNode()->GetSortPoint() == glm::vec2(2.0f, 3.0f));
 
         instance.SetName("foobar");
         instance.SetSize(glm::vec2(200.0f, 200.0f));
