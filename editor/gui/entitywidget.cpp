@@ -2464,6 +2464,15 @@ void EntityWidget::on_btnResetTextRasterHeight_clicked()
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_mnVCenter_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_mnHCenter_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_drawableItem_toggled(bool on)
 {
     if (auto* node = GetCurrentNode())
@@ -2636,6 +2645,25 @@ void EntityWidget::on_fixture_toggled(bool on)
         {
             node->RemoveFixture();
             DEBUG("Removed fixture from '%1'.", node->GetName());
+        }
+    }
+    DisplayCurrentNodeProperties();
+}
+
+void EntityWidget::on_mapNode_toggled(bool on)
+{
+    if(auto* node = GetCurrentNode())
+    {
+        if (on && !node->HasMapNode())
+        {
+            game::MapNodeClass map;
+
+            node->SetMapNode(map);
+            DEBUG("Added map node to '%1'", node->GetName());
+        }
+        else if (!on && node->HasMapNode())
+        {
+            node->RemoveMapNode();
         }
     }
     DisplayCurrentNodeProperties();
@@ -2878,6 +2906,25 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
                 const auto& size = node->GetSize();
                 const auto& pos = mState.entity->MapCoordsFromNodeBox(size, node);
                 ShowMessage(app::ToUtf8(comment), gfx::FPoint(pos.x + 10, pos.y + 10), painter);
+            }
+        }
+    }
+
+    if (const auto* node = GetCurrentNode())
+    {
+        if (const auto* map = node->GetMapNode())
+        {
+            const auto has_focus = mUI.mnVCenter->hasFocus() || mUI.mnHCenter->hasFocus();
+            if (has_focus)
+            {
+                const auto& center = map->GetSortPoint();
+                const auto& size = node->GetSize();
+                const auto& pos = mState.entity->MapCoordsFromNodeBox(size * center, node);
+                gfx::Transform model;
+                model.MoveTo(pos);
+                model.Resize(10.0f, 10.0f);
+                model.Translate(-5.0f, -5.0f);
+                painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
             }
         }
     }
@@ -3241,6 +3288,9 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.fxBounciness, mUI.fxBounciness->minimum());
     SetValue(mUI.fxDensity, mUI.fxDensity->minimum());
     SetValue(mUI.fxIsSensor, false);
+    SetValue(mUI.mapNode, false);
+    SetValue(mUI.mnHCenter, 0.5f);
+    SetValue(mUI.mnVCenter, 1.0f);
     SetEnabled(mUI.nodeProperties, false);
     SetEnabled(mUI.nodeTransform, false);
     SetEnabled(mUI.nodeItems, false);
@@ -3267,6 +3317,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
         SetValue(mUI.nodeRotation, qRadiansToDegrees(node->GetRotation()));
         if (const auto* ptr = base::SafeFind(mComments, node->GetId()))
             SetValue(mUI.nodeComment, *ptr);
+
         if (const auto* item = node->GetDrawable())
         {
             SetValue(mUI.drawableItem, true);
@@ -3368,6 +3419,14 @@ void EntityWidget::DisplayCurrentNodeProperties()
                 SetValue(mUI.fxDensity, *val);
 
             SetValue(mUI.fxIsSensor, fixture->TestFlag(game::FixtureClass::Flags::Sensor));
+        }
+        if (const auto* map = node->GetMapNode())
+        {
+            const auto& center = map->GetSortPoint();
+
+            SetValue(mUI.mapNode, true);
+            SetValue(mUI.mnVCenter, center.y);
+            SetValue(mUI.mnHCenter, center.x);
         }
     }
 }
@@ -3520,6 +3579,14 @@ void EntityWidget::UpdateCurrentNodeProperties()
     {
         sp->SetShape(GetValue(mUI.spnShape));
         sp->SetFlag(game::SpatialNodeClass::Flags::Enabled, GetValue(mUI.spnEnabled));
+    }
+
+    if (auto* map = node->GetMapNode())
+    {
+        glm::vec2 center;
+        center.x = GetValue(mUI.mnHCenter);
+        center.y = GetValue(mUI.mnVCenter);
+        map->SetMapSortPoint(center);
     }
 
     RealizeEntityChange(mState.entity);

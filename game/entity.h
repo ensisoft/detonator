@@ -76,6 +76,23 @@ namespace game
         };
     } // namespace
 
+    class MapNodeClass
+    {
+    public:
+        inline void SetMapSortPoint(glm::vec2 point) noexcept
+        { mMapSortPoint = point; }
+        inline glm::vec2 GetSortPoint() const noexcept
+        { return mMapSortPoint; }
+
+        std::size_t GetHash() const noexcept;
+
+        void IntoJson(data::Writer& data) const;
+
+        bool FromJson(const data::Reader& data);
+    private:
+        glm::vec2 mMapSortPoint = {0.5f, 1.0f};
+    };
+
     class SpatialNodeClass
     {
     public:
@@ -571,6 +588,22 @@ namespace game
     };
 
 
+    class MapNode
+    {
+    public:
+        MapNode(std::shared_ptr<const MapNodeClass> klass)
+          : mClass(klass)
+        {}
+        inline glm::vec2 GetSortPoint() const noexcept
+        { return mClass->GetSortPoint(); }
+        inline const MapNodeClass& GetClass() const noexcept
+        { return *mClass; }
+        inline const MapNodeClass* operator ->() const noexcept
+        { return mClass.get(); }
+    private:
+        std::shared_ptr<const MapNodeClass> mClass;
+    };
+
     class DrawableItem
     {
     public:
@@ -984,10 +1017,10 @@ namespace game
         float GetRotation() const noexcept
         { return mRotation; }
         // Set the human-readable node name.
-        void SetName(std::string name)
+        void SetName(std::string name) noexcept
         { mName = std::move(name); }
         // Set the entity node tag string.
-        void SetTag(std::string tag)
+        void SetTag(std::string tag) noexcept
         { mTag = std::move(tag); }
         // Set the node's scale. The scale applies to all
         // the subsequent hierarchy, i.e. all the nodes that
@@ -1028,6 +1061,8 @@ namespace game
         void SetSpatialNode(const SpatialNodeClass& node);
         // Attach a rigid body fixture to this node class.
         void SetFixture(const FixtureClass& fixture);
+        // Attach a tilemap node to this node class.
+        void SetMapNode(const MapNodeClass& map);
         // Create and attach a rigid body with default settings.
         void CreateRigidBody();
         // Create and attach a drawable with default settings.
@@ -1038,6 +1073,8 @@ namespace game
         void CreateSpatialNode();
         // Create and attach a fixture with default settings.
         void CreateFixture();
+        // Create and attach a map node with default settings.
+        void CreateMapNode();
 
         void RemoveDrawable() noexcept
         { mDrawable.reset(); }
@@ -1049,6 +1086,8 @@ namespace game
         { mSpatialNode.reset(); }
         void RemoveFixture() noexcept
         { mFixture.reset(); }
+        void RemoveMapNode() noexcept
+        { mMapNode.reset(); }
 
         // Get the rigid body shared class object if any.
         std::shared_ptr<const RigidBodyItemClass> GetSharedRigidBody() const noexcept
@@ -1065,6 +1104,9 @@ namespace game
         // Get the fixture class if any
         std::shared_ptr<const FixtureClass> GetSharedFixture() const noexcept
         { return mFixture; }
+        // Get the map node class if any.
+        std::shared_ptr<const MapNodeClass> GetSharedMapNode() const noexcept
+        { return mMapNode; }
 
         // Returns true if a rigid body has been set for this class.
         bool HasRigidBody() const noexcept
@@ -1078,6 +1120,8 @@ namespace game
         { return !!mSpatialNode; }
         bool HasFixture() const noexcept
         { return !!mFixture; }
+        bool HasMapNode() const noexcept
+        { return !!mMapNode; }
 
         // Get the rigid body object if any. If no rigid body class object
         // has been set then returns nullptr.
@@ -1099,6 +1143,8 @@ namespace game
         // then returns nullptr.
         FixtureClass* GetFixture() noexcept
         { return mFixture.get(); }
+        MapNodeClass* GetMapNode() noexcept
+        { return mMapNode.get(); }
         // Get the rigid body object if any. If no rigid body class object
         // has been set then returns nullptr.
         const RigidBodyItemClass* GetRigidBody() const noexcept
@@ -1119,6 +1165,9 @@ namespace game
         // then returns nullptr.
         const FixtureClass* GetFixture() const noexcept
         { return mFixture.get(); }
+
+        const MapNodeClass* GetMapNode() const noexcept
+        { return mMapNode.get(); }
 
         // Get the transform that applies to this node
         // and the subsequent hierarchy of nodes.
@@ -1167,6 +1216,8 @@ namespace game
         std::shared_ptr<SpatialNodeClass> mSpatialNode;
         // fixture if any.
         std::shared_ptr<FixtureClass> mFixture;
+
+        std::shared_ptr<MapNodeClass> mMapNode;
         // bitflags that apply to node.
         base::bitflag<Flags> mBitFlags;
     };
@@ -1247,6 +1298,9 @@ namespace game
         // Get the node's fixture if any. If no fixture is et
         // then returns nullptr.
         Fixture* GetFixture();
+
+        MapNode* GetMapNode();
+
         // Get the node's drawable item if any. If now drawable
         // item is set then returns nullptr.
         const DrawableItem* GetDrawable() const;
@@ -1263,6 +1317,8 @@ namespace game
         // then returns nullptr.
         const Fixture* GetFixture() const;
 
+        const MapNode* GetMapNode() const;
+
         bool HasRigidBody() const noexcept
         { return !!mRigidBody; }
         bool HasDrawable() const noexcept
@@ -1273,6 +1329,8 @@ namespace game
         { return !!mSpatialNode; }
         bool HasFixture() const noexcept
         { return !!mFixture; }
+        bool HasMapNode() const noexcept
+        { return !!mMapNode; }
 
         // shortcut for class getters.
         const std::string& GetClassId() const noexcept
@@ -1325,6 +1383,8 @@ namespace game
         std::unique_ptr<SpatialNode> mSpatialNode;
         // fixture if any
         std::unique_ptr<Fixture> mFixture;
+        // map node if any.
+        std::unique_ptr<MapNode> mMapNode;
         // The entity that owns this node.
         Entity* mEntity = nullptr;
     };
