@@ -272,13 +272,13 @@ public:
             camera.position = glm::vec2{game_view.GetX(), game_view.GetY()};
             mRenderer.SetCamera(camera);
 
-
             if (mFlags.test(Flags::EditingMode))
             {
                 ConfigureRendererForScene();
             }
+
             TRACE_CALL("Renderer::BeginFrame", mRenderer.BeginFrame());
-            TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mPainter, &cull));
+            TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mPainter, &cull, mTilemap.get()));
             TRACE_CALL("Renderer::EndFrame", mRenderer.EndFrame());
             TRACE_CALL("DebugDraw", DrawDebugObjects());
         }
@@ -913,6 +913,7 @@ private:
             {
                 mTilemap = game::CreateTilemap(map);              
                 mTilemap->Load(*mGameLoader, 1024); // todo:
+                DEBUG("Created tilemap instance");
             }
         }
 
