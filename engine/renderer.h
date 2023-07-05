@@ -240,7 +240,8 @@ namespace engine
                                  EntityDrawHook<EntityNodeType>* hook);
 
         void OffsetPacketLayers(std::vector<DrawPacket>& packets) const;
-        void DrawPackets(gfx::Painter& painter, const std::vector<DrawPacket>& packets) const;
+        void DrawScenePackets(gfx::Painter& painter, const std::vector<DrawPacket>& packets) const;
+        void DrawEditorPackets(gfx::Painter& painter, const std::vector<DrawPacket>& packets) const;
 
         struct TileBatch;
 

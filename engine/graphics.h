@@ -37,6 +37,10 @@ namespace engine
         enum class Flags {
             PP_Bloom
         };
+        enum class Domain {
+            Scene, Editor
+        };
+        Domain domain = Domain::Scene;
         // flags to control the rendering etc.
         base::bitflag<Flags> flags;
         // shortcut to the node's material.

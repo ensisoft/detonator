@@ -175,6 +175,7 @@ void Renderer::Draw(gfx::Painter& painter, EntityInstanceDrawHook* hook, const g
             else BUG("unknown projection");
 
             DrawPacket packet;
+            packet.domain       = DrawPacket::Domain::Scene;
             packet.material     = batch.material;
             packet.drawable     = std::move(tiles);
             packet.transform    = from_map_to_scene;
@@ -217,7 +218,7 @@ void Renderer::Draw(gfx::Painter& painter, EntityInstanceDrawHook* hook, const g
         OffsetPacketLayers(packets);
     }
 
-    DrawPackets(painter, packets);
+    DrawScenePackets(painter, packets);
 }
 
 void Renderer::Draw(const Entity& entity,
@@ -633,6 +634,7 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
                 else BUG("unknown projection");
 
                 DrawPacket packet;
+                packet.domain       = DrawPacket::Domain::Scene;
                 packet.material     = batch.material;
                 packet.drawable     = std::move(tiles);
                 packet.transform    = from_map_to_scene;
@@ -742,7 +744,8 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
         OffsetPacketLayers(packets);
     }
 
-    DrawPackets(scene_painter, packets);
+    DrawScenePackets(scene_painter, packets);
+    DrawEditorPackets(scene_painter, packets);
 }
 
 template<typename EntityType, typename NodeType>
@@ -826,7 +829,9 @@ void Renderer::DrawEntity(const EntityType& entity,
     }
 
     OffsetPacketLayers(packets);
-    DrawPackets(painter, packets);
+
+    DrawScenePackets(painter, packets);
+    DrawEditorPackets(painter, packets);
 }
 
 template<typename EntityType, typename EntityNodeType>
@@ -997,6 +1002,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
         {
             DrawPacket packet;
             packet.flags.set(DrawPacket::Flags::PP_Bloom, text->TestFlag(TextItemClass::Flags::PP_EnableBloom));
+            packet.domain       = DrawPacket::Domain::Scene;
             packet.drawable     = paint_node.text_drawable;
             packet.material     = paint_node.text_material;
             packet.transform    = transform;
@@ -1028,6 +1034,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
         {
             DrawPacket packet;
             packet.flags.set(DrawPacket::Flags::PP_Bloom, item->TestFlag(DrawableItemType::Flags::PP_EnableBloom));
+            packet.domain       = DrawPacket::Domain::Scene;
             packet.material     = paint_node.item_material;
             packet.drawable     = paint_node.item_drawable;
             packet.transform    = transform;
@@ -1074,7 +1081,16 @@ void Renderer::OffsetPacketLayers(std::vector<DrawPacket>& packets) const
     }
 }
 
-void Renderer::DrawPackets(gfx::Painter& painter, const std::vector<DrawPacket>& packets) const
+void Renderer::DrawEditorPackets(gfx::Painter& painter, const std::vector<DrawPacket>& packets) const
+{
+    for (const auto& packet : packets)
+    {
+        if (packet.domain == DrawPacket::Domain::Editor)
+            painter.Draw(*packet.drawable, packet.transform, *packet.material);
+    }
+}
+
+void Renderer::DrawScenePackets(gfx::Painter& painter, const std::vector<DrawPacket>& packets) const
 {
     // Each entity in the scene is assigned to a scene/entity layer and each
     // entity node within an entity is assigned to an entity layer.
@@ -1082,9 +1098,11 @@ void Renderer::DrawPackets(gfx::Painter& painter, const std::vector<DrawPacket>&
     // render packet must be considered!
     std::vector<std::vector<RenderLayer>> layers;
 
-    for (auto& packet : packets)
+    for (const auto& packet : packets)
     {
         if (!packet.material || !packet.drawable)
+            continue;
+        if (packet.domain != DrawPacket::Domain::Scene)
             continue;
 
         const auto render_layer_index = packet.render_layer;
