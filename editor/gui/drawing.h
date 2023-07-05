@@ -45,9 +45,9 @@ void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans);
 void DrawSelectionBox(gfx::Painter& painter, gfx::Transform& trans, const gfx::FRect& rect);
 void DrawInvisibleItemBox(gfx::Painter& painter, gfx::Transform& trans, const gfx::FRect& rect);
 
-void DrawBasisVectors(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, int layer);
-void DrawSelectionBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect, int layer);
-void DrawInvisibleItemBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect, int layer);
+void DrawBasisVectors(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets);
+void DrawSelectionBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect);
+void DrawInvisibleItemBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect);
 
 enum class GridDensity {
     Grid10x10   = 10,
@@ -188,13 +188,13 @@ public:
 
         if (&placement == mSelectedSceneNode)
         {
-            DrawSelectionBox(model, packets, bounds, placement.GetLayer() + 1);
+            DrawSelectionBox(model, packets, bounds);
             if (mDrawVectors)
-                DrawBasisVectors(model, packets, placement.GetLayer() + 1);
+                DrawBasisVectors(model, packets);
         }
         else if (!placement.TestFlag(game::EntityPlacement::Flags::VisibleInGame))
         {
-            DrawInvisibleItemBox(model, packets, bounds, placement.GetLayer() + 1);
+            DrawInvisibleItemBox(model, packets, bounds);
         }
 
         model.Pop();
@@ -231,15 +231,15 @@ private:
         // then add a visualization for it.
         if ((!is_visible_game && !is_selected && !is_playing) && is_visible_editor)
         {
-            DrawInvisibleItemBox(trans, packets, rect, node->GetLayer() + 1);
+            DrawInvisibleItemBox(trans, packets, rect);
         }
 
         if (!is_selected)
             return;
 
-        DrawSelectionBox(trans, packets, rect, node->GetLayer() + 1);
+        DrawSelectionBox(trans, packets, rect);
         if (mDrawVectors)
-            DrawBasisVectors(trans, packets, node->GetLayer() + 1);
+            DrawBasisVectors(trans, packets);
     }
 
     inline bool IsSelected(const game::EntityNodeClass* node) const

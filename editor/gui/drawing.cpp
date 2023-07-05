@@ -126,7 +126,7 @@ void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans)
     trans.Pop();
 }
 
-void DrawBasisVectors(gfx::Transform& view, std::vector<engine::DrawPacket>& packets, int layer)
+void DrawBasisVectors(gfx::Transform& model, std::vector<engine::DrawPacket>& packets)
 {
     static auto green = std::make_shared<gfx::MaterialClassInst>(
             gfx::CreateMaterialClassFromColor(gfx::Color::Green));
@@ -135,39 +135,41 @@ void DrawBasisVectors(gfx::Transform& view, std::vector<engine::DrawPacket>& pac
     static auto arrow = std::make_shared<gfx::Arrow>();
 
     // draw the X vector
-    view.Push();
-        view.Scale(100.0f, 5.0f);
-        view.Translate(0.0f, -2.5f);
-        engine::DrawPacket x;
-        x.transform = view.GetAsMatrix();
-        x.material  = green;
-        x.drawable  = arrow;
-        x.packet_index = layer;
-        packets.push_back(std::move(x));
-    view.Pop();
+    {
+        model.Push();
+            model.Scale(100.0f, 5.0f);
+            model.Translate(0.0f, -2.5f);
+            engine::DrawPacket packet;
+            packet.domain       = engine::DrawPacket::Domain::Editor;
+            packet.transform    = model;
+            packet.material     = green;
+            packet.drawable     = arrow;
+            packet.render_layer = 0;
+            packet.packet_index = 0;
+            packets.push_back(std::move(packet));
+        model.Pop();
+    }
 
     // draw the Y vector
-    view.Push();
-        view.Scale(100.0f, 5.0f);
-        view.Translate(-50.0f, -2.5f);
-        view.RotateAroundZ(math::Pi * 0.5f);
-        view.Translate(0.0f, 50.0f);
-        engine::DrawPacket y;
-        y.transform = view.GetAsMatrix();
-        y.material  = red;
-        y.drawable  = arrow;
-        y.packet_index = layer;
-        packets.push_back(std::move(y));
-    view.Pop();
-
-    view.Push();
-        view.Scale(2.5f, 2.5f);
-        view.Translate(-1.25f, -1.25f);
-        //painter.Draw(gfx::RoundRectangle(), view, gfx::CreateMaterialFromColor(gfx::Color::Yellow));
-    view.Pop();
+    {
+        model.Push();
+            model.Scale(100.0f, 5.0f);
+            model.Translate(-50.0f, -2.5f);
+            model.RotateAroundZ(math::Pi * 0.5f);
+            model.Translate(0.0f, 50.0f);
+            engine::DrawPacket packet;
+            packet.domain = engine::DrawPacket::Domain::Editor;
+            packet.transform    = model;
+            packet.material     = red;
+            packet.drawable     = arrow;
+            packet.render_layer = 0;
+            packet.packet_index = 0;
+            packets.push_back(std::move(packet));
+        model.Pop();
+    }
 }
 
-void DrawSelectionBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect, int layer)
+void DrawSelectionBox(gfx::Transform& model, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect)
 {
     static const auto green  = std::make_shared<gfx::MaterialClassInst>(
             gfx::CreateMaterialClassFromColor(gfx::Color::Green));
@@ -177,22 +179,23 @@ void DrawSelectionBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& pa
     const auto width  = rect.GetWidth();
     const auto height = rect.GetHeight();
 
-    trans.Push();
-        trans.Scale(width, height);
-        trans.Translate(-width*0.5f, -height*0.5f);
+    model.Push();
+        model.Scale(width, height);
+        model.Translate(-width*0.5f, -height*0.5f);
         engine::DrawPacket selection;
-        selection.transform = trans.GetAsMatrix();
-        selection.material  = green;
-        selection.drawable  = outline;
-        selection.packet_index = layer;
+        selection.domain       = engine::DrawPacket::Domain::Editor;
+        selection.transform    = model;
+        selection.material     = green;
+        selection.drawable     = outline;
+        selection.render_layer = 0;
+        selection.packet_index = 0;
         packets.push_back(selection);
-    trans.Pop();
-
+    model.Pop();
 
     // decompose the matrix in order to get the combined scaling component
     // so that we can use the inverse scale to keep the resize and rotation
     // indicators always with same size.
-    const auto& mat = trans.GetAsMatrix();
+    const glm::mat4 mat = model;
     glm::vec3 scale;
     glm::vec3 translation;
     glm::vec3 skew;
@@ -201,31 +204,35 @@ void DrawSelectionBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& pa
     glm::decompose(mat, scale, orientation, translation, skew,  perspective);
 
     // draw the resize indicator. (lower right corner box)
-    trans.Push();
-        trans.Scale(10.0f/scale.x, 10.0f/scale.y);
-        trans.Translate(width*0.5f-10.0f/scale.x, height*0.5f-10.0f/scale.y);
+    model.Push();
+        model.Scale(10.0f/scale.x, 10.0f/scale.y);
+        model.Translate(width*0.5f-10.0f/scale.x, height*0.5f-10.0f/scale.y);
         engine::DrawPacket sizing_box;
-        sizing_box.transform = trans.GetAsMatrix();
-        sizing_box.material  = green;
-        sizing_box.drawable  = outline;
-        sizing_box.packet_index = layer;
+        sizing_box.domain       = engine::DrawPacket::Domain::Editor;
+        sizing_box.transform    = model;
+        sizing_box.material     = green;
+        sizing_box.drawable     = outline;
+        sizing_box.render_layer = 0;
+        sizing_box.packet_index = 0;
         packets.push_back(sizing_box);
-    trans.Pop();
+    model.Pop();
 
     // draw the rotation indicator. (upper left corner circle)
-    trans.Push();
-        trans.Scale(10.0f/scale.x, 10.0f/scale.y);
-        trans.Translate(-width*0.5f, -height*0.5f);
+    model.Push();
+        model.Scale(10.0f/scale.x, 10.0f/scale.y);
+        model.Translate(-width*0.5f, -height*0.5f);
         engine::DrawPacket rotation_circle;
-        rotation_circle.transform = trans.GetAsMatrix();
-        rotation_circle.material  = green;
-        rotation_circle.drawable  = circle;
-        rotation_circle.packet_index = layer;
+        rotation_circle.domain       = engine::DrawPacket::Domain::Editor;
+        rotation_circle.transform    = model;
+        rotation_circle.material     = green;
+        rotation_circle.drawable     = circle;
+        rotation_circle.render_layer = 0;
+        rotation_circle.packet_index = 0;
         packets.push_back(rotation_circle);
-    trans.Pop();
+    model.Pop();
 }
 
-void DrawInvisibleItemBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect, int layer)
+void DrawInvisibleItemBox(gfx::Transform& model, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect)
 {
     static const auto yellow = std::make_shared<gfx::MaterialClassInst>(
             gfx::CreateMaterialClassFromColor(gfx::Color::DarkYellow));
@@ -234,17 +241,18 @@ void DrawInvisibleItemBox(gfx::Transform& trans, std::vector<engine::DrawPacket>
     const auto width  = rect.GetWidth();
     const auto height = rect.GetHeight();
 
-    trans.Push();
-        trans.Scale(rect.GetSize());
-        trans.Translate(-width*0.5, -height*0.5);
+    model.Push();
+        model.Scale(rect.GetSize());
+        model.Translate(-width*0.5, -height*0.5);
         engine::DrawPacket box;
-        box.transform         = trans.GetAsMatrix();
+        box.domain            = engine::DrawPacket::Domain::Editor;
+        box.transform         = model;
         box.material          = yellow;
         box.drawable          = shape;
-        box.render_layer  = 0;
-        box.packet_index = layer;
+        box.render_layer      = 0;
+        box.packet_index      = 0;
         packets.push_back(box);
-    trans.Pop();
+    model.Pop();
 }
 
 void SetGridColor(const gfx::Color4f& color)
