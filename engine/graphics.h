@@ -50,8 +50,18 @@ namespace engine
         // there's no clamping so negative values and range beyond 0.0f - 1.0f
         // is allowed.
         glm::vec2 sort_point = {0.5f, 1.0f};
-        std::int32_t entity_layer = 0;
-        std::int32_t scene_layer = 0;
+
+        // render_layer and packet index together define the order of packets
+        // when sorting for rendering.
+        // render_layer is the 1st order sorting key followed by packet_index.
+        // in other words
+        // 0. = render_layer=0, packet_index=0,
+        // 1. = render_layer=0, packet_index=1
+        // 2. = render_layer=1, packet_index=0
+        // etc.
+        std::int32_t render_layer = 0;
+        // packet index wthhin the render layer.
+        std::int32_t packet_index = 0;
 
         // these values are only used / valid when the packet has been
         // created in conjunction with tilemap.
