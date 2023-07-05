@@ -21,6 +21,48 @@
 #include "base/assert.h"
 #include "engine/camera.h"
 
+//
+// TODO: Maybe get rid of that ugly rotation on dimetric projection in the view matrix creation
+//       -> Instead rotating the world, work out the camera rotation around different axis for having
+//          the same angle/perspective but on a different plane instead of the XY plane. OTOH, all
+//          the current drawing functionality is on the XY plane so then there'd still have to be
+//          some transformation for mapping the draws onto some other plane.
+//
+// TODO: See if the same orthographic perspective matrix could be used in both cases.
+
+// TODO: Solve the depth problem with dimetric projection. Currently the way the camera moves
+//       the fact that the camera and the plane are not perpendicular the plane will at some
+//       point clip the near/far planes.
+//       -> Find a transformation that would translate objects based on the current camera distance
+//          to the plane to in order to keep a constant distance. This means that objects within
+//          the current viewing volume would then fit inside the near/far planes
+//       -> or maybe map the draw vertices from dimetric space to orthographic space and then draw
+//          with orthographic (axis aligned) perspective. (Would require changes everywhere where a
+//          a tile painter is used!)
+
+// TODO: Solve the issue (is this still an issue?) regarding finding some position on the plane.
+//       Similar problem to the view clipping, the relative camera/plane position (angle of the plane
+//       relative to the camera) means that the plane will clip the camera's position at some point
+//       and then the intersection point will be at a negative distance. Current fix here right now
+//       is to use a custom version of the IntersectRayPlane.
+//       Either find a different algorithm to do this or maybe fix the camera clipping issue
+//       (regarding near/far clipping planes) by keeping the camera - plane distance constant.
+//
+
+namespace {
+    // this is based on GLM. removed the check on positive vector distance
+    float IntersectRayPlane(const glm::vec4& orig, const glm::vec4& dir,
+                            const glm::vec4& planeOrig, const glm::vec4& planeNormal)
+    {
+        const float angle = glm::dot(dir, planeNormal);
+
+        // check for collinear vectors
+        ASSERT(glm::abs(angle) > std::numeric_limits<float>::epsilon());
+
+        return glm::dot(planeOrig - orig, planeNormal) / angle;
+    }
+}
+
 namespace engine
 {
 
@@ -170,15 +212,23 @@ std::vector<glm::vec4> WindowToWorldPlane(const glm::mat4& view_to_clip,
         // i.e. the ray is collinear with the -z vector
         constexpr const auto ray_direction = glm::vec4{0.0f, 0.0f, -1.0f, 0.0f};
 
-        float intersection_distance = 0.0f;
-        ASSERT(glm::intersectRayPlane(ray_origin,
-                                      ray_direction,
-                                      plane_origin_view,
-                                      plane_normal_view,
-                                      intersection_distance));
+        // !! if the camera isn't perpendicular to the plane
+        // at some point when the camera moves far enough the plane
+        // will clip the camera's view position and at that point the
+        // plane ray intersection point is actually *behind* the camera
+        // i.e with negative distance.
+        //
+        // Todo: maybe this needs some better solution? For now we're
+        // going to use a custom version of the ray plane intersection
+        // with the relevant check disabled so the distance value can
+        // be negative also.
+
+        const auto intersection_distance = IntersectRayPlane(ray_origin,
+                                                             ray_direction,
+                                                             plane_origin_view,
+                                                             plane_normal_view);
 
         const auto& view_to_world = glm::inverse(world_to_view);
-
         const auto& intersection_point_view = ray_origin + ray_direction * intersection_distance;
         const auto& intersection_point_world = view_to_world * intersection_point_view;
         ret.push_back(intersection_point_world);
@@ -207,12 +257,11 @@ glm::vec4 SceneToWorldPlane(const glm::mat4& scene_view_to_clip,
     constexpr const auto ray_direction = glm::vec4 {0.0f, 0.0f, -1.0f, 0.0f};
     const auto ray_origin = scene_pos_in_plane_space_view;
 
-    float intersection_distance = 0.0f;
-    ASSERT(glm::intersectRayPlane(ray_origin,
-                                  ray_direction,
-                                  plane_origin_view,
-                                  plane_normal_view,
-                                  intersection_distance));
+    const auto intersection_distance = IntersectRayPlane(ray_origin,
+                                                         ray_direction,
+                                                         plane_origin_view,
+                                                         plane_normal_view);
+
     const auto intersection_point_view = ray_origin + ray_direction * intersection_distance;
     const auto intersection_point_world = glm::inverse(plane_world_to_view) * intersection_point_view;
     return intersection_point_world;
