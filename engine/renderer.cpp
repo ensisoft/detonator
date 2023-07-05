@@ -181,8 +181,8 @@ void Renderer::Draw(gfx::Painter& painter, EntityInstanceDrawHook* hook, const g
             packet.map_row      = batch.row;
             packet.map_col      = batch.col;
             packet.map_layer    = batch.layer;
-            packet.scene_layer  = 0;
-            packet.entity_layer = 0;
+            packet.render_layer = 0;
+            packet.packet_index = 0;
             packet.pass         = RenderPass::DrawColor;
             packets.push_back(packet);
         }
@@ -639,8 +639,8 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
                 packet.map_row      = batch.row;
                 packet.map_col      = batch.col;
                 packet.map_layer    = batch.layer;
-                packet.scene_layer  = 0;
-                packet.entity_layer = 0;
+                packet.render_layer = 0;
+                packet.packet_index = 0;
                 packet.pass         = RenderPass::DrawColor;
                 packets.push_back(packet);
             }
@@ -700,7 +700,7 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
             // (but only a stub function) and the real layer information is in the placement.
             for (auto& packet: entity_packets)
             {
-                packet.scene_layer = placement->GetLayer();
+                packet.render_layer = placement->GetLayer();
             }
 
             // Compute tile coordinates for each draw packet created by the entity.
@@ -1002,8 +1002,8 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
             packet.transform    = transform;
             packet.sort_point   = sort_point;
             packet.pass         = RenderPass::DrawColor;
-            packet.entity_layer = text->GetLayer();
-            packet.scene_layer  = entity.GetLayer();
+            packet.packet_index = text->GetLayer();
+            packet.render_layer = entity.GetLayer();
             if (!hook || hook->InspectPacket(&node, packet))
                 packets.push_back(std::move(packet));
         }
@@ -1033,8 +1033,8 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
             packet.transform    = transform;
             packet.sort_point   = sort_point;
             packet.pass         = item->GetRenderPass();
-            packet.entity_layer = item->GetLayer();
-            packet.scene_layer  = entity.GetLayer();
+            packet.packet_index = item->GetLayer();
+            packet.render_layer = entity.GetLayer();
             if (!hook || hook->InspectPacket(&node , packet))
                 packets.push_back(std::move(packet));
         }
@@ -1056,21 +1056,21 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
 
 void Renderer::OffsetPacketLayers(std::vector<DrawPacket>& packets) const
 {
-    // the layer value can be negative but for the bucket sorting
-    // packets into layers the indices must be positive.
-    int first_entity_node_layer_index = std::numeric_limits<int>::max();
-    int first_scene_node_layer_index  = std::numeric_limits<int>::max();
+    // the layer values can be negative but for the bucket sorting,
+    // sorting packets into layers the indices must be positive.
+    int32_t first_packet_index = std::numeric_limits<int>::max();
+    int32_t first_render_layer = std::numeric_limits<int>::max();
     for (auto &packet : packets)
     {
-        first_entity_node_layer_index = std::min(first_entity_node_layer_index, packet.entity_layer);
-        first_scene_node_layer_index  = std::min(first_scene_node_layer_index, packet.scene_layer);
+        first_packet_index = std::min(first_packet_index, packet.packet_index);
+        first_render_layer = std::min(first_render_layer, packet.render_layer);
     }
     // offset the layers.
     for (auto &packet : packets)
     {
-        packet.entity_layer -= first_entity_node_layer_index;
-        packet.scene_layer  -= first_scene_node_layer_index;
-        ASSERT(packet.entity_layer >= 0 && packet.scene_layer >= 0);
+        packet.packet_index -= first_packet_index;
+        packet.render_layer -= first_render_layer;
+        ASSERT(packet.packet_index >= 0 && packet.render_layer >= 0);
     }
 }
 
@@ -1087,17 +1087,17 @@ void Renderer::DrawPackets(gfx::Painter& painter, const std::vector<DrawPacket>&
         if (!packet.material || !packet.drawable)
             continue;
 
-        const auto scene_layer_index = packet.scene_layer;
-        if (scene_layer_index >= layers.size())
-            layers.resize(scene_layer_index + 1);
+        const auto render_layer_index = packet.render_layer;
+        if (render_layer_index >= layers.size())
+            layers.resize(render_layer_index + 1);
 
-        auto& entity_scene_layer = layers[scene_layer_index];
+        auto& render_layer = layers[render_layer_index];
 
-        const auto entity_node_layer_index = packet.entity_layer;
-        if (entity_node_layer_index >= entity_scene_layer.size())
-            entity_scene_layer.resize(entity_node_layer_index + 1);
+        const auto packet_index = packet.packet_index;
+        if (packet_index >= render_layer.size())
+            render_layer.resize(packet_index + 1);
 
-        RenderLayer& entity_layer = entity_scene_layer[entity_node_layer_index];
+        RenderLayer& layer = render_layer[packet_index];
         if (packet.pass == RenderPass::DrawColor)
         {
             gfx::Painter::DrawShape shape;
@@ -1105,7 +1105,7 @@ void Renderer::DrawPackets(gfx::Painter& painter, const std::vector<DrawPacket>&
             shape.transform = &packet.transform;
             shape.drawable  = packet.drawable.get();
             shape.material  = packet.material.get();
-            entity_layer.draw_color_list.push_back(shape);
+            layer.draw_color_list.push_back(shape);
         }
         else if (packet.pass == RenderPass::MaskCover)
         {
@@ -1114,7 +1114,7 @@ void Renderer::DrawPackets(gfx::Painter& painter, const std::vector<DrawPacket>&
             shape.transform = &packet.transform;
             shape.drawable  = packet.drawable.get();
             shape.material  = packet.material.get();
-            entity_layer.mask_cover_list.push_back(shape);
+            layer.mask_cover_list.push_back(shape);
         }
         else if (packet.pass == RenderPass::MaskExpose)
         {
@@ -1123,7 +1123,7 @@ void Renderer::DrawPackets(gfx::Painter& painter, const std::vector<DrawPacket>&
             shape.transform = &packet.transform;
             shape.drawable  = packet.drawable.get();
             shape.material  = packet.material.get();
-            entity_layer.mask_expose_list.push_back(shape);
+            layer.mask_expose_list.push_back(shape);
         }
     }
 
@@ -1413,7 +1413,7 @@ void Renderer::SortTilePackets(std::vector<DrawPacket>& packets) const
         if (packets[i].map_row != current_row || packets[i].map_col != current_col)
             ++current_render_layer;
 
-        packets[i].scene_layer = current_render_layer;
+        packets[i].render_layer = current_render_layer;
         current_row = packets[i].map_row;
         current_col = packets[i].map_col;
     }
@@ -1450,7 +1450,7 @@ void Renderer::ComputeTileCoordinates(const glm::mat4& scene_view_to_clip,
         ASSERT(map_row < map_height && map_col < map_width);
         packet.map_row   = map_row;
         packet.map_col   = map_col;
-        packet.map_layer = std::max(0, packet.scene_layer);
+        packet.map_layer = std::max(0, packet.render_layer);
     }
 }
 
