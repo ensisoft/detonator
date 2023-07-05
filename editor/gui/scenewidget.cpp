@@ -2493,11 +2493,11 @@ void SceneWidget::FindNode(const game::EntityPlacement* node)
     if (!entity_klass)
         return;
 
-    const auto view = engine::CreateViewMatrix(game::Perspective::AxisAligned,
-                                               mState.camera_offset_x,
-                                               mState.camera_offset_y,
-                                               1.0f, 1.0f,
-                                               GetValue(mUI.rotation));
+    const auto view = engine::CreateModelViewMatrix(game::Perspective::AxisAligned,
+                                                    mState.camera_offset_x,
+                                                    mState.camera_offset_y,
+                                                    1.0f, 1.0f,
+                                                    GetValue(mUI.rotation));
 
     const auto& node_world_pos = mState.scene->MapCoordsFromNodeBox(0.0f, 0.0f, node);
     const auto& node_view_pos  = view * glm::vec4(node_world_pos, 0.0f, 1.0f);

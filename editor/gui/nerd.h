@@ -65,11 +65,11 @@ glm::mat4 CreateViewMatrix(const UI& ui, const State& state,
     const float ys = GetValue(ui.scaleY);
     const float rotation = GetValue(ui.rotation);
 
-    return engine::CreateViewMatrix(perspective,
-                                    state.camera_offset_x,
-                                    state.camera_offset_y,
-                                    zoom*xs, zoom*ys,
-                                    rotation);
+    return engine::CreateModelViewMatrix(perspective,
+                                         state.camera_offset_x,
+                                         state.camera_offset_y,
+                                         zoom * xs, zoom * ys,
+                                         rotation);
 }
 
 template<typename UI>
