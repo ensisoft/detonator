@@ -43,11 +43,26 @@ namespace engine
         std::shared_ptr<const gfx::Material> material;
         // shortcut to the node's drawable.
         std::shared_ptr<const gfx::Drawable> drawable;
-        // transform that pertains to the draw.
+        // model to world transform for transforming the drawable.
         glm::mat4 transform;
-        // the node layer this draw belongs to.
-        int entity_layer = 0;
-        int scene_layer = 0;
+        // the sort point (in model space) for mapping a point from the
+        // model into tile map coordinates. y = 0.0f = top, y = 1.0 = bottom.
+        // there's no clamping so negative values and range beyond 0.0f - 1.0f
+        // is allowed.
+        glm::vec2 sort_point = {0.5f, 1.0f};
+        std::int32_t entity_layer = 0;
+        std::int32_t scene_layer = 0;
+
+        // these values are only used / valid when the packet has been
+        // created in conjunction with tilemap.
+
+        // the row on the map as mapped based on the sort point on the model
+        std::uint32_t map_row = 0;
+        // the column on the map as mapped based on the sort point on the model.
+        std::uint32_t map_col = 0;
+        // map layer.
+        std::uint16_t map_layer = 0;
+
         // the render pass this draw belongs to.
         game::RenderPass pass = game::RenderPass::DrawColor;
     };
