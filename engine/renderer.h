@@ -152,7 +152,7 @@ namespace engine
         // representing the contents of the given scene.
         void UpdateRenderStateFromScene(const game::Scene& scene);
         // Draw the current rendering state.
-        void Draw(gfx::Painter& painter, EntityInstanceDrawHook* hook);
+        void Draw(gfx::Painter& painter, EntityInstanceDrawHook* hook, const game::Tilemap* map = nullptr);
         // Update the renderer state, i.e. update/animate materials etc.
         void Update(float time, float dt);
 
@@ -265,6 +265,17 @@ namespace engine
         void DrawTileBatches(const game::Tilemap& map,
                              std::vector<TileBatch>& batches,
                              gfx::Painter& painter);
+        void SortTileBatches(std::vector<TileBatch>& batches) const;
+
+        void SortTilePackets(std::vector<DrawPacket>& packets) const;
+
+        void ComputeTileCoordinates(const glm::mat4& scene_view_to_clip,
+                                    const glm::mat4& scene_world_to_view,
+                                    const glm::mat4& map_view_to_clip,
+                                    const glm::mat4& map_world_to_view,
+                                    const game::Tilemap& map,
+                                    std::size_t packet_start_index,
+                                    std::vector<DrawPacket>& packets) const;
 
 
         std::shared_ptr<const gfx::Material> GetTileMaterial(const game::Tilemap& map,
