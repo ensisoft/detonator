@@ -267,6 +267,21 @@ glm::vec4 SceneToWorldPlane(const glm::mat4& scene_view_to_clip,
     return intersection_point_world;
 }
 
+glm::vec4 WorldPlaneToScene(const glm::mat4& scene_view_to_clip,
+                            const glm::mat4& scene_world_to_view,
+                            const glm::mat4& plane_view_to_clip,
+                            const glm::mat4& plane_world_to_view,
+                            const glm::vec4& plane_pos)
+{
+    glm::vec2 clip_space = plane_view_to_clip * plane_world_to_view * plane_pos;
+
+    // clip to near plane
+    constexpr auto depth_value_at_near_plane = -1.0f;
+
+    return glm::inverse(scene_view_to_clip * scene_world_to_view) * glm::vec4{clip_space, depth_value_at_near_plane, 1.0f};
+}
+
+
 glm::vec4 WindowToWorld(const glm::mat4& view_to_clip,
                         const glm::mat4& world_to_view,
                         const glm::vec2& window_coord,

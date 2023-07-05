@@ -403,7 +403,7 @@ public:
     }
     virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
     {
-        mWorldPos = mickey.WorldPlanePos();
+        mWorldPos = mickey.MapToPlane();
     }
     virtual void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
     {
@@ -539,8 +539,10 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     connect(workspace, &app::Workspace::ResourceUpdated, this, &SceneWidget::ResourceUpdated);
 
     PopulateFromEnum<game::SceneClass::SpatialIndex>(mUI.cmbSpatialIndex);
+    PopulateFromEnum<game::Perspective>(mUI.cmbPerspective);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
+    SetValue(mUI.cmbPerspective, game::Perspective::AxisAligned);
     SetValue(mUI.zoom, 1.0f);
     SetValue(mUI.ID, mState.scene->GetId());
     SetValue(mUI.name, mState.scene->GetName());
@@ -568,6 +570,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
     GetUserProperty(resource, "snap", mUI.chkSnap);
+    GetUserProperty(resource, "perspective", mUI.cmbPerspective);
     GetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     GetUserProperty(resource, "show_viewport", mUI.chkShowViewport);
@@ -686,6 +689,7 @@ bool SceneWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Scene", mUI.sceneIndexGroup);
     settings.SaveWidget("Scene", mUI.effectsGroup);
     settings.SaveWidget("Scene", mUI.bloomGroup);
+    settings.SaveWidget("Scene", mUI.cmbPerspective);
     return true;
 }
 bool SceneWidget::LoadState(const Settings& settings)
@@ -715,6 +719,7 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Scene", mUI.sceneIndexGroup);
     settings.LoadWidget("Scene", mUI.effectsGroup);
     settings.LoadWidget("Scene", mUI.bloomGroup);
+    settings.LoadWidget("Scene", mUI.cmbPerspective);
 
     if (!mState.scene->FromJson(json))
         WARN("Failed to restore scene state.");
@@ -1212,6 +1217,7 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "zoom", mUI.zoom);
     SetUserProperty(resource, "grid", mUI.cmbGrid);
     SetUserProperty(resource, "snap", mUI.chkSnap);
+    SetUserProperty(resource, "perspective", mUI.cmbPerspective);
     SetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     SetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     SetUserProperty(resource, "show_viewport", mUI.chkShowViewport);
@@ -1902,7 +1908,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     const auto xs     = (float)GetValue(mUI.scaleX);
     const auto ys     = (float)GetValue(mUI.scaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
-    const auto perspective = game::Perspective::AxisAligned;
+    const auto perspective = (game::Perspective)GetValue(mUI.cmbPerspective);
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
@@ -2011,19 +2017,23 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     PrintMousePos(mUI, mState, painter, perspective);
 }
 
-void SceneWidget::MouseMove(QMouseEvent* mickey)
+void SceneWidget::MouseMove(QMouseEvent* event)
 {
     if (mCurrentTool)
     {
-        mCurrentTool->MouseMove(MouseEvent(mickey, mUI, mState));
+        const MouseEvent mickey(event, mUI, mState);
+
+        mCurrentTool->MouseMove(mickey);
         // update the properties that might have changed as the result of application
         // of the current tool.
         DisplayCurrentCameraLocation();
         DisplayCurrentNodeProperties();
     }
 }
-void SceneWidget::MousePress(QMouseEvent* mickey)
+void SceneWidget::MousePress(QMouseEvent* event)
 {
+    const MouseEvent mickey(event, mUI, mState);
+
     if (!mCurrentTool && (mickey->button() == Qt::LeftButton))
     {
         const auto snap = (bool)GetValue(mUI.chkSnap);
@@ -2054,7 +2064,7 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
         {
             if (auto* selection = SelectNode(click_point))
             {
-                mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.scene, selection, snap, grid_size));
+                mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.scene, selection, snap, grid_size, GetValue(mUI.cmbPerspective)));
                 mUI.tree->SelectItemById(selection->GetId());
             }
             else
@@ -2069,14 +2079,16 @@ void SceneWidget::MousePress(QMouseEvent* mickey)
     }
 
     if (mCurrentTool)
-        mCurrentTool->MousePress(MouseEvent(mickey, mUI, mState));
+        mCurrentTool->MousePress(mickey);
 }
-void SceneWidget::MouseRelease(QMouseEvent* mickey)
+void SceneWidget::MouseRelease(QMouseEvent* event)
 {
     if (!mCurrentTool)
         return;
 
-    if (mCurrentTool->MouseRelease(MouseEvent(mickey, mUI, mState)))
+    const MouseEvent mickey(event, mUI, mState);
+
+    if (mCurrentTool->MouseRelease(mickey))
     {
         mCurrentTool.reset();
         UncheckPlacementActions();
@@ -2138,23 +2150,11 @@ bool SceneWidget::KeyPress(QKeyEvent* key)
         case Qt::Key_Delete:
             on_actionNodeDelete_triggered();
             break;
-        case Qt::Key_W:
-            TranslateCamera(0.0f, 20.0f);
-            break;
-        case Qt::Key_S:
-            TranslateCamera(0.0f, -20.0f);
-            break;
-        case Qt::Key_A:
-            TranslateCamera(20.0f, 0.0);
-            break;
-        case Qt::Key_D:
-            TranslateCamera(-20.0f, 0.0f);
-            break;
         case Qt::Key_Left:
-            TranslateCurrentNode(-20.0f, 0.0f);
+            TranslateCurrentNode(20.0f, 0.0f);
             break;
         case Qt::Key_Right:
-            TranslateCurrentNode(20.0f, 0.0f);
+            TranslateCurrentNode(-20.0f, 0.0f);
             break;
         case Qt::Key_Up:
             TranslateCurrentNode(0.0f, -20.0f);
