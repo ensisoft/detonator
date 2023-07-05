@@ -105,7 +105,7 @@ glm::mat4 CreateProjectionMatrix(game::Perspective perspective, float surface_wi
     return CreateProjectionMatrix(perspective, glm::vec2{surface_width, surface_height});
 }
 
-glm::mat4 CreateViewMatrix(game::Perspective perspective)
+glm::mat4 CreateModelMatrix(game::Perspective perspective)
 {
     if (perspective == game::Perspective::AxisAligned)
     {
@@ -121,10 +121,10 @@ glm::mat4 CreateViewMatrix(game::Perspective perspective)
     return glm::mat4(1.0f);
 }
 
-glm::mat4 CreateViewMatrix(game::Perspective perspective,
-                           const glm::vec2& camera_pos,
-                           const glm::vec2& camera_scale,
-                           float camera_rotation)
+glm::mat4 CreateModelViewMatrix(game::Perspective perspective,
+                                const glm::vec2& camera_pos,
+                                const glm::vec2& camera_scale,
+                                float camera_rotation)
 {
     // remember that if you use operator *= as in a *= b; it's the same as
     // a = a * b;
@@ -149,7 +149,7 @@ glm::mat4 CreateViewMatrix(game::Perspective perspective,
         mat = glm::rotate(mat, glm::radians(camera_rotation), glm::vec3{0.0f, 0.0f, 1.0f});
     }
 
-    mat *= CreateViewMatrix(perspective);
+    mat *= CreateModelMatrix(perspective);
 
     if (perspective == game::Perspective::Dimetric)
     {
@@ -236,11 +236,11 @@ std::vector<glm::vec4> WindowToWorldPlane(const glm::mat4& view_to_clip,
     return ret;
 }
 
-glm::vec4 SceneToWorldPlane(const glm::mat4& scene_view_to_clip,
-                            const glm::mat4& scene_world_to_view,
-                            const glm::mat4& plane_view_to_clip,
-                            const glm::mat4& plane_world_to_view,
-                            const glm::vec4& scene_pos)
+glm::vec4 SceneToTilePlane(const glm::mat4& scene_view_to_clip,
+                           const glm::mat4& scene_world_to_view,
+                           const glm::mat4& plane_view_to_clip,
+                           const glm::mat4& plane_world_to_view,
+                           const glm::vec4& scene_pos)
 {
     constexpr const auto plane_origin_world = glm::vec4 {0.0f, 0.0f, 0.0f, 1.0f};
     constexpr const auto plane_normal_world = glm::vec4 {0.0f, 0.0f, 1.0f, 0.0f};
@@ -267,11 +267,11 @@ glm::vec4 SceneToWorldPlane(const glm::mat4& scene_view_to_clip,
     return intersection_point_world;
 }
 
-glm::vec4 WorldPlaneToScene(const glm::mat4& scene_view_to_clip,
-                            const glm::mat4& scene_world_to_view,
-                            const glm::mat4& plane_view_to_clip,
-                            const glm::mat4& plane_world_to_view,
-                            const glm::vec4& plane_pos)
+glm::vec4 TilePlaneToScene(const glm::mat4& scene_view_to_clip,
+                           const glm::mat4& scene_world_to_view,
+                           const glm::mat4& plane_view_to_clip,
+                           const glm::mat4& plane_world_to_view,
+                           const glm::vec4& plane_pos)
 {
     glm::vec2 clip_space = plane_view_to_clip * plane_world_to_view * plane_pos;
 

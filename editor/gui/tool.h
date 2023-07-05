@@ -149,7 +149,8 @@ namespace gui
         inline Point2Df MapToPlane() const noexcept
         {
             const auto& view_to_clip = engine::CreateProjectionMatrix(mPerspective, mWindowSize.x, mWindowSize.y);
-            const auto& world_to_view = engine::CreateViewMatrix(mPerspective, mCameraPos, mCameraScale*mZoom, mCameraRotation);
+            const auto& world_to_view = engine::CreateModelViewMatrix(mPerspective, mCameraPos, mCameraScale * mZoom,
+                                                                      mCameraRotation);
             const auto ret = engine::WindowToWorldPlane(view_to_clip, world_to_view, WindowPos(), mWindowSize);
             return {ret.x, ret.y};
         }
@@ -171,22 +172,24 @@ namespace gui
                 return point;
 
             const auto src_view_to_clip = engine::CreateProjectionMatrix(game::Perspective::AxisAligned, mWindowSize.x, mWindowSize.y);
-            const auto src_world_to_view = engine::CreateViewMatrix(game::Perspective::AxisAligned, mCameraPos, mCameraScale*mZoom, mCameraRotation);
+            const auto src_world_to_view = engine::CreateModelViewMatrix(game::Perspective::AxisAligned, mCameraPos,
+                                                                         mCameraScale * mZoom, mCameraRotation);
             const auto dst_view_to_clip = engine::CreateProjectionMatrix(game::Perspective::Dimetric, mWindowSize.x, mWindowSize.y);
-            const auto dst_world_to_view = engine::CreateViewMatrix(game::Perspective::Dimetric, mCameraPos, mCameraScale*mZoom, mCameraRotation);
+            const auto dst_world_to_view = engine::CreateModelViewMatrix(game::Perspective::Dimetric, mCameraPos,
+                                                                         mCameraScale * mZoom, mCameraRotation);
 
             glm::vec2 ret;
             if (src == game::Perspective::AxisAligned && dst == game::Perspective::Dimetric)
             {
-                ret = engine::SceneToWorldPlane(src_view_to_clip, src_world_to_view,
-                                                dst_view_to_clip, dst_world_to_view,
-                                                glm::vec4{point.x(), point.y(), 0.0f, 1.0});
+                ret = engine::SceneToTilePlane(src_view_to_clip, src_world_to_view,
+                                               dst_view_to_clip, dst_world_to_view,
+                                               glm::vec4{point.x(), point.y(), 0.0f, 1.0});
             }
             else if (src == game::Perspective::Dimetric && dst == game::Perspective::AxisAligned)
             {
-                ret = engine::WorldPlaneToScene(src_view_to_clip, src_world_to_view,
-                                                dst_view_to_clip, dst_world_to_view,
-                                                glm::vec4{point.x(), point.y(), 0.0f, 1.0});
+                ret = engine::TilePlaneToScene(src_view_to_clip, src_world_to_view,
+                                               dst_view_to_clip, dst_world_to_view,
+                                               glm::vec4{point.x(), point.y(), 0.0f, 1.0});
             }
             return ret;
         }
@@ -307,9 +310,11 @@ namespace gui
                                          // irrespective of the camera rotation
 
             mViewToClip  = engine::CreateProjectionMatrix(game::Perspective::AxisAligned, width, height);
-            mWorldToView = engine::CreateViewMatrix(game::Perspective::AxisAligned,
-                                                    mState.camera_offset_x, mState.camera_offset_y,
-                                                    zoom*xs, zoom*ys, rotation);
+            mWorldToView = engine::CreateModelViewMatrix(game::Perspective::AxisAligned,
+                                                         mState.camera_offset_x,
+                                                         mState.camera_offset_y,
+                                                         zoom * xs, zoom * ys,
+                                                         rotation);
             mWindowSize = glm::vec2{width, height};
         }
         virtual void Render(gfx::Painter& window, gfx::Painter&) const override
