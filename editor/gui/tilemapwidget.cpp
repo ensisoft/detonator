@@ -2143,7 +2143,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                         layer_tile_height * selection.height);
             model.MoveTo(layer_tile_width * selection.start_col,
                          layer_tile_height * selection.start_row);
-            tile_painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline), model,
+            tile_painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline, 2.0f), model,
                               gfx::CreateMaterialFromColor(gfx::Color::Green));
         }
 
@@ -2160,7 +2160,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                 gfx::Transform model;
                 model.Scale(layer_tile_width, layer_tile_height);
                 model.MoveTo(layer_tile_width * tile_col, layer_tile_height * tile_row);
-                tile_painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline), model,
+                tile_painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline, 2.0f), model,
                                   gfx::CreateMaterialFromColor(gfx::Color::HotPink));
 
                 const glm::vec2 corner = engine::ProjectPoint(tile_painter.GetProjMatrix(),
