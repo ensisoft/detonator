@@ -347,11 +347,11 @@ public:
     }
     virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
     {
-        mWorldPos = mickey.WorldPlanePos();
+        mWorldPos = mickey.MapToPlane();
     }
     virtual void MousePress(const MouseEvent& mickey, gfx::Transform&) override
     {
-        mWorldPos = mickey.WorldPlanePos();
+        mWorldPos = mickey.MapToPlane();
         mWorldStartPos = mWorldPos;
     }
     virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
@@ -486,7 +486,7 @@ public:
         const auto tile_width  = mState.klass->GetTileWidth() * tile_scale;
         const auto tile_height = mState.klass->GetTileHeight() * tile_scale;
 
-        const glm::vec2 world_pos = mickey.WorldPlanePos();
+        const glm::vec2 world_pos = mickey.MapToPlane();
         mTileCol  = world_pos.x / tile_width;
         mTileRow  = world_pos.y / tile_height;
 

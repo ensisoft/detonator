@@ -1295,6 +1295,9 @@
            <widget class="QComboBox" name="cmbGrid"/>
           </item>
           <item>
+           <widget class="QComboBox" name="cmbPerspective"/>
+          </item>
+          <item>
            <spacer name="horizontalSpacer_2">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>

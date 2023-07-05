@@ -208,6 +208,12 @@ namespace engine
                                 const glm::mat4& plane_world_to_view,
                                 const glm::vec4& scene_pos);
 
+    glm::vec4 WorldPlaneToScene(const glm::mat4& scene_view_to_clip,
+                                const glm::mat4& scene_world_to_view,
+                                const glm::mat4& plane_view_to_clip,
+                                const glm::mat4& plane_world_to_view,
+                                const glm::vec4& plane_pos);
+
     // Map a window (2D projection surface coordinate) to world space.
     glm::vec4 WindowToWorld(const glm::mat4& view_to_clip,
                             const glm::mat4& world_to_view,
@@ -226,7 +232,7 @@ namespace engine
     // For example let's assume that we have some world coordinate in "isometric"
     // space and wish to know where this point maps in the 2D axis aligned space.
     // The solution can be found by applying these transformations.
-    inline glm::vec3 ProjectPoint(const glm::mat4& src_view_to_clip, // aka projection matrix
+    inline glm::vec4 ProjectPoint(const glm::mat4& src_view_to_clip, // aka projection matrix
                                   const glm::mat4& src_world_to_view, // aka view/camera matrix
                                   const glm::mat4& dst_view_to_clip, // aka projection matrix
                                   const glm::mat4& dst_world_to_view, // aka view/camera matrix

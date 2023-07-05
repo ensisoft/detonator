@@ -104,6 +104,11 @@ namespace gui
         { return {mX, mY}; }
         operator Tuple () const noexcept
         { return {mX, mY}; }
+
+        inline float x() const noexcept
+        { return mX; }
+        inline float y() const noexcept
+        { return mY; }
     private:
         float mX = 0.0f;
         float mY = 0.0f;
