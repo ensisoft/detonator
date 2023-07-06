@@ -1432,89 +1432,38 @@ void SceneWidget::on_btnAddScript_clicked()
     // use the script ID as the file name so that we can
     // avoid naming clashes and always find the correct lua
     // file even if the entity is later renamed.
-    const auto& filename = app::FromUtf8(script.GetId());
-    const auto& fileuri  = QString("ws://lua/%1.lua").arg(filename);
-    const auto& filepath = mState.workspace->MapFileToFilesystem(fileuri);
+    const auto& uri  = app::toString("ws://lua/%1.lua", script.GetId());
+    const auto& file = mState.workspace->MapFileToFilesystem(uri);
     const auto& name = GetValue(mUI.name);
-    const QFileInfo info(filepath);
-    if (info.exists())
+
+    if (app::FileExists(file))
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Question);
         msg.setWindowTitle(tr("File already exists"));
-        msg.setText(tr("Overwrite existing script file?\n%1").arg(filepath));
+        msg.setText(tr("Overwrite existing script file?\n%1").arg(file));
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
         if (msg.exec() == QMessageBox::Cancel)
             return;
     }
 
-    QFile io;
-    io.setFileName(filepath);
-    if (!io.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    QString source = GenerateSceneScriptSource(name);
+
+    QFile::FileError err_val = QFile::FileError::NoError;
+    QString err_str;
+    if (!app::WriteTextFile(file, source, &err_val, &err_str))
     {
-        ERROR("Failed to open '%1' for writing (%2)", filepath, io.error());
-        ERROR(io.errorString());
-        QMessageBox msg;
+        ERROR("Failed to write file. [file='%1', err_val=%2, err_str='%3']", file, err_val, err_str);
+        QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);
-        msg.setWindowTitle(tr("Error Occurred"));
-        msg.setText(tr("There was a problem creating the script file.\n%1").arg(io.errorString()));
+        msg.setWindowTitle("Error Occurred");
+        msg.setText(tr("Failed to write the script file. [%1]").arg(err_str));
         msg.setStandardButtons(QMessageBox::Ok);
+        msg.exec();
         return;
     }
-    QString var = name;
-    var.replace(' ', '_');
-    var = var.toLower();
 
-    // TODO: refactor this and a dupe from MainWindow into a single place.
-    QTextStream stream(&io);
-    stream.setCodec("UTF-8");
-    stream << QString("-- Scene '%1' script.\n\n").arg(name);
-    stream << QString("-- This script will be called for every instance of '%1'\n"
-                      "-- during gameplay.\n").arg(name);
-    stream << "-- You're free to delete functions you don't need.\n\n";
-    stream << "-- Called when the scene begins play.\n";
-    stream << QString("function BeginPlay(%1)\nend\n\n").arg(var);
-    stream << "-- Called when the scene ends play.\n";
-    stream << QString("function EndPlay(%1)\nend\n\n").arg(var);
-    stream << "-- Called when a new entity has been spawned in the scene.\n";
-    stream << QString("function SpawnEntity(%1, entity)\n\nend\n\n").arg(var);
-    stream << "-- Called when an entity has been killed from the scene.\n";
-    stream << QString("function KillEntity(%1, entity)\n\nend\n\n").arg(var);
-    stream << "-- Called on every low frequency game tick.\n";
-    stream << QString("function Tick(%1, game_time, dt)\n\nend\n\n").arg(var);
-    stream << "-- Called on every iteration of game loop.\n";
-    stream << QString("function Update(%1, game_time, dt)\n\nend\n\n").arg(var);
-    stream << "-- Called on collision events with other objects.\n";
-    stream << QString("function OnBeginContact(%1, entity, entity_node, other, other_node)\nend\n\n").arg(var);
-    stream << "-- Called on collision events with other objects.\n";
-    stream << QString("function OnEndContact(%1, entity, entity_node, other, other_node)\nend\n\n").arg(var);
-    stream << "-- Called on key down events.\n";
-    stream << QString("function OnKeyDown(%1, symbol, modifier_bits)\nend\n\n").arg(var);
-    stream << "-- Called on key up events.\n";
-    stream << QString("function OnKeyUp(%1, symbol, modifier_bits)\nend\n\n").arg(var);
-    stream << "-- Called on mouse button press events.\n";
-    stream << QString("function OnMousePress(%1, mouse)\nend\n\n").arg(var);
-    stream << "-- Called on mouse button release events.\n";
-    stream << QString("function OnMouseRelease(%1, mouse)\nend\n\n").arg(var);
-    stream << "-- Called on mouse move events.\n";
-    stream << QString("function OnMouseMove(%1, mouse)\nend\n\n").arg(var);
-    stream << "-- Called on game events.\n";
-    stream << QString("function OnGameEvent(%1, event)\nend\n\n").arg(var);
-    stream << "-- Called on entity timer events.\n";
-    stream << QString("function OnEntityTimer(%1, entity, timer, jitter)\nend\n\n").arg(var);
-    stream << "-- Called on posted entity events.\n";
-    stream << QString("function OnEntityEvent(%1, entity, event)\nend\n\n").arg(var);
-    stream << "-- Called on UI open event.\n";
-    stream << QString("function OnUIOpen(%1, ui)\nend\n\n").arg(var);
-    stream << "-- Called on UI close event.\n";
-    stream << QString("function OnUIClose(%1, ui, result)\nend\n\n").arg(var);
-    stream << "--Called on UI action event.\n";
-    stream << QString("function OnUIAction(%1, ui, action)\nend\n\n").arg(var);
-
-    io.flush();
-    io.close();
-
-    script.SetFileURI(app::ToUtf8(fileuri));
+    script.SetFileURI(uri);
     app::ScriptResource resource(script, name);
     mState.workspace->SaveResource(resource);
     mState.scene->SetScriptFileId(script.GetId());
@@ -2662,6 +2611,101 @@ const game::EntityPlacement* SceneWidget::GetCurrentNode() const
     else if (!item->GetUserData())
         return nullptr;
     return static_cast<const game::EntityPlacement*>(item->GetUserData());
+}
+
+QString GenerateSceneScriptSource(QString scene)
+{
+    scene = app::GenerateScriptVarName(scene);
+
+    QString source(R"(
+-- Scene '%1' script.
+-- This script will be called for every instance of '%1' during gameplay.
+-- You're free to delete functions you don't need.
+
+-- Called when the scene begins play.
+function BeginPlay(%1)
+end
+
+-- Called when the scene ends play.
+function EndPlay(%1)
+end
+
+-- Called when a new entity has been spawned in the scene.
+-- This function will be called before entity BeginPlay.
+function SpawnEntity(%1, entity)
+end
+
+-- Called when an entity has been killed from the scene.
+-- This function will be called before entity EndPlay.
+function KillEntity(%1, entity)
+end
+
+-- Called on every low frequency game tick.
+function Tick(%1, game_time, dt)
+end
+
+-- Called on every iteration of game loop.
+function Update(%1, game_time, dt)
+end
+
+-- Physics collision callback on contact begin.
+-- This is called when an entity node begins contact with another
+-- entity node in the scene.
+function OnBeginContact(%1, entity, entity_node, other, other_node)
+end
+
+-- Physics collision callback on end contact.
+-- This is called when an entity node ends contact with another
+-- entity node in the scene.
+function OnEndContact(%1, entity, entity_node, other, other_node)
+end
+
+-- Called on keyboard key down events.
+function OnKeyDown(%1, symbol, modifier_bits)
+end
+
+-- Called on keyboard key up events.
+function OnKeyUp(%1, symbol, modifier_bits)
+end
+
+-- Called on mouse button press events.
+function OnMousePress(%1, mouse)
+end
+
+-- Called on mouse button release events.
+function OnMouseRelease(%1, mouse)
+end
+
+-- Called on mouse move events.
+function OnMouseMove(%1, mouse)
+end
+
+-- Called on game events.
+function OnGameEvent(%1, event)
+end
+
+-- Called on entity timer events.
+function OnEntityTimer(%1, entity, timer, jitter)
+end
+
+-- Called on posted entity events.
+function OnEntityEvent(%1, entity, event)
+end
+
+-- Called on UI open event.
+function OnUIOpen(%1, ui)
+end
+
+-- Called on UI close event.
+function OnUIClose(%1, ui, result)
+end
+
+--Called on UI action event.
+function OnUIAction(%1, ui, action)
+end
+    )");
+
+    return source.replace("%1", scene);
 }
 
 } // bui

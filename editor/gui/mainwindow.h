@@ -214,6 +214,9 @@ namespace gui
         ChildWindow* ShowWidget(MainWidget* widget, bool new_window);
         MainWidget* MakeWidget(app::Resource::Type type, const app::Resource* resource = nullptr);
 
+        using ScriptGen = QString(*)(QString);
+        void GenerateNewScript(const QString& script_name, const QString& arg_name, ScriptGen gen);
+
     private:
         virtual bool event(QEvent* event)  override;
         virtual void closeEvent(QCloseEvent* event) override;

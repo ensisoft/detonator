@@ -257,4 +257,6 @@ namespace gui
         game::Scene::BloomFilter mBloom;
 
     };
+
+    QString GenerateSceneScriptSource(QString scene);
 }
