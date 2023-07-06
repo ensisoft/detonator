@@ -35,13 +35,13 @@ function AttackTarget(skeleton, target)
 end
 
 -- Called once when the game play begins for the entity in the scene.
-function BeginPlay(skeleton, scene)
+function BeginPlay(skeleton, scene, map)
     local animator = skeleton:GetAnimator()
     animator.attack = false
 end
 
 -- Called once when the game play ends for the entity in the scene.
-function EndPlay(skeleton, scene)
+function EndPlay(skeleton, scene, map)
 end
 
 -- Called on every low frequency game tick. The tick frequency is

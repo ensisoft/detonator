@@ -90,7 +90,7 @@ function LostBall(ball)
 end
 
 -- Called when the game play begins for an entity in the scene.
-function BeginPlay(ball, scene)
+function BeginPlay(ball, scene, map)
     if ball.demo_ball then
         ball.launched = true
         ball.velocity = glm.normalize(glm.vec2:new(300, 500.0)) * 300
@@ -101,7 +101,7 @@ function BeginPlay(ball, scene)
 end
 
 -- Called when the game play ends for an entity in the scene.
-function EndPlay(ball, scene)
+function EndPlay(ball, scene, map)
 
 end
 

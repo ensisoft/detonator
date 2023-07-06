@@ -843,13 +843,13 @@ void unit_test_entity_begin_end_play()
     TEST_CASE(test::Type::Feature)
 
     base::OverwriteTextFile("entity_begin_end_play_test.lua", R"(
-function BeginPlay(entity, scene)
+function BeginPlay(entity, scene, map)
    local event = game.GameEvent:new()
    event.from  = entity:GetName()
    event.message = 'begin'
    Game:PostEvent(event)
 end
-function EndPlay(entity, scene)
+function EndPlay(entity, scene, map)
    local event = game.GameEvent:new()
    event.from = entity:GetName()
    event.message = 'end'
@@ -875,7 +875,7 @@ end
     engine::LuaRuntime script(".", "", "", "");
     script.SetDataLoader(&loader);
     script.Init();
-    script.BeginPlay(&scene);
+    script.BeginPlay(&scene, nullptr);
 
     // begin play should invoke BeginPlay on the entities that are
     // statically in the scene class.
@@ -978,7 +978,7 @@ end
     engine::LuaRuntime script(".", "", "", "");
     script.SetDataLoader(&loader);
     script.Init();
-    script.BeginPlay(&scene);
+    script.BeginPlay(&scene, nullptr);
 
     script.BeginLoop();
     script.Tick(0.0, 0.0);
@@ -1149,7 +1149,7 @@ end
     script.SetDataLoader(&loader);
     script.Init();
 
-    script.BeginPlay(&scene);
+    script.BeginPlay(&scene, nullptr);
     script.BeginLoop();
     script.Update(time, step);
     time += step;
@@ -1269,7 +1269,7 @@ end
     engine::LuaRuntime script(".", "", "", "");
     script.SetDataLoader(&loader);
     script.Init();
-    script.BeginPlay(&instance);
+    script.BeginPlay(&instance, nullptr);
     script.Tick(0.0, 0.0);
 
     engine::Action action1;
@@ -1380,7 +1380,7 @@ end
     engine::LuaRuntime script(".", "", "", "");
     script.SetDataLoader(&loader);
     script.Init();
-    script.BeginPlay(&instance);
+    script.BeginPlay(&instance, nullptr);
     script.Tick(0.0, 0.0);
 
     engine::Action action1;
@@ -1457,7 +1457,7 @@ end
     engine::LuaRuntime script(".", "", "", "");
     script.SetDataLoader(&loader);
     script.Init();
-    script.BeginPlay(&instance);
+    script.BeginPlay(&instance, nullptr);
     script.Tick(0.0, 0.0);
 
     engine::Action action1;
@@ -1528,7 +1528,7 @@ end
     engine::LuaRuntime script(".", "", "", "");
     script.SetDataLoader(&loader);
     script.Init();
-    script.BeginPlay(&instance);
+    script.BeginPlay(&instance, nullptr);
     script.Tick(0.0, 0.0);
 
     engine::Action action;

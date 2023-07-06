@@ -2623,21 +2623,23 @@ QString GenerateSceneScriptSource(QString scene)
 -- You're free to delete functions you don't need.
 
 -- Called when the scene begins play.
-function BeginPlay(%1)
+-- Map may be nil if the scene has no map set.
+function BeginPlay(%1, map)
 end
 
 -- Called when the scene ends play.
-function EndPlay(%1)
+-- Map may be nil if the scene has no map set.
+function EndPlay(%1, map)
 end
 
 -- Called when a new entity has been spawned in the scene.
 -- This function will be called before entity BeginPlay.
-function SpawnEntity(%1, entity)
+function SpawnEntity(%1, map, entity)
 end
 
 -- Called when an entity has been killed from the scene.
 -- This function will be called before entity EndPlay.
-function KillEntity(%1, entity)
+function KillEntity(%1, map, entity)
 end
 
 -- Called on every low frequency game tick.

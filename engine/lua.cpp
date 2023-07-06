@@ -47,6 +47,8 @@
 #include "game/scene.h"
 #include "game/transform.h"
 #include "graphics/material.h"
+#include "game/tilemap.h"
+#include "engine/camera.h"
 #include "engine/game.h"
 #include "engine/audio.h"
 #include "engine/classlib.h"
@@ -1558,7 +1560,7 @@ void LuaRuntime::StopGame()
         CallLua((*mGameEnv)["StopGame"]);
 }
 
-void LuaRuntime::BeginPlay(Scene* scene)
+void LuaRuntime::BeginPlay(Scene* scene, Tilemap* map)
 {
     // table that maps entity types to their scripting
     // environments. then we later invoke the script per
@@ -1705,23 +1707,25 @@ void LuaRuntime::BeginPlay(Scene* scene)
     mAnimatorEnvs = std::move(animator_env_map);
 
     mScene = scene;
+    mTilemap = map;
     (*mLuaState)["Scene"] = mScene;
+    (*mLuaState)["Map"]   = mTilemap;
 
     if (mGameEnv)
-        CallLua((*mGameEnv)["BeginPlay"], scene);
+        CallLua((*mGameEnv)["BeginPlay"], scene, map);
 
     if (mSceneEnv)
-        CallLua((*mSceneEnv)["BeginPlay"], scene);
+        CallLua((*mSceneEnv)["BeginPlay"], scene, map);
 
     for (size_t i=0; i<scene->GetNumEntities(); ++i)
     {
         auto* entity = &mScene->GetEntity(i);
         if (mSceneEnv)
-            CallLua((*mSceneEnv)["SpawnEntity"], scene, entity);
+            CallLua((*mSceneEnv)["SpawnEntity"], scene, map, entity);
 
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
-            CallLua((*env)["BeginPlay"], entity, scene);
+            CallLua((*env)["BeginPlay"], entity, scene, map);
         }
 
         if (auto* animator = entity->GetAnimator())
@@ -1734,18 +1738,20 @@ void LuaRuntime::BeginPlay(Scene* scene)
     }
 }
 
-void LuaRuntime::EndPlay(Scene* scene)
+void LuaRuntime::EndPlay(Scene* scene, Tilemap* map)
 {
     if (mGameEnv)
-        CallLua((*mGameEnv)["EndPlay"], scene);
+        CallLua((*mGameEnv)["EndPlay"], scene, map);
 
     if (mSceneEnv)
-        CallLua((*mSceneEnv)["EndPlay"], scene);
+        CallLua((*mSceneEnv)["EndPlay"], scene, map);
 
     mSceneEnv.reset();
     mEntityEnvs.clear();
     mScene = nullptr;
+    mTilemap = nullptr;
     (*mLuaState)["Scene"] = nullptr;
+    (*mLuaState)["Map"]   = nullptr;
 }
 
 void LuaRuntime::Tick(double game_time, double dt)
@@ -1880,11 +1886,11 @@ void LuaRuntime::BeginLoop()
             continue;
 
         if (mSceneEnv)
-            CallLua((*mSceneEnv)["SpawnEntity"], mScene, entity);
+            CallLua((*mSceneEnv)["SpawnEntity"], mScene, mTilemap, entity);
 
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
-            CallLua((*env)["BeginPlay"], entity, mScene);
+            CallLua((*env)["BeginPlay"], entity, mScene, mTilemap);
         }
 
         if (auto* animator = entity->GetAnimator())
@@ -1908,11 +1914,11 @@ void LuaRuntime::EndLoop()
          if (!entity->TestFlag(game::Entity::ControlFlags::Killed))
              continue;
          if (mSceneEnv)
-             CallLua((*mSceneEnv)["KillEntity"], mScene, entity);
+             CallLua((*mSceneEnv)["KillEntity"], mScene, mTilemap, entity);
 
          if (auto* env = GetTypeEnv(entity->GetClass()))
          {
-             CallLua((*env)["EndPlay"], entity, mScene);
+             CallLua((*env)["EndPlay"], entity, mScene, mTilemap);
          }
      }
 }
@@ -3544,6 +3550,85 @@ void BindGameLib(sol::state& L)
         }
     };
 
+    auto layer = table.new_usertype<TilemapLayer>("MapLayer");
+    layer["GetClassName"]     = &TilemapLayer::GetClassName;
+    layer["GetClassId"]       = &TilemapLayer::GetClassId;
+    layer["GetWidth"]         = &TilemapLayer::GetWidth;
+    layer["GetHeight"]        = &TilemapLayer::GetHeight;
+    layer["GetTileSizeScale"] = &TilemapLayer::GetTileSizeScaler;
+    layer["GetType"]          = [](TilemapLayer* map) { return base::ToString(map->GetType()); };
+
+
+    auto map = table.new_usertype<Tilemap>("Map");
+    map["GetClassName"]         = &Tilemap::GetClassName;
+    map["GetClassId"]           = &Tilemap::GetClassId;
+    map["GetNumLayers"]         = &Tilemap::GetNumLayers;
+    map["GetMapWidth"]          = &Tilemap::GetMapWidth;
+    map["GetMapHeight"]         = &Tilemap::GetMapHeight;
+    map["GetTileWidth"]         = &Tilemap::GetTileWidth;
+    map["GetTileHeight"]        = &Tilemap::GetTileHeight;
+    map["GetPerspective"]       = [](Tilemap& map) { return base::ToString(map.GetPerspective()); };
+    map["GetLayer"]             = (TilemapLayer&(Tilemap::*)(size_t))&Tilemap::GetLayer;
+    map["FindLayerByClassName"] = (TilemapLayer*(Tilemap::*)(const std::string&))&Tilemap::FindLayerByClassName;
+    map["FindLayerByClassId"]   = (TilemapLayer*(Tilemap::*)(const std::string&))&Tilemap::FindLayerByClassId;
+    map["MapToTile"]            = sol::overload(
+        [](Tilemap& map, TilemapLayer& layer, const glm::vec2& point) {
+            const auto tile_width = map.GetTileWidth() * layer.GetTileSizeScaler();
+            const auto tile_height = map.GetTileHeight() * layer.GetTileSizeScaler();
+            const int row = tile_height / tile_height;
+            const int col = tile_width / tile_width;
+            return std::make_tuple(row, col);
+        },
+        [](Tilemap& map, TilemapLayer& layer, const base::FPoint& point) {
+            const auto tile_width = map.GetTileWidth() * layer.GetTileSizeScaler();
+            const auto tile_height = map.GetTileHeight() * layer.GetTileSizeScaler();
+            const int row = tile_height / tile_height;
+            const int col = tile_width / tile_width;
+            return std::make_tuple(row, col);
+        },
+        [](Tilemap& map, TilemapLayer& layer, float x, float y) {
+            const auto tile_width = map.GetTileWidth() * layer.GetTileSizeScaler();
+            const auto tile_height = map.GetTileHeight() * layer.GetTileSizeScaler();
+            const int row = tile_height / tile_height;
+            const int col = tile_width / tile_width;
+            return std::make_tuple(row, col);
+        });
+    map["ClampRowCol"] = [](Tilemap& map, TilemapLayer& layer, int row, int col) {
+        const int max_cols = layer.GetWidth();
+        const int max_rows = layer.GetHeight();
+        row = math::clamp(0, max_rows-1, row);
+        col = math::clamp(0, max_cols-1, col);
+        return std::make_tuple(row, col);
+    };
+    map["MapPointFromScene"] = sol::overload(
+        [](Tilemap& map, const glm::vec2& point) {
+            const glm::vec2 ret = engine::SceneToTilePlane(glm::vec4{point.x, point.y, 0.0f, 1.0f}, map.GetPerspective());
+            return ret;
+        },
+        [](Tilemap& map, const base::FPoint& point) {
+            const glm::vec2 ret = engine::SceneToTilePlane(glm::vec4{point.GetX(), point.GetY(), 0.0f, 1.0f}, map.GetPerspective());
+            return base::FPoint(ret.x, ret.y);
+        });
+    map["MapPointToScene"] = sol::overload(
+        [](Tilemap& map, const glm::vec2& point) {
+            const glm::vec2 ret = engine::TilePlaneToScene(glm::vec4{point.x, point.y, 0.0f, 1.0f}, map.GetPerspective());
+            return ret;
+        },
+        [](Tilemap& map, const base::FPoint& point) {
+            const glm::vec2 ret = engine::TilePlaneToScene(glm::vec4{point.GetX(), point.GetY(), 0.0f, 1.0f}, map.GetPerspective());
+            return base::FPoint(ret.x, ret.y);
+        });
+    map["MapVectorFromScene"] = sol::overload(
+        [](Tilemap& map, const glm::vec2& vector) {
+            const glm::vec2 ret = engine::SceneToTilePlane(glm::vec4{vector.x, vector.y, 0.0f, 1.0f}, map.GetPerspective());
+            return ret;
+        });
+    map["MapVectorToScene"] = sol::overload(
+        [](Tilemap& map, const glm::vec2& vector) {
+            const glm::vec2 ret = engine::TilePlaneToScene(glm::vec4{vector.x, vector.y, 0.0f, 1.0f}, map.GetPerspective());
+            return ret;
+        });
+
     auto scene = table.new_usertype<Scene>("Scene",
        sol::meta_function::index,     &GetScriptVar<Scene>,
        sol::meta_function::new_index, &SetScriptVar<Scene>);
@@ -3553,6 +3638,7 @@ void BindGameLib(sol::state& L)
     scene["ListEntitiesByTag"] = [](Scene& scene, const std::string& tag) {
         return EntityList(scene.ListEntitiesByTag(tag));
     };
+    scene["GetMap"]                     = (Tilemap*(Scene::*)())&Scene::GetMap;
     scene["GetTime"]                    = &Scene::GetTime;
     scene["GetClassName"]               = &Scene::GetClassName;
     scene["GetClassId"]                 = &Scene::GetClassId;

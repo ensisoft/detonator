@@ -916,8 +916,8 @@ private:
                 DEBUG("Created tilemap instance");
             }
         }
-
-        mRuntime->BeginPlay(mScene.get());
+        mScene->SetMap(mTilemap.get());
+        mRuntime->BeginPlay(mScene.get(), mTilemap.get());
     }
     void OnAction(const engine::SuspendAction& action)
     {
@@ -931,7 +931,7 @@ private:
     {
         if (!mScene)
             return;
-        mRuntime->EndPlay(mScene.get());
+        mRuntime->EndPlay(mScene.get(), mTilemap.get());
         mScene.reset();
         mTilemap.reset();
     }

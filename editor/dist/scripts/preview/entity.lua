@@ -34,7 +34,7 @@ function StartGame()
     Game:SetViewport(base.FRect:new(-SurfaceWidth*0.5, -SurfaceHeight*0.5, SurfaceWidth, SurfaceHeight))
 end
 
-function BeginPlay(scene)
+function BeginPlay(scene, map)
     SpawnEntity()
 end
 

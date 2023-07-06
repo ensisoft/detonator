@@ -49,20 +49,20 @@ local selection_mode = SelectionMode.All
 local selection_method = SelectionMethod.Rectangle
 
 -- Called when the scene begins play.
-function BeginPlay(spatial_query_test)
+function BeginPlay(spatial_query_test, map)
 end
 
 -- Called when the scene ends play.
-function EndPlay(spatial_query_test)
+function EndPlay(spatial_query_test, map)
 end
 
 -- Called when a new entity has been spawned in the scene.
-function SpawnEntity(spatial_query_test, entity)
+function SpawnEntity(spatial_query_test, map, entity)
 
 end
 
 -- Called when an entity has been killed from the scene.
-function KillEntity(spatial_query_test, entity)
+function KillEntity(spatial_query_test, map, entity)
 
 end
 

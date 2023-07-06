@@ -5,7 +5,7 @@
 --
 --
 -- Called when the scene begins play.
-function BeginPlay(level)
+function BeginPlay(level, map)
     local num_items = 0
     local num_entities = level:GetNumEntities()
     for i = 0, num_entities - 1, 1 do
@@ -21,16 +21,16 @@ function BeginPlay(level)
 end
 
 -- Called when the scene ends play.
-function EndPlay(level)
+function EndPlay(level, map)
 end
 
 -- Called when a new entity has been spawned in the scene.
-function SpawnEntity(level, entity)
+function SpawnEntity(level, map, entity)
 
 end
 
 -- Called when an entity has been killed from the scene.
-function KillEntity(level, carcass)
+function KillEntity(level, map, carcass)
     local num_bricks = 0
     local num_entities = level:GetNumEntities()
     for i = 0, num_entities - 1, 1 do

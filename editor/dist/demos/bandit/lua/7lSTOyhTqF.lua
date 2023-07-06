@@ -1,16 +1,14 @@
 -- Entity 'Coin' script.
-
 -- This script will be called for every instance of 'Coin'
 -- in the scene during gameplay.
 -- You're free to delete functions you don't need.
-
 -- Called when the game play begins for an entity in the scene.
-function BeginPlay(coin, scene)
+function BeginPlay(coin, scene, map)
 
 end
 
 -- Called when the game play ends for an entity in the scene.
-function EndPlay(coin, scene)
+function EndPlay(coin, scene, map)
 
 end
 

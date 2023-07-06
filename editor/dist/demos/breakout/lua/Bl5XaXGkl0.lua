@@ -3,14 +3,14 @@
 -- in the scene during gameplay.
 -- You're free to delete functions you don't need.
 -- Called when the game play begins for an entity in the scene.
-function BeginPlay(powerup, scene)
+function BeginPlay(powerup, scene, map)
     local node = powerup:GetNode(0)
     local body = node:GetRigidBody()
     body:AdjustLinearVelocity(0.0, 2.0)
 end
 
 -- Called when the game play ends for an entity in the scene.
-function EndPlay(powerup_shrink, scene)
+function EndPlay(powerup_shrink, scene, map)
 
 end
 

@@ -1,16 +1,14 @@
 -- Entity 'Static Block' script.
-
 -- This script will be called for every instance of 'Static Block'
 -- in the scene during gameplay.
 -- You're free to delete functions you don't need.
-
 -- Called when the game play begins for an entity in the scene.
-function BeginPlay(static_block, scene)
+function BeginPlay(static_block, scene, map)
 
 end
 
 -- Called when the game play ends for an entity in the scene.
-function EndPlay(static_block, scene)
+function EndPlay(static_block, scene, map)
 
 end
 
@@ -47,15 +45,17 @@ end
 
 -- Called on mouse button press events.
 function OnMousePress(static_block, mouse)
-    if not mouse.over_scene then return end
+    if not mouse.over_scene then
+        return
+    end
 
     local node = static_block:GetNode(0)
     local rect = Scene:FindEntityNodeBoundingRect(static_block, node)
 
-    if not rect:TestPoint(util.ToPoint(mouse.scene_coord)) then 
-        return 
+    if not rect:TestPoint(util.ToPoint(mouse.scene_coord)) then
+        return
     end
-    static_block.dragging = true        
+    static_block.dragging = true
     Game:DebugPrint('Dragging ' .. static_block:GetName())
 end
 
@@ -66,10 +66,12 @@ end
 
 -- Called on mouse move events.
 function OnMouseMove(static_block, mouse)
-    if not mouse.over_scene then return end
+    if not mouse.over_scene then
+        return
+    end
     if not static_block.dragging then
-        return 
-    end       
+        return
+    end
     local node = static_block:GetNode(0)
     node:SetTranslation(mouse.scene_coord)
 end

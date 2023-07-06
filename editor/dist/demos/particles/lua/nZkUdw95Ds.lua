@@ -3,7 +3,7 @@
 -- in the scene during gameplay.
 -- You're free to delete functions you don't need.
 -- Called when the game play begins for an entity in the scene.
-function BeginPlay(my_entity, scene)
+function BeginPlay(my_entity, scene, map)
     local rocket = my_entity:FindNodeByClassName('Rocket')
     local body = rocket:GetRigidBody()
     local xdir = util.Random(-0.1, 0.1)
@@ -18,7 +18,7 @@ function BeginPlay(my_entity, scene)
 end
 
 -- Called when the game play ends for an entity in the scene.
-function EndPlay(my_entity, scene)
+function EndPlay(my_entity, scene, map)
 
 end
 

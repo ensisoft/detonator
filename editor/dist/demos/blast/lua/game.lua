@@ -179,7 +179,7 @@ function SaveGame()
     data.WriteJsonFile(json, state_json)
 end
 
-function BeginPlay(scene)
+function BeginPlay(scene, map)
     Game:DebugPrint('BeginPlay ' .. scene:GetClassName())
     if scene:GetClassName() == 'Menu' then
         GameState.state = States.Menu
@@ -189,7 +189,7 @@ function BeginPlay(scene)
     end
 end
 
-function EndPlay(scene)
+function EndPlay(scene, map)
     Game:DebugPrint('EndPlay' .. scene:GetClassName())
 end
 

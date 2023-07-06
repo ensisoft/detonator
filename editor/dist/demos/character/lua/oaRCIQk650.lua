@@ -33,11 +33,11 @@ function SpearThrust(combat_dummy)
 end
 
 -- Called once when the game play begins for the entity in the scene.
-function BeginPlay(combat_dummy, scene)
+function BeginPlay(combat_dummy, scene, map)
 end
 
 -- Called once when the game play ends for the entity in the scene.
-function EndPlay(combat_dummy, scene)
+function EndPlay(combat_dummy, scene, map)
 end
 
 -- Called on every low frequency game tick. The tick frequency is

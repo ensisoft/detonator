@@ -1,16 +1,14 @@
 -- Entity 'FlappyBird' script.
-
 -- This script will be called for every instance of 'FlappyBird'
 -- in the scene during gameplay.
 -- You're free to delete functions you don't need.
-
 -- Called when the game play begins for the entity in the scene.
-function BeginPlay(flappybird, scene)
+function BeginPlay(flappybird, scene, map)
 
 end
 
 -- Called when the game play ends for the entity in the scene.
-function EndPlay(flappybird, scene)
+function EndPlay(flappybird, scene, map)
 
 end
 
