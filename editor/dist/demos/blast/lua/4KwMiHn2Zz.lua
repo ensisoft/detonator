@@ -5,7 +5,7 @@
 require('common')
 
 -- Called when the game play begins for a scene.
-function BeginPlay(bullet, scene)
+function BeginPlay(bullet, scene, map)
 end
 
 -- Called on every low frequency game tick.

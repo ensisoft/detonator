@@ -1,22 +1,19 @@
 -- Entity 'Ball' script.
-
 -- This script will be called for every instance of 'Ball'
 -- in the scene during gameplay.
 -- You're free to delete functions you don't need.
-
 -- keep the ball's "speed" constant but allow changes 
 -- in direction.
 -- Setting the velocity directly can cause problems 
 -- in the physics simulation. An alternative way 
 -- is to apply impulses as appropriate.
-
 -- *physics world* units per second, i.e. in m/s
 local _ball_speed = 10
 
 local _adjust_velocity = false
 
 -- Called when the game play begins for an entity in the scene.
-function BeginPlay(ball, scene)
+function BeginPlay(ball, scene, map)
     local node = ball:FindNodeByClassName('Body')
     local body = node:GetRigidBody()
     local forward = scene:MapVectorFromEntityNode(ball, node, game.X)
@@ -25,7 +22,7 @@ function BeginPlay(ball, scene)
 end
 
 -- Called when the game play ends for an entity in the scene.
-function EndPlay(ball, scene)
+function EndPlay(ball, scene, map)
 
 end
 
@@ -36,7 +33,7 @@ end
 
 -- Called on every iteration of the game loop.
 function Update(ball, game_time, dt)
-    if not _adjust_velocity then 
+    if not _adjust_velocity then
         return
     end
     local node = ball:FindNodeByClassName('Body')

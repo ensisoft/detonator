@@ -1,14 +1,12 @@
 -- Entity script.
-
 -- This script will be called for every assigned entity instance
 -- You're free to delete functions you don't need.
-
 -- Called when the game play begins for an entity in the scene.
-function BeginPlay(entity, scene)
+function BeginPlay(entity, scene, map)
 end
 
 -- Called when the game play ends for an entity in the scene.
-function EndPlay(entity, scene)
+function EndPlay(entity, scene, map)
 end
 
 -- Called on every low frequency game tick.
@@ -43,11 +41,11 @@ end
 -- Called on mouse button press events.
 function OnMousePress(entity, mouse)
     if mouse.over_scene == false then
-        return 
+        return
     end
     local scene = entity:GetScene()
-    local body  = entity:FindNodeByClassName('Body')
-    local rect  = scene:FindEntityNodeBoundingRect(entity, body)
+    local body = entity:FindNodeByClassName('Body')
+    local rect = scene:FindEntityNodeBoundingRect(entity, body)
     if rect:TestPoint(util.ToPoint(mouse.scene_coord)) then
         entity.dragging = true
     end
@@ -60,7 +58,7 @@ end
 
 -- Called on mouse move events.
 function OnMouseMove(entity, mouse)
-    if entity.dragging == false then 
+    if entity.dragging == false then
         return
     end
     local body = entity:FindNodeByClassName('Body')

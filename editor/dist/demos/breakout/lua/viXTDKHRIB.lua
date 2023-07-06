@@ -36,12 +36,12 @@ function DropPowerup(brick)
 end
 
 -- Called when the game play begins for an entity in the scene.
-function BeginPlay(brick, scene)
+function BeginPlay(brick, scene, map)
 
 end
 
 -- Called when the game play ends for an entity in the scene.
-function EndPlay(brick, scene)
+function EndPlay(brick, scene, map)
 
 end
 

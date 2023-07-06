@@ -1,16 +1,14 @@
 -- Entity 'StoneBlock' script.
-
 -- This script will be called for every instance of 'StoneBlock'
 -- in the scene during gameplay.
 -- You're free to delete functions you don't need.
-
 -- Called when the game play begins for an entity in the scene.
-function BeginPlay(stoneblock, scene)
+function BeginPlay(stoneblock, scene, map)
 
 end
 
 -- Called when the game play ends for an entity in the scene.
-function EndPlay(stoneblock, scene)
+function EndPlay(stoneblock, scene, map)
 
 end
 
@@ -31,7 +29,7 @@ end
 
 -- Called on collision events with other objects.
 function OnBeginContact(stoneblock, node, other, other_node)
-    if other:GetClassName() == 'Player' then 
+    if other:GetClassName() == 'Player' then
         local body = node:GetRigidBody()
         stoneblock:PlayAnimationByName('Fall Down')
     end

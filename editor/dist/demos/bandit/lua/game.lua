@@ -53,7 +53,7 @@ function StartGame()
 end
 
 -- Called when the scene begins to play
-function BeginPlay(scene)
+function BeginPlay(scene, map)
     if scene:GetClassName() == 'Level 0' then
         local ui = Game:GetTopUI()
         if ui == nil then
@@ -76,7 +76,7 @@ function BeginPlay(scene)
 end
 
 -- Called when the scene play ends.
-function EndPlay(scene)
+function EndPlay(scene, map)
 
 end
 

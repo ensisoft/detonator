@@ -1,26 +1,24 @@
 -- Scene 'Game' script.
-
 -- This script will be called for every instance of 'Game'
 -- during gameplay.
 -- You're free to delete functions you don't need.
-
 -- Called when the scene begins play.
-function BeginPlay(game)
+function BeginPlay(game, map)
     local player = game:FindEntityByInstanceName('Player')
     player:PlayAnimationByName('Fly In')
 end
 
 -- Called when the scene ends play.
-function EndPlay(game)
+function EndPlay(game, map)
 end
-            
+
 -- Called when a new entity has been spawned in the scene.
-function SpawnEntity(game, entity)
+function SpawnEntity(game, map, entity)
 
 end
 
 -- Called when an entity has been killed from the scene.
-function KillEntity(game, entity)
+function KillEntity(game, map, entity)
 
 end
 

@@ -14,7 +14,7 @@ end
 
 -- Called as a response to Game:Play when an instance
 -- of the scene has been created and the game play begins.
-function BeginPlay(scene)
+function BeginPlay(scene, map)
     Game:DebugPrint('Press Space to fly the bird!')
     Audio:SetMusicEffect('MenuMusic', 'FadeOut', 2000)
     Audio:KillMusic('MenuMusic', 2000)
@@ -22,7 +22,7 @@ end
 
 
 -- Called as a response to Game:EndPlay when the game play ends.
-function EndPlay(scene)
+function EndPlay(scene, map)
     Game:DebugPrint('EndPlay called.')
     Game:OpenUI('MainMenu')
     Audio:KillMusic('MenuMusic')

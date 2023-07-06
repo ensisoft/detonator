@@ -8,21 +8,21 @@ local _mouse_pos = nil
 local _raycast_mode = 'All'
 
 -- Called when the scene begins play.
-function BeginPlay(phys_test_5)
+function BeginPlay(phys_test_5, map)
 
 end
 
 -- Called when the scene ends play.
-function EndPlay(phys_test_5)
+function EndPlay(phys_test_5, map)
 end
 
 -- Called when a new entity has been spawned in the scene.
-function SpawnEntity(phys_test_5, entity)
+function SpawnEntity(phys_test_5, map, entity)
 
 end
 
 -- Called when an entity has been killed from the scene.
-function KillEntity(phys_test_5, entity)
+function KillEntity(phys_test_5, map, entity)
 
 end
 

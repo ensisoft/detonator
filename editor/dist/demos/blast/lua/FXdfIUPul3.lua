@@ -32,7 +32,7 @@ function CheckBulletAction(ship_pos, bullet_pos)
 end
 
 -- Called when the game play begins for a scene.
-function BeginPlay(ship2, scene)
+function BeginPlay(ship2, scene, map)
 
 end
 

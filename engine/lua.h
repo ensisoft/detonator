@@ -62,8 +62,8 @@ namespace engine
         virtual void StartGame() override;
         virtual void SaveGame() override;
         virtual void StopGame() override;
-        virtual void BeginPlay(game::Scene* scene) override;
-        virtual void EndPlay(game::Scene* scene) override;
+        virtual void BeginPlay(game::Scene* scene, game::Tilemap* map) override;
+        virtual void EndPlay(game::Scene* scene, game::Tilemap* map) override;
         virtual void Tick(double game_time, double dt) override;
         virtual void Update(double game_time, double dt) override;
         virtual void PostUpdate(double game_time) override;
@@ -114,6 +114,7 @@ namespace engine
         std::unique_ptr<sol::environment> mGameEnv;
         std::queue<Action> mActionQueue;
         game::Scene* mScene = nullptr;
+        game::Tilemap* mTilemap = nullptr;
         uik::Window* mWindow = nullptr;
         FRect mView;
         bool mEditingMode = false;

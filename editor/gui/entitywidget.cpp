@@ -3777,11 +3777,11 @@ QString source(R"(
 --
 
 -- Called once when the game play begins for the entity in the scene.
-function BeginPlay(%1, scene)
+function BeginPlay(%1, scene, map)
 end
 
 -- Called once when the game play ends for the entity in the scene.
-function EndPlay(%1, scene)
+function EndPlay(%1, scene, map)
 end
 
 -- Called on every low frequency game tick. The tick frequency is

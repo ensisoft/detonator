@@ -99,7 +99,7 @@ namespace engine
         // action is processed the engine creates an instance of the scene
         // and then calls BeginPlay. The Engine will maintain the ownership
         // of the scene for the duration of the game play.
-        virtual void BeginPlay(game::Scene* scene) = 0;
+        virtual void BeginPlay(game::Scene* scene, game::Tilemap* map) = 0;
         // Begin one iteration of the game update loop. In the update the loop
         // the sequence of calls are:
         // BeginLoop, Update, Tick, PostUpdate, EndLoop
@@ -137,7 +137,7 @@ namespace engine
         virtual void ResumePlay()
         {}
         // Called after StopAction has taken place.
-        virtual void EndPlay(game::Scene* scene) = 0;
+        virtual void EndPlay(game::Scene* scene, game::Tilemap* map) = 0;
         // todo:
         virtual void SaveGame() = 0;
         // todo:

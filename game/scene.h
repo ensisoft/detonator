@@ -45,6 +45,8 @@
 
 namespace game
 {
+    class Tilemap;
+
     // EntityPlacement holds the information for placing an entity
     // into the scene when the actual scene instance is created.
     // In other words the EntityPlacement objects in the SceneClass
@@ -735,6 +737,13 @@ namespace game
         inline void QuerySpatialNodes(const FPoint& a, const FPoint& b, std::vector<const EntityNode*>* result, SpatialQueryMode mode = SpatialQueryMode::All) const
         { query_spatial_nodes_by_line(a, b, result, mode); }
 
+        const Tilemap* GetMap() const noexcept
+        { return mMap; }
+        Tilemap* GetMap() noexcept
+        { return mMap; }
+        void SetMap(Tilemap* map) noexcept
+        { mMap = map; }
+
         const SpatialIndex* GetSpatialIndex() const noexcept
         { return mSpatialIndex.get(); }
         // Get the scene's render tree (scene graph). The render tree defines
@@ -824,6 +833,8 @@ namespace game
         std::unordered_set<Entity*> mKillSet;
         // Spatial index for object (entity node) queries (if any)
         std::unique_ptr<SpatialIndex> mSpatialIndex;
+        // for convenience..
+        Tilemap* mMap = nullptr;
     };
 
     std::unique_ptr<Scene> CreateSceneInstance(std::shared_ptr<const SceneClass> klass);

@@ -30,7 +30,7 @@ end
 
 -- Called as a response to Game:Play when an instance
 -- of the scene has been created and the game play begins.
-function BeginPlay(scene)
+function BeginPlay(scene, map)
     Game:DebugPrint('BeginPlay called.')
     if _State.current_state == _GameStates.Play then
         SpawnBall()
@@ -38,7 +38,7 @@ function BeginPlay(scene)
 end
 
 -- Called as a response to Game:EndPlay when the game play ends.s
-function EndPlay(scene)
+function EndPlay(scene, map)
     Game:DebugPrint('EndPlay called.')
 end
 

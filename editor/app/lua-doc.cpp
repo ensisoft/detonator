@@ -1333,6 +1333,42 @@ void InitLuaDoc()
     DOC_METHOD_2("void", "ForEach", "Call a callback function one ach entity in the list. Any optional argument is passed as-is to the callback.",
                  "function", "callback", "...", "...");
 
+    DOC_TABLE("game.MapLayer");
+    DOC_METHOD_0("string", "GetClassName", "Get the map layer's class name.");
+    DOC_METHOD_0("string", "GetClassId", "Get the map layer's class ID.");
+    DOC_METHOD_0("unsigned", "GetWidth" ,"Get the width  of this layer in tiles. If the layer has a scaling factor the layer width may be different from the map width.");
+    DOC_METHOD_0("unsigned", "GetHeight" ,"Get the width  of this layer in tiles. If the layer has a scaling factor the layer height may be different from the map height.");
+    DOC_METHOD_0("float", "GetTileSizeScale", "Get the scaling factor for scaling the layer tiles to world units. I.e. the layer's tile width/height is the map tile width/height * scale.");
+
+    DOC_TABLE("game.Map");
+    DOC_METHOD_0("string", "GetClassName", "Get the map's class name.");
+    DOC_METHOD_0("string", "GetClassId", "Get map's class ID.");
+    DOC_METHOD_0("unsigned", "GetNumLayers", "Get the number of layers in the map.");
+    DOC_METHOD_0("unsigned", "GetMapWidth", "Get the width of the map in tiles.");
+    DOC_METHOD_0("unsigned", "GetMapHeight", "Get the height of the map in tiles.");
+    DOC_METHOD_0("float", "GetTileWidth", "Get the width of the tile in units.");
+    DOC_METHOD_0("float", "GetTileHeight", "Get the height of the tile in units.");
+    DOC_METHOD_1("game.MapLayer", "GetLayer", "Get a map layer at the given index. The index must be valid.", "unsigned", "index");
+    DOC_METHOD_1("number, number", "MapToTile", "Map a point on the tile layer plane to a tile (row, col) coordinate.<br>"
+                                                "The result is *not* clamped, thus it's possible to produce negative values or row/col that would be out of bounds on tile grid.<br>"
+                                                "Use ClampRowCol to clamp the coordinates to a valid range.",
+                                                "glm.vec2|base.FPoint", "point");
+    DOC_METHOD_2("number, number", "MapToTile", "Map a point on the tile layer plane to a tile (row, col) coordinate.<br>"
+                                                "The result is *not* clamped, thus it's possible to produce negative values or row/col that would be out of bounds on tile grid.<br>"
+                                                "Use ClampRowCol to clamp the coordinates to a valid range.",
+                 "float", "x", "float", "y");
+    DOC_METHOD_2("unsigned,unsigned", "ClampRowCol", "Clamp a row and a column to a valid range on the map layer.",
+                                                     "int", "row", "int", "col");
+    DOC_METHOD_1("glm.vec2|base.FPoint", "MapPointFromScene", "Map a point from the scene plane to the map plane.",
+                 "glm.vec2|base.FPoint", "point");
+    DOC_METHOD_1("glm.vec2|base.FPoint", "MapPointToScene", "Map a point from the map plane to scene.",
+                 "glm.vec2|base.FPoint", "point");
+    DOC_METHOD_1("glm.vec2", "MapVectorFromScene", "Map a direction vector from the scene plane to the map plane.",
+                 "glm.vec2", "vector");
+    DOC_METHOD_1("glm.vec2", "MapVectorToScene", "Map a direction vector from the map plan plane to scene.",
+                 "glm.vec2", "vector");
+
+
     DOC_TABLE("game.Scene");
     DOC_METHOD_0("bool|float|string|int|vec2", "index", "Lua index meta method.<br>"
                                                         "The scene's script variables are accessible as properties of the scene object.<br>"
@@ -1404,6 +1440,7 @@ void InitLuaDoc()
                  "game.Entity", "entity", "game.EntityNode", "node", "base.FPoint", "point");
     DOC_METHOD_3("glm.vec2", "MapPointFromEntityNode", "Map a point relative to entity node coordinate space into world/scene space.",
                  "game.Entity", "entity", "game.EntityNode", "node", "glm.vec2", "point");
+    DOC_METHOD_0("game.Map", "GetMap", "Get the associated tilemap if any. If there's no current map nil is returned.");
     DOC_METHOD_0("float", "GetTime", "Get the scene's current time.");
     DOC_METHOD_0("string", "GetClassName", "Get the name of the scene's class.");
     DOC_METHOD_0("string", "GetClassId", "Get the ID of the scene's class.");

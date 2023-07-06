@@ -4,7 +4,7 @@
 -- You're free to delete functions you don't need.
 --
 -- Called once when the game play begins for the entity in the scene.
-function BeginPlay(arrow, scene)
+function BeginPlay(arrow, scene, map)
     -- rotate to proper direction
     local dir = glm.normalize(arrow.direction)
     local angle = glm.dot(dir, glm.vec2:new(1.0, 0.0))
@@ -19,7 +19,7 @@ function BeginPlay(arrow, scene)
 end
 
 -- Called once when the game play ends for the entity in the scene.
-function EndPlay(arrow, scene)
+function EndPlay(arrow, scene, map)
 end
 
 -- Called on every low frequency game tick. The tick frequency is

@@ -6,7 +6,7 @@
 local random = util.RandomEngine:new()
 random:Seed(7272)
 
-function BeginPlay(ball, scene)
+function BeginPlay(ball, scene, map)
     local x = random:Random(-10.0, 10.0)
     local y = random:Random(-10.0, 10.0)
 
@@ -17,7 +17,7 @@ function BeginPlay(ball, scene)
 end
 
 -- Called when the game play ends for an entity in the scene.
-function EndPlay(kinematic_constant_speed_ball, scene)
+function EndPlay(kinematic_constant_speed_ball, scene, map)
 
 end
 

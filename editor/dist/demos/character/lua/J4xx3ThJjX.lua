@@ -20,7 +20,7 @@ function DaggerStab(player)
 end
 
 -- Called once when the game play begins for the entity in the scene.
-function BeginPlay(entity, scene)
+function BeginPlay(entity, scene, map)
 
     -- direction and velocity are separate vectors because
     -- velocity can be a zero vector, i.e. player isn't moving/walking
@@ -34,7 +34,7 @@ function BeginPlay(entity, scene)
 end
 
 -- Called once when the game play ends for the entity in the scene.4
-function EndPlay(entity, scene)
+function EndPlay(entity, scene, map)
 end
 
 -- Called on every low frequency game tick. The tick frequency is

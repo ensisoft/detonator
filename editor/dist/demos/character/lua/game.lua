@@ -45,12 +45,12 @@ end
 
 -- Called as a response to Game:Play when an instance
 -- of the scene has been created and the game play begins.
-function BeginPlay(scene)
+function BeginPlay(scene, map)
     Game:DebugPrint('BeginPlay called.')
 end
 
 -- Called as a response to Game:EndPlay when the game play ends.
-function EndPlay(scene)
+function EndPlay(scene, map)
     Game:DebugPrint('EndPlay called.')
 end
 

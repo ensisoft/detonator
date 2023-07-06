@@ -16,12 +16,12 @@ function ClipVelocity(velo, min, max)
 end
 
 -- Called when the game play begins for an entity in the scene.
-function BeginPlay(player, scene)
+function BeginPlay(player, scene, map)
 
 end
 
 -- Called when the game play ends for an entity in the scene.
-function EndPlay(player, scene)
+function EndPlay(player, scene, map)
 
 end
 

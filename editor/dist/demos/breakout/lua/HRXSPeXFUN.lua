@@ -26,12 +26,12 @@ function EndPowerup(paddle)
     powerup_time = 0
 end
 
-function BeginPlay(paddle, scene)
+function BeginPlay(paddle, scene, map)
 
 end
 
 -- Called when the game play ends for an entity in the scene.
-function EndPlay(paddle, scene)
+function EndPlay(paddle, scene, map)
 
 end
 

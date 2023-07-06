@@ -5,11 +5,11 @@ local tick_count = 0
 -- in the scene during gameplay.
 -- You're free to delete functions you don't need.
 -- Called when the game play begins for an entity in the scene.
-function BeginPlay(firework, scene)
+function BeginPlay(firework, scene, map)
 end
 
 -- Called when the game play ends for an entity in the scene.
-function EndPlay(firework, scene)
+function EndPlay(firework, scene, map)
 end
 
 -- Called on every low frequency game tick.
@@ -20,12 +20,14 @@ end
 function Update(firework, game_time, dt)
     if tick_count % 7 == 0 then
         local index = util.Random(0, 1)
-        local launchbox = firework:FindNodeByClassName('LaunchBox' .. tostring(index))
+        local launchbox = firework:FindNodeByClassName('LaunchBox' ..
+                                                           tostring(index))
         local scene = firework:GetScene()
 
         local args = game.EntityArgs:new()
         args.class = ClassLib:FindEntityClassByName('Firework Rocket')
-        args.position = scene:MapPointFromEntityNode(firework, launchbox, glm.vec2:new(0, 0))
+        args.position = scene:MapPointFromEntityNode(firework, launchbox,
+                                                     glm.vec2:new(0, 0))
         scene:SpawnEntity(args, true)
     end
     tick_count = tick_count + 1

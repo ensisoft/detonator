@@ -3,7 +3,7 @@
 -- during gameplay.
 -- You're free to delete functions you don't need.
 -- Called when the scene begins play.
-function BeginPlay(mainmenu)
+function BeginPlay(mainmenu, map)
     local bricks = mainmenu:ListEntitiesByClassName('Yellow Brick')
 
     while bricks:HasNext() do
@@ -15,16 +15,16 @@ function BeginPlay(mainmenu)
 end
 
 -- Called when the scene ends play.
-function EndPlay(mainmenu)
+function EndPlay(mainmenu, map)
 end
 
 -- Called when a new entity has been spawned in the scene.
-function SpawnEntity(mainmenu, entity)
+function SpawnEntity(mainmenu, map, entity)
 
 end
 
 -- Called when an entity has been killed from the scene.
-function KillEntity(mainmenu, entity)
+function KillEntity(mainmenu, map, entity)
 
 end
 
