@@ -61,7 +61,24 @@ namespace {
 
         return glm::dot(planeOrig - orig, planeNormal) / angle;
     }
-}
+
+    glm::mat4 CreateDimetricModelTransform()
+    {
+        constexpr const static glm::vec3 WorldUp = {0.0f, 1.0f, 0.0f};
+        constexpr const static float Yaw   = -90.0f - 45.0f;
+        constexpr const static float Pitch = -30.0f;
+
+        glm::vec3 position = {0.0f, 0.0f, 0.0f};
+
+        glm::vec3 direction;
+        direction.x = std::cos(glm::radians(Yaw)) * std::cos(glm::radians(Pitch));
+        direction.y = std::sin(glm::radians(Pitch));
+        direction.z = std::sin(glm::radians(Yaw)) * std::cos(glm::radians(Pitch));
+        direction = glm::normalize(direction);
+
+        return glm::lookAt(position, position + direction, WorldUp);
+    }
+} // namespace
 
 namespace engine
 {
@@ -109,13 +126,14 @@ glm::mat4 CreateModelMatrix(game::Perspective perspective)
 {
     if (perspective == game::Perspective::AxisAligned)
     {
-        static Camera cam(perspective);
-        return cam.GetViewMatrix();
+        return glm::mat4 { 1.0f };
     }
     else if (perspective == game::Perspective::Dimetric)
     {
-        static Camera cam(perspective);
-        return cam.GetViewMatrix();
+        const static auto dimetric_rotation = CreateDimetricModelTransform();
+        const static auto plane_rotation = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3 { 1.0f, 0.0f, 0.0f });
+        const static auto model_matrix = dimetric_rotation * plane_rotation;
+        return model_matrix;
     }
     else BUG("Unknown perspective");
     return glm::mat4(1.0f);
@@ -135,31 +153,20 @@ glm::mat4 CreateModelViewMatrix(game::Perspective perspective,
     // is used to transform the vertices the bar operation will take place
     // first, then followed by foo.
 
-    glm::mat4 mat(1.0f);
+    glm::mat4 view(1.0f);
     if (perspective == game::Perspective::Dimetric)
     {
-        mat = glm::scale(mat, glm::vec3{camera_scale.x, camera_scale.y, 1.0f});
-        mat = glm::translate(mat, glm::vec3{-camera_pos.x, camera_pos.y, 0.0f});
-        mat = glm::rotate(mat, glm::radians(-camera_rotation), glm::vec3{0.0f, 0.0f, 1.0f});
+        view = glm::scale(view, glm::vec3{camera_scale.x, camera_scale.y, 1.0f});
+        view = glm::translate(view, glm::vec3{-camera_pos.x, camera_pos.y, 0.0f});
+        view = glm::rotate(view, glm::radians(-camera_rotation), glm::vec3{0.0f, 0.0f, 1.0f});
     }
     else if (perspective == game::Perspective::AxisAligned)
     {
-        mat = glm::scale(mat, glm::vec3{camera_scale.x, camera_scale.y, 1.0f});
-        mat = glm::translate(mat, glm::vec3{-camera_pos.x, -camera_pos.y, 0.0f});
-        mat = glm::rotate(mat, glm::radians(camera_rotation), glm::vec3{0.0f, 0.0f, 1.0f});
+        view = glm::scale(view, glm::vec3{camera_scale.x, camera_scale.y, 1.0f});
+        view = glm::translate(view, glm::vec3{-camera_pos.x, -camera_pos.y, 0.0f});
+        view = glm::rotate(view, glm::radians(camera_rotation), glm::vec3{0.0f, 0.0f, 1.0f});
     }
-
-    mat *= CreateModelMatrix(perspective);
-
-    if (perspective == game::Perspective::Dimetric)
-    {
-        mat = glm::rotate(mat, glm::radians(90.0f), glm::vec3{1.0f, 0.0f, 0.0f});
-    }
-    else if (perspective == game::Perspective::AxisAligned)
-    {
-
-    }
-    return mat;
+    return view * CreateModelMatrix(perspective);
 }
 
 glm::vec4 WindowToWorldPlane(const glm::mat4& view_to_clip,
