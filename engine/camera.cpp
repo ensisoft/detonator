@@ -28,7 +28,7 @@
 //          the current drawing functionality is on the XY plane so then there'd still have to be
 //          some transformation for mapping the draws onto some other plane.
 //
-// TODO: See if the same orthographic perspective matrix could be used in both cases.
+// DONE: See if the same orthographic perspective matrix could be used in both cases.
 
 // TODO: Solve the depth problem with dimetric projection. Currently the way the camera moves
 //       the fact that the camera and the plane are not perpendicular the plane will at some
@@ -89,12 +89,7 @@ glm::mat4 CreateProjectionMatrix(game::Perspective perspective, const glm::vec2&
 {
     const auto half_width  = surface_size.x*0.5f;
     const auto half_height = surface_size.y*0.5f;
-    if (perspective == game::Perspective::AxisAligned)
-        return glm::ortho(-half_width, half_width, half_height, -half_height, -1.0f, 1.0f);
-    else if (perspective == game::Perspective::Dimetric)
-        return glm::ortho(-half_width, half_width, -half_height, half_height, -10000.0f, 10000.0f);
-    else BUG("Unknown perspective");
-    return glm::mat4(1.0f);
+    return glm::ortho(-half_width, half_width, -half_height, half_height, -10000.0f, 10000.0f);
 }
 
 glm::mat4 CreateProjectionMatrix(game::Perspective perspective, const game::FRect& viewport)
@@ -110,12 +105,7 @@ glm::mat4 CreateProjectionMatrix(game::Perspective perspective, const game::FRec
     const auto top    = ypos;
     const auto bottom = ypos + height;
 
-    if (perspective == game::Perspective::AxisAligned)
-        return glm::ortho(left, right, bottom, top, -1.0f, 1.0f);
-    else if (perspective == game::Perspective::Dimetric)
-        return glm::ortho(left, right, -bottom, -top, -10000.0f, 10000.0f);
-    else BUG("Unknown perspective");
-    return glm::mat4(1.0f);
+    return glm::ortho(left, right, -bottom, -top, -10000.0f, 10000.0f);
 }
 glm::mat4 CreateProjectionMatrix(game::Perspective perspective, float surface_width, float surface_height)
 {
@@ -126,7 +116,8 @@ glm::mat4 CreateModelMatrix(game::Perspective perspective)
 {
     if (perspective == game::Perspective::AxisAligned)
     {
-        return glm::mat4 { 1.0f };
+        const static auto model_rotation = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3{1.0f,  0.0f, 0.0f});
+        return model_rotation;
     }
     else if (perspective == game::Perspective::Dimetric)
     {
@@ -154,18 +145,10 @@ glm::mat4 CreateModelViewMatrix(game::Perspective perspective,
     // first, then followed by foo.
 
     glm::mat4 view(1.0f);
-    if (perspective == game::Perspective::Dimetric)
-    {
-        view = glm::scale(view, glm::vec3{camera_scale.x, camera_scale.y, 1.0f});
-        view = glm::translate(view, glm::vec3{-camera_pos.x, camera_pos.y, 0.0f});
-        view = glm::rotate(view, glm::radians(-camera_rotation), glm::vec3{0.0f, 0.0f, 1.0f});
-    }
-    else if (perspective == game::Perspective::AxisAligned)
-    {
-        view = glm::scale(view, glm::vec3{camera_scale.x, camera_scale.y, 1.0f});
-        view = glm::translate(view, glm::vec3{-camera_pos.x, -camera_pos.y, 0.0f});
-        view = glm::rotate(view, glm::radians(camera_rotation), glm::vec3{0.0f, 0.0f, 1.0f});
-    }
+    view = glm::scale(view, glm::vec3{camera_scale.x, camera_scale.y, 1.0f});
+    view = glm::translate(view, glm::vec3{-camera_pos.x, camera_pos.y, 0.0f});
+    view = glm::rotate(view, glm::radians(-camera_rotation), glm::vec3{0.0f, 0.0f, 1.0f});
+
     return view * CreateModelMatrix(perspective);
 }
 
