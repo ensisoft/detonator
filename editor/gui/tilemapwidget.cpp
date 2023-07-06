@@ -2080,6 +2080,13 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
     tile_painter.SetViewport(0, 0, width, height);
     tile_painter.SetSurfaceSize(width, height);
 
+    gfx::Painter scene_painter(painter.GetDevice());
+    scene_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, game::Perspective::AxisAligned));
+    scene_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, game::Perspective::AxisAligned));
+    scene_painter.SetPixelRatio({1.0f*xs*zoom, 1.0f*ys*zoom});
+    scene_painter.SetViewport(0, 0, width, height);
+    scene_painter.SetSurfaceSize(width, height);
+
     // draw the background grid in tilespace and project with the map perspective
     if (GetValue(mUI.chkShowGrid))
     {
@@ -2197,17 +2204,31 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         points.push_back({tile_width*map_width, tile_height*map_height, 0.0f});
         points.push_back({0.0f, tile_height*map_height, 0.0f});
 
-        for (size_t i=0; i<points.size(); ++i)
+        for (const auto& point : points)
         {
-            points[i] = engine::ProjectPoint(tile_painter.GetProjMatrix(),
-                                             tile_painter.GetViewMatrix(),
-                                             painter.GetProjMatrix(),
-                                             painter.GetViewMatrix(),
-                                             points[i]);
-            gfx::Transform model;
-            model.Scale(10.0f, 10.0f);
-            model.Translate(points[i].x-5.0f, points[i].y-5.0f);
-            painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+            // tile plane -> painter coordinate space projection.
+            {
+
+                const auto& p = engine::ProjectPoint(tile_painter.GetProjMatrix(),
+                                                     tile_painter.GetViewMatrix(),
+                                                     painter.GetProjMatrix(),
+                                                     painter.GetViewMatrix(),
+                                                     point);
+                gfx::Transform model;
+                model.Scale(10.0f, 10.0f);
+                model.Translate(p.x, p.y);
+                model.Translate(-5.0f, -5.0f);
+                painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+            }
+
+            {
+                const auto& p = engine::TilePlaneToScene(glm::vec4{point.x, point.y, 0.0f, 1.0f}, mState.klass->GetPerspective());
+                gfx::Transform model;
+                model.Scale(10.0f, 10.0f);
+                model.Translate(p.x, p.y);
+                model.Translate(-5.0f, -5.0f);
+                scene_painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
+            }
         }
     }
 #endif
