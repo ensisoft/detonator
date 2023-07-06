@@ -271,6 +271,28 @@ glm::vec4 TilePlaneToScene(const glm::mat4& scene_view_to_clip,
     return glm::inverse(scene_view_to_clip * scene_world_to_view) * glm::vec4{clip_space, depth_value_at_near_plane, 1.0f};
 }
 
+glm::vec4 PlaneToPlane(const glm::vec4& pos, game::Perspective src, game::Perspective dst)
+{
+    if (src == dst)
+        return pos;
+
+    const auto& src_plane_to_world = CreateModelMatrix(src);
+    const auto& dst_plane_to_world = CreateModelMatrix(dst);
+    const auto& world_pos = src_plane_to_world * pos;
+
+    const auto dst_plane_origin = dst_plane_to_world * glm::vec4{0.0f, 0.0f, 0.0f, 0.0f};
+    const auto dst_plane_normal = dst_plane_to_world * glm::vec4{0.0f, 0.0f, 1.0f, 0.0f};
+
+    const auto ray_origin = world_pos;
+    const auto ray_direction = -dst_plane_normal;
+
+    const auto intersection_distance = IntersectRayPlane(ray_origin,
+                                                         ray_direction,
+                                                         dst_plane_origin,
+                                                         dst_plane_normal);
+    const auto intersection_point_world = ray_origin + ray_direction * intersection_distance;
+    return glm::inverse(dst_plane_to_world) * intersection_point_world;
+}
 
 glm::vec4 WindowToWorld(const glm::mat4& view_to_clip,
                         const glm::mat4& world_to_view,
