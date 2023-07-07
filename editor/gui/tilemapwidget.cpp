@@ -412,8 +412,6 @@ public:
     }
     virtual void Render(gfx::Painter& painter, gfx::Painter& tile_painter) const override
     {
-        painter.ResetViewMatrix();
-        painter.SetPixelRatio(glm::vec2{1.0f, 1.0f});
 
         // This matrix will project a coordinate in isometric tile world space into
         // 2D screen space/surface coordinate.
@@ -2184,8 +2182,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
 
     if (mCurrentTool)
     {
-        gfx::Painter p(painter);
-        mCurrentTool->Render(p, tile_painter);
+        mCurrentTool->Render(scene_painter, tile_painter);
     }
 
 
