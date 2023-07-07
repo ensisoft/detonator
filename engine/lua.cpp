@@ -3979,22 +3979,13 @@ void BindGameLib(sol::state& L)
             }
     );
 
-    auto mouse_event = table.new_usertype<MouseEvent>("MouseEvent",
-        sol::meta_function::index, [&L](const MouseEvent& event, const char* key) {
-                sol::state_view lua(L);
-                if (!std::strcmp(key, "window_coord"))
-                    return sol::make_object(lua, event.window_coord);
-                else if (!std::strcmp(key, "scene_coord"))
-                    return sol::make_object(lua, event.scene_coord);
-                else if (!std::strcmp(key, "button"))
-                    return sol::make_object(lua, event.btn);
-                else if (!std::strcmp(key, "modifiers"))
-                    return sol::make_object(lua, event.mods.value());
-                else if (!std::strcmp(key, "over_scene"))
-                    return sol::make_object(lua, event.over_scene);
-                throw GameError(base::FormatString("No such mouse event index: %1", key));
-            }
-    );
+    auto mouse_event = table.new_usertype<MouseEvent>("MouseEvent");
+    mouse_event["window_coord"] = &MouseEvent::window_coord;
+    mouse_event["scene_coord"]  = &MouseEvent::scene_coord;
+    mouse_event["map_coord"]    = &MouseEvent::map_coord;
+    mouse_event["button"]       = &MouseEvent::btn;
+    mouse_event["modifiers"]    = &MouseEvent::mods;
+    mouse_event["over_scene"]   = &MouseEvent::over_scene;
 
     auto game_event = table.new_usertype<GameEvent>("GameEvent", sol::constructors<GameEvent()>(),
         sol::meta_function::index, [&L](const GameEvent& event, const char* key) {

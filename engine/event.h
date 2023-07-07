@@ -40,6 +40,9 @@ namespace engine
         glm::vec2 window_coord;
         // mouse cursor position in scene coordinates.
         glm::vec2 scene_coord;
+        // mouse cursor position in map coordinates.
+        // this is only valid when there's a map associated with the scene.
+        glm::vec2 map_coord;
         // true when the mouse cursor is within/over the viewport
         // in the window that renders the visible part of the
         // game/scene.
