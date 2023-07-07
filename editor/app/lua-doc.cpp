@@ -1587,16 +1587,18 @@ void InitLuaDoc()
     DOC_OBJECT_PROPERTY("string", "source", "Source of the audio event. Either 'music' or 'effect'");
 
     DOC_TABLE("game.MouseEvent");
+    DOC_OBJECT_PROPERTY("glm.vec2", "map_coord", "Mouse cursor position on the map plane.<br>"
+                                                 "Only valid when over_scene is true and there is a map.");
     DOC_OBJECT_PROPERTY("glm.vec2", "window_coord", "Mouse cursor position in native window coordinates.");
     DOC_OBJECT_PROPERTY("glm.vec2", "scene_coord", "Mouse cursor position in scene coordinates.<br>"
-                                            "Only valid when over_scene is true.");
+                                                   "Only valid when over_scene is true.");
     DOC_OBJECT_PROPERTY("unsigned", "button", "The mouse button value that was pressed.<br>"
-                                  "For a list of available buttons see wdk.Buttons");
+                                              "For a list of available buttons see wdk.Buttons");
     DOC_OBJECT_PROPERTY("unsigned", "modifiers", "A bit string of keyboard modifier keys that were pressed.<br>"
-                                     "For a list of available modifiers see wdk.Mods.<br>"
-                                     "For testing a modifier use wdk.TestMod(bits, key).");
+                                                 "For a list of available modifiers see wdk.Mods.<br>"
+                                                 "For testing a modifier use wdk.TestMod(bits, key).");
     DOC_OBJECT_PROPERTY("bool", "over_scene", "True when the mouse is within the game viewport in the window.<br>"
-                                       "Indicates whether screen_coords are valid or not.");
+                                              "Indicates whether screen_coords are valid or not.");
 
     DOC_TABLE("game.GameEvent");
     DOC_META_METHOD_0("...", "index", "Lua index meta method.");
