@@ -38,7 +38,12 @@ namespace engine
         virtual ~EngineData() = default;
         virtual const void* GetData() const = 0;
         virtual std::size_t GetByteSize() const = 0;
+        // Get the name of underlying the source for the data.
+        // This could be for example a filename when the data comes
+        // from a file.
         virtual std::string GetSourceName() const = 0;
+        // Get a human-readable name associated with the data if any.
+        virtual std::string GetName() const { return ""; }
 
         inline std::string_view GetStringView() const noexcept {
             const auto* str = static_cast<const char*>(GetData());
