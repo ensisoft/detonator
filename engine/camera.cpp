@@ -284,7 +284,11 @@ glm::vec4 PlaneToPlane(const glm::vec4& pos, game::Perspective src, game::Perspe
     const auto dst_plane_normal = dst_plane_to_world * glm::vec4{0.0f, 0.0f, 1.0f, 0.0f};
 
     const auto ray_origin = world_pos;
-    const auto ray_direction = -dst_plane_normal;
+    // actually using the inverse of plane normal vector doesn't work the right way.
+    // what we really need is a ray/vector that is collinear with the Z axis and maps
+    // directly between the two planes. Using a random -z vector now which should
+    // work in any case since the IntersectRayPlane can handle negative distances too!
+    const auto ray_direction = glm::vec4{0.0f, 0.0f, -1.0f, 0.0f};  //-dst_plane_normal;
 
     const auto intersection_distance = IntersectRayPlane(ray_origin,
                                                          ray_direction,
