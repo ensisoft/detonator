@@ -52,9 +52,9 @@ namespace app
                     return nullptr;
                 return (const void*)mFileData.data();
             }
-            virtual std::size_t GetSize() const override
+            virtual std::size_t GetByteSize() const override
             { return mFileData.size(); }
-            virtual std::string GetName() const override
+            virtual std::string GetSourceName() const override
             { return app::ToUtf8(mFileName); }
 
             static std::shared_ptr<const FileBuffer> LoadFromFile(const QString& file)

@@ -301,9 +301,9 @@ public:
     {
         size_t ret = 0;
         for (const auto& pair : mEngineDataBuffers)
-            ret += pair.second->GetSize();
+            ret += pair.second->GetByteSize();
         for (const auto& pair : mGraphicsBuffers)
-            ret += pair.second->GetSize();
+            ret += pair.second->GetByteSize();
         return ret;
     }
     void BlowCaches()

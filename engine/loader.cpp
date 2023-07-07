@@ -153,9 +153,9 @@ public:
             return nullptr;
         return &mFileData[0];
     }
-    virtual std::size_t GetSize() const override
+    virtual std::size_t GetByteSize() const override
     { return mFileData.size(); }
-    virtual std::string GetName() const override
+    virtual std::string GetSourceName() const override
     { return mFileName; }
 private:
     const std::string mFileName;

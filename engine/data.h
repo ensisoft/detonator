@@ -37,12 +37,12 @@ namespace engine
 
         virtual ~EngineData() = default;
         virtual const void* GetData() const = 0;
-        virtual std::size_t GetSize() const = 0;
-        virtual std::string GetName() const = 0;
+        virtual std::size_t GetByteSize() const = 0;
+        virtual std::string GetSourceName() const = 0;
 
         inline std::string_view GetStringView() const noexcept {
             const auto* str = static_cast<const char*>(GetData());
-            const auto  len = GetSize();
+            const auto  len = GetByteSize();
             return { str, len };
         }
     private:

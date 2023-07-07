@@ -63,9 +63,9 @@ public:
     { mData = base::LoadBinaryFile(file); }
     virtual const void* GetData() const override
     { return &mData[0]; }
-    virtual std::size_t GetSize() const override
+    virtual std::size_t GetByteSize() const override
     { return mData.size(); }
-    virtual std::string GetName() const override
+    virtual std::string GetSourceName() const override
     { return mName; }
 private:
     const std::string mName;

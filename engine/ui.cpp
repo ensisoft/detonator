@@ -158,7 +158,7 @@ UIMaterial::MaterialClass UITexture::GetClass(const ClassLibrary*, const Loader*
     }
     DEBUG("Loaded UITexture descriptor meta file. [uri='%1']", mMetafileUri);
     const auto* beg = (const char*)data->GetData();
-    const auto* end = (const char*)data->GetData() + data->GetSize();
+    const auto* end = (const char*)data->GetData() + data->GetByteSize();
     const auto& [ok, json, error] = base::JsonParse(beg, end);
     if (!ok)
     {
@@ -395,11 +395,11 @@ bool UIStyle::LoadStyle(const nlohmann::json& json)
 bool UIStyle::LoadStyle(const EngineData& data)
 {
     const auto* beg = (const char*)data.GetData();
-    const auto* end = beg + data.GetSize();
+    const auto* end = beg + data.GetByteSize();
     auto [ok, json, error] = base::JsonParse(beg, end);
     if (!ok)
     {
-        ERROR("UI style load failed with JSON parse error. [error='%1', file='%2']", error, data.GetName());
+        ERROR("UI style load failed with JSON parse error. [error='%1', file='%2']", error, data.GetSourceName());
         return false;
     }
     return LoadStyle(json);
@@ -1347,11 +1347,11 @@ bool UIKeyMap::LoadKeys(const nlohmann::json& json)
 bool UIKeyMap::LoadKeys(const EngineData& data)
 {
     const auto* beg = (const char*)data.GetData();
-    const auto* end = (const char*)data.GetData() + data.GetSize();
+    const auto* end = (const char*)data.GetData() + data.GetByteSize();
     const auto& [ok, json, error] = base::JsonParse(beg, end);
     if (!ok)
     {
-        ERROR("UI Keymap load failed with JSON parse error. [error='%1', file='%2']", error, data.GetName());
+        ERROR("UI Keymap load failed with JSON parse error. [error='%1', file='%2']", error, data.GetSourceName());
         return false;
     }
     return LoadKeys(json);

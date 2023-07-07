@@ -90,11 +90,11 @@ public:
     bool ParseFont(const std::string& uri)
     {
         const auto& fontbuff = gfx::LoadResource(uri);
-        if (!fontbuff || !fontbuff->GetSize())
+        if (!fontbuff || !fontbuff->GetByteSize())
             ERROR_RETURN(false, "Failed to load font file. [file='%1']", uri);
 
         const char* beg = (const char*)fontbuff->GetData();
-        const char* end = (const char*)fontbuff->GetData() + fontbuff->GetSize();
+        const char* end = (const char*)fontbuff->GetData() + fontbuff->GetByteSize();
         const auto& [success, json, error] = base::JsonParse(beg, end);
         if (!success)
             ERROR_RETURN(false, "Failed to parse font JSON. [file='%1']", uri);
@@ -615,7 +615,7 @@ std::shared_ptr<AlphaMask> TextBuffer::RasterizeBitmap() const
         ERROR_RETURN(nullptr, "Failed to load font file. [font='%1]", mText.font);
 
     if (FT_New_Memory_Face(freetype.library, (const FT_Byte*)fontbuff->GetData(),
-                           fontbuff->GetSize(), 0, &face))
+                           fontbuff->GetByteSize(), 0, &face))
         ERROR_RETURN(nullptr, "Failed to load font face. [font='%1']", mText.font);
 
     auto face_raii = base::MakeUniqueHandle(face, FT_Done_Face);

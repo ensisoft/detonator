@@ -2159,7 +2159,7 @@ Shader* MaterialClass::GetCustomShader(const State& state, Device& device) const
         }
 
         const char* beg = (const char*)buffer->GetData();
-        const char* end = beg + buffer->GetSize();
+        const char* end = beg + buffer->GetByteSize();
         if (!shader->CompileSource(state.shader_pass->ModifyFragmentSource(device, std::string(beg, end))))
         {
             ERROR("Failed to compile custom material shader source. [name='%1', uri='%2']", mName, mShaderUri);
