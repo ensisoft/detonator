@@ -342,14 +342,70 @@ keke(my_function)
     )");
 }
 
+
+int my_exception_handler(lua_State* L, sol::optional<const std::exception&> maybe_exception, sol::string_view description) {
+    // L is the lua state, which you can wrap in a state_view if necessary
+    // maybe_exception will contain exception, if it exists
+    // description will either be the what() of the exception or a description saying that we hit the general-case catch(...)
+
+    if (maybe_exception) {
+        const std::exception& ex = *maybe_exception;
+        std::cout << "exception: " << ex.what() << std::endl;
+        std::cout << "description: " << description << std::endl;
+    }
+    else {
+        std::cout << "(from the description parameter): ";
+        std::cout.write(description.data(), static_cast<std::streamsize>(description.size()));
+        std::cout << std::endl;
+    }
+
+    // you must push 1 element onto the stack to be
+    // transported through as the error object in Lua
+    // note that Lua -- and 99.5% of all Lua users and libraries -- expects a string
+    // so we push a single string (in our case, the description of the error)
+    return sol::stack::push(L, description);
+}
+void will_throw() {
+	throw std::runtime_error("oh no not an exception!!!");
+}
+
+
+void exception_handler_test()
+{
+    sol::state lua;
+    lua.open_libraries(sol::lib::base);
+    //lua.set_exception_handler(&my_exception_handler);
+    lua.set_function("will_throw", &will_throw);
+    lua.script(R"(
+function invalid_lua_code()
+    --local foo = nil
+    --foo:rectangulate()
+    will_throw()
+end
+)");
+
+    sol::protected_function func = lua["invalid_lua_code"];
+
+    sol::protected_function_result ret = func();
+    sol::error err = ret;
+
+    //sol::protected_function_result pfr = lua.safe_script("will_throw()", &sol::script_pass_on_error);
+    //c_assert(!pfr.valid());
+    //sol::error err = pfr;
+    std::cout << "err what: " << err.what() << std::endl;
+    //std::cout << std::endl;
+
+}
+
 int main(int argc, char* argv[])
 {
     //vector_test();
     //array_type_test();
     //environment_variable_test();
     //environment_variable_test_entity();
+    //function_from_lua();
 
-    function_from_lua();
+    exception_handler_test();
 
     return 0;
 }

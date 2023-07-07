@@ -1510,8 +1510,10 @@ void LuaRuntime::Init()
         mGameEnv = std::make_unique<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
         (*mGameEnv)["__script_id__"] = "__main__";
 
+        // todo: use the LoadEngineDataId here. (Requires changing the main script from URI to an ID)
         const auto& script_uri  = mGameScript;
         const auto& script_buff = mDataLoader->LoadEngineDataUri(script_uri);
+        const auto& chunk_name  = mGameScript;
         DEBUG("Loading main game script. [uri='%1']", script_uri);
 
         if (!script_buff)
@@ -1521,7 +1523,7 @@ void LuaRuntime::Init()
         }
         const auto& script_file = script_buff->GetSourceName();
         const auto& script_view = script_buff->GetStringView();
-        auto result = mLuaState->script(script_view, *mGameEnv);
+        auto result = mLuaState->script(script_view, *mGameEnv, chunk_name);
         if (!result.valid())
         {
             const sol::error err = result;
@@ -1604,7 +1606,8 @@ void LuaRuntime::BeginPlay(Scene* scene, Tilemap* map)
 
             const auto& script_file = script_buff->GetSourceName();
             const auto& script_view = script_buff->GetStringView();
-            const auto& result = mLuaState->script(script_view, *script_env);
+            const auto& chunk_name  = script_buff->GetName();
+            const auto& result = mLuaState->script(script_view, *script_env, chunk_name);
             if (!result.valid())
             {
                 const sol::error err = result;
@@ -1653,7 +1656,8 @@ void LuaRuntime::BeginPlay(Scene* scene, Tilemap* map)
 
             const auto& script_file = script_buff->GetSourceName();
             const auto& script_view = script_buff->GetStringView();
-            const auto& result = mLuaState->script(script_view, *script_env);
+            const auto& chunk_name  = script_buff->GetName();
+            const auto& result = mLuaState->script(script_view, *script_env, chunk_name);
             if (!result.valid())
             {
                 const sol::error err = result;
@@ -1687,7 +1691,8 @@ void LuaRuntime::BeginPlay(Scene* scene, Tilemap* map)
 
             const auto& script_file = script_buff->GetSourceName();
             const auto& script_view = script_buff->GetStringView();
-            const auto& result = mLuaState->script(script_view, *scene_env);
+            const auto& chunk_name  = script_buff->GetName();
+            const auto& result = mLuaState->script(script_view, *scene_env, chunk_name);
             if (!result.valid())
             {
                 const sol::error err = result;
@@ -2225,7 +2230,8 @@ sol::environment* LuaRuntime::GetTypeEnv(const AnimatorClass& klass)
 
     const auto& script_file = script_buff->GetSourceName();
     const auto& script_view = script_buff->GetStringView();
-    const auto& result = mLuaState->script(script_view, *script_env);
+    const auto& chunk_name  = script_buff->GetName();
+    const auto& result = mLuaState->script(script_view, *script_env, chunk_name);
     if (!result.valid())
     {
         const sol::error err = result;
@@ -2266,7 +2272,8 @@ sol::environment* LuaRuntime::GetTypeEnv(const EntityClass& klass)
 
     const auto& script_file = script_buff->GetSourceName();
     const auto& script_view = script_buff->GetStringView();
-    const auto& result = mLuaState->script(script_view, *script_env);
+    const auto& chunk_name  = script_buff->GetName();
+    const auto& result = mLuaState->script(script_view, *script_env, chunk_name);
     if (!result.valid())
     {
         const sol::error err = result;
@@ -2300,9 +2307,10 @@ sol::environment* LuaRuntime::GetTypeEnv(const uik::Window& window)
     }
     const auto& script_file = script_buff->GetSourceName();
     const auto& script_view = script_buff->GetStringView();
+    const auto& chunk_name  = script_buff->GetName();
     auto script_env = std::make_unique<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
     (*script_env)["__script_id__"] = script;
-    const auto& result = mLuaState->script(script_view, *script_env);
+    const auto& result = mLuaState->script(script_view, *script_env, chunk_name);
     if (!result.valid())
     {
         const sol::error err = result;

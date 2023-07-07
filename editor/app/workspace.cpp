@@ -1734,7 +1734,7 @@ engine::EngineDataHandle Workspace::LoadEngineDataId(const std::string& id) cons
         else BUG("Unknown ID in engine data loading.");
         const auto& file = MapFileToFilesystem(uri);
         DEBUG("URI '%1' => '%2'", uri, file);
-        return EngineBuffer::LoadFromFile(file);
+        return EngineBuffer::LoadFromFile(file, resource->GetName());
     }
     return nullptr;
 }

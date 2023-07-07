@@ -42,9 +42,12 @@ namespace app
         class FileBuffer : public Interface
         {
         public:
-            FileBuffer(QString filename, QByteArray data)
+            FileBuffer(const QString& filename,
+                       const QByteArray& data,
+                       const QString& name = QString())
                 : mFileName(filename)
                 , mFileData(data)
+                , mHumanName(name)
             {}
             virtual const void* GetData() const override
             {
@@ -56,17 +59,20 @@ namespace app
             { return mFileData.size(); }
             virtual std::string GetSourceName() const override
             { return app::ToUtf8(mFileName); }
+            virtual std::string GetName() const /* override */  // this method is only in EngineData so therefore no "override"
+            { return app::ToUtf8(mHumanName); }
 
-            static std::shared_ptr<const FileBuffer> LoadFromFile(const QString& file)
+            static std::shared_ptr<const FileBuffer> LoadFromFile(const QString& file, const QString& name = QString())
             {
                 QByteArray data;
                 if (!detail::LoadArrayBuffer(file, &data))
                     return nullptr;
-                return std::make_shared<FileBuffer>(file, data);
+                return std::make_shared<FileBuffer>(file, data, name);
             }
         private:
             const QString mFileName;
             const QByteArray mFileData;
+            const QString mHumanName;
         };
     } // detail
 
