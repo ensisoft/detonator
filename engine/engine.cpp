@@ -226,6 +226,14 @@ public:
         // aspect ratio as the logical viewport.
         const float game_view_width  = game_view.GetWidth();
         const float game_view_height = game_view.GetHeight();
+
+        // if the game hasn't set the viewport... then don't draw!
+        if (game_view_width <= 0.0f || game_view_height <= 0.0f)
+        {
+            WARN("Game viewport is invalid. [width=%1, height=%2]", game_view_width, game_view_height);
+            return;
+        }
+
         // the scaling factor for mapping game units to rendering surface (pixel) units.
         const float game_scale  = std::min(surf_width / game_view_width, surf_height / game_view_height);
 
