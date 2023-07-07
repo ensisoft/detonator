@@ -38,7 +38,7 @@ Image::Image(const std::string& URI)
     int yres  = 0;
     int depth = 0;
     auto* bmp = stbi_load_from_memory((const stbi_uc*)buffer->GetData(),
-                                      (int)buffer->GetSize(), &xres, &yres, &depth, 0);
+                                      (int)buffer->GetByteSize(), &xres, &yres, &depth, 0);
     if (bmp == nullptr)
         return;
 

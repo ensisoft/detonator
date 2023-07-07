@@ -49,8 +49,8 @@ namespace gfx
         // Get the immutable data content pointer.
         virtual const void* GetData() const = 0;
         // Get the size of the resource in bytes.
-        virtual std::size_t GetSize() const = 0;
-        virtual std::string GetName() const = 0;
+        virtual std::size_t GetByteSize() const = 0;
+        virtual std::string GetSourceName() const = 0;
     private:
     };
 

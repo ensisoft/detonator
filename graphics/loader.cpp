@@ -60,9 +60,9 @@ public:
         if (mBuffer.empty()) return nullptr;
         return &mBuffer[0];
     }
-    virtual std::size_t GetSize() const override
+    virtual std::size_t GetByteSize() const override
     { return mBuffer.size(); }
-    virtual std::string GetName() const override
+    virtual std::string GetSourceName() const override
     { return mFilename; }
 
     bool IsGood() const

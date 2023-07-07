@@ -1263,7 +1263,7 @@ void LuaRuntime::Init()
         if (!buffer)
             throw GameError("Can't find lua module: " + module);
 
-        auto ret = mLuaState->load_buffer((const char*)buffer->GetData(), buffer->GetSize());
+        auto ret = mLuaState->load_buffer((const char*)buffer->GetData(), buffer->GetByteSize());
         if (!ret.valid())
         {
             sol::error err = ret;
@@ -1519,7 +1519,7 @@ void LuaRuntime::Init()
             ERROR("Failed to load main game script file. [uri='%1']", script_uri);
             throw std::runtime_error("failed to load main game script.");
         }
-        const auto& script_file = script_buff->GetName();
+        const auto& script_file = script_buff->GetSourceName();
         const auto& script_view = script_buff->GetStringView();
         auto result = mLuaState->script(script_view, *mGameEnv);
         if (!result.valid())
@@ -1602,7 +1602,7 @@ void LuaRuntime::BeginPlay(Scene* scene, Tilemap* map)
             // stored the script environment.
             (*script_env)["__script_id__"] = script;
 
-            const auto& script_file = script_buff->GetName();
+            const auto& script_file = script_buff->GetSourceName();
             const auto& script_view = script_buff->GetStringView();
             const auto& result = mLuaState->script(script_view, *script_env);
             if (!result.valid())
@@ -1651,7 +1651,7 @@ void LuaRuntime::BeginPlay(Scene* scene, Tilemap* map)
             // stored the script environment.
             (*script_env)["__script_id__"] = scriptId;
 
-            const auto& script_file = script_buff->GetName();
+            const auto& script_file = script_buff->GetSourceName();
             const auto& script_view = script_buff->GetStringView();
             const auto& result = mLuaState->script(script_view, *script_env);
             if (!result.valid())
@@ -1685,7 +1685,7 @@ void LuaRuntime::BeginPlay(Scene* scene, Tilemap* map)
             scene_env = std::make_unique<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
             (*scene_env)["__script_id__"] = script;
 
-            const auto& script_file = script_buff->GetName();
+            const auto& script_file = script_buff->GetSourceName();
             const auto& script_view = script_buff->GetStringView();
             const auto& result = mLuaState->script(script_view, *scene_env);
             if (!result.valid())
@@ -2223,7 +2223,7 @@ sol::environment* LuaRuntime::GetTypeEnv(const AnimatorClass& klass)
     // stored the script environment.
     (*script_env)["__script_id__"] = script;
 
-    const auto& script_file = script_buff->GetName();
+    const auto& script_file = script_buff->GetSourceName();
     const auto& script_view = script_buff->GetStringView();
     const auto& result = mLuaState->script(script_view, *script_env);
     if (!result.valid())
@@ -2264,7 +2264,7 @@ sol::environment* LuaRuntime::GetTypeEnv(const EntityClass& klass)
     // stored the script environment.
     (*script_env)["__script_id__"] = script;
 
-    const auto& script_file = script_buff->GetName();
+    const auto& script_file = script_buff->GetSourceName();
     const auto& script_view = script_buff->GetStringView();
     const auto& result = mLuaState->script(script_view, *script_env);
     if (!result.valid())
@@ -2298,7 +2298,7 @@ sol::environment* LuaRuntime::GetTypeEnv(const uik::Window& window)
         ERROR("Failed to load UiKit window script file. [class='%1', script='%2']", window.GetName(), script);
         return nullptr;
     }
-    const auto& script_file = script_buff->GetName();
+    const auto& script_file = script_buff->GetSourceName();
     const auto& script_view = script_buff->GetStringView();
     auto script_env = std::make_unique<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
     (*script_env)["__script_id__"] = script;
