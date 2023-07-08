@@ -697,7 +697,15 @@ install(TARGETS GameMain DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 add_library(GameEngine SHARED
     engine/loader.cpp
     engine/engine.cpp
-    engine/lua.cpp
+    engine/lua_game_runtime.cpp
+    engine/lua_util.cpp
+    engine/lua_base.cpp
+    engine/lua_data.cpp
+    engine/lua_glm.cpp
+    engine/lua_wdk.cpp
+    engine/lua_uik.cpp
+    engine/lua_gfx.cpp
+    engine/lua_game.cpp
     engine/main/gamelib.cpp
 )
 target_include_directories(GameEngine PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/main")
@@ -868,7 +876,15 @@ add_library(EngineLibTesting
     engine/renderer.cpp
     engine/camera.cpp
     engine/graphics.cpp
-    engine/lua.cpp
+    engine/lua_game_runtime.cpp
+    engine/lua_util.cpp
+    engine/lua_base.cpp
+    engine/lua_data.cpp
+    engine/lua_glm.cpp
+    engine/lua_wdk.cpp
+    engine/lua_uik.cpp
+    engine/lua_gfx.cpp
+    engine/lua_game.cpp
     engine/state.cpp)
 target_include_directories(GameLibTesting   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game/unit_test")
 target_include_directories(EngineLibTesting PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")

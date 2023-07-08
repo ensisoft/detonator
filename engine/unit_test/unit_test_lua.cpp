@@ -29,6 +29,7 @@
 #include "data/json.h"
 #include "game/scene.h"
 #include "engine/lua.h"
+#include "engine/lua_game_runtime.h"
 #include "engine/loader.h"
 #include "engine/event.h"
 
@@ -499,41 +500,41 @@ function read_json(json_string)
 
     _, val = json:ReadFloat('float')
     if val ~= 1.0 then
-       return 'fail'
+       return 'fail read float'
     end
     _, val = json:ReadInt('int')
     if val ~= 123 then
-       return 'fail'
+       return 'fail read int'
     end
     _, val = json:ReadString('str')
     if val ~= 'hello world' then
-       return 'fail'
+       return 'fail read string'
     end
     _, val = json:ReadVec2('vec2')
     if val.x ~= 1.0 or val.y ~= 2.0 then
-       return 'fail'
+       return 'fail read vec2'
     end
     _, val = json:ReadVec3('vec3')
     if val.x ~= 1.0 or val.y ~= 2.0 or val.z ~= 3.0 then
-       return 'fail'
+       return 'fail read vec3'
     end
     _, val = json:ReadVec4('vec4')
     if val.x ~= 1.0 or val.y ~= 2.0 or val.z ~= 3.0 or val.w ~= 4.0 then
-       return 'fail'
+       return 'fail read vec4'
     end
     local num_chunks = json:GetNumChunks('fruits')
     if num_chunks ~= 2 then
-        return 'fail'
+        return 'fail get num chunks'
     end
     local chunk = json:GetReadChunk('fruits', 0)
     _, val = chunk:ReadString('name')
     if val ~= 'banana' then
-        return  'fail'
+        return  'fail read chunk string'
     end
     chunk = json:GetReadChunk('fruits', 1)
     _, val = chunk:ReadString('name')
     if val ~= 'apple' then
-        return 'fail'
+        return 'fail read chunk string'
     end
 
     -- out of bounds on chunk index test

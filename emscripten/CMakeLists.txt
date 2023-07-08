@@ -85,7 +85,15 @@ add_executable(GameEngine
     ../engine/audio.cpp
     ../engine/engine.cpp
     ../engine/loader.cpp
-    ../engine/lua.cpp
+    ../engine/lua_game_runtime.cpp
+    ../engine/lua_util.cpp
+    ../engine/lua_base.cpp
+    ../engine/lua_data.cpp
+    ../engine/lua_glm.cpp
+    ../engine/lua_wdk.cpp
+    ../engine/lua_uik.cpp
+    ../engine/lua_gfx.cpp
+    ../engine/lua_game.cpp
     ../engine/physics.cpp
     ../engine/renderer.cpp
     ../engine/state.cpp

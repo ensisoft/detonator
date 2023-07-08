@@ -51,13 +51,19 @@
 #include "engine/event.h"
 #include "engine/physics.h"
 #include "engine/game.h"
-#include "engine/lua.h"
+#include "engine/lua_game_runtime.h"
 #include "engine/format.h"
 #include "engine/ui.h"
 #include "engine/state.h"
 #include "uikit/window.h"
 #include "uikit/painter.h"
 #include "uikit/state.h"
+
+#ifndef SOL_ALL_SAFETIES_ON
+#  error we need SOL safety flags for correct function
+#else
+#  pragma message "SOL SAFETIES ARE ON  !"
+#endif
 
 namespace
 {
