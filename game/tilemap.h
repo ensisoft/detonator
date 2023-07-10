@@ -376,6 +376,8 @@ namespace game
         { return mResolution; }
         Storage GetStorage() const
         { return mStorage; }
+        int GetDepth() const
+        { return mDepth; }
         void SetId(const std::string& id)
         { mId = id; }
         void SetName(const std::string& name)
@@ -404,6 +406,8 @@ namespace game
         { mFlags.set(Flags::ReadOnly, on_off); }
         void SetFlags(base::bitflag<Flags> flags)
         { mFlags = flags; }
+        void SetDepth(int depth)
+        { mDepth = depth; }
 
         void SetType(Type type);
 
@@ -497,6 +501,7 @@ namespace game
         Cache mCache = Cache::Cache64;
         Resolution mResolution = Resolution::Original;
         DefaultValue  mDefault;
+        int mDepth = 0;
     };
 
     class TilemapLayer
@@ -522,6 +527,7 @@ namespace game
 
         virtual unsigned GetWidth() const = 0;
         virtual unsigned GetHeight() const = 0;
+        virtual int GetDepth() const = 0;
         virtual void SetPaletteMaterialId(const std::string& material, size_t index) = 0;
         virtual void SetMapDimensions(unsigned width, unsigned  height) = 0;
 
@@ -650,6 +656,8 @@ namespace game
             { return mClass->MapDimension(mMapWidth); }
             virtual unsigned GetHeight() const override
             { return mClass->MapDimension(mMapHeight); }
+            virtual int GetDepth() const override
+            { return mClass->GetDepth(); }
             virtual float GetTileSizeScaler() const override
             { return mClass->GetTileSizeScaler(); }
             virtual bool SetTilePaletteIndex(uint8_t index, unsigned row, unsigned col) override
@@ -771,11 +779,13 @@ namespace game
         { mTileWorldSize.x = width; }
         inline void SetTileHeight(float height) noexcept
         { mTileWorldSize.y = height; }
+        inline void SetTileDepth(float depth) noexcept
+        { mTileWorldSize.z = depth; }
         inline void SetPerspective(Perspective perspective) noexcept
         { mPerspective = perspective; }
         inline void SetTileRenderScale(glm::vec2 scale) noexcept
         { mTileRenderScale = scale; }
-        inline void SetTileSize(glm::vec2 size) noexcept
+        inline void SetTileSize(glm::vec3 size) noexcept
         { mTileWorldSize = size; }
         inline void SetTileRenderWidthScale(float scale) noexcept
         { mTileRenderScale.x = scale; }
@@ -798,9 +808,11 @@ namespace game
         { return mTileWorldSize.x; }
         inline float GetTileHeight() const noexcept
         { return mTileWorldSize.y; }
+        inline float GetTileDepth() const noexcept
+        { return mTileWorldSize.z; }
         inline Perspective GetPerspective() const noexcept
         { return mPerspective; }
-        inline glm::vec2 GetTileSize() const noexcept
+        inline glm::vec3 GetTileSize() const noexcept
         { return mTileWorldSize; }
         inline glm::vec2 GetTileRenderScale() const noexcept
         { return mTileRenderScale; }
@@ -848,7 +860,7 @@ namespace game
         std::string mScriptFile;
         unsigned mWidth = 0;
         unsigned mHeight = 0;
-        glm::vec2 mTileWorldSize = {0.0f, 0.0f};
+        glm::vec3 mTileWorldSize = {0.0f, 0.0f, 0.0f};
         glm::vec2 mTileRenderScale = {1.0f, 1.0f};
         Perspective mPerspective = Perspective::AxisAligned;
         std::vector<std::shared_ptr<TilemapLayerClass>> mLayers;
@@ -900,6 +912,8 @@ namespace game
         { return mClass->GetTileWidth(); }
         inline float GetTileHeight() const noexcept
         { return mClass->GetTileHeight(); }
+        inline float GetTileDepth() const noexcept
+        { return mClass->GetTileDepth(); }
         inline Perspective GetPerspective() const noexcept
         { return mClass->GetPerspective();}
         inline float GetTileRenderWidthScale() const noexcept

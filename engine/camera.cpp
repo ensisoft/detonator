@@ -349,4 +349,53 @@ glm::vec2 ComputeTileRenderSize(const glm::mat4& tile_to_render,
     return {0.0f, 0.0f};
 }
 
+glm::vec3 GetTileCuboidFactors(game::Perspective perspective)
+{
+    // When dealing with an isometric cube you'd be inclined to think that the isometric
+    // sprite represents a cube, but this is actually not the case. Rather the tile
+    // sprite represents a cuboid with vertical height not being the same as the base
+    // width/height.
+    //
+    // So in order to map the tiles properly into a 3D elements in the conceptual tile
+    // world (for example when adjusting the level height by doing a vertical offset)
+    // we need to know the scaling co-efficients for each of the cuboid dimensions.
+    //
+    // Based on the isometric tile sprite you'd think that the ratios would follow
+    // equally. In a sprite tile the square base of the tile has equal width and height.
+    // These can be computed as:
+    //
+    //  base_width = base_height = base_size = sqrt(0.25*0.25 + 0.5*0.5) ~= 0.5590
+    //
+    // It is already known that the vertical height of the rendered tile is  0.5.
+    //
+    // so this would imply that the tile vertical height is
+    //
+    //   vertical_height  = 0.5 / base_size ~= 0.8944
+    //
+    // BUT... this does not track! Experimenting with this value (directly in 3D, so
+    // no tile sprite rendering involved)  shows that the vertical height of the cuboid
+    // is too high! Using this value to offset the tile sprites causes misalignment
+    // where going vertically up one level does not align with the grid!
+    //
+    // So either this math above here is wrong and the ratios of sides cannot be
+    // discovered from the projected geometry or something else is wrong somewhere
+    // else!
+    //
+    // I spent some time trying to compute the ratios of the projected sides using
+    // algebra but didn't manage to do so yet. :-(
+
+    if (perspective == game::Perspective::Dimetric)
+    {
+        // so this doesn't work right...
+        //const auto projected_tile_vertical_height = 0.5f;
+        //const auto projected_tile_base_size = std::sqrt(0.25*0.25 + 0.5*0.5);
+        //const auto scale = 1.0f / projected_tile_base_size;
+        //return glm::vec3{1.0f, 1.0, projected_tile_vertical_height * scale };
+
+        // empirically invented magic value!
+        return glm::vec3{1.0f, 1.0f, 0.815f};
+    }
+    return glm::vec3{1.0f, 1.0f, 1.0f};
+}
+
 } // namespace

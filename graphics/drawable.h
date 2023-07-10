@@ -1210,7 +1210,7 @@ namespace gfx
         };
 
         struct Tile {
-            Vec2 pos;
+            Vec3 pos;
         };
         TileBatch() = default;
         explicit TileBatch(const std::vector<Tile>& tiles)
@@ -1244,7 +1244,9 @@ namespace gfx
         { mTileWorldSize.x = width; }
         inline void SetTileWorldHeight(float height) noexcept
         { mTileWorldSize.y = height; }
-        inline void SetTileWorldSize(const glm::vec2& size) noexcept
+        inline void SetTileWorldDepth(float depth) noexcept
+        { mTileWorldSize.z = depth; }
+        inline void SetTileWorldSize(const glm::vec3& size) noexcept
         { mTileWorldSize = size; }
         inline void SetTileRenderWidth(float width) noexcept
         { mTileRenderSize.x = width; }
@@ -1272,7 +1274,7 @@ namespace gfx
         Projection mProjection = Projection::AxisAligned;
         TileShape mShape = TileShape::Automatic;
         std::vector<Tile> mTiles;
-        glm::vec2 mTileWorldSize = {0.0f, 0.0f};
+        glm::vec3 mTileWorldSize = {0.0f, 0.0f, 0.0f};
         glm::vec2 mTileRenderSize = {0.0f, 0.0f};
     };
 

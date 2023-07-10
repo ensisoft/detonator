@@ -121,6 +121,7 @@ void perspective_projection()
     //    value that is greater than z=-1.0 which is less.  (see glDepthRange)
     // 5. Finally the NDC values are mapped (through viewport setting) to pixels (fragments)
     //    and depth values. (glViewport, glDepthRange)
+    // - Anything inside the half space at z > 0.0f will be discard and not rasterized.
 
     // When the projection matrix (+ division by W) transforms the scene into a unit cube,
     // the vertices that are at the corners of the far plane (intersecting with the corner
@@ -134,7 +135,7 @@ void perspective_projection()
     const auto width  = 1024.0f;
     const auto height = 768.0f;
     const auto fov   = glm::radians(45.0f);
-    const auto znear = 1.0f;
+    const auto znear = 25.0f;
     const auto zfar  = 100.0f;
     const auto aspect =  width / height;
 
@@ -172,7 +173,7 @@ void perspective_projection()
         glm::vec4 point;
     };
     Point points[] = {
-       "Center of far plane",      {0.0f, 0.0f, -100.0f, 1.0f},
+       "Center of far plane",      {0.0f, 0.0f, -zfar, 1.0f},
        "Center top at far plane",  {0.0f,  tan(fov*0.5)*zfar, -zfar, 1.0f},
        "Center bot at far plane",  {0.0f, -tan(fov*0.5)*zfar, -zfar, 1.0f},
        "Center top at near plane", {0.0f,  tan(fov*0.5)*znear, -znear, 1.0f},
@@ -189,7 +190,7 @@ void perspective_projection()
     }
 }
 
-void orthographic_projection()
+void orthographic_projection_top_left()
 {
     const auto left   = 0.0f;
     const auto top    = 0.0f;
@@ -204,7 +205,7 @@ void orthographic_projection()
     //  |_________|, 1000,1000
     //
 
-    const auto near = 1.0f;
+    const auto near = 27.0f;
     const auto far  = 100.0f;
     // the near and far values are again (similar to projection) the *distances*
     // from the viewer to the near and far planes. (according to the original glOrtho
@@ -220,10 +221,58 @@ void orthographic_projection()
         glm::vec4 point;
     };
     Point points[] = {
-        {"Top left at near plane", {0.0f,   0.0f,   -1.0f,   1.0f}},
+        {"Top left at near plane", {0.0f,   0.0f,   -27.0f,  1.0f}},
         {"Top left at far plane",  {0.0f,   0.0f,   -100.0f, 1.0f}},
-        {"Center at near plane",   {500.0f, 500.0f, -1.0f,   1.0f}},
+        {"Center at near plane",   {500.0f, 500.0f, -27.0f,  1.0f}},
         {"Center at far plane",    {500.0f, 500.0f, -100.0f, 1.0f}}
+    };
+    for (const auto& p : points)
+    {
+        const auto& p_ = proj * p.point;
+        std::cout << p.name << std::endl;
+        std::cout << "World: " << ToString(p.point)    << std::endl;
+        std::cout << "Clip:  " << ToString(p_)         << std::endl;
+        std::cout << "NDC:   " << ToString(p_ / p_.w)  << std::endl;
+        std::cout << std::endl;
+    }
+}
+
+void orthographic_projection_center()
+{
+    const auto left   = -500.0f;
+    const auto top    =  500.0f;
+    const auto right  =  500.0f;
+    const auto bottom = -500.0f;
+
+    //
+    // -500,500
+    //       _________
+    //      |         |
+    //      |    +    |
+    //      |_________|,
+    //                 500,-500
+    //
+
+    const auto near = 27.0f;
+    const auto far  = 100.0f;
+    // the near and far values are again (similar to projection) the *distances*
+    // from the viewer to the near and far planes. (according to the original glOrtho
+    // also negative values could be used in which case the planes are behind the
+    // viewer. not sure what this means though...)
+    const auto& proj = glm::ortho(left, right, bottom, top, near, far);
+
+    std::cout << "Center Origin Orthographic Projection.\n";
+    std::cout << "========================================\n";
+
+    struct Point {
+        const char* name;
+        glm::vec4 point;
+    };
+    Point points[] = {
+            {"Top left at near plane", {-500.0f, 500.0f,   -27.0f, 1.0f}},
+            {"Top left at far plane",  {-500.0f, 500.0f, -100.0f,  1.0f}},
+            {"Center at near plane",   {   0.0f,   0.0f,   -27.0f, 1.0f}},
+            {"Center at far plane",    {   0.0f,   0.0f, -100.0f,  1.0f}}
     };
     for (const auto& p : points)
     {
@@ -253,6 +302,7 @@ int main()
     // change_of_basis();
     // matrix_inverse();
     perspective_projection();
-    orthographic_projection();
+    orthographic_projection_top_left();
+    orthographic_projection_center();
     return 0;
 }

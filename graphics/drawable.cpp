@@ -2318,6 +2318,9 @@ void TileBatch::ApplyDynamicState(const Environment& env, Program& program, Rast
 
     const auto shape = ResolveTileShape();
 
+    // Choose a point on the tile for projecting the tile onto the
+    // rendering surface.
+
     // if the tile shape is square we're rendering point sprites which
     // are always centered around the vertex when rasterized by OpenGL.
     // This means that the projection plays a role when choosing the vertex
@@ -2331,24 +2334,27 @@ void TileBatch::ApplyDynamicState(const Environment& env, Program& program, Rast
     //    In this case the center of the tile yields the center of the
     //    square when projected.
     //
-    glm::vec2 tile_offset = {0.0f, 0.0f};
+    glm::vec3 tile_point_offset = {0.0f, 0.0f, 0.0f};
     if (mProjection == Projection::AxisAligned && shape == TileShape::Square)
-        tile_offset = mTileWorldSize * 0.5f;
+        tile_point_offset = mTileWorldSize * glm::vec3{0.5f, 0.5f, 0.0f};
     else if (mProjection == Projection::Dimetric && shape == TileShape::Rectangle)
-        tile_offset = mTileWorldSize; // bottom right corner is the basis for the billboard
+        tile_point_offset = mTileWorldSize * glm::vec3{1.0f, 1.0f, 0.0f};  // bottom right corner is the basis for the billboard
     else if (mProjection == Projection::AxisAligned && shape == TileShape::Rectangle)
-        tile_offset = glm::vec2{mTileWorldSize.x*0.5f, mTileWorldSize.y*1.0f}; // middle of the bottom edge
+        tile_point_offset = mTileWorldSize * glm::vec3{0.5f, 1.0f, 0.0f}; // middle of the bottom edge
 
     glm::vec2 tile_render_size = mTileRenderSize;
     if (shape == TileShape::Square)
         tile_render_size *= pixel_scale;
 
     program.SetUniform("kTileWorldSize", mTileWorldSize);
-    program.SetUniform("kTileWorldOffset", tile_offset);
+    // This is the offset in units to add to the top left tile corner (row, col)
+    // for projecting the tile into the render surface coordinates.
+    program.SetUniform("kTilePointOffset", tile_point_offset);
     program.SetUniform("kTileRenderSize", tile_render_size);
     program.SetUniform("kTileTransform", *env.proj_matrix * *env.view_matrix);
     program.SetUniform("kTileCoordinateSpaceTransform", *env.model_matrix);
 }
+
 Shader* TileBatch::GetShader(const Environment& env, Device& device) const
 {
     // the shader uses dummy varyings vParticleAlpha, vParticleRandomValue
@@ -2360,13 +2366,13 @@ Shader* TileBatch::GetShader(const Environment& env, Device& device) const
 
     constexpr const auto*  square_tile_source = R"(
 #version 100
-attribute vec2 aTilePosition;
+attribute vec3 aTilePosition;
 
 uniform mat4 kTileTransform;
 uniform mat4 kTileCoordinateSpaceTransform;
 
-uniform vec2 kTileWorldSize;
-uniform vec2 kTileWorldOffset;
+uniform vec3 kTileWorldSize;
+uniform vec3 kTilePointOffset;
 uniform vec2 kTileRenderSize;
 
 varying float vParticleAlpha;
@@ -2376,9 +2382,9 @@ varying vec2 vTexCoord;
 void main()
 {
   // transform tile row,col index into a tile position in units in the x,y plane,
-  vec2 tile = aTilePosition * kTileWorldSize + kTileWorldOffset;
+  vec3 tile = aTilePosition * kTileWorldSize + kTilePointOffset;
 
-  vec4 vertex = kTileCoordinateSpaceTransform * vec4(tile.xy, 0.0, 1.0);
+  vec4 vertex = kTileCoordinateSpaceTransform * vec4(tile.xyz, 1.0);
 
   gl_Position = kTileTransform * vertex;
 
@@ -2393,14 +2399,14 @@ void main()
 
     constexpr const auto* rectangle_tile_source = R"(
 #version 100
-attribute vec2 aTilePosition;
+attribute vec3 aTilePosition;
 attribute vec2 aTileCorner;
 
 uniform mat4 kTileTransform;
 uniform mat4 kTileCoordinateSpaceTransform;
 
-uniform vec2 kTileWorldSize;
-uniform vec2 kTileWorldOffset;
+uniform vec3 kTileWorldSize;
+uniform vec3 kTilePointOffset;
 uniform vec2 kTileRenderSize;
 
 varying float vParticleAlpha;
@@ -2410,10 +2416,10 @@ varying vec2 vTexCoord;
 void main()
 {
   // transform tile col,row index into a tile position in tile world units in the tile x,y plane
-  vec2 tile = aTilePosition * kTileWorldSize + kTileWorldOffset;
+  vec3 tile = aTilePosition * kTileWorldSize + kTilePointOffset;
 
   // transform the tile from tile space to rendering space
-  vec4 vertex = kTileCoordinateSpaceTransform * vec4(tile.xy, 0.0, 1.0);
+  vec4 vertex = kTileCoordinateSpaceTransform * vec4(tile.xyz, 1.0);
 
   // pull the corner vertices apart by adding a corner offset
   // for each vertex towards some corner/direction away from the
@@ -2458,7 +2464,7 @@ Geometry* TileBatch::Upload(const Environment& env, Device& device) const
     {
         using TileVertex = Tile;
         static const VertexLayout layout(sizeof(TileVertex), {
-            {"aTilePosition", 0, 2, 0, offsetof(TileVertex, pos)},
+            {"aTilePosition", 0, 3, 0, offsetof(TileVertex, pos)},
         });
 
         geom->SetVertexBuffer(mTiles, Geometry::Usage::Stream);
@@ -2469,11 +2475,11 @@ Geometry* TileBatch::Upload(const Environment& env, Device& device) const
     else if (shape == TileShape::Rectangle)
     {
         struct TileVertex {
-            Vec2 position;
+            Vec3 position;
             Vec2 corner;
         };
         static const VertexLayout layout(sizeof(TileVertex), {
-            {"aTilePosition", 0, 2, 0, offsetof(TileVertex, position)},
+            {"aTilePosition", 0, 3, 0, offsetof(TileVertex, position)},
             {"aTileCorner",   0, 2, 0, offsetof(TileVertex, corner)}
         });
         std::vector<TileVertex> vertices;

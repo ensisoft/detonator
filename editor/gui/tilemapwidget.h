@@ -111,6 +111,7 @@ namespace gui
         void on_layers_doubleClicked(const QModelIndex& index);
         void on_layerName_textChanged();
         void on_cmbLayerCache_currentIndexChanged(int);
+        void on_layerDepth_valueChanged(int);
         void on_chkLayerVisible_stateChanged(int);
         void on_chkLayerEnabled_stateChanged(int);
         void on_chkLayerReadOnly_stateChanged(int);

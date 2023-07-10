@@ -326,9 +326,10 @@ namespace engine
             std::vector<gfx::TileBatch::Tile> tiles;
             std::shared_ptr<const gfx::Material> material;
             std::uint16_t layer;
+            std::int16_t depth;
             std::uint32_t row;
             std::uint32_t col;
-            glm::vec2 tile_size;
+            glm::vec3 tile_size;
         };
         using TilemapLayerPalette = std::vector<TilemapLayerPaletteEntry>;
         std::vector<TilemapLayerPalette> mTilemapPalette;
