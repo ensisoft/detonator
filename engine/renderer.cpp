@@ -1180,8 +1180,15 @@ void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
     // these are the tile sizes in units
     const auto map_tile_width_units    = map.GetTileWidth();
     const auto map_tile_height_units   = map.GetTileHeight();
+    const auto map_tile_depth_units    = map.GetTileDepth();
     const auto layer_tile_width_units  = map_tile_width_units * layer.GetTileSizeScaler();
     const auto layer_tile_height_units = map_tile_height_units * layer.GetTileSizeScaler();
+    const auto layer_tile_depth_units  = map_tile_depth_units * layer.GetTileSizeScaler();
+
+    const auto cuboid_scale_factors = GetTileCuboidFactors(map.GetPerspective());
+    const auto layer_tile_size = glm::vec3 { map_tile_width_units * cuboid_scale_factors.x,
+                                             map_tile_height_units * cuboid_scale_factors.y,
+                                             map_tile_depth_units * cuboid_scale_factors.z };
 
     for (unsigned row=tile_row; row<max_row; ++row)
     {
@@ -1206,9 +1213,10 @@ void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
                 auto& batch = batches.back();
                 batch.material  = GetTileMaterial(map, layer_index, material_index);
                 batch.layer     = layer_index;
+                batch.depth     = layer.GetDepth();
                 batch.row       = row;
                 batch.col       = col;
-                batch.tile_size = glm::vec2{layer_tile_width_units, layer_tile_height_units};
+                batch.tile_size = layer_tile_size;
                 batch.type      = TileBatchType::Render;
             }
 
@@ -1217,6 +1225,7 @@ void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
             gfx::TileBatch::Tile tile;
             tile.pos.x = col;
             tile.pos.y = row;
+            tile.pos.z = layer.GetDepth();
             batch.tiles.push_back(tile);
 
             // keep track of the last material used.
@@ -1274,8 +1283,7 @@ void Renderer::DrawTileBatches(const game::Tilemap& map,
 
     const auto perspective = map->GetPerspective();
     const auto& map_view_to_clip = CreateProjectionMatrix(perspective, mCamera.viewport);
-    const auto& map_world_to_view = CreateModelViewMatrix(perspective, mCamera.position, mCamera.scale,
-                                                          mCamera.rotation);
+    const auto& map_world_to_view = CreateModelViewMatrix(perspective, mCamera.position, mCamera.scale, mCamera.rotation);
 
     const auto& view_to_clip = painter.GetProjMatrix();
     const auto& world_to_view = painter.GetViewMatrix();
@@ -1289,8 +1297,8 @@ void Renderer::DrawTileBatches(const game::Tilemap& map,
 
     // Setup painter to draw in whatever is the map perspective.
     gfx::Painter tile_painter(painter.GetDevice());
-    tile_painter.SetViewMatrix(CreateModelViewMatrix(perspective, mCamera.position, mCamera.scale, mCamera.rotation));
-    tile_painter.SetProjectionMatrix(CreateProjectionMatrix(perspective, mCamera.viewport));
+    tile_painter.SetViewMatrix(map_world_to_view);
+    tile_painter.SetProjectionMatrix(map_view_to_clip);
     tile_painter.SetPixelRatio({1.0f, 1.0f});
     tile_painter.SetViewport(mSurface.viewport);
     tile_painter.SetSurfaceSize(mSurface.size);
@@ -1355,8 +1363,15 @@ void Renderer::PrepareDataLayerTileBatches(const game::Tilemap& map,
     // these are the tile sizes in units
     const auto map_tile_width_units    = map.GetTileWidth();
     const auto map_tile_height_units   = map.GetTileHeight();
+    const auto map_tile_depth_units    = map.GetTileDepth();
     const auto layer_tile_width_units  = map_tile_width_units * layer.GetTileSizeScaler();
     const auto layer_tile_height_units = map_tile_height_units * layer.GetTileSizeScaler();
+    const auto layer_tile_depth_units  = map_tile_depth_units * layer.GetTileSizeScaler();
+
+    const auto cuboid_scale_factors = GetTileCuboidFactors(map.GetPerspective());
+    const auto layer_tile_size = glm::vec3 { map_tile_width_units * cuboid_scale_factors.x,
+                                             map_tile_height_units * cuboid_scale_factors.y,
+                                             map_tile_depth_units * cuboid_scale_factors.y };
 
     for (unsigned row=tile_row; row<max_row; ++row)
     {
@@ -1374,15 +1389,17 @@ void Renderer::PrepareDataLayerTileBatches(const game::Tilemap& map,
             gfx::TileBatch::Tile tile;
             tile.pos.x = col;
             tile.pos.y = row;
+            tile.pos.z = layer.GetDepth();
 
             TileBatch batch;
             batch.tiles.push_back(tile);
             batch.material  = gfx::CreateMaterialInstance(color);
+            batch.depth     = layer.GetDepth();
             batch.row       = row;
             batch.col       = col;
             batch.layer     = layer_index;
             batch.type      = TileBatchType::Data;
-            batch.tile_size = glm::vec2{layer_tile_width_units, layer_tile_height_units};
+            batch.tile_size = layer_tile_size;
             batches.push_back(std::move(batch));
         }
     }

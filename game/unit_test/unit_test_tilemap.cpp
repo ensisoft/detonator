@@ -313,6 +313,7 @@ void test_tilemap_layer()
     klass.SetDataUri("pck://foobar/data.bin");
     klass.SetPaletteMaterialId("some_material", 0);
     klass.SetPaletteMaterialId("other_material", 1);
+    klass.SetDepth(-2);
 
     {
         data::JsonObject json;
@@ -333,6 +334,7 @@ void test_tilemap_layer()
         TEST_REQUIRE(ret.GetDataUri() == "pck://foobar/data.bin");
         TEST_REQUIRE(ret.GetPaletteMaterialId(0) == "some_material");
         TEST_REQUIRE(ret.GetPaletteMaterialId(1) == "other_material");
+        TEST_REQUIRE(ret.GetDepth() == -2);
     }
 
     // copy
@@ -393,6 +395,7 @@ void test_tilemap_class()
     klass.SetName("foobar");
     klass.SetTileWidth(5.0f);
     klass.SetTileHeight(8.0f);
+    klass.SetTileDepth(10.0f);
     klass.SetMapWidth(200);
     klass.SetMapHeight(240);
     klass.SetTileRenderScale({2.0f, 3.0f});
@@ -420,6 +423,7 @@ void test_tilemap_class()
         TEST_REQUIRE(ret.GetMapHeight() == 240);
         TEST_REQUIRE(ret.GetTileWidth() == 5.0f);
         TEST_REQUIRE(ret.GetTileHeight() == 8.0f);
+        TEST_REQUIRE(ret.GetTileDepth() == 10.0f);
         TEST_REQUIRE(ret.GetTileRenderScale() == glm::vec2(2.0f, 3.0f));
     }
 

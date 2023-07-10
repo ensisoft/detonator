@@ -547,6 +547,7 @@ std::size_t TilemapLayerClass::GetHash() const
     hash = base::hash_combine(hash, mCache);
     hash = base::hash_combine(hash, mResolution);
     hash = base::hash_combine(hash, mDefault);
+    hash = base::hash_combine(hash, mDepth);
 
     std::set<size_t> keys;
     for (const auto& [key, val] : mPalette)
@@ -714,6 +715,7 @@ void TilemapLayerClass::IntoJson(data::Writer& data) const
     data.Write("type",     type);
     data.Write("cache",    mCache);
     data.Write("rez",      mResolution);
+    data.Write("depth",    mDepth);
 
     std::set<size_t> keys;
     for (const auto [key, val] : mPalette)
@@ -750,6 +752,7 @@ bool TilemapLayerClass::FromJson(const data::Reader& data)
     ok &= data.Read("storage",  &mStorage);
     ok &= data.Read("cache",    &mCache);
     ok &= data.Read("rez",      &mResolution);
+    ok &= data.Read("depth",    &mDepth);
 
     for (unsigned i=0; i<data.GetNumChunks("palette"); ++i)
     {
@@ -910,8 +913,8 @@ void TilemapLayerClass::GetSparseBlockSize(unsigned tile_data_size,
     }
 
     // if the layer is going to be 100% full the sparse layer
-    // can never beat it since there's some overhead associated
-    // with the sparse data structure itself.
+    // can never beat dense layer since there's some overhead
+    // associated with the sparse data structure itself.
     // so instead try to figure out which combination would have
     // the least overhead when being at most 50% full and each
     // tile block being at most 50% full.

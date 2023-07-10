@@ -419,16 +419,18 @@ public:
                                                                                             tile_painter.GetViewMatrix(),
                                                                                             painter.GetProjMatrix(),
                                                                                             painter.GetViewMatrix());
+        const auto perspective = mState.klass->GetPerspective();
         const auto tile_scaler = mLayer.GetTileSizeScaler();
         const auto tile_width_units = mState.klass->GetTileWidth() * tile_scaler;
         const auto tile_height_units = mState.klass->GetTileHeight() * tile_scaler;
+        const auto tile_depth_units  = mState.klass->GetTileDepth() * tile_scaler;
         const auto tile_render_width_scale = mState.klass->GetTileRenderWidthScale();
         const auto tile_render_height_scale = mState.klass->GetTileRenderHeightScale();
-
-        const auto perspective = mState.klass->GetPerspective();
-        const auto& render_size = engine::ComputeTileRenderSize(tile_projection_transform_matrix,
-                                                                {tile_width_units, tile_height_units},
-                                                                perspective);
+        const auto cuboid_scale = engine::GetTileCuboidFactors(perspective);
+        const auto tile_size = glm::vec3{tile_width_units, tile_height_units, tile_depth_units};
+        const auto render_size = engine::ComputeTileRenderSize(tile_projection_transform_matrix,
+                                                               {tile_width_units, tile_height_units},
+                                                               perspective);
         gfx::FRect tool_bounds;
         gfx::TileBatch batch;
         for (unsigned row=0; row<mTool.height; ++row)
@@ -444,6 +446,7 @@ public:
                 gfx::TileBatch::Tile tile;
                 tile.pos.y = tile_row;
                 tile.pos.x = tile_col;
+                tile.pos.z = mLayer.GetDepth();
                 batch.AddTile(tile);
 
                 gfx::FRect rect;
@@ -452,8 +455,7 @@ public:
                 tool_bounds = Union(tool_bounds, rect);
             }
         }
-        batch.SetTileWorldWidth(tile_width_units);
-        batch.SetTileWorldHeight(tile_height_units);
+        batch.SetTileWorldSize(tile_size * cuboid_scale);
         batch.SetTileRenderWidth(render_size.x * tile_render_width_scale);
         batch.SetTileRenderHeight(render_size.y * tile_render_height_scale);
         batch.SetTileShape(gfx::TileBatch::TileShape::Automatic);
@@ -576,6 +578,7 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
     mState.klass->SetMapHeight(384);
     mState.klass->SetTileWidth(10.0f);
     mState.klass->SetTileHeight(10.0f);
+    mState.klass->SetTileDepth(10.0f);
     mState.map = game::CreateTilemap(mState.klass);
     mModel.reset(new LayerModel(mState));
     mRenderer.SetEditingMode(true);
@@ -1508,6 +1511,11 @@ void TilemapWidget::on_cmbLayerCache_currentIndexChanged(int)
 {
     ModifyCurrentLayer();
 }
+void TilemapWidget::on_layerDepth_valueChanged(int)
+{
+    ModifyCurrentLayer();
+}
+
 void TilemapWidget::on_chkLayerVisible_stateChanged(int)
 {
     ModifyCurrentLayer();
@@ -1873,6 +1881,7 @@ void TilemapWidget::SetMapProperties()
     mState.klass->SetName(GetValue(mUI.mapName));
     mState.klass->SetTileWidth(GetValue(mUI.mapTileSize));
     mState.klass->SetTileHeight(GetValue(mUI.mapTileSize));
+    mState.klass->SetTileDepth(GetValue(mUI.mapTileSize));
     mState.klass->SetPerspective(GetValue(mUI.cmbPerspective));
     mState.klass->SetTileRenderWidthScale(GetValue(mUI.tileScaleX));
     mState.klass->SetTileRenderHeightScale(GetValue(mUI.tileScaleY));
@@ -1919,6 +1928,7 @@ void TilemapWidget::DisplayLayerProperties()
     SetValue(mUI.cmbLayerStorage,    -1);
     SetValue(mUI.cmbLayerResolution, -1);
     SetValue(mUI.cmbLayerCache,      -1);
+    SetValue(mUI.layerDepth,          0);
     SetValue(mUI.chkLayerVisible,   false);
     SetValue(mUI.chkLayerEnabled,   false);
     SetValue(mUI.chkLayerReadOnly,  false);
@@ -1945,6 +1955,7 @@ void TilemapWidget::DisplayLayerProperties()
         SetValue(mUI.cmbLayerStorage,    layer->GetStorage());
         SetValue(mUI.cmbLayerCache,      layer->GetCache());
         SetValue(mUI.cmbLayerResolution, layer->GetResolution());
+        SetValue(mUI.layerDepth,         layer->GetDepth() * -1);
         SetValue(mUI.chkLayerVisible,    layer->IsVisible());
         SetValue(mUI.chkLayerEnabled,    layer->IsEnabled());
         SetValue(mUI.chkLayerReadOnly,   layer->IsReadOnly());
@@ -2190,8 +2201,10 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
     // into our 2D axis aligned space. this is here simply because of convenience.
 #if 0
     {
+
         const auto tile_width  = mState.klass->GetTileWidth();
         const auto tile_height = mState.klass->GetTileHeight();
+        const auto tile_depth  = mState.klass->GetTileDepth();
         const auto map_width = mState.klass->GetMapWidth();
         const auto map_height = mState.klass->GetMapHeight();
 
@@ -2200,6 +2213,24 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         points.push_back({tile_width*map_width, 0.0f, 0.0f});
         points.push_back({tile_width*map_width, tile_height*map_height, 0.0f});
         points.push_back({0.0f, tile_height*map_height, 0.0f});
+
+        points.push_back({0.0f, 0.0f, tile_depth*-1.0f});
+        points.push_back({tile_width*map_width, 0.0f, tile_depth*-1.0f});
+        points.push_back({tile_width*map_width, tile_height*map_height, tile_depth*-1.0f});
+        points.push_back({0.0f, tile_height*map_height, tile_depth*-1.0f});
+
+        {
+            const auto base_size = glm::vec3{tile_width, tile_height, tile_depth};
+            const auto size_factors = engine::GetTileCuboidFactors(mState.klass->GetPerspective());
+            //const auto size_factors = glm::vec3 { 1.0f, 1.0f, 0.8994f };
+
+            auto checkerboard = mState.workspace->GetMaterialClassById("_checkerboard");
+            gfx::Transform model;
+            model.Translate(0.5f, 0.5f, -0.5f);
+            model.Scale(base_size * size_factors);
+            tile_painter.Draw(gfx::Cube(), model, gfx::MaterialClassInst(checkerboard));
+        }
+
 
         for (const auto& point : points)
         {
@@ -2215,16 +2246,16 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                 model.Scale(10.0f, 10.0f);
                 model.Translate(p.x, p.y);
                 model.Translate(-5.0f, -5.0f);
-                painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+                //painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
             }
 
             {
-                const auto& p = engine::TilePlaneToScene(glm::vec4{point.x, point.y, 0.0f, 1.0f}, mState.klass->GetPerspective());
+                const auto& p = engine::TilePlaneToScene(glm::vec4{point.x, point.y, point.z, 1.0f}, mState.klass->GetPerspective());
                 gfx::Transform model;
                 model.Scale(10.0f, 10.0f);
                 model.Translate(p.x, p.y);
                 model.Translate(-5.0f, -5.0f);
-                scene_painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
+                //scene_painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
             }
         }
     }
@@ -2767,6 +2798,7 @@ void TilemapWidget::ModifyCurrentLayer()
         layer->SetVisible(GetValue(mUI.chkLayerVisible));
         layer->SetEnabled(GetValue(mUI.chkLayerEnabled));
         layer->SetReadOnly(GetValue(mUI.chkLayerReadOnly));
+        layer->SetDepth(GetValue(mUI.layerDepth)*-1);
 
         auto* instance = GetCurrentLayerInstance();
         instance->SetFlags(layer->GetFlags());
