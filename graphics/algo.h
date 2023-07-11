@@ -48,6 +48,11 @@ enum class BlurDirection {
 void ApplyBlur(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* device,
     unsigned iterations = 4, BlurDirection direction = BlurDirection::BiDirectional);
 
+void DetectSpriteEdges(const gfx::Texture* src, gfx::Texture* dst, gfx::Device* device,
+                       const gfx::Color4f& edge_color = gfx::Color::White);
+void DetectSpriteEdges(const std::string& gpu_id,  gfx::Texture* texture, gfx::Device* device,
+                       const gfx::Color4f& edge_color = gfx::Color::White);
+
 void CopyTexture(const gfx::Texture* src, gfx::Texture* dst, gfx::Device* device, const glm::mat3& matrix = glm::mat3(1.0f));
 
 enum class FlipDirection {
