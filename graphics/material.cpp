@@ -239,21 +239,30 @@ Texture* detail::TextureFileSource::Upload(const Environment& env, Device& devic
         constexpr auto skip_mips = false;
         const auto sRGB = mColorSpace == ColorSpace::sRGB;
         texture->SetContentHash(content_hash);
-        texture->Upload(bitmap->GetDataPtr(), bitmap->GetWidth(), bitmap->GetHeight(),
-            Texture::DepthToFormat(bitmap->GetDepthBits(), sRGB), generate_mips);
+        texture->Upload(bitmap->GetDataPtr(),
+                        bitmap->GetWidth(),
+                        bitmap->GetHeight(),
+                        Texture::DepthToFormat(bitmap->GetDepthBits(), sRGB),
+                        skip_mips);
+        texture->SetFilter(Texture::MinFilter::Linear);
+        texture->SetFilter(Texture::MagFilter::Linear);
 
         if (mEffects.test(Effect::Blur))
         {
             const auto format = texture->GetFormat();
-            if (format == gfx::Texture::Format::RGBA ||
-                format == gfx::Texture::Format::sRGBA)
-            {
-                texture->SetFilter(Texture::MinFilter::Linear);
-                texture->SetFilter(Texture::MagFilter::Linear);
+            if (format == gfx::Texture::Format::RGBA || format == gfx::Texture::Format::sRGBA)
                 algo::ApplyBlur(gpu_id, texture, &device);
-                texture->GenerateMips();
-            } else WARN("Texture blur is not supported on texture format. [file='%1', format='%2']", mFile, format);
+            else WARN("Texture blur is not supported on texture format. [file='%1', format='%2']", mFile, format);
         }
+        if (mEffects.test(Effect::Edges))
+        {
+            const auto format = texture->GetFormat();
+            if (format == gfx::Texture::Format::RGBA || format == gfx::Texture::Format::sRGBA)
+               algo::DetectSpriteEdges(gpu_id, texture, &device);
+            else WARN("Texture edge detection is not supported on texture format. [file='%1', format='%2']", mFile, format);
+        }
+
+        texture->GenerateMips();
         return texture;
     }
     return nullptr;
@@ -498,8 +507,16 @@ Texture* detail::TextureTextBufferSource::Upload(const Environment& env, Device&
                     algo::ApplyBlur(mId, texture, &device);
                 else WARN("Texture blur is not supported on texture format. [name='%1', format=%2]", mName, format);
             }
+            if (mEffects.test(Effect::Edges))
+            {
+                const auto format = texture->GetFormat();
+                if (format == gfx::Texture::Format::RGBA || format == gfx::Texture::Format::sRGBA)
+                    algo::DetectSpriteEdges(mId, texture, &device);
+            }
+
             texture->GenerateMips();
             return texture;
+
         } else ERROR("Failed to rasterize texture from text buffer. [name='%1']", mName);
         return nullptr;
     }
