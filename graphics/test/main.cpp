@@ -27,6 +27,7 @@
 #include "base/logging.h"
 #include "base/format.h"
 #include "device/device.h"
+#include "graphics/algo.h"
 #include "graphics/image.h"
 #include "graphics/device.h"
 #include "graphics/material.h"
@@ -585,6 +586,43 @@ private:
     std::unique_ptr<gfx::Material> mClear1024x1024;
     std::unique_ptr<gfx::Material> mClear512x512;
     std::unique_ptr<gfx::Material> mClear256x256;
+};
+
+class TextureEdgeTest : public GraphicsTest
+{
+public:
+    TextureEdgeTest()
+    {
+        gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
+        material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+
+        {
+            auto source = gfx::LoadTextureFromFile("textures/bird/bird-512x512.png");
+            source->SetName("bird-512x512.png (edge)");
+            source->SetEffect(gfx::TextureSource::Effect::Edges, true);
+            material.SetTexture(std::move(source));
+            mEdge512x512 = gfx::CreateMaterialInstance(material);
+        }
+
+        {
+            auto source = gfx::LoadTextureFromFile("textures/bird/bird-512x512.png");
+            source->SetName("bird-512x512.png (none)");
+            material.SetTexture(std::move(source));
+            material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+            mClear512x512 = gfx::CreateMaterialInstance(material);
+        }
+    }
+
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::FillRect(painter, gfx::FRect(400, 100, 256, 256), *mEdge512x512);
+        gfx::FillRect(painter, gfx::FRect(400, 400, 256, 256), *mClear512x512);
+    }
+    virtual std::string GetName() const override
+    { return "TextureEdgeTest"; }
+private:
+    std::unique_ptr<gfx::Material> mEdge512x512;
+    std::unique_ptr<gfx::Material> mClear512x512;
 };
 
 class GradientTest : public GraphicsTest
@@ -2277,6 +2315,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new ShapeTest<gfx::Sector>("SectorTest"));
     tests.emplace_back(new TextureTest);
     tests.emplace_back(new TextureBlurTest);
+    tests.emplace_back(new TextureEdgeTest);
     tests.emplace_back(new GradientTest);
     tests.emplace_back(new SpriteTest);
     tests.emplace_back(new SpriteSheetTest);

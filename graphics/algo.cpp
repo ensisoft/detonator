@@ -195,6 +195,149 @@ void main() {
     fbo->SetColorTarget(nullptr);
 }
 
+void DetectSpriteEdges(const gfx::Texture* src, gfx::Texture* dst, gfx::Device* device,
+                       const gfx::Color4f& edge_color)
+{
+    auto* fbo = device->FindFramebuffer("AlgoFBO");
+    if (!fbo)
+    {
+        fbo = device->MakeFramebuffer("AlgoFBO");
+        Framebuffer::Config conf;
+        conf.width  = 0; // irrelevant since using texture target
+        conf.height = 0; // irrelevant since using texture target.
+        conf.format = Framebuffer::Format::ColorRGBA8;
+        fbo->SetConfig(conf);
+    }
+    dst->SetFilter(gfx::Texture::MinFilter::Linear);
+    dst->SetFilter(gfx::Texture::MagFilter::Linear);
+    dst->SetWrapX(gfx::Texture::Wrapping::Clamp);
+    dst->SetWrapY(gfx::Texture::Wrapping::Clamp);
+    fbo->SetColorTarget(dst);
+
+    constexpr auto* vertex_src = R"(
+#version 100
+attribute vec2 aPosition;
+attribute vec2 aTexCoord;
+varying vec2 vTexCoord;
+
+void main() {
+  gl_Position = vec4(aPosition.xy, 0.0, 1.0);
+  vTexCoord   = aTexCoord;
+}
+)";
+
+    constexpr auto* fragment_src = R"(
+#version 100
+
+precision highp float;
+
+uniform vec2 kTextureSize;
+uniform vec4 kEdgeColor;
+uniform sampler2D kSrcTexture;
+
+varying vec2 vTexCoord;
+
+vec4 texel(vec2 offset)
+{
+   float w = 1.0 / kTextureSize.x;
+   float h = 1.0 / kTextureSize.y;
+
+   vec2 coord = vTexCoord + offset;
+   if (coord.x < 2.0*w || coord.x > (1.0-2.0*w))
+      return vec4(0.0);
+   if (coord.y < 2.0*h || coord.y > (1.0-2.0*h))
+      return vec4(0.0);
+
+   return texture2D(kSrcTexture, coord);
+}
+
+void sample(inout vec4[9] samples)
+{
+   // texel size in normalized units.
+   float w = 1.0 / kTextureSize.x;
+   float h = 1.0 / kTextureSize.y;
+
+   samples[0] = texel(vec2( -w, -h));
+   samples[1] = texel(vec2(0.0, -h));
+   samples[2] = texel(vec2(  w, -h));
+   samples[3] = texel(vec2( -w, 0.0));
+   samples[4] = texel(vec2(0.0, 0.0));
+   samples[5] = texel(vec2(  w, 0.0));
+   samples[6] = texel(vec2( -w, h));
+   samples[7] = texel(vec2(0.0, h));
+   samples[8] = texel(vec2(  w, h));
+}
+
+void main() {
+
+   vec4 n[9];
+   sample(n);
+
+   vec4 sobel_edge_h = n[2] + (2.0*n[5]) + n[8] - (n[0] + (2.0*n[3]) + n[6]);
+   vec4 sobel_edge_v = n[0] + (2.0*n[1]) + n[2] - (n[6] + (2.0*n[7]) + n[8]);
+   vec4 sobel = sqrt((sobel_edge_h * sobel_edge_h) + (sobel_edge_v * sobel_edge_v));
+
+   //gl_FragColor = vec4(1.0 - sobel.rgb, 1.0);
+   gl_FragColor = vec4(kEdgeColor.rgb, kEdgeColor * sobel.a);
+
+   //gl_FragColor = vec4(1.0) * (1.0 - sobel.a);
+
+}
+)";
+
+    auto* program = device->FindProgram("EdgeProgram");
+    if (!program)
+        program = MakeProgram(vertex_src, fragment_src, "EdgeProgram", *device);
+
+    const float src_width  = src->GetWidth();
+    const float src_height = src->GetHeight();
+    program->SetTextureCount(1);
+    program->SetTexture("kSrcTexture", 0, *src);
+    program->SetUniform("kTextureSize", src_width, src_height);
+    program->SetUniform("kEdgeColor", edge_color);
+
+    auto* quad = MakeFullscreenQuad(*device);
+
+    AutoFBO change(*device);
+    const auto dst_width  = dst->GetWidth();
+    const auto dst_height = dst->GetHeight();
+
+    gfx::Device::State state;
+    state.bWriteColor  = true;
+    state.premulalpha  = false;
+    state.depth_test   = gfx::Device::State::DepthTest::Disabled;
+    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+    state.culling      = gfx::Device::State::Culling::None;
+    state.blending     = gfx::Device::State::BlendOp::None;
+    state.viewport     = gfx::IRect(0, 0, dst_width, dst_height);
+    device->SetFramebuffer(fbo);
+    device->Draw(*program, *quad, state);
+
+}
+
+void DetectSpriteEdges(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* device, const gfx::Color4f& edge_color)
+{
+    auto* tmp = device->FindTexture(gpu_id + "/tmp-color");
+    if (!tmp)
+    {
+        tmp = device->MakeTexture(gpu_id + "/tmp-color");
+
+        tmp->Allocate(texture->GetWidth(),
+                      texture->GetHeight(),
+                      gfx::Texture::Format::RGBA);
+
+        tmp->SetName("EdgeDetectionHelperTexture");
+        tmp->SetFilter(gfx::Texture::MinFilter::Linear);
+        tmp->SetFilter(gfx::Texture::MagFilter::Linear);
+        tmp->SetWrapX(gfx::Texture::Wrapping::Clamp);
+        tmp->SetWrapY(gfx::Texture::Wrapping::Clamp);
+        tmp->SetGarbageCollection(texture->GarbageCollect());
+        tmp->SetTransient(texture->IsTransient());
+    }
+    DetectSpriteEdges(texture, tmp, device, edge_color);
+    CopyTexture(tmp, texture, device);
+}
+
 void CopyTexture(const gfx::Texture* src, gfx::Texture* dst, gfx::Device* device, const glm::mat3& matrix)
 {
     auto* fbo = device->FindFramebuffer("AlgoFBO");
@@ -238,7 +381,7 @@ void main() {
     if (!program)
         program = MakeProgram(vertex_src, fragment_src, "CopyProgram", *device);
 
-    program->SetUniform("kTextureMatrix", *(const Program::Matrix3x3*)glm::value_ptr(matrix));
+    program->SetUniform("kTextureMatrix", matrix);
     program->SetTexture("kTexture", 0, *src);
     program->SetTextureCount(1);
 
