@@ -74,7 +74,8 @@ namespace gfx
         };
 
         enum class Effect {
-            Blur
+            Blur,
+            Edges,
         };
 
         virtual ~TextureSource() = default;
