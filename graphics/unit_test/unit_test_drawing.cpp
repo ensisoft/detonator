@@ -1935,6 +1935,74 @@ void unit_test_packed_texture_bug()
     }
 }
 
+// static flag should generate new program IDs since
+// the static uniforms get folded into the shader code.
+// however not having static should not generate new IDs
+void unit_test_gpu_id_bug()
+{
+    gfx::detail::GenericShaderPass pass;
+    gfx::MaterialClass::State env;
+    env.shader_pass   = &pass;
+    env.material_time = 0.0f;
+    env.editing_mode  = false;
+
+    {
+        gfx::MaterialClass klass(gfx::MaterialClass::Type::Color);
+        klass.SetStatic(false);
+        klass.SetColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetGamma(1.0f);
+
+        const auto& initial = klass.GetProgramId(env);
+        klass.SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetGamma(1.5f);
+        TEST_REQUIRE(klass.GetProgramId(env) == initial);
+    }
+
+    {
+        gfx::MaterialClass klass(gfx::MaterialClass::Type::Texture);
+        klass.SetStatic(false);
+        klass.SetColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetGamma(1.0f);
+        klass.SetTextureScaleX(1.0f);
+        klass.SetTextureScaleY(1.0f);
+        klass.SetTextureVelocityX(0.0f);
+        klass.SetTextureVelocityY(0.0f);
+        klass.SetTextureRotation(0.0f);
+        const auto& initial = klass.GetProgramId(env);
+
+        klass.SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetGamma(1.5f);
+        klass.SetTextureScaleX(1.5f);
+        klass.SetTextureScaleY(1.5f);
+        klass.SetTextureVelocityX(1.0f);
+        klass.SetTextureVelocityY(1.0f);
+        klass.SetTextureRotation(1.0f);
+        TEST_REQUIRE(klass.GetProgramId(env) == initial);
+    }
+
+    {
+        gfx::MaterialClass klass(gfx::MaterialClass::Type::Sprite);
+        klass.SetStatic(false);
+        klass.SetGamma(1.0);
+        klass.SetColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetTextureScaleX(1.0f);
+        klass.SetTextureScaleY(1.0f);
+        klass.SetTextureVelocityX(0.0f);
+        klass.SetTextureVelocityY(0.0f);
+        klass.SetTextureRotation(0.0f);
+        const auto& initial = klass.GetProgramId(env);
+
+        klass.SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetGamma(1.5f);
+        klass.SetTextureScaleX(1.5f);
+        klass.SetTextureScaleY(1.5f);
+        klass.SetTextureVelocityX(1.0f);
+        klass.SetTextureVelocityY(1.0f);
+        klass.SetTextureRotation(1.0f);
+        TEST_REQUIRE(klass.GetProgramId(env) == initial);
+    }
+}
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
@@ -1951,6 +2019,7 @@ int test_main(int argc, char* argv[])
     unit_test_painter_shape_material_pairing();
 
     unit_test_packed_texture_bug();
+    unit_test_gpu_id_bug();
     return 0;
 }
 ) // TEST_MAIN

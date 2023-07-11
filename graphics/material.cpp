@@ -958,11 +958,14 @@ std::string MaterialClass::GetProgramId(const State& state) const noexcept
     }
     else if (mType == Type::Texture)
     {
-        hash = base::hash_combine(hash, mGamma);
-        hash = base::hash_combine(hash, mColorMap[ColorIndex::BaseColor]);
-        hash = base::hash_combine(hash, mTextureScale);
-        hash = base::hash_combine(hash, mTextureVelocity);
-        hash = base::hash_combine(hash, mTextureRotation);
+        if (IsStatic())
+        {
+            hash = base::hash_combine(hash, mGamma);
+            hash = base::hash_combine(hash, mColorMap[ColorIndex::BaseColor]);
+            hash = base::hash_combine(hash, mTextureScale);
+            hash = base::hash_combine(hash, mTextureVelocity);
+            hash = base::hash_combine(hash, mTextureRotation);
+        }
     }
     else if (mType == Type::Custom)
     {
