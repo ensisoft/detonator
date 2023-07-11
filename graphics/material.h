@@ -1187,6 +1187,9 @@ namespace gfx
         virtual void ResetUniforms() = 0;
         // Get the current material time.
         virtual double GetRuntime() const = 0;
+        // Get the material class instance if any. Warning, this may be null for
+        // material objects that aren't based on any material clas!
+        virtual const MaterialClass* GetClass() const  { return nullptr; }
     private:
     };
 
@@ -1226,10 +1229,9 @@ namespace gfx
         { mUniforms = uniforms; }
         virtual double GetRuntime() const override
         { return mRuntime; }
+        virtual const MaterialClass* GetClass() const override
+        { return mClass.get(); }
 
-        // Get the material class object instance.
-        const MaterialClass& GetClass() const
-        { return *mClass; }
         // Shortcut operator for accessing the class object instance.
         const MaterialClass* operator->() const
         { return mClass.get(); }
