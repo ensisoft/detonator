@@ -1091,11 +1091,11 @@ namespace gfx
         }
     private:
         TextureMap* SelectTextureMap(const State& state) const noexcept;
-        Shader* GetColorShader(const State& state, Device& device) const noexcept;
-        Shader* GetGradientShader(const State& state, Device& device) const noexcept;
-        Shader* GetSpriteShader(const State& state, Device& device) const noexcept;
-        Shader* GetCustomShader(const State& state, Device& device) const noexcept;
-        Shader* GetTextureShader(const State& state, Device& device) const noexcept;
+        std::string GetShaderSource(const State& state, Device& device) const;
+        std::string GetColorShaderSource(const State& state, Device& device) const;
+        std::string GetGradientShaderSource(const State& state, Device& device) const;
+        std::string GetSpriteShaderSource(const State& state, Device& device) const;
+        std::string GetTextureShaderSource(const State& state, Device& device) const;
         bool ApplySpriteDynamicState(const State& state, Device& device, Program& program) const noexcept;
         bool ApplyCustomDynamicState(const State& state, Device& device, Program& program) const noexcept;
         bool ApplyTextureDynamicState(const State& state, Device& device, Program& program) const noexcept;
