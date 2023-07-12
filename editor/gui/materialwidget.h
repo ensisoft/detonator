@@ -135,6 +135,7 @@ namespace gui
         void on_chkAllowResizing_stateChanged(int);
         void on_chkPreMulAlpha_stateChanged(int);
         void on_chkBlurTexture_stateChanged(int);
+        void on_chkDetectEdges_stateChanged(int);
         void on_textureMapName_textChanged(const QString& text);
         void on_textureSourceName_textChanged(const QString& text);
         void on_findMap_textChanged(const QString& text);
