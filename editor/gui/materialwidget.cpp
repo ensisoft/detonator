@@ -867,6 +867,9 @@ void MaterialWidget::on_chkPreMulAlpha_stateChanged(int)
 { SetTextureFlags(); }
 void MaterialWidget::on_chkBlurTexture_stateChanged(int)
 { SetTextureFlags(); }
+void MaterialWidget::on_chkDetectEdges_stateChanged(int)
+{ SetTextureFlags(); }
+
 
 void MaterialWidget::on_textureMapName_textChanged(const QString& text)
 {
@@ -1303,10 +1306,12 @@ void MaterialWidget::SetTextureFlags()
             ptr->SetFlag(gfx::detail::TextureFileSource::Flags::AllowResizing, GetValue(mUI.chkAllowResizing));
             ptr->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, GetValue(mUI.chkPreMulAlpha));
             ptr->SetEffect(gfx::TextureSource::Effect::Blur, GetValue(mUI.chkBlurTexture));
+            ptr->SetEffect(gfx::TextureSource::Effect::Edges, GetValue(mUI.chkDetectEdges));
         }
         else if (auto* ptr = dynamic_cast<gfx::detail::TextureTextBufferSource*>(source))
         {
             ptr->SetEffect(gfx::TextureSource::Effect::Blur, GetValue(mUI.chkBlurTexture));
+            ptr->SetEffect(gfx::TextureSource::Effect::Edges, GetValue(mUI.chkDetectEdges));
         }
     }
 }
@@ -1537,6 +1542,7 @@ void MaterialWidget::GetTextureProperties()
     SetEnabled(mUI.chkAllowResizing,  false);
     SetEnabled(mUI.chkPreMulAlpha,    false);
     SetEnabled(mUI.chkBlurTexture,    false);
+    SetEnabled(mUI.chkDetectEdges,    false);
 
     SetEnabled(mUI.textureRect, false);
     SetValue(mUI.rectX, 0.0f);
@@ -1574,15 +1580,19 @@ void MaterialWidget::GetTextureProperties()
         SetValue(mUI.chkAllowResizing,  ptr->TestFlag(gfx::detail::TextureFileSource::Flags::AllowResizing));
         SetValue(mUI.chkPreMulAlpha,    ptr->TestFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha));
         SetValue(mUI.chkBlurTexture,    ptr->TestEffect(gfx::TextureSource::Effect::Blur));
+        SetValue(mUI.chkDetectEdges,    ptr->TestEffect(gfx::TextureSource::Effect::Edges));
         SetEnabled(mUI.chkAllowPacking,  true);
         SetEnabled(mUI.chkAllowResizing, true);
         SetEnabled(mUI.chkPreMulAlpha,   true);
         SetEnabled(mUI.chkBlurTexture,   true);
+        SetEnabled(mUI.chkDetectEdges,   true);
     }
     else if (const auto* ptr = dynamic_cast<const gfx::detail::TextureTextBufferSource*>(source))
     {
         SetEnabled(mUI.chkBlurTexture, true);
+        SetEnabled(mUI.chkDetectEdges, true);
         SetValue(mUI.chkBlurTexture, ptr->TestEffect(gfx::TextureSource::Effect::Blur));
+        SetValue(mUI.chkDetectEdges, ptr->TestEffect(gfx::TextureSource::Effect::Edges));
     }
 }
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1525</width>
-    <height>1388</height>
+    <width>1834</width>
+    <height>1404</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -1171,7 +1171,7 @@
         <item>
          <widget class="QListWidget" name="textures">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -1222,7 +1222,7 @@
           <x>0</x>
           <y>0</y>
           <width>350</width>
-          <height>1116</height>
+          <height>912</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -1519,13 +1519,36 @@
            <layout class="QVBoxLayout" name="verticalLayout_12">
             <item>
              <layout class="QGridLayout" name="gridLayout_3">
-              <item row="2" column="2" colspan="2">
-               <widget class="QLineEdit" name="textureSourceID">
+              <item row="4" column="1">
+               <widget class="QLabel" name="label_36">
+                <property name="text">
+                 <string>Width</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="2">
+               <widget class="QLineEdit" name="textureWidth">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2" colspan="2">
+               <widget class="QLineEdit" name="textureSourceFile">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1533,27 +1556,6 @@
                <widget class="QLabel" name="label_17">
                 <property name="text">
                  <string>Name</string>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="2">
-               <widget class="QCheckBox" name="chkAllowResizing">
-                <property name="text">
-                 <string>Allow resizing</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="1">
-               <widget class="QLabel" name="label_37">
-                <property name="text">
-                 <string>Height</string>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="1">
-               <widget class="QLabel" name="label_38">
-                <property name="text">
-                 <string>Depth</string>
                 </property>
                </widget>
               </item>
@@ -1579,49 +1581,6 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
-               <widget class="QLabel" name="label">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>File</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="1">
-               <widget class="QLabel" name="label_36">
-                <property name="text">
-                 <string>Width</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="2">
-               <widget class="QLineEdit" name="textureWidth">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="2" colspan="2">
-               <widget class="QLineEdit" name="textureSourceName">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
-              </item>
               <item row="10" column="2">
                <widget class="QCheckBox" name="chkBlurTexture">
                 <property name="text">
@@ -1633,36 +1592,6 @@
                <widget class="QLabel" name="label_13">
                 <property name="text">
                  <string>ID</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="2">
-               <widget class="QLineEdit" name="textureHeight">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string/>
-                </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="1">
-               <widget class="QLabel" name="label_15">
-                <property name="text">
-                 <string>Flags</string>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="2">
-               <widget class="QCheckBox" name="chkAllowPacking">
-                <property name="text">
-                 <string>Allow combining</string>
                 </property>
                </widget>
               </item>
@@ -1682,10 +1611,19 @@
                 </property>
                </widget>
               </item>
-              <item row="11" column="2" colspan="2">
-               <widget class="QPushButton" name="btnEditTexture">
+              <item row="5" column="2">
+               <widget class="QLineEdit" name="textureHeight">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="text">
-                 <string>Edit Texture</string>
+                 <string/>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1696,16 +1634,85 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="2" colspan="2">
-               <widget class="QLineEdit" name="textureSourceFile">
+              <item row="3" column="2" colspan="2">
+               <widget class="QLineEdit" name="textureSourceName">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
-                <property name="readOnly">
-                 <bool>true</bool>
+               </widget>
+              </item>
+              <item row="2" column="2" colspan="2">
+               <widget class="QLineEdit" name="textureSourceID">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLabel" name="label">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>File</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QLabel" name="label_37">
+                <property name="text">
+                 <string>Height</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="1">
+               <widget class="QLabel" name="label_15">
+                <property name="text">
+                 <string>Flags</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="2">
+               <widget class="QCheckBox" name="chkAllowPacking">
+                <property name="text">
+                 <string>Allow combining</string>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="2">
+               <widget class="QCheckBox" name="chkAllowResizing">
+                <property name="text">
+                 <string>Allow resizing</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="1">
+               <widget class="QLabel" name="label_38">
+                <property name="text">
+                 <string>Depth</string>
+                </property>
+               </widget>
+              </item>
+              <item row="12" column="2" colspan="2">
+               <widget class="QPushButton" name="btnEditTexture">
+                <property name="text">
+                 <string>Edit Texture</string>
+                </property>
+               </widget>
+              </item>
+              <item row="11" column="2" colspan="2">
+               <widget class="QCheckBox" name="chkDetectEdges">
+                <property name="text">
+                 <string>Edge detection</string>
                 </property>
                </widget>
               </item>
@@ -1900,19 +1907,6 @@
                </widget>
               </item>
              </layout>
-            </item>
-            <item>
-             <spacer name="verticalSpacer">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
-              </property>
-             </spacer>
             </item>
            </layout>
           </widget>
@@ -2172,6 +2166,7 @@
   <tabstop>chkAllowResizing</tabstop>
   <tabstop>chkPreMulAlpha</tabstop>
   <tabstop>chkBlurTexture</tabstop>
+  <tabstop>chkDetectEdges</tabstop>
   <tabstop>btnEditTexture</tabstop>
   <tabstop>rectX</tabstop>
   <tabstop>rectY</tabstop>
