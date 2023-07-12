@@ -924,6 +924,8 @@ std::string MaterialClass::GetProgramId(const State& state) const noexcept
     size_t hash = 0;
     hash = state.shader_pass->GetHash();
     hash = base::hash_combine(hash, mType);
+    hash = base::hash_combine(hash, mShaderSrc);
+    hash = base::hash_combine(hash, mShaderUri);
 
     if (mType == Type::Color)
     {
@@ -969,8 +971,8 @@ std::string MaterialClass::GetProgramId(const State& state) const noexcept
     }
     else if (mType == Type::Custom)
     {
-        hash = base::hash_combine(hash, mShaderSrc);
-        hash = base::hash_combine(hash, mShaderUri);
+        // todo: static uniform information
+
     } else BUG("Unknown material type.");
 
     return std::to_string(hash);
@@ -1029,22 +1031,35 @@ std::size_t MaterialClass::GetHash() const noexcept
 
 Shader* MaterialClass::GetShader(const State& state, Device& device) const noexcept
 {
-    if (auto* shader = device.FindShader(GetProgramId(state)))
+    const auto& id = GetProgramId(state);
+    if (auto* shader = device.FindShader(id))
         return shader;
 
-    if (mType == Type::Color)
-        return GetColorShader(state, device);
-    else if (mType == Type::Gradient)
-        return GetGradientShader(state, device);
-    else if (mType == Type::Sprite)
-        return GetSpriteShader(state, device);
-    else if (mType == Type::Texture)
-        return GetTextureShader(state, device);
-    else if (mType == Type::Custom)
-        return GetCustomShader(state, device);
-    else BUG("Unknown material type.");
+    std::string source = GetShaderSource(state, device);
+    if (source.empty())
+        return nullptr;
 
-    return nullptr;
+    if (IsStatic())
+    {
+        ShaderData data;
+        data.gamma            = mGamma;
+        data.base_color       = mColorMap[ColorIndex::BaseColor];
+        data.color_map[0]     = mColorMap[0];
+        data.color_map[1]     = mColorMap[1];
+        data.color_map[2]     = mColorMap[2];
+        data.color_map[3]     = mColorMap[3];
+        data.gradient_offset  = mColorWeight;
+        data.texture_velocity = mTextureVelocity;
+        data.texture_rotation = mTextureRotation;
+        data.texture_scale    = mTextureScale;
+        source = FoldUniforms(source, data);
+    }
+    source = state.shader_pass->ModifyFragmentSource(device, std::move(source));
+
+    auto* shader = device.MakeShader(id);
+    shader->SetName(IsStatic() ? mName : base::FormatString("BuiltIn%1Shader", mType));
+    shader->CompileSource(source);
+    return shader;
 }
 
 bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Program& program) const noexcept
@@ -1652,10 +1667,48 @@ TextureMap* MaterialClass::SelectTextureMap(const State& state) const noexcept
     return mTextureMaps[0].get();
 }
 
-Shader* MaterialClass::GetColorShader(const State& state, Device& device) const noexcept
+std::string MaterialClass::GetShaderSource(const State& state, Device& device) const
 {
+    // First check the inline source within the material. If that doesn't
+    // exist then check the shader URI for loading the shader from the URI.
+    // Finally if that doesn't exist and the material has a known type then
+    // use one of the built-in shaders!
 
-std::string source(R"(
+    if (!mShaderSrc.empty())
+        return mShaderSrc;
+
+    if (!mShaderUri.empty())
+    {
+        const auto& buffer = gfx::LoadResource(mShaderUri);
+        if (!buffer)
+        {
+            ERROR("Failed to load custom material shader source file. [name='%1', uri='%2']", mName, mShaderUri);
+            return "";
+        }
+        const char* beg = (const char*)buffer->GetData();
+        const char* end = beg + buffer->GetByteSize();
+        return std::string(beg, end);
+    }
+
+    if (mType == Type::Color)
+        return GetColorShaderSource(state, device);
+    else if (mType == Type::Gradient)
+        return GetGradientShaderSource(state, device);
+    else if (mType == Type::Sprite)
+        return GetSpriteShaderSource(state, device);
+    else if (mType == Type::Texture)
+        return GetTextureShaderSource(state, device);
+    else  if (mType == Type::Custom)
+    {
+        ERROR("Material has no shader source specified. [name='%1']", mName);
+        return "";
+    } else BUG("Unknown material type.");
+    return "";
+}
+
+std::string MaterialClass::GetColorShaderSource(const State& state, Device& device) const
+{
+    constexpr const auto* source = R"(
 #version 100
 precision mediump float;
 uniform vec4 kBaseColor;
@@ -1675,26 +1728,13 @@ void main()
   gl_FragColor = ShaderPass(color);
 
 }
-)");
-
-    if (IsStatic())
-    {
-        ShaderData data;
-        data.gamma      = mGamma;
-        data.base_color = mColorMap[ColorIndex::BaseColor];
-        source = FoldUniforms(source, data);
-    }
-    source = state.shader_pass->ModifyFragmentSource(device, std::move(source));
-
-    auto* shader = device.MakeShader(GetProgramId(state));
-    shader->SetName(IsStatic() ? mName : "ColorShader");
-    shader->CompileSource(source);
-    return shader;
+)";
+    return source;
 }
 
-Shader* MaterialClass::GetGradientShader(const State& state, Device& device) const noexcept
+std::string MaterialClass::GetGradientShaderSource(const State& state, Device& device) const
 {
-std::string source(R"(
+    constexpr const auto* source = R"(
 #version 100
 precision highp float;
 
@@ -1733,30 +1773,14 @@ void main()
 
   gl_FragColor = ShaderPass(color);
 }
-)");
-    if (IsStatic())
-    {
-        ShaderData data;
-        data.gamma = mGamma;
-        data.color_map[0] = mColorMap[0];
-        data.color_map[1] = mColorMap[1];
-        data.color_map[2] = mColorMap[2];
-        data.color_map[3] = mColorMap[3];
-        data.gradient_offset = mColorWeight;
-        source = FoldUniforms(source, data);
-    }
-    source = state.shader_pass->ModifyFragmentSource(device, source);
-
-    auto* shader = device.MakeShader(GetProgramId(state));
-    shader->SetName(IsStatic() ? mName : "GradientShader");
-    shader->CompileSource(source);
-    return shader;
+)";
+    return source;
 }
 
-Shader* MaterialClass::GetSpriteShader(const State& state, Device& device) const noexcept
+std::string MaterialClass::GetSpriteShaderSource(const State& state, Device& device) const
 {
     // todo: maybe pack some of shader uniforms
-    std::string source(R"(
+    constexpr const auto* source = R"(
 #version 100
 precision highp float;
 
@@ -1862,22 +1886,8 @@ void main()
 
     gl_FragColor = ShaderPass(color);
 }
-)");
-    if (IsStatic())
-    {
-        ShaderData data;
-        data.gamma = mGamma;
-        data.texture_scale = mTextureScale;
-        data.texture_velocity = mTextureVelocity;
-        data.texture_rotation = mTextureRotation;
-        source = FoldUniforms(source, data);
-    }
-    source = state.shader_pass->ModifyFragmentSource(device, std::move(source));
-
-    auto* shader = device.MakeShader(GetProgramId(state));
-    shader->SetName(IsStatic() ? mName : "SpriteShader");
-    shader->CompileSource(source);
-    return shader;
+)";
+    return source;
 }
 
 bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, Program& program) const noexcept
@@ -1962,10 +1972,10 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
     return true;
 }
 
-Shader* MaterialClass::GetTextureShader(const State& state, Device& device) const noexcept
+std::string MaterialClass::GetTextureShaderSource(const State& state, Device& device) const
 {
 // todo: pack some of the uniforms ?
-    std::string source(R"(
+    constexpr const auto* source = R"(
 #version 100
 precision highp float;
 
@@ -2064,23 +2074,8 @@ void main()
 
     gl_FragColor = ShaderPass(color);
 }
-)");
-    if (IsStatic())
-    {
-        ShaderData data;
-        data.gamma            = mGamma;
-        data.base_color       = mColorMap[ColorIndex::BaseColor];
-        data.texture_scale    = mTextureScale;
-        data.texture_velocity = mTextureVelocity;
-        data.texture_rotation = mTextureRotation;
-        source = FoldUniforms(source, data);
-    }
-    source = state.shader_pass->ModifyFragmentSource(device, std::move(source));
-
-    auto* shader = device.MakeShader(GetProgramId(state));
-    shader->SetName(IsStatic() ? mName : "Texture2DShader");
-    shader->CompileSource(source);
-    return shader;
+)";
+    return source;
 }
 
 bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device, Program& program) const noexcept
@@ -2148,41 +2143,6 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
         SetUniform("kTextureRotation",   state.uniforms, mTextureRotation, program);
     }
     return true;
-}
-
-Shader* MaterialClass::GetCustomShader(const State& state, Device& device) const noexcept
-{
-    auto* shader = device.MakeShader(GetProgramId(state));
-    if (!mShaderSrc.empty())
-    {
-        shader->SetName("CustomShaderSource");
-        if (!shader->CompileSource(state.shader_pass->ModifyFragmentSource(device, mShaderSrc)))
-        {
-            ERROR("Failed to compile custom material shader source. [class='%1']", mName);
-            return nullptr;
-        }
-        DEBUG("Compiled custom shader source. [name='%1']", mName);
-    }
-    else
-    {
-        shader->SetName(mShaderUri);
-        const auto& buffer = gfx::LoadResource(mShaderUri);
-        if (!buffer)
-        {
-            ERROR("Failed to load custom material shader source file. [class='%1', uri='%1']", mName, mShaderUri);
-            return nullptr;
-        }
-
-        const char* beg = (const char*)buffer->GetData();
-        const char* end = beg + buffer->GetByteSize();
-        if (!shader->CompileSource(state.shader_pass->ModifyFragmentSource(device, std::string(beg, end))))
-        {
-            ERROR("Failed to compile custom material shader source. [name='%1', uri='%2']", mName, mShaderUri);
-            return nullptr;
-        }
-        DEBUG("Compiled shader source file. [name='%1', uri='%2']", mName, mShaderUri);
-    }
-    return shader;
 }
 
 bool MaterialClass::ApplyCustomDynamicState(const State& state, Device& device, Program& program) const noexcept
