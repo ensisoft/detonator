@@ -62,6 +62,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     DEBUG("Create MaterialWidget");
     mWorkspace = workspace;
     mMaterial  = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color, base::RandomString(10));
+    mMaterial->SetName("My Material");
     mOriginalHash = mMaterial->GetHash();
 
     mUI.setupUi(this);
@@ -94,8 +95,8 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     SetList(mUI.cmbModel, workspace->ListPrimitiveDrawables());
     SetValue(mUI.cmbModel, "Rectangle");
     SetValue(mUI.materialID, mMaterial->GetId());
-    SetValue(mUI.materialName, QString("My Material"));
-    setWindowTitle("My Material");
+    SetValue(mUI.materialName, mMaterial->GetName());
+    setWindowTitle(GetValue(mUI.materialName));
 
     GetMaterialProperties();
     GetTextureMapProperties();
