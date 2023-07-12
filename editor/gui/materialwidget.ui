@@ -197,6 +197,29 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QToolButton" name="btnResetShader">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="toolTip">
+               <string>Reset textures to nothing</string>
+              </property>
+              <property name="text">
+               <string>,..</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+              </property>
+              <property name="autoRaise">
+               <bool>false</bool>
+              </property>
+              <property name="arrowType">
+               <enum>Qt::NoArrow</enum>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
          </layout>
@@ -1373,29 +1396,6 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QToolButton" name="btnResetTextureMap">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="toolTip">
-                   <string>Reset textures to nothing</string>
-                  </property>
-                  <property name="text">
-                   <string>,..</string>
-                  </property>
-                  <property name="icon">
-                   <iconset resource="../resource/resource.qrc">
-                    <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
-                  </property>
-                  <property name="autoRaise">
-                   <bool>false</bool>
-                  </property>
-                  <property name="arrowType">
-                   <enum>Qt::NoArrow</enum>
-                  </property>
-                 </widget>
-                </item>
-                <item>
                  <widget class="QToolButton" name="btnAddTextureMap">
                   <property name="enabled">
                    <bool>true</bool>
@@ -1415,6 +1415,29 @@
                   </property>
                   <property name="toolButtonStyle">
                    <enum>Qt::ToolButtonIconOnly</enum>
+                  </property>
+                  <property name="autoRaise">
+                   <bool>false</bool>
+                  </property>
+                  <property name="arrowType">
+                   <enum>Qt::NoArrow</enum>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QToolButton" name="btnResetTextureMap">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="toolTip">
+                   <string>Reset textures to nothing</string>
+                  </property>
+                  <property name="text">
+                   <string>,..</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="../resource/resource.qrc">
+                    <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
                   </property>
                   <property name="autoRaise">
                    <bool>false</bool>
@@ -2114,6 +2137,7 @@
   <tabstop>btnSelectShader</tabstop>
   <tabstop>btnCreateShader</tabstop>
   <tabstop>btnEditShader</tabstop>
+  <tabstop>btnResetShader</tabstop>
   <tabstop>chkBlendPreMulAlpha</tabstop>
   <tabstop>chkStaticInstance</tabstop>
   <tabstop>chkBlendFrames</tabstop>
@@ -2149,8 +2173,8 @@
   <tabstop>textureMapName</tabstop>
   <tabstop>textureMapType</tabstop>
   <tabstop>textureMapTextures</tabstop>
-  <tabstop>btnResetTextureMap</tabstop>
   <tabstop>btnAddTextureMap</tabstop>
+  <tabstop>btnResetTextureMap</tabstop>
   <tabstop>textureMapFps</tabstop>
   <tabstop>spriteSheet</tabstop>
   <tabstop>spriteRows</tabstop>
