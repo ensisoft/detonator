@@ -78,7 +78,7 @@ private:
 namespace engine
 {
 
-BloomPass::BloomPass(const std::string& name, const gfx::Color4f& color, float threshold, gfx::Painter& painter)
+BloomPass::BloomPass(const std::string& name, const gfx::Color4f& color, float threshold, const gfx::Painter& painter)
     : mName(name)
     , mColor(color)
     , mThreshold(threshold)
@@ -124,9 +124,8 @@ void BloomPass::Draw(const SceneRenderLayerList& layers) const
     }
     bloom_fbo->SetColorTarget(bloom_tex);
 
-    gfx::AutoFBO fbo_change(*device);
-    device->SetFramebuffer(bloom_fbo);
-    device->ClearColor(gfx::Color::Transparent);
+    mPainter.SetFramebuffer(bloom_fbo);
+    mPainter.ClearColor(gfx::Color::Transparent);
 
     const BloomShaderPass bloom_shader_pass(mColor, mThreshold);
 

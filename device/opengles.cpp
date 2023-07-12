@@ -533,42 +533,42 @@ public:
         }
     }
 
-    virtual void ClearColor(const gfx::Color4f& color) override
+    virtual void ClearColor(const gfx::Color4f& color, gfx::Framebuffer* fbo) override
     {
-        if (!SetupFBO())
+        if (!SetupFBO(fbo))
             return;
 
         GL_CALL(glClearColor(color.Red(), color.Green(), color.Blue(), color.Alpha()));
         GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
     }
-    virtual void ClearStencil(int value) override
+    virtual void ClearStencil(int value, gfx::Framebuffer* fbo) override
     {
-        if (!SetupFBO())
+        if (!SetupFBO(fbo))
             return;
 
         GL_CALL(glClearStencil(value));
         GL_CALL(glClear(GL_STENCIL_BUFFER_BIT));
     }
-    virtual void ClearDepth(float value) override
+    virtual void ClearDepth(float value, gfx::Framebuffer* fbo) override
     {
-        if (!SetupFBO())
+        if (!SetupFBO(fbo))
             return;
 
         GL_CALL(glClearDepthf(value));
         GL_CALL(glClear(GL_DEPTH_BUFFER_BIT));
     }
-    virtual void ClearColorDepth(const gfx::Color4f& color, float depth) override
+    virtual void ClearColorDepth(const gfx::Color4f& color, float depth, gfx::Framebuffer* fbo) override
     {
-        if (!SetupFBO())
+        if (!SetupFBO(fbo))
             return;
 
         GL_CALL(glClearColor(color.Red(), color.Green(), color.Blue(), color.Alpha()));
         GL_CALL(glClearDepthf(depth));
         GL_CALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
     }
-    virtual void ClearColorDepthStencil(const gfx::Color4f&  color, float depth, int stencil) override
+    virtual void ClearColorDepthStencil(const gfx::Color4f&  color, float depth, int stencil, gfx::Framebuffer* fbo) override
     {
-        if (!SetupFBO())
+        if (!SetupFBO(fbo))
             return;
 
         GL_CALL(glClearColor(color.Red(), color.Green(), color.Blue(), color.Alpha()));
@@ -697,40 +697,11 @@ public:
     virtual void DeleteFramebuffers() override
     {
         mFBOs.clear();
-
-        if (mCurrentFBO)
-        {
-            GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-            mCurrentFBO = nullptr;
-        }
     }
 
-    virtual bool SetFramebuffer(const gfx::Framebuffer* fbo) override
+    virtual void Draw(const gfx::Program& program, const gfx::Geometry& geometry, const State& state, gfx::Framebuffer* fbo) override
     {
-        auto impl = (FramebufferImpl*)fbo;
-        if (impl == nullptr)
-        {
-            GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-        }
-        else if (impl->IsReady())
-        {
-            if (!impl->Complete(true))
-                return false;
-        }
-        else
-        {
-            if (!impl->Create())
-                return false;
-            if (!impl->Complete(false))
-                return false;
-        }
-        mCurrentFBO = impl;
-        return true;
-    }
-
-    virtual void Draw(const gfx::Program& program, const gfx::Geometry& geometry, const State& state) override
-    {
-        if (!SetupFBO())
+        if (!SetupFBO(fbo))
             return;
 
         const auto* myprog = static_cast<const ProgImpl*>(&program);
@@ -1305,25 +1276,32 @@ public:
         }
     }
 
-    virtual gfx::Bitmap<gfx::RGBA> ReadColorBuffer(unsigned width, unsigned height) const override
+    virtual gfx::Bitmap<gfx::RGBA> ReadColorBuffer(unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
     {
-        gfx::Bitmap<gfx::RGBA> bmp(width, height);
+        gfx::Bitmap<gfx::RGBA> bmp;
+
+        if (!SetupFBO(fbo))
+            return bmp;
+
+        bmp.Resize(width, height);
 
         GL_CALL(glPixelStorei(GL_PACK_ALIGNMENT, 1));
-        GL_CALL(glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
-            (void*)bmp.GetDataPtr()));
+        GL_CALL(glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)bmp.GetDataPtr()));
         // by default the scan row order is reversed to what we expect.
         bmp.FlipHorizontally();
         return bmp;
     }
 
-    virtual gfx::Bitmap<gfx::RGBA> ReadColorBuffer(unsigned x, unsigned y,
-                                         unsigned width, unsigned height) const override
+    virtual gfx::Bitmap<gfx::RGBA> ReadColorBuffer(unsigned x, unsigned y, unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
     {
-        gfx::Bitmap<gfx::RGBA> bmp(width, height);
+        gfx::Bitmap<gfx::RGBA> bmp;
+        if (!SetupFBO(fbo))
+            return bmp;
+
+        bmp.Resize(width, height);
+
         GL_CALL(glPixelStorei(GL_PACK_ALIGNMENT, 1));
-        GL_CALL(glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
-                (void*)bmp.GetDataPtr()));
+        GL_CALL(glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, (void*)bmp.GetDataPtr()));
         bmp.FlipHorizontally();
         return bmp;
     }
@@ -1379,8 +1357,6 @@ public:
         caps->max_fbo_height        = max_fbo_size;
         caps->max_fbo_width         = max_fbo_size;
     }
-    virtual const gfx::Framebuffer* GetCurrentFramebuffer() const override
-    { return mCurrentFBO; }
 
     virtual gfx::Device* AsGraphicsDevice() override
     { return this; }
@@ -1511,13 +1487,28 @@ public:
                   buffer.name, bytes, offset, percent_full, buffer.usage, GLEnumToStr(static_cast<GLenum>(type)));
         }
     }
-    bool SetupFBO()
+    bool SetupFBO(gfx::Framebuffer* fbo) const
     {
-        if (mCurrentFBO)
+        if (fbo)
         {
-            if (!mCurrentFBO->Complete(false))
-                return false;
-            mCurrentFBO->SetFrameStamp(mFrameNumber);
+            auto* impl = static_cast<FramebufferImpl*>(fbo);
+            if (impl->IsReady())
+            {
+                if (!impl->Complete(true))
+                    return false;
+            }
+            else
+            {
+                if (!impl->Create())
+                    return false;
+                if (!impl->Complete(false))
+                    return false;
+            }
+            impl->SetFrameStamp(mFrameNumber);
+        }
+        else
+        {
+            GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
         }
         return true;
     }
@@ -2768,8 +2759,6 @@ private:
         bool EXT_sRGB = false;
         bool OES_packed_depth_stencil = false;
     } mExtensions;
-
-    FramebufferImpl* mCurrentFBO = nullptr;
 };
 
 } // namespace

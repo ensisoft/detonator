@@ -110,6 +110,8 @@ namespace gfx
         { mDeviceInst = device; mDevice = mDeviceInst.get(); }
         inline void SetDevice(Device* device) noexcept
         { mDevice = device; }
+        inline void SetFramebuffer(Framebuffer* fbo) noexcept
+        { mFrameBuffer = fbo; }
 
         inline const glm::mat4& GetViewMatrix() const noexcept
         { return mViewMatrix; }
@@ -128,12 +130,17 @@ namespace gfx
         { return mDevice; }
         inline const Device* GetDevice() const noexcept
         { return mDevice; }
+        inline Framebuffer* GetFramebuffer() noexcept
+        { return mFrameBuffer; }
+        inline const Framebuffer* GetFramebuffer() const noexcept
+        { return mFrameBuffer; }
 
 
         // Clear the current render target color buffer with the given clear color.
         void ClearColor(const Color4f& color);
         // Clear the current render target stencil buffer with the given stencil value.
         void ClearStencil(const StencilClearValue& stencil);
+        void ClearDepth(float depth);
 
         using StencilFunc = Device::State::StencilFunc;
         using StencilOp   = Device::State::StencilOp;
@@ -217,6 +224,7 @@ namespace gfx
         std::shared_ptr<Device> mDeviceInst;
         Device* mDevice = nullptr;
     private:
+        gfx::Framebuffer* mFrameBuffer = nullptr;
         gfx::USize mSize;
         gfx::IRect mViewport;
         gfx::IRect mScissor;

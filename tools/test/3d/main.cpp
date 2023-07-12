@@ -964,17 +964,17 @@ int main(int argc, char* argv[])
         // draw to the depth texture.
         DepthTexturePass depth_pass;
         fbo->SetColorTarget(depth);
-        gfx_device->SetFramebuffer(fbo);
-        gfx_device->ClearColor(gfx::Color::Black); // black = 0.0f =  zero depth
-        gfx_device->ClearDepth(1.0f);
+        painter->SetFramebuffer(fbo);
+        painter->ClearColor(gfx::Color::Black);
+        painter->ClearDepth(1.0f);
         DrawScene(depth_pass, *painter, state);
 
         const auto perspective_depth_test = !state.perspective.has_value();
 
         ColorPass color_pass(perspective_depth_test);
-        gfx_device->SetFramebuffer(nullptr);
-        gfx_device->ClearColor(gfx::Color4f(0x23, 0x23, 0x23, 0xff));
-        gfx_device->ClearDepth(1.0f);
+        painter->SetFramebuffer(nullptr);
+        painter->ClearColor(gfx::Color4f(0x23, 0x23, 0x23, 0xff));
+        painter->ClearDepth(1.0f);
         DrawScene(color_pass, *painter, state);
 
         // draw a focus rect

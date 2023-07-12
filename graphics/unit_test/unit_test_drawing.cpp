@@ -337,15 +337,15 @@ private:
 class TestDevice : public gfx::Device
 {
 public:
-    virtual void ClearColor(const gfx::Color4f& color) override
+    virtual void ClearColor(const gfx::Color4f& color, gfx::Framebuffer* ) override
     {}
-    virtual void ClearStencil(int value) override
+    virtual void ClearStencil(int value, gfx::Framebuffer* fbo) override
     {}
-    virtual void ClearDepth(float value) override
+    virtual void ClearDepth(float value, gfx::Framebuffer* fbo) override
     {}
-    virtual void ClearColorDepth(const gfx::Color4f& color, float depth) override
+    virtual void ClearColorDepth(const gfx::Color4f& color, float depth, gfx::Framebuffer* fbo) override
     {}
-    virtual void ClearColorDepthStencil(const gfx::Color4f& color, float depth, int stencil) override
+    virtual void ClearColorDepthStencil(const gfx::Color4f& color, float depth, int stencil, gfx::Framebuffer* fbo) override
     {}
 
     virtual void SetDefaultTextureFilter(MinFilter filter) override
@@ -429,11 +429,7 @@ public:
     {}
     virtual void DeleteFramebuffers() override
     {}
-    virtual bool SetFramebuffer(const gfx::Framebuffer* fbo) override
-    {
-        return true;
-    }
-    virtual void Draw(const gfx::Program& program, const gfx::Geometry& geometry, const State& state) override
+    virtual void Draw(const gfx::Program& program, const gfx::Geometry& geometry, const State& state, gfx::Framebuffer* fbo) override
     {}
 
     virtual void CleanGarbage(size_t, unsigned) override
@@ -443,7 +439,7 @@ public:
     {}
     virtual void EndFrame(bool display) override
     {}
-    virtual gfx::Bitmap<gfx::RGBA> ReadColorBuffer(unsigned width, unsigned height) const override
+    virtual gfx::Bitmap<gfx::RGBA> ReadColorBuffer(unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
     {
         gfx::Bitmap<gfx::RGBA> bitmap;
         bitmap.Resize(width, height);
@@ -451,7 +447,7 @@ public:
         return bitmap;
     }
     virtual gfx::Bitmap<gfx::RGBA> ReadColorBuffer(unsigned x, unsigned y,
-                                                   unsigned width, unsigned height) const override
+                                                   unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
     {
         gfx::Bitmap<gfx::RGBA> bitmap;
         bitmap.Resize(width, height);
@@ -466,11 +462,6 @@ public:
     {
 
     }
-    virtual const gfx::Framebuffer* GetCurrentFramebuffer() const override
-    {
-        return nullptr;
-    }
-
     const TestTexture& GetTexture(size_t index) const
     {
         TEST_REQUIRE(index < mTextures.size());
