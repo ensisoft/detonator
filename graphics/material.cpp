@@ -1049,6 +1049,9 @@ Shader* MaterialClass::GetShader(const State& state, Device& device) const noexc
 
 bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Program& program) const noexcept
 {
+    program.SetUniform("kRenderPoints", state.render_points ? 1.0f : 0.0f);
+    program.SetUniform("kTime", (float)state.material_time);
+
     if (mType == Type::Color)
     {
         if (!IsStatic())
@@ -1059,7 +1062,6 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
     }
     else if (mType == Type::Gradient)
     {
-        program.SetUniform("kRenderPoints", state.render_points ? 1.0f : 0.0f);
         if (!IsStatic())
         {
             SetUniform("kGamma",  state.uniforms, mGamma,       program);
@@ -1930,14 +1932,10 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
             math::equals(1.0f, sy, eps))
             need_software_wrap = false;
     }
-    const float kMaterialTime     = state.material_time;
-    const float kRenderPoints     = state.render_points ? 1.0f : 0.0f;
     const float kParticleRotation = state.render_points && mParticleAction == ParticleAction::Rotate ? 1.0f : 0.0f;
     const float kBlendCoeff       = BlendFrames() ? binds.blend_coefficient : 0.0f;
     program.SetTextureCount(2);
     program.SetUniform("kBlendCoeff",                  kBlendCoeff);
-    program.SetUniform("kTime",                        kMaterialTime);
-    program.SetUniform("kRenderPoints",                kRenderPoints);
     program.SetUniform("kAlphaMask",                   alpha_mask);
     program.SetUniform("kApplyRandomParticleRotation", kParticleRotation);
 
@@ -2126,10 +2124,7 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
     program.SetTexture("kTexture", 0, *texture);
     program.SetUniform("kTextureBox", x, y, sx, sy);
     program.SetTextureCount(1);
-    program.SetUniform("kApplyRandomParticleRotation",
-                    state.render_points && mParticleAction == ParticleAction::Rotate ? 1.0f : 0.0f);
-    program.SetUniform("kRenderPoints", state.render_points ? 1.0f : 0.0f);
-    program.SetUniform("kTime", (float)state.material_time);
+    program.SetUniform("kApplyRandomParticleRotation", state.render_points && mParticleAction == ParticleAction::Rotate ? 1.0f : 0.0f);
     program.SetUniform("kAlphaMask", binds.textures[0]->GetFormat() == Texture::Format::Grayscale ? 1.0f : 0.0f);
 
     // set software wrap/clamp. 0 = disabled.
@@ -2246,8 +2241,6 @@ bool MaterialClass::ApplyCustomDynamicState(const State& state, Device& device, 
             texture_unit++;
         }
     }
-    program.SetUniform("kTime", (float)state.material_time);
-    program.SetUniform("kRenderPoints", state.render_points ? 1.0f : 0.0f);
     program.SetTextureCount(texture_unit);
     return true;
 }
