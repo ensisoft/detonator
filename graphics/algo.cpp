@@ -159,11 +159,6 @@ void main() {
 
     auto* quad = gfx::MakeFullscreenQuad(*device);
 
-    AutoFBO change(*device);
-
-    fbo->SetColorTarget(tmp);
-    device->SetFramebuffer(fbo);
-
     gfx::Device::State state;
     state.bWriteColor  = true;
     state.premulalpha  = false;
@@ -187,7 +182,7 @@ void main() {
         program->SetUniform("kTextureSize", (float)src_width, (float)src_height);
         program->SetTextureCount(1);
         program->SetTexture("kTexture", 0, *textures[1]);
-        device->Draw(*program, *quad, state);
+        device->Draw(*program, *quad, state, fbo);
 
         std::swap(textures[0], textures[1]);
     }
@@ -297,8 +292,6 @@ void main() {
     program->SetUniform("kEdgeColor", edge_color);
 
     auto* quad = MakeFullscreenQuad(*device);
-
-    AutoFBO change(*device);
     const auto dst_width  = dst->GetWidth();
     const auto dst_height = dst->GetHeight();
 
@@ -310,8 +303,7 @@ void main() {
     state.culling      = gfx::Device::State::Culling::None;
     state.blending     = gfx::Device::State::BlendOp::None;
     state.viewport     = gfx::IRect(0, 0, dst_width, dst_height);
-    device->SetFramebuffer(fbo);
-    device->Draw(*program, *quad, state);
+    device->Draw(*program, *quad, state, fbo);
 
 }
 
@@ -386,8 +378,6 @@ void main() {
     program->SetTextureCount(1);
 
     auto* quad = MakeFullscreenQuad(*device);
-
-    AutoFBO change(*device);
     const auto dst_width  = dst->GetWidth();
     const auto dst_height = dst->GetHeight();
 
@@ -399,8 +389,7 @@ void main() {
     state.culling      = gfx::Device::State::Culling::None;
     state.blending     = gfx::Device::State::BlendOp::None;
     state.viewport     = gfx::IRect(0, 0, dst_width, dst_height);
-    device->SetFramebuffer(fbo);
-    device->Draw(*program, *quad, state);
+    device->Draw(*program, *quad, state, fbo);
 }
 
 void FlipTexture(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* device, FlipDirection direction)
@@ -486,9 +475,7 @@ std::unique_ptr<IBitmap> ReadTexture(const gfx::Texture* texture, gfx::Device* d
     }
     fbo->SetColorTarget(const_cast<gfx::Texture*>(texture));
 
-    AutoFBO change(*device);
-    device->SetFramebuffer(fbo);
-    auto bmp = device->ReadColorBuffer(width, height);
+    auto bmp = device->ReadColorBuffer(width, height, fbo);
 
     return std::make_unique<RgbaBitmap>(std::move(bmp));
 }

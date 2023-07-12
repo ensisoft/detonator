@@ -342,7 +342,6 @@ void unit_test_render_fbo(gfx::Framebuffer::Format format)
     TEST_CASE(test::Type::Feature)
 
     auto dev = CreateDevice();
-    TEST_REQUIRE(dev->GetCurrentFramebuffer() == nullptr);
 
     auto* geom = dev->MakeGeometry("geom");
     const gfx::Vertex2D verts[] = {
@@ -410,10 +409,8 @@ void main() {
         {
             dev->BeginFrame();
             // clear the FBO to render and then render the green quad into it.
-            dev->SetFramebuffer(fbo);
-            dev->ClearColor(gfx::Color::Red);
-            dev->Draw(*p0, *geom, state);
-            TEST_REQUIRE(dev->GetCurrentFramebuffer() == fbo);
+            dev->ClearColor(gfx::Color::Red, fbo);
+            dev->Draw(*p0, *geom, state, fbo);
 
             // render using the second program and sample from the FBO texture.
             gfx::Texture* color = nullptr;
@@ -423,14 +420,12 @@ void main() {
 
             p1->SetTexture("kTexture", 0, *color);
 
-            dev->SetFramebuffer(nullptr);
-            dev->ClearColor(gfx::Color::Blue);
-            dev->Draw(*p1, *geom, state);
-            TEST_REQUIRE(dev->GetCurrentFramebuffer() == nullptr);
+            dev->ClearColor(gfx::Color::Blue, nullptr);
+            dev->Draw(*p1, *geom, state, nullptr);
 
             dev->EndFrame();
 
-            const auto& bmp = dev->ReadColorBuffer(10, 10);
+            const auto& bmp = dev->ReadColorBuffer(10, 10, nullptr);
             TEST_REQUIRE(bmp.Compare(gfx::Color::Green));
         }
 
@@ -458,9 +453,8 @@ void main() {
         {
             dev->BeginFrame();
             // clear the FBO to render and then render the green quad into it.
-            dev->SetFramebuffer(fbo);
-            dev->ClearColor(gfx::Color::Red);
-            dev->Draw(*p0, *geom, state);
+            dev->ClearColor(gfx::Color::Red, fbo);
+            dev->Draw(*p0, *geom, state, fbo);
 
             // render using the second program and sample from the FBO texture.
             gfx::Texture* color = nullptr;
@@ -470,13 +464,12 @@ void main() {
 
             p1->SetTexture("kTexture", 0, *color);
 
-            dev->SetFramebuffer(nullptr);
-            dev->ClearColor(gfx::Color::Blue);
-            dev->Draw(*p1, *geom, state);
+            dev->ClearColor(gfx::Color::Blue, nullptr);
+            dev->Draw(*p1, *geom, state, nullptr);
 
             dev->EndFrame();
 
-            const auto& bmp = dev->ReadColorBuffer(10, 10);
+            const auto& bmp = dev->ReadColorBuffer(10, 10, nullptr);
             TEST_REQUIRE(bmp.Compare(gfx::Color::Green));
         }
 
@@ -2137,9 +2130,7 @@ void unit_test_algo_texture_copy()
     fbo->SetConfig(conf);
     fbo->SetColorTarget(dst);
 
-    dev->SetFramebuffer(fbo);
-
-    const auto& ret = dev->ReadColorBuffer(10, 10);
+    const auto& ret = dev->ReadColorBuffer(10, 10, fbo);
     TEST_REQUIRE(ret == bmp);
 }
 
@@ -2171,8 +2162,8 @@ void unit_test_algo_texture_flip()
     auto* fbo = dev->MakeFramebuffer("test");
     fbo->SetConfig(conf);
     fbo->SetColorTarget(tex);
-    dev->SetFramebuffer(fbo);
-    const auto& ret = dev->ReadColorBuffer(10, 10);
+
+    const auto& ret = dev->ReadColorBuffer(10, 10, fbo);
     TEST_REQUIRE(ret == bmp);
 
     // todo: vertical flip test
@@ -2297,8 +2288,7 @@ void unit_test_fbo_texture_delete_bug()
     fbo->SetColorTarget(render_target_texture);
 
     dev->BeginFrame();
-    dev->SetFramebuffer(fbo);
-    dev->ClearColor(gfx::Color::White);
+    dev->ClearColor(gfx::Color::White, fbo);
     dev->EndFrame();
     dev->CleanGarbage(1, gfx::Device::GCFlags::Textures);
 
@@ -2309,8 +2299,8 @@ void unit_test_fbo_texture_delete_bug()
     // which means the FBO will allocate its own texture.
     dev->BeginFrame();
     fbo->SetColorTarget(nullptr);
-    dev->SetFramebuffer(fbo);
-    dev->ClearColor(gfx::Color::White);
+
+    dev->ClearColor(gfx::Color::White, fbo);
     dev->EndFrame();
     dev->CleanGarbage(1, gfx::Device::GCFlags::Textures);
 
@@ -2346,11 +2336,11 @@ void unit_test_fbo_change_color_target_bug()
     dev->BeginFrame();
 
     fbo->SetColorTarget(red);
-    dev->SetFramebuffer(fbo);
-    dev->ClearColor(gfx::Color::Red);
+
+    dev->ClearColor(gfx::Color::Red, fbo);
 
     fbo->SetColorTarget(green);
-    dev->ClearColor(gfx::Color::Green);
+    dev->ClearColor(gfx::Color::Green, fbo);
 
     dev->EndFrame();
 
@@ -2382,23 +2372,23 @@ void main() {
     state.viewport     = gfx::IRect(0, 0, 10, 10);
 
     dev->BeginFrame();
-    dev->SetFramebuffer(nullptr);
+
     program->SetTextureCount(1);
     program->SetTexture("kTexture", 0, *red);
-    dev->Draw(*program, *quad, state);
+    dev->Draw(*program, *quad, state, nullptr);
     dev->EndFrame();
 
     const auto& result_red = dev->ReadColorBuffer(10, 10);
     TEST_REQUIRE(result_red.Compare(gfx::Color::Red));
 
     dev->BeginFrame();
-    dev->SetFramebuffer(nullptr);
+
     program->SetTextureCount(1);
     program->SetTexture("kTexture", 0, *green);
-    dev->Draw(*program, *quad, state);
+    dev->Draw(*program, *quad, state, nullptr);
     dev->EndFrame();
 
-    const auto& result_green = dev->ReadColorBuffer(10, 10);
+    const auto& result_green = dev->ReadColorBuffer(10, 10, nullptr);
     TEST_REQUIRE(result_green.Compare(gfx::Color::Green));
 }
 

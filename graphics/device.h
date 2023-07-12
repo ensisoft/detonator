@@ -123,11 +123,11 @@ namespace gfx
 
         virtual ~Device() = default;
 
-        virtual void ClearColor(const Color4f& color) = 0;
-        virtual void ClearStencil(int value) = 0;
-        virtual void ClearDepth(float value) = 0;
-        virtual void ClearColorDepth(const Color4f& color, float depth) = 0;
-        virtual void ClearColorDepthStencil(const Color4f& color, float depth, int stencil) = 0;
+        virtual void ClearColor(const Color4f& color, Framebuffer* fbo = nullptr) = 0;
+        virtual void ClearStencil(int value, Framebuffer* fbo = nullptr) = 0;
+        virtual void ClearDepth(float value, Framebuffer* fbo = nullptr) = 0;
+        virtual void ClearColorDepth(const Color4f& color, float depth, Framebuffer* fbo = nullptr) = 0;
+        virtual void ClearColorDepthStencil(const Color4f& color, float depth, int stencil, Framebuffer* fbo = nullptr) = 0;
 
         // Texture minifying filter is used whenever the
         // pixel being textured maps to an area greater than
@@ -184,13 +184,9 @@ namespace gfx
         virtual void DeleteGeometries() = 0;
         virtual void DeleteTextures() = 0;
         virtual void DeleteFramebuffers() = 0;
-        // Set the render buffer used for the next Draw, Clear and Read commands.
-        // If the fbo is nullptr then set the frame buffer to the default fbo 
-        // that is the rendering surface of the context.
-        virtual bool SetFramebuffer(const Framebuffer* fbo = nullptr) = 0;
 
         // Draw the given geometry using the given program with the specified state applied.
-        virtual void Draw(const Program& program, const Geometry& geometry, const State& state) = 0;
+        virtual void Draw(const Program& program, const Geometry& geometry, const State& state, Framebuffer* fbo = nullptr) = 0;
 
         enum GCFlags {
             Textures   = 0x1,
@@ -218,8 +214,8 @@ namespace gfx
         // Width and height specify the dimensions of the data to read.
         // If the dimensions exceed the dimensions of the current render
         // target's color surface then those pixels contents are undefined.
-        virtual Bitmap<RGBA> ReadColorBuffer(unsigned width, unsigned height) const = 0;
-        virtual Bitmap<RGBA> ReadColorBuffer(unsigned x, unsigned y, unsigned width, unsigned height) const = 0;
+        virtual Bitmap<RGBA> ReadColorBuffer(unsigned width, unsigned height, Framebuffer* fbo = nullptr) const = 0;
+        virtual Bitmap<RGBA> ReadColorBuffer(unsigned x, unsigned y, unsigned width, unsigned height, Framebuffer* fbo = nullptr) const = 0;
 
         struct ResourceStats {
             // vertex buffer objects
@@ -245,28 +241,7 @@ namespace gfx
             unsigned max_fbo_height = 0;
         };
         virtual void GetDeviceCaps(DeviceCaps* caps) const = 0;
-
-        virtual const Framebuffer* GetCurrentFramebuffer() const = 0;
     private:
-    };
-
-    class AutoFBO
-    {
-    public:
-        explicit  AutoFBO(Device& device)
-          : mDevice(device)
-        {
-            mCurrent = mDevice.GetCurrentFramebuffer();
-        }
-        ~AutoFBO()
-        {
-            mDevice.SetFramebuffer(mCurrent);
-        }
-        AutoFBO(const AutoFBO&) = delete;
-        AutoFBO& operator=(const AutoFBO&) = delete;
-    private:
-        const Framebuffer* mCurrent = nullptr;
-        Device& mDevice;
     };
 
 } // namespace

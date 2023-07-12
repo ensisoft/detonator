@@ -93,7 +93,7 @@ namespace engine
     class BloomPass
     {
     public:
-        BloomPass(const std::string& name, const gfx::Color4f& color, float threshold, gfx::Painter& painter);
+        BloomPass(const std::string& name, const gfx::Color4f& color, float threshold, const gfx::Painter& painter);
 
         void Draw(const SceneRenderLayerList& layers) const;
         std::string GetBloomTextureName() const;
@@ -103,7 +103,7 @@ namespace engine
         const std::string mName;
         const gfx::Color4f mColor;
         const float mThreshold = 1.0f;
-        gfx::Painter& mPainter;
+        mutable gfx::Painter mPainter;
         mutable gfx::Texture* mBloomTexture = nullptr;
     };
 

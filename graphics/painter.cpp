@@ -33,12 +33,17 @@ namespace gfx
 
 void Painter::ClearColor(const Color4f& color)
 {
-    mDevice->ClearColor(color);
+    mDevice->ClearColor(color, mFrameBuffer);
 }
 
 void Painter::ClearStencil(const StencilClearValue& stencil)
 {
-    mDevice->ClearStencil(stencil.value);
+    mDevice->ClearStencil(stencil.value, mFrameBuffer);
+}
+
+void Painter::ClearDepth(float depth)
+{
+    mDevice->ClearDepth(depth, mFrameBuffer);
 }
 
 void Painter::Draw(const std::vector<DrawShape>& shapes,
@@ -98,7 +103,7 @@ void Painter::Draw(const std::vector<DrawShape>& shapes,
         // on the best program and device state for this draw.
         pass.ApplyDynamicState(*program, device_state);
 
-        mDevice->Draw(*program, *geometry, device_state);
+        mDevice->Draw(*program, *geometry, device_state, mFrameBuffer);
     }
 }
 

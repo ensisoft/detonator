@@ -925,11 +925,9 @@ void main() {
     program->SetTexture("kGlyphMap", 0, *font_texture);
     program->SetTextureCount(1);
 
-    AutoFBO fbo_change(device);
-
     fbo->SetColorTarget(result_texture);
-    device.SetFramebuffer(fbo);
-    device.ClearColor(gfx::Color4f(0.0f, 0.0f, 0.0f, 0.0f));
+
+    device.ClearColor(gfx::Color4f(0.0f, 0.0f, 0.0f, 0.0f), fbo);
 
     Device::State state;
     state.bWriteColor = true;
@@ -940,7 +938,7 @@ void main() {
     state.scissor     = IRect(); // disabled
     state.viewport    = IRect(0, 0, buffer_width, buffer_height);
     state.stencil_func = Device::State::StencilFunc::Disabled;
-    device.Draw(*program, *geometry, state);
+    device.Draw(*program, *geometry, state, fbo);
     return result_texture;
 }
 
