@@ -451,19 +451,17 @@ void MaterialWidget::on_actionReloadTextures_triggered()
 
 void MaterialWidget::on_btnSelectShader_clicked()
 {
-    if (mMaterial->GetType() == gfx::MaterialClass::Type::Custom)
-    {
-        const auto& shader = QFileDialog::getOpenFileName(this,
-            tr("Select Shader File"), "",
-            tr("Shaders (*.glsl)"));
-        if (shader.isEmpty())
-            return;
+    const auto& shader = QFileDialog::getOpenFileName(this,
+        tr("Select Shader File"), "",
+        tr("Shaders (*.glsl)"));
+    if (shader.isEmpty())
+        return;
 
-        mMaterial->SetShaderUri(mWorkspace->MapFileToWorkspace(shader));
-        ApplyShaderDescription();
-        ReloadShaders();
-        GetMaterialProperties();
-    }
+    mMaterial->SetShaderUri(mWorkspace->MapFileToWorkspace(shader));
+    ApplyShaderDescription();
+    ReloadShaders();
+    GetMaterialProperties();
+
 }
 
 void MaterialWidget::on_btnCreateShader_clicked()
@@ -617,13 +615,21 @@ constexpr auto json = R"(
 
 void MaterialWidget::on_btnEditShader_clicked()
 {
-    if (mMaterial->GetType() == gfx::MaterialClass::Type::Custom)
+    const auto& uri = mMaterial->GetShaderUri();
+    if (uri.empty())
+        return;
+    const auto& glsl = mWorkspace->MapFileToFilesystem(uri);
+    emit OpenExternalShader(glsl);
+}
+
+void MaterialWidget::on_btnResetShader_clicked()
+{
+    if (mMaterial->HasShaderUri())
     {
-        const auto& uri = mMaterial->GetShaderUri();
-        if (uri.empty())
-            return;
-        const auto& glsl = mWorkspace->MapFileToFilesystem(uri);
-        emit OpenExternalShader(glsl);
+        mMaterial->ClearShaderUri();
+        SetEnabled(mUI.btnEditShader, false);
+        SetEnabled(mUI.btnResetShader, false);
+        SetValue(mUI.shaderFile, QString(""));
     }
 }
 
@@ -1429,13 +1435,22 @@ void MaterialWidget::GetMaterialProperties()
 
     if (mMaterial->GetType() == gfx::MaterialClass::Type::Custom)
     {
+        SetPlaceholderText(mUI.shaderFile, "None Selected");
         SetEnabled(mUI.shaderFile,      true);
         SetEnabled(mUI.btnSelectShader, true);
         SetEnabled(mUI.btnCreateShader, true);
-        SetEnabled(mUI.btnEditShader,   true);
+        SetEnabled(mUI.btnEditShader,   mMaterial->HasShaderUri());
+        SetEnabled(mUI.btnResetShader,  mMaterial->HasShaderUri());
     }
     else
     {
+        SetPlaceholderText(mUI.shaderFile, "Built-in");
+        SetEnabled(mUI.shaderFile,      true);
+        SetEnabled(mUI.btnSelectShader, true); // allow an alternative shader to be used from the file
+        SetEnabled(mUI.btnCreateShader, false); // todo.
+        SetEnabled(mUI.btnEditShader,   mMaterial->HasShaderUri());
+        SetEnabled(mUI.btnResetShader,  mMaterial->HasShaderUri());
+
         SetVisible(mUI.builtInProperties,   true);
         SetEnabled(mUI.chkStaticInstance,   true);
         SetVisible(mUI.chkStaticInstance,   true);

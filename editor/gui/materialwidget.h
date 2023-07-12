@@ -89,6 +89,7 @@ namespace gui
         void on_btnSelectShader_clicked();
         void on_btnCreateShader_clicked();
         void on_btnEditShader_clicked();
+        void on_btnResetShader_clicked();
         void on_btnAddTextureMap_clicked();
         void on_btnResetTextureMap_clicked();
         void on_btnEditTexture_clicked();

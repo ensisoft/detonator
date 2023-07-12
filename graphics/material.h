@@ -886,6 +886,15 @@ namespace gfx
         inline void SetShaderSrc(std::string src) noexcept
         { mShaderSrc = std::move(src); }
 
+        inline bool HasShaderUri() const noexcept
+        { return !mShaderUri.empty(); }
+        inline bool HasShaderSrc() const noexcept
+        { return !mShaderSrc.empty(); }
+        inline void ClearShaderSrc() noexcept
+        { mShaderSrc.clear(); }
+        inline void ClearShaderUri() noexcept
+        { mShaderUri.clear(); }
+
         inline float GetGamma() const noexcept
         { return mGamma; }
         inline Color4f GetColor(ColorIndex index) const noexcept
