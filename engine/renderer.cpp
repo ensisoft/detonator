@@ -117,7 +117,7 @@ void Renderer::Update(float time, float dt)
     }
 }
 
-void Renderer::Draw(gfx::Painter& painter, EntityInstanceDrawHook* hook, const game::Tilemap* map)
+void Renderer::Draw(gfx::Painter& painter, const game::Tilemap* map)
 {
     painter.SetProjectionMatrix(CreateProjectionMatrix(game::Perspective::AxisAligned, mCamera.viewport));
     painter.SetViewMatrix(CreateModelViewMatrix(game::Perspective::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
@@ -176,6 +176,7 @@ void Renderer::Draw(gfx::Painter& painter, EntityInstanceDrawHook* hook, const g
             else BUG("unknown projection");
 
             DrawPacket packet;
+            packet.source       = DrawPacket::Source::Map;
             packet.domain       = DrawPacket::Domain::Scene;
             packet.material     = batch.material;
             packet.drawable     = std::move(tiles);
@@ -196,7 +197,7 @@ void Renderer::Draw(gfx::Painter& painter, EntityInstanceDrawHook* hook, const g
     for (auto& [key, paint] : mPaintNodes)
     {
         CreateDrawResources<Entity, EntityNode>(paint);
-        GenerateDrawPackets<Entity, EntityNode>(paint, packets, hook);
+        GenerateDrawPackets<Entity, EntityNode>(paint, packets, nullptr);
         paint.visited = true;
     }
 
@@ -253,6 +254,7 @@ void Renderer::Draw(const SceneClass& scene, const game::Tilemap* map,
 
 void Renderer::Draw(const game::Tilemap& map,
                     gfx::Painter& painter,
+                    TileBatchDrawHook* hook,
                     bool draw_render_layer,
                     bool draw_data_layer)
 {
@@ -261,7 +263,7 @@ void Renderer::Draw(const game::Tilemap& map,
     std::vector<TileBatch> batches;
     PrepareMapTileBatches(map, batches, draw_render_layer, draw_data_layer, obey_klass_flags);
     SortTileBatches(batches);
-    DrawTileBatches(map, batches, painter);
+    DrawTileBatches(map, hook, batches, painter);
 }
 
 void Renderer::PrepareMapTileBatches(const game::Tilemap& map,
@@ -616,7 +618,7 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
         // Create draw packets out of tile batches
         for (auto& batch : batches)
         {
-            if (batch.type == TileBatchType::Render)
+            if (batch.type == TileBatch::Type::Render)
             {
                 const auto tile_render_size = ComputeTileRenderSize(from_map_to_scene, batch.tile_size, perspective);
                 const auto tile_render_width_scale = map->GetTileRenderWidthScale();
@@ -636,6 +638,7 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
                 else BUG("unknown projection");
 
                 DrawPacket packet;
+                packet.source       = DrawPacket::Source::Map;
                 packet.domain       = DrawPacket::Domain::Scene;
                 packet.material     = batch.material;
                 packet.drawable     = std::move(tiles);
@@ -1004,6 +1007,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
         {
             DrawPacket packet;
             packet.flags.set(DrawPacket::Flags::PP_Bloom, text->TestFlag(TextItemClass::Flags::PP_EnableBloom));
+            packet.source       = DrawPacket::Source::Scene;
             packet.domain       = DrawPacket::Domain::Scene;
             packet.drawable     = paint_node.text_drawable;
             packet.material     = paint_node.text_material;
@@ -1036,6 +1040,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
         {
             DrawPacket packet;
             packet.flags.set(DrawPacket::Flags::PP_Bloom, item->TestFlag(DrawableItemType::Flags::PP_EnableBloom));
+            packet.source       = DrawPacket::Source::Scene;
             packet.domain       = DrawPacket::Domain::Scene;
             packet.material     = paint_node.item_material;
             packet.drawable     = paint_node.item_drawable;
@@ -1104,7 +1109,9 @@ void Renderer::DrawScenePackets(gfx::Painter& painter, const std::vector<DrawPac
     {
         if (!packet.material || !packet.drawable)
             continue;
-        if (packet.domain != DrawPacket::Domain::Scene)
+        else if (packet.domain != DrawPacket::Domain::Scene)
+            continue;
+        else if (mPacketFilter && !mPacketFilter->InspectPacket(packet))
             continue;
 
         const auto render_layer_index = packet.render_layer;
@@ -1217,7 +1224,7 @@ void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
                 batch.row       = row;
                 batch.col       = col;
                 batch.tile_size = layer_tile_size;
-                batch.type      = TileBatchType::Render;
+                batch.type      = TileBatch::Type::Render;
             }
 
             // append to tile to the current batch
@@ -1236,6 +1243,7 @@ void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
 
 
 void Renderer::DrawTileBatches(const game::Tilemap& map,
+                               TileBatchDrawHook* hook,
                                std::vector<TileBatch>& batches,
                                gfx::Painter& painter)
 {
@@ -1308,34 +1316,56 @@ void Renderer::DrawTileBatches(const game::Tilemap& map,
         if (batch.material == nullptr)
             continue;
 
-        if (batch.type == TileBatchType::Render)
+        if (hook && !hook->FilterBatch(batch))
+            continue;
+
+        if (batch.type == TileBatch::Type::Render)
         {
             const auto tile_render_size = ComputeTileRenderSize(tile_projection_transform_matrix, batch.tile_size,  perspective);
             const auto tile_render_width_scale  = map->GetTileRenderWidthScale();
             const auto tile_render_height_scale = map->GetTileRenderHeightScale();
             const auto tile_width_render_units  = tile_render_size.x * tile_render_width_scale;
             const auto tile_height_render_units = tile_render_size.y * tile_render_height_scale;
+            batch.render_size = glm::vec2 {tile_width_render_units, tile_height_render_units};
 
-            gfx::TileBatch tiles(std::move(batch.tiles));
+            if (hook)
+                hook->BeginDrawBatch(batch, tile_projection_transform_matrix, painter);
+
+            gfx::TileBatch tiles(batch.tiles);
             tiles.SetTileWorldSize(batch.tile_size);
-            tiles.SetTileRenderWidth(tile_width_render_units);
-            tiles.SetTileRenderHeight(tile_height_render_units);
+            tiles.SetTileRenderSize(batch.render_size);
             tiles.SetTileShape(gfx::TileBatch::TileShape::Automatic);
             if (perspective == game::Perspective::AxisAligned)
                 tiles.SetProjection(gfx::TileBatch::Projection::AxisAligned);
             else if (perspective == game::Perspective::Dimetric)
                 tiles.SetProjection(gfx::TileBatch::Projection::Dimetric);
             else BUG("unknown projection");
+
             painter.Draw(tiles, tile_projection_transform_matrix, *batch.material);
+
+            if (hook)
+                hook->EndDrawBatch(batch, tile_projection_transform_matrix, painter);
         }
-        else if (batch.type == TileBatchType::Data)
+        else if (batch.type == TileBatch::Type::Data)
         {
-            gfx::TileBatch tiles(std::move(batch.tiles));
+            batch.render_size = batch.tile_size;
+
+            gfx::TileBatch tiles(batch.tiles);
             tiles.SetTileWorldSize(batch.tile_size);
             tiles.SetTileRenderSize(batch.tile_size);
             tiles.SetTileShape(gfx::TileBatch::TileShape::Rectangle);
             tiles.SetProjection(gfx::TileBatch::Projection::AxisAligned);
-            tile_painter.Draw(tiles, glm::mat4(1.0f), *batch.material);
+
+            const auto model = glm::mat4(1.0f);
+
+            if (hook)
+                hook->BeginDrawBatch(batch, model, painter);
+
+            tile_painter.Draw(tiles, model, *batch.material);
+
+            if (hook)
+                hook->EndDrawBatch(batch, model, tile_painter);
+
         } else BUG("Unhandled tile batch type.");
     }
 }
@@ -1398,7 +1428,7 @@ void Renderer::PrepareDataLayerTileBatches(const game::Tilemap& map,
             batch.row       = row;
             batch.col       = col;
             batch.layer     = layer_index;
-            batch.type      = TileBatchType::Data;
+            batch.type      = TileBatch::Type::Data;
             batch.tile_size = layer_tile_size;
             batches.push_back(std::move(batch));
         }
@@ -1421,7 +1451,7 @@ void Renderer::SortTileBatches(std::vector<TileBatch>& batches) const
     });
 
     std::stable_partition(batches.begin(), batches.end(), [](const auto& batch) {
-        return batch.type == TileBatchType::Render;
+        return batch.type == TileBatch::Type::Render;
     });
 }
 
