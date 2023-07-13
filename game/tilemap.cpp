@@ -1050,6 +1050,16 @@ const TilemapLayerClass* TilemapClass::FindLayerByName(const std::string& name) 
     return nullptr;
 }
 
+size_t TilemapClass::FindLayerIndex(const TilemapLayerClass* layer) const
+{
+    for (size_t i=0; i<mLayers.size(); ++i)
+    {
+        if (mLayers[i]->GetId() == layer->GetId())
+            return i;
+    }
+    return mLayers.size();
+}
+
 size_t TilemapClass::GetHash() const
 {
     size_t hash = 0;
@@ -1276,6 +1286,17 @@ TilemapLayer* Tilemap::FindLayerByClassId(const std::string& id)
     }
     return nullptr;
 }
+
+std::size_t Tilemap::FindLayerIndex(const TilemapLayer* layer) const noexcept
+{
+    for (size_t i=0; i<mLayers.size(); ++i)
+    {
+        if (mLayers[i]->GetClassId() == layer->GetClassId())
+            return i;
+    }
+    return mLayers.size();
+}
+
 
 std::unique_ptr<TilemapLayer> CreateTilemapLayer(const std::shared_ptr<const TilemapLayerClass>& klass,
                                                  unsigned map_width, unsigned map_height)
