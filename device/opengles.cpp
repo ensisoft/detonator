@@ -1141,6 +1141,18 @@ public:
 
     virtual void CleanGarbage(size_t max_num_idle_frames, unsigned flags) override
     {
+        if (flags &  GCFlags::FBOs)
+        {
+            for (auto it = mFBOs.begin(); it != mFBOs.end(); )
+            {
+                auto* impl = static_cast<FramebufferImpl*>(it->second.get());
+                const auto last_used_frame_number = impl->GetFrameStamp();
+                if (mFrameNumber - last_used_frame_number >= max_num_idle_frames)
+                    it = mFBOs.erase(it);
+                else ++it;
+            }
+        }
+
         if (flags & GCFlags::Programs)
         {
             for (auto it = mPrograms.begin(); it != mPrograms.end();)
@@ -2719,7 +2731,10 @@ private:
                 mColorTarget->SetFrameStamp(stamp);
             if (mResolveTarget)
                 mResolveTarget->SetFrameStamp(stamp);
+            mFrameNumber = stamp;
         }
+        inline size_t GetFrameStamp() const noexcept
+        { return mFrameNumber; }
 
         GLuint GetHandle() const
         { return mHandle; }
@@ -2738,6 +2753,7 @@ private:
         Config mConfig;
         TextureImpl* mColorTarget = nullptr;
         TextureImpl* mResolveTarget = nullptr;
+        std::size_t mFrameNumber;
     };
 private:
     std::map<std::string, std::unique_ptr<gfx::Geometry>> mGeoms;
