@@ -31,24 +31,24 @@
 namespace gfx
 {
 
-void Painter::ClearColor(const Color4f& color)
+void Painter::ClearColor(const Color4f& color) const
 {
     mDevice->ClearColor(color, mFrameBuffer);
 }
 
-void Painter::ClearStencil(const StencilClearValue& stencil)
+void Painter::ClearStencil(const StencilClearValue& stencil) const
 {
     mDevice->ClearStencil(stencil.value, mFrameBuffer);
 }
 
-void Painter::ClearDepth(float depth)
+void Painter::ClearDepth(float depth) const
 {
     mDevice->ClearDepth(depth, mFrameBuffer);
 }
 
 void Painter::Draw(const std::vector<DrawShape>& shapes,
                    const RenderPassState& state,
-                   const ShaderPass& pass)
+                   const ShaderPass& pass) const
 {
 
     Device::State device_state;
@@ -111,7 +111,7 @@ void Painter::Draw(const Drawable& shape,
                    const glm::mat4& model,
                    const Material& material,
                    const RenderPassState& renderp,
-                   const ShaderPass& shaderp)
+                   const ShaderPass& shaderp) const
 {
     std::vector<DrawShape> shapes;
     shapes.resize(1);
@@ -121,7 +121,7 @@ void Painter::Draw(const Drawable& shape,
     Draw(shapes, renderp, shaderp);
 }
 
-void Painter::Draw(const Drawable& drawable, const glm::mat4& model, const Material& material)
+void Painter::Draw(const Drawable& drawable, const glm::mat4& model, const Material& material) const
 {
     RenderPassState state;
     state.write_color  = true;
@@ -145,7 +145,7 @@ std::unique_ptr<Painter> Painter::Create(Device* device)
 Program* Painter::GetProgram(const Drawable& drawable,
                              const Material& material,
                              const Drawable::Environment& drawable_environment,
-                             const Material::Environment& material_environment)
+                             const Material::Environment& material_environment) const
 {
     const auto& id = drawable.GetProgramId(drawable_environment) + "/" +
                      material.GetProgramId(material_environment);

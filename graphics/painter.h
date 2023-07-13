@@ -137,10 +137,10 @@ namespace gfx
 
 
         // Clear the current render target color buffer with the given clear color.
-        void ClearColor(const Color4f& color);
+        void ClearColor(const Color4f& color) const;
         // Clear the current render target stencil buffer with the given stencil value.
-        void ClearStencil(const StencilClearValue& stencil);
-        void ClearDepth(float depth);
+        void ClearStencil(const StencilClearValue& stencil) const;
+        void ClearDepth(float depth) const;
 
         using StencilFunc = Device::State::StencilFunc;
         using StencilOp   = Device::State::StencilOp;
@@ -182,7 +182,7 @@ namespace gfx
         // and finally a transform which defines the model-to-world transform.
         virtual void Draw(const DrawList& shapes,
                           const RenderPassState& renderp,
-                          const ShaderPass& shaderp);
+                          const ShaderPass& shaderp) const;
 
         // legacy draw functions.
 
@@ -192,7 +192,7 @@ namespace gfx
                   const glm::mat4& model,
                   const Material& material,
                   const RenderPassState& renderp,
-                  const ShaderPass& shaderp);
+                  const ShaderPass& shaderp) const;
         // Legacy immediate mode draw function.
         // Draw the shape with the material and transformation immediately in the
         // current render target. The following default render target state is used:
@@ -206,7 +206,7 @@ namespace gfx
         // to draw multiple objects at once.
         void Draw(const Drawable& drawable,
                   const glm::mat4& model,
-                  const Material& material);
+                  const Material& material) const;
 
         // Create new painter implementation using the given graphics device.
         static std::unique_ptr<Painter> Create(std::shared_ptr<Device> device);
@@ -218,7 +218,7 @@ namespace gfx
         Program* GetProgram(const Drawable& drawable,
                             const Material& material,
                             const Drawable::Environment& drawable_environment,
-                            const Material::Environment& material_environment);
+                            const Material::Environment& material_environment) const;
 
     private:
         std::shared_ptr<Device> mDeviceInst;
