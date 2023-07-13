@@ -837,6 +837,33 @@ Geometry* CubeGeometry::Generate(const Environment& env, Style style, Device& de
         }
         return geom;
     }
+    else if (style == Style::Outline)
+    {
+        Geometry* geom = device.FindGeometry("CubeOutline");
+        if (geom == nullptr)
+        {
+            geom = device.MakeGeometry("CubeOutline");
+
+            std::vector<Vertex3D> verts;
+            AddLine(FrontTopLeft,  FrontBotLeft, verts);
+            AddLine(FrontBotLeft,  FrontBotRight, verts);
+            AddLine(FrontBotRight, FrontTopRight, verts);
+            AddLine(FrontTopRight, FrontTopLeft, verts);
+            AddLine(BackTopLeft,  BackBotLeft, verts);
+            AddLine(BackBotLeft,  BackBotRight, verts);
+            AddLine(BackBotRight, BackTopRight, verts);
+            AddLine(BackTopRight, BackTopLeft, verts);
+            AddLine(FrontTopLeft, BackTopLeft, verts);
+            AddLine(FrontTopRight, BackTopRight, verts);
+            AddLine(FrontBotLeft, BackBotLeft, verts);
+            AddLine(FrontBotRight, BackBotRight, verts);
+
+            geom->SetVertexBuffer(std::move(verts));
+            geom->SetVertexLayout(GetVertexLayout<Vertex3D>());
+            geom->AddDrawCmd(Geometry::DrawType::Lines);
+        }
+        return geom;
+    }
     return nullptr;
 }
 // static
@@ -868,6 +895,18 @@ void CubeGeometry::MakeFace(size_t vertex_offset, Index16* indices, Vertex3D* ve
     indices[3] = gfx::Index16(vertex_offset + 2);
     indices[4] = gfx::Index16(vertex_offset + 3);
     indices[5] = gfx::Index16(vertex_offset + 0);
+}
+// static
+void CubeGeometry::AddLine(const Vec3& v0, const Vec3& v1, std::vector<Vertex3D>& vertex)
+{
+    Vertex3D a;
+    a.aPosition = v0;
+
+    Vertex3D b;
+    b.aPosition = v1;
+
+    vertex.push_back(a);
+    vertex.push_back(b);
 }
 
 } // detail
