@@ -171,7 +171,10 @@ namespace gfx
 
 Texture* detail::TextureTextureSource::Upload(const Environment& env, Device& device) const
 {
-    return device.FindTexture(mGpuId);
+    if (!mTexture)
+        mTexture = device.FindTexture(mGpuId);
+
+    return mTexture;
 }
 
 void detail::TextureTextureSource::IntoJson(data::Writer& data) const
@@ -2655,6 +2658,22 @@ MaterialClassInst CreateMaterialFromText(const TextBuffer& text)
 MaterialClassInst CreateMaterialFromText(TextBuffer&& text)
 {
     return MaterialClassInst(CreateMaterialClassFromText(std::move(text)));
+}
+
+MaterialClassInst CreateMaterialFromTexture(std::string gpu_id, Texture* texture)
+{
+    auto map = std::make_unique<TextureMap>("");
+    map->SetType(TextureMap::Type::Texture2D);
+    map->SetName("Texture");
+    map->SetNumTextures(1);
+    map->SetTextureSource(0, UseExistingTexture(std::move(gpu_id), texture));
+
+    MaterialClass material(MaterialClass::Type::Texture, std::string(""));
+    material.SetSurfaceType(MaterialClass::SurfaceType::Transparent);
+    material.SetNumTextureMaps(1);
+    material.SetTextureMap(0, std::move(map));
+
+    return MaterialClassInst(material);
 }
 
 
