@@ -391,6 +391,7 @@ namespace gfx
             static void MakeFace(size_t vertex_offset, Index16* indices, Vertex3D* vertices,
                                  const Vec3& v0, const Vec3& v1, const Vec3& v2, const Vec3& v3,
                                  const Vec3& normal);
+            static void AddLine(const Vec3& v0, const Vec3& v1, std::vector<Vertex3D>& vertex);
         };
     } // namespace
 
