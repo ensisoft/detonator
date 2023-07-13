@@ -3,7 +3,7 @@ DETONATOR 2D 💥💣
 An OpenGL ES based 2D game engine and editor for Linux, Windows and HTML5. Designed for simple single player games such
 as puzzle games, platformers, side scrollers and tile based real time strategy and tactics.  🍄🧩🗺️
 
-![Screenshot](editor/resource/splash.gif "Bandit demo")  
+![Screenshot](screens/derp.gif "Bandit demo")  
 
 
 This readme and other readme files, are for developers and cover information related to developing and building the engine itself.
@@ -52,6 +52,7 @@ Currently, not yet 100% complete major features:
   * Related algorithms such as path finding
   * Compression etc. performance improvements
   * Rendering performance improvements and fixes
+  * Isometric tilemap integration wtih scene+entity system
 
 Planned major features not yet implemented:
 * Partial 3D support for specific objects (think objects such as coins, diamonds, player ship etc.)
@@ -66,11 +67,15 @@ Planned major features not yet implemented:
 Planned minor features not yet implemented:
 * See issues for more details
 
+![Screenshot](screens/editor-tilemap.png "Map editor")
+Create tile based maps using the tile editor. The map supports multiple layers and both isometric and axis aligned perspective.
+The map can then be combined with the scene and the scene based entities to produce the final game world.
+
 ![Screenshot](screens/editor-animation.png "Entity editor")
 Create animated game play characters in the entity editor. Each entity can contain an arbitrary render tree
-of nodes with various attachments for physics, rendering, text display etc. Animation tracks allow changing the properties
-of the nodes and transforming the tree itself over time. Each entity type can then be associated with a Lua script where
-you can write your entity specific game play code.
+of nodes with various attachments for physics, rendering, text display etc. The entity system supports scriptable
+animation state graph as well as animation tracks for managing animation and entity state over time.
+Each entity type can then be associated with a Lua script where you can write your entity specific game play code.
 
 ![Screenshot](screens/editor-material.png "Material editor")
 Create materials using the material editor by setting some properties for the provided default material shaders.
@@ -98,427 +103,16 @@ help system for accessing the engine side Lua API documentation as well as autom
 a code completion system! 
 
 ![Screenshot](screens/editor-particle.png "Particle editor")
-The particle editor allows several types of particle effects to be created conveniently by adjusting several sliders 
+Create different types of particle effects in the particle editor by onveniently by adjusting several sliders 
 and knobs that control the particle effect. 
 
-![Screenshot](screens/demo-bandit.png "Editor game play window")
-During the development the game is available for play in the editor. It's possible to do live edits to the
-game content in the editor and see the changes take place in the play window.
+## Getting Started
 
-Build Instructions 👨🏼‍💻
-==================
+### [Build Instructions](BUILDING.md)
 
-![Screenshot](logo/cmake.png)
-![Screenshot](logo/linux.png)
-![Screenshot](logo/win10.png)
-![Screenshot](logo/emscripten.png)
+## Detailed Documentation
 
-WASM (Emscripten)
-------------------------------
-
-Some notes about building to WASM.
-
-* Building to WASM is currently supported only for the engine but not the editor.  
-* The build is separated from the main engine build and is in emscripten/ folder.
-  * See emscripten/CMakeLists.txt for build details. 
-* Current Emscripten version is 3.0.0. Using other version will likely break things.
-* If using Windows Install Ninja from https://github.com/ninja-build/ninja/releases. 
-  * Drop the ninja.exe for example into the emsdk/ folder or anywhere on your PATH.
-
-<details><summary>How to build on Linux</summary>
-
-- Install Emscripten
-```
-  $ cd detonator
-  $ git clone https://github.com/emscripten-core/emsdk.git
-  $ cd emsdk
-  $ git pull
-  $ ./emsdk install latest
-  $ ./emsdk activate 3.0.0
-  $ source ./emsdk_env.sh
-```
-- Check your Emscripten installation
-```
-  $ which emcc
-  $ /home/user/emsdk/upstream/emscripten/emcc
-  $ emcc --version
-  $ emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.0.0 (3fd52e107187b8a169bb04a02b9f982c8a075205)
-```
-- Build the DETONATOR 2D engine into a WASM blob. Make sure that you have the emscripten tools in your path,
-  i.e. you have sourced emsdk_env.sh in your current shell.
-```
-  $ git clone https://github.com/ensisoft/detonator
-  $ cd detonator
-  $ git submodule update --init --recursive
-  $ cd emscripten
-  $ mkdir build
-  $ cd build
-  $ emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
-  $ make -j16 install
-``` 
-</details>
-
-<details><summary>How to build on Windows</summary>
-
-- Install Emscripten
-```
-  $ cd detonator
-  $ git clone https://github.com/emscripten-core/emsdk.git
-  $ cd emsdk
-  $ git pull
-  $ emsdk.bat install latest
-  $ emsdk.bat activate 3.0.0
-  $ emsdk_env.bat
-```
-- Check your Emscripten and Ninja installation
-```
-  $ where emcc
-  $ C:\coding\detonator\emsdk\upstream\emscripten\emcc
-  $ C:\coding\detonator\emsdk\upstream\emscripten\emcc.bat
-  $ emcc --version
-  $ emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.0.0 (3fd52e107187b8a169bb04a02b9f982c8a075205)
-  $ where ninja
-  $ C:\coding\detonator\emsdk\ninja.exe
-  $ ninja --version
-  $ 1.10.2
-```
-- Build the DETONATOR 2D engine into a WASM blob. Make sure you have emcc and ninja in your path i.e. you have
-  ran emsdk_env.bat in your current shell. 
-```
-  $ git clone https://github.com/ensisoft/detonator
-  $ cd detonator
-  $ git submodule update --init --recursive
-  $ cd emscripten
-  $ mkdir build
-  $ cd build
-  $ emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
-  $ ninja -j16
-  $ ninja -j16 install
-```
-</details>
-
-If everything went well there should now be GameEngine.js and GameEngine.wasm files in the editor's dist folder. 
-The .js file contains the JavaScript glue code needed to manhandle the WASM code into the browser's WASM engine
-when the web page loads. When a game is packaged for web these files will then be deployed (copied) into the
-game's output directory.
-
-Desktop Linux
--------------------------------------
-
-<details><summary>How to install dependencies</summary>
-
-*See your distro manuals for how to install the packages.*
-
-Install these packages:
-
-- GCC (or Clang) compiler suite
-- CMake build tool
-- Boost C++ libraries
-- Conan package manager (VERSION 2)
-  - *On Archlinux you can use 'yay' to install conan + its dependencies from AUR*  
-- Git version control system
-- Qt5 application framework
-  
-</details>
-
-<details><summary>How to build the project in RELEASE</summary>
-
-```
-  $ git clone https://github.com/ensisoft/detonator
-  $ cd detonator
-  $ git submodule update --init --recursive
-  $ mkdir build
-  $ cd build
-  $ conan install .. --output-folder=conan --build missing
-  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
-  $ make -j16 install
-  $ ctest -j16
-```
-</details>
-
-<details><summary>How to build the project in DEBUG</summary>
-
-```
-  $ git clone https://github.com/ensisoft/detonator
-  $ cd detonator
-  $ git submodule update --init --recursive
-  $ mkdir build_d
-  $ cd build_d
-  $ conan install .. --output-folder=conan --build missing -s build_type=Debug
-  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
-  $ make -j16 install
-  $ ctest -j16
-```
-</details>
-
-<details><summary>How to build the project in PROFILE</summary>
-
-- Build the project for profiling using valgrind / kcachegrind
-```
-  $ git clone https://github.com/ensisoft/detonator
-  $ cd detonator
-  $ git submodule update --init --recursive
-  $ mkdir build_profile
-  $ cd build_profile
-  $ conan install .. --build missing 
-  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=RelWithDebInfo
-  $ make -j16 install
-```
-- Then in order to profile and analyze the output use the combination of valgrind and kcachegrind.
-For example:
-```
-  $ cd detonator/audio/test/
-  $ valgrind --tool=cachegrind ./audio_test --graph
-  $ kcaghegrind cachegrind.out.XXXXX
-```
-</details>
-
-<details><summary>How to build with Ninja, Clang and Mold linker (OPTIONAL)</summary>
-
-- These are alternative instructions for build using Ninja, Clang and Mold linker. 
- 
-```
-  $ export CC=/usr/bin/clang
-  $ export CXX=/usr/bin/clang++
-  $ conan profile new detonator-clang --detect
-  
-  $ git clone https://github.com/ensisoft/detonator
-  $ cd detonator
-  $ git submodule update --init --recursive
-  $ mkdir build
-  $ cd build
-  $ conan install .. --build missing --profile detonator-clang
-  $ cmake -G "Ninja" .. -DCMAKE_BUILD_TYPE=Release -DUSE_MOLD_LINKER=ON 
-  $ ninja -j16 install
-```
-</details>
-
-<details><summary>How to build Qt5 designer plugin (OPTIONAL)</summary>
-
-```
-  $ cd detonator/editor/gui/qt
-  $ mkdir build
-  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Release
-  $ make -j16 
-  $ sudo make install
-```
-
-</details>
-
-<details><summary>Build troubleshooting</summary>
-
-When you create a Conan profile with
-
-```
-$ conan profile new default --detect
-```
-
-If Conan bitches about "ERROR: invalid setting" (for example when GCC major version changes)
-you can try edit ~/.conan/settings.yaml. Search for the GCC versions and edit there.
-
-</details>
-
-Desktop Windows
----------------------------------
-
-These build instructions are for MSVS 2019 Community Edition and for 64bit build.
-
-<details><summary>How to install dependencies</summary>
-
-- Install Git version control system
-https://git-scm.com/download/win
-
-- Install Microsoft Visual Studio 2019 Community
-https://www.visualstudio.com/downloads/
-
-- Install prebuilt Qt 5.15.2
-http://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.zip
-
-- Install prebuilt Boost 1.72
-https://sourceforge.net/projects/boost/files/boost-binaries/1.72.0_b1/
-
-- Install Conan package manager (VERSION 2)
-https://docs.conan.io/en/latest/installation.html
-
-- Install CMake build tool
-https://cmake.org/install/
-
-</details>
-
-
-<details><summary>How to build the project in RELEASE</summary>
-
-- Open "Developer Command Prompt for VS 2019"
-
-```
-  $ git clone https://github.com/ensisoft/detonator
-  $ cd detonator
-  $ git submodule update --init --recursive
-  $ mkdir build
-  $ cd build
-  $ conan install .. --output-folder=conan --build missing
-  $ cmake -G "Visual Studio 16 2019" .. -DCMAKE_BUILD_TYPE=Release  -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
-  $ cmake --build   . --config Release
-  $ cmake --install . --config Release
-```
-
-</details>
-
-<details><summary>How to build the project in DEBUG</summary>
-
-_Note that on MSVS the library interfaces change between debug/release build configs. (e.g. iterator debug levels). 
-This means that in order to link to 3rd party libraries the debug versions of those libraries must be used._
-
-- Open "Developer Command Prompt for VS 2019"
-
-```
-  $ git clone https://github.com/ensisoft/detonator
-  $ cd detonator
-  $ git submodule update --init --recursive
-  $ mkdir build_d
-  $ cd build_d
-  $ conan install .. --output-folder=conan --build missing -s build_type=Debug
-  $ cmake -G "Visual Studio 16 2019" .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
-  $ cmake --build   . --config Debug
-  $ cmake --install . --config Debug
-```
-
-</details>
-
-<details><summary>How to build Qt5 designer plugin (OPTIONAL)</summary>
-
-```
-  $ cd editor\gui\qt
-  $ mkdir build
-  $ cmake -G "Visual Studio 16 2019" -DCMAKE-BUILD_TYPE=Release
-  $ cmake --build . --config Release
-  $ cmake --install . --config Release
-```
-
-</details>
-
-The Boring Documentation 🥱
-=========================
-
-Workflow and getting started 📔
-----------------------------
-Going from a git clone to a running game is known as the "build workflow". This involves various steps
-involving the source tree of the engine, the source tree of the game, the runtime assets provided with the
-engine and the runtime assets that are part of the game. Overall this will involve several build and packaging steps.
-
-Currently, only Lua based games are supported. There's a provided game engine that is built into a shared library
-and which contains all the relevant functionality for running a game. That is it will take care of rendering the scene,
-ticking the physics engine, handling the UI input as well as invoking the Lua scripts in order to run *your* game code.
-It's possible to also not use this provided engine but write a completely different engine. In this case the interface
-to implement is the "Engine" interface in engine/main/interface.h.
-
-From source code to a running game:
-1. Build the whole project as outlined in the **Build Instructions** previously.
-   You will also need to *install* the build targets. Installing not only copies the binaries into the right place
-   but also copies other assets such as GLSL shader files. Without the installation step things will not work correctly!
-2. After building launch the Editor from the editor/dist folder.
-3. *In the Editor:* Open your game's workspace folder. This is the folder that contains the workspace.json and content.json files.
-   In DETONATOR 2D this is essentially your "project" (It's simply a folder with those two specific files in it).
-4. *In the Editor:* Package your content. (Workspace|Package). Select the assets you want to package (most likely everything).
-   When the packaging process is complete your selected output directory will contain the following:
-   1. The game resources copied over, i.e. shaders, textures, font files etc.
-   2. A content.json file that contains the resource descriptions for your assets that you've built in the editor
-   3. A config.json file that contains the settings for the GameMain to launch the game
-   4. A native "GameMain" executable and engine library.  These are the default game studio binaries for running your
-      game content after the project has been packaged.
-   5. FILESYSTEM, FILESYSTEM.js, game.html GameEngine.wasm, GameEngine.js. These are the HTML5/WASM files that are
-      needed to run the game in the browser. 
-5. After packaging launch your game by running the GameMain executable in the package output directory.
-
-Running (Unit) Tests 🫣
------------------------------
-
-There's a bunch of unit tests that are built as part of the normal build process. Basically anything that begins with
-a "*unit_test_*" is a unit test.  
-For writing tests there's a very simple testing utility that is available in base. [base/test_minimal.h](base/test_minimal.h)
-
-In addition to having the unit tests both the audio and graphics subsystems also have "rendering" tests, i.e. playing audio
-or rendering stuff on the screen. The rendering tests rely on a set of *gold images* a.k.a. known good images.
-Currently, the images are provided as part of this repository but there's the problem that because of differences
-in OpenGL implementations it's possible that the rendering output is not exactly the same between various
-vendors/implementations (such as NVIDIA, AMD, Intel etc. Fixing this is a todo for later). The audio tests, however,
-don't have any automated way of verifying the test output.
-
-#### [See this list for known Issues](ISSUES.md)
-
-### On the desktop (Linux/Windows)
-
-<details><summary>How to run all tests</summary>
-  
-*Currently, the expectation is that all cases should pass on Linux. On Windows some tests are unfortunately broken.*  
-* In order to run tests after a successful build:
-
-```
-  $ cd detonator/build
-  $ ctest -j16
-```
-</details>
-
-<details><summary>How to run audio tests</summary>
-
-* Runs, mp3, ogg, flag and 24bit .wav tests. Use --help for more information.
-```
-  $ cd detonator/audio/test
-  $ ./audio_test --mp3 --ogg --flac --24bit
-  $ ...
-  $ ./audio_test --help
-```
-
-</details>
-
-<details><summary>How to run graphics tests</summary>
-
-*Any test rendering that differs from the expected gold image will stop the program for user input
-(press any key to continue) and will generate a *Delta_* and *Result_* images. The former will help visualize the pixels 
-that were not the same between result and gold and the result will be actual rendering result.* 
-
-* Run all tests with MSAA4. Use --help for more information
-
-```
-  $ cd detonator/graphics/test/dist
-  $ ./graphics_test --test --msaa4
-  $ ...
-  $ ./graphics_test --help 
-```
-
-</details>
-
-### On the Web (WASM+HTML5)
-*Currently, only some unit tests are available on the web. More tests will be enabled as needed.* 
-
-<details><summary>How to run unit tests</summary>
-
-The detonator/emscripten/bin folder should contain the following build artifacts:
- * unit-test.html
- * UnitTest.js
- * UnitTest.wasm 
-
-Launch a web server for serving the test HTML page.
-
-```
-  $ cd detonator/emscripten/bin
-  $ python -m http.server
-```
-
-Open your web browser and navigate to http://localhost:8000/unit-test.html.
-
-</details>
-
-System Architecture
--------------------
-#### [See this document](ARCHITECTURE.md)
-
-Coding Convention & Design 💭
-----------------------------
-#### [See this document](DESIGN.md)
-
-
-Tracing & Profiling 💭
-----------------------
-#### [See this document](PROFILING.md)
+### [System Architecture](ARCHITECTURE.md)
+### [Coding Convetion & Design](DESIGN.md)
+### [Tracing & Profiling](PROFILING.md)
 
