@@ -1,0 +1,8 @@
+.gitignore
+.vscode
+build
+build_d
+emsdk
+editor/dist
+graphics/test/dist/Delta*
+graphics/test/dist/Result*
