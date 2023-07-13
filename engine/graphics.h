@@ -33,6 +33,23 @@
 
 namespace engine
 {
+    struct TileBatch {
+        enum class Type {
+            Render, Data
+        };
+
+        Type type = Type::Render;
+        std::vector<gfx::TileBatch::Tile> tiles;
+        std::shared_ptr<const gfx::Material> material;
+        std::uint16_t layer = 0;
+        std::int16_t depth  = 0;
+        std::uint32_t row   = 0;
+        std::uint32_t col   = 0;
+        glm::vec3 tile_size = {0.0f, 0.0f, 0.0f};
+        glm::vec2 render_size = {0.0f, 0.0f};
+    };
+
+
     struct DrawPacket {
         enum class Flags {
             PP_Bloom
@@ -40,6 +57,11 @@ namespace engine
         enum class Domain {
             Scene, Editor
         };
+        enum class Source {
+            Map, Scene
+        };
+        Source source = Source::Scene;
+
         Domain domain = Domain::Scene;
         // flags to control the rendering etc.
         base::bitflag<Flags> flags;

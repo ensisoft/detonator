@@ -88,6 +88,21 @@ namespace engine
     private:
     };
 
+    class PacketFilter
+    {
+    public:
+        virtual ~PacketFilter() = default;
+        virtual bool InspectPacket(const DrawPacket& packet) { return true; }
+    };
+
+    class TileBatchDrawHook
+    {
+    public:
+        virtual bool FilterBatch(const TileBatch& batch) { return true; }
+        virtual void BeginDrawBatch(const TileBatch& batch, const glm::mat4& model, gfx::Painter& painter) {};
+        virtual void EndDrawBatch(const TileBatch& batch, const glm::mat4& model, gfx::Painter& painter) {}
+    };
+
     using EntityClassDrawHook     = EntityDrawHook<game::EntityNodeClass>;
     using EntityInstanceDrawHook  = EntityDrawHook<game::EntityNode>;
     using SceneClassDrawHook      = SceneDrawHook<game::EntityPlacement>;
@@ -140,6 +155,8 @@ namespace engine
         { mCamera = camera; }
         inline void SetSurface(const Surface& surface) noexcept
         { mSurface = surface; }
+        inline void SetPacketFilter(PacketFilter* filter)
+        { mPacketFilter = filter; }
 
         void BeginFrame();
 
@@ -152,7 +169,7 @@ namespace engine
         // representing the contents of the given scene.
         void UpdateRenderStateFromScene(const game::Scene& scene);
         // Draw the current rendering state.
-        void Draw(gfx::Painter& painter, EntityInstanceDrawHook* hook, const game::Tilemap* map = nullptr);
+        void Draw(gfx::Painter& painter, const game::Tilemap* map = nullptr);
         // Update the renderer state, i.e. update/animate materials etc.
         void Update(float time, float dt);
 
@@ -192,6 +209,7 @@ namespace engine
 
         void Draw(const game::Tilemap& map,
                   gfx::Painter& painter,
+                  TileBatchDrawHook* hook,
                   bool draw_render_layer,
                   bool draw_data_layer);
 
@@ -243,8 +261,6 @@ namespace engine
         void DrawScenePackets(gfx::Painter& painter, const std::vector<DrawPacket>& packets) const;
         void DrawEditorPackets(gfx::Painter& painter, const std::vector<DrawPacket>& packets) const;
 
-        struct TileBatch;
-
         void PrepareMapTileBatches(const game::Tilemap& map,
                                    std::vector<TileBatch>& batches,
                                    bool draw_render_layer,
@@ -264,6 +280,7 @@ namespace engine
                                            std::uint16_t layer_index);
 
         void DrawTileBatches(const game::Tilemap& map,
+                             TileBatchDrawHook* hook,
                              std::vector<TileBatch>& batches,
                              gfx::Painter& painter);
         void SortTileBatches(std::vector<TileBatch>& batches) const;
@@ -317,20 +334,6 @@ namespace engine
             std::shared_ptr<gfx::Material> material;
         };
 
-        enum class TileBatchType {
-            Render, Data
-        };
-
-        struct TileBatch {
-            TileBatchType type = TileBatchType::Render;
-            std::vector<gfx::TileBatch::Tile> tiles;
-            std::shared_ptr<const gfx::Material> material;
-            std::uint16_t layer;
-            std::int16_t depth;
-            std::uint32_t row;
-            std::uint32_t col;
-            glm::vec3 tile_size;
-        };
         using TilemapLayerPalette = std::vector<TilemapLayerPaletteEntry>;
         std::vector<TilemapLayerPalette> mTilemapPalette;
 
@@ -340,6 +343,8 @@ namespace engine
         BloomParams mBloom;
         Camera mCamera;
         Surface mSurface;
+
+        PacketFilter* mPacketFilter = nullptr;
     };
 
 } // namespace

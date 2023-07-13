@@ -254,15 +254,17 @@ public:
 
             // low level draw packet filter for culling draw packets
             // that fall outside the current viewport.
-            class Culler : public engine::EntityInstanceDrawHook {
+            class Culler : public engine::PacketFilter {
             public:
-                Culler(const engine::FRect& view_rect,
-                       const glm::mat4& view_matrix)
+                Culler(const engine::FRect& view_rect, const glm::mat4& view_matrix)
                   : mViewRect(view_rect)
                   , mViewMatrix(view_matrix)
                 {}
-                virtual bool InspectPacket(const game::EntityNode* node, engine::DrawPacket& packet) override
+                virtual bool InspectPacket(const engine::DrawPacket& packet) override
                 {
+                    if (packet.source == engine::DrawPacket::Source::Map)
+                        return true;
+
                     const auto& rect = game::ComputeBoundingRect(mViewMatrix * packet.transform);
                     if (!DoesIntersect(rect, mViewRect))
                         return false;
@@ -287,13 +289,15 @@ public:
             camera.position = glm::vec2{game_view.GetX(), game_view.GetY()};
             mRenderer.SetCamera(camera);
 
+            mRenderer.SetPacketFilter(&cull);
+
             if (mFlags.test(Flags::EditingMode))
             {
                 ConfigureRendererForScene();
             }
 
             TRACE_CALL("Renderer::BeginFrame", mRenderer.BeginFrame());
-            TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mPainter, &cull, mTilemap.get()));
+            TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mPainter, mTilemap.get()));
             TRACE_CALL("Renderer::EndFrame", mRenderer.EndFrame());
             TRACE_CALL("DebugDraw", DrawDebugObjects());
         }

@@ -638,7 +638,7 @@ void unit_test_entity_lifecycle()
 
             renderer.BeginFrame();
             {
-                renderer.Draw(*painter, hook);
+                renderer.Draw(*painter);
             }
             renderer.EndFrame();
         }
@@ -664,7 +664,7 @@ void unit_test_entity_lifecycle()
 
             renderer.BeginFrame();
             {
-                renderer.Draw(*painter, hook);
+                renderer.Draw(*painter);
             }
             renderer.EndFrame();
         }
@@ -683,7 +683,7 @@ void unit_test_entity_lifecycle()
 
             renderer.BeginFrame();
             {
-                renderer.Draw(*painter, hook);
+                renderer.Draw(*painter);
             }
             renderer.EndFrame();
         }
