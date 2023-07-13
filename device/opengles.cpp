@@ -533,7 +533,7 @@ public:
         }
     }
 
-    virtual void ClearColor(const gfx::Color4f& color, gfx::Framebuffer* fbo) override
+    virtual void ClearColor(const gfx::Color4f& color, gfx::Framebuffer* fbo) const override
     {
         if (!SetupFBO(fbo))
             return;
@@ -541,7 +541,7 @@ public:
         GL_CALL(glClearColor(color.Red(), color.Green(), color.Blue(), color.Alpha()));
         GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
     }
-    virtual void ClearStencil(int value, gfx::Framebuffer* fbo) override
+    virtual void ClearStencil(int value, gfx::Framebuffer* fbo) const override
     {
         if (!SetupFBO(fbo))
             return;
@@ -549,7 +549,7 @@ public:
         GL_CALL(glClearStencil(value));
         GL_CALL(glClear(GL_STENCIL_BUFFER_BIT));
     }
-    virtual void ClearDepth(float value, gfx::Framebuffer* fbo) override
+    virtual void ClearDepth(float value, gfx::Framebuffer* fbo) const override
     {
         if (!SetupFBO(fbo))
             return;
@@ -557,7 +557,7 @@ public:
         GL_CALL(glClearDepthf(value));
         GL_CALL(glClear(GL_DEPTH_BUFFER_BIT));
     }
-    virtual void ClearColorDepth(const gfx::Color4f& color, float depth, gfx::Framebuffer* fbo) override
+    virtual void ClearColorDepth(const gfx::Color4f& color, float depth, gfx::Framebuffer* fbo) const override
     {
         if (!SetupFBO(fbo))
             return;
@@ -566,7 +566,7 @@ public:
         GL_CALL(glClearDepthf(depth));
         GL_CALL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
     }
-    virtual void ClearColorDepthStencil(const gfx::Color4f&  color, float depth, int stencil, gfx::Framebuffer* fbo) override
+    virtual void ClearColorDepthStencil(const gfx::Color4f&  color, float depth, int stencil, gfx::Framebuffer* fbo) const override
     {
         if (!SetupFBO(fbo))
             return;
@@ -699,7 +699,7 @@ public:
         mFBOs.clear();
     }
 
-    virtual void Draw(const gfx::Program& program, const gfx::Geometry& geometry, const State& state, gfx::Framebuffer* fbo) override
+    virtual void Draw(const gfx::Program& program, const gfx::Geometry& geometry, const State& state, gfx::Framebuffer* fbo) const override
     {
         if (!SetupFBO(fbo))
             return;
@@ -1513,7 +1513,7 @@ public:
         return true;
     }
 private:
-    bool EnableIf(GLenum flag, bool on_off)
+    bool EnableIf(GLenum flag, bool on_off) const
     {
         if (on_off)
         {
@@ -2752,7 +2752,7 @@ private:
     MinFilter mDefaultMinTextureFilter = MinFilter::Nearest;
     MagFilter mDefaultMagTextureFilter = MagFilter::Nearest;
     // texture units and their current settings.
-    TextureUnits mTextureUnits;
+    mutable TextureUnits mTextureUnits;
 
     struct BufferObject {
         gfx::Geometry::Usage usage = gfx::Geometry::Usage::Static;

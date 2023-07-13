@@ -337,15 +337,15 @@ private:
 class TestDevice : public gfx::Device
 {
 public:
-    virtual void ClearColor(const gfx::Color4f& color, gfx::Framebuffer* ) override
+    virtual void ClearColor(const gfx::Color4f& color, gfx::Framebuffer* ) const override
     {}
-    virtual void ClearStencil(int value, gfx::Framebuffer* fbo) override
+    virtual void ClearStencil(int value, gfx::Framebuffer* fbo) const override
     {}
-    virtual void ClearDepth(float value, gfx::Framebuffer* fbo) override
+    virtual void ClearDepth(float value, gfx::Framebuffer* fbo) const override
     {}
-    virtual void ClearColorDepth(const gfx::Color4f& color, float depth, gfx::Framebuffer* fbo) override
+    virtual void ClearColorDepth(const gfx::Color4f& color, float depth, gfx::Framebuffer* fbo) const override
     {}
-    virtual void ClearColorDepthStencil(const gfx::Color4f& color, float depth, int stencil, gfx::Framebuffer* fbo) override
+    virtual void ClearColorDepthStencil(const gfx::Color4f& color, float depth, int stencil, gfx::Framebuffer* fbo) const override
     {}
 
     virtual void SetDefaultTextureFilter(MinFilter filter) override
@@ -429,7 +429,7 @@ public:
     {}
     virtual void DeleteFramebuffers() override
     {}
-    virtual void Draw(const gfx::Program& program, const gfx::Geometry& geometry, const State& state, gfx::Framebuffer* fbo) override
+    virtual void Draw(const gfx::Program& program, const gfx::Geometry& geometry, const State& state, gfx::Framebuffer* fbo) const override
     {}
 
     virtual void CleanGarbage(size_t, unsigned) override

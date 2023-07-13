@@ -123,11 +123,11 @@ namespace gfx
 
         virtual ~Device() = default;
 
-        virtual void ClearColor(const Color4f& color, Framebuffer* fbo = nullptr) = 0;
-        virtual void ClearStencil(int value, Framebuffer* fbo = nullptr) = 0;
-        virtual void ClearDepth(float value, Framebuffer* fbo = nullptr) = 0;
-        virtual void ClearColorDepth(const Color4f& color, float depth, Framebuffer* fbo = nullptr) = 0;
-        virtual void ClearColorDepthStencil(const Color4f& color, float depth, int stencil, Framebuffer* fbo = nullptr) = 0;
+        virtual void ClearColor(const Color4f& color, Framebuffer* fbo = nullptr) const = 0;
+        virtual void ClearStencil(int value, Framebuffer* fbo = nullptr) const = 0;
+        virtual void ClearDepth(float value, Framebuffer* fbo = nullptr) const = 0;
+        virtual void ClearColorDepth(const Color4f& color, float depth, Framebuffer* fbo = nullptr) const = 0;
+        virtual void ClearColorDepthStencil(const Color4f& color, float depth, int stencil, Framebuffer* fbo = nullptr) const = 0;
 
         // Texture minifying filter is used whenever the
         // pixel being textured maps to an area greater than
@@ -186,7 +186,7 @@ namespace gfx
         virtual void DeleteFramebuffers() = 0;
 
         // Draw the given geometry using the given program with the specified state applied.
-        virtual void Draw(const Program& program, const Geometry& geometry, const State& state, Framebuffer* fbo = nullptr) = 0;
+        virtual void Draw(const Program& program, const Geometry& geometry, const State& state, Framebuffer* fbo = nullptr) const = 0;
 
         enum GCFlags {
             Textures   = 0x1,
