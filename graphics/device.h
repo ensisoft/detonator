@@ -191,7 +191,8 @@ namespace gfx
         enum GCFlags {
             Textures   = 0x1,
             Programs   = 0x2,
-            Geometries = 0x4
+            Geometries = 0x4,
+            FBOs       = 0x8,
         };
 
         // Delete GPU resources that are no longer being used and that are
