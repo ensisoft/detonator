@@ -174,6 +174,7 @@ namespace gui
         class LayerData;
         class TileBrushTool;
         class TileSelectTool;
+
         enum class ToolFunction {
             TileBrush
         };
@@ -212,6 +213,7 @@ namespace gui
             std::optional<TileSelection> selection;
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;
+            engine::Renderer renderer;
         } mState;
 
         std::unique_ptr<MouseTool> mCurrentTool;
@@ -221,7 +223,6 @@ namespace gui
             std::shared_ptr<LayerData>> mLayerData;
         std::vector<PaletteMaterial*> mPaletteMaterialWidgets;
         std::size_t mHash = 0;
-        engine::Renderer mRenderer;
         double mCurrentTime = 0.0;
 
         UIAnimator mAnimator;

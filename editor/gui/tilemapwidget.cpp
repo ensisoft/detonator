@@ -410,15 +410,15 @@ public:
         auto klass = state.workspace->GetMaterialClassById(tool.material);
         mMaterial = gfx::CreateMaterialInstance(klass);
     }
-    virtual void Render(gfx::Painter& painter, gfx::Painter& tile_painter) const override
+    virtual void Render(gfx::Painter& scene_painter, gfx::Painter& tile_painter) const override
     {
 
         // This matrix will project a coordinate in isometric tile world space into
         // 2D screen space/surface coordinate.
         const auto& tile_projection_transform_matrix = engine::GetProjectionTransformMatrix(tile_painter.GetProjMatrix(),
                                                                                             tile_painter.GetViewMatrix(),
-                                                                                            painter.GetProjMatrix(),
-                                                                                            painter.GetViewMatrix());
+                                                                                            scene_painter.GetProjMatrix(),
+                                                                                            scene_painter.GetViewMatrix());
         const auto perspective = mState.klass->GetPerspective();
         const auto tile_scaler = mLayer.GetTileSizeScaler();
         const auto tile_width_units = mState.klass->GetTileWidth() * tile_scaler;
@@ -466,7 +466,7 @@ public:
         else BUG("missing tile projection.");
 
         // draw the tilebatch
-        painter.Draw(batch, tile_projection_transform_matrix, *mMaterial);
+        scene_painter.Draw(batch, tile_projection_transform_matrix, *mMaterial);
 
         // draw a rect around the tool on the tile plane
         {
@@ -581,8 +581,8 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
     mState.klass->SetTileDepth(10.0f);
     mState.map = game::CreateTilemap(mState.klass);
     mModel.reset(new LayerModel(mState));
-    mRenderer.SetEditingMode(true);
-    mRenderer.SetClassLibrary(workspace);
+    mState.renderer.SetEditingMode(true);
+    mState.renderer.SetClassLibrary(workspace);
     mHash = mState.klass->GetHash();
 
     mUI.setupUi(this);
@@ -1815,7 +1815,7 @@ void TilemapWidget::ResourceRemoved(const app::Resource* resource)
         for (auto* widget : mPaletteMaterialWidgets)
             widget->UpdateMaterialList(materials);
 
-        mRenderer.ClearPaintState();
+        mState.renderer.ClearPaintState();
 
         SetList(mUI.cmbToolMaterial, materials);
         SetList(mUI.cmbTileMaterial, materials);
@@ -1831,7 +1831,7 @@ void TilemapWidget::ResourceUpdated(const app::Resource* resource)
         for (auto* widget : mPaletteMaterialWidgets)
             widget->UpdateMaterialList(materials);
 
-        mRenderer.ClearPaintState();
+        mState.renderer.ClearPaintState();
 
         SetList(mUI.cmbToolMaterial, materials);
         SetList(mUI.cmbTileMaterial, materials);
@@ -2104,6 +2104,56 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
 
     // render the actual tilemap
     {
+        class DrawHook : public engine::TileBatchDrawHook
+        {
+        public:
+            explicit DrawHook(const State& state, const game::TilemapLayer* layer, const gfx::Painter& painter)
+              : mState(state)
+              , mLayer(layer)
+              , mPainter(painter)
+            {
+                auto klass = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Texture);
+            }
+            virtual void EndDrawBatch(const engine::TileBatch& batch, const glm::mat4& model, gfx::Painter& painter) override
+            {
+                if (!mState.selection.has_value() || !mLayer)
+                    return;
+
+                const auto layer_index = mState.map->FindLayerIndex(mLayer);
+                if (batch.layer != layer_index)
+                    return;
+
+                const auto perspective = mState.map->GetPerspective();
+                const auto& selection = mState.selection.value();
+
+                for (const auto& tile : batch.tiles)
+                {
+                    if (tile.pos.x < selection.start_col ||
+                        tile.pos.x >= selection.start_col + selection.width)
+                        continue;
+                    else if (tile.pos.y < selection.start_row ||
+                             tile.pos.y >= selection.start_row + selection.height)
+                        continue;
+
+                    gfx::TileBatch tiles;
+                    tiles.AddTile(tile);
+                    tiles.SetTileWorldSize(batch.tile_size);
+                    tiles.SetTileRenderSize(batch.render_size);
+                    tiles.SetTileShape(gfx::TileBatch::TileShape::Automatic);
+                    if (perspective == game::Perspective::AxisAligned)
+                        tiles.SetProjection(gfx::TileBatch::Projection::AxisAligned);
+                    else if (perspective == game::Perspective::Dimetric)
+                        tiles.SetProjection(gfx::TileBatch::Projection::Dimetric);
+                    else BUG("unknown projection");
+
+                    DrawEdges(painter, mPainter, tiles, *batch.material, model, mState.klass->GetId());
+                }
+            }
+        private:
+            const State& mState;
+            const game::TilemapLayer* mLayer = nullptr;
+            const gfx::Painter& mPainter;
+        } hook(mState, GetCurrentLayerInstance(), painter);
 
         gfx::Painter p(painter.GetDevice());
 
@@ -2112,19 +2162,19 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         camera.scale      = glm::vec2{xs * zoom, ys * zoom };
         camera.rotation   = GetValue(mUI.rotation);
         camera.viewport   = game::FRect(-width*0.5f, -height*0.5f, width, height);
-        mRenderer.SetCamera(camera);
+        mState.renderer.SetCamera(camera);
 
         engine::Renderer::Surface surface;
         surface.viewport = gfx::IRect(0, 0, width, height);
         surface.size     = gfx::USize(width, height);
-        mRenderer.SetSurface(surface);
+        mState.renderer.SetSurface(surface);
 
         const bool show_render_layers = GetValue(mUI.chkShowRenderLayers);
         const bool show_data_layers = GetValue(mUI.chkShowDataLayers);
 
-        mRenderer.BeginFrame();
-        mRenderer.Draw(*mState.map, p, show_render_layers, show_data_layers);
-        mRenderer.EndFrame();
+        mState.renderer.BeginFrame();
+        mState.renderer.Draw(*mState.map, p, &hook, show_render_layers, show_data_layers);
+        mState.renderer.EndFrame();
     }
 
     // render assistance when a layer is selected.
@@ -2133,9 +2183,13 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         //const auto layer_index = GetCurrentLayerIndex();
         const auto tile_width  = mState.klass->GetTileWidth();
         const auto tile_height = mState.klass->GetTileHeight();
+        const auto tile_depth  = mState.klass->GetTileDepth();
         const auto tile_scaler = layer->GetTileSizeScaler();
-        const auto layer_tile_width = tile_width * tile_scaler;
+        const auto layer_tile_width  = tile_width * tile_scaler;
         const auto layer_tile_height = tile_height * tile_scaler;
+        const auto layer_tile_depth  = tile_depth * tile_scaler;
+        const auto layer_tile_size   = glm::vec3{layer_tile_width, layer_tile_height, layer_tile_depth};
+        const auto cuboid_scale = engine::GetTileCuboidFactors(perspective);
 
         // draw the map boundary
         {
@@ -2159,8 +2213,8 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                         layer_tile_height * selection.height);
             model.MoveTo(layer_tile_width * selection.start_col,
                          layer_tile_height * selection.start_row);
-            tile_painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline, 2.0f), model,
-                              gfx::CreateMaterialFromColor(gfx::Color::Green));
+            //tile_painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline, 2.0f), model,
+            //                  gfx::CreateMaterialFromColor(gfx::Color::Green));
         }
 
         // visualize the tile under the mouse pointer.
@@ -2195,7 +2249,6 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
     {
         mCurrentTool->Render(scene_painter, tile_painter);
     }
-
 
     // a test case for mapping the corners of the tilemap from the isometric space
     // into our 2D axis aligned space. this is here simply because of convenience.

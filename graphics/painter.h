@@ -135,6 +135,8 @@ namespace gfx
         inline const Framebuffer* GetFramebuffer() const noexcept
         { return mFrameBuffer; }
 
+        inline bool HasScissor() const noexcept
+        { return !mScissor.IsEmpty(); }
 
         // Clear the current render target color buffer with the given clear color.
         void ClearColor(const Color4f& color) const;

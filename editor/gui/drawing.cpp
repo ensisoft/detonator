@@ -30,11 +30,13 @@
 #include "editor/app/utility.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/utility.h"
+#include "graphics/algo.h"
 #include "graphics/painter.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
+#include "graphics/framebuffer.h"
 
 namespace {
     gfx::Color4f DefaultGridColor = gfx::Color::LightGray;
@@ -254,6 +256,71 @@ void DrawInvisibleItemBox(gfx::Transform& model, std::vector<engine::DrawPacket>
         packets.push_back(box);
     model.Pop();
 }
+
+void DrawEdges(const gfx::Painter& scene_painter,
+               const gfx::Painter& window_painter,
+               const gfx::Drawable& drawable,
+               const gfx::Material& material,
+               const glm::mat4& model,
+               const std::string& widget_id)
+{
+    // in order to draw edges we basically create a secondary FBO with
+    // texture color attachment. then render the actual drawable with the
+    // actual material in that texture, perform edge detection on the texture
+    // and then draw in the whole window using the edge detection texture.
+    //
+    // This is currently inefficient since the FBO allocated is rather large
+    // and it should be possible to use a smaller one. Size could be derived
+    // from the object's bounding when transformed to window coordinates.
+
+    ASSERT(!scene_painter.HasScissor());
+
+    gfx::Painter painter(scene_painter);
+
+    auto* device = painter.GetDevice();
+    auto* fbo = device->FindFramebuffer("Editor/Widget/" + widget_id);
+    if (!fbo)
+        fbo = device->MakeFramebuffer("Editor/Widget/" + widget_id);
+
+    const auto surface = painter.GetSurfaceSize();
+    const unsigned src_width  = surface.GetWidth();
+    const unsigned src_height = surface.GetHeight();
+    // down sample by half rez to reduce the memory drag a bit.
+    const unsigned target_width = src_width / 2;
+    const unsigned target_height = src_height / 2;
+
+    gfx::Framebuffer::Config conf;
+    conf.width  = target_width;
+    conf.height = target_height;
+    conf.format = gfx::Framebuffer::Format::ColorRGBA8;
+    fbo->SetConfig(conf);
+
+    painter.SetFramebuffer(fbo);
+    painter.SetSurfaceSize(target_width, target_height);
+    painter.SetViewport(0, 0, target_width, target_height);
+    painter.ClearColor(gfx::Color::Transparent);
+    painter.Draw(drawable, model, material);
+
+    // get the output
+    gfx::Texture* result = nullptr;
+    fbo->Resolve(&result);
+
+    gfx::algo::FlipTexture("Editor/Widget/" + widget_id + "/EdgeTexture", result, device, gfx::algo::FlipDirection::Horizontal);
+
+    // detect the edges (updates the texture in place)
+    gfx::algo::DetectSpriteEdges("Editor/Widget/" + widget_id + "/EdgeTexture", result, device, gfx::Color::HotPink);
+
+    // blend it back in the scene
+    {
+        const auto window_size = window_painter.GetSurfaceSize();
+
+        gfx::Transform model;
+        model.Resize(window_size.GetWidth(), window_size.GetHeight());
+        model.MoveTo(0.0f, 0.0f);
+        window_painter.Draw(gfx::Rectangle(), model, gfx::CreateMaterialFromTexture("", result));
+    }
+}
+
 
 void SetGridColor(const gfx::Color4f& color)
 {
