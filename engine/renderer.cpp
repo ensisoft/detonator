@@ -1393,7 +1393,7 @@ void Renderer::PrepareDataLayerTileBatches(const game::Tilemap& map,
 
             TileBatch batch;
             batch.tiles.push_back(tile);
-            batch.material  = gfx::CreateMaterialInstance(color);
+            batch.material  = gfx::CreateMaterialInstance(gfx::CreateMaterialClassFromColor(color));
             batch.depth     = layer.GetDepth();
             batch.row       = row;
             batch.col       = col;

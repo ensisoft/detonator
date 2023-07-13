@@ -146,9 +146,9 @@ namespace gfx
             TextureTextureSource()
               : mId(base::RandomString(10))
             {}
-            TextureTextureSource(std::string gpu_id)
-              : mId(base::RandomString(10))
-              , mGpuId(gpu_id)
+            TextureTextureSource(std::string gpu_id, std::string id = base::RandomString(10))
+               : mId(std::move(id))
+               , mGpuId(std::move(gpu_id))
             {}
 
             virtual ColorSpace GetColorSpace() const override
@@ -174,15 +174,10 @@ namespace gfx
             virtual Texture* Upload(const Environment& env, Device& device) const override;
             virtual void IntoJson(data::Writer& data) const override;
             virtual bool FromJson(const data::Reader& data) override;
-
-            std::string GetTextureGpuId() const
-            { return mGpuId; }
-            void SetTextureGpuId(std::string gpu_id)
-            { mGpuId = std::move(gpu_id); }
         protected:
             virtual std::unique_ptr<TextureSource> MakeCopy(std::string copy_id) const override
             {
-                auto ret = std::make_unique<TextureTextureSource>();
+                auto ret = std::make_unique<TextureTextureSource>(*this);
                 ret->mId = std::move(copy_id);
                 return ret;
             }
@@ -202,13 +197,18 @@ namespace gfx
                 PremulAlpha
             };
             TextureFileSource()
+              : mId(base::RandomString(10))
             {
-                mId = base::RandomString(10);
                 mFlags.set(Flags::AllowResizing, true);
                 mFlags.set(Flags::AllowPacking, true);
             }
-            TextureFileSource(const std::string& file) : TextureFileSource()
-            { mFile = file; }
+            TextureFileSource(std::string file, std::string id = base::RandomString(10))
+              : mId(std::move(id))
+              , mFile(std::move(file))
+            {
+                mFlags.set(Flags::AllowResizing, true);
+                mFlags.set(Flags::AllowPacking, true);
+            }
             virtual ColorSpace GetColorSpace() const override
             { return mColorSpace; }
             virtual Source GetSourceType() const override
@@ -259,7 +259,7 @@ namespace gfx
             virtual std::unique_ptr<TextureSource> MakeCopy(std::string id) const override
             {
                 auto ret = std::make_unique<TextureFileSource>(*this);
-                ret->mId = id;
+                ret->mId = std::move(id);
                 return ret;
             }
         private:
@@ -277,26 +277,31 @@ namespace gfx
         {
         public:
             TextureBitmapBufferSource()
-            { mId = base::RandomString(10); }
-            TextureBitmapBufferSource(std::unique_ptr<IBitmap>&& bitmap) : TextureBitmapBufferSource()
-            { mBitmap = std::move(bitmap); }
+              : mId(base::RandomString(10))
+            {}
+
+            TextureBitmapBufferSource(std::unique_ptr<IBitmap>&& bitmap, std::string id = base::RandomString(10))
+              : mId(std::move(id))
+              , mBitmap(std::move(bitmap))
+            {}
+
             template<typename T>
-            TextureBitmapBufferSource(const Bitmap<T>& bmp) : TextureBitmapBufferSource()
-            {
-                mBitmap.reset(new Bitmap<T>(bmp));
-            }
+            TextureBitmapBufferSource(const Bitmap<T>& bmp, std::string id = base::RandomString(10))
+              : mId(std::move(id))
+              , mBitmap(new Bitmap<T>(bmp))
+            {}
+
             template<typename T>
-            TextureBitmapBufferSource(Bitmap<T>&& bmp) : TextureBitmapBufferSource()
-            {
-                mBitmap.reset(new Bitmap<T>(std::move(bmp)));
-            }
+            TextureBitmapBufferSource(Bitmap<T>&& bmp, std::string id = base::RandomString(10))
+              : mId(std::move(id))
+              , mBitmap(new Bitmap<T>(std::move(bmp)))
+            {}
 
             TextureBitmapBufferSource(const TextureBitmapBufferSource& other)
-            {
-                mId     = other.mId;
-                mName   = other.mName;
-                mBitmap = other.mBitmap->Clone();
-            }
+              : mId(other.mId)
+              , mName(other.mName)
+              , mBitmap(other.mBitmap->Clone())
+            {}
 
             virtual Source GetSourceType() const override
             { return Source::BitmapBuffer; }
@@ -371,18 +376,19 @@ namespace gfx
         {
         public:
             TextureBitmapGeneratorSource()
-            { mId = base::RandomString(10); }
-            TextureBitmapGeneratorSource(std::unique_ptr<IBitmapGenerator>&& generator)
-                : TextureBitmapGeneratorSource()
-            {
-                mGenerator = std::move(generator);
-            }
+              : mId(base::RandomString(10))
+            {}
+
+            TextureBitmapGeneratorSource(std::unique_ptr<IBitmapGenerator>&& generator, std::string id = base::RandomString(10))
+              : mId(std::move(id))
+              , mGenerator(std::move(generator))
+            {}
+
             TextureBitmapGeneratorSource(const TextureBitmapGeneratorSource& other)
-            {
-                mGenerator = other.mGenerator->Clone();
-                mId = other.mId;
-                mName = other.mName;
-            }
+              : mId(other.mId)
+              , mName(other.mName)
+              , mGenerator(other.mGenerator->Clone())
+            {}
 
             virtual Source GetSourceType() const override
             { return Source::BitmapGenerator; }
@@ -426,7 +432,7 @@ namespace gfx
             virtual std::unique_ptr<TextureSource> MakeCopy(std::string id) const override
             {
                 auto ret = std::make_unique<TextureBitmapGeneratorSource>(*this);
-                ret->mId = id;
+                ret->mId = std::move(id);
                 return ret;
             }
         private:
@@ -440,16 +446,19 @@ namespace gfx
         {
         public:
             TextureTextBufferSource()
-            { mId = base::RandomString(10); }
+              : mId(base::RandomString(10))
+            {}
 
-            TextureTextBufferSource(const TextBuffer& text) : TextureTextBufferSource()
-            {
-                mTextBuffer = text;
-            }
-            TextureTextBufferSource(TextBuffer&& text) : TextureTextBufferSource()
-            {
-                mTextBuffer = std::move(text);
-            }
+            TextureTextBufferSource(const TextBuffer& text, std::string id = base::RandomString(10))
+              : mId(std::move(id))
+              , mTextBuffer(text)
+            {}
+
+            TextureTextBufferSource(TextBuffer&& text, std::string id = base::RandomString(10))
+              : mId(std::move(id))
+              , mTextBuffer(std::move(text))
+            {}
+
             virtual base::bitflag<Effect> GetEffects() const override
             {return mEffects; }
             virtual Source GetSourceType() const override
@@ -490,7 +499,7 @@ namespace gfx
             virtual std::unique_ptr<TextureSource> MakeCopy(std::string id) const override
             {
                 auto ret = std::make_unique<TextureTextBufferSource>(*this);
-                ret->mId = id;
+                ret->mId = std::move(id);
                 return ret;
             }
 
@@ -503,36 +512,38 @@ namespace gfx
 
     } // detail
 
-    inline std::unique_ptr<detail::TextureFileSource> LoadTextureFromFile(const std::string& uri)
-    { return std::make_unique<detail::TextureFileSource>(uri); }
+    inline std::unique_ptr<detail::TextureFileSource> LoadTextureFromFile(std::string uri, std::string id = base::RandomString(10))
+    { return std::make_unique<detail::TextureFileSource>(std::move(uri), std::move(id)); }
 
     template<typename T> inline
-    std::unique_ptr<detail::TextureBitmapBufferSource> CreateTextureFromBitmap(const Bitmap<T>& bitmap)
-    { return std::make_unique<detail::TextureBitmapBufferSource>(bitmap); }
+    std::unique_ptr<detail::TextureBitmapBufferSource> CreateTextureFromBitmap(const Bitmap<T>& bitmap, std::string id = base::RandomString(10))
+    { return std::make_unique<detail::TextureBitmapBufferSource>(bitmap, id); }
+
     template<typename T> inline
-    std::unique_ptr<TextureSource> CreateTextureFromBitmap(Bitmap<T>&& bitmap)
-    { return std::make_unique<detail::TextureBitmapBufferSource>(std::forward<T>(bitmap)); }
+    std::unique_ptr<TextureSource> CreateTextureFromBitmap(Bitmap<T>&& bitmap, std::string id = base::RandomString(10))
+    { return std::make_unique<detail::TextureBitmapBufferSource>(std::forward<T>(bitmap), std::move(id)); }
 
-    inline std::unique_ptr<detail::TextureTextBufferSource> CreateTextureFromText(const TextBuffer& text)
-    { return std::make_unique<detail::TextureTextBufferSource>(text); }
-    inline std::unique_ptr<detail::TextureTextBufferSource> CreateTextureFromText(TextBuffer&& text)
-    { return std::make_unique<detail::TextureTextBufferSource>(std::move(text)); }
+    inline std::unique_ptr<detail::TextureTextBufferSource> CreateTextureFromText(const TextBuffer& text, std::string id = base::RandomString(10))
+    { return std::make_unique<detail::TextureTextBufferSource>(text, std::move(id)); }
+    inline std::unique_ptr<detail::TextureTextBufferSource> CreateTextureFromText(TextBuffer&& text, std::string id = base::RandomString(10))
+    { return std::make_unique<detail::TextureTextBufferSource>(std::move(text), std::move(id)); }
 
-    inline std::unique_ptr<detail::TextureBitmapGeneratorSource> GenerateTexture(std::unique_ptr<IBitmapGenerator> generator)
-    { return std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(generator)); }
+    inline std::unique_ptr<detail::TextureBitmapGeneratorSource> GenerateTexture(std::unique_ptr<IBitmapGenerator> generator, std::string id = base::RandomString(10))
+    { return std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(generator), std::move(id)); }
+
     template<typename T> inline
-    std::unique_ptr<detail::TextureBitmapGeneratorSource> GenerateTexture(T&& generator)
-    { return GenerateTexture(std::make_unique<std::remove_reference_t<T>>(std::forward<T>(generator))); }
+    std::unique_ptr<detail::TextureBitmapGeneratorSource> GenerateTexture(T&& generator, std::string id = base::RandomString(10))
+    { return GenerateTexture(std::make_unique<std::remove_reference_t<T>>(std::forward<T>(generator), std::move(id))); }
 
-    inline std::unique_ptr<detail::TextureBitmapGeneratorSource> GenerateNoiseTexture(const NoiseBitmapGenerator& generator)
+    inline std::unique_ptr<detail::TextureBitmapGeneratorSource> GenerateNoiseTexture(const NoiseBitmapGenerator& generator, std::string id = base::RandomString(10))
     {
         auto gen = std::make_unique<NoiseBitmapGenerator>(generator);
-        return std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(gen));
+        return std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(gen), std::move(id));
     }
-    inline std::unique_ptr<detail::TextureBitmapGeneratorSource> GenerateNoiseTexture(NoiseBitmapGenerator&& generator)
+    inline std::unique_ptr<detail::TextureBitmapGeneratorSource> GenerateNoiseTexture(NoiseBitmapGenerator&& generator, std::string id = base::RandomString(10))
     {
         auto gen = std::make_unique<NoiseBitmapGenerator>(std::move(generator));
-        return std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(gen));
+        return std::make_unique<detail::TextureBitmapGeneratorSource>(std::move(gen), std::move(id));
     }
 
     // Interface for binding texture map(s) to texture sampler(s) in the material shader.
@@ -580,7 +591,7 @@ namespace gfx
         };
 
         TextureMap(std::string id = base::RandomString(10))
-          : mId(id)
+          : mId(std::move(id))
           , mName("Default")
         {}
         TextureMap(const TextureMap& other, bool copy);
@@ -1297,6 +1308,13 @@ namespace gfx
         Color4f mColor = Color::White;
         bool mPointSampling = true;
     };
+
+    // These functions are intended to use when you just need to create
+    // a material quickly on the stack to draw something immediately and
+    // don't need keep a material class around long term.
+    //
+    //             !! NO CLASS IDS ARE CREATED !!
+
     // Create gradient material based on 4 colors
     GradientClass CreateMaterialClassFromColor(const Color4f& top_left,
                                                const Color4f& top_right,
@@ -1316,29 +1334,30 @@ namespace gfx
     SpriteClass CreateMaterialClassFromSpriteAtlas(const std::string& texture, const std::vector<FRect>& frames);
     // Create a material class from a text buffer.
     TextureMap2DClass CreateMaterialClassFromText(const TextBuffer& text);
+    TextureMap2DClass CreateMaterialClassFromText(TextBuffer&& text);
 
-    inline MaterialClassInst CreateMaterialFromColor(const Color4f& top_left,
-                                                     const Color4f& top_right,
-                                                     const Color4f& bottom_left,
-                                                     const Color4f& bottom_right)
-    { return MaterialClassInst(CreateMaterialClassFromColor(top_left, top_right, bottom_left, bottom_right)); }
-    inline MaterialClassInst CreateMaterialFromColor(const Color4f& color)
-    { return MaterialClassInst(CreateMaterialClassFromColor(color)); }
-    inline MaterialClassInst CreateMaterialFromImage(const std::string& uri)
-    { return MaterialClassInst(CreateMaterialClassFromImage(uri)); }
-    inline MaterialClassInst CreateMaterialFromImages(const std::initializer_list<std::string>& uris)
-    { return MaterialClassInst(CreateMaterialClassFromImages(uris)); }
-    inline MaterialClassInst CreateMaterialFromImages(const std::vector<std::string>& uris)
-    { return MaterialClassInst(CreateMaterialClassFromImages(uris)); }
-    inline MaterialClassInst CreateMaterialFromSpriteAtlas(const std::string& uri, const std::vector<FRect>& frames)
-    { return MaterialClassInst(CreateMaterialClassFromSpriteAtlas(uri, frames)); }
-    inline MaterialClassInst CreateMaterialFromText(const TextBuffer& text)
-    { return MaterialClassInst(CreateMaterialClassFromText(text)); }
+    // These functions are intended to be used when you just need to draw
+    // something immediately and don't need to keep the material around.
+    // It's unspecified whether any material classes are used or so on.
+    // That means that the all the materials of some particular type *may*
+    // share the material class which gets modified.
+    
+    MaterialClassInst CreateMaterialFromColor(const Color4f& top_left,
+                                              const Color4f& top_right,
+                                              const Color4f& bottom_left,
+                                              const Color4f& bottom_right);
+    MaterialClassInst CreateMaterialFromColor(const Color4f& color);
+    MaterialClassInst CreateMaterialFromImage(const std::string& uri);
+    MaterialClassInst CreateMaterialFromImages(const std::initializer_list<std::string>& uris);
+    MaterialClassInst CreateMaterialFromImages(const std::vector<std::string>& uris);
+    MaterialClassInst CreateMaterialFromSpriteAtlas(const std::string& uri, const std::vector<FRect>& frames);
+    MaterialClassInst CreateMaterialFromText(const TextBuffer& text);
+    MaterialClassInst CreateMaterialFromText(TextBuffer&& text);
 
     std::unique_ptr<Material> CreateMaterialInstance(const MaterialClass& klass);
     std::unique_ptr<Material> CreateMaterialInstance(const std::shared_ptr<const MaterialClass>& klass);
     std::unique_ptr<TextMaterial> CreateMaterialInstance(const TextBuffer& text);
     std::unique_ptr<TextMaterial> CreateMaterialInstance(TextBuffer&& text);
-    std::unique_ptr<Material> CreateMaterialInstance(const Color4f& color);
+
 
 } // namespace

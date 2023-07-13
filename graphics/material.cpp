@@ -2518,10 +2518,10 @@ ColorClass CreateMaterialClassFromColor(const Color4f& color)
 
 TextureMap2DClass CreateMaterialClassFromImage(const std::string& uri)
 {
-    auto map = std::make_unique<TextureMap>();
+    auto map = std::make_unique<TextureMap>("");
     map->SetName("Sprite");
     map->SetNumTextures(1);
-    map->SetTextureSource(0, LoadTextureFromFile(uri));
+    map->SetTextureSource(0, LoadTextureFromFile(uri, ""));
 
     MaterialClass material(MaterialClass::Type::Texture, std::string(""));
     material.SetSurfaceType(MaterialClass::SurfaceType::Opaque);
@@ -2534,12 +2534,12 @@ SpriteClass CreateMaterialClassFromImages(const std::initializer_list<std::strin
 {
     const std::vector<std::string> tmp(uris);
 
-    auto map = std::make_unique<TextureMap>();
+    auto map = std::make_unique<TextureMap>("");
     map->SetName("Sprite");
     map->SetType(TextureMap::Type::Sprite);
     map->SetNumTextures(uris.size());
     for (size_t i=0; i<uris.size(); ++i)
-        map->SetTextureSource(i, LoadTextureFromFile(tmp[i]));
+        map->SetTextureSource(i, LoadTextureFromFile(tmp[i], ""));
 
     MaterialClass material(MaterialClass::Type::Sprite, std::string(""));
     material.SetSurfaceType(MaterialClass::SurfaceType::Transparent);
@@ -2550,12 +2550,12 @@ SpriteClass CreateMaterialClassFromImages(const std::initializer_list<std::strin
 
 SpriteClass CreateMaterialClassFromImages(const std::vector<std::string>& uris)
 {
-    auto map = std::make_unique<TextureMap>();
+    auto map = std::make_unique<TextureMap>("");
     map->SetName("Sprite");
     map->SetType(TextureMap::Type::Sprite);
     map->SetNumTextures(uris.size());
     for (size_t i=0; i<uris.size(); ++i)
-        map->SetTextureSource(i, LoadTextureFromFile(uris[i]));
+        map->SetTextureSource(i, LoadTextureFromFile(uris[i], ""));
 
     SpriteClass material(MaterialClass::Type::Sprite, std::string(""));
     material.SetSurfaceType(MaterialClass::SurfaceType::Transparent);
@@ -2566,13 +2566,13 @@ SpriteClass CreateMaterialClassFromImages(const std::vector<std::string>& uris)
 
 SpriteClass CreateMaterialClassFromSpriteAtlas(const std::string& uri, const std::vector<FRect>& frames)
 {
-    auto map = std::make_unique<TextureMap>();
+    auto map = std::make_unique<TextureMap>("");
     map->SetName("Sprite");
     map->SetType(TextureMap::Type::Sprite);
     map->SetNumTextures(uri.size());
     for (size_t i=0; i<frames.size(); ++i)
     {
-        map->SetTextureSource(i, LoadTextureFromFile(uri));
+        map->SetTextureSource(i, LoadTextureFromFile(uri, ""));
         map->SetTextureRect(i, frames[i]);
     }
 
@@ -2585,11 +2585,11 @@ SpriteClass CreateMaterialClassFromSpriteAtlas(const std::string& uri, const std
 
 TextureMap2DClass CreateMaterialClassFromText(const TextBuffer& text)
 {
-    auto map = std::make_unique<TextureMap>();
+    auto map = std::make_unique<TextureMap>("");
     map->SetType(TextureMap::Type::Texture2D);
     map->SetName("Text");
     map->SetNumTextures(1);
-    map->SetTextureSource(0, CreateTextureFromText(text));
+    map->SetTextureSource(0, CreateTextureFromText(text, ""));
 
     MaterialClass material(MaterialClass::Type::Texture, std::string(""));
     material.SetSurfaceType(MaterialClass::SurfaceType::Transparent);
@@ -2597,6 +2597,66 @@ TextureMap2DClass CreateMaterialClassFromText(const TextBuffer& text)
     material.SetTextureMap(0, std::move(map));
     return material;
 }
+
+TextureMap2DClass CreateMaterialClassFromText(TextBuffer&& text)
+{
+    auto map = std::make_unique<TextureMap>("");
+    map->SetType(TextureMap::Type::Texture2D);
+    map->SetName("Text");
+    map->SetNumTextures(1);
+    map->SetTextureSource(0, CreateTextureFromText(std::move(text), ""));
+
+    MaterialClass material(MaterialClass::Type::Texture, std::string(""));
+    material.SetSurfaceType(MaterialClass::SurfaceType::Transparent);
+    material.SetNumTextureMaps(1);
+    material.SetTextureMap(0, std::move(map));
+    return material;
+}
+
+
+MaterialClassInst CreateMaterialFromColor(const Color4f& top_left,
+                                          const Color4f& top_right,
+                                          const Color4f& bottom_left,
+                                          const Color4f& bottom_right)
+{
+    return MaterialClassInst(CreateMaterialClassFromColor(top_left, top_right, bottom_left, bottom_right));
+}
+
+MaterialClassInst CreateMaterialFromColor(const Color4f& color)
+{
+    return MaterialClassInst(CreateMaterialClassFromColor(color));
+}
+
+MaterialClassInst CreateMaterialFromImage(const std::string& uri)
+{
+    return MaterialClassInst(CreateMaterialClassFromImage(uri));
+}
+
+MaterialClassInst CreateMaterialFromImages(const std::initializer_list<std::string>& uris)
+{
+    return MaterialClassInst(CreateMaterialClassFromImages(uris));
+}
+
+MaterialClassInst CreateMaterialFromImages(const std::vector<std::string>& uris)
+{
+    return MaterialClassInst(CreateMaterialClassFromImages(uris));
+}
+
+MaterialClassInst CreateMaterialFromSpriteAtlas(const std::string& uri, const std::vector<FRect>& frames)
+{
+    return MaterialClassInst(CreateMaterialClassFromSpriteAtlas(uri, frames));
+}
+
+MaterialClassInst CreateMaterialFromText(const TextBuffer& text)
+{
+    return MaterialClassInst(CreateMaterialClassFromText(text));
+}
+
+MaterialClassInst CreateMaterialFromText(TextBuffer&& text)
+{
+    return MaterialClassInst(CreateMaterialClassFromText(std::move(text)));
+}
+
 
 std::unique_ptr<Material> CreateMaterialInstance(const MaterialClass& klass)
 {
@@ -2615,10 +2675,6 @@ std::unique_ptr<TextMaterial> CreateMaterialInstance(const TextBuffer& text)
 std::unique_ptr<TextMaterial> CreateMaterialInstance(TextBuffer&& text)
 {
     return std::make_unique<TextMaterial>(std::move(text));
-}
-std::unique_ptr<Material> CreateMaterialInstance(const gfx::Color4f& color)
-{
-    return CreateMaterialInstance(CreateMaterialClassFromColor(color));
 }
 
 } // namespace
