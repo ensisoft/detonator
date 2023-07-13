@@ -841,6 +841,8 @@ namespace game
         const TilemapLayerClass* FindLayerById(const std::string& id) const;
         const TilemapLayerClass* FindLayerByName(const std::string& name) const;
 
+        std::size_t FindLayerIndex(const TilemapLayerClass* layer) const;
+
         std::size_t GetHash() const;
         std::shared_ptr<TilemapLayerClass> GetSharedLayerClass(size_t index);
         std::shared_ptr<const TilemapLayerClass> GetSharedLayerClass(size_t index) const;
@@ -897,6 +899,7 @@ namespace game
             ASSERT(dst < mLayers.size());
             std::swap(mLayers[src], mLayers[dst]);
         }
+        std::size_t FindLayerIndex(const TilemapLayer* layer) const noexcept;
 
         inline std::size_t GetNumLayers() const noexcept
         { return mLayers.size(); }
