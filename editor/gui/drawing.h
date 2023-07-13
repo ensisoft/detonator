@@ -49,6 +49,13 @@ void DrawBasisVectors(gfx::Transform& trans, std::vector<engine::DrawPacket>& pa
 void DrawSelectionBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect);
 void DrawInvisibleItemBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect);
 
+void DrawEdges(const gfx::Painter& scene_painter,
+               const gfx::Painter& window_painter,
+               const gfx::Drawable& drawable,
+               const gfx::Material& material,
+               const glm::mat4& model,
+               const std::string& widget_id);
+
 enum class GridDensity {
     Grid10x10   = 10,
     Grid20x20   = 20,
