@@ -486,7 +486,8 @@ void GfxWindow::CleanGarbage()
         return;
     device->CleanGarbage(120, gfx::Device::GCFlags::Textures |
                               gfx::Device::GCFlags::Programs |
-                              gfx::Device::GCFlags::Geometries);
+                              gfx::Device::GCFlags::Geometries |
+                              gfx::Device::GCFlags::FBOs);
 }
 
 // static
