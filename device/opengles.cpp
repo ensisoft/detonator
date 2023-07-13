@@ -2520,7 +2520,6 @@ private:
         }
         virtual void SetConfig(const Config& conf) override
         {
-            ASSERT(mHandle == 0);
             mConfig = conf;
         }
 
@@ -2530,7 +2529,6 @@ private:
                 mColorTarget->SetFBOTarget(false);
 
             mColorTarget = static_cast<TextureImpl*>(texture);
-            mBindColor   = true;
             if (mColorTarget)
                 mColorTarget->SetFBOTarget(true);
         }
@@ -2541,7 +2539,6 @@ private:
                 mResolveTarget->SetFBOTarget(false);
 
             mResolveTarget = static_cast<TextureImpl*>(texture);
-            mBindResolve   = true;
 
             if (mResolveTarget)
                 mResolveTarget->SetFBOTarget(true);
@@ -2562,25 +2559,38 @@ private:
 
         bool Complete(bool bind_buffer)
         {
-            if (bind_buffer)
-                GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, mHandle));
-
-            if (!mBindColor && !mBindResolve)
-                return true;
-
-            if (mBindColor)
+            // check if we have a texture object as color target coming from the outside.
+            // if the client has configured the color target texture then we use that
+            // otherwise we create our own color buffer.
+            if (!mColorTarget)
             {
-                if (!mColorTarget)
+                // create our own color target. This is currently texture in order to facilitate
+                // the subsequent use of the rendered output, but with GL ES3 it could also be a
+                // render buffer from which we could then blit (MSAA resolve) the result into a
+                // texture object in the resolve step.
+                if (!mColor)
                 {
                     mColor = std::make_unique<TextureImpl>(mGL, mDevice);
                     mColor->SetName("FBO/" + mName + "/color0");
                     mColor->Allocate(mConfig.width, mConfig.height, gfx::Texture::Format::RGBA);
-                    mColorTarget = mColor.get();
+                    mColor->SetFilter(gfx::Texture::MinFilter::Linear);
+                    mColor->SetFilter(gfx::Texture::MagFilter::Linear);
+                    mColor->SetWrapX(gfx::Texture::Wrapping::Clamp);
+                    mColor->SetWrapY(gfx::Texture::Wrapping::Clamp);
                     DEBUG("Allocated new FBO color buffer (texture) target. [name='%1', width=%2, height=%3]]", mName, mConfig.width, mConfig.height);
                 }
-                GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColorTarget->GetHandle(), 0));
-                mBindColor = false;
+                // if the dimensions have changed, i.e. FBO config changed re-allocate the
+                // texture object.
+                const auto target_width  = mColor->GetWidth();
+                const auto target_height = mColor->GetHeight();
+                if (target_width != mConfig.width || target_height != mConfig.height)
+                    mColor->Allocate(mConfig.width, mConfig.height, gfx::Texture::Format::RGBA);
+
+                // using this buffer as the color target.
+                mColorTarget = mColor.get();
             }
+            GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, mHandle));
+            GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColorTarget->GetHandle(), 0));
             // possible FBO *error* statuses are: INCOMPLETE_ATTACHMENT, INCOMPLETE_DIMENSIONS and INCOMPLETE_MISSING_ATTACHMENT
             // we're treating these status codes as BUGS in the engine code that is trying to create the
             // frame buffer object and has violated the frame buffer completeness requirement or other
@@ -2728,8 +2738,6 @@ private:
         Config mConfig;
         TextureImpl* mColorTarget = nullptr;
         TextureImpl* mResolveTarget = nullptr;
-        bool mBindColor = true;
-        bool mBindResolve = true;
     };
 private:
     std::map<std::string, std::unique_ptr<gfx::Geometry>> mGeoms;
