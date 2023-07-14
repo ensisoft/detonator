@@ -875,7 +875,12 @@ public:
         // done. Otherwise, see if there's a free texture unit slot or lastly
         // "evict" some texture from some unit and overwrite the binding with
         // this texture.
-        size_t unit = 0;
+
+        // this is the set of units we're using already for this draw.
+        // it might happen so that a texture that gets bound is an one
+        // that was not used recently and then the next bind would
+        // replace this texture! 
+        std::unordered_set<size_t> units_for_this_draw;
 
         TRACE_ENTER(BindTextures);
         for (size_t i=0; i<num_textures; ++i)
@@ -888,45 +893,46 @@ public:
             if (sampler.location == -1)
                 continue;
 
-            // see if there's already a unit that has this texture bound.
-            // if so, we use the same unit.
-            for (unit=0; unit < mTextureUnits.size(); ++unit)
+            const auto num_units = mTextureUnits.size();
+            size_t lru_unit        = num_units;
+            size_t free_unit       = num_units;
+            size_t current_unit    = num_units;
+            size_t lru_frame_stamp = mFrameNumber;
+
+            for (size_t i=0; i<mTextureUnits.size(); ++i)
             {
-                if (mTextureUnits[unit].texture == texture)
+                if (mTextureUnits[i].texture == texture)
+                {
+                    current_unit = i;
                     break;
-            }
-            // if the texture isn't bound yet we need to find a texture
-            // unit that can be used. first look for a free unit if any.
-            if (unit == mTextureUnits.size())
-            {
-                for (unit=0; unit<mTextureUnits.size(); ++unit)
-                {
-                    if (mTextureUnits[unit].texture == nullptr)
-                        break;
                 }
-            }
-            // if the texture isn't bound yet we're using all texture units.
-            // this means a texture must be evicted and to let this texture be
-            // bound to a unit. so we must look for a texture candidate for
-            // replacement.
-            if (unit == mTextureUnits.size())
-            {
-                size_t lru_frame_stamp = mTextureUnits[0].texture->GetFrameStamp();
-                unit = 0;
-                // look for a unit we can reuse, find the unit with the
-                // LRU (least recently used) texture for replacement.
-                for (size_t i=1; i<mTextureUnits.size(); ++i)
+                else if (mTextureUnits[i].texture == nullptr)
                 {
-                    const auto* bound_texture = mTextureUnits[i].texture;
-                    const auto frame_stamp = bound_texture->GetFrameStamp();
-                    if (frame_stamp < lru_frame_stamp)
+                    free_unit = i;
+                    break;
+                }
+
+                const auto frame_stamp = mTextureUnits[i].texture->GetFrameStamp();
+                if (frame_stamp <= lru_frame_stamp)
+                {
+                    if (!base::Contains(units_for_this_draw, i))
                     {
-                        unit = i;
                         lru_frame_stamp = frame_stamp;
+                        lru_unit = i;
                     }
                 }
             }
+
+            size_t unit = 0;
+            if (current_unit < num_units)
+                unit = current_unit;
+            else if (free_unit < num_units)
+                unit = free_unit;
+            else unit = lru_unit;
+
             ASSERT(unit < mTextureUnits.size());
+
+            units_for_this_draw.insert(unit);
 
             // map the texture filter to a GL setting.
             GLenum texture_min_filter = GL_NONE;
