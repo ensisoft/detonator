@@ -17,6 +17,7 @@
 #include "config.h"
 
 #include <vector>
+#include <fstream>
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
@@ -30,6 +31,8 @@
 #include "game/entity.h"
 #include "game/scene.h"
 #include "game/util.h"
+#include "game/tilemap.h"
+#include "game/loader.h"
 #include "engine/renderer.h"
 #include "engine/classlib.h"
 
@@ -73,6 +76,62 @@ bool TestPixelCount(const gfx::Bitmap<Pixel>& bmp, const gfx::URect& area, gfx::
         return true;
     return false;
 }
+
+class TestMapData : public game::TilemapData
+{
+public:
+    virtual void Write(const void* ptr, size_t bytes, size_t offset) override
+    {
+        TEST_REQUIRE(offset + bytes <= mBytes.size());
+
+        std::memcpy(&mBytes[offset], ptr, bytes);
+    }
+    virtual void Read(void* ptr, size_t bytes, size_t offset) const override
+    {
+        TEST_REQUIRE(offset + bytes <= mBytes.size());
+
+        std::memcpy(ptr, &mBytes[offset], bytes);
+    }
+    virtual size_t AppendChunk(size_t bytes) override
+    {
+        const auto offset = mBytes.size();
+        mBytes.resize(offset + bytes);
+        return offset;
+    }
+    virtual void Resize(size_t bytes) override
+    {
+        mBytes.resize(bytes);
+    }
+    virtual void ClearChunk(const void* value, size_t value_size, size_t offset, size_t num_values) override
+    {
+        TEST_REQUIRE(offset + value_size * num_values <= mBytes.size());
+
+        for (size_t i=0; i<num_values; ++i)
+        {
+            const auto buffer_offset = offset + i * value_size;
+            TEST_REQUIRE(buffer_offset + value_size <= mBytes.size());
+            std::memcpy(&mBytes[buffer_offset], value, value_size);
+        }
+    }
+    virtual size_t GetByteCount() const override
+    {
+        return mBytes.size();
+    }
+
+    void Dump(const std::string& file) const
+    {
+        std::ofstream out;
+        out.open(file, std::ios::out | std::ios::binary);
+        TEST_REQUIRE(out.is_open());
+        out.write((const char*)(&mBytes[0]), mBytes.size());
+    }
+private:
+    std::vector<unsigned char> mBytes;
+    unsigned mNumRows = 0;
+    unsigned mNumCols = 0;
+    size_t mValSize = 0;
+};
+
 
 // setup context for headless rendering.
 class TestContext : public dev::Context
@@ -144,6 +203,8 @@ public:
             return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color::Red));
         else if (id == "green")
             return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color::Green));
+        else if (id == "blue")
+            return std::make_shared<gfx::ColorClass>(gfx::CreateMaterialClassFromColor(gfx::Color::Blue));
         else if (id == "red-green")
         {
             gfx::RgbBitmap bmp;
@@ -617,7 +678,6 @@ void unit_test_entity_lifecycle()
 
     const float dt = 1.0f/60.0f;
 
-    engine::EntityInstanceDrawHook* hook = nullptr;
 
     renderer.CreateRenderStateFromScene(*scene);
     TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
@@ -780,6 +840,220 @@ void unit_test_transform_precision()
     }
 }
 
+void unit_test_axis_aligned_map()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // Set things up, create a 2x2 tiles map with 2 layers
+    auto map = std::make_shared<game::TilemapClass>();
+    map->SetTileWidth(50.0f);
+    map->SetTileHeight(50.0f);
+    map->SetTileDepth(50.0f);
+    map->SetMapWidth(2);
+    map->SetMapHeight(2);
+    map->SetPerspective(game::Perspective::AxisAligned);
+
+    auto layer0 = std::make_shared<game::TilemapLayerClass>();
+    layer0->SetName("layer0");
+    layer0->SetDepth(0);
+    layer0->SetType(game::TilemapLayerClass::Type::Render);
+    layer0->SetDefaultTilePaletteMaterialIndex(layer0->GetMaxPaletteIndex());
+    layer0->SetReadOnly(false);
+    layer0->SetPaletteMaterialId("red", 0);
+    layer0->SetPaletteMaterialId("green", 1);
+    layer0->SetPaletteMaterialId("blue", 2);
+    layer0->SetPaletteMaterialId("pink", 3);
+    map->AddLayer(layer0);
+
+    auto layer1 = std::make_shared<game::TilemapLayerClass>();
+    layer1->SetName("layer1");
+    layer1->SetDepth(0);
+    layer1->SetType(game::TilemapLayerClass::Type::Render);
+    layer1->SetDefaultTilePaletteMaterialIndex(layer1->GetMaxPaletteIndex());
+    layer1->SetReadOnly(false);
+    layer1->SetPaletteMaterialId("red", 0);
+    layer1->SetPaletteMaterialId("green", 1);
+    layer1->SetPaletteMaterialId("blue", 2);
+    layer1->SetPaletteMaterialId("pink", 3);
+    map->AddLayer(layer1);
+
+    auto data0 = std::make_shared<TestMapData>();
+    auto data1 = std::make_shared<TestMapData>();
+    // initialize the layer data structures on the data object.
+    layer0->Initialize(map->GetMapWidth(), map->GetMapHeight(), *data0);
+    layer1->Initialize(map->GetMapWidth(), map->GetMapHeight(), *data1);
+
+    // setup layer0 tile data
+    {
+
+        auto layer = game::CreateTilemapLayer(layer0, map->GetMapWidth(), map->GetMapHeight());
+
+        layer->Load(data0, 1024);
+
+        auto* ptr = game::TilemapLayerCast<game::TilemapLayer_Render>(layer);
+        ptr->SetTile({0}, 0, 0);
+        ptr->SetTile({1}, 0, 1);
+        ptr->SetTile({2}, 1, 0);
+        ptr->SetTile({3}, 1, 1);
+
+        layer->FlushCache();
+        layer->Save();
+    }
+    // setup layer1 tile data
+    {
+        auto layer = game::CreateTilemapLayer(layer1, map->GetMapWidth(), map->GetMapHeight());
+        layer->Load(data1, 1024);
+
+        auto* ptr = game::TilemapLayerCast<game::TilemapLayer_Render>(layer);
+        ptr->SetTile({3}, 0, 0);
+        ptr->SetTile({2}, 0, 1);
+        ptr->SetTile({1}, 1, 0);
+        ptr->SetTile({0}, 1, 1);
+
+        layer->FlushCache();
+        layer->Save();
+    }
+
+    auto map_instance = game::CreateTilemap(map);
+    // calling load on each layer instead of calling MapLoad because we don't
+    // have the loader implemented for tilemap data.
+    map_instance->GetLayer(0).Load(data0, 1024);
+    map_instance->GetLayer(1).Load(data1, 1024);
+    TEST_REQUIRE(map_instance->GetNumLayers() == 2);
+    TEST_REQUIRE(map_instance->GetLayer(0).IsLoaded());
+    TEST_REQUIRE(map_instance->GetLayer(1).IsLoaded());
+    TEST_REQUIRE(map_instance->GetLayer(0).IsVisible());
+    TEST_REQUIRE(map_instance->GetLayer(1).IsVisible());
+
+    auto device = CreateDevice();
+    auto painter = gfx::Painter::Create(device);
+
+    painter->SetEditingMode(false);
+    painter->SetViewport(0, 0, 256, 256);
+    painter->SetSurfaceSize(256, 256);
+
+    DummyClassLib library;
+
+    engine::Renderer renderer;
+    renderer.SetClassLibrary(&library);
+    renderer.SetEditingMode(false);
+
+    engine::Renderer::Surface surface;
+    surface.size = painter->GetSurfaceSize();
+    surface.viewport = painter->GetViewport();
+    renderer.SetSurface(surface);
+
+    engine::Renderer::Camera camera;
+    camera.position   = glm::vec2{0.0f, 0.0f};
+    camera.scale      = glm::vec2{1.0f, 1.0f};
+    camera.rotation   = 0.0f;
+    camera.viewport   = game::FRect(-128, -128, 256, 256);
+    renderer.SetCamera(camera);
+
+    class MapHook : public engine::TileBatchDrawHook {
+    public:
+        virtual void BeginDrawBatch(const engine::TileBatch& batch, const glm::mat4& model, gfx::Painter&) override
+        {
+            batches.push_back(batch);
+            matrices.push_back(model);
+        }
+        void Clear()
+        {
+            batches.clear();
+            matrices.clear();
+        }
+
+        std::vector<engine::TileBatch> batches;
+        std::vector<glm::mat4> matrices;
+    } hook;
+
+    renderer.Draw(*map_instance, *painter, &hook, true, false);
+
+    {
+        const auto& bmp = device->ReadColorBuffer(0, 0, 256, 256);
+        gfx::WritePNG(bmp, "map_render.png");
+    }
+
+    // verify the render order.
+    {
+        // current rendering order should be
+        // row < col < height < layer
+
+        // but right now we assume the layer takes care of the height,
+        // so we end up with
+        //
+        // row=0, col=0, layer=0
+        // row=0, col=0, layer=1,
+        // row=0, col=1, layer=0,
+        // row=0; col=1, layer=1,
+        // ...
+        // row=n, col=m; layer=0,
+        // row=n, col=m, layer=1
+
+        const auto& batches = hook.batches;
+        TEST_REQUIRE(batches.size() == 2 * 2 * 2);
+
+        struct Expected {
+            uint16_t row, col, layer;
+        } expected[] = {
+            {0, 0, 0},
+            {0, 0, 1},
+            {0, 1, 0},
+            {0, 1, 1},
+            {1, 0, 0},
+            {1, 0, 1},
+            {1, 1, 0},
+            {1, 1, 1}
+        };
+        for (size_t i=0; i<batches.size(); ++i)
+        {
+            TEST_REQUIRE(batches[i].row   == expected[i].row);
+            TEST_REQUIRE(batches[i].col   == expected[i].col);
+            TEST_REQUIRE(batches[i].layer == expected[i].layer);
+        }
+    }
+
+    // verify the render and tile size.
+    {
+        hook.Clear();
+
+        map->SetTileRenderWidthScale(1.0);
+        map->SetTileRenderHeightScale(1.0f);
+        renderer.Draw(*map_instance, *painter, &hook, true, false);
+        for (size_t i=0; i<hook.batches.size(); ++i)
+        {
+            const auto& batch = hook.batches[i];
+            TEST_REQUIRE(batch.render_size == glm::vec2(50.0f, 50.0f));
+        }
+
+        hook.Clear();
+
+        // change the render scale
+        map->SetTileRenderWidthScale(2.0);
+        map->SetTileRenderHeightScale(1.0f);
+        renderer.Draw(*map_instance, *painter, &hook, true, false);
+
+        for (size_t i=0; i<hook.batches.size(); ++i)
+        {
+            const auto& batch = hook.batches[i];
+            const auto& model = hook.matrices[i];
+            TEST_REQUIRE(batch.render_size == glm::vec2(100.0f, 50.0f));
+        }
+
+        hook.Clear();
+
+        map->SetTileRenderWidthScale(1.0f);
+        map->SetTileRenderHeightScale(2.0f);
+        renderer.Draw(*map_instance, *painter, &hook, true, false);
+        for (size_t i=0; i<hook.batches.size(); ++i)
+        {
+            const auto& batch = hook.batches[i];
+            const auto& model = hook.matrices[i];
+            TEST_REQUIRE(batch.render_size == glm::vec2(50.0f, 100.0f));
+        }
+    }
+}
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
@@ -789,6 +1063,8 @@ int test_main(int argc, char* argv[])
     unit_test_scene_layering();
     unit_test_entity_lifecycle();
     unit_test_transform_precision();
+
+    unit_test_axis_aligned_map();
     return 0;
 }
 ) // TEST_MAIN
