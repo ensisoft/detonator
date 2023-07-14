@@ -63,6 +63,8 @@ void FlipTexture(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* 
 
 std::unique_ptr<IBitmap> ReadTexture(const gfx::Texture* texture, gfx::Device* device);
 
+void ClearTexture(gfx::Texture* texture, gfx::Device* device, const gfx::Color4f& clear_color);
+
 
 } // namespace
 } // namespace

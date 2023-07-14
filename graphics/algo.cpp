@@ -480,5 +480,31 @@ std::unique_ptr<IBitmap> ReadTexture(const gfx::Texture* texture, gfx::Device* d
     return std::make_unique<RgbaBitmap>(std::move(bmp));
 }
 
+void ClearTexture(gfx::Texture* texture, gfx::Device* device, const gfx::Color4f& clear_color)
+{
+    const auto format = texture->GetFormat();
+    const auto width  = texture->GetWidth();
+    const auto height = texture->GetHeight();
+
+    // Currently, this is the only supported format due to limitations on the
+    // GL ES2 FBO color buffer target.
+    ASSERT(format == gfx::Texture::Format::RGBA ||
+           format == gfx::Texture::Format::sRGBA);
+
+    auto* fbo = device->FindFramebuffer("AlgoFBO");
+    if (!fbo)
+    {
+        fbo = device->MakeFramebuffer("AlgoFBO");
+        Framebuffer::Config conf;
+        conf.width  = 0; // irrelevant since using texture target
+        conf.height = 0; // irrelevant since using texture target.
+        conf.format = Framebuffer::Format::ColorRGBA8;
+        fbo->SetConfig(conf);
+    }
+    fbo->SetColorTarget(texture);
+
+    device->ClearColor(clear_color, fbo);
+}
+
 } // namespace
 } // namespace
