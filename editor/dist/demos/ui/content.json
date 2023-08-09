@@ -111,7 +111,8 @@
                 "width": 512
               },
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "id": "Kni3liNI6b",
               "name": "TextBuffer",
