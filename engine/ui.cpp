@@ -146,6 +146,7 @@ UIMaterial::MaterialClass UITexture::GetClass(const ClassLibrary*, const Loader*
     material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     material->SetTexture(gfx::LoadTextureFromFile(mTextureUri));
     material->SetName("UITexture");
+    material->GetTextureMap(0)->GetTextureSource(0)->SetName("UITexture/" + mTextureName);
 
     if (mMetafileUri.empty() || mTextureName.empty())
         return material;
@@ -172,7 +173,7 @@ UIMaterial::MaterialClass UITexture::GetClass(const ClassLibrary*, const Loader*
     base::JsonReadSafe(json, "image_height", &img_height_px);
     if (!img_width_px || !img_height_px)
     {
-        WARN("Packed UITexture texture size not know. (uri='%1']", mMetafileUri);
+        WARN("Packed UITexture texture size not know. [uri='%1']", mMetafileUri);
         return material;
     }
 

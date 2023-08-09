@@ -487,7 +487,8 @@ Texture* detail::TextureTextBufferSource::Upload(const Environment& env, Device&
             texture->SetContentHash(content_hash);
             texture->Upload(mask->GetDataPtr(), mask->GetWidth(), mask->GetHeight(), Texture::Format::Grayscale, generate_mips);
             return texture;
-        }
+
+        } else ERROR("Failed to rasterize text into bitmap. [name='%1']", mName);
     }
     else if (format == TextBuffer::RasterFormat::Texture)
     {
@@ -516,13 +517,13 @@ Texture* detail::TextureTextBufferSource::Upload(const Environment& env, Device&
                 const auto format = texture->GetFormat();
                 if (format == gfx::Texture::Format::RGBA || format == gfx::Texture::Format::sRGBA)
                     algo::DetectSpriteEdges(mId, texture, &device);
+                else WARN("Texture edge detection is not supported on texture format. [name='%1', format=%2]", mName, format);
             }
 
             texture->GenerateMips();
             return texture;
 
-        } else ERROR("Failed to rasterize texture from text buffer. [name='%1']", mName);
-        return nullptr;
+        } else ERROR("Failed to rasterize text into texture. [name='%1']", mName);
     }
     return nullptr;
 }
@@ -979,7 +980,7 @@ std::string MaterialClass::GetProgramId(const State& state) const noexcept
 
     } else BUG("Unknown material type.");
 
-    return std::to_string(hash);
+    return base::FormatString("%1+%2", mType, hash);
 }
 
 std::size_t MaterialClass::GetHash() const noexcept
@@ -1898,7 +1899,11 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
 {
     auto* map = SelectTextureMap(state);
     if (map == nullptr)
+    {
+        if (state.first_render)
+            WARN("Failed to select texture map. [material='%1']", mName);
         return false;
+    }
 
     TextureMap::BindingState ts;
     ts.dynamic_content = state.editing_mode || !IsStatic();
@@ -1907,7 +1912,11 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
 
     TextureMap::BoundState binds;
     if (!map->BindTextures(ts, device,  binds))
+    {
+        if (state.first_render)
+            ERROR("Failed to bind sprite textures. [material='%1']", mName);
         return false;
+    }
 
     glm::vec2 alpha_mask;
 
@@ -2086,7 +2095,11 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
 {
     auto* map = SelectTextureMap(state);
     if (map == nullptr)
+    {
+        if (state.first_render)
+            ERROR("Failed to select material texture map. [material='%1']", mName);
         return false;
+    }
 
     TextureMap::BindingState ts;
     ts.dynamic_content = state.editing_mode || !IsStatic();
@@ -2094,7 +2107,11 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
 
     TextureMap::BoundState binds;
     if (!map->BindTextures(ts, device, binds))
+    {
+        if (state.first_render)
+            ERROR("Failed to bind material texture. [material='%1']", mName);
         return false;
+    }
 
     auto* texture = binds.textures[0];
     texture->SetFilter(mTextureMinFilter);
