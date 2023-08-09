@@ -13,6 +13,7 @@ function LoadGame()
     _TestTable[1] = 'Jungle'
     _TestTable[2] = 'Kenney'
     Game:OpenUI(_TestTable[0])
+    Game:SetViewport(0, 0, 1024, 768)
     return true
 end
 
