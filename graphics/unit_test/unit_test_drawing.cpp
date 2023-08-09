@@ -1937,6 +1937,15 @@ void unit_test_gpu_id_bug()
     env.material_time = 0.0f;
     env.editing_mode  = false;
 
+    // each one of these different materials objects with the
+    // same type maps to the same underlying shader object.
+    // for example two color shaders that arent static can share
+    // the same shader/program object and set their state dynamically
+    // through uniform settings.
+    // however if they're marked static the uniforms are folded in the
+    // shader source which means they now must be different shader objects.
+
+    // not -static, i.e. dynamic
     {
         gfx::MaterialClass klass(gfx::MaterialClass::Type::Color);
         klass.SetStatic(false);
@@ -1992,6 +2001,64 @@ void unit_test_gpu_id_bug()
         klass.SetTextureRotation(1.0f);
         TEST_REQUIRE(klass.GetProgramId(env) == initial);
     }
+
+    // static
+    {
+        gfx::MaterialClass klass(gfx::MaterialClass::Type::Color);
+        klass.SetStatic(true);
+        klass.SetColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetGamma(1.0f);
+
+        const auto& initial = klass.GetProgramId(env);
+        klass.SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetGamma(1.5f);
+        TEST_REQUIRE(klass.GetProgramId(env) != initial);
+    }
+
+    {
+        gfx::MaterialClass klass(gfx::MaterialClass::Type::Texture);
+        klass.SetStatic(true);
+        klass.SetColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetGamma(1.0f);
+        klass.SetTextureScaleX(1.0f);
+        klass.SetTextureScaleY(1.0f);
+        klass.SetTextureVelocityX(0.0f);
+        klass.SetTextureVelocityY(0.0f);
+        klass.SetTextureRotation(0.0f);
+        const auto& initial = klass.GetProgramId(env);
+
+        klass.SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetGamma(1.5f);
+        klass.SetTextureScaleX(1.5f);
+        klass.SetTextureScaleY(1.5f);
+        klass.SetTextureVelocityX(1.0f);
+        klass.SetTextureVelocityY(1.0f);
+        klass.SetTextureRotation(1.0f);
+        TEST_REQUIRE(klass.GetProgramId(env) != initial);
+    }
+
+    {
+        gfx::MaterialClass klass(gfx::MaterialClass::Type::Sprite);
+        klass.SetStatic(true);
+        klass.SetGamma(1.0);
+        klass.SetColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetTextureScaleX(1.0f);
+        klass.SetTextureScaleY(1.0f);
+        klass.SetTextureVelocityX(0.0f);
+        klass.SetTextureVelocityY(0.0f);
+        klass.SetTextureRotation(0.0f);
+        const auto& initial = klass.GetProgramId(env);
+
+        klass.SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BaseColor);
+        klass.SetGamma(1.5f);
+        klass.SetTextureScaleX(1.5f);
+        klass.SetTextureScaleY(1.5f);
+        klass.SetTextureVelocityX(1.0f);
+        klass.SetTextureVelocityY(1.0f);
+        klass.SetTextureRotation(1.0f);
+        TEST_REQUIRE(klass.GetProgramId(env) != initial);
+    }
+
 }
 
 EXPORT_TEST_MAIN(
