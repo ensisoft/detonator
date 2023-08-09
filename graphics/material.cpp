@@ -486,6 +486,7 @@ Texture* detail::TextureTextBufferSource::Upload(const Environment& env, Device&
             constexpr auto generate_mips = true;
             texture->SetContentHash(content_hash);
             texture->Upload(mask->GetDataPtr(), mask->GetWidth(), mask->GetHeight(), Texture::Format::Grayscale, generate_mips);
+            return texture;
         }
     }
     else if (format == TextBuffer::RasterFormat::Texture)
