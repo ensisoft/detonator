@@ -745,11 +745,11 @@ void InitLuaDoc()
     DOC_METHOD_1("void", "Enable", "Enable widget.", "bool", "enable");
     DOC_METHOD_2("void", "SetStyleProperty", "Set a painter specific styling property value on the widget.<br>"
                                              "These style properties take precedence over any other styling.",
-                 "string", "key", "int|float|string|base.Color4f", "value");
+                 "string", "key", "int|float|bool|string|base.Color4f", "value");
     DOC_METHOD_1("void", "DeleteStyleProperty", "Delete a specific styling property by the given key.",
                  "string", "key");
-    DOC_METHOD_1("int|float|string|base.Color4f", "GetStyleProperty", "Get a styling property by the given key.<br>"
-                                                                          "Returns nil if no such property exists.",
+    DOC_METHOD_1("int|float|bool|string|base.Color4f", "GetStyleProperty", "Get a styling property by the given key.<br>"
+                                                                           "Returns nil if no such property exists.",
                  "string", "key");
     DOC_METHOD_2("void", "SetStyleMaterial", "Set a painter specific material style property string.",
                  "string", "key", "string", "material_style_string");
