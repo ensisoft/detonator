@@ -65,6 +65,10 @@ enum class Color {
     Error, Warning, Success, Message, Info
 };
 
+enum class Flags {
+    TODO = 0x1
+};
+
 extern base::bitflag<Type> EnabledTestTypes;
 extern std::vector<std::string> EnabledTestNames;
 extern std::vector<TestBundle*> TestBundles;
@@ -107,7 +111,9 @@ public:
         test::Print(test::Color::Info, "%-50s", mName);
         if (enabled_by_type && enabled_by_name)
         {
-            if (mErrors == ErrorCount)
+            if (mFlags & static_cast<unsigned>(Flags::TODO))
+                test::Print(test::Color::Warning, "TODO\n");
+            else if (mErrors == ErrorCount)
                 test::Print(test::Color::Success, "OK\n");
             else test::Print(test::Color::Warning, "Fail\n");
         }
@@ -116,11 +122,14 @@ public:
             test::Print(test::Color::Message, "Skipped\n");
         }
     }
+    inline void SetFlag(Flags flag) noexcept
+    { mFlags |= static_cast<unsigned>(flag); }
 private:
     const char* mFile = nullptr;
     const char* mName = nullptr;
     const Type mType;
     unsigned mErrors = 0;
+    unsigned mFlags = 0;
 };
 
 } // test
@@ -152,6 +161,9 @@ private:
         return;                                                                     \
     if (!test::IsEnabledByName(test::GetTestName(__PRETTY_FUNCTION__)))             \
         return;
+
+#define TEST_CASE_TODO \
+    test_case_reporter.SetFlag(test::Flags::TODO);
 
 // When using a test bundle the test_main is no longer a global function
 // but instead becomes a member function that implements/overrides the
