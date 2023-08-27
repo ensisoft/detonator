@@ -275,7 +275,7 @@ const Widget* Window::HitTest(const FPoint& window, FPoint* widget, bool flags)c
     return hit_test(mRenderTree, window, widget, nullptr, flags);
 }
 
-void Window::Paint(State& state, Painter& painter, double time, PaintHook* hook) const
+void Window::Paint(TransientState& state, Painter& painter, double time, PaintHook* hook) const
 {
     // the pre-order traversal and painting is simple and leads to a
     // correct transformation hierarchy in terms of the relative
@@ -303,7 +303,7 @@ void Window::Paint(State& state, Painter& painter, double time, PaintHook* hook)
 
     class PaintVisitor : public ConstVisitor {
     public:
-        PaintVisitor(const Window& w, double time, Painter& p, State& s, PaintHook* h)
+        PaintVisitor(const Window& w, double time, Painter& p, TransientState& s, PaintHook* h)
           : mWindow(w)
           , mCurrentTime(time)
           , mPainter(p)
@@ -375,7 +375,7 @@ void Window::Paint(State& state, Painter& painter, double time, PaintHook* hook)
         const Window& mWindow;
         const double mCurrentTime = 0.0;
         Painter& mPainter;
-        State& mWidgetState;
+        TransientState& mWidgetState;
         PaintHook* mPaintHook = nullptr;
         struct PaintState {
             FRect clip;
@@ -392,7 +392,7 @@ void Window::Paint(State& state, Painter& painter, double time, PaintHook* hook)
     painter.EndDrawWidgets();
 }
 
-void Window::Show(State& state)
+void Window::Show(TransientState& state)
 {
     if (!mFlags.test(Flags::EnableVirtualKeys))
         return;
@@ -414,7 +414,7 @@ void Window::Show(State& state)
     state.SetValue(mId + "/focused-widget", widget);
 }
 
-void Window::Update(State& state, double time, float dt)
+void Window::Update(TransientState& state, double time, float dt)
 {
     for (auto& widget : mWidgets)
         widget->Update(state, time, dt);
@@ -525,7 +525,7 @@ void Window::IntoJson(data::Writer& data) const
     RenderTreeIntoJson(mRenderTree, data, nullptr);
 }
 
-std::vector<Window::WidgetAction> Window::PollAction(State& state, double time, float dt)
+std::vector<Window::WidgetAction> Window::PollAction(TransientState& state, double time, float dt)
 {
     std::vector<WidgetAction> actions;
     for (auto& widget : mWidgets)
@@ -572,20 +572,20 @@ std::vector<Window::WidgetAction> Window::PollAction(State& state, double time, 
     return actions;
 }
 
-std::vector<Window::WidgetAction> Window::MousePress(const MouseEvent& mouse, State& state)
+std::vector<Window::WidgetAction> Window::MousePress(const MouseEvent& mouse, TransientState& state)
 {
     return send_mouse_event(mouse, &Widget::MousePress, state, true);
 }
-std::vector<Window::WidgetAction> Window::MouseRelease(const MouseEvent& mouse, State& state)
+std::vector<Window::WidgetAction> Window::MouseRelease(const MouseEvent& mouse, TransientState& state)
 {
     return send_mouse_event(mouse, &Widget::MouseRelease, state, false);
 }
-std::vector<Window::WidgetAction> Window::MouseMove(const MouseEvent& mouse, State& state)
+std::vector<Window::WidgetAction> Window::MouseMove(const MouseEvent& mouse, TransientState& state)
 {
     return send_mouse_event(mouse, &Widget::MouseMove, state, false);
 }
 
-std::vector<Window::WidgetAction> Window::KeyDown(const KeyEvent& key, State& state)
+std::vector<Window::WidgetAction> Window::KeyDown(const KeyEvent& key, TransientState& state)
 {
     Widget* focused_widget = nullptr;
     state.GetValue(mId + "/focused-widget", &focused_widget);
@@ -745,7 +745,7 @@ std::vector<Window::WidgetAction> Window::KeyDown(const KeyEvent& key, State& st
     return ret;
 }
 
-std::vector<Window::WidgetAction> Window::KeyUp(const KeyEvent& key, State& state)
+std::vector<Window::WidgetAction> Window::KeyUp(const KeyEvent& key, TransientState& state)
 {
     Widget* focused_widget = nullptr;
     if (state.GetValue(mId + "/focused-widget", &focused_widget))
@@ -777,7 +777,7 @@ void Window::ClearWidgets()
     mWidgets.clear();
 }
 
-const Widget* Window::GetFocusedWidget(const State& state) const
+const Widget* Window::GetFocusedWidget(const TransientState& state) const
 {
     const Widget* widget = nullptr;
     state.GetValue(mId + "/focused-widget", &widget);
@@ -843,7 +843,7 @@ bool Window::FromJson(const data::Reader& data)
     return ok;
 }
 
-std::vector<Window::WidgetAction> Window::send_mouse_event(const MouseEvent& mouse, MouseHandler which, State& state, bool is_mouse_press)
+std::vector<Window::WidgetAction> Window::send_mouse_event(const MouseEvent& mouse, MouseHandler which, TransientState& state, bool is_mouse_press)
 {
     std::vector<Window::WidgetAction> ret;
 

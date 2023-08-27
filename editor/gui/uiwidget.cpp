@@ -268,7 +268,7 @@ public:
     {}
     virtual void Render(gfx::Painter&, gfx::Painter&) const override
     {
-        uik::State state;
+        uik::TransientState state;
         uik::Widget::PaintEvent paint;
         paint.focused = false;
         paint.moused  = false;
@@ -1108,7 +1108,7 @@ void UIWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
     mState.active_window = std::make_unique<uik::Window>(mState.window);
-    mState.active_state  = std::make_unique<uik::State>();
+    mState.active_state  = std::make_unique<uik::TransientState>();
     mState.active_window->Show(*mState.active_state);
     SetEnabled(mUI.actionPlay,  false);
     SetEnabled(mUI.actionPause, true);
@@ -1951,13 +1951,13 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
               : mState(state)
               , mPaintTabOrder(paint_tab_order)
             {}
-            virtual bool InspectPaint(const uik::Widget* widget, const uik::State& state, PaintEvent& event) override
+            virtual bool InspectPaint(const uik::Widget* widget, const uik::TransientState& state, PaintEvent& event) override
             {
                 if (!widget->TestFlag(uik::Widget::Flags::VisibleInEditor))
                     return false;
                 return true;
             }
-            virtual void EndPaintWidget(const uik::Widget* widget, const uik::State& state, const PaintEvent& paint, uik::Painter& painter) override
+            virtual void EndPaintWidget(const uik::Widget* widget, const uik::TransientState& state, const PaintEvent& paint, uik::Painter& painter) override
             {
                 if (!mPaintTabOrder)
                     return;
@@ -1979,7 +1979,7 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
         } hook (mState, GetValue(mUI.chkShowTabOrder));
 
         // paint the design state copy of the window.
-        uik::State s;
+        uik::TransientState s;
         mState.window.Paint(s , *mState.painter, 0.0, &hook);
 
         // draw the window outline

@@ -613,7 +613,7 @@ void SpinBoxModel::ComputeBoxes(const FRect& rect, FRect* btn_inc, FRect* btn_de
     *btn_dec = btn;
 }
 
-WidgetAction SpinBoxModel::UpdateValue(const std::string& id, State& state)
+WidgetAction SpinBoxModel::UpdateValue(const std::string& id, TransientState& state)
 {
     const auto inc_down = state.GetValue(id + "/btn-inc-pressed", false);
     const auto dec_down = state.GetValue(id + "/btn-dec-pressed", false);

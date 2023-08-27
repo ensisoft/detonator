@@ -905,7 +905,7 @@ private:
     float mOffsetX = 250.0f;
     float mOffsetY = 180.0f;
     uik::Window mWindow;
-    uik::State mState;
+    uik::TransientState mState;
     engine::UIStyle mStyle;
     engine::UIPainter mPainter;
     double mTime = 0.0;

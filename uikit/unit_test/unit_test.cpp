@@ -159,16 +159,16 @@ public:
     virtual bool FromJson(const data::Reader& json) override
     { return true; }
 
-    virtual void Paint(const PaintEvent& paint, uik::State& state, uik::Painter& painter) const override
+    virtual void Paint(const PaintEvent& paint, uik::TransientState& state, uik::Painter& painter) const override
     {}
-    virtual Action MouseEnter(uik::State& state) override
+    virtual Action MouseEnter(uik::TransientState& state) override
     {
         MouseData m;
         m.name = "enter";
         mouse.push_back(m);
         return Action{};
     }
-    virtual Action MousePress(const MouseEvent& mouse, uik::State& state) override
+    virtual Action MousePress(const MouseEvent& mouse, uik::TransientState& state) override
     {
         MouseData m;
         m.name = "press";
@@ -176,7 +176,7 @@ public:
         this->mouse.push_back(m);
         return Action{};
     }
-    virtual Action MouseRelease(const MouseEvent& mouse, uik::State& state) override
+    virtual Action MouseRelease(const MouseEvent& mouse, uik::TransientState& state) override
     {
         MouseData m;
         m.name = "release";
@@ -184,7 +184,7 @@ public:
         this->mouse.push_back(m);
         return Action{};
     }
-    virtual Action MouseMove(const MouseEvent& mouse, uik::State& state) override
+    virtual Action MouseMove(const MouseEvent& mouse, uik::TransientState& state) override
     {
         MouseData m;
         m.name = "move";
@@ -192,18 +192,18 @@ public:
         this->mouse.push_back(m);
         return Action{};
     }
-    virtual Action MouseLeave(uik::State& state) override
+    virtual Action MouseLeave(uik::TransientState& state) override
     {
         MouseData m;
         m.name = "leave";
         mouse.push_back(m);
         return Action{};
     }
-    virtual Action KeyDown(const KeyEvent& key, uik::State& state) override
+    virtual Action KeyDown(const KeyEvent& key, uik::TransientState& state) override
     {
         return {};
     }
-    virtual Action KeyUp(const KeyEvent& key, uik::State& state) override
+    virtual Action KeyUp(const KeyEvent& key, uik::TransientState& state) override
     {
         return {};
     }
@@ -328,7 +328,7 @@ void unit_test_label()
     // paint.
     {
         Painter p;
-        uik::State s;
+        uik::TransientState s;
         uik::Widget::PaintEvent paint;
         paint.rect = widget.GetRect();
         widget.Paint(paint, s, p);
@@ -348,7 +348,7 @@ void unit_test_pushbutton()
 
     // mouse press/release -> button press action
     {
-        uik::State s;
+        uik::TransientState s;
         uik::Widget::MouseEvent event;
         event.widget_window_rect = widget.GetRect();
         event.window_mouse_pos   = uik::FPoint(10.0f, 10.0f);
@@ -366,7 +366,7 @@ void unit_test_pushbutton()
 
     // mouse leaves while button down has occurred -> no action
     {
-        uik::State s;
+        uik::TransientState s;
         uik::Widget::MouseEvent event;
         event.widget_window_rect = widget.GetRect();
         event.window_mouse_pos   = uik::FPoint(10.0f, 10.0f);
@@ -385,7 +385,7 @@ void unit_test_pushbutton()
     // paint.
     {
         Painter p;
-        uik::State s;
+        uik::TransientState s;
         uik::Widget::PaintEvent paint;
         paint.rect = widget.GetRect();
         widget.Paint(paint, s, p);
@@ -602,7 +602,7 @@ void unit_test_window_paint()
         win.LinkChild(win.FindWidgetByName("form"), win.FindWidgetByName("groupbox"));
         win.LinkChild(win.FindWidgetByName("groupbox"), win.FindWidgetByName("child_label0"));
     }
-    uik::State state;
+    uik::TransientState state;
     const uik::Widget* form   = win.FindWidgetByName("form");
     const uik::Widget* button = win.FindWidgetByName("pushbutton");
     const uik::Widget* group  = win.FindWidgetByName("groupbox");
@@ -695,7 +695,7 @@ void unit_test_window_mouse()
 
     // mouse enter, mouse leave.
     {
-        uik::State state;
+        uik::TransientState state;
         uik::Window::MouseEvent mouse;
         mouse.window_mouse_pos = uik::FPoint(10.0f , 10.0f);
         win.MouseMove(mouse , state);
@@ -754,7 +754,7 @@ void unit_test_window_transforms()
         win.LinkChild(win.FindWidgetByName("form"), win.FindWidgetByName("groupbox"));
         win.LinkChild(win.FindWidgetByName("groupbox"), win.FindWidgetByName("child_label0"));
     }
-    uik::State state;
+    uik::TransientState state;
     const uik::Widget* form   = win.FindWidgetByName("form");
     const uik::Widget* button = win.FindWidgetByName("pushbutton");
     const uik::Widget* group  = win.FindWidgetByName("groupbox");
@@ -830,7 +830,7 @@ void unit_test_keyboard_focus()
 {
     // no widgets that can take keyboard focus.
     {
-        uik::State state;
+        uik::TransientState state;
         uik::Window window;
         window.EnableVirtualKeys(true);
         window.Show(state);
@@ -844,7 +844,7 @@ void unit_test_keyboard_focus()
 
     // widget that can take a keyboard focus is in a container
     {
-        uik::State state;
+        uik::TransientState state;
         uik::Window window;
         window.EnableVirtualKeys(true);
 
@@ -858,7 +858,7 @@ void unit_test_keyboard_focus()
 
     // widget that can focus is in a container that is disabled.
     {
-        uik::State state;
+        uik::TransientState state;
         uik::Window window;
         window.EnableVirtualKeys(true);
 
@@ -873,7 +873,7 @@ void unit_test_keyboard_focus()
 
     // widget that can focus is in a container that is hidden
     {
-        uik::State state;
+        uik::TransientState state;
         uik::Window window;
         window.EnableVirtualKeys(true);
 
@@ -890,7 +890,7 @@ void unit_test_keyboard_focus()
     // one keyboard focusable widget
     {
         uik::Window window;
-        uik::State state;
+        uik::TransientState state;
 
         auto* btn = window.AddWidget(uik::PushButton());
         window.LinkChild(nullptr, btn);
@@ -914,7 +914,7 @@ void unit_test_keyboard_focus()
     // cycle over multiple focusable widgets backwards and forwards.
     {
         uik::Window window;
-        uik::State state;
+        uik::TransientState state;
 
         window.EnableVirtualKeys(true);
         auto* btn0 = window.AddWidget(uik::PushButton());
@@ -958,7 +958,7 @@ void unit_test_keyboard_radiobutton_select()
 
     {
 
-        uik::State state;
+        uik::TransientState state;
         uik::Window window;
         window.EnableVirtualKeys(true);
 
@@ -983,7 +983,7 @@ void unit_test_keyboard_radiobutton_select()
 
     // switch between two buttons.
     {
-        uik::State state;
+        uik::TransientState state;
         uik::Window window;
         window.EnableVirtualKeys(true);
 
@@ -1014,7 +1014,7 @@ void unit_test_keyboard_radiobutton_select()
 
     // switch between two buttons when one is disabled.
     {
-        uik::State state;
+        uik::TransientState state;
         uik::Window window;
         window.EnableVirtualKeys(true);
 
@@ -1046,7 +1046,7 @@ void unit_test_keyboard_radiobutton_select()
 
     // switch between two buttons when one is hidden.
     {
-        uik::State state;
+        uik::TransientState state;
         uik::Window window;
         window.EnableVirtualKeys(true);
 
@@ -1081,7 +1081,7 @@ void unit_test_keyboard_radiobutton_select()
     // (realizing the change in selection between auto exclusive radio
     // button group happens in PollAction)
     {
-        uik::State state;
+        uik::TransientState state;
         uik::Window window;
         window.EnableVirtualKeys(true);
 

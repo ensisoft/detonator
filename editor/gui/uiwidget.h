@@ -195,7 +195,7 @@ namespace gui
             uik::Window window;
             // transient window state that only exists when we're playing
             // the window, i.e. passing events such as mouse events to it.
-            std::unique_ptr<uik::State> active_state;
+            std::unique_ptr<uik::TransientState> active_state;
             // the active window that only exists when we're playing
             // the window. originally it's a bit-wise copy of the
             // design time window but then obviously changes state

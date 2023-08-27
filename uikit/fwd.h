@@ -21,6 +21,6 @@
 namespace uik {
     class Window;
     class Widget;
-    class State;
+    class TransientState;
     class Painter;
 } // namespace

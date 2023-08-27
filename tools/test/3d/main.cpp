@@ -222,7 +222,7 @@ struct State{
     engine::UIStyle ui_style;
     engine::UIPainter ui_painter;
     uik::Window ui_window;
-    uik::State ui_state;
+    uik::TransientState ui_state;
 
     gfx::Texture* depth;
     gfx::Device* device;
