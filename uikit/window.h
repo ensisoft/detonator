@@ -32,7 +32,7 @@
 
 namespace uik
 {
-    class State;
+    class TransientState;
     class Painter;
 
     // Paint hook interface is for intercepting and inspecting the widget
@@ -48,14 +48,14 @@ namespace uik
         // Inspect the paint event that will take place for the given widget.
         // Should return true if the painting is to proceed or false to omit
         // the actual painting.
-        virtual bool InspectPaint(const Widget* widget, const State& state, PaintEvent& paint)
+        virtual bool InspectPaint(const Widget* widget, const TransientState& state, PaintEvent& paint)
         { return true; }
         // When widget painting is taking place this is called right before
         // the widget is asked to paint itself.
-        virtual void BeginPaintWidget(const Widget* widget, const State& state, const PaintEvent& paint, Painter& painter) {}
+        virtual void BeginPaintWidget(const Widget* widget, const TransientState& state, const PaintEvent& paint, Painter& painter) {}
         // When widget painting is taking place this called right after
         // the widget has painted itself.
-        virtual void EndPaintWidget(const Widget* widget, const State& state, const PaintEvent& paint, Painter& painter) {}
+        virtual void EndPaintWidget(const Widget* widget, const TransientState& state, const PaintEvent& paint, Painter& painter) {}
     private:
     };
 
@@ -174,12 +174,12 @@ namespace uik
         const Widget* HitTest(const FPoint& window_point, FPoint* widget_point = nullptr, bool consider_flags = false) const;
 
         // Paint the window and its widgets.
-        void Paint(State& state, Painter& painter, double time = 0.0, PaintHook* hook = nullptr) const;
+        void Paint(TransientState& state, Painter& painter, double time = 0.0, PaintHook* hook = nullptr) const;
 
-        void Show(State& state);
+        void Show(TransientState& state);
 
         // Update the window and its widgets.
-        void Update(State& state, double time, float dt);
+        void Update(TransientState& state, double time, float dt);
 
         // Apply the style information from each widget (and the window) onto the
         // painter. With painters that support styling and parsing widgets' style
@@ -291,20 +291,20 @@ namespace uik
         // that must be dispatched.
         // Time is the current time and dt is the delta time since
         // the last PollAction call.
-        std::vector<WidgetAction> PollAction(State& state, double time, float dt);
+        std::vector<WidgetAction> PollAction(TransientState& state, double time, float dt);
 
         // Dispatch mouse press event.
-        std::vector<WidgetAction> MousePress(const MouseEvent& mouse, State& state);
+        std::vector<WidgetAction> MousePress(const MouseEvent& mouse, TransientState& state);
         // Dispatch mouse release event.
-        std::vector<WidgetAction> MouseRelease(const MouseEvent& mouse, State& state);
+        std::vector<WidgetAction> MouseRelease(const MouseEvent& mouse, TransientState& state);
         // Dispatch mouse move event.
-        std::vector<WidgetAction> MouseMove(const MouseEvent& mouse, State& state);
+        std::vector<WidgetAction> MouseMove(const MouseEvent& mouse, TransientState& state);
         // Dispatch key event to the widget that has the current
         // keyboard input focus.
-        std::vector<WidgetAction> KeyDown(const KeyEvent& key, State& state);
+        std::vector<WidgetAction> KeyDown(const KeyEvent& key, TransientState& state);
         // Dispatch key event to the widget that has the current
         // keyboard input focus.
-        std::vector<WidgetAction> KeyUp(const KeyEvent& key, State& state);
+        std::vector<WidgetAction> KeyUp(const KeyEvent& key, TransientState& state);
 
         // Serialize the window and its widget hierarchy into JSON.
         void IntoJson(data::Writer& data) const;
@@ -365,7 +365,7 @@ namespace uik
         std::string GetKeyMapFile() const
         { return mKeyMapFile; }
 
-        const Widget* GetFocusedWidget(const State& state) const;
+        const Widget* GetFocusedWidget(const TransientState& state) const;
 
         // Helpers
         Widget* FindWidgetByName(const std::string& name)
@@ -393,8 +393,8 @@ namespace uik
         enum class MouseEventType {
             ButtonPress, ButtonRelease, MouseMove
         };
-        using MouseHandler = Widget::Action (Widget::*)(const Widget::MouseEvent&, State&);
-        std::vector<WidgetAction> send_mouse_event(const MouseEvent& mouse, MouseHandler which, State& state, bool mouse_press);
+        using MouseHandler = Widget::Action (Widget::*)(const Widget::MouseEvent&, TransientState&);
+        std::vector<WidgetAction> send_mouse_event(const MouseEvent& mouse, MouseHandler which, TransientState& state, bool mouse_press);
 
         Widget* AddWidgetPtr(std::unique_ptr<Widget> widget);
 

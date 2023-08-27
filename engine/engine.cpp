@@ -749,7 +749,7 @@ private:
         return event;
     }
 
-    using UIKeyFunc = std::vector<uik::Window::WidgetAction> (uik::Window::*)(const uik::Window::KeyEvent&, uik::State&);
+    using UIKeyFunc = std::vector<uik::Window::WidgetAction> (uik::Window::*)(const uik::Window::KeyEvent&, uik::TransientState&);
     template<typename WdkEvent>
     void SendUIKeyEvent(const WdkEvent& key, UIKeyFunc which)
     {
@@ -774,7 +774,7 @@ private:
         }
     }
 
-    using UIMouseFunc = std::vector<uik::Window::WidgetAction> (uik::Window::*)(const uik::Window::MouseEvent&, uik::State&);
+    using UIMouseFunc = std::vector<uik::Window::WidgetAction> (uik::Window::*)(const uik::Window::MouseEvent&, uik::TransientState&);
     void SendUIMouseEvent(const uik::Window::MouseEvent& mickey, UIMouseFunc which)
     {
         auto* ui = GetUI();
@@ -1341,7 +1341,7 @@ private:
     // not displaying any UI
     std::stack<std::shared_ptr<uik::Window>> mUIStack;
     // Transient UI state.
-    uik::State mUIState;
+    uik::TransientState mUIState;
     // current debug options.
     engine::Engine::DebugOptions mDebug;
     // last statistics about the rendering rate etc.

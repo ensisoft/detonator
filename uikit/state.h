@@ -38,7 +38,7 @@ namespace uik
     // ctor or assignment op?" or "why are these fields not written into JSON?"
     // rather the division of state between persistent state and transient state
     // is very clear.
-    class State
+    class TransientState
     {
     public:
         bool HasValue(const std::string& key) const

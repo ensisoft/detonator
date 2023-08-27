@@ -32,7 +32,7 @@
 
 namespace uik
 {
-    class State;
+    class TransientState;
     class Painter;
 
     class Widget
@@ -144,9 +144,9 @@ namespace uik
             FRect clip;
         };
         // Paint the widget.
-        virtual void Paint(const PaintEvent& paint, State& state, Painter& painter) const = 0;
+        virtual void Paint(const PaintEvent& paint, TransientState& state, Painter& painter) const = 0;
 
-        virtual void Update(State& state, double time, float dt)
+        virtual void Update(TransientState& state, double time, float dt)
         {}
 
         struct MouseEvent {
@@ -191,29 +191,29 @@ namespace uik
         // actions when for example a button is being held.
         // Time is the current time and dt is the delta time since
         // the last PollAction call.
-        virtual Action PollAction(State& state, double time, float dt)
+        virtual Action PollAction(TransientState& state, double time, float dt)
         { return Action {}; }
 
         // Mouse event handler to indicate that the mouse has moved
         // on top of the widget. This will always be called before any
         // other mouse event will be called.
-        virtual Action MouseEnter(State& state) = 0;
+        virtual Action MouseEnter(TransientState& state) = 0;
         // Mouse event handler to handle mouse button presses while the mouse
         // is on top of the widget.
-        virtual Action MousePress(const MouseEvent& mouse, State& state) = 0;
+        virtual Action MousePress(const MouseEvent& mouse, TransientState& state) = 0;
         // Mouse event handler to handle mouse button releases while the
         // mouse is on top of the widget.
-        virtual Action MouseRelease(const MouseEvent& mouse, State& state) = 0;
+        virtual Action MouseRelease(const MouseEvent& mouse, TransientState& state) = 0;
         // Mouse event handler to handle mouse movement while the mouse
         // is on top of the widget.
-        virtual Action MouseMove(const MouseEvent& mouse, State& state) = 0;
+        virtual Action MouseMove(const MouseEvent& mouse, TransientState& state) = 0;
         // Mouse event handler to be called right after the mouse has left
         // the widget and is no longer on top of the widget.
-        virtual Action MouseLeave(State& state) = 0;
+        virtual Action MouseLeave(TransientState& state) = 0;
         // Keyboard key down event handler for virtual keys.
-        virtual Action KeyDown(const KeyEvent& key, State& state) = 0;
+        virtual Action KeyDown(const KeyEvent& key, TransientState& state) = 0;
         // Keyboard key up event handler for virtual keys.
-        virtual Action KeyUp(const KeyEvent& key, State& state) = 0;
+        virtual Action KeyUp(const KeyEvent& key, TransientState& state) = 0;
 
         // Create an exact copy of this widget with the same properties
         // and same widget ID. Be sure to know how to use this right.
@@ -323,31 +323,31 @@ namespace uik
             const StylePropertyMap* style_properties = nullptr;
             const StyleMaterialMap* style_materials = nullptr;
             Painter* painter = nullptr;
-            State* state = nullptr;
+            TransientState* state = nullptr;
         };
         struct MouseStruct {
             std::string widgetId;
             std::string widgetName;
-            State* state = nullptr;
+            TransientState* state = nullptr;
         };
         struct UpdateStruct {
             std::string widgetId;
             std::string widgetName;
-            State* state = nullptr;
+            TransientState* state = nullptr;
             double time  = 0.0;
             float dt = 0.0f;
         };
         struct PollStruct {
             std::string widgetId;
             std::string widgetName;
-            State* state = nullptr;
+            TransientState* state = nullptr;
             double time  = 0.0;
             float dt     = 0.0f;
         };
         struct KeyStruct {
             std::string widgetId;
             std::string widgetName;
-            State* state = nullptr;
+            TransientState* state = nullptr;
         };
 
         class FormModel
@@ -443,7 +443,7 @@ namespace uik
             WidgetAction KeyUp(const KeyEvent& key, const KeyStruct& ks);
         private:
            void ComputeBoxes(const FRect& rect, FRect* btn_inc, FRect* btn_dec, FRect* edit =nullptr) const;
-           WidgetAction UpdateValue(const std::string& id, State& state);
+           WidgetAction UpdateValue(const std::string& id, TransientState& state);
         private:
             int mValue  = 0;
             int mMinVal = 0;
@@ -830,7 +830,7 @@ namespace uik
                 return hash;
             }
 
-            virtual void Paint(const PaintEvent& paint, State& state, Painter& painter) const override
+            virtual void Paint(const PaintEvent& paint, TransientState& state, Painter& painter) const override
             {
                 PaintStruct ps;
                 ps.widgetId    = mId;
@@ -844,7 +844,7 @@ namespace uik
 
                 WidgetModel::Paint(paint, ps);
             }
-            virtual void Update(State& state, double time, float dt) override
+            virtual void Update(TransientState& state, double time, float dt) override
             {
                 if constexpr (Traits::WantsUpdate)
                 {
@@ -869,7 +869,7 @@ namespace uik
                     return false;
                 return WidgetModel::FromJson(data);
             }
-            virtual WidgetAction PollAction(State& state, double time, float dt) override
+            virtual WidgetAction PollAction(TransientState& state, double time, float dt) override
             {
                 if constexpr (Traits::WantsPoll)
                 {
@@ -884,7 +884,7 @@ namespace uik
                 else return WidgetAction {};
             }
 
-            virtual WidgetAction MouseEnter(State& state) override
+            virtual WidgetAction MouseEnter(TransientState& state) override
             {
                 if constexpr (Traits::WantsMouseEvents)
                 {
@@ -896,7 +896,7 @@ namespace uik
                 }
                 else return WidgetAction {};
             }
-            virtual WidgetAction MousePress(const MouseEvent& mouse, State& state) override
+            virtual WidgetAction MousePress(const MouseEvent& mouse, TransientState& state) override
             {
                 if constexpr (Traits::WantsMouseEvents)
                 {
@@ -908,7 +908,7 @@ namespace uik
                 }
                 else return WidgetAction{};
             }
-            virtual WidgetAction MouseRelease(const MouseEvent& mouse, State& state) override
+            virtual WidgetAction MouseRelease(const MouseEvent& mouse, TransientState& state) override
             {
                 if constexpr (Traits::WantsMouseEvents)
                 {
@@ -920,7 +920,7 @@ namespace uik
                 }
                 else return WidgetAction{};
             }
-            virtual WidgetAction MouseMove(const MouseEvent& mouse, State& state) override
+            virtual WidgetAction MouseMove(const MouseEvent& mouse, TransientState& state) override
             {
                 if constexpr (Traits::WantsMouseEvents)
                 {
@@ -932,7 +932,7 @@ namespace uik
                 }
                 else return WidgetAction{};
             }
-            virtual WidgetAction MouseLeave(State& state) override
+            virtual WidgetAction MouseLeave(TransientState& state) override
             {
                 if constexpr (Traits::WantsMouseEvents)
                 {
@@ -944,7 +944,7 @@ namespace uik
                 }
                 else return WidgetAction {};
             }
-            virtual WidgetAction KeyDown(const KeyEvent& key, State& state) override
+            virtual WidgetAction KeyDown(const KeyEvent& key, TransientState& state) override
             {
                 if constexpr (Traits::WantsKeyEvents)
                 {
@@ -955,7 +955,7 @@ namespace uik
                     return WidgetModel::KeyDown(key, ks);
                 } else return WidgetAction {};
             }
-            virtual WidgetAction KeyUp(const KeyEvent& key, State& state) override
+            virtual WidgetAction KeyUp(const KeyEvent& key, TransientState& state) override
             {
                 if constexpr(Traits::WantsKeyEvents)
                 {
