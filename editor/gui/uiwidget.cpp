@@ -43,7 +43,7 @@
 #include "editor/gui/clipboard.h"
 #include "editor/gui/dlgmaterial.h"
 #include "editor/gui/dlgstyleproperties.h"
-#include "editor/gui/dlgstylestring.h"
+#include "editor/gui/dlgtextedit.h"
 #include "editor/gui/dlgwidgetlist.h"
 #include "editor/gui/drawing.h"
 #include "editor/gui/scriptwidget.h"
@@ -1580,11 +1580,13 @@ void UIWidget::on_btnEditWidgetStyleString_clicked()
         const auto& style_key = widget_id + "/";
         boost::erase_all(old_style_string, style_key);
 
-        DlgWidgetStyleString dlg(this, app::FromUtf8(old_style_string));
+        DlgTextEdit dlg(this);
+        dlg.SetText(old_style_string);
+        dlg.SetTitle("Style String");
         if (dlg.exec() == QDialog::Rejected)
             return;
 
-        const auto& new_style_string = app::ToUtf8(dlg.GetStyleString());
+        const std::string new_style_string = dlg.GetText();
 
         mState.style->DeleteMaterials(widget->GetId());
         mState.style->DeleteProperties(widget->GetId());
@@ -1660,11 +1662,12 @@ void UIWidget::on_btnEditWindowStyleString_clicked()
 
     boost::erase_all(old_style_string, "window/");
 
-    DlgWidgetStyleString dlg(this, app::FromUtf8(old_style_string));
+    DlgTextEdit dlg(this);
+    dlg.SetText(old_style_string);
     if (dlg.exec() == QDialog::Rejected)
         return;
 
-    const auto& new_style_string = app::ToUtf8(dlg.GetStyleString());
+    const std::string new_style_string = dlg.GetText();
 
     mState.style->DeleteMaterials("window");
     mState.style->DeleteProperties("window");

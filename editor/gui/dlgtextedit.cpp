@@ -1,3 +1,4 @@
+
 // Copyright (C) 2020-2021 Sami Väisänen
 // Copyright (C) 2020-2021 Ensisoft http://www.ensisoft.com
 //
@@ -14,34 +15,49 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#pragma once
+#define LOGTAG "gui"
 
 #include "config.h"
 
 #include "warnpush.h"
-#  include <QWidget>
-#  include <QColor>
-#  include <QDialog>
-#  include "ui_dlgstylestring.h"
+#  include <QFileDialog>
+#  include <QFileInfo>
 #include "warnpop.h"
 
-#include <string>
-#include <memory>
-#include <vector>
-
+#include "editor/gui/dlgtextedit.h"
+#include "editor/app/utility.h"
 namespace gui
 {
-    class DlgWidgetStyleString : public QDialog
-    {
-        Q_OBJECT
-    public:
-        DlgWidgetStyleString(QWidget* parent, const QString& style_string);
 
-        QString GetStyleString() const;
-    private slots:
-        void on_btnAccept_clicked();
-        void on_btnCancel_clicked();
-    private:
-        Ui::DlgStyleString mUI;
-    };
+DlgTextEdit::DlgTextEdit(QWidget* parent)
+  : QDialog(parent)
+{
+    mUI.setupUi(this);
+}
+
+void DlgTextEdit::SetTitle(const QString& str)
+{
+    setWindowTitle(str);
+    mUI.groupBox->setTitle(str);
+}
+
+void DlgTextEdit::SetText(const app::AnyString& str)
+{
+    mUI.text->setPlainText(str);
+}
+
+app::AnyString DlgTextEdit::GetText() const
+{
+    return mUI.text->toPlainText();
+}
+
+void DlgTextEdit::on_btnAccept_clicked()
+{
+     accept();
+}
+void DlgTextEdit::on_btnCancel_clicked()
+{
+     reject();
+}
+
 } // namespace
