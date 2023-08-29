@@ -869,7 +869,7 @@
              <bool>true</bool>
             </property>
             <property name="placeholderText">
-             <string>No style set</string>
+             <string>Nothing</string>
             </property>
            </widget>
           </item>

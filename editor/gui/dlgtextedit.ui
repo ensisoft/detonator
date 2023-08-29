@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DlgStyleString</class>
- <widget class="QWidget" name="DlgStyleString">
+ <class>DlgTextEdit</class>
+ <widget class="QWidget" name="DlgTextEdit">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -25,7 +25,11 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QPlainTextEdit" name="text"/>
+       <widget class="QPlainTextEdit" name="text">
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
