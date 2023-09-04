@@ -41,7 +41,8 @@ size_t BaseWidget::GetHash() const
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
-    hash = base::hash_combine(hash, mStyle);
+    hash = base::hash_combine(hash, mStyleString);
+    hash = base::hash_combine(hash, mAnimationString);
     hash = base::hash_combine(hash, mPosition);
     hash = base::hash_combine(hash, mSize);
     hash = base::hash_combine(hash, mFlags);
@@ -78,7 +79,8 @@ void BaseWidget::IntoJson(data::Writer& data) const
 {
     data.Write("id",        mId);
     data.Write("name",      mName);
-    data.Write("style",     mStyle);
+    data.Write("style",     mStyleString);
+    data.Write("animation", mAnimationString);
     data.Write("position",  mPosition);
     data.Write("size",      mSize);
     data.Write("flags",     mFlags);
@@ -110,7 +112,9 @@ bool BaseWidget::FromJson(const data::Reader& data)
     bool ok = true;
     ok &= data.Read("id",        &mId);
     ok &= data.Read("name",      &mName);
-    ok &= data.Read("style",     &mStyle);
+    ok &= data.Read("style",     &mStyleString);
+    if (data.HasValue("animation"))
+        ok &= data.Read("animation", &mAnimationString);
     ok &= data.Read("position",  &mPosition);
     ok &= data.Read("size",      &mSize);
     ok &= data.Read("flags",     &mFlags);

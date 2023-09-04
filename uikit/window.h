@@ -26,6 +26,7 @@
 #include "data/fwd.h"
 #include "base/tree.h"
 #include "base/bitflag.h"
+#include "uikit/animation.h"
 #include "uikit/widget.h"
 #include "uikit/types.h"
 #include "uikit/op.h"
@@ -176,10 +177,10 @@ namespace uik
         // Paint the window and its widgets.
         void Paint(TransientState& state, Painter& painter, double time = 0.0, PaintHook* hook = nullptr) const;
 
-        void Show(TransientState& state);
+        void Show(TransientState& state, AnimationStateArray* animations = nullptr);
 
         // Update the window and its widgets.
-        void Update(TransientState& state, double time, float dt);
+        void Update(TransientState& state, double time, float dt, AnimationStateArray* animations = nullptr);
 
         // Apply the style information from each widget (and the window) onto the
         // painter. With painters that support styling and parsing widgets' style
@@ -305,6 +306,8 @@ namespace uik
         // Dispatch key event to the widget that has the current
         // keyboard input focus.
         std::vector<WidgetAction> KeyUp(const KeyEvent& key, TransientState& state);
+
+        void TriggerAnimations(const std::vector<WidgetAction>& actions, TransientState& state, AnimationStateArray& animations);
 
         // Serialize the window and its widget hierarchy into JSON.
         void IntoJson(data::Writer& data) const;

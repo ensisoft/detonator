@@ -157,6 +157,36 @@ std::string ToChars(float value)
     ss >> ret;
     return ret;
 }
+
+std::string ToChars(int value)
+{
+    return std::to_string(value);
+}
+
+bool FromChars(const std::string& str, float* value)
+{
+    std::stringstream ss(str);
+    ss.imbue(std::locale("C"));
+    ss >> *value;
+    return !ss.fail();
+}
+
+bool FromChars(const std::string& str, int* value)
+{
+    std::stringstream ss(str);
+    ss.imbue(std::locale("C"));
+    ss >> *value;
+    return !ss.fail();
+}
+
+bool FromChars(const std::string& str, unsigned* value)
+{
+    std::stringstream ss(str);
+    ss.imbue(std::locale("C"));
+    ss >> *value;
+    return !ss.fail();
+}
+
 } // namespace
 
 #if defined(__MSVC__)
