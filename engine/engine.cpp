@@ -772,6 +772,7 @@ private:
             mRuntime->OnUIAction(ui, action);
             //DEBUG("Widget action: '%1'", action.type);
         }
+        ui->TriggerAnimations(actions, mUIState, mUIAnimations);
     }
 
     using UIMouseFunc = std::vector<uik::Window::WidgetAction> (uik::Window::*)(const uik::Window::MouseEvent&, uik::TransientState&);
@@ -785,6 +786,7 @@ private:
             mRuntime->OnUIAction(ui, action);
             //DEBUG("Widget action: '%1'", action.type);
         }
+        ui->TriggerAnimations(actions, mUIState, mUIAnimations);
     }
     template<typename WdkMouseEvent>
     uik::Window::MouseEvent MapUIMouseEvent(const WdkMouseEvent& mickey) const
@@ -888,8 +890,9 @@ private:
         LoadKeyMap(window->GetKeyMapFile());
 
         mUIState.Clear();
+        mUIAnimations.clear();
         window->Style(mUIPainter);
-        window->Show(mUIState);
+        window->Show(mUIState, &mUIAnimations);
         // push the window to the top of the UI stack. this is the new
         // currently active UI
         mUIStack.push(window);
@@ -920,9 +923,10 @@ private:
 
             mUIPainter.DeleteMaterialInstances();
             mUIState.Clear();
+            mUIAnimations.clear();
 
             ui->Style(mUIPainter);
-            ui->Show(mUIState);
+            ui->Show(mUIState, &mUIAnimations);
         }
     }
     void OnAction(engine::PlayAction& action)
@@ -1126,13 +1130,14 @@ private:
             TRACE_CALL("UI Painter::Update", mUIPainter.Update(game_time, dt));
 
             // Update the UI widgets in order to do widget animation.
-            TRACE_CALL("UI Window::Update", ui->Update(mUIState, game_time, dt));
+            TRACE_CALL("UI Window::Update", ui->Update(mUIState, game_time, dt, &mUIAnimations));
 
             const auto& actions = ui->PollAction(mUIState, game_time, dt);
             for (const auto& action : actions)
             {
                 mRuntime->OnUIAction(ui, action);
             }
+            ui->TriggerAnimations(actions, mUIState, mUIAnimations);
         }
 
         gfx::Drawable::Environment env; // todo:
@@ -1342,6 +1347,7 @@ private:
     std::stack<std::shared_ptr<uik::Window>> mUIStack;
     // Transient UI state.
     uik::TransientState mUIState;
+    uik::AnimationStateArray mUIAnimations;
     // current debug options.
     engine::Engine::DebugOptions mDebug;
     // last statistics about the rendering rate etc.
