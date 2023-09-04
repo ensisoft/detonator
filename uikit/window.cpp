@@ -632,6 +632,30 @@ FRect Window::FindWidgetRect(const Widget* widget) const
 
 FRect Window::GetBoundingRect() const
 {
+    // if there's a top level form (i.e. a widget of type Form and without a parent)
+    // we assume the widget's bounding rect is the same as the form's
+    Widget* top_level_form = nullptr;
+
+    for (auto& widget : mWidgets)
+    {
+        if (widget->GetType() != Widget::Type::Form)
+            continue;
+        else if (mRenderTree.GetParent(widget.get()))
+            continue;
+
+        if (top_level_form)
+        {
+            top_level_form = nullptr;
+            break;
+        }
+        else top_level_form = widget.get();
+    }
+
+    if (top_level_form)
+        return top_level_form->GetRect();
+
+    // combine the bounding rect from the union of all widgets' rects
+
     class PrivateVisitor : public ConstVisitor {
     public:
         virtual void EnterNode(const Widget* widget) override
@@ -642,10 +666,7 @@ FRect Window::GetBoundingRect() const
             FRect rect = widget->GetRect();
             rect.Translate(widget->GetPosition());
             rect.Translate(mWidgetOrigin);
-            if (mRect.IsEmpty())
-                mRect = rect;
-            else mRect = Union(mRect, rect);
-
+            mRect = Union(mRect, rect);
             mWidgetOrigin += widget->GetPosition();
         }
         virtual void LeaveNode(const Widget* widget) override
