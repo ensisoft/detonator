@@ -58,12 +58,16 @@ bool RenderTreeFromJson(const data::Reader& data, RenderTree& tree,
     std::vector<std::unique_ptr<Widget>>& container,
     uik::Widget* parent = nullptr)
 {
+    bool ok = true;
+
     std::unique_ptr<Widget> widget;
     Widget::Type type;
     if (data.Read("type", &type))
+    {
         widget = uik::CreateWidget(type);
-    if (widget && !widget->FromJson(data))
-        return false;
+        if (widget)
+            ok &= widget->FromJson(data);
+    }
 
     if (widget)
     {
@@ -75,10 +79,9 @@ bool RenderTreeFromJson(const data::Reader& data, RenderTree& tree,
     for (unsigned i=0; i<data.GetNumChunks("widgets"); ++i)
     {
         const auto& chunk = data.GetReadChunk("widgets", i);
-        if (!RenderTreeFromJson(*chunk, tree, container, parent))
-            return false;
+        ok &= RenderTreeFromJson(*chunk, tree, container, parent);
     }
-    return true;
+    return ok;
 }
 
 static

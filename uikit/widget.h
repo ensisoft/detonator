@@ -83,6 +83,10 @@ namespace uik
         // specific style properties that the painter could take into account
         // when performing paint operations after having parsed the widget's style string.
         virtual std::string GetStyleString() const = 0;
+        // Get the animation string (if any). The animation string specifies widget
+        // specific transformations that will take place on certain triggers such as
+        // when the widget is shown for the first time.
+        virtual std::string GetAnimationString() const = 0;
         // Get the current size of the widget.
         virtual uik::FSize GetSize() const = 0;
         // Get the current position of the widget. The position is always relative
@@ -111,6 +115,8 @@ namespace uik
         // that can then be used by the painter to modify the painting
         // output for the widget.
         virtual void SetStyleString(const std::string& style) = 0;
+        // Set the widget's animation widget.
+        virtual void SetAnimationString(const std::string& animation) = 0;
         // Set a widget flag on or off.
         virtual void SetFlag(Flags flag, bool on_off) = 0;
         // Set the tab index that is used to navigate between widgets
@@ -748,7 +754,9 @@ namespace uik
         public:
             using Flags = Widget::Flags;
             virtual std::string GetStyleString() const override
-            { return mStyle; }
+            { return mStyleString; }
+            virtual std::string GetAnimationString() const override
+            { return mAnimationString; }
             virtual std::string GetId() const override
             { return mId; }
             virtual std::string GetName() const override
@@ -770,7 +778,9 @@ namespace uik
             virtual void SetPosition(const FPoint& pos) override
             { mPosition = pos; }
             virtual void SetStyleString(const std::string& style) override
-            { mStyle = style; }
+            { mStyleString = style; }
+            virtual void SetAnimationString(const std::string& animation) override
+            { mAnimationString = animation; }
             virtual void SetFlag(Flags flag, bool on_off) override
             { mFlags.set(flag, on_off); }
             virtual void SetTabIndex(unsigned index) override
@@ -787,7 +797,8 @@ namespace uik
         protected:
             std::string mId;
             std::string mName;
-            std::string mStyle;
+            std::string mStyleString;
+            std::string mAnimationString;
             uik::FPoint mPosition;
             uik::FSize  mSize;
             base::bitflag<Flags> mFlags;

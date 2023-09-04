@@ -24,6 +24,7 @@
 #include "base/test_help.h"
 #include "base/assert.h"
 #include "data/json.h"
+#include "uikit/animation.h"
 #include "uikit/layout.h"
 #include "uikit/painter.h"
 #include "uikit/widget.h"
@@ -130,6 +131,8 @@ public:
     { return 0x12345; }
     virtual std::string GetStyleString() const override
     { return ""; }
+    virtual std::string GetAnimationString() const override
+    { return ""; }
     virtual uik::FSize GetSize() const override
     { return size; }
     virtual uik::FPoint GetPosition() const override
@@ -149,6 +152,8 @@ public:
     virtual void SetPosition(const uik::FPoint& pos) override
     { this->point = pos; }
     virtual void SetStyleString(const std::string& style) override
+    {}
+    virtual void SetAnimationString(const std::string&) override
     {}
     virtual void SetFlag(Flags flag, bool on_off) override
     { this->flags.set(flag, on_off); }
@@ -253,6 +258,7 @@ void unit_test_widget()
 
     widget.SetName("widget");
     widget.SetStyleString("style string");
+    widget.SetAnimationString("animation string");
     widget.SetSize(100.0f, 150.0f);
     widget.SetPosition(45.0f, 50.0f);
     widget.SetFlag(uik::Widget::Flags::VisibleInGame, false);
@@ -270,6 +276,7 @@ void unit_test_widget()
         TEST_REQUIRE(other.GetName() == widget.GetName());
         TEST_REQUIRE(other.GetHash() == widget.GetHash());
         TEST_REQUIRE(other.GetStyleString() == widget.GetStyleString());
+        TEST_REQUIRE(other.GetAnimationString() == widget.GetAnimationString());
         TEST_REQUIRE(other.GetSize() == widget.GetSize());
         TEST_REQUIRE(other.GetPosition() == widget.GetPosition());
         TEST_REQUIRE(other.IsEnabled() == widget.IsEnabled());
@@ -314,6 +321,8 @@ void unit_test_widget()
 
 void unit_test_label()
 {
+    TEST_CASE(test::Type::Feature)
+
     unit_test_widget<uik::Label>();
 
     uik::Label widget;
@@ -340,6 +349,8 @@ void unit_test_label()
 
 void unit_test_pushbutton()
 {
+    TEST_CASE(test::Type::Feature)
+
     unit_test_widget<uik::PushButton>();
 
     uik::PushButton widget;
@@ -406,6 +417,8 @@ void unit_test_pushbutton()
 
 void unit_test_checkbox()
 {
+    TEST_CASE(test::Type::Feature)
+
     unit_test_widget<uik::CheckBox>();
 
     // bug.
@@ -428,6 +441,8 @@ void unit_test_checkbox()
 
 void unit_test_groupbox()
 {
+    TEST_CASE(test::Type::Feature)
+
     unit_test_widget<uik::GroupBox>();
 
     // todo:
@@ -435,6 +450,8 @@ void unit_test_groupbox()
 
 void unit_test_window()
 {
+    TEST_CASE(test::Type::Feature)
+
     uik::Window win;
     TEST_REQUIRE(win.GetId() != "");
     TEST_REQUIRE(win.GetName() == "");
@@ -564,6 +581,8 @@ void unit_test_window()
 
 void unit_test_window_paint()
 {
+    TEST_CASE(test::Type::Feature)
+
     uik::Window win;
     {
         uik::Form  form;
@@ -662,6 +681,8 @@ void unit_test_window_paint()
 
 void unit_test_window_mouse()
 {
+    TEST_CASE(test::Type::Feature)
+
     uik::Window win;
 
     {
@@ -716,6 +737,8 @@ void unit_test_window_mouse()
 
 void unit_test_window_transforms()
 {
+    TEST_CASE(test::Type::Feature)
+
     uik::Window win;
     {
         uik::Form  form;
@@ -789,6 +812,8 @@ void unit_test_window_transforms()
 
 void unit_test_util()
 {
+    TEST_CASE(test::Type::Feature)
+
     auto widget = uik::CreateWidget(uik::Widget::Type::Label);
 
     auto* label = uik::WidgetCast<uik::Label>(widget);
@@ -799,6 +824,8 @@ void unit_test_util()
 
 void unit_test_apply_style()
 {
+    TEST_CASE(test::Type::Feature)
+
     uik::Window win;
 
     {
@@ -828,6 +855,8 @@ void unit_test_apply_style()
 
 void unit_test_keyboard_focus()
 {
+    TEST_CASE(test::Type::Feature)
+
     // no widgets that can take keyboard focus.
     {
         uik::TransientState state;
@@ -953,6 +982,8 @@ void unit_test_keyboard_focus()
 
 void unit_test_keyboard_radiobutton_select()
 {
+    TEST_CASE(test::Type::Feature)
+
     // when several radio buttons are in the same container (group)
     // using the up/down virtual keys will cycle over the radio buttons
 
@@ -1107,6 +1138,269 @@ void unit_test_keyboard_radiobutton_select()
     }
 }
 
+void unit_test_animation_parse()
+{
+    {
+        constexpr const char* str = R"(
+$OnClick
+resize 100.0 200.0
+move 45.0 50.0
+delay 1.0
+duration 2.0
+loops 5
+interpolation Cosine
+
+; this is a comment
+$OnOpen
+move 200.0 250.0
+
+        )";
+
+        std::vector<uik::Animation> animations;
+        TEST_REQUIRE(uik::ParseAnimations(str, &animations));
+        TEST_REQUIRE(animations.size() == 2);
+
+        TEST_REQUIRE(animations[0].delay == 1.0f);
+        TEST_REQUIRE(animations[0].duration == 2.0f);
+        TEST_REQUIRE(animations[0].interpolation == math::Interpolation::Cosine);
+        TEST_REQUIRE(animations[0].trigger == uik::Animation::Trigger::Click);
+        TEST_REQUIRE(animations[0].loops == 5);
+        TEST_REQUIRE(animations[0].actions.size() == 2);
+        TEST_REQUIRE(animations[0].actions[0].type == uik::Animation::Action::Type::Resize);
+        TEST_REQUIRE(std::get_if<uik::FSize>(&animations[0].actions[0].end_value)->GetWidth() == 100.0f);
+        TEST_REQUIRE(std::get_if<uik::FSize>(&animations[0].actions[0].end_value)->GetHeight() == 200.0f);
+        TEST_REQUIRE(animations[0].actions[1].type == uik::Animation::Action::Type::Move);
+        TEST_REQUIRE(std::get_if<uik::FPoint>(&animations[0].actions[1].end_value)->GetX() == 45.0f);
+        TEST_REQUIRE(std::get_if<uik::FPoint>(&animations[0].actions[1].end_value)->GetY() == 50.0f);
+
+        TEST_REQUIRE(animations[1].loops == 1);
+        TEST_REQUIRE(animations[1].delay == 0.0f);
+        TEST_REQUIRE(animations[1].duration == 1.0f);
+        TEST_REQUIRE(animations[1].interpolation == math::Interpolation::Linear);
+        TEST_REQUIRE(animations[1].actions.size() == 1);
+        TEST_REQUIRE(animations[1].actions[0].type == uik::Animation::Action::Type::Move);
+    }
+
+    {
+        constexpr const char* str = R"(
+asgasgga
+        )";
+
+        std::vector<uik::Animation> animations;
+        TEST_REQUIRE(!uik::ParseAnimations(str, &animations));
+    }
+
+    {
+        constexpr const char* str = R"(
+$Foobar
+move 100.0 200.0
+        )";
+        std::vector<uik::Animation> animations;
+        TEST_REQUIRE(!uik::ParseAnimations(str, &animations));
+    }
+
+    {
+        constexpr const char* str = R"(
+$OnOpen
+blergh 100.0 200.0
+        )";
+        std::vector<uik::Animation> animations;
+        TEST_REQUIRE(!uik::ParseAnimations(str, &animations));
+    }
+
+    {
+        constexpr const char* str = R"(
+$OnOpen
+move 100.0 xwg12
+        )";
+        std::vector<uik::Animation> animations;
+        TEST_REQUIRE(!uik::ParseAnimations(str, &animations));
+    }
+}
+
+void unit_test_widget_animation()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // check animation initial state when the animation first begins to execute
+    {
+        uik::Window window;
+        uik::PushButton btn;
+        btn.SetName("test");
+        btn.SetPosition(uik::FPoint(10.0f, 10.0f));
+        btn.SetSize(uik::FSize(10.0f, 10.0f));
+        btn.SetAnimationString(R"(
+$OnOpen
+move 100.0 100.0
+resize 100.0 100.0
+delay 0.0
+duration 1.0
+loops 1
+
+        )");
+
+        auto* widget = window.AddWidget(btn);
+
+        uik::TransientState state;
+        uik::AnimationStateArray animations;
+        window.Show(state, &animations);
+        // the initial state is fetched from the widget when the animation begins to
+        // execute the first time. i.e after it's become active (trigger has executed)
+        // and any possible delay has been consumed.
+        window.Update(state, 0.0, 0.5f, &animations);
+
+        TEST_REQUIRE(animations.size() == 1);
+        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].time == 0.5f);
+        TEST_REQUIRE(animations[0].duration == 1.0f);
+        TEST_REQUIRE(animations[0].actions.size() == 2);
+        TEST_REQUIRE(animations[0].actions[0].type == uik::Animation::Action::Type::Move);
+        TEST_REQUIRE(*std::get_if<uik::FPoint>(&animations[0].actions[0].start_value) == uik::FPoint(10.0f, 10.0f));
+        TEST_REQUIRE(*std::get_if<uik::FPoint>(&animations[0].actions[0].end_value) == uik::FPoint(100.0f, 100.0f));
+        TEST_REQUIRE(animations[0].actions[1].type == uik::Animation::Action::Type::Resize);
+        TEST_REQUIRE(*std::get_if<uik::FSize>(&animations[0].actions[1].start_value) == uik::FSize(10.0f, 10.0f));
+        TEST_REQUIRE(*std::get_if<uik::FSize>(&animations[0].actions[1].end_value) == uik::FSize(100.0f, 100.0f));
+    }
+
+
+    // looping once without delay
+    {
+        uik::Window window;
+        uik::PushButton btn;
+        btn.SetName("test");
+        btn.SetPosition(uik::FPoint(0.0f, 0.0f));
+        btn.SetSize(uik::FSize(10.0f, 10.0f));
+        btn.SetAnimationString(R"(
+$OnOpen
+move 100.0 100.0
+duration 1.0
+loops 1
+
+        )");
+
+        auto* widget = window.AddWidget(btn);
+
+        uik::TransientState state;
+        uik::AnimationStateArray animations;
+
+        window.Show(state, &animations);
+        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].time == 0.0f);
+        TEST_REQUIRE(animations[0].loops == 1);
+        TEST_REQUIRE(widget->GetPosition() == uik::FPoint(0.0f, 0.0f));
+
+        window.Update(state, 0.0, 0.5f, &animations);
+        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].time == 0.5f);
+        TEST_REQUIRE(animations[0].loops == 1);
+        TEST_REQUIRE(widget->GetPosition() == uik::FPoint(50.0f, 50.0f));
+
+        window.Update(state, 0.5f, 0.5f, &animations);
+        TEST_REQUIRE(animations[0].state == uik::Animation::State::Inactive);
+        TEST_REQUIRE(animations[0].time == 1.0f);
+        TEST_REQUIRE(animations[0].loops == 0);
+        TEST_REQUIRE(widget->GetPosition() == uik::FPoint(100.0f, 100.0f));
+    }
+
+    // looping twice without delay
+    {
+        uik::Window window;
+        uik::PushButton btn;
+        btn.SetName("test");
+        btn.SetPosition(uik::FPoint(0.0f, 0.0f));
+        btn.SetSize(uik::FSize(10.0f, 10.0f));
+        btn.SetAnimationString(R"(
+$OnOpen
+move 100.0 100.0
+duration 1.0
+loops 2
+
+        )");
+
+        auto* widget = window.AddWidget(btn);
+
+        uik::TransientState state;
+        uik::AnimationStateArray animations;
+
+        window.Show(state, &animations);
+        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].time == 0.0f);
+        TEST_REQUIRE(animations[0].loops == 2);
+        TEST_REQUIRE(widget->GetPosition() == uik::FPoint(0.0f, 0.0f));
+
+        window.Update(state, 0.0, 0.5f, &animations);
+        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].time == 0.5f);
+        TEST_REQUIRE(animations[0].loops == 2);
+        TEST_REQUIRE(widget->GetPosition() == uik::FPoint(50.0f, 50.0f));
+
+        window.Update(state, 0.5f, 0.5f, &animations);
+        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].time == 0.0f);
+        TEST_REQUIRE(animations[0].loops == 1);
+        TEST_REQUIRE(widget->GetPosition() == uik::FPoint(100.0f, 100.0f));
+
+        window.Update(state, 1.0f, 0.5f, &animations);
+        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].time == 0.5f);
+        TEST_REQUIRE(animations[0].loops == 1);
+        TEST_REQUIRE(widget->GetPosition() == uik::FPoint(50.0f, 50.0f));
+
+        window.Update(state, 1.5f, 0.5f, &animations);
+        TEST_REQUIRE(animations[0].state == uik::Animation::State::Inactive);
+        TEST_REQUIRE(animations[0].time == 1.0f);
+        TEST_REQUIRE(animations[0].loops == 0);
+        TEST_REQUIRE(widget->GetPosition() == uik::FPoint(100.0f, 100.0f));
+    }
+
+    // loop once with delay
+    {
+        uik::Window window;
+        uik::PushButton btn;
+        btn.SetName("test");
+        btn.SetPosition(uik::FPoint(10.0f, 10.0f));
+        btn.SetSize(uik::FSize(10.0f, 10.0f));
+        btn.SetAnimationString(R"(
+$OnOpen
+move 100.0 100.0
+duration 1.0
+delay 1.0
+loops 1
+        )");
+
+        auto* widget = window.AddWidget(btn);
+
+        uik::TransientState state;
+        uik::AnimationStateArray animations;
+
+        window.Show(state, &animations);
+        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].time == -1.0f);
+        TEST_REQUIRE(widget->GetPosition() == uik::FPoint(10.0f, 10.0f));
+
+        window.Update(state, 0.0f, 0.5f, &animations);
+        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].time == -0.5f);
+        TEST_REQUIRE(widget->GetPosition() == uik::FPoint(10.0f, 10.0f));
+
+        window.Update(state, 0.5f, 0.5f, &animations);
+        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].time == 0.0f);
+        TEST_REQUIRE(widget->GetPosition() == uik::FPoint(10.0f, 10.0f));
+
+        window.Update(state, 1.0f, 0.5f, &animations);
+        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].time == 0.5f);
+        TEST_REQUIRE(widget->GetPosition() == uik::FPoint(55.0f, 55.0f));
+
+        window.Update(state, 1.5f, 0.5f, &animations);
+        TEST_REQUIRE(animations[0].state == uik::Animation::State::Inactive);
+        TEST_REQUIRE(animations[0].time == 1.0f);
+        TEST_REQUIRE(widget->GetPosition() == uik::FPoint(100.0f, 100.0f));
+    }
+}
+
+EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     unit_test_label();
@@ -1121,5 +1415,8 @@ int test_main(int argc, char* argv[])
     unit_test_apply_style();
     unit_test_keyboard_focus();
     unit_test_keyboard_radiobutton_select();
+    unit_test_animation_parse();
+    unit_test_widget_animation();
     return 0;
 }
+) // TEST_MAIN

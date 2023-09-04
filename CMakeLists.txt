@@ -227,6 +227,7 @@ add_library(EngineLib
     engine/ui.cpp
     engine/state.cpp)
 add_library(UiLib
+    uikit/animation.cpp
     uikit/layout.cpp
     uikit/widget.cpp
     uikit/window.cpp)
@@ -940,6 +941,7 @@ add_test(NAME unit_test_tilemap   COMMAND unit_test_tilemap)
 #UI kit tests
 add_executable(unit_test_uikit
         uikit/unit_test/unit_test.cpp
+        uikit/animation.cpp
         uikit/widget.cpp
         uikit/window.cpp)
 target_include_directories(unit_test_uikit PRIVATE "${CMAKE_CURRENT_LIST_DIR}/uikit/unit_test")
