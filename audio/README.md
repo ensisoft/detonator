@@ -1,21 +1,22 @@
-DETONATOR 2D AUDIO 🎼
-=====================
+DETONATOR 2D 💥💣
+===============
 
-Overview 💭
+Audio Subsystem 💭
 ---------------------
 The audio subsystem is divided into following core components that take part in playing audio.
 
 * Device 
-   - Abstract interface for accessing some underlying platform API for playing audio.
-   - Uses PulseAudio on Linux, Waveout on Win32 and OpenAL on Emscripten
+   - An abstract interface for accessing some underlying platform API for playing audio.
+   - Implementations use PulseAudio on Linux, Waveout on Win32 and OpenAL on Emscripten.
 * Player
-  - Takes care of managing audio playback by using some audio playback device.
-  - Supports running a native audio thread for audio playback
+  - Handles the high level audio track management and uses a device object for the audio playback. 
+  - Supports running a native audio thread for audio playback.
 * Source
-  - A low level source object for filling audio buffers with PCM data
-  - Called by the playback stream object that exists on some device whenever the playback device asks for more PCM data
+  - A low level source object for filling device audio buffers with PCM data.
+  - Inside the device object each active audio stream maps to a source. Whenever the underlying audio API
+    requires more data the audio buffer is filled using the source object which provides the PCM data.
 * Stream
-  - Device specific audio playback stream with some state. Sources its data from its Source object.
+  - Device specific audio playback stream with some stream state and a Source object.
   - Exists only inside the device and is not accessible from outside the device during playback.
     
 Overview of the basic steps needed to play audio:
@@ -29,7 +30,7 @@ Overview of the basic steps needed to play audio:
    4. The player will observe the stream for state changes, manage its playback and fill PCM buffers 
       1. *Source::HasMore* is used to check whether the *Source* has more PCM data or not.
       2. *Source::FillBuffer* is used to provide PCM data to underlying audio device
-5. Periodically call *audio::Player::GetEvent* to receive *SourceCompleteEVent* information regarding the 
+5. Periodically call *audio::Player::GetEvent* to receive *SourceCompleteEvent* information regarding the 
    completion of some audio playback. 
 6. (Optional) call *Player::Pause*, *Player::Resume* or *Player::Cancel* to manage the playback of the audio. 
 
