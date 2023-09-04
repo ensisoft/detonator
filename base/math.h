@@ -77,6 +77,139 @@ namespace math
         return (1.0f - t) * y0 + t * y1;
     }
 
+    namespace easing {
+        inline float ease_in_sine(float t) noexcept
+        { return 1.0f - std::cos((t * Pi) / 2.0); }
+        inline float ease_out_sine(float t) noexcept
+        { return std::sin((t * Pi) / 2.0); }
+        inline float ease_in_out_sine(float t) noexcept
+        { return -(std::cos(Pi * t) - 1.0) / 2.0;}
+        inline float ease_in_quadratic(float t) noexcept
+        { return t*t; }
+        inline float ease_out_quadratic(float t) noexcept
+        { return 1.0f - (1.0f - t) * (1.0f - t);}
+        inline float ease_in_out_quadratic(float t) noexcept
+        {
+            return t < 0.5f
+                   ? 2.0f * t * t
+                   : 1.0f - std::pow(-2.0f * t + 2.0f, 2.0f) / 2.0f;
+        }
+        inline float ease_in_cubic(float t) noexcept
+        { return t * t * t; }
+        inline float ease_out_cubic(float t) noexcept
+        { return 1.0f - std::pow(1.0f - t, 3.0f); }
+        inline float ease_in_out_cubic(float t) noexcept
+        {
+            return t < 0.5f
+                 ? 4.0f  * t * t * t
+                 : 1.0f - std::pow(-2.0f * t + 2.0f, 3.0f) / 2.0f;
+        }
+        inline float ease_in_back(float t) noexcept
+        {
+            const auto c1 = 1.70158f;
+            const auto c3 = c1 + 1.0f;
+            return c3 * t * t * t - c1 * t * t;
+        }
+        inline float ease_out_back(float t) noexcept
+        {
+            const auto c1 = 1.70158f;
+            const auto c3 = c1 + 1.0f;
+            return 1.0f + c3 * std::pow(t - 1.0f, 3.0f) + c1 * std::pow(t - 1.0f, 2.0f);
+        }
+        inline float ease_in_out_back(float t) noexcept
+        {
+            const auto c1 = 1.70158f;
+            const auto c2 = c1 * 1.525f;
+
+            return t < 0.5f
+                   ? (std::pow(2.0f * t, 2.0f) * ((c2 + 1.0f) * 2.0f * t - c2)) / 2.0f
+                   : (std::pow(2.0f * t - 2.0f, 2.0f) * ((c2 + 1.0f) * (t * 2.0f - 2.0f) + c2) + 2.0f) / 2.0f;
+        }
+
+        inline float ease_in_elastic(float t) noexcept
+        {
+            t = math::clamp(0.0f, 1.0f, t);
+            if (t == 0.0f)
+                return 0.0f;
+            else if (t == 1.0f)
+                return 1.0f;
+
+            const auto c4 = (2.0f * Pi) / 3.0f;
+
+            return  -std::pow(2.0f, 10.0f * t - 10.0f) * std::sin((t * 10.0f - 10.75f) * c4);
+        }
+
+        inline float ease_out_elastic(float t) noexcept
+        {
+            t = math::clamp(0.0f, 1.0f, t);
+            if (t == 0.0f)
+                return 0.0f;
+            else if (t == 1.0f)
+                return 1.0f;
+
+            const auto c4 = (2.0f * Pi) / 3.0f;
+
+            return std::pow(2.0f, -10.0f * t) * std::sin((t * 10.0f - 0.75f) * c4) + 1.0f;
+        }
+        inline float ease_in_out_elastic(float t) noexcept
+        {
+            t = math::clamp(0.0f, 1.0f, t);
+            if (t == 0.0f)
+                return 0.0f;
+            else if (t == 1.0f)
+                return 1.0f;
+
+            const auto c5 = (2.0f * Pi) / 4.5f;
+
+            return  t < 0.5f
+                    ? -(std::pow(2.0f,  20.0f * t - 10.0f) * std::sin((20.0f * t - 11.125f) * c5)) / 2.0f
+                    :  (std::pow(2.0f, -20.0f * t + 10.0f) * std::sin((20.0f * t - 11.125f) * c5)) / 2.0f + 1.0f;
+        }
+
+        inline float ease_out_bounce(float t) noexcept
+        {
+            const auto n1 = 7.5625f;
+            const auto d1 = 2.75f;
+            if (t < 1.0f / d1)
+                return n1 * t * t;
+            else if (t < 2.0f / d1)
+            {
+                const auto x = t - 1.5f/d1;
+                return n1 * x * x + 0.75f;
+            }
+            else if (t < 2.5f / d1)
+            {
+                const auto x = t - 2.25f/d1;
+                return n1 * x * x + 0.9375f;
+            }
+            const auto x = t - 2.625f/d1;
+            return n1 * x * x + 0.984375f;
+        }
+        inline float ease_in_bounce(float t) noexcept
+        {
+            return 1.0f - ease_out_bounce(1.0f - t);
+        }
+        inline float ease_in_out_bounce(float t) noexcept
+        {
+            return t < 0.5f
+                   ? (1.0f - ease_out_bounce(1.0f - 2.0f * t)) / 2.0f
+                   : (1.0f + ease_out_bounce(2.0f * t - 1.0f)) / 2.0f;
+        }
+    }
+
+    namespace interp {
+        inline float step(float t) noexcept
+        { return (t < 0.5f) ? 0.0f : 1.0f; }
+        inline float cosine(float t) noexcept
+        { return -std::cos(Pi * t) * 0.5f + 0.5f; }
+        inline float smooth_step(float t) noexcept
+        { return 3.0f*t*t - 2.0f*t*t*t; }
+        inline float acceleration(float t) noexcept
+        { return t*t; }
+        inline float deceleration(float t) noexcept
+        { return 1.0f - ((1.0f-t)*(1.0f-t)); }
+    }
+
     // Interpolation defines the function used to determine  the intermediate
     // values between y0 and y1 are achieved when T varies between 0.0f and 1.0f.
     // I.e. when T is 0.0 interpolation returns y0 and when T is 1.0 interpolation
@@ -95,25 +228,89 @@ namespace math
         // Accelerate increase in y1 value when t approaches 1.0f
         Acceleration,
         // Decelerate increase in y1 value when t approaches 1.0f
-        Deceleration
+        Deceleration,
+
+        // Easing curves, CSS inspired.
+        // https://easings.net/
+        EaseInSine,
+        EaseOutSine,
+        EaseInOutSine,
+        EaseInQuadratic,
+        EaseOutQuadratic,
+        EaseInOutQuadratic,
+        EaseInCubic,
+        EaseOutCubic,
+        EaseInOutCubic,
+        EaseInBack,
+        EaseOutBack,
+        EaseInOutBack,
+        EaseInElastic,
+        EaseOutElastic,
+        EaseInOutElastic,
+        EaseInBounce,
+        EaseOutBounce,
+        EaseInOutBounce
     };
+
+    inline float interpolate(float t, Interpolation method) noexcept
+    {
+        if (method == Interpolation::Step)
+            return interp::step(t);
+        if (method == Interpolation::Linear)
+            return math::clamp(0.0f, 1.0f, t);
+        else if (method == Interpolation::Cosine)
+            return interp::cosine(t);
+        else if (method == Interpolation::SmoothStep)
+            return interp::smooth_step(t);
+        else if (method == Interpolation::Acceleration)
+            return interp::acceleration(t);
+        else if (method == Interpolation::Deceleration)
+            return interp::deceleration(t);
+        else if (method == Interpolation::EaseInSine)
+            return easing::ease_in_sine(t);
+        else if (method == Interpolation::EaseOutSine)
+            return easing::ease_out_sine(t);
+        else if (method == Interpolation::EaseInOutSine)
+            return easing::ease_in_out_sine(t);
+        else if (method == Interpolation::EaseInQuadratic)
+            return easing::ease_in_quadratic(t);
+        else if (method == Interpolation::EaseOutQuadratic)
+            return easing::ease_out_quadratic(t);
+        else if (method == Interpolation::EaseInOutQuadratic)
+            return easing::ease_in_out_quadratic(t);
+        else if (method == Interpolation::EaseInCubic)
+            return easing::ease_in_cubic(t);
+        else if (method == Interpolation::EaseOutCubic)
+            return easing::ease_out_cubic(t);
+        else if (method == Interpolation::EaseInOutCubic)
+            return easing::ease_in_out_cubic(t);
+        else if (method == Interpolation::EaseInBack)
+            return easing::ease_in_back(t);
+        else if (method == Interpolation::EaseOutBack)
+            return easing::ease_out_back(t);
+        else if (method == Interpolation::EaseInOutBack)
+            return easing::ease_in_out_back(t);
+        else if (method == Interpolation::EaseInElastic)
+            return easing::ease_in_elastic(t);
+        else if (method == Interpolation::EaseOutElastic)
+            return easing::ease_out_elastic(t);
+        else if (method == Interpolation::EaseInOutElastic)
+            return easing::ease_in_out_elastic(t);
+        else if (method == Interpolation::EaseInBounce)
+            return easing::ease_in_bounce(t);
+        else if (method == Interpolation::EaseOutBounce)
+            return easing::ease_out_bounce(t);
+        else if (method == Interpolation::EaseInOutBounce)
+            return easing::ease_in_out_bounce(t);
+        else BUG("Missing interpolation method.");
+        return t;
+    }
 
     template<typename T>
     T interpolate(const T& y0, const T& y1, float t, Interpolation method) noexcept
     {
-        if (method == Interpolation::Step)
-            return (t < 0.5f) ? y0 : y1;
-        else if (method == Interpolation::Cosine)
-            t = -std::cos(Pi * t) * 0.5 + 0.5;
-        else if (method == Interpolation::SmoothStep)
-            t = 3*t*t - 2*t*t*t;
-        else if (method == Interpolation::Acceleration)
-            t = t*t;
-        else if (method == Interpolation::Deceleration)
-            t = 1.0f - ((1-t)*(1-t));
-        return math::lerp(y0, y1, t);
+        return math::lerp(y0, y1, math::interpolate(t, method));
     }
-
 
     // epsilon based check for float equality
     template<typename RealT> inline
