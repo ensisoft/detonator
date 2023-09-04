@@ -57,6 +57,12 @@ namespace base
         T mHeight = T();
     };
     template<typename T> inline
+    Size<T> operator*(T scale, const Size<T>& size) noexcept
+    {
+        return Size<T>(size.GetWidth() * scale,
+                       size.GetHeight() * scale);
+    }
+    template<typename T> inline
     Size<T> operator*(const Size<T>& size, T scale) noexcept
     {
         return Size<T>(size.GetWidth() * scale,
@@ -139,6 +145,20 @@ namespace base
         T mY = T();
     };
 
+    template<typename T> inline
+    Point<T> operator*(const Point<T>& point, T scalar) noexcept
+    {
+        const auto x = point.GetX();
+        const auto y = point.GetY();
+        return {x * scalar, y * scalar};
+    }
+    template<typename T> inline
+    Point<T> operator*(T scalar, const Point<T>& point) noexcept
+    {
+        const auto x = point.GetX();
+        const auto y = point.GetY();
+        return { x * scalar, y * scalar };
+    }
     template<typename T> inline
     Point<T> operator-(const Point<T>& lhs, const Point<T>& rhs) noexcept
     {
