@@ -173,7 +173,7 @@ UIMaterial::MaterialClass UITexture::GetClass(const ClassLibrary*, const Loader*
     base::JsonReadSafe(json, "image_height", &img_height_px);
     if (!img_width_px || !img_height_px)
     {
-        WARN("Packed UITexture texture size not know. [uri='%1']", mMetafileUri);
+        WARN("Packed UITexture texture size is not known (missing image_width or image_height). [uri='%1', name='%2']", mMetafileUri, mTextureName);
         return material;
     }
 
@@ -197,7 +197,7 @@ UIMaterial::MaterialClass UITexture::GetClass(const ClassLibrary*, const Loader*
     }
     if (!img_rect_width_px || !img_rect_height_px)
     {
-        WARN("Packed UITexture sub rectangle description not found. [uri='%1', name='%2']", mMetafileUri, mTextureName);
+        WARN("Packed UITexture sub-rectangle description is not found. [uri='%1', name='%2']", mMetafileUri, mTextureName);
         return material;
     }
     gfx::FRect  rect;
@@ -283,7 +283,7 @@ bool UIStyle::ParseStyleString(const std::string& tag, const std::string& style)
     auto [ok, json, error] = base::JsonParse(style);
     if (!ok)
     {
-        ERROR("Failed to parse UI style string. [tag=%1, error='%2']", tag, error);
+        ERROR("Failed to parse UI style string. [tag='%1', error='%2']", tag, error);
         return false;
     }
     std::vector<PropertyPair> props;
@@ -573,7 +573,7 @@ bool UIStyle::ParseProperties(const nlohmann::json& json, std::vector<PropertyPa
             // this is not necessarily a BUG because currently the style json files are
             // hand written. thus we have to be prepared to handle unexpected cases.
             success = false;
-            WARN("Ignoring unexpected UI style property type for key '%1'. ", key);
+            WARN("Ignoring unexpected UI style property. [key='%1']", key);
             continue;
         }
         prop.key = key;
@@ -622,7 +622,7 @@ bool UIStyle::ParseMaterials(const nlohmann::json& json, std::vector<MaterialPai
         if (!material->FromJson(json))
         {
             success = false;
-            WARN("Failed to parse UI Material '%1'", key);
+            WARN("Failed to parse UI material. [key='%1']", key);
             continue;
         }
 
@@ -1208,7 +1208,7 @@ gfx::Material* UIPainter::GetWidgetMaterial(const std::string& id,
     auto it = mFailedProperties.find("widget/" + key);
     if (it == mFailedProperties.end())
     {
-        WARN("UI material '%1' is not defined." , key);
+        WARN("UI material is not defined. [key='%1']" , key);
         mFailedProperties.insert("widget/" + key);
     }
     return nullptr;
@@ -1286,7 +1286,7 @@ UIProperty UIPainter::GetWidgetProperty(const std::string& id,
     auto it = mFailedProperties.find("widget/" + key);
     if (it == mFailedProperties.end())
     {
-        WARN("UI style property '%1' is not defined.", key);
+        WARN("UI style property is not defined. [key='%1']", key);
         mFailedProperties.insert("widget/" + key);
     }
     return UIProperty();
