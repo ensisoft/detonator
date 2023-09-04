@@ -953,12 +953,13 @@ void UIWidget::Update(double dt)
     {
         mPlayTime += dt;
         mState.painter->Update(mPlayTime, dt);
-        mState.active_window->Update(*mState.active_state, mPlayTime, dt);
+        mState.active_window->Update(*mState.active_state, mPlayTime, dt, mState.animation_state.get());
         const auto& actions = mState.active_window->PollAction(*mState.active_state, mPlayTime, dt);
         for (const auto& action : actions)
         {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
         }
+        mState.active_window->TriggerAnimations(actions, *mState.active_state, *mState.animation_state);
     }
     mCurrentTime += dt;
 }
@@ -1109,7 +1110,8 @@ void UIWidget::on_actionPlay_triggered()
     mPlayState = PlayState::Playing;
     mState.active_window = std::make_unique<uik::Window>(mState.window);
     mState.active_state  = std::make_unique<uik::TransientState>();
-    mState.active_window->Show(*mState.active_state);
+    mState.animation_state = std::make_unique<uik::AnimationStateArray>();
+    mState.active_window->Show(*mState.active_state, mState.animation_state.get());
     SetEnabled(mUI.actionPlay,  false);
     SetEnabled(mUI.actionPause, true);
     SetEnabled(mUI.actionStop,  true);
@@ -1145,6 +1147,7 @@ void UIWidget::on_actionStop_triggered()
     mPlayState = PlayState::Stopped;
     mState.active_state.reset();
     mState.active_window.reset();
+    mState.animation_state.reset();
     mState.painter->DeleteMaterialInstances();
     SetEnabled(mUI.actionPlay,  true);
     SetEnabled(mUI.actionPause, false);
@@ -1616,6 +1619,34 @@ void UIWidget::on_btnResetWidgetStyle_clicked()
     }
 }
 
+void UIWidget::on_btnEditWidgetAnimationString_clicked()
+{
+    if (auto* widget= GetCurrentWidget())
+    {
+        std::string old_animation_string = widget->GetAnimationString();
+
+        DlgTextEdit dlg(this);
+        dlg.SetText(old_animation_string);
+        dlg.SetTitle("Animation String");
+        if (dlg.exec() == QDialog::Rejected)
+            return;
+
+        const std::string new_animation_string = dlg.GetText();
+
+        widget->SetAnimationString(new_animation_string);
+        SetValue(mUI.widgetAnimationString, new_animation_string);
+    }
+}
+void UIWidget::on_btnResetWidgetAnimationString_clicked()
+{
+    if (auto* widget = GetCurrentWidget())
+    {
+        widget->SetAnimationString("");
+
+        DisplayCurrentWidgetProperties();
+    }
+}
+
 void UIWidget::on_btnEditWindowStyle_clicked()
 {
     std::string style_string = mState.window.GetStyleString();
@@ -1664,6 +1695,7 @@ void UIWidget::on_btnEditWindowStyleString_clicked()
 
     DlgTextEdit dlg(this);
     dlg.SetText(old_style_string);
+    dlg.SetTitle("Style String");
     if (dlg.exec() == QDialog::Rejected)
         return;
 
@@ -2049,6 +2081,7 @@ void UIWidget::MouseMove(QMouseEvent* mickey)
         {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
         }
+        mState.active_window->TriggerAnimations(actions, *mState.active_state, *mState.animation_state);
     }
     else if (mCurrentTool)
     {
@@ -2090,6 +2123,7 @@ void UIWidget::MousePress(QMouseEvent* mickey)
         {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
         }
+        mState.active_window->TriggerAnimations(actions, *mState.active_state, *mState.animation_state);
     }
     else if (!mCurrentTool && (mickey->button() == Qt::LeftButton))
     {
@@ -2161,6 +2195,7 @@ void UIWidget::MouseRelease(QMouseEvent* mickey)
         {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
         }
+        mState.active_window->TriggerAnimations(actions, *mState.active_state, *mState.animation_state);
     }
     else if (mCurrentTool && mCurrentTool->MouseRelease(mickey, view))
     {
@@ -2210,7 +2245,7 @@ bool UIWidget::KeyPress(QKeyEvent* key)
         {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
         }
-
+        mState.active_window->TriggerAnimations(actions, *mState.active_state, *mState.animation_state);
         //DEBUG("Key press mapped to UI vk: %1", e.key);
         return true;
     }
@@ -2280,6 +2315,7 @@ bool UIWidget::KeyRelease(QKeyEvent* key)
         {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
         }
+        mState.active_window->TriggerAnimations(actions, *mState.active_state, *mState.animation_state);
         //DEBUG("Key release mapped to UI vk: %1", e.key);
         return true;
     }
@@ -2381,6 +2417,7 @@ void UIWidget::DisplayCurrentWidgetProperties()
     SetValue(mUI.widgetName, QString(""));
     SetValue(mUI.widgetType, QString(""));
     SetValue(mUI.widgetStyleString, QString(""));
+    SetValue(mUI.widgetAnimationString, QString(""));
     SetValue(mUI.widgetWidth, 0.0f);
     SetValue(mUI.widgetHeight, 0.0f);
     SetValue(mUI.widgetXPos, 0.0f);
@@ -2405,6 +2442,7 @@ void UIWidget::DisplayCurrentWidgetProperties()
         SetValue(mUI.widgetType, app::toString(widget->GetType()));
         SetValue(mUI.widgetName , widget->GetName());
         SetValue(mUI.widgetStyleString, widget->GetStyleString());
+        SetValue(mUI.widgetAnimationString, widget->GetAnimationString());
         SetValue(mUI.widgetWidth , size.GetWidth());
         SetValue(mUI.widgetHeight , size.GetHeight());
         SetValue(mUI.widgetXPos , pos.GetX());

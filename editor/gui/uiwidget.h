@@ -131,6 +131,9 @@ namespace gui
         void on_btnEditWidgetStyle_clicked();
         void on_btnEditWidgetStyleString_clicked();
         void on_btnResetWidgetStyle_clicked();
+        void on_btnEditWidgetAnimationString_clicked();
+        void on_btnResetWidgetAnimationString_clicked();
+
         void on_btnEditWindowStyle_clicked();
         void on_btnEditWindowStyleString_clicked();
         void on_btnResetWindowStyle_clicked();
@@ -196,6 +199,7 @@ namespace gui
             // transient window state that only exists when we're playing
             // the window, i.e. passing events such as mouse events to it.
             std::unique_ptr<uik::TransientState> active_state;
+            std::unique_ptr<uik::AnimationStateArray> animation_state;
             // the active window that only exists when we're playing
             // the window. originally it's a bit-wise copy of the
             // design time window but then obviously changes state
