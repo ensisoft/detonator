@@ -112,6 +112,7 @@ add_executable(GameEngine
     ../graphics/text.cpp
     ../graphics/utility.cpp
     ../wdk/wdk/keys.cpp
+    ../uikit/animation.cpp
     ../uikit/window.cpp
     ../uikit/widget.cpp
     ../third_party/base64/base64.cpp
