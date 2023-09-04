@@ -3,8 +3,7 @@ DETONATOR 2D 💥💣
 An OpenGL ES based 2D game engine and editor for Linux, Windows and HTML5. Designed for simple single player games such
 as puzzle games, platformers, side scrollers and tile based real time strategy and tactics.  🍄🧩🗺️
 
-![Screenshot](screens/derp.gif "Bandit demo")  
-
+![Screenshot](screens/derp.gif "Starter demo")  
 
 This readme and other readme files, are for developers and cover information related to developing and building the engine itself.
 For end user guide see  [help](editor/dist/help/help.html "user help") instead. 
@@ -23,7 +22,7 @@ Other (subsystem) readmes:
   * [WDK](https://github.com/ensisoft/wdk/blob/master/README.md "WDK readme") 
 
 
-Currently, supported major features:
+Currently supported major features:
 * Qt5 based WYSIWYG editor
 * Text rendering (vector and bitmap)
 * Various primitive shapes, custom polygon shapes
@@ -34,7 +33,11 @@ Currently, supported major features:
 * Lua based scripting for entities, scenes and UIs
 * Built-in Lua script editor with code formatting, API help and code completion
 * Scene builder
-* Styleable UI system (JSON style files *and* material system integration) 
+* In game UI system
+  * Animation ready through simple CSS inspired keyframe declarations
+  * Styling support through JSON style files *and* material system integration
+  * Virtual key support and mouse input support
+  * Scripting support for integrating with the game
 * Physics engine based on Box2D
 * Demo content and starter content
 * Game content packaging for native and HTML5/WASM (with Emscripten)
@@ -69,7 +72,7 @@ Planned minor features not yet implemented:
 
 ![Screenshot](screens/editor-tilemap.png "Map editor")
 Create tile based maps using the tile editor. The map supports multiple layers and both isometric and axis aligned perspective.
-The map can then be combined with the scene and the scene based entities to produce the final game world.
+The map can then be combined with the scene and the scene based entities in order to produce the final game world.
 
 ![Screenshot](screens/editor-animation.png "Entity editor")
 Create animated game play characters in the entity editor. Each entity can contain an arbitrary render tree
@@ -78,9 +81,9 @@ animation state graph as well as animation tracks for managing animation and ent
 Each entity type can then be associated with a Lua script where you can write your entity specific game play code.
 
 ![Screenshot](screens/editor-material.png "Material editor")
-Create materials using the material editor by setting some properties for the provided default material shaders.
-Currently, supports sprite animations, textures (including text and noise), gradient and color fills out of box.
-Custom shaders can be used too.
+Create materials using the material editor by adjusting properties for the provided default material shaders or
+create your own materials with custom shaders! Currently supports sprite animations, textures (including text and noise), 
+gradient and color fills out of box.
 
 ![Screenshot](screens/editor-scene.png "Scene editor")
 Create the game play scenes using the scene editor. The entities you create in the entity editor are available here
@@ -99,20 +102,16 @@ Supported formats are wav, mp3, ogg and flac.
 
 ![Screenshot](screens/editor-script.png "Script editor")
 Use the built-in code editor to write the Lua scripts for the entities, scenes, game or UI. The editor has a built-in
-help system for accessing the engine side Lua API documentation as well as automatic Lua code formatting and linting and
+help system for accessing the engine side Lua API documentation as well as automatic Lua code formatting, linting and
 a code completion system! 
 
 ![Screenshot](screens/editor-particle.png "Particle editor")
-Create different types of particle effects in the particle editor by onveniently by adjusting several sliders 
+Create different types of particle effects in the particle editor by conveniently adjusting several sliders 
 and knobs that control the particle effect. 
 
-## Getting Started
-
-### [Build Instructions](BUILDING.md)
-
 ## Detailed Documentation
-
+### [Build Instructions](BUILDING.md)
 ### [System Architecture](ARCHITECTURE.md)
-### [Coding Convetion & Design](DESIGN.md)
+### [Design Document](DESIGN.md)
 ### [Tracing & Profiling](PROFILING.md)
 
