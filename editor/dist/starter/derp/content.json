@@ -240,6 +240,51 @@
             "y": 100.0
           },
           "tag": ""
+        },
+        {
+          "class": "mmd8qzxl3w",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Text",
+          "position": {
+            "x": -5.0,
+            "y": -117.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 410.0,
+            "y": 134.0
+          },
+          "tag": "",
+          "text_item": {
+            "flags": {
+              "BlinkText": false,
+              "PP_EnableBloom": true,
+              "StaticContent": false,
+              "UnderlineText": false,
+              "VisibleInGame": true
+            },
+            "font_name": "app://fonts/KomikaTitle-Paint.ttf",
+            "font_size": 24,
+            "horizontal_align": "Center",
+            "layer": 0,
+            "line_height": 1.0,
+            "raster_height": 0,
+            "raster_width": 0,
+            "text": "Press space to fly me!",
+            "text_color": {
+              "a": 1.0,
+              "b": 0.1568627506494522,
+              "g": 0.3529411852359772,
+              "r": 0.9411764740943909
+            },
+            "vertical_align": "Center"
+          }
         }
       ],
       "render_tree": {
@@ -254,6 +299,11 @@
               {
                 "node": {
                   "id": "2qZDXrpOrX"
+                }
+              },
+              {
+                "node": {
+                  "id": "mmd8qzxl3w"
                 }
               }
             ],
@@ -661,7 +711,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/FlappyBird/Flying/frame-1.png",
               "flags": {
@@ -682,7 +733,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/FlappyBird/Flying/frame-2.png",
               "flags": {
@@ -703,7 +755,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/FlappyBird/Flying/frame-3.png",
               "flags": {
@@ -724,7 +777,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/FlappyBird/Flying/frame-4.png",
               "flags": {
@@ -745,7 +799,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/FlappyBird/Flying/frame-5.png",
               "flags": {
@@ -766,7 +821,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/FlappyBird/Flying/frame-6.png",
               "flags": {
@@ -787,7 +843,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/FlappyBird/Flying/frame-7.png",
               "flags": {
@@ -808,7 +865,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/FlappyBird/Flying/frame-8.png",
               "flags": {
@@ -904,7 +962,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Background/full_background.png",
               "flags": {
@@ -1000,7 +1059,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/FlappyBird/Hurt/frame-1.png",
               "flags": {
@@ -1021,7 +1081,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/FlappyBird/Hurt/frame-2.png",
               "flags": {
@@ -1117,7 +1178,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Spikes/sharp wood.png",
               "flags": {
@@ -1153,6 +1215,118 @@
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
       "type": "Texture"
+    },
+    {
+      "active_texture_map": "",
+      "color_map0": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map1": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map2": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_map3": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "color_weight": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "gamma": 1.0,
+      "id": "E0qZ7nA8br",
+      "name": "Spiral",
+      "particle_action": "None",
+      "resource_id": "E0qZ7nA8br",
+      "resource_name": "Spiral",
+      "shader_src": "",
+      "shader_uri": "ws://shaders/es2/Spiral.glsl",
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "wH4TQytqSd",
+          "looping": true,
+          "name": "kTexture",
+          "rect_name0": "kTextureRect",
+          "rect_name1": "",
+          "sampler_name0": "kTexture",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "Linear",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/Background/full_background.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "b3jFWbkWqF",
+              "name": "full_background",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_rotation": 0.0,
+      "texture_scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "texture_velocity": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Custom",
+      "uniforms": [
+        {
+          "name": "kBaseColor",
+          "value": {
+            "a": 1.0,
+            "b": 0.9987335205078125,
+            "g": 1.0,
+            "r": 0.8662699460983276
+          }
+        },
+        {
+          "name": "kGamma",
+          "value": 2.200000047683716
+        }
+      ]
     }
   ],
   "scenes": [
@@ -1193,8 +1367,8 @@
           "name": "FlappyBird",
           "parent_render_tree_node": "",
           "position": {
-            "x": -369.0,
-            "y": -392.0
+            "x": -300.0,
+            "y": -400.0
           },
           "rotation": 0.0015032291412353516,
           "scale": {
@@ -1564,6 +1738,7 @@
         {
           "widgets": [
             {
+              "animation": "",
               "flags": {
                 "Enabled": true,
                 "VisibleInEditor": true,
@@ -1579,11 +1754,12 @@
                 "h": 800.0,
                 "w": 1000.0
               },
-              "style": "{\"materials\":[{\"key\":\"background\",\"material\":\"LPH6tgo9eN\",\"type\":\"Reference\"}]}",
+              "style": "{\"materials\":[{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"background\",\"material\":\"E0qZ7nA8br\",\"type\":\"Reference\"}]}",
               "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
+                  "animation": "",
                   "flags": {
                     "Enabled": true,
                     "VisibleInEditor": true,
@@ -1606,6 +1782,7 @@
                   "type": "Label"
                 },
                 {
+                  "animation": "$OnOpen\nmove 50.0 50.0\nduration 1.0\ninterpolation Cosine",
                   "flags": {
                     "Enabled": true,
                     "VisibleInEditor": true,
@@ -1615,19 +1792,20 @@
                   "line_height": 1.0,
                   "name": "Label_2",
                   "position": {
-                    "x": 50.5,
-                    "y": 50.5
+                    "x": 50.0,
+                    "y": -200.0
                   },
                   "size": {
                     "h": 200.0,
                     "w": 900.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"text-size\",\"value\":36},{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"font-size\",\"value\":36}]}",
+                  "style": "{\"properties\":[{\"key\":\"font-size\",\"value\":36},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"text-size\",\"value\":36},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}}]}",
                   "tab_index": 0,
                   "text": "Press ' Space' to fly the derpo bird\nbut watch out for the spike!",
                   "type": "Label"
                 },
                 {
+                  "animation": "$OnOpen\nmove 350.0 500\nduration 1.0\ninterpolation EaseOutBounce\n\n$OnClick\nmove -150.0 500.0\nduration 0.5\ninterpolation EaseInBack",
                   "flags": {
                     "Enabled": true,
                     "VisibleInEditor": true,
@@ -1636,19 +1814,20 @@
                   "id": "iZfD90A3RQ",
                   "name": "play",
                   "position": {
-                    "x": 350.5,
-                    "y": 500.5
+                    "x": -150.0,
+                    "y": 500.0
                   },
                   "size": {
                     "h": 100.0,
                     "w": 100.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.3333333432674408,\"g\":0.8627451062202454,\"r\":0.4783855974674225}},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"font-size\",\"value\":36},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"text-size\",\"value\":36},{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"mouse-over/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.3333333432674408,\"g\":0.8627451062202454,\"r\":0.4783855974674225}}]}",
+                  "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"text-size\",\"value\":36},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"font-size\",\"value\":36},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"mouse-over/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.3333333432674408,\"g\":0.8627451062202454,\"r\":0.4783855974674225}},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.3333333432674408,\"g\":0.8627451062202454,\"r\":0.4783855974674225}}]}",
                   "tab_index": 0,
                   "text": "Play",
                   "type": "PushButton"
                 },
                 {
+                  "animation": "$OnOpen\nmove 550.5 500.5\nduration 1.0\ninterpolation EaseOutBounce\n\n$OnClick\nmove 1050.0 500.0\nduration 0.5\ninterpolation EaseInBack",
                   "flags": {
                     "Enabled": true,
                     "VisibleInEditor": true,
@@ -1657,19 +1836,20 @@
                   "id": "5MYpaegeng",
                   "name": "quit",
                   "position": {
-                    "x": 550.5,
-                    "y": 500.5
+                    "x": 1050.0,
+                    "y": 500.0
                   },
                   "size": {
                     "h": 100.0,
                     "w": 100.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"pressed/border\",\"type\":\"Null\"},{\"key\":\"mouse-over/border\",\"type\":\"Null\"},{\"key\":\"mouse-over/background\",\"type\":\"Null\"},{\"key\":\"pressed/background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"mouse-over/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.3333333432674408,\"g\":0.8627451062202454,\"r\":0.4783855974674225}},{\"key\":\"font-size\",\"value\":36},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"text-size\",\"value\":36},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.3333333432674408,\"g\":0.8627451062202454,\"r\":0.4783855974674225}},{\"key\":\"edit-text-size\",\"value\":36}]}",
+                  "style": "{\"materials\":[{\"key\":\"pressed/background\",\"type\":\"Null\"},{\"key\":\"mouse-over/background\",\"type\":\"Null\"},{\"key\":\"mouse-over/border\",\"type\":\"Null\"},{\"key\":\"pressed/border\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"edit-text-size\",\"value\":36},{\"key\":\"mouse-over/text-color\",\"value\":{\"a\":1.0,\"b\":0.3333333432674408,\"g\":0.8627451062202454,\"r\":0.4783855974674225}},{\"key\":\"text-size\",\"value\":36},{\"key\":\"text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/KomikaTitle-Paint.ttf\"},{\"key\":\"font-name\",\"value\":\"app://fonts/2Dumb.ttf\"},{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":0.1568627506494522,\"g\":0.3529411852359772,\"r\":0.9411764740943909}},{\"key\":\"font-size\",\"value\":36},{\"key\":\"mouse-over/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.3333333432674408,\"g\":0.8627451062202454,\"r\":0.4783855974674225}}]}",
                   "tab_index": 1,
                   "text": "Quit",
                   "type": "PushButton"
                 },
                 {
+                  "animation": "",
                   "flags": {
                     "Enabled": true,
                     "VisibleInEditor": true,
@@ -1692,6 +1872,7 @@
                   "type": "Label"
                 },
                 {
+                  "animation": "",
                   "flags": {
                     "Enabled": true,
                     "VisibleInEditor": true,

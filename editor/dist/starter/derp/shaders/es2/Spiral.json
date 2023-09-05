@@ -1,0 +1,24 @@
+
+{
+  "uniforms": [
+     {
+        "type": "Float",
+        "name": "kGamma",
+        "desc": "Gamma",
+        "value": 2.2
+     },
+     {
+        "type": "Color",
+        "name": "kBaseColor",
+        "desc": "Base Color",
+        "value": "White"
+     }
+  ],
+  "maps": [
+   {
+      "desc": "Texture",
+      "name": "kTexture",
+      "type": "Texture2D"
+   }
+  ]
+}
