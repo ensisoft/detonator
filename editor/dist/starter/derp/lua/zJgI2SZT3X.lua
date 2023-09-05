@@ -34,12 +34,22 @@ end
 function OnEndContact(flappybird, node, other, other_node)
 end
 
+local space_counter = 0
+
 -- key down event handler.
 -- Only ever called if entity's 'Receive key events' flag is set.
 function OnKeyDown(flappybird, symbol, modifier_bits)
     if symbol == wdk.Keys.Space then
-        local body = flappybird:FindNodeByClassName('Body')
+        space_counter = space_counter + 1
+
+        local body = flappybird:GetNode(0)
         Physics:ApplyImpulseToCenter(body, glm.vec2:new(0.1, -4.0))
+
+        if space_counter == 4 then
+            local text = flappybird:GetNode(3)
+            local txt = text:GetTextItem()
+            txt:SetFlag('VisibleInGame', false)
+        end
     end
 end
 

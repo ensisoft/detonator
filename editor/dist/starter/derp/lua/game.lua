@@ -20,7 +20,6 @@ function BeginPlay(scene, map)
     Audio:KillMusic('MenuMusic', 2000)
 end
 
-
 -- Called as a response to Game:EndPlay when the game play ends.
 function EndPlay(scene, map)
     Game:DebugPrint('EndPlay called.')
@@ -91,10 +90,12 @@ end
 -- 'value' - value (int, float, bool, string) of the  action if any.
 function OnUIAction(ui, action)
     if action.name == 'play' then
+        Game:Delay(0.5)
         Game:CloseUI(0)
         Game:Play('My Scene')
         Audio:PlaySoundEffect('Click', 0)
     elseif action.name == 'quit' then
+        Game:Delay(0.5)
         Game:Quit(0)
     end
 end
