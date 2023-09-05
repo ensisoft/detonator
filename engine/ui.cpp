@@ -148,6 +148,9 @@ UIMaterial::MaterialClass UITexture::GetClass(const ClassLibrary*, const Loader*
     material->SetName("UITexture");
     material->GetTextureMap(0)->GetTextureSource(0)->SetName("UITexture/" + mTextureName);
 
+    // if there's no associated image meta file we assume that the image file is a non-packed
+    // image file, i.e. not a texture "atlas". alternatively if the name isn't set
+    // we can't identify the texture object in the atlas even if using an atlas.
     if (mMetafileUri.empty() || mTextureName.empty())
         return material;
 

@@ -979,8 +979,8 @@ void DlgWidgetStyleProperties::SetWidgetImage()
 
     QString image_name;
     QString json_file;
-    json_file = image_file + ".json";
-    if (FileExists(json_file))
+    json_file = app::FindImageJsonFile(image_file);
+    if (!json_file.isEmpty())
     {
         DlgImgView dlg(this);
         dlg.SetDialogMode();
