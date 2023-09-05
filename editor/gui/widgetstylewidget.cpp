@@ -536,7 +536,7 @@ void WidgetStyleWidget::SetMaterialImage(const char* key)
         QString image_name;
         QString json_file;
         json_file = app::FindImageJsonFile(image_file);
-        if (FileExists(json_file))
+        if (!json_file.isEmpty())
         {
             DlgImgView dlg(this);
             dlg.SetDialogMode();
@@ -553,6 +553,9 @@ void WidgetStyleWidget::SetMaterialImage(const char* key)
         const auto& image_uri = mWorkspace->MapFileToWorkspace(image_file);
         const auto& json_uri  = mWorkspace->MapFileToWorkspace(json_file);
 
+        // it's possible that json_uri is an empty string in which case the image file
+        // is assumed to be a non-packed single image. UITexture class will handle this
+        // case and will then skip trying to read the JSON file.
         engine::detail::UITexture texture;
         texture.SetTextureUri(image_uri);
         texture.SetMetafileUri(json_uri);

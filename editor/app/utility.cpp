@@ -112,6 +112,8 @@ QString FindImageJsonFile(const QString& image_file)
     {
         tmp = image_file;
         tmp.replace(suffix, ".json", Qt::CaseInsensitive);
+        if (!tmp.endsWith(".json", Qt::CaseInsensitive))
+            continue;
         if (FileExists(tmp))
             return tmp;
     }
