@@ -429,7 +429,10 @@ inline void SetValue(QComboBox* combo, const QString& str)
     const auto index = combo->findText(str);
     combo->setCurrentIndex(index);
     if (combo->isEditable())
+    {
         combo->setEditText(str);
+        combo->lineEdit()->setCursorPosition(0);
+    }
 }
 
 template<typename T>
@@ -452,7 +455,10 @@ inline bool SetValue(QComboBox* combo, const ListItemId& id)
         {
             combo->setCurrentIndex(i);
             if (combo->isEditable())
+            {
                 combo->setEditText(combo->itemText(i));
+                combo->lineEdit()->setCursorPosition(0);
+            }
             return true;
         }
     }
@@ -672,7 +678,10 @@ void SetList(QComboBox* combo, const std::vector<Type>& list)
         {
             combo->setCurrentIndex(i);
             if (combo->isEditable())
+            {
                 combo->setEditText(combo->itemText(i));
+                combo->lineEdit()->setCursorPosition(0);
+            }
             return;
         }
     }

@@ -79,6 +79,8 @@ void PopulateFontNames(QComboBox* cmb)
     {
         cmb->addItem(font);
     }
+    if (cmb->isEditable())
+        cmb->lineEdit()->setCursorPosition(0);
 }
 
 void PopulateFontSizes(QComboBox* cmb)
@@ -109,6 +111,8 @@ void PopulateUIStyles(QComboBox* cmb)
         const QFileInfo info(style_file);
         cmb->addItem("app://ui/style/" + info.fileName());
     }
+    if (cmb->isEditable())
+        cmb->lineEdit()->setCursorPosition(0);
 }
 
 void PopulateUIKeyMaps(QComboBox* cmb)
@@ -129,6 +133,8 @@ void PopulateUIKeyMaps(QComboBox* cmb)
         const QFileInfo info(style_file);
         cmb->addItem("app://ui/keymap/" + info.fileName());
     }
+    if (cmb->isEditable())
+        cmb->lineEdit()->setCursorPosition(0);
 }
 
 void PopulateQtStyles(QComboBox* cmb)
@@ -142,6 +148,8 @@ void PopulateQtStyles(QComboBox* cmb)
     {
         cmb->addItem(style);
     }
+    if (cmb->isEditable())
+        cmb->lineEdit()->setCursorPosition(0);
 }
 
 } // gui
