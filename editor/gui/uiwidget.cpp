@@ -1034,7 +1034,14 @@ bool UIWidget::OnEscape()
         mCurrentTool.reset();
         UncheckPlacementActions();
     }
-    else mUI.tree->ClearSelection();
+    else if (mUI.tree->GetSelectedItem())
+    {
+        mUI.tree->ClearSelection();
+    }
+    else
+    {
+        on_btnResetTransform_clicked();
+    }
     return true;
 }
 
@@ -2284,12 +2291,7 @@ bool UIWidget::KeyPress(QKeyEvent* key)
             TranslateCurrentWidget(0.0f, 20.0f);
             break;
         case Qt::Key_Escape:
-            if (mCurrentTool)
-            {
-                mCurrentTool.reset();
-                UncheckPlacementActions();
-            }
-            else mUI.tree->ClearSelection();
+            OnEscape();
             break;
         default:
             return false;
