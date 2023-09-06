@@ -1958,6 +1958,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     if (GetValue(mUI.chkShowViewport))
     {
         gfx::Transform view;
+        MakeViewTransform(mUI, mState, view);
         const auto& settings = mState.workspace->GetProjectSettings();
         const float game_width = settings.viewport_width;
         const float game_height = settings.viewport_height;
