@@ -39,7 +39,7 @@ float ring_alpha(float ring_distance_from_origin, float fragment_distance_from_o
 
 void main()
 {
-    float time = 1.2;
+    float time = 0.6;
     float s = mod(kTime, time) / time;
     float disc_radius = 0.01 + s * (0.5-0.015);
     disc_radius = clamp(disc_radius, 0.01, 0.45);

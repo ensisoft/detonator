@@ -1,89 +1,108 @@
--- Entity 'Ship2' script.
--- This script will be called for every instance of 'Ship2'
+-- Entity 'Enemy' script.
+-- This script will be called for every instance of 'Enemy'
 -- in the scene during gameplay.
 -- You're free to delete functions you don't need.
+require('common')
+
 local tick_counter = 0
 
-BulletAction = {
-    NoPanic = 'NoPanic',
-    DodgeLeft = 'DodgeLeft',
-    DodgeRight = 'DodgeRight'
-}
+function BroadcastDeath(ship)
+    local event = game.GameEvent:new()
+    event.from = 'enemy'
+    event.message = 'dead'
+    event.to = 'game'
+    event.value = ship.score
+    Game:PostEvent(event)
+end
 
-function CheckBulletAction(ship_pos, bullet_pos)
-    local ship_vertical = ship_pos.x
-    local bullet_vertical = bullet_pos.x
-    -- whats the horizontal safety margin on our vertical
-    -- path vs. bullet's vertical path ?
-    local margin = bullet_vertical - ship_vertical
-    if margin >= 15 or margin <= -15 then
-        return BulletAction.NoPanic
-    end
-    local distance = bullet_pos.y - ship_pos.y
-    -- if it's too far ahead (or behind us) it doesn't matter
-    if distance >= 500 or distance <= 0 then
-        return BulletAction.NoPanic
+function RocketBlast(ship, mine)
+    local ship_node = ship:GetNode(0)
+    local ship_pos = ship_node:GetTranslation()
+    local mine_node = mine:GetNode(0)
+    local mine_pos = mine_node:GetTranslation()
+    local dist = glm.length(mine_pos - ship_pos)
+
+    local blast_force = 1.0 - (dist / 550.0)
+    blast_force = blast_force * 0.6
+    blast_force = blast_force + util.rand(0.0, 0.4)
+
+    local blast_vector = glm.normalize(ship_pos - mine_pos)
+    ship.velocity = blast_vector * blast_force * 1500.0
+    ship.rotation = util.rand(-15.0, 29.4)
+    ship:DieLater(util.rand(0.1, 0.6))
+end
+
+function BulletHit(ship, bullet)
+    if bullet.player == false then
+        return
     end
 
-    if margin > 0 then
-        return BulletAction.DodgeLeft
-    end
-    return BulletAction.DodgeRight
+    ship:Die()
+    bullet:Die()
 end
 
 -- Called when the game play begins for a scene.
-function BeginPlay(ship2, scene, map)
+function BeginPlay(ship, scene, map)
 
 end
 
 -- Called on every low frequency game tick.
-function Tick(ship2, game_time, dt)
+function Tick(ship, game_time, dt)
     -- launch a few bullets towards the player.
 
     if math.fmod(tick_counter, 3) == 0 then
-        local weapon = ship2:FindNodeByClassName('Weapon')
-        local matrix = Scene:FindEntityNodeTransform(ship2, weapon)
+        local weapon = ship:FindNodeByClassName('Weapon')
+        local matrix = Scene:FindEntityNodeTransform(ship, weapon)
         local args = game.EntityArgs:new()
-        args.class = ClassLib:FindEntityClassByName('BlueBullet')
+        args.class = ClassLib:FindEntityClassByName('Bullet/Enemy')
         args.position = util.GetTranslationFromMatrix(matrix)
         args.name = 'blue bullet'
         local bullet = Scene:SpawnEntity(args, true)
-        bullet.velocity = ship2.velocity.y + 100
+        bullet.velocity = ship.velocity.y + 100
     end
     tick_counter = tick_counter + 1
 end
 
 -- Called on every iteration of game loop.
-function Update(ship2, game_time, dt)
+function Update(ship, game_time, dt)
     -- move ship forward
-    local ship_body = ship2:FindNodeByClassName('Body')
+    local ship_body = ship:GetNode(0)
     local ship_pos = ship_body:GetTranslation()
-    ship_pos.x = ship_pos.x + dt * ship2.velocity.x
-    ship_pos.y = ship_pos.y + dt * ship2.velocity.y
-    local velocity = ship2.velocity
+    local ship_rot = ship_body:GetRotation()
+
+    if ship:IsDying() then
+        if ship_pos.y > 500.0 then
+            return
+        end
+
+        SpawnExplosion(ship_pos, 'Enemy Explosion')
+        SpawnScore(ship_pos, ship.score)
+        BroadcastDeath(ship)
+    end
+
+    -- update x,y position
+    ship_pos.x = ship_pos.x + dt * ship.velocity.x
+    ship_pos.y = ship_pos.y + dt * ship.velocity.y
+
+    local velocity = ship.velocity
     -- change direction at the boundaries
     if ship_pos.x >= 550 then
         velocity.x = velocity.x * -1.0
         ship_pos.x = 550
-        -- ship2:PlayAnimationByName('Turn Exhaust Right')
     elseif ship_pos.x <= -550 then
         velocity.x = velocity.x * -1.0
         ship_pos.x = -550
-        -- ship2:PlayAnimationByName('Turn Exhaust Left')
     end
-    ship2.velocity = velocity
+    ship.velocity = velocity
     ship_body:SetTranslation(ship_pos)
+
+    ship_rot = ship_rot + ship.rotation * dt
+
+    ship_body:SetRotation(ship_rot)
+
     -- if it reached the edge of space then kill it.
     if ship_pos.y > 500 then
-        Scene:KillEntity(ship2)
+        ship:Die()
     end
-end
-
--- Called on collision events with other objects.
-function OnBeginContact(ship2, node, other, other_node)
-end
-
--- Called on collision events with other objects.
-function OnEndContact(ship2, node, other, other_node)
 end
 

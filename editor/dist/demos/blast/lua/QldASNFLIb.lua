@@ -8,46 +8,39 @@ local velocity = -100
 
 function Explode(redmine, mine_pos)
     Game:DebugPrint('KAPOW')
-    Scene:KillEntity(redmine)
+
     local args = game.EntityArgs:new()
-    args.class = ClassLib:FindEntityClassByName('Shockwave')
+    args.class = ClassLib:FindEntityClassByName('Rocket Explosion')
     args.name = 'blast radius'
     args.position = mine_pos
-    args.rotation = util.Random(0.0, 3.1456 * 2.0)
-    local shockwave = Scene:SpawnEntity(args, true)
-    shockwave:SetLayer(1)
-
-    args = game.EntityArgs:new()
-    args.class = ClassLib:FindEntityClassByName('Flash')
-    args.name = 'flash'
-    args.position = glm.vec2:new(0.0, 0.0)
-    local flash = Scene:SpawnEntity(args, true)
-    flash:SetLayer(3)
+    args.layer = 4
+    Scene:SpawnEntity(args, true)
 
     -- which enemy ships are close enough to be affected
     -- by the mine, i.e. are within the mine radius
     local num_entities = Scene:GetNumEntities()
     for i = 0, num_entities - 1, 1 do
         local enemy = Scene:GetEntity(i)
-        if enemy:GetClassName() == 'Ship2' then
-            local ship_node = enemy:FindNodeByClassName('Body')
+        if enemy:GetTag() == '#enemy' then
+            local ship_node = enemy:GetNode(0)
             local ship_pos = ship_node:GetTranslation()
             local distance = glm.length(mine_pos - ship_pos)
-            if distance <= 250 then
-                Scene:KillEntity(enemy)
-                SpawnExplosion(ship_pos, 'BlueExplosion')
+            if distance <= 550 then
+                CallMethod(enemy, 'RocketBlast', redmine)
             end
         end
     end
-    if State.play_effects then
-        Audio:PlaySoundEffect('Mine Explosion')
-    end
+
+    Audio:PlaySoundEffect('Rocket Explosion')
+
+    redmine:Die()
+
 end
 
 -- Called when the game play begins for a scene.
 function BeginPlay(redmine, scene, map)
     if State.play_effects then
-        Audio:PlaySoundEffect('Mine Launch')
+        Audio:PlaySoundEffect('Rocket Launch')
     end
 end
 
@@ -58,7 +51,11 @@ end
 
 -- Called on every iteration of game loop.
 function Update(redmine, game_time, dt)
-    local mine_body = redmine:FindNodeByClassName('Body')
+    if redmine:IsDying() then
+        return
+    end
+
+    local mine_body = redmine:GetNode(0)
     local mine_pos = mine_body:GetTranslation()
     if redmine:HasExpired() then
         Explode(redmine, mine_pos)
@@ -68,7 +65,7 @@ function Update(redmine, game_time, dt)
     local num_entities = Scene:GetNumEntities()
     for i = 0, num_entities - 1, 1 do
         local enemy = Scene:GetEntity(i)
-        if enemy:GetClassName() == 'Ship2' then
+        if enemy:GetClassName() == 'Enemy' then
             local ship_body = enemy:FindNodeByClassName('Body')
             local ship_pos = ship_body:GetTranslation()
             local distance = glm.length(mine_pos - ship_pos)
