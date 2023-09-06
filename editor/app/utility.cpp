@@ -275,26 +275,40 @@ std::uint64_t GetFileHash(const QString& file)
 
 QString JoinPath(const QString& lhs, const QString& rhs)
 {
+    QString s;
     if (lhs.isEmpty())
-        return rhs;
+        s = rhs;
     else if (rhs.isEmpty())
-        return lhs;
-    const auto p = lhs + "/" + rhs;
-    return ToNativeSeparators(QDir::cleanPath(p));
+        s = lhs;
+    else s = lhs + "/" + rhs;
+    return ToNativeSeparators(QDir::cleanPath(s));
 }
 
 QString JoinPath(std::initializer_list<QString> parts)
 {
     QString ret;
     for (const auto& str : parts)
-        ret = JoinPath(ret, str);
-
-    return ret;
+    {
+        ret += str;
+        ret += "/";
+    }
+    return ToNativeSeparators(QDir::cleanPath(ret));
 }
 
 QString CleanPath(const QString& path)
 {
-    return ToNativeSeparators(QDir::cleanPath(path));
+    QDir dir(path);
+    QString s;
+    s = dir.canonicalPath();
+    if (s.isEmpty())
+    {
+        QFileInfo info(path);
+        s = info.canonicalFilePath();
+    }
+    if (s.isEmpty())
+        s = path;
+    s = QDir::cleanPath(s);
+    return ToNativeSeparators(s);
 }
 
 bool MakePath(const QString& path)

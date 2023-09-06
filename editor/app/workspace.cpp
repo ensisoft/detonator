@@ -1830,7 +1830,7 @@ QString Workspace::GetDir() const
 
 QString Workspace::GetSubDir(const QString& dir, bool create) const
 {
-    const auto& path = app::JoinPath(mWorkspaceDir, dir);
+    const auto& path = JoinPath(mWorkspaceDir, dir);
 
     if (create)
     {
@@ -1849,6 +1849,8 @@ QString Workspace::GetSubDir(const QString& dir, bool create) const
 AnyString Workspace::MapFileToWorkspace(const AnyString& name) const
 {
     const QString filepath = name;
+    if (filepath.isEmpty())
+        return AnyString("");
 
     // don't remap already mapped files.
     if (filepath.startsWith("app://") ||
