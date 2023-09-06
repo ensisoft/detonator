@@ -23,6 +23,8 @@
 #  include <sol/sol.hpp>
 #include "warnpop.h"
 
+#include <chrono>
+
 #include "base/utility.h"
 #include "base/format.h"
 #include "game/util.h"
@@ -154,6 +156,21 @@ namespace engine
             sol::state_view view(state);
             return sol::make_object(view, RandomEngine::NextFloatGlobal(min, max));
         });
+
+    util["GetSeconds"] = []() {
+        using clock = std::chrono::high_resolution_clock;
+        const auto now  = clock::now();
+        const auto gone = now.time_since_epoch();
+        const auto us = std::chrono::duration_cast<std::chrono::microseconds>(gone);
+        return us.count() / (1000.0 * 1000.0);
+    };
+    util["GetMilliseconds"] = []() {
+        using clock = std::chrono::high_resolution_clock;
+        const auto now = clock::now();
+        const auto gone = now.time_since_epoch();
+        const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(gone);
+        return ms.count();
+    };
 
     sol::constructors<RandomEngine()> random_engine_ctor;
     auto random_engine = util.new_usertype<RandomEngine>("RandomEngine", random_engine_ctor);

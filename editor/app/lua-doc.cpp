@@ -277,6 +277,9 @@ void InitLuaDoc()
     DOC_FUNCTION_1("glm.vec2", "ToVec2", "glm.vec2 conversion helper", "base.FPoint", "point");
     DOC_FUNCTION_1("base.FPoint", "ToPoint", "base.FPoint conversion  helper", "glm.vec2", "vec2");
 
+    DOC_FUNCTION_0("number", "GetSeconds", "Get elapsed time in fractional seconds since undefined epoch.");
+    DOC_FUNCTION_0("unsigned", "GetMilliseconds", "Get elapsed time in milliseconds since undefined epoch.");
+
     DOC_FUNCTION_1("void", "RandomSeed", "Seed the random engine with the given seed value.<br>"
                                      "For any given seed the the generated pseudo random number sequence will always be same on every platform.",
                                      "int", "seed");
