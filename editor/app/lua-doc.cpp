@@ -893,8 +893,13 @@ void InitLuaDoc()
                                          "returned window object to query for widgets etc. and set their initial values conveniently.",
                  "uik.Window|string", "window|name");
     DOC_METHOD_1("void", "CloseUI", "Close the topmost UI Window and pop it off the window stack. <br>"
+                                    "If there's no UI currently open then nothing is done.<br>"
                                     "The associated exit_code will be passed to any OnUIClose event handlers as the result value.",
                  "int", "exit_code");
+    DOC_METHOD_2("void", "CloseUI", "Conditionally close the topmost UI if the UI name matches the given name.<br>"
+                                    "If there's no UI currently open of the name doesn't match then nothing is done.<br>"
+                                    "The associated exit_code will be passed to any OnUIClose event handlers as the result value.",
+                 "string", "name_filter", "int", "exit_code");
     DOC_METHOD_1("void", "PostEvent", "Post a GameEvent to all OnGameEvent handlers.", "game.GameEvent", "event");
     DOC_METHOD_1("void", "ShowDeveloperUI", "Show or hide the developer UI when supported by the host app/platform.", "bool", "show");
     DOC_METHOD_2("void", "EnableEffect", "Enable/disable a rendering effect. <br>Possible effects: 'Bloom'.",

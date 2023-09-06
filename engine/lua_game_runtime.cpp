@@ -549,11 +549,20 @@ void LuaRuntime::Init()
             self.mActionQueue.push(action);
             return action.ui.get();
         });
-    engine["CloseUI"] = [](LuaRuntime& self, int result) {
-        CloseUIAction action;
-        action.result = result;
-        self.mActionQueue.push(std::move(action));
-    };
+    engine["CloseUI"] = sol::overload(
+       [](LuaRuntime& self, int result) {
+           CloseUIAction action;
+           action.result = result;
+           self.mActionQueue.push(std::move(action));
+       },
+       [](LuaRuntime& self, const std::string& name, int result) {
+           if (self.mWindow && self.mWindow->GetName() == name)
+           {
+               CloseUIAction action;
+               action.result = result;
+               self.mActionQueue.push(std::move(action));
+           }
+       });
     engine["PostEvent"] =  [](LuaRuntime& self, const GameEvent& event) {
         PostEventAction action;
         action.event = event;
