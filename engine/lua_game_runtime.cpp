@@ -357,7 +357,10 @@ void LuaRuntime::Init()
     engine["Play"] = sol::overload(
         [](LuaRuntime& self, ClassHandle<SceneClass> klass) {
             if (!klass)
-                throw GameError("Nil scene class");
+            {
+                ERROR("Failed to play scene. Scene class is nil.");
+                return (game::Scene*)nullptr;
+            }
             PlayAction play;
             play.scene = game::CreateSceneInstance(klass);
             auto* ret = play.scene.get();
@@ -367,7 +370,10 @@ void LuaRuntime::Init()
         [](LuaRuntime& self, std::string name) {
             auto klass = self.mClassLib->FindSceneClassByName(name);
             if (!klass)
-                throw GameError("No such scene class: " + name);
+            {
+                ERROR("Failed to play scene. No such scene class. [klass='%1']", name);
+                return (game::Scene*)nullptr;
+            }
             PlayAction play;
             play.scene = game::CreateSceneInstance(klass);
             auto* ret = play.scene.get();
@@ -520,7 +526,10 @@ void LuaRuntime::Init()
     engine["OpenUI"] = sol::overload(
         [](LuaRuntime& self, ClassHandle<uik::Window> model) {
             if (!model)
-                throw GameError("Nil UI window object.");
+            {
+                ERROR("Failed to open game UI. Window object is nil.");
+                return (uik::Window*)nullptr;
+            }
             // there's no "class" object for the UI system so we're just
             // going to create a mutable copy and put that on the UI stack.
             OpenUIAction action;
@@ -531,7 +540,10 @@ void LuaRuntime::Init()
         [](LuaRuntime& self, std::string name) {
             auto handle = self.mClassLib->FindUIByName(name);
             if (!handle)
-                throw GameError("No such UI: " + name);
+            {
+                ERROR("Failed to open game UI. No such window class. [name='%1']", name);
+                return (uik::Window*)nullptr;
+            }
             OpenUIAction action;
             action.ui = std::make_shared<uik::Window>(*handle);
             self.mActionQueue.push(action);

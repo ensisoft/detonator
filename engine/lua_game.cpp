@@ -1080,6 +1080,11 @@ void BindGameLib(sol::state& L)
         });
     scene["SpawnEntity"] = sol::overload(
         [](Scene& scene, const EntityArgs& args) {
+            if (args.klass == nullptr)
+            {
+                ERROR("Failed to spawn entity. Entity class is nil.");
+                return (game::Entity*)nullptr;
+            }
             return scene.SpawnEntity(args, true);
         },
         [](Scene& scene, const EntityArgs& args, bool link) {
@@ -1092,8 +1097,10 @@ void BindGameLib(sol::state& L)
             game::EntityArgs args;
             args.klass = classlib->FindEntityClassByName(klass);
             if (!args.klass)
-                throw GameError("No such entity class could be found: " + klass);
-
+            {
+                ERROR("Failed to spawn entity. No such entity class. [klass='%1']", klass);
+                return (game::Entity*)nullptr;
+            }
             return scene.SpawnEntity(args);
         },
         [](Scene& scene, const std::string& klass, const sol::table& args_table, sol::this_state this_state) {
@@ -1103,7 +1110,10 @@ void BindGameLib(sol::state& L)
             game::EntityArgs args;
             args.klass = classlib->FindEntityClassByName(klass);
             if (!args.klass)
-                throw GameError("No such entity class could be found: " + klass);
+            {
+                ERROR("Failed to spawn entity. No such entity class. [klass='%1']", klass);
+                return (game::Entity*)nullptr;
+            }
 
             args.id             = args_table.get_or("id", std::string(""));
             args.name           = args_table.get_or("name", std::string(""));
@@ -1284,39 +1294,58 @@ void BindGameLib(sol::state& L)
     audio["PrepareMusicGraph"] = sol::overload(
             [](AudioEngine& engine, std::shared_ptr<const audio::GraphClass> klass) {
                 if (!klass)
-                    throw GameError("Nil audio graph class.");
+                {
+                    ERROR("Failed to prepare music graph. Audio graph is nil.");
+                    return false;
+                }
                 return engine.PrepareMusicGraph(klass);
             },
             [](AudioEngine& engine, const std::string& name) {
                 const auto* lib = engine.GetClassLibrary();
                 auto klass = lib->FindAudioGraphClassByName(name);
+
                 if (!klass)
-                    throw GameError("No such audio graph: " + name);
+                {
+                    ERROR("Failed to prepare music graph. No such audio graph class. [class='%1']", name);
+                    return false;
+                }
                 return engine.PrepareMusicGraph(klass);
             });
     audio["PlayMusic"] = sol::overload(
             [](AudioEngine& engine, std::shared_ptr<const audio::GraphClass> klass) {
                 if (!klass)
-                    throw GameError("Nil audio graph class.");
+                {
+                    ERROR("Failed to play music. Audio graph is nil.");
+                    return false;
+                }
                 return engine.PlayMusic(klass);
             },
             [](AudioEngine& engine, std::shared_ptr<const audio::GraphClass> klass, unsigned when) {
                 if (!klass)
-                    throw GameError("Nil audio graph class.");
+                {
+                    ERROR("Failed to play music. Audio graph is nil.");
+                    return false;
+                }
                 return engine.PlayMusic(klass, when);
             },
             [](AudioEngine& engine, const std::string& name, unsigned when) {
                 const auto* lib = engine.GetClassLibrary();
                 auto klass = lib->FindAudioGraphClassByName(name);
                 if (!klass)
-                    throw GameError("No such audio graph: " + name);
+                {
+                    ERROR("Failed to play music. No such audio graph class. [class='%1']", name);
+                    return false;
+                }
                 return engine.PlayMusic(klass, when);
             },
             [](AudioEngine& engine, const std::string& name) {
                 const auto* lib = engine.GetClassLibrary();
                 auto klass = lib->FindAudioGraphClassByName(name);
                 if (!klass)
-                    throw GameError("No such audio graph: " + name);
+                {
+                    ERROR("Failed to play music. No such audio graph class. [class='%1']", name);
+                    return false;
+                }
                 return engine.PlayMusic(klass);
             });
 
@@ -1356,26 +1385,38 @@ void BindGameLib(sol::state& L)
     audio["PlaySoundEffect"] = sol::overload(
             [](AudioEngine& engine, std::shared_ptr<const audio::GraphClass> klass, unsigned when) {
                 if (!klass)
-                    throw GameError("Nil audio effect graph class.");
+                {
+                    ERROR("Failed to play audio effect. Audio graph is nil.");
+                    return false;
+                }
                 return engine.PlaySoundEffect(klass, when);
             },
             [](AudioEngine& engine, std::shared_ptr<const audio::GraphClass> klass) {
                 if (!klass)
-                    throw GameError("Nil audio effect graph class.");
+                {
+                    ERROR("Failed to play audio effect. Audio graph is nil.");
+                    return false;
+                }
                 return engine.PlaySoundEffect(klass, 0);
             },
             [](AudioEngine& engine, const std::string& name, unsigned when) {
                 const auto* lib = engine.GetClassLibrary();
                 auto klass = lib->FindAudioGraphClassByName(name);
                 if (!klass)
-                    throw GameError("No such audio effect graph:" + name);
+                {
+                    ERROR("Failed to play audio effect. No such audio effect graph. [name='%1']", name);
+                    return false;
+                }
                 return engine.PlaySoundEffect(klass, when);
             },
             [](AudioEngine& engine, const std::string& name) {
                 const auto* lib = engine.GetClassLibrary();
                 auto klass = lib->FindAudioGraphClassByName(name);
                 if (!klass)
-                    throw GameError("No such audio effect graph:" + name);
+                {
+                    ERROR("Failed to play audio effect. No such audio effect graph. [name='%1']", name);
+                    return false;
+                }
                 return engine.PlaySoundEffect(klass, 0);
             });
     audio["SetSoundEffectGain"] = &AudioEngine::SetSoundEffectGain;

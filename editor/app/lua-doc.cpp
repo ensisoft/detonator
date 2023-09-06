@@ -1553,9 +1553,11 @@ void InitLuaDoc()
                                               "In order to start the actual audio playback ResumeMusic must be called separately.<br>"
                                               "Returns true if the audio graph was prepared successfully or false on error.",
                  "audio.GraphClass|string", "graph|name");
-    DOC_METHOD_1("bool", "PlayMusic", "Similar to PrepareMusicGraph except the audio playback is also started immediately.",
+    DOC_METHOD_1("bool", "PlayMusic", "Similar to PrepareMusicGraph except the audio playback is also started immediately."
+                                      "Returns true on successful play or false on error.",
                  "audio.GraphClass|string", "graph|name");
-    DOC_METHOD_2("bool", "PlayMusic", "Similar to PrepareMusicGraph except the audio playback is started after some delay (in milliseconds) elapses.",
+    DOC_METHOD_2("bool", "PlayMusic", "Similar to PrepareMusicGraph except the audio playback is started after some delay (in milliseconds) elapses."
+                                      "Returns true on successful play or false on error.",
                  "audio.GraphClass|string", "graph|name", "unsigned", "delay");
     DOC_METHOD_1("void", "ResumeMusic", "Resume the playback of the named music graph immediately.",
                  "string", "name");
@@ -1575,8 +1577,9 @@ void InitLuaDoc()
                                            "Effect can be one of the following: 'FadeIn', 'FadeOut'",
                  "string", "graph_name", "string", "effect_name", "unsigned", "duration");
     DOC_METHOD_1("void", "SetMusicGain", "Set the overall music gain (volume adjustment) in the audio mixer.", "float", "gain");
-    DOC_METHOD_1("void", "PlaySoundEffect", "Play a sound effect audio graph immediately.", "audio.GraphClass|string", "graph|name");
-    DOC_METHOD_2("void", "PlaySoundEffect", "Play a sound effect audio graph after some delay (in milliseconds) elapses.",
+    DOC_METHOD_1("bool", "PlaySoundEffect", "Play a sound effect audio graph immediately. Returns true on successful playback or false on error.",
+                 "audio.GraphClass|string", "graph|name");
+    DOC_METHOD_2("bool", "PlaySoundEffect", "Play a sound effect audio graph after some delay (in milliseconds) elapses. Returns true on successful playback or false on error.",
                  "audio.GraphClass|string", "graph|name", "unsigned", "delay");
     DOC_METHOD_1("void", "SetSoundEffectGain", "Set the overall sound effect gain (volume adjustment) in the audio mixer.", "float", "gain");
     DOC_METHOD_1("void", "EnableEffects", "Enable or disable actual sound effect playing. "
