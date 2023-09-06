@@ -14,7 +14,7 @@ end
 
 -- Called on every iteration of game loop.
 function Update(bullet, game_time, dt)
-    local bullet_node = bullet:FindNodeByClassName('Bullet')
+    local bullet_node = bullet:GetNode(0)
     local bullet_pos = bullet_node:GetTranslation()
     local velocity = bullet.velocity
     bullet_pos.y = bullet_pos.y + dt * velocity
@@ -22,32 +22,28 @@ function Update(bullet, game_time, dt)
 end
 
 function PostUpdate(bullet, game_time)
+    if bullet:IsDying() then
+        return
+    end
+
     -- check if this bullet is hitting anything
-    local bullet_node = bullet:FindNodeByClassName('Bullet')
+    local bullet_node = bullet:GetNode(0)
     local bullet_pos = bullet_node:GetTranslation()
+
+    if bullet_pos.y > 400.0 then
+        return
+    end
+    if bullet_pos.y < -400.0 then
+        return
+    end
+
     local query_ret = Scene:QuerySpatialNodes(bullet_pos, 'Closest')
+
+    -- invoke BulletHit on every entity we have hit
     while query_ret:HasNext() do
         local node = query_ret:Get()
         local entity = node:GetEntity()
-        local node_pos = node:GetTranslation()
-        if entity:GetClassName() == 'Ship2' and bullet.red then
-            Game:DebugPrint('Enemy was hit!')
-            Scene:KillEntity(entity)
-            Scene:KillEntity(bullet)
-            SpawnExplosion(node_pos, 'BlueExplosion')
-            SpawnScore(node_pos, entity.score)
-            local score = Scene:FindEntityByInstanceName('GameScore')
-            local node = score:FindNodeByClassName('text')
-            local text = node:GetTextItem()
-            Scene.score = Scene.score + entity.score
-            text:SetText(tostring(Scene.score))
-        elseif entity:GetClassName() == 'Asteroid' and bullet.red then
-            Scene:KillEntity(bullet)
-        elseif entity:GetClassName() == 'Player' and bullet.red == false then
-            Game:DebugPrint('You were hit!')
-            Scene:KillEntity(entity)
-            SpawnExplosion(node_pos, 'RedExplosion')
-        end
+        CallMethod(entity, 'BulletHit', bullet)
         query_ret:Next()
     end
 end
