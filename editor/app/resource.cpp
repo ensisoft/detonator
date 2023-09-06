@@ -624,6 +624,8 @@ void MigrateResource(uik::Window& window, app::MigrationLog* log)
         }
     }
 
+    unsigned focusable_widget_count = 0;
+
     // if all widgets have 0 as tab index then initialize here.
     bool does_have_tab_ordering = false;
     bool does_need_tab_ordering = false;
@@ -633,6 +635,7 @@ void MigrateResource(uik::Window& window, app::MigrationLog* log)
         const auto& widget = window.GetWidget(i);
         if (!widget.CanFocus())
             continue;
+        focusable_widget_count++;
         does_need_tab_ordering = true;
         if (widget.GetTabIndex() != 0u)
         {
@@ -640,6 +643,9 @@ void MigrateResource(uik::Window& window, app::MigrationLog* log)
             break;
         }
     }
+    if (focusable_widget_count == 0 || focusable_widget_count == 1)
+        return;
+
     if (!does_need_tab_ordering || does_have_tab_ordering)
         return;
 
