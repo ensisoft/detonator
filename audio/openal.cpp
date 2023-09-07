@@ -55,6 +55,11 @@ const char* ToString(ALenum e)
     return "???";
 }
 
+#if !defined(AUDIO_CHECK_OPENAL)
+#pragma message "OpenAL calls are NOT checked!"
+#define AL_CALL_IMPL(x, line)  \
+do  { x; } while(0)
+#else
 #define AL_CALL_IMPL(x, line)     \
 do {                              \
     x;                            \
@@ -64,6 +69,8 @@ do {                              \
       std::abort();               \
     }                             \
 } while (0)
+#pragma message "OpenAL calls are checked!"
+#endif
 
 
 // used to check calls for cases where failures are thought out to be BUGS.

@@ -148,7 +148,8 @@ typedef  void (GL_APIENTRY *PFNGLDEBUGMESSAGECALLBACKPROC)(GLDEBUGPROC proc, con
 // #define RENDERBUFFER_KHR                                  ????
 // #define FRAMEBUFFER_KHR                                   ????
 
-#if defined(WEBGL)
+#if !defined(GRAPHICS_CHECK_OPENGL)
+#  pragma message "OpenGL calls are NOT checked!"
 #  define GL_CALL(x) mGL.x
 #else
 #define GL_CALL(x)                                      \
@@ -162,6 +163,8 @@ do {                                                    \
         std::abort();                                   \
     }                                                   \
 } while(0)
+
+#pragma message "OpenGL calls are checked!"
 #endif
 
 namespace
@@ -169,6 +172,7 @@ namespace
 
 const char* GLEnumToStr(GLenum eval)
 {
+
 #define CASE(x) case x: return #x
     switch (eval)
     {
