@@ -182,9 +182,9 @@ namespace gfx
         // which provides the geometrical information of the object to be drawn, a material,
         // which provides the "look&feel" i.e. the surface properties for the shape
         // and finally a transform which defines the model-to-world transform.
-        virtual void Draw(const DrawList& shapes,
-                          const RenderPassState& renderp,
-                          const ShaderPass& shaderp) const;
+        void Draw(const DrawList& shapes,
+                  const RenderPassState& renderp,
+                  const ShaderPass& shaderp) const;
 
         // legacy draw functions.
 
