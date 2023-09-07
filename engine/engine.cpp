@@ -59,11 +59,7 @@
 #include "uikit/painter.h"
 #include "uikit/state.h"
 
-#ifndef SOL_ALL_SAFETIES_ON
-#  error we need SOL safety flags for correct function
-#else
-#  pragma message "SOL SAFETIES ARE ON  !"
-#endif
+
 
 namespace
 {

@@ -17,3 +17,5 @@
 // keep these turned off on purpose for now
 //#define GRAPHICS_CHECK_OPENGL
 //#define AUDIO_CHECK_OPENAL
+
+#define SOL_ALL_SAFETIES_ON 1

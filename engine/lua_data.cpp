@@ -33,6 +33,15 @@
 #include "data/reader.h"
 #include "data/writer.h"
 
+// sol overload resolution requires a define
+// SOL_ALL_SAFETIES_ON will take care of that
+
+#ifndef SOL_ALL_SAFETIES_ON
+#  error we need SOL safety flags for correct function
+#else
+#  pragma message "SOL SAFETIES ARE ON  !"
+#endif
+
 using namespace data;
 using namespace engine::lua;
 
