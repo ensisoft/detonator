@@ -617,6 +617,7 @@ namespace game
           : mClass(klass)
           , mMaterialId(mClass->GetMaterialId())
           , mInstanceFlags(mClass->GetFlags())
+          , mInstanceTimeScale(mClass->GetTimeScale())
           , mMaterialParams(mClass->GetMaterialParams())
         {}
         bool HasMaterialTimeAdjustment() const noexcept
