@@ -164,6 +164,7 @@ namespace gui
         app::Workspace* mWorkspace = nullptr;
         // the material class we're editing
         std::shared_ptr<gfx::MaterialClass> mMaterial;
+        std::unique_ptr<gfx::MaterialClassInst> mMaterialInst;
         // play state
         enum PlayState {
             Playing, Paused, Stopped
