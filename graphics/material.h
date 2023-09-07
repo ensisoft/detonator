@@ -1266,6 +1266,9 @@ namespace gfx
         // Shortcut operator for accessing the class object instance.
         const MaterialClass* operator->() const
         { return mClass.get(); }
+
+        inline bool HasError() const noexcept
+        { return mError; }
     private:
         // This is the "class" object for this material type.
         std::shared_ptr<const MaterialClass> mClass;
@@ -1278,6 +1281,7 @@ namespace gfx
         // but it'd be nice if the problem was logged only once instead
         // of spamming the log continuously.
         mutable bool mFirstRender = true;
+        mutable bool mError = false;
     };
 
     // material specialized for rendering text using

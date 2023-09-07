@@ -211,7 +211,7 @@ Texture* detail::TextureFileSource::Upload(const Environment& env, Device& devic
     // identify this texture object on the GPU because it's
     // possible that the *same* texture object (same underlying file)
     // is used with *different* flags in another material.
-    // in other words, "foo.png with premultiplied alpha" must be
+    // in other words, "foo.png with pre-multiplied alpha" must be
     // a different GPU texture object than "foo.png with straight alpha".
     size_t gpu_hash = 0;
     gpu_hash = base::hash_combine(gpu_hash, mFile);
@@ -234,6 +234,19 @@ Texture* detail::TextureFileSource::Upload(const Environment& env, Device& devic
     if (!texture) {
         texture = device.MakeTexture(gpu_id);
         texture->SetName(mName);
+        texture->SetContentHash(0);
+    }
+    else if (texture->GetContentHash() == 0)
+    {
+        // if the texture already exists but hash is zero that means we've been here
+        // before and the texture has failed to load. In this case return early with
+        // a nullptr and skip subsequent load attempts.
+        // Note that in the editor if the user wants to reload a texture that was
+        // for example just modified by an image editor tool there's explicitly
+        // the reload mechanism that will nuke textures from the device.
+        // After that is done, the next Upload will again have to recreate the
+        // texture object on the device again.
+        return nullptr;
     }
 
     if (const auto& bitmap = GetData())
@@ -293,13 +306,12 @@ std::shared_ptr<IBitmap> detail::TextureFileSource::GetData() const
         auto view = file.GetPixelReadView<RGBA>();
         auto ret = std::make_shared<Bitmap<RGBA>>();
         ret->Resize(view.GetWidth(), view.GetHeight());
-        DEBUG("Performing alpha premultiply on texture. [file='%1']", mFile);
+        DEBUG("Performing alpha pre-multiply on texture. [file='%1']", mFile);
         PremultiplyAlpha(ret->GetPixelWriteView(), view, true /* srgb */);
         return ret;
     }
-    else ERROR("Unexpected texture bit depth. [file='%1']", mFile);
+    else ERROR("Unexpected texture bit depth. [file='%1', depth=%2]", mFile, file.GetDepthBits());
 
-    ERROR("Failed to load texture. [file='%1']", mFile);
     return nullptr;
 }
 void detail::TextureFileSource::IntoJson(data::Writer& data) const
@@ -2242,7 +2254,11 @@ bool MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device
     mFirstRender = false;
 
     if (!mClass->ApplyDynamicState(state, device, program))
+    {
+        mError = true;
         return false;
+    }
+    mError = false;
 
     const auto surface = mClass->GetSurfaceType();
     if (surface == MaterialClass::SurfaceType::Opaque)

@@ -258,10 +258,16 @@ void MaterialWidget::ZoomOut()
 void MaterialWidget::ReloadShaders()
 {
     mUI.widget->reloadShaders();
+
+    // reset material instance so that any one time error logging will take place.
+    mMaterialInst.reset();
 }
 void MaterialWidget::ReloadTextures()
 {
     mUI.widget->reloadTextures();
+
+    // reset material instance so that any one time error logging will take place.
+    mMaterialInst.reset();
 
     GetTextureProperties();
 }
@@ -1731,10 +1737,17 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         return;
     }
 
-    gfx::MaterialClassInst material(mMaterial);
+    if (!mMaterialInst)
+        mMaterialInst = std::make_unique<gfx::MaterialClassInst>(mMaterial);
+
     const auto time = mState == PlayState::Playing ? mTime : GetValue(mUI.kTime);
-    material.SetRuntime(time);
-    painter.Draw(*drawable, transform, material);
+    mMaterialInst->SetRuntime(time);
+    painter.Draw(*drawable, transform, *mMaterialInst);
+
+    if (mMaterialInst->HasError())
+    {
+        ShowError("Error in material!", gfx::FPoint(10.0f, 10.0f), painter);
+    }
 }
 
 gfx::TextureMap* MaterialWidget::GetSelectedTextureMap()
