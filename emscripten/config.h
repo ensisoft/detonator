@@ -13,3 +13,7 @@
 #define BASE_TEST_HELP_SUPPORT_GLM
 #define GAMESTUDIO_ENABLE_PHYSICS_DEBUG
 #define GAMESTUDIO_ENABLE_AUDIO
+
+// keep these turned off on purpose for now
+//#define GRAPHICS_CHECK_OPENGL
+//#define AUDIO_CHECK_OPENAL

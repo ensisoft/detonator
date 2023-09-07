@@ -6,3 +6,4 @@
 #include "config/config.h"
 
 #define MATH_FORCE_DETERMINISTIC_RANDOM
+#define GRAPHICS_CHECK_OPENGL
