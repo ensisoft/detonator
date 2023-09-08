@@ -1,6 +1,7 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
   <qresource>
+    <file>16x16_ico_png/deptree.png</file>
     <file>16x16_ico_png/move_up.png</file>
     <file>16x16_ico_png/move_down.png</file>
     <file>16x16_ico_png/svg_logo.png</file>

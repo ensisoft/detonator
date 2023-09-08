@@ -453,6 +453,9 @@ add_executable(Detonator
     editor/gui/dlgproject.h
     editor/gui/dlgproject.ui
     editor/gui/dlgproject.cpp
+    editor/gui/dlgresdeps.h
+    editor/gui/dlgresdeps.ui
+    editor/gui/dlgresdeps.cpp
     editor/gui/dlgsave.h
     editor/gui/dlgsave.ui
     editor/gui/dlgsave.cpp

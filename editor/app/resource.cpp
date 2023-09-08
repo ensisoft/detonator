@@ -666,4 +666,54 @@ void MigrateResource(uik::Window& window, app::MigrationLog* log)
 }
 
 } // namespace
+
+QVariant ResourceListModel::data(const QModelIndex& index, int role) const
+{
+    ASSERT(index.model() == this);
+    ASSERT(index.row() < mResources.size());
+    const auto& item = mResources[index.row()];
+
+    if (role == Qt::SizeHintRole)
+        return QSize(0, 16);
+    else if (role == Qt::DisplayRole)
+    {
+        switch (index.column())
+        {
+            case 0: return toString(item.resource->GetType());
+            case 1: return toString(item.resource->GetName());
+        }
+    }
+    else if (role == Qt::DecorationRole && index.column() == 0)
+    {
+        return item.resource->GetIcon();
+    }
+    return QVariant();
+}
+QVariant ResourceListModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
+    {
+        switch (section)
+        {
+            case 0:  return "Type";
+            case 1:  return "Name";
+        }
+    }
+    return QVariant();
+}
+
+void ResourceListModel::SetList(const ResourceList& list)
+{
+    QAbstractTableModel::beginResetModel();
+    mResources = list;
+    QAbstractTableModel::endResetModel();
+}
+
+void ResourceListModel::Clear()
+{
+    QAbstractTableModel::beginResetModel();
+    mResources.clear();
+    QAbstractTableModel::endResetModel();
+}
+
 } // namespace

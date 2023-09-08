@@ -1348,7 +1348,11 @@
     </property>
     <widget class="QMenu" name="menuImport">
      <property name="title">
-      <string>Import Resource</string>
+      <string>Import Resource...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../resource/resource.qrc">
+       <normaloff>:/16x16_ico_png/import.png</normaloff>:/16x16_ico_png/import.png</iconset>
      </property>
      <addaction name="actionImportTiles"/>
      <addaction name="actionImportFiles"/>
@@ -1366,11 +1370,14 @@
     <addaction name="actionNewScript"/>
     <addaction name="actionNewResource"/>
     <addaction name="separator"/>
-    <addaction name="menuImport"/>
     <addaction name="actionSelectResourceForEditing"/>
     <addaction name="separator"/>
+    <addaction name="menuImport"/>
+    <addaction name="separator"/>
     <addaction name="actionProjectSync"/>
+    <addaction name="separator"/>
     <addaction name="actionProjectSettings"/>
+    <addaction name="separator"/>
     <addaction name="actionPackageResources"/>
     <addaction name="separator"/>
     <addaction name="actionProjectPlay"/>
@@ -1793,7 +1800,10 @@
      <normaloff>:/16x16_ico_png/package.png</normaloff>:/16x16_ico_png/package.png</iconset>
    </property>
    <property name="text">
-    <string>Package ...</string>
+    <string>Package Game...</string>
+   </property>
+   <property name="toolTip">
+    <string>Package the game for distribution</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+P</string>
@@ -1829,7 +1839,7 @@
      <normaloff>:/16x16_ico_png/settings.png</normaloff>:/16x16_ico_png/settings.png</iconset>
    </property>
    <property name="text">
-    <string>Settings ...</string>
+    <string>Game Settings ...</string>
    </property>
    <property name="toolTip">
     <string>Workspace settings</string>
@@ -2018,7 +2028,7 @@
      <normaloff>:/16x16_ico_png/import.png</normaloff>:/16x16_ico_png/import.png</iconset>
    </property>
    <property name="text">
-    <string> Files ...</string>
+    <string>From Files</string>
    </property>
    <property name="toolTip">
     <string>Import files as resources</string>
@@ -2042,7 +2052,7 @@
      <normaloff>:/16x16_ico_png/tag.png</normaloff>:/16x16_ico_png/tag.png</iconset>
    </property>
    <property name="text">
-    <string>Json...</string>
+    <string>To JSON</string>
    </property>
    <property name="toolTip">
     <string>Export resources as JSON</string>
@@ -2102,7 +2112,7 @@
      <normaloff>:/16x16_ico_png/tag.png</normaloff>:/16x16_ico_png/tag.png</iconset>
    </property>
    <property name="text">
-    <string> Json...</string>
+    <string>From JSON</string>
    </property>
    <property name="toolTip">
     <string>Import resources from JSON</string>
@@ -2171,7 +2181,7 @@
      <normaloff>:/16x16_ico_png/import.png</normaloff>:/16x16_ico_png/import.png</iconset>
    </property>
    <property name="text">
-    <string>Tileset...</string>
+    <string>From Tileset</string>
    </property>
    <property name="toolTip">
     <string>Import new tiles from a packed tilemap</string>
@@ -2186,10 +2196,10 @@
      <normaloff>:/16x16_ico_png/compress.png</normaloff>:/16x16_ico_png/compress.png</iconset>
    </property>
    <property name="text">
-    <string> Pack...</string>
+    <string>From Resource Pack</string>
    </property>
    <property name="toolTip">
-    <string>Import resources from a zip package</string>
+    <string>Import resources from a resource package</string>
    </property>
   </action>
   <action name="actionExportZIP">
@@ -2198,10 +2208,10 @@
      <normaloff>:/16x16_ico_png/compress.png</normaloff>:/16x16_ico_png/compress.png</iconset>
    </property>
    <property name="text">
-    <string>Pack...</string>
+    <string>To Resource Pack</string>
    </property>
    <property name="toolTip">
-    <string>Export selected resources into a zip package</string>
+    <string>Export selected resources to a resource package</string>
    </property>
   </action>
   <action name="actionLaunchViewer">
@@ -2274,6 +2284,18 @@
    </property>
    <property name="toolTip">
     <string>Create new entity animator script</string>
+   </property>
+  </action>
+  <action name="actionDependencies">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/deptree.png</normaloff>:/16x16_ico_png/deptree.png</iconset>
+   </property>
+   <property name="text">
+    <string>Dependencies...</string>
+   </property>
+   <property name="toolTip">
+    <string>Show resource depedency graph</string>
    </property>
   </action>
  </widget>
