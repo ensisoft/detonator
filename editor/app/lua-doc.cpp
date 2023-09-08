@@ -433,6 +433,7 @@ void InitLuaDoc()
     DOC_METHOD_0("base.FRect", "new", "Construct a new axis aligned rectangle without any size.");
     DOC_METHOD_4("base.FRect", "new", "Construct a new axis aligned rectangle.",
                  "float", "x", "float", "y", "float", "width", "float", "height");
+    DOC_METHOD_0("base.FRect", "Copy", "Create a copy of this object.");
     DOC_METHOD_0("float", "GetHeight", "Get the height of the rectangle.");
     DOC_METHOD_0("float", "GetWidth", "Get the width of the rectangle.");
     DOC_METHOD_0("float", "GetX", "Get the X position of the rectangle.");
@@ -485,6 +486,7 @@ void InitLuaDoc()
     DOC_METHOD_0("base.FSize", "new", "Construct a new size with zero width and height.");
     DOC_METHOD_2("base.FSize", "new", "Construct a new size with the given width and height.",
                "float", "width", "float", "height");
+    DOC_METHOD_0("base.FSize", "Copy", "Create a copy of this object.");
     DOC_METHOD_0("float", "GetWidth", "Get the width of the size.");
     DOC_METHOD_0("float", "GetHeight", "Get the height of the size.");
     DOC_METHOD_0("bool", "IsZero", "Check whether the size is a zero size. A size is zero when it has no width or height.");
@@ -496,6 +498,7 @@ void InitLuaDoc()
     DOC_TABLE("base.FPoint");
     DOC_METHOD_0("base.FPoint", "new", "Construct a new point with zero x, y position.");
     DOC_METHOD_2("base.FPoint", "new", "Construct a new point with the given x,y position.", "float", "x", "float", "y");
+    DOC_METHOD_0("base.FPoint", "Copy", "Create a copy of this object.");
     DOC_METHOD_0("float", "GetX", "Get the x position.");
     DOC_METHOD_0("float", "GetY", "Get the y position.");
     DOC_METHOD_1("void", "SetX", "Set the x position.", "float", "x");
@@ -523,6 +526,7 @@ void InitLuaDoc()
     DOC_METHOD_4("base.Color4f", "new", "Construct a new color with int [0, 255] channel values.",
                  "int", "r", "int", "g", "int", "b", "int", "a");
     DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.", "base.Color4f", "color");
+    DOC_METHOD_0("base.Color4f", "Copy", "Create a copy of this object.");
     DOC_METHOD_0("float", "GetRed", "Get normalized red channel value.");
     DOC_METHOD_0("float", "GetGreen", "Get normalized green channel value.");
     DOC_METHOD_0("float", "GetBlue", "Get normalized blue channel value.");
