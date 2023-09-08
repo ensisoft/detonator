@@ -1892,7 +1892,7 @@ void unit_test_duplicate_with_data()
         TEST_REQUIRE(workspace.GetUserDefinedResource(0).GetName() == "layer data");
         TEST_REQUIRE(workspace.GetUserDefinedResource(1).GetName() == "tilemap");
 
-        workspace.DuplicateResource(1);
+        workspace.DuplicateResources(1);
         TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 4);
 
         {
@@ -1962,7 +1962,7 @@ void unit_test_delete_with_data()
         TEST_REQUIRE(workspace.GetUserDefinedResource(0).GetName() == "layer data");
         TEST_REQUIRE(workspace.GetUserDefinedResource(1).GetName() == "tilemap");
 
-        workspace.DeleteResource(1);
+        workspace.DeleteResources(1);
         TEST_REQUIRE(workspace.GetNumUserDefinedResources() == 0);
         TEST_REQUIRE(QFileInfo(data_file).exists() == false);
     }
