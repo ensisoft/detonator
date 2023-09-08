@@ -24,6 +24,7 @@
 #  include <QVariantMap>
 #  include <QJsonObject>
 #  include <QIcon>
+#  include <QAbstractTableModel>
 #  include <boost/logic/tribool.hpp>
 #include "warnpop.h"
 
@@ -924,5 +925,29 @@ namespace app
     };
 
     using ResourceList = std::vector<ResourceListItem>;
+
+    class ResourceListModel : public QAbstractTableModel
+    {
+    public:
+        explicit ResourceListModel(const ResourceList& list)
+          : mResources(list)
+        {}
+        ResourceListModel() = default;
+
+        virtual QVariant data(const QModelIndex& index, int role) const override;
+        virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+        virtual int rowCount(const QModelIndex&) const override
+        { return static_cast<int>(mResources.size()); }
+        virtual int columnCount(const QModelIndex&) const override
+        { return 2; }
+        void SetList(const ResourceList& list);
+        void Clear();
+
+        inline const ResourceList& GetList() const noexcept
+        { return mResources; }
+
+    private:
+        ResourceList mResources;
+    };
 
 } // namespace

@@ -59,6 +59,7 @@
 #include "editor/gui/polygonwidget.h"
 #include "editor/gui/tilemapwidget.h"
 #include "editor/gui/dlgabout.h"
+#include "editor/gui/dlgresdeps.h"
 #include "editor/gui/dlgimport.h"
 #include "editor/gui/dlgtileimport.h"
 #include "editor/gui/dlgsettings.h"
@@ -1600,6 +1601,20 @@ void MainWindow::on_actionDuplicateResource_triggered()
     mWorkspace->DuplicateResources(selected);
 }
 
+void MainWindow::on_actionDependencies_triggered()
+{
+    if (!mWorkspace)
+        return;
+
+    DlgResourceDeps dlg(this, *mWorkspace);
+
+    const auto& selected = GetSelection(mUI.workspace);
+    if (!selected.isEmpty())
+        dlg.SelectItem(mWorkspace->GetResource(selected[0]));
+
+    dlg.exec();
+}
+
 void MainWindow::on_actionSaveWorkspace_triggered()
 {
     if (!mWorkspace->SaveWorkspace())
@@ -2054,16 +2069,15 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
 
     QMenu import;
     import.setIcon(QIcon("icons:import.png"));
-    import.setTitle("Import");
+    import.setTitle("Import Resource...");
     import.addAction(mUI.actionImportTiles);
-    import.addSeparator();
     import.addAction(mUI.actionImportFiles);
     import.addAction(mUI.actionImportJSON);
     import.addAction(mUI.actionImportZIP);
 
     QMenu export_;
     export_.setIcon(QIcon("icons:export.png"));
-    export_.setTitle("Export");
+    export_.setTitle("Export...");
     export_.addAction(mUI.actionExportJSON);
     export_.addAction(mUI.actionExportZIP);
     export_.setEnabled(!indices.isEmpty());
@@ -2079,8 +2093,8 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionNewAudioGraph);
     menu.addMenu(&script);
     menu.addSeparator();
-    menu.addMenu(&import);
-    menu.addSeparator();
+    //menu.addMenu(&import);
+    //menu.addSeparator();
     menu.addAction(mUI.actionEditResource);
     menu.addAction(mUI.actionEditResourceNewWindow);
     menu.addAction(mUI.actionEditResourceNewTab);
@@ -2088,6 +2102,9 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionRenameResource);
     menu.addAction(mUI.actionDuplicateResource);
     menu.addMenu(&export_);
+    menu.addSeparator();
+    menu.addAction(mUI.actionDependencies);
+    menu.addSeparator();
     menu.addAction(mUI.actionDeleteResource);
     menu.addSeparator();
     menu.addMenu(&show);

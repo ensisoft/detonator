@@ -136,6 +136,7 @@ namespace gui
         void on_actionDeleteResource_triggered();
         void on_actionRenameResource_triggered();
         void on_actionDuplicateResource_triggered();
+        void on_actionDependencies_triggered();
         void on_actionSaveWorkspace_triggered();
         void on_actionLoadWorkspace_triggered();
         void on_actionNewWorkspace_triggered();
