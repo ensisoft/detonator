@@ -2361,15 +2361,7 @@ Workspace::ResourceList Workspace::ListDataFiles() const
     return ListResources(Resource::Type::DataFile, false, false);
 }
 
-ResourceList Workspace::ListDependencies(const QModelIndexList& list) const
-{
-    std::vector<size_t> indices;
-    for (const auto& index : list)
-        indices.push_back(index.row());
-
-    return ListDependencies(std::move(indices));
-}
-ResourceList Workspace::ListDependencies(std::vector<size_t> indices) const
+ResourceList Workspace::ListDependencies(const ModelIndexList& indices) const
 {
     std::unordered_map<QString, Resource*> resource_map;
     for (size_t i=0; i < mUserResourceCount; ++i)
@@ -2431,20 +2423,7 @@ ResourceList Workspace::ListDependencies(std::vector<size_t> indices) const
     return ret;
 }
 
-ResourceList Workspace::ListDependencies(std::size_t index) const
-{
-    return ListDependencies(std::vector<size_t>{index});
-}
-
-QStringList Workspace::ListFileResources(const QModelIndexList& list) const
-{
-    std::vector<size_t> indices;
-    for (const auto& index : list)
-        indices.push_back(index.row());
-
-    return ListFileResources(std::move(indices));
-}
-QStringList Workspace::ListFileResources(std::vector<size_t> indices) const
+QStringList Workspace::ListFileResources(const ModelIndexList& indices) const
 {
     // setup a phoney resource packer that actually does no packing
     // but only captures all the resource URIs
@@ -2511,11 +2490,6 @@ QStringList Workspace::ListFileResources(std::vector<size_t> indices) const
         const_cast<Resource&>(resource).Pack(packer);
     }
     return packer.ListUris();
-}
-
-QStringList Workspace::ListFileResources(std::size_t index) const
-{
-    return ListFileResources(std::vector<size_t> {index});
 }
 
 void Workspace::SaveResource(const Resource& resource)
@@ -2762,22 +2736,11 @@ const Resource& Workspace::GetPrimitiveResource(size_t index) const
     return *mResources[mUserResourceCount + index];
 }
 
-void Workspace::DeleteResources(const QModelIndexList& list, std::vector<QString>* dead_files)
-{
-    std::vector<size_t> indices;
-    for (const auto& i : list)
-        indices.push_back(i.row());
-
-    DeleteResources(indices, dead_files);
-}
-void Workspace::DeleteResource(size_t index, std::vector<QString>* dead_files)
-{
-    DeleteResources(std::vector<size_t>{index}, dead_files);
-}
-
-void Workspace::DeleteResources(std::vector<size_t> indices, std::vector<QString>* dead_files)
+void Workspace::DeleteResources(const ModelIndexList& list, std::vector<QString>* dead_files)
 {
     RECURSION_GUARD(this, "ResourceList");
+
+    std::vector<size_t> indices = list.GetData();
 
     std::vector<size_t> relatives;
     // scan the list of indices for associated data resources. 
@@ -2904,23 +2867,17 @@ void Workspace::DeleteResource(const AnyString& id, std::vector<QString>* dead_f
         const auto& res = GetUserDefinedResource(i);
         if (res.GetId() == id)
         {
-            DeleteResource(i, dead_files);
+            DeleteResources(i, dead_files);
             return;
         }
     }
 }
 
-void Workspace::DuplicateResources(const QModelIndexList& list)
-{
-    std::vector<size_t> indices;
-    for (const auto& i : list)
-        indices.push_back(i.row());
-    DuplicateResources(indices);
-}
-
-void Workspace::DuplicateResources(std::vector<size_t> indices)
+void Workspace::DuplicateResources(const ModelIndexList& list)
 {
     RECURSION_GUARD(this, "ResourceList");
+
+    auto indices = list.GetData();
 
     std::sort(indices.begin(), indices.end(), std::less<size_t>());
 
@@ -2997,20 +2954,7 @@ void Workspace::DuplicateResources(std::vector<size_t> indices)
     }
 }
 
-void Workspace::DuplicateResource(size_t index)
-{
-    DuplicateResources(std::vector<size_t>{index});
-}
-
-bool Workspace::ExportResourceJson(const QModelIndexList& list, const QString& filename) const
-{
-    std::vector<size_t> indices;
-    for (const auto& index : list)
-        indices.push_back(index.row());
-    return ExportResourceJson(indices, filename);
-}
-
-bool Workspace::ExportResourceJson(const std::vector<size_t>& indices, const QString& filename) const
+bool Workspace::ExportResourceJson(const ModelIndexList& indices, const QString& filename) const
 {
     data::JsonObject json;
     for (size_t index : indices)

@@ -18,17 +18,69 @@
 
 #include "warnpush.h"
 #  include <QString>
+#  include <QModelIndexList>
 #include "warnpop.h"
 
 #include <string>
 #include <functional>
+#include <vector>
+#include <cstddef>
 
+#include "base/assert.h"
 #include "base/json.h"
+#include "base/utility.h"
 #include "editor/app/format.h"
 #include "editor/app/utility.h"
 
 namespace app
 {
+    // Falicate implicit conversion from various ways of expressing Qt's
+    // model indices lists into a single unified type.
+    class ModelIndexList
+    {
+    public:
+        ModelIndexList() = default;
+        ModelIndexList(const QModelIndexList& list)
+        {
+            for (const auto& index : list)
+            {
+                ASSERT(index.row() >= 0);
+                mIndices.push_back(static_cast<size_t>(index.row()));
+            }
+        }
+        ModelIndexList(const std::vector<size_t>& list)
+          : mIndices(list)
+        {}
+        ModelIndexList(std::vector<size_t>&& list) noexcept
+          : mIndices(std::move(list))
+        {}
+        ModelIndexList(size_t index) noexcept
+        {
+            mIndices.push_back(index);
+        }
+
+        inline size_t operator[](size_t index) const noexcept
+        { return base::SafeIndex(mIndices, index); }
+        inline size_t size() const noexcept
+        { return mIndices.size(); }
+
+        inline void push_back(size_t index)
+        { mIndices.push_back(index); }
+
+        inline auto begin() { return mIndices.begin(); }
+        inline auto end() { return mIndices.end(); }
+        inline auto begin() const { return mIndices.begin(); }
+        inline auto end() const { return mIndices.end(); }
+
+        inline auto& GetRef() { return mIndices; }
+        inline const auto& GetRef() const { return mIndices; }
+        inline auto GetData() const { return mIndices; }
+        //inline auto GetData() && { return std::move(mIndices); }
+    private:
+        std::vector<size_t> mIndices;
+    };
+
+
     // Facilitate implicit conversion from different
     // types into a property key string.
     class PropertyKey

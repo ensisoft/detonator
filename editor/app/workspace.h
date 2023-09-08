@@ -247,17 +247,14 @@ namespace app
 
         ResourceList ListDataFiles() const;
 
-        // List user defined resource dependencies.
-        ResourceList ListDependencies(const QModelIndexList& list) const;
-        ResourceList ListDependencies(std::vector<size_t> indices) const;
-        ResourceList ListDependencies(std::size_t index) const;
+        // List user defined resource dependencies for the given resources.
+        ResourceList ListDependencies(const ModelIndexList& list) const;
 
         // List the files on the filesystem used by the user defined resources.
         // The files are provided by their URIs which can then be expanded to the
         // actual filesystem paths.
-        QStringList ListFileResources(const QModelIndexList& list) const;
-        QStringList ListFileResources(std::vector<size_t> indices) const;
-        QStringList ListFileResources(std::size_t index) const;
+        QStringList ListFileResources(const ModelIndexList& list) const;
+
 
         // Map material ID to its human-readable name.
         QString MapMaterialIdToName(const AnyString& id) const;
@@ -328,18 +325,14 @@ namespace app
         // The list can contain multiple items and can be discontinuous
         // and unsorted. Afterwards it will be sorted (ascending) based
         // on the item row numbers.
-        void DeleteResources(const QModelIndexList& list, std::vector<QString>* dead_files = nullptr);
-        void DeleteResources(std::vector<size_t> indices, std::vector<QString>* dead_files = nullptr);
+        void DeleteResources(const ModelIndexList& list, std::vector<QString>* dead_files = nullptr);
         void DeleteResource(const AnyString& id, std::vector<QString>* dead_files = nullptr);
-        void DeleteResource(size_t index, std::vector<QString>* dead_files = nullptr);
 
         // Create duplicate copies of the selected resources.
-        void DuplicateResources(const QModelIndexList& list);
-        void DuplicateResources(std::vector<size_t> indices);
-        void DuplicateResource(size_t index);
+        void DuplicateResources(const ModelIndexList& list);
 
-        bool ExportResourceJson(const QModelIndexList& list, const QString& filename) const;
-        bool ExportResourceJson(const std::vector<size_t>& indices, const QString& filename) const;
+        // Export the raw JSON of the the selected resources.
+        bool ExportResourceJson(const ModelIndexList& list, const QString& filename) const;
 
         static
         bool ImportResourcesFromJson(const QString& filename, std::vector<std::unique_ptr<Resource>>& resources);
