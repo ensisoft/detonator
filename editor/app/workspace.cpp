@@ -2340,6 +2340,24 @@ Workspace::ResourceList Workspace::ListResources(Resource::Type type, bool primi
     return list;
 }
 
+Workspace::ResourceList Workspace::ListUserDefinedResources() const
+{
+    ResourceList ret;
+
+    for (size_t i=0; i<mUserResourceCount; ++i)
+    {
+        const auto& resource = mResources[i];
+
+        ResourceListItem item;
+        item.name = resource->GetName();
+        item.id   = resource->GetId();
+        item.icon = resource->GetIcon();
+        item.resource = resource.get();
+        ret.push_back(item);
+    }
+    return ret;
+}
+
 Workspace::ResourceList Workspace::ListCursors() const
 {
     ResourceList list;
@@ -2422,6 +2440,52 @@ ResourceList Workspace::ListDependencies(const ModelIndexList& indices) const
     }
     return ret;
 }
+
+ResourceList Workspace::ListResourceUsers(const ModelIndexList& list) const
+{
+    ResourceList users;
+
+    // The dependency graph goes only one way from user -> dependant.
+    // this means that right now to go the other way.
+    // in order to make this operation run faster we'd need to track the
+    // relationship the other way too.
+    // This could be done either when the resource is saved or in the background
+    // in the Workspace tick (or something)
+
+    for (size_t i=0; i<mUserResourceCount; ++i)
+    {
+        // take a resource and find its deps
+        const auto& current_res = mResources[i];
+        const auto& current_deps = ListDependencies(i); // << warning this is the slow/heavy OP !
+
+        // if the deps include any of the resources listed as args then this
+        // current resource is a user.
+        for (const auto& dep : current_deps)
+        {
+            bool found_match = false;
+
+            for (auto index : list)
+            {
+                if (mResources[index]->GetId() == dep.id)
+                {
+                    found_match = true;
+                    break;
+                }
+            }
+            if (found_match)
+            {
+                ResourceListItem ret;
+                ret.id = current_res->GetId();
+                ret.name = current_res->GetName();
+                ret.icon = current_res->GetIcon();
+                ret.resource = current_res.get();
+                users.push_back(ret);
+            }
+        }
+    }
+    return users;
+}
+
 
 QStringList Workspace::ListFileResources(const ModelIndexList& indices) const
 {

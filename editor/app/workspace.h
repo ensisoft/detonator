@@ -243,6 +243,8 @@ namespace app
         // Get a list of resources with the matching type and primitive flag
         ResourceList ListResources(Resource::Type type, bool primitive, bool sort = true) const;
 
+        ResourceList ListUserDefinedResources() const;
+
         ResourceList ListCursors() const;
 
         ResourceList ListDataFiles() const;
@@ -250,11 +252,13 @@ namespace app
         // List user defined resource dependencies for the given resources.
         ResourceList ListDependencies(const ModelIndexList& list) const;
 
+        // List the resources that depend on any of the resources in the given list.
+        ResourceList ListResourceUsers(const ModelIndexList& list) const;
+
         // List the files on the filesystem used by the user defined resources.
         // The files are provided by their URIs which can then be expanded to the
         // actual filesystem paths.
         QStringList ListFileResources(const ModelIndexList& list) const;
-
 
         // Map material ID to its human-readable name.
         QString MapMaterialIdToName(const AnyString& id) const;
