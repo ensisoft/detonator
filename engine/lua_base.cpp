@@ -75,6 +75,7 @@ void BindBase(sol::state& L)
     rect["SetWidth"]       = &base::FRect::SetWidth;
     rect["SetHeight"]      = &base::FRect::SetHeight;
     rect["IsEmpty"]        = &base::FRect::IsEmpty;
+    rect["Copy"]           = [](const base::FRect& src) { return base::FRect(src); };
     rect["Resize"]         = sol::overload(
         [](base::FRect& rect, float x, float y) {
             rect.Resize(x, y);
@@ -163,6 +164,7 @@ void BindBase(sol::state& L)
     size["GetWidth"]  = &base::FSize::GetWidth;
     size["GetHeight"] = &base::FSize::GetHeight;
     size["IsZero"]    = &base::FSize::IsZero;
+    size["Copy"]      = [](const base::FSize& size) { return base::FSize(size); };
     size.set_function(sol::meta_function::multiplication, [](const base::FSize& size, float scalar) { return size * scalar; });
     size.set_function(sol::meta_function::addition, [](const base::FSize& lhs, const base::FSize& rhs) { return lhs + rhs; });
     size.set_function(sol::meta_function::subtraction, [](const base::FSize& lhs, const base::FSize& rhs) { return lhs - rhs; });
@@ -174,6 +176,7 @@ void BindBase(sol::state& L)
     point["GetY"] = &base::FPoint::GetY;
     point["SetX"] = &base::FPoint::SetX;
     point["SetY"] = &base::FPoint::SetY;
+    point["Copy"] = [](const base::FPoint& point) { return base::FPoint(point); };
     point["Distance"] = &base::Distance;
     point["SquareDistance"] = &base::Distance;
 
@@ -197,6 +200,7 @@ void BindBase(sol::state& L)
     color["GetGreen"]   = &base::Color4f::Green;
     color["GetBlue"]    = &base::Color4f::Blue;
     color["GetAlpha"]   = &base::Color4f::Alpha;
+    color["Copy"]       = [](const base::Color4f& color) { return base::Color4f(color); };
     color["SetRed"]     = (void(base::Color4f::*)(float))&base::Color4f::SetRed;
     color["SetGreen"]   = (void(base::Color4f::*)(float))&base::Color4f::SetGreen;
     color["SetBlue"]    = (void(base::Color4f::*)(float))&base::Color4f::SetBlue;
