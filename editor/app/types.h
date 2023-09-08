@@ -34,6 +34,25 @@
 
 namespace app
 {
+    class ModelIndex
+    {
+    public:
+        ModelIndex() = default;
+        ModelIndex(const QModelIndex& index)
+        {
+            ASSERT(index.row() >= 0);
+            ASSERT(index.isValid());
+            mIndex = static_cast<size_t>(index.row());
+        }
+        ModelIndex(size_t index)
+          : mIndex(index)
+        {}
+        operator size_t () const noexcept
+        { return mIndex; }
+    private:
+        std::size_t mIndex = 0;
+    };
+
     // Falicate implicit conversion from various ways of expressing Qt's
     // model indices lists into a single unified type.
     class ModelIndexList
@@ -45,6 +64,7 @@ namespace app
             for (const auto& index : list)
             {
                 ASSERT(index.row() >= 0);
+                ASSERT(index.isValid());
                 mIndices.push_back(static_cast<size_t>(index.row()));
             }
         }

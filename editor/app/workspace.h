@@ -296,8 +296,7 @@ namespace app
 
         // Get resource at a specific index in the list of all resources.
         // This will get any resource regardless user defined or not.
-        Resource& GetResource(size_t index);
-        Resource& GetResource(const QModelIndex& index);
+        Resource& GetResource(const ModelIndex& index);
         // Get a user defined resource.
         Resource& GetUserDefinedResource(size_t index);
         // Get a primitive (built-in) resource.
@@ -319,8 +318,7 @@ namespace app
         const Resource* FindResourceByName(const QString& name, Resource::Type type) const;
         // Get resource at a specific index in the list of all resources.
         // This will get any resource regardless user defined or not.
-        const Resource& GetResource(size_t index) const;
-        const Resource& GetResource(const QModelIndex& index) const;
+        const Resource& GetResource(const ModelIndex& index) const;
         // Get a user defined resource.
         const Resource& GetUserDefinedResource(size_t index) const;
         // Get a primitive (built-in) resource.

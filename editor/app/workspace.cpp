@@ -2677,17 +2677,10 @@ bool Workspace::IsUserDefinedResource(const AnyString& id) const
     return false;
 }
 
-Resource& Workspace::GetResource(size_t index)
+Resource& Workspace::GetResource(const ModelIndex& index)
 {
     ASSERT(index < mResources.size());
     return *mResources[index];
-}
-
-Resource& Workspace::GetResource(const QModelIndex& index)
-{
-    ASSERT(index.model() == this);
-    ASSERT(index.row() < mResources.size());
-    return *mResources[index.row()];
 }
 
 Resource& Workspace::GetPrimitiveResource(size_t index)
@@ -2774,17 +2767,10 @@ const Resource* Workspace::FindResourceByName(const QString &name, Resource::Typ
     return nullptr;
 }
 
-const Resource& Workspace::GetResource(size_t index) const
+const Resource& Workspace::GetResource(const ModelIndex& index) const
 {
     ASSERT(index < mResources.size());
     return *mResources[index];
-}
-
-const Resource& Workspace::GetResource(const QModelIndex& index) const
-{
-    ASSERT(index.model() == this);
-    ASSERT(index.row() < mResources.size());
-    return *mResources[index.row()];
 }
 
 const Resource& Workspace::GetUserDefinedResource(size_t index) const
