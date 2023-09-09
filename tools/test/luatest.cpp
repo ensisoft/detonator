@@ -27,12 +27,14 @@
 #include <unordered_map>
 #include <chrono>
 #include <thread>
-
+#include <variant>
 
 // type provided by the engine
 class Entity
 {
 public:
+    Entity() = default;
+
     Entity(std::string type, std::string name)
       : mType(type)
       , mName(name)
@@ -44,10 +46,22 @@ public:
     { mPos = pos; }
     std::string GetName() const
     { return mName; }
+
+    using Value = std::variant<int, float, std::string>;
+
+    Value GetVariantValue() const
+    { return mValue; }
+
+    void SetVariantValue(Value val)
+    { mValue = std::move(val); }
+
+    Value variant_property;
+
 private:
     std::string mType;
     std::string mName;
     glm::vec2 mPos;
+    Value mValue;
 };
 
 class Scene
@@ -397,6 +411,127 @@ end
 
 }
 
+void variant_test()
+{
+    sol::state lua;
+    lua.open_libraries();
+
+    auto entity = lua.new_usertype<Entity>("Entity",
+        sol::meta_function::index, [](const Entity& entity, const std::string& key) {
+            std::cout << "index " << key << std::endl;
+            return entity.variant_property;
+        },
+        sol::meta_function::new_index, [](Entity& entity, const std::string& key, Entity::Value value) {
+            std::cout << "new_index " << key << std::endl;
+            entity.variant_property = value;
+        });
+
+    entity["GetVariantValue"] = &Entity::GetVariantValue;
+    entity["SetVariantValue"] = &Entity::SetVariantValue;
+
+    // sol property is a wrapper for creating either read, write or read/write "properties"
+    // so using this raw member pointer instead.
+    entity["variant_property"] = &Entity::variant_property;
+
+    // create the entity instance
+    Entity the_entity;
+    lua["the_entity"] = &the_entity;
+
+    the_entity.variant_property = 123;
+    the_entity.SetVariantValue(321);
+
+    // read from lua
+    lua.script(R"(
+print(the_entity.variant_property)
+print(the_entity:GetVariantValue())
+print(the_entity.using_index_meta_method)
+)");
+
+    // write from lua
+    lua.script(R"(
+the_entity.using_index_meta_method = 123
+the_entity.variant_property = 'lalal'
+the_entity:SetVariantValue('foobar')
+
+)");
+
+    if (const auto* str = std::get_if<std::string>(&the_entity.variant_property))
+        std::cout << *str << std::endl;
+
+    auto val = the_entity.GetVariantValue();
+    if (const auto* str = std::get_if<std::string>(&val))
+        std::cout << *str << std::endl;
+
+    try
+    {
+        // wrong type frm lua
+        lua.script(R"(
+the_entity.variant_property = true
+)");
+    }
+    catch (const std::exception& lua_err)
+    {
+        //std::cout << lua_err.what();
+        //std::cout << std::endl;
+    }
+
+    try
+    {
+        // wrong type frm lua
+        lua.script(R"(
+the_entity:SetVariantValue(true)
+)");
+    }
+    catch (const std::exception& lua_err)
+    {
+        //std::cout << lua_err.what();
+        //std::cout << std::endl;
+    }
+
+
+    lua.script(R"(
+the_entity.variant_property = 123.0
+
+print(the_entity.variant_property)
+    )");
+}
+
+void variant_bug_test()
+{
+    // testing for what seems to be a sol2 bug.
+    // https://github.com/ThePhD/sol2/issues/1524
+    //
+    // using sol::overload to differentiate between int and other types.
+
+    sol::state lua;
+    lua.open_libraries();
+
+    using Variant = std::variant<float, int, std::string>;
+
+    Variant the_value;
+    lua["set_the_variant"] = sol::overload(
+        [&the_value](int value) {
+            the_value = value;
+        },
+        [&the_value](Variant val) {
+            the_value = val;
+        });
+
+    lua["get_the_variant"] = [&the_value]() {
+        return the_value;
+    };
+
+    lua.script(R"(
+set_the_variant(123)
+print(get_the_variant())
+set_the_variant(123.0)
+print(get_the_variant())
+set_the_variant('keke')
+print(get_the_variant())
+)");
+
+}
+
 int main(int argc, char* argv[])
 {
     //vector_test();
@@ -404,8 +539,11 @@ int main(int argc, char* argv[])
     //environment_variable_test();
     //environment_variable_test_entity();
     //function_from_lua();
+    //exception_handler_test();
 
-    exception_handler_test();
+    //variant_test();
+
+    variant_bug_test();
 
     return 0;
 }
