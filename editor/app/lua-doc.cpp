@@ -547,9 +547,9 @@ void InitLuaDoc()
     DOC_METHOD_1("void", "SetGreen", "Set normalized green channel value.", "float", "green");
     DOC_METHOD_1("void", "SetBlue", "Set normalized blue channel value.", "float", "blue");
     DOC_METHOD_1("void", "SetAlpha", "Set normalized alpha channel value.", "float", "alpha");
-    DOC_METHOD_1("void", "SetColor", "Set color based on base.Colors color value.", "int", "color");
+    DOC_METHOD_1("void", "SetColor", "Set color based on base.Colors color value.", "base.Colors", "color");
     DOC_METHOD_1("void", "SetColor", "Set color based on base.Colors color name.", "string", "color");
-    DOC_FUNCTION_1("base.Color4f", "FromEnum", "Construct a new color from base.Colors color value.", "int", "color");
+    DOC_FUNCTION_1("base.Color4f", "FromEnum", "Construct a new color from base.Colors color value.", "base.Colors", "color");
     DOC_FUNCTION_1("base.Color4f", "FromEnum", "Construct a new color from base.Colors color name.", "string", "color");
 
     DOC_TABLE("data.Reader");
@@ -702,16 +702,16 @@ void InitLuaDoc()
     DOC_OBJECT_PROPERTY("float", "w", "W component of the vector.");
 
     DOC_TABLE("wdk");
-    DOC_FUNCTION_1("string", "KeyStr", "Convert a key value to a named key string.", "unsigned", "key");
-    DOC_FUNCTION_1("string", "BtnStr", "Convert a mouse button value to a named button string.", "unsigned", "button");
-    DOC_FUNCTION_1("string", "ModStr", "Convert a modifier key value to a named modifier string.", "unsigned", "modifier");
-    DOC_FUNCTION_1("string", "ModBitStr", "Map keyboard key modifier bit string to a named modifier string.", "unsigned", "mod_bits");
+    DOC_FUNCTION_1("string", "KeyStr", "Convert a key symbol to a named key string.", "wdk.Keys", "key");
+    DOC_FUNCTION_1("string", "BtnStr", "Convert a mouse button to a named button string.", "wdk.Buttons", "button");
+    DOC_FUNCTION_1("string", "ModStr", "Convert a modifier key symbol to a named modifier string.", "wdk.Mods", "modifier");
+    DOC_FUNCTION_1("string", "ModBitStr", "Map keyboard key modifier bit set to a named modifier string.", "unsigned", "modifier_bits");
     DOC_FUNCTION_1("bool", "TestKeyDown", "Test whether the given keyboard key is currently down.<br>"
-                                        "The key value is one of the key values in in wdk.Keys. <br>"
-                                        "This function is only available on Windows and Linux. ",
-                                        "unsigned", "key");
+                                        "The key value is one of the symbolic keys in wdk.Keys. <br>"
+                                        "This function is only available on desktop Windows and Linux. ",
+                                        "wdk.Keys", "key");
     DOC_FUNCTION_2("bool", "TestMod", "Test whether the given modifier bit is set in the bitset of modifier keys.",
-                 "unsigned", "modifier_bits", "unsigned", "modifier_value");
+                 "unsigned", "modifier_bits", "wdk.Mods", "modifier");
 
     DOC_TABLE("wdk.Keys");
     for (const auto& key : magic_enum::enum_values<wdk::Keysym>())
@@ -950,7 +950,21 @@ void InitLuaDoc()
     DOC_METHOD_1("uik.Window", "FindUIById", "Find a UI Window by ID.<br>"
                                                "Returns nil if no such window object could be found.","string", "id");
 
+    DOC_TABLE2("game.DrawableCommand", "The drawable command type is used to send commands to the gfx drawable object associated "
+                                       "with the game.Drawable inside the renderer.<br>"
+                                       "It carries a command name and a variable number of arguments. You can use a DrawableCommand "
+                                       "to for example send a command to a particle engine to emit some particles.");
+    DOC_META_METHOD_0("...", "index", "Lua index meta method.");
+    DOC_META_METHOD_0("...", "newindex", "Lua new index meta method.");
+    DOC_OBJECT_PROPERTY("string", "name", "The name of the command.");
+
     DOC_TABLE("game.Drawable");
+    DOC_METHOD_1("void", "Command", "Send a command to the gfx drawable in the renderer.", "string", "cmd_name");
+    DOC_METHOD_2("void", "Command", "Send a command to the gfx drawable in the renderer.", "string", "cmd_name", "int|float|string", "cmd_arg");
+    DOC_METHOD_2("void", "Command", "Send a command to the gfx drawable in the renderer.<br><br>"
+                                    "my_drawable:Command('example', { arg = 123, other_arg = 321.0 })"
+                                    "", "string", "cmd_name", "table", "cmd_ags");
+
     DOC_METHOD_1("void", "SetMaterialId", "Set drawable material to a material specified by its class ID.<br>"
                                           "Remember that you most likely also want to reset the material time, active texture map and clear any previous uniforms.",
                  "string", "id");
@@ -958,7 +972,7 @@ void InitLuaDoc()
                                         "Returns true on success or false on failure."
                                         "Remember that you most likely also want to reset the material time, active texture map and clear any previous uniforms.",
                  "string", "name");
-    DOC_METHOD_1("void", "SetMaterial", "Set drawable item material to a new material class. The class object must be a valid object.",
+    DOC_METHOD_1("bool", "SetMaterial", "Set drawable item material to a new material class. The class object must be a valid object.",
                  "gfx.MaterialClass", "material");
     DOC_METHOD_1("bool", "SetActiveTextureMap", "Set the currently active texture map on this drawable item's material to the one identified by its name."
                                                 "If no such material map exists no change is done. Returns true on success or false on failure.",
@@ -1609,23 +1623,28 @@ void InitLuaDoc()
 
     DOC_TABLE("game.AudioEvent");
     DOC_OBJECT_PROPERTY("string", "type", "The type of the audio event.<br>"
-                                          "One of the following: 'TrackDone'");
-    DOC_OBJECT_PROPERTY("string", "track", "Name of the audio graph to which the event pertains to.");
-    DOC_OBJECT_PROPERTY("string", "source", "Source of the audio event. Either 'music' or 'effect'");
+                                          "One of the following: 'TrackDone'<br>"
+                                          "This property is read only.");
+    DOC_OBJECT_PROPERTY("string", "track", "Name of the audio graph to which the event pertains to.<br>This property is read only.");
+    DOC_OBJECT_PROPERTY("string", "source", "Source of the audio event. Either 'music' or 'effect'.<br>This property is read only.");
 
     DOC_TABLE("game.MouseEvent");
     DOC_OBJECT_PROPERTY("glm.vec2", "map_coord", "Mouse cursor position on the map plane.<br>"
-                                                 "Only valid when over_scene is true and there is a map.");
-    DOC_OBJECT_PROPERTY("glm.vec2", "window_coord", "Mouse cursor position in native window coordinates.");
+                                                 "Only valid when over_scene is true and there is a map.<br>"
+                                                 "This property is read only.");
+    DOC_OBJECT_PROPERTY("glm.vec2", "window_coord", "Mouse cursor position in native window coordinates.<br>"
+                                                    "This property is read only.");
     DOC_OBJECT_PROPERTY("glm.vec2", "scene_coord", "Mouse cursor position in scene coordinates.<br>"
-                                                   "Only valid when over_scene is true.");
-    DOC_OBJECT_PROPERTY("unsigned", "button", "The mouse button value that was pressed.<br>"
-                                              "For a list of available buttons see wdk.Buttons");
+                                                   "Only valid when over_scene is true.<br>"
+                                                   "This property is read only.");
+    DOC_OBJECT_PROPERTY("wdk.Buttons", "button", "The mouse button value that was pressed.<br>This property is read only.");
     DOC_OBJECT_PROPERTY("unsigned", "modifiers", "A bit string of keyboard modifier keys that were pressed.<br>"
                                                  "For a list of available modifiers see wdk.Mods.<br>"
-                                                 "For testing a modifier use wdk.TestMod(bits, key).");
+                                                 "For testing a modifier use wdk.TestMod(bits, key).<br>"
+                                                 "This property is read only.");
     DOC_OBJECT_PROPERTY("bool", "over_scene", "True when the mouse is within the game viewport in the window.<br>"
-                                              "Indicates whether screen_coords are valid or not.");
+                                              "Indicates whether screen_coords are valid or not.<br>"
+                                              "This property is read only.");
 
     DOC_TABLE("game.GameEvent");
     DOC_META_METHOD_0("...", "index", "Lua index meta method.");
@@ -1642,11 +1661,11 @@ void InitLuaDoc()
 
     DOC_TABLE("game.KeyValueStore");
     DOC_META_METHOD_0("...", "index", "Lua index meta method.");
-    DOC_META_METHOD_0("...", "newindex", "LUa new index meta method.");
+    DOC_META_METHOD_0("...", "newindex", "Lua new index meta method.");
     DOC_METHOD_2("void", "SetValue", "Set a value by the given key in the key-value store.",
                  "string", "key", "bool|int|float|string|glm.vec2|glm.vec3|glm.vec4|base.Color4f|base.FSize|base.FRect|base.FPoint", "value");
     DOC_METHOD_1("...", "GetValue", "Get a value by the given key in the key-value store. <br>"
-                                    "It is an error to try to access a key that doesn't exist.",
+                                    "Returns nil if the given key doesn't exist.",
                  "string", "key");
     DOC_METHOD_2("...", "GetValue", "Get a value by the given key if it exists or return default.",
                  "string", "key", "bool|int|float|string|glm.vec2|glm.vec3|glm.vec4|base.Color4f|base.FSize|base.FRect|base.FPoint", "default");
@@ -1658,6 +1677,7 @@ void InitLuaDoc()
                  "data.JsonObject|data.Reader", "data");
     DOC_METHOD_2("void", "InitValue", "Initialize a key with a value if it doesn't yet exist.",
                  "string", "key", "bool|int|float|string|glm.vec2|glm.vec3|glm.vec4|base.Color4f|base.FSize|base.FRect|base.FPoint", "value");
+    DOC_METHOD_1("void", "DelValue", "Delete a value by the given key from the store.", "string", "key");
 
     // Lua standard libraries
     DOC_TABLE("math");
