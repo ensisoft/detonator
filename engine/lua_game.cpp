@@ -39,6 +39,15 @@
 #include "uikit/window.h"
 #include "uikit/widget.h"
 
+// sol overload resolution requires a define
+// SOL_ALL_SAFETIES_ON will take care of that
+
+#ifndef SOL_ALL_SAFETIES_ON
+#  error we need SOL safety flags for correct function
+#else
+#  pragma message "SOL SAFETIES ARE ON  !"
+#endif
+
 using namespace engine::lua;
 using namespace game;
 
@@ -330,33 +339,6 @@ template sol::object GetScriptVar<game::Entity>(game::Entity&, const char*, sol:
 template void SetScriptVar<game::Scene>(game::Scene&, const char* key, sol::object, sol::this_state, sol::this_environment);
 template void SetScriptVar<game::Entity>(game::Entity&, const char* key, sol::object, sol::this_state, sol::this_environment);
 
-void SetKvValue(engine::KeyValueStore& kv, const char* key, sol::object value)
-{
-    if (value.is<bool>())
-        kv.SetValue(key, value.as<bool>());
-    else if (value.is<int>())
-        kv.SetValue(key, value.as<int>());
-    else if (value.is<float>())
-        kv.SetValue(key, value.as<float>());
-    else if (value.is<std::string>())
-        kv.SetValue(key, value.as<std::string>());
-    else if (value.is<glm::vec2>())
-        kv.SetValue(key, value.as<glm::vec2>());
-    else if (value.is<glm::vec3>())
-        kv.SetValue(key, value.as<glm::vec3>());
-    else if (value.is<glm::vec4>())
-        kv.SetValue(key, value.as<glm::vec4>());
-    else if (value.is<base::Color4f>())
-        kv.SetValue(key, value.as<base::Color4f>());
-    else if (value.is<base::FSize>())
-        kv.SetValue(key, value.as<base::FSize>());
-    else if (value.is<base::FRect>())
-        kv.SetValue(key, value.as<base::FRect>());
-    else if (value.is<base::FPoint>())
-        kv.SetValue(key, value.as<base::FPoint>());
-    else throw GameError("Unsupported key-value store value type.");
-}
-
 template<typename T>
 class ResultSet
 {
@@ -484,15 +466,22 @@ void BindGameLib(sol::state& L)
             sol::state_view L(this_state);
             ClassLibrary* lib = L["ClassLib"];
             const auto ret = lib->FindMaterialClassByName(name);
-            if (ret)
-                item.SetMaterialId(ret->GetId());
-            else WARN("No such material class. [name='%1']", name);
-            return !!ret;
+            if (!ret)
+            {
+                ERROR("Failed to set drawable material. No such material class. [class='%1']", name);
+                return false;
+            }
+            item.SetMaterialId(ret->GetId());
+            return true;
         },
         [](DrawableItem& item, const std::shared_ptr<const gfx::MaterialClass>& klass) {
             if (!klass)
-                throw GameError("Nil material class in SetMaterial.");
+            {
+                ERROR("Failed to set drawable material. Material is nil.");
+                return false;
+            }
             item.SetMaterialId(klass->GetId());
+            return true;
         });
 
     drawable["SetActiveTextureMap"] = [](DrawableItem& item, const std::string& name, sol::this_state this_state) {
@@ -516,44 +505,39 @@ void BindGameLib(sol::state& L)
         WARN("No such texture map. [name='%1']", name);
         return false;
     };
-    drawable["SetMaterialId"] = &DrawableItem::SetMaterialId;
-    drawable["GetMaterialId"] = &DrawableItem::GetMaterialId;
-    drawable["GetDrawableId"] = &DrawableItem::GetDrawableId;
-    drawable["GetLayer"]      = &DrawableItem::GetLayer;
-    drawable["GetLineWidth"]  = &DrawableItem::GetLineWidth;
-    drawable["GetTimeScale"]  = &DrawableItem::GetTimeScale;
-    drawable["SetTimeScale"]  = &DrawableItem::SetTimeScale;
-    drawable["TestFlag"]      = &TestFlag<DrawableItem>;
-    drawable["SetFlag"]       = &SetFlag<DrawableItem>;
-    drawable["IsVisible"]     = &DrawableItem::IsVisible;
-    drawable["SetVisible"]    = &DrawableItem::SetVisible;
-    drawable["SetUniform"]    = [](DrawableItem& item, const char* name, sol::object value) {
-        if (value.is<float>())
-            item.SetMaterialParam(name, value.as<float>());
-        else if (value.is<int>())
-            item.SetMaterialParam(name, value.as<int>());
-        else if (value.is<base::Color4f>())
-            item.SetMaterialParam(name, value.as<base::Color4f>());
-        else if (value.is<glm::vec2>())
-            item.SetMaterialParam(name, value.as<glm::vec2>());
-        else if (value.is<glm::vec3>())
-            item.SetMaterialParam(name, value.as<glm::vec3>());
-        else if (value.is<glm::vec4>())
-            item.SetMaterialParam(name, value.as<glm::vec4>());
-        else throw GameError("Unsupported material uniform type.");
-    };
+    drawable["TestFlag"]                  = &TestFlag<DrawableItem>;
+    drawable["SetFlag"]                   = &SetFlag<DrawableItem>;
+    drawable["SetMaterialId"]             = &DrawableItem::SetMaterialId;
+    drawable["GetMaterialId"]             = &DrawableItem::GetMaterialId;
+    drawable["GetDrawableId"]             = &DrawableItem::GetDrawableId;
+    drawable["GetLayer"]                  = &DrawableItem::GetLayer;
+    drawable["GetLineWidth"]              = &DrawableItem::GetLineWidth;
+    drawable["GetTimeScale"]              = &DrawableItem::GetTimeScale;
+    drawable["SetTimeScale"]              = &DrawableItem::SetTimeScale;
+    drawable["IsVisible"]                 = &DrawableItem::IsVisible;
+    drawable["SetVisible"]                = &DrawableItem::SetVisible;
+    drawable["HasUniform"]                = &DrawableItem::HasMaterialParam;
+    drawable["DeleteUniform"]             = &DrawableItem::DeleteMaterialParam;
+    drawable["ClearUniforms"]             = &DrawableItem::ClearMaterialParams;
+    drawable["GetMaterialTime"]           = &DrawableItem::GetCurrentMaterialTime;
+    drawable["AdjustMaterialTime"]        = &DrawableItem::AdjustMaterialTime;
+    drawable["HasMaterialTimeAdjustment"] = &DrawableItem::HasMaterialTimeAdjustment;
+    // sol2 bug regarding variant with float-int types.
+    // ints get converted into a float and type information is lost
+    // https://github.com/ThePhD/sol2/issues/1524
+    drawable["SetUniform"] = sol::overload(
+        [](DrawableItem& item, const std::string& key, int value) {
+            item.SetMaterialParam(key, value);
+        },
+        [](DrawableItem& item, const std::string& key, DrawableItem::MaterialParam param) {
+            item.SetMaterialParam(key, param);
+        });
     drawable["FindUniform"] = [](const DrawableItem& item, const char* name, sol::this_state state) {
         sol::state_view L(state);
         if (const auto* value = item.FindMaterialParam(name))
-            return sol::make_object(L, *value);
+                return sol::make_object(L, *value);
         return sol::make_object(L, sol::nil);
     };
-    drawable["HasUniform"]    = &DrawableItem::HasMaterialParam;
-    drawable["DeleteUniform"] = &DrawableItem::DeleteMaterialParam;
-    drawable["ClearUniforms"]  = &DrawableItem::ClearMaterialParams;
-    drawable["AdjustMaterialTime"]        = &DrawableItem::AdjustMaterialTime;
-    drawable["HasMaterialTimeAdjustment"] = &DrawableItem::HasMaterialTimeAdjustment;
-    drawable["GetMaterialTime"]    = &DrawableItem::GetCurrentMaterialTime;
 
     auto body = table.new_usertype<RigidBodyItem>("RigidBody");
     body["IsEnabled"]             = &RigidBodyItem::IsEnabled;
@@ -830,25 +814,18 @@ void BindGameLib(sol::state& L)
     entity["SetVisible"]           = &Entity::SetVisible;
     entity["SetTimer"]             = &Entity::SetTimer;
     entity["PostEvent"]            = sol::overload(
-        [](Entity* entity, const std::string& message, const std::string& sender, sol::object value) {
+        [](Entity* entity, const std::string& message, const std::string& sender, int value) {
             Entity::PostedEvent event;
             event.message = message;
             event.sender  = sender;
-            if (value.is<bool>())
-                event.value = value.as<bool>();
-            else if (value.is<int>())
-                event.value = value.as<int>();
-            else if (value.is<float>())
-                event.value = value.as<float>();
-            else if (value.is<std::string>())
-                event.value = value.as<std::string>();
-            else if (value.is<glm::vec2>())
-                event.value = value.as<glm::vec2>();
-            else if (value.is<glm::vec3>())
-                event.value = value.as<glm::vec3>();
-            else if (value.is<glm::vec4>())
-                event.value = value.as<glm::vec4>();
-            else throw GameError("Unsupported event event value type.");
+            event.value   = value;
+            entity->PostEvent(std::move(event));
+        },
+        [](Entity* entity, const std::string& message, const std::string& sender, Entity::PostedEventValue value) {
+            Entity::PostedEvent event;
+            event.message = message;
+            event.sender  = sender;
+            event.value   = value;
             entity->PostEvent(std::move(event));
         },
         [](Entity* entity, const std::string& message, const std::string& sender) {
@@ -1422,107 +1399,62 @@ void BindGameLib(sol::state& L)
     audio["SetSoundEffectGain"] = &AudioEngine::SetSoundEffectGain;
     audio["EnableEffects"]      = &AudioEngine::EnableEffects;
 
-    auto audio_event = table.new_usertype<AudioEvent>("AudioEvent",
-        sol::meta_function::index, [&L](const AudioEvent& event, const char* key) {
-                sol::state_view lua(L);
-                if (!std::strcmp(key, "type"))
-                    return sol::make_object(lua, base::ToString(event.type));
-                else if (!std::strcmp(key, "track"))
-                    return sol::make_object(lua, event.track);
-                else if (!std::strcmp(key, "source"))
-                    return sol::make_object(lua, event.source);
-                throw GameError(base::FormatString("No such audio event index: %1", key));
-            }
-    );
+    auto audio_event = table.new_usertype<AudioEvent>("AudioEvent");
+    audio_event["source"] = sol::readonly_property(&AudioEvent::source);
+    audio_event["track"]  = sol::readonly_property(&AudioEvent::track);
+    audio_event["type"]   = sol::readonly_property([](const AudioEvent& event) { return base::ToString(event.type); });
 
     auto mouse_event = table.new_usertype<MouseEvent>("MouseEvent");
-    mouse_event["window_coord"] = &MouseEvent::window_coord;
-    mouse_event["scene_coord"]  = &MouseEvent::scene_coord;
-    mouse_event["map_coord"]    = &MouseEvent::map_coord;
-    mouse_event["button"]       = &MouseEvent::btn;
-    mouse_event["modifiers"]    = &MouseEvent::mods;
-    mouse_event["over_scene"]   = &MouseEvent::over_scene;
+    mouse_event["window_coord"] = sol::readonly_property(&MouseEvent::window_coord);
+    mouse_event["scene_coord"]  = sol::readonly_property(&MouseEvent::scene_coord);
+    mouse_event["map_coord"]    = sol::readonly_property(&MouseEvent::map_coord);
+    mouse_event["button"]       = sol::readonly_property(&MouseEvent::btn);
+    mouse_event["modifiers"]    = sol::readonly_property(&MouseEvent::mods);
+    mouse_event["over_scene"]   = sol::readonly_property(&MouseEvent::over_scene);
 
     auto game_event = table.new_usertype<GameEvent>("GameEvent", sol::constructors<GameEvent()>(),
-        sol::meta_function::index, [&L](const GameEvent& event, const char* key) {
-            sol::state_view lua(L);
-            if (!std::strcmp(key, "from"))
-                return sol::make_object(lua, event.from);
-            else if (!std::strcmp(key, "to"))
-                return sol::make_object(lua, event.to);
-            else if (!std::strcmp(key ,"message"))
-                return sol::make_object(lua, event.message);
-
-            const auto* val = base::SafeFind(event.values, std::string(key));
-            return val ? sol::make_object(lua, *val)
-                       : sol::make_object(lua, sol::nil);
+        sol::meta_function::index, [](const GameEvent& event, const std::string& key, sol::this_state state) {
+            sol::state_view lua(state);
+            if (const auto* val = base::SafeFind(event.values, key))
+                return sol::make_object(lua, *val);
+            return sol::make_object(lua, sol::nil);
         },
-        sol::meta_function::new_index, [&L](GameEvent& event, const char* key, sol::object value) {
-            if (!std::strcmp(key, "from")) {
-                if (value.is<std::string>())
-                    event.from = value.as<std::string>();
-                else if (value.is<game::Scene*>())
-                    event.from = value.as<game::Scene*>();
-                else if (value.is<game::Entity*>())
-                    event.from = value.as<game::Entity*>();
-                else throw GameError("Unsupported game event from field type.");
-            } else if (!std::strcmp(key, "to")) {
-                if (value.is<std::string>())
-                    event.to = value.as<std::string>();
-                else if (value.is<game::Scene*>())
-                    event.to = value.as<game::Scene*>();
-                else if (value.is<game::Entity*>())
-                    event.to = value.as<game::Entity*>();
-                else throw GameError("Unsupported game event to field type.");
-            } else if (!std::strcmp(key, "message")) {
-                if (value.is<std::string>())
-                    event.message = value.as<std::string>();
-                else throw GameError("Unsupported game event message field type.");
-            } else {
-                const auto& k = std::string(key);
-                if (value.is<bool>())
-                    event.values[key] = value.as<bool>();
-                else if (value.is<int>())
-                    event.values[key] = value.as<int>();
-                else if (value.is<float>())
-                    event.values[key] = value.as<float>();
-                else if (value.is<std::string>())
-                    event.values[key] = value.as<std::string>();
-                else if(value.is<glm::vec2>())
-                    event.values[key] = value.as<glm::vec2>();
-                else if (value.is<glm::vec3>())
-                    event.values[key] = value.as<glm::vec3>();
-                else if (value.is<glm::vec4>())
-                    event.values[key] = value.as<glm::vec4>();
-                else if (value.is<base::Color4f>())
-                    event.values[key] = value.as<base::Color4f>();
-                else if (value.is<base::FSize>())
-                    event.values[key] = value.as<base::FSize>();
-                else if (value.is<base::FRect>())
-                    event.values[key] = key, value.as<base::FRect>();
-                else if (value.is<base::FPoint>())
-                    event.values[key] = value.as<base::FPoint>();
-                else if (value.is<game::Entity*>())
-                    event.values[key] = value.as<game::Entity*>();
-                else if (value.is<game::Scene*>())
-                    event.values[key] = value.as<game::Scene*>();
-                else throw GameError("Unsupported game event value type.");
-            }
-        });
+        sol::meta_function::new_index, sol::overload(
+            [](GameEvent& event, const std::string& key, int value) {
+                event.values[key] = value;
+            },
+            [](GameEvent& event, const std::string& key, GameEventValue value) {
+                event.values[key] = value;
+            })
+        );
+    game_event["from"]    = &GameEvent::from;
+    game_event["to"]      = &GameEvent::to;
+    game_event["message"] = &GameEvent::message;
 
     auto kvstore = table.new_usertype<KeyValueStore>("KeyValueStore", sol::constructors<KeyValueStore()>(),
-        sol::meta_function::index, [](const KeyValueStore& kv, const char* key, sol::this_state state) {
+        sol::meta_function::index, [](const KeyValueStore& kv, const std::string& key, sol::this_state state) {
             sol::state_view lua(state);
             KeyValueStore::Value value;
-            if (!kv.GetValue(key, &value))
-                throw GameError("No such key value store index: " + std::string(key));
-            return sol::make_object(lua, value);
+            if (kv.GetValue(key, &value))
+                return sol::make_object(lua, value);
+            return sol::make_object(lua, sol::nil);
         },
-        sol::meta_function::new_index, [&L](KeyValueStore& kv, const char* key, sol::object value) {
-            SetKvValue(kv, key, value);
-        }
-    );
-    kvstore["SetValue"] = SetKvValue;
+        sol::meta_function::new_index, sol::overload(
+            [](KeyValueStore& kv, const std::string& key, int value) {
+                kv.SetValue(key, value);
+            },
+            [](KeyValueStore& kv, const std::string& key, const KeyValueStore::Value& value) {
+                kv.SetValue(key, value);
+            })
+        );
+    kvstore["SetValue"] = sol::overload(
+        [](KeyValueStore& kv, const std::string& key, int value) {
+            kv.SetValue(key, value);
+        },
+        [](KeyValueStore& kv, const std::string& key, const KeyValueStore::Value& value) {
+            kv.SetValue(key, value);
+        });
+    kvstore["DelValue"] = &KeyValueStore::DeleteValue;
     kvstore["HasValue"] = &KeyValueStore::HasValue;
     kvstore["Clear"]    = &KeyValueStore::Clear;
     kvstore["Persist"]  = sol::overload(
@@ -1541,26 +1473,41 @@ void BindGameLib(sol::state& L)
                 return kv.Restore(reader);
             });
     kvstore["GetValue"] = sol::overload(
-        [](const KeyValueStore& kv, const char* key, sol::this_state state) {
+        [](const KeyValueStore& kv, const std::string& key, sol::this_state state) {
             sol::state_view lua(state);
             KeyValueStore::Value value;
-            if (!kv.GetValue(key, &value))
-                throw GameError("No such key value key: " + std::string(key));
+            if (kv.GetValue(key, &value))
+                return sol::make_object(lua, value);
             return sol::make_object(lua, value);
         },
-        [](KeyValueStore& kv, const char* key, sol::this_state state, sol::object value) {
+        [](KeyValueStore& kv, const std::string& key, int value, sol::this_state state) {
             sol::state_view lua(state);
             KeyValueStore::Value val;
             if (kv.GetValue(key, &val))
                 return sol::make_object(lua, val);
-            SetKvValue(kv, key, value);
-            return value;
+            kv.SetValue(key, value);
+            return sol::make_object(lua, value);
+        },
+        [](KeyValueStore& kv, const std::string& key, const KeyValueStore::Value& value, sol::this_state state) {
+            sol::state_view lua(state);
+            KeyValueStore::Value val;
+            if (kv.GetValue(key, &val))
+                return sol::make_object(lua, val);
+            kv.SetValue(key, value);
+            return sol::make_object(lua, value);
         });
-    kvstore["InitValue"] = [](KeyValueStore& kv, const char* key, sol::object value) {
-        if (kv.HasValue(key))
-            return;
-        SetKvValue(kv, key, value);
-    };
+
+    kvstore["InitValue"] = sol::overload(
+        [](KeyValueStore& kv, const std::string& key, int value) {
+            if (kv.HasValue(key))
+                return;
+            kv.SetValue(key, value);
+        },
+        [](KeyValueStore& kv, const std::string& key, const KeyValueStore::Value& value) {
+            if (kv.HasValue(key))
+                return;
+            kv.SetValue(key, value);
+        });
 }
 
 } // namespace

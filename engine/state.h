@@ -43,9 +43,9 @@ namespace engine
                 glm::vec2, glm::vec3, glm::vec4,
                 base::FPoint, base::FRect , base::FSize,
                 base::Color4f>;
-        bool HasValue(const std::string& key) const
+        bool HasValue(const std::string& key) const noexcept
         { return mValues.find(key) != mValues.end(); }
-        Value GetValue(const std::string& key) const
+        Value GetValue(const std::string& key) const noexcept
         {
             auto it = mValues.find(key);
             if (it == mValues.end())
@@ -67,8 +67,10 @@ namespace engine
         template<typename T>
         void SetValue(const std::string& key, T value)
         { mValues[key] = Value(value); }
-        void Clear()
+        void Clear() noexcept
         { mValues.clear(); }
+        void DeleteValue(const std::string& key) noexcept
+        { mValues.erase(key); }
 
         void Persist(data::Writer& writer) const;
         bool Restore(const data::Reader& reader);

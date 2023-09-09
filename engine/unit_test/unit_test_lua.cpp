@@ -32,7 +32,7 @@
 #include "engine/lua_game_runtime.h"
 #include "engine/loader.h"
 #include "engine/event.h"
-
+#include "engine/state.h"
 
 bool Eq(const engine::GameEventValue& lhs, const engine::GameEventValue& rhs)
 {
@@ -547,6 +547,434 @@ end
         const std::string& ret = L["read_json"](json);
         std::cout << ret;
         TEST_REQUIRE(ret == "ok");
+    }
+}
+
+void unit_test_game()
+{
+    TEST_CASE(test::Type::Feature)
+
+    sol::state L;
+    L.open_libraries();
+    engine::BindBase(L);
+    engine::BindGameLib(L);
+    engine::BindGLM(L);
+    engine::BindUtil(L);
+
+    L["test_bool"] = [](bool a, bool b) {
+        if (a != b)
+            throw std::runtime_error("boolean fail");
+    };
+    L["test_int"] = [](int a, int b) {
+        std::printf("test_int a=%d, b=%d\n", a, b);
+        if (a != b)
+            throw std::runtime_error("int fail");
+    };
+    L["test_float"] = [](float a, float b) {
+        std::printf("test_float a=%f, b=%f\n", a, b);
+        if (!real::equals(a, b))
+            throw std::runtime_error("float fail");
+    };
+
+    // game event type.
+    {
+        L.script(R"(
+function test(event)
+   event.from    = 'test'
+   event.to      = 'test too'
+   event.message = 'message'
+   event.some_int    = 123
+   event.some_float  = 123.0
+   event.some_bool   = true
+   event.some_str    = 'foobar'
+   event.some_vec2   = glm.vec2:new(1.0, 2.0)
+   event.some_vec3   = glm.vec3:new(1.0, 2.0, 3.0)
+   event.some_vec4   = glm.vec4:new(1.0, 2.0, 3.0, 4.0)
+end
+)");
+        engine::GameEvent event;
+        sol::function_result ret = L["test"](&event);
+        TEST_REQUIRE(ret.valid());
+        TEST_REQUIRE(event.from    == std::string("test"));
+        TEST_REQUIRE(event.to      == std::string("test too"));
+        TEST_REQUIRE(event.message == std::string("message"));
+        TEST_REQUIRE(event.values["some_int"]   == 123);
+        TEST_REQUIRE(event.values["some_float"] == 123.0f);
+        TEST_REQUIRE(event.values["some_bool"]  == true);
+        TEST_REQUIRE(event.values["some_str"]   == std::string("foobar"));
+        TEST_REQUIRE(event.values["some_vec2"]  == glm::vec2(1.0, 2.0));
+        TEST_REQUIRE(event.values["some_vec3"]  == glm::vec3(1.0, 2.0, 3.0));
+        TEST_REQUIRE(event.values["some_vec4"]  == glm::vec4(1.0, 2.0, 3.0, 4.0));
+    }
+
+    {
+        auto entity = std::make_shared<game::EntityClass>();
+        entity->SetName("entity");
+
+        auto scene = std::make_shared<game::SceneClass>();
+        scene->SetName("scene");
+
+        game::Entity e(entity);
+        game::Scene s(scene);
+
+        L.script(R"(
+function test(event, object)
+   event.from   = object
+   event.to     = object
+   event.value  = object
+end
+    )");
+        {
+            engine::GameEvent event;
+            sol::function_result ret = L["test"](&event, &e);
+            TEST_REQUIRE(ret.valid());
+            TEST_REQUIRE(event.from == &e);
+            TEST_REQUIRE(event.to == &e);
+            TEST_REQUIRE(event.values["value"] == &e);
+        }
+
+        {
+            engine::GameEvent event;
+            sol::function_result ret = L["test"](&event, &s);
+            TEST_REQUIRE(ret.valid());
+            TEST_REQUIRE(event.from == &s);
+            TEST_REQUIRE(event.to == &s);
+            TEST_REQUIRE(event.values["value"] == &s);
+        }
+    }
+
+    // key-value store
+    {
+        engine::KeyValueStore store;
+        data::JsonObject json;
+        L.script(R"(
+function test(store, json)
+  --doesn't exist
+  test_bool(store:HasValue('int'), false)
+
+  -- get and initialize to 123
+  test_int(store:GetValue('int', 123), 123)
+  test_float(store:GetValue('float', 123.0), 123.0)
+
+  -- should get the value initialized before
+  test_int(store:GetValue('int', 666), 123)
+  test_float(store:GetValue('float', 666.0), 123.0)
+
+  store:DelValue('int')
+  store:DelValue('float')
+  test_bool(store:HasValue('int'), false)
+  test_bool(store:HasValue('float'), false)
+
+  test_bool(store.int == nil, true)
+  test_bool(store.float == nil, true)
+
+  store:InitValue('int', 123)
+  store:InitValue('float', 123.0)
+  test_bool(store:HasValue('int'), true)
+  test_bool(store:HasValue('float'), true)
+
+  store['bool']   = true
+  store['int']    = 123
+  store['float']  = 123.0
+  store['string'] = 'foobar'
+  store['vec2']   = glm.vec2:new(1.0, 2.0)
+  store['vec3']   = glm.vec3:new(1.0, 2.0, 3.0)
+  store['vec4']   = glm.vec4:new(1.0, 2.0, 3.0, 4.0)
+  store['point']  = base.FPoint:new(1.0, 2.0)
+  store['rect']   = base.FRect:new(1.0, 2.0, 3.0, 4.0)
+  store['size']   = base.FSize:new(1.0, 2.0)
+  store['color']  = base.Color4f:new(0.1, 0.2, 0.3, 0.4)
+
+  test_bool(store:HasValue('bool'), true)
+  test_bool(store:HasValue('int'), true)
+  test_bool(store:HasValue('float'), true)
+  test_bool(store:HasValue('keke'), false)
+
+  -- do reads in Lua from the store and save into _G
+  the_bool   = store.bool
+  the_int    = store.int
+  the_float  = store.float
+  the_string = store.string
+  the_vec2   = store.vec2
+  the_vec3   = store.vec3
+  the_vec4   = store.vec4
+  the_point  = store.point
+  the_rect   = store.rect
+  the_size   = store.size
+  the_color  = store.color
+
+  store:Persist(json)
+end
+)");
+
+        sol::function_result ret = L["test"](&store, &json);
+        TEST_REQUIRE(ret.valid());
+        TEST_REQUIRE(store.GetValue("bool")   == true);
+        TEST_REQUIRE(store.GetValue("int")    == 123);
+        TEST_REQUIRE(store.GetValue("float")  == 123.0f);
+        TEST_REQUIRE(store.GetValue("string") == std::string("foobar"));
+        TEST_REQUIRE(store.GetValue("vec2")   == glm::vec2(1.0f, 2.0f));
+        TEST_REQUIRE(store.GetValue("vec3")   == glm::vec3(1.0f, 2.0f, 3.0f));
+        TEST_REQUIRE(store.GetValue("vec4")   == glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
+        TEST_REQUIRE(store.GetValue("point")  == base::FPoint(1.0f, 2.0f));
+        TEST_REQUIRE(store.GetValue("rect")   == base::FRect(1.0f, 2.0f, 3.0f, 4.0f));
+        TEST_REQUIRE(store.GetValue("size")   == base::FSize(1.0f, 2.0f));
+        TEST_REQUIRE(store.GetValue("color")  == base::Color4f(0.1f, 0.2f, 0.3f, 0.4f));
+
+        TEST_REQUIRE(L["the_bool"]   == true);
+        TEST_REQUIRE(L["the_int"]    == 123);
+        TEST_REQUIRE(L["the_float"]  == 123.0f);
+        TEST_REQUIRE(L["the_string"] == std::string("foobar"));
+        TEST_REQUIRE(L["the_vec2"]   == glm::vec2(1.0f, 2.0f));
+        TEST_REQUIRE(L["the_vec3"]   == glm::vec3(1.0f, 2.0f, 3.0f));
+        TEST_REQUIRE(L["the_vec4"]   == glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
+        TEST_REQUIRE(L["the_point"]  == base::FPoint(1.0f, 2.0f));
+        TEST_REQUIRE(L["the_rect"]   == base::FRect(1.0f, 2.0f, 3.0f, 4.0f));
+        TEST_REQUIRE(L["the_size"]   == base::FSize(1.0f, 2.0f));
+        TEST_REQUIRE(L["the_color"]  == base::Color4f(0.1f, 0.2f, 0.3f, 0.4f));
+
+        store.Clear();
+        TEST_REQUIRE(store.HasValue("bool") == false);
+        TEST_REQUIRE(store.HasValue("int") == false);
+
+        L.script(R"(
+function test(store, json)
+   test_bool(store:Restore(json), true)
+   test_bool(store:HasValue('int'), true)
+   test_bool(store:HasValue('float'), true)
+
+   test_int(store.int, 123)
+   test_float(store.float, 123.0)
+end
+)");
+        ret = L["test"](&store, &json);
+        TEST_REQUIRE(ret.valid());
+    }
+}
+
+void unit_test_entity_interface()
+{
+    TEST_CASE(test::Type::Feature)
+
+    sol::state L;
+    L.open_libraries();
+    engine::BindBase(L);
+    engine::BindGameLib(L);
+    engine::BindGLM(L);
+    engine::BindUtil(L);
+
+    L["test_float"] = [](float a, float b) {
+        std::printf("test_float a=%f, b=%f\n", a, b);
+        if (!real::equals(a, b))
+            throw std::runtime_error("float fail");
+    };
+    L["test_int"] = [](int a, int b) {
+        std::printf("test_int a=%d, b=%d\n", a, b);
+        if (a != b)
+            throw std::runtime_error("int fail");
+    };
+    L["test_str"] = [](std::string a, std::string b) {
+        std::printf("test_str a='%s', b='%s'\n", a.c_str(), b.c_str());
+        if (a != b)
+            throw std::runtime_error("string fail");
+    };
+    L["test_bool"] = [](bool a, bool b) {
+        if (a != b)
+            throw std::runtime_error("boolean fail");
+    };
+    L["test_vec2"] = [](const glm::vec2& vec, float x, float y)  {
+        if (vec != glm::vec2(x, y))
+            throw std::runtime_error("vec2 fail");
+    };
+    L["test_vec3"] = [](const glm::vec3& vec, float x, float y, float z)  {
+        if (vec != glm::vec3(x, y, z))
+            throw std::runtime_error("vec3 fail");
+    };
+    L["test_vec4"] = [](const glm::vec4& vec, float x, float y, float z, float w)  {
+        if (vec != glm::vec4(x, y, z, w))
+            throw std::runtime_error("vec4 fail");
+    };
+    L["test_color"] = [](const base::Color4f& color, float r, float g, float b, float a)  {
+        if (color != base::Color4f(r, g, b,a))
+            throw std::runtime_error("vec4 fail");
+    };
+
+    // DrawableItem
+    {
+        auto klass = std::make_shared<game::DrawableItemClass>();
+        klass->SetMaterialId("material");
+        klass->SetDrawableId("drawable");
+        klass->SetLayer(5);
+        klass->SetLineWidth(2.0f);
+        klass->SetTimeScale(3.0f);
+        klass->SetFlag(game::DrawableItemClass::Flags::FlipHorizontally, true);
+        klass->SetFlag(game::DrawableItemClass::Flags::RestartDrawable, false);
+
+        game::DrawableItem item(klass);
+        item.SetCurrentMaterialTime(2.0f);
+
+        L.script(R"(
+function test(node)
+   test_str(node:GetMaterialId(), "material")
+   test_str(node:GetDrawableId(), "drawable")
+   test_int(node:GetLayer(), 5)
+   test_float(node:GetLineWidth(), 2.0)
+   test_float(node:GetTimeScale(), 3.0)
+   test_float(node:GetMaterialTime(), 2.0)
+   test_bool(node:TestFlag('FlipHorizontally'), true)
+   test_bool(node:TestFlag('RestartDrawable'), false)
+   test_bool(node:IsVisible(), true)
+
+   node:SetVisible(false)
+   test_bool(node:IsVisible(), false)
+   node:SetFlag('VisibleInGame', true)
+   test_bool(node:IsVisible(), true)
+
+   node:SetTimeScale(1.0)
+   test_float(node:GetTimeScale(), 1.0)
+
+   node:SetUniform('float', 1.0)
+   node:SetUniform('int',   2)
+   node:SetUniform('vec2', glm.vec2:new(1.0, 2.0))
+   node:SetUniform('vec3', glm.vec3:new(1.0, 2.0, 3.0))
+   node:SetUniform('vec4', glm.vec4:new(1.0, 2.0, 3.0, 4.0))
+   node:SetUniform('color', base.Color4f:new(0.1, 0.2, 0.3, 0.4))
+
+   test_bool(node:HasUniform('kek'),   false)
+   test_bool(node:HasUniform('float'), true)
+   test_bool(node:HasUniform('int'),   true)
+   test_bool(node:HasUniform('vec2'),  true)
+   test_bool(node:HasUniform('vec3'),  true)
+   test_bool(node:HasUniform('vec4'),  true)
+   test_bool(node:HasUniform('color'), true)
+
+   test_bool(node:FindUniform('kek') == nil, true)
+
+   test_int(node:FindUniform('int'), 2)
+   test_float(node:FindUniform('float'), 1.0)
+   test_vec2(node:FindUniform('vec2'), 1.0, 2.0)
+   test_vec3(node:FindUniform('vec3'), 1.0, 2.0, 3.0)
+   test_vec4(node:FindUniform('vec4'), 1.0, 2.0, 3.0, 4.0)
+   test_color(node:FindUniform('color'), 0.1, 0.2, 0.3, 0.4)
+
+   node:DeleteUniform('kek') -- should do nothing
+   node:DeleteUniform('int')
+   test_bool(node:HasUniform('int'), false)
+
+   node:ClearUniforms()
+   test_bool(node:HasUniform('vec2'), false)
+   test_bool(node:HasUniform('vec3'), false)
+   test_bool(node:HasUniform('vec4'), false)
+   test_bool(node:HasUniform('color'), false)
+
+   test_bool(node:HasMaterialTimeAdjustment(), false)
+   node:AdjustMaterialTime(1.0)
+end
+)");
+        sol::function_result  ret = L["test"](&item);
+        TEST_REQUIRE(ret.valid());
+        TEST_REQUIRE(item.HasMaterialTimeAdjustment());
+        TEST_REQUIRE(item.GetMaterialTimeAdjustment() == 1.0);
+    }
+
+    // Rigid body
+    {
+        auto klass = std::make_shared<game::RigidBodyItemClass>();
+        klass->SetFlag(game::RigidBodyItemClass::Flags::Bullet, true);
+        klass->SetFlag(game::RigidBodyItemClass::Flags::Enabled, false);
+        klass->SetFlag(game::RigidBodyItemClass::Flags::Sensor, false);
+        klass->SetLinearDamping(-1.0f);
+        klass->SetAngularDamping(1.0f);
+        klass->SetDensity(2.0f);
+        klass->SetRestitution(3.0f);
+        klass->SetSimulation(game::RigidBodyItemClass::Simulation::Kinematic);
+        klass->SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Polygon);
+        klass->SetPolygonShapeId("polygon");
+        klass->SetFriction(5.0f);
+
+        game::RigidBodyItem body(klass);
+        body.SetLinearVelocity(glm::vec2(1.0f, 2.0f));
+        body.SetAngularVelocity(2.0f);
+
+        L.script(R"(
+function test(body)
+    test_bool(body:IsEnabled(), false)
+    test_bool(body:IsSensor(), false)
+    test_bool(body:IsBullet(), true)
+    test_bool(body:TestFlag('Bullet'), true)
+    test_bool(body:TestFlag('Enabled'), false)
+    test_bool(body:TestFlag('Sensor'), false)
+
+    test_float(body:GetFriction(), 5.0)
+    test_float(body:GetRestitution(), 3.0)
+    test_float(body:GetAngularDamping(), 1.0)
+    test_float(body:GetLinearDamping(), -1.0)
+    test_float(body:GetDensity(), 2.0)
+    test_str(body:GetPolygonShapeId(), 'polygon')
+
+    test_vec2(body:GetLinearVelocity(), 1.0, 2.0)
+    test_float(body:GetAngularVelocity(), 2.0)
+
+    body:Enable(true)
+    test_bool(body:IsEnabled(), true)
+
+    test_str(body:GetSimulationType(), 'Kinematic')
+    test_str(body:GetCollisionShapeType(), 'Polygon')
+
+    body:ApplyImpulse(1.0, 2.0)
+end
+)");
+        sol::function_result  ret = L["test"](&body);
+        TEST_REQUIRE(ret.valid());
+        TEST_REQUIRE(body.HasCenterImpulse());
+        TEST_REQUIRE(body.GetLinearImpulseToCenter() == glm::vec2(1.0f, 2.0f));
+    }
+
+    // Text item
+    {
+
+    }
+
+    // entity
+    {
+        auto entity = std::make_shared<game::EntityClass>();
+        entity->SetName("entity");
+
+        game::Entity e(entity);
+
+        // test posted event.
+L.script(R"(
+function test(e)
+   e:PostEvent('int', 'test', 123)
+   e:PostEvent('str', 'test', 'keke')
+   e:PostEvent('bool', 'test', true)
+   e:PostEvent('float', 'test', 123.0)
+   e:PostEvent('vec2', 'test', glm.vec2:new(1.0, 2.0))
+   e:PostEvent('vec3', 'test', glm.vec3:new(1.0, 2.0, 3.0))
+   e:PostEvent('vec4', 'test', glm.vec4:new(1.0, 2.0, 3.0, 4.0))
+end
+)");
+        sol::function_result ret = L["test"](&e);
+        TEST_REQUIRE(ret.valid());
+
+        std::vector<game::Entity::Event> events;
+        e.Update(0.0f, &events);
+        TEST_REQUIRE(events.size() == 7);
+        TEST_REQUIRE(std::get<game::Entity::PostedEvent>(events[0]).message == "int");
+        TEST_REQUIRE(std::get<game::Entity::PostedEvent>(events[0]).value   == 123);
+        TEST_REQUIRE(std::get<game::Entity::PostedEvent>(events[1]).message == "str");
+        TEST_REQUIRE(std::get<game::Entity::PostedEvent>(events[1]).value   == std::string("keke"));
+        TEST_REQUIRE(std::get<game::Entity::PostedEvent>(events[2]).message == "bool");
+        TEST_REQUIRE(std::get<game::Entity::PostedEvent>(events[2]).value   == true);
+        TEST_REQUIRE(std::get<game::Entity::PostedEvent>(events[3]).message == "float");
+        TEST_REQUIRE(std::get<game::Entity::PostedEvent>(events[3]).value   == 123.0f);
+        TEST_REQUIRE(std::get<game::Entity::PostedEvent>(events[4]).message == "vec2");
+        TEST_REQUIRE(std::get<game::Entity::PostedEvent>(events[4]).value   == glm::vec2(1.0f, 2.0f));
+        TEST_REQUIRE(std::get<game::Entity::PostedEvent>(events[5]).message == "vec3");
+        TEST_REQUIRE(std::get<game::Entity::PostedEvent>(events[5]).value   == glm::vec3(1.0f, 2.0f, 3.0f));
+        TEST_REQUIRE(std::get<game::Entity::PostedEvent>(events[6]).message == "vec4");
+        TEST_REQUIRE(std::get<game::Entity::PostedEvent>(events[6]).value   == glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
+
     }
 }
 
@@ -1666,6 +2094,8 @@ int test_main(int argc, char* argv[])
     unit_test_glm();
     unit_test_base();
     unit_test_data();
+    unit_test_game();
+    unit_test_entity_interface();
     unit_test_scene_interface();
     unit_test_entity_begin_end_play();
     unit_test_entity_tick_update();
