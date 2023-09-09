@@ -412,6 +412,18 @@ void InitLuaDoc()
     DOC_FUNCTION_3("float|int", "wrap", "Wrap a value from min to max and from max to min.",
                    "float|int", "min", "float|int", "max", "float|int", "value");
 
+    DOC_TABLE("easing");
+    DOC_METHOD_2("float", "adjust", "Adjust the value of t based on the easing curve.",
+                                    "float", "t", "easing.Curves", "curve");
+    DOC_METHOD_2("float", "adjust", "Adjust the value of t based on the easing curve.",
+                 "float", "t", "string", "curve");
+    DOC_TABLE("easing.Curves");
+    for (const auto& value : magic_enum::enum_values<math::Interpolation>())
+    {
+        const std::string name(magic_enum::enum_name(value));
+        DOC_TABLE_PROPERTY("int", QString::fromStdString(name), app::toString("Easing curve value for '%1'.", name));
+    }
+
     DOC_TABLE("trace");
     DOC_FUNCTION_1("void", "marker", "Set a marker message in the application trace.",
                  "string", "message");
