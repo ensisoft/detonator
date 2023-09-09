@@ -34,19 +34,19 @@ void BindWDK(sol::state& L)
     table["KeyStr"] = [](int value) {
         const auto key = magic_enum::enum_cast<wdk::Keysym>(value);
         if (!key.has_value())
-            throw GameError("No such keysym value:" + std::to_string(value));
+            throw GameError("No such key symbol:" + std::to_string(value));
         return std::string(magic_enum::enum_name(key.value()));
     };
     table["BtnStr"] = [](int value) {
         const auto key = magic_enum::enum_cast<wdk::MouseButton>(value);
         if (!key.has_value())
-            throw GameError("No such mouse button value: " + std::to_string(value));
+            throw GameError("No such mouse button: " + std::to_string(value));
         return std::string(magic_enum::enum_name(key.value()));
     };
     table["ModStr"] = [](int value) {
         const auto mod = magic_enum::enum_cast<wdk::Keymod>(value);
         if (!mod.has_value())
-            throw GameError("No such keymod value: " + std::to_string(value));
+            throw GameError("No such key modifier: " + std::to_string(value));
         return std::string(magic_enum::enum_name(mod.value()));
     };
     table["ModBitStr"] = [](int bits) {
@@ -76,7 +76,7 @@ void BindWDK(sol::state& L)
     table["TestMod"] = [](int bits, int value) {
         const auto mod = magic_enum::enum_cast<wdk::Keymod>(value);
         if (!mod.has_value())
-            throw GameError("No such modifier: " + std::to_string(value));
+            throw GameError("No such key modifier: " + std::to_string(value));
         wdk::bitflag<wdk::Keymod> mods;
         mods.set_from_value(bits);
         return mods.test(mod.value());
@@ -111,13 +111,13 @@ void BindWDK(sol::state& L)
     key_bit_string["Set"] = [](KeyBitSet& bits, int key, bool on_off) {
         const auto sym = magic_enum::enum_cast<wdk::Keysym>(key);
         if (!sym.has_value())
-            throw GameError("No such keysym: " + std::to_string(key));
+            throw GameError("No such key symbol: " + std::to_string(key));
         bits[static_cast<unsigned>(sym.value())] = on_off;
     };
     key_bit_string["Test"] = [](const KeyBitSet& bits, int key) {
         const auto sym = magic_enum::enum_cast<wdk::Keysym>(key);
         if (!sym.has_value())
-            throw GameError("No such keysym: " + std::to_string(key));
+            throw GameError("No such key symbol: " + std::to_string(key));
         const bool ret = bits[static_cast<unsigned>(sym.value())];
         return ret;
     };
@@ -132,7 +132,7 @@ void BindWDK(sol::state& L)
         [](const KeyBitSet& bits, int key) {
             const auto sym = magic_enum::enum_cast<wdk::Keysym>(key);
             if (!sym.has_value())
-                throw GameError("No such keysym: " + std::to_string(key));
+                throw GameError("No such key symbol: " + std::to_string(key));
             KeyBitSet tmp;
             tmp[static_cast<unsigned>(sym.value())] = true;
             return bits & tmp;
@@ -144,7 +144,7 @@ void BindWDK(sol::state& L)
         [](const KeyBitSet& bits, int key) {
             const auto sym = magic_enum::enum_cast<wdk::Keysym>(key);
             if (!sym.has_value())
-                throw GameError("No such keysym: " + std::to_string(key));
+                throw GameError("No such key symbol: " + std::to_string(key));
             KeyBitSet tmp;
             tmp[static_cast<unsigned>(sym.value())] = true;
             return bits | tmp;
