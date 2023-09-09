@@ -21,6 +21,7 @@
 #include "warnpop.h"
 
 #include "engine/lua.h"
+#include "base/math.h"
 #include "base/logging.h"
 #include "base/trace.h"
 #include "game/types.h"
@@ -55,6 +56,26 @@ void BindBase(sol::state& L)
         [](int min, int max, int value) {
             return math::clamp(min, max, value);
         });
+
+    auto easing = L.create_named_table("easing");
+    for (const auto& value : magic_enum::enum_values<math::Interpolation>())
+    {
+        const std::string name(magic_enum::enum_name(value));
+        easing[sol::create_if_nil]["Curves"][name] = magic_enum::enum_integer(value);
+    }
+    easing["adjust"] = sol::overload(
+      [](float t, const std::string& method) {
+          const auto value = magic_enum::enum_cast<math::Interpolation>(method);
+          if (!value.has_value())
+              throw GameError("No such easing curve: " + method);
+          return math::interpolate(t, value.value());
+      },
+      [](float t, int method) {
+          const auto value = magic_enum::enum_cast<math::Interpolation>(method);
+          if (!value.has_value())
+              throw GameError("No such easing curve: " + std::to_string(method));
+          return math::interpolate(t, value.value());
+      });
 
     auto trace = L.create_named_table("trace");
     trace["marker"] = sol::overload(
