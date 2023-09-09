@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <limits>
 #include <functional>
+#include <variant>
 
 #include "base/test_float.h"
 #include "base/test_minimal.h"
@@ -87,6 +88,32 @@ static bool operator!=(const FPoint& lhs, const FPoint& rhs)
 { return !(lhs == rhs); }
 
 } // base
+
+template<typename... Args>
+static bool operator==(const std::variant<Args...>& variant, const real::float32& val)
+{
+    TEST_REQUIRE(std::holds_alternative<float>(variant));
+    return std::get<float>(variant) == val;
+}
+template<typename... Args>
+static bool operator!=(const std::variant<Args...>& variant, const real::float32& val)
+{
+    TEST_REQUIRE(std::holds_alternative<float>(variant));
+    return std::get<float>(variant) == val;
+}
+
+template<typename T, typename... Args>
+static bool operator==(const std::variant<Args...>& variant, const T& val)
+{
+    TEST_REQUIRE(std::holds_alternative<T>(variant));
+    return std::get<T>(variant) == val;
+}
+template<typename T, typename... Args>
+static bool operator!=(const std::variant<Args...>& variant, const T& val)
+{
+    TEST_REQUIRE(std::holds_alternative<T>(variant));
+    return std::get<T>(variant) != val;
+}
 
 namespace test {
 struct TestTimes {
