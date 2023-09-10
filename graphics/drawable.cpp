@@ -1870,26 +1870,34 @@ void KinematicsParticleEngineClass::Update(const Environment& env, InstanceState
     //   Possibly a hybrid solution could be used.
     //   It could also be possible to simulate transform feedback through
     //   texture writes. For example here: https://nullprogram.com/webgl-particles/
-    if (state.time >= mParams.max_time)
+
+    const bool has_max_time = mParams.max_time < std::numeric_limits<float>::max();
+
+    // check if we've exceeded maximum lifetime.
+    if (has_max_time && state.time >= mParams.max_time)
     {
         state.particles.clear();
         state.time += dt;
         return;
     }
 
-    if (state.time < state.delay)
+    // with automatic spawn modes (once, maintain, continuous) do first
+    // particle emission after initial delay has expired.
+    if (mParams.mode != SpawnPolicy::Command)
     {
-        if (state.time + dt > state.delay)
+        if (state.time < state.delay)
         {
-            InitParticles(env, state, state.hatching);
-            state.hatching = 0;
+            if (state.time + dt > state.delay)
+            {
+                InitParticles(env, state, state.hatching);
+                state.hatching = 0;
+            }
+            state.time += dt;
+            return;
         }
-        state.time += dt;
-        return;
     }
 
-
-    // update each particle
+    // update each current particle
     for (size_t i=0; i<state.particles.size();)
     {
         if (UpdateParticle(env, state, i, dt))
@@ -1935,10 +1943,19 @@ bool KinematicsParticleEngineClass::IsAlive(const InstanceState& state) const
         return false;
 
     if (mParams.mode == SpawnPolicy::Continuous ||
-        mParams.mode == SpawnPolicy::Maintain)
+        mParams.mode == SpawnPolicy::Maintain ||
+        mParams.mode == SpawnPolicy::Command)
         return true;
 
     return !state.particles.empty();
+}
+
+void KinematicsParticleEngineClass::Emit(const Environment& env, InstanceState& state, int count) const
+{
+    if (count < 0)
+        return;
+
+    InitParticles(env, state, size_t(count));
 }
 
 // ParticleEngine implementation. Restart the simulation
@@ -1946,13 +1963,18 @@ bool KinematicsParticleEngineClass::IsAlive(const InstanceState& state) const
 void KinematicsParticleEngineClass::Restart(const Environment& env, InstanceState& state) const
 {
     state.particles.clear();
-    state.delay = mParams.delay;
-    state.time  = 0.0f;
+    state.delay    = mParams.delay;
+    state.time     = 0.0f;
     state.hatching = 0.0f;
     // if the spawn policy is continuous the num particles
     // is a rate of particles per second. in order to avoid
     // a massive initial burst of particles skip the init here
     if (mParams.mode == SpawnPolicy::Continuous)
+        return;
+
+    // if the spawn mode is on command only we don't spawn anything
+    // unless by command.
+    if (mParams.mode == SpawnPolicy::Command)
         return;
 
     if (state.delay != 0.0f)
@@ -2349,6 +2371,64 @@ bool KinematicsParticleEngineClass::UpdateParticle(const Environment& env, Insta
         p.position.y = math::clamp(0.0f, mParams.max_ypos, p.position.y);
     }
     return true;
+}
+
+void KinematicsParticleEngine::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
+{
+    state.line_width = 1.0;
+    state.culling    = Culling::None;
+    mClass->ApplyDynamicState(env, program);
+}
+
+Shader* KinematicsParticleEngine::GetShader(const Environment& env, Device& device) const
+{
+    return mClass->GetShader(env, device);
+}
+Geometry* KinematicsParticleEngine::Upload(const Environment& env, Device& device) const
+{
+    return mClass->Upload(env, mState, device);
+}
+std::string KinematicsParticleEngine::GetProgramId(const Environment&  env) const
+{
+    return mClass->GetProgramId(env);
+}
+
+Drawable::Style KinematicsParticleEngine::GetStyle() const
+{
+    return Style::Points;
+}
+
+void KinematicsParticleEngine::Update(const Environment& env, float dt)
+{
+    mClass->Update(env, mState, dt);
+}
+
+bool KinematicsParticleEngine::IsAlive() const
+{
+    return mClass->IsAlive(mState);
+}
+
+void KinematicsParticleEngine::Restart(const Environment& env)
+{
+    mClass->Restart(env, mState);
+}
+
+void KinematicsParticleEngine::Execute(const Environment& env, const Command& cmd)
+{
+    if (cmd.name == "EmitParticles")
+    {
+        if (const auto* count = base::SafeFind(cmd.args, std::string("count")))
+        {
+            if (const auto* val = std::get_if<int>(count))
+                mClass->Emit(env, mState, *val);
+        }
+        else
+        {
+            const auto& params = mClass->GetParams();
+            mClass->Emit(env, mState, (int)params.num_particles);
+        }
+    }
+    else WARN("No such particle engine command. [cmd='%1']", cmd.name);
 }
 
 void TileBatch::ApplyDynamicState(const Environment& env, Program& program, RasterState& raster) const
