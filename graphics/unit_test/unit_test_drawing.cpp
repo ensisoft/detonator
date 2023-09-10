@@ -1846,6 +1846,130 @@ void unit_test_particles()
 {
     TEST_CASE(test::Type::Feature)
 
+    // emission mode once.
+    {
+        gfx::KinematicsParticleEngineClass::Params p;
+        p.num_particles = 100;
+        p.max_lifetime  = 1.0f;
+        p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Once;
+        gfx::KinematicsParticleEngineClass klass(p);
+        gfx::KinematicsParticleEngine eng(klass);
+
+        TestDevice dev;
+        gfx::detail::GenericShaderPass pass;
+        gfx::DrawableClass::Environment env;
+        env.shader_pass = &pass;
+
+        eng.Restart(env);
+        TEST_REQUIRE(eng.IsAlive());
+        TEST_REQUIRE(eng.GetNumParticlesAlive() == 100);
+
+        eng.Update(env, 1.5f);
+        TEST_REQUIRE(eng.IsAlive() == false);
+        TEST_REQUIRE(eng.GetNumParticlesAlive() == 0);
+    }
+
+
+    // emission mode maintain, new particles are spawned to compensate
+    // for ones that died.
+    {
+        gfx::KinematicsParticleEngineClass::Params p;
+        p.num_particles = 100;
+        p.max_lifetime  = 1.0f;
+        p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Maintain;
+        gfx::KinematicsParticleEngineClass klass(p);
+        gfx::KinematicsParticleEngine eng(klass);
+
+        TestDevice dev;
+        gfx::detail::GenericShaderPass pass;
+        gfx::DrawableClass::Environment env;
+        env.shader_pass = &pass;
+
+        eng.Restart(env);
+        TEST_REQUIRE(eng.IsAlive());
+        TEST_REQUIRE(eng.GetNumParticlesAlive() == 100);
+
+        eng.Update(env, 1.5f);
+        TEST_REQUIRE(eng.IsAlive());
+        TEST_REQUIRE(eng.GetNumParticlesAlive() == 100);
+
+        eng.Update(env, 1.5f);
+        TEST_REQUIRE(eng.IsAlive());
+        TEST_REQUIRE(eng.GetNumParticlesAlive() == 100);
+    }
+
+    // continuously spawn new particles. num_particles is the spawn
+    // rate of particles in particles/second
+    {
+        gfx::KinematicsParticleEngineClass::Params p;
+        p.num_particles = 10; // 10 particles per second.
+        p.min_lifetime  = 10.0f;
+        p.max_lifetime  = 10.0f;
+        p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Continuous;
+        gfx::KinematicsParticleEngineClass klass(p);
+        gfx::KinematicsParticleEngine eng(klass);
+
+        TestDevice dev;
+        gfx::detail::GenericShaderPass pass;
+        gfx::DrawableClass::Environment env;
+        env.shader_pass = &pass;
+
+        // we're starting with 0 particles and on every update
+        // spawn new particles within the spawn rate.
+        eng.Restart(env);
+        TEST_REQUIRE(eng.IsAlive());
+        TEST_REQUIRE(eng.GetNumParticlesAlive() == 0);
+
+        eng.Update(env, 0.5f);
+        TEST_REQUIRE(eng.IsAlive());
+        TEST_REQUIRE(eng.GetNumParticlesAlive() == 5);
+
+        eng.Update(env, 0.5f);
+        TEST_REQUIRE(eng.IsAlive());
+        TEST_REQUIRE(eng.GetNumParticlesAlive() == 10);
+
+        eng.Update(env, 0.5f);
+        TEST_REQUIRE(eng.IsAlive());
+        TEST_REQUIRE(eng.GetNumParticlesAlive() == 15);
+    }
+
+    // Spawn on command only
+    {
+        gfx::KinematicsParticleEngineClass::Params p;
+        p.num_particles = 10; // 10 particles per second.
+        p.min_lifetime  = 10.0f;
+        p.max_lifetime  = 10.0f;
+        p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Command;
+        gfx::KinematicsParticleEngineClass klass(p);
+        gfx::KinematicsParticleEngine eng(klass);
+
+        TestDevice dev;
+        gfx::detail::GenericShaderPass pass;
+        gfx::DrawableClass::Environment env;
+        env.shader_pass = &pass;
+
+        eng.Restart(env);
+        TEST_REQUIRE(eng.IsAlive());
+        TEST_REQUIRE(eng.GetNumParticlesAlive() == 0);
+
+        gfx::Drawable::Command cmd;
+        cmd.name = "EmitParticles";
+        cmd.args["count"] = 10;
+        eng.Execute(env, cmd);
+        TEST_REQUIRE(eng.IsAlive());
+        TEST_REQUIRE(eng.GetNumParticlesAlive() == 10);
+
+        // update should not affect particle spawning since it's on command now
+        eng.Update(env, 0.5f);
+        TEST_REQUIRE(eng.IsAlive());
+        TEST_REQUIRE(eng.GetNumParticlesAlive() == 10);
+
+        eng.Execute(env, cmd);
+        TEST_REQUIRE(eng.IsAlive());
+        TEST_REQUIRE(eng.GetNumParticlesAlive() == 20);
+    }
+
+
     // todo: test the following:
     // - emission mode
     // - min and max duration of the simulation

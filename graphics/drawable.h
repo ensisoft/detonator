@@ -29,6 +29,8 @@
 #include <vector>
 #include <limits>
 #include <optional>
+#include <variant>
+#include <unordered_map>
 
 #include "base/assert.h"
 #include "base/utility.h"
@@ -156,9 +158,15 @@ namespace gfx
             Culling culling = Culling::Back;
         };
 
+        using CommandArg = std::variant<float, int, std::string>;
+        struct Command {
+            std::string name;
+            std::unordered_map<std::string, CommandArg> args;
+        };
+        using CommandList = std::vector<Command>;
+
         virtual ~Drawable() = default;
-        // Apply the drawable's state (if any) on the program
-        // and set the rasterizer state.
+        // Apply the drawable's state (if any) on the program and set the rasterizer state.
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const = 0;
         // Get the device specific shader object.
         // If the shader does not yet exist on the device it's created
@@ -175,8 +183,7 @@ namespace gfx
         // Request a particular line width to be used when style
         // is either Outline or Wireframe.
         virtual void SetLineWidth(float width) {}
-        // Set the style to be used for rasterizing the drawable
-        // shapes's fragments.
+        // Set the style to be used for generating the drawable geometry.
         // Not all drawables support all Styles.
         virtual void SetStyle(Style style) {}
         // Set the culling flag for the drawable.
@@ -189,9 +196,15 @@ namespace gfx
         { return true; }
         // Restart the drawable, if applicable.
         virtual void Restart(const Environment& env) {}
-        // Get the vertex program ID for shape. Used to map the
-        // drawable to a device specific program object.
+        // Get the vertex program ID for shape. The ID is Used to map the
+        // drawable to a device specific program object when combined with
+        // the material ID.
         virtual std::string GetProgramId(const Environment& env) const = 0;
+        // Execute drawable commands coming from the scripting environment.
+        // The commands can be used to change the drawable, alter its parameters
+        // or trigger its function such as particle emission.
+        virtual void Execute(const Environment& env, const Command& command)
+        {}
     private:
     };
 
@@ -952,7 +965,9 @@ namespace gfx
             // Continuously spawn new particles on every update
             // of the simulation. num particles is the number of
             // particles to spawn per second.
-            Continuous
+            Continuous,
+            // Spawn only on emission command
+            Command
         };
 
         // Control the simulation space for the particles.
@@ -1080,7 +1095,6 @@ namespace gfx
             float time = 0.0f;
             // fractional count of new particles being hatched.
             float hatching = 0.0f;
-
         };
 
         KinematicsParticleEngineClass()
@@ -1106,6 +1120,8 @@ namespace gfx
         void Update(const Environment& env, InstanceState& state, float dt) const;
         void Restart(const Environment& env, InstanceState& state) const;
         bool IsAlive(const InstanceState& state) const;
+
+        void Emit(const Environment& env, InstanceState& state, int count) const;
 
         // Get the params.
         const Params& GetParams() const
@@ -1147,49 +1163,18 @@ namespace gfx
         KinematicsParticleEngine(const KinematicsParticleEngineClass::Params& params)
           : mClass(std::make_shared<KinematicsParticleEngineClass>(params))
         {}
-        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
-        {
-            state.line_width = 1.0;
-            state.culling    = Culling::None;
-            mClass->ApplyDynamicState(env, program);
-        }
-        // Drawable implementation. Compile the shader.
-        virtual Shader* GetShader(const Environment& env, Device& device) const override
-        {
-            return mClass->GetShader(env, device);
-        }
-        // Drawable implementation. Upload particles to the device.
-        virtual Geometry* Upload(const Environment& env, Device& device) const override
-        {
-            return mClass->Upload(env, mState, device);
-        }
-        virtual std::string GetProgramId(const Environment&  env) const override
-        {
-            return mClass->GetProgramId(env);
-        }
-
-        virtual Style GetStyle() const override
-        {
-            return Style::Points;
-        }
-
-        // Update the particle simulation.
-        virtual void Update(const Environment& env, float dt) override
-        {
-            mClass->Update(env, mState, dt);
-        }
-
-        virtual bool IsAlive() const override
-        {
-            return mClass->IsAlive(mState);
-        }
-        virtual void Restart(const Environment& env) override
-        {
-            mClass->Restart(env, mState);
-        }
+        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
+        virtual Shader* GetShader(const Environment& env, Device& device) const override;
+        virtual Geometry* Upload(const Environment& env, Device& device) const override;
+        virtual std::string GetProgramId(const Environment&  env) const override;
+        virtual Style GetStyle() const override;
+        virtual void Update(const Environment& env, float dt);
+        virtual bool IsAlive() const override;
+        virtual void Restart(const Environment& env) override;
+        virtual void Execute(const Environment& env, const Command& cmd) override;
 
         // Get the current number of alive particles.
-        size_t GetNumParticlesAlive() const
+        inline size_t GetNumParticlesAlive() const noexcept
         { return mState.particles.size(); }
 
     private:
