@@ -2078,11 +2078,6 @@ void KinematicsParticleEngineClass::InitParticles(const Environment& env, Instan
         transform.Scale(mParams.init_rect_width, mParams.init_rect_height);
         transform.Translate(mParams.init_rect_xpos, mParams.init_rect_ypos);
         const auto& particle_to_world = transform.GetAsMatrix();
-        const auto world_direction = glm::normalize(particle_to_world * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-        const auto world_angle_cos = glm::dot(world_direction, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-        const auto world_angle = world_direction.y < 0.0f
-                                 ? -std::acos(world_angle_cos)
-                                 :  std::acos(world_angle_cos);
         const auto emitter_radius = 0.5f;
         const auto emitter_center = glm::vec2(0.5f, 0.5f);
 
@@ -2134,8 +2129,15 @@ void KinematicsParticleEngineClass::InitParticles(const Environment& env, Instan
 
             if (mParams.direction == Direction::Sector)
             {
-                const auto angle = math::rand(0.0f, mParams.direction_sector_size) + mParams.direction_sector_start_angle + world_angle;
-                direction = glm::vec2(std::cos(angle), std::sin(angle));
+                Transform local_transform;
+                local_transform.RotateAroundZ(mParams.direction_sector_start_angle +
+                                              math::rand(0.0f, mParams.direction_sector_size));
+
+                const auto local_direction = local_transform * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
+                const auto world_direction = glm::normalize(particle_to_world * local_direction);
+                const auto world_angle_cos = glm::dot(world_direction, glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+                const auto world_angle = std::atan2(world_direction.y, world_direction.x);
+                direction = glm::vec2(std::cos(world_angle), std::sin(world_angle));
             }
             else if (mParams.placement == Placement::Center)
             {
