@@ -609,9 +609,15 @@ namespace game
     public:
         using MaterialParam    = DrawableItemClass::MaterialParam;
         using MaterialParamMap = DrawableItemClass::MaterialParamMap;
-        using Flags       = DrawableItemClass::Flags;
-        using RenderPass  = DrawableItemClass::RenderPass;
-        using RenderStyle = DrawableItemClass::RenderStyle ;
+        using Flags            = DrawableItemClass::Flags;
+        using RenderPass       = DrawableItemClass::RenderPass;
+        using RenderStyle      = DrawableItemClass::RenderStyle;
+
+        using CommandArg = std::variant<float, int, std::string>;
+        struct Command {
+            std::string name;
+            std::unordered_map<std::string, CommandArg> args;
+        };
 
         DrawableItem(std::shared_ptr<const DrawableItemClass> klass)
           : mClass(klass)
@@ -660,7 +666,7 @@ namespace game
         // You likely should do all of the above and the reason why they
         // aren't done automatically is because then doing things in a
         // different order would create another bug setting material ID
-        // would accidentally destroy other previsouly set state.
+        // would accidentally destroy other previously set state.
         void SetMaterialId(std::string id) noexcept
         { mMaterialId = std::move(id); }
         void SetMaterialParam(const std::string& name, const MaterialParam& value)
@@ -703,6 +709,21 @@ namespace game
         double GetCurrentMaterialTime() const noexcept
         { return mMaterialTime; }
 
+        void EnqueueCommand(const Command& cmd)
+        { mCommands.push_back(cmd); }
+        void EnqueueCommand(Command&& cmd) noexcept
+        { mCommands.push_back(std::move(cmd)); }
+        const auto& GetCommands() const noexcept
+        { return mCommands; }
+        const auto& GetCommand(size_t index) const noexcept
+        { return mCommands[index]; }
+        auto GetCommand(size_t index) noexcept
+        { return mCommands[index]; }
+        void ClearCommands() const noexcept
+        { mCommands.clear(); }
+        size_t GetNumCommands() const noexcept
+        { return mCommands.size(); }
+
         const DrawableItemClass& GetClass() const noexcept
         { return *mClass.get(); }
         const DrawableItemClass* operator->() const noexcept
@@ -711,6 +732,7 @@ namespace game
         std::shared_ptr<const DrawableItemClass> mClass;
         std::string mMaterialId;
         mutable std::optional<double> mTimeAdjustment;
+        mutable std::vector<Command> mCommands;
         base::bitflag<Flags> mInstanceFlags;
         float mInstanceTimeScale = 1.0f;
         mutable double mMaterialTime = 0.0f;

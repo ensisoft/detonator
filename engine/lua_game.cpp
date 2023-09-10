@@ -460,7 +460,66 @@ void BindGameLib(sol::state& L)
     classlib["FindAudioGraphClassByName"] = &ClassLibrary::FindAudioGraphClassByName;
     classlib["FindAudioGraphClassById"]   = &ClassLibrary::FindAudioGraphClassById;
 
+    using DrawableCommand    = DrawableItem::Command;
+    using DrawableCommandArg = DrawableItem::CommandArg;
+    auto drawcmd = table.new_usertype<DrawableCommand>("DrawableCommand", sol::constructors<DrawableCommand()>(),
+        sol::meta_function::index, [](const DrawableCommand& cmd, const std::string& key, sol::this_state state) {
+            sol::state_view lua(state);
+            if (const auto* val = base::SafeFind(cmd.args, key))
+                return sol::make_object(lua, *val);
+            return sol::make_object(lua, sol::nil);
+        },
+        sol::meta_function::new_index, sol::overload(
+            [](DrawableCommand& cmd, const std::string& key, int value)  {
+                cmd.args[key] = value;
+            },
+            [](DrawableCommand& cmd, const std::string& key, DrawableCommandArg value) {
+                cmd.args[key] = value;
+            }
+        )
+    );
+    drawcmd["name"] = &DrawableCommand::name;
+
     auto drawable = table.new_usertype<DrawableItem>("Drawable");
+    drawable["Command"] = sol::overload(
+        [](DrawableItem& item, const std::string& cmd_name) {
+            DrawableCommand cmd;
+            cmd.name = cmd_name;
+            item.EnqueueCommand(std::move(cmd));
+        },
+        [](DrawableItem& item, const std::string& cmd_name, const std::string& arg_name, int value) {
+            DrawableCommand cmd;
+            cmd.name = cmd_name;
+            cmd.args[arg_name] = value;
+            item.EnqueueCommand(std::move(cmd));
+        },
+        [](DrawableItem& item, const std::string& cmd_name, const std::string& arg_name, DrawableCommandArg value) {
+            DrawableCommand  cmd;
+            cmd.name = cmd_name;
+            cmd.args[arg_name] = value;
+            item.EnqueueCommand(std::move(cmd));
+        },
+        [](DrawableItem& item, const std::string& cmd_name, const sol::table args_table) {
+            DrawableCommand cmd;
+            cmd.name = cmd_name;
+            for (const auto& key_value_pair : args_table) {
+                sol::object key = key_value_pair.first;
+                sol::object val = key_value_pair.second;
+                std::string key_str = key.as<std::string>();
+                // FYI doing key.as<DrawableCommandArg> doesn't work as expected, float/int BS again.
+                // FYI the order of int/float matters. int must come first.
+                if (val.is<int>())
+                    cmd.args[key_str] = val.as<int>();
+                else if (val.is<float>())
+                    cmd.args[key_str] = val.as<float>();
+                else if (val.is<std::string>())
+                    cmd.args[key_str] = val.as<std::string>();
+                else throw GameError("Unexpected type in drawable command argument table.");
+            }
+            item.EnqueueCommand(std::move(cmd));
+        }
+    );
+
     drawable["SetMaterial"] = sol::overload(
         [](DrawableItem& item, const std::string& name, sol::this_state this_state) {
             sol::state_view L(this_state);

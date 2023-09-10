@@ -523,6 +523,19 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
             paint_node.item_drawable->Update(env, dt * time_scale);
         if (item->TestFlag(DrawableItemType::Flags::RestartDrawable) && !paint_node.item_drawable->IsAlive())
             paint_node.item_drawable->Restart(env);
+
+        if constexpr (std::is_same_v<EntityNodeType, game::EntityNode>)
+        {
+            for (size_t i=0; i<item->GetNumCommands(); ++i)
+            {
+                const auto& src_cmd = item->GetCommand(i);
+                gfx::Drawable::Command gfx_cmd;
+                gfx_cmd.name = src_cmd.name;
+                gfx_cmd.args = src_cmd.args;
+                paint_node.item_drawable->Execute(env, gfx_cmd);
+            }
+            item->ClearCommands();
+        }
     }
 
     if (text && paint_node.text_material)
