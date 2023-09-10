@@ -490,10 +490,6 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
     transform.Translate(paint_node.world_pos);
 
     transform.Push(node.GetModelTransform());
-    const auto& model = transform.GetAsMatrix();
-
-    gfx::Drawable::Environment env;
-    env.model_matrix = &model;
 
     if (item && paint_node.item_material)
     {
@@ -518,6 +514,23 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
     }
     if (item && paint_node.item_drawable)
     {
+        if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
+        {
+            transform.Push();
+            transform.Scale(-1.0f, 1.0f);
+            transform.Translate(1.0f, 0.0f);
+        }
+        if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+        {
+            transform.Push();
+            transform.Scale(1.0f, -1.0f);
+            transform.Translate(0.0f, 1.0f);
+        }
+        const auto& model = transform.GetAsMatrix();
+        gfx::Drawable::Environment env;
+        env.model_matrix = &model;
+        // todo: other env matrices?
+
         const auto time_scale = item->GetTimeScale();
         if (item->TestFlag(DrawableItemType::Flags::UpdateDrawable))
             paint_node.item_drawable->Update(env, dt * time_scale);
@@ -536,6 +549,11 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
             }
             item->ClearCommands();
         }
+
+        if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
+            transform.Pop();
+        if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+            transform.Pop();
     }
 
     if (text && paint_node.text_material)
@@ -544,6 +562,11 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
     }
     if (text && paint_node.text_drawable)
     {
+        const auto& model = transform.GetAsMatrix();
+        gfx::Drawable::Environment env;
+        env.model_matrix = &model;
+        // todo: other env matrices?
+
         paint_node.text_drawable->Update(env, dt);
     }
 }
