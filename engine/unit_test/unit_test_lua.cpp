@@ -875,6 +875,36 @@ end
         TEST_REQUIRE(ret.valid());
         TEST_REQUIRE(item.HasMaterialTimeAdjustment());
         TEST_REQUIRE(item.GetMaterialTimeAdjustment() == 1.0);
+
+        // drawable command enqueue
+        L.script(R"(
+function test(item)
+    item:Command('test')
+    item:Command('test', 'arg', 123)
+    item:Command('test', 'arg', 123.0)
+    item:Command('test', 'arg', 'foobar')
+    item:Command('test', { first = 123 })
+    item:Command('test', { first = 123, second=123.0 })
+end
+)");
+
+        ret = L["test"](&item);
+        TEST_REQUIRE(ret.valid());
+        TEST_REQUIRE(item.GetNumCommands() == 6);
+        TEST_REQUIRE(item.GetCommand(0).name == "test");
+        TEST_REQUIRE(item.GetCommand(1).name == "test");
+        TEST_REQUIRE(item.GetCommand(1).args["arg"] == 123);
+        TEST_REQUIRE(item.GetCommand(2).name == "test");
+        TEST_REQUIRE(item.GetCommand(2).args["arg"] == 123.0f);
+
+        TEST_REQUIRE(item.GetCommand(3).name == "test");
+        TEST_REQUIRE(item.GetCommand(3).args["arg"] == std::string("foobar"));
+
+        TEST_REQUIRE(item.GetCommand(4).name == "test");
+        TEST_REQUIRE(item.GetCommand(4).args["first"] == 123);
+
+        TEST_REQUIRE(item.GetCommand(5).args["first"] == 123);
+        TEST_REQUIRE(item.GetCommand(5).args["second"] == 123.0f);
     }
 
     // Rigid body
