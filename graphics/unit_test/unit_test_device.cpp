@@ -249,7 +249,7 @@ void unit_test_texture()
     TEST_REQUIRE(texture->GetWrapY() == gfx::Texture::Wrapping::Repeat);
     // format is unspecified.
 
-    const gfx::RGB pixels[2*3] = {
+    const gfx::Pixel_RGB pixels[2 * 3] = {
         gfx::Color::White, gfx::Color::White,
         gfx::Color::Red, gfx::Color::Red,
         gfx::Color::Blue, gfx::Color::Blue
@@ -563,7 +563,7 @@ void unit_test_render_with_single_texture()
 
     auto dev = CreateDevice();
 
-    gfx::Bitmap<gfx::RGBA> data(4, 4);
+    gfx::Bitmap<gfx::Pixel_RGBA> data(4, 4);
     data.SetPixel(0, 0, gfx::Color::Red);
     data.SetPixel(1, 0, gfx::Color::Red);
     data.SetPixel(0, 1, gfx::Color::Red);
@@ -653,14 +653,14 @@ void unit_test_render_with_multiple_textures()
 
     // setup 4 textures and the output from fragment shader
     // is then the sum of all of these, i.e. white.
-    gfx::Bitmap<gfx::RGBA> r(1, 1);
-    gfx::Bitmap<gfx::RGBA> g(1, 1);
-    gfx::Bitmap<gfx::RGBA> b(1, 1);
-    gfx::Bitmap<gfx::RGBA> a(1, 1);
+    gfx::Bitmap<gfx::Pixel_RGBA> r(1, 1);
+    gfx::Bitmap<gfx::Pixel_RGBA> g(1, 1);
+    gfx::Bitmap<gfx::Pixel_RGBA> b(1, 1);
+    gfx::Bitmap<gfx::Pixel_RGBA> a(1, 1);
     r.SetPixel(0, 0, gfx::Color::Red);
     g.SetPixel(0, 0, gfx::Color::Green);
     b.SetPixel(0, 0, gfx::Color::Blue);
-    a.SetPixel(0, 0, gfx::RGBA(0, 0, 0, 0xff));
+    a.SetPixel(0, 0, gfx::Pixel_RGBA(0, 0, 0, 0xff));
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::White);
@@ -1166,7 +1166,7 @@ void unit_test_uniform_sampler_optimize_bug()
     dev->ClearColor(gfx::Color::Red);
 
     auto* texture = dev->MakeTexture("foo");
-    const gfx::RGB pixels[2*3] = {
+    const gfx::Pixel_RGB pixels[2 * 3] = {
             gfx::Color::White, gfx::Color::White,
             gfx::Color::Red, gfx::Color::Red,
             gfx::Color::Blue, gfx::Color::Blue
@@ -1237,7 +1237,7 @@ void unit_test_clean_textures()
     state.viewport     = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
 
-    const gfx::RGB pixels[2 * 3] = {
+    const gfx::Pixel_RGB pixels[2 * 3] = {
         gfx::Color::White, gfx::Color::White,
         gfx::Color::Red, gfx::Color::Red,
         gfx::Color::Blue, gfx::Color::Blue
@@ -1915,7 +1915,7 @@ void main() {
 })";
     auto* program = MakeTestProgram(*dev, vssrc, fssrc);
 
-    gfx::Bitmap<gfx::RGBA> bmp(10, 10);
+    gfx::Bitmap<gfx::Pixel_RGBA> bmp(10, 10);
     bmp.Fill(gfx::Color::Green);
 
     gfx::Device::State state;
@@ -1941,7 +1941,7 @@ void main() {
     // forcing some previous texture to be evicted.
 
     {
-        gfx::Bitmap<gfx::RGBA> pink(10, 10);
+        gfx::Bitmap<gfx::Pixel_RGBA> pink(10, 10);
         pink.Fill(gfx::Color::HotPink);
         auto* texture = dev->MakeTexture("pink");
         texture->SetFilter(gfx::Texture::MinFilter::Trilinear);
@@ -2014,7 +2014,7 @@ void main() {
 })";
         auto* program = MakeTestProgram(*dev, vssrc, fssrc);
 
-        gfx::Bitmap<gfx::RGBA> bmp(10, 10);
+        gfx::Bitmap<gfx::Pixel_RGBA> bmp(10, 10);
         bmp.Fill(gfx::Color::Green);
 
         gfx::Device::State state;
@@ -2061,14 +2061,14 @@ void main() {
         auto* program = MakeTestProgram(*dev, vssrc, fssrc);
         // setup 4 textures and the output from fragment shader
         // is then the sum of all of these, i.e. white.
-        gfx::Bitmap<gfx::RGBA> r(1, 1);
-        gfx::Bitmap<gfx::RGBA> g(1, 1);
-        gfx::Bitmap<gfx::RGBA> b(1, 1);
-        gfx::Bitmap<gfx::RGBA> a(1, 1);
+        gfx::Bitmap<gfx::Pixel_RGBA> r(1, 1);
+        gfx::Bitmap<gfx::Pixel_RGBA> g(1, 1);
+        gfx::Bitmap<gfx::Pixel_RGBA> b(1, 1);
+        gfx::Bitmap<gfx::Pixel_RGBA> a(1, 1);
         r.SetPixel(0, 0, gfx::Color::Red);
         g.SetPixel(0, 0, gfx::Color::Green);
         b.SetPixel(0, 0, gfx::Color::Blue);
-        a.SetPixel(0, 0, gfx::RGBA(0, 0, 0, 0xff));
+        a.SetPixel(0, 0, gfx::Pixel_RGBA(0, 0, 0, 0xff));
         auto* tex0 = dev->MakeTexture("tex0");
         auto* tex1 = dev->MakeTexture("tex1");
         auto* tex2 = dev->MakeTexture("tex2");
@@ -2109,7 +2109,7 @@ void unit_test_algo_texture_copy()
     auto* src = dev->MakeTexture("src");
     auto* dst = dev->MakeTexture("dst");
 
-    gfx::Bitmap<gfx::RGBA> bmp(10, 10);
+    gfx::Bitmap<gfx::Pixel_RGBA> bmp(10, 10);
     bmp.Fill(gfx::Color::Red);
     bmp.Fill(gfx::URect(0, 0, 10, 5), gfx::Color::Green);
     // flip the bitmap now temporarily to match the layout expected by OpenGL
@@ -2142,7 +2142,7 @@ void unit_test_algo_texture_flip()
 
     auto* tex = dev->MakeTexture("texture");
 
-    gfx::Bitmap<gfx::RGBA> bmp(10, 10);
+    gfx::Bitmap<gfx::Pixel_RGBA> bmp(10, 10);
     bmp.Fill(gfx::Color::Red);
     bmp.Fill(gfx::URect(0, 0, 10, 5), gfx::Color::Green);
     // flip the bitmap now temporarily to match the layout expected by OpenGL
@@ -2177,7 +2177,7 @@ void unit_test_algo_texture_read()
 
     auto* tex = dev->MakeTexture("texture");
 
-    gfx::Bitmap<gfx::RGBA> bmp(10, 10);
+    gfx::Bitmap<gfx::Pixel_RGBA> bmp(10, 10);
     bmp.Fill(gfx::Color::Red);
     bmp.Fill(gfx::URect(0, 0, 10, 5), gfx::Color::Green);
     // flip the bitmap now temporarily to match the layout expected by OpenGL

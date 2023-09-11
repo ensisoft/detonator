@@ -2011,7 +2011,7 @@ public:
             ASSERT(img.GetHeight() == 2);
 
             auto view = img.GetReadView();
-            gfx::RGB values[4];
+            gfx::Pixel_RGB values[4];
             // okay so the image was created with THE GIMP and should
             // contain 4 pixels. One fully black (0.0f, 0.0f, 0.0f),
             // one gray at (0.5f, 0.5f, 0.5f) and finally one white
@@ -2408,8 +2408,8 @@ int main(int argc, char* argv[])
                 // render the test.
                 test->Render(*painter);
 
-                const gfx::Bitmap<gfx::RGBA>& result = gfx_device->ReadColorBuffer(window.GetSurfaceWidth(),
-                    window.GetSurfaceHeight());
+                const gfx::Bitmap<gfx::Pixel_RGBA>& result = gfx_device->ReadColorBuffer(window.GetSurfaceWidth(),
+                                                                                         window.GetSurfaceHeight());
 
                 const auto& resultfile = base::FormatString("Result_%1_%2_%3_.png", test->GetName(), i, sampling);
                 const auto& goldfile   = base::FormatString("Gold_%1_%2_%3_.png", test->GetName(), i, sampling);
@@ -2426,12 +2426,12 @@ int main(int argc, char* argv[])
 
                 stop_for_input = true;
 
-                gfx::Bitmap<gfx::RGBA>::MSE mse;
+                gfx::Bitmap<gfx::Pixel_RGBA>::MSE mse;
                 mse.SetErrorTreshold(5.0);
 
                 // load gold image
                 gfx::Image img(goldfile);
-                const gfx::Bitmap<gfx::RGBA>& gold = img.AsBitmap<gfx::RGBA>();
+                const gfx::Bitmap<gfx::Pixel_RGBA>& gold = img.AsBitmap<gfx::Pixel_RGBA>();
                 if (!gfx::Compare(gold, result, mse))
                 {
                     ERROR("'%1' vs '%2' FAILED.", goldfile, resultfile);
@@ -2444,7 +2444,7 @@ int main(int argc, char* argv[])
                     else
                     {
                         // generate difference visualization file.
-                        gfx::Bitmap<gfx::RGBA> diff;
+                        gfx::Bitmap<gfx::Pixel_RGBA> diff;
                         diff.Resize(gold.GetWidth(), gold.GetHeight());
                         diff.Fill(gfx::Color::White);
                         for (size_t y=0; y<gold.GetHeight(); ++y)

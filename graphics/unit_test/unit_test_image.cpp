@@ -30,8 +30,8 @@ int test_main(int argc, char* argv[])
         TEST_REQUIRE(img.GetWidth() == 4);
         TEST_REQUIRE(img.GetDepthBits() == 24);
 
-        gfx::Bitmap<gfx::RGB> bmp = img.AsBitmap<gfx::RGB>(); 
-        gfx::Bitmap<gfx::RGB> ref(4, 4);
+        gfx::Bitmap<gfx::Pixel_RGB> bmp = img.AsBitmap<gfx::Pixel_RGB>();
+        gfx::Bitmap<gfx::Pixel_RGB> ref(4, 4);
         
         // top left 2x2
         ref.SetPixel(0, 0, gfx::Color::Red);
@@ -57,7 +57,7 @@ int test_main(int argc, char* argv[])
         ref.SetPixel(3, 2, gfx::Color::White); 
         ref.SetPixel(3, 3, gfx::Color::White);                
 
-        gfx::Bitmap<gfx::RGB>::MSE mse;
+        gfx::Bitmap<gfx::Pixel_RGB>::MSE mse;
         mse.SetErrorTreshold(10);
         TEST_REQUIRE(Compare(bmp, gfx::URect(0, 0, 4, 4), ref, mse));
 
@@ -69,8 +69,8 @@ int test_main(int argc, char* argv[])
         TEST_REQUIRE(img.GetWidth() == 4);
         TEST_REQUIRE(img.GetDepthBits() == 32);
 
-        gfx::Bitmap<gfx::RGBA> bmp = img.AsBitmap<gfx::RGBA>(); 
-        gfx::Bitmap<gfx::RGBA> ref(4, 4);
+        gfx::Bitmap<gfx::Pixel_RGBA> bmp = img.AsBitmap<gfx::Pixel_RGBA>();
+        gfx::Bitmap<gfx::Pixel_RGBA> ref(4, 4);
         
         // top left 2x2
         ref.SetPixel(0, 0, gfx::Color::Red);
@@ -96,7 +96,7 @@ int test_main(int argc, char* argv[])
         ref.SetPixel(3, 2, gfx::Color::White); 
         ref.SetPixel(3, 3, gfx::Color::White);                
 
-        gfx::Bitmap<gfx::RGBA>::MSE mse;
+        gfx::Bitmap<gfx::Pixel_RGBA>::MSE mse;
         mse.SetErrorTreshold(10);
         TEST_REQUIRE(Compare(bmp, gfx::URect(0, 0, 4, 4), ref, mse));
 
@@ -109,9 +109,9 @@ int test_main(int argc, char* argv[])
         TEST_REQUIRE(img.GetWidth() == 4);
         TEST_REQUIRE(img.GetDepthBits() == 8);
 
-        gfx::Bitmap<gfx::Grayscale> bmp = img.AsBitmap<gfx::Grayscale>();
+        gfx::Bitmap<gfx::Pixel_A> bmp = img.AsBitmap<gfx::Pixel_A>();
         
-        gfx::Bitmap<gfx::Grayscale> ref(4, 4);
+        gfx::Bitmap<gfx::Pixel_A> ref(4, 4);
         ref.Fill(0xff);
         ref.SetPixel(0, 0, 0);
         ref.SetPixel(0, 1, 0);
@@ -122,7 +122,7 @@ int test_main(int argc, char* argv[])
         ref.SetPixel(3, 2, 0x7f);
         ref.SetPixel(3, 3, 0x7f);
 
-        gfx::Bitmap<gfx::Grayscale>::MSE mse;
+        gfx::Bitmap<gfx::Pixel_A>::MSE mse;
         mse.SetErrorTreshold(10);
         TEST_REQUIRE(Compare(bmp, gfx::URect(0, 0, 4, 4), ref, mse));
     }

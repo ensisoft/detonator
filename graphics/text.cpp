@@ -272,7 +272,7 @@ struct FontLibrary {
 const auto EFFIN_MAGIC_SCALE = 64;
 
 using gfx::Bitmap;
-using gfx::Grayscale;
+using gfx::Pixel_A;
 
 template<size_t Pool>
 std::shared_ptr<gfx::AlphaMask> AllocateBitmap(unsigned width, unsigned height)
@@ -295,7 +295,7 @@ std::shared_ptr<gfx::AlphaMask> AllocateBitmap(unsigned width, unsigned height)
     else if (it->second.use_count() == 1)
     {
         bmp = it->second;
-        bmp->Fill(Grayscale(0));
+        bmp->Fill(Pixel_A(0));
     }
     else
     {
@@ -459,7 +459,7 @@ LineRaster RasterizeLine(const std::string& line, const gfx::TextBuffer::Text& t
             FT_GlyphSlot slot = face->glyph;
 
             // copy into our buffer
-            gfx::AlphaMask bmp(reinterpret_cast<const Grayscale*>(slot->bitmap.buffer),
+            gfx::AlphaMask bmp(reinterpret_cast<const Pixel_A*>(slot->bitmap.buffer),
                                   slot->bitmap.width,
                                   slot->bitmap.rows,
                                   slot->bitmap.pitch);
@@ -546,7 +546,7 @@ LineRaster RasterizeLine(const std::string& line, const gfx::TextBuffer::Text& t
         const int x = pen_x + info.bearing_x + xo;
         const int y = pen_y + info.bearing_y + yo;
 
-        bmp->Blit(x, baseline - y, info.bitmap, gfx::RasterOp_BitwiseOr<Grayscale>);
+        bmp->Blit(x, baseline - y, info.bitmap, gfx::RasterOp_BitwiseOr<Pixel_A>);
 
         pen_x += xa;
         pen_y += ya;
@@ -557,7 +557,7 @@ LineRaster RasterizeLine(const std::string& line, const gfx::TextBuffer::Text& t
         const auto width = bmp->GetWidth();
         const gfx::URect underline(0, baseline + underline_position,
                                    width, underline_thickness);
-        bmp->Fill(underline, gfx::Grayscale(0xff));
+        bmp->Fill(underline, gfx::Pixel_A(0xff));
     }
 
     hb_font_destroy(hb_font);
@@ -684,7 +684,7 @@ std::shared_ptr<AlphaMask> TextBuffer::RasterizeBitmap() const
 
     // for debugging purposes dump the rasterized bitmap as .ppm file
 #if 0
-    Bitmap<RGB> tmp;
+    Bitmap<Pixel_RGB> tmp;
     tmp.Resize(out->GetWidth(), out->GetHeight());
     tmp.Copy(0, 0, *out);
     WritePPM(tmp, "/tmp/text-buffer.ppm");
