@@ -557,13 +557,13 @@ public:
         const auto& rgba = mDevice->ReadColorBuffer(mSurfaceWidth, mSurfaceHeight);
         // pre-multiply alpha, STB image write with semi transparent pixels
         // aren't really the expected output visually. should this just discard alpha?
-        gfx::Bitmap<gfx::RGB> rgb;
+        gfx::Bitmap<gfx::Pixel_RGB> rgb;
         rgb.Resize(rgba.GetWidth(), rgba.GetHeight());
         for (unsigned y=0; y<rgba.GetHeight(); ++y) {
             for (unsigned x=0; x<rgba.GetWidth(); ++x) {
                 const auto src = rgba.GetPixel(y, x);
                 const auto alpha = src.a / 255.0;
-                const auto dst = gfx::RGB(src.r * alpha, src.g * alpha, src.b * alpha);
+                const auto dst = gfx::Pixel_RGB(src.r * alpha, src.g * alpha, src.b * alpha);
                 rgb.SetPixel(y, x, dst);
             }
         }

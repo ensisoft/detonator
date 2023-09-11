@@ -100,11 +100,11 @@ std::unique_ptr<IBitmap> Image::GetBitmap() const
 {
     std::unique_ptr<IBitmap> ret;
     if (mDepth == 1)
-        ret.reset(new AlphaMask((Grayscale*)mData, mWidth, mHeight));
+        ret.reset(new AlphaMask((Pixel_A*)mData, mWidth, mHeight));
     else if (mDepth == 3)
-        ret.reset(new Bitmap<RGB>((RGB*)mData, mWidth, mHeight));
+        ret.reset(new Bitmap<Pixel_RGB>((Pixel_RGB*)mData, mWidth, mHeight));
     else if (mDepth == 4)
-        ret.reset(new Bitmap<RGBA>((RGBA*)mData, mWidth, mHeight));
+        ret.reset(new Bitmap<Pixel_RGBA>((Pixel_RGBA*)mData, mWidth, mHeight));
     return ret;
 }
 
@@ -112,11 +112,11 @@ std::unique_ptr<IBitmapWriteView> Image::GetWriteView()
 {
     std::unique_ptr<IBitmapWriteView> ret;
     if (mDepth == 1)
-        ret.reset(new BitmapWriteView<Grayscale>((Grayscale*)mData, mWidth, mHeight));
+        ret.reset(new BitmapWriteView<Pixel_A>((Pixel_A*)mData, mWidth, mHeight));
     else if (mDepth == 3)
-        ret.reset(new BitmapWriteView<RGB>((RGB*)mData, mWidth, mHeight));
+        ret.reset(new BitmapWriteView<Pixel_RGB>((Pixel_RGB*)mData, mWidth, mHeight));
     else if (mDepth == 4)
-        ret.reset(new BitmapWriteView<RGBA>((RGBA*)mData, mWidth, mHeight));
+        ret.reset(new BitmapWriteView<Pixel_RGBA>((Pixel_RGBA*)mData, mWidth, mHeight));
     return ret;
 }
 
@@ -124,11 +124,11 @@ std::unique_ptr<IBitmapReadView> Image::GetReadView() const
 {
     std::unique_ptr<IBitmapReadView> ret;
     if (mDepth == 1)
-        ret.reset(new BitmapReadView<Grayscale>((const Grayscale*)mData, mWidth, mHeight));
+        ret.reset(new BitmapReadView<Pixel_A>((const Pixel_A*)mData, mWidth, mHeight));
     else if (mDepth == 3)
-        ret.reset(new BitmapReadView<RGB>((const RGB*)mData, mWidth, mHeight));
+        ret.reset(new BitmapReadView<Pixel_RGB>((const Pixel_RGB*)mData, mWidth, mHeight));
     else if (mDepth == 4)
-        ret.reset(new BitmapReadView<RGBA>((const RGBA*)mData, mWidth, mHeight));
+        ret.reset(new BitmapReadView<Pixel_RGBA>((const Pixel_RGBA*)mData, mWidth, mHeight));
     return ret;
 }
 

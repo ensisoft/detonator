@@ -116,7 +116,7 @@ public:
 private:
     unsigned mWidth  = 0;
     unsigned mHeight = 0;
-    Format mFormat  = Format::Grayscale;
+    Format mFormat  = Format::AlphaMask;
     Wrapping mWrapX = Wrapping::Repeat;
     Wrapping mWrapY = Wrapping::Repeat;
     MinFilter mMinFilter = MinFilter::Default;
@@ -439,17 +439,17 @@ public:
     {}
     virtual void EndFrame(bool display) override
     {}
-    virtual gfx::Bitmap<gfx::RGBA> ReadColorBuffer(unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
+    virtual gfx::Bitmap<gfx::Pixel_RGBA> ReadColorBuffer(unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
     {
-        gfx::Bitmap<gfx::RGBA> bitmap;
+        gfx::Bitmap<gfx::Pixel_RGBA> bitmap;
         bitmap.Resize(width, height);
         bitmap.Fill(gfx::Color::DarkGreen);
         return bitmap;
     }
-    virtual gfx::Bitmap<gfx::RGBA> ReadColorBuffer(unsigned x, unsigned y,
-                                                   unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
+    virtual gfx::Bitmap<gfx::Pixel_RGBA> ReadColorBuffer(unsigned x, unsigned y,
+                                                         unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
     {
-        gfx::Bitmap<gfx::RGBA> bitmap;
+        gfx::Bitmap<gfx::Pixel_RGBA> bitmap;
         bitmap.Resize(width, height);
         bitmap.Fill(gfx::Color::DarkGreen);
         return bitmap;

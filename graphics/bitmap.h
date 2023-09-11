@@ -40,129 +40,119 @@ namespace gfx
 {
     using u8 = std::uint8_t;
 
-    // About this monochromatic 8-bits per pixel type.
-    //
-    // This is called grayscale here in the type system but is typically
-    // used to actually represent alpha masks instead of true grayscale images.
-    // Bitwise representation is the same for the both, i.e. both have just
-    // one 8 bit channel but the meaning is completely different. With alpha
-    // masks the channel represents linear opacity from 0.0f/0x00 to 1.0f/0xff,
+    // Pixel_A represents linear opacity from 0.0f/0x00 to 1.0f/0xff,
     // 0.0f being fully transparent and 1.0f being fully opaque.
-    // True grayscale images use the 8bit channel to represent the luminance
-    // of the image with some encoding such as sRGB.
-    struct Grayscale {
+    struct Pixel_A {
         u8 r = 0;
-        Grayscale(u8 value=0) : r(value)
+        Pixel_A(u8 value=0) : r(value)
         {}
     };
-    bool operator==(const Grayscale& lhs, const Grayscale& rhs);
-    bool operator!=(const Grayscale& lhs, const Grayscale& rhs);
-    Grayscale operator & (const Grayscale& lhs, const Grayscale& rhs);
-    Grayscale operator | (const Grayscale& lhs, const Grayscale& rhs);
-    Grayscale operator >> (const Grayscale& lhs, unsigned bits);
+    bool operator==(const Pixel_A& lhs, const Pixel_A& rhs);
+    bool operator!=(const Pixel_A& lhs, const Pixel_A& rhs);
+    Pixel_A operator & (const Pixel_A& lhs, const Pixel_A& rhs);
+    Pixel_A operator | (const Pixel_A& lhs, const Pixel_A& rhs);
+    Pixel_A operator >> (const Pixel_A& lhs, unsigned bits);
 
-    // RGB represents a pixel in the RGB color model but doesn't
+    // Pixel_RGB represents a pixel in the Pixel_RGB color model but doesn't
     // require any specific color model/encoding. The actual channel
     // values can thus represent color values either in sRGB, linear
     // or some other 8bit encoding.
-    struct RGB {
+    struct Pixel_RGB {
         u8 r = 0;
         u8 g = 0;
         u8 b = 0;
-        RGB(u8 red=0, u8 green=0, u8 blue=0)
+        Pixel_RGB(u8 red=0, u8 green=0, u8 blue=0)
           : r(red), g(green), b(blue)
         {}
-        // Set the RGB value based on a color name.
-        // The result is sRGB encoded RGB triplet.
-        RGB(Color name);
+        // Set the Pixel_RGB value based on a color name.
+        // The result is sRGB encoded Pixel_RGB triplet.
+        Pixel_RGB(Color name);
     };
 
-    bool operator==(const RGB& lhs, const RGB& rhs);
-    bool operator!=(const RGB& lhs, const RGB& rhs);
-    RGB operator & (const RGB& lhs, const RGB& rhs);
-    RGB operator | (const RGB& lhs, const RGB& rhs);
-    RGB operator >> (const RGB& lhs, unsigned bits);
+    bool operator==(const Pixel_RGB& lhs, const Pixel_RGB& rhs);
+    bool operator!=(const Pixel_RGB& lhs, const Pixel_RGB& rhs);
+    Pixel_RGB operator & (const Pixel_RGB& lhs, const Pixel_RGB& rhs);
+    Pixel_RGB operator | (const Pixel_RGB& lhs, const Pixel_RGB& rhs);
+    Pixel_RGB operator >> (const Pixel_RGB& lhs, unsigned bits);
 
-    // RGBA represents a pixel in the RGB color model but doesn't
+    // Pixel_RGBA represents a pixel in the Pixel_RGB color model but doesn't
     // require any actual color model/encoding. The actual channel
     // color values can thus represent color values either in sRGB,
     // linear or some other 8bit encoding.
     // Note that even when using sRGB the alpha value is not sRGB
     // encoded but represents pixel's transparency on a linear scale.
     // In addition, the alpha value can be either straight or pre-multiplied.
-    struct RGBA {
+    struct Pixel_RGBA {
         u8 r = 0;
         u8 g = 0;
         u8 b = 0;
         u8 a = 255;
-        RGBA(u8 red=0, u8 green=0, u8 blue=0, u8 alpha = 0xff)
+        Pixel_RGBA(u8 red=0, u8 green=0, u8 blue=0, u8 alpha = 0xff)
           : r(red), g(green), b(blue), a(alpha)
         {}
-        // Set the RGB value based on a color name.
-        // The result is sRGB encoded RGB triplet.
-        RGBA(Color name, u8 alpha=255);
+        // Set the Pixel_RGB value based on a color name.
+        // The result is sRGB encoded Pixel_RGB triplet.
+        Pixel_RGBA(Color name, u8 alpha=255);
     };
 
-    bool operator==(const RGBA& lhs, const RGBA& rhs);
-    bool operator!=(const RGBA& lhs, const RGBA& rhs);
-    RGBA operator & (const RGBA& lhs, const RGBA& rhs);
-    RGBA operator | (const RGBA& lhs, const RGBA& rhs);
-    RGBA operator >> (const RGBA& lhs, unsigned bits);
+    bool operator==(const Pixel_RGBA& lhs, const Pixel_RGBA& rhs);
+    bool operator!=(const Pixel_RGBA& lhs, const Pixel_RGBA& rhs);
+    Pixel_RGBA operator & (const Pixel_RGBA& lhs, const Pixel_RGBA& rhs);
+    Pixel_RGBA operator | (const Pixel_RGBA& lhs, const Pixel_RGBA& rhs);
+    Pixel_RGBA operator >> (const Pixel_RGBA& lhs, unsigned bits);
 
-    struct fRGBA {
+    struct Pixel_RGBAf {
         float r = 0.0f;
         float g = 0.0f;
         float b = 0.0f;
         float a = 0.0f;
     };
-    fRGBA operator + (const fRGBA& lhs, const fRGBA& rhs);
-    fRGBA operator * (const fRGBA& lhs, float scaler);
-    fRGBA operator * (float scaler, const fRGBA& rhs);
+    Pixel_RGBAf operator + (const Pixel_RGBAf& lhs, const Pixel_RGBAf& rhs);
+    Pixel_RGBAf operator * (const Pixel_RGBAf& lhs, float scaler);
+    Pixel_RGBAf operator * (float scaler, const Pixel_RGBAf& rhs);
 
-    struct fRGB {
+    struct Pixel_RGBf {
         float r = 0.0f;
         float g = 0.0f;
         float b = 0.0f;
     };
-    fRGB operator + (const fRGB& lhs, const fRGB& rhs);
-    fRGB operator * (const fRGB& lhs, float scaler);
-    fRGB operator * (float scaler, const fRGB& rhs);
+    Pixel_RGBf operator + (const Pixel_RGBf& lhs, const Pixel_RGBf& rhs);
+    Pixel_RGBf operator * (const Pixel_RGBf& lhs, float scaler);
+    Pixel_RGBf operator * (float scaler, const Pixel_RGBf& rhs);
 
-    struct fGrayscale {
+    struct Pixel_Af {
         float r = 0.0f;
     };
-    fGrayscale operator + (const fGrayscale& lhs, const fGrayscale& rhs);
-    fGrayscale operator * (const fGrayscale& lhs, float scaler);
-    fGrayscale operator * (float scaler, const fGrayscale& rhs);
+    Pixel_Af operator + (const Pixel_Af& lhs, const Pixel_Af& rhs);
+    Pixel_Af operator * (const Pixel_Af& lhs, float scaler);
+    Pixel_Af operator * (float scaler, const Pixel_Af& rhs);
 
     float sRGB_decode(float value);
     float sRGB_encode(float value);
-    fRGBA sRGB_decode(const fRGBA& value);
-    fRGBA sRGB_encode(const fRGBA& value);
-    fRGB sRGB_decode(const fRGB& value);
-    fRGB sRGB_encode(const fRGB& value);
+    Pixel_RGBAf sRGB_decode(const Pixel_RGBAf& value);
+    Pixel_RGBAf sRGB_encode(const Pixel_RGBAf& value);
+    Pixel_RGBf sRGB_decode(const Pixel_RGBf& value);
+    Pixel_RGBf sRGB_encode(const Pixel_RGBf& value);
 
     // transform between unsigned integer and floating
     // point pixel representations.
-    fRGBA Pixel_to_floats(const RGBA& value);
-    fRGB Pixel_to_floats(const RGB& value);
-    fGrayscale Pixel_to_floats(const Grayscale& value);
-    RGBA Pixel_to_uints(const fRGBA& value);
-    RGB Pixel_to_uints(const fRGB& value);
-    Grayscale Pixel_to_uints(const fGrayscale& value);
+    Pixel_RGBAf Pixel_to_floats(const Pixel_RGBA& value);
+    Pixel_RGBf Pixel_to_floats(const Pixel_RGB& value);
+    Pixel_Af Pixel_to_floats(const Pixel_A& value);
+    Pixel_RGBA Pixel_to_uints(const Pixel_RGBAf& value);
+    Pixel_RGB Pixel_to_uints(const Pixel_RGBf& value);
+    Pixel_A Pixel_to_uints(const Pixel_Af& value);
 
-    fRGBA sRGBA_from_color(Color name);
-    fRGB sRGB_from_color(Color name);
-    fGrayscale sRGB_grayscale_from_color(Color name);
+    Pixel_RGBAf sRGBA_from_color(Color name);
+    Pixel_RGBf sRGB_from_color(Color name);
+    Pixel_RGBAf RGBA_premul_alpha(const Pixel_RGBAf& rgba);
 
-    fRGBA RGBA_premul_alpha(const fRGBA& rgba);
-
-    static_assert(sizeof(Grayscale) == 1,
-        "Unexpected size of Grayscale pixel struct type.");
-    static_assert(sizeof(RGB) == 3,
-        "Unexpected size of RGB pixel struct type.");
-    static_assert(sizeof(RGBA) == 4,
-        "Unexpected size of RGBA pixel struct type.");
+    static_assert(sizeof(Pixel_A) == 1,
+        "Unexpected size of Pixel_A pixel struct type.");
+    static_assert(sizeof(Pixel_RGB) == 3,
+        "Unexpected size of Pixel_RGB pixel struct type.");
+    static_assert(sizeof(Pixel_RGBA) == 4,
+        "Unexpected size of Pixel_RGBA pixel struct type.");
 
     template<typename Pixel>
     inline Pixel RasterOp_SourceOver(const Pixel& dst, const Pixel& src)
@@ -195,9 +185,9 @@ namespace gfx
         // object. These functions don't do any color space etc.
         // conversion but only consider bits. The number of bytes
         // copied into output pixel are truncated to actual size.
-        virtual void ReadPixel(unsigned row, unsigned col, RGBA* pixel) const = 0;
-        virtual void ReadPixel(unsigned row, unsigned col, RGB* pixel) const = 0;
-        virtual void ReadPixel(unsigned row, unsigned col, Grayscale* pixel) const = 0;
+        virtual void ReadPixel(unsigned row, unsigned col, Pixel_RGBA* pixel) const = 0;
+        virtual void ReadPixel(unsigned row, unsigned col, Pixel_RGB* pixel) const = 0;
+        virtual void ReadPixel(unsigned row, unsigned col, Pixel_A* pixel) const = 0;
 
         template<typename Pixel>
         inline void ReadPixel(const UPoint& point, Pixel* pixel) const
@@ -265,9 +255,9 @@ namespace gfx
         // object. These functions don't do any color space etc.
         // conversion but only consider bits. The number of bytes
         // copied into destination bitmap are truncated to actual size.
-        virtual void WritePixel(unsigned row, unsigned col, const RGBA& pixel) const = 0;
-        virtual void WritePixel(unsigned row, unsigned col, const RGB& pixel) const = 0;
-        virtual void WritePixel(unsigned row, unsigned col, const Grayscale& pixel) const = 0;
+        virtual void WritePixel(unsigned row, unsigned col, const Pixel_RGBA& pixel) const = 0;
+        virtual void WritePixel(unsigned row, unsigned col, const Pixel_RGB& pixel) const = 0;
+        virtual void WritePixel(unsigned row, unsigned col, const Pixel_A& pixel) const = 0;
 
         template<typename Pixel>
         inline void WritePixel(const UPoint& point, const Pixel& pixel) const
@@ -331,11 +321,11 @@ namespace gfx
         { return mPixels; }
         virtual bool IsValid() const override
         { return mPixels  && mWidth && mHeight; }
-        virtual void ReadPixel(unsigned row, unsigned col, RGBA* pixel) const override
+        virtual void ReadPixel(unsigned row, unsigned col, Pixel_RGBA* pixel) const override
         { read_pixel(row, col, pixel); }
-        virtual void ReadPixel(unsigned row, unsigned col, RGB* pixel) const override
+        virtual void ReadPixel(unsigned row, unsigned col, Pixel_RGB* pixel) const override
         { read_pixel(row, col, pixel); }
-        virtual void ReadPixel(unsigned row, unsigned col, Grayscale* pixel) const override
+        virtual void ReadPixel(unsigned row, unsigned col, Pixel_A* pixel) const override
         { read_pixel(row, col, pixel); }
 
         using IBitmapReadView::ReadPixel;
@@ -376,11 +366,11 @@ namespace gfx
         { return mPixels; }
         virtual bool IsValid() const override
         { return mPixels  && mWidth && mHeight; }
-        virtual void WritePixel(unsigned row, unsigned col, const RGBA& pixel) const override
+        virtual void WritePixel(unsigned row, unsigned col, const Pixel_RGBA& pixel) const override
         { write_pixel(row, col, pixel); }
-        virtual void WritePixel(unsigned row, unsigned col, const RGB& pixel) const override
+        virtual void WritePixel(unsigned row, unsigned col, const Pixel_RGB& pixel) const override
         { write_pixel(row, col, pixel); }
-        virtual void WritePixel(unsigned row, unsigned col, const Grayscale& pixel) const override
+        virtual void WritePixel(unsigned row, unsigned col, const Pixel_A& pixel) const override
         { write_pixel(row, col, pixel); }
 
         using IBitmapWriteView::WritePixel;
@@ -422,17 +412,17 @@ namespace gfx
         { return mPixels; }
         virtual bool IsValid() const override
         { return mPixels  && mWidth && mHeight; }
-        virtual void WritePixel(unsigned row, unsigned col, const RGBA& pixel) const override
+        virtual void WritePixel(unsigned row, unsigned col, const Pixel_RGBA& pixel) const override
         { write_pixel(row, col, pixel); }
-        virtual void WritePixel(unsigned row, unsigned col, const RGB& pixel) const override
+        virtual void WritePixel(unsigned row, unsigned col, const Pixel_RGB& pixel) const override
         { write_pixel(row, col, pixel); }
-        virtual void WritePixel(unsigned row, unsigned col, const Grayscale& pixel) const override
+        virtual void WritePixel(unsigned row, unsigned col, const Pixel_A& pixel) const override
         { write_pixel(row, col, pixel); }
-        virtual void ReadPixel(unsigned row, unsigned col, RGBA* pixel) const override
+        virtual void ReadPixel(unsigned row, unsigned col, Pixel_RGBA* pixel) const override
         { read_pixel(row, col, pixel); }
-        virtual void ReadPixel(unsigned row, unsigned col, RGB* pixel) const override
+        virtual void ReadPixel(unsigned row, unsigned col, Pixel_RGB* pixel) const override
         { read_pixel(row, col, pixel); }
-        virtual void ReadPixel(unsigned row, unsigned col, Grayscale* pixel) const override
+        virtual void ReadPixel(unsigned row, unsigned col, Pixel_A* pixel) const override
         { read_pixel(row, col, pixel); }
 
         using IBitmapWriteView::WritePixel;
@@ -704,7 +694,7 @@ namespace gfx
 
         // mean-squared-error
         struct MSE {
-            bool operator()(const Grayscale& lhs, const Grayscale& rhs) const
+            bool operator()(const Pixel_A& lhs, const Pixel_A& rhs) const
             {
                 const auto r = (int)lhs.r - (int)rhs.r;
                 const auto sum = r*r;
@@ -712,7 +702,7 @@ namespace gfx
                 return mse < max_mse;
             }
 
-            bool operator()(const RGB& lhs, const RGB& rhs) const
+            bool operator()(const Pixel_RGB& lhs, const Pixel_RGB& rhs) const
             {
                 const auto r = (int)lhs.r - (int)rhs.r;
                 const auto g = (int)lhs.g - (int)rhs.g;
@@ -722,7 +712,7 @@ namespace gfx
                 const auto mse = sum / 3;
                 return mse < max_mse;
             }
-            bool operator()(const RGBA& lhs, const RGBA& rhs) const
+            bool operator()(const Pixel_RGBA& lhs, const Pixel_RGBA& rhs) const
             {
                 const auto r = (int)lhs.r - (int)rhs.r;
                 const auto g = (int)lhs.g - (int)rhs.g;
@@ -1056,10 +1046,9 @@ namespace gfx
         template<typename T> friend bool operator!=(const Bitmap<T>& lhs, const Bitmap<T>& rhs);
     };
 
-    using GrayscaleBitmap = Bitmap<Grayscale>;
-    using AlphaMask  = Bitmap<Grayscale>;
-    using RgbBitmap  = Bitmap<RGB>;
-    using RgbaBitmap = Bitmap<RGBA>;
+    using AlphaMask  = Bitmap<Pixel_A>;
+    using RgbBitmap  = Bitmap<Pixel_RGB>;
+    using RgbaBitmap = Bitmap<Pixel_RGBA>;
 
     // Compare the pixels between two pixmaps within the given rectangle using
     // the given compare functor.
@@ -1142,10 +1131,10 @@ namespace gfx
     std::unique_ptr<IBitmap> ConvertToLinear(const IBitmapReadView& src);
     std::unique_ptr<IBitmap> ConvertToLinear(const IBitmap& src);
 
-    void PremultiplyAlpha(const BitmapWriteView<RGBA>& dst,
-                          const BitmapReadView<RGBA>& src, bool srgb);
-    Bitmap<RGBA> PremultiplyAlpha(const BitmapReadView<RGBA>& src, bool srgb);
-    Bitmap<RGBA> PremultiplyAlpha(const Bitmap<RGBA>& src, bool srgb);
+    void PremultiplyAlpha(const BitmapWriteView<Pixel_RGBA>& dst,
+                          const BitmapReadView<Pixel_RGBA>& src, bool srgb);
+    Bitmap<Pixel_RGBA> PremultiplyAlpha(const BitmapReadView<Pixel_RGBA>& src, bool srgb);
+    Bitmap<Pixel_RGBA> PremultiplyAlpha(const Bitmap<Pixel_RGBA>& src, bool srgb);
 
     // Interface for accessing / generating bitmaps procedurally.
     // Each implementation implements some procedural method for

@@ -295,16 +295,16 @@ std::shared_ptr<IBitmap> detail::TextureFileSource::GetData() const
     }
 
     if (file.GetDepthBits() == 8)
-        return std::make_shared<AlphaMask>(file.AsBitmap<Grayscale>());
+        return std::make_shared<AlphaMask>(file.AsBitmap<Pixel_A>());
     else if (file.GetDepthBits() == 24)
-        return std::make_shared<RgbBitmap>(file.AsBitmap<RGB>());
+        return std::make_shared<RgbBitmap>(file.AsBitmap<Pixel_RGB>());
     else if (file.GetDepthBits() == 32)
     {
         if (!TestFlag(Flags::PremulAlpha))
-            return std::make_shared<RgbaBitmap>(file.AsBitmap<RGBA>());
+            return std::make_shared<RgbaBitmap>(file.AsBitmap<Pixel_RGBA>());
 
-        auto view = file.GetPixelReadView<RGBA>();
-        auto ret = std::make_shared<Bitmap<RGBA>>();
+        auto view = file.GetPixelReadView<Pixel_RGBA>();
+        auto ret = std::make_shared<Bitmap<Pixel_RGBA>>();
         ret->Resize(view.GetWidth(), view.GetHeight());
         DEBUG("Performing alpha pre-multiply on texture. [file='%1']", mFile);
         PremultiplyAlpha(ret->GetPixelWriteView(), view, true /* srgb */);
@@ -394,11 +394,11 @@ bool detail::TextureBitmapBufferSource::FromJson(const data::Reader& data)
 
     const auto& bits = base64::Decode(base64);
     if (depth == 1 && bits.size() == width*height)
-        mBitmap = std::make_shared<GrayscaleBitmap>((const Grayscale*) &bits[0], width, height);
+        mBitmap = std::make_shared<AlphaMask>((const Pixel_A*) &bits[0], width, height);
     else if (depth == 3 && bits.size() == width*height*3)
-        mBitmap = std::make_shared<RgbBitmap>((const RGB*) &bits[0], width, height);
+        mBitmap = std::make_shared<RgbBitmap>((const Pixel_RGB*) &bits[0], width, height);
     else if (depth == 4 && bits.size() == width*height*4)
-        mBitmap = std::make_shared<RgbaBitmap>((const RGBA*) &bits[0], width, height);
+        mBitmap = std::make_shared<RgbaBitmap>((const Pixel_RGBA*) &bits[0], width, height);
     else return false;
     return ok;
 }

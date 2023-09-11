@@ -215,8 +215,8 @@ namespace gfx
         // Width and height specify the dimensions of the data to read.
         // If the dimensions exceed the dimensions of the current render
         // target's color surface then those pixels contents are undefined.
-        virtual Bitmap<RGBA> ReadColorBuffer(unsigned width, unsigned height, Framebuffer* fbo = nullptr) const = 0;
-        virtual Bitmap<RGBA> ReadColorBuffer(unsigned x, unsigned y, unsigned width, unsigned height, Framebuffer* fbo = nullptr) const = 0;
+        virtual Bitmap<Pixel_RGBA> ReadColorBuffer(unsigned width, unsigned height, Framebuffer* fbo = nullptr) const = 0;
+        virtual Bitmap<Pixel_RGBA> ReadColorBuffer(unsigned x, unsigned y, unsigned width, unsigned height, Framebuffer* fbo = nullptr) const = 0;
 
         struct ResourceStats {
             // vertex buffer objects

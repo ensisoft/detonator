@@ -70,11 +70,11 @@ namespace gfx
 
             Bitmap<PixelT> ret(mWidth, mHeight);
             if (mDepth == 1)
-                ReinterpretBitmap(ret.GetPixelWriteView(), BitmapReadView<Grayscale>((const Grayscale*)mData, mWidth, mHeight));
+                ReinterpretBitmap(ret.GetPixelWriteView(), BitmapReadView<Pixel_A>((const Pixel_A*)mData, mWidth, mHeight));
             else if (mDepth == 3)
-                ReinterpretBitmap(ret.GetPixelWriteView(), BitmapReadView<RGB>((const RGB*)mData, mWidth, mHeight));
+                ReinterpretBitmap(ret.GetPixelWriteView(), BitmapReadView<Pixel_RGB>((const Pixel_RGB*)mData, mWidth, mHeight));
             else if (mDepth == 4)
-                ReinterpretBitmap(ret.GetPixelWriteView(), BitmapReadView<RGBA>((const RGBA*)mData, mWidth, mHeight));
+                ReinterpretBitmap(ret.GetPixelWriteView(), BitmapReadView<Pixel_RGBA>((const Pixel_RGBA*)mData, mWidth, mHeight));
             return ret;
         }
         template<typename PixelT>

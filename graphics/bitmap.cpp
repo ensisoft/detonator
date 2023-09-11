@@ -32,16 +32,16 @@
 #include "graphics/bitmap.h"
 
 namespace {
-void PremultiplyPixel_lRGB(const gfx::RGBA& src, gfx::RGBA* dst)
+void PremultiplyPixel_lRGB(const gfx::Pixel_RGBA& src, gfx::Pixel_RGBA* dst)
 {
-    gfx::fRGBA norm;
+    gfx::Pixel_RGBAf norm;
     norm = gfx::Pixel_to_floats(src);
     norm = gfx::RGBA_premul_alpha(norm);
     *dst = gfx::Pixel_to_uints(norm);
 }
-void PremultiplyPixel_sRGB(const gfx::RGBA& src, gfx::RGBA* dst)
+void PremultiplyPixel_sRGB(const gfx::Pixel_RGBA& src, gfx::Pixel_RGBA* dst)
 {
-    gfx::fRGBA norm;
+    gfx::Pixel_RGBAf norm;
     norm = gfx::Pixel_to_floats(src);
     norm = gfx::sRGB_decode(norm);
     norm = gfx::RGBA_premul_alpha(norm);
@@ -168,7 +168,7 @@ std::unique_ptr<gfx::Bitmap<T_u8>> BoxFilter(const gfx::IBitmapReadView& src, bo
 namespace gfx
 {
 
-RGB::RGB(Color c)
+Pixel_RGB::Pixel_RGB(Color c)
 {
     switch (c)
     {
@@ -250,101 +250,101 @@ RGB::RGB(Color c)
     }
 } // ctor
 
-RGBA::RGBA(Color name, u8 alpha)
+Pixel_RGBA::Pixel_RGBA(Color name, u8 alpha)
 {
-    RGB tmp(name);
+    Pixel_RGB tmp(name);
     r = tmp.r;
     g = tmp.g;
     b = tmp.b;
     a = alpha;
 }
 
-bool operator==(const Grayscale& lhs, const Grayscale& rhs)
+bool operator==(const Pixel_A& lhs, const Pixel_A& rhs)
 {
     return lhs.r == rhs.r;
 }
-bool operator!=(const Grayscale& lhs, const Grayscale& rhs)
+bool operator!=(const Pixel_A& lhs, const Pixel_A& rhs)
 {
     return lhs.r != rhs.r;
 }
-Grayscale operator & (const Grayscale& lhs, const Grayscale& rhs)
+Pixel_A operator & (const Pixel_A& lhs, const Pixel_A& rhs)
 {
-    Grayscale ret;
+    Pixel_A ret;
     ret.r = lhs.r & rhs.r;
     return ret;
 }
-Grayscale operator | (const Grayscale& lhs, const Grayscale& rhs)
+Pixel_A operator | (const Pixel_A& lhs, const Pixel_A& rhs)
 {
-    Grayscale ret;
+    Pixel_A ret;
     ret.r = lhs.r | rhs.r;
     return ret;
 }
 
-Grayscale operator >> (const Grayscale& lhs, unsigned bits)
+Pixel_A operator >> (const Pixel_A& lhs, unsigned bits)
 {
-    Grayscale ret;
+    Pixel_A ret;
     ret.r = lhs.r >> bits;
     return ret;
 }
 
-bool operator==(const RGB& lhs, const RGB& rhs)
+bool operator==(const Pixel_RGB& lhs, const Pixel_RGB& rhs)
 {
     return lhs.r == rhs.r &&
            lhs.g == rhs.g &&
            lhs.b == rhs.b;
 }
-bool operator!=(const RGB& lhs, const RGB& rhs)
+bool operator!=(const Pixel_RGB& lhs, const Pixel_RGB& rhs)
 { return !(lhs == rhs); }
 
-RGB operator & (const RGB& lhs, const RGB& rhs)
+Pixel_RGB operator & (const Pixel_RGB& lhs, const Pixel_RGB& rhs)
 {
-    RGB ret;
+    Pixel_RGB ret;
     ret.r = lhs.r & rhs.r;
     ret.g = lhs.g & rhs.g;
     ret.b = lhs.b & rhs.b;
     return ret;
 }
-RGB operator | (const RGB& lhs, const RGB& rhs)
+Pixel_RGB operator | (const Pixel_RGB& lhs, const Pixel_RGB& rhs)
 {
-    RGB ret;
+    Pixel_RGB ret;
     ret.r = lhs.r | rhs.r;
     ret.g = lhs.g | rhs.g;
     ret.b = lhs.b | rhs.b;
     return ret;
 }
 
-RGB operator >> (const RGB& lhs, unsigned bits)
+Pixel_RGB operator >> (const Pixel_RGB& lhs, unsigned bits)
 {
-    RGB ret;
+    Pixel_RGB ret;
     ret.r = lhs.r >> bits;
     ret.g = lhs.g >> bits;
     ret.b = lhs.b >> bits;
     return ret;
 }
 
-bool operator==(const RGBA& lhs, const RGBA& rhs)
+bool operator==(const Pixel_RGBA& lhs, const Pixel_RGBA& rhs)
 {
     return lhs.r == rhs.r &&
            lhs.g == rhs.g &&
            lhs.b == rhs.b &&
            lhs.a == rhs.a;
 }
-bool operator!=(const RGBA& lhs, const RGBA& rhs)
+bool operator!=(const Pixel_RGBA& lhs, const Pixel_RGBA& rhs)
 {
     return !(lhs == rhs);
 }
-RGBA operator & (const RGBA& lhs, const RGBA& rhs)
+Pixel_RGBA operator & (const Pixel_RGBA& lhs, const Pixel_RGBA& rhs)
 {
-    RGBA ret;
+    Pixel_RGBA ret;
     ret.r = lhs.r & rhs.r;
     ret.g = lhs.g & rhs.g;
     ret.b = lhs.b & rhs.b;
     ret.a = lhs.a & rhs.a;
     return ret;
 }
-RGBA operator | (const RGBA& lhs, const RGBA& rhs)
+Pixel_RGBA operator | (const Pixel_RGBA& lhs, const Pixel_RGBA& rhs)
 {
-    RGBA ret;
+    Pixel_RGBA ret;
     ret.r = lhs.r | rhs.r;
     ret.g = lhs.g | rhs.g;
     ret.b = lhs.b | rhs.b;
@@ -352,9 +352,9 @@ RGBA operator | (const RGBA& lhs, const RGBA& rhs)
     return ret;
 }
 
-RGBA operator >> (const RGBA& lhs, unsigned bits)
+Pixel_RGBA operator >> (const Pixel_RGBA& lhs, unsigned bits)
 {
-    RGBA ret;
+    Pixel_RGBA ret;
     ret.r = lhs.r >> bits;
     ret.g = lhs.g >> bits;
     ret.b = lhs.b >> bits;
@@ -362,27 +362,27 @@ RGBA operator >> (const RGBA& lhs, unsigned bits)
     return ret;
 }
 
-fRGBA operator + (const fRGBA& lhs, const fRGBA& rhs)
+Pixel_RGBAf operator + (const Pixel_RGBAf& lhs, const Pixel_RGBAf& rhs)
 {
-    fRGBA ret;
+    Pixel_RGBAf ret;
     ret.r = lhs.r + rhs.r;
     ret.g = lhs.g + rhs.g;
     ret.b = lhs.b + rhs.b;
     ret.a = lhs.a + rhs.a;
     return ret;
 }
-fRGBA operator * (const fRGBA& lhs, float scaler)
+Pixel_RGBAf operator * (const Pixel_RGBAf& lhs, float scaler)
 {
-    fRGBA ret;
+    Pixel_RGBAf ret;
     ret.r = lhs.r * scaler;
     ret.g = lhs.g * scaler;
     ret.b = lhs.b * scaler;
     ret.a = lhs.a * scaler;
     return ret;
 }
-fRGBA operator * (float scaler, const fRGBA& rhs)
+Pixel_RGBAf operator * (float scaler, const Pixel_RGBAf& rhs)
 {
-    fRGBA ret;
+    Pixel_RGBAf ret;
     ret.r = rhs.r * scaler;
     ret.g = rhs.g * scaler;
     ret.b = rhs.b * scaler;
@@ -390,46 +390,46 @@ fRGBA operator * (float scaler, const fRGBA& rhs)
     return ret;
 }
 
-fRGB operator + (const fRGB& lhs, const fRGB& rhs)
+Pixel_RGBf operator + (const Pixel_RGBf& lhs, const Pixel_RGBf& rhs)
 {
-    fRGB ret;
+    Pixel_RGBf ret;
     ret.r = lhs.r + rhs.r;
     ret.g = lhs.g + rhs.g;
     ret.b = lhs.b + rhs.b;
     return ret;
 }
-fRGB operator * (const fRGB& lhs, float scaler)
+Pixel_RGBf operator * (const Pixel_RGBf& lhs, float scaler)
 {
-    fRGB ret;
+    Pixel_RGBf ret;
     ret.r = lhs.r * scaler;
     ret.g = lhs.g * scaler;
     ret.b = lhs.b * scaler;
     return ret;
 }
-fRGB operator * (float scaler, const fRGB& rhs)
+Pixel_RGBf operator * (float scaler, const Pixel_RGBf& rhs)
 {
-    fRGB ret;
+    Pixel_RGBf ret;
     ret.r = rhs.r * scaler;
     ret.g = rhs.g * scaler;
     ret.b = rhs.b * scaler;
     return ret;
 }
 
-fGrayscale operator + (const fGrayscale& lhs, const fGrayscale& rhs)
+Pixel_Af operator + (const Pixel_Af& lhs, const Pixel_Af& rhs)
 {
-    fGrayscale ret;
+    Pixel_Af ret;
     ret.r = lhs.r + rhs.r;
     return ret;
 }
-fGrayscale operator * (const fGrayscale& lhs, float scaler)
+Pixel_Af operator * (const Pixel_Af& lhs, float scaler)
 {
-    fGrayscale ret;
+    Pixel_Af ret;
     ret.r = lhs.r * scaler;
     return ret;
 }
-fGrayscale operator * (float scaler, const fGrayscale& rhs)
+Pixel_Af operator * (float scaler, const Pixel_Af& rhs)
 {
-    fGrayscale ret;
+    Pixel_Af ret;
     ret.r = rhs.r * scaler;
     return ret;
 }
@@ -447,9 +447,9 @@ float sRGB_encode(float value)
            : std::pow(value, 1.0f/2.4f) * 1.055f - 0.055f;
 }
 
-fRGBA sRGB_decode(const fRGBA& value)
+Pixel_RGBAf sRGB_decode(const Pixel_RGBAf& value)
 {
-    fRGBA ret;
+    Pixel_RGBAf ret;
     ret.r = sRGB_decode(value.r);
     ret.g = sRGB_decode(value.g);
     ret.b = sRGB_decode(value.b);
@@ -457,17 +457,17 @@ fRGBA sRGB_decode(const fRGBA& value)
     ret.a = value.a;
     return ret;
 }
-fRGB sRGB_decode(const fRGB& value)
+Pixel_RGBf sRGB_decode(const Pixel_RGBf& value)
 {
-    fRGB ret;
+    Pixel_RGBf ret;
     ret.r = sRGB_decode(value.r);
     ret.g = sRGB_decode(value.g);
     ret.b = sRGB_decode(value.b);
     return ret;
 }
-fRGBA sRGB_encode(const fRGBA& value)
+Pixel_RGBAf sRGB_encode(const Pixel_RGBAf& value)
 {
-    fRGBA ret;
+    Pixel_RGBAf ret;
     ret.r = sRGB_encode(value.r);
     ret.g = sRGB_encode(value.g);
     ret.b = sRGB_encode(value.b);
@@ -475,65 +475,65 @@ fRGBA sRGB_encode(const fRGBA& value)
     ret.a = value.a;
     return ret;
 }
-fRGB sRGB_encode(const fRGB& value)
+Pixel_RGBf sRGB_encode(const Pixel_RGBf& value)
 {
-    fRGB ret;
+    Pixel_RGBf ret;
     ret.r = sRGB_encode(value.r);
     ret.g = sRGB_encode(value.g);
     ret.b = sRGB_encode(value.b);
     return ret;
 }
 
-fRGBA Pixel_to_floats(const RGBA& value)
+Pixel_RGBAf Pixel_to_floats(const Pixel_RGBA& value)
 {
-    fRGBA ret;
+    Pixel_RGBAf ret;
     ret.r = value.r / 255.0f;
     ret.g = value.g / 255.0f;
     ret.b = value.b / 255.0f;
     ret.a = value.a / 255.0f;
     return ret;
 }
-fRGB Pixel_to_floats(const RGB& value)
+Pixel_RGBf Pixel_to_floats(const Pixel_RGB& value)
 {
-    fRGB ret;
+    Pixel_RGBf ret;
     ret.r = value.r / 255.0f;
     ret.g = value.g / 255.0f;
     ret.b = value.b / 255.0f;
     return ret;
 }
-fGrayscale Pixel_to_floats(const Grayscale& value)
+Pixel_Af Pixel_to_floats(const Pixel_A& value)
 {
-    fGrayscale ret;
+    Pixel_Af ret;
     ret.r = value.r / 255.0f;
     return ret;
 }
 
-RGBA Pixel_to_uints(const fRGBA& value)
+Pixel_RGBA Pixel_to_uints(const Pixel_RGBAf& value)
 {
-    RGBA ret;
+    Pixel_RGBA ret;
     ret.r = value.r * 255;
     ret.g = value.g * 255;
     ret.b = value.b * 255;
     ret.a = value.a * 255;
     return ret;
 }
-RGB Pixel_to_uints(const fRGB& value)
+Pixel_RGB Pixel_to_uints(const Pixel_RGBf& value)
 {
-    RGB ret;
+    Pixel_RGB ret;
     ret.r = value.r * 255;
     ret.g = value.g * 255;
     ret.b = value.b * 255;
     return ret;
 }
-Grayscale Pixel_to_uints(const fGrayscale& value)
+Pixel_A Pixel_to_uints(const Pixel_Af& value)
 {
-    Grayscale ret;
+    Pixel_A ret;
     ret.r = value.r * 255;
     return ret;
 }
-fRGBA RGBA_premul_alpha(const fRGBA& rgba)
+Pixel_RGBAf RGBA_premul_alpha(const Pixel_RGBAf& rgba)
 {
-    fRGBA ret;
+    Pixel_RGBAf ret;
     ret.r = rgba.r * rgba.a;
     ret.g = rgba.g * rgba.a;
     ret.b = rgba.b * rgba.a;
@@ -541,11 +541,11 @@ fRGBA RGBA_premul_alpha(const fRGBA& rgba)
     return ret;
 }
 
-fRGBA sRGBA_from_color(Color name)
+Pixel_RGBAf sRGBA_from_color(Color name)
 {
     const Color4f color(name);
 
-    fRGBA ret;
+    Pixel_RGBAf ret;
     ret.r = color.Red();
     ret.g = color.Green();
     ret.b = color.Blue();
@@ -553,43 +553,21 @@ fRGBA sRGBA_from_color(Color name)
     return ret;
 }
 
-fRGB sRGB_from_color(Color name)
+Pixel_RGBf sRGB_from_color(Color name)
 {
     const Color4f color(name);
 
-    fRGB ret;
+    Pixel_RGBf ret;
     ret.r = color.Red();
     ret.g = color.Green();
     ret.b = color.Blue();
     return ret;
 }
 
-fGrayscale sRGB_grayscale_from_color(Color name)
-{
-    // we're taking the sRGB (gamma encoded) color value
-    // and converting it into linear brightness
-    // then apply the RGB to grayscale formula and convert
-    // back into gamma encoded sRGB space but discarding the
-    // duplicate channels (since if the grayscale image was
-    // encoded with R, G, B channels all channels would have
-    // the same value)
-
-    // https://en.wikipedia.org/wiki/Grayscale
-    // Colorimetric_(perceptual_luminance-preserving)_conversion_to_grayscale
-    const auto srgb   = sRGB_from_color(name);
-    const auto linear = sRGB_decode(srgb);
-    const float Y_linear = 0.2126f * linear.r +
-                           0.7252f * linear.g +
-                           0.0722f * linear.b;
-    fGrayscale ret;
-    ret.r = sRGB_encode(Y_linear);
-    return ret;
-}
-
 void WritePPM(const IBitmapReadView& bmp, const std::string& filename)
 {
-    static_assert(sizeof(RGB) == 3,
-        "Padding bytes found. Cannot copy RGB data as a byte stream.");
+    static_assert(sizeof(Pixel_RGB) == 3,
+        "Padding bytes found. Cannot copy Pixel_RGB data as a byte stream.");
 
     std::ofstream out(filename, std::ios::binary);
     if (!out.is_open())
@@ -598,15 +576,15 @@ void WritePPM(const IBitmapReadView& bmp, const std::string& filename)
     const auto width  = bmp.GetWidth();
     const auto height = bmp.GetHeight();
     const auto depth  = bmp.GetDepthBits() / 8;
-    const auto bytes  = width * height * sizeof(RGB);
+    const auto bytes  = width * height * sizeof(Pixel_RGB);
 
-    std::vector<RGB> tmp;
+    std::vector<Pixel_RGB> tmp;
     tmp.reserve(width * height);
     for (unsigned row=0; row<height; ++row)
     {
         for (unsigned col=0; col<width; ++col)
         {
-            RGB value;
+            Pixel_RGB value;
             bmp.ReadPixel(row, col, &value);
             tmp.push_back(value);
         }
@@ -639,11 +617,11 @@ std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmapReadView& src, bool srg
 {
     const auto premul_alpha = false;
     if (src.GetDepthBits() == 32) {
-       return ::BoxFilter<RGBA, fRGBA, true, true>(src, srgb, premul_alpha);
+       return ::BoxFilter<Pixel_RGBA, Pixel_RGBAf, true, true>(src, srgb, premul_alpha);
     } else if (src.GetDepthBits() == 24) {
-        return ::BoxFilter<RGB, fRGB, true, false> (src, srgb, false);
+        return ::BoxFilter<Pixel_RGB, Pixel_RGBf, true, false> (src, srgb, false);
     } else if (src.GetDepthBits() == 8)
-        return ::BoxFilter<Grayscale, fGrayscale, false, false>(src, false, false);
+        return ::BoxFilter<Pixel_A, Pixel_Af, false, false>(src, false, false);
     return nullptr;
 }
 std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmap& src, bool srgb)
@@ -655,9 +633,9 @@ std::unique_ptr<IBitmap> GenerateNextMipmap(const IBitmap& src, bool srgb)
 std::unique_ptr<IBitmap> ConvertToLinear(const IBitmapReadView& src)
 {
     if (src.GetDepthBits() == 32)
-        return ::ConvertToLinear<RGBA, fRGBA>(src);
+        return ::ConvertToLinear < Pixel_RGBA, Pixel_RGBAf > (src);
     else if (src.GetDepthBits() == 24)
-        return ::ConvertToLinear<RGB, fRGB>(src);
+        return ::ConvertToLinear < Pixel_RGB, Pixel_RGBf > (src);
     return nullptr;
 }
 std::unique_ptr<IBitmap> ConvertToLinear(const IBitmap& src)
@@ -666,27 +644,27 @@ std::unique_ptr<IBitmap> ConvertToLinear(const IBitmap& src)
     return ConvertToLinear(*view);
 }
 
-void PremultiplyAlpha(const BitmapWriteView<RGBA>& dst,
-                      const BitmapReadView<RGBA>& src, bool srgb)
+void PremultiplyAlpha(const BitmapWriteView<Pixel_RGBA>& dst,
+                      const BitmapReadView<Pixel_RGBA>& src, bool srgb)
 {
     auto conversion  = srgb ? &PremultiplyPixel_sRGB
                             : &PremultiplyPixel_lRGB;
     ConvertBitmap(dst, src, conversion);
 }
 
-Bitmap<RGBA> PremultiplyAlpha(const BitmapReadView<RGBA>& src, bool srgb)
+Bitmap<Pixel_RGBA> PremultiplyAlpha(const BitmapReadView<Pixel_RGBA>& src, bool srgb)
 {
     const auto src_width  = src.GetWidth();
     const auto src_height = src.GetHeight();
 
-    Bitmap<RGBA> ret;
+    Bitmap<Pixel_RGBA> ret;
     ret.Resize(src_width, src_height);
 
     PremultiplyAlpha(ret.GetPixelWriteView(), src, srgb);
     return ret;
 }
 
-Bitmap<RGBA> PremultiplyAlpha(const Bitmap<RGBA>& src, bool srgb)
+Bitmap<Pixel_RGBA> PremultiplyAlpha(const Bitmap<Pixel_RGBA>& src, bool srgb)
 {
     return PremultiplyAlpha(src.GetPixelReadView(), srgb);
 }
@@ -761,7 +739,7 @@ std::unique_ptr<IBitmap> NoiseBitmapGenerator::Generate() const
                 const auto sample = gen.GetSample(x / w, y / h);
                 pixel += (sample * amplitude);
             }
-            Grayscale px;
+            Pixel_A px;
             px.r = math::clamp(0u, 255u, (unsigned) pixel);
             ret->SetPixel(y, x, px);
         }

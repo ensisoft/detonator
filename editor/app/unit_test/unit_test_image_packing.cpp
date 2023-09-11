@@ -52,7 +52,7 @@ void unit_test_unbounded()
             images.push_back(img);
         }
         const auto ret = app::PackRectangles(images);
-        gfx::Bitmap<gfx::RGB> bmp(ret.width, ret.height);
+        gfx::Bitmap<gfx::Pixel_RGB> bmp(ret.width, ret.height);
         bmp.Fill(gfx::Color::Black);
         for (size_t i=0; i<images.size(); ++i)
         {

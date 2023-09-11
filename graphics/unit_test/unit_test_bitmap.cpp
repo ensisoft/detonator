@@ -31,7 +31,7 @@ int test_main(int argc, char* argv[])
 {
     // test empty bitmap for "emptiness"
     {
-        gfx::Bitmap<gfx::RGB> bmp;
+        gfx::Bitmap<gfx::Pixel_RGB> bmp;
         TEST_REQUIRE(bmp.GetWidth() == 0);
         TEST_REQUIRE(bmp.GetHeight() == 0);
         TEST_REQUIRE(bmp.GetDataPtr() == nullptr);
@@ -41,7 +41,7 @@ int test_main(int argc, char* argv[])
     // test initialized bitmap for "non emptiness"
     {
 
-        gfx::Bitmap<gfx::RGB> bmp(2, 2);
+        gfx::Bitmap<gfx::Pixel_RGB> bmp(2, 2);
         TEST_REQUIRE(bmp.GetWidth() == 2);
         TEST_REQUIRE(bmp.GetHeight() == 2);
         TEST_REQUIRE(bmp.GetDataPtr() != nullptr);
@@ -50,7 +50,7 @@ int test_main(int argc, char* argv[])
 
     // test pixel set/get
     {
-        gfx::Bitmap<gfx::RGB> bmp(2, 2);
+        gfx::Bitmap<gfx::Pixel_RGB> bmp(2, 2);
         bmp.SetPixel(0, 0, gfx::Color::White);
         bmp.SetPixel(0, 1, gfx::Color::Red);        
         bmp.SetPixel(1, 0, gfx::Color::Green);        
@@ -64,7 +64,7 @@ int test_main(int argc, char* argv[])
     // test bitmap filling
     {
         {
-            gfx::Bitmap<gfx::RGB> bmp(2, 2);
+            gfx::Bitmap<gfx::Pixel_RGB> bmp(2, 2);
             TEST_REQUIRE(bmp.GetPixel(0, 0) == gfx::Color::Black);
             TEST_REQUIRE(bmp.GetPixel(1, 0) == gfx::Color::Black);
             TEST_REQUIRE(bmp.GetPixel(1, 1) == gfx::Color::Black);
@@ -95,7 +95,7 @@ int test_main(int argc, char* argv[])
             TEST_REQUIRE(bmp.GetPixel(0, 1) == gfx::Color::Red);                        
         }
 
-        gfx::Bitmap<gfx::RGB> bmp(100, 100);
+        gfx::Bitmap<gfx::Pixel_RGB> bmp(100, 100);
         struct Rect {
             int x, y;
             int w, h;
@@ -136,7 +136,7 @@ int test_main(int argc, char* argv[])
 
     // test the compare against pixel
     {
-        gfx::Bitmap<gfx::RGB> bmp(100, 100);
+        gfx::Bitmap<gfx::Pixel_RGB> bmp(100, 100);
         struct Rect {
             int x, y; 
             int w, h;
@@ -164,10 +164,10 @@ int test_main(int argc, char* argv[])
 
     // test copying of data from a pixel buffer pointer
     {
-        gfx::Bitmap<gfx::RGB> dst(4, 4);
+        gfx::Bitmap<gfx::Pixel_RGB> dst(4, 4);
         dst.Fill(gfx::Color::White);
 
-        const gfx::RGB red_data[2*2] = {
+        const gfx::Pixel_RGB red_data[2 * 2] = {
             gfx::Color::Red, gfx::Color::Green,
             gfx::Color::Yellow, gfx::Color::Blue
         };
@@ -205,8 +205,8 @@ int test_main(int argc, char* argv[])
 
     // test copying of data from a bitmap
     {
-        gfx::Bitmap<gfx::RGB> dst(4, 4);
-        gfx::Bitmap<gfx::RGB> src(2, 2);
+        gfx::Bitmap<gfx::Pixel_RGB> dst(4, 4);
+        gfx::Bitmap<gfx::Pixel_RGB> src(2, 2);
         src.SetPixel(0, 0, gfx::Color::Red);
         src.SetPixel(0, 1, gfx::Color::Green);
         src.SetPixel(1, 0, gfx::Color::Blue);
@@ -253,7 +253,7 @@ int test_main(int argc, char* argv[])
 
     // test copying of data out of a bitmap.
     {
-        gfx::Bitmap<gfx::RGB> src(4, 4);
+        gfx::Bitmap<gfx::Pixel_RGB> src(4, 4);
         src.Fill(gfx::URect(0, 0, 2, 2), gfx::Color::Red);
         src.Fill(gfx::URect(2, 0, 2, 2), gfx::Color::Green);
         src.Fill(gfx::URect(0, 2, 2, 2), gfx::Color::Blue);
@@ -302,7 +302,7 @@ int test_main(int argc, char* argv[])
 
     // test flip
     {
-        gfx::Bitmap<gfx::RGB> bmp(4, 5);
+        gfx::Bitmap<gfx::Pixel_RGB> bmp(4, 5);
         bmp.Fill(gfx::Color::White);
         bmp.SetPixel(0, 0, gfx::Color::Red);
         bmp.SetPixel(0, 1, gfx::Color::Red);
@@ -323,7 +323,7 @@ int test_main(int argc, char* argv[])
 
     // test PPM writing
     {
-        gfx::Bitmap<gfx::RGB> bmp(256, 256);
+        gfx::Bitmap<gfx::Pixel_RGB> bmp(256, 256);
         bmp.Fill(gfx::Color::Green);
         
         for (int y=0; y<256; ++y)
@@ -343,7 +343,7 @@ int test_main(int argc, char* argv[])
 
     // test mip map generation with box filter
     {
-        gfx::Bitmap<gfx::RGB> src(256, 256);
+        gfx::Bitmap<gfx::Pixel_RGB> src(256, 256);
         src.Fill(gfx::Color::Green);
 
         for (int y=0; y<256; ++y)
@@ -371,7 +371,7 @@ int test_main(int argc, char* argv[])
 
         for (auto test : cases)
         {
-            gfx::Bitmap<gfx::RGB> bmp;
+            gfx::Bitmap<gfx::Pixel_RGB> bmp;
             bmp.Resize(test.width, test.height);
             bmp.Fill(gfx::Color::White);
             bmp.Copy(0, 0, src);

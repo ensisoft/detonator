@@ -1298,9 +1298,9 @@ public:
         }
     }
 
-    virtual gfx::Bitmap<gfx::RGBA> ReadColorBuffer(unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
+    virtual gfx::Bitmap<gfx::Pixel_RGBA> ReadColorBuffer(unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
     {
-        gfx::Bitmap<gfx::RGBA> bmp;
+        gfx::Bitmap<gfx::Pixel_RGBA> bmp;
 
         if (!SetupFBO(fbo))
             return bmp;
@@ -1314,9 +1314,9 @@ public:
         return bmp;
     }
 
-    virtual gfx::Bitmap<gfx::RGBA> ReadColorBuffer(unsigned x, unsigned y, unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
+    virtual gfx::Bitmap<gfx::Pixel_RGBA> ReadColorBuffer(unsigned x, unsigned y, unsigned width, unsigned height, gfx::Framebuffer* fbo) const override
     {
-        gfx::Bitmap<gfx::RGBA> bmp;
+        gfx::Bitmap<gfx::Pixel_RGBA> bmp;
         if (!SetupFBO(fbo))
             return bmp;
 
@@ -1657,7 +1657,7 @@ private:
             {
                 if (format == Format::sRGB && !mDevice.mExtensions.EXT_sRGB)
                 {
-                    gfx::BitmapReadView<gfx::RGB> view((const gfx::RGB*) bytes, xres, yres);
+                    gfx::BitmapReadView<gfx::Pixel_RGB> view((const gfx::Pixel_RGB*) bytes, xres, yres);
                     linear = ConvertToLinear(view);
                     bytes = linear->GetDataPtr();
                     sizeFormat = GL_RGB;
@@ -1665,7 +1665,7 @@ private:
                 }
                 else if (format == Format::sRGBA && !mDevice.mExtensions.EXT_sRGB)
                 {
-                    gfx::BitmapReadView<gfx::RGBA> view((const gfx::RGBA*) bytes, xres, yres);
+                    gfx::BitmapReadView<gfx::Pixel_RGBA> view((const gfx::Pixel_RGBA*) bytes, xres, yres);
                     linear = ConvertToLinear(view);
                     bytes = linear->GetDataPtr();
                     sizeFormat = GL_RGBA;
@@ -1838,9 +1838,9 @@ private:
         void GenerateMips(const void* bytes, unsigned xres, unsigned yres, Format format)
         {
             if (format == Format::sRGB)
-                GenerateMipsFrom_sRGB<gfx::RGB>(bytes, xres, yres, GL_SRGB_EXT);
+                GenerateMipsFrom_sRGB<gfx::Pixel_RGB>(bytes, xres, yres, GL_SRGB_EXT);
             else if (format == Format::sRGBA)
-                GenerateMipsFrom_sRGB<gfx::RGBA>(bytes, xres, yres, GL_SRGB_ALPHA_EXT);
+                GenerateMipsFrom_sRGB<gfx::Pixel_RGBA>(bytes, xres, yres, GL_SRGB_ALPHA_EXT);
             else GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
         }
         template<typename T_rgb>

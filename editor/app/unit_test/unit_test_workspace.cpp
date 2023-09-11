@@ -69,7 +69,7 @@ size_t CountPixels(const gfx::Bitmap<Pixel>& bmp, gfx::Color color)
     }
     return ret;
 }
-size_t CountPixels(const gfx::Bitmap<gfx::Grayscale>& bmp, int value)
+size_t CountPixels(const gfx::Bitmap<gfx::Pixel_A>& bmp, int value)
 {
     size_t ret = 0;
     for (unsigned  y=0; y<bmp.GetHeight(); ++y) {
@@ -545,7 +545,7 @@ void unit_test_packing_texture_composition(unsigned padding)
 
         gfx::Image generated;
         TEST_REQUIRE(generated.Load("TestPackage/textures/test_bitmap0.png"));
-        const auto& bmp = generated.AsBitmap<gfx::RGB>();
+        const auto& bmp = generated.AsBitmap<gfx::Pixel_RGB>();
         TEST_REQUIRE(bmp.GetWidth() == bitmap[0].GetWidth());
         TEST_REQUIRE(bmp.GetHeight() == bitmap[0].GetHeight());
         TEST_REQUIRE(gfx::Compare(bitmap[0], bmp));
@@ -584,7 +584,7 @@ void unit_test_packing_texture_composition(unsigned padding)
 
         gfx::Image generated;
         TEST_REQUIRE(generated.Load("TestPackage/textures/Generated_0.png"));
-        const auto& bmp = generated.AsBitmap<gfx::RGB>();
+        const auto& bmp = generated.AsBitmap<gfx::Pixel_RGB>();
         TEST_REQUIRE(bmp.GetWidth() == 1024 && bmp.GetWidth() == 1024);
         TEST_REQUIRE(CountPixels(bmp, gfx::Color::Blue) == (64+2*padding)*(64+2*padding));
         TEST_REQUIRE(CountPixels(bmp, gfx::Color::Red) == (64+2*padding)*(64+2*padding));
@@ -623,10 +623,10 @@ void unit_test_packing_texture_composition(unsigned padding)
 
         gfx::Image img;
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap0.png"));
-        TEST_REQUIRE(gfx::Compare(bitmap[0], img.AsBitmap<gfx::RGB>()));
+        TEST_REQUIRE(gfx::Compare(bitmap[0], img.AsBitmap<gfx::Pixel_RGB>()));
 
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap1.png"));
-        TEST_REQUIRE(gfx::Compare(bitmap[1], img.AsBitmap<gfx::RGB>()));
+        TEST_REQUIRE(gfx::Compare(bitmap[1], img.AsBitmap<gfx::Pixel_RGB>()));
     }
 
     // texture size that exceeds the max texture sizes and no resizing and no packing
@@ -659,7 +659,7 @@ void unit_test_packing_texture_composition(unsigned padding)
 
         gfx::Image img;
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap3.png"));
-        TEST_REQUIRE(gfx::Compare(bitmap[3], img.AsBitmap<gfx::RGB>()));
+        TEST_REQUIRE(gfx::Compare(bitmap[3], img.AsBitmap<gfx::Pixel_RGB>()));
     }
 
     // texture size that exceeds the max texture size gets resized.
@@ -692,7 +692,7 @@ void unit_test_packing_texture_composition(unsigned padding)
 
         gfx::Image img;
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap3.png"));
-        const auto& bmp = img.AsBitmap<gfx::RGB>();
+        const auto& bmp = img.AsBitmap<gfx::Pixel_RGB>();
         TEST_REQUIRE(bmp.GetHeight() == 512);
         TEST_REQUIRE(bmp.GetWidth() == 512);
         TEST_REQUIRE(CountPixels(bmp, gfx::Color::Yellow) == 512*512);
@@ -745,14 +745,14 @@ void unit_test_packing_texture_composition(unsigned padding)
         // with bitmap2. Bitmap3 is too large to pack.
         gfx::Image generated;
         TEST_REQUIRE(generated.Load("TestPackage/textures/Generated_0.png"));
-        const auto& bmp = generated.AsBitmap<gfx::RGB>();
+        const auto& bmp = generated.AsBitmap<gfx::Pixel_RGB>();
         TEST_REQUIRE(CountPixels(bmp, gfx::Color::Blue) == (64+2*padding)*(64+2*padding));
         TEST_REQUIRE(CountPixels(bmp, gfx::Color::Red) == (64+2*padding)*(64+2*padding));
         TEST_REQUIRE(CountPixels(bmp, gfx::Color::Green) == (512+2*padding)*(512+2*padding));
 
         gfx::Image img;
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap3.png"));
-        TEST_REQUIRE(gfx::Compare(bitmap[3], img.AsBitmap<gfx::RGB>()));
+        TEST_REQUIRE(gfx::Compare(bitmap[3], img.AsBitmap<gfx::Pixel_RGB>()));
     }
 
     // test discarding multiple copies of textures
@@ -800,13 +800,13 @@ void unit_test_packing_texture_composition(unsigned padding)
 
         gfx::Image img;
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap0.png"));
-        TEST_REQUIRE(gfx::Compare(bitmap[0], img.AsBitmap<gfx::RGB>()));
+        TEST_REQUIRE(gfx::Compare(bitmap[0], img.AsBitmap<gfx::Pixel_RGB>()));
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap1.png"));
-        TEST_REQUIRE(gfx::Compare(bitmap[1], img.AsBitmap<gfx::RGB>()));
+        TEST_REQUIRE(gfx::Compare(bitmap[1], img.AsBitmap<gfx::Pixel_RGB>()));
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap2.png"));
-        TEST_REQUIRE(gfx::Compare(bitmap[2], img.AsBitmap<gfx::RGB>()));
+        TEST_REQUIRE(gfx::Compare(bitmap[2], img.AsBitmap<gfx::Pixel_RGB>()));
         TEST_REQUIRE(img.Load("TestPackage/textures/test_bitmap3.png"));
-        TEST_REQUIRE(gfx::Compare(bitmap[3], img.AsBitmap<gfx::RGB>()));
+        TEST_REQUIRE(gfx::Compare(bitmap[3], img.AsBitmap<gfx::Pixel_RGB>()));
     }
 
     // todo: test cases where texture packing cannot be done (see material.cpp)
@@ -830,9 +830,9 @@ void unit_test_packing_texture_composition_format()
         gfx::RgbaBitmap rgba_textures[2];
 
         masks[0].Resize(64, 64);
-        masks[0].Fill(gfx::Grayscale(0x20));
+        masks[0].Fill(gfx::Pixel_A(0x20));
         masks[1].Resize(50, 180);
-        masks[1].Fill(gfx::Grayscale(0x45));
+        masks[1].Fill(gfx::Pixel_A(0x45));
 
         rgb_textures[0].Resize(80, 166);
         rgb_textures[0].Fill(gfx::Color::Red);
@@ -890,7 +890,7 @@ void unit_test_packing_texture_composition_format()
             TEST_REQUIRE(generated.GetWidth() == 1024);
             TEST_REQUIRE(generated.GetHeight() == 1024);
             TEST_REQUIRE(generated.GetDepthBits() == 32);
-            const auto& bmp = generated.AsBitmap<gfx::RGBA>();
+            const auto& bmp = generated.AsBitmap<gfx::Pixel_RGBA>();
             TEST_REQUIRE(CountPixels(bmp, gfx::Color::Blue) == 100*100);
             TEST_REQUIRE(CountPixels(bmp, gfx::Color::Red) == 200*100);
         }
@@ -902,7 +902,7 @@ void unit_test_packing_texture_composition_format()
             TEST_REQUIRE(generated.GetWidth() == 1024);
             TEST_REQUIRE(generated.GetHeight() == 1024);
             TEST_REQUIRE(generated.GetDepthBits() == 24);
-            const auto& bmp = generated.AsBitmap<gfx::RGB>();
+            const auto& bmp = generated.AsBitmap<gfx::Pixel_RGB>();
             TEST_REQUIRE(CountPixels(bmp, gfx::Color::Yellow) == 64*64);
             TEST_REQUIRE(CountPixels(bmp, gfx::Color::Red) == 80*166);
         }
@@ -914,7 +914,7 @@ void unit_test_packing_texture_composition_format()
             TEST_REQUIRE(generated.GetWidth() == 1024);
             TEST_REQUIRE(generated.GetHeight() == 1024);
             TEST_REQUIRE(generated.GetDepthBits() == 8);
-            const auto& bmp = generated.AsBitmap<gfx::Grayscale>();
+            const auto& bmp = generated.AsBitmap<gfx::Pixel_A>();
             TEST_REQUIRE(CountPixels(bmp, 0x20) == 64*64);
             TEST_REQUIRE(CountPixels(bmp, 0x45) == 50*180);
         }
@@ -1043,7 +1043,7 @@ void unit_test_packing_texture_composition_rects(unsigned padding)
 
         gfx::Image img;
         TEST_REQUIRE(img.Load("TestPackage/textures/Generated_0.png"));
-        const auto& bmp = img.AsBitmap<gfx::RGB>();
+        const auto& bmp = img.AsBitmap<gfx::Pixel_RGB>();
         TEST_REQUIRE(CountPixels(bmp, gfx::Color::HotPink) == (32+2*padding) * (32+2*padding));
         TEST_REQUIRE(CountPixels(bmp, gfx::Color::Green)   >= 32*32);
         TEST_REQUIRE(CountPixels(bmp, gfx::Color::Red)     >= 32*32);
@@ -1124,7 +1124,7 @@ void unit_test_packing_texture_name_collision()
         const auto* file = static_cast<const gfx::detail::TextureFileSource*>(source);
         gfx::Image img;
         TEST_REQUIRE(img.Load(file->GetFilename()));
-        const auto& bmp = img.AsBitmap<gfx::RGB>();
+        const auto& bmp = img.AsBitmap<gfx::Pixel_RGB>();
         TEST_REQUIRE(bmp == bitmap[0]);
     }
 
@@ -1134,7 +1134,7 @@ void unit_test_packing_texture_name_collision()
         const auto* file = static_cast<const gfx::detail::TextureFileSource*>(source);
         gfx::Image img;
         TEST_REQUIRE(img.Load(file->GetFilename()));
-        const auto& bmp = img.AsBitmap<gfx::RGB>();
+        const auto& bmp = img.AsBitmap<gfx::Pixel_RGB>();
         TEST_REQUIRE(bmp == bitmap[1]);
     }
     gfx::SetResourceLoader(nullptr);
@@ -1317,7 +1317,7 @@ void unit_test_packing_texture_name_collision_resample_bug()
         const auto* file = static_cast<const gfx::detail::TextureFileSource*>(source);
         gfx::Image img;
         TEST_REQUIRE(img.Load(file->GetFilename()));
-        const auto& bmp = img.AsBitmap<gfx::RGB>();
+        const auto& bmp = img.AsBitmap<gfx::Pixel_RGB>();
 
         // the output texture has been resampled.
         gfx::RgbBitmap expected;
@@ -1332,7 +1332,7 @@ void unit_test_packing_texture_name_collision_resample_bug()
         const auto* file = static_cast<const gfx::detail::TextureFileSource*>(source);
         gfx::Image img;
         TEST_REQUIRE(img.Load(file->GetFilename()));
-        const auto& bmp = img.AsBitmap<gfx::RGB>();
+        const auto& bmp = img.AsBitmap<gfx::Pixel_RGB>();
         TEST_REQUIRE(bmp == bitmap[1]);
     }
     gfx::SetResourceLoader(nullptr);
@@ -1765,7 +1765,7 @@ void unit_test_export_import_basic()
 
         gfx::Image texture;
         TEST_REQUIRE(texture.Load("TestWorkspace/test-export/textures/test_bitmap.png"));
-        const auto& bmp = texture.AsBitmap<gfx::RGB>();
+        const auto& bmp = texture.AsBitmap<gfx::Pixel_RGB>();
         TEST_REQUIRE(bmp.GetWidth() == 128);
         TEST_REQUIRE(bmp.GetHeight() == 100);
         TEST_REQUIRE(CountPixels(bmp, gfx::Color::Yellow) == 128 * 100);
@@ -1840,8 +1840,8 @@ void unit_test_export_name_dupe()
             gfx::Image img1;
             TEST_REQUIRE(img0.Load(app::ToUtf8(texture_file0)));
             TEST_REQUIRE(img1.Load(app::ToUtf8(texture_file1)));
-            const auto& bmp0 = img0.AsBitmap<gfx::RGB>();
-            const auto& bmp1 = img1.AsBitmap<gfx::RGB>();
+            const auto& bmp0 = img0.AsBitmap<gfx::Pixel_RGB>();
+            const auto& bmp1 = img1.AsBitmap<gfx::Pixel_RGB>();
             TEST_REQUIRE(bmp0 == bitmap[0]);
             TEST_REQUIRE(bmp1 == bitmap[1]);
         }
