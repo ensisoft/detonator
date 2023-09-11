@@ -68,12 +68,14 @@ namespace gui
         virtual void Save() override;
         virtual bool HasUnsavedChanges() const override;
         virtual bool GetStats(Stats* stats) const override;
+
     private slots:
         void on_widgetColor_colorChanged(QColor color);
         void on_actionPlay_triggered();
         void on_actionStop_triggered();
         void on_actionPause_triggered();
         void on_actionSave_triggered();
+        void on_actionEmit_triggered();
         void on_resetEmitter_clicked();
         void on_resetTransform_clicked();
         void on_btnViewPlus90_clicked();
