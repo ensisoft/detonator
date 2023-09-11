@@ -233,13 +233,12 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     DEBUG("Create ParticleEditorWidget");
 
     mUI.setupUi(this);
-    mUI.widget->onPaintScene = std::bind(&ParticleEditorWidget::PaintScene,
-        this, std::placeholders::_1, std::placeholders::_2);
+    mUI.widget->onPaintScene   = std::bind(&ParticleEditorWidget::PaintScene, this, std::placeholders::_1, std::placeholders::_2);
     mUI.widget->onMouseMove    = std::bind(&ParticleEditorWidget::MouseMove, this, std::placeholders::_1);
     mUI.widget->onMouseRelease = std::bind(&ParticleEditorWidget::MouseRelease, this, std::placeholders::_1);
     mUI.widget->onMousePress   = std::bind(&ParticleEditorWidget::MousePress, this, std::placeholders::_1);
-    mUI.widget->onZoomIn  = std::bind(&ParticleEditorWidget::ZoomIn, this);
-    mUI.widget->onZoomOut = std::bind(&ParticleEditorWidget::ZoomOut, this);
+    mUI.widget->onZoomIn       = std::bind(&ParticleEditorWidget::ZoomIn, this);
+    mUI.widget->onZoomOut      = std::bind(&ParticleEditorWidget::ZoomOut, this);
 
     // if you change this change the UI widget values min/max values too!
     mUI.velocity->SetScale(1000.0f);
@@ -277,6 +276,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     on_space_currentIndexChanged(0);
     on_direction_currentIndexChanged(0);
     on_canExpire_stateChanged(0);
+    on_when_currentIndexChanged(0);
 
     // connect workspace signals for resource management
     connect(mWorkspace, &app::Workspace::ResourceAdded,   this, &ParticleEditorWidget::ResourceAdded);
@@ -338,6 +338,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     on_space_currentIndexChanged(0);
     on_direction_currentIndexChanged(0);
     on_canExpire_stateChanged(0);
+    on_when_currentIndexChanged(0);
 }
 
 ParticleEditorWidget::~ParticleEditorWidget()
@@ -385,6 +386,8 @@ void ParticleEditorWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionStop);
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
+    bar.addSeparator();
+    bar.addAction(mUI.actionEmit);
 }
 
 void ParticleEditorWidget::AddActions(QMenu& menu)
@@ -395,6 +398,8 @@ void ParticleEditorWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionStop);
     menu.addSeparator();
     menu.addAction(mUI.actionSave);
+    menu.addSeparator();
+    menu.addAction(mUI.actionEmit);
 }
 
 bool ParticleEditorWidget::SaveState(Settings& settings) const
@@ -462,6 +467,7 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     on_space_currentIndexChanged(0);
     on_direction_currentIndexChanged(0);
     on_canExpire_stateChanged(0);
+    on_when_currentIndexChanged(0);
     return true;
 }
 
@@ -623,6 +629,38 @@ void ParticleEditorWidget::on_actionSave_triggered()
 
     mWorkspace->SaveResource(particle_resource);
     mOriginalHash = mClass->GetHash();
+}
+
+void ParticleEditorWidget::on_actionEmit_triggered()
+{
+    const auto& p = mClass->GetParams();
+    if (p.mode != gfx::KinematicsParticleEngineClass::SpawnPolicy::Command)
+        return;
+
+    if (!mEngine)
+        on_actionPlay_triggered();
+
+    const float viz_xpos   = GetValue(mUI.translateX);
+    const float viz_ypos   = GetValue(mUI.translateY);
+    const float viz_width  = GetValue(mUI.scaleX);
+    const float viz_height = GetValue(mUI.scaleY);
+    const float viz_rot    = qDegreesToRadians((float)GetValue(mUI.rotation));
+
+    gfx::Transform model;
+    model.Scale(viz_width, viz_height);
+    model.Translate(-viz_width*0.5, -viz_height*0.5);
+    model.RotateAroundZ(viz_rot);
+    model.Translate(viz_xpos, viz_ypos);
+    const auto& model_matrix = model.GetAsMatrix();
+
+    gfx::Drawable::Environment env;
+    env.model_matrix = &model_matrix;
+    env.editing_mode = true;
+
+    gfx::Drawable::Command cmd;
+    cmd.name = "EmitParticles";
+    // no count here.
+    mEngine->Execute(env, cmd);
 }
 
 void ParticleEditorWidget::SetParams()
@@ -798,6 +836,10 @@ void ParticleEditorWidget::on_actionPlay_triggered()
     mPaused = false;
     SetEnabled(mUI.actionPause, true);
     SetEnabled(mUI.actionStop, true);
+
+    if (mClass->GetParams().mode == gfx::KinematicsParticleEngineClass::SpawnPolicy::Command)
+        on_actionEmit_triggered();
+
     DEBUG("Created new particle engine");
 }
 
@@ -894,6 +936,18 @@ void ParticleEditorWidget::on_boundary_currentIndexChanged(int)
 
 void ParticleEditorWidget::on_when_currentIndexChanged(int)
 {
+    const gfx::KinematicsParticleEngineClass::SpawnPolicy spawning = GetValue(mUI.when);
+    if (spawning == gfx::KinematicsParticleEngineClass::SpawnPolicy::Command)
+    {
+        SetEnabled(mUI.delay, false);
+        SetEnabled(mUI.actionEmit, true);
+    }
+    else
+    {
+        SetEnabled(mUI.delay, true);
+        SetEnabled(mUI.actionEmit, false);
+    }
+
     SetParams();
 }
 void ParticleEditorWidget::on_shape_currentIndexChanged(int)
@@ -1274,9 +1328,21 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
         transform.Pop();
     }
 
+
+    const auto& params = mClass->GetParams();
+    const auto emission = params.mode;
     if (mEngine)
     {
-        ShowMessage(base::FormatString("Particles %1", mEngine->GetNumParticlesAlive()), painter);
+        const auto count = mEngine->GetNumParticlesAlive();
+        if (emission == gfx::KinematicsParticleEngineClass::SpawnPolicy::Command && count == 0)
+        {
+            const auto& shortcut = mUI.actionEmit->shortcut().toString();
+            ShowMessage(app::toString("Hit %1 to emit some particles!", shortcut), painter);
+        }
+        else
+        {
+            ShowMessage(base::FormatString("Particles %1", mEngine->GetNumParticlesAlive()), painter);
+        }
     }
 }
 
