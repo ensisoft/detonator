@@ -1746,7 +1746,25 @@ void InitLuaDoc()
     DOC_TABLE2("KB.ARROW", "A logical key binding for binding  arrow keys to logical game action keys.<br>"
                            "Up arrow = Up, Left Arrow = Left, Right Arrow = Right, Down Arrow = Down and Space = Fire");
 
+    DOC_TABLE("util");
+    DOC_FUNCTION_2("glm.vec2", "RandomVec2", "Generate a random glm.vec2 with x and y inside min, max (inclusive).",
+                                             "float", "min", "float", "max");
+    DOC_FUNCTION_3("...", "lerp", "Linearly interpolate between two values y0 and y1.",
+                   "...", "y0", "...", "y1", "float", "t");
+    DOC_FUNCTION_4("...", "interpolate", "Interpolate between two values y0 and y1 with an easing curve to adjust t.",
+                   "...", "y0", "...", "y1", "float", "t", "easing.Curves", "curve");
 
+    DOC_TABLE2("Camera", "Camera (and viewport) handling routines. The camera can be used to manipulate and change the viewport (FRect) over time "
+                         "in order to create effects such as a camera shake");
+    DOC_FUNCTION_1("void", "SetViewport", "Set the viewport rectangle to be manipulated.", "base.FRect", "viewport");
+    DOC_FUNCTION_2("void", "Shake", "Start shaking the camera.<br>"
+                                    "The shake effect is defined by its strength in game units and its duration in seconds.<br>"
+                                    "In order to perform the shake you should then call the Update method and take the resulting viewport with the shake effect applied "
+                                    "and use that as your game's viewport setting.",
+                   "float", "strength", "float", "duration");
+    DOC_FUNCTION_1("base.FRect", "Update", "Update the camera with the given time step.<br>"
+                                           "Returns the updated viewport with any effects/movement applied.",
+                   "float", "dt");
 
     std::sort(g_method_docs.begin(), g_method_docs.end(),
         [](const auto& left, const auto& right) {
