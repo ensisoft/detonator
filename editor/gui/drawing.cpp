@@ -466,7 +466,7 @@ void DrawViewport(gfx::Painter& painter,
     gfx::DrawRectOutline(painter, rect, gfx::Color::HotPink, 2.0f);
 }
 
-void ShowMessage(const std::string& msg, gfx::Painter& painter)
+void ShowMessage(const app::AnyString& msg, gfx::Painter& painter)
 {
     const gfx::FRect rect(10.0f, 10.0f, 500.0f, 20.0f);
     gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", 14, rect,
@@ -474,13 +474,13 @@ void ShowMessage(const std::string& msg, gfx::Painter& painter)
                       gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
 }
 
-void ShowMessage(const std::string& msg, const Rect2Df& rect, gfx::Painter& painter)
+void ShowMessage(const app::AnyString& msg, const Rect2Df& rect, gfx::Painter& painter)
 {
     gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", 14, rect,
                       gfx::Color::HotPink,
                       gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
 }
-void ShowMessage(const std::string& msg, const Point2Df& pos, gfx::Painter& painter)
+void ShowMessage(const app::AnyString& msg, const Point2Df& pos, gfx::Painter& painter)
 {
     // using 0 for rect width and height, this will create a raster buffer
     // with dimensions derived from the rasterized text extents.
@@ -490,7 +490,7 @@ void ShowMessage(const std::string& msg, const Point2Df& pos, gfx::Painter& pain
                       gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
 }
 
-void ShowError(const std::string& msg, const Point2Df& pos, gfx::Painter& painter)
+void ShowError(const app::AnyString& msg, const Point2Df& pos, gfx::Painter& painter)
 {
     // using 0 for rect width and height, this will create a raster buffer
     // with dimensions derived from the rasterized text extents.
@@ -501,7 +501,7 @@ void ShowError(const std::string& msg, const Point2Df& pos, gfx::Painter& painte
                       gfx::TextProp::Blinking);
 }
 
-void ShowInstruction(const std::string& msg, const Rect2Df& rect, gfx::Painter& painter)
+void ShowInstruction(const app::AnyString& msg, const Rect2Df& rect, gfx::Painter& painter)
 {
     gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", 20,
                       rect,
