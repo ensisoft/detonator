@@ -1639,7 +1639,7 @@ private:
                     sizeFormat = GL_RGBA;
                     baseFormat = GL_RGBA;
                     break;
-                case Format::Grayscale:
+                case Format::AlphaMask:
                     // when sampling R = G = B = 0.0 and A is the alpha value from here.
                     sizeFormat = GL_ALPHA;
                     baseFormat = GL_ALPHA;
@@ -1883,7 +1883,7 @@ private:
         MagFilter mMagFilter = MagFilter::Default;
         Wrapping mWrapX = Wrapping::Repeat;
         Wrapping mWrapY = Wrapping::Repeat;
-        Format mFormat  = Texture::Format::Grayscale;
+        Format mFormat  = Texture::Format::AlphaMask;
     private:
         unsigned mWidth  = 0;
         unsigned mHeight = 0;

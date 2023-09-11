@@ -44,9 +44,8 @@ namespace gfx
             // linear RGB(A) data.
             RGB,
             RGBA,
-            // Grayscale (8-bit) data only.
-            // Typically, used as an alpha mask only.
-            Grayscale,
+            // 8bit linear alpha mask
+            AlphaMask
         };
         // Texture minifying filter is used whenever the
         // pixel being textured maps to an area greater than
@@ -101,7 +100,7 @@ namespace gfx
         static Format DepthToFormat(unsigned bit_depth, bool srgb)
         {
             if (bit_depth == 8)
-                return Format::Grayscale;
+                return Format::AlphaMask;
             else if (bit_depth == 24 && srgb)
                 return Format::sRGB;
             else if (bit_depth == 24)

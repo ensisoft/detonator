@@ -497,7 +497,7 @@ Texture* detail::TextureTextBufferSource::Upload(const Environment& env, Device&
         {
             constexpr auto generate_mips = true;
             texture->SetContentHash(content_hash);
-            texture->Upload(mask->GetDataPtr(), mask->GetWidth(), mask->GetHeight(), Texture::Format::Grayscale, generate_mips);
+            texture->Upload(mask->GetDataPtr(), mask->GetWidth(), mask->GetHeight(), Texture::Format::AlphaMask, generate_mips);
             return texture;
 
         } else ERROR("Failed to rasterize text into bitmap. [name='%1']", mName);
@@ -1943,7 +1943,7 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
         texture->SetWrapY(mTextureWrapY);
         texture->SetGroup(mClassId);
 
-        alpha_mask[i] = texture->GetFormat() == Texture::Format::Grayscale
+        alpha_mask[i] = texture->GetFormat() == Texture::Format::AlphaMask
                         ? 1.0f : 0.0f;
 
         const auto& box = binds.rects[i];
@@ -2153,7 +2153,7 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
     program.SetUniform("kTextureBox", x, y, sx, sy);
     program.SetTextureCount(1);
     program.SetUniform("kApplyRandomParticleRotation", state.render_points && mParticleAction == ParticleAction::Rotate ? 1.0f : 0.0f);
-    program.SetUniform("kAlphaMask", binds.textures[0]->GetFormat() == Texture::Format::Grayscale ? 1.0f : 0.0f);
+    program.SetUniform("kAlphaMask", binds.textures[0]->GetFormat() == Texture::Format::AlphaMask ? 1.0f : 0.0f);
 
     // set software wrap/clamp. 0 = disabled.
     if (need_software_wrap)
@@ -2409,7 +2409,7 @@ bool TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
                 return false;
             const auto width = bitmap->GetWidth();
             const auto height = bitmap->GetHeight();
-            texture->Upload(bitmap->GetDataPtr(), width, height, gfx::Texture::Format::Grayscale, mips);
+            texture->Upload(bitmap->GetDataPtr(), width, height, gfx::Texture::Format::AlphaMask, mips);
         }
         else if (format == TextBuffer::RasterFormat::Texture)
         {
