@@ -71,8 +71,8 @@ void ApplyBlur(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* de
         tmp->SetFilter(gfx::Texture::MagFilter::Linear);
         tmp->SetWrapX(gfx::Texture::Wrapping::Clamp);
         tmp->SetWrapY(gfx::Texture::Wrapping::Clamp);
-        tmp->SetGarbageCollection(texture->GarbageCollect());
-        tmp->SetTransient(texture->IsTransient());
+        tmp->SetGarbageCollection(true);
+        tmp->SetTransient(true);
     }
 
     const auto src_width  = texture->GetWidth();
@@ -323,8 +323,8 @@ void DetectSpriteEdges(const std::string& gpu_id, gfx::Texture* texture, gfx::De
         tmp->SetFilter(gfx::Texture::MagFilter::Linear);
         tmp->SetWrapX(gfx::Texture::Wrapping::Clamp);
         tmp->SetWrapY(gfx::Texture::Wrapping::Clamp);
-        tmp->SetGarbageCollection(texture->GarbageCollect());
-        tmp->SetTransient(texture->IsTransient());
+        tmp->SetGarbageCollection(true);
+        tmp->SetTransient(true);
     }
     DetectSpriteEdges(texture, tmp, device, edge_color);
     CopyTexture(tmp, texture, device);
@@ -332,6 +332,9 @@ void DetectSpriteEdges(const std::string& gpu_id, gfx::Texture* texture, gfx::De
 
 void CopyTexture(const gfx::Texture* src, gfx::Texture* dst, gfx::Device* device, const glm::mat3& matrix)
 {
+    ASSERT(dst->GetFormat() == Texture::Format::RGBA ||
+           dst->GetFormat() == Texture::Format::sRGB);
+
     auto* fbo = device->FindFramebuffer("AlgoFBO");
     if (!fbo)
     {
@@ -415,13 +418,13 @@ void FlipTexture(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* 
     if (!tmp)
     {
         tmp = device->MakeTexture(gpu_id + "/tmp-color");
-        tmp->SetName("AlgoHelperTexture");
+        tmp->SetName("FlipTextureHelper");
         tmp->SetFilter(gfx::Texture::MinFilter::Linear);
         tmp->SetFilter(gfx::Texture::MagFilter::Linear);
         tmp->SetWrapX(gfx::Texture::Wrapping::Clamp);
         tmp->SetWrapY(gfx::Texture::Wrapping::Clamp);
-        tmp->SetGarbageCollection(texture->GarbageCollect());
-        tmp->SetTransient(texture->IsTransient());
+        tmp->SetGarbageCollection(true);
+        tmp->SetTransient(true);
     }
 
     const auto src_width  = texture->GetWidth();
