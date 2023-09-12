@@ -33,6 +33,46 @@
 
 namespace gfx {
 namespace algo {
+
+void ColorTextureFromAlpha(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* device)
+{
+    ASSERT(texture->GetFormat() == Texture::Format::AlphaMask);
+
+    const auto width  = texture->GetWidth();
+    const auto height = texture->GetHeight();
+
+    // Create a new temp texture, copy the alpha texture over
+    // then respecify the incoming texture to be RGBA and copy
+    // the data over from the temp.
+
+    auto* tmp = device->FindTexture(gpu_id + "/tmp-color");
+    if (!tmp)
+    {
+        tmp = device->MakeTexture(gpu_id + "/tmp-color");
+        tmp->Allocate(texture->GetWidth(), texture->GetHeight(), gfx::Texture::Format::RGBA);
+        tmp->SetName("AlphaColorHelperTexture");
+        tmp->SetFilter(gfx::Texture::MinFilter::Nearest);
+        tmp->SetFilter(gfx::Texture::MagFilter::Nearest);
+        tmp->SetWrapX(gfx::Texture::Wrapping::Clamp);
+        tmp->SetWrapY(gfx::Texture::Wrapping::Clamp);
+        tmp->SetGarbageCollection(true);
+        tmp->SetTransient(true);
+    }
+
+    // copy from alpha into temp
+    CopyTexture(texture, tmp, device);
+
+    // respecify the alpha texture. Format RGBA should be okay
+    // since alpha is linear and we don't have rea RGB data.
+    texture->Allocate(width, height, Texture::Format::RGBA);
+
+    // copy temp back to alpha
+    CopyTexture(tmp, texture, device);
+
+    // logical alpha only.
+    texture->SetFlag(Texture::Flags::AlphaMask, true);
+}
+
 void ApplyBlur(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* device,
     unsigned iterations, BlurDirection direction)
 {
