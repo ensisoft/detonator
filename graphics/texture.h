@@ -34,7 +34,10 @@ namespace gfx
             Transient,
             // Flag to control whether the (non-transient) texture can be
             // ever be garbage collected or not. Default is true.
-            GarbageCollect
+            GarbageCollect,
+            // Logical alpha mask flag to indicate that the texture should only
+            // be used as an alpha mask even though it has RGA format.
+            AlphaMask
         };
 
         enum class Format {
@@ -175,10 +178,18 @@ namespace gfx
         inline void SetGarbageCollection(bool on_off)
         { SetFlag(Flags::GarbageCollect, on_off); }
 
-        inline bool IsTransient() const
+        inline bool IsTransient() const noexcept
         { return TestFlag(Flags::Transient); }
-        inline bool GarbageCollect() const
+        inline bool GarbageCollect() const noexcept
         { return TestFlag(Flags::GarbageCollect); }
+        // Check whether the texture is an alpha mask (and should be used as one)
+        // even if the underlying pixel format isn't
+        inline bool IsAlphaMask() const noexcept
+        {
+            if (GetFormat() == Format::AlphaMask || TestFlag(Flags::AlphaMask))
+                return true;
+            return false;
+        }
 
         // Allocate texture storage based on the texture format and dimensions.
         // The contents of the texture are unspecified and any previous contents
