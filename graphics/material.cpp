@@ -225,13 +225,15 @@ Texture* detail::TextureFileSource::Upload(const Environment& env, Device& devic
         return texture;
 
     size_t content_hash = 0;
-    if (env.dynamic_content) {
+    if (env.dynamic_content) 
+    {
         content_hash = base::hash_combine(0, mFile);
         if (texture && texture->GetContentHash() == content_hash)
             return texture;
     }
 
-    if (!texture) {
+    if (!texture)
+    {
         texture = device.MakeTexture(gpu_id);
         texture->SetName(mName);
         texture->SetContentHash(0);
@@ -263,24 +265,19 @@ Texture* detail::TextureFileSource::Upload(const Environment& env, Device& devic
         texture->SetFilter(Texture::MinFilter::Linear);
         texture->SetFilter(Texture::MagFilter::Linear);
 
-        if (mEffects.test(Effect::Blur))
-        {
-            const auto format = texture->GetFormat();
-            if (format == gfx::Texture::Format::RGBA || format == gfx::Texture::Format::sRGBA)
-                algo::ApplyBlur(gpu_id, texture, &device);
-            else WARN("Texture blur is not supported on texture format. [file='%1', format='%2']", mFile, format);
-        }
+        const auto format = texture->GetFormat();
+        if (mEffects.any_bit() && format == Texture::Format::AlphaMask)
+            algo::ColorTextureFromAlpha(gpu_id, texture, &device);
+
         if (mEffects.test(Effect::Edges))
-        {
-            const auto format = texture->GetFormat();
-            if (format == gfx::Texture::Format::RGBA || format == gfx::Texture::Format::sRGBA)
-               algo::DetectSpriteEdges(gpu_id, texture, &device);
-            else WARN("Texture edge detection is not supported on texture format. [file='%1', format='%2']", mFile, format);
-        }
+            algo::DetectSpriteEdges(gpu_id, texture, &device);
+        if (mEffects.test(Effect::Blur))
+            algo::ApplyBlur(gpu_id, texture, &device);
 
         texture->GenerateMips();
+        DEBUG("Uploaded texture file source texture. [name='%1', file='%2', effects=%3]", mName, mFile, mEffects);
         return texture;
-    }
+    } else ERROR("Failed to upload texture source texture. [name='%1', file='%2']", mName, mFile);
     return nullptr;
 }
 
@@ -343,14 +340,17 @@ Texture* detail::TextureBitmapBufferSource::Upload(const Environment& env, Devic
         return texture;
 
     size_t content_hash = 0;
-    if (env.dynamic_content) {
+    if (env.dynamic_content)
+    {
         content_hash = base::hash_combine(content_hash, mBitmap->GetWidth());
         content_hash = base::hash_combine(content_hash, mBitmap->GetHeight());
         content_hash = base::hash_combine(content_hash, mBitmap->GetHash());
+        content_hash = base::hash_combine(content_hash, mEffects);
         if (texture && texture->GetContentHash() == content_hash)
             return texture;
     }
-    if (!texture) {
+    if (!texture)
+    {
         texture = device.MakeTexture(mId);
         texture->SetName(mName);
     }
@@ -377,6 +377,7 @@ void detail::TextureBitmapBufferSource::IntoJson(data::Writer& data) const
     data.Write("height", height);
     data.Write("depth",  depth);
     data.Write("data", base64::Encode((const unsigned char*)mBitmap->GetDataPtr(), bytes));
+    data.Write("effects", mEffects);
 }
 bool detail::TextureBitmapBufferSource::FromJson(const data::Reader& data)
 {
@@ -391,6 +392,8 @@ bool detail::TextureBitmapBufferSource::FromJson(const data::Reader& data)
     ok &= data.Read("height", &height);
     ok &= data.Read("depth",  &depth);
     ok &= data.Read("data",   &base64);
+    if (data.HasValue("effects"))
+        ok &= data.Read("effects", &mEffects);
 
     const auto& bits = base64::Decode(base64);
     if (depth == 1 && bits.size() == width*height)
@@ -410,12 +413,15 @@ Texture* detail::TextureBitmapGeneratorSource::Upload(const Environment& env, De
         return texture;
 
     size_t content_hash = 0;
-    if (env.dynamic_content) {
+    if (env.dynamic_content)
+    {
         content_hash = mGenerator->GetHash();
+        content_hash = base::hash_combine(content_hash, mEffects);
         if (texture && texture->GetContentHash() == content_hash)
             return texture;
     }
-    if (!texture) {
+    if (!texture)
+    {
         texture = device.MakeTexture(mId);
         texture->SetName(mName);
     }
@@ -428,9 +434,23 @@ Texture* detail::TextureBitmapGeneratorSource::Upload(const Environment& env, De
     {
         texture->SetContentHash(content_hash);
         texture->Upload(bitmap->GetDataPtr(), bitmap->GetWidth(), bitmap->GetHeight(),
-            Texture::DepthToFormat(bitmap->GetDepthBits(), sRGB), generate_mips);
+            Texture::DepthToFormat(bitmap->GetDepthBits(), sRGB), false);
+        texture->SetFilter(Texture::MinFilter::Linear);
+        texture->SetFilter(Texture::MagFilter::Linear);
+
+        const auto format = texture->GetFormat();
+        if (mEffects.any_bit() && format == Texture::Format::AlphaMask)
+            algo::ColorTextureFromAlpha(mId, texture, &device);
+
+        if (mEffects.test(Effect::Edges))
+            algo::DetectSpriteEdges(mId, texture, &device);
+        if (mEffects.test(Effect::Blur))
+            algo::ApplyBlur(mId, texture, &device);
+
+        texture->GenerateMips();
+        DEBUG("Uploaded bitmap generator texture. [name='%1', effects=%2]", mName, mEffects);
         return texture;
-    }
+    } else ERROR("Failed to generate bitmap generator texture. [name='%1']", mName);
     return nullptr;
 }
 
@@ -442,6 +462,7 @@ void detail::TextureBitmapGeneratorSource::IntoJson(data::Writer& data) const
     data.Write("name", mName);
     data.Write("function", mGenerator->GetFunction());
     data.Write("generator", std::move(chunk));
+    data.Write("effects", mEffects);
 }
 bool detail::TextureBitmapGeneratorSource::FromJson(const data::Reader& data)
 {
@@ -451,6 +472,8 @@ bool detail::TextureBitmapGeneratorSource::FromJson(const data::Reader& data)
     ok &= data.Read("name",     &mName);
     if (!data.Read("function", &function))
         return false;
+    if (data.HasValue("effects"))
+        ok &= data.Read("effects", &mEffects);
 
     if (function == IBitmapGenerator::Function::Noise)
         mGenerator = std::make_unique<NoiseBitmapGenerator>();
@@ -479,7 +502,8 @@ Texture* detail::TextureTextBufferSource::Upload(const Environment& env, Device&
         return texture;
 
     size_t content_hash = 0;
-    if (env.dynamic_content) {
+    if (env.dynamic_content)
+    {
         content_hash = base::hash_combine(content_hash, mTextBuffer.GetHash());
         content_hash = base::hash_combine(content_hash, mEffects);
         if (texture && texture->GetContentHash() == content_hash)
@@ -495,48 +519,55 @@ Texture* detail::TextureTextBufferSource::Upload(const Environment& env, Device&
         }
         if (const auto& mask = mTextBuffer.RasterizeBitmap())
         {
-            constexpr auto generate_mips = true;
             texture->SetContentHash(content_hash);
-            texture->Upload(mask->GetDataPtr(), mask->GetWidth(), mask->GetHeight(), Texture::Format::AlphaMask, generate_mips);
-            return texture;
+            texture->Upload(mask->GetDataPtr(), mask->GetWidth(), mask->GetHeight(), Texture::Format::AlphaMask, false);
+            texture->SetFilter(Texture::MinFilter::Linear);
+            texture->SetFilter(Texture::MagFilter::Linear);
+            texture->SetContentHash(content_hash);
 
-        } else ERROR("Failed to rasterize text into bitmap. [name='%1']", mName);
+            // create a logical alpha texture with RGBA format.
+            if (mEffects.any_bit())
+                algo::ColorTextureFromAlpha(mId, texture, &device);
+
+            // then apply effects
+            if (mEffects.test(Effect::Edges))
+                algo::DetectSpriteEdges(mId, texture, &device);
+            if (mEffects.test(Effect::Blur))
+                algo::ApplyBlur(mId, texture, &device);
+
+            texture->GenerateMips();
+        }
     }
     else if (format == TextBuffer::RasterFormat::Texture)
     {
         if (auto* texture = mTextBuffer.RasterizeTexture(mId, mName, device))
         {
-            DEBUG("Rasterized new texture from text buffer. [name='%1']", mName);
             texture->SetName(mName);
             texture->SetFilter(Texture::MinFilter::Linear);
             texture->SetFilter(Texture::MagFilter::Linear);
             texture->SetContentHash(content_hash);
+
+            ASSERT(texture->GetFormat() == Texture::Format::RGBA);
 
             // The frame buffer render produces a texture that doesn't play nice with
             // model space texture coordinates right now. Simplest solution for now is
             // to simply flip it horizontally...
             algo::FlipTexture(mId, texture, &device, algo::FlipDirection::Horizontal);
 
-            if (mEffects.test(Effect::Blur))
-            {
-                const auto format = texture->GetFormat();
-                if (format == gfx::Texture::Format::RGBA || format == gfx::Texture::Format::sRGBA)
-                    algo::ApplyBlur(mId, texture, &device);
-                else WARN("Texture blur is not supported on texture format. [name='%1', format=%2]", mName, format);
-            }
             if (mEffects.test(Effect::Edges))
-            {
-                const auto format = texture->GetFormat();
-                if (format == gfx::Texture::Format::RGBA || format == gfx::Texture::Format::sRGBA)
-                    algo::DetectSpriteEdges(mId, texture, &device);
-                else WARN("Texture edge detection is not supported on texture format. [name='%1', format=%2]", mName, format);
-            }
+                algo::DetectSpriteEdges(mId, texture, &device);
+            if (mEffects.test(Effect::Blur))
+                algo::ApplyBlur(mId, texture, &device);
 
             texture->GenerateMips();
-            return texture;
-
-        } else ERROR("Failed to rasterize text into texture. [name='%1']", mName);
+        }
     }
+    if (texture)
+    {
+        DEBUG("Uploaded new text texture. [name='%1', effects=%2]", mName, mEffects);
+        return texture;
+    }
+    ERROR("Failed to rasterize text texture. [name='%1']", mName);
     return nullptr;
 }
 
@@ -1943,8 +1974,7 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
         texture->SetWrapY(mTextureWrapY);
         texture->SetGroup(mClassId);
 
-        alpha_mask[i] = texture->GetFormat() == Texture::Format::AlphaMask
-                        ? 1.0f : 0.0f;
+        alpha_mask[i] = texture->IsAlphaMask() ? 1.0f : 0.0f;
 
         const auto& box = binds.rects[i];
         const float x  = box.GetX();
@@ -2153,7 +2183,7 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
     program.SetUniform("kTextureBox", x, y, sx, sy);
     program.SetTextureCount(1);
     program.SetUniform("kApplyRandomParticleRotation", state.render_points && mParticleAction == ParticleAction::Rotate ? 1.0f : 0.0f);
-    program.SetUniform("kAlphaMask", binds.textures[0]->GetFormat() == Texture::Format::AlphaMask ? 1.0f : 0.0f);
+    program.SetUniform("kAlphaMask", binds.textures[0]->IsAlphaMask() ? 1.0f : 0.0f);
 
     // set software wrap/clamp. 0 = disabled.
     if (need_software_wrap)
