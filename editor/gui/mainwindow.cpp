@@ -981,6 +981,7 @@ void MainWindow::on_mainTab_currentChanged(int index)
         mUI.actionZoomOut->setEnabled(widget->CanTakeAction(MainWidget::Actions::CanZoomOut));
         mUI.actionReloadShaders->setEnabled(widget->CanTakeAction(MainWidget::Actions::CanReloadShaders));
         mUI.actionReloadTextures->setEnabled(widget->CanTakeAction(MainWidget::Actions::CanReloadTextures));
+        mUI.actionTakeScreenshot->setEnabled(widget->CanTakeAction(MainWidget::Actions::CanScreenshot));
         mUI.statusBarFrame->setVisible(widget->HasStats());
     }
     else
@@ -1185,6 +1186,46 @@ void MainWindow::on_actionReloadTextures_triggered()
         return;
     mCurrentWidget->ReloadTextures();
     INFO("'%1' textures reloaded.", mCurrentWidget->windowTitle());
+}
+
+void MainWindow::on_actionTakeScreenshot_triggered()
+{
+    if (!mCurrentWidget)
+        return;
+
+    const auto& screenshot = mCurrentWidget->TakeScreenshot();
+    if (screenshot.isNull())
+        return;
+
+    QString filename;
+    filename = mCurrentWidget->property("screenshot").toString();
+    if (filename.isEmpty())
+    {
+        const auto& title = mCurrentWidget->windowTitle();
+        filename = title + ".png";
+    }
+    filename = QFileDialog::getSaveFileName(this,
+        tr("Select Save File"), filename,
+        tr("Images (*.png)"));
+    if (filename.isEmpty())
+        return;
+
+    mCurrentWidget->setProperty("screenshot", filename);
+
+    QImageWriter writer;
+    writer.setFormat("PNG");
+    writer.setQuality(100);
+    writer.setFileName(filename);
+    if (!writer.write(screenshot))
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setText(tr("Failed to write the image.\n%1").arg(writer.errorString()));
+        msg.exec();
+        return;
+    }
+    NOTE("Wrote screenshot file '%1'", filename);
 }
 
 void MainWindow::on_actionNewMaterial_triggered()

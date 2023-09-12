@@ -179,7 +179,7 @@
      <x>0</x>
      <y>0</y>
      <width>832</width>
-     <height>28</height>
+     <height>36</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuTemp">
@@ -210,6 +210,8 @@
     <addaction name="separator"/>
     <addaction name="actionReloadShaders"/>
     <addaction name="actionReloadTextures"/>
+    <addaction name="separator"/>
+    <addaction name="actionTakeScreenshot"/>
    </widget>
    <addaction name="menuWindow"/>
    <addaction name="menuEdit"/>
@@ -351,6 +353,18 @@
    </property>
    <property name="toolTip">
     <string>Undo the last action</string>
+   </property>
+  </action>
+  <action name="actionTakeScreenshot">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/camera.png</normaloff>:/32x32_ico_png/camera.png</iconset>
+   </property>
+   <property name="text">
+    <string>Take Screenshot</string>
+   </property>
+   <property name="shortcut">
+    <string>F9</string>
    </property>
   </action>
  </widget>

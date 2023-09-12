@@ -488,7 +488,6 @@ bool ParticleEditorWidget::CanTakeAction(Actions action, const Clipboard* clipbo
         case Actions::CanZoomOut:
             return CanZoomOut(mUI.zoom);
     }
-    BUG("Unhandled action query.");
     return false;
 }
 

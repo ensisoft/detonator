@@ -424,7 +424,6 @@ bool AnimationTrackWidget::CanTakeAction(Actions action, const Clipboard* clipbo
             return val > min;
         } break;
     }
-    BUG("Unhandled action query.");
     return false;
 }
 
