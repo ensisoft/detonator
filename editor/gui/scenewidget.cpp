@@ -757,9 +757,9 @@ bool SceneWidget::CanTakeAction(Actions action, const Clipboard* clipboard) cons
             return CanZoomOut(mUI.zoom);
         case Actions::CanReloadShaders:
         case Actions::CanReloadTextures:
+        case Actions::CanScreenshot:
             return true;
     }
-    BUG("Unhandled action query.");
     return false;
 }
 
@@ -1037,6 +1037,11 @@ bool SceneWidget::GetStats(Stats* stats) const
     stats->device.streaming_vbo_mem_use   = dev_stats.streaming_vbo_mem_use;
     stats->device.streaming_vbo_mem_alloc = dev_stats.streaming_vbo_mem_alloc;
     return true;
+}
+
+QImage SceneWidget::TakeScreenshot() const
+{
+    return mUI.widget->TakeSreenshot();
 }
 
 void SceneWidget::on_name_textChanged(const QString&)

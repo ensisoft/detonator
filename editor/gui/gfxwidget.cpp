@@ -194,6 +194,32 @@ gfx::Color4f GfxWindow::GetCurrentClearColor()
     return mClearColor.value_or(GfxWindow::ClearColor);
 }
 
+QImage GfxWindow::TakeScreenshot() const
+{
+    QImage ret;
+    if (!isExposed())
+        return ret;
+
+    const auto width  = this->width();
+    const auto height = this->height();
+
+    const QSurface* surface = this;
+    
+    mContext->makeCurrent(const_cast<QSurface*>(surface));
+
+    const auto& bmp = mCustomGraphicsDevice->ReadColorBuffer(width, height);
+    if (!bmp.IsValid())
+        return ret;
+
+    const auto bitmap_width  = bmp.GetWidth();
+    const auto bitmap_height = bmp.GetHeight();
+    // QImage doesn't own the data, the data ptr must be valid for the lifetime
+    // of the QImage too.
+    ret = QImage((const uchar*)bmp.GetDataPtr(), bitmap_width, bitmap_height, bitmap_width * 4, QImage::Format_RGBA8888);
+    ret = ret.copy(); // make a copy here
+    return ret;
+}
+
 void GfxWindow::initializeGL()
 {
 

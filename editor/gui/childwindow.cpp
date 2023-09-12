@@ -310,6 +310,39 @@ void ChildWindow::on_actionZoomOut_triggered()
     mUI.actionZoomOut->setEnabled(mWidget->CanTakeAction(MainWidget::Actions::CanZoomOut));
 }
 
+void ChildWindow::on_actionTakeScreenshot_triggered()
+{
+    if (!mWidget)
+        return;
+
+    const auto& screenshot = mWidget->TakeScreenshot();
+    if (screenshot.isNull())
+        return;
+
+    const auto& title = mWidget->windowTitle();
+    QString filename = title + ".png";
+    filename = QFileDialog::getSaveFileName(this,
+        tr("Select Save File"), filename,
+        tr("Images (*.png)"));
+    if (filename.isEmpty())
+        return;
+
+    QImageWriter writer;
+    writer.setFormat("PNG");
+    writer.setQuality(100);
+    writer.setFileName(filename);
+    if (!writer.write(screenshot))
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setText(tr("Failed to write the image.\n%1").arg(writer.errorString()));
+        msg.exec();
+        return;
+    }
+    NOTE("Wrote screenshot file '%1'", filename);
+}
+
 void ChildWindow::keyPressEvent(QKeyEvent* key)
 {
     if (key->key() != Qt::Key_Escape)

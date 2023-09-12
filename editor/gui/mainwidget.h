@@ -20,6 +20,7 @@
 
 #include "warnpush.h"
 #  include <QtWidgets>
+#  include <QImage>
 #include "warnpop.h"
 
 #include "editor/gui/drawing.h"
@@ -56,7 +57,8 @@ namespace gui
             CanPaste   = 0x10,
             CanUndo    = 0x20,
             CanReloadTextures = 0x40,
-            CanReloadShaders  = 0x80
+            CanReloadShaders  = 0x80,
+            CanScreenshot     = 0x100
         };
 
         using GridDensity = gui::GridDensity;
@@ -199,7 +201,10 @@ namespace gui
         // Undo the last action on the undo stack.
         virtual void Undo()
         {}
-        
+
+        virtual QImage TakeScreenshot() const
+        { return QImage(); }
+
         // Returns true if the widget has whatever are considered
         // as "unsaved changes". 
         virtual bool HasUnsavedChanges() const

@@ -230,6 +230,7 @@ bool MaterialWidget::CanTakeAction(Actions action, const Clipboard* clipboard) c
         case Actions::CanCopy:
         case Actions::CanPaste:
         case Actions::CanUndo:
+        case Actions::CanScreenshot:
             return false;
         case Actions::CanZoomIn:
             return CanZoomIn(mUI.zoom);
@@ -239,7 +240,6 @@ bool MaterialWidget::CanTakeAction(Actions action, const Clipboard* clipboard) c
         case Actions::CanReloadShaders:
             return true;
     }
-    BUG("Unhandled action query.");
     return false;
 }
 

@@ -256,7 +256,6 @@ bool ShapeWidget::CanTakeAction(Actions action, const Clipboard* clipboard) cons
         case Actions::CanUndo:
             return false;
     }
-    BUG("Unhandled action query.");
     return false;
 }
 

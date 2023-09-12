@@ -24,6 +24,7 @@
 #  include <QKeyEvent>
 #  include <QElapsedTimer>
 #  include <QPalette>
+#  include <QImage>
 #include "warnpop.h"
 
 #include <memory>
@@ -109,6 +110,8 @@ namespace gui
         { return mCurrentFps; }
 
         void CreateRenderingSurface(bool vsync);
+
+        QImage TakeScreenshot() const;
 
         // callback to invoke when paint must be done.
         // secs is the seconds elapsed since last paint.
@@ -224,6 +227,8 @@ namespace gui
         { mWindow->SetClearColor(color); }
         void ResetClearColor()
         { mWindow->ResetClearColor(); }
+        QImage TakeSreenshot() const
+        { return mWindow->TakeScreenshot(); }
         // callback to invoke when paint must be done.
         // secs is the seconds elapsed since last paint.
         std::function<void (gfx::Painter&, double secs)> onPaintScene;
