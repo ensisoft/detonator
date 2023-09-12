@@ -74,9 +74,9 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     mUI.actionStop->setEnabled(false);
 
     QMenu* menu  = new QMenu(this);
-    QAction* add_texture_from_file = menu->addAction(QIcon("icons:folder.png"), "File");
-    QAction* add_texture_from_text = menu->addAction(QIcon("icons:text.png"), "Text");
-    QAction* add_texture_from_bitmap = menu->addAction(QIcon("icons:bitmap.png"), "Bitmap");
+    QAction* add_texture_from_file = menu->addAction(QIcon("icons:folder.png"), "From File");
+    QAction* add_texture_from_text = menu->addAction(QIcon("icons:text.png"), "From Text");
+    QAction* add_texture_from_bitmap = menu->addAction(QIcon("icons:bitmap.png"), "From Bitmap");
     connect(add_texture_from_file, &QAction::triggered, this, &MaterialWidget::AddNewTextureMapFromFile);
     connect(add_texture_from_text, &QAction::triggered, this, &MaterialWidget::AddNewTextureMapFromText);
     connect(add_texture_from_bitmap, &QAction::triggered, this, &MaterialWidget::AddNewTextureMapFromBitmap);
@@ -742,16 +742,23 @@ void MaterialWidget::on_textures_customContextMenuRequested(const QPoint&)
     SetEnabled(mUI.actionRemoveTexture, tag == "texture");
     SetEnabled(mUI.actionEditTexture,   tag == "texture");
 
+    QMenu add;
+    add.setTitle("Add Texture...");
+    add.addAction(mUI.actionAddFile);
+    add.addAction(mUI.actionAddText);
+    add.addAction(mUI.actionAddBitmap);
+    add.setIcon(QIcon("icons:add.png"));
+    add.setEnabled(tag == "map");
+
     QMenu menu(this);
     menu.addAction(mUI.actionNewMap);
-    menu.addAction(mUI.actionDelMap);
     menu.addSeparator();
-    menu.addAction(mUI.actionAddFile);
-    menu.addAction(mUI.actionAddText);
-    menu.addAction(mUI.actionAddBitmap);
-    menu.addSeparator();
+    menu.addMenu(&add);
     menu.addAction(mUI.actionEditTexture);
+    menu.addSeparator();
     menu.addAction(mUI.actionRemoveTexture);
+    menu.addSeparator();
+    menu.addAction(mUI.actionDelMap);
     menu.exec(QCursor::pos());
 }
 
@@ -1317,14 +1324,9 @@ void MaterialWidget::SetTextureFlags()
             ptr->SetFlag(gfx::detail::TextureFileSource::Flags::AllowPacking, GetValue(mUI.chkAllowPacking));
             ptr->SetFlag(gfx::detail::TextureFileSource::Flags::AllowResizing, GetValue(mUI.chkAllowResizing));
             ptr->SetFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha, GetValue(mUI.chkPreMulAlpha));
-            ptr->SetEffect(gfx::TextureSource::Effect::Blur, GetValue(mUI.chkBlurTexture));
-            ptr->SetEffect(gfx::TextureSource::Effect::Edges, GetValue(mUI.chkDetectEdges));
         }
-        else if (auto* ptr = dynamic_cast<gfx::detail::TextureTextBufferSource*>(source))
-        {
-            ptr->SetEffect(gfx::TextureSource::Effect::Blur, GetValue(mUI.chkBlurTexture));
-            ptr->SetEffect(gfx::TextureSource::Effect::Edges, GetValue(mUI.chkDetectEdges));
-        }
+        source->SetEffect(gfx::TextureSource::Effect::Blur, GetValue(mUI.chkBlurTexture));
+        source->SetEffect(gfx::TextureSource::Effect::Edges, GetValue(mUI.chkDetectEdges));
     }
 }
 
@@ -1600,21 +1602,16 @@ void MaterialWidget::GetTextureProperties()
         SetValue(mUI.chkAllowPacking,   ptr->TestFlag(gfx::detail::TextureFileSource::Flags::AllowPacking));
         SetValue(mUI.chkAllowResizing,  ptr->TestFlag(gfx::detail::TextureFileSource::Flags::AllowResizing));
         SetValue(mUI.chkPreMulAlpha,    ptr->TestFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha));
-        SetValue(mUI.chkBlurTexture,    ptr->TestEffect(gfx::TextureSource::Effect::Blur));
-        SetValue(mUI.chkDetectEdges,    ptr->TestEffect(gfx::TextureSource::Effect::Edges));
         SetEnabled(mUI.chkAllowPacking,  true);
         SetEnabled(mUI.chkAllowResizing, true);
         SetEnabled(mUI.chkPreMulAlpha,   true);
-        SetEnabled(mUI.chkBlurTexture,   true);
-        SetEnabled(mUI.chkDetectEdges,   true);
     }
-    else if (const auto* ptr = dynamic_cast<const gfx::detail::TextureTextBufferSource*>(source))
-    {
-        SetEnabled(mUI.chkBlurTexture, true);
-        SetEnabled(mUI.chkDetectEdges, true);
-        SetValue(mUI.chkBlurTexture, ptr->TestEffect(gfx::TextureSource::Effect::Blur));
-        SetValue(mUI.chkDetectEdges, ptr->TestEffect(gfx::TextureSource::Effect::Edges));
-    }
+
+    SetEnabled(mUI.chkBlurTexture, true);
+    SetEnabled(mUI.chkDetectEdges, true);
+    SetValue(mUI.chkBlurTexture, source->TestEffect(gfx::TextureSource::Effect::Blur));
+    SetValue(mUI.chkDetectEdges, source->TestEffect(gfx::TextureSource::Effect::Edges));
+
 }
 
 void MaterialWidget::GetTextureMapProperties()
