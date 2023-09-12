@@ -41,11 +41,14 @@
         </item>
         <item>
          <widget class="QSpinBox" name="fontSize">
+          <property name="suffix">
+           <string> px</string>
+          </property>
           <property name="minimum">
            <number>6</number>
           </property>
           <property name="maximum">
-           <number>100</number>
+           <number>500</number>
           </property>
           <property name="value">
            <number>22</number>
@@ -114,6 +117,9 @@
       </item>
       <item>
        <widget class="QPlainTextEdit" name="text">
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
         <property name="plainText">
          <string>Hello</string>
         </property>
@@ -139,14 +145,20 @@
         </item>
         <item>
          <widget class="QSpinBox" name="bufferWidth">
+          <property name="suffix">
+           <string> px</string>
+          </property>
           <property name="minimum">
            <number>1</number>
           </property>
           <property name="maximum">
-           <number>1024</number>
+           <number>4096</number>
+          </property>
+          <property name="stepType">
+           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
           </property>
           <property name="value">
-           <number>200</number>
+           <number>256</number>
           </property>
          </widget>
         </item>
@@ -159,14 +171,23 @@
         </item>
         <item>
          <widget class="QSpinBox" name="bufferHeight">
+          <property name="suffix">
+           <string> px</string>
+          </property>
+          <property name="prefix">
+           <string/>
+          </property>
           <property name="minimum">
            <number>1</number>
           </property>
           <property name="maximum">
-           <number>1024</number>
+           <number>4096</number>
+          </property>
+          <property name="stepType">
+           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
           </property>
           <property name="value">
-           <number>200</number>
+           <number>64</number>
           </property>
          </widget>
         </item>

@@ -71,6 +71,8 @@ DlgText::DlgText(QWidget* parent, gfx::TextBuffer& text)
     SetValue(mUI.bufferHeight, text.GetBufferHeight());
     SetValue(mUI.cmbVAlign, text.GetVerticalAlignment());
     SetValue(mUI.cmbHAlign, text.GetHorizontalAligment());
+
+    mUI.cmbFont->lineEdit()->setReadOnly(true);
 }
 
 void DlgText::on_btnAccept_clicked()
@@ -180,8 +182,8 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
     }
     else
     {
-        const auto x = (widget_width - buffer_width) / 2;
-        const auto y = (widget_height - buffer_height) / 2;
+        const auto x = ((float)widget_width - (float)buffer_width) / 2.0f;
+        const auto y = ((float)widget_height - (float)buffer_height) / 2.0f;
         gfx::FillRect(painter, gfx::FRect(x, y, buffer_width, buffer_height), *mMaterial);
         gfx::DrawRectOutline(painter, gfx::FRect(x, y, buffer_width, buffer_height),
                              gfx::CreateMaterialFromColor(gfx::Color::DarkGreen), 1.0f);
