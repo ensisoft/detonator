@@ -3128,6 +3128,8 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
 
     // rebuild window menu and shortcuts
     UpdateWindowMenu();
+
+    activateWindow();
     // no child window
     return nullptr;
 }
