@@ -34,6 +34,7 @@
 #include <tuple>
 #include <type_traits>
 
+#include "base/bitflag.h"
 #include "base/types.h"
 #include "base/color4f.h"
 
@@ -102,6 +103,28 @@ namespace base
             else return ValueToString(value);
 #else
             return ValueToString(value);
+#endif
+        }
+
+        template<typename Enum> inline
+        std::string ToString(const bitflag<Enum>& bits)
+        {
+#if defined(BASE_FORMAT_SUPPORT_MAGIC_ENUM)
+            std::string ret;
+            for (const auto& key : magic_enum::enum_values<Enum>())
+            {
+                const std::string name(magic_enum::enum_name(key));
+                if (bits.test(magic_enum::enum_integer(key)))
+                {
+                    ret += name;
+                    ret += "|";
+                }
+            }
+            if (!ret.empty())
+                ret.pop_back();
+            return ret;
+#else
+            return ValueToString(bits.value());
 #endif
         }
 
