@@ -38,6 +38,10 @@ enum class BlurDirection {
     Vertical
 };
 
+// Create a color texture from alpha texture. In other words expand a texture which originally
+// only has alpha channel into a RGBA texture while keeping it as a "logical alpha" mask
+void ColorTextureFromAlpha(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* device);
+
 // Apply a blur kernel on the texture. The input texture is used both as a source
 // and as destination for rendering while doing multiple blur passes (defined by iterations).
 // Important requirements for the texture.
