@@ -217,7 +217,7 @@ inline bool SetImage(QLabel* label, const gfx::IBitmap& bitmap)
     const auto depth  = bitmap.GetDepthBits();
     QImage img;
     if (depth == 8)
-        img = QImage((const uchar*)bitmap.GetDataPtr(), width, height, width, QImage::Format_Grayscale8);
+        img = QImage((const uchar*)bitmap.GetDataPtr(), width, height, width, QImage::Format_Alpha8);
     else if (depth == 24)
         img = QImage((const uchar*)bitmap.GetDataPtr(), width, height, width * 3, QImage::Format_RGB888);
     else if (depth == 32)
