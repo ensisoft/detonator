@@ -308,6 +308,8 @@ namespace gfx
               , mBitmap(other.mBitmap->Clone())
             {}
 
+            virtual base::bitflag<Effect> GetEffects() const override
+            { return mEffects; }
             virtual Source GetSourceType() const override
             { return Source::BitmapBuffer; }
             virtual std::string GetId() const override
@@ -319,6 +321,7 @@ namespace gfx
                 hash = base::hash_combine(hash, mBitmap->GetHeight());
                 hash = base::hash_combine(hash, mId);
                 hash = base::hash_combine(hash, mName);
+                hash = base::hash_combine(hash, mEffects);
                 return hash;
             }
             virtual std::string GetName() const override
@@ -327,6 +330,8 @@ namespace gfx
             { mName = name; }
             virtual std::shared_ptr<IBitmap> GetData() const override
             { return mBitmap; }
+            virtual void SetEffect(Effect effect, bool on_off) override
+            { mEffects.set(effect, on_off); }
 
             virtual Texture* Upload(const Environment& env, Device& device) const override;
 
@@ -374,6 +379,7 @@ namespace gfx
             std::string mId;
             std::string mName;
             std::shared_ptr<IBitmap> mBitmap;
+            base::bitflag<Effect> mEffects;
         };
 
         // Source texture data from a bitmap
@@ -395,6 +401,8 @@ namespace gfx
               , mGenerator(other.mGenerator->Clone())
             {}
 
+            virtual base::bitflag<Effect> GetEffects() const override
+            { return mEffects; }
             virtual Source GetSourceType() const override
             { return Source::BitmapGenerator; }
             virtual std::string GetId() const override
@@ -404,12 +412,15 @@ namespace gfx
                 auto hash = mGenerator->GetHash();
                 hash = base::hash_combine(hash, mId);
                 hash = base::hash_combine(hash, mName);
+                hash = base::hash_combine(hash, mEffects);
                 return hash;
             }
             virtual std::string GetName() const override
             { return mName; }
             virtual void SetName(const std::string& name) override
             { mName = name; }
+            virtual void SetEffect(Effect effect, bool on_off) override
+            { mEffects.set(effect, on_off); }
             virtual std::shared_ptr<IBitmap> GetData() const override
             { return mGenerator->Generate(); }
 
@@ -444,6 +455,7 @@ namespace gfx
             std::string mId;
             std::string mName;
             std::unique_ptr<IBitmapGenerator> mGenerator;
+            base::bitflag<Effect> mEffects;
         };
 
         // Rasterize text buffer and provide as a texture source.
