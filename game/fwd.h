@@ -34,7 +34,6 @@ namespace game {
     class SceneClass;
     class Scene;
     class ScriptVar;
-    class FBox;
     class MaterialActuatorClass;
     class TransformActuatorClass;
     class SetFlagActuatorClass;
@@ -46,5 +45,8 @@ namespace game {
     class SetValueActuator;
     class KinematicActuator;
     class MaterialActuator;
-
 } // namespace
+
+namespace base {
+    class FBox;
+}
