@@ -232,13 +232,6 @@ namespace uik
         // widget id.
         virtual std::unique_ptr<Widget> Clone() const = 0;
 
-        // Get the rectangle within the widget in which painting/click
-        // testing and child clipping  should take place.
-        // This could be a sub rectangle inside the extents of the widget
-        // with a smaller area when the widget has some margins
-        virtual FRect GetRect() const
-        { return FRect(0.0f, 0.0f, GetSize()); }
-
         // Override a specific style property for this widget only by setting
         // a new property by the given key value. This property value will take
         // precedence over the inline style string associated with this widget
@@ -256,6 +249,13 @@ namespace uik
         virtual void DeleteStyleMaterial(const std::string& key) = 0;
 
         // helpers
+
+        // Get the rectangle of this widget wrt its parent.
+        // In other words a child widget occupies some area inside
+        // it's parent that area is described by this rectangle.
+        inline FRect GetRect() const noexcept
+        { return FRect(GetPosition(), GetSize()); }
+
         void SetColor(const std::string& key, const Color4f& color);
         void SetMaterial(const std::string& key, const std::string& material);
         void SetGradient(const std::string& key,

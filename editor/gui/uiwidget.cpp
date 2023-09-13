@@ -320,6 +320,7 @@ public:
         mState.tree->Rebuild();
         mState.tree->SelectItemById(app::FromUtf8(child->GetId()));
         mWidget = child->Clone();
+        mWidget->SetPosition(0.0f, 0.0f);
         return false;
     }
     void UpdateMousePosition(const QPoint& pos, gfx::Transform& view)
