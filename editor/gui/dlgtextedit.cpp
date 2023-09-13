@@ -22,10 +22,14 @@
 #include "warnpush.h"
 #  include <QFileDialog>
 #  include <QFileInfo>
+#  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
+
+#include "base/json.h"
 #include "editor/gui/dlgtextedit.h"
 #include "editor/app/utility.h"
+
 namespace gui
 {
 
@@ -46,9 +50,43 @@ void DlgTextEdit::SetText(const app::AnyString& str)
     mUI.text->setPlainText(str);
 }
 
+void DlgTextEdit::SetText(const app::AnyString& str, const std::string& format)
+{
+    app::AnyString kek = str;
+
+    if (format == "JSON")
+    {
+        const auto& [ok, json, error] = base::JsonParse(str);
+        if (ok)
+        {
+            kek = json.dump(2);
+        }
+    }
+
+    mUI.text->setPlainText(kek);
+}
+
 app::AnyString DlgTextEdit::GetText() const
 {
     return mUI.text->toPlainText();
+}
+
+app::AnyString DlgTextEdit::GetText(const std::string& format) const
+{
+    auto ret = GetText();
+    if (ret.IsEmpty())
+        return ret;
+
+    if (format == "JSON")
+    {
+        const auto& [ok, json, error] = base::JsonParse(ret);
+        if (ok)
+        {
+            ret = json.dump();
+        }
+    }
+
+    return ret;
 }
 
 void DlgTextEdit::on_btnAccept_clicked()

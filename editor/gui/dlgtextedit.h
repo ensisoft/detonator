@@ -42,7 +42,9 @@ namespace gui
         void SetTitle(const QString& str);
 
         void SetText(const app::AnyString& str);
+        void SetText(const app::AnyString& str, const std::string& format);
         app::AnyString GetText() const;
+        app::AnyString GetText(const std::string& format) const;
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();

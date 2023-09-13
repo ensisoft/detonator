@@ -552,6 +552,9 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     DisplayCurrentWidgetProperties();
     mOriginalHash = mState.window.GetHash();
 
+
+    mUI.windowKeyMap->lineEdit()->setReadOnly(true);
+    mUI.windowStyleFile->lineEdit()->setReadOnly(true);
 }
 
 UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : UIWidget(workspace)
@@ -1591,12 +1594,12 @@ void UIWidget::on_btnEditWidgetStyleString_clicked()
         boost::erase_all(old_style_string, style_key);
 
         DlgTextEdit dlg(this);
-        dlg.SetText(old_style_string);
+        dlg.SetText(old_style_string, "JSON");
         dlg.SetTitle("Style String");
         if (dlg.exec() == QDialog::Rejected)
             return;
 
-        const std::string new_style_string = dlg.GetText();
+        const std::string new_style_string = dlg.GetText("JSON");
 
         mState.style->DeleteMaterials(widget->GetId());
         mState.style->DeleteProperties(widget->GetId());
@@ -1638,7 +1641,7 @@ void UIWidget::on_btnEditWidgetAnimationString_clicked()
         if (dlg.exec() == QDialog::Rejected)
             return;
 
-        const std::string new_animation_string = dlg.GetText();
+        const std::string new_animation_string = dlg.GetText("JSON");
 
         widget->SetAnimationString(new_animation_string);
         SetValue(mUI.widgetAnimationString, new_animation_string);
