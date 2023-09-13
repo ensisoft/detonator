@@ -55,7 +55,6 @@ public:
         if ((mCheckFlags && visible && enabled) || !mCheckFlags)
         {
             FRect rect = widget->GetRect();
-            rect.Translate(widget->GetPosition());
             rect.Translate(mWidgetOrigin);
             if (rect.TestPoint(mPoint))
             {
@@ -329,7 +328,6 @@ void Window::Paint(TransientState& state, Painter& painter, double time, PaintHo
             if (visible)
             {
                 FRect rect = widget->GetRect();
-                rect.Translate(widget->GetPosition());
                 rect.Translate(mWidgetOrigin);
 
                 Widget::PaintEvent paint;
@@ -611,7 +609,6 @@ FRect Window::FindWidgetRect(const Widget* widget) const
             if (mWidget == widget)
             {
                 FRect rect = widget->GetRect();
-                rect.Translate(widget->GetPosition());
                 rect.Translate(mWidgetOrigin);
                 mRect = rect;
                 mDone = true;
@@ -674,7 +671,6 @@ FRect Window::GetBoundingRect() const
                 return;
 
             FRect rect = widget->GetRect();
-            rect.Translate(widget->GetPosition());
             rect.Translate(mWidgetOrigin);
             mRect = Union(mRect, rect);
             mWidgetOrigin += widget->GetPosition();
