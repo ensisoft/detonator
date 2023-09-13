@@ -224,10 +224,14 @@ Texture* detail::TextureFileSource::Upload(const Environment& env, Device& devic
     if (texture && !env.dynamic_content)
         return texture;
 
+    // compute content hash on first time or every time if dynamic_content
     size_t content_hash = 0;
+    if (env.dynamic_content || !texture)
+        content_hash = base::hash_combine(0, mFile);
+
     if (env.dynamic_content) 
     {
-        content_hash = base::hash_combine(0, mFile);
+        // check for dynamic changes.
         if (texture && texture->GetContentHash() == content_hash)
             return texture;
     }
