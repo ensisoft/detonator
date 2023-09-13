@@ -1227,8 +1227,20 @@
             <height>300</height>
            </size>
           </property>
+          <property name="tabPosition">
+           <enum>QTabWidget::North</enum>
+          </property>
           <property name="currentIndex">
            <number>0</number>
+          </property>
+          <property name="usesScrollButtons">
+           <bool>true</bool>
+          </property>
+          <property name="documentMode">
+           <bool>true</bool>
+          </property>
+          <property name="tabBarAutoHide">
+           <bool>false</bool>
           </property>
           <widget class="QWidget" name="tabNormal">
            <attribute name="title">

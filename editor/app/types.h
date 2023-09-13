@@ -165,6 +165,9 @@ namespace app
         const quint64 GetHash() const
         { return qHash(mStr); }
 
+        bool IsEmpty() const
+        { return mStr.isEmpty(); }
+
         AnyString& operator=(const QString& str)
         {
             mStr = str;

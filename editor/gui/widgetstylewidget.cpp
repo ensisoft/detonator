@@ -74,6 +74,8 @@ WidgetStyleWidget::WidgetStyleWidget(QWidget* parent) : QWidget(parent)
 
     PopulateFontNames(mUI.widgetFontName);
     PopulateFontSizes(mUI.widgetFontSize);
+
+    mUI.widgetFontName->lineEdit()->setReadOnly(true);
 }
 
 void WidgetStyleWidget::RebuildMaterialCombos(const std::vector<ResourceListItem>& list)
