@@ -111,7 +111,7 @@ std::optional<uik::Animation::Action> ParseAction(const std::vector<std::string>
 {
     const auto& directive = GetToken(tokens, 0);
 
-    if (directive == "resize")
+    if (directive == "resize" || directive == "grow")
     {
         float width  = 0.0f;
         float height = 0.0f;
@@ -120,11 +120,14 @@ std::optional<uik::Animation::Action> ParseAction(const std::vector<std::string>
             return std::nullopt;
 
             uik::Animation::Action action;
-            action.type  = uik::Animation::Action::Type::Resize;
             action.end_value = uik::FSize(width, height);
+            if (directive == "resize")
+                action.type  = uik::Animation::Action::Type::Resize;
+            else if (directive == "grow")
+                action.type  = uik::Animation::Action::Type::Grow;
             return action;
     }
-    else if (directive == "move")
+    else if (directive == "move" || directive == "translate")
     {
         float x = 0.0f;
         float y = 0.0f;
@@ -133,8 +136,11 @@ std::optional<uik::Animation::Action> ParseAction(const std::vector<std::string>
             return std::nullopt;
 
         uik::Animation::Action action;
-        action.type  = uik::Animation::Action::Type::Move;
         action.end_value = uik::FPoint(x, y);
+        if (directive == "move")
+            action.type  = uik::Animation::Action::Type::Move;
+        else if (directive == "translate")
+            action.type = uik::Animation::Action::Type::Translate;
         return action;
     }
     else if (directive == "del")
@@ -322,6 +328,10 @@ bool ParseAnimations(const std::string& str, std::vector<Animation>* animations)
             trigger = uik::Animation::Trigger::GainFocus;
         else if (line == "$OnFocusOut")
             trigger = uik::Animation::Trigger::LostFocus;
+        else if (line == "$OnMouseLeave")
+            trigger = uik::Animation::Trigger::MouseLeave;
+        else if (line == "$OnMouseEnter")
+            trigger = uik::Animation::Trigger::MouseEnter;
         else WARN("No such animation trigger. [trigger='%1']", line);
 
         ok &= trigger.has_value();
