@@ -147,12 +147,14 @@ namespace {
             }
             ASSERT(require.captureCount() == 1);
             // cap(0) is the whole regex
-            const QString& module = match.captured(1);
+            QString module = match.captured(1);
             if (module.startsWith("app://") ||
                 module.startsWith("fs://")  ||
                 module.startsWith("ws://"))
             {
                 DEBUG("Found dependent script. %1 depends on %2", uri, module);
+                if (!module.endsWith(".lua"))
+                    module.append(".lua");
 
                 // big recursive call here. maybe this should be postponed
                 // and we should just explore the requires first and then
