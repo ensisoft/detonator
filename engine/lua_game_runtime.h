@@ -82,7 +82,7 @@ namespace engine
         virtual void OnMouseRelease(const MouseEvent& mouse) override;
         virtual void OnUIOpen(uik::Window* ui) override;
         virtual void OnUIClose(uik::Window* ui, int result) override;
-        virtual void OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& action) override;
+        virtual void OnUIAction(uik::Window* ui, const WidgetActionList& actions) override;
         virtual FRect GetViewport() const override
         { return mView; }
 

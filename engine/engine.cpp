@@ -763,11 +763,8 @@ private:
         event.key  = vk;
         event.time = base::GetTime();
         const auto& actions = (ui->*which)(event, mUIState);
-        for (const auto& action : actions)
-        {
-            mRuntime->OnUIAction(ui, action);
-            //DEBUG("Widget action: '%1'", action.type);
-        }
+        mRuntime->OnUIAction(ui, actions);
+
         ui->TriggerAnimations(actions, mUIState, mUIAnimations);
     }
 
@@ -777,11 +774,8 @@ private:
         auto* ui = GetUI();
 
         const auto& actions = (ui->*which)(mickey, mUIState);
-        for (const auto& action : actions)
-        {
-            mRuntime->OnUIAction(ui, action);
-            //DEBUG("Widget action: '%1'", action.type);
-        }
+        mRuntime->OnUIAction(ui, actions);
+
         ui->TriggerAnimations(actions, mUIState, mUIAnimations);
     }
     template<typename WdkMouseEvent>
@@ -1129,10 +1123,8 @@ private:
             TRACE_CALL("UI Window::Update", ui->Update(mUIState, game_time, dt, &mUIAnimations));
 
             const auto& actions = ui->PollAction(mUIState, game_time, dt);
-            for (const auto& action : actions)
-            {
-                mRuntime->OnUIAction(ui, action);
-            }
+            mRuntime->OnUIAction(ui, actions);
+
             ui->TriggerAnimations(actions, mUIState, mUIAnimations);
         }
 

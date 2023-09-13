@@ -1271,75 +1271,7 @@ void MainWindow::on_actionNewSceneScript_triggered()
 
 void MainWindow::on_actionNewUIScript_triggered()
 {
-    if (!mWorkspace)
-        return;
-
-    app::Script script;
-    // use the script ID as the file name so that we can
-    // avoid naming clashes and always find the correct lua
-    // file even if the entity is later renamed.
-    const auto& filename = app::FromUtf8(script.GetId());
-    const auto& fileuri  = QString("ws://lua/%1.lua").arg(filename);
-    const auto& filepath = mWorkspace->MapFileToFilesystem(fileuri);
-    const QFileInfo info(filepath);
-    if (info.exists())
-    {
-        QMessageBox msg(this);
-        msg.setIcon(QMessageBox::Question);
-        msg.setWindowTitle(tr("File already exists"));
-        msg.setText(tr("Overwrite existing script file?\n%1").arg(filepath));
-        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
-        if (msg.exec() == QMessageBox::Cancel)
-            return;
-    }
-
-    QFile io;
-    io.setFileName(filepath);
-    if (!io.open(QIODevice::WriteOnly | QIODevice::Truncate))
-    {
-        ERROR("Failed to open file for writing. [file='%1, error='%2']", filepath, io.error());
-        QMessageBox msg(this);
-        msg.setIcon(QMessageBox::Critical);
-        msg.setWindowTitle(tr("Error Occurred"));
-        msg.setText(tr("There was a problem creating the script file.\n%1").arg(io.errorString()));
-        msg.setStandardButtons(QMessageBox::Ok);
-        return;
-    }
-
-    // TODO: refactor this and a dupe from MainWindow into a single place.
-    QTextStream stream(&io);
-    stream.setCodec("UTF-8");
-    stream << "-- UI script.\n\n";
-    stream << "-- This script will be called for every assigned UI instance.\n";
-    stream << "-- You're free to delete functions you don't need.\n\n";
-    stream << "-- Called whenever the UI has been opened.\n";
-    stream << "function OnUIOpen(ui)\nend\n\n";
-    stream << " -- Called whenever the UI is about to be closed.\n";
-    stream << "-- result is the value passed in the exit_code in the call to CloseUI.\n";
-    stream << "function OnUIClose(ui, result)\nend\n\n";
-    stream << "-- Called whenever some UI action such as button click etc. occurs\n";
-    stream << "function OnUIAction(ui, action)\nend\n\n";
-    stream << "-- Optionally called on mouse events when the flag is set.\n";
-    stream << "function OnMouseMove(ui, mouse)\nend\n\n";
-    stream << "-- Optionally called on mouse events when the flag is set.\n";
-    stream << "function OnMousePress(ui, mouse)\nend\n\n";
-    stream << "-- Optionally called on mouse events when the flag is set.\n";
-    stream << "function OnMouseRelease(ui, mouse)\nend\n\n";
-    stream << "-- Optionally called on keyboard events when the flag is set.\n";
-    stream << "function OnKeyDown(ui, symbol, modifier_bits)\nend\n\n";
-    stream << "-- Optionally called on keyboard events when the flag is set.\n";
-    stream << "function OnKeyUp(ui, symbol, modifier_bits)\nend\n\n";
-
-    io.flush();
-    io.close();
-
-    script.SetFileURI(app::ToUtf8(fileuri));
-    app::ScriptResource resource(script, "UI Script");
-    mWorkspace->SaveResource(resource);
-
-    auto* widget = new ScriptWidget(mWorkspace.get(), resource);
-
-    OpenNewWidget(widget);
+    GenerateNewScript("UI Script", "window", GenerateUIScriptSource);
 }
 
 void MainWindow::on_actionNewAnimatorScript_triggered()
