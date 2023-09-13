@@ -486,6 +486,16 @@ void Window::Update(TransientState& state, double time, float dt, AnimationState
                         action.start_value = widget->GetPosition();
                     else if (action.type == Animation::Action::Type::Resize)
                         action.start_value = widget->GetSize();
+                    else if (action.type == Animation::Action::Type::Translate)
+                    {
+                        action.start_value = widget->GetPosition();
+                        action.end_value   = widget->GetPosition() + std::get<uik::FPoint>(action.end_value);
+                    }
+                    else if (action.type == Animation::Action::Type::Grow)
+                    {
+                        action.start_value = widget->GetSize();
+                        action.end_value   = widget->GetSize() + std::get<uik::FSize>(action.end_value);
+                    }
                 }
             }
         }
@@ -495,7 +505,7 @@ void Window::Update(TransientState& state, double time, float dt, AnimationState
         const float t = math::clamp(0.0f, anim.duration, anim.time) / anim.duration;
         for (auto& action : anim.actions)
         {
-            if (action.type == Animation::Action::Type::Resize)
+            if (action.type == Animation::Action::Type::Resize || action.type ==Animation::Action::Type::Grow)
             {
                 ASSERT(std::holds_alternative<uik::FSize>(action.start_value));
                 ASSERT(std::holds_alternative<uik::FSize>(action.end_value));
@@ -505,7 +515,7 @@ void Window::Update(TransientState& state, double time, float dt, AnimationState
                 const auto value       = math::interpolate(start_value, end_value, t, anim.interpolation);
                 widget->SetSize(value);
             }
-            else if (action.type == Animation::Action::Type::Move)
+            else if (action.type == Animation::Action::Type::Move || action.type == Animation::Action::Type::Translate)
             {
                 ASSERT(std::holds_alternative<uik::FPoint>(action.start_value));
                 ASSERT(std::holds_alternative<uik::FPoint>(action.end_value));
@@ -980,9 +990,14 @@ void Window::TriggerAnimations(const std::vector<WidgetAction>& actions, Transie
             }
             else if (action.type == WidgetActionType::ValueChange &&
                      anim.trigger == Animation::Trigger::ValueChange)
-            {
                 should_trigger = true;
-            }
+            else if (action.type == WidgetActionType::MouseEnter &&
+                     anim.trigger == Animation::Trigger::MouseEnter)
+                should_trigger = true;
+            else if(action.type == WidgetActionType::MouseLeave &&
+                    anim.trigger == Animation::Trigger::MouseLeave)
+                should_trigger = true;
+
             if (!should_trigger)
                 continue;
 
