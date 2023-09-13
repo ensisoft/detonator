@@ -223,4 +223,7 @@ namespace gui
         std::size_t mOriginalHash = 0;
         boost::circular_buffer<uik::Window> mUndoStack;
     };
+
+    QString GenerateUIScriptSource(QString window);
+
 } // namespace

@@ -1145,17 +1145,25 @@ void LuaRuntime::OnUIClose(uik::Window* ui, int result)
         CallLua((*env)["OnUIClose"], ui, result);
     }
 }
-void LuaRuntime::OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& action)
+void LuaRuntime::OnUIAction(uik::Window* ui, const WidgetActionList& actions)
 {
-    if (mGameEnv)
-        CallLua((*mGameEnv)["OnUIAction"], ui, action);
-
-    if (mScene && mSceneEnv)
-        CallLua((*mSceneEnv)["OnUIAction"], mScene, ui, action);
-
-    if (auto* env = GetTypeEnv(*ui))
+    for (const auto& action : actions)
     {
-        CallLua((*env)["OnUIAction"], ui, action);
+        std::string method;
+        if (uik::IsNotification(action.type))
+            method = "OnUINotify";
+        else method = "OnUIAction";
+
+        if (mGameEnv)
+            CallLua((*mGameEnv)[method], ui, action);
+
+        if (mScene && mSceneEnv)
+            CallLua((*mSceneEnv)[method], mScene, ui, action);
+
+        if (auto* env = GetTypeEnv(*ui))
+        {
+            CallLua((*env)[method], ui, action);
+        }
     }
 }
 

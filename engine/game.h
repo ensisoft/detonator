@@ -166,7 +166,8 @@ namespace engine
         // returns the UI is deleted and removed from the window stack.
         virtual void OnUIClose(uik::Window* ui, int result) {}
         // Called when a some UI action happens as a result of user input.
-        virtual void OnUIAction(uik::Window* ui, const uik::Window::WidgetAction& action) {}
+        using WidgetActionList = std::vector<uik::Window::WidgetAction>;
+        virtual void OnUIAction(uik::Window* ui, const WidgetActionList& actions) {}
         // Act on a contact event when 2 physics bodies have come into
         // contact or have come out of contact.
         // Called when the physics engine reports collision between bodies.

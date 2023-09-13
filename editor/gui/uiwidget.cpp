@@ -1748,66 +1748,38 @@ void UIWidget::on_btnAddScript_clicked()
     // use the script ID as the file name so that we can
     // avoid naming clashes and always find the correct lua
     // file even if the entity is later renamed.
-    const auto& filename = app::FromUtf8(script.GetId());
-    const auto& fileuri  = QString("ws://lua/%1.lua").arg(filename);
-    const auto& filepath = mState.workspace->MapFileToFilesystem(fileuri);
+    const auto& uri  = app::toString("ws://lua/%1.lua", script.GetId());
+    const auto& file = mState.workspace->MapFileToFilesystem(uri);
     const auto& name = GetValue(mUI.windowName);
-    const QFileInfo info(filepath);
-    if (info.exists())
+
+    if (app::FileExists(file))
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Question);
         msg.setWindowTitle(tr("File already exists"));
-        msg.setText(tr("Overwrite existing script file?\n%1").arg(filepath));
+        msg.setText(tr("Overwrite existing script file?\n%1").arg(file));
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
         if (msg.exec() == QMessageBox::Cancel)
             return;
     }
 
-    QFile io;
-    io.setFileName(filepath);
-    if (!io.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    QString source = GenerateUIScriptSource(GetValue(mUI.windowName));
+
+    QFile::FileError err_val = QFile::FileError::NoError;
+    QString err_str;
+    if (!app::WriteTextFile(file, source, &err_val, &err_str))
     {
-        ERROR("Failed to open file for writing. [file='%1, error='%2']", filepath, io.error());
+        ERROR("Failed to write file. [file='%1', err_val=%2, err_str='%3']", file, err_val, err_str);
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);
-        msg.setWindowTitle(tr("Error Occurred"));
-        msg.setText(tr("There was a problem creating the script file.\n%1").arg(io.errorString()));
+        msg.setWindowTitle("Error Occurred");
+        msg.setText(tr("Failed to write the script file. [%1]").arg(err_str));
         msg.setStandardButtons(QMessageBox::Ok);
+        msg.exec();
         return;
     }
-    QString var = name;
-    var.replace(' ', '_');
-    var = var.toLower();
 
-    // TODO: refactor this and a dupe from MainWindow into a single place.
-    QTextStream stream(&io);
-    stream.setCodec("UTF-8");
-    stream << QString("-- UI '%1' script.\n\n").arg(name);
-    stream << QString("-- This script will be called for every instance of '%1.'\n").arg(name);
-    stream << "-- You're free to delete functions you don't need.\n\n";
-    stream << "-- Called whenever the UI has been opened.\n";
-    stream << "function OnUIOpen(ui)\nend\n\n";
-    stream << " -- Called whenever the UI is about to be closed.\n";
-    stream << "-- result is the value passed in the exit_code in the call to CloseUI.\n";
-    stream << "function OnUIClose(ui, result)\nend\n\n";
-    stream << "-- Called whenever some UI action such as button click etc. occurs\n";
-    stream << "function OnUIAction(ui, action)\nend\n\n";
-    stream << "-- Optionally called on mouse events when the flag is set.\n";
-    stream << "function OnMouseMove(ui, mouse)\nend\n\n";
-    stream << "-- Optionally called on mouse events when the flag is set.\n";
-    stream << "function OnMousePress(ui, mouse)\nend\n\n";
-    stream << "-- Optionally called on mouse events when the flag is set.\n";
-    stream << "function OnMouseRelease(ui, mouse)\nend\n\n";
-    stream << "-- Optionally called on keyboard events when the flag is set.\n";
-    stream << "function OnKeyDown(ui, symbol, modifier_bits)\nend\n\n";
-    stream << "-- Optionally called on keyboard events when the flag is set.\n";
-    stream << "function OnKeyUp(ui, symbol, modifier_bits)\nend\n\n";
-
-    io.flush();
-    io.close();
-
-    script.SetFileURI(app::ToUtf8(fileuri));
+    script.SetFileURI(uri);
     app::ScriptResource resource(script, name);
     mState.workspace->SaveResource(resource);
     mState.window.SetScriptFile(script.GetId());
@@ -2821,6 +2793,62 @@ uik::FSize UIWidget::GetFormSize() const
 {
     //return mState.window.FindWidgetByType(uik::Widget::Type::Form)->GetSize();
     return mState.window.GetBoundingRect().GetSize();
+}
+
+QString GenerateUIScriptSource(QString window)
+{
+    window = app::GenerateScriptVarName(window);
+
+    QString source(R"(
+-- UI Window '%1' script.
+-- This script will be called for every instance of '%1'.
+-- You're free to delete functions you don't need.
+--
+-- Called whenever the UI has been opened. This is a good place for
+-- setting some initial widget state.
+function OnUIOpen(ui)
+end
+
+-- Called whenever the UI is about to be closed.
+-- result is the value passed in the exit_code in the call to CloseUI.
+function OnUIClose(ui, result)
+end
+
+-- Called whenever some UI action such as button click etc. occurs.
+-- This is most likely the place where you want to handle your user input.
+function OnUIAction(ui, action)
+end
+
+-- Called on notification type of UI events for example when some UI
+-- element has gained keyboard focus, lost keyboard focus etc.
+-- These notifications are superficial and you're fee to ignore them
+-- completely. You might want to react to these might be to trigger
+-- some animation or change some widget style property etc.
+function OnUINotify(ui, event)
+end
+
+-- Optionally called on mouse events when the flag is set.
+function OnMouseMove(ui, mouse)
+end
+
+-- Optionally called on mouse events when the flag is set.
+function OnMousePress(ui, mouse)
+end
+
+-- Optionally called on mouse events when the flag is set.
+function OnMouseRelease(ui, mouse)
+end
+
+-- Optionally called on keyboard events when the flag is set.
+function OnKeyDown(ui, symbol, modifier_bits)
+end
+
+-- Optionally called on keyboard events when the flag is set.
+function OnKeyUp(ui, symbol, modifier_bits)
+end
+    )");
+
+    return source.replace("%1", window);
 }
 
 } // namespace
