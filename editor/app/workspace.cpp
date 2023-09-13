@@ -579,6 +579,9 @@ public:
 
         const auto& src_file = MapFileToFilesystem(uri);
         const auto& dst_file = CopyFile(src_file, app::FromUtf8(dir));
+        if (dst_file.isEmpty())
+            return;
+
         const auto& dst_uri  = MapFileToPackage(dst_file);
         mUriMapping[uri] = dst_uri;
 
@@ -609,9 +612,10 @@ public:
     }
     virtual app::AnyString MapUri(const app::AnyString& uri) const override
     {
-        const auto* mapping = base::SafeFind(mUriMapping, uri);
-        ASSERT(mapping);
-        return *mapping;
+        if (const auto* mapping = base::SafeFind(mUriMapping, uri))
+            return *mapping;
+
+        return QString("");
     }
     virtual bool HasMapping(const app::AnyString& uri) const override
     {
@@ -662,6 +666,7 @@ public:
         const auto& dst_file = CreateFileName(src_file, dst_dir, filename);
         if (dst_file.isEmpty())
         {
+            ERROR("Failed to create output file name. [src_file='%1']", src_file);
             mNumErrors++;
             return "";
         }
