@@ -1087,9 +1087,25 @@ std::vector<Window::WidgetAction> Window::send_mouse_event(const MouseEvent& mou
     if (new_widget_under_mouse != old_widget_under_mouse)
     {
         if (old_widget_under_mouse)
+        {
             old_widget_under_mouse->MouseLeave(state);
+
+            WidgetAction mouse_leave;
+            mouse_leave.type = WidgetActionType::MouseLeave;
+            mouse_leave.name = old_widget_under_mouse->GetName();
+            mouse_leave.id   = old_widget_under_mouse->GetId();
+            ret.push_back(mouse_leave);
+        }
         if (new_widget_under_mouse)
+        {
             new_widget_under_mouse->MouseEnter(state);
+
+            WidgetAction mouse_enter;
+            mouse_enter.type = WidgetActionType::MouseEnter;
+            mouse_enter.name = new_widget_under_mouse->GetName();
+            mouse_enter.id   = new_widget_under_mouse->GetId();
+            ret.push_back(mouse_enter);
+        }
     }
     state.SetValue(mId + "/widget-under-mouse", new_widget_under_mouse);
 

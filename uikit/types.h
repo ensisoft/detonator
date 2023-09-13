@@ -64,7 +64,9 @@ namespace uik
         ButtonPress,
         ValueChange,
         RadioButtonSelect,
-        SingleItemSelect
+        SingleItemSelect,
+        MouseEnter,
+        MouseLeave
     };
     struct ListItem {
         std::string text;
