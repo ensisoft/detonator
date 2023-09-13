@@ -261,6 +261,8 @@ void MaterialWidget::ReloadShaders()
 
     // reset material instance so that any one time error logging will take place.
     mMaterialInst.reset();
+
+    NOTE("Reloaded shaders.");
 }
 void MaterialWidget::ReloadTextures()
 {
@@ -270,6 +272,8 @@ void MaterialWidget::ReloadTextures()
     mMaterialInst.reset();
 
     GetTextureProperties();
+
+    NOTE("Reloaded textures.");
 }
 
 void MaterialWidget::Shutdown()
@@ -933,6 +937,11 @@ void MaterialWidget::on_findMap_textChanged(const QString& needle)
             return;
         }
     }
+}
+
+void MaterialWidget::on_cmbModel_currentIndexChanged(int)
+{
+    mDrawable.reset();
 }
 
 void MaterialWidget::AddNewTextureMapFromFile()
@@ -1691,7 +1700,9 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     const auto content_height = width * zoom;
     const auto xpos = (width - content_width) * 0.5f;
     const auto ypos = (height - content_height) * 0.5f;
-    const auto drawable = mWorkspace->MakeDrawableByName(GetValue(mUI.cmbModel));
+
+    if (!mDrawable)
+        mDrawable = mWorkspace->MakeDrawableByName(GetValue(mUI.cmbModel));
 
     // use the material to fill a model shape in the middle of the screen.
     gfx::Transform transform;
@@ -1728,7 +1739,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         if (dummy)
         {
             static auto dummy = gfx::CreateMaterialClassFromImage("app://textures/Checkerboard.png");
-            painter.Draw(*drawable, transform, gfx::MaterialClassInst(dummy));
+            painter.Draw(*mDrawable, transform, gfx::MaterialClassInst(dummy));
         }
         ShowMessage(message, painter);
         return;
@@ -1739,7 +1750,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
 
     const auto time = mState == PlayState::Playing ? mTime : GetValue(mUI.kTime);
     mMaterialInst->SetRuntime(time);
-    painter.Draw(*drawable, transform, *mMaterialInst);
+    painter.Draw(*mDrawable, transform, *mMaterialInst);
 
     if (mMaterialInst->HasError())
     {

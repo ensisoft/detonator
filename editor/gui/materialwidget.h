@@ -140,6 +140,7 @@ namespace gui
         void on_textureMapName_textChanged(const QString& text);
         void on_textureSourceName_textChanged(const QString& text);
         void on_findMap_textChanged(const QString& text);
+        void on_cmbModel_currentIndexChanged(int);
         void AddNewTextureMapFromFile();
         void AddNewTextureMapFromText();
         void AddNewTextureMapFromBitmap();
@@ -165,6 +166,7 @@ namespace gui
         // the material class we're editing
         std::shared_ptr<gfx::MaterialClass> mMaterial;
         std::unique_ptr<gfx::MaterialClassInst> mMaterialInst;
+        std::unique_ptr<gfx::Drawable> mDrawable;
         // play state
         enum PlayState {
             Playing, Paused, Stopped
