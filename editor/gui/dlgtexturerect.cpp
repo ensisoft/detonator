@@ -188,8 +188,8 @@ void DlgTextureRect::OnPaintScene(gfx::Painter& painter, double)
     // draw the cross-hairs
     const int xp = mCurrentPoint.x();
     const int yp = mCurrentPoint.y();
-    gfx::DrawLine(painter, gfx::FPoint(xp, 0), gfx::FPoint(xp, height), gfx::Color::HotPink);
-    gfx::DrawLine(painter, gfx::FPoint(0, yp), gfx::FPoint(width, yp),  gfx::Color::HotPink);
+    gfx::DebugDrawLine(painter, gfx::FPoint(xp, 0), gfx::FPoint(xp, height), gfx::Color::HotPink);
+    gfx::DebugDrawLine(painter, gfx::FPoint(0, yp), gfx::FPoint(width, yp), gfx::Color::HotPink);
 
     const int x = (xp - xpos - mTrackingOffset.x()) / zoom;
     const int y = (yp - ypos - mTrackingOffset.y()) / zoom;

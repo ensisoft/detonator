@@ -501,12 +501,12 @@ void DrawCrossHair(State& state, gfx::Painter& painter)
     painter.SetViewport(0, 0, state.window.x, state.window.y);
     painter.ResetViewMatrix();
 
-    gfx::DrawLine(painter,
-                  gfx::FPoint(state.window.x*0.5, 0.0f),
-                  gfx::FPoint(state.window.x*0.5, state.window.y), gfx::Color4f(gfx::Color::Green, 0.2f));
-    gfx::DrawLine(painter,
-                  gfx::FPoint(0.0f, state.window.y*0.5),
-                  gfx::FPoint(state.window.x, state.window.y*0.5), gfx::Color4f(gfx::Color::Green, 0.2f));
+    gfx::DebugDrawLine(painter,
+                       gfx::FPoint(state.window.x * 0.5, 0.0f),
+                       gfx::FPoint(state.window.x * 0.5, state.window.y), gfx::Color4f(gfx::Color::Green, 0.2f));
+    gfx::DebugDrawLine(painter,
+                       gfx::FPoint(0.0f, state.window.y * 0.5),
+                       gfx::FPoint(state.window.x, state.window.y * 0.5), gfx::Color4f(gfx::Color::Green, 0.2f));
 }
 
 void DrawUI(State& state, gfx::Painter& painter)
@@ -985,7 +985,7 @@ int main(int argc, char* argv[])
             painter->SetProjectionMatrix(gfx::MakeOrthographicProjection(state.window.x, state.window.y));
             painter->ResetViewMatrix();
             gfx::FRect rect(1.0f, 1.0f, state.window.x-2.0f, state.window.y-2.0f);
-            gfx::DrawRect(*painter, rect, gfx::Color::Blue, 1.0f);
+            gfx::DebugDrawRect(*painter, rect, gfx::Color::Blue, 1.0f);
         }
 
         DrawCrossHair(state, *painter);

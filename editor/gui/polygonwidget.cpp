@@ -502,7 +502,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     {
         const QPoint& a = mPoints.back();
         const QPoint& b = mCurrentPoint;
-        gfx::DrawLine(painter, ToGfx(a), ToGfx(b), gfx::Color::HotPink ,2.0f);
+        gfx::DebugDrawLine(painter, ToGfx(a), ToGfx(b), gfx::Color::HotPink, 2.0f);
     }
 
     std::vector<QPoint> points = mPoints;

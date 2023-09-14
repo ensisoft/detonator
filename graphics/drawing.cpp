@@ -202,12 +202,12 @@ void DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape
     cover.Draw(shape, outline_transform, material);
 }
 
-void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Color4f& color, float line_width)
+void DebugDrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Color4f& color, float line_width)
 {
-    DrawLine(painter, a, b, MakeMaterial(color), line_width);
+    DebugDrawLine(painter, a, b, MakeMaterial(color), line_width);
 }
 
-void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Material& material, float line_width)
+void DebugDrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Material& material, float line_width)
 {
     // The line shape defines a horizontal line so in order to
     // support lines with arbitrary directions we need to figure
@@ -236,12 +236,12 @@ void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Material
     painter.Draw(StaticLine(line_width), trans, material);
 }
 
-void DrawCircle(Painter& painter, const FCircle& circle, const Color4f& color, float line_width)
+void DebugDrawCircle(Painter& painter, const FCircle& circle, const Color4f& color, float line_width)
 {
-    DrawCircle(painter, circle, MakeMaterial(color), line_width);
+    DebugDrawCircle(painter, circle, MakeMaterial(color), line_width);
 }
 
-void DrawCircle(Painter& painter, const FCircle & circle, const Material& material, float line_width)
+void DebugDrawCircle(Painter& painter, const FCircle & circle, const Material& material, float line_width)
 {
     const auto radius = circle.GetRadius();
 
@@ -252,17 +252,17 @@ void DrawCircle(Painter& painter, const FCircle & circle, const Material& materi
     painter.Draw(Circle(Drawable::Style::Outline, line_width), trans, material);
 }
 
-void DrawRect(Painter& painter, const FRect& rect, const Color4f& color, float line_width)
+void DebugDrawRect(Painter& painter, const FRect& rect, const Color4f& color, float line_width)
 {
-    DrawRect(painter, rect, MakeMaterial(color), line_width);
+    DebugDrawRect(painter, rect, MakeMaterial(color), line_width);
 }
-void DrawRect(Painter& painter, const FRect& rect, const Material& material, float line_width)
+void DebugDrawRect(Painter& painter, const FRect& rect, const Material& material, float line_width)
 {
     const auto [c0, c1, c2, c3] = rect.GetCorners();
-    gfx::DrawLine(painter, c0, c1, material, line_width);
-    gfx::DrawLine(painter, c1, c3, material, line_width);
-    gfx::DrawLine(painter, c3, c2, material, line_width);
-    gfx::DrawLine(painter, c2, c0, material, line_width);
+    gfx::DebugDrawLine(painter, c0, c1, material, line_width);
+    gfx::DebugDrawLine(painter, c1, c3, material, line_width);
+    gfx::DebugDrawLine(painter, c3, c2, material, line_width);
+    gfx::DebugDrawLine(painter, c2, c0, material, line_width);
 }
 
 
