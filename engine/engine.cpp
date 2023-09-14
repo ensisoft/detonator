@@ -1185,11 +1185,12 @@ private:
                 for (const auto& draw: mDebugDraws)
                 {
                     if (const auto* ptr = std::get_if<engine::DebugDrawLine>(&draw))
-                        gfx::DrawLine(*mPainter, ptr->a, ptr->b, ptr->color, ptr->width);
+                        gfx::DebugDrawLine(*mPainter, ptr->a, ptr->b, ptr->color, ptr->width);
                     else if (const auto* ptr = std::get_if<engine::DebugDrawRect>(&draw))
-                        gfx::DrawRect(*mPainter, gfx::FRect(ptr->top_left, ptr->bottom_right), ptr->color, ptr->width);
+                        gfx::DebugDrawRect(*mPainter, gfx::FRect(ptr->top_left, ptr->bottom_right), ptr->color,
+                                           ptr->width);
                     else if (const auto* ptr = std::get_if<engine::DebugDrawCircle>(&draw))
-                        gfx::DrawCircle(*mPainter, gfx::FCircle(ptr->center, ptr->radius), ptr->color, ptr->width);
+                        gfx::DebugDrawCircle(*mPainter, gfx::FCircle(ptr->center, ptr->radius), ptr->color, ptr->width);
                     else BUG("Missing debug draw implementation");
                 }
             }
@@ -1235,7 +1236,7 @@ private:
                         continue;
 
                     const auto& aabb = mScene->FindEntityNodeBoundingRect(&entity, &node);
-                    gfx::DrawRect(*mPainter, aabb, gfx::Color::Gray, 1.0f);
+                    gfx::DebugDrawRect(*mPainter, aabb, gfx::Color::Gray, 1.0f);
                 }
             }
             if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::BoundingRect))

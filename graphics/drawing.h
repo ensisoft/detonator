@@ -116,14 +116,14 @@ void DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape
 // using the given line width (if possible) and with the given color.
 // Points A and B are relative to the top left corner of the rendering
 // target (e.g the window surface).
-void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Color4f& color, float line_width = 1.0f);
+void DebugDrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Color4f& color, float line_width = 1.0f);
 // Like above but instead use a material for rasterizing the line fragments.
-void DrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Material& material, float line_width = 1.0f);
+void DebugDrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Material& material, float line_width = 1.0f);
 
-void DrawCircle(Painter& painter, const FCircle& circle, const Color4f& color, float line_width = 1.0f);
-void DrawCircle(Painter& painter, const FCircle& circle, const Material& material, float line_width = 1.0f);
+void DebugDrawCircle(Painter& painter, const FCircle& circle, const Color4f& color, float line_width = 1.0f);
+void DebugDrawCircle(Painter& painter, const FCircle& circle, const Material& material, float line_width = 1.0f);
 
-void DrawRect(Painter& painter, const FRect& rect, const Color4f& color, float line_width = 1.0f);
-void DrawRect(Painter& painter, const FRect& rect, const Material& material, float line_width = 1.0f);
+void DebugDrawRect(Painter& painter, const FRect& rect, const Color4f& color, float line_width = 1.0f);
+void DebugDrawRect(Painter& painter, const FRect& rect, const Material& material, float line_width = 1.0f);
 
 } // namespace

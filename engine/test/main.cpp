@@ -533,10 +533,14 @@ public:
                 if (mDrawEntityNodeBoundingBoxes)
                 {
                     auto box = mScene->FindEntityNodeBoundingBox(&entity, &node);
-                    gfx::DrawLine(painter, ToPoint(box.GetTopLeft()), ToPoint(box.GetTopRight()), gfx::Color::HotPink);
-                    gfx::DrawLine(painter, ToPoint(box.GetTopRight()), ToPoint(box.GetBotRight()), gfx::Color::HotPink);
-                    gfx::DrawLine(painter, ToPoint(box.GetBotRight()), ToPoint(box.GetBotLeft()), gfx::Color::HotPink);
-                    gfx::DrawLine(painter, ToPoint(box.GetBotLeft()), ToPoint(box.GetTopLeft()), gfx::Color::HotPink);
+                    gfx::DebugDrawLine(painter, ToPoint(box.GetTopLeft()), ToPoint(box.GetTopRight()),
+                                       gfx::Color::HotPink);
+                    gfx::DebugDrawLine(painter, ToPoint(box.GetTopRight()), ToPoint(box.GetBotRight()),
+                                       gfx::Color::HotPink);
+                    gfx::DebugDrawLine(painter, ToPoint(box.GetBotRight()), ToPoint(box.GetBotLeft()),
+                                       gfx::Color::HotPink);
+                    gfx::DebugDrawLine(painter, ToPoint(box.GetBotLeft()), ToPoint(box.GetTopLeft()),
+                                       gfx::Color::HotPink);
                 }
             }
         }
@@ -614,10 +618,10 @@ public:
             if (mDrawBoundingBoxes)
             {
                 auto box = mEntity->FindNodeBoundingBox(&node);
-                gfx::DrawLine(painter, ToPoint(box.GetTopLeft()), ToPoint(box.GetTopRight()), gfx::Color::HotPink);
-                gfx::DrawLine(painter, ToPoint(box.GetTopRight()), ToPoint(box.GetBotRight()), gfx::Color::HotPink);
-                gfx::DrawLine(painter, ToPoint(box.GetBotRight()), ToPoint(box.GetBotLeft()), gfx::Color::HotPink);
-                gfx::DrawLine(painter, ToPoint(box.GetBotLeft()), ToPoint(box.GetTopLeft()), gfx::Color::HotPink);
+                gfx::DebugDrawLine(painter, ToPoint(box.GetTopLeft()), ToPoint(box.GetTopRight()), gfx::Color::HotPink);
+                gfx::DebugDrawLine(painter, ToPoint(box.GetTopRight()), ToPoint(box.GetBotRight()), gfx::Color::HotPink);
+                gfx::DebugDrawLine(painter, ToPoint(box.GetBotRight()), ToPoint(box.GetBotLeft()), gfx::Color::HotPink);
+                gfx::DebugDrawLine(painter, ToPoint(box.GetBotLeft()), ToPoint(box.GetTopLeft()), gfx::Color::HotPink);
             }
             if (mDrawBoundingRects)
             {
