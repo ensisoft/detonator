@@ -200,6 +200,12 @@ namespace base
         {
             return mParents.find(node) != mParents.end();
         }
+        bool HasChildren(const Element* node) const noexcept
+        {
+            if (mChildren.find(node) != mChildren.end())
+                return true;
+            return false;
+        }
 
         // Build an equivalent tree (in terms of topology) based on the
         // source tree while remapping nodes from one instance to another

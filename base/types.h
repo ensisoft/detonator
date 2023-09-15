@@ -475,7 +475,26 @@ namespace base
     {
         return !(lhs == rhs);
     }
+    template<typename T>
+    Rect<float> MapToLocalNormalize(const Rect<T>& parent_rect, const Rect<T>& sub_rect)
+    {
+        return FRect(
+                (float)sub_rect.GetX() / (float)parent_rect.GetWidth(),
+                (float)sub_rect.GetY() / (float)parent_rect.GetHeight(),
+                (float)sub_rect.GetWidth() /  (float)parent_rect.GetWidth(),
+                (float)sub_rect.GetHeight() / (float)parent_rect.GetHeight()
+        );
+    }
 
+    template<typename T>
+    Rect<T> MapToGlobalExpand(const Rect<T>& parent_rect, const FRect& sub_rect)
+    {
+        return Rect<T>(
+                parent_rect.GetX() + parent_rect.GetWidth() * sub_rect.GetX(),
+                parent_rect.GetY() + parent_rect.GetHeight() * sub_rect.GetY(),
+                parent_rect.GetWidth() * sub_rect.GetWidth(),
+                parent_rect.GetHeight() * sub_rect.GetHeight());
+    }
 
     template<typename T>
     class Circle

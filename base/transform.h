@@ -75,6 +75,8 @@ namespace base
         { Accumulate(glm::translate(glm::mat4(1.0f), {x, y, z})); }
         inline void Translate(const FPoint& point) noexcept
         { Translate(point.GetX(), point.GetY()); }
+        inline void Translate(const FRect& rect) noexcept
+        { Translate(rect.GetX(), rect.GetY()); }
         inline void Translate(const glm::vec2& offset) noexcept
         { Translate(offset.x, offset.y); }
         inline void Translate(const glm::vec3& offset) noexcept

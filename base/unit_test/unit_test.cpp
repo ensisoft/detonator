@@ -272,6 +272,35 @@ void unit_test_rect_test_point()
     TEST_REQUIRE(rect.TestPoint(25, 17));
 }
 
+void unit_test_rect_mapping()
+{
+    base::FRect rect(0.0f, 0.0f, 100.0f, 200.0f);
+
+    {
+        base::FRect ret;
+        ret = MapToLocalNormalize(rect, base::FRect(0.0f, 0.0f, 10.0f, 10.0f));
+        TEST_REQUIRE(ret == base::FRect(0.0f,  0.0f, 0.1f, 0.05f));
+
+        ret = MapToLocalNormalize(rect, base::FRect(10.0f, 0.0f, 10.0f, 10.0f));
+        TEST_REQUIRE(ret == base::FRect(0.1f, 0.0f, 0.1f, 0.05f));
+
+        ret = MapToLocalNormalize(rect, base::FRect(0.0f, -10.0f, 10.0f, 10.0f));
+        TEST_REQUIRE(ret == base::FRect(0.0f, -0.05f, 0.1f, 0.05f));
+    }
+
+    {
+        base::FRect ret;
+        ret = MapToGlobalExpand(rect, base::FRect(0.0f, 0.0f, 0.1f, 0.1f));
+        TEST_REQUIRE(ret == base::FRect(0.0f, 0.0f, 10.0f, 20.0f));
+        ret = MapToGlobalExpand(rect, base::FRect(0.1f, 0.1f, 0.1f, 0.1f));
+        TEST_REQUIRE(ret == base::FRect(10.0f, 20.0f, 10.0f, 20.0f));
+
+        rect.Translate(150.0f, 50.0f);
+        ret = MapToGlobalExpand(rect, base::FRect(0.1f, 0.1f, 0.1f, 0.1f));
+        TEST_REQUIRE(ret == base::FRect(160.0f, 70.0f, 10.0f, 20.0f));
+    }
+}
+
 void bar()
 {
     TRACE_SCOPE("bar");
@@ -332,6 +361,7 @@ int test_main(int argc, char* argv[])
     unit_test_rect_union<int>();
     unit_test_rect_test_point<int>();
     unit_test_rect_test_point<float>();
+    unit_test_rect_mapping();
     unit_test_trace();
     return 0;
 }
