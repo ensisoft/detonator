@@ -105,6 +105,7 @@ public:
         mUIStyle.SetDataLoader(mEngineDataLoader);
         mUIPainter.SetPainter(mPainter.get());
         mUIPainter.SetStyle(&mUIStyle);
+        mUIPainter.SetFlag(engine::UIPainter::Flags::ClipWidgets, true);
         mRenderer.SetClassLibrary(mClasslib);
         mRenderer.SetEditingMode(init.editing_mode);
         mRenderer.SetName("Engine");
@@ -302,22 +303,26 @@ public:
         {
             TRACE_SCOPE("DrawUI");
 
-            const auto& rect   = ui->GetBoundingRect();
-            const float width  = rect.GetWidth();
-            const float height = rect.GetHeight();
+            const auto& window_rect   = ui->GetBoundingRect();
+            const float width  = window_rect.GetWidth();
+            const float height = window_rect.GetHeight();
             const float scale  = std::min(surf_width / width, surf_height / height);
             const float device_viewport_width = width * scale;
             const float device_viewport_height = height * scale;
 
             mPainter->SetPixelRatio(glm::vec2(1.0f, 1.0f));
             mPainter->SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, width, height));
+            mPainter->ResetViewMatrix();
+
+            gfx::IRect device_viewport;
+            device_viewport.Move((surf_width - device_viewport_width)*0.5,
+                                 (surf_height - device_viewport_height)*0.5);
+            device_viewport.Resize(device_viewport_width, device_viewport_height);
+
             // Set the actual device viewport for rendering into the window surface.
             // the viewport retains the UI's aspect ratio and is centered in the middle
             // of the rendering surface.
-            mPainter->SetViewport((surf_width - device_viewport_width)*0.5,
-                                  (surf_height - device_viewport_height)*0.5,
-                                  device_viewport_width, device_viewport_height);
-            mPainter->ResetViewMatrix();
+            mPainter->SetViewport(device_viewport);
             TRACE_CALL("UI::Paint", ui->Paint(mUIState, mUIPainter, base::GetTime(), nullptr));
         }
 

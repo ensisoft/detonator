@@ -323,16 +323,20 @@ void Window::Paint(TransientState& state, Painter& painter, double time, PaintHo
                 return;
 
             const auto state = mState.top();
-            const bool visible = state.visible & widget->TestFlag(Widget::Flags::VisibleInGame);
-            const bool enabled = state.enabled & widget->TestFlag(Widget::Flags::Enabled);
+            const bool visible = state.visible && widget->TestFlag(Widget::Flags::VisibleInGame) &&
+                                                  widget->TestFlag(Widget::Flags::VisibleInEditor);
+            const bool enabled = state.enabled && widget->TestFlag(Widget::Flags::Enabled);
+
+            FRect widget_rect = widget->GetRect();
+            widget_rect.Translate(mParentWidgetOrigin);
+
             if (visible)
             {
-                FRect rect = widget->GetRect();
-                rect.Translate(mWidgetOrigin);
+                //mPainter.RealizeMask();
 
                 Widget::PaintEvent paint;
                 paint.clip    = state.clip;
-                paint.rect    = rect;
+                paint.rect    = widget_rect;
                 paint.focused = (widget == mFocusedWidget);
                 paint.moused  = (widget == mWidgetUnderMouse);
                 paint.enabled = enabled;
@@ -350,23 +354,41 @@ void Window::Paint(TransientState& state, Painter& painter, double time, PaintHo
                 {
                     widget->Paint(paint , mWidgetState , mPainter);
                 }
+                if (widget->IsContainer() && widget->ClipChildren() &&
+                    mWindow.mRenderTree.HasChildren(widget))
+                {
+                    Painter::MaskStruct mask;
+                    mask.id    = widget->GetId();
+                    mask.klass = widget->GetClassName();
+                    mask.name  = widget->GetName();
+                    mask.rect  = widget_rect;
+
+                    // Push the current widget's clipping mask onto the painter's clip stack.
+                    // The clipping mask is added to the previous masks and is then used
+                    // to clip the child widgets (during subsequent draw operations)
+                    mPainter.PushMask(mask);
+                }
             }
 
             PaintState ps;
             ps.enabled = enabled;
             ps.visible = visible;
-            ps.clip    = FRect(mWidgetOrigin + widget->GetPosition(), widget->GetSize());
-
+            ps.clip    = widget_rect;
             mState.push(ps);
-            mWidgetOrigin += widget->GetPosition();
+
+            mParentWidgetOrigin += widget->GetPosition();
         }
         virtual void LeaveNode(const Widget* widget) override
         {
             if (!widget)
                 return;
 
-            mWidgetOrigin -= widget->GetPosition();
+            mParentWidgetOrigin -= widget->GetPosition();
             mState.pop();
+
+            if (widget->IsContainer() && widget->ClipChildren() &&
+                mWindow.mRenderTree.HasChildren(widget))
+                mPainter.PopMask();
         }
     private:
         const Widget* mFocusedWidget = nullptr;
@@ -382,7 +404,7 @@ void Window::Paint(TransientState& state, Painter& painter, double time, PaintHo
             bool  enabled = true;
         };
         std::stack<PaintState> mState;
-        FPoint mWidgetOrigin;
+        FPoint mParentWidgetOrigin;
     };
 
     PaintVisitor visitor(*this, time, painter, state, hook);

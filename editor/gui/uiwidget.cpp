@@ -575,6 +575,7 @@ UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : U
     GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     GetUserProperty(resource, "show_bounds", mUI.chkShowBounds);
     GetUserProperty(resource, "show_tab_order", mUI.chkShowTabOrder);
+    GetUserProperty(resource, "clip_widgets", mUI.chkClipWidgets);
     GetUserProperty(resource, "widget", mUI.widget);
     GetUserProperty(resource, "camera_scale_x", mUI.scaleX);
     GetUserProperty(resource, "camera_scale_y", mUI.scaleY);
@@ -649,6 +650,7 @@ void UIWidget::SetViewerMode()
     SetValue(mUI.chkShowOrigin,      false);
     SetValue(mUI.chkShowBounds,      false);
     SetValue(mUI.chkShowTabOrder,    false);
+    SetValue(mUI.chkClipWidgets,     true);
     QTimer::singleShot(10, this, &UIWidget::on_btnResetTransform_clicked);
     on_actionPlay_triggered();
 }
@@ -708,6 +710,7 @@ bool UIWidget::SaveState(Settings& settings) const
     settings.SaveWidget("UI", mUI.chkShowGrid);
     settings.SaveWidget("UI", mUI.chkShowBounds);
     settings.SaveWidget("UI", mUI.chkShowTabOrder);
+    settings.SaveWidget("UI", mUI.chkClipWidgets);
     settings.SaveWidget("UI", mUI.chkSnap);
     settings.SaveWidget("UI", mUI.cmbGrid);
     settings.SaveWidget("UI", mUI.zoom);
@@ -732,6 +735,7 @@ bool UIWidget::LoadState(const Settings& settings)
     settings.LoadWidget("UI", mUI.chkSnap);
     settings.LoadWidget("UI", mUI.cmbGrid);
     settings.LoadWidget("UI", mUI.chkShowTabOrder);
+    settings.LoadWidget("UI", mUI.chkClipWidgets);
     settings.LoadWidget("UI", mUI.zoom);
     settings.LoadWidget("UI", mUI.widget);
 
@@ -1208,6 +1212,7 @@ void UIWidget::on_actionSave_triggered()
     SetUserProperty(resource, "show_bounds", mUI.chkShowBounds);
     SetUserProperty(resource, "show_tab_order", mUI.chkShowTabOrder);
     SetUserProperty(resource, "widget", mUI.widget);
+    SetUserProperty(resource, "clip_widgets", mUI.chkClipWidgets);
 
     mState.workspace->SaveResource(resource);
     mOriginalHash = mState.window.GetHash();
@@ -1807,6 +1812,10 @@ void UIWidget::on_chkWidgetVisible_stateChanged(int)
 {
     UpdateCurrentWidgetProperties();
 }
+void UIWidget::on_chkWidgetClipChildren_stateChanged(int)
+{
+    UpdateCurrentWidgetProperties();
+}
 
 void UIWidget::on_tree_customContextMenuRequested(QPoint)
 {
@@ -1916,16 +1925,12 @@ void UIWidget::WidgetStyleEdited()
 
 void UIWidget::PaintScene(gfx::Painter& painter, double sec)
 {
-    const auto& form_size = GetFormSize();
     const auto surface_width  = mUI.widget->width();
     const auto surface_height = mUI.widget->height();
     const auto zoom   = (float)GetValue(mUI.zoom);
     const auto xs     = (float)GetValue(mUI.scaleX);
     const auto ys     = (float)GetValue(mUI.scaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
-    const auto window_width  = form_size.GetWidth();
-    const auto window_height = form_size.GetHeight();
-
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
     const auto view_rotation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTransformStartTime);
@@ -1958,7 +1963,10 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
 
     painter.SetViewMatrix(view.GetAsMatrix());
     painter.SetPixelRatio(glm::vec2(xs * zoom, ys * zoom));
-    mState.painter->SetPainter(&painter);
+
+    gfx::Painter ui_painter(painter);
+
+    mState.painter->SetPainter(&ui_painter);
     mState.painter->SetStyle(mState.style.get());
     if (mPlayState == PlayState::Stopped)
     {
@@ -1998,6 +2006,7 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
 
         // paint the design state copy of the window.
         uik::TransientState s;
+        mState.painter->SetFlag(engine::UIPainter::Flags::ClipWidgets, GetValue(mUI.chkClipWidgets));
         mState.window.Paint(s , *mState.painter, 0.0, &hook);
 
         // draw the window outline
@@ -2007,7 +2016,7 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
     else
     {
         const auto show_window = true;
-        // paint the active playback window.
+        mState.painter->SetFlag(engine::UIPainter::Flags::ClipWidgets, GetValue(mUI.chkClipWidgets));
         mState.active_window->Paint(*mState.active_state, *mState.painter, mPlayTime);
     }
 
@@ -2309,6 +2318,7 @@ void UIWidget::UpdateCurrentWidgetProperties()
         widget->SetPosition(GetValue(mUI.widgetXPos) , GetValue(mUI.widgetYPos));
         widget->SetFlag(uik::Widget::Flags::VisibleInGame, GetValue(mUI.chkWidgetVisible));
         widget->SetFlag(uik::Widget::Flags::Enabled, GetValue(mUI.chkWidgetEnabled));
+        widget->SetFlag(uik::Widget::Flags::ClipChildren, GetValue(mUI.chkWidgetClipChildren));
 
         // the widget style data is set in the WidgetStyleWidget whenever
         // those UI values are changed.
@@ -2402,6 +2412,7 @@ void UIWidget::DisplayCurrentWidgetProperties()
     SetValue(mUI.widgetYPos, 0.0f);
     SetValue(mUI.chkWidgetEnabled, true);
     SetValue(mUI.chkWidgetVisible, true);
+    SetValue(mUI.chkWidgetClipChildren, true);
     SetEnabled(mUI.widgetProperties, false);
     SetEnabled(mUI.widgetStyleTab,   false);
     SetEnabled(mUI.widgetData,       false);
@@ -2427,6 +2438,7 @@ void UIWidget::DisplayCurrentWidgetProperties()
         SetValue(mUI.widgetYPos , pos.GetY());
         SetValue(mUI.chkWidgetEnabled, widget->TestFlag(uik::Widget::Flags::Enabled));
         SetValue(mUI.chkWidgetVisible, widget->TestFlag(uik::Widget::Flags::VisibleInGame));
+        SetValue(mUI.chkWidgetClipChildren, widget->TestFlag(uik::Widget::Flags::ClipChildren));
 
         if (const auto* label = uik::WidgetCast<uik::Label>(widget))
         {

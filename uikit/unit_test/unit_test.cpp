@@ -164,7 +164,7 @@ public:
     virtual bool FromJson(const data::Reader& json) override
     { return true; }
 
-    virtual void Paint(const PaintEvent& paint, uik::TransientState& state, uik::Painter& painter) const override
+    virtual void Paint(const PaintEvent& paint, const uik::TransientState& state, uik::Painter& painter) const override
     {}
     virtual Action MouseEnter(uik::TransientState& state) override
     {

@@ -49,7 +49,7 @@ namespace uik
             // Indicates whether widget/item is currently enabled or not.
             // when enabled is false pressed/focused/moused will also
             // be false since only enabled widget can have one of those
-            // substates (and can rect to user input).
+            // sub-states (and can rect to user input).
             bool enabled = true;
             // Indicates whether the widget/item is currently pressed.
             // pressed state occurs for example when a push button is
@@ -133,6 +133,23 @@ namespace uik
         virtual void DrawToggle(const WidgetId& id, const PaintStruct& ps, const FRect& knob, bool on_off) const = 0;
 
         virtual void EndDrawWidgets() {}
+
+        struct MaskStruct {
+            std::string id;
+            std::string klass;
+            std::string name; // debug significance only
+            uik::FRect rect;
+            // todo: more properties if needed
+        };
+
+        // Add a clipping mask to the current clip stack that applies on the
+        // subsequent draw operations.
+        virtual void PushMask(const MaskStruct& mask) {}
+        // Pop the latest clipping mask from the mask stack.
+        virtual void PopMask() {}
+        // Clear the mask stack completely.
+        virtual void ClearMask() {}
+        virtual void RealizeMask() {}
 
         // todo: more sub widget draw ops.
 

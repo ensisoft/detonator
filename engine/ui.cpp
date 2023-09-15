@@ -23,6 +23,7 @@
 #include <algorithm>
 
 #include "base/assert.h"
+#include "base/box.h"
 #include "base/logging.h"
 #include "base/utility.h"
 #include "base/json.h"
@@ -32,6 +33,7 @@
 #include "graphics/drawing.h"
 #include "graphics/painter.h"
 #include "graphics/transform.h"
+#include "graphics/renderpass.h"
 #include "engine/ui.h"
 #include "engine/classlib.h"
 #include "engine/data.h"
@@ -682,6 +684,7 @@ void UIPainter::DrawStaticText(const WidgetId& id, const PaintStruct& ps, const 
         alignment |= gfx::TextAlign::AlignHCenter;
     else if (ha == UIStyle::HorizontalTextAlign::Right)
         alignment |= gfx::TextAlign::AlignRight;
+    else BUG("Unknown horizontal text alignment.");
 
     if (va == UIStyle::VerticalTextAlign::Top)
         alignment |= gfx::TextAlign::AlignTop;
@@ -689,8 +692,9 @@ void UIPainter::DrawStaticText(const WidgetId& id, const PaintStruct& ps, const 
         alignment |= gfx::TextAlign::AlignVCenter;
     else if (va == UIStyle::VerticalTextAlign::Bottom)
         alignment |= gfx::TextAlign::AlignBottom;
+    else BUG("Unknown vertical text alignment.");
 
-    gfx::DrawTextRect(*mPainter, text, font_name, font_size, ps.rect, text_color, alignment, properties, line_height);
+    DrawText(text, font_name, font_size, ps.rect, text_color, alignment, properties, line_height);
 }
 
 void UIPainter::DrawEditableText(const WidgetId& id, const PaintStruct& ps, const EditableText& text) const
@@ -703,7 +707,7 @@ void UIPainter::DrawEditableText(const WidgetId& id, const PaintStruct& ps, cons
     const auto  font_size  = GetWidgetProperty(id, ps, "edit-text-size",16);
     const unsigned alignment  = gfx::TextAlign::AlignVCenter | gfx::TextAlign::AlignLeft;
     const unsigned properties = 0;
-    gfx::DrawTextRect(*mPainter, text.text, font_name, font_size, ps.rect, text_color, alignment, properties, 1.0f);
+    DrawText(text.text, font_name, font_size, ps.rect, text_color, alignment, properties, 1.0f);
 }
 
 void UIPainter::DrawTextEditBox(const WidgetId& id, const PaintStruct& ps) const
@@ -1012,6 +1016,36 @@ bool UIPainter::ParseStyle(const std::string& tag, const std::string& style)
     return mStyle->ParseStyleString(tag, style);
 }
 
+void UIPainter::PushMask(const MaskStruct& mask)
+{
+    if (mask.klass == "form" || mask.klass == "groupbox")
+    {
+        ClippingMask clip;
+        clip.name  = mask.name;
+        clip.rect  = mask.rect;
+        clip.shape = GetWidgetProperty(mask.id, mask.klass, "shape", UIStyle::WidgetShape::Rectangle);
+
+        // offset the masking area by the thickness of the border
+        const auto border_thickness = GetWidgetProperty(mask.id, mask.klass, "border-width", 1.0f);
+        clip.rect.Grow(-2.0*border_thickness, -2.0*border_thickness);
+        clip.rect.Translate(border_thickness, border_thickness);
+
+        mClippingMaskStack.push_back(std::move(clip));
+    }
+    else BUG("Unimplemented clipping mask for widget klass.");
+}
+void UIPainter::PopMask()
+{
+    ASSERT(!mClippingMaskStack.empty());
+
+    mClippingMaskStack.pop_back();
+}
+
+void UIPainter::RealizeMask()
+{
+
+}
+
 void UIPainter::DeleteMaterialInstances(const std::string& filter)
 {
     for (auto it = mMaterials.begin(); it != mMaterials.end(); )
@@ -1060,46 +1094,127 @@ void UIPainter::Update(double time, float dt)
     }
 }
 
-void UIPainter::SetClip(const gfx::FRect& rect)
+uint8_t UIPainter::StencilPass() const
 {
-    // todo:
-    // clip can be simple or more difficult to implement. If the
-    // painters view matrix doesn't have rotation in non-straight angles
-    // the clip rectangle will always be aligned along the render target axis
-    // which means the clip can be set using device/HW clip (Painter::SetScissor)
+    // we're using the stencil buffer here to setup a mask that is
+    // a combination of all the clipping masks currently in the
+    // clipping stack.
+    // Each widget pushes their clipping shape onto the stack prior
+    // to rendering their child and for each child render the final
+    // clipping mask is the combination of all the parents' clipping
+    // masks. (basically the intersection)
+    // Note that you might think that taking the first parent's mask
+    // would be sufficient but that isn't because the parent could be
+    // clipped against it's parent etc.
 
-    // however if there's some obscure rotation the clip needs to be done with for
-    // example stencil buffer using 2 pass widget rendering.
+    if (mClippingMaskStack.empty() || !mFlags.test(Flags::ClipWidgets))
+        return 0;
+
+    // start with clear 0 stencil. Each mask tests against the stencil
+    // value which increments on every write.
+    // can't just bitwise and since the stencil bits outside the rasterized
+    // shape are *not* modified (obv)
+
+    mPainter->ClearStencil(gfx::StencilClearValue(0));
+
+    gfx::StencilWriteValue stencil_val = 0;
+
+    for (const auto& mask : mClippingMaskStack)
+    {
+        gfx::StencilMaskPass overlap(gfx::StencilWriteValue(stencil_val), *mPainter,
+                                     gfx::StencilMaskPass::StencilFunc::OverlapIncrement);
+        DrawShape(mask.rect, gfx::CreateMaterialFromColor(gfx::Color::White), overlap, mask.shape);
+        ++stencil_val;
+    }
+    return stencil_val;
+}
+
+void UIPainter::DrawText(const std::string& text, const std::string& font_name, int font_size,
+                         const gfx::FRect& rect, const gfx::Color4f & color, unsigned alignment, unsigned properties,
+                         float line_height) const
+{
+    auto raster_width  =  (unsigned)math::clamp(0.0f, 2048.0f, rect.GetWidth());
+    auto raster_height =  (unsigned)math::clamp(0.0f, 2048.0f, rect.GetHeight());
+    const bool underline = properties & gfx::TextProp::Underline;
+    const bool blinking  = properties & gfx::TextProp::Blinking;
+
+    // if the text is set to be blinking do a sharp cut off
+    // and when we have the "off" interval then simply don't
+    // render the text.
+    if (blinking)
+    {
+        const auto fps = 1.5;
+        const auto full_period = 2.0 / fps;
+        const auto half_period = full_period * 0.5;
+        const auto time = fmodf(base::GetTime(), full_period);
+        if (time >= half_period)
+            return;
+    }
+
+    auto material = gfx::CreateMaterialFromText(text, font_name, color, font_size,
+                                                raster_width, raster_height,
+                                                alignment, properties, line_height);
+
+    if (const auto value = StencilPass())
+    {
+        gfx::StencilTestColorWritePass pass(gfx::StencilPassValue(value), *mPainter);
+        DrawShape(rect, material, pass, UIStyle::WidgetShape::Rectangle);
+    }
+    else
+    {
+        gfx::GenericRenderPass pass(*mPainter);
+        DrawShape(rect, material, pass, UIStyle::WidgetShape::Rectangle);
+    }
+
+    //gfx::DrawTextRect(*mPainter, text, font_name, font_size, rect, color, alignment, properties, line_height);
 }
 
 void UIPainter::FillShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape) const
 {
-    if (shape == UIStyle::WidgetShape::Rectangle)
-        gfx::FillShape(*mPainter, rect, gfx::Rectangle(), material);
-    else if (shape == UIStyle::WidgetShape::RoundRect)
-        gfx::FillShape(*mPainter, rect, gfx::RoundRectangle(), material);
-    else if(shape == UIStyle::WidgetShape::Parallelogram)
-        gfx::FillShape(*mPainter, rect, gfx::Parallelogram(), material);
-    else if (shape == UIStyle::WidgetShape::Circle)
-        gfx::FillShape(*mPainter, rect, gfx::Circle(), material);
-    else if (shape == UIStyle::WidgetShape::Capsule)
-        gfx::FillShape(*mPainter, rect, gfx::Capsule(), material);
-    else BUG("Unknown widget shape.");
+    if (const auto value = StencilPass())
+    {
+        gfx::StencilTestColorWritePass pass(gfx::StencilPassValue(value), *mPainter);
+        DrawShape(rect, material, pass, shape);
+    }
+    else
+    {
+        gfx::GenericRenderPass pass(*mPainter);
+        DrawShape(rect, material, pass, shape);
+    }
 }
 
-void UIPainter::OutlineShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape, float width) const
+void UIPainter::OutlineShape(const gfx::FRect& shape_rect, const gfx::Material& material, UIStyle::WidgetShape shape, float thickness) const
 {
-    if (shape == UIStyle::WidgetShape::Rectangle)
-        gfx::DrawShapeOutline(*mPainter, rect, gfx::Rectangle(), material, width);
-    else if (shape == UIStyle::WidgetShape::RoundRect)
-        gfx::DrawShapeOutline(*mPainter, rect, gfx::RoundRectangle(), material, width);
-    else if(shape == UIStyle::WidgetShape::Parallelogram)
-        gfx::DrawShapeOutline(*mPainter, rect, gfx::Parallelogram(), material, width);
-    else if (shape == UIStyle::WidgetShape::Circle)
-        gfx::DrawShapeOutline(*mPainter, rect, gfx::Circle(), material, width);
-    else if (shape == UIStyle::WidgetShape::Capsule)
-        gfx::DrawShapeOutline(*mPainter, rect, gfx::Capsule(), material, width);
-    else BUG("Unknown widget shape.");
+    const auto width  = shape_rect.GetWidth();
+    const auto height = shape_rect.GetHeight();
+    const auto x = shape_rect.GetX();
+    const auto y = shape_rect.GetY();
+
+    gfx::FRect mask_rect;
+    const auto mask_width  = width - 2 * thickness;
+    const auto mask_height = height - 2 * thickness;
+    mask_rect.Resize(mask_width, mask_height);
+    mask_rect.Translate(x + thickness, y + thickness);
+
+    if (const auto stencil_value = StencilPass())
+    {
+        const gfx::StencilMaskPass mask(gfx::StencilWriteValue(0), *mPainter,
+                                     gfx::StencilMaskPass::StencilFunc::Overwrite);
+        DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), mask, shape);
+
+        const gfx::StencilTestColorWritePass cover(stencil_value, *mPainter);
+        DrawShape(shape_rect, material, cover, shape);
+    }
+    else
+    {
+        const gfx::StencilMaskPass overlap(gfx::StencilClearValue(1),
+                                           gfx::StencilWriteValue(0), *mPainter,
+                                           gfx::StencilMaskPass::StencilFunc::Overwrite);
+        DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), overlap, shape);
+
+        const gfx::StencilTestColorWritePass cover(gfx::StencilPassValue(1), *mPainter);
+        DrawShape(shape_rect, material, cover, shape);
+    }
 }
 
 bool UIPainter::GetMaterial(const std::string& key, gfx::Material** material) const
@@ -1294,6 +1409,46 @@ UIProperty UIPainter::GetWidgetProperty(const std::string& id,
     }
     return UIProperty();
 }
+
+template<typename T> inline
+T UIPainter::GetWidgetProperty(const std::string& id,
+                    const PaintStruct& ps,
+                    const std::string& key,
+                    const T& value) const
+{
+    const auto& p = GetWidgetProperty(id, ps, key);
+    return p.GetValue(value);
+}
+template<typename T> inline
+T UIPainter::GetWidgetProperty(const std::string& id,
+                    const std::string& klass,
+                    const std::string& key,
+                    const T& value) const
+{
+    const auto& p = GetWidgetProperty(id, klass, key);
+    return p.GetValue(value);
+}
+
+template<typename RenderPass>
+void UIPainter::DrawShape(const gfx::FRect& rect, const gfx::Material& material, const RenderPass& pass, UIStyle::WidgetShape shape) const
+{
+    gfx::Transform transform;
+    transform.Resize(rect);
+    transform.Translate(rect);
+
+    if (shape == UIStyle::WidgetShape::Rectangle)
+        pass.Draw(gfx::Rectangle(), transform, material);
+    else if (shape == UIStyle::WidgetShape::RoundRect)
+        pass.Draw(gfx::RoundRectangle(), transform, material);
+    else if (shape == UIStyle::WidgetShape::Circle)
+        pass.Draw(gfx::Circle(), transform, material);
+    else if (shape == UIStyle::WidgetShape::Capsule)
+        pass.Draw(gfx::Capsule(), transform, material);
+    else if (shape == UIStyle::WidgetShape::Parallelogram)
+        pass.Draw(gfx::Parallelogram(), transform, material);
+    else BUG("Missing mask shape case.");
+}
+
 
 void UIKeyMap::Clear()
 {
