@@ -898,7 +898,7 @@ int main(int argc, char* argv[])
 
     BuildUI(state.ui_window);
     state.ui_window.Style(state.ui_painter);
-    state.ui_window.Show(state.ui_state);
+    state.ui_window.Open(state.ui_state);
 
     auto time = base::GetTime();
 

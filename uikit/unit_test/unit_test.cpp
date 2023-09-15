@@ -862,7 +862,7 @@ void unit_test_keyboard_focus()
         uik::TransientState state;
         uik::Window window;
         window.EnableVirtualKeys(true);
-        window.Show(state);
+        window.Open(state);
 
         uik::Window::KeyEvent event;
         event.key  = uik::VirtualKey::FocusNext;
@@ -881,7 +881,7 @@ void unit_test_keyboard_focus()
         auto* box = window.AddWidget(uik::GroupBox());
         window.LinkChild(nullptr, box);
         window.LinkChild(box, btn);
-        window.Show(state);
+        window.Open(state);
         TEST_REQUIRE(window.GetFocusedWidget(state) == btn);
     }
 
@@ -896,7 +896,7 @@ void unit_test_keyboard_focus()
         box->SetEnabled(false);
         window.LinkChild(nullptr, box);
         window.LinkChild(box, btn);
-        window.Show(state);
+        window.Open(state);
         TEST_REQUIRE(window.GetFocusedWidget(state) == nullptr);
     }
 
@@ -911,7 +911,7 @@ void unit_test_keyboard_focus()
         box->SetVisible(false);
         window.LinkChild(nullptr, box);
         window.LinkChild(box, btn);
-        window.Show(state);
+        window.Open(state);
         TEST_REQUIRE(window.GetFocusedWidget(state) == nullptr);
     }
 
@@ -925,7 +925,7 @@ void unit_test_keyboard_focus()
         window.LinkChild(nullptr, btn);
 
         window.EnableVirtualKeys(true);
-        window.Show(state);
+        window.Open(state);
         TEST_REQUIRE(window.GetFocusedWidget(state) == btn);
 
         uik::Window::KeyEvent event;
@@ -955,7 +955,7 @@ void unit_test_keyboard_focus()
         window.LinkChild(nullptr, btn1);
         window.LinkChild(nullptr, lbl);
 
-        window.Show(state);
+        window.Open(state);
         TEST_REQUIRE(window.GetFocusedWidget(state) == btn0);
 
         uik::Window::KeyEvent event;
@@ -997,7 +997,7 @@ void unit_test_keyboard_radiobutton_select()
         rad0->SetSelected(true);
         window.LinkChild(nullptr, rad0);
 
-        window.Show(state);
+        window.Open(state);
         TEST_REQUIRE(window.GetFocusedWidget(state) == rad0);
         TEST_REQUIRE(rad0->IsSelected() == true);
 
@@ -1025,7 +1025,7 @@ void unit_test_keyboard_radiobutton_select()
         window.LinkChild(nullptr, rad0);
         window.LinkChild(nullptr, rad1);
 
-        window.Show(state);
+        window.Open(state);
         TEST_REQUIRE(window.GetFocusedWidget(state) == rad0);
         TEST_REQUIRE(rad0->IsSelected() == true);
         TEST_REQUIRE(rad1->IsSelected() == false);
@@ -1057,7 +1057,7 @@ void unit_test_keyboard_radiobutton_select()
         window.LinkChild(nullptr, rad0);
         window.LinkChild(nullptr, rad1);
 
-        window.Show(state);
+        window.Open(state);
         TEST_REQUIRE(window.GetFocusedWidget(state) == rad0);
         TEST_REQUIRE(rad0->IsSelected() == true);
         TEST_REQUIRE(rad1->IsSelected() == false);
@@ -1089,7 +1089,7 @@ void unit_test_keyboard_radiobutton_select()
         window.LinkChild(nullptr, rad0);
         window.LinkChild(nullptr, rad1);
 
-        window.Show(state);
+        window.Open(state);
         TEST_REQUIRE(window.GetFocusedWidget(state) == rad0);
         TEST_REQUIRE(rad0->IsSelected() == true);
         TEST_REQUIRE(rad1->IsSelected() == false);
@@ -1123,7 +1123,7 @@ void unit_test_keyboard_radiobutton_select()
         window.LinkChild(nullptr, rad0);
         window.LinkChild(nullptr, rad1);
 
-        window.Show(state);
+        window.Open(state);
         TEST_REQUIRE(window.GetFocusedWidget(state) == rad0);
         TEST_REQUIRE(rad0->IsSelected() == false);
         TEST_REQUIRE(rad1->IsSelected() == false);
@@ -1243,7 +1243,7 @@ loops 1
 
         uik::TransientState state;
         uik::AnimationStateArray animations;
-        window.Show(state, &animations);
+        window.Open(state, &animations);
         // the initial state is fetched from the widget when the animation begins to
         // execute the first time. i.e after it's become active (trigger has executed)
         // and any possible delay has been consumed.
@@ -1283,7 +1283,7 @@ loops 1
         uik::TransientState state;
         uik::AnimationStateArray animations;
 
-        window.Show(state, &animations);
+        window.Open(state, &animations);
         TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
         TEST_REQUIRE(animations[0].time == 0.0f);
         TEST_REQUIRE(animations[0].loops == 1);
@@ -1322,7 +1322,7 @@ loops 2
         uik::TransientState state;
         uik::AnimationStateArray animations;
 
-        window.Show(state, &animations);
+        window.Open(state, &animations);
         TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
         TEST_REQUIRE(animations[0].time == 0.0f);
         TEST_REQUIRE(animations[0].loops == 2);
@@ -1373,7 +1373,7 @@ loops 1
         uik::TransientState state;
         uik::AnimationStateArray animations;
 
-        window.Show(state, &animations);
+        window.Open(state, &animations);
         TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
         TEST_REQUIRE(animations[0].time == -1.0f);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(10.0f, 10.0f));
