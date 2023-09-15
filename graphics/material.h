@@ -1318,7 +1318,9 @@ namespace gfx
         virtual double GetRuntime() const override
         { return 0.0f; }
 
-        void SetColor(const Color4f& color)
+        void ComputeTextMetrics(unsigned* width, unsigned* height) const;
+
+        inline void SetColor(const Color4f& color) noexcept
         { mColor = color; }
         // Set point sampling to true in order to use a fast filtering
         // when sampling from the texture. This should be for maximum perf
@@ -1328,7 +1330,7 @@ namespace gfx
         // rasterized dimensions (in pixels) of the rectangle from the
         // dimensions of the rasterized text texture.
         // The default is true.
-        void SetPointSampling(bool on_off)
+        inline void SetPointSampling(bool on_off) noexcept
         { mPointSampling = on_off; }
     private:
         TextBuffer mText;
@@ -1381,6 +1383,16 @@ namespace gfx
     MaterialClassInst CreateMaterialFromText(const TextBuffer& text);
     MaterialClassInst CreateMaterialFromText(TextBuffer&& text);
     MaterialClassInst CreateMaterialFromTexture(std::string gpu_id, Texture* texture = nullptr);
+
+    TextMaterial CreateMaterialFromText(const std::string& text,
+                                        const std::string& font,
+                                        const gfx::Color4f& color,
+                                        unsigned font_size_px,
+                                        unsigned raster_width,
+                                        unsigned raster_height,
+                                        unsigned text_align,
+                                        unsigned text_prop,
+                                        float line_height);
 
     std::unique_ptr<Material> CreateMaterialInstance(const MaterialClass& klass);
     std::unique_ptr<Material> CreateMaterialInstance(const std::shared_ptr<const MaterialClass>& klass);

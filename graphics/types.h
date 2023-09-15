@@ -23,10 +23,29 @@
 #  include <glm/mat4x4.hpp>
 #include "warnpop.h"
 
+#include "base/assert.h"
 #include "base/types.h"
 
 namespace gfx
 {
+    // Text alignment inside a rect
+    enum TextAlign {
+        // Vertical text alignment
+        AlignTop     = 0x1,
+        AlignVCenter = 0x2,
+        AlignBottom  = 0x4,
+        // Horizontal text alignment
+        AlignLeft    = 0x10,
+        AlignHCenter = 0x20,
+        AlignRight   = 0x40
+    };
+
+    enum TextProp {
+        None      = 0x0,
+        Underline = 0x1,
+        Blinking  = 0x2
+    };
+
     // type aliases for base types for gfx.
     using FPoint = base::FPoint;
     using IPoint = base::IPoint;
@@ -62,6 +81,29 @@ namespace gfx
         StencilValue() = default;
         StencilValue(uint8_t val) : value(val) {}
         inline operator uint8_t () const { return value; }
+
+        inline StencilValue operator++(int) {
+            ASSERT(value < 0xff);
+            auto ret = value;
+            ++value;
+            return StencilValue(ret);
+        }
+        inline StencilValue& operator++() {
+            ASSERT(value < 0xff);
+            ++value;
+            return *this;
+        }
+        inline StencilValue operator--(int) {
+            ASSERT(value > 0);
+            auto ret = value;
+            --value;
+            return StencilValue(ret);
+        }
+        inline StencilValue& operator--() {
+            ASSERT(value > 0);
+            --value;
+            return *this;
+        }
     };
 
     using StencilClearValue = StencilValue<0>;

@@ -61,22 +61,6 @@ void DrawTextRect(Painter& painter,
 {
     auto raster_width  =  (unsigned)math::clamp(0.0f, 2048.0f, rect.GetWidth());
     auto raster_height =  (unsigned)math::clamp(0.0f, 2048.0f, rect.GetHeight());
-
-    TextBuffer buff(raster_width, raster_height);
-    if ((alignment & 0xf) == AlignTop)
-        buff.SetAlignment(TextBuffer::VerticalAlignment::AlignTop);
-    else if((alignment & 0xf) == AlignVCenter)
-        buff.SetAlignment(TextBuffer::VerticalAlignment::AlignCenter);
-    else if ((alignment & 0xf) == AlignBottom)
-        buff.SetAlignment(TextBuffer::VerticalAlignment::AlignBottom);
-
-    if ((alignment & 0xf0) == AlignLeft)
-        buff.SetAlignment(TextBuffer::HorizontalAlignment::AlignLeft);
-    else if ((alignment & 0xf0) == AlignHCenter)
-        buff.SetAlignment(TextBuffer::HorizontalAlignment::AlignCenter);
-    else if ((alignment & 0xf0) == AlignRight)
-        buff.SetAlignment(TextBuffer::HorizontalAlignment::AlignRight);
-
     const bool underline = properties & TextProp::Underline;
     const bool blinking  = properties & TextProp::Blinking;
 
@@ -93,14 +77,10 @@ void DrawTextRect(Painter& painter,
             return;
     }
 
-    // Add blob of text in the buffer.
-    TextBuffer::Text text_and_style;
-    text_and_style.text = text;
-    text_and_style.font = font;
-    text_and_style.fontsize = font_size_px;
-    text_and_style.underline = underline;
-    text_and_style.lineheight = line_height;
-    buff.SetText(text_and_style);
+    TextMaterial material = CreateMaterialFromText(text, font, color, font_size_px,
+                                                   raster_width, raster_height,
+                                                   alignment, properties,
+                                                   line_height);
 
     // unfortunately if no raster buffer dimensions were
     // specified the only way to figure them out is to
@@ -112,11 +92,9 @@ void DrawTextRect(Painter& painter,
     // metrics right now.
     if (raster_width == 0 || raster_height == 0)
     {
-        buff.ComputeTextMetrics(&raster_width, &raster_height);
+        material.ComputeTextMetrics(&raster_width, &raster_height);
     }
 
-    TextMaterial material(std::move(buff));
-    material.SetColor(color);
     // todo: we should/could check the painter whether it has a
     // a view transformation set that will change the texture mapping
     // between the rasterized fragments and the underlying texture object.
