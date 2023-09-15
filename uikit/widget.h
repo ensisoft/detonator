@@ -67,7 +67,8 @@ namespace uik
         enum class Flags {
             Enabled,
             VisibleInGame,
-            VisibleInEditor
+            VisibleInEditor,
+            ClipChildren
         };
 
         // dtor.
@@ -150,7 +151,7 @@ namespace uik
             FRect clip;
         };
         // Paint the widget.
-        virtual void Paint(const PaintEvent& paint, TransientState& state, Painter& painter) const = 0;
+        virtual void Paint(const PaintEvent& paint, const TransientState& state, Painter& painter) const = 0;
 
         virtual void Update(TransientState& state, double time, float dt)
         {}
@@ -264,14 +265,14 @@ namespace uik
                          const Color4f& bottom_left,
                          const Color4f& bottom_right);
 
-        inline bool IsContainer() const
+        inline bool IsContainer() const noexcept
         {
             const auto type = GetType();
             if (type == Type::GroupBox || type == Type::Form)
                 return true;
             return false;
         }
-        inline bool CanFocus() const
+        inline bool CanFocus() const noexcept
         {
             const auto type = GetType();
             if (type == Type::GroupBox || type == Type::Form ||
@@ -280,32 +281,35 @@ namespace uik
             return true;
         }
 
-        inline bool IsEnabled() const
+        inline bool ClipChildren() const noexcept
+        { return TestFlag(Flags::ClipChildren); }
+
+        inline bool IsEnabled() const noexcept
         { return TestFlag(Flags::Enabled);  }
-        inline bool IsVisible() const
+        inline bool IsVisible() const noexcept
         { return TestFlag(Flags::VisibleInGame); }
-        inline void SetSize(float width, float height)
+        inline void SetSize(float width, float height) noexcept
         { SetSize(FSize(width , height)); }
-        inline void SetPosition(float x, float y)
+        inline void SetPosition(float x, float y) noexcept
         { SetPosition(FPoint(x , y)); }
-        inline void SetEnabled(bool on_off)
+        inline void SetEnabled(bool on_off) noexcept
         { SetFlag(Flags::Enabled, on_off); }
-        inline void SetVisible(bool on_off)
+        inline void SetVisible(bool on_off) noexcept
         { SetFlag(Flags::VisibleInGame, on_off); }
 
-        inline void Grow(float dw, float dh)
+        inline void Grow(float dw, float dh) noexcept
         { SetSize(ClampSize(GetSize() + FSize(dw, dh))); }
-        inline void Translate(float dx, float dy)
+        inline void Translate(float dx, float dy) noexcept
         { SetPosition(GetPosition() + FPoint(dx, dy)); }
 
-        inline float GetWidth() const
+        inline float GetWidth() const noexcept
         { return GetSize().GetWidth(); }
-        inline float GetHeight() const
+        inline float GetHeight() const noexcept
         { return GetSize().GetHeight(); }
-        inline std::string GetClassName() const
+        inline std::string GetClassName() const noexcept
         { return GetWidgetClassName(this->GetType()); }
 
-        static FSize ClampSize(const FSize& size)
+        static FSize ClampSize(const FSize& size) noexcept
         {
             const auto width  = math::clamp(0.0f, size.GetWidth(), size.GetWidth());
             const auto height = math::clamp(0.0f, size.GetHeight(), size.GetHeight());
@@ -328,8 +332,8 @@ namespace uik
             std::string widgetName;
             const StylePropertyMap* style_properties = nullptr;
             const StyleMaterialMap* style_materials = nullptr;
+            const TransientState* state = nullptr;
             Painter* painter = nullptr;
-            TransientState* state = nullptr;
         };
         struct MouseStruct {
             std::string widgetId;
@@ -828,6 +832,7 @@ namespace uik
                 mFlags.set(Flags::Enabled, true);
                 mFlags.set(Flags::VisibleInGame, true);
                 mFlags.set(Flags::VisibleInEditor, true);
+                mFlags.set(Flags::ClipChildren, true);
             }
 
             virtual Type GetType() const override
@@ -841,7 +846,7 @@ namespace uik
                 return hash;
             }
 
-            virtual void Paint(const PaintEvent& paint, TransientState& state, Painter& painter) const override
+            virtual void Paint(const PaintEvent& paint, const TransientState& state, Painter& painter) const override
             {
                 PaintStruct ps;
                 ps.widgetId    = mId;

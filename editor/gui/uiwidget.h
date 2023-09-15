@@ -142,6 +142,7 @@ namespace gui
         void on_btnResetScript_clicked();
         void on_chkWidgetEnabled_stateChanged(int);
         void on_chkWidgetVisible_stateChanged(int);
+        void on_chkWidgetClipChildren_stateChanged(int);
         void on_tree_customContextMenuRequested(QPoint);
 
         void TreeCurrentWidgetChangedEvent();

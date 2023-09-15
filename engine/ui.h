@@ -30,6 +30,7 @@
 #include <functional>
 
 #include "base/assert.h"
+#include "base/bitflag.h"
 #include "uikit/painter.h"
 #include "graphics/color4f.h"
 #include "graphics/material.h"
@@ -517,6 +518,10 @@ namespace engine
                 : mStyle(style)
                 , mPainter(painter)
         {}
+        enum class Flags {
+            ClipWidgets
+        };
+
         // uik::Painter implementation.
         virtual void BeginDrawWidgets() override;
         virtual void DrawWidgetBackground(const WidgetId& id, const PaintStruct& ps) const override;
@@ -533,6 +538,10 @@ namespace engine
         virtual void DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob, bool on_off) const override;
         virtual void EndDrawWidgets() override;
         virtual bool ParseStyle(const std::string& tag, const std::string& style) override;
+
+        virtual void PushMask(const MaskStruct& mask) override;
+        virtual void PopMask() override;
+        virtual void RealizeMask() override;
 
         // About deleting material instances.
         // This is mostly useful when designing the UI in the editor and changes
@@ -553,17 +562,26 @@ namespace engine
         void Update(double time, float dt);
 
         // Set the style reference for accessing styling properties.
-        void SetStyle(UIStyle* style)
+        inline void SetStyle(UIStyle* style) noexcept
         { mStyle = style; }
         // Set the actual gfx painter object used to perform the
         // painting operations.
-        void SetPainter(gfx::Painter* painter)
+        inline void SetPainter(gfx::Painter* painter) noexcept
         { mPainter = painter; }
 
-        gfx::Painter* GetPainter()
+        inline gfx::Painter* GetPainter() noexcept
         { return mPainter; }
+        inline const gfx::Painter* GetPainter() const noexcept
+        { return mPainter; }
+        inline bool TestFlag(Flags flag) const noexcept
+        { return mFlags.test(flag); }
+        inline void SetFlag(Flags flag, bool on_off) noexcept
+        { mFlags.set(flag, on_off); }
     private:
-        void SetClip(const gfx::FRect& rect);
+        uint8_t StencilPass() const;
+        void DrawText(const std::string& text, const std::string& font_name, int font_size,
+                      const gfx::FRect& rect, const gfx::Color4f & color, unsigned alignment, unsigned properties,
+                      float line_height) const;
         void FillShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape) const;
         void OutlineShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape, float width) const;
         bool GetMaterial(const std::string& key, gfx::Material** material) const;
@@ -583,20 +601,34 @@ namespace engine
         T GetWidgetProperty(const std::string& id,
                             const PaintStruct& ps,
                             const std::string& key,
-                            const T& value) const
-        {
-            const auto& p = GetWidgetProperty(id, ps, key);
-            return p.GetValue(value);
-        }
+                            const T& value) const;
+
+        template<typename T> inline
+        T GetWidgetProperty(const std::string& id,
+                            const std::string& klass,
+                            const std::string& key,
+                            const T& value) const;
+
+        template<typename RenderPass>
+        void DrawShape(const gfx::FRect& rect, const gfx::Material& material, const RenderPass& pass, UIStyle::WidgetShape shape) const;
+
     private:
         UIStyle* mStyle = nullptr;
-        gfx::Painter* mPainter = nullptr;
+        mutable gfx::Painter* mPainter = nullptr;
+
+        struct ClippingMask {
+            std::string name;
+            gfx::FRect rect;
+            UIStyle::WidgetShape shape = UIStyle::WidgetShape::Rectangle;
+        };
+        std::vector<ClippingMask> mClippingMaskStack;
+
+        base::bitflag<Flags> mFlags;
 
         // "static" material instances based on a combination of properties
         // from a) style (JSON) file, b) style strings that are loaded through
         // calls to ParseStyle.
-        mutable std::unordered_map<std::string,
-                    std::unique_ptr<gfx::Material>> mMaterials;
+        mutable std::unordered_map<std::string, std::unique_ptr<gfx::Material>> mMaterials;
         // "dynamic" materials that are only per specific widget and take
         // precedence over the base materials (see above).
         // Created and deleted on the fly based on the material information
