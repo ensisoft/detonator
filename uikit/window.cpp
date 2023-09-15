@@ -413,7 +413,7 @@ void Window::Paint(TransientState& state, Painter& painter, double time, PaintHo
     painter.EndDrawWidgets();
 }
 
-void Window::Show(TransientState& state, AnimationStateArray* animations)
+void Window::Open(TransientState& state, AnimationStateArray* animations)
 {
     if (animations)
     {

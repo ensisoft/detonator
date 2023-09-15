@@ -177,7 +177,7 @@ namespace uik
         // Paint the window and its widgets.
         void Paint(TransientState& state, Painter& painter, double time = 0.0, PaintHook* hook = nullptr) const;
 
-        void Show(TransientState& state, AnimationStateArray* animations = nullptr);
+        void Open(TransientState& state, AnimationStateArray* animations = nullptr);
 
         // Update the window and its widgets.
         void Update(TransientState& state, double time, float dt, AnimationStateArray* animations = nullptr);

@@ -1126,7 +1126,7 @@ void UIWidget::on_actionPlay_triggered()
     mState.active_window = std::make_unique<uik::Window>(mState.window);
     mState.active_state  = std::make_unique<uik::TransientState>();
     mState.animation_state = std::make_unique<uik::AnimationStateArray>();
-    mState.active_window->Show(*mState.active_state, mState.animation_state.get());
+    mState.active_window->Open(*mState.active_state, mState.animation_state.get());
     SetEnabled(mUI.actionPlay,  false);
     SetEnabled(mUI.actionPause, true);
     SetEnabled(mUI.actionStop,  true);

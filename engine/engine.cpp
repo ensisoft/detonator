@@ -887,7 +887,7 @@ private:
         mUIState.Clear();
         mUIAnimations.clear();
         window->Style(mUIPainter);
-        window->Show(mUIState, &mUIAnimations);
+        window->Open(mUIState, &mUIAnimations);
         // push the window to the top of the UI stack. this is the new
         // currently active UI
         mUIStack.push(window);
@@ -921,7 +921,7 @@ private:
             mUIAnimations.clear();
 
             ui->Style(mUIPainter);
-            ui->Show(mUIState, &mUIAnimations);
+            ui->Open(mUIState, &mUIAnimations);
         }
     }
     void OnAction(engine::PlayAction& action)
