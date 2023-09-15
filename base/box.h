@@ -70,6 +70,17 @@ namespace base
             mBotLeft  = ToVec2(mat * ToVec4(glm::vec2(0.0f, h)));
             mBotRight = ToVec2(mat * ToVec4(glm::vec2(w,    h)));
         }
+        FBox(const glm::mat4& mat, const FRect& rect)
+        {
+            const auto w = rect.GetWidth();
+            const auto h = rect.GetHeight();
+            const auto x = rect.GetX();
+            const auto y = rect.GetY();
+            mTopLeft  = ToVec2(mat * ToVec4(glm::vec2(x,     y    )));
+            mTopRight = ToVec2(mat * ToVec4(glm::vec2(x + w, y    )));
+            mBotLeft  = ToVec2(mat * ToVec4(glm::vec2(x,     y + h)));
+            mBotRight = ToVec2(mat * ToVec4(glm::vec2(x + w, y + h)));
+        }
         void Transform(const glm::mat4& mat)
         {
             mTopLeft  = ToVec2(mat * ToVec4(mTopLeft));
