@@ -2560,7 +2560,10 @@ void TextMaterial::ResetUniforms()
 {}
 void TextMaterial::SetUniforms(const UniformMap& uniforms)
 {}
-
+void TextMaterial::ComputeTextMetrics(unsigned int* width, unsigned int* height) const
+{
+    mText.ComputeTextMetrics(width, height);
+}
 
 GradientClass CreateMaterialClassFromColor(const Color4f& top_left,
                                            const Color4f& top_right,
@@ -2742,6 +2745,49 @@ MaterialClassInst CreateMaterialFromTexture(std::string gpu_id, Texture* texture
     material.SetTextureMap(0, std::move(map));
 
     return MaterialClassInst(material);
+}
+
+TextMaterial CreateMaterialFromText(const std::string& text,
+                                    const std::string& font,
+                                    const gfx::Color4f& color,
+                                    unsigned font_size_px,
+                                    unsigned raster_width,
+                                    unsigned raster_height,
+                                    unsigned text_align,
+                                    unsigned text_prop,
+                                    float line_height)
+{
+    TextBuffer buff(raster_width, raster_height);
+    if ((text_align & 0xf) == TextAlign::AlignTop)
+        buff.SetAlignment(TextBuffer::VerticalAlignment::AlignTop);
+    else if((text_align & 0xf) == TextAlign::AlignVCenter)
+        buff.SetAlignment(TextBuffer::VerticalAlignment::AlignCenter);
+    else if ((text_align & 0xf) == TextAlign::AlignBottom)
+        buff.SetAlignment(TextBuffer::VerticalAlignment::AlignBottom);
+
+    if ((text_align & 0xf0) == TextAlign::AlignLeft)
+        buff.SetAlignment(TextBuffer::HorizontalAlignment::AlignLeft);
+    else if ((text_align & 0xf0) == TextAlign::AlignHCenter)
+        buff.SetAlignment(TextBuffer::HorizontalAlignment::AlignCenter);
+    else if ((text_align & 0xf0) == TextAlign::AlignRight)
+        buff.SetAlignment(TextBuffer::HorizontalAlignment::AlignRight);
+
+    const bool underline = text_prop & TextProp::Underline;
+    const bool blinking  = text_prop & TextProp::Blinking;
+
+    // Add blob of text in the buffer.
+    TextBuffer::Text text_and_style;
+    text_and_style.text       = text;
+    text_and_style.font       = font;
+    text_and_style.fontsize   = font_size_px;
+    text_and_style.underline  = underline;
+    text_and_style.lineheight = line_height;
+    buff.SetText(text_and_style);
+
+    TextMaterial material(std::move(buff));
+    material.SetPointSampling(true);
+    material.SetColor(color);
+    return material;
 }
 
 

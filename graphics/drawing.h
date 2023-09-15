@@ -64,24 +64,6 @@ class Painter;
 class Material;
 class Drawable;
 
-// Text alignment inside a rect
-enum TextAlign {
-    // Vertical text alignment
-    AlignTop     = 0x1,
-    AlignVCenter = 0x2,
-    AlignBottom  = 0x4,
-    // Horizontal text alignment
-    AlignLeft    = 0x10,
-    AlignHCenter = 0x20,
-    AlignRight   = 0x40
-};
-
-enum TextProp {
-    None      = 0x0,
-    Underline = 0x1,
-    Blinking  = 0x2
-};
-
 // Draw text inside the given rectangle.
 void DrawTextRect(Painter& painter,
     const std::string& text,
