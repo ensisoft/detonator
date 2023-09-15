@@ -67,6 +67,7 @@ namespace gfx
                 RefIsLessOrEqual,
                 RefIsMore,
                 RefIsMoreOrEqual,
+                // The stencil test passes if (ref & mask) == (stencil & mask)
                 RefIsEqual,
                 RefIsNotEqual
             };
@@ -82,7 +83,7 @@ namespace gfx
             StencilFunc  stencil_func  = StencilFunc::Disabled;
             // what to do when the stencil test fails.
             StencilOp    stencil_fail  = StencilOp::DontModify;
-            // what to do when the stencil test passes.
+            // what to do when the stencil test passes and the depth passes
             StencilOp    stencil_dpass = StencilOp::DontModify;
             // what to do when the stencil test passes but depth test fails.
             StencilOp    stencil_dfail = StencilOp::DontModify;

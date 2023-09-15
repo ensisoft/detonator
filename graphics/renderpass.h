@@ -47,6 +47,23 @@ namespace gfx
             state.depth_test   = Painter::DepthTest::Disabled;
             mPainter.Draw(list, state, pass);
         }
+        void Draw(const Drawable& drawable, const Transform& transform, const Material& material) const
+        {
+            Painter::RenderPassState state;
+            state.write_color  = true;
+            state.stencil_func = Painter::StencilFunc::Disabled;
+            state.depth_test   = Painter::DepthTest::Disabled;
+
+            const auto& mat = transform.GetAsMatrix();
+
+            Painter::DrawShape shape;
+            shape.material  = &material;
+            shape.drawable  = &drawable;
+            shape.transform = &mat;
+            Painter::DrawList list;
+            list.push_back(shape);
+            mPainter.Draw(list, state, detail::GenericShaderPass());
+        }
     private:
         Painter& mPainter;
     };
@@ -59,26 +76,28 @@ namespace gfx
         using DrawShape  = Painter::DrawShape;
         using DrawList   = Painter::DrawList;
 
-        StencilMaskPass(StencilClearValue clear_value, StencilWriteValue write_value, Painter& painter)
+        enum class StencilFunc {
+            Overwrite,
+            BitwiseAnd,
+            OverlapIncrement
+        };
+
+        StencilMaskPass(StencilClearValue clear_value, StencilWriteValue write_value, Painter& painter, StencilFunc func = StencilFunc::Overwrite)
           : mStencilWriteValue(write_value)
+          , mStencilFunc(func)
           , mPainter(painter)
         {
             painter.ClearStencil(clear_value);
         }
-        StencilMaskPass(StencilWriteValue write_value, Painter& painter)
+        StencilMaskPass(StencilWriteValue write_value, Painter& painter, StencilFunc func = StencilFunc::Overwrite)
           : mStencilWriteValue(write_value)
+          , mStencilFunc(func)
           , mPainter(painter)
         {}
         void Draw(const Drawable& drawable, const Transform& transform, const Material& material) const
         {
             Painter::RenderPassState state;
-            state.write_color   = false;
-            state.depth_test    = Painter::DepthTest::Disabled;
-            state.stencil_func  = Painter::StencilFunc::PassAlways;
-            state.stencil_dpass = Painter::StencilOp::WriteRef;
-            state.stencil_dfail = Painter::StencilOp::WriteRef;
-            state.stencil_ref   = mStencilWriteValue;
-            state.stencil_mask  = 0xff;
+            SetState(state);
 
             detail::StencilShaderPass pass;
             mPainter.Draw(drawable, transform, material, state, pass);
@@ -86,19 +105,40 @@ namespace gfx
         void Draw(const DrawList& list) const
         {
             Painter::RenderPassState state;
+            SetState(state);
+
+            detail::StencilShaderPass pass;
+            mPainter.Draw(list, state, pass);
+        }
+        void SetState(Painter::RenderPassState& state) const
+        {
             state.write_color   = false;
             state.depth_test    = Painter::DepthTest::Disabled;
-            state.stencil_func  = Painter::StencilFunc::PassAlways;
             state.stencil_dpass = Painter::StencilOp::WriteRef;
             state.stencil_dfail = Painter::StencilOp::WriteRef;
             state.stencil_ref   = mStencilWriteValue;
             state.stencil_mask  = 0xff;
 
-            detail::StencilShaderPass pass;
-            mPainter.Draw(list, state, pass);
+            if (mStencilFunc == StencilFunc::Overwrite)
+            {
+                state.stencil_func = Painter::StencilFunc::PassAlways;
+            }
+            else if (mStencilFunc == StencilFunc::BitwiseAnd)
+            {
+                state.stencil_ref  = 1;
+                state.stencil_func = Painter::StencilFunc::RefIsEqual;
+                state.stencil_fail = Painter::StencilOp::WriteZero;
+            }
+            else if (mStencilFunc == StencilFunc::OverlapIncrement)
+            {
+                state.stencil_func  = Painter::StencilFunc::RefIsEqual;
+                state.stencil_dpass = Painter::StencilOp::Increment;
+                state.stencil_fail  = Painter::StencilOp::WriteZero;
+            }
         }
     private:
         const WriteValue mStencilWriteValue = 1;
+        const StencilFunc mStencilFunc;
         Painter& mPainter;
     };
 
