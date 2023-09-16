@@ -468,6 +468,54 @@ void Window::Open(TransientState& state, AnimationStateArray* animations)
     state.SetValue(mId + "/focused-widget", widget);
 }
 
+void Window::Close(TransientState& state, AnimationStateArray* animations)
+{
+    if (state.HasValue(mId + "/closing"))
+        return;
+
+    if (animations)
+    {
+        // start animations that trigger on $OnClose
+        for (auto& anim : *animations)
+        {
+            if (anim.trigger != Animation::Trigger::Close)
+                continue;
+
+            anim.state = Animation::State::Active;
+            anim.time  = -anim.delay;
+        }
+    }
+    state.SetValue(mId + "/closing", true);
+}
+
+bool Window::IsClosed(const TransientState& state, const AnimationStateArray* animations) const
+{
+    bool closing = false;
+    state.GetValue(mId + "/closing", &closing);
+    if (!closing)
+        return false;
+
+    if (!animations)
+        return true;
+
+    for (const auto& anim : *animations)
+    {
+        if (anim.trigger == Animation::Trigger::Close)
+        {
+            if (anim.state == Animation::State::Active)
+                return false;
+        }
+    }
+    return true;
+}
+
+bool Window::IsClosing(const TransientState& state) const
+{
+    bool closing = false;
+    state.GetValue(mId + "/closing", &closing);
+    return closing;
+}
+
 void Window::Update(TransientState& state, double time, float dt, AnimationStateArray* animations)
 {
     for (auto& widget : mWidgets)
