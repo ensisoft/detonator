@@ -45,7 +45,14 @@ namespace uik
 
     struct Animation {
         enum class Trigger {
-            Open, Click, ValueChange, GainFocus, LostFocus, MouseEnter, MouseLeave
+            Open,
+            Close,
+            Click,
+            ValueChange,
+            GainFocus,
+            LostFocus,
+            MouseEnter,
+            MouseLeave
         };
         enum class State {
             Active, Inactive

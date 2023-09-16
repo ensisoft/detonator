@@ -320,6 +320,8 @@ bool ParseAnimations(const std::string& str, std::vector<Animation>* animations)
         std::optional<uik::Animation::Trigger> trigger;
         if (line == "$OnOpen")
             trigger = uik::Animation::Trigger::Open;
+        else if (line == "$OnClose")
+            trigger = uik::Animation::Trigger::Close;
         else if (line == "$OnClick")
             trigger = uik::Animation::Trigger::Click;
         else if (line == "$OnValue")

@@ -179,6 +179,11 @@ namespace uik
 
         void Open(TransientState& state, AnimationStateArray* animations = nullptr);
 
+        void Close(TransientState& state, AnimationStateArray* animations = nullptr);
+
+        bool IsClosed(const TransientState& state, const AnimationStateArray* animations = nullptr) const;
+        bool IsClosing(const TransientState& state) const;
+
         // Update the window and its widgets.
         void Update(TransientState& state, double time, float dt, AnimationStateArray* animations = nullptr);
 
