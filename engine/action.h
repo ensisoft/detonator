@@ -39,6 +39,8 @@ namespace engine
     // Close the topmost UI and pop it off of the UI stack.
     struct CloseUIAction {
         int result = 0;
+        std::string action_id;
+        std::string window_name;
     };
 
     // Action to start playing the given scene.
