@@ -30,10 +30,15 @@ namespace gui
     class DlgGradient : public QDialog
     {
         Q_OBJECT
+
     public:
         DlgGradient(QWidget* parent) : QDialog(parent)
         {
             mUI.setupUi(this);
+            connect(mUI.colorMap0, &color_widgets::ColorSelector::colorChanged, this, &DlgGradient::ColorMapColorChanged);
+            connect(mUI.colorMap1, &color_widgets::ColorSelector::colorChanged, this, &DlgGradient::ColorMapColorChanged);
+            connect(mUI.colorMap2, &color_widgets::ColorSelector::colorChanged, this, &DlgGradient::ColorMapColorChanged);
+            connect(mUI.colorMap3, &color_widgets::ColorSelector::colorChanged, this, &DlgGradient::ColorMapColorChanged);
         }
         void SetColor(const QColor& color, int index)
         {
@@ -60,6 +65,9 @@ namespace gui
             else BUG("Incorrect color index.");
             return QColor();
         }
+    signals:
+        void ColorChanged(QColor color0, QColor color1, QColor color2, QColor color3);
+
     private slots:
         void on_btnAccept_clicked()
         {
@@ -68,6 +76,13 @@ namespace gui
         void on_btnCancel_clicked()
         {
             reject();
+        }
+        void ColorMapColorChanged(QColor color)
+        {
+            emit ColorChanged(mUI.colorMap0->color(),
+                              mUI.colorMap1->color(),
+                              mUI.colorMap2->color(),
+                              mUI.colorMap3->color());
         }
     private:
         Ui::DlgGradient mUI;
