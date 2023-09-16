@@ -546,6 +546,7 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     SetValue(mUI.zoom, 1.0f);
     SetEnabled(mUI.actionPause, false);
     SetEnabled(mUI.actionStop, false);
+    SetEnabled(mUI.actionClose, false);
     SetEnabled(mUI.btnEditScript, mState.window.HasScriptFile());
     setWindowTitle(GetValue(mUI.windowName));
 
@@ -662,6 +663,8 @@ void UIWidget::AddActions(QToolBar& bar)
     bar.addSeparator();
     bar.addAction(mUI.actionStop);
     bar.addSeparator();
+    bar.addAction(mUI.actionClose);
+    bar.addSeparator();
     bar.addAction(mUI.actionSave);
     bar.addSeparator();
     bar.addAction(mUI.actionNewLabel);
@@ -681,6 +684,8 @@ void UIWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionPause);
     menu.addSeparator();
     menu.addAction(mUI.actionStop);
+    menu.addSeparator();
+    menu.addAction(mUI.actionClose);
     menu.addSeparator();
     menu.addAction(mUI.actionSave);
     menu.addSeparator();
@@ -968,6 +973,11 @@ void UIWidget::Update(double dt)
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
         }
         mState.active_window->TriggerAnimations(actions, *mState.active_state, *mState.animation_state);
+
+        if (mState.active_window->IsClosed(*mState.active_state, mState.animation_state.get()))
+        {
+            on_actionStop_triggered();
+        }
     }
     mCurrentTime += dt;
 }
@@ -1123,13 +1133,14 @@ void UIWidget::on_widgetColor_colorChanged(QColor color)
 void UIWidget::on_actionPlay_triggered()
 {
     mPlayState = PlayState::Playing;
-    mState.active_window = std::make_unique<uik::Window>(mState.window);
-    mState.active_state  = std::make_unique<uik::TransientState>();
+    mState.active_window   = std::make_unique<uik::Window>(mState.window);
+    mState.active_state    = std::make_unique<uik::TransientState>();
     mState.animation_state = std::make_unique<uik::AnimationStateArray>();
     mState.active_window->Open(*mState.active_state, mState.animation_state.get());
-    SetEnabled(mUI.actionPlay,  false);
-    SetEnabled(mUI.actionPause, true);
-    SetEnabled(mUI.actionStop,  true);
+    SetEnabled(mUI.actionPlay,           false);
+    SetEnabled(mUI.actionPause,          true);
+    SetEnabled(mUI.actionStop,           true);
+    SetEnabled(mUI.actionClose,          true);
     SetEnabled(mUI.baseProperties,       false);
     SetEnabled(mUI.viewTransform,        false);
     SetEnabled(mUI.widgetTree,           false);
@@ -1164,9 +1175,11 @@ void UIWidget::on_actionStop_triggered()
     mState.active_window.reset();
     mState.animation_state.reset();
     mState.painter->DeleteMaterialInstances();
-    SetEnabled(mUI.actionPlay,  true);
-    SetEnabled(mUI.actionPause, false);
-    SetEnabled(mUI.actionStop,  false);
+
+    SetEnabled(mUI.actionPlay,          true);
+    SetEnabled(mUI.actionPause,         false);
+    SetEnabled(mUI.actionStop,          false);
+    SetEnabled(mUI.actionClose,         false);
     SetEnabled(mUI.baseProperties,      true);
     SetEnabled(mUI.viewTransform,       true);
     SetEnabled(mUI.widgetTree,          true);
@@ -1190,9 +1203,18 @@ void UIWidget::on_actionStop_triggered()
     SetEnabled(mUI.chkShowGrid,          true);
     SetEnabled(mUI.chkShowBounds,        true);
     SetEnabled(mUI.chkShowTabOrder,      true);
-
     mMessageQueue.clear();
 }
+
+void UIWidget::on_actionClose_triggered()
+{
+    if (!mState.active_window)
+        return;
+
+    // start a closing animation
+    mState.active_window->Close(*mState.active_state, mState.animation_state.get());
+}
+
 void UIWidget::on_actionSave_triggered()
 {
     if (!MustHaveInput(mUI.windowName))
@@ -2006,7 +2028,7 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
 
         // paint the design state copy of the window.
         uik::TransientState s;
-        mState.painter->SetFlag(engine::UIPainter::Flags::ClipWidgets, GetValue(mUI.chkClipWidgets));
+        mState.painter->SetFlag(engine::UIPainter::Flags::ClipWidgets, true);
         mState.window.Paint(s , *mState.painter, 0.0, &hook);
 
         // draw the window outline

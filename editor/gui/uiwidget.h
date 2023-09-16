@@ -78,6 +78,7 @@ namespace gui
         void on_actionPlay_triggered();
         void on_actionPause_triggered();
         void on_actionStop_triggered();
+        void on_actionClose_triggered();
         void on_actionSave_triggered();
         void on_actionNewForm_triggered();
         void on_actionNewLabel_triggered();

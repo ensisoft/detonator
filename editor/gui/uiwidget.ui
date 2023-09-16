@@ -2141,6 +2141,18 @@
     <string>Place a new toggle box</string>
    </property>
   </action>
+  <action name="actionClose">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/app_exit.png</normaloff>:/16x16_ico_png/app_exit.png</iconset>
+   </property>
+   <property name="text">
+    <string>Close</string>
+   </property>
+   <property name="toolTip">
+    <string>Close the open window</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
