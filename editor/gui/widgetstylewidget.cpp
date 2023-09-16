@@ -26,6 +26,8 @@
 #  include <Qt-Color-Widgets/include/ColorDialog>
 #include "warnpop.h"
 
+#include <optional>
+
 #include "uikit/widget.h"
 #include "engine/ui.h"
 #include "engine/color.h"
@@ -464,17 +466,37 @@ void WidgetStyleWidget::SetMaterialColor(const char* key)
         color_widgets::ColorDialog dlg(this);
         dlg.setAlphaEnabled(true);
         dlg.setButtonMode(color_widgets::ColorDialog::ButtonMode::OkCancel);
+
+        connect(&dlg, &color_widgets::ColorDialog::colorChanged, [this, &key](QColor color) {
+            mStyle->SetMaterial(MapProperty(key), engine::detail::UIColor(ToGfx(color)));
+            mPainter->DeleteMaterialInstanceByKey(MapProperty(key));
+        });
+
+        std::optional<gfx::Color4f> previous;
+
         if (const auto* material = mStyle->GetMaterialType(MapProperty(key)))
         {
             if (const auto* p = dynamic_cast<const engine::detail::UIColor*>(material))
-                dlg.setColor(FromGfx(p->GetColor()));
+            {
+                previous = p->GetColor();
+
+                dlg.setColor(FromGfx(previous.value()));
+            }
         }
         if (dlg.exec() == QDialog::Rejected)
+        {
+            if (previous.has_value())
+            {
+                mStyle->SetMaterial(MapProperty(key), engine::detail::UIColor(previous.value()));
+                mPainter->DeleteMaterialInstanceByKey(MapProperty(key));
+            }
+            else
+            {
+                mStyle->DeleteMaterial(MapProperty(key));
+                mPainter->DeleteMaterialInstanceByKey(MapProperty(key));
+            }
             return;
-
-        mStyle->SetMaterial(MapProperty(key), engine::detail::UIColor(ToGfx(dlg.color())));
-
-        mPainter->DeleteMaterialInstanceByKey(MapProperty(key));
+        }
 
         UpdateWidgetStyleString();
 
@@ -489,7 +511,23 @@ void WidgetStyleWidget::SetMaterialGradient(const char* key)
 
     if (mWidget)
     {
+        std::optional<engine::detail::UIGradient> previous_gradient;
+
         DlgGradient dlg(this);
+
+        connect(&dlg, &DlgGradient::ColorChanged, [this, &key](QColor color0,
+                                                               QColor color1,
+                                                               QColor color2,
+                                                               QColor color3) {
+            engine::detail::UIGradient gradient;
+            gradient.SetColor(ToGfx(color0), Index::TopLeft);
+            gradient.SetColor(ToGfx(color1), Index::TopRight);
+            gradient.SetColor(ToGfx(color2), Index::BottomLeft);
+            gradient.SetColor(ToGfx(color3), Index::BottomRight);
+            mStyle->SetMaterial(MapProperty(key), gradient);
+            mPainter->DeleteMaterialInstanceByKey(MapProperty(key));
+        });
+
         if (const auto* material = mStyle->GetMaterialType(MapProperty(key)))
         {
             if (const auto* p = dynamic_cast<const engine::detail::UIGradient*>(material))
@@ -499,6 +537,8 @@ void WidgetStyleWidget::SetMaterialGradient(const char* key)
                 const auto color_bot_left = p->GetColor(Index::BottomLeft);
                 const auto color_bot_right = p->GetColor(Index::BottomRight);
 
+                previous_gradient = *p;
+
                 dlg.SetColor(FromGfx(color_top_left), 0);
                 dlg.SetColor(FromGfx(color_top_right), 1);
                 dlg.SetColor(FromGfx(color_bot_left), 2);
@@ -506,16 +546,19 @@ void WidgetStyleWidget::SetMaterialGradient(const char* key)
             }
         }
         if (dlg.exec() == QDialog::Rejected)
+        {
+            if (previous_gradient.has_value())
+            {
+                mStyle->SetMaterial(MapProperty(key), previous_gradient.value());
+                mPainter->DeleteMaterialInstanceByKey(MapProperty(key));
+            }
+            else
+            {
+                mStyle->DeleteMaterial(MapProperty(key));
+                mPainter->DeleteMaterialInstanceByKey(MapProperty(key));
+            }
             return;
-
-        engine::detail::UIGradient gradient;
-        gradient.SetColor(ToGfx(dlg.GetColor(0)), Index::TopLeft);
-        gradient.SetColor(ToGfx(dlg.GetColor(1)), Index::TopRight);
-        gradient.SetColor(ToGfx(dlg.GetColor(2)), Index::BottomLeft);
-        gradient.SetColor(ToGfx(dlg.GetColor(3)), Index::BottomRight);
-        mStyle->SetMaterial(MapProperty(key), std::move(gradient));
-
-        mPainter->DeleteMaterialInstanceByKey(MapProperty(key));
+        }
 
         UpdateWidgetStyleString();
 
