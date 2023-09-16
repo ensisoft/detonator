@@ -908,12 +908,16 @@ void InitLuaDoc()
                                          "Returns a reference to the window that was opened so it's possible to use the "
                                          "returned window object to query for widgets etc. and set their initial values conveniently.",
                  "uik.Window|string", "window|name");
-    DOC_METHOD_1("void", "CloseUI", "Close the topmost UI Window and pop it off the window stack. <br>"
-                                    "If there's no UI currently open then nothing is done.<br>"
+    DOC_METHOD_1("void", "CloseUI", "Request to close the topmost UI and pop it off of the window stack. <br>"
+                                    "If there's no UI open when the request executes nothing is done.<br>"
+                                    "This method is deprecated and should not be used. There's no conditional "
+                                    "to check whether the close is a duplicate so it's easy to manipulate the UI"
+                                    " stack incorrectly by adding superfluous close commands. A better alternative is "
+                                    "to use CloseUI(ui, exit_code) which will filter out duplicate close requests."
                                     "The associated exit_code will be passed to any OnUIClose event handlers as the result value.",
                  "int", "exit_code");
-    DOC_METHOD_2("void", "CloseUI", "Conditionally close the topmost UI if the UI name matches the given name.<br>"
-                                    "If there's no UI currently open of the name doesn't match then nothing is done.<br>"
+    DOC_METHOD_2("void", "CloseUI", "Request to conditionally close the topmost UI if the UI name matches the given name.<br>"
+                                    "If there's no UI open or if the UI's name does not match the name_filer then nothing is done.<br>"
                                     "The associated exit_code will be passed to any OnUIClose event handlers as the result value.",
                  "string", "name_filter", "int", "exit_code");
     DOC_METHOD_1("void", "PostEvent", "Post a GameEvent to all OnGameEvent handlers.", "game.GameEvent", "event");
