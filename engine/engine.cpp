@@ -27,6 +27,7 @@
 #include <memory>
 #include <vector>
 #include <stack>
+#include <queue>
 
 #include "base/bitflag.h"
 #include "base/logging.h"
@@ -628,7 +629,8 @@ public:
         if (mFlags.test(Flags::BlockKeyboard))
             return;
 
-        SendUIKeyEvent(key, &uik::Window::KeyDown);
+        if (HaveOpenUI())
+            SendUIKeyEvent(key, &uik::Window::KeyDown);
 
         mRuntime->OnKeyDown(key);
     }
@@ -637,7 +639,8 @@ public:
         if (mFlags.test(Flags::BlockKeyboard))
             return;
 
-        SendUIKeyEvent(key, &uik::Window::KeyUp);
+        if (HaveOpenUI())
+            SendUIKeyEvent(key, &uik::Window::KeyUp);
 
         mRuntime->OnKeyUp(key);
     }
@@ -835,8 +838,19 @@ private:
             return nullptr;
         return mUIStack.top().get();
     }
-    bool HaveOpenUI() const
-    { return !mUIStack.empty(); }
+    inline bool HaveOpenUI() const
+    {
+        auto* ui = GetUI();
+        if (ui == nullptr)
+            return false;
+        // disregard window if it's closing or already closed. this filters
+        // out keyboard and mouse event input that would otherwise be dispatched
+        // to the window's input handler callbacks
+        if (ui->IsClosing(mUIState) || ui->IsClosing(mUIState))
+            return false;
+
+        return true;
+    }
 
     void LoadStyle(const std::string& uri)
     {
@@ -879,50 +893,88 @@ private:
 
     void OnAction(const engine::OpenUIAction& action)
     {
-        auto window = action.ui;
-
-        LoadStyle(window->GetStyleName());
-        LoadKeyMap(window->GetKeyMapFile());
-
-        mUIState.Clear();
-        mUIAnimations.clear();
-        window->Style(mUIPainter);
-        window->Open(mUIState, &mUIAnimations);
-        // push the window to the top of the UI stack. this is the new
-        // currently active UI
-        mUIStack.push(window);
-
-        mUIPainter.DeleteMaterialInstances();
-
-        auto* ui = mUIStack.top().get();
-        mRuntime->OnUIOpen(ui);
-        mRuntime->SetCurrentUI(ui);
+        mUIStackActions.push(action);
     }
     void OnAction(const engine::CloseUIAction& action)
     {
-        // get the current top UI (if any) and close it and
-        // pop it off the UI stack.
-        if (auto* ui = GetUI())
+        if (mUIStackActions.empty())
         {
-            mRuntime->OnUIClose(ui, action.result);
-            mUIStack.pop();
+            mUIStackActions.push(action);
+            return;
         }
-        mRuntime->SetCurrentUI(GetUI());
 
-        // If there's another UI in the UI stack then reapply
-        // styling information.
-        if (auto* ui = GetUI())
+        // filter out repeat input here, so for example if the game reacts to
+        // a key press such as Escape to close an UI, it's possible the key
+        // press is dispatched multiple times. if each key press callback
+        // then does Game:CloseUI(0) the state will end wrong since the close
+        // is done multiple times and multiple windows will close unless
+        // duplicate closes are filtered out and the intention (most likely)
+        // was to close just the top most window.
+        //
+        // Keep in mind that we don't have a mechanism to expose transient state
+        // to the game, i.e. there's no window:IsClosing() type of functionality
+        // available in the window object. Arguably this would be useful for
+        // the game programmer but that would result in mixing the window's
+        // persistent and transient state together which we want to avoid or then
+        // find a way to expose the transient window state separately somehow.
+        //
+        // But ultimately it would seem that this is a problem that can (and should?)
+        // be solved for everyone once by simply filtering out superfluous window
+        // close requests. This should make life easier for all games for once and
+        // and for all. Theoretically it could be possible that the game *wants to*
+        // open the same window type multiple times such, but really I expect this
+        // to be an unwanted condition caused by superfluous input handling.
+        //
+
+        const auto& back = mUIStackActions.back();
+        if (const auto* last_close = std::get_if<engine::CloseUIAction>(&back))
         {
-            LoadStyle(ui->GetStyleName());
-            LoadKeyMap(ui->GetKeyMapFile());
+            // if theres an action id and it's a dupe with what was already
+            // posted onto the UI stack queue ignore it.
+            if (!last_close->action_id.empty() && !action.action_id.empty())
+            {
+                if (last_close->action_id == action.action_id)
+                {
+                    DEBUG("Ignored duplicate/superfluous UI close. [ui='%1']", action.window_name);
+                    return;
+                }
+            }
 
-            mUIPainter.DeleteMaterialInstances();
-            mUIState.Clear();
-            mUIAnimations.clear();
-
-            ui->Style(mUIPainter);
-            ui->Open(mUIState, &mUIAnimations);
+            // if there's target window name and it's a dupe then ignore it.
+            if (!last_close->window_name.empty() && !action.window_name.empty())
+            {
+                if (last_close->window_name == action.window_name)
+                {
+                    DEBUG("Ignored duplicate/superfluous UI close. [ui='%1']", action.window_name);
+                    return;
+                }
+            }
         }
+
+        // window name  is also used as a conditional close,
+        // in other words the close takes place only if there is a window
+        // with that name open at the right time.
+        // this is useful for closing UIs that are conditionally open.
+        //
+        auto window_stack = mUIStack;
+        auto pending_actions = mUIStackActions;
+        while (!pending_actions.empty())
+        {
+            const auto& action = pending_actions.front();
+            if (const auto* closing_action = std::get_if<engine::CloseUIAction>(&action))
+                window_stack.pop();
+            else if (const auto* opening_action = std::get_if<engine::OpenUIAction>(&action))
+                window_stack.push(opening_action->ui);
+            else BUG("Missing UI action handling.");
+            pending_actions.pop();
+        }
+        if (window_stack.empty())
+            return;
+        const auto& future_top_most_window = window_stack.top();
+        if (future_top_most_window->GetName() != action.window_name)
+            return;
+
+        mUIStackActions.push(action);
     }
     void OnAction(engine::PlayAction& action)
     {
@@ -1133,10 +1185,108 @@ private:
             ui->TriggerAnimations(actions, mUIState, mUIAnimations);
         }
 
+        PerformUIStackActions();
+
         gfx::Drawable::Environment env; // todo:
         mMouseMaterial->Update(dt);
         mMouseDrawable->Update(env, dt);
     }
+    void PerformUIStackActions()
+    {
+        // The UI stack manipulation is done through a "queue" so that
+        // the actions execute in order and the next action will not start
+        // until the previous UI stack operation has completed.
+        // this important for the following scenario for example.
+        //
+        // Game:CloseUI(0)
+        // Game:OpenUI('MainMenu')
+        //
+        // the open cannot run until the previous UI has closed properly
+        // and finished all it's $OnClose animations etc.
+        //
+
+        while (!mUIStackActions.empty())
+        {
+            const auto& action = mUIStackActions.front();
+            if (const auto* closing_action = std::get_if<engine::CloseUIAction>(&action))
+            {
+                auto* ui = GetUI();
+                if (ui == nullptr)
+                {
+                    WARN("Request to close a UI but there's no such UI open. ui='%1']", closing_action->window_name);
+                    mUIStackActions.pop();
+                    continue;
+                }
+
+                if (ui->IsClosed(mUIState, &mUIAnimations))
+                {
+                    DEBUG("Closing UI '%1'", ui->GetName());
+
+                    int close_result = 0;
+                    mUIState.GetValue("close_result", &close_result);
+                    mUIState.DeleteValue("close_result");
+                    mRuntime->OnUIClose(ui, close_result);
+
+                    // pop this UI off of the UI stack
+                    mUIStack.pop();
+
+                    // GetUI could be nullptr at this point.
+                    PrepareUI(GetUI());
+
+                    mRuntime->SetCurrentUI(GetUI());
+
+                    mUIStackActions.pop();
+                }
+                else if (!ui->IsClosing(mUIState))
+                {
+                    mUIState.SetValue("close_result", closing_action->result);
+                    ui->Close(mUIState, &mUIAnimations);
+                    break;
+                } else break;
+            }
+            else if (const auto* open_action = std::get_if<engine::OpenUIAction>(&action))
+            {
+                auto ui = open_action->ui;
+
+                mUIStack.push(ui);
+
+                PrepareUI(GetUI());
+
+                mRuntime->OnUIOpen(GetUI());
+                mRuntime->SetCurrentUI(GetUI());
+
+                mUIStackActions.pop();
+
+                DEBUG("Opened new UI '%1'", ui->GetName());
+            }
+        }
+    }
+
+    void PrepareUI(uik::Window* ui)
+    {
+        if (ui)
+        {
+            LoadStyle(ui->GetStyleName());
+            LoadKeyMap(ui->GetKeyMapFile());
+
+            mUIPainter.DeleteMaterialInstances();
+            mUIState.Clear();
+            mUIAnimations.clear();
+
+            ui->Style(mUIPainter);
+
+            // todo: open doesn't execute in consistent state since the open might
+            // have executed before (and some widgets were for example animated and their
+            // state was changed)
+            // but when open is called again the animation state is cleared thus resulting
+            // in half-ass animation state.
+            // we should keep the state available in the state stack then the problem
+            // is solved.
+            ui->Open(mUIState, &mUIAnimations);
+        }
+    }
+
+
     void PerformGameActions(float dt)
     {
         // todo: the action processing probably needs to be split
@@ -1339,6 +1489,8 @@ private:
     // possible that the stack is empty if the game is
     // not displaying any UI
     std::stack<std::shared_ptr<uik::Window>> mUIStack;
+    using UIStackAction = std::variant<engine::OpenUIAction, engine::CloseUIAction>;
+    std::queue<UIStackAction> mUIStackActions;
     // Transient UI state.
     uik::TransientState mUIState;
     uik::AnimationStateArray mUIAnimations;

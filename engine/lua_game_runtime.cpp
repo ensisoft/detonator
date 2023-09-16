@@ -556,12 +556,17 @@ void LuaRuntime::Init()
            self.mActionQueue.push(std::move(action));
        },
        [](LuaRuntime& self, const std::string& name, int result) {
-           if (self.mWindow && self.mWindow->GetName() == name)
-           {
-               CloseUIAction action;
-               action.result = result;
-               self.mActionQueue.push(std::move(action));
-           }
+           CloseUIAction action;
+           action.result = result;
+           action.window_name = name;
+           self.mActionQueue.push(std::move(action));
+       },
+       [](LuaRuntime& self, const uik::Window& window, int result) {
+           CloseUIAction action;
+           action.result = result;
+           action.window_name = window.GetName();
+           action.action_id = window.GetId();
+           self.mActionQueue.push(std::move(action));
        });
     engine["PostEvent"] =  [](LuaRuntime& self, const GameEvent& event) {
         PostEventAction action;
