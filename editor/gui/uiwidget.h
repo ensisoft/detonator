@@ -129,6 +129,7 @@ namespace gui
         void on_btnViewPlus90_clicked();
         void on_btnViewMinus90_clicked();
         void on_btnResetTransform_clicked();
+        void on_btnMoreViewportSettings_clicked();
         void on_btnEditWidgetStyle_clicked();
         void on_btnEditWidgetStyleString_clicked();
         void on_btnResetWidgetStyle_clicked();
