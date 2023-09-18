@@ -1158,6 +1158,23 @@ AudioWidget::~AudioWidget()
     ClearList(mUI.elements);
 }
 
+void AudioWidget::InitializeContent()
+{
+    auto* element = new AudioElement(FindElementDescription("FileSource"));
+    element->SetName("Kalimba");
+    if (auto* val = element->GetArgValue<std::string>("file"))
+        *val = "app://audio/music/Kalimba_short.mp3";
+
+    mScene->addItem(element);
+    mItems.push_back(element);
+    UpdateElementList();
+
+    SetValue(mUI.outElem, ListItemId(element->GetId()));
+    on_outElem_currentIndexChanged(0);
+    SetValue(mUI.outPort, ListItemId(element->GetOutputPort(0).name));
+    mGraphHash = GetHash();
+}
+
 QString AudioWidget::GetId() const
 {
     return GetValue(mUI.graphID);
@@ -1198,6 +1215,17 @@ void AudioWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionStop);
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
+    bar.addSeparator();
+
+    const auto& map = GetElementMap();
+    for (const auto& pair : map)
+    {
+        auto* action = bar.addAction(app::toString("%1", pair.first));
+        action->setIcon(QIcon("level:plugin-add.png"));
+        action->setData(app::FromUtf8(pair.first));
+        connect(action, &QAction::triggered, this, &AudioWidget::AddElementAction);
+    }
+
 }
 void AudioWidget::AddActions(QMenu& menu)
 {
@@ -1667,8 +1695,8 @@ void AudioWidget::on_view_customContextMenuRequested(QPoint pos)
     const auto& map = GetElementMap();
     for (const auto& pair : map)
     {
-        auto* action = menu.addAction(QIcon("icons:add.png"),
-            QString("New %1").arg(app::FromUtf8(pair.first)));
+        auto* action = menu.addAction(app::toString("New %1", pair.first));
+        action->setIcon(QIcon("icons:add.png"));
         action->setData(app::FromUtf8(pair.first));
         connect(action, &QAction::triggered, this, &AudioWidget::AddElementAction);
     }
@@ -1765,8 +1793,8 @@ void AudioWidget::on_outElem_currentIndexChanged(int)
     {
         const auto& port = item->GetOutputPort(i);
         ResourceListItem  li;
-        li.name = app::FromUtf8(port.name);
-        li.id   = app::FromUtf8(port.name);
+        li.name = port.name;
+        li.id   = port.name;
         ports.push_back(li);
     }
     SetList(mUI.outPort, ports);
