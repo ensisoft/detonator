@@ -262,7 +262,7 @@ font: 16pt &quot;Sans Serif&quot;;</string>
      <x>0</x>
      <y>0</y>
      <width>1053</width>
-     <height>28</height>
+     <height>36</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -347,6 +347,7 @@ font: 16pt &quot;Sans Serif&quot;;</string>
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionClose"/>
    <addaction name="actionPause"/>
    <addaction name="actionStep"/>
    <addaction name="separator"/>
@@ -565,7 +566,7 @@ font: 16pt &quot;Sans Serif&quot;;</string>
    </property>
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/32x32_ico_png/cog.png</normaloff>:/32x32_ico_png/cog.png</iconset>
+     <normaloff>:/32x32_ico_png/wrench.png</normaloff>:/32x32_ico_png/wrench.png</iconset>
    </property>
    <property name="text">
     <string>Debug Draw</string>
@@ -583,7 +584,7 @@ font: 16pt &quot;Sans Serif&quot;;</string>
    </property>
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/32x32_ico_png/cog.png</normaloff>:/32x32_ico_png/cog.png</iconset>
+     <normaloff>:/32x32_ico_png/wrench.png</normaloff>:/32x32_ico_png/wrench.png</iconset>
    </property>
    <property name="text">
     <string>Debug Log</string>
@@ -634,7 +635,7 @@ font: 16pt &quot;Sans Serif&quot;;</string>
    </property>
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/32x32_ico_png/cog.png</normaloff>:/32x32_ico_png/cog.png</iconset>
+     <normaloff>:/32x32_ico_png/wrench.png</normaloff>:/32x32_ico_png/wrench.png</iconset>
    </property>
    <property name="text">
     <string>Debug Msg</string>
