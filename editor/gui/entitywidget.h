@@ -158,6 +158,7 @@ namespace gui
         void on_btnEditAnimatorScript_clicked();
         void on_btnAddAnimatorScript_clicked();
         void on_btnResetAnimatorScript_clicked();
+        void on_btnMoreViewportSettings_clicked();
         void on_trackList_itemSelectionChanged();
         void on_idleTrack_currentIndexChanged(int);
         void on_scriptFile_currentIndexChanged(int);
@@ -235,12 +236,19 @@ namespace gui
         void on_btnResetTextRasterHeight_clicked();
         void on_mnVCenter_valueChanged(double);
         void on_mnHCenter_valueChanged(double);
-        void on_drawableItem_toggled(bool on);
-        void on_rigidBodyItem_toggled(bool on);
-        void on_textItem_toggled(bool on);
-        void on_spatialNode_toggled(bool on);
-        void on_fixture_toggled(bool on);
-        void on_mapNode_toggled(bool on);
+        void on_btnAddDrawable_clicked();
+        void on_btnDelDrawable_clicked();
+        void on_btnAddTextItem_clicked();
+        void on_btnDelTextItem_clicked();
+        void on_btnAddRigidBody_clicked();
+        void on_btnDelRigidBody_clicked();
+        void on_btnAddFixture_clicked();
+        void on_btnDelFixture_clicked();
+        void on_btnAddTilemapNode_clicked();
+        void on_btnDelTilemapNode_clicked();
+        void on_btnAddSpatialNode_clicked();
+        void on_btnDelSpatialNode_clicked();
+
         void on_animator_toggled(bool on);
         void on_tree_customContextMenuRequested(QPoint);
         void on_scriptVarList_customContextMenuRequested(QPoint);
@@ -255,6 +263,15 @@ namespace gui
         void ResourceUpdated(const app::Resource* resource);
         void PlaceNewParticleSystem();
         void PlaceNewCustomShape();
+
+    private:
+        void ToggleDrawable(bool on);
+        void ToggleRigidBody(bool on);
+        void ToggleTextItem(bool on);
+        void ToggleSpatialNode(bool on);
+        void ToggleFixture(bool on);
+        void ToggleTilemapNode(bool on);
+
     private:
         void InitScene(unsigned width, unsigned height);
         void PaintScene(gfx::Painter& painter, double secs);
@@ -299,7 +316,7 @@ namespace gui
             app::Workspace* workspace = nullptr;
             float camera_offset_x = 0.0f;
             float camera_offset_y = 0.0f;
-            TreeWidget* view = nullptr;
+            Ui::EntityWidget* view = nullptr;
         } mState;
 
         // Tree model impl for displaying scene's render tree
