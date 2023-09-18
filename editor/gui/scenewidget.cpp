@@ -519,8 +519,8 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
                                             std::placeholders::_2);
     // the menu for adding entities in the scene.
     mEntities = new QMenu(this);
-    mEntities->menuAction()->setIcon(QIcon("icons:entity.png"));
-    mEntities->menuAction()->setText("Entities");
+    mEntities->menuAction()->setIcon(QIcon("level:entity.png"));
+    mEntities->menuAction()->setText("Place Entity");
 
     mState.scene->SetName("My Scene");
     mState.workspace = workspace;
@@ -546,6 +546,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     SetValue(mUI.zoom, 1.0f);
     SetValue(mUI.ID, mState.scene->GetId());
     SetValue(mUI.name, mState.scene->GetName());
+    SetVisible(mUI.transform, false);
 
     RebuildMenus();
     RebuildCombos();
@@ -635,11 +636,9 @@ void SceneWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionPause);
     bar.addAction(mUI.actionStop);
     bar.addSeparator();
-    bar.addAction(mUI.actionSave);
-    bar.addSeparator();
     bar.addAction(mUI.actionPreview);
     bar.addSeparator();
-    bar.addAction(mUI.actionNodePlace);
+    bar.addAction(mUI.actionSave);
     bar.addSeparator();
     bar.addAction(mEntities->menuAction());
     bar.addSeparator();
@@ -651,11 +650,9 @@ void SceneWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionPause);
     menu.addAction(mUI.actionStop);
     menu.addSeparator();
-    menu.addAction(mUI.actionSave);
-    menu.addSeparator();
     menu.addAction(mUI.actionPreview);
     menu.addSeparator();
-    menu.addAction(mUI.actionNodePlace);
+    menu.addAction(mUI.actionSave);
     menu.addSeparator();
     menu.addAction(mEntities->menuAction());
     menu.addAction(mUI.actionFind);
@@ -1316,18 +1313,6 @@ void SceneWidget::on_actionNodeBreakLink_triggered()
     }
 }
 
-void SceneWidget::on_actionNodePlace_triggered()
-{
-    const auto snap = (bool)GetValue(mUI.chkSnap);
-    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
-    const auto grid_size = (unsigned)grid;
-    auto tool = std::make_unique<PlaceEntityTool>(mState, snap, grid_size);
-    tool->SetWorldPos(MapWindowCoordinateToWorld(mUI, mState, mUI.widget->mapFromGlobal(QCursor::pos())));
-
-    mCurrentTool = std::move(tool);
-    mUI.actionNodePlace->setChecked(true);
-}
-
 void SceneWidget::on_actionNodeDuplicate_triggered()
 {
     if (const auto* node = GetCurrentNode())
@@ -1590,6 +1575,15 @@ void SceneWidget::on_btnViewReset_clicked()
     SetValue(mUI.scaleY,     1.0f);
 }
 
+void SceneWidget::on_btnMoreViewportSettings_clicked()
+{
+    const auto visible = mUI.transform->isVisible();
+    SetVisible(mUI.transform, !visible);
+    if (!visible)
+        mUI.btnMoreViewportSettings->setArrowType(Qt::ArrowType::DownArrow);
+    else mUI.btnMoreViewportSettings->setArrowType(Qt::ArrowType::UpArrow);
+}
+
 void SceneWidget::on_widgetColor_colorChanged(QColor color)
 {
     mUI.widget->SetClearColor(ToGfx(color));
@@ -1776,6 +1770,16 @@ void SceneWidget::on_scriptVarList_customContextMenuRequested(QPoint)
     menu.exec(QCursor::pos());
 }
 
+void SceneWidget::PlaceAnyEntity()
+{
+    const auto snap = (bool)GetValue(mUI.chkSnap);
+    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
+    const auto grid_size = (unsigned)grid;
+    auto tool = std::make_unique<PlaceEntityTool>(mState, snap, grid_size);
+    tool->SetWorldPos(MapWindowCoordinateToWorld(mUI, mState, mUI.widget->mapFromGlobal(QCursor::pos())));
+    mCurrentTool = std::move(tool);
+}
+
 void SceneWidget::PlaceNewEntity()
 {
     const auto* action = qobject_cast<QAction*>(sender());
@@ -1951,6 +1955,24 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
             continue;
         const auto& pos = mState.scene->MapCoordsFromNodeBox(0.0f, 0.0f, &node);
         ShowError(base::FormatString("%1 Missing entity reference!", node.GetName()), gfx::FPoint(pos.x, pos.y), scene_painter);
+    }
+
+    if (mState.scene->GetNumNodes() == 0)
+    {
+        ShowInstruction(
+            "Create a new scene where game play takes place.\n\n"
+            "INSTRUCTIONS\n"
+            "1. Select 'Place Entity' in the main tool bar above.\n"
+            "2. Move the mouse to place the entity into the scene.\n"
+            "3. Use the mouse wheel to scroll through the entities.\n"
+            "4. Press 'Escape' to quit placing entities.\n\n\n"
+            "Hit 'Play' to animate materials and shapes.\n"
+            "Hit 'Test Run' to test the scene.\n"
+            "Hit 'Save' to save the scene.",
+            gfx::FRect(0, 0, width, height),
+            painter, 28
+        );
+        return;
     }
 
     // right arrow
@@ -2340,20 +2362,27 @@ void SceneWidget::TranslateCamera(float dx, float dy)
 void SceneWidget::RebuildMenus()
 {
     mEntities->clear();
-    for (size_t i=0; i<mState.workspace->GetNumResources(); ++i)
+
+    const auto& entities = mState.workspace->ListUserDefinedEntities();
+    if (entities.empty())
     {
-        const auto& resource = mState.workspace->GetResource(i);
-        const auto& name     = resource.GetName();
-        const auto& id       = resource.GetId();
-        if (resource.GetType() == app::Resource::Type::Entity)
-        {
-            QAction* action = mEntities->addAction(name);
-            action->setData(id);
-            connect(action, &QAction::triggered, this, &SceneWidget::PlaceNewEntity);
-        }
+        SetEnabled(mEntities, false);
+        return;
     }
-    SetEnabled(mEntities, !mEntities->isEmpty());
-    SetEnabled(mUI.actionNodePlace, !mEntities->isEmpty());
+
+    QAction* action = mEntities->addAction("Any Entity");
+    action->setIcon(QIcon("icons:entity.png"));
+    action->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_A));
+    connect(action, &QAction::triggered, this, &SceneWidget::PlaceAnyEntity);
+    mEntities->addSeparator();
+
+    for (const auto& resource : entities)
+    {
+        QAction* action = mEntities->addAction(resource.name);
+        action->setData(resource.id);
+        connect(action, &QAction::triggered, this, &SceneWidget::PlaceNewEntity);
+    }
+    SetEnabled(mEntities, true);
 }
 
 void SceneWidget::RebuildCombos()

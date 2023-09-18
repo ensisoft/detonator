@@ -21,7 +21,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Find entity node</string>
+      <string>Find entity in scene</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
@@ -33,6 +33,9 @@
       </item>
       <item>
        <widget class="QTableView" name="tableView">
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
         <property name="selectionMode">
          <enum>QAbstractItemView::SingleSelection</enum>
         </property>

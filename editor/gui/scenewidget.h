@@ -147,7 +147,6 @@ namespace gui
         void on_actionNodeEdit_triggered();
         void on_actionNodeDelete_triggered();
         void on_actionNodeBreakLink_triggered();
-        void on_actionNodePlace_triggered();
         void on_actionNodeDuplicate_triggered();
         void on_actionNodeMoveUpLayer_triggered();
         void on_actionNodeMoveDownLayer_triggered();
@@ -168,6 +167,7 @@ namespace gui
         void on_btnViewPlus90_clicked();
         void on_btnViewMinus90_clicked();
         void on_btnViewReset_clicked();
+        void on_btnMoreViewportSettings_clicked();
         void on_nodeName_textChanged(const QString& text);
         void on_nodeEntity_currentIndexChanged(const QString& name);
         void on_nodeLayer_valueChanged(int layer);
@@ -185,6 +185,7 @@ namespace gui
         void on_tree_customContextMenuRequested(QPoint);
         void on_scriptVarList_customContextMenuRequested(QPoint);
 
+        void PlaceAnyEntity();
         void PlaceNewEntity();
         void TreeCurrentNodeChangedEvent();
         void TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target);
