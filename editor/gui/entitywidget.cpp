@@ -300,8 +300,7 @@ public:
     {
         if (!mEngaged)
         {
-            ShowMessage("Click + hold to draw!",
-                        gfx::FRect(mCurrent.x+10.0f, mCurrent.y+10.0f, 200, 20), window);
+            ShowMessage("Click + hold to draw!", gfx::FRect(mCurrent.x+20.0f, mCurrent.y+20.0f, 200, 20), window);
             return;
         }
 
@@ -382,8 +381,9 @@ public:
         // by default we're appending to the root item.
         auto* child = mState.entity->AddNode(std::move(node));
         mState.entity->LinkChild(nullptr, child);
-        mState.view->Rebuild();
-        mState.view->SelectItemById(child->GetId());
+        mState.view->tree->Rebuild();
+        mState.view->tree->SelectItemById(child->GetId());
+        mState.view->drawable->Collapse(false);
         DEBUG("Added new shape '%1'", name);
         return true;
     }
@@ -468,7 +468,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mState.workspace = workspace;
     mState.renderer.SetClassLibrary(workspace);
     mState.renderer.SetEditingMode(true);
-    mState.view = mUI.tree;
+    mState.view = &mUI;
 
     // connect tree widget signals
     connect(mUI.tree, &TreeWidget::currentRowChanged, this, &EntityWidget::TreeCurrentNodeChangedEvent);
@@ -492,6 +492,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFontSizes(mUI.tiFontSize);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.zoom, 1.0f);
+    SetVisible(mUI.transform, false);
 
     RebuildMenus();
     RebuildCombos();
@@ -501,6 +502,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     DisplayCurrentNodeProperties();
     DisplayCurrentCameraLocation();
     setWindowTitle("My Entity");
+
+    mUI.tiFontName->lineEdit()->setReadOnly(true);
 }
 
 EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -630,9 +633,9 @@ void EntityWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionPause);
     bar.addAction(mUI.actionStop);
     bar.addSeparator();
-    bar.addAction(mUI.actionSave);
-    bar.addSeparator();
     bar.addAction(mUI.actionPreview);
+    bar.addSeparator();
+    bar.addAction(mUI.actionSave);
     bar.addSeparator();
     bar.addAction(mUI.actionNewRect);
     bar.addAction(mUI.actionNewRoundRect);
@@ -654,9 +657,9 @@ void EntityWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionPause);
     menu.addAction(mUI.actionStop);
     menu.addSeparator();
-    menu.addAction(mUI.actionSave);
-    menu.addSeparator();
     menu.addAction(mUI.actionPreview);
+    menu.addSeparator();
+    menu.addAction(mUI.actionSave);
     menu.addSeparator();
     menu.addAction(mUI.actionNewRect);
     menu.addAction(mUI.actionNewRoundRect);
@@ -982,7 +985,7 @@ void EntityWidget::Undo()
     // animation track widget is open?
 
     *mState.entity = mUndoStack.back();
-    mState.view->Rebuild();
+    mUI.tree->Rebuild();
     mUndoStack.pop_back();
     mScriptVarModel->Reset();
     mJointModel->Reset();
@@ -1439,8 +1442,8 @@ void EntityWidget::on_actionNodeDuplicate_triggered()
         // so that it's possible to tell it apart from the source of the copy.
         dupe->SetTranslation(node->GetTranslation() * 1.2f);
 
-        mState.view->Rebuild();
-        mState.view->SelectItemById(app::FromUtf8(dupe->GetId()));
+        mUI.tree->Rebuild();
+        mUI.tree->SelectItemById(app::FromUtf8(dupe->GetId()));
         RealizeEntityChange(mState.entity);
     }
 }
@@ -2020,6 +2023,15 @@ void EntityWidget::on_btnResetAnimatorScript_clicked()
     SetEnabled(mUI.btnResetAnimatorScript, false);
 }
 
+void EntityWidget::on_btnMoreViewportSettings_clicked()
+{
+    const auto visible = mUI.transform->isVisible();
+    SetVisible(mUI.transform, !visible);
+    if (!visible)
+        mUI.btnMoreViewportSettings->setArrowType(Qt::ArrowType::DownArrow);
+    else mUI.btnMoreViewportSettings->setArrowType(Qt::ArrowType::UpArrow);
+}
+
 void EntityWidget::on_trackList_itemSelectionChanged()
 {
     auto list = mUI.trackList->selectedItems();
@@ -2473,7 +2485,17 @@ void EntityWidget::on_mnHCenter_valueChanged(double)
     UpdateCurrentNodeProperties();
 }
 
-void EntityWidget::on_drawableItem_toggled(bool on)
+void EntityWidget::on_btnAddDrawable_clicked()
+{
+    ToggleDrawable(true);
+}
+
+void EntityWidget::on_btnDelDrawable_clicked()
+{
+    ToggleDrawable(false);
+}
+
+void EntityWidget::ToggleDrawable(bool on)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -2495,9 +2517,22 @@ void EntityWidget::on_drawableItem_toggled(bool on)
         }
         DisplayCurrentNodeProperties();
         RealizeEntityChange(mState.entity);
+
+        mUI.drawable->Collapse(!on);
     }
 }
-void EntityWidget::on_rigidBodyItem_toggled(bool on)
+
+void EntityWidget::on_btnAddRigidBody_clicked()
+{
+    ToggleRigidBody(true);
+}
+
+void EntityWidget::on_btnDelRigidBody_clicked()
+{
+    ToggleRigidBody(false);
+}
+
+void EntityWidget::ToggleRigidBody(bool on)
 {
     auto* node = GetCurrentNode();
     if (!node)
@@ -2547,9 +2582,20 @@ void EntityWidget::on_rigidBodyItem_toggled(bool on)
     DisplayCurrentNodeProperties();
     RebuildCombosInternal();
     RealizeEntityChange(mState.entity);
+
+    mUI.rigidBody->Collapse(!on);
 }
 
-void EntityWidget::on_textItem_toggled(bool on)
+void EntityWidget::on_btnAddTextItem_clicked()
+{
+    ToggleTextItem(true);
+}
+void EntityWidget::on_btnDelTextItem_clicked()
+{
+    ToggleTextItem(false);
+}
+
+void EntityWidget::ToggleTextItem(bool on)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -2557,6 +2603,10 @@ void EntityWidget::on_textItem_toggled(bool on)
         {
             if (!node->HasTextItem())
             {
+                int layer = 0;
+                if (const auto* draw = node->GetDrawable())
+                    layer = draw->GetLayer() + 1;
+
                 // Select some font as a default. Without this the font is an
                 // empty string which will not render any text (but rather print
                 // a cascade of crap in the debug/error logs)
@@ -2565,6 +2615,8 @@ void EntityWidget::on_textItem_toggled(bool on)
                 game::TextItemClass text;
                 text.SetFontSize(GetValue(mUI.tiFontSize));
                 text.SetFontName(GetValue(mUI.tiFontName));
+                text.SetText("Hello");
+                text.SetLayer(layer);
                 node->SetTextItem(text);
                 DEBUG("Added text item to '%1'", node->GetName());
             }
@@ -2576,9 +2628,21 @@ void EntityWidget::on_textItem_toggled(bool on)
         }
         RealizeEntityChange(mState.entity);
         DisplayCurrentNodeProperties();
+
+        mUI.textItem->Collapse(!on);
     }
 }
-void EntityWidget::on_spatialNode_toggled(bool on)
+
+void EntityWidget::on_btnAddSpatialNode_clicked()
+{
+    ToggleSpatialNode(true);
+}
+void EntityWidget::on_btnDelSpatialNode_clicked()
+{
+    ToggleSpatialNode(false);
+}
+
+void EntityWidget::ToggleSpatialNode(bool on)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -2586,8 +2650,10 @@ void EntityWidget::on_spatialNode_toggled(bool on)
         {
             if (!node->HasSpatialNode())
             {
+                SetValue(mUI.spnShape, game::SpatialNodeClass::Shape::AABB);
+
                 game::SpatialNodeClass sp;
-                sp.SetShape(GetValue(mUI.spnShape));
+                sp.SetShape(game::SpatialNodeClass::Shape::AABB);
                 sp.SetFlag(game::SpatialNodeClass::Flags::Enabled, GetValue(mUI.spnEnabled));
                 node->SetSpatialNode(sp);
                 DEBUG("Added spatial node to '%1'.", node->GetName());
@@ -2598,11 +2664,22 @@ void EntityWidget::on_spatialNode_toggled(bool on)
             node->RemoveSpatialNode();
             DEBUG("Removed spatial node from '%1'.", node->GetName());
         }
+        DisplayCurrentNodeProperties();
+
+        mUI.spatialNode->Collapse(!on);
     }
-    DisplayCurrentNodeProperties();
 }
 
-void EntityWidget::on_fixture_toggled(bool on)
+void EntityWidget::on_btnAddFixture_clicked()
+{
+    ToggleFixture(true);
+}
+void EntityWidget::on_btnDelFixture_clicked()
+{
+    ToggleFixture(false);
+}
+
+void EntityWidget::ToggleFixture(bool on)
 {
     if (auto* node = GetCurrentNode())
     {
@@ -2646,11 +2723,22 @@ void EntityWidget::on_fixture_toggled(bool on)
             node->RemoveFixture();
             DEBUG("Removed fixture from '%1'.", node->GetName());
         }
+        DisplayCurrentNodeProperties();
+
+        mUI.fixture->Collapse(!on);
     }
-    DisplayCurrentNodeProperties();
 }
 
-void EntityWidget::on_mapNode_toggled(bool on)
+void EntityWidget::on_btnAddTilemapNode_clicked()
+{
+    ToggleTilemapNode(true);
+}
+void EntityWidget::on_btnDelTilemapNode_clicked()
+{
+    ToggleTilemapNode(false);
+}
+
+void EntityWidget::ToggleTilemapNode(bool on)
 {
     if(auto* node = GetCurrentNode())
     {
@@ -2665,8 +2753,10 @@ void EntityWidget::on_mapNode_toggled(bool on)
         {
             node->RemoveMapNode();
         }
+        DisplayCurrentNodeProperties();
+
+        mUI.tilemapNode->Collapse(!on);
     }
-    DisplayCurrentNodeProperties();
 }
 
 void EntityWidget::on_animator_toggled(bool on)
@@ -2853,6 +2943,8 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
+
+
     gfx::Transform view;
     view.Scale(xs, ys);
     view.Scale(zoom, zoom);
@@ -2934,6 +3026,23 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
 
     painter.ResetViewMatrix();
 
+    if (mState.entity->GetNumNodes() == 0)
+    {
+        ShowInstruction(
+            "Create a new game play entity.\n\n"
+            "INSTRUCTIONS\n"
+            "1. Select a shape in the main tool bar above.\n"
+            "2. Click & hold left mouse button to draw.\n"
+            "3. Adjust the shape properties in the panel on the right.\n\n\n"
+            "Hit 'Play' to animate materials and shapes.\n"
+            "Hit 'Test Run' to test the entity.\n"
+            "Hit 'Save' to save the entity.",
+            gfx::FRect(0, 0, width, height),
+            painter, 28
+        );
+        return;
+    }
+
     // right arrow
     if (GetValue(mUI.chkShowOrigin))
     {
@@ -2949,6 +3058,8 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     }
 
     PrintMousePos(view, painter, mUI.widget);
+
+
 }
 
 void EntityWidget::MouseZoom(std::function<void(void)> zoom_function)
@@ -3241,10 +3352,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.nodeScaleX, 1.0f);
     SetValue(mUI.nodeScaleY, 1.0f);
     SetValue(mUI.nodeRotation, 0.0f);
-    SetValue(mUI.drawableItem, false);
-    SetValue(mUI.rigidBodyItem, false);
-    SetValue(mUI.textItem, false);
-    SetValue(mUI.spatialNode, false);
     SetValue(mUI.dsMaterial, QString(""));
     SetValue(mUI.dsDrawable, QString(""));
     SetValue(mUI.dsLayer, 0);
@@ -3280,7 +3387,6 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.tiBloom, false);
     SetValue(mUI.spnShape, -1);
     SetValue(mUI.spnEnabled, true);
-    SetValue(mUI.fixture, false);
     SetValue(mUI.fxBody, QString(""));
     SetValue(mUI.fxShape, -1);
     SetValue(mUI.fxPolygon, QString(""));
@@ -3288,12 +3394,25 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.fxBounciness, mUI.fxBounciness->minimum());
     SetValue(mUI.fxDensity, mUI.fxDensity->minimum());
     SetValue(mUI.fxIsSensor, false);
-    SetValue(mUI.mapNode, false);
     SetValue(mUI.mnHCenter, 0.5f);
     SetValue(mUI.mnVCenter, 1.0f);
     SetEnabled(mUI.nodeProperties, false);
     SetEnabled(mUI.nodeTransform, false);
     SetEnabled(mUI.nodeItems, false);
+
+    // attachments (node items)
+    SetVisible(mUI.btnAddDrawable, true);
+    SetVisible(mUI.btnAddTextItem, true);
+    SetVisible(mUI.btnAddRigidBody, true);
+    SetVisible(mUI.btnAddFixture, true);
+    SetVisible(mUI.btnAddTilemapNode, true);
+    SetVisible(mUI.btnAddSpatialNode, true);
+    SetVisible(mUI.drawable, false);
+    SetVisible(mUI.textItem, false);
+    SetVisible(mUI.rigidBody, false);
+    SetVisible(mUI.fixture, false);
+    SetVisible(mUI.tilemapNode, false);
+    SetVisible(mUI.spatialNode, false);
 
     if (const auto* node = GetCurrentNode())
     {
@@ -3320,7 +3439,8 @@ void EntityWidget::DisplayCurrentNodeProperties()
 
         if (const auto* item = node->GetDrawable())
         {
-            SetValue(mUI.drawableItem, true);
+            SetVisible(mUI.btnAddDrawable, false);
+            SetVisible(mUI.drawable, true);
             SetValue(mUI.dsMaterial, ListItemId(item->GetMaterialId()));
             SetValue(mUI.dsDrawable, ListItemId(item->GetDrawableId()));
             SetValue(mUI.dsRenderPass, item->GetRenderPass());
@@ -3347,7 +3467,8 @@ void EntityWidget::DisplayCurrentNodeProperties()
         }
         if (const auto* body = node->GetRigidBody())
         {
-            SetValue(mUI.rigidBodyItem, true);
+            SetVisible(mUI.btnAddRigidBody, false);
+            SetVisible(mUI.rigidBody, true);
             SetValue(mUI.rbSimulation, body->GetSimulation());
             SetValue(mUI.rbShape, body->GetCollisionShape());
             SetValue(mUI.rbFriction, body->GetFriction());
@@ -3373,7 +3494,8 @@ void EntityWidget::DisplayCurrentNodeProperties()
         }
         if (const auto* text = node->GetTextItem())
         {
-            SetValue(mUI.textItem, true);
+            SetVisible(mUI.textItem, true);
+            SetVisible(mUI.btnAddTextItem, false);
             SetValue(mUI.tiFontName, text->GetFontName());
             SetValue(mUI.tiFontSize, text->GetFontSize());
             SetValue(mUI.tiVAlign, text->GetVAlign());
@@ -3392,13 +3514,17 @@ void EntityWidget::DisplayCurrentNodeProperties()
         }
         if (const auto* sp = node->GetSpatialNode())
         {
-            SetValue(mUI.spatialNode, true);
+            SetVisible(mUI.btnAddSpatialNode, false);
+            SetVisible(mUI.spatialNode, true);
+
             SetValue(mUI.spnShape, sp->GetShape());
             SetValue(mUI.spnEnabled, sp->TestFlag(game::SpatialNodeClass::Flags::Enabled));
         }
         if (const auto* fixture = node->GetFixture())
         {
-            SetValue(mUI.fixture, true);
+            SetVisible(mUI.btnAddFixture, false);
+            SetVisible(mUI.fixture, true);
+
             SetValue(mUI.fxBody, ListItemId(fixture->GetRigidBodyNodeId()));
             SetValue(mUI.fxShape, fixture->GetCollisionShape());
             if (fixture->GetCollisionShape() == game::FixtureClass::CollisionShape::Polygon)
@@ -3422,9 +3548,10 @@ void EntityWidget::DisplayCurrentNodeProperties()
         }
         if (const auto* map = node->GetMapNode())
         {
-            const auto& center = map->GetSortPoint();
+            SetVisible(mUI.btnAddTilemapNode, false);
+            SetVisible(mUI.tilemapNode, true);
 
-            SetValue(mUI.mapNode, true);
+            const auto& center = map->GetSortPoint();
             SetValue(mUI.mnVCenter, center.y);
             SetValue(mUI.mnHCenter, center.x);
         }

@@ -464,6 +464,14 @@ void DrawViewport(gfx::Painter& painter,
     const gfx::FRect rect(game_viewport_x_in_window, game_viewport_y_in_window,
                           game_viewport_width_in_window, game_viewport_height_in_window);
     gfx::DrawRectOutline(painter, rect, gfx::Color::HotPink, 2.0f);
+
+    const gfx::FRect text(game_viewport_x_in_window +  0.0f,
+                          game_viewport_y_in_window + game_viewport_height_in_window + 10.0f,
+                          200.0f, 20.0f);
+    gfx::DrawTextRect(painter, base::FormatString("%1 x %2", (int)game_viewport_width, (int)game_viewport_height),
+                      "app://fonts/orbitron-medium.otf", 14, text,
+                      gfx::Color::HotPink,
+                      gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
 }
 
 void ShowMessage(const app::AnyString& msg, gfx::Painter& painter)
@@ -501,9 +509,9 @@ void ShowError(const app::AnyString& msg, const Point2Df& pos, gfx::Painter& pai
                       gfx::TextProp::Blinking);
 }
 
-void ShowInstruction(const app::AnyString& msg, const Rect2Df& rect, gfx::Painter& painter)
+void ShowInstruction(const app::AnyString& msg, const Rect2Df& rect, gfx::Painter& painter, unsigned font_size_px)
 {
-    gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", 20,
+    gfx::DrawTextRect(painter, msg, "app://fonts/orbitron-medium.otf", font_size_px,
                       rect,
                       gfx::Color::Silver,
                       gfx::TextAlign::AlignVCenter | gfx::TextAlign::AlignHCenter,
