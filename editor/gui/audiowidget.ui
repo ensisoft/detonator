@@ -30,7 +30,7 @@
        </property>
        <property name="maximumSize">
         <size>
-         <width>350</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -171,6 +171,9 @@
         <property name="contextMenuPolicy">
          <enum>Qt::CustomContextMenu</enum>
         </property>
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
         <property name="verticalScrollBarPolicy">
          <enum>Qt::ScrollBarAsNeeded</enum>
         </property>
@@ -221,13 +224,13 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>350</width>
+         <width>0</width>
          <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>350</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -261,6 +264,9 @@
           <property name="contextMenuPolicy">
            <enum>Qt::CustomContextMenu</enum>
           </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
           <property name="selectionMode">
            <enum>QAbstractItemView::ExtendedSelection</enum>
           </property>
@@ -291,7 +297,7 @@
        </property>
        <property name="maximumSize">
         <size>
-         <width>350</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>
@@ -622,7 +628,7 @@
       <widget class="QGroupBox" name="audioFile">
        <property name="maximumSize">
         <size>
-         <width>350</width>
+         <width>16777215</width>
          <height>16777215</height>
         </size>
        </property>

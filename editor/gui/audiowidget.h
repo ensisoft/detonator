@@ -89,6 +89,7 @@ namespace gui
         AudioWidget(app::Workspace* workspace, const app::Resource& resource);
        ~AudioWidget();
 
+        virtual void InitializeContent() override;
         virtual QString GetId() const override;
         virtual bool IsAccelerated() const override;
         virtual bool CanTakeAction(Actions action, const Clipboard*) const override;
