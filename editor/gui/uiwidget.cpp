@@ -548,6 +548,7 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     SetEnabled(mUI.actionStop, false);
     SetEnabled(mUI.actionClose, false);
     SetEnabled(mUI.btnEditScript, mState.window.HasScriptFile());
+    SetVisible(mUI.transform, false);
     setWindowTitle(GetValue(mUI.windowName));
 
     RebuildCombos();
@@ -629,15 +630,35 @@ void UIWidget::InitializeContent()
     uik::Form form;
     form.SetSize(1024, 768);
     form.SetName("Form");
+
+    uik::Label label;
+    label.SetName("Label");
+    label.SetText("Hello,\n\nthis is a label widget.\n\n"
+                  "Press Play (F5) to try the UI.");
+    label.SetPosition(200.0f, 200.0f);
+    label.SetSize(650.0f, 400.0f);
+
+    uik::PushButton button;
+    button.SetName("Button");
+    button.SetText("Button");
+    button.SetPosition(450.0f, 650.0f);
+    button.SetSize(150.0f, 50.0f);
+
     mState.window.AddWidget(form);
+    mState.window.AddWidget(label);
+    mState.window.AddWidget(button);
     mState.window.LinkChild(nullptr, &mState.window.GetWidget(0));
+    mState.window.LinkChild(mState.window.FindWidgetByName("Form"),
+                            mState.window.FindWidgetByName("Label"));
+    mState.window.LinkChild(mState.window.FindWidgetByName("Form"),
+                            mState.window.FindWidgetByName("Button"));
     mOriginalHash = mState.window.GetHash();
 }
 
 void UIWidget::SetViewerMode()
 {
     SetVisible(mUI.baseProperties,   false);
-    SetVisible(mUI.viewTransform,    false);
+    SetVisible(mUI.transform,        false);
     SetVisible(mUI.widgetTree,       false);
     SetVisible(mUI.widgetProperties, false);
     SetVisible(mUI.widgetStyle,      false);
@@ -1142,7 +1163,7 @@ void UIWidget::on_actionPlay_triggered()
     SetEnabled(mUI.actionStop,           true);
     SetEnabled(mUI.actionClose,          true);
     SetEnabled(mUI.baseProperties,       false);
-    SetEnabled(mUI.viewTransform,        false);
+    SetEnabled(mUI.transform,            false);
     SetEnabled(mUI.widgetTree,           false);
     SetEnabled(mUI.widgetProperties,     false);
     SetEnabled(mUI.widgetStyle,          false);
@@ -1181,7 +1202,7 @@ void UIWidget::on_actionStop_triggered()
     SetEnabled(mUI.actionStop,          false);
     SetEnabled(mUI.actionClose,         false);
     SetEnabled(mUI.baseProperties,      true);
-    SetEnabled(mUI.viewTransform,       true);
+    SetEnabled(mUI.transform,           true);
     SetEnabled(mUI.widgetTree,          true);
     SetEnabled(mUI.widgetProperties,    true);
     SetEnabled(mUI.widgetStyle,         true);
@@ -1543,6 +1564,15 @@ void UIWidget::on_btnViewMinus90_clicked()
     mUI.rotation->setValue(math::clamp(-180.0f, 180.0f, value - 90.0f));
     mViewTransformRotation  = value;
     mViewTransformStartTime = mCurrentTime;
+}
+
+void UIWidget::on_btnMoreViewportSettings_clicked()
+{
+    const auto visible = mUI.transform->isVisible();
+    SetVisible(mUI.transform, !visible);
+    if (!visible)
+        mUI.btnMoreViewportSettings->setArrowType(Qt::ArrowType::DownArrow);
+    else mUI.btnMoreViewportSettings->setArrowType(Qt::ArrowType::UpArrow);
 }
 
 void UIWidget::on_btnResetTransform_clicked()
@@ -1974,6 +2004,22 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
         DrawBasisVectors(painter , view);
     }
 
+    if (mState.window.GetNumWidgets() == 0)
+    {
+        ShowInstruction(
+            "Create a new game User Interface (UI).\n\n"
+            "INSTRUCTIONS\n"
+            "1. Select a widget in the main tool bar above.\n"
+            "2. Move the mouse to place the widget into the UI.\n"
+            "3. Adjust the widget properties in the panel on the right.\n"
+            "4. Press 'Escape' to quit placing widgets.\n\n\n"
+            "Hit 'Test' to test the UI with input.\n"
+            "Hit 'Save' to save the UI.",
+            gfx::FRect(0, 0, surface_width, surface_height),
+            painter, 28
+        );
+    }
+
     gfx::FRect rect(10.0f, 10.0f, 500.0f, 20.0f);
     for (const auto& print : mMessageQueue)
     {
@@ -2028,7 +2074,7 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
 
         // paint the design state copy of the window.
         uik::TransientState s;
-        mState.painter->SetFlag(engine::UIPainter::Flags::ClipWidgets, true);
+        mState.painter->SetFlag(engine::UIPainter::Flags::ClipWidgets, GetValue(mUI.chkClipWidgets));
         mState.window.Paint(s , *mState.painter, 0.0, &hook);
 
         // draw the window outline
@@ -2037,8 +2083,7 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
     }
     else
     {
-        const auto show_window = true;
-        mState.painter->SetFlag(engine::UIPainter::Flags::ClipWidgets, GetValue(mUI.chkClipWidgets));
+        mState.painter->SetFlag(engine::UIPainter::Flags::ClipWidgets, true);
         mState.active_window->Paint(*mState.active_state, *mState.painter, mPlayTime);
     }
 
