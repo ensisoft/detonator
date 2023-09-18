@@ -94,6 +94,8 @@
     <file>16x16_ico_png/transmit_error.png</file>
     <file>16x16_ico_png/transmit_go.png</file>
 
+    <file>32x32_ico_png/entity.png</file>
+    <file>32x32_ico_png/wrench.png</file>
     <file>32x32_ico_png/explosion.png</file>
     <file>32x32_ico_png/arrow-forward.png</file>
     <file>32x32_ico_png/arrow-back.png</file>
