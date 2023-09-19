@@ -140,6 +140,13 @@ namespace engine
     util["ToPoint"] = [](const glm::vec2& vec2) {
         return base::FPoint(vec2.x, vec2.y);
     };
+    util["rand"] = sol::overload(
+        [](float min, float max) {
+            return math::rand(min, max);
+        },
+        [](int min, int max) {
+            return math::rand(min, max);
+        });
 
     // see comments at RandomEngine about why this is done.
     util["RandomSeed"] = &RandomEngine::SeedGlobal;
