@@ -1961,6 +1961,7 @@ namespace game
         glm::mat4 FindRelativeTransform(const EntityNode* parent, const EntityNode* child) const;
 
         void Die();
+        void DieIn(float seconds);
 
         using PostedEventValue = std::variant<
             bool, int, float,
@@ -2208,6 +2209,10 @@ namespace game
         // the render tree for hierarchical traversal and transformation
         // of the entity and its nodes.
         RenderTree mRenderTree;
+        // the current scene.
+        Scene* mScene = nullptr;
+        // remaining time for the until scheduled death takes place
+        std::optional<float> mScheduledDeath;
         // Current entity time.
         double mCurrentTime = 0.0;
         // Entity's max lifetime.
@@ -2222,8 +2227,6 @@ namespace game
         base::bitflag<ControlFlags> mControlFlags;
         // the previously finished animation track (if any)
         std::unique_ptr<Animation> mFinishedAnimation;
-        // the current scene.
-        Scene* mScene = nullptr;
 
         struct Timer {
             std::string name;
@@ -2231,6 +2234,7 @@ namespace game
         };
         std::vector<Timer> mTimers;
         std::vector<PostedEvent> mEvents;
+
     };
 
     std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> klass);

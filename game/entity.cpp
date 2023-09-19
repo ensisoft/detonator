@@ -1801,10 +1801,23 @@ void Entity::Die()
 {
     SetFlag(ControlFlags::WantsToDie, true);
 }
+void Entity::DieIn(float seconds)
+{
+    mScheduledDeath = seconds;
+}
 
 void Entity::Update(float dt, std::vector<Event>* events)
 {
     mCurrentTime += dt;
+
+    if (mScheduledDeath.has_value())
+    {
+        float& val = mScheduledDeath.value();
+        val -= dt;
+        if (val <= 0.0f)
+            SetFlag(ControlFlags::WantsToDie, true);
+    }
+
     mFinishedAnimation.reset();
 
     for (auto it = mTimers.begin(); it != mTimers.end();)

@@ -867,6 +867,7 @@ void BindGameLib(sol::state& L)
     entity["PlayAnimationByName"]  = &Entity::PlayAnimationByName;
     entity["PlayAnimationById"]    = &Entity::PlayAnimationById;
     entity["Die"]                  = &Entity::Die;
+    entity["DieLater"]             = &Entity::DieIn;
     entity["SetTag"]               = &Entity::SetTag;
     entity["TestFlag"]             = &TestFlag<Entity>;
     entity["SetFlag"]              = &SetFlag<Entity>;
