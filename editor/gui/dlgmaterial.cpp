@@ -83,7 +83,10 @@ void DlgMaterial::on_btnAccept_clicked()
 {
     const_cast<app::Workspace*>(mWorkspace)->SetUserProperty("dlg_material_geometry", saveGeometry());
 
-    accept();
+    // auto default bites again!
+    if (mSelectedMaterialId.isEmpty())
+        reject();
+    else  accept();
 }
 void DlgMaterial::on_btnCancel_clicked()
 {
