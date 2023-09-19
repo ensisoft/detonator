@@ -281,10 +281,16 @@ void InitLuaDoc()
     DOC_FUNCTION_0("unsigned", "GetMilliseconds", "Get elapsed time in milliseconds since undefined epoch.");
 
     DOC_FUNCTION_1("void", "RandomSeed", "Seed the random engine with the given seed value.<br>"
-                                     "For any given seed the the generated pseudo random number sequence will always be same on every platform.",
-                                     "int", "seed");
-    DOC_FUNCTION_2("int|float", "Random", "Generate a new pseudo random number between the given (inclusive) min/max values.<br>",
+                                         "For any given seed the the generated pseudo random number sequence will always be same on every platform.<br>"
+                                         "You can use this random number generation for game events etc. that always need to take place in the same order.<br>"
+                                         "After having seeded the random engine call Random in order to get the next random number.",
+                   "int", "seed");
+    DOC_FUNCTION_2("int|float", "Random", "Generate a new pseudo random number between the given (inclusive) min/max values.<br>"
+                                          "The random number generation is based on the seed used in RandomSeed.",
                  "int|float", "min", "int|float", "max");
+    DOC_FUNCTION_2("int|flot", "rand", "Generate a new pseudo random number with arbitrary seed.<br>"
+                                       "Do not use this random number generator if you need always the same sequence.",
+                                       "int|float", "min", "int|float", "max");
     DOC_FUNCTION_2("string", "JoinPath", "Concatenate file system paths together.<br>"
                                        "No assumption is made regarding the validity of the paths.",
                  "string", "a", "string", "b");
@@ -1269,7 +1275,8 @@ void InitLuaDoc()
     DOC_METHOD_2("void", "SetFlag", "Set entity flag. Possible flags: 'VisibleInGame', 'LimitLifetime', 'KillAtLifetime', 'KillAtBoundary', 'TickEntity', 'UpdateEntity', 'WantsKeyEvents', 'WantsMouseEvents'",
                  "string", "name", "bool", "on_off");
     DOC_METHOD_1("void", "SetVisible", "Set entity visibility flag.", "bool", "on_off");
-    DOC_METHOD_0("void", "Die", "Let the entity die and be removed from the scene.");
+    DOC_METHOD_0("void", "Die", "Schedule immediate entity death and have it removed from the scene.");
+    DOC_METHOD_1("void", "DieLater", "Schedule future entity death after time in seconds elapses.", "float", "seconds");
     DOC_METHOD_2("void", "SetTimer", "Set a named timer on the entity.<br>"
                                      "The timer's resolution is based on the game's update resolution configured in the project settings.<br>"
                                      "When the timer fires OnTimer entity callback is called and the provided value 'jitter' indicates the delta time "
