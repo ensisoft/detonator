@@ -767,6 +767,18 @@ private:
         if (vk == uik::VirtualKey::None)
             return;
 
+        if (base::IsDebugLogEnabled())
+        {
+            std::string mod_string;
+            if (key.modifiers.test(wdk::Keymod::Control))
+                mod_string += "Ctrl+";
+            if (key.modifiers.test(wdk::Keymod::Shift))
+                mod_string += "Shift+";
+            if (key.modifiers.test(wdk::Keymod::Alt))
+                mod_string += "Alt+";
+            DEBUG("UI virtual key mapping %1%2 => %3", mod_string, key.symbol, vk);
+        }
+
         uik::Window::KeyEvent event;
         event.key  = vk;
         event.time = base::GetTime();

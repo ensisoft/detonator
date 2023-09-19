@@ -2299,13 +2299,22 @@ bool UIWidget::KeyPress(QKeyEvent* key)
         uik::Window::KeyEvent e;
         e.key  = mState.keymap->MapKey(sym, mods);
         e.time = mPlayTime;
+
+        std::string mod_string;
+        if (mods.test(wdk::Keymod::Control))
+            mod_string += "Ctrl+";
+        if (mods.test(wdk::Keymod::Shift))
+            mod_string += "Shift+";
+        if (mods.test(wdk::Keymod::Alt))
+            mod_string += "Alt+";
+        DEBUG("UI virtual key mapping %1%2 => %3", mod_string, sym, e.key);
+
         const auto& actions = mState.active_window->KeyDown(e, *mState.active_state);
         for (const auto& action : actions)
         {
             mMessageQueue.push_back(base::FormatString("Event: %1, widget: '%2'", action.type, action.name));
         }
         mState.active_window->TriggerAnimations(actions, *mState.active_state, *mState.animation_state);
-        //DEBUG("Key press mapped to UI vk: %1", e.key);
         return true;
     }
 
