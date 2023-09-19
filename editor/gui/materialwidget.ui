@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1834</width>
-    <height>1404</height>
+    <width>1662</width>
+    <height>1311</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -1022,31 +1022,90 @@
      <property name="title">
       <string>Viewport</string>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <widget class="gui::GfxWidget" name="widget" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
-         <widget class="gui::GfxWidget" name="widget" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+         <widget class="QDoubleSpinBox" name="zoom">
+          <property name="minimum">
+           <double>0.100000000000000</double>
           </property>
-          <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
+          <property name="maximum">
+           <double>5.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="stepType">
+           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
           </property>
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <widget class="QLabel" name="label_14">
+          <property name="text">
+           <string>Model</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cmbModel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Preferred</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
-           <widget class="QDoubleSpinBox" name="zoom">
-            <property name="minimum">
-             <double>0.100000000000000</double>
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>kTime</string>
             </property>
-            <property name="maximum">
-             <double>5.000000000000000</double>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="kTime">
+            <property name="prefix">
+             <string/>
+            </property>
+            <property name="suffix">
+             <string> s</string>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -1054,101 +1113,38 @@
             <property name="stepType">
              <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
             </property>
-            <property name="value">
-             <double>1.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_14">
-            <property name="text">
-             <string>Model</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="cmbModel">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Preferred</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <item>
-             <widget class="QLabel" name="label_4">
-              <property name="text">
-               <string>kTime</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="kTime">
-              <property name="prefix">
-               <string/>
-              </property>
-              <property name="suffix">
-               <string> s</string>
-              </property>
-              <property name="singleStep">
-               <double>0.100000000000000</double>
-              </property>
-              <property name="stepType">
-               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Expanding</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="color_widgets::ColorSelector" name="widgetColor">
-            <property name="minimumSize">
-             <size>
-              <width>30</width>
-              <height>20</height>
-             </size>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::TabFocus</enum>
-            </property>
            </widget>
           </item>
          </layout>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Expanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="color_widgets::ColorSelector" name="widgetColor">
+          <property name="minimumSize">
+           <size>
+            <width>30</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::TabFocus</enum>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -1227,15 +1223,6 @@
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
        </property>
-       <property name="frameShadow">
-        <enum>QFrame::Plain</enum>
-       </property>
-       <property name="horizontalScrollBarPolicy">
-        <enum>Qt::ScrollBarAsNeeded</enum>
-       </property>
-       <property name="sizeAdjustPolicy">
-        <enum>QAbstractScrollArea::AdjustIgnored</enum>
-       </property>
        <property name="widgetResizable">
         <bool>true</bool>
        </property>
@@ -1243,31 +1230,16 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>0</y>
+          <y>-281</y>
           <width>350</width>
-          <height>912</height>
+          <height>930</height>
          </rect>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_8">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetDefaultConstraint</enum>
-         </property>
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
          <item>
           <widget class="QGroupBox" name="textureMap">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -1536,19 +1508,18 @@
            <property name="enabled">
             <bool>true</bool>
            </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="title">
             <string>Texture properties</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_12">
             <item>
              <layout class="QGridLayout" name="gridLayout_3">
-              <item row="4" column="1">
-               <widget class="QLabel" name="label_36">
-                <property name="text">
-                 <string>Width</string>
-                </property>
-               </widget>
-              </item>
               <item row="4" column="2">
                <widget class="QLineEdit" name="textureWidth">
                 <property name="sizePolicy">
@@ -1562,28 +1533,14 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="2" colspan="2">
-               <widget class="QLineEdit" name="textureSourceFile">
+              <item row="4" column="3" rowspan="3">
+               <widget class="QLabel" name="texturePreview">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
-               <widget class="QLabel" name="label_17">
-                <property name="text">
-                 <string>Name</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="3" rowspan="6">
-               <widget class="QLabel" name="texturePreview">
                 <property name="minimumSize">
                  <size>
                   <width>128</width>
@@ -1604,17 +1561,58 @@
                 </property>
                </widget>
               </item>
-              <item row="10" column="2">
-               <widget class="QCheckBox" name="chkBlurTexture">
+              <item row="11" column="2">
+               <widget class="QCheckBox" name="chkPreMulAlpha">
                 <property name="text">
-                 <string>Apply blur</string>
+                 <string>Premultipy alpha</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
-               <widget class="QLabel" name="label_13">
+              <item row="1" column="1">
+               <widget class="QLabel" name="label">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="text">
-                 <string>ID</string>
+                 <string>File</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="1">
+               <widget class="QLabel" name="label_38">
+                <property name="text">
+                 <string>Depth</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QLabel" name="label_37">
+                <property name="text">
+                 <string>Height</string>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="2">
+               <widget class="QCheckBox" name="chkAllowResizing">
+                <property name="text">
+                 <string>Allow resizing</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QLabel" name="label_36">
+                <property name="text">
+                 <string>Width</string>
+                </property>
+               </widget>
+              </item>
+              <item row="12" column="2">
+               <widget class="QCheckBox" name="chkBlurTexture">
+                <property name="text">
+                 <string>Apply blur</string>
                 </property>
                </widget>
               </item>
@@ -1634,6 +1632,30 @@
                 </property>
                </widget>
               </item>
+              <item row="8" column="1">
+               <widget class="QLabel" name="label_15">
+                <property name="text">
+                 <string>Flags</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2" colspan="2">
+               <widget class="QLineEdit" name="textureSourceID">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QLabel" name="label_17">
+                <property name="text">
+                 <string>Name</string>
+                </property>
+               </widget>
+              </item>
               <item row="5" column="2">
                <widget class="QLineEdit" name="textureHeight">
                 <property name="sizePolicy">
@@ -1650,10 +1672,37 @@
                 </property>
                </widget>
               </item>
-              <item row="9" column="2">
-               <widget class="QCheckBox" name="chkPreMulAlpha">
+              <item row="14" column="2">
+               <widget class="QCheckBox" name="chkDetectEdges">
                 <property name="text">
-                 <string>Premultipy alpha</string>
+                 <string>Edge detection</string>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="2">
+               <widget class="QCheckBox" name="chkAllowPacking">
+                <property name="text">
+                 <string>Allow combining</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLabel" name="label_13">
+                <property name="text">
+                 <string>ID</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2" colspan="2">
+               <widget class="QLineEdit" name="textureSourceFile">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1667,75 +1716,17 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="2" colspan="2">
-               <widget class="QLineEdit" name="textureSourceID">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QLabel" name="label">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text">
-                 <string>File</string>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="1">
-               <widget class="QLabel" name="label_37">
-                <property name="text">
-                 <string>Height</string>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="1">
-               <widget class="QLabel" name="label_15">
-                <property name="text">
-                 <string>Flags</string>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="2">
-               <widget class="QCheckBox" name="chkAllowPacking">
-                <property name="text">
-                 <string>Allow combining</string>
-                </property>
-               </widget>
-              </item>
-              <item row="8" column="2">
-               <widget class="QCheckBox" name="chkAllowResizing">
-                <property name="text">
-                 <string>Allow resizing</string>
-                </property>
-               </widget>
-              </item>
-              <item row="6" column="1">
-               <widget class="QLabel" name="label_38">
-                <property name="text">
-                 <string>Depth</string>
-                </property>
-               </widget>
-              </item>
-              <item row="12" column="2" colspan="2">
+              <item row="8" column="3">
                <widget class="QPushButton" name="btnEditTexture">
                 <property name="text">
-                 <string>Edit Texture</string>
+                 <string>Edit Texture ...</string>
                 </property>
                </widget>
               </item>
-              <item row="11" column="2" colspan="2">
-               <widget class="QCheckBox" name="chkDetectEdges">
+              <item row="9" column="3">
+               <widget class="QPushButton" name="btnSelectTextureRect">
                 <property name="text">
-                 <string>Edge detection</string>
+                 <string>Select Area ...</string>
                 </property>
                </widget>
               </item>
@@ -1748,6 +1739,12 @@
           <widget class="QGroupBox" name="textureRect">
            <property name="enabled">
             <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
            <property name="title">
             <string>Texture rect</string>
@@ -1894,29 +1891,6 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
-               <spacer name="horizontalSpacer_2">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Preferred</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btnSelectTextureRect">
-                <property name="text">
-                 <string>Select ...</string>
-                </property>
-               </widget>
-              </item>
-              <item>
                <widget class="QPushButton" name="btnResetTextureRect">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -1930,6 +1904,19 @@
                </widget>
               </item>
              </layout>
+            </item>
+            <item>
+             <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </widget>
@@ -2192,11 +2179,11 @@
   <tabstop>chkBlurTexture</tabstop>
   <tabstop>chkDetectEdges</tabstop>
   <tabstop>btnEditTexture</tabstop>
+  <tabstop>btnSelectTextureRect</tabstop>
   <tabstop>rectX</tabstop>
   <tabstop>rectY</tabstop>
   <tabstop>rectW</tabstop>
   <tabstop>rectH</tabstop>
-  <tabstop>btnSelectTextureRect</tabstop>
   <tabstop>btnResetTextureRect</tabstop>
  </tabstops>
  <resources>

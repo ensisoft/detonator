@@ -104,7 +104,8 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
 
     SetValue(mUI.zoom, 1.0f);
 
-    mUI.scrollAreaWidgetContents->setMinimumSize(mUI.scrollAreaWidgetContents->sizeHint());
+    // hide this for now.
+    SetVisible(mUI.textureRect, false);
 }
 
 MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& resource) : MaterialWidget(workspace)
@@ -1684,7 +1685,6 @@ void MaterialWidget::GetTextureMapProperties()
     {
         SetValue(mUI.textureMapTextures, app::toString("%1 textures", count));
     }
-
 }
 
 void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
