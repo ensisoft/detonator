@@ -51,10 +51,12 @@ public:
             else if (col == 1) return app::toString(var.IsReadOnly());
             else if (col == 2)
             {
-                const auto* val = mNode.FindScriptVarValueById(var.GetId());
-                if (val == nullptr)
-                    return "Class Default";
-                return GetScriptVarData(*val);
+                // if there's an instance specific override value then use that
+                if (const auto* val = mNode.FindScriptVarValueById(var.GetId()))
+                    return GetScriptVarData(val->value);
+
+                // show the class value.
+                return GetScriptVarData(var.GetVariantValue());
             }
             else BUG("Unknown script variable data index.");
         }
@@ -65,7 +67,7 @@ public:
         if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
         {
             if (section == 0) return "Name";
-            else if (section == 1) return "ReadOnly";
+            else if (section == 1) return "Read Only";
             else if (section == 2) return "Value";
             else BUG("Unknown script variable data index.");
         }
@@ -103,40 +105,40 @@ public:
     }
 
 private:
-    QVariant GetScriptVarData(const game::EntityPlacement::ScriptVarValue& value) const
+    QVariant GetScriptVarData(const game::ScriptVar::VariantType& value) const
     {
-        switch (game::ScriptVar::GetTypeFromVariant(value.value))
+        switch (game::ScriptVar::GetTypeFromVariant(value))
         {
             case game::ScriptVar::Type::Boolean: {
-                const auto& array = std::get<std::vector<bool>>(value.value);
+                const auto& array = std::get<std::vector<bool>>(value);
                 if (array.size() == 1)
                     return array[0];
                 return QString("[0]=%1 ...").arg(array[0]);
             }
             break;
             case game::ScriptVar::Type::String: {
-                const auto& array = std::get<std::vector<std::string>>(value.value);
+                const auto& array = std::get<std::vector<std::string>>(value);
                 if (array.size() == 1)
                     return app::FromUtf8(array[0]);
                 return QString("[0]='%1' ...").arg(app::FromUtf8(array[0]));
             }
             break;
             case game::ScriptVar::Type::Float: {
-                const auto& array = std::get<std::vector<float>>(value.value);
+                const auto& array = std::get<std::vector<float>>(value);
                 if (array.size() == 1)
                     return QString::number(array[0], 'f', 2);
                 return QString("[0]=%1 ...").arg(QString::number(array[0], 'f', 2));
             }
             break;
             case game::ScriptVar::Type::Integer: {
-                const auto& array = std::get<std::vector<int>>(value.value);
+                const auto& array = std::get<std::vector<int>>(value);
                 if (array.size() == 1)
                     return array[0];
                 return QString("[0]=%1 ...").arg(array[0]);
             }
             break;
             case game::ScriptVar::Type::Vec2: {
-                const auto& array = std::get<std::vector<glm::vec2>>(value.value);
+                const auto& array = std::get<std::vector<glm::vec2>>(value);
                 const auto& vec = array[0];
                 if (array.size() == 1)
                     return QString("%1,%2")
@@ -149,14 +151,14 @@ private:
             }
             break;
             case game::ScriptVar::Type::EntityReference: {
-                const auto& array = std::get<std::vector<game::ScriptVar::EntityReference>>(value.value);
+                const auto& array = std::get<std::vector<game::ScriptVar::EntityReference>>(value);
                 if (array.size() == 1)
                     return "Nil";
                 return "[0]=Nil ...";
             }
             break;
             case game::ScriptVar::Type::EntityNodeReference: {
-                const auto& array = std::get<std::vector<game::ScriptVar::EntityNodeReference>>(value.value);
+                const auto& array = std::get<std::vector<game::ScriptVar::EntityNodeReference>>(value);
                 const auto& id = array[0].id;
                 QString name = "Nil";
                 if (const auto* node = mEntity.FindNodeById(id))
@@ -166,7 +168,7 @@ private:
                 return QString("[0]=%1 ...").arg(name);
             }
             case game::ScriptVar::Type::MaterialReference: {
-                const auto& array = std::get<std::vector<game::ScriptVar::MaterialReference>>(value.value);
+                const auto& array = std::get<std::vector<game::ScriptVar::MaterialReference>>(value);
                 const auto& id = array[0].id;
                 QString name = "Nil";
                 if (const auto& material = mWorkspace->FindMaterialClassById(id))

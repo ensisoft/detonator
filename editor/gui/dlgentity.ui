@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>481</width>
-    <height>512</height>
+    <width>568</width>
+    <height>403</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,325 +24,324 @@
       <string>Entity instance</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="3" column="0">
+      <item row="2" column="0">
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
          <number>0</number>
         </property>
+        <property name="documentMode">
+         <bool>false</bool>
+        </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
-          <string>Base Properties</string>
+          <string>Entity Properties</string>
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QGroupBox" name="groupBox">
-            <property name="title">
-             <string>Base properties</string>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_2">
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_40">
-               <property name="text">
-                <string>Lifetime</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QToolButton" name="btnResetIdleAnimation">
-               <property name="toolTip">
-                <string>Reset idle track to nothing</string>
-               </property>
-               <property name="text">
-                <string>...</string>
-               </property>
-               <property name="icon">
-                <iconset resource="../resource/resource.qrc">
-                 <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
-               </property>
-               <property name="autoRaise">
-                <bool>false</bool>
-               </property>
-               <property name="arrowType">
-                <enum>Qt::NoArrow</enum>
-               </property>
-              </widget>
-             </item>
-             <item row="7" column="1">
-              <widget class="QCheckBox" name="chkKeyEvents">
-               <property name="text">
-                <string>Receive keyboard events</string>
-               </property>
-               <property name="checked">
-                <bool>false</bool>
-               </property>
-               <property name="tristate">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="1">
-              <widget class="QCheckBox" name="chkTickEntity">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Tick entity</string>
-               </property>
-               <property name="checked">
-                <bool>false</bool>
-               </property>
-               <property name="tristate">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="9" column="1">
-              <spacer name="verticalSpacer">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>327</width>
-                 <height>191</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="5" column="1">
-              <widget class="QCheckBox" name="chkUpdateEntity">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Update entity</string>
-               </property>
-               <property name="checked">
-                <bool>false</bool>
-               </property>
-               <property name="tristate">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QComboBox" name="idleAnimation">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="placeholderText">
-                <string>Class Default</string>
-               </property>
-              </widget>
-             </item>
-             <item row="8" column="1">
-              <widget class="QCheckBox" name="chkMouseEvents">
-               <property name="text">
-                <string>Receive mouse events</string>
-               </property>
-               <property name="tristate">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="2">
-              <widget class="QToolButton" name="btnResetLifetime">
-               <property name="toolTip">
-                <string>Reset idle track to nothing</string>
-               </property>
-               <property name="text">
-                <string>...</string>
-               </property>
-               <property name="icon">
-                <iconset resource="../resource/resource.qrc">
-                 <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
-               </property>
-               <property name="autoRaise">
-                <bool>false</bool>
-               </property>
-               <property name="arrowType">
-                <enum>Qt::NoArrow</enum>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QCheckBox" name="chkKillAtLifetime">
-               <property name="text">
-                <string>Kill at lifetime</string>
-               </property>
-               <property name="checked">
-                <bool>false</bool>
-               </property>
-               <property name="tristate">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QCheckBox" name="chkKillAtBoundary">
-               <property name="text">
-                <string>Kill at scene boundary</string>
-               </property>
-               <property name="tristate">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label">
-               <property name="text">
-                <string>Idle track</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QDoubleSpinBox" name="entityLifetime">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="specialValueText">
-                <string>Class Default</string>
-               </property>
-               <property name="suffix">
-                <string> s</string>
-               </property>
-               <property name="minimum">
-                <double>0.000000000000000</double>
-               </property>
-               <property name="maximum">
-                <double>99999.000000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.100000000000000</double>
-               </property>
-               <property name="stepType">
-                <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-               </property>
-               <property name="value">
-                <double>0.000000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QLineEdit" name="entityTag">
-               <property name="placeholderText">
-                <string>Class Default</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_11">
-               <property name="text">
-                <string>Tag</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="2">
-              <widget class="QToolButton" name="btnResetTag">
-               <property name="toolTip">
-                <string>Reset idle track to nothing</string>
-               </property>
-               <property name="text">
-                <string>...</string>
-               </property>
-               <property name="icon">
-                <iconset resource="../resource/resource.qrc">
-                 <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
-               </property>
-               <property name="autoRaise">
-                <bool>false</bool>
-               </property>
-               <property name="arrowType">
-                <enum>Qt::NoArrow</enum>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_11">
+              <property name="text">
+               <string>Instance tag</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="1">
+             <widget class="QCheckBox" name="chkKeyEvents">
+              <property name="text">
+               <string>Receive keyboard events </string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+              <property name="tristate">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QDoubleSpinBox" name="entityLifetime">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="specialValueText">
+               <string>Class Default</string>
+              </property>
+              <property name="suffix">
+               <string> s</string>
+              </property>
+              <property name="minimum">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>99999.000000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.100000000000000</double>
+              </property>
+              <property name="stepType">
+               <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+              </property>
+              <property name="value">
+               <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="QToolButton" name="btnResetTag">
+              <property name="toolTip">
+               <string>Reset idle track to nothing</string>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+              </property>
+              <property name="autoRaise">
+               <bool>false</bool>
+              </property>
+              <property name="arrowType">
+               <enum>Qt::NoArrow</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="entityTag">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="placeholderText">
+               <string>Class Default</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_40">
+              <property name="text">
+               <string>Instance lifetime</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QToolButton" name="btnResetLifetime">
+              <property name="toolTip">
+               <string>Reset idle track to nothing</string>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+              </property>
+              <property name="autoRaise">
+               <bool>false</bool>
+              </property>
+              <property name="arrowType">
+               <enum>Qt::NoArrow</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_2">
+              <property name="text">
+               <string>Instance flags</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QCheckBox" name="chkUpdateEntity">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Update entity script</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+              <property name="tristate">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Instance idle animation</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QCheckBox" name="chkKillAtLifetime">
+              <property name="text">
+               <string>Kill at lifetime</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+              <property name="tristate">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1">
+             <widget class="QCheckBox" name="chkTickEntity">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Tick entity script</string>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
+              </property>
+              <property name="tristate">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QCheckBox" name="chkKillAtBoundary">
+              <property name="text">
+               <string>Kill at scene boundary</string>
+              </property>
+              <property name="tristate">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QToolButton" name="btnResetIdleAnimation">
+              <property name="toolTip">
+               <string>Reset idle track to nothing</string>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+              </property>
+              <property name="autoRaise">
+               <bool>false</bool>
+              </property>
+              <property name="arrowType">
+               <enum>Qt::NoArrow</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="idleAnimation">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="placeholderText">
+               <string>Class Default</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="1">
+             <widget class="QCheckBox" name="chkMouseEvents">
+              <property name="text">
+               <string>Receive mouse events</string>
+              </property>
+              <property name="tristate">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="0">
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
         <widget class="QWidget" name="tab_2">
          <attribute name="title">
-          <string>Script Variables</string>
+          <string>Entity Script Variables</string>
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
-           <widget class="QGroupBox" name="groupBox_3">
-            <property name="title">
-             <string>Script variables</string>
+           <widget class="QTableView" name="tableView">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_3">
-             <item>
-              <widget class="QTableView" name="tableView">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="selectionMode">
-                <enum>QAbstractItemView::SingleSelection</enum>
-               </property>
-               <property name="selectionBehavior">
-                <enum>QAbstractItemView::SelectRows</enum>
-               </property>
-               <attribute name="horizontalHeaderStretchLastSection">
-                <bool>true</bool>
-               </attribute>
-               <attribute name="verticalHeaderVisible">
-                <bool>false</bool>
-               </attribute>
-               <attribute name="verticalHeaderDefaultSectionSize">
-                <number>24</number>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout">
-               <item>
-                <spacer name="horizontalSpacer">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <widget class="QPushButton" name="btnEditVar">
-                 <property name="text">
-                  <string>Edit ...</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="btnResetVar">
-                 <property name="text">
-                  <string>Reset</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-            </layout>
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::SingleSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectRows</enum>
+            </property>
+            <attribute name="horizontalHeaderStretchLastSection">
+             <bool>true</bool>
+            </attribute>
+            <attribute name="verticalHeaderVisible">
+             <bool>false</bool>
+            </attribute>
+            <attribute name="verticalHeaderDefaultSectionSize">
+             <number>24</number>
+            </attribute>
            </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnEditVar">
+              <property name="text">
+               <string>Edit ...</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnResetVar">
+              <property name="text">
+               <string>Reset</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
