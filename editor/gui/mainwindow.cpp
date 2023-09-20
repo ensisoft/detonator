@@ -43,6 +43,7 @@
 #include "graphics/loader.h"
 #include "editor/app/buffer.h"
 #include "editor/app/format.h"
+#include "editor/app/platform.h"
 #include "editor/app/process.h"
 #include "editor/app/utility.h"
 #include "editor/app/eventlog.h"
@@ -1016,18 +1017,9 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionHelp_triggered()
 {
-    QStringList help_args;
-    help_args << "-collectionFile";
-    help_args << "help/help.qhc";
-    QString help_name = "assistant-qt5";
-#if defined(WINDOWS_OS)
-    help_name.append(".exe");
-#endif
-    const auto& help = app::JoinPath(QCoreApplication::applicationDirPath(), help_name);
-    if (!QProcess::startDetached(help, help_args))
-    {
-        ERROR("Failed to start assistant-qt5.");
-    }
+    const auto& file = app::JoinPath(QCoreApplication::applicationDirPath(), "help/help.html");
+    const auto& uri = app::toString("file://%1", file);
+    app::OpenWeb(uri);
 }
 
 void MainWindow::on_actionAbout_triggered()
