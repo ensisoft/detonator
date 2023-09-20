@@ -9,17 +9,56 @@ Build Instructions 👨🏼‍💻
 ![Screenshot](logo/win10.png)
 ![Screenshot](logo/emscripten.png)
 
-WASM (Emscripten)
+HTML5/WASM (Emscripten)
 ------------------------------
 
-Some notes about building to WASM.
+Some notes about building to HTML5/WASM.
 
-* Building to WASM is currently supported only for the engine but not the editor.
-* The build is separated from the main engine build and is in emscripten/ folder.
-    * See emscripten/CMakeLists.txt for build details.
+* Building to HTML5/WASM is currently supported only for the engine but not the editor.
 * Current Emscripten version is 3.0.0. Using other version will likely break things.
-* If using Windows Install Ninja from https://github.com/ninja-build/ninja/releases.
-    * Drop the ninja.exe for example into the emsdk/ folder or anywhere on your PATH.
+* Building to HTML5/WASM will produce the required JS and WASM files to run games in the browser,<br> 
+  but you still need to build the editor in order to develop the game and package it.<br>
+  When you package your game through the editor the HTML5/WASM game files are copied by the editor<br>
+  during the packaging process in order to produce the final deployable output.
+
+### Thread Support
+Supporting threads using pthread requires some more complicated steps in the Emscripten build AND in the game deployment.
+
+1. Turn on the pthread support in the Emscripten build in [emscripten/CMakeLists.txt](emscripten/CMakeLists.txt)
+
+```
+   target_compile_options(GameEngine PRIVATE -pthread)
+   ...
+   target_link_options(GameEngine PRIVATE -pthread)
+   ...
+   install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.worker.js" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../editor/dist")
+```
+
+2. When you deploy your game to a web server the host must turn on HTTP Cross-Origin policy flags in order to enable SharedArrayBuffer.<br>
+   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer
+
+.htaccess file
+```
+Header set Access-Control-Allow-Origin  "https://your-domain.com"
+Header set Cross-Origin-Embedder-Policy "require-corp"
+Header set Cross-Origin-Resource-Policy "same-site"
+Header set Cross-Origin-Opener-Policy   "same-origin"
+Header set Access-Control-Allow-Headers "range"
+```
+
+#### Audio Thread
+
+The audio engine inside DETONATOR 2D engine can use a separate audio thread for audio playback.<br>
+There are several build variables that control this feature.
+
+[escripten/config.h](emscripten/config.h)
+
+```
+  #define AUDIO_USE_LOCK_FREE_QUEUE
+  #define AUDIO_USE_PLAYER_THREAD
+```
+
+### Building for WASM
 
 <details><summary>How to build on Linux</summary>
 
@@ -56,6 +95,11 @@ Some notes about building to WASM.
 
 <details><summary>How to build on Windows</summary>
 
+- Install Ninja built tool https://github.com/ninja-build/ninja/releases
+ 
+  Drop the ninja.exe for example into the emsdk/ folder or anywhere on your PATH.
+
+
 - Install Emscripten
 ```
   $ cd detonator
@@ -78,7 +122,7 @@ Some notes about building to WASM.
   $ ninja --version
   $ 1.10.2
 ```
-- Build the DETONATOR 2D engine into a WASM blob. Make sure you have emcc and ninja in your path i.e. you have
+- Build the DETONATOR 2D engine into a WASM blob. Make sure you have emcc and Ninja in your path i.e. you have
   ran emsdk_env.bat in your current shell.
 ```
   $ git clone https://github.com/ensisoft/detonator
@@ -93,10 +137,15 @@ Some notes about building to WASM.
 ```
 </details>
 
-If everything went well there should now be GameEngine.js and GameEngine.wasm files in the editor's dist folder.
+If everything went well there should now be 'GameEngine.js' and 'GameEngine.wasm' files in the editor's dist folder.
 The .js file contains the JavaScript glue code needed to manhandle the WASM code into the browser's WASM engine
 when the web page loads. When a game is packaged for web these files will then be deployed (copied) into the
 game's output directory.
+
+When threading is turned on in the Emscripten build an additional 'GameEngine.worker.js" file is produced.
+This file contains some required JavaScript glue code for the web workers that implement the pthread support in Emscripten.
+This file must then be deployed alongside the GameEngine.js, GameEngine.wasm etc files.
+
 
 Desktop Linux
 -------------------------------------
@@ -230,14 +279,13 @@ These build instructions are for MSVS 2019 Community Edition and for 64bit build
 - Install prebuilt Qt 5.15.2
   http://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.zip
 
-- Install prebuilt Boost 1.72
-  https://sourceforge.net/projects/boost/files/boost-binaries/1.72.0_b1/
-
 - Install Conan package manager (VERSION 2)
   https://docs.conan.io/en/latest/installation.html
 
 - Install CMake build tool
   https://cmake.org/install/
+
+
 
 </details>
 
