@@ -33,6 +33,7 @@
 #include "editor/gui/utility.h"
 #include "editor/gui/dlgpackage.h"
 #include "editor/gui/dlgsettings.h"
+#include "editor/gui/dlgcomplete.h"
 
 namespace gui
 {
@@ -226,11 +227,8 @@ void DlgPackage::on_btnStart_clicked()
 
     if (success)
     {
-        QMessageBox msg(this);
-        msg.setIcon(QMessageBox::Information);
-        msg.setStandardButtons(QMessageBox::Ok);
-        msg.setText(tr("Success!\nHave a good day. :)"));
-        msg.exec();
+        DlgComplete dlg(this, mWorkspace, options);
+        dlg.exec();
     }
     else
     {

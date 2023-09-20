@@ -416,6 +416,9 @@ add_executable(Detonator
     editor/gui/dlgabout.h
     editor/gui/dlgabout.ui
     editor/gui/dlgabout.cpp
+    editor/gui/dlgcomplete.h
+    editor/gui/dlgcomplete.ui
+    editor/gui/dlgcomplete.cpp
     editor/gui/dlgjoint.h
     editor/gui/dlgjoint.ui
     editor/gui/dlgjoint.cpp
