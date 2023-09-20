@@ -462,7 +462,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mParticleSystems->menuAction()->setCheckable(true);
     mCustomShapes = new QMenu(this);
     mCustomShapes->menuAction()->setIcon(QIcon("icons:polygon.png"));
-    mCustomShapes->menuAction()->setText("Shapes");
+    mCustomShapes->menuAction()->setText("Custom Shapes");
     mCustomShapes->menuAction()->setCheckable(true);
 
     mState.workspace = workspace;
@@ -523,7 +523,6 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     GetUserProperty(resource, "camera_scale_x", mUI.scaleX);
     GetUserProperty(resource, "camera_scale_y", mUI.scaleY);
     GetUserProperty(resource, "camera_rotation", mUI.rotation);
-    GetUserProperty(resource, "callbacks_group", mUI.callbacks);
     GetUserProperty(resource, "variables_group", mUI.variables);
     GetUserProperty(resource, "animations_group", mUI.animations);
     GetUserProperty(resource, "joints_group", mUI.joints);
@@ -711,7 +710,6 @@ bool EntityWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Entity", mUI.cmbGrid);
     settings.SaveWidget("Entity", mUI.zoom);
     settings.SaveWidget("Entity", mUI.widget);
-    settings.SaveWidget("Entity", mUI.callbacks);
     settings.SaveWidget("Entity", mUI.variables);
     settings.SaveWidget("Entity", mUI.animations);
     settings.SaveWidget("Entity", mUI.joints);
@@ -737,7 +735,6 @@ bool EntityWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Entity", mUI.cmbGrid);
     settings.LoadWidget("Entity", mUI.zoom);
     settings.LoadWidget("Entity", mUI.widget);
-    settings.LoadWidget("Entity", mUI.callbacks);
     settings.LoadWidget("Entity", mUI.variables);
     settings.LoadWidget("Entity", mUI.animations);
     settings.LoadWidget("Entity", mUI.joints);
@@ -1249,7 +1246,6 @@ void EntityWidget::on_actionSave_triggered()
     SetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     SetUserProperty(resource, "widget", mUI.widget);
     SetUserProperty(resource, "show_viewport", mUI.chkShowViewport);
-    SetUserProperty(resource, "callbacks_group", mUI.callbacks);
     SetUserProperty(resource, "variables_group", mUI.variables);
     SetUserProperty(resource, "animations_group", mUI.animations);
     SetUserProperty(resource, "joints_group", mUI.joints);
