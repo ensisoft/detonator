@@ -143,6 +143,7 @@ namespace gui
         void on_actionStop_triggered();
         void on_actionSave_triggered();
         void on_actionFind_triggered();
+        void on_actionEditEntityClass_triggered();
         void on_actionPreview_triggered();
         void on_actionNodeEdit_triggered();
         void on_actionNodeDelete_triggered();

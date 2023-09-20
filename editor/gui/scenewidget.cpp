@@ -593,7 +593,6 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "variables_group", mUI.sceneVariablesGroup);
     GetUserProperty(resource, "bounds_group", mUI.sceneBoundsGroup);
     GetUserProperty(resource, "index_group", mUI.sceneIndexGroup);
-    GetUserProperty(resource, "effects_group", mUI.effectsGroup);
     GetUserProperty(resource, "bloom_group", mUI.bloomGroup);
     GetUserProperty(resource, "bloom_threshold", &mBloom.threshold);
     GetUserProperty(resource, "bloom_red",       &mBloom.red);
@@ -684,7 +683,6 @@ bool SceneWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Scene", mUI.sceneVariablesGroup);
     settings.SaveWidget("Scene", mUI.sceneBoundsGroup);
     settings.SaveWidget("Scene", mUI.sceneIndexGroup);
-    settings.SaveWidget("Scene", mUI.effectsGroup);
     settings.SaveWidget("Scene", mUI.bloomGroup);
     settings.SaveWidget("Scene", mUI.cmbPerspective);
     return true;
@@ -714,7 +712,6 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Scene", mUI.sceneVariablesGroup);
     settings.LoadWidget("Scene", mUI.sceneBoundsGroup);
     settings.LoadWidget("Scene", mUI.sceneIndexGroup);
-    settings.LoadWidget("Scene", mUI.effectsGroup);
     settings.LoadWidget("Scene", mUI.bloomGroup);
     settings.LoadWidget("Scene", mUI.cmbPerspective);
 
@@ -1236,7 +1233,6 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "variables_group", mUI.sceneVariablesGroup);
     SetUserProperty(resource, "bounds_group", mUI.sceneBoundsGroup);
     SetUserProperty(resource, "index_group", mUI.sceneIndexGroup);
-    SetUserProperty(resource, "effects_group", mUI.effectsGroup);
     SetUserProperty(resource, "bloom_group", mUI.bloomGroup);
     SetUserProperty(resource, "bloom_threshold", mBloom.threshold);
     SetUserProperty(resource, "bloom_red",       mBloom.red);
@@ -1260,6 +1256,11 @@ void SceneWidget::on_actionFind_triggered()
     FindNode(node);
     mUI.tree->SelectItemById(node->GetId());
     mUI.widget->setFocus();
+}
+
+void SceneWidget::on_actionEditEntityClass_triggered()
+{
+    on_btnEditEntity_clicked();
 }
 
 void SceneWidget::on_actionPreview_triggered()
@@ -1288,6 +1289,8 @@ void SceneWidget::on_actionNodeEdit_triggered()
 
         DlgEntity dlg(this, mState.workspace, *klass, *node);
         dlg.exec();
+
+        node->ClearStaleScriptValues(*klass);
     }
 }
 
@@ -1711,6 +1714,8 @@ void SceneWidget::on_btnEntityParams_clicked()
 
         DlgEntity dlg(this, mState.workspace, *klass, *node);
         dlg.exec();
+
+        node->ClearStaleScriptValues(*klass);
     }
 }
 
@@ -1745,6 +1750,7 @@ void SceneWidget::on_tree_customContextMenuRequested(QPoint)
     mUI.actionNodeEdit->setEnabled(node != nullptr);
     mUI.actionNodeFind->setEnabled(node != nullptr);
     mUI.actionEntityVarRef->setEnabled(node != nullptr);
+    mUI.actionEditEntityClass->setEnabled(node != nullptr);
 
     QMenu menu(this);
     menu.addAction(mUI.actionNodeMoveUpLayer);
@@ -1754,6 +1760,7 @@ void SceneWidget::on_tree_customContextMenuRequested(QPoint)
     menu.addAction(mUI.actionNodeFind);
     menu.addSeparator();
     menu.addAction(mUI.actionNodeEdit);
+    menu.addAction(mUI.actionEditEntityClass);
     menu.addSeparator();
     menu.addAction(mUI.actionEntityVarRef);
     menu.addSeparator();
@@ -2092,6 +2099,8 @@ void SceneWidget::MouseDoubleClick(QMouseEvent* mickey)
 
     DlgEntity dlg(this, mState.workspace, *entity_klass, *scene_node);
     dlg.exec();
+
+    scene_node->ClearStaleScriptValues(*entity_klass);
 }
 
 void SceneWidget::MouseWheel(QWheelEvent* wheel)
