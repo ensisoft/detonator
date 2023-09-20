@@ -230,6 +230,8 @@ namespace game
         static bool FromJson(const data::Reader& reader, VariantType* variant);
         static Type GetTypeFromVariant(const VariantType& variant);
 
+        static bool SameSame(const VariantType& first, const VariantType& other);
+
         template<typename T>
         static std::vector<T>& GetVectorFromVariant(VariantType& variant)
         {
