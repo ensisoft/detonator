@@ -349,4 +349,11 @@ ScriptVar::Type ScriptVar::GetTypeFromVariant(const VariantType& variant)
     else BUG("Unknown ScriptVar type!");
 }
 
+// static
+bool ScriptVar::SameSame(const VariantType& first, const VariantType& other)
+{
+    return GetHash(first) == GetHash(other);
+}
+
+
 } // namespace

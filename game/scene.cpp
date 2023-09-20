@@ -140,6 +140,8 @@ void EntityPlacement::ClearStaleScriptValues(const EntityClass& klass)
             it = mScriptVarValues.erase(it);
         } else if(var->IsReadOnly()) {
             it = mScriptVarValues.erase(it);
+        } else if (ScriptVar::SameSame(val.value, var->GetVariantValue())) {
+            it = mScriptVarValues.erase(it);
         } else ++it;
     }
 }

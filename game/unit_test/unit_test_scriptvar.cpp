@@ -21,8 +21,10 @@
 #include "game/scriptvar.h"
 #include "data/json.h"
 
-int test_main(int argc, char* argv[])
+void test_script_var()
 {
+    TEST_CASE(test::Type::Feature)
+
     {
         game::ScriptVar var("foo", std::string("blabla"), false);
         TEST_REQUIRE(var.IsReadOnly() == false);
@@ -141,5 +143,44 @@ int test_main(int argc, char* argv[])
 
     }
 
+    {
+
+        TEST_REQUIRE(game::ScriptVar::SameSame(std::vector<int>{123},
+                                               std::vector<int>{123}));
+        TEST_REQUIRE(!game::ScriptVar::SameSame(std::vector<int>{123},
+                                               std::vector<int>{321}));
+    }
+    {
+
+        TEST_REQUIRE(game::ScriptVar::SameSame(std::vector<std::string>{"foobar"},
+                                               std::vector<std::string>{"foobar"}));
+        TEST_REQUIRE(!game::ScriptVar::SameSame(std::vector<std::string>{"foobar"},
+                                                std::vector<std::string>{"doober"}));
+    }
+
+    {
+        TEST_REQUIRE(game::ScriptVar::SameSame(std::vector<float>{123.0f},
+                                               std::vector<float>{123.0f}));
+        TEST_REQUIRE(!game::ScriptVar::SameSame(std::vector<float>{123.0f},
+                                                std::vector<float>{321.0f}));
+    }
+
+    {
+        std::vector<game::ScriptVar::MaterialReference> refs;
+        refs.push_back({"1234"});
+        refs.push_back({"abasbs"});
+        TEST_REQUIRE(game::ScriptVar::SameSame(refs, refs));
+
+        auto other = refs;
+        other[1] = game::ScriptVar::MaterialReference {"keke"};
+        TEST_REQUIRE(!game::ScriptVar::SameSame(refs, other));
+    }
+}
+EXPORT_TEST_MAIN(
+int test_main(int argc, char* argv[])
+{
+    test_script_var();
+
     return 0;
 }
+) // TEST_MAIN
