@@ -3544,13 +3544,21 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
     {
         // these should be in the dist/ folder and are the
         // built by the emscripten build in emscripten/
-        const QString files[] = {
-           "GameEngine.js", "GameEngine.wasm"
+        struct HTML5_Engine_File {
+            QString name;
+            bool mandatory;
         };
-        for (int i=0; i<2; ++i)
+
+        const HTML5_Engine_File files[] = {
+            {"GameEngine.js", true},
+            {"GameEngine.wasm", true},
+            // this is just a helper file for convenience
+            {"http-server.py", false}
+        };
+        for (int i=0; i<3; ++i)
         {
-            const auto& src = app::GetAppInstFilePath(files[i]);
-            const auto& dst = app::JoinPath(options.directory, files[i]);
+            const auto& src = app::GetAppInstFilePath(files[i].name);
+            const auto& dst = app::JoinPath(options.directory, files[i].name);
             auto[success, error] = app::CopyFile(src, dst);
             if (!success)
             {
