@@ -2490,15 +2490,15 @@ void UIWidget::DisplayCurrentWidgetProperties()
     SetValue(mUI.chkWidgetVisible, true);
     SetValue(mUI.chkWidgetClipChildren, true);
     SetEnabled(mUI.widgetProperties, false);
-    SetEnabled(mUI.widgetStyleTab,   false);
-    SetEnabled(mUI.widgetData,       false);
+    SetEnabled(mUI.widgetStyle,false);
+    SetEnabled(mUI.widgetData, false);
     mUI.stackedWidget->setCurrentWidget(mUI.blankPage);
 
     if (const auto* widget = GetCurrentWidget())
     {
         SetEnabled(mUI.widgetProperties, true);
-        SetEnabled(mUI.widgetStyleTab,   true);
-        SetEnabled(mUI.widgetData,       true);
+        SetEnabled(mUI.widgetStyle, true);
+        SetEnabled(mUI.widgetData, true);
 
         const auto& id = widget->GetId();
         const auto& size = widget->GetSize();
