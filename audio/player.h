@@ -141,13 +141,7 @@ namespace audio
         void QueueAction(Action&& action);
         bool DequeueAction(Action* action);
     private:
-#if defined(AUDIO_LOCK_FREE_QUEUE)
-        // queue of actions for tracks (pause/resume)
-        boost::lockfree::queue<Action> track_actions_;
-#else
-        std::mutex action_mutex_;
-        std::queue<Action> track_actions_;
-#endif
+
         // unique track id
         std::size_t trackid_ = 1;
 
@@ -156,13 +150,23 @@ namespace audio
         std::mutex event_mutex_;
         std::queue<Event> events_;
 
+        // if we use an audio thread the possibility is to use a
+        // lock free queue or a std::queue + std::mutex.
 #if defined(AUDIO_USE_PLAYER_THREAD)
         // audio thread stop flag
         std::atomic_flag run_thread_ = ATOMIC_FLAG_INIT;
         std::unique_ptr<std::thread> thread_;
+  #if defined(AUDIO_LOCK_FREE_QUEUE)
+        // queue of actions for tracks (pause/resume)
+        boost::lockfree::queue<Action> track_actions_;
+  #else
+        std::mutex action_mutex_;
+        std::queue<Action> track_actions_;
+  #endif
 #else
         std::list<Track> track_list_;
         std::unique_ptr<Device> device_;
+        std::queue<Action> track_actions_;
 #endif
     };
 
