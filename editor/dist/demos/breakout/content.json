@@ -3337,7 +3337,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/ballBlue_05.png",
               "flags": {
@@ -3433,7 +3434,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/element_blue_rectangle_glossy.png",
               "flags": {
@@ -3529,7 +3531,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/element_red_rectangle_glossy.png",
               "flags": {
@@ -3625,7 +3628,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/element_green_rectangle_glossy.png",
               "flags": {
@@ -3721,7 +3725,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/element_purple_rectangle_glossy.png",
               "flags": {
@@ -3817,7 +3822,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/element_yellow_rectangle_glossy.png",
               "flags": {
@@ -3913,7 +3919,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/element_grey_rectangle_glossy.png",
               "flags": {
@@ -4009,7 +4016,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://backgrounds/22.png",
               "flags": {
@@ -4225,7 +4233,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/element_grey_rectangle_glossy.png",
               "flags": {
@@ -4321,7 +4330,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/ballGrey_05.png",
               "flags": {
@@ -4417,7 +4427,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/paddle_09.png",
               "flags": {
@@ -4513,7 +4524,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/paddle_01.png",
               "flags": {
@@ -4609,7 +4621,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/paddle_05.png",
               "flags": {
@@ -24408,7 +24421,9 @@
         {
           "widgets": [
             {
+              "animation": "",
               "flags": {
+                "ClipChildren": true,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
@@ -24428,7 +24443,9 @@
               "type": "Form",
               "widgets": [
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -24449,7 +24466,9 @@
                   "type": "GroupBox",
                   "widgets": [
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -24471,7 +24490,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -24495,7 +24516,9 @@
                   ]
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -24516,7 +24539,9 @@
                   "type": "PushButton"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -24537,7 +24562,9 @@
                   "type": "PushButton"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -24559,7 +24586,9 @@
                   "type": "Label"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -24604,7 +24633,9 @@
         {
           "widgets": [
             {
+              "animation": "",
               "flags": {
+                "ClipChildren": true,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
@@ -24624,7 +24655,9 @@
               "type": "Form",
               "widgets": [
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -24645,7 +24678,9 @@
                   "type": "GroupBox",
                   "widgets": [
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -24667,7 +24702,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -24689,7 +24726,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -24711,7 +24750,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -24733,7 +24774,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": false

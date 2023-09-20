@@ -1740,6 +1740,7 @@
             {
               "animation": "",
               "flags": {
+                "ClipChildren": true,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
@@ -1761,6 +1762,7 @@
                 {
                   "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -1784,6 +1786,7 @@
                 {
                   "animation": "$OnOpen\nmove 50.0 50.0\nduration 1.0\ninterpolation Cosine",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -1807,6 +1810,7 @@
                 {
                   "animation": "$OnOpen\nmove 350.0 500\nduration 1.0\ninterpolation EaseOutBounce\n\n$OnClick\nmove -150.0 500.0\nduration 0.5\ninterpolation EaseInBack",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -1829,6 +1833,7 @@
                 {
                   "animation": "$OnOpen\nmove 550.5 500.5\nduration 1.0\ninterpolation EaseOutBounce\n\n$OnClick\nmove 1050.0 500.0\nduration 0.5\ninterpolation EaseInBack",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -1851,6 +1856,7 @@
                 {
                   "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -1874,6 +1880,7 @@
                 {
                   "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true

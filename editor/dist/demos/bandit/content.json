@@ -6053,7 +6053,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Objects/StoneBlock.png",
               "flags": {
@@ -6149,7 +6150,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Tile/tile1.png",
               "flags": {
@@ -6245,7 +6247,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Tile/tile2.png",
               "flags": {
@@ -6341,7 +6344,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Tile/tile3.png",
               "flags": {
@@ -6437,7 +6441,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Tile/tile4.png",
               "flags": {
@@ -6533,7 +6538,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Tile/tile5.png",
               "flags": {
@@ -6629,7 +6635,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Tile/tile6.png",
               "flags": {
@@ -6725,7 +6732,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Tile/tile7.png",
               "flags": {
@@ -6821,7 +6829,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Tile/tile8.png",
               "flags": {
@@ -6917,7 +6926,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Tile/tile9.png",
               "flags": {
@@ -7013,7 +7023,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Tile/tile10.png",
               "flags": {
@@ -7109,7 +7120,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Tile/tile11.png",
               "flags": {
@@ -7205,7 +7217,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Tile/tile12.png",
               "flags": {
@@ -7301,7 +7314,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Tile/tile13.png",
               "flags": {
@@ -7397,7 +7411,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Tile/tile14.png",
               "flags": {
@@ -7493,7 +7508,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Tile/tile15.png",
               "flags": {
@@ -7589,7 +7605,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Tile/tile16.png",
               "flags": {
@@ -7685,7 +7702,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Objects/Bush (1).png",
               "flags": {
@@ -7781,7 +7799,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Objects/Bush (2).png",
               "flags": {
@@ -7877,7 +7896,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Objects/Cactus (1).png",
               "flags": {
@@ -7973,7 +7993,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Objects/Cactus (2).png",
               "flags": {
@@ -8069,7 +8090,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Objects/Cactus (3).png",
               "flags": {
@@ -8165,7 +8187,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Objects/Crate.png",
               "flags": {
@@ -8261,7 +8284,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Objects/Grass (1).png",
               "flags": {
@@ -8357,7 +8381,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Objects/Grass (2).png",
               "flags": {
@@ -8453,7 +8478,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Objects/Sign.png",
               "flags": {
@@ -8549,7 +8575,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Objects/SignArrow.png",
               "flags": {
@@ -8645,7 +8672,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Objects/Skeleton.png",
               "flags": {
@@ -8741,7 +8769,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Objects/Stone.png",
               "flags": {
@@ -8837,7 +8866,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/Objects/Tree.png",
               "flags": {
@@ -8933,7 +8963,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/BG_layer_0.png",
               "flags": {
@@ -9029,7 +9060,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_000.png",
               "flags": {
@@ -9050,7 +9082,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_001.png",
               "flags": {
@@ -9071,7 +9104,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_002.png",
               "flags": {
@@ -9092,7 +9126,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_003.png",
               "flags": {
@@ -9113,7 +9148,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_004.png",
               "flags": {
@@ -9134,7 +9170,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_005.png",
               "flags": {
@@ -9155,7 +9192,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_006.png",
               "flags": {
@@ -9176,7 +9214,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_007.png",
               "flags": {
@@ -9197,7 +9236,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_008.png",
               "flags": {
@@ -9218,7 +9258,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_009.png",
               "flags": {
@@ -9239,7 +9280,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_010.png",
               "flags": {
@@ -9260,7 +9302,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/01-Idle/__Bandit02_Idle_011.png",
               "flags": {
@@ -9356,7 +9399,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_000.png",
               "flags": {
@@ -9377,7 +9421,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_001.png",
               "flags": {
@@ -9398,7 +9443,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_002.png",
               "flags": {
@@ -9419,7 +9465,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_003.png",
               "flags": {
@@ -9440,7 +9487,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_004.png",
               "flags": {
@@ -9461,7 +9509,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_005.png",
               "flags": {
@@ -9482,7 +9531,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_006.png",
               "flags": {
@@ -9503,7 +9553,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/02-Walk/__Bandit02_Walk_007.png",
               "flags": {
@@ -9599,7 +9650,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_000.png",
               "flags": {
@@ -9620,7 +9672,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_001.png",
               "flags": {
@@ -9641,7 +9694,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_002.png",
               "flags": {
@@ -9662,7 +9716,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_003.png",
               "flags": {
@@ -9683,7 +9738,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_004.png",
               "flags": {
@@ -9704,7 +9760,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_005.png",
               "flags": {
@@ -9725,7 +9782,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_006.png",
               "flags": {
@@ -9746,7 +9804,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/05-JumpUp/__Bandit02_JumpUP_007.png",
               "flags": {
@@ -9842,7 +9901,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_000.png",
               "flags": {
@@ -9863,7 +9923,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_001.png",
               "flags": {
@@ -9884,7 +9945,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_002.png",
               "flags": {
@@ -9905,7 +9967,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_003.png",
               "flags": {
@@ -9926,7 +9989,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_004.png",
               "flags": {
@@ -9947,7 +10011,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_005.png",
               "flags": {
@@ -9968,7 +10033,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_006.png",
               "flags": {
@@ -9989,7 +10055,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/03-Attack/__Bandit02_Attack_007.png",
               "flags": {
@@ -10085,7 +10152,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_000.png",
               "flags": {
@@ -10106,7 +10174,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_001.png",
               "flags": {
@@ -10127,7 +10196,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_002.png",
               "flags": {
@@ -10148,7 +10218,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_003.png",
               "flags": {
@@ -10169,7 +10240,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_004.png",
               "flags": {
@@ -10190,7 +10262,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_005.png",
               "flags": {
@@ -10211,7 +10284,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_006.png",
               "flags": {
@@ -10232,7 +10306,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/06-FallDown/__Bandit02_FallDown_007.png",
               "flags": {
@@ -10328,7 +10403,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_000.png",
               "flags": {
@@ -10349,7 +10425,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_001.png",
               "flags": {
@@ -10370,7 +10447,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_002.png",
               "flags": {
@@ -10391,7 +10469,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_003.png",
               "flags": {
@@ -10412,7 +10491,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_004.png",
               "flags": {
@@ -10433,7 +10513,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_005.png",
               "flags": {
@@ -10454,7 +10535,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_006.png",
               "flags": {
@@ -10475,7 +10557,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/07-Hurt/__Bandit02_Hurt_007.png",
               "flags": {
@@ -10571,7 +10654,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_000.png",
               "flags": {
@@ -10592,7 +10676,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_001.png",
               "flags": {
@@ -10613,7 +10698,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_002.png",
               "flags": {
@@ -10634,7 +10720,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_003.png",
               "flags": {
@@ -10655,7 +10742,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_004.png",
               "flags": {
@@ -10676,7 +10764,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_005.png",
               "flags": {
@@ -10697,7 +10786,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_006.png",
               "flags": {
@@ -10718,7 +10808,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Bandit/08-Die/__Bandit02_Die_007.png",
               "flags": {
@@ -10814,7 +10905,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/BG_layer_1.png",
               "flags": {
@@ -10910,7 +11002,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/BG_layer_2.png",
               "flags": {
@@ -11006,7 +11099,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Coin/Spin/star coin rotate 1.png",
               "flags": {
@@ -11027,7 +11121,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Coin/Spin/star coin rotate 2.png",
               "flags": {
@@ -11048,7 +11143,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Coin/Spin/star coin rotate 3.png",
               "flags": {
@@ -11069,7 +11165,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Coin/Spin/star coin rotate 4.png",
               "flags": {
@@ -11090,7 +11187,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Coin/Spin/star coin rotate 5.png",
               "flags": {
@@ -11111,7 +11209,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/Coin/Spin/star coin rotate 6.png",
               "flags": {
@@ -11207,7 +11306,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/diamond/diamond violet.png",
               "flags": {
@@ -11303,7 +11403,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/desert tile set/BG.png",
               "flags": {
@@ -19450,7 +19551,9 @@
         {
           "widgets": [
             {
+              "animation": "",
               "flags": {
+                "ClipChildren": true,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
@@ -19470,7 +19573,9 @@
               "type": "Form",
               "widgets": [
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -19491,7 +19596,9 @@
                   "type": "GroupBox",
                   "widgets": [
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -19513,7 +19620,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -19535,7 +19644,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -19557,7 +19668,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -19604,7 +19717,9 @@
         {
           "widgets": [
             {
+              "animation": "",
               "flags": {
+                "ClipChildren": true,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
@@ -19624,7 +19739,9 @@
               "type": "Form",
               "widgets": [
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -19646,7 +19763,9 @@
                   "type": "Label"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -19668,7 +19787,9 @@
                   "type": "Label"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -19689,7 +19810,9 @@
                   "type": "PushButton"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
