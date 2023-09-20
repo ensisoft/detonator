@@ -593,6 +593,11 @@ target_link_libraries(Detonator cmake_git_version_tracking)
 target_link_libraries(Detonator tree-sitter)
 install(TARGETS Detonator DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
+# Copy the Python based http-server for serving the HTML5/WASM game locally
+# with the right access policy headers for enabling some features such
+# as the infamous SharedArrayBuffer
+install(FILES "${CMAKE_CURRENT_LIST_DIR}/tools/http-server.py" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
+
 # game host application which provides a host process to load the game
 # libraries for playback.
 add_executable(EditorGameHost
