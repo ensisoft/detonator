@@ -192,7 +192,9 @@
         {
           "widgets": [
             {
+              "animation": "",
               "flags": {
+                "ClipChildren": true,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
@@ -212,9 +214,11 @@
               "type": "Form",
               "widgets": [
                 {
+                  "animation": "",
                   "check": "Left",
                   "checked": false,
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -235,7 +239,9 @@
                   "type": "CheckBox"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -256,7 +262,9 @@
                   "value": 0.5
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -278,9 +286,11 @@
                   "value": 0.5
                 },
                 {
+                  "animation": "",
                   "check": "Left",
                   "checked": true,
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -301,7 +311,9 @@
                   "type": "CheckBox"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -322,7 +334,9 @@
                   "type": "ProgressBar"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -344,7 +358,9 @@
                   "type": "Label"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -366,7 +382,9 @@
                   "type": "Label"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -388,7 +406,9 @@
                   "type": "Label"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -410,7 +430,9 @@
                   "type": "Label"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -432,29 +454,33 @@
                   "type": "Label"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
                   },
                   "id": "ZNmb19Rn79",
-                  "line_height": 1.0,
+                  "line_height": 1.2000000476837158,
                   "name": "Label_5",
                   "position": {
                     "x": 550.5,
                     "y": 50.5
                   },
                   "size": {
-                    "h": 200.0,
-                    "w": 400.0
+                    "h": 227.0,
+                    "w": 431.0
                   },
                   "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":18},{\"key\":\"edit-text-font\",\"value\":\"app://fonts/AtariFontFullVersion.ttf\"},{\"key\":\"edit-text-color\",\"value\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0}}]}",
                   "tab_index": 0,
-                  "text": "Press Left or Right arrow to navigate\nPress Esc to exit\n\nPress Tab key to change keyboard focus.\nPress Space key to select.\nPress Up/Down keys to change values.\n\napp://ui/style/default.json",
+                  "text": "Press Left or Right arrow to navigate\nPress Esc to exit\n\n\nPress Tab key to change keyboard focus.\nPress Space key to select.\nPress Up/Down keys to change values.\n\n",
                   "type": "Label"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -476,7 +502,9 @@
                   "value": 0.5
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -497,7 +525,9 @@
                   "type": "PushButton"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -518,7 +548,9 @@
                   "type": "PushButton"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -539,7 +571,9 @@
                   "type": "PushButton"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -560,7 +594,9 @@
                   "type": "PushButton"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -581,7 +617,9 @@
                   "type": "PushButton"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -602,8 +640,10 @@
                   "type": "GroupBox",
                   "widgets": [
                     {
+                      "animation": "",
                       "check": "Left",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -625,8 +665,10 @@
                       "type": "RadioButton"
                     },
                     {
+                      "animation": "",
                       "check": "Left",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -648,8 +690,10 @@
                       "type": "RadioButton"
                     },
                     {
+                      "animation": "",
                       "check": "Left",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -673,7 +717,9 @@
                   ]
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -696,7 +742,9 @@
                   "value": 0
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -718,7 +766,9 @@
                   "type": "Label"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -740,8 +790,10 @@
                   "type": "Label"
                 },
                 {
+                  "animation": "",
                   "checked": false,
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -761,7 +813,9 @@
                   "type": "ToggleBox"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -785,7 +839,9 @@
               ]
             },
             {
+              "animation": "",
               "flags": {
+                "ClipChildren": true,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
@@ -827,7 +883,9 @@
         {
           "widgets": [
             {
+              "animation": "",
               "flags": {
+                "ClipChildren": true,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
@@ -848,7 +906,9 @@
               "type": "GroupBox",
               "widgets": [
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -869,7 +929,9 @@
                   "type": "PushButton"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -890,7 +952,9 @@
                   "type": "PushButton"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -914,7 +978,9 @@
               ]
             },
             {
+              "animation": "",
               "flags": {
+                "ClipChildren": true,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
@@ -935,7 +1001,9 @@
               "type": "GroupBox",
               "widgets": [
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -957,7 +1025,9 @@
                   "type": "Label"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -978,9 +1048,11 @@
                   "type": "GroupBox",
                   "widgets": [
                     {
+                      "animation": "",
                       "check": "Left",
                       "checked": true,
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1001,9 +1073,11 @@
                       "type": "CheckBox"
                     },
                     {
+                      "animation": "",
                       "check": "Left",
                       "checked": false,
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1024,9 +1098,11 @@
                       "type": "CheckBox"
                     },
                     {
+                      "animation": "",
                       "check": "Left",
                       "checked": false,
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1051,7 +1127,9 @@
               ]
             },
             {
+              "animation": "",
               "flags": {
+                "ClipChildren": true,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
@@ -1072,7 +1150,9 @@
               "type": "GroupBox",
               "widgets": [
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -1093,9 +1173,11 @@
                   "type": "GroupBox",
                   "widgets": [
                     {
+                      "animation": "",
                       "check": "Left",
                       "checked": true,
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1116,9 +1198,11 @@
                       "type": "CheckBox"
                     },
                     {
+                      "animation": "",
                       "check": "Left",
                       "checked": true,
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1141,7 +1225,9 @@
                   ]
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -1165,7 +1251,9 @@
               ]
             },
             {
+              "animation": "",
               "flags": {
+                "ClipChildren": true,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
@@ -1186,7 +1274,9 @@
               "type": "GroupBox",
               "widgets": [
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -1207,7 +1297,9 @@
                   "type": "GroupBox",
                   "widgets": [
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1230,7 +1322,9 @@
                       "value": 0
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1252,7 +1346,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1274,7 +1370,9 @@
                       "value": 0.5
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1297,7 +1395,9 @@
                   ]
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -1342,7 +1442,9 @@
         {
           "widgets": [
             {
+              "animation": "",
               "flags": {
+                "ClipChildren": true,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
@@ -1362,7 +1464,9 @@
               "type": "Form",
               "widgets": [
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -1383,7 +1487,9 @@
                   "type": "GroupBox",
                   "widgets": [
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1405,7 +1511,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1427,7 +1535,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1449,7 +1559,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1471,7 +1583,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1492,7 +1606,9 @@
                       "type": "PushButton"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1513,7 +1629,9 @@
                       "type": "PushButton"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1536,7 +1654,9 @@
                   ]
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -1559,7 +1679,9 @@
               ]
             },
             {
+              "animation": "",
               "flags": {
+                "ClipChildren": true,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
@@ -1579,7 +1701,9 @@
               "type": "Form",
               "widgets": [
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -1600,7 +1724,9 @@
                   "type": "GroupBox",
                   "widgets": [
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1622,8 +1748,10 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "checked": true,
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1643,8 +1771,10 @@
                       "type": "ToggleBox"
                     },
                     {
+                      "animation": "",
                       "checked": false,
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1664,8 +1794,10 @@
                       "type": "ToggleBox"
                     },
                     {
+                      "animation": "",
                       "checked": true,
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1685,8 +1817,10 @@
                       "type": "ToggleBox"
                     },
                     {
+                      "animation": "",
                       "checked": false,
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1706,7 +1840,9 @@
                       "type": "ToggleBox"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1728,7 +1864,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1750,7 +1888,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1772,7 +1912,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1794,7 +1936,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1816,7 +1960,9 @@
                       "value": 0.5
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1837,7 +1983,9 @@
                       "type": "PushButton"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1858,7 +2006,9 @@
                       "type": "PushButton"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1882,7 +2032,9 @@
                   ]
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -1905,7 +2057,9 @@
               ]
             },
             {
+              "animation": "",
               "flags": {
+                "ClipChildren": true,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
@@ -1925,7 +2079,9 @@
               "type": "Form",
               "widgets": [
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -1946,7 +2102,9 @@
                   "type": "GroupBox",
                   "widgets": [
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1968,7 +2126,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -1992,7 +2152,9 @@
                   ]
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -2014,7 +2176,9 @@
                   "type": "Label"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -2035,7 +2199,9 @@
                   "type": "PushButton"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -2056,7 +2222,9 @@
                   "type": "PushButton"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -2079,7 +2247,9 @@
               ]
             },
             {
+              "animation": "",
               "flags": {
+                "ClipChildren": true,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
@@ -2099,7 +2269,9 @@
               "type": "Form",
               "widgets": [
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -2120,7 +2292,9 @@
                   "type": "GroupBox",
                   "widgets": [
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -2144,7 +2318,9 @@
                   ]
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -2166,7 +2342,9 @@
                   "type": "Label"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -2188,7 +2366,9 @@
                   "type": "Label"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -2210,7 +2390,9 @@
                   "value": 0.5
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -2232,7 +2414,9 @@
                   "type": "Label"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -2254,7 +2438,9 @@
                   "type": "Label"
                 },
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -2278,7 +2464,9 @@
               ]
             },
             {
+              "animation": "",
               "flags": {
+                "ClipChildren": true,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true

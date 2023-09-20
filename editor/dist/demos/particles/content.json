@@ -3888,7 +3888,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/ParticlePack/star_05.png",
               "flags": {
@@ -4016,7 +4017,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/lightning.png",
               "flags": {
@@ -4144,7 +4146,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/rain.png",
               "flags": {
@@ -4272,7 +4275,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/ParticlePack/flame_03.png",
               "flags": {
@@ -4400,7 +4404,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/ParticlePack/spark_04.png",
               "flags": {
@@ -4528,7 +4533,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/ParticlePack/smoke_03.png",
               "flags": {
@@ -4656,7 +4662,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/ParticlePack/smoke_01.png",
               "flags": {
@@ -4784,7 +4791,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/ParticlePack/square.png",
               "flags": {
@@ -4912,7 +4920,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/ParticlePack/circle_05.png",
               "flags": {
@@ -5040,7 +5049,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/wallpaperflare.com_wallpaper.jpg",
               "flags": {
@@ -5136,7 +5146,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/snowflake.png",
               "flags": {
@@ -5232,7 +5243,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/circle4a.png",
               "flags": {
@@ -5360,7 +5372,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/blood-splatter-png-14061.png",
               "flags": {
@@ -5456,7 +5469,8 @@
             {
               "colorspace": "Linear",
               "effects": {
-                "Blur": false
+                "Blur": false,
+                "Edges": false
               },
               "file": "ws://textures/TM_1.png",
               "flags": {
@@ -6705,7 +6719,9 @@
         {
           "widgets": [
             {
+              "animation": "",
               "flags": {
+                "ClipChildren": true,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
@@ -6725,7 +6741,9 @@
               "type": "Form",
               "widgets": [
                 {
+                  "animation": "",
                   "flags": {
+                    "ClipChildren": true,
                     "Enabled": true,
                     "VisibleInEditor": true,
                     "VisibleInGame": true
@@ -6746,7 +6764,9 @@
                   "type": "GroupBox",
                   "widgets": [
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -6768,7 +6788,9 @@
                       "type": "Label"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -6789,7 +6811,9 @@
                       "type": "PushButton"
                     },
                     {
+                      "animation": "",
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -6810,9 +6834,11 @@
                       "type": "PushButton"
                     },
                     {
+                      "animation": "",
                       "check": "Left",
                       "checked": true,
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true
@@ -6833,9 +6859,11 @@
                       "type": "CheckBox"
                     },
                     {
+                      "animation": "",
                       "check": "Left",
                       "checked": false,
                       "flags": {
+                        "ClipChildren": true,
                         "Enabled": true,
                         "VisibleInEditor": true,
                         "VisibleInGame": true

@@ -61,7 +61,13 @@ function BeginPlay(scene, map)
         end
         local l0 = ui:FindWidgetByName('life0')
         local l1 = ui:FindWidgetByName('life1')
+        Game:DebugPrint(tostring(l0))
         Game:DebugPrint(tostring(l1))
+
+        if true then
+            return
+        end
+
         if _Lives == 2 then
             l0:SetVisible(true)
             l1:SetVisible(true)
@@ -94,6 +100,11 @@ function Update(game_time, dt)
     end
 
     local ui = Game:GetTopUI()
+
+    if true then
+        return
+    end
+
     local coins = ui:FindWidgetByName('coins')
     coins:SetText('x' .. tostring(player.coins))
 

@@ -42,6 +42,7 @@
         "comment_uNSbgrIAfJ": ""
     },
     "UWnXOsuD6o": {
+        "checked_for_packing": 1
     },
     "Xg0GdRiaQU": {
         "checked_for_packing": 1
@@ -118,10 +119,10 @@
         "clear_color": "4280492835",
         "command_line_arguments": "",
         "config_srgb": true,
-        "debug_draw": false,
+        "debug_draw": true,
         "debug_font": "",
         "debug_print_fps": false,
-        "debug_show_fps": false,
+        "debug_show_fps": true,
         "debug_show_msg": false,
         "default_mag_filter": "Linear",
         "default_min_filter": "Trilinear",
@@ -132,7 +133,7 @@
         "game_viewport_height": 800,
         "game_viewport_width": 1000,
         "grab_mouse": false,
-        "html5_developer_ui": false,
+        "html5_developer_ui": true,
         "logging_debug": false,
         "logging_error": false,
         "logging_info": false,
@@ -184,7 +185,7 @@
         "packing_param_combine_textures": true,
         "packing_param_copy_html5": true,
         "packing_param_copy_native": true,
-        "packing_param_delete_prev": false,
+        "packing_param_delete_prev": true,
         "packing_param_generate_html5": true,
         "packing_param_generate_html5_filesys": true,
         "packing_param_max_tex_height": "1024",
