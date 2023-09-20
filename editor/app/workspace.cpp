@@ -3591,6 +3591,10 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
     // Copy game main executable/engine library
     if (options.copy_native_files)
     {
+        // TODO: fix this name stuff here, only take it from the options.
+        // the name stuff is duplicated in the package complete dialog
+        // when trying to launch the native game.
+
         QString src_exec = "GameMain";
         QString dst_exec = mSettings.application_name;
         if (dst_exec.isEmpty())
