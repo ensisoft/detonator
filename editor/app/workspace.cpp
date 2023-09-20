@@ -3552,10 +3552,13 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         const HTML5_Engine_File files[] = {
             {"GameEngine.js", true},
             {"GameEngine.wasm", true},
+            // the JS Web worker glue code. this file is only produced by Emscripten
+            // if the threaded WASM build is being used.
+            {"GameEngine.worker.js", false},
             // this is just a helper file for convenience
             {"http-server.py", false}
         };
-        for (int i=0; i<3; ++i)
+        for (int i=0; i<4; ++i)
         {
             const auto& src = app::GetAppInstFilePath(files[i].name);
             const auto& dst = app::JoinPath(options.directory, files[i].name);
