@@ -370,6 +370,8 @@ add_executable(Detonator
     editor/app/format.cpp
     editor/app/packing.h
     editor/app/packing.cpp
+    editor/app/platform.h
+    editor/app/platform.cpp
     editor/app/utility.h
     editor/app/utility.cpp
     editor/app/workspace.h
