@@ -132,4 +132,16 @@ namespace app
         bool mSilentMode = false;
     private:
     };
+
+    struct ExternalApplicationArgs {
+        QString executable_binary;
+        // this gets expanded with the values from below
+        QString executable_args;
+        // replaces ${file} placeholder
+        QString file_arg;
+        // places ${uri} placeholder
+        QString uri_arg;
+    };
+    bool LaunchExternalApplication(const ExternalApplicationArgs& args);
+
 } // namespace

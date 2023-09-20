@@ -43,6 +43,7 @@
 #include "graphics/loader.h"
 #include "editor/app/buffer.h"
 #include "editor/app/format.h"
+#include "editor/app/process.h"
 #include "editor/app/utility.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/mainwindow.h"
@@ -139,33 +140,6 @@ gui::MainWidget* CreateWidget(app::Resource::Type type, app::Workspace* workspac
     }
     BUG("Unhandled widget type.");
     return nullptr;
-}
-
-struct ExternalApplicationArgs {
-    QString executable_binary;
-    QString executable_args;
-    QString file;
-};
-
-void LaunchExternalApplication(const ExternalApplicationArgs& args)
-{
-    if (gui::MissingFile(args.file))
-        WARN("Could not find '%1'", args.file);
-
-    QStringList arg_list;
-    QStringList tokens = args.executable_args.split(" ", Qt::SkipEmptyParts);
-    for (const auto& item : tokens)
-    {
-        if (item == "${file}")
-            arg_list << args.file;
-        else arg_list << item;
-    }
-    if (!QProcess::startDetached(args.executable_binary, arg_list))
-    {
-        ERROR("Failed to start application '%1'", args.executable_binary);
-        return;
-    }
-    DEBUG("Start application '%1'", args.executable_binary);
 }
 
 } // namespace
@@ -2552,11 +2526,11 @@ void MainWindow::OpenExternalImage(const QString& file)
             return;
         }
     }
-    ExternalApplicationArgs args;
+    app::ExternalApplicationArgs args;
     args.executable_args   = mSettings.image_editor_arguments;
     args.executable_binary = mSettings.image_editor_executable;
-    args.file = QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
-    LaunchExternalApplication(args);
+    args.file_arg = QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
+    app::LaunchExternalApplication(args);
 }
 
 void MainWindow::OpenExternalShader(const QString& file)
@@ -2577,11 +2551,11 @@ void MainWindow::OpenExternalShader(const QString& file)
             return;
         }
     }
-    ExternalApplicationArgs args;
+    app::ExternalApplicationArgs args;
     args.executable_args   = mSettings.shader_editor_arguments;
     args.executable_binary = mSettings.shader_editor_executable;
-    args.file = QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
-    LaunchExternalApplication(args);
+    args.file_arg = QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
+    app::LaunchExternalApplication(args);
 }
 
 void MainWindow::OpenExternalScript(const QString& file)
@@ -2602,11 +2576,11 @@ void MainWindow::OpenExternalScript(const QString& file)
             return;
         }
     }
-    ExternalApplicationArgs args;
+    app::ExternalApplicationArgs args;
     args.executable_args   = mSettings.script_editor_arguments;
     args.executable_binary = mSettings.script_editor_executable;
-    args.file = QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
-    LaunchExternalApplication(args);
+    args.file_arg = QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
+    app::LaunchExternalApplication(args);
 }
 
 void MainWindow::OpenExternalAudio(const QString& file)
@@ -2627,11 +2601,11 @@ void MainWindow::OpenExternalAudio(const QString& file)
             return;
         }
     }
-    ExternalApplicationArgs args;
+    app::ExternalApplicationArgs args;
     args.executable_args   = mSettings.audio_editor_arguments;
     args.executable_binary = mSettings.audio_editor_executable;
-    args.file = QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
-    LaunchExternalApplication(args);
+    args.file_arg = QDir::toNativeSeparators(mWorkspace->MapFileToFilesystem(file));
+    app::LaunchExternalApplication(args);
 }
 
 void MainWindow::OpenNewWidget(MainWidget* widget)

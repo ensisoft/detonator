@@ -344,5 +344,32 @@ void Process::ProcessTimeout()
 
 }
 
+bool LaunchExternalApplication(const ExternalApplicationArgs& args)
+{
+    if (!args.file_arg.isEmpty())
+    {
+        if (!FileExists(args.file_arg))
+            WARN("Could not find file. [file='%1']", args.file_arg);
+    }
+
+    QStringList arg_list;
+    QStringList tokens = args.executable_args.split(" ", Qt::SkipEmptyParts);
+    for (const auto& item : tokens)
+    {
+        if (item == "${file}")
+            arg_list << args.file_arg;
+        else if (item == "${uri}")
+            arg_list << args.uri_arg;
+        else arg_list << item;
+    }
+    if (!QProcess::startDetached(args.executable_binary, arg_list))
+    {
+        ERROR("Failed to start external application. [file='%1']", args.executable_binary);
+        return false;
+    }
+    DEBUG("Start external application. [file='%1']", args.executable_binary);
+    return true;
+}
+
 } // namespace
 
