@@ -136,6 +136,9 @@ target_compile_options(GameEngine PRIVATE -sUSE_HARFBUZZ)
 target_compile_options(GameEngine PRIVATE -sUSE_FREETYPE)
 target_compile_options(GameEngine PRIVATE -sUSE_BOOST_HEADERS)
 
+# uncomment this in order to enable threading
+#target_compile_options(GameEngine PRIVATE -pthread)
+
 target_link_options(GameEngine PRIVATE -sNO_DISABLE_EXCEPTION_CATCHING)
 target_link_options(GameEngine PRIVATE -sUSE_MPG123)
 target_link_options(GameEngine PRIVATE -sUSE_HARFBUZZ)
@@ -148,9 +151,15 @@ target_link_options(GameEngine PRIVATE -lidbfs.js)
 target_link_options(GameEngine PRIVATE -sEXPORTED_FUNCTIONS=_main,_gui_set_flag)
 target_link_options(GameEngine PRIVATE -sEXPORTED_RUNTIME_METHODS=ccall)
 
+# uncomment this in order to enable threading
+#target_link_options(GameEngine PRIVATE -pthread)
+
 # emscripten cache (when emscripten is installed from github)
 # seems to be under /home/user/emsdk/upstream/emscripten/cache
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.js"   DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../editor/dist")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.wasm" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../editor/dist")
-#install(FILES   ${CMAKE_CURRENT_BINARY_DIR}/test-engine.worker.js DESTINATION "${CMAKE_CURRENT_LIST_DIR}/dist")
+
+# uncomment this in order to enable threading
+#install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.worker.js" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../editor/dist")
+
