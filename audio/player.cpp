@@ -146,20 +146,32 @@ void Player::ProcessOnce()
 
 void Player::QueueAction(Action&& action)
 {
-#if defined(AUDIO_LOCK_FREE_QUEUE)
+#if defined(AUDIO_USE_PLAYER_THREAD)
+  #if defined(AUDIO_LOCK_FREE_QUEUE)
     track_actions_.push(std::move(action));
-#else
+  #else
     std::unique_lock<decltype(action_mutex_)> lock(action_mutex_);
+    track_actions_.push(std::move(action));
+  #endif
+#else
     track_actions_.push(std::move(action));
 #endif
 }
 
 bool Player::DequeueAction(Action* action)
 {
-#if defined(AUDIO_LOCK_FREE_QUEUE)
+#if defined(AUDIO_USE_PLAYER_THREAD)
+  #if defined(AUDIO_LOCK_FREE_QUEUE)
     return track_actions_.pop(*action);
-#else
+  #else
     std::unique_lock<decltype(action_mutex_)> lock(action_mutex_);
+    if (track_actions_.empty())
+        return false;
+    *action = track_actions_.front();
+    track_actions_.pop();
+    return true;
+  #endif
+#else
     if (track_actions_.empty())
         return false;
     *action = track_actions_.front();
