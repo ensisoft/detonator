@@ -1,23 +1,22 @@
-#!/usr/bin/env python
+import http.server
+import socketserver
+import os
 
-# Attribution: https://stackoverflow.com/questions/21956683/enable-access-control-on-simple-http-server
+# Set the port you want to use for the web server
+port = 8000
 
-try:
-    # Python 3
-    from http.server import HTTPServer, SimpleHTTPRequestHandler, test as test_orig
-    import sys
-    def test (*args):
-        test_orig(*args, port=int(sys.argv[1]) if len(sys.argv) > 1 else 8000)
-except ImportError: # Python 2
-    from BaseHTTPServer import HTTPServer, test
-    from SimpleHTTPServer import SimpleHTTPRequestHandler
-
-class CORSRequestHandler (SimpleHTTPRequestHandler):
-    def end_headers (self):
-        #self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Cross-Origin-Embedder-Policy', 'require-corp')
+# Define a custom request handler to enable SharedArrayBuffer
+class CustomRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def end_headers(self):
         self.send_header('Cross-Origin-Opener-Policy', 'same-origin')
-        SimpleHTTPRequestHandler.end_headers(self)
+        self.send_header('Cross-Origin-Embedder-Policy', 'require-corp')
+        super().end_headers()
 
-if __name__ == '__main__':
-    test(CORSRequestHandler, HTTPServer)
+# Change to the directory where your files are located
+web_dir = "."
+os.chdir(web_dir)
+
+# Start the web server
+with socketserver.TCPServer(("", port), CustomRequestHandler) as httpd:
+    print("Serving at port", port)
+    httpd.serve_forever()
