@@ -638,50 +638,14 @@
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_39">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_36">
             <property name="text">
-             <string>Frames</string>
+             <string>Channels</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="2" rowspan="3">
-           <widget class="QLabel" name="texturePreview">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="pixmap">
-             <pixmap resource="../resource/resource.qrc">:/music.png</pixmap>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1" colspan="2">
-           <widget class="gui::TimeWidget" name="afDuration" native="true">
-            <property name="focusPolicy">
-             <enum>Qt::TabFocus</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_37">
-            <property name="text">
-             <string>Sample rate</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
+          <item row="4" column="0">
            <widget class="QLabel" name="label_38">
             <property name="text">
              <string>Duration</string>
@@ -714,10 +678,10 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_36">
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_37">
             <property name="text">
-             <string>Channels</string>
+             <string>Sample rate</string>
             </property>
            </widget>
           </item>
@@ -734,14 +698,21 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="1" colspan="2">
-           <widget class="QPushButton" name="btnEditFile">
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_39">
             <property name="text">
-             <string>Edit Audio File</string>
+             <string>Frames</string>
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
+          <item row="4" column="1" colspan="2">
+           <widget class="gui::TimeWidget" name="afDuration" native="true">
+            <property name="focusPolicy">
+             <enum>Qt::TabFocus</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
            <widget class="QLineEdit" name="afSize">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -754,10 +725,39 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
+          <item row="3" column="0">
            <widget class="QLabel" name="label_40">
             <property name="text">
              <string>File size</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0" colspan="3">
+           <widget class="QPushButton" name="btnEditFile">
+            <property name="text">
+             <string>Edit Audio File</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2" rowspan="4">
+           <widget class="QLabel" name="texturePreview">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="pixmap">
+             <pixmap resource="../resource/resource.qrc">:/music.png</pixmap>
             </property>
            </widget>
           </item>
@@ -950,8 +950,8 @@
   <tabstop>afChannels</tabstop>
   <tabstop>afSampleRate</tabstop>
   <tabstop>afFrames</tabstop>
-  <tabstop>afDuration</tabstop>
   <tabstop>afSize</tabstop>
+  <tabstop>afDuration</tabstop>
   <tabstop>btnEditFile</tabstop>
  </tabstops>
  <resources>

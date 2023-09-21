@@ -34,7 +34,7 @@ namespace gui
 
     public:
         enum class Format {
-            Milliseconds,
+            Millisecs,
             Seconds,
             Minutes
         };
