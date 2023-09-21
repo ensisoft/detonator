@@ -181,22 +181,18 @@ void RangeWidget::mousePressEvent(QMouseEvent* mickey)
     const QRectF range(range_start + mLo * range_width - handle_half,
                        top, range_width * (mHi - mLo), handle_size);
 
-    if (math::equals(mLo, mHi))
-    {
-        if (math::equals(mLo, 0.0f))
-            mDragging = Dragging::Hi;
-        else if (math::equals(mHi, 1.0f))
-            mDragging = Dragging::Lo;
-        else mDragging = Dragging::NotSure;
-    }
-    else if (lo_handle.contains(mickey->pos()))
+    const auto& pos = mickey->pos();
+
+    if (lo_handle.contains(pos) && hi_handle.contains(pos))
+        mDragging = Dragging::NotSure;
+    else if (lo_handle.contains(pos))
         mDragging = Dragging::Lo;
-    else if (hi_handle.contains(mickey->pos()))
+    else if (hi_handle.contains(pos))
         mDragging = Dragging::Hi;
-    else if (range.contains(mickey->pos()))
+    else if (range.contains(pos))
         mDragging = Dragging::Range;
 
-    mDragStart = mickey->pos();
+    mDragStart = pos;
 
     update();
 }
