@@ -32,7 +32,7 @@ TimeWidget::TimeWidget(QWidget* parent) : QWidget(parent)
     mUI = new Ui::TimeWidget();
     mUI->setupUi(this);
     PopulateFromEnum<Format>(mUI->format);
-    SetValue(mUI->format, Format::Milliseconds);
+    SetValue(mUI->format, Format::Millisecs);
     SetSuffix();
 }
 TimeWidget::~TimeWidget()
@@ -50,7 +50,7 @@ unsigned TimeWidget::GetTime() const
 {
     const auto format = (Format)gui::GetValue(mUI->format);
     const float value = gui::GetValue(mUI->value);
-    if (format == Format::Milliseconds)
+    if (format == Format::Millisecs)
         return value;
     else if (format == Format::Seconds)
         return value * 1000.0;
@@ -86,7 +86,7 @@ void TimeWidget::on_value_valueChanged(double)
 void TimeWidget::ShowValue()
 {
     const auto format = (Format)gui::GetValue(mUI->format);
-    if (format == Format::Milliseconds)
+    if (format == Format::Millisecs)
         gui::SetValue(mUI->value, mMilliseconds);
     else if (format == Format::Seconds)
         gui::SetValue(mUI->value, mMilliseconds / (1000.0));
@@ -98,7 +98,7 @@ void TimeWidget::ShowValue()
 void TimeWidget::SetSuffix()
 {
     const auto format = (Format)GetValue(mUI->format);
-    if (format == Format::Milliseconds)
+    if (format == Format::Millisecs)
         mUI->value->setSuffix(" ms");
     else if (format == Format::Minutes)
         mUI->value->setSuffix(" min");
