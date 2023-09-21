@@ -1774,6 +1774,9 @@
               <property name="wrapping">
                <bool>true</bool>
               </property>
+              <property name="suffix">
+               <string> °</string>
+              </property>
               <property name="minimum">
                <double>-180.000000000000000</double>
               </property>
@@ -1787,12 +1790,15 @@
             </item>
             <item>
              <widget class="QToolButton" name="btnNodePlus90">
+              <property name="toolTip">
+               <string>Rotate the entity 90 degrees clockwise</string>
+              </property>
               <property name="text">
                <string>+ 90°</string>
               </property>
               <property name="icon">
                <iconset resource="../resource/resource.qrc">
-                <normaloff>:/16x16_ico_png/arrow_rotate_anticlockwise.png</normaloff>:/16x16_ico_png/arrow_rotate_anticlockwise.png</iconset>
+                <normaloff>:/16x16_ico_png/arrow_rotate_clockwise.png</normaloff>:/16x16_ico_png/arrow_rotate_clockwise.png</iconset>
               </property>
              </widget>
             </item>
@@ -1803,6 +1809,9 @@
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Rotate the entity 90 degrees counter clockwise</string>
               </property>
               <property name="text">
                <string>- 90°</string>
