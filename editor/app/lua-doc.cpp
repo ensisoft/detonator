@@ -1731,16 +1731,14 @@ void InitLuaDoc()
     // Lua scripts that are packaged with the editor.
 
     // Keyboard script
-    DOC_TABLE2("KB", "Keyboard utilities for common keyboard handling functionality.<br>"
-                     "If you want to use this pre-built functionality you should include this in your own script with<br>"
-                     "require('app://scripts/utility/keyboard.lua')<br>"
-                     "Then you need to make sure that you call KB.KeyUp and KB.KeyDown on any key event your script receives.");
+    DOC_TABLE2("KB", "Keyboard utilities for common keyboard handling functionality such as mapping wdk.Keys to logical action keys.<br>"
+                     "require('app://scripts/utility/keyboard.lua')");
     DOC_FUNCTION_1("bool", "TestKeyDown", "Test whether the logical game action key is currently active or not, i.e. down or not.",
                    "unsigned", "key");
     DOC_FUNCTION_3("void", "KeyDown", "Receive native keyboard key down event and convert it to a logical action key based on the key map.",
-                   "unsigned", "symbol", "unsigned", "modifier_bits", "table", "map");
+                   "wdk.Keys", "key", "unsigned", "modifier_bits", "table", "mapping");
     DOC_FUNCTION_3("void", "KeyUp", "Receive native keyboard key up event nad convert it to a logical action key.",
-                   "unsigned", "symbol", "unsigned", "modifier_bits", "table", "map");
+                   "wdk.Keys", "key", "unsigned", "modifier_bits", "table", "mapping");
 
     DOC_TABLE2("KB.Keys", "This table defines logical game action keys such as Up, Down etc. "
                           "You can use these for logical actions in your game instead of relying on "
@@ -1766,7 +1764,8 @@ void InitLuaDoc()
                    "...", "y0", "...", "y1", "float", "t", "easing.Curves", "curve");
 
     DOC_TABLE2("Camera", "Camera (and viewport) handling routines. The camera can be used to manipulate and change the viewport (FRect) over time "
-                         "in order to create effects such as a camera shake");
+                         "in order to create effects such as a camera shake.<br>"
+                         "require('app://scripts/utility/camera.lua')");
     DOC_FUNCTION_1("void", "SetViewport", "Set the viewport rectangle to be manipulated.", "base.FRect", "viewport");
     DOC_FUNCTION_2("void", "Shake", "Start shaking the camera.<br>"
                                     "The shake effect is defined by its strength in game units and its duration in seconds.<br>"
