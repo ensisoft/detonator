@@ -2051,7 +2051,7 @@
      <normaloff>:/32x32_ico_png/cog.png</normaloff>:/32x32_ico_png/cog.png</iconset>
    </property>
    <property name="text">
-    <string>Test RUn</string>
+    <string>Test Run</string>
    </property>
    <property name="toolTip">
     <string>Test run the scene</string>

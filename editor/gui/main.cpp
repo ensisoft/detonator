@@ -146,6 +146,9 @@ void copyright()
     INFO("https://github.com/stachenov/quazip");
     INFO("https://stachenov.github.io/quazip/");
 
+    INFO("Free icons from Icons8");
+    INFO("https://icons8.com");
+
     INFO("http://www.ensisoft.com");
     INFO("https://github.com/ensisoft/detonator");
     INFO("Compiler: %1 %2", COMPILER_NAME , COMPILER_VERSION);

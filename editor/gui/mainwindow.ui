@@ -248,11 +248,17 @@
                   </size>
                  </property>
                  <property name="text">
-                  <string>UI</string>
+                  <string>User Interface</string>
                  </property>
                  <property name="icon">
                   <iconset resource="../resource/resource.qrc">
-                   <normaloff>:/16x16_ico_png/ui.png</normaloff>:/16x16_ico_png/ui.png</iconset>
+                   <normaloff>:/32x32_ico_png/ui.png</normaloff>:/32x32_ico_png/ui.png</iconset>
+                 </property>
+                 <property name="iconSize">
+                  <size>
+                   <width>32</width>
+                   <height>32</height>
+                  </size>
                  </property>
                 </widget>
                </item>
@@ -281,14 +287,23 @@
                  </property>
                  <property name="icon">
                   <iconset resource="../resource/resource.qrc">
-                   <normaloff>:/16x16_ico_png/entity.png</normaloff>:/16x16_ico_png/entity.png</iconset>
+                   <normaloff>:/32x32_ico_png/entity.png</normaloff>:/32x32_ico_png/entity.png</iconset>
+                 </property>
+                 <property name="iconSize">
+                  <size>
+                   <width>32</width>
+                   <height>32</height>
+                  </size>
                  </property>
                 </widget>
                </item>
                <item row="7" column="0">
                 <widget class="QLabel" name="label_14">
                  <property name="text">
-                  <string>Create a new UI for in-game menus, HUDs etc.</string>
+                  <string>Build a new in-game user interface (UI).</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
                  </property>
                  <property name="wordWrap">
                   <bool>true</bool>
@@ -316,11 +331,17 @@
                   </size>
                  </property>
                  <property name="text">
-                  <string>Particle Engine</string>
+                  <string>Particle System</string>
                  </property>
                  <property name="icon">
                   <iconset resource="../resource/resource.qrc">
-                   <normaloff>:/16x16_ico_png/particle.png</normaloff>:/16x16_ico_png/particle.png</iconset>
+                   <normaloff>:/32x32_ico_png/particle.png</normaloff>:/32x32_ico_png/particle.png</iconset>
+                 </property>
+                 <property name="iconSize">
+                  <size>
+                   <width>32</width>
+                   <height>32</height>
+                  </size>
                  </property>
                 </widget>
                </item>
@@ -349,14 +370,20 @@
                  </property>
                  <property name="icon">
                   <iconset resource="../resource/resource.qrc">
-                   <normaloff>:/16x16_ico_png/audio.png</normaloff>:/16x16_ico_png/audio.png</iconset>
+                   <normaloff>:/32x32_ico_png/audio.png</normaloff>:/32x32_ico_png/audio.png</iconset>
+                 </property>
+                 <property name="iconSize">
+                  <size>
+                   <width>32</width>
+                   <height>32</height>
+                  </size>
                  </property>
                 </widget>
                </item>
                <item row="7" column="2">
                 <widget class="QLabel" name="label_15">
                  <property name="text">
-                  <string>Create a new audio graph for game music and effects</string>
+                  <string>Build a new audio graph for game music and sound effects.</string>
                  </property>
                  <property name="wordWrap">
                   <bool>true</bool>
@@ -388,12 +415,12 @@
                  </property>
                  <property name="icon">
                   <iconset resource="../resource/resource.qrc">
-                   <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
+                   <normaloff>:/32x32_ico_png/material.png</normaloff>:/32x32_ico_png/material.png</iconset>
                  </property>
                  <property name="iconSize">
                   <size>
-                   <width>16</width>
-                   <height>16</height>
+                   <width>32</width>
+                   <height>32</height>
                   </size>
                  </property>
                 </widget>
@@ -401,7 +428,7 @@
                <item row="3" column="2">
                 <widget class="QLabel" name="label_11">
                  <property name="text">
-                  <string>Combine shapes into a hierarchy of nodes with various properties.</string>
+                  <string>Build a new game object with shapes and materials.</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -420,7 +447,7 @@
                   </sizepolicy>
                  </property>
                  <property name="text">
-                  <string>Materials define how objecs look. Materials are applied on shapes and particles.</string>
+                  <string>Create a new material and define how objects look.</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -433,7 +460,7 @@
                <item row="1" column="2">
                 <widget class="QLabel" name="label_9">
                  <property name="text">
-                  <string>Display kinematic particles in motion based on velocity etc. parameters.</string>
+                  <string>Create a new particle based animation for effects such as smoke or explosion.</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -468,7 +495,16 @@
                  </property>
                  <property name="icon">
                   <iconset resource="../resource/resource.qrc">
-                   <normaloff>:/16x16_ico_png/polygon.png</normaloff>:/16x16_ico_png/polygon.png</iconset>
+                   <normaloff>:/32x32_ico_png/polygon.png</normaloff>:/32x32_ico_png/polygon.png</iconset>
+                 </property>
+                 <property name="iconSize">
+                  <size>
+                   <width>32</width>
+                   <height>32</height>
+                  </size>
+                 </property>
+                 <property name="shortcut">
+                  <string>Ctrl+R</string>
                  </property>
                 </widget>
                </item>
@@ -510,14 +546,23 @@
                  </property>
                  <property name="icon">
                   <iconset resource="../resource/resource.qrc">
-                   <normaloff>:/16x16_ico_png/scene.png</normaloff>:/16x16_ico_png/scene.png</iconset>
+                   <normaloff>:/32x32_ico_png/scene.png</normaloff>:/32x32_ico_png/scene.png</iconset>
+                 </property>
+                 <property name="iconSize">
+                  <size>
+                   <width>32</width>
+                   <height>32</height>
+                  </size>
+                 </property>
+                 <property name="shortcut">
+                  <string>Ctrl+S, Ctrl+R</string>
                  </property>
                 </widget>
                </item>
                <item row="3" column="0">
                 <widget class="QLabel" name="label_12">
                  <property name="text">
-                  <string>Build a new game world using entities.</string>
+                  <string>Build a new game world with entities and tilemaps.</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -530,7 +575,7 @@
                <item row="7" column="3">
                 <widget class="QLabel" name="label_13">
                  <property name="text">
-                  <string>Scripts allow you to implement your actual game logic.</string>
+                  <string>Create new blank script for game logic.</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -565,7 +610,13 @@
                  </property>
                  <property name="icon">
                   <iconset resource="../resource/resource.qrc">
-                   <normaloff>:/16x16_ico_png/script.png</normaloff>:/16x16_ico_png/script.png</iconset>
+                   <normaloff>:/32x32_ico_png/script.png</normaloff>:/32x32_ico_png/script.png</iconset>
+                 </property>
+                 <property name="iconSize">
+                  <size>
+                   <width>32</width>
+                   <height>32</height>
+                  </size>
                  </property>
                 </widget>
                </item>
@@ -594,14 +645,20 @@
                  </property>
                  <property name="icon">
                   <iconset resource="../resource/resource.qrc">
-                   <normaloff>:/16x16_ico_png/tilemap.png</normaloff>:/16x16_ico_png/tilemap.png</iconset>
+                   <normaloff>:/32x32_ico_png/tilemap.png</normaloff>:/32x32_ico_png/tilemap.png</iconset>
+                 </property>
+                 <property name="iconSize">
+                  <size>
+                   <width>32</width>
+                   <height>32</height>
+                  </size>
                  </property>
                 </widget>
                </item>
                <item row="3" column="3">
                 <widget class="QLabel" name="label_20">
                  <property name="text">
-                  <string>Create a new tilemap with different layers of data.</string>
+                  <string>Build a new tile based game map with layers of game data.</string>
                  </property>
                  <property name="wordWrap">
                   <bool>true</bool>
@@ -1483,6 +1540,9 @@
        <property name="placeholderText">
         <string>Filter</string>
        </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -1671,7 +1731,7 @@
    </property>
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+     <normaloff>:/32x32_ico_png/material.png</normaloff>:/32x32_ico_png/material.png</iconset>
    </property>
    <property name="text">
     <string>New Material</string>
@@ -1683,7 +1743,7 @@
   <action name="actionNewParticleSystem">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+     <normaloff>:/32x32_ico_png/particle.png</normaloff>:/32x32_ico_png/particle.png</iconset>
    </property>
    <property name="text">
     <string>New Particle System</string>
@@ -1826,7 +1886,7 @@
   <action name="actionNewResource">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+     <normaloff>:/32x32_ico_png/add.png</normaloff>:/32x32_ico_png/add.png</iconset>
    </property>
    <property name="text">
     <string>New Resource ...</string>
@@ -1865,7 +1925,7 @@
   <action name="actionNewCustomShape">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+     <normaloff>:/32x32_ico_png/polygon.png</normaloff>:/32x32_ico_png/polygon.png</iconset>
    </property>
    <property name="text">
     <string>New Shape</string>
@@ -1898,7 +1958,7 @@
   <action name="actionNewEntity">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+     <normaloff>:/32x32_ico_png/entity.png</normaloff>:/32x32_ico_png/entity.png</iconset>
    </property>
    <property name="text">
     <string>New Entity</string>
@@ -1958,7 +2018,7 @@
   <action name="actionNewScene">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+     <normaloff>:/32x32_ico_png/scene.png</normaloff>:/32x32_ico_png/scene.png</iconset>
    </property>
    <property name="text">
     <string>New Scene</string>
@@ -1970,7 +2030,7 @@
   <action name="actionNewScript">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+     <normaloff>:/32x32_ico_png/script.png</normaloff>:/32x32_ico_png/script.png</iconset>
    </property>
    <property name="text">
     <string>New Script</string>
@@ -2033,7 +2093,7 @@
   <action name="actionImportFiles">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/import.png</normaloff>:/16x16_ico_png/import.png</iconset>
+     <normaloff>:/32x32_ico_png/folder.png</normaloff>:/32x32_ico_png/folder.png</iconset>
    </property>
    <property name="text">
     <string>From Files</string>
@@ -2045,13 +2105,13 @@
   <action name="actionNewUI">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+     <normaloff>:/32x32_ico_png/ui.png</normaloff>:/32x32_ico_png/ui.png</iconset>
    </property>
    <property name="text">
-    <string>New UI</string>
+    <string>New User Interface</string>
    </property>
    <property name="toolTip">
-    <string>New UI</string>
+    <string>Create new game user interface</string>
    </property>
   </action>
   <action name="actionExportJSON">
@@ -2093,7 +2153,7 @@
   <action name="actionNewAudioGraph">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+     <normaloff>:/32x32_ico_png/audio.png</normaloff>:/32x32_ico_png/audio.png</iconset>
    </property>
    <property name="text">
     <string>New Audio Graph</string>
@@ -2168,7 +2228,7 @@
      <normaloff>:/16x16_ico_png/ui.png</normaloff>:/16x16_ico_png/ui.png</iconset>
    </property>
    <property name="text">
-    <string>New UI Script</string>
+    <string>New User Interface Script</string>
    </property>
    <property name="toolTip">
     <string>Create new UI script</string>
@@ -2177,7 +2237,7 @@
   <action name="actionNewTilemap">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+     <normaloff>:/32x32_ico_png/tilemap.png</normaloff>:/32x32_ico_png/tilemap.png</iconset>
    </property>
    <property name="text">
     <string>New Tilemap</string>
@@ -2186,13 +2246,13 @@
   <action name="actionImportTiles">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/import.png</normaloff>:/16x16_ico_png/import.png</iconset>
+     <normaloff>:/32x32_ico_png/tileset.png</normaloff>:/32x32_ico_png/tileset.png</iconset>
    </property>
    <property name="text">
     <string>From Tileset</string>
    </property>
    <property name="toolTip">
-    <string>Import new tiles from a packed tilemap</string>
+    <string>Import new tiles from a packed tileset</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+Shift+T</string>
