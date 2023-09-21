@@ -180,14 +180,9 @@ namespace gfx
         // Update the state of the drawable object. dt is the
         // elapsed (delta) time in seconds.
         virtual void Update(const Environment& env, float dt) {}
-        // Request a particular line width to be used when style
-        // is either Outline or Wireframe.
-        virtual void SetLineWidth(float width) {}
         // Set the style to be used for generating the drawable geometry.
         // Not all drawables support all Styles.
         virtual void SetStyle(Style style) {}
-        // Set the culling flag for the drawable.
-        virtual void SetCulling(Culling culling) {}
         // Get the current style.
         virtual Style GetStyle() const = 0;
         // Returns true if the drawable is still considered to be alive.
@@ -232,7 +227,7 @@ namespace gfx
             virtual std::unique_ptr<DrawableClass> Copy() const override
             { return std::make_unique<Class>(*static_cast<const Class*>(this)); }
         protected:
-            DrawableClassBase(std::string id = base::RandomString(10))
+            DrawableClassBase(std::string id = base::RandomString(10)) noexcept
               : mId(std::move(id))
             {}
         protected:
@@ -246,7 +241,7 @@ namespace gfx
         class GenericDrawableClass : public DrawableClass
         {
         public:
-            GenericDrawableClass(std::string id = base::RandomString(10))
+            explicit GenericDrawableClass(std::string id = base::RandomString(10)) noexcept
               : mId(std::move(id))
             {}
             virtual Type GetType() const override
@@ -291,37 +286,13 @@ namespace gfx
         class GenericDrawable : public Drawable
         {
         public:
-            using Style   = typename DrawableGeometry::Style;
-            using Culling = typename DrawableGeometry::Culling;
+            using Style = typename DrawableGeometry::Style;
 
-            GenericDrawable() = default;
-            explicit GenericDrawable(Style style)
+            explicit GenericDrawable(Style style = Style::Solid) noexcept
               : mStyle(style)
             {}
-            GenericDrawable(Style style, float line_width)
-              : mStyle(style)
-              , mLineWidth(line_width)
-            {}
-            GenericDrawable(Style style, Culling culling)
-              : mStyle(style)
-              , mCulling(culling)
-            {}
-            GenericDrawable(Style style, Culling culling, float line_width)
-                : mStyle(style)
-                , mCulling(culling)
-                , mLineWidth(line_width)
-            {}
-            explicit GenericDrawable(float line_width)
-              : mLineWidth(line_width)
-            {}
-            explicit GenericDrawable(Culling culling)
-              : mCulling(culling)
-            {}
-
             virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
             {
-                state.line_width = mLineWidth;
-                state.culling    = mCulling;
                 const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
                 const auto& kProjectionMatrix = *env.proj_matrix;
                 program.SetUniform("kProjectionMatrix", kProjectionMatrix);
@@ -333,25 +304,18 @@ namespace gfx
             { return DrawableGeometry::GetProgramId(); }
             virtual Geometry* Upload(const Environment& env, Device& device) const override
             { return DrawableGeometry::Generate(env, mStyle, device); }
-            virtual void SetCulling(Culling culling) override
-            { mCulling = culling; }
-            virtual void SetLineWidth(float width) override
-            { mLineWidth = width; }
+
             virtual void SetStyle(Style style) override
             { mStyle = style; }
             virtual Style GetStyle() const override
             { return mStyle; }
         private:
-            Style mStyle     = DrawableGeometry::InitialStyle;
-            Culling mCulling = DrawableGeometry::InitialCulling;
-            float mLineWidth = 1.0f;
+            Style mStyle  = DrawableGeometry::InitialStyle;
         };
 
         struct GeometryBase2D {
             using Environment = Drawable::Environment;
             using Style       = Drawable::Style;
-            using Culling     = Drawable::Culling ;
-            static constexpr Culling InitialCulling = Culling::Back;
             static constexpr Style   InitialStyle   = Style::Solid;
             static Shader* GetShader(Device& device);
             static std::string GetProgramId();
@@ -359,8 +323,6 @@ namespace gfx
         struct GeometryBase3D {
             using Environment = Drawable::Environment;
             using Style       = Drawable::Style;
-            using Culling     = Drawable::Culling ;
-            static constexpr Culling InitialCulling = Culling::Back;
             static constexpr Style   InitialStyle   = Style::Solid;
             static Shader* GetShader(Device& device);
             static std::string GetProgramId();
@@ -370,7 +332,6 @@ namespace gfx
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
         struct StaticLineGeometry : public GeometryBase2D {
-            static constexpr Culling InitialCulling = Culling::None;
             static constexpr Style   InitialStyle   = Style::Outline;
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
@@ -462,25 +423,18 @@ namespace gfx
     class Sector : public Drawable
     {
     public:
-        Sector(const std::shared_ptr<const SectorClass>& klass)
-          : mClass(klass)
-        {}
         Sector()
           : mClass(std::make_shared<SectorClass>())
         {}
-        Sector(Style style) : Sector()
+        explicit Sector(const std::shared_ptr<const SectorClass>& klass) noexcept
+          : mClass(klass)
+        {}
+        explicit Sector(Style style) : Sector()
         {
             mStyle = style;
-        }
-        Sector(Style style, float linewidth) : Sector()
-        {
-            mStyle = style;
-            mLineWidth = linewidth;
         }
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
         {
-            state.line_width = mLineWidth;
-            state.culling    = mCulling;
             const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
             const auto& kProjectionMatrix = *env.proj_matrix;
             program.SetUniform("kProjectionMatrix",
@@ -492,12 +446,8 @@ namespace gfx
         { return mClass->GetShader(env, device); }
         virtual Geometry* Upload(const Environment& env, Device& device) const override
         { return mClass->Upload(env, mStyle, device); }
-        virtual void SetCulling(Culling cull) override
-        { mCulling = cull; }
         virtual void SetStyle(Style style) override
         { mStyle = style; }
-        virtual void SetLineWidth(float width) override
-        { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
         virtual std::string GetProgramId(const Environment& env) const override
@@ -505,25 +455,23 @@ namespace gfx
     private:
         std::shared_ptr<const SectorClass> mClass;
         Style mStyle     = Style::Solid;
-        float mLineWidth = 1.0f;
-        Culling mCulling = Culling::Back;
     };
 
     class RoundRectangleClass : public detail::DrawableClassBase<RoundRectangleClass>
     {
     public:
-        RoundRectangleClass(float corner_radius = 0.05)
+        explicit RoundRectangleClass(float corner_radius = 0.05) noexcept
           : BaseClass()
           , mRadius(corner_radius)
         {}
-        RoundRectangleClass(const std::string& id, float corner_radius = 0.05)
-          : BaseClass(id)
+        explicit RoundRectangleClass(std::string id, float corner_radius = 0.05) noexcept
+          : BaseClass(std::move(id))
           , mRadius(corner_radius)
         {}
 
-        float GetRadius() const
+        inline float GetRadius() const noexcept
         { return mRadius; }
-        void SetRadius(float radius)
+        inline void SetRadius(float radius) noexcept
         { mRadius = radius;}
 
         Shader* GetShader(const Environment& env, Device& device) const;
@@ -543,29 +491,21 @@ namespace gfx
     class RoundRectangle : public Drawable
     {
     public:
-        RoundRectangle(const std::shared_ptr<const RoundRectangleClass>& klass)
+        RoundRectangle()
+            : mClass(std::make_shared<RoundRectangleClass>())
+        {}
+        explicit RoundRectangle(const std::shared_ptr<const RoundRectangleClass>& klass) noexcept
           : mClass(klass)
         {}
-        RoundRectangle(const RoundRectangleClass& klass)
+        explicit RoundRectangle(const RoundRectangleClass& klass)
           : mClass(std::make_shared<RoundRectangleClass>(klass))
         {}
-        RoundRectangle()
-          : mClass(std::make_shared<RoundRectangleClass>())
-        {}
-        RoundRectangle(Style style) : RoundRectangle()
+        explicit RoundRectangle(Style style) : RoundRectangle()
         {
             mStyle = style;
         }
-        RoundRectangle(Style style, float linewidth) : RoundRectangle()
-        {
-            mStyle = style;
-            mLineWidth = linewidth;
-        }
-
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
         {
-            state.line_width = mLineWidth;
-            state.culling    = mCulling;
             const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
             const auto& kProjectionMatrix = *env.proj_matrix;
             program.SetUniform("kProjectionMatrix",
@@ -579,28 +519,23 @@ namespace gfx
         { return mClass->Upload(env, mStyle, device); }
         virtual std::string GetProgramId(const Environment& env) const override
         { return mClass->GetProgramId(env); }
-
-        virtual void SetCulling(Culling cull) override
-        { mCulling = cull; }
         virtual void SetStyle(Style style) override
         { mStyle = style; }
-        virtual void SetLineWidth(float width) override
-        { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return mStyle; }
     private:
         std::shared_ptr<const RoundRectangleClass> mClass;
-        Culling mCulling = Culling::Back;
         Style mStyle = Style::Solid;
-        float mLineWidth = 1.0f;
     };
 
     class GridClass : public detail::DrawableClassBase<GridClass>
     {
     public:
-        GridClass() : BaseClass()
+        GridClass() noexcept
+          : BaseClass()
         {}
-        GridClass(const std::string& id) : BaseClass(id)
+        explicit GridClass(std::string id) noexcept
+          : BaseClass(std::move(id))
         {}
         Shader* GetShader(const Environment& env, Device& device) const;
         Geometry* Upload(const Environment& env, Device& device) const;
@@ -634,10 +569,10 @@ namespace gfx
     class Grid : public Drawable
     {
     public:
-        Grid(const std::shared_ptr<const GridClass>& klass)
+        explicit Grid(const std::shared_ptr<const GridClass>& klass) noexcept
             : mClass(klass)
         {}
-        Grid(const GridClass& klass)
+        explicit Grid(const GridClass& klass)
            : mClass(std::make_shared<GridClass>(klass))
         {}
 
@@ -653,8 +588,6 @@ namespace gfx
         }
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
         {
-            state.line_width = mLineWidth;
-            state.culling    = Culling::None;
             const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
             const auto& kProjectionMatrix = *env.proj_matrix;
             program.SetUniform("kProjectionMatrix",
@@ -668,15 +601,11 @@ namespace gfx
         { return mClass->Upload(env, device); }
         virtual std::string GetProgramId(const Environment& env) const override
         { return mClass->GetProgramId(env); }
-
-        virtual void SetLineWidth(float width) override
-        { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return Style::Outline; }
-
     private:
         std::shared_ptr<const GridClass> mClass;
-        float mLineWidth = 1.0f;
+
     };
 
     // Combines multiple primitive draw commands into a single
@@ -695,9 +624,11 @@ namespace gfx
 
         using Vertex = gfx::Vertex2D;
 
-        PolygonClass() : BaseClass()
+        PolygonClass() noexcept
+          : BaseClass()
         {}
-        PolygonClass(const std::string& id) : BaseClass(id)
+        explicit PolygonClass(std::string id) noexcept
+          : BaseClass(std::move(id))
         {}
 
         void Clear();
@@ -775,17 +706,15 @@ namespace gfx
     class Polygon : public Drawable
     {
     public:
-        Polygon(const std::shared_ptr<const PolygonClass>& klass)
+        explicit Polygon(const std::shared_ptr<const PolygonClass>& klass) noexcept
           : mClass(klass)
         {}
-        Polygon(const PolygonClass& klass)
+        explicit Polygon(const PolygonClass& klass)
           : mClass(std::make_shared<PolygonClass>(klass))
         {}
 
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
         {
-            state.culling = mCulling;
-            state.line_width = mLineWidth;
             const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
             const auto& kProjectionMatrix = *env.proj_matrix;
             program.SetUniform("kProjectionMatrix",
@@ -802,15 +731,8 @@ namespace gfx
 
         virtual Style GetStyle() const override
         { return Style::Solid; }
-        virtual void SetCulling(Culling culling) override
-        { mCulling = culling;}
-        virtual void SetLineWidth(float width) override
-        { mLineWidth = width; }
-
     private:
         std::shared_ptr<const PolygonClass> mClass;
-        Culling mCulling = Culling::Back;
-        float mLineWidth = 1.0f;
     };
 
     class CursorClass : public detail::DrawableClassBase<CursorClass>
@@ -1267,25 +1189,20 @@ namespace gfx
     class DynamicLine3D : public Drawable
     {
     public:
-        DynamicLine3D(const glm::vec3& a, const glm::vec3& b, float line_width=1.0f)
-            : mPointA(a)
-            , mPointB(b)
-            , mLineWidth(line_width)
+        DynamicLine3D(const glm::vec3& a, const glm::vec3& b, float line_width=1.0f) noexcept
+          : mPointA(a)
+          , mPointB(b)
         {}
         virtual void ApplyDynamicState(const Environment& environment, Program& program, RasterState& state) const override;
         virtual Shader* GetShader(const Environment& environment, Device& device) const override;
         virtual Geometry* Upload(const Environment& environment, Device& device) const override;
-        virtual void SetLineWidth(float width) override
-        { mLineWidth = width; }
         virtual Style GetStyle() const override
         { return Style::Outline; }
         virtual std::string GetProgramId(const Environment& environment) const override;
     private:
         glm::vec3 mPointA;
         glm::vec3 mPointB;
-        float mLineWidth = 1.0f;
     };
-
 
     std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const DrawableClass>& klass);
 

@@ -465,8 +465,8 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     }
     else
     {
-        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 1.0f), view,
-                     gfx::CreateMaterialFromColor(gfx::Color4f(gfx::Color::LightGray)));
+        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), view,
+                     gfx::CreateMaterialFromColor(gfx::Color::LightGray));
     }
 
     // draw the polygon we're working on

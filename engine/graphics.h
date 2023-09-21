@@ -51,6 +51,9 @@ namespace engine
 
 
     struct DrawPacket {
+        using Culling = gfx::Painter::Culling;
+        using RenderPass = game::RenderPass;
+
         enum class Flags {
             PP_Bloom
         };
@@ -60,6 +63,10 @@ namespace engine
         enum class Source {
             Map, Scene
         };
+        RenderPass  pass = RenderPass::DrawColor;
+
+        Culling culling = Culling::Back;
+
         Source source = Source::Scene;
 
         Domain domain = Domain::Scene;
@@ -99,8 +106,7 @@ namespace engine
         // map layer.
         std::uint16_t map_layer = 0;
 
-        // the render pass this draw belongs to.
-        game::RenderPass pass = game::RenderPass::DrawColor;
+        float line_width = 1.0f;
     };
 
     struct RenderLayer {

@@ -211,7 +211,7 @@ void DebugDrawLine(Painter& painter, const FPoint& a, const FPoint& b, const Mat
     trans.Translate(a);
 
     // Draw the shape (line)
-    painter.Draw(StaticLine(line_width), trans, material);
+    painter.Draw(StaticLine(), trans, material, line_width);
 }
 
 void DebugDrawCircle(Painter& painter, const FCircle& circle, const Color4f& color, float line_width)
@@ -227,7 +227,7 @@ void DebugDrawCircle(Painter& painter, const FCircle & circle, const Material& m
     trans.Resize(circle.Inscribe());
     trans.Translate(circle.GetCenter());
     trans.Translate(-radius, -radius);
-    painter.Draw(Circle(Drawable::Style::Outline, line_width), trans, material);
+    painter.Draw(Circle(Drawable::Style::Outline), trans, material, line_width);
 }
 
 void DebugDrawRect(Painter& painter, const FRect& rect, const Color4f& color, float line_width)

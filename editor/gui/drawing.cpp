@@ -69,16 +69,16 @@ void DrawSelectionBox(gfx::Painter& painter, gfx::Transform& trans, const gfx::F
     trans.Push();
         trans.Scale(box.GetSize());
         trans.Translate(box.GetPosition());
-        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 2.0f), trans,
-                     gfx::CreateMaterialFromColor(gfx::Color::Green));
+        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), trans,
+                     gfx::CreateMaterialFromColor(gfx::Color::Green), 2.0f);
     trans.Pop();
 
     // rotation circle
     trans.Push();
         trans.Scale(10.0f/scale.x, 10.0f/scale.y);
         trans.Translate(box.GetPosition());
-        painter.Draw(gfx::Circle(gfx::Drawable::Style::Outline, 2.0f), trans,
-                     gfx::CreateMaterialFromColor(gfx::Color::Green));
+        painter.Draw(gfx::Circle(gfx::Drawable::Style::Outline), trans,
+                     gfx::CreateMaterialFromColor(gfx::Color::Green), 2.0f);
     trans.Pop();
 
     const auto [_0, _1, _2, bottom_right] = box.GetCorners();
@@ -88,8 +88,8 @@ void DrawSelectionBox(gfx::Painter& painter, gfx::Transform& trans, const gfx::F
         trans.Scale(10.0f/scale.x, 10.0f/scale.y);
         trans.Translate(bottom_right);
         trans.Translate(-10.0f/scale.x, -10.0f/scale.y);
-        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 2.0f), trans,
-                     gfx::CreateMaterialFromColor(gfx::Color::Green));
+        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), trans,
+                     gfx::CreateMaterialFromColor(gfx::Color::Green), 2.0f);
     trans.Pop();
 }
 
@@ -98,8 +98,8 @@ void DrawInvisibleItemBox(gfx::Painter& painter, gfx::Transform& trans, const gf
     trans.Push();
         trans.Scale(box.GetSize());
         trans.Translate(box.GetPosition());
-        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 2.0f), trans,
-                     gfx::CreateMaterialFromColor(gfx::Color::DarkYellow));
+        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), trans,
+                     gfx::CreateMaterialFromColor(gfx::Color::DarkYellow), 2.0f);
     trans.Pop();
 }
 
@@ -109,7 +109,7 @@ void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans)
     trans.Push();
         trans.Scale(100.0f, 5.0f);
         trans.Translate(0.0f, -2.5f);
-        painter.Draw(gfx::Arrow(gfx::Drawable::Culling::None), trans, gfx::CreateMaterialFromColor(gfx::Color::Green));
+        painter.Draw(gfx::Arrow(), trans, gfx::CreateMaterialFromColor(gfx::Color::Green));
     trans.Pop();
 
     // draw the Y vector
@@ -118,7 +118,7 @@ void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans)
         trans.Translate(-50.0f, -2.5f);
         trans.RotateAroundZ(math::Pi * 0.5f);
         trans.Translate(0.0f, 50.0f);
-        painter.Draw(gfx::Arrow(gfx::Drawable::Culling::None), trans, gfx::CreateMaterialFromColor(gfx::Color::Red));
+        painter.Draw(gfx::Arrow(), trans, gfx::CreateMaterialFromColor(gfx::Color::Red));
     trans.Pop();
 
     trans.Push();
@@ -175,8 +175,8 @@ void DrawSelectionBox(gfx::Transform& model, std::vector<engine::DrawPacket>& pa
 {
     static const auto green  = std::make_shared<gfx::MaterialClassInst>(
             gfx::CreateMaterialClassFromColor(gfx::Color::Green));
-    static const auto outline = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
-    static const auto circle  = std::make_shared<gfx::Circle>(gfx::Drawable::Style::Outline, 2.0f);
+    static const auto outline = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline);
+    static const auto circle  = std::make_shared<gfx::Circle>(gfx::Drawable::Style::Outline);
 
     const auto width  = rect.GetWidth();
     const auto height = rect.GetHeight();
@@ -191,6 +191,7 @@ void DrawSelectionBox(gfx::Transform& model, std::vector<engine::DrawPacket>& pa
         selection.drawable     = outline;
         selection.render_layer = 0;
         selection.packet_index = 0;
+        selection.line_width   = 2.0f;
         packets.push_back(selection);
     model.Pop();
 
@@ -216,6 +217,7 @@ void DrawSelectionBox(gfx::Transform& model, std::vector<engine::DrawPacket>& pa
         sizing_box.drawable     = outline;
         sizing_box.render_layer = 0;
         sizing_box.packet_index = 0;
+        sizing_box.line_width   = 2.0f;
         packets.push_back(sizing_box);
     model.Pop();
 
@@ -230,6 +232,7 @@ void DrawSelectionBox(gfx::Transform& model, std::vector<engine::DrawPacket>& pa
         rotation_circle.drawable     = circle;
         rotation_circle.render_layer = 0;
         rotation_circle.packet_index = 0;
+        rotation_circle.line_width   = 2.0f;
         packets.push_back(rotation_circle);
     model.Pop();
 }
@@ -238,7 +241,7 @@ void DrawInvisibleItemBox(gfx::Transform& model, std::vector<engine::DrawPacket>
 {
     static const auto yellow = std::make_shared<gfx::MaterialClassInst>(
             gfx::CreateMaterialClassFromColor(gfx::Color::DarkYellow));
-    static const auto shape  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline, 2.0f);
+    static const auto shape  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline);
 
     const auto width  = rect.GetWidth();
     const auto height = rect.GetHeight();
@@ -253,6 +256,7 @@ void DrawInvisibleItemBox(gfx::Transform& model, std::vector<engine::DrawPacket>
         box.drawable          = shape;
         box.render_layer      = 0;
         box.packet_index      = 0;
+        box.line_width        = 2.0f;
         packets.push_back(box);
     model.Pop();
 }
