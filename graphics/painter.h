@@ -147,6 +147,7 @@ namespace gfx
         using StencilFunc = Device::State::StencilFunc;
         using StencilOp   = Device::State::StencilOp;
         using DepthTest   = Device::State::DepthTest;
+        using Culling     = Device::State::Culling;
 
         struct RenderPassState {
             bool write_color = true;
@@ -175,6 +176,11 @@ namespace gfx
             // ShaderPass::FilterDraw for doing low level shape/draw filtering.
             // Using dodgy/Unsafe void* here for performance reasons. vs. std::any
             void* user = nullptr;
+            // line width setting used to rasterize lines when the drawable style is Lines
+            float line_width = 1.0f;
+
+            Culling culling = Culling::Back;
+
         };
         using DrawList = std::vector<DrawShape>;
 
@@ -183,18 +189,42 @@ namespace gfx
         // which provides the "look&feel" i.e. the surface properties for the shape
         // and finally a transform which defines the model-to-world transform.
         void Draw(const DrawList& shapes,
-                  const RenderPassState& renderp,
-                  const ShaderPass& shaderp) const;
+                  const RenderPassState& render_pass_state,
+                  const ShaderPass& shader_pass) const;
 
         // legacy draw functions.
+
+        struct LegacyDrawState
+        {
+            float line_width = 1.0f;
+            Culling culling = Culling::Back;
+
+            LegacyDrawState() {}
+
+            LegacyDrawState(float line_width)
+              : line_width(line_width)
+            {}
+            LegacyDrawState(Culling culling)
+              : culling(culling)
+            {}
+            LegacyDrawState(float line_width, Culling culling)
+              : line_width(line_width)
+              , culling(culling)
+            {}
+            LegacyDrawState(Culling culling, float line_width)
+              : line_width(line_width)
+              , culling(culling)
+            {}
+        };
 
         // Similar to the legacy draw except that allows the device state to be
         // changed through state and shader pass objects.
         void Draw(const Drawable& shape,
                   const glm::mat4& model,
                   const Material& material,
-                  const RenderPassState& renderp,
-                  const ShaderPass& shaderp) const;
+                  const RenderPassState& render_pass_state,
+                  const ShaderPass& shader_pass,
+                  const LegacyDrawState& draw_state = LegacyDrawState()) const;
         // Legacy immediate mode draw function.
         // Draw the shape with the material and transformation immediately in the
         // current render target. The following default render target state is used:
@@ -208,7 +238,8 @@ namespace gfx
         // to draw multiple objects at once.
         void Draw(const Drawable& drawable,
                   const glm::mat4& model,
-                  const Material& material) const;
+                  const Material& material,
+                  const LegacyDrawState& draw_state = LegacyDrawState()) const;
 
         // Create new painter implementation using the given graphics device.
         static std::unique_ptr<Painter> Create(std::shared_ptr<Device> device);

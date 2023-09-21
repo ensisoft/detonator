@@ -47,26 +47,26 @@ void Painter::ClearDepth(float depth) const
 }
 
 void Painter::Draw(const std::vector<DrawShape>& shapes,
-                   const RenderPassState& state,
-                   const ShaderPass& pass) const
+                   const RenderPassState& render_pass_state,
+                   const ShaderPass& shader_pass) const
 {
 
     Device::State device_state;
     device_state.viewport      = MapToDevice(mViewport);
     device_state.scissor       = MapToDevice(mScissor);
-    device_state.stencil_func  = state.stencil_func;
-    device_state.stencil_dpass = state.stencil_dpass;
-    device_state.stencil_dfail = state.stencil_dfail;
-    device_state.stencil_fail  = state.stencil_fail;
-    device_state.stencil_mask  = state.stencil_mask;
-    device_state.stencil_ref   = state.stencil_ref;
-    device_state.bWriteColor   = state.write_color;
-    device_state.depth_test    = state.depth_test;
+    device_state.stencil_func  = render_pass_state.stencil_func;
+    device_state.stencil_dpass = render_pass_state.stencil_dpass;
+    device_state.stencil_dfail = render_pass_state.stencil_dfail;
+    device_state.stencil_fail  = render_pass_state.stencil_fail;
+    device_state.stencil_mask  = render_pass_state.stencil_mask;
+    device_state.stencil_ref   = render_pass_state.stencil_ref;
+    device_state.bWriteColor   = render_pass_state.write_color;
+    device_state.depth_test    = render_pass_state.depth_test;
 
     for (const auto& shape : shapes)
     {
         // Low level draw filtering.
-        if (!pass.FilterDraw(shape.user))
+        if (!shader_pass.FilterDraw(shape.user))
             continue;
 
         Drawable::Environment drawable_env;
@@ -75,7 +75,7 @@ void Painter::Draw(const std::vector<DrawShape>& shapes,
         drawable_env.view_matrix  = &mViewMatrix;
         drawable_env.proj_matrix  = &mProjMatrix;
         drawable_env.model_matrix = shape.transform;
-        drawable_env.shader_pass  = &pass;
+        drawable_env.shader_pass  = &shader_pass;
         Geometry* geometry = shape.drawable->Upload(drawable_env, *mDevice);
         if (geometry == nullptr)
             continue;
@@ -83,7 +83,7 @@ void Painter::Draw(const std::vector<DrawShape>& shapes,
         Material::Environment material_env;
         material_env.editing_mode  = mEditingMode;
         material_env.render_points = shape.drawable->GetStyle() == Drawable::Style::Points;
-        material_env.shader_pass   = &pass;
+        material_env.shader_pass   = &shader_pass;
         Program* program = GetProgram(*shape.drawable, *shape.material, drawable_env, material_env);
         if (program == nullptr)
             continue;
@@ -95,13 +95,16 @@ void Painter::Draw(const std::vector<DrawShape>& shapes,
         device_state.premulalpha = material_raster_state.premultiplied_alpha;
 
         Drawable::RasterState drawable_raster_state;
+        drawable_raster_state.culling    = shape.culling;
+        drawable_raster_state.line_width = shape.line_width;
+
         shape.drawable->ApplyDynamicState(drawable_env, *program, drawable_raster_state);
         device_state.line_width = drawable_raster_state.line_width;
         device_state.culling    = drawable_raster_state.culling;
 
         // Do final state setting here. The shader pass can then ultimately decide
         // on the best program and device state for this draw.
-        pass.ApplyDynamicState(*program, device_state);
+        shader_pass.ApplyDynamicState(*program, device_state);
 
         mDevice->Draw(*program, *geometry, device_state, mFrameBuffer);
     }
@@ -110,25 +113,31 @@ void Painter::Draw(const std::vector<DrawShape>& shapes,
 void Painter::Draw(const Drawable& shape,
                    const glm::mat4& model,
                    const Material& material,
-                   const RenderPassState& renderp,
-                   const ShaderPass& shaderp) const
+                   const RenderPassState& render_pass_state,
+                   const ShaderPass& shader_pass,
+                   const LegacyDrawState& draw_state) const
 {
     std::vector<DrawShape> shapes;
     shapes.resize(1);
-    shapes[0].drawable  = &shape;
-    shapes[0].material  = &material;
-    shapes[0].transform = &model;
-    Draw(shapes, renderp, shaderp);
+    shapes[0].drawable   = &shape;
+    shapes[0].material   = &material;
+    shapes[0].transform  = &model;
+    shapes[0].line_width = draw_state.line_width;
+    shapes[0].culling    = draw_state.culling;
+    Draw(shapes, render_pass_state, shader_pass);
 }
 
-void Painter::Draw(const Drawable& drawable, const glm::mat4& model, const Material& material) const
+void Painter::Draw(const Drawable& drawable,
+                   const glm::mat4& model,
+                   const Material& material,
+                   const LegacyDrawState& draw_state) const
 {
-    RenderPassState state;
-    state.write_color  = true;
-    state.stencil_func = StencilFunc::Disabled;
-    state.depth_test   = DepthTest::Disabled;
-    detail::GenericShaderPass pass;
-    Draw(drawable, model, material, state, pass);
+    RenderPassState render_pass_state;
+    render_pass_state.write_color  = true;
+    render_pass_state.stencil_func = StencilFunc::Disabled;
+    render_pass_state.depth_test   = DepthTest::Disabled;
+    detail::GenericShaderPass shader_pass;
+    Draw(drawable, model, material, render_pass_state, shader_pass, draw_state);
 }
 
 // static

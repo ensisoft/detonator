@@ -1248,8 +1248,8 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
         model.Push();
             model.Scale(10.0f/scalex, 10.0f/scaley);
             model.Translate(1.0f-(10.0f/scalex), 1.0f-(10.0f/scaley));
-            painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 2.0f), model,
-                         gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+            painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), model,
+                         gfx::CreateMaterialFromColor(gfx::Color::HotPink), 2.0f);
         model.Pop();
     }
 
@@ -1279,16 +1279,16 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
         model.Push();
             model.Scale(emitter_width, emitter_height);
             model.Translate(emitter_xpos, emitter_ypos);
-            painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 2.0f), model,
-                         gfx::CreateMaterialFromColor(gfx::Color::Green));
+            painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), model,
+                         gfx::CreateMaterialFromColor(gfx::Color::Green), 2.0f);
 
             const auto scalex = zoom * viz_width * emitter_width;
             const auto scaley = zoom * viz_height * emitter_height;
             model.Push();
                 model.Scale(10.0f/scalex, 10.0f/scaley);
                 model.Translate(1.0f-(10.0f/scalex), 1.0f-(10.0f/scaley));
-                painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline, 2.0f), model,
-                             gfx::CreateMaterialFromColor(gfx::Color::Green));
+                painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), model,
+                             gfx::CreateMaterialFromColor(gfx::Color::Green), 2.0f);
             model.Pop();
         model.Pop();
     }

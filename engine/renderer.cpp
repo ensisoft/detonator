@@ -959,8 +959,9 @@ void Renderer::CreateDrawResources(PaintNode& paint_node)
             auto klass = mClassLib->FindDrawableClassById(drawable);
             if (klass)
                 paint_node.item_drawable = gfx::CreateDrawableInstance(klass);
+
             if (!paint_node.item_drawable)
-                WARN("No such drawable class found. [drawable='%1', entity='%2, node='%3']", drawable, entity.GetName(), node.GetName());
+                WARN("No such drawable class found. [drawable='%1', entity='%2', node='%3']", drawable, entity.GetName(), node.GetName());
             if (paint_node.item_drawable)
             {
                 gfx::Transform transform;
@@ -995,12 +996,6 @@ void Renderer::CreateDrawResources(PaintNode& paint_node)
             else BUG("Unsupported rendering style.");
 
             paint_node.item_drawable->SetStyle(style);
-            paint_node.item_drawable->SetLineWidth(item->GetLineWidth());
-            const auto flip_h = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
-            const auto flip_v = item->TestFlag(DrawableItemType::Flags::FlipVertically);
-            if (flip_h ^ flip_v)
-                paint_node.item_drawable->SetCulling(gfx::Drawable::Culling::Front);
-            else paint_node.item_drawable->SetCulling(gfx::Drawable::Culling::Back);
         }
     }
 }
@@ -1059,13 +1054,16 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
 
     if (const auto* item = node.GetDrawable())
     {
-        if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
+        const auto horizontal_flip = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
+        const auto vertical_flip   = item->TestFlag(DrawableItemType::Flags::FlipVertically);
+
+        if (horizontal_flip)
         {
             transform.Push();
             transform.Scale(-1.0f , 1.0f);
             transform.Translate(1.0f , 0.0f);
         }
-        if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+        if (vertical_flip)
         {
             transform.Push();
             transform.Scale(1.0f, -1.0f);
@@ -1085,12 +1083,16 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
             packet.pass         = item->GetRenderPass();
             packet.packet_index = item->GetLayer();
             packet.render_layer = entity.GetLayer();
+            packet.line_width   = item->GetLineWidth();
+            if (horizontal_flip ^ vertical_flip)
+                packet.culling = DrawPacket::Culling::Front;
+
             if (!hook || hook->InspectPacket(&node , packet))
                 packets.push_back(std::move(packet));
         }
-        if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
+        if (horizontal_flip)
             transform.Pop();
-        if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+        if (vertical_flip)
             transform.Pop();
     }
 
@@ -1164,28 +1166,34 @@ void Renderer::DrawScenePackets(gfx::Painter& painter, const std::vector<DrawPac
         if (packet.pass == RenderPass::DrawColor)
         {
             gfx::Painter::DrawShape shape;
-            shape.user      = (void*)&packet;
-            shape.transform = &packet.transform;
-            shape.drawable  = packet.drawable.get();
-            shape.material  = packet.material.get();
+            shape.user       = (void*)&packet;
+            shape.transform  = &packet.transform;
+            shape.drawable   = packet.drawable.get();
+            shape.material   = packet.material.get();
+            shape.culling    = packet.culling;
+            shape.line_width = packet.line_width;
             layer.draw_color_list.push_back(shape);
         }
         else if (packet.pass == RenderPass::MaskCover)
         {
             gfx::Painter::DrawShape shape;
-            shape.user      = (void*)&packet;
-            shape.transform = &packet.transform;
-            shape.drawable  = packet.drawable.get();
-            shape.material  = packet.material.get();
+            shape.user       = (void*)&packet;
+            shape.transform  = &packet.transform;
+            shape.drawable   = packet.drawable.get();
+            shape.material   = packet.material.get();
+            shape.culling    = packet.culling;
+            shape.line_width = packet.line_width;
             layer.mask_cover_list.push_back(shape);
         }
         else if (packet.pass == RenderPass::MaskExpose)
         {
             gfx::Painter::DrawShape shape;
-            shape.user      = (void*)&packet;
-            shape.transform = &packet.transform;
-            shape.drawable  = packet.drawable.get();
-            shape.material  = packet.material.get();
+            shape.user       = (void*)&packet;
+            shape.transform  = &packet.transform;
+            shape.drawable   = packet.drawable.get();
+            shape.material   = packet.material.get();
+            shape.culling    = packet.culling;
+            shape.line_width = packet.line_width;
             layer.mask_expose_list.push_back(shape);
         }
     }

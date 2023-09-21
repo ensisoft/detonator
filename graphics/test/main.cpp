@@ -1328,7 +1328,7 @@ public:
         transform.Translate(250.0f, 0.0f);
         painter.Draw(Shape(gfx::Drawable::Style::Solid), transform, material);
         transform.Translate(250.0f, 0.0f);
-        painter.Draw(Shape(gfx::Drawable::Style::Outline, 10.0f), transform, material);
+        painter.Draw(Shape(gfx::Drawable::Style::Outline), transform, material, 10.0f);
 
         transform.MoveTo(10.0f, 250.0f);
         transform.Resize(200.0f, 100.0f);
@@ -1338,7 +1338,7 @@ public:
         transform.Translate(250.0f, 0.0f);
         painter.Draw(Shape(gfx::Drawable::Style::Solid), transform, material);
         transform.Translate(250.0f, 0.0f);
-        painter.Draw(Shape(gfx::Drawable::Style::Wireframe, 2.0f), transform, material);
+        painter.Draw(Shape(gfx::Drawable::Style::Wireframe), transform, material, 2.0);
 
         transform.MoveTo(60.0f, 400.0f);
         transform.Resize(100.0f, 200.0f);
