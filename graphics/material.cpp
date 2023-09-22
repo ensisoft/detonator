@@ -614,7 +614,7 @@ TextureMap::TextureMap(const TextureMap& other, bool copy)
     mSpriteSheet        = other.mSpriteSheet;
     for (const auto& texture : other.mTextures)
     {
-        Texture dupe;
+        MyTexture dupe;
         dupe.rect = texture.rect;
         if (texture.source)
             dupe.source = copy ? texture.source->Copy() : texture.source->Clone();
@@ -810,7 +810,7 @@ bool TextureMap::FromJson(const data::Reader& data)
                 source = std::make_unique<detail::TextureTextureSource>();
             else BUG("Unhandled texture source type.");
 
-            Texture texture;
+            MyTexture texture;
             ok &= source->FromJson(*chunk);
             ok &= chunk->Read("rect", &texture.rect);
             texture.source = std::move(source);
