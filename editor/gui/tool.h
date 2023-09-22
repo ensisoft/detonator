@@ -138,8 +138,8 @@ namespace gui
           , mCameraScale(GetValue(ui.scaleX), GetValue(ui.scaleY))
           , mZoom(GetValue(ui.zoom))
           , mCameraRotation(GetValue(ui.rotation))
-          , mPerspective(perspective)
           , mCanTransform(true)
+          , mPerspective(perspective)
         {}
         inline Point2Df WindowPos() const noexcept
         { return mMickey->pos(); }

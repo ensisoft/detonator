@@ -466,12 +466,12 @@ namespace gfx
               : mId(base::RandomString(10))
             {}
 
-            TextureTextBufferSource(const TextBuffer& text, std::string id = base::RandomString(10))
+            explicit TextureTextBufferSource(const TextBuffer& text, std::string id = base::RandomString(10))
               : mId(std::move(id))
               , mTextBuffer(text)
             {}
 
-            TextureTextBufferSource(TextBuffer&& text, std::string id = base::RandomString(10))
+            explicit TextureTextBufferSource(TextBuffer&& text, std::string id = base::RandomString(10)) noexcept
               : mId(std::move(id))
               , mTextBuffer(std::move(text))
             {}
@@ -521,9 +521,9 @@ namespace gfx
             }
 
         private:
-            TextBuffer mTextBuffer;
             std::string mId;
             std::string mName;
+            TextBuffer mTextBuffer;
             base::bitflag<Effect> mEffects;
         };
 
@@ -614,8 +614,8 @@ namespace gfx
         };
 
         TextureMap(std::string id = base::RandomString(10))
-          : mId(std::move(id))
-          , mName("Default")
+          : mName("Default")
+          , mId(std::move(id))
         {}
         TextureMap(const TextureMap& other, bool copy);
         TextureMap(const TextureMap& other) : TextureMap(other, true) {}
@@ -727,11 +727,11 @@ namespace gfx
 
         Type mType = Type::Texture2D;
         float mFps = 0.0f;
-        struct Texture {
+        struct MyTexture {
             FRect rect = FRect(0.0f, 0.0f, 1.0f, 1.0f);
             std::unique_ptr<TextureSource> source;
         };
-        std::vector<Texture> mTextures;
+        std::vector<MyTexture> mTextures;
         std::string mSamplerName[2];
         std::string mRectUniformName[2];
         std::optional<SpriteSheet> mSpriteSheet;
