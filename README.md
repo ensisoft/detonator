@@ -1,28 +1,15 @@
 DETONATOR 2D 💥💣
 ===================
 An OpenGL ES based 2D game engine and editor for Linux, Windows and HTML5. Designed for simple single player games such
-as puzzle games, platformers, side scrollers and tile based real time strategy and tactics.  🍄🧩🗺️
+as puzzle games, platformers, side scrollers and tile based real time strategy and tactics.  
+🍄🧩🗺️
 
-![Screenshot](screens/derp.gif "Starter demo")  
+[![SHMUP DEMO](screens/blast-thumbnail.png)](https://www.ensisoft.com/github/blast.mp4)
+  
 
-This readme and other readme files, are for developers and cover information related to developing and building the engine itself.
-For end user guide see  [help](editor/dist/help/help.html "user help") instead. 
+### CURRENT TOP FEATURES !
 
-This project would not be possible without the following 🙏 
-* Qt, GLM, Freetype, Harfbuzz, Lua, sol3, STB, nlohmann/json, mpg123, libsndfile, Box2D, Emscripten and many others!
-* Royalty free art from [https://opengameart.com](https://opengameart.com "https://opengameart.com") 
-
-Other (subsystem) readmes:
-
-  * [Audio](audio/README.md "Audio readme") 🎼
-  * [Graphics](graphics/README.md "Graphics readme") (todo)
-  * [Game](game/README.md "Game readme") (todo) 👾
-  * [Engine](engine/README.md "Engine readme") (todo)
-  * [UI](uikit/README.md "UIKit readme") 
-  * [WDK](https://github.com/ensisoft/wdk/blob/master/README.md "WDK readme") 
-
-
-Currently supported major features:
+* Windows, Linux and HTML5/WASM support
 * Qt5 based WYSIWYG editor
 * Text rendering (vector and bitmap)
 * Various primitive shapes, custom polygon shapes
@@ -38,6 +25,10 @@ Currently supported major features:
   * Styling support through JSON style files *and* material system integration
   * Virtual key support and mouse input support
   * Scripting support for integrating with the game
+* Tilemap builder for tile based worlds
+  * Multiple render and data layers
+  * Isometric (dimetric) and axis aligned top down support
+  * Combines with scene and its entities!
 * Physics engine based on Box2D
 * Demo content and starter content
 * Game content packaging for native and HTML5/WASM (with Emscripten)
@@ -49,26 +40,63 @@ Currently supported major features:
   * SVG viewer and PNG exporter
   * VCS (Git) integration for syncing project changes to Git
 
-Currently, not yet 100% complete major features:
-* Continued work on tilemaps 
-  * Lua APIs for data access etc.
-  * Related algorithms such as path finding
-  * Compression etc. performance improvements
-  * Rendering performance improvements and fixes
-  * Isometric tilemap integration wtih scene+entity system
+<br>
 
-Planned major features not yet implemented:
-* Partial 3D support for specific objects (think objects such as coins, diamonds, player ship etc.)
-* OpenGL ES3 backend and WebGL2 support
-* Android support (TBD)
-* Mobile web + touch screen support 
-* Post-processing effects such as bloom, custom render passes
-* Vector fields, fluid sims, more elaborate particle effects
+
+
+### DOWNLOAD LATEST WINDOWS BINARY
+
+https://github.com/ensisoft/detonator/releases/tag/rel-3
+
+### ROADMAP
+
+<details><summary>Click here for roadmap</summary> 
+
+#### Functional Features
+
+* Tilemap features
+  * Height layer for tile height adjustment
+  * Lua APIs for data access etc.
+  * Logical data layer related algorithms such as path finding
+  * Compression etc. performance improvements
+  * Chunked data loading
+  * ~~Isometric tilemap integration with scene+entity system~~  DONE
+
+* Game play system
+  * Game state loading and saving
+
+* Platform support
+  * HighDPI content scaling (mobile device support) [#84][i84]
+  * Content rotation in landscape mode [#165](i165)
+  * Touch screen input [#164](i164)
+  * OpenGL ES3 backend and WebGL2 support [#55][i55]
+    * Instanced rendering, transform feedback, compute shaders, MSAA FBO
+
+* Rendering features
+  * Lights and shadows
+  * Fluid dynamics in the particle simulations
+  * Partial 3D object support for specific objects
+    * Think objects such as coins, diamonds, player's ship etc.
+  * Some post processing effects
+    * Bloom DONE but sucks because RGBA render target, no floating point FBO :(
+
+#### Performance Features
+* Acceleration structures for rendering and physics
 * Plenty of asset baking features
-* Acceleration structures for game subsystems such as physics and rendering
-  
-Planned minor features not yet implemented:
+  * For example audio pre-render when possible
+
+#### Minor Features
 * See issues for more details
+
+</details>
+
+[i55]:  https://github.com/ensisoft/detonator/issues/55
+[i84]:  https://github.com/ensisoft/detonator/issues/84
+[i165]: https://github.com/ensisoft/detonator/issues/165
+[i164]: https://github.com/ensisoft/detonator/issues/164
+
+### SCREENSHOTS
+
 
 ![Screenshot](screens/editor-tilemap.png "Map editor")
 Create tile based maps using the tile editor. The map supports multiple layers and both isometric and axis aligned perspective.
@@ -109,9 +137,24 @@ a code completion system!
 Create different types of particle effects in the particle editor by conveniently adjusting several sliders 
 and knobs that control the particle effect. 
 
-## Detailed Documentation
+## DEV ZONE
 ### [Build Instructions](BUILDING.md)
 ### [System Architecture](ARCHITECTURE.md)
 ### [Design Document](DESIGN.md)
 ### [Tracing & Profiling](PROFILING.md)
 
+### Engine Subsystems
+
+* [Audio](audio/README.md "Audio readme") 🎼
+* [Graphics](graphics/README.md "Graphics readme") (todo)
+* [Game](game/README.md "Game readme") (todo) 👾
+* [Engine](engine/README.md "Engine readme") (todo)
+* [UI](uikit/README.md "UIKit readme")
+* [WDK](https://github.com/ensisoft/wdk/blob/master/README.md "WDK readme")
+
+
+## THANKS
+
+This project would not be possible without the following 🙏 
+* Qt, GLM, Freetype, Harfbuzz, Lua, sol3, STB, nlohmann/json, mpg123, libsndfile, Box2D, Emscripten and many others!
+* Royalty free art from [https://opengameart.com](https://opengameart.com "https://opengameart.com")
