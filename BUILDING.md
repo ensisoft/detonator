@@ -158,9 +158,8 @@ Install these packages:
 
 - GCC (or Clang) compiler suite
 - CMake build tool
-- Boost C++ libraries
 - Conan package manager (VERSION 2)
-    - *On Archlinux you can use 'yay' to install conan + its dependencies from AUR*
+    - On Archlinux you can use 'yay' to install conan + its dependencies from AUR*
 - Git version control system
 - Qt5 application framework
 
