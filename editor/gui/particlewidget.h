@@ -153,8 +153,8 @@ namespace gui
         class SizeVizTool;
         struct UIState;
         app::Workspace* mWorkspace = nullptr;
-        std::shared_ptr<gfx::KinematicsParticleEngineClass> mClass;
-        std::unique_ptr<gfx::KinematicsParticleEngine> mEngine;
+        std::shared_ptr<gfx::ParticleEngineClass> mClass;
+        std::unique_ptr<gfx::ParticleEngineInstance> mEngine;
         std::unique_ptr<gfx::Material> mMaterial;
         std::unique_ptr<MouseTool> mMouseTool;
         std::unique_ptr<UIState> mState;

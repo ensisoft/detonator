@@ -229,7 +229,7 @@ private:
 ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
 {
     mWorkspace = workspace;
-    mClass = std::make_shared<gfx::KinematicsParticleEngineClass>();
+    mClass = std::make_shared<gfx::ParticleEngineClass>();
     DEBUG("Create ParticleEditorWidget");
 
     mUI.setupUi(this);
@@ -250,13 +250,13 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace)
     mUI.alpha->SetScale(1.0f);
     mUI.alpha->SetExponent(1.0f);
 
-    PopulateFromEnum<gfx::KinematicsParticleEngineClass::CoordinateSpace>(mUI.space);
-    PopulateFromEnum<gfx::KinematicsParticleEngineClass::Motion>(mUI.motion);
-    PopulateFromEnum<gfx::KinematicsParticleEngineClass::BoundaryPolicy>(mUI.boundary);
-    PopulateFromEnum<gfx::KinematicsParticleEngineClass::SpawnPolicy>(mUI.when);
-    PopulateFromEnum<gfx::KinematicsParticleEngineClass::EmitterShape>(mUI.shape);
-    PopulateFromEnum<gfx::KinematicsParticleEngineClass::Placement>(mUI.placement);
-    PopulateFromEnum<gfx::KinematicsParticleEngineClass::Direction>(mUI.direction);
+    PopulateFromEnum<gfx::ParticleEngineClass::CoordinateSpace>(mUI.space);
+    PopulateFromEnum<gfx::ParticleEngineClass::Motion>(mUI.motion);
+    PopulateFromEnum<gfx::ParticleEngineClass::BoundaryPolicy>(mUI.boundary);
+    PopulateFromEnum<gfx::ParticleEngineClass::SpawnPolicy>(mUI.when);
+    PopulateFromEnum<gfx::ParticleEngineClass::EmitterShape>(mUI.shape);
+    PopulateFromEnum<gfx::ParticleEngineClass::Placement>(mUI.placement);
+    PopulateFromEnum<gfx::ParticleEngineClass::Direction>(mUI.direction);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetList(mUI.materials, workspace->ListAllMaterials());
     SetValue(mUI.name, QString("My Particle System"));
@@ -296,9 +296,9 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
   : ParticleEditorWidget(workspace)
 {
     const auto& name   = resource.GetName();
-    const auto* klass  = resource.GetContent<gfx::KinematicsParticleEngineClass>();
+    const auto* klass  = resource.GetContent<gfx::ParticleEngineClass>();
     const auto& params = klass->GetParams();
-    mClass = std::make_shared<gfx::KinematicsParticleEngineClass>(*klass);
+    mClass = std::make_shared<gfx::ParticleEngineClass>(*klass);
     mOriginalHash = mClass->GetHash();
     DEBUG("Editing particle system: '%1'", name);
 
@@ -454,7 +454,7 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Particle", mUI.zoom);
     settings.LoadWidget("Particle", mUI.widget);
 
-    mClass = std::make_shared<gfx::KinematicsParticleEngineClass>();
+    mClass = std::make_shared<gfx::ParticleEngineClass>();
     if (!mClass->FromJson(json))
         WARN("Failed to restore particle engine state.");
 
@@ -633,7 +633,7 @@ void ParticleEditorWidget::on_actionSave_triggered()
 void ParticleEditorWidget::on_actionEmit_triggered()
 {
     const auto& p = mClass->GetParams();
-    if (p.mode != gfx::KinematicsParticleEngineClass::SpawnPolicy::Command)
+    if (p.mode != gfx::ParticleEngineClass::SpawnPolicy::Command)
         return;
 
     if (!mEngine)
@@ -664,7 +664,7 @@ void ParticleEditorWidget::on_actionEmit_triggered()
 
 void ParticleEditorWidget::SetParams()
 {
-    gfx::KinematicsParticleEngineClass::Params params;
+    gfx::ParticleEngineClass::Params params;
     params.coordinate_space                 = GetValue(mUI.space);
     params.motion                           = GetValue(mUI.motion);
     params.shape                            = GetValue(mUI.shape);
@@ -706,8 +706,8 @@ void ParticleEditorWidget::SetParams()
 
     params.delay = GetValue(mUI.delay);
 
-    const gfx::KinematicsParticleEngineClass::CoordinateSpace space = GetValue(mUI.space);
-    if (space == gfx::KinematicsParticleEngineClass::CoordinateSpace::Local)
+    const gfx::ParticleEngineClass::CoordinateSpace space = GetValue(mUI.space);
+    if (space == gfx::ParticleEngineClass::CoordinateSpace::Local)
     {
         params.init_rect_xpos   = GetValue(mUI.initX);
         params.init_rect_ypos   = GetValue(mUI.initY);
@@ -771,7 +771,7 @@ void ParticleEditorWidget::ShowParams()
     mUI.alpha->SetLo(params.min_alpha);
     mUI.alpha->SetHi(params.max_alpha);
 
-    if (params.coordinate_space == gfx::KinematicsParticleEngineClass::CoordinateSpace::Local)
+    if (params.coordinate_space == gfx::ParticleEngineClass::CoordinateSpace::Local)
     {
         SetValue(mUI.initX,      params.init_rect_xpos);
         SetValue(mUI.initY,      params.init_rect_ypos);
@@ -829,14 +829,14 @@ void ParticleEditorWidget::on_actionPlay_triggered()
     env.model_matrix = &model_matrix;
     env.editing_mode = true;
 
-    mEngine.reset(new gfx::KinematicsParticleEngine(mClass));
+    mEngine.reset(new gfx::ParticleEngineInstance(mClass));
     mEngine->Restart(env);
     mTime   = 0.0f;
     mPaused = false;
     SetEnabled(mUI.actionPause, true);
     SetEnabled(mUI.actionStop, true);
 
-    if (mClass->GetParams().mode == gfx::KinematicsParticleEngineClass::SpawnPolicy::Command)
+    if (mClass->GetParams().mode == gfx::ParticleEngineClass::SpawnPolicy::Command)
         on_actionEmit_triggered();
 
     DEBUG("Created new particle engine");
@@ -892,8 +892,8 @@ void ParticleEditorWidget::on_btnSelectMaterial_clicked()
 
 void ParticleEditorWidget::on_space_currentIndexChanged(int)
 {
-    const gfx::KinematicsParticleEngineClass::CoordinateSpace space = GetValue(mUI.space);
-    if (space == gfx::KinematicsParticleEngineClass::CoordinateSpace::Local)
+    const gfx::ParticleEngineClass::CoordinateSpace space = GetValue(mUI.space);
+    if (space == gfx::ParticleEngineClass::CoordinateSpace::Local)
     {
         SetEnabled(mUI.localEmitter, true);
         SetEnabled(mUI.chkShowEmitter, true);
@@ -914,8 +914,8 @@ void ParticleEditorWidget::on_space_currentIndexChanged(int)
 
 void ParticleEditorWidget::on_motion_currentIndexChanged(int)
 {
-    const gfx::KinematicsParticleEngineClass::Motion motion = GetValue(mUI.motion);
-    if (motion == gfx::KinematicsParticleEngineClass::Motion::Projectile)
+    const gfx::ParticleEngineClass::Motion motion = GetValue(mUI.motion);
+    if (motion == gfx::ParticleEngineClass::Motion::Projectile)
     {
         SetEnabled(mUI.gravityY, true);
         SetEnabled(mUI.gravityX, true);
@@ -935,8 +935,8 @@ void ParticleEditorWidget::on_boundary_currentIndexChanged(int)
 
 void ParticleEditorWidget::on_when_currentIndexChanged(int)
 {
-    const gfx::KinematicsParticleEngineClass::SpawnPolicy spawning = GetValue(mUI.when);
-    if (spawning == gfx::KinematicsParticleEngineClass::SpawnPolicy::Command)
+    const gfx::ParticleEngineClass::SpawnPolicy spawning = GetValue(mUI.when);
+    if (spawning == gfx::ParticleEngineClass::SpawnPolicy::Command)
     {
         SetEnabled(mUI.delay, false);
         SetEnabled(mUI.actionEmit, true);
@@ -959,8 +959,8 @@ void ParticleEditorWidget::on_placement_currentIndexChanged(int)
 }
 void ParticleEditorWidget::on_direction_currentIndexChanged(int)
 {
-    const gfx::KinematicsParticleEngineClass::Direction dir = GetValue(mUI.direction);
-    if (dir == gfx::KinematicsParticleEngineClass::Direction::Sector)
+    const gfx::ParticleEngineClass::Direction dir = GetValue(mUI.direction);
+    if (dir == gfx::ParticleEngineClass::Direction::Sector)
     {
         SetEnabled(mUI.dirSizeAngle, true);
         SetEnabled(mUI.dirStartAngle, true);
@@ -1264,9 +1264,9 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
         painter.Draw(*mEngine, model, *mMaterial);
     }
 
-    const gfx::KinematicsParticleEngineClass::CoordinateSpace space = GetValue(mUI.space);
+    const gfx::ParticleEngineClass::CoordinateSpace space = GetValue(mUI.space);
 
-    if (GetValue(mUI.chkShowEmitter) && space == gfx::KinematicsParticleEngineClass::CoordinateSpace::Local)
+    if (GetValue(mUI.chkShowEmitter) && space == gfx::ParticleEngineClass::CoordinateSpace::Local)
     {
         // visualize the emitter as a box inside the simulation space.
         // note that these are normalized coordinates that get scaled
@@ -1333,7 +1333,7 @@ void ParticleEditorWidget::PaintScene(gfx::Painter& painter, double secs)
     if (mEngine)
     {
         const auto count = mEngine->GetNumParticlesAlive();
-        if (emission == gfx::KinematicsParticleEngineClass::SpawnPolicy::Command && count == 0)
+        if (emission == gfx::ParticleEngineClass::SpawnPolicy::Command && count == 0)
         {
             const auto& shortcut = mUI.actionEmit->shortcut().toString();
             ShowMessage(app::toString("Hit %1 to emit some particles!", shortcut), painter);
@@ -1426,8 +1426,8 @@ void ParticleEditorWidget::MousePress(QMouseEvent* mickey)
         state->emitter_width          = emitter_width;
         state->emitter_height         = emitter_height;
 
-        const gfx::KinematicsParticleEngineClass::CoordinateSpace space = GetValue(mUI.space);
-        if ((space == gfx::KinematicsParticleEngineClass::CoordinateSpace::Local) &&
+        const gfx::ParticleEngineClass::CoordinateSpace space = GetValue(mUI.space);
+        if ((space == gfx::ParticleEngineClass::CoordinateSpace::Local) &&
             (local_x >= emitter_left && local_x <= emitter_right) &&
             (local_y >= emitter_top && local_y <= emitter_bottom))
         {

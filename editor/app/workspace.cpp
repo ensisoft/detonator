@@ -1281,7 +1281,7 @@ bool ResourceArchive::Open(const QString& zip_file)
     }
 
     LoadMaterials<gfx::MaterialClass>("materials", content, mResources);
-    LoadResources<gfx::KinematicsParticleEngineClass>("particles", content, mResources);
+    LoadResources<gfx::ParticleEngineClass>("particles", content, mResources);
     LoadResources<gfx::PolygonClass>("shapes", content, mResources);
     LoadResources<game::EntityClass>("entities", content, mResources);
     LoadResources<game::SceneClass>("scenes", content, mResources);
@@ -1386,11 +1386,10 @@ Workspace::Workspace(const QString& dir)
     mResources.emplace_back(new DrawableResource<gfx::SemiCircleClass>(gfx::SemiCircleClass("_semi_circle"), "SemiCircle"));
     mResources.emplace_back(new DrawableResource<gfx::TrapezoidClass>(gfx::TrapezoidClass("_trapezoid"), "Trapezoid"));
     mResources.emplace_back(new DrawableResource<gfx::ParallelogramClass>(gfx::ParallelogramClass("_parallelogram"), "Parallelogram"));
-    mResources.emplace_back(new DrawableResource<gfx::RoundRectangleClass>(gfx::RoundRectangleClass("_round_rect", 0.05f), "RoundRect"));
-    mResources.emplace_back(new DrawableResource<gfx::CursorClass>(gfx::CursorClass("_arrow_cursor",
-                                                                          gfx::CursorClass::Shape::Arrow),"Arrow Cursor"));
-    mResources.emplace_back(new DrawableResource<gfx::CursorClass>(gfx::CursorClass("_block_cursor",
-                                                                                    gfx::CursorClass::Shape::Block),"Block Cursor"));
+    mResources.emplace_back(new DrawableResource<gfx::RoundRectangleClass>(gfx::RoundRectangleClass("_round_rect", "", 0.05f), "RoundRect"));
+    mResources.emplace_back(new DrawableResource<gfx::ArrowCursorClass>(gfx::ArrowCursorClass("_arrow_cursor"), "Arrow Cursor"));
+    mResources.emplace_back(new DrawableResource<gfx::BlockCursorClass>(gfx::BlockCursorClass("_block_cursor"), "Block Cursor"));
+
     for (auto& resource : mResources)
     {
         resource->SetIsPrimitive(true);
@@ -1511,7 +1510,7 @@ std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassByName(cons
         if (resource->GetType() == Resource::Type::Drawable)
             return ResourceCast<gfx::DrawableClass>(*resource).GetSharedResource();
         if (resource->GetType() == Resource::Type::ParticleSystem)
-            return ResourceCast<gfx::KinematicsParticleEngineClass>(*resource).GetSharedResource();
+            return ResourceCast<gfx::ParticleEngineClass>(*resource).GetSharedResource();
         else if (resource->GetType() == Resource::Type::Shape)
             return ResourceCast<gfx::PolygonClass>(*resource).GetSharedResource();
     }
@@ -1533,7 +1532,7 @@ std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassById(const 
         if (resource->GetType() == Resource::Type::Drawable)
             return ResourceCast<gfx::DrawableClass>(*resource).GetSharedResource();
         if (resource->GetType() == Resource::Type::ParticleSystem)
-            return ResourceCast<gfx::KinematicsParticleEngineClass>(*resource).GetSharedResource();
+            return ResourceCast<gfx::ParticleEngineClass>(*resource).GetSharedResource();
         else if (resource->GetType() == Resource::Type::Shape)
             return ResourceCast<gfx::PolygonClass>(*resource).GetSharedResource();
     }
@@ -1618,7 +1617,7 @@ engine::ClassHandle<const gfx::DrawableClass> Workspace::FindDrawableClassById(c
         if (resource->GetType() == Resource::Type::Drawable)
             return ResourceCast<gfx::DrawableClass>(*resource).GetSharedResource();
         else if (resource->GetType() == Resource::Type::ParticleSystem)
-            return ResourceCast<gfx::KinematicsParticleEngineClass>(*resource).GetSharedResource();
+            return ResourceCast<gfx::ParticleEngineClass>(*resource).GetSharedResource();
         else if (resource->GetType() == Resource::Type::Shape)
             return ResourceCast<gfx::PolygonClass>(*resource).GetSharedResource();
     }
@@ -1946,7 +1945,7 @@ bool Workspace::LoadContent(const QString& filename, MigrationLog* log)
 
     bool ok = true;
     ok &= LoadMaterials<gfx::MaterialClass>("materials", root, mResources, log);
-    ok &= LoadResources<gfx::KinematicsParticleEngineClass>("particles", root, mResources, log);
+    ok &= LoadResources<gfx::ParticleEngineClass>("particles", root, mResources, log);
     ok &= LoadResources<gfx::PolygonClass>("shapes", root, mResources, log);
     ok &= LoadResources<game::EntityClass>("entities", root, mResources, log);
     ok &= LoadResources<game::SceneClass>("scenes", root, mResources, log);
@@ -3050,7 +3049,7 @@ bool Workspace::ImportResourcesFromJson(const QString& filename, std::vector<std
 
     success = true;
     success = success && LoadMaterials<gfx::MaterialClass>("materials", root, resources);
-    success = success && LoadResources<gfx::KinematicsParticleEngineClass>("particles", root, resources);
+    success = success && LoadResources<gfx::ParticleEngineClass>("particles", root, resources);
     success = success && LoadResources<gfx::PolygonClass>("shapes", root, resources);
     success = success && LoadResources<game::EntityClass>("entities", root, resources);
     success = success && LoadResources<game::SceneClass>("scenes", root, resources);

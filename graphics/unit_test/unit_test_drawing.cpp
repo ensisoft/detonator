@@ -1573,8 +1573,8 @@ void unit_test_local_particles()
 {
     TEST_CASE(test::Type::Feature)
 
-    using K = gfx::KinematicsParticleEngineClass;
-    using P = gfx::KinematicsParticleEngineClass::Params;
+    using K = gfx::ParticleEngineClass;
+    using P = gfx::ParticleEngineClass::Params;
 
     struct ParticleVertex {
         gfx::Vec2 aPosition;
@@ -1583,7 +1583,7 @@ void unit_test_local_particles()
 
     // emitter position and spawning inside rectangle
     {
-        gfx::KinematicsParticleEngineClass::Params p;
+        gfx::ParticleEngineClass::Params p;
         p.mode             = K::SpawnPolicy::Once;
         p.placement        = K::Placement::Inside;
         p.shape            = K::EmitterShape::Rectangle;
@@ -1594,8 +1594,8 @@ void unit_test_local_particles()
         p.init_rect_xpos   = 0.25f;
         p.init_rect_ypos   = 0.25f;
         p.num_particles    = 10;
-        gfx::KinematicsParticleEngineClass klass(p);
-        gfx::KinematicsParticleEngine eng(klass);
+        gfx::ParticleEngineClass klass(p);
+        gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
         gfx::detail::GenericShaderPass pass;
@@ -1616,7 +1616,7 @@ void unit_test_local_particles()
     }
     // emitter position and spawning outside rectangle
     {
-        gfx::KinematicsParticleEngineClass::Params p;
+        gfx::ParticleEngineClass::Params p;
         p.mode             = K::SpawnPolicy::Once;
         p.placement        = K::Placement::Outside;
         p.shape            = K::EmitterShape::Rectangle;
@@ -1627,8 +1627,8 @@ void unit_test_local_particles()
         p.init_rect_xpos   = 0.25f;
         p.init_rect_ypos   = 0.25f;
         p.num_particles    = 10;
-        gfx::KinematicsParticleEngineClass klass(p);
-        gfx::KinematicsParticleEngine eng(klass);
+        gfx::ParticleEngineClass klass(p);
+        gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
         gfx::detail::GenericShaderPass pass;
@@ -1649,7 +1649,7 @@ void unit_test_local_particles()
 
     // emitter position and spawning edge of rectangle
     {
-        gfx::KinematicsParticleEngineClass::Params p;
+        gfx::ParticleEngineClass::Params p;
         p.mode             = K::SpawnPolicy::Once;
         p.placement        = K::Placement::Edge;
         p.shape            = K::EmitterShape::Rectangle;
@@ -1660,8 +1660,8 @@ void unit_test_local_particles()
         p.init_rect_xpos   = 0.25f;
         p.init_rect_ypos   = 0.25f;
         p.num_particles    = 10;
-        gfx::KinematicsParticleEngineClass klass(p);
-        gfx::KinematicsParticleEngine eng(klass);
+        gfx::ParticleEngineClass klass(p);
+        gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
         gfx::detail::GenericShaderPass pass;
@@ -1684,7 +1684,7 @@ void unit_test_local_particles()
 
     // emitter position and spawning center of rectangle
     {
-        gfx::KinematicsParticleEngineClass::Params p;
+        gfx::ParticleEngineClass::Params p;
         p.mode             = K::SpawnPolicy::Once;
         p.placement        = K::Placement::Center;
         p.shape            = K::EmitterShape::Rectangle;
@@ -1695,8 +1695,8 @@ void unit_test_local_particles()
         p.init_rect_xpos   = 0.25f;
         p.init_rect_ypos   = 0.25f;
         p.num_particles    = 10;
-        gfx::KinematicsParticleEngineClass klass(p);
-        gfx::KinematicsParticleEngine eng(klass);
+        gfx::ParticleEngineClass klass(p);
+        gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
         gfx::detail::GenericShaderPass pass;
@@ -1724,7 +1724,7 @@ void unit_test_local_particles()
         };
         for (auto placement : placements)
         {
-            gfx::KinematicsParticleEngineClass::Params p;
+            gfx::ParticleEngineClass::Params p;
             p.placement        = placement;
             p.mode             = K::SpawnPolicy::Once;
             p.shape            = K::EmitterShape::Circle;
@@ -1735,8 +1735,8 @@ void unit_test_local_particles()
             p.init_rect_xpos   = 0.25f;
             p.init_rect_ypos   = 0.25f;
             p.num_particles    = 10;
-            gfx::KinematicsParticleEngineClass klass(p);
-            gfx::KinematicsParticleEngine eng(klass);
+            gfx::ParticleEngineClass klass(p);
+            gfx::ParticleEngineInstance eng(klass);
 
             TestDevice dev;
             gfx::detail::GenericShaderPass pass;
@@ -1764,7 +1764,7 @@ void unit_test_local_particles()
 
     // direction of travel outwards from circle edge.
     {
-        gfx::KinematicsParticleEngineClass::Params p;
+        gfx::ParticleEngineClass::Params p;
         p.placement        = K::Placement::Edge;
         p.mode             = K::SpawnPolicy::Once;
         p.shape            = K::EmitterShape::Circle;
@@ -1778,8 +1778,8 @@ void unit_test_local_particles()
         p.num_particles    = 10;
         p.min_velocity     = 1.0f;
         p.max_velocity     = 1.0f;
-        gfx::KinematicsParticleEngineClass klass(p);
-        gfx::KinematicsParticleEngine eng(klass);
+        gfx::ParticleEngineClass klass(p);
+        gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
         gfx::detail::GenericShaderPass pass;
@@ -1800,7 +1800,7 @@ void unit_test_local_particles()
 
     // direction of travel inwards from circle edge.
     {
-        gfx::KinematicsParticleEngineClass::Params p;
+        gfx::ParticleEngineClass::Params p;
         p.placement        = K::Placement::Edge;
         p.mode             = K::SpawnPolicy::Once;
         p.shape            = K::EmitterShape::Circle;
@@ -1814,8 +1814,8 @@ void unit_test_local_particles()
         p.num_particles    = 10;
         p.min_velocity     = 1.0f;
         p.max_velocity     = 1.0f;
-        gfx::KinematicsParticleEngineClass klass(p);
-        gfx::KinematicsParticleEngine eng(klass);
+        gfx::ParticleEngineClass klass(p);
+        gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
         gfx::detail::GenericShaderPass pass;
@@ -1848,12 +1848,12 @@ void unit_test_particles()
 
     // emission mode once.
     {
-        gfx::KinematicsParticleEngineClass::Params p;
+        gfx::ParticleEngineClass::Params p;
         p.num_particles = 100;
         p.max_lifetime  = 1.0f;
-        p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Once;
-        gfx::KinematicsParticleEngineClass klass(p);
-        gfx::KinematicsParticleEngine eng(klass);
+        p.mode = gfx::ParticleEngineClass::SpawnPolicy::Once;
+        gfx::ParticleEngineClass klass(p);
+        gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
         gfx::detail::GenericShaderPass pass;
@@ -1873,12 +1873,12 @@ void unit_test_particles()
     // emission mode maintain, new particles are spawned to compensate
     // for ones that died.
     {
-        gfx::KinematicsParticleEngineClass::Params p;
+        gfx::ParticleEngineClass::Params p;
         p.num_particles = 100;
         p.max_lifetime  = 1.0f;
-        p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Maintain;
-        gfx::KinematicsParticleEngineClass klass(p);
-        gfx::KinematicsParticleEngine eng(klass);
+        p.mode = gfx::ParticleEngineClass::SpawnPolicy::Maintain;
+        gfx::ParticleEngineClass klass(p);
+        gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
         gfx::detail::GenericShaderPass pass;
@@ -1901,13 +1901,13 @@ void unit_test_particles()
     // continuously spawn new particles. num_particles is the spawn
     // rate of particles in particles/second
     {
-        gfx::KinematicsParticleEngineClass::Params p;
+        gfx::ParticleEngineClass::Params p;
         p.num_particles = 10; // 10 particles per second.
         p.min_lifetime  = 10.0f;
         p.max_lifetime  = 10.0f;
-        p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Continuous;
-        gfx::KinematicsParticleEngineClass klass(p);
-        gfx::KinematicsParticleEngine eng(klass);
+        p.mode = gfx::ParticleEngineClass::SpawnPolicy::Continuous;
+        gfx::ParticleEngineClass klass(p);
+        gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
         gfx::detail::GenericShaderPass pass;
@@ -1935,13 +1935,13 @@ void unit_test_particles()
 
     // Spawn on command only
     {
-        gfx::KinematicsParticleEngineClass::Params p;
+        gfx::ParticleEngineClass::Params p;
         p.num_particles = 10; // 10 particles per second.
         p.min_lifetime  = 10.0f;
         p.max_lifetime  = 10.0f;
-        p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Command;
-        gfx::KinematicsParticleEngineClass klass(p);
-        gfx::KinematicsParticleEngine eng(klass);
+        p.mode = gfx::ParticleEngineClass::SpawnPolicy::Command;
+        gfx::ParticleEngineClass klass(p);
+        gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
         gfx::detail::GenericShaderPass pass;

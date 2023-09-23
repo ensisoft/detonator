@@ -328,7 +328,7 @@ QStringList ListResourceDependencies(const gfx::PolygonClass& poly, const QVaria
     return ret;
 
 }
-QStringList ListResourceDependencies(const gfx::KinematicsParticleEngineClass& particles, const QVariantMap& props)
+QStringList ListResourceDependencies(const gfx::ParticleEngineClass& particles, const QVariantMap& props)
 {
     // soft dependency
     QStringList ret;

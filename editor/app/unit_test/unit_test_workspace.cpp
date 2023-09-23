@@ -162,7 +162,7 @@ void unit_test_resource()
 
     gfx::PolygonClass poly;
     app::CustomShapeResource shape_resource(poly, "poly");
-    gfx::KinematicsParticleEngineClass particles;
+    gfx::ParticleEngineClass particles;
     app::ParticleSystemResource  particle_resource(particles, "particles");
 
     workspace.SaveResource(shape_resource);
@@ -371,7 +371,7 @@ R"(
     app::MaterialResource material_resource(material, "material");
     gfx::PolygonClass poly;
     app::CustomShapeResource shape_resource(poly, "poly");
-    gfx::KinematicsParticleEngineClass particles;
+    gfx::ParticleEngineClass particles;
     app::ParticleSystemResource  particle_resource(particles, "particles");
 
     app::Script script;
@@ -1458,7 +1458,7 @@ void unit_test_list_deps()
     }
 
     {
-        gfx::KinematicsParticleEngineClass particles;
+        gfx::ParticleEngineClass particles;
         app::ParticleSystemResource  particle_resource(particles, "particles");
         workspace.SaveResource(particle_resource);
     }
@@ -1693,7 +1693,7 @@ void unit_test_export_import_basic()
 
         gfx::PolygonClass poly;
         app::CustomShapeResource shape_resource(poly, "poly");
-        gfx::KinematicsParticleEngineClass particles;
+        gfx::ParticleEngineClass particles;
         app::ParticleSystemResource particle_resource(particles, "particles");
 
         app::Script script;

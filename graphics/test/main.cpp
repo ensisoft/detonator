@@ -161,9 +161,9 @@ class MegaParticleTest : public GraphicsTest
 public:
     MegaParticleTest()
     {
-        gfx::KinematicsParticleEngineClass::Params p;
-        p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Once;
-        p.boundary = gfx::KinematicsParticleEngineClass::BoundaryPolicy::Reflect;
+        gfx::ParticleEngineClass::Params p;
+        p.mode = gfx::ParticleEngineClass::SpawnPolicy::Once;
+        p.boundary = gfx::ParticleEngineClass::BoundaryPolicy::Reflect;
         p.num_particles = 100000;
         p.min_lifetime = std::numeric_limits<float>::max();
         p.max_lifetime = std::numeric_limits<float>::max();
@@ -179,8 +179,8 @@ public:
         p.max_velocity = 0.5;
         p.min_point_size = 2;
         p.max_point_size = 2;
-        gfx::KinematicsParticleEngineClass klass(p);
-        mEngine.reset(new gfx::KinematicsParticleEngine(p));
+        gfx::ParticleEngineClass klass(p);
+        mEngine.reset(new gfx::ParticleEngineInstance(p));
     }
     virtual void Render(gfx::Painter& painter) override
     {
@@ -223,7 +223,7 @@ public:
     virtual bool IsFeatureTest() const override
     { return false; }
 private:
-    std::unique_ptr<gfx::KinematicsParticleEngine> mEngine;
+    std::unique_ptr<gfx::ParticleEngineInstance> mEngine;
     bool mStarted = false;
 };
 
@@ -232,9 +232,9 @@ class JankTest : public GraphicsTest
 public:
     JankTest()
     {
-        gfx::KinematicsParticleEngineClass::Params p;
-        p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Once;
-        p.boundary = gfx::KinematicsParticleEngineClass::BoundaryPolicy::Reflect;
+        gfx::ParticleEngineClass::Params p;
+        p.mode = gfx::ParticleEngineClass::SpawnPolicy::Once;
+        p.boundary = gfx::ParticleEngineClass::BoundaryPolicy::Reflect;
         p.num_particles = 1000;
         p.min_lifetime = std::numeric_limits<float>::max();
         p.max_lifetime = std::numeric_limits<float>::max();
@@ -251,14 +251,14 @@ public:
         p.min_point_size = 40;
         p.max_point_size = 40;
         {
-            gfx::KinematicsParticleEngineClass klass(p);
-            mEngine[0].reset(new gfx::KinematicsParticleEngine(klass));
+            gfx::ParticleEngineClass klass(p);
+            mEngine[0].reset(new gfx::ParticleEngineInstance(klass));
         }
 
         {
             p.init_rect_xpos = 0.5f;
-            gfx::KinematicsParticleEngineClass klass(p);
-            mEngine[1].reset(new gfx::KinematicsParticleEngine(klass));
+            gfx::ParticleEngineClass klass(p);
+            mEngine[1].reset(new gfx::ParticleEngineInstance(klass));
         }
     }
     virtual void Render(gfx::Painter& painter) override
@@ -297,7 +297,7 @@ public:
     virtual bool IsFeatureTest() const override
     { return false; }
 private:
-    std::unique_ptr<gfx::KinematicsParticleEngine> mEngine[2];
+    std::unique_ptr<gfx::ParticleEngineInstance> mEngine[2];
 };
 
 class PolygonTest : public GraphicsTest
@@ -328,7 +328,7 @@ public:
         material.SetColor(gfx::Color::Black,  gfx::GradientClass::ColorIndex::BottomLeft);
         material.SetColor(gfx::Color::Yellow, gfx::GradientClass::ColorIndex::BottomRight);
         material.SetGamma(2.2f);
-        painter.Draw(gfx::Polygon(mPoly), transform, gfx::MaterialClassInst(material));
+        painter.Draw(gfx::PolygonInstance(mPoly), transform, gfx::MaterialClassInst(material));
 
         // eye
         transform.Resize(40, 40);
@@ -1359,14 +1359,14 @@ private:
 class RenderParticleTest : public GraphicsTest
 {
 public:
-    using ParticleEngine = gfx::KinematicsParticleEngine;
+    using ParticleEngine = gfx::ParticleEngineInstance;
 
     RenderParticleTest()
     {
         {
-            gfx::KinematicsParticleEngineClass::Params p;
-            p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Continuous;
-            p.boundary = gfx::KinematicsParticleEngineClass::BoundaryPolicy::Kill;
+            gfx::ParticleEngineClass::Params p;
+            p.mode = gfx::ParticleEngineClass::SpawnPolicy::Continuous;
+            p.boundary = gfx::ParticleEngineClass::BoundaryPolicy::Kill;
             p.num_particles = 300;
             p.min_lifetime = 1.0f;
             p.max_lifetime = 2.0f;
@@ -1386,13 +1386,13 @@ public:
             p.max_point_size = 60;
             p.rate_of_change_in_size_wrt_dist = -2.0f;
             p.rate_of_change_in_size_wrt_time = -2.0f;
-            mFire.reset(new gfx::KinematicsParticleEngine(p));
+            mFire.reset(new gfx::ParticleEngineInstance(p));
         }
 
         {
-            gfx::KinematicsParticleEngineClass::Params p;
-            p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Continuous;
-            p.boundary = gfx::KinematicsParticleEngineClass::BoundaryPolicy::Kill;
+            gfx::ParticleEngineClass::Params p;
+            p.mode = gfx::ParticleEngineClass::SpawnPolicy::Continuous;
+            p.boundary = gfx::ParticleEngineClass::BoundaryPolicy::Kill;
             p.num_particles = 300;
             p.min_lifetime = 1.0f;
             p.max_lifetime = 2.0f;
@@ -1412,13 +1412,13 @@ public:
             p.max_point_size = 60;
             p.rate_of_change_in_size_wrt_dist = -4.0f;
             p.rate_of_change_in_size_wrt_time = -8.0f;
-            mSmoke.reset(new gfx::KinematicsParticleEngine(p));
+            mSmoke.reset(new gfx::ParticleEngineInstance(p));
         }
 
         {
-            gfx::KinematicsParticleEngineClass::Params p;
-            p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Continuous;
-            p.boundary = gfx::KinematicsParticleEngineClass::BoundaryPolicy::Kill;
+            gfx::ParticleEngineClass::Params p;
+            p.mode = gfx::ParticleEngineClass::SpawnPolicy::Continuous;
+            p.boundary = gfx::ParticleEngineClass::BoundaryPolicy::Kill;
             p.num_particles = 1000;
             p.min_lifetime = 1.0f;
             p.max_lifetime = 2.0f;
@@ -1436,13 +1436,13 @@ public:
             p.max_point_size = 40;
             p.rate_of_change_in_size_wrt_time = -2.0f;
             p.rate_of_change_in_size_wrt_dist = -2.0f;
-            mBlood.reset(new gfx::KinematicsParticleEngine(p));
+            mBlood.reset(new gfx::ParticleEngineInstance(p));
         }
 
         {
-            gfx::KinematicsParticleEngineClass::Params p;
-            p.mode = gfx::KinematicsParticleEngineClass::SpawnPolicy::Continuous;
-            p.boundary = gfx::KinematicsParticleEngineClass::BoundaryPolicy::Kill;
+            gfx::ParticleEngineClass::Params p;
+            p.mode = gfx::ParticleEngineClass::SpawnPolicy::Continuous;
+            p.boundary = gfx::ParticleEngineClass::BoundaryPolicy::Kill;
             p.num_particles = 0.45;
             p.min_lifetime = 20.0f;
             p.max_lifetime = 20.0f;
@@ -1460,7 +1460,7 @@ public:
             p.max_lifetime = 30.0f;
             p.min_point_size = 100;
             p.max_point_size = 150;
-            mClouds.reset(new gfx::KinematicsParticleEngine(p));
+            mClouds.reset(new gfx::ParticleEngineInstance(p));
         }
 
     }

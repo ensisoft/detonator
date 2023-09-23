@@ -192,7 +192,7 @@ public:
         if (!mouse_drawable)
         {
             WARN("No such mouse cursor drawable found. [drawable='%1']", conf.mouse_cursor.drawable);
-            mouse_drawable = std::make_shared<gfx::CursorClass>(gfx::CursorClass::Shape::Arrow);
+            mouse_drawable = std::make_shared<gfx::ArrowCursorClass>();
             mCursorSize    = glm::vec2(20.0f, 20.0f);
             mCursorHotspot = glm::vec2(0.0f, 0.0f);
         }
