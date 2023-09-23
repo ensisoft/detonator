@@ -319,7 +319,7 @@ void GfxWindow::paintGL()
             gfx::Transform transform;
             transform.Resize(20.0f, 20.0f);
             transform.MoveTo(mickey.x(), mickey.y());
-            mCustomGraphicsPainter->Draw(gfx::Cursor(gfx::Cursor::Shape::Arrow), transform,
+            mCustomGraphicsPainter->Draw(gfx::ArrowCursor(), transform,
                                          gfx::MaterialClassInst(cursor_material));
         }
     }

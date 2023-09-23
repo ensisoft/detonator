@@ -270,7 +270,7 @@ void main() {
         else if (id == "circle")
             return std::make_shared<gfx::CircleClass>();
         else if (id == "particles")
-            return std::make_shared<gfx::KinematicsParticleEngineClass>();
+            return std::make_shared<gfx::ParticleEngineClass>();
         TEST_REQUIRE(!"OOPS");
         return nullptr;
     }

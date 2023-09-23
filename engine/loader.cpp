@@ -732,11 +732,11 @@ ContentLoaderImpl::ContentLoaderImpl()
     mDrawables["_capsule"]            = std::make_shared<gfx::CapsuleClass>("_capsule");
     mDrawables["_circle"]             = std::make_shared<gfx::CircleClass>("_circle");
     mDrawables["_semi_circle"]        = std::make_shared<gfx::SemiCircleClass>("_semi_circle");
-    mDrawables["_round_rect"]         = std::make_shared<gfx::RoundRectangleClass>("_round_rect", 0.05f);
+    mDrawables["_round_rect"]         = std::make_shared<gfx::RoundRectangleClass>("_round_rect", "", 0.05f);
     mDrawables["_trapezoid"]          = std::make_shared<gfx::TrapezoidClass>("_trapezoid");
     mDrawables["_parallelogram"]      = std::make_shared<gfx::ParallelogramClass>("_parallelogram");
-    mDrawables["_arrow_cursor"]       = std::make_shared<gfx::CursorClass>("_arrow_cursor",gfx::CursorClass::Shape::Arrow);
-    mDrawables["_block_cursor"]       = std::make_shared<gfx::CursorClass>("_block_cursor", gfx::CursorClass::Shape::Block);
+    mDrawables["_arrow_cursor"]       = std::make_shared<gfx::ArrowCursorClass>("_arrow_cursor");
+    mDrawables["_block_cursor"]       = std::make_shared<gfx::BlockCursorClass>("_block_cursor");
 }
 
 ClassHandle<const audio::GraphClass> ContentLoaderImpl::FindAudioGraphClassById(const std::string& id) const
@@ -859,7 +859,7 @@ bool ContentLoaderImpl::LoadClasses(const data::Reader& data)
 {
     if (!LoadMaterials(data, "materials", mMaterials, nullptr))
         return false;
-    if (!LoadContent<gfx::DrawableClass, gfx::KinematicsParticleEngineClass>(data, "particles", mDrawables, nullptr))
+    if (!LoadContent<gfx::DrawableClass, gfx::ParticleEngineClass>(data, "particles", mDrawables, nullptr))
         return false;
    if (!LoadContent<gfx::DrawableClass, gfx::PolygonClass>(data, "shapes", mDrawables, nullptr))
        return false;

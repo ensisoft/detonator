@@ -463,7 +463,7 @@ namespace app
         struct ResourceTypeTraits;
 
         template<>
-        struct ResourceTypeTraits<gfx::KinematicsParticleEngineClass> {
+        struct ResourceTypeTraits<gfx::ParticleEngineClass> {
             static constexpr auto Type = app::Resource::Type::ParticleSystem;
         };
         template<>
@@ -530,7 +530,7 @@ namespace app
         }
 
         QStringList ListResourceDependencies(const gfx::PolygonClass& poly, const QVariantMap& props);
-        QStringList ListResourceDependencies(const gfx::KinematicsParticleEngineClass& particles, const QVariantMap& props);
+        QStringList ListResourceDependencies(const gfx::ParticleEngineClass& particles, const QVariantMap& props);
 
         QStringList ListResourceDependencies(const game::EntityClass& entity, const QVariantMap& props);
         QStringList ListResourceDependencies(const game::SceneClass& scene, const QVariantMap& props);
@@ -902,7 +902,7 @@ namespace app
     }
 
     //using MaterialResource       = GameResource<gfx::MaterialClass>;
-    using ParticleSystemResource = GameResource<gfx::KinematicsParticleEngineClass>;
+    using ParticleSystemResource = GameResource<gfx::ParticleEngineClass>;
     using CustomShapeResource    = GameResource<gfx::PolygonClass>;
     using EntityResource         = GameResource<game::EntityClass>;
     using SceneResource          = GameResource<game::SceneClass>;

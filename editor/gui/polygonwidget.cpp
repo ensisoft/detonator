@@ -474,7 +474,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     static gfx::ColorClass color(gfx::MaterialClass::Type::Color);
     color.SetBaseColor(gfx::Color4f(gfx::Color::LightGray, alpha));
     color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-    painter.Draw(gfx::Polygon(mPolygon), view, gfx::MaterialClassInst(color));
+    painter.Draw(gfx::PolygonInstance(mPolygon), view, gfx::MaterialClassInst(color));
 
     // visualize the vertices.
     view.Resize(6, 6);
@@ -519,7 +519,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     mCurrentDraw.ClearVertices();
     mCurrentDraw.AddVertices(MakeVerts(points, width, height));
     mCurrentDraw.AddDrawCommand(cmd);
-    painter.Draw(gfx::Polygon(mCurrentDraw), view, gfx::MaterialClassInst(color));
+    painter.Draw(gfx::PolygonInstance(mCurrentDraw), view, gfx::MaterialClassInst(color));
 }
 
 void ShapeWidget::OnMousePress(QMouseEvent* mickey)

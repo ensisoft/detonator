@@ -258,10 +258,10 @@ void unit_test_polygon_vertex_operations()
 
 void unit_test_particle_engine_data()
 {
-    gfx::KinematicsParticleEngineClass::Params params;
-    params.motion   = gfx::KinematicsParticleEngineClass::Motion::Projectile;
-    params.mode     = gfx::KinematicsParticleEngineClass::SpawnPolicy::Continuous;
-    params.boundary = gfx::KinematicsParticleEngineClass::BoundaryPolicy::Kill;
+    gfx::ParticleEngineClass::Params params;
+    params.motion   = gfx::ParticleEngineClass::Motion::Projectile;
+    params.mode     = gfx::ParticleEngineClass::SpawnPolicy::Continuous;
+    params.boundary = gfx::ParticleEngineClass::BoundaryPolicy::Kill;
     params.num_particles = 500.0f;
     params.min_lifetime  = 2.0f;
     params.max_lifetime  = 5.0f;
@@ -284,21 +284,21 @@ void unit_test_particle_engine_data()
     params.rate_of_change_in_alpha_wrt_dist = 3.0f;
     params.rate_of_change_in_alpha_wrt_time = 4.0f;
     params.gravity = glm::vec2{5.0f, 5.0f};
-    gfx::KinematicsParticleEngineClass klass(params);
+    gfx::ParticleEngineClass klass(params);
 
     // to/from json
     {
         data::JsonObject json;
         klass.IntoJson(json);
-        gfx::KinematicsParticleEngineClass ret;
+        gfx::ParticleEngineClass ret;
         TEST_REQUIRE(ret.FromJson(json));
         TEST_REQUIRE(ret.GetId() == klass.GetId());
         TEST_REQUIRE(ret.GetHash() == klass.GetHash());
 
         const auto& p = ret.GetParams();
-        TEST_REQUIRE(p.motion                           == gfx::KinematicsParticleEngineClass::Motion::Projectile);
-        TEST_REQUIRE(p.mode                             == gfx::KinematicsParticleEngineClass::SpawnPolicy::Continuous);
-        TEST_REQUIRE(p.boundary                         == gfx::KinematicsParticleEngineClass::BoundaryPolicy::Kill);
+        TEST_REQUIRE(p.motion                           == gfx::ParticleEngineClass::Motion::Projectile);
+        TEST_REQUIRE(p.mode                             == gfx::ParticleEngineClass::SpawnPolicy::Continuous);
+        TEST_REQUIRE(p.boundary                         == gfx::ParticleEngineClass::BoundaryPolicy::Kill);
         TEST_REQUIRE(p.num_particles                    == real::float32(500.0f));
         TEST_REQUIRE(p.min_lifetime                     == real::float32(2.0f));
         TEST_REQUIRE(p.max_lifetime                     == real::float32(5.0f));
@@ -325,7 +325,7 @@ void unit_test_particle_engine_data()
 
     // test copy ctor/assignment
     {
-        gfx::KinematicsParticleEngineClass copy(klass);
+        gfx::ParticleEngineClass copy(klass);
         TEST_REQUIRE(copy.GetId() == klass.GetId());
         TEST_REQUIRE(copy.GetHash() == klass.GetHash());
 

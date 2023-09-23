@@ -57,24 +57,10 @@ namespace gfx
         using Culling = Device::State::Culling;
         // Type of the drawable (and its instances)
         enum class Type {
-            Arrow,
-            Capsule,
-            Cube,
-            SemiCircle,
-            Sector,
-            Cursor,
-            Circle,
-            Grid,
-            IsoscelesTriangle,
-            KinematicsParticleEngine,
-            StaticLine,
-            Parallelogram,
+            ParticleEngine,
             Polygon,
-            Rectangle,
-            RightTriangle,
-            RoundRectangle,
-            Trapezoid,
-            TileBatch
+            TileBatch,
+            SimpleShape
         };
          // Style of the drawable's geometry determines how the geometry
          // is to be rasterized.
@@ -204,163 +190,54 @@ namespace gfx
     };
 
     namespace detail {
-        // helper class template to stomp out the class implementation classes
-        // in cases where some class state is needed including a class ID
-        template<typename Class>
-        class DrawableClassBase : public DrawableClass
-        {
-        public:
-            using BaseClass = DrawableClassBase;
+        using Environment = Drawable::Environment;
+        using Style = Drawable::Style;
 
-            virtual std::string GetId() const override
-            { return mId; }
-            virtual std::string GetName() const override
-            { return mName; }
-            virtual void SetName(const std::string& name) override
-            { mName = name; }
-            virtual std::unique_ptr<DrawableClass> Clone() const override
-            {
-                auto ret = std::make_unique<Class>(*static_cast<const Class*>(this));
-                ret->mId = base::RandomString(10);
-                return ret;
-            }
-            virtual std::unique_ptr<DrawableClass> Copy() const override
-            { return std::make_unique<Class>(*static_cast<const Class*>(this)); }
-        protected:
-            DrawableClassBase(std::string id = base::RandomString(10)) noexcept
-              : mId(std::move(id))
-            {}
-        protected:
-            std::string mId;
-            std::string mName;
-        };
-
-        // helper class template to stomp out generic class type that
-        // doesn't have any associated class state other than ID.
-        template<DrawableClass::Type DrawableType>
-        class GenericDrawableClass : public DrawableClass
-        {
-        public:
-            explicit GenericDrawableClass(std::string id = base::RandomString(10)) noexcept
-              : mId(std::move(id))
-            {}
-            virtual Type GetType() const override
-            { return DrawableType; }
-            virtual std::string GetId() const override
-            { return mId; }
-            virtual std::string GetName() const override
-            { return mName; }
-            virtual void SetName(const std::string& name) override
-            { mName = name; }
-            virtual std::unique_ptr<DrawableClass> Clone() const override
-            {
-                auto ret = std::make_unique<GenericDrawableClass>(*this);
-                ret->mId = base::RandomString(10);
-                return ret;
-            }
-            virtual std::unique_ptr<DrawableClass> Copy() const override
-            { return std::make_unique<GenericDrawableClass>(*this); }
-            virtual std::size_t GetHash() const override
-            { return base::hash_combine(0, mId); }
-            virtual void IntoJson(data::Writer& writer) const override
-            {
-                writer.Write("id",   mId);
-                writer.Write("name", mName);
-            }
-            virtual bool FromJson(const data::Reader& reader) override
-            {
-                bool ok = true;
-                ok &= reader.Read("id",   &mId);
-                ok &= reader.Read("name", &mName);
-                return ok;
-            }
-        protected:
-            std::string mId;
-            std::string mName;
-        };
-
-
-        // helper class template to create a mostly generic drawable instance
-        // that is customized through the DrawableGeometry template parameter
-        template<typename DrawableGeometry>
-        class GenericDrawable : public Drawable
-        {
-        public:
-            using Style = typename DrawableGeometry::Style;
-
-            explicit GenericDrawable(Style style = Style::Solid) noexcept
-              : mStyle(style)
-            {}
-            virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
-            {
-                const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
-                const auto& kProjectionMatrix = *env.proj_matrix;
-                program.SetUniform("kProjectionMatrix", kProjectionMatrix);
-                program.SetUniform("kModelViewMatrix", kModelViewMatrix);
-            }
-            virtual Shader* GetShader(const Environment& env, Device& device) const override
-            { return DrawableGeometry::GetShader(device); }
-            virtual std::string GetProgramId(const Environment& env) const override
-            { return DrawableGeometry::GetProgramId(); }
-            virtual Geometry* Upload(const Environment& env, Device& device) const override
-            { return DrawableGeometry::Generate(env, mStyle, device); }
-
-            virtual void SetStyle(Style style) override
-            { mStyle = style; }
-            virtual Style GetStyle() const override
-            { return mStyle; }
-        private:
-            Style mStyle  = DrawableGeometry::InitialStyle;
-        };
-
-        struct GeometryBase2D {
-            using Environment = Drawable::Environment;
-            using Style       = Drawable::Style;
-            static constexpr Style   InitialStyle   = Style::Solid;
-            static Shader* GetShader(Device& device);
-            static std::string GetProgramId();
-        };
-        struct GeometryBase3D {
-            using Environment = Drawable::Environment;
-            using Style       = Drawable::Style;
-            static constexpr Style   InitialStyle   = Style::Solid;
-            static Shader* GetShader(Device& device);
-            static std::string GetProgramId();
-        };
-
-        struct ArrowGeometry : public GeometryBase2D {
+        struct ArrowGeometry {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct StaticLineGeometry : public GeometryBase2D {
-            static constexpr Style   InitialStyle   = Style::Outline;
+        struct StaticLineGeometry {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct CapsuleGeometry : public GeometryBase2D {
+        struct CapsuleGeometry {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct SemiCircleGeometry : public GeometryBase2D {
+        struct SemiCircleGeometry {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct CircleGeometry : public GeometryBase2D {
+        struct CircleGeometry {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct RectangleGeometry : public GeometryBase2D {
+        struct RectangleGeometry {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct IsoscelesTriangleGeometry : public GeometryBase2D {
+        struct IsoscelesTriangleGeometry {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct RightTriangleGeometry : public GeometryBase2D {
+        struct RightTriangleGeometry {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct TrapezoidGeometry : public GeometryBase2D {
+        struct TrapezoidGeometry {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-        struct ParallelogramGeometry : public GeometryBase2D {
+        struct ParallelogramGeometry {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
         };
-
-        struct CubeGeometry : public GeometryBase3D {
+        struct SectorGeometry {
+            static Geometry* Generate(const Environment& env, Style style, Device& device,
+                                      float fill_percentage);
+        };
+        struct RoundRectGeometry {
+            static Geometry* Generate(const Environment& env, Style style, Device& device,
+                                      float corner_radius);
+        };
+        struct ArrowCursorGeometry {
+            static Geometry* Generate(const Environment& env, Style style, Device& device);
+        };
+        struct BlockCursorGeometry {
+            static Geometry* Generate(const Environment& env, Style style, Device& device);
+        };
+        struct CubeGeometry {
             static Geometry* Generate(const Environment& env, Style style, Device& device);
             static void MakeFace(size_t vertex_offset, Index16* indices, Vertex3D* vertices,
                                  const Vec3& v0, const Vec3& v1, const Vec3& v2, const Vec3& v3,
@@ -369,248 +246,307 @@ namespace gfx
         };
     } // namespace
 
-    // shim type definitions for drawables that don't have or need their
-    // own actual type class yet.
-    using ArrowClass             = detail::GenericDrawableClass<DrawableClass::Type::Arrow>;
-    using CapsuleClass           = detail::GenericDrawableClass<DrawableClass::Type::Capsule>;
-    using SemiCircleClass        = detail::GenericDrawableClass<DrawableClass::Type::SemiCircle>;
-    using CircleClass            = detail::GenericDrawableClass<DrawableClass::Type::Circle>;
-    using IsoscelesTriangleClass = detail::GenericDrawableClass<DrawableClass::Type::IsoscelesTriangle>;
-    using StaticLineClass        = detail::GenericDrawableClass<DrawableClass::Type::StaticLine>;
-    using ParallelogramClass     = detail::GenericDrawableClass<DrawableClass::Type::Parallelogram>;
-    using RectangleClass         = detail::GenericDrawableClass<DrawableClass::Type::Rectangle>;
-    using RightTriangleClass     = detail::GenericDrawableClass<DrawableClass::Type::RightTriangle>;
-    using TrapezoidClass         = detail::GenericDrawableClass<DrawableClass::Type::Trapezoid>;
-    using CubeClass              = detail::GenericDrawableClass<DrawableClass::Type::Cube>;
+    enum class SimpleShapeType {
+        Arrow,
+        ArrowCursor,
+        BlockCursor,
+        Capsule,
+        Cube,
+        Circle,
+        IsoscelesTriangle,
+        Parallelogram,
+        Rectangle,
+        RightTriangle,
+        RoundRect,
+        Sector,
+        SemiCircle,
+        StaticLine,
+        Trapezoid,
+        Triangle
+    };
 
-    // generic drawable definitions for drawables that don't need special
-    // behaviour at runtime.
-    using Arrow             = detail::GenericDrawable<detail::ArrowGeometry>;
-    using Capsule           = detail::GenericDrawable<detail::CapsuleGeometry>;
-    using SemiCircle        = detail::GenericDrawable<detail::SemiCircleGeometry>;
-    using Circle            = detail::GenericDrawable<detail::CircleGeometry>;
-    using IsoscelesTriangle = detail::GenericDrawable<detail::IsoscelesTriangleGeometry>;
-    using StaticLine        = detail::GenericDrawable<detail::StaticLineGeometry>;
-    using Parallelogram     = detail::GenericDrawable<detail::ParallelogramGeometry>;
-    using Rectangle         = detail::GenericDrawable<detail::RectangleGeometry>;
-    using RightTriangle     = detail::GenericDrawable<detail::RightTriangleGeometry>;
-    using Trapezoid         = detail::GenericDrawable<detail::TrapezoidGeometry>;
-    using Cube              = detail::GenericDrawable<detail::CubeGeometry>;
+    namespace detail {
+        struct SectorShapeArgs {
+            float fill_percentage = 0.25f;
+        };
+        struct RoundRectShapeArgs {
+            float corner_radius = 0.05f;
+        };
 
-    class SectorClass : public detail::DrawableClassBase<SectorClass>
+        using SimpleShapeArgs = std::variant<std::monostate, SectorShapeArgs, RoundRectShapeArgs>;
+        using SimpleShapeEnvironment = DrawableClass::Environment;
+        using SimpleShapeStyle       = DrawableClass::Style;
+        
+        Geometry* ConstructShape(const SimpleShapeArgs& args,
+                                 const SimpleShapeEnvironment& environment,
+                                 SimpleShapeStyle style,
+                                 SimpleShapeType type,
+                                 Device& device);
+
+    } // detail
+
+
+    class SimpleShapeClass : public DrawableClass
     {
     public:
-        SectorClass(float percentage = 0.25f)
-          : BaseClass()
-          , mPercentage(percentage)
+        using Shape = SimpleShapeType;
+
+        SimpleShapeClass() = default;
+        explicit SimpleShapeClass(SimpleShapeType shape, detail::SimpleShapeArgs args, std::string id, std::string name) noexcept
+          : mId(std::move(id))
+          , mName(std::move(name))
+          , mShape(shape)
+          , mArgs(std::move(args))
         {}
-        SectorClass(const std::string& id, float percentage = 0.25f)
-          : BaseClass(id)
-          , mPercentage(percentage)
+        SimpleShapeClass(const SimpleShapeClass& other, std::string id)
+          : mId(std::move(id))
+          , mName(other.mName)
+          , mShape(other.mShape)
+          , mArgs(other.mArgs)
         {}
-        Shader* GetShader(const Environment& environment, Device& device) const;
-        Geometry* Upload(const Environment& environment, Style style, Device& device) const;
-        std::string GetProgramId(const Environment& environment) const;
+        inline const detail::SimpleShapeArgs& GetShapeArgs() const noexcept
+        { return mArgs; }
+        inline void SetShapeArgs(detail::SimpleShapeArgs args) noexcept
+        { mArgs = std::move(args); }
+        inline Shape GetShapeType() const noexcept
+        { return mShape; }
 
         virtual Type GetType() const override
-        { return Type::Sector; }
+        { return Type::SimpleShape; }
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::string GetName() const override
+        { return mName; }
+        virtual void SetName(const std::string& name) override
+        { mName = name; }
+        virtual std::unique_ptr<DrawableClass> Clone() const override
+        { return std::make_unique<SimpleShapeClass>(*this, base::RandomString(10)); }
+        virtual std::unique_ptr<DrawableClass> Copy() const override
+        { return std::make_unique<SimpleShapeClass>(*this); }
         virtual std::size_t GetHash() const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson(const data::Reader& data) override;
     private:
-        float mPercentage = 0.25f;
+        std::string mId;
+        std::string mName;
+        SimpleShapeType mShape;
+        detail::SimpleShapeArgs mArgs;
     };
-    class Sector : public Drawable
+
+    namespace detail {
+        template<SimpleShapeType type>
+        struct SimpleShapeClassTypeShim : public SimpleShapeClass {
+            SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
+                                     std::string name = "") noexcept
+              : SimpleShapeClass(type, std::monostate(), std::move(id), std::move(name))
+            {}
+        };
+
+        template<>
+        struct SimpleShapeClassTypeShim<SimpleShapeType::Sector> : public SimpleShapeClass {
+            SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
+                                     std::string name = "",
+                                     float fill_percentage = 0.25f) noexcept
+              : SimpleShapeClass(SimpleShapeType::Sector, SectorShapeArgs{fill_percentage}, std::move(id), std::move(name))
+            {}
+        };
+
+        template<>
+        struct SimpleShapeClassTypeShim<SimpleShapeType::RoundRect> : public SimpleShapeClass {
+            SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
+                                     std::string name = "",
+                                     float corner_radius = 0.05f) noexcept
+              : SimpleShapeClass(SimpleShapeType::RoundRect, RoundRectShapeArgs{corner_radius}, std::move(id), std::move(name))
+            {}
+        };
+
+    } // detail
+
+    // Instance of a simple shape when a class object is needed.
+    // if you're drawing in "immediate" mode, i.e. creating the
+    // drawable shape on the fly (as in a temporary just for the
+    // draw call) the optimized version is to use SimpleShape,
+    // which will eliminate the need to use a class object.
+    class SimpleShapeInstance : public Drawable
     {
     public:
-        Sector()
-          : mClass(std::make_shared<SectorClass>())
-        {}
-        explicit Sector(const std::shared_ptr<const SectorClass>& klass) noexcept
+        using Class = SimpleShapeClass;
+        using Style = Drawable::Style;
+
+        explicit SimpleShapeInstance(const std::shared_ptr<const Class>& klass, Style style = Style::Solid) noexcept
           : mClass(klass)
+          , mStyle(style)
         {}
-        explicit Sector(Style style) : Sector()
-        {
-            mStyle = style;
-        }
-        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
-        {
-            const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
-            const auto& kProjectionMatrix = *env.proj_matrix;
-            program.SetUniform("kProjectionMatrix",
-                *(const Program::Matrix4x4 *) glm::value_ptr(kProjectionMatrix));
-            program.SetUniform("kModelViewMatrix",
-               *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
-        }
-        virtual Shader* GetShader(const Environment& env, Device& device) const override
-        { return mClass->GetShader(env, device); }
-        virtual Geometry* Upload(const Environment& env, Device& device) const override
-        { return mClass->Upload(env, mStyle, device); }
+        explicit SimpleShapeInstance(const Class& klass, Style style = Style::Solid)
+          : mClass(std::make_shared<Class>(klass))
+          , mStyle(style)
+        {}
+        explicit SimpleShapeInstance(Class&& klass, Style style = Style::Solid)
+          : mClass(std::make_shared<Class>(std::move(klass)))
+          , mStyle(style)
+        {}
+        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
+        virtual Shader* GetShader(const Environment& env, Device& device) const override;
+        virtual Geometry* Upload(const Environment& env, Device& device) const override;
+        virtual std::string GetProgramId(const Environment& env) const override;
         virtual void SetStyle(Style style) override
         { mStyle = style; }
         virtual Style GetStyle() const override
         { return mStyle; }
-        virtual std::string GetProgramId(const Environment& env) const override
-        { return mClass->GetProgramId(env); }
+
     private:
-        std::shared_ptr<const SectorClass> mClass;
-        Style mStyle     = Style::Solid;
+        std::shared_ptr<const Class> mClass;
+        Style mStyle;
     };
 
-    class RoundRectangleClass : public detail::DrawableClassBase<RoundRectangleClass>
+    // Instance of a simple shape without class object.
+    // Optimized version of SimpleShapeInstance for immediate mode
+    // drawing, i.e. when drawing with a temporary shape object.
+    class SimpleShape : public Drawable
     {
     public:
-        explicit RoundRectangleClass(float corner_radius = 0.05) noexcept
-          : BaseClass()
-          , mRadius(corner_radius)
+        using Shape = SimpleShapeType;
+        using Style = Drawable::Style;
+        explicit SimpleShape(SimpleShapeType shape, Style style = Style::Solid) noexcept
+          : mShape(shape)
+          , mStyle(style)
         {}
-        explicit RoundRectangleClass(std::string id, float corner_radius = 0.05) noexcept
-          : BaseClass(std::move(id))
-          , mRadius(corner_radius)
+        explicit SimpleShape(SimpleShapeType shape, detail::SimpleShapeArgs args, Style style = Style::Solid) noexcept
+          : mShape(shape)
+          , mArgs(args)
+          , mStyle(style)
         {}
-
-        inline float GetRadius() const noexcept
-        { return mRadius; }
-        inline void SetRadius(float radius) noexcept
-        { mRadius = radius;}
-
-        Shader* GetShader(const Environment& env, Device& device) const;
-        Geometry* Upload(const Environment& env, Style style, Device& device) const;
-        std::string GetProgramId(const Environment& env) const;
-
-        virtual Type GetType() const override
-        { return Type::RoundRectangle; }
-        virtual std::size_t GetHash() const override;
-        virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson(const data::Reader& data) override;
-    private:
-        float mRadius = 0.05;
-    };
-
-    // Rectangle with rounded corners
-    class RoundRectangle : public Drawable
-    {
-    public:
-        RoundRectangle()
-            : mClass(std::make_shared<RoundRectangleClass>())
-        {}
-        explicit RoundRectangle(const std::shared_ptr<const RoundRectangleClass>& klass) noexcept
-          : mClass(klass)
-        {}
-        explicit RoundRectangle(const RoundRectangleClass& klass)
-          : mClass(std::make_shared<RoundRectangleClass>(klass))
-        {}
-        explicit RoundRectangle(Style style) : RoundRectangle()
-        {
-            mStyle = style;
-        }
-        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
-        {
-            const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
-            const auto& kProjectionMatrix = *env.proj_matrix;
-            program.SetUniform("kProjectionMatrix",
-                *(const Program::Matrix4x4 *) glm::value_ptr(kProjectionMatrix));
-            program.SetUniform("kModelViewMatrix",
-               *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
-        }
-        virtual Shader* GetShader(const Environment& env, Device& device) const override
-        { return mClass->GetShader(env, device); }
-        virtual Geometry* Upload(const Environment& env, Device& device) const override
-        { return mClass->Upload(env, mStyle, device); }
-        virtual std::string GetProgramId(const Environment& env) const override
-        { return mClass->GetProgramId(env); }
+        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
+        virtual Shader* GetShader(const Environment& env, Device& device) const override;
+        virtual Geometry* Upload(const Environment& env, Device& device) const override;
+        virtual std::string GetProgramId(const Environment& env) const override;
         virtual void SetStyle(Style style) override
         { mStyle = style; }
         virtual Style GetStyle() const override
         { return mStyle; }
     private:
-        std::shared_ptr<const RoundRectangleClass> mClass;
-        Style mStyle = Style::Solid;
+        SimpleShapeType mShape;
+        detail::SimpleShapeArgs mArgs;
+        Style mStyle;
     };
 
-    class GridClass : public detail::DrawableClassBase<GridClass>
-    {
-    public:
-        GridClass() noexcept
-          : BaseClass()
-        {}
-        explicit GridClass(std::string id) noexcept
-          : BaseClass(std::move(id))
-        {}
-        Shader* GetShader(const Environment& env, Device& device) const;
-        Geometry* Upload(const Environment& env, Device& device) const;
-        std::string GetProgramId(const Environment& env) const;
-        void SetNumVerticalLines(unsigned lines)
-        { mNumVerticalLines = lines; }
-        void SetNumHorizontalLines(unsigned lines)
-        { mNumHorizontalLines = lines; }
-        void SetBorders(bool on_off)
-        { mBorderLines = on_off; }
-        unsigned GetNumVerticalLines() const
-        { return mNumVerticalLines; }
-        unsigned GetNumHorizontalLines() const
-        { return mNumHorizontalLines; }
-        bool HasBorderLines() const
-        { return mBorderLines; }
+    namespace detail {
+        // use a template to generate a new specific shape type
+        // and provide some more constructor arguments specific to a type.
+        // This is needed for backwards compatibility and for convenience.
+        template<SimpleShapeType type>
+        struct SimpleShapeInstanceTypeShim : public SimpleShape
+        {
+            explicit SimpleShapeInstanceTypeShim(Style style = Style::Solid) noexcept
+              : SimpleShape(type, style)
+            {}
+        };
 
-        virtual Type GetType() const override
-        { return Type::Grid; }
-        virtual std::size_t GetHash() const override;
-        virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson(const data::Reader& data) override;
-    private:
-        unsigned mNumVerticalLines = 1;
-        unsigned mNumHorizontalLines = 1;
-        bool mBorderLines = false;
-    };
+        template<>
+        struct SimpleShapeInstanceTypeShim<SimpleShapeType::Sector> : public SimpleShape
+        {
+            explicit SimpleShapeInstanceTypeShim(Style style = Style::Solid, float fill_percentage = 0.25f) noexcept
+              : SimpleShape(SimpleShapeType::Sector, SectorShapeArgs{fill_percentage}, style)
+            {}
+        };
+
+        template<>
+        struct SimpleShapeInstanceTypeShim<SimpleShapeType::RoundRect> : public SimpleShape
+        {
+            explicit SimpleShapeInstanceTypeShim(Style style = Style::Solid, float corner_radius = 0.05f) noexcept
+              : SimpleShape(SimpleShapeType::RoundRect, RoundRectShapeArgs{corner_radius}, style)
+            {}
+        };
+
+    } // namespace
+
+    using ArrowClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::Arrow>;
+    using ArrowInstance = SimpleShapeInstance;
+    using Arrow         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Arrow>;
+
+    using ArrowCursorClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::ArrowCursor>;
+    using ArrowCursorInstance = SimpleShapeInstance;
+    using ArrowCursor         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::ArrowCursor>;
+
+    using BlockCursorClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::BlockCursor>;
+    using BlockCursorInstance = SimpleShapeInstance;
+    using BlockCursor         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::BlockCursor>;
+
+    using CapsuleClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::Capsule>;
+    using CapsuleInstance = SimpleShapeInstance;
+    using Capsule         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Capsule>;
+
+    using CircleClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::Circle>;
+    using CircleInstance = SimpleShapeInstance;
+    using Circle         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Circle>;
+
+    using CubeClass    = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Cube>;
+    using CubeInstance = SimpleShapeInstance;
+    using Cube         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Cube>;
+
+    using IsoscelesTriangleClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::IsoscelesTriangle>;
+    using IsoscelesTriangleInstance = SimpleShapeInstance;
+    using IsoscelesTriangle         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::IsoscelesTriangle>;
+
+    using ParallelogramClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::Parallelogram>;
+    using ParallelogramInstance = SimpleShapeInstance;
+    using Parallelogram         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Parallelogram>;
+
+    using RectangleClass         = detail::SimpleShapeClassTypeShim<SimpleShapeType::Rectangle>;
+    using RectangleClassInstance = SimpleShapeInstance;
+    using Rectangle              = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Rectangle>;
+
+    using RightTriangleClass         = detail::SimpleShapeClassTypeShim<SimpleShapeType::RightTriangle>;
+    using RightTriangleClassInstance = SimpleShapeInstance;
+    using RightTriangle              = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::RightTriangle>;
+
+    using SemiCircleClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::SemiCircle>;
+    using SemiCircleInstance = SimpleShapeInstance;
+    using SemiCircle         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::SemiCircle>;
+
+    using RoundRectangleClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::RoundRect>;
+    using RoundRectangleInstance = SimpleShapeInstance;
+    using RoundRectangle         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::RoundRect>;
+
+    using StaticLineClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::StaticLine>;
+    using StaticLineInstance = SimpleShapeInstance;
+    using StaticLine         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::StaticLine>;
+
+    using TrapezoidClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::Trapezoid>;
+    using TrapezoidInstance = SimpleShapeInstance;
+    using Trapezoid         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Trapezoid>;
+
+    using SectorClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::Sector>;
+    using SectorInstance = SimpleShapeInstance;
+    using Sector         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Sector>;
 
     // render a series of intersecting horizontal and vertical lines
     // at some particular interval (gap distance)
     class Grid : public Drawable
     {
     public:
-        explicit Grid(const std::shared_ptr<const GridClass>& klass) noexcept
-            : mClass(klass)
-        {}
-        explicit Grid(const GridClass& klass)
-           : mClass(std::make_shared<GridClass>(klass))
-        {}
-
         // the num vertical and horizontal lines is the number of lines
         // *inside* the grid. I.e. not including the enclosing border lines
-        Grid(unsigned num_vertical_lines, unsigned num_horizontal_lines, bool border_lines = true)
-        {
-            auto klass = std::make_shared<GridClass>();
-            klass->SetNumVerticalLines(num_vertical_lines);
-            klass->SetNumHorizontalLines(num_horizontal_lines);
-            klass->SetBorders(border_lines);
-            mClass = klass;
-        }
-        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
-        {
-            const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
-            const auto& kProjectionMatrix = *env.proj_matrix;
-            program.SetUniform("kProjectionMatrix",
-                *(const Program::Matrix4x4 *) glm::value_ptr(kProjectionMatrix));
-            program.SetUniform("kModelViewMatrix",
-                *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
-        }
-        virtual Shader* GetShader(const Environment& env, Device& device) const override
-        { return mClass->GetShader(env, device); }
-        virtual Geometry* Upload(const Environment& env, Device& device) const override
-        { return mClass->Upload(env, device); }
-        virtual std::string GetProgramId(const Environment& env) const override
-        { return mClass->GetProgramId(env); }
+        Grid(unsigned num_vertical_lines, unsigned num_horizontal_lines, bool border_lines = true) noexcept
+          : mNumVerticalLines(num_vertical_lines)
+          , mNumHorizontalLines(num_horizontal_lines)
+          , mBorderLines(border_lines)
+        {}
+        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
+        virtual Shader* GetShader(const Environment& env, Device& device) const override;
+        virtual Geometry* Upload(const Environment& env, Device& device) const override;
+        virtual std::string GetProgramId(const Environment& env) const override;
         virtual Style GetStyle() const override
         { return Style::Outline; }
     private:
-        std::shared_ptr<const GridClass> mClass;
-
+        unsigned mNumVerticalLines = 1;
+        unsigned mNumHorizontalLines = 1;
+        bool mBorderLines = false;
     };
 
     // Combines multiple primitive draw commands into a single
     // drawable shape.
-    class PolygonClass : public detail::DrawableClassBase<PolygonClass>
+    class PolygonClass : public DrawableClass
     {
     public:
         // Define how the geometry is to be rasterized.
@@ -624,11 +560,10 @@ namespace gfx
 
         using Vertex = gfx::Vertex2D;
 
-        PolygonClass() noexcept
-          : BaseClass()
-        {}
-        explicit PolygonClass(std::string id) noexcept
-          : BaseClass(std::move(id))
+        PolygonClass(std::string id = base::RandomString(10),
+                     std::string name = "") noexcept
+          : mId(std::move(id))
+          , mName(std::move(name))
         {}
 
         void Clear();
@@ -688,116 +623,49 @@ namespace gfx
         { mStatic = on_off; }
         void SetDynamic(bool on_off)
         { mStatic = !on_off; }
-        Shader* GetShader(const Environment& env, Device& device) const;
+
         Geometry* Upload(const Environment& env, Device& device) const;
-        std::string GetProgramId(const Environment& env) const;
 
         virtual Type GetType() const override
         { return Type::Polygon; }
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::string GetName() const override
+        { return mName; }
+        virtual void SetName(const std::string& name) override
+        { mName = name; }
         virtual std::size_t GetHash() const override;
+        virtual std::unique_ptr<DrawableClass> Clone() const override;
+        virtual std::unique_ptr<DrawableClass> Copy() const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson(const data::Reader& data) override;
     private:
+        std::string mId;
+        std::string mName;
         std::vector<Vertex> mVertices;
         std::vector<DrawCommand> mDrawCommands;
         bool mStatic = true;
     };
 
-    class Polygon : public Drawable
+
+    class PolygonInstance : public Drawable
     {
     public:
-        explicit Polygon(const std::shared_ptr<const PolygonClass>& klass) noexcept
+        explicit PolygonInstance(const std::shared_ptr<const PolygonClass>& klass) noexcept
           : mClass(klass)
         {}
-        explicit Polygon(const PolygonClass& klass)
+        explicit PolygonInstance(const PolygonClass& klass)
           : mClass(std::make_shared<PolygonClass>(klass))
         {}
 
-        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
-        {
-            const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
-            const auto& kProjectionMatrix = *env.proj_matrix;
-            program.SetUniform("kProjectionMatrix",
-                *(const Program::Matrix4x4 *) glm::value_ptr(kProjectionMatrix));
-            program.SetUniform("kModelViewMatrix",
-                *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
-        }
-        virtual Shader* GetShader(const Environment& env, Device& device) const override
-        { return mClass->GetShader(env, device); }
-        virtual Geometry* Upload(const Environment& env, Device& device) const override
-        { return mClass->Upload(env, device); }
-        virtual std::string GetProgramId(const Environment& env) const override
-        { return mClass->GetProgramId(env); }
-
-        virtual Style GetStyle() const override
-        { return Style::Solid; }
-    private:
-        std::shared_ptr<const PolygonClass> mClass;
-    };
-
-    class CursorClass : public detail::DrawableClassBase<CursorClass>
-    {
-    public:
-        enum class Shape {
-            Arrow,
-            Block
-        };
-        CursorClass(Shape shape)
-          : BaseClass()
-          , mShape(shape)
-        {}
-
-        CursorClass(const std::string& id, Shape shape)
-          : BaseClass(id)
-          , mShape(shape)
-        {}
-
-        Shape GetShape() const
-        { return mShape; }
-
-        virtual Type GetType() const override
-        { return Type::Cursor; }
-        virtual std::size_t GetHash() const override;
-        virtual void IntoJson(data::Writer& data) const override;
-        virtual bool FromJson(const data::Reader& data) override;
-    private:
-        Shape mShape = Shape::Arrow;
-    };
-
-    class Cursor : public Drawable
-    {
-    public:
-        using Shape = CursorClass::Shape;
-
-        Cursor(const std::shared_ptr<const CursorClass>& klass)
-          : mClass(klass)
-        {}
-        Cursor(const CursorClass& klass)
-          : mClass(std::make_shared<CursorClass>(klass))
-        {}
-        Cursor(Shape shape)
-          : mClass(std::make_shared<CursorClass>(shape))
-        {}
-        Shape GetShape() const
-        { return mClass->GetShape(); }
-
-        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override
-        {
-            const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
-            const auto& kProjectionMatrix = *env.proj_matrix;
-            program.SetUniform("kProjectionMatrix",
-                *(const Program::Matrix4x4 *) glm::value_ptr(kProjectionMatrix));
-            program.SetUniform("kModelViewMatrix",
-                *(const Program::Matrix4x4 *) glm::value_ptr(kModelViewMatrix));
-        }
+        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
         virtual Shader* GetShader(const Environment& env, Device& device) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual std::string GetProgramId(const Environment& env) const override;
         virtual Style GetStyle() const override
         { return Style::Solid; }
-
     private:
-        std::shared_ptr<const CursorClass> mClass;
+        std::shared_ptr<const PolygonClass> mClass;
     };
 
 
@@ -813,18 +681,18 @@ namespace gfx
     private:
     };
 
-    // KinematicsParticleEngineClass holds data for some type of
+    // ParticleEngineClass holds data for some type of
     // particle engine. The data and the class implementation together
     // are used to define a "type" / class for particle engines.
     // For example the user might have defined a particle engine called
     // "smoke" with some particular set of parameters. Once instance
-    // (a c++ object) of KinematicsParticleEngineClass is then used to
-    // represent this particle engine type. KinematicsParticleEngine
+    // (a c++ object) of ParticleEngineClass is then used to
+    // represent this particle engine type. ParticleEngineInstance
     // objects are then instances of some engine type and point to the
     // class for class specific behaviour while containing their
     // instance specific data. (I.e. one instance of "smoke" can have
     // particles in different stages as some other instance of "smoke".
-    class KinematicsParticleEngineClass : public detail::DrawableClassBase<KinematicsParticleEngineClass>
+    class ParticleEngineClass : public DrawableClass
     {
     public:
         struct Particle {
@@ -1007,7 +875,7 @@ namespace gfx
             glm::vec2 gravity = {0.0f, 0.3f};
         };
 
-        // State of any instance of KinematicsParticleEngine.
+        // State of any instance of ParticleEngineInstance.
         struct InstanceState {
             // the simulation particles.
             std::vector<Particle> particles;
@@ -1019,19 +887,14 @@ namespace gfx
             float hatching = 0.0f;
         };
 
-        KinematicsParticleEngineClass()
-          : BaseClass()
-        {}
-        KinematicsParticleEngineClass(const std::string& id)
-          : BaseClass(id)
-        {}
-        KinematicsParticleEngineClass(const Params& init)
-          : BaseClass()
+        ParticleEngineClass(const Params& init, std::string id = base::RandomString(10), std::string name = "") noexcept
+          : mId(std::move(id))
+          , mName(std::move(name))
           , mParams(init)
         {}
-        KinematicsParticleEngineClass(const std::string& id, const Params& init)
-          : BaseClass(id)
-          , mParams(init)
+        ParticleEngineClass(std::string id = base::RandomString(10), std::string name = "") noexcept
+          : mId(std::move(id))
+          , mName(std::move(name))
         {}
 
         Shader* GetShader(const Environment& env, Device& device) const;
@@ -1046,44 +909,54 @@ namespace gfx
         void Emit(const Environment& env, InstanceState& state, int count) const;
 
         // Get the params.
-        const Params& GetParams() const
+        inline const Params& GetParams() const noexcept
         { return mParams; }
         // Set the params.
-        void SetParams(const Params& p)
-        { mParams = p;}
+        inline void SetParams(const Params& params) noexcept
+        { mParams = params;}
 
         virtual Type GetType() const override
-        { return DrawableClass::Type::KinematicsParticleEngine; }
+        { return DrawableClass::Type::ParticleEngine; }
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::string GetName() const override
+        { return mName; };
+        virtual void SetName(const std::string& name) override
+        { mName = name; }
         virtual std::size_t GetHash() const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson(const data::Reader& data) override;
+        virtual std::unique_ptr<DrawableClass> Clone() const override;
+        virtual std::unique_ptr<DrawableClass> Copy() const override;
     private:
         void InitParticles(const Environment& env, InstanceState& state, size_t num) const;
         void KillParticle(InstanceState& state, size_t i) const;
         bool UpdateParticle(const Environment& env, InstanceState& state, size_t i, float dt) const;
     private:
+        std::string mId;
+        std::string mName;
         Params mParams;
     };
 
-    // KinematicsParticleEngine implements particle simulation
+    // ParticleEngineInstance implements particle simulation
     // based on pure motion without reference to the forces
     // or the masses acting upon the particles.
-    // It represents an instance of a some type of KinematicsParticleEngineClass,
+    // It represents an instance of a some type of ParticleEngineClass,
     // which is the "type definition" i.e. class for some particle engine.
-    class KinematicsParticleEngine : public Drawable,
-                                     public ParticleEngine
+    class ParticleEngineInstance : public Drawable,
+                                   public ParticleEngine
     {
     public:
         // Create a new particle engine based on an existing particle engine
         // class definition.
-        KinematicsParticleEngine(const std::shared_ptr<const KinematicsParticleEngineClass>& klass)
+        explicit ParticleEngineInstance(const std::shared_ptr<const ParticleEngineClass>& klass) noexcept
           : mClass(klass)
         {}
-        KinematicsParticleEngine(const KinematicsParticleEngineClass& klass)
-          : mClass(std::make_shared<KinematicsParticleEngineClass>(klass))
+        explicit ParticleEngineInstance(const ParticleEngineClass& klass)
+          : mClass(std::make_shared<ParticleEngineClass>(klass))
         {}
-        KinematicsParticleEngine(const KinematicsParticleEngineClass::Params& params)
-          : mClass(std::make_shared<KinematicsParticleEngineClass>(params))
+        explicit ParticleEngineInstance(const ParticleEngineClass::Params& params)
+          : mClass(std::make_shared<ParticleEngineClass>(params))
         {}
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
         virtual Shader* GetShader(const Environment& env, Device& device) const override;
@@ -1101,9 +974,9 @@ namespace gfx
 
     private:
         // this is the "class" object for this particle engine type.
-        std::shared_ptr<const KinematicsParticleEngineClass> mClass;
+        std::shared_ptr<const ParticleEngineClass> mClass;
         // this is this particle engine's state.
-        KinematicsParticleEngineClass::InstanceState mState;
+        ParticleEngineClass::InstanceState mState;
     };
 
 

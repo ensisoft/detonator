@@ -145,17 +145,6 @@ void main()
 
 namespace gfx {
 namespace detail {
-// static
-Shader* GeometryBase2D::GetShader(Device& device)
-{ return MakeGeneric2DVertexShader(device); }
-std::string GeometryBase2D::GetProgramId()
-{ return "generic-2D-vertex-program"; }
-// static
-
-Shader* GeometryBase3D::GetShader(Device& device)
-{ return MakeGeneric3DVertexShader(device); }
-std::string GeometryBase3D::GetProgramId()
-{ return "generic-3D-vertex-program"; }
 
 Geometry* ArrowGeometry::Generate(const Environment& env, Style style, Device& device)
 {
@@ -795,132 +784,7 @@ Geometry* ParallelogramGeometry::Generate(const Environment& env, Style style, D
 }
 
 // static
-Geometry* CubeGeometry::Generate(const Environment& env, Style style, Device& device)
-{
-    // all corners of the cube.
-    constexpr const Vec3 FrontTopLeft =  {-0.5f,  0.5f,  0.5f};
-    constexpr const Vec3 FrontBotLeft =  {-0.5f, -0.5f,  0.5f};
-    constexpr const Vec3 FrontBotRight = { 0.5f, -0.5f,  0.5f};
-    constexpr const Vec3 FrontTopRight = { 0.5f,  0.5f,  0.5f};
-    constexpr const Vec3 BackTopLeft   = {-0.5f,  0.5f, -0.5f};
-    constexpr const Vec3 BackBotLeft   = {-0.5f, -0.5f, -0.5f};
-    constexpr const Vec3 BackBotRight  = { 0.5f, -0.5f, -0.5f};
-    constexpr const Vec3 BackTopRight  = { 0.5f,  0.5f, -0.5f};
-
-    if (style == Style::Solid)
-    {
-        Geometry* geom = device.FindGeometry("SolidCube");
-        if (geom == nullptr)
-        {
-            geom = device.MakeGeometry("SolidCube");
-
-            Vertex3D vertices[4 * 6];
-            Index16 indices[6 * 6];
-
-            // front face
-            MakeFace(0, &indices[0], &vertices[0], FrontTopLeft, FrontBotLeft, FrontBotRight, FrontTopRight, Vec3 {0.0, 0.0, 1.0} );
-            // left face
-            MakeFace(4, &indices[6], &vertices[4], BackTopLeft, BackBotLeft, FrontBotLeft, FrontTopLeft, Vec3 {-1.0, 0.0, 0.0});
-            // right face
-            MakeFace(8, &indices[12], &vertices[8], FrontTopRight, FrontBotRight, BackBotRight, BackTopRight, Vec3 {1.0, 0.0, 0.0});
-            // top face
-            MakeFace(12, &indices[18], &vertices[12], BackTopLeft, FrontTopLeft, FrontTopRight, BackTopRight, Vec3 {0.0, 1.0, 0.0});
-            // bottom face
-            MakeFace(16, &indices[24], &vertices[16], FrontBotLeft, BackBotLeft, BackBotRight, FrontBotRight, Vec3{0.0, -1.0, 0.0});
-            // back face
-            MakeFace(20, &indices[30], &vertices[20], BackTopRight, BackBotRight, BackBotLeft, BackTopLeft, Vec3{0.0, 0.0, -1.0});
-
-            geom->UploadVertices(vertices, sizeof(vertices), Geometry::Usage::Static);
-            geom->UploadIndices(indices, sizeof(indices), Geometry::IndexType::Index16, Geometry::Usage::Static);
-            geom->SetVertexLayout(GetVertexLayout<Vertex3D>());
-            geom->AddDrawCmd(Geometry::DrawType::Triangles);
-        }
-        return geom;
-    }
-    else if (style == Style::Outline)
-    {
-        Geometry* geom = device.FindGeometry("CubeOutline");
-        if (geom == nullptr)
-        {
-            geom = device.MakeGeometry("CubeOutline");
-
-            std::vector<Vertex3D> verts;
-            AddLine(FrontTopLeft,  FrontBotLeft, verts);
-            AddLine(FrontBotLeft,  FrontBotRight, verts);
-            AddLine(FrontBotRight, FrontTopRight, verts);
-            AddLine(FrontTopRight, FrontTopLeft, verts);
-            AddLine(BackTopLeft,  BackBotLeft, verts);
-            AddLine(BackBotLeft,  BackBotRight, verts);
-            AddLine(BackBotRight, BackTopRight, verts);
-            AddLine(BackTopRight, BackTopLeft, verts);
-            AddLine(FrontTopLeft, BackTopLeft, verts);
-            AddLine(FrontTopRight, BackTopRight, verts);
-            AddLine(FrontBotLeft, BackBotLeft, verts);
-            AddLine(FrontBotRight, BackBotRight, verts);
-
-            geom->SetVertexBuffer(std::move(verts));
-            geom->SetVertexLayout(GetVertexLayout<Vertex3D>());
-            geom->AddDrawCmd(Geometry::DrawType::Lines);
-        }
-        return geom;
-    }
-    return nullptr;
-}
-// static
-void CubeGeometry::MakeFace(size_t vertex_offset, Index16* indices, Vertex3D* vertices,
-                            const Vec3& v0, const Vec3& v1, const Vec3& v2, const Vec3& v3,
-                            const Vec3& normal)
-{
-    constexpr const Vec2 TexBotLeft  = {0.0, 0.0};
-    constexpr const Vec2 TexTopLeft  = {0.0, 1.0};
-    constexpr const Vec2 TexTopRight = {1.0, 1.0};
-    constexpr const Vec2 TexBotRight = {1.0, 0.0};
-
-    vertices[0].aPosition = v0;
-    vertices[1].aPosition = v1;
-    vertices[2].aPosition = v2;
-    vertices[3].aPosition = v3;
-    vertices[0].aTexCoord = TexTopLeft;
-    vertices[1].aTexCoord = TexBotLeft;
-    vertices[2].aTexCoord = TexBotRight;
-    vertices[3].aTexCoord = TexTopRight;
-    vertices[0].aNormal   = normal;
-    vertices[1].aNormal   = normal;
-    vertices[2].aNormal   = normal;
-    vertices[3].aNormal   = normal;
-
-    indices[0] = gfx::Index16(vertex_offset + 0);
-    indices[1] = gfx::Index16(vertex_offset + 1);
-    indices[2] = gfx::Index16(vertex_offset + 2);
-    indices[3] = gfx::Index16(vertex_offset + 2);
-    indices[4] = gfx::Index16(vertex_offset + 3);
-    indices[5] = gfx::Index16(vertex_offset + 0);
-}
-// static
-void CubeGeometry::AddLine(const Vec3& v0, const Vec3& v1, std::vector<Vertex3D>& vertex)
-{
-    Vertex3D a;
-    a.aPosition = v0;
-
-    Vertex3D b;
-    b.aPosition = v1;
-
-    vertex.push_back(a);
-    vertex.push_back(b);
-}
-
-} // detail
-
-std::string SectorClass::GetProgramId(const Environment&) const
-{
-    return "generic-2D-vertex-program";
-}
-
-Shader* SectorClass::GetShader(const  Environment&, Device& device) const
-{
-    return MakeGeneric2DVertexShader(device);
-}
-Geometry* SectorClass::Upload(const Environment& environment, Style style, Device& device) const
+Geometry* SectorGeometry::Generate(const Environment& env, Style style, Device& device, float fill_percentage)
 {
     if (style == Style::Points)
         return nullptr;
@@ -942,8 +806,8 @@ Geometry* SectorClass::Upload(const Environment& environment, Style style, Devic
         {
             vs.push_back(center);
         }
-        const auto slices    = 100 * mPercentage;
-        const auto angle_max = math::Pi * 2.0 * mPercentage;
+        const auto slices    = 100 * fill_percentage;
+        const auto angle_max = math::Pi * 2.0 * fill_percentage;
         const auto angle_inc = angle_max / slices;
         const auto max_slice = style == Style::Wireframe ? slices : slices + 1;
 
@@ -988,37 +852,8 @@ Geometry* SectorClass::Upload(const Environment& environment, Style style, Devic
     return geom;
 }
 
-std::size_t SectorClass::GetHash() const
-{
-    size_t hash = 0;
-    hash = base::hash_combine(hash, mId);
-    hash = base::hash_combine(hash, mName);
-    hash = base::hash_combine(hash, mPercentage);
-    return hash;
-}
-
-void SectorClass::IntoJson(data::Writer& data) const
-{
-    data.Write("id",         mId);
-    data.Write("name",       mName);
-    data.Write("percentage", mPercentage);
-}
-bool SectorClass::FromJson(const data::Reader& data)
-{
-    bool ok = true;
-    ok &= data.Read("id",         &mId);
-    ok &= data.Read("name",       &mName);
-    ok &= data.Read("percentage", &mPercentage);
-    return ok;
-}
-
-std::string RoundRectangleClass::GetProgramId(const Environment&) const
-{ return "generic-2D-vertex-program"; }
-
-Shader* RoundRectangleClass::GetShader(const Environment& env, Device& device) const
-{ return MakeGeneric2DVertexShader(device); }
-
-Geometry* RoundRectangleClass::Upload(const Environment& env, Drawable::Style style, Device& device) const
+// static
+Geometry* RoundRectGeometry::Generate(const Environment& env, Style style, Device& device, float corner_radius)
 {
     using Style = Drawable::Style;
 
@@ -1032,8 +867,8 @@ Geometry* RoundRectangleClass::Upload(const Environment& env, Drawable::Style st
     const auto rect_width  = glm::length(model_matrix * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
     const auto rect_height = glm::length(model_matrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
     const auto aspect_ratio = rect_width / rect_height;
-    float w = mRadius;
-    float h = mRadius;
+    float w = corner_radius;
+    float h = corner_radius;
     if (rect_width > rect_height)
         w = h / (rect_width/rect_height);
     else h = w / (rect_height/rect_width);
@@ -1225,39 +1060,311 @@ Geometry* RoundRectangleClass::Upload(const Environment& env, Drawable::Style st
     return geom;
 }
 
-std::size_t RoundRectangleClass::GetHash() const
+// static
+Geometry* ArrowCursorGeometry::Generate(const Environment& env, Style style, Device& device)
 {
-    size_t hash = 0;
+    Geometry* geom = device.FindGeometry("ArrowCursor");
+    if (!geom)
+    {
+        const Vertex2D verts[] = {
+            {{0.0f,  0.0f}, {0.0f, 0.0f}},
+            {{0.0f, -0.6f}, {0.0f, 0.6f}},
+            {{0.6f, 0.0f}, {0.6f, 0.0f}},
+
+            {{0.3f, 0.0f}, {0.3f, 0.0f}},
+            {{0.0f, -0.3f}, {0.0f, 0.3f}},
+            {{0.7f, -1.0f}, {0.7f, 1.0f}},
+
+            {{0.3f, 0.0f}, {0.3f, 0.0f}},
+            {{0.7f, -1.0f}, {0.7f, 1.0f}},
+            {{1.0f, -0.7f}, {1.0f, 0.7f}}
+        };
+        geom = device.MakeGeometry("ArrowCursor");
+        geom->SetVertexBuffer(verts, 9);
+        geom->AddDrawCmd(Geometry::DrawType::Triangles);
+    }
+    return geom;
+}
+
+// static
+Geometry* BlockCursorGeometry::Generate(const Environment& env, Style style, Device& device)
+{
+    Geometry* geom = device.FindGeometry("BlockCursor");
+    if (!geom)
+    {
+        const Vertex2D verts[] = {
+            { {0.0f,  0.0f}, {0.0f, 0.0f} },
+            { {0.0f, -1.0f}, {0.0f, 1.0f} },
+            { {1.0f, -1.0f}, {1.0f, 1.0f} },
+
+            { {0.0f,  0.0f}, {0.0f, 0.0f} },
+            { {1.0f, -1.0f}, {1.0f, 1.0f} },
+            { {1.0f,  0.0f}, {1.0f, 0.0f} }
+        };
+        geom = device.MakeGeometry("BlockCursor");
+        geom->SetVertexBuffer(verts, 6);
+        geom->AddDrawCmd(Geometry::DrawType::Triangles);
+    }
+    return geom;
+}
+
+// static
+Geometry* CubeGeometry::Generate(const Environment& env, Style style, Device& device)
+{
+    // all corners of the cube.
+    constexpr const Vec3 FrontTopLeft =  {-0.5f,  0.5f,  0.5f};
+    constexpr const Vec3 FrontBotLeft =  {-0.5f, -0.5f,  0.5f};
+    constexpr const Vec3 FrontBotRight = { 0.5f, -0.5f,  0.5f};
+    constexpr const Vec3 FrontTopRight = { 0.5f,  0.5f,  0.5f};
+    constexpr const Vec3 BackTopLeft   = {-0.5f,  0.5f, -0.5f};
+    constexpr const Vec3 BackBotLeft   = {-0.5f, -0.5f, -0.5f};
+    constexpr const Vec3 BackBotRight  = { 0.5f, -0.5f, -0.5f};
+    constexpr const Vec3 BackTopRight  = { 0.5f,  0.5f, -0.5f};
+
+    if (style == Style::Solid)
+    {
+        Geometry* geom = device.FindGeometry("SolidCube");
+        if (geom == nullptr)
+        {
+            geom = device.MakeGeometry("SolidCube");
+
+            Vertex3D vertices[4 * 6];
+            Index16 indices[6 * 6];
+
+            // front face
+            MakeFace(0, &indices[0], &vertices[0], FrontTopLeft, FrontBotLeft, FrontBotRight, FrontTopRight, Vec3 {0.0, 0.0, 1.0} );
+            // left face
+            MakeFace(4, &indices[6], &vertices[4], BackTopLeft, BackBotLeft, FrontBotLeft, FrontTopLeft, Vec3 {-1.0, 0.0, 0.0});
+            // right face
+            MakeFace(8, &indices[12], &vertices[8], FrontTopRight, FrontBotRight, BackBotRight, BackTopRight, Vec3 {1.0, 0.0, 0.0});
+            // top face
+            MakeFace(12, &indices[18], &vertices[12], BackTopLeft, FrontTopLeft, FrontTopRight, BackTopRight, Vec3 {0.0, 1.0, 0.0});
+            // bottom face
+            MakeFace(16, &indices[24], &vertices[16], FrontBotLeft, BackBotLeft, BackBotRight, FrontBotRight, Vec3{0.0, -1.0, 0.0});
+            // back face
+            MakeFace(20, &indices[30], &vertices[20], BackTopRight, BackBotRight, BackBotLeft, BackTopLeft, Vec3{0.0, 0.0, -1.0});
+
+            geom->UploadVertices(vertices, sizeof(vertices), Geometry::Usage::Static);
+            geom->UploadIndices(indices, sizeof(indices), Geometry::IndexType::Index16, Geometry::Usage::Static);
+            geom->SetVertexLayout(GetVertexLayout<Vertex3D>());
+            geom->AddDrawCmd(Geometry::DrawType::Triangles);
+        }
+        return geom;
+    }
+    else if (style == Style::Outline)
+    {
+        Geometry* geom = device.FindGeometry("CubeOutline");
+        if (geom == nullptr)
+        {
+            geom = device.MakeGeometry("CubeOutline");
+
+            std::vector<Vertex3D> verts;
+            AddLine(FrontTopLeft,  FrontBotLeft, verts);
+            AddLine(FrontBotLeft,  FrontBotRight, verts);
+            AddLine(FrontBotRight, FrontTopRight, verts);
+            AddLine(FrontTopRight, FrontTopLeft, verts);
+            AddLine(BackTopLeft,  BackBotLeft, verts);
+            AddLine(BackBotLeft,  BackBotRight, verts);
+            AddLine(BackBotRight, BackTopRight, verts);
+            AddLine(BackTopRight, BackTopLeft, verts);
+            AddLine(FrontTopLeft, BackTopLeft, verts);
+            AddLine(FrontTopRight, BackTopRight, verts);
+            AddLine(FrontBotLeft, BackBotLeft, verts);
+            AddLine(FrontBotRight, BackBotRight, verts);
+
+            geom->SetVertexBuffer(std::move(verts));
+            geom->SetVertexLayout(GetVertexLayout<Vertex3D>());
+            geom->AddDrawCmd(Geometry::DrawType::Lines);
+        }
+        return geom;
+    }
+    return nullptr;
+}
+// static
+void CubeGeometry::MakeFace(size_t vertex_offset, Index16* indices, Vertex3D* vertices,
+                            const Vec3& v0, const Vec3& v1, const Vec3& v2, const Vec3& v3,
+                            const Vec3& normal)
+{
+    constexpr const Vec2 TexBotLeft  = {0.0, 0.0};
+    constexpr const Vec2 TexTopLeft  = {0.0, 1.0};
+    constexpr const Vec2 TexTopRight = {1.0, 1.0};
+    constexpr const Vec2 TexBotRight = {1.0, 0.0};
+
+    vertices[0].aPosition = v0;
+    vertices[1].aPosition = v1;
+    vertices[2].aPosition = v2;
+    vertices[3].aPosition = v3;
+    vertices[0].aTexCoord = TexTopLeft;
+    vertices[1].aTexCoord = TexBotLeft;
+    vertices[2].aTexCoord = TexBotRight;
+    vertices[3].aTexCoord = TexTopRight;
+    vertices[0].aNormal   = normal;
+    vertices[1].aNormal   = normal;
+    vertices[2].aNormal   = normal;
+    vertices[3].aNormal   = normal;
+
+    indices[0] = gfx::Index16(vertex_offset + 0);
+    indices[1] = gfx::Index16(vertex_offset + 1);
+    indices[2] = gfx::Index16(vertex_offset + 2);
+    indices[3] = gfx::Index16(vertex_offset + 2);
+    indices[4] = gfx::Index16(vertex_offset + 3);
+    indices[5] = gfx::Index16(vertex_offset + 0);
+}
+// static
+void CubeGeometry::AddLine(const Vec3& v0, const Vec3& v1, std::vector<Vertex3D>& vertex)
+{
+    Vertex3D a;
+    a.aPosition = v0;
+
+    Vertex3D b;
+    b.aPosition = v1;
+
+    vertex.push_back(a);
+    vertex.push_back(b);
+}
+
+Geometry* ConstructShape(const SimpleShapeArgs& args,
+                         const SimpleShapeEnvironment& environment,
+                         SimpleShapeStyle style,
+                         SimpleShapeType type,
+                         Device& device)
+{
+    if (type == SimpleShapeType::Arrow)
+        return detail::ArrowGeometry::Generate(environment, style, device);
+    if (type == SimpleShapeType::ArrowCursor)
+        return detail::ArrowCursorGeometry::Generate(environment, style, device);
+    else if (type == SimpleShapeType::BlockCursor)
+        return detail::BlockCursorGeometry::Generate(environment, style, device);
+    else if (type == SimpleShapeType::Capsule)
+        return detail::CapsuleGeometry::Generate(environment, style, device);
+    else if (type == SimpleShapeType::Circle)
+        return detail::CircleGeometry::Generate(environment, style, device);
+    else if (type == SimpleShapeType::Cube)
+        return detail::CubeGeometry::Generate(environment, style, device);
+    else if (type == SimpleShapeType::IsoscelesTriangle)
+        return detail::IsoscelesTriangleGeometry::Generate(environment, style, device);
+    else if (type == SimpleShapeType::Parallelogram)
+        return detail::ParallelogramGeometry::Generate(environment, style, device);
+    else if (type == SimpleShapeType::Rectangle)
+        return detail::RectangleGeometry::Generate(environment, style, device);
+    else if (type == SimpleShapeType::RightTriangle)
+        return detail::RightTriangleGeometry::Generate(environment, style, device);
+    else if (type == SimpleShapeType::RoundRect)
+        return detail::RoundRectGeometry::Generate(environment, style, device, std::get<RoundRectShapeArgs>(args).corner_radius);
+    else if (type == SimpleShapeType::SemiCircle)
+        return detail::SemiCircleGeometry::Generate(environment, style, device);
+    else if (type == SimpleShapeType::Sector)
+        return detail::SectorGeometry::Generate(environment, style, device, std::get<SectorShapeArgs>(args).fill_percentage);
+    else if (type == SimpleShapeType::StaticLine)
+        return detail::StaticLineGeometry::Generate(environment, style, device);
+    else if (type == SimpleShapeType::Trapezoid)
+        return detail::TrapezoidGeometry::Generate(environment, style, device);
+    else BUG("Missing geometry.");
+
+    return nullptr;
+}
+
+} // detail
+
+std::size_t SimpleShapeClass::GetHash() const
+{
+    std::size_t hash = 0;
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
-    hash = base::hash_combine(hash, mRadius);
+    hash = base::hash_combine(hash, mShape);
+    hash = base::hash_combine(hash, mArgs);
     return hash;
 }
-
-
-void RoundRectangleClass::IntoJson(data::Writer& data) const
+void SimpleShapeClass::IntoJson(data::Writer& data) const
 {
-    data.Write("id",     mId);
-    data.Write("name",   mName);
-    data.Write("radius", mRadius);
-}
+    data.Write("id", mId);
+    data.Write("name", mName);
+    data.Write("shape", mShape);
 
-bool RoundRectangleClass::FromJson(const data::Reader& data)
+    //if (const auto* ptr = std::get_if<SectorShapeArgs>(&mArgs))
+    //    data.Write("sector_fill", ptr->fill_percentage);
+
+}
+bool SimpleShapeClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
-    ok &= data.Read("id",     &mId);
-    ok &= data.Read("name",   &mName);
-    ok &= data.Read("radius", &mRadius);
+    ok &= data.Read("id", &mId);
+    ok &= data.Read("name", &mName);
+    ok &= data.Read("shape", &mShape);
+
+    //if (mShape == SimpleShapeType::Sector)
+    //    ok &= data.Read("sector_fill", )
+
     return ok;
 }
 
-std::string GridClass::GetProgramId(const Environment&) const
+void SimpleShapeInstance::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
+{
+    const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
+    const auto& kProjectionMatrix = *env.proj_matrix;
+    program.SetUniform("kProjectionMatrix", kProjectionMatrix);
+    program.SetUniform("kModelViewMatrix", kModelViewMatrix);
+}
+Shader* SimpleShapeInstance::GetShader(const Environment& env, Device& device) const
+{
+    if (mClass->GetShapeType() == SimpleShapeType::Cube)
+        return MakeGeneric3DVertexShader(device);
+
+    return MakeGeneric2DVertexShader(device);
+}
+Geometry* SimpleShapeInstance::Upload(const Environment& env, Device& device) const
+{
+    return detail::ConstructShape(mClass->GetShapeArgs(), env, mStyle, mClass->GetShapeType(), device);
+}
+std::string SimpleShapeInstance::GetProgramId(const Environment& env) const
+{
+    if (mClass->GetShapeType() == SimpleShapeType::Cube)
+        return "generic-3D-vertex-program";
+
+    return "generic-2D-vertex-program";
+}
+
+void SimpleShape::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
+{
+    const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
+    const auto& kProjectionMatrix = *env.proj_matrix;
+    program.SetUniform("kProjectionMatrix", kProjectionMatrix);
+    program.SetUniform("kModelViewMatrix", kModelViewMatrix);
+}
+Shader* SimpleShape::GetShader(const Environment& env, Device& device) const
+{
+    if (mShape == SimpleShapeType::Cube)
+        return MakeGeneric3DVertexShader(device);
+
+    return MakeGeneric2DVertexShader(device);
+}
+Geometry* SimpleShape::Upload(const Environment& env, Device& device) const
+{
+    return detail::ConstructShape(mArgs, env, mStyle, mShape, device);
+}
+std::string SimpleShape::GetProgramId(const Environment& env) const
+{
+    if (mShape == SimpleShapeType::Cube)
+        return "generic-3D-vertex-program";
+
+    return "generic-2D-vertex-program";
+}
+
+void Grid::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
+{
+    const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
+    const auto& kProjectionMatrix = *env.proj_matrix;
+    program.SetUniform("kProjectionMatrix", kProjectionMatrix);
+    program.SetUniform("kModelViewMatrix", kModelViewMatrix);
+}
+
+std::string Grid::GetProgramId(const Environment&) const
 { return "generic-2D-vertex-program"; }
 
-Shader* GridClass::GetShader(const Environment&, Device& device) const
+Shader* Grid::GetShader(const Environment&, Device& device) const
 { return MakeGeneric2DVertexShader(device); }
 
-Geometry* GridClass::Upload(const Environment&, Device& device) const
+Geometry* Grid::Upload(const Environment&, Device& device) const
 {
     // use the content properties to generate a name for the
     // gpu side geometry.
@@ -1323,37 +1430,6 @@ Geometry* GridClass::Upload(const Environment&, Device& device) const
     return geom;
 }
 
-std::size_t GridClass::GetHash() const
-{
-    size_t hash = 0;
-    hash = base::hash_combine(hash, mId);
-    hash = base::hash_combine(hash, mName);
-    hash = base::hash_combine(hash, mNumHorizontalLines);
-    hash = base::hash_combine(hash, mNumVerticalLines);
-    hash = base::hash_combine(hash, mBorderLines);
-    return hash;
-}
-
-void GridClass::IntoJson(data::Writer& data) const
-{
-    data.Write("id",               mId);
-    data.Write("name",             mName);
-    data.Write("vertical_lines",   mNumVerticalLines);
-    data.Write("horizontal_lines", mNumHorizontalLines);
-    data.Write("border_lines",     mBorderLines);
-}
-
-bool GridClass::FromJson(const data::Reader& data)
-{
-    bool ok = true;
-    ok &= data.Read("id",               &mId);
-    ok &= data.Read("name",             &mName);
-    ok &= data.Read("vertical_lines",   &mNumVerticalLines);
-    ok &= data.Read("horizontal_lines", &mNumHorizontalLines);
-    ok &= data.Read("border_lines",     &mBorderLines);
-    return ok;
-}
-
 void PolygonClass::Clear()
 {
     mVertices.clear();
@@ -1384,12 +1460,6 @@ void PolygonClass::AddDrawCommand(const DrawCommand& cmd)
 {
     mDrawCommands.push_back(cmd);
 }
-
-std::string PolygonClass::GetProgramId(const Environment&) const
-{ return "generic-2D-vertex-program"; }
-
-Shader* PolygonClass::GetShader(const Environment&, Device& device) const
-{ return MakeGeneric2DVertexShader(device); }
 
 Geometry* PolygonClass::Upload(const Environment& env, Device& device) const
 {
@@ -1470,6 +1540,17 @@ std::size_t PolygonClass::GetHash() const
         hash = base::hash_combine(hash, draw.offset);
     }
     return hash;
+}
+
+std::unique_ptr<DrawableClass> PolygonClass::Clone() const
+{
+    auto ret = std::make_unique<PolygonClass>(*this);
+    ret->mId = base::RandomString(10);
+    return ret;
+}
+std::unique_ptr<DrawableClass> PolygonClass::Copy() const
+{
+    return std::make_unique<PolygonClass>(*this);
 }
 
 void PolygonClass::IntoJson(data::Writer& data) const
@@ -1611,85 +1692,29 @@ const size_t PolygonClass::FindDrawCommand(size_t vertex_index) const
     BUG("no draw command found.");
 }
 
-std::size_t CursorClass::GetHash() const
+void PolygonInstance::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
 {
-    size_t hash = 0;
-    hash = base::hash_combine(hash, mId);
-    hash = base::hash_combine(hash, mName);
-    hash = base::hash_combine(hash, mShape);
-    return hash;
+    const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
+    const auto& kProjectionMatrix = *env.proj_matrix;
+    program.SetUniform("kProjectionMatrix", kProjectionMatrix);
+    program.SetUniform("kModelViewMatrix", kModelViewMatrix);
+}
+Shader* PolygonInstance::GetShader(const Environment& env, Device& device) const
+{
+    return MakeGeneric2DVertexShader(device);
 }
 
-void CursorClass::IntoJson(data::Writer& data) const
+Geometry* PolygonInstance::Upload(const Environment& env, Device& device) const
 {
-    data.Write("id",    mId);
-    data.Write("name",  mName);
-    data.Write("shape", mShape);
+    return mClass->Upload(env, device);
 }
-bool CursorClass::FromJson(const data::Reader& data)
+std::string PolygonInstance::GetProgramId(const Environment& env) const
 {
-    bool ok = true;
-    ok &= data.Read("id",    &mId);
-    ok &= data.Read("name",  &mName);
-    ok &= data.Read("shape", &mShape);
-    return ok;
+    return "generic-2D-vertex-program";
 }
 
-std::string Cursor::GetProgramId(const Environment& env) const
-{ return "generic-2D-vertex-program"; }
 
-Shader* Cursor::GetShader(const Environment& env, Device& device) const
-{ return MakeGeneric2DVertexShader(device); }
-Geometry* Cursor::Upload(const Environment& env, Device& device) const
-{
-    if (GetShape() == Shape::Arrow)
-    {
-        Geometry* geom = device.FindGeometry("ArrowCursor");
-        if (!geom)
-        {
-            const Vertex2D verts[] = {
-                {{0.0f,  0.0f}, {0.0f, 0.0f}},
-                {{0.0f, -0.6f}, {0.0f, 0.6f}},
-                {{0.6f, 0.0f}, {0.6f, 0.0f}},
-
-                {{0.3f, 0.0f}, {0.3f, 0.0f}},
-                {{0.0f, -0.3f}, {0.0f, 0.3f}},
-                {{0.7f, -1.0f}, {0.7f, 1.0f}},
-
-                {{0.3f, 0.0f}, {0.3f, 0.0f}},
-                {{0.7f, -1.0f}, {0.7f, 1.0f}},
-                {{1.0f, -0.7f}, {1.0f, 0.7f}}
-            };
-            geom = device.MakeGeometry("ArrowCursor");
-            geom->SetVertexBuffer(verts, 9);
-            geom->AddDrawCmd(Geometry::DrawType::Triangles);
-        }
-        return geom;
-    }
-    else if (GetShape() == Shape::Block)
-    {
-        Geometry* geom = device.FindGeometry("BlockCursor");
-        if (!geom)
-        {
-            const Vertex2D verts[] = {
-                { {0.0f,  0.0f}, {0.0f, 0.0f} },
-                { {0.0f, -1.0f}, {0.0f, 1.0f} },
-                { {1.0f, -1.0f}, {1.0f, 1.0f} },
-
-                { {0.0f,  0.0f}, {0.0f, 0.0f} },
-                { {1.0f, -1.0f}, {1.0f, 1.0f} },
-                { {1.0f,  0.0f}, {1.0f, 0.0f} }
-            };
-            geom = device.MakeGeometry("BlockCursor");
-            geom->SetVertexBuffer(verts, 6);
-            geom->AddDrawCmd(Geometry::DrawType::Triangles);
-        }
-        return geom;
-    }
-    return nullptr;
-}
-
-std::string KinematicsParticleEngineClass::GetProgramId(const Environment& env) const
+std::string ParticleEngineClass::GetProgramId(const Environment& env) const
 {
     if (mParams.coordinate_space == CoordinateSpace::Local)
         return "local-particle-program";
@@ -1699,7 +1724,7 @@ std::string KinematicsParticleEngineClass::GetProgramId(const Environment& env) 
     return "";
 }
 
-Shader* KinematicsParticleEngineClass::GetShader(const Environment& env, Device& device) const
+Shader* ParticleEngineClass::GetShader(const Environment& env, Device& device) const
 {
     // this shader doesn't actually write to vTexCoord because when
     // particle (GL_POINTS) rasterization is done the fragment shader
@@ -1767,7 +1792,7 @@ void main()
     return shader;
 }
 
-Geometry* KinematicsParticleEngineClass::Upload(const Drawable::Environment& env, const InstanceState& state, Device& device) const
+Geometry* ParticleEngineClass::Upload(const Drawable::Environment& env, const InstanceState& state, Device& device) const
 {
     Geometry* geom = device.FindGeometry("particle-buffer");
     if (!geom)
@@ -1821,7 +1846,7 @@ Geometry* KinematicsParticleEngineClass::Upload(const Drawable::Environment& env
     return geom;
 }
 
-void KinematicsParticleEngineClass::ApplyDynamicState(const Environment& env, Program& program) const
+void ParticleEngineClass::ApplyDynamicState(const Environment& env, Program& program) const
 {
     if (mParams.coordinate_space == CoordinateSpace::Global)
     {
@@ -1830,24 +1855,20 @@ void KinematicsParticleEngineClass::ApplyDynamicState(const Environment& env, Pr
         // is needed but only the view transformation.
         const auto& kViewMatrix = *env.view_matrix;
         const auto& kProjectionMatrix = *env.proj_matrix;
-        program.SetUniform("kProjectionMatrix",
-            *(const Program::Matrix4x4*) glm::value_ptr(kProjectionMatrix));
-        program.SetUniform("kViewMatrix",
-            *(const Program::Matrix4x4*) glm::value_ptr(kViewMatrix));
+        program.SetUniform("kProjectionMatrix", kProjectionMatrix);
+        program.SetUniform("kViewMatrix", kViewMatrix);
     }
     else if (mParams.coordinate_space == CoordinateSpace::Local)
     {
         const auto& kModelViewMatrix = (*env.view_matrix) * (*env.model_matrix);
         const auto& kProjectionMatrix = *env.proj_matrix;
-        program.SetUniform("kProjectionMatrix",
-            *(const Program::Matrix4x4*) glm::value_ptr(kProjectionMatrix));
-        program.SetUniform("kModelViewMatrix",
-            *(const Program::Matrix4x4*) glm::value_ptr(kModelViewMatrix));
+        program.SetUniform("kProjectionMatrix", kProjectionMatrix);
+        program.SetUniform("kModelViewMatrix", kModelViewMatrix);
     }
 }
 
 // Update the particle simulation.
-void KinematicsParticleEngineClass::Update(const Environment& env, InstanceState& state, float dt) const
+void ParticleEngineClass::Update(const Environment& env, InstanceState& state, float dt) const
 {
     // In case particles become heavy on the CPU here are some ways to try
     // to mitigate the issue:
@@ -1933,7 +1954,7 @@ void KinematicsParticleEngineClass::Update(const Environment& env, InstanceState
 }
 
 // ParticleEngine implementation.
-bool KinematicsParticleEngineClass::IsAlive(const InstanceState& state) const
+bool ParticleEngineClass::IsAlive(const InstanceState& state) const
 {
     if (state.time < mParams.delay)
         return true;
@@ -1950,7 +1971,7 @@ bool KinematicsParticleEngineClass::IsAlive(const InstanceState& state) const
     return !state.particles.empty();
 }
 
-void KinematicsParticleEngineClass::Emit(const Environment& env, InstanceState& state, int count) const
+void ParticleEngineClass::Emit(const Environment& env, InstanceState& state, int count) const
 {
     if (count < 0)
         return;
@@ -1960,7 +1981,7 @@ void KinematicsParticleEngineClass::Emit(const Environment& env, InstanceState& 
 
 // ParticleEngine implementation. Restart the simulation
 // with the previous parameters.
-void KinematicsParticleEngineClass::Restart(const Environment& env, InstanceState& state) const
+void ParticleEngineClass::Restart(const Environment& env, InstanceState& state) const
 {
     state.particles.clear();
     state.delay    = mParams.delay;
@@ -1982,7 +2003,7 @@ void KinematicsParticleEngineClass::Restart(const Environment& env, InstanceStat
     else InitParticles(env, state, size_t(mParams.num_particles));
 }
 
-void KinematicsParticleEngineClass::IntoJson(data::Writer& data) const
+void ParticleEngineClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",                           mId);
     data.Write("name",                         mName);
@@ -2020,7 +2041,7 @@ void KinematicsParticleEngineClass::IntoJson(data::Writer& data) const
     data.Write("gravity",                      mParams.gravity);
 }
 
-bool KinematicsParticleEngineClass::FromJson(const data::Reader& data)
+bool ParticleEngineClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
     ok &= data.Read("id",                           &mId);
@@ -2060,7 +2081,18 @@ bool KinematicsParticleEngineClass::FromJson(const data::Reader& data)
     return ok;
 }
 
-std::size_t KinematicsParticleEngineClass::GetHash() const
+std::unique_ptr<DrawableClass> ParticleEngineClass::Clone() const
+{
+    auto ret = std::make_unique<ParticleEngineClass>(*this);
+    ret->mId = base::RandomString(10);
+    return ret;
+}
+std::unique_ptr<DrawableClass> ParticleEngineClass::Copy() const
+{
+    return std::make_unique<ParticleEngineClass>(*this);
+}
+
+std::size_t ParticleEngineClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
@@ -2069,7 +2101,7 @@ std::size_t KinematicsParticleEngineClass::GetHash() const
     return hash;
 }
 
-void KinematicsParticleEngineClass::InitParticles(const Environment& env, InstanceState& state, size_t num) const
+void ParticleEngineClass::InitParticles(const Environment& env, InstanceState& state, size_t num) const
 {
     if (mParams.coordinate_space == CoordinateSpace::Global)
     {
@@ -2280,14 +2312,14 @@ void KinematicsParticleEngineClass::InitParticles(const Environment& env, Instan
         }
     } else BUG("Unhandled particle system coordinate space.");
 }
-void KinematicsParticleEngineClass::KillParticle(InstanceState& state, size_t i) const
+void ParticleEngineClass::KillParticle(InstanceState& state, size_t i) const
 {
     const auto last = state.particles.size() - 1;
     std::swap(state.particles[i], state.particles[last]);
     state.particles.pop_back();
 }
 
-bool KinematicsParticleEngineClass::UpdateParticle(const Environment& env, InstanceState& state, size_t i, float dt) const
+bool ParticleEngineClass::UpdateParticle(const Environment& env, InstanceState& state, size_t i, float dt) const
 {
     auto& p = state.particles[i];
 
@@ -2375,47 +2407,47 @@ bool KinematicsParticleEngineClass::UpdateParticle(const Environment& env, Insta
     return true;
 }
 
-void KinematicsParticleEngine::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
+void ParticleEngineInstance::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
 {
     state.line_width = 1.0;
     state.culling    = Culling::None;
     mClass->ApplyDynamicState(env, program);
 }
 
-Shader* KinematicsParticleEngine::GetShader(const Environment& env, Device& device) const
+Shader* ParticleEngineInstance::GetShader(const Environment& env, Device& device) const
 {
     return mClass->GetShader(env, device);
 }
-Geometry* KinematicsParticleEngine::Upload(const Environment& env, Device& device) const
+Geometry* ParticleEngineInstance::Upload(const Environment& env, Device& device) const
 {
     return mClass->Upload(env, mState, device);
 }
-std::string KinematicsParticleEngine::GetProgramId(const Environment&  env) const
+std::string ParticleEngineInstance::GetProgramId(const Environment&  env) const
 {
     return mClass->GetProgramId(env);
 }
 
-Drawable::Style KinematicsParticleEngine::GetStyle() const
+Drawable::Style ParticleEngineInstance::GetStyle() const
 {
     return Style::Points;
 }
 
-void KinematicsParticleEngine::Update(const Environment& env, float dt)
+void ParticleEngineInstance::Update(const Environment& env, float dt)
 {
     mClass->Update(env, mState, dt);
 }
 
-bool KinematicsParticleEngine::IsAlive() const
+bool ParticleEngineInstance::IsAlive() const
 {
     return mClass->IsAlive(mState);
 }
 
-void KinematicsParticleEngine::Restart(const Environment& env)
+void ParticleEngineInstance::Restart(const Environment& env)
 {
     mClass->Restart(env, mState);
 }
 
-void KinematicsParticleEngine::Execute(const Environment& env, const Command& cmd)
+void ParticleEngineInstance::Execute(const Environment& env, const Command& cmd)
 {
     if (cmd.name == "EmitParticles")
     {
@@ -2701,48 +2733,16 @@ std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const Dra
     // it'd cause some problems at some point.
     // secondly it'd create a circular dependency between class and the instance types
     // which is going to cause some problems at some point.
+    const auto type = klass->GetType();
 
-    switch (klass->GetType())
-    {
-        case DrawableClass::Type::Arrow:
-            return std::make_unique<Arrow>();
-        case DrawableClass::Type::StaticLine:
-            return std::make_unique<StaticLine>();
-        case DrawableClass::Type::Capsule:
-            return std::make_unique<Capsule>();
-        case DrawableClass::Type::Circle:
-            return std::make_unique<Circle>();
-        case DrawableClass::Type::Cube:
-            return std::make_unique<Cube>();
-        case DrawableClass::Type::SemiCircle:
-            return std::make_unique<SemiCircle>();
-        case DrawableClass::Type::Rectangle:
-            return std::make_unique<Rectangle>();
-        case DrawableClass::Type::RoundRectangle:
-            return std::make_unique<RoundRectangle>(std::static_pointer_cast<const RoundRectangleClass>(klass));
-        case DrawableClass::Type::IsoscelesTriangle:
-            return std::make_unique<IsoscelesTriangle>();
-        case DrawableClass::Type::RightTriangle:
-            return std::make_unique<RightTriangle>();
-        case DrawableClass::Type::Trapezoid:
-            return std::make_unique<Trapezoid>();
-        case DrawableClass::Type::Parallelogram:
-            return std::make_unique<Parallelogram>();
-        case DrawableClass::Type::Grid:
-            return std::make_unique<Grid>(std::static_pointer_cast<const GridClass>(klass));
-        case DrawableClass::Type::KinematicsParticleEngine:
-            return std::make_unique<KinematicsParticleEngine>(std::static_pointer_cast<const KinematicsParticleEngineClass>(klass));
-        case DrawableClass::Type::Polygon:
-            return std::make_unique<Polygon>(std::static_pointer_cast<const PolygonClass>(klass));
-        case DrawableClass::Type::Cursor:
-            return std::make_unique<Cursor>(std::static_pointer_cast<const CursorClass>(klass));
-        case DrawableClass::Type::Sector:
-            return std::make_unique<Sector>(std::static_pointer_cast<const SectorClass>(klass));
-        case DrawableClass::Type::TileBatch:
-            return std::make_unique<TileBatch>();
-    }
-    BUG("Unhandled drawable class type");
-    return {};
+    if (type == DrawableClass::Type::SimpleShape)
+        return std::make_unique<SimpleShapeInstance>(std::static_pointer_cast<const SimpleShapeClass>(klass));
+    else if (type == DrawableClass::Type::ParticleEngine)
+        return std::make_unique<ParticleEngineInstance>(std::static_pointer_cast<const ParticleEngineClass>(klass));
+    else if (type == DrawableClass::Type::Polygon)
+        return std::make_unique<PolygonInstance>(std::static_pointer_cast<const PolygonClass>(klass));
+    else BUG("Unhandled drawable class type");
+    return nullptr;
 }
 
 } // namespace
