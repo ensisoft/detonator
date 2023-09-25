@@ -116,6 +116,7 @@ namespace {
     { return base::FormatString("vec4(%1,%2,%3,%4)", ToChars(vec4.x), ToChars(vec4.y), ToChars(vec4.z), ToChars(vec4.w)); }
 
     struct ShaderData {
+        float alpha_cutoff = 0.0f;
         float gamma = 0.0f;
         float texture_rotation = 0;
         glm::vec2 texture_scale;
@@ -136,6 +137,8 @@ namespace {
                 const auto original = line;
                 if (base::Contains(line, "kGamma"))
                     line = base::FormatString("const float kGamma = %1;", ToConst(data.gamma));
+                else if (base::Contains(line, "kAlphaCutoff"))
+                    line = base::FormatString("const float kAlphaCutoff = %1;", ToConst(data.alpha_cutoff));
                 else if (base::Contains(line, "kBaseColor"))
                     line = base::FormatString("const vec4 kBaseColor = %1;", ToConst(data.base_color));
                 else if (base::Contains(line, "kTextureScale"))
@@ -1008,6 +1011,7 @@ std::string MaterialClass::GetProgramId(const State& state) const noexcept
             hash = base::hash_combine(hash, GetTextureScale());
             hash = base::hash_combine(hash, GetTextureVelocity());
             hash = base::hash_combine(hash, GetTextureRotation());
+            hash = base::hash_combine(hash, GetAlphaCutoff());
         }
     }
     else if (mType == Type::Texture)
@@ -1019,6 +1023,7 @@ std::string MaterialClass::GetProgramId(const State& state) const noexcept
             hash = base::hash_combine(hash, GetTextureScale());
             hash = base::hash_combine(hash, GetTextureVelocity());
             hash = base::hash_combine(hash, GetTextureRotation());
+            hash = base::hash_combine(hash, GetAlphaCutoff());
         }
     }
     else if (mType == Type::Custom)
@@ -1057,7 +1062,7 @@ std::size_t MaterialClass::GetHash() const noexcept
     hash = base::hash_combine(hash, GetColor(ColorIndex::BottomLeft));
     hash = base::hash_combine(hash, GetColor(ColorIndex::BottomRight));
     hash = base::hash_combine(hash, GetColorWeight());
-
+    hash = base::hash_combine(hash, GetAlphaCutoff());
 
     // remember that the order of uniforms (and texturemaps)
     // can change between IntoJson/FromJson! This can result
@@ -1097,6 +1102,7 @@ Shader* MaterialClass::GetShader(const State& state, Device& device) const noexc
     if (IsStatic())
     {
         ShaderData data;
+        data.alpha_cutoff     = GetAlphaCutoff();
         data.gamma            = GetGamma();
         data.base_color       = GetColor(ColorIndex::BaseColor);
         data.color_map[0]     = GetColor(ColorIndex::TopLeft);
@@ -1176,6 +1182,7 @@ void MaterialClass::ApplyStaticState(const State& state, Device& device, Program
         program.SetUniform("kTextureScale",      GetTextureScale());
         program.SetUniform("kTextureVelocity",   GetTextureVelocity());
         program.SetUniform("kTextureRotation",   GetTextureRotation());
+        program.SetUniform("kAlphaCutoff",       GetAlphaCutoff());
     }
     else if (mType == Type::Texture)
     {
@@ -1184,6 +1191,7 @@ void MaterialClass::ApplyStaticState(const State& state, Device& device, Program
         program.SetUniform("kTextureScale",      GetTextureScale());
         program.SetUniform("kTextureVelocity",   GetTextureVelocity());
         program.SetUniform("kTextureRotation",   GetTextureRotation());
+        program.SetUniform("kAlphaCutoff",       GetAlphaCutoff());
     }
     else if (mType == Type::Custom)
     {
@@ -1863,6 +1871,7 @@ uniform vec4 kTextureBox1;
 uniform vec4 kBaseColor;
 uniform float kRenderPoints;
 uniform float kGamma;
+uniform float kAlphaCutoff;
 uniform float kTime;
 uniform float kBlendCoeff;
 uniform float kApplyRandomParticleRotation;
@@ -1951,6 +1960,9 @@ void main()
 
     vec4 color = mix(col0, col1, kBlendCoeff);
     color.a *= vParticleAlpha;
+
+    if (color.a < kAlphaCutoff)
+        discard;
 
     // apply gamma (in)correction.
     color.rgb = pow(color.rgb, vec3(kGamma));
@@ -2045,6 +2057,7 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
         SetUniform("kTextureScale",      state.uniforms, GetTextureScale(), program);
         SetUniform("kTextureVelocity",   state.uniforms, GetTextureVelocity(), program);
         SetUniform("kTextureRotation",   state.uniforms, GetTextureRotation(), program);
+        SetUniform("kAlphaCutoff",       state.uniforms, GetAlphaCutoff(), program);
     }
     return true;
 }
@@ -2061,6 +2074,7 @@ uniform vec4 kTextureBox;
 uniform float kAlphaMask;
 uniform float kRenderPoints;
 uniform float kGamma;
+uniform float kAlphaCutoff;
 uniform float kApplyRandomParticleRotation;
 uniform float kTime;
 uniform vec2 kTextureScale;
@@ -2145,6 +2159,9 @@ void main()
     vec4 color = mix(kBaseColor * texel, vec4(kBaseColor.rgb, kBaseColor.a * texel.a), kAlphaMask);
     color.a *= vParticleAlpha;
 
+    if (color.a < kAlphaCutoff)
+        discard;
+
     // apply gamma (in)correction.
     color.rgb = pow(color.rgb, vec3(kGamma));
 
@@ -2224,6 +2241,7 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
         SetUniform("kTextureScale",      state.uniforms, GetTextureScale(), program);
         SetUniform("kTextureVelocity",   state.uniforms, GetTextureVelocity(), program);
         SetUniform("kTextureRotation",   state.uniforms, GetTextureRotation(), program);
+        SetUniform("kAlphaCutoff",       state.uniforms, GetAlphaCutoff(), program);
     }
     return true;
 }
