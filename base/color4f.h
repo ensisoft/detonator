@@ -48,7 +48,7 @@ namespace base
         Color4f() = default;
         // construct a Color4f object from floating point
         // channel values in the range of [0.0f, 1.0f]
-        Color4f(float red, float green, float blue, float alpha)
+        Color4f(float red, float green, float blue, float alpha) noexcept
         {
             mRed   = math::clamp(0.0f, 1.0f, red);
             mGreen = math::clamp(0.0f, 1.0f, green);
@@ -58,7 +58,7 @@ namespace base
 
         // construct a new color object from integers
         // each integer gets clamped to [0, 255] range
-        Color4f(int red, int green, int blue, int alpha)
+        Color4f(int red, int green, int blue, int alpha) noexcept
         {
             // note: we take integers (as opposed to some
             // type unsigned) so that the simple syntax of
@@ -71,7 +71,7 @@ namespace base
             mAlpha = math::clamp(0, 255, alpha) / 255.0f;
         }
 
-        Color4f(Color c, float alpha = 1.0f)
+        Color4f(Color c, float alpha = 1.0f) noexcept
                 : mRed(0.0f)
                 , mGreen(0.0f)
                 , mBlue(0.0f)
@@ -157,36 +157,29 @@ namespace base
             }
         }
 
-        float Red() const
+        inline float Red() const noexcept
         { return mRed; }
-
-        float Green() const
+        inline float Green() const noexcept
         { return mGreen; }
-
-        float Blue() const
+        inline float Blue() const noexcept
         { return mBlue; }
-
-        float Alpha() const
+        inline float Alpha() const noexcept
         { return mAlpha; }
-
-        void SetRed(float red)
+        inline void SetRed(float red) noexcept
         { mRed = math::clamp(0.0f, 1.0f, red); }
-        void SetRed(int red)
+        inline void SetRed(int red) noexcept
         { mRed = math::clamp(0, 255, red) / 255.0f; }
-
-        void SetBlue(float blue)
+        inline void SetBlue(float blue) noexcept
         { mBlue = math::clamp(0.0f, 1.0f, blue); }
-        void SetBlue(int blue)
+        inline void SetBlue(int blue) noexcept
         { mBlue = math::clamp(0, 255, blue) / 255.0f; }
-
-        void SetGreen(float green)
+        inline void SetGreen(float green) noexcept
         { mGreen = math::clamp(0.0f, 1.0f,  green); }
-        void SetGreen(int green)
+        inline void SetGreen(int green) noexcept
         { mGreen = math::clamp(0, 255, green) / 255.0f; }
-
-        void SetAlpha(float alpha)
+        inline void SetAlpha(float alpha) noexcept
         { mAlpha = math::clamp(0.0f, 1.0f, alpha); }
-        void SetAlpha(int alpha)
+        inline void SetAlpha(int alpha) noexcept
         { mAlpha = math::clamp(0, 255, alpha) / 255.0f; }
     private:
         float mRed   = 1.0f;
@@ -195,7 +188,7 @@ namespace base
         float mAlpha = 1.0f;
     };
 
-    inline Color4f operator*(const Color4f& color, float scalar)
+    inline Color4f operator*(const Color4f& color, float scalar) noexcept
     {
         const auto r = color.Red();
         const auto g = color.Green();
@@ -203,7 +196,7 @@ namespace base
         const auto a = color.Alpha();
         return Color4f(r * scalar, g * scalar, b * scalar, a * scalar);
     }
-    inline Color4f operator*(float scalar, const Color4f& color)
+    inline Color4f operator*(float scalar, const Color4f& color) noexcept
     {
         const auto r = color.Red();
         const auto g = color.Green();
@@ -211,13 +204,23 @@ namespace base
         const auto a = color.Alpha();
         return Color4f(r * scalar, g * scalar, b * scalar, a * scalar);
     }
-    inline Color4f operator+(const Color4f& lhs, const Color4f& rhs)
+    inline Color4f operator+(const Color4f& lhs, const Color4f& rhs) noexcept
     {
         return Color4f(lhs.Red()    + rhs.Red(),
                        lhs.Green() + rhs.Green(),
                        lhs.Blue()   + rhs.Blue(),
                        lhs.Alpha() + rhs.Alpha());
 
+    }
+
+    inline bool Equals(const Color4f& lhs, const Color4f& rhs, float epsilon = 0.0001) noexcept
+    {
+        if (math::equals(lhs.Red(), rhs.Red()) &&
+            math::equals(lhs.Green(), rhs.Green()) &&
+            math::equals(lhs.Blue(), rhs.Blue()) &&
+            math::equals(lhs.Alpha(), rhs.Alpha()))
+            return true;
+        return false;
     }
 
 } // namespace
