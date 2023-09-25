@@ -2308,9 +2308,6 @@ bool MaterialClass::ApplyCustomDynamicState(const State& state, Device& device, 
 
 bool MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const
 {
-    if (env.shader_pass->GetType() == ShaderPass::Type::Stencil)
-        return true;
-
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
     state.render_points = env.render_points;
@@ -2342,9 +2339,6 @@ bool MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device
 
 void MaterialClassInst::ApplyStaticState(const Environment& env, Device& device, Program& program) const
 {
-    if (env.shader_pass->GetType() == ShaderPass::Type::Stencil)
-        return;
-
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
     state.render_points = env.render_points;
@@ -2354,9 +2348,6 @@ void MaterialClassInst::ApplyStaticState(const Environment& env, Device& device,
 
 std::string MaterialClassInst::GetProgramId(const Environment& env) const
 {
-    if (env.shader_pass->GetType() == ShaderPass::Type::Stencil)
-        return "stencil-shader";
-
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
     state.render_points = env.render_points;
@@ -2366,43 +2357,7 @@ std::string MaterialClassInst::GetProgramId(const Environment& env) const
 
 Shader* MaterialClassInst::GetShader(const Environment& env, Device& device) const
 {
-    // two ways to replace a shader when doing a stencil or depth pass.
-    // a) replace the shader source completely and ignore the "real" shader source.
-    // b) combine the shader source from "real" shader and "pass" shader.
-    //
-    // Currently we're doing a) here but this means that stencil and depth
-    // passes are not fine grained but consider only the fragments that are
-    // being rasterized. For example if we're rendering a cut-out sprite using
-    // a rectangle geometry a stencil pass using option a) will write stencil
-    // values to the stencil buffer for the whole rectangle. But with option b)
-    // the stencil pass shader could inspect the incoming vec4 value and then
-    // decide to write or discard the shader.
-    //
-    // However doing option b) means that the shader pass ID must contribute
-    // to the shader object GPU ID so that 'base shader S + pass0' map to a
-    // different GPU shader object than 'base shader S + pass1'.
-    // Moving to option b) would also let the caller (shader pass) to control
-    // which type of behaviour to do. Downside would be more shader objects!
-
-    if (env.shader_pass->GetType() == ShaderPass::Type::Stencil)
-    {
-        auto* shader = device.FindShader("simple-stencil-shader");
-        if (shader)
-            return shader;
-
-        constexpr const auto* simple_stencil_source = R"(
-#version 100
-precision mediump float;
-void main() {
-   gl_FragColor = vec4(1.0);
-}
-)";
-        shader = device.MakeShader("simple-stencil-shader");
-        shader->SetName("SimpleStencilShader");
-        shader->CompileSource(simple_stencil_source);
-        return shader;
-    }
-    else if (env.shader_pass->GetType() == ShaderPass::Type::DepthTexture)
+    if (env.shader_pass->GetType() == ShaderPass::Type::DepthTexture)
     {
         // this shader maps the interpolated fragment depth (the .z component)
         // to a color value linearly. (important to keep this in mind when using
