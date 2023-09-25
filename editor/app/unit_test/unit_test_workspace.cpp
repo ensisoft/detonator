@@ -1629,6 +1629,7 @@ void unit_test_export_import_basic()
         TEST_REQUIRE(d.mkpath("TestWorkspace/textures"));
         TEST_REQUIRE(d.mkpath("TestWorkspace/textures/foobar"));
         TEST_REQUIRE(app::WriteTextFile("TestWorkspace/shaders/es2/my_material.glsl", "my_material.glsl"));
+        TEST_REQUIRE(app::WriteTextFile("TestWorkspace/shaders/es2/my_material.json", "my_material.json"));
         TEST_REQUIRE(app::WriteTextFile("TestWorkspace/lua/game_script.lua", "game_script.lua"));
         TEST_REQUIRE(app::WriteTextFile("TestWorkspace/audio/music.mp3", "music.mp3"));
         TEST_REQUIRE(app::WriteTextFile("TestWorkspace/data/levels.txt", "levels.txt"));

@@ -52,8 +52,8 @@ namespace app
     {
     public:
         virtual ~ResourcePacker() = default;
-        virtual void CopyFile(const app::AnyString& uri, const std::string& dir) = 0;
-        virtual void WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) = 0;
+        virtual bool CopyFile(const app::AnyString& uri, const std::string& dir) = 0;
+        virtual bool WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) = 0;
         virtual bool ReadFile(const app::AnyString& uri, QByteArray* bytes) const = 0;
         virtual bool HasMapping(const app::AnyString& uri) const = 0;
         virtual app::AnyString MapUri(const app::AnyString& uri) const = 0;
@@ -187,7 +187,7 @@ namespace app
         // List the IDs of resources that this resource depends on.
         virtual QStringList ListDependencies() const = 0;
 
-        virtual void Pack(ResourcePacker& packer) = 0;
+        virtual bool Pack(ResourcePacker& packer) = 0;
 
         // Migrate resource from previous version to the current version.
         virtual void Migrate(MigrationLog* log) = 0;
@@ -538,16 +538,16 @@ namespace app
         QStringList ListResourceDependencies(const uik::Window& window, const QVariantMap& props);
 
         template<typename ResourceType> inline
-        void PackResource(const ResourceType&, const ResourcePacker&)
-        {}
+        bool PackResource(const ResourceType&, const ResourcePacker&)
+        { return true; }
 
-        void PackResource(app::Script& script, ResourcePacker& packer);
-        void PackResource(app::DataFile& data, ResourcePacker& packer);
-        void PackResource(audio::GraphClass& audio, ResourcePacker& packer);
-        void PackResource(game::EntityClass& entity, ResourcePacker& packer);
-        void PackResource(game::TilemapClass& map, ResourcePacker& packer);
-        void PackResource(uik::Window& window, ResourcePacker& packer);
-        void PackResource(gfx::MaterialClass& material, ResourcePacker& packer);
+        bool PackResource(app::Script& script, ResourcePacker& packer);
+        bool PackResource(app::DataFile& data, ResourcePacker& packer);
+        bool PackResource(audio::GraphClass& audio, ResourcePacker& packer);
+        bool PackResource(game::EntityClass& entity, ResourcePacker& packer);
+        bool PackResource(game::TilemapClass& map, ResourcePacker& packer);
+        bool PackResource(uik::Window& window, ResourcePacker& packer);
+        bool PackResource(gfx::MaterialClass& material, ResourcePacker& packer);
 
         // Stub for migrating the low level data chunk from one version to another.
         // This stub does nothing and returns the original chunk. Resources that
@@ -701,8 +701,8 @@ namespace app
         }
         virtual QStringList ListDependencies() const override
         { return detail::ListResourceDependencies(*mContent, mProps); }
-        virtual void Pack(ResourcePacker& packer) override
-        { detail::PackResource(*mContent, packer); }
+        virtual bool Pack(ResourcePacker& packer) override
+        { return detail::PackResource(*mContent, packer); }
         virtual void Migrate(MigrationLog* log) override
         { detail::MigrateResource(*mContent, log); }
 
@@ -846,8 +846,8 @@ namespace app
         }
         virtual QStringList ListDependencies() const override
         { return detail::ListResourceDependencies(*mClass, mProps); }
-        virtual void Pack(ResourcePacker& packer) override
-        { detail::PackResource(*mClass, packer); }
+        virtual bool Pack(ResourcePacker& packer) override
+        { return detail::PackResource(*mClass, packer); }
         virtual void Migrate(MigrationLog* log) override
         { detail::MigrateResource(*mClass, log); }
 
