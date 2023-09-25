@@ -208,12 +208,12 @@ void unit_test_material_class()
         TEST_REQUIRE(ret->GetShaderUri() == "my_shader.glsl");
         TEST_REQUIRE(ret->GetShaderSrc() == "some shader source");
         TEST_REQUIRE(ret->GetActiveTextureMap() == "123abc");
-        TEST_REQUIRE(*ret->GetUniformValue<int>("int")            == 123);
-        TEST_REQUIRE(*ret->GetUniformValue<float>("float")        == real::float32(56.0f));
-        TEST_REQUIRE(*ret->GetUniformValue<glm::vec2>("vec2")     == glm::vec2(1.0f, 2.0f));
-        TEST_REQUIRE(*ret->GetUniformValue<glm::vec3>("vec3")     == glm::vec3(1.0f, 2.0f, 3.0f));
-        TEST_REQUIRE(*ret->GetUniformValue<glm::vec4>("vec4")     == glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
-        TEST_REQUIRE(*ret->GetUniformValue<gfx::Color4f>("color") == gfx::Color::DarkCyan);
+        TEST_REQUIRE(*ret->FindUniformValue<int>("int") == 123);
+        TEST_REQUIRE(*ret->FindUniformValue<float>("float") == real::float32(56.0f));
+        TEST_REQUIRE(*ret->FindUniformValue<glm::vec2>("vec2") == glm::vec2(1.0f, 2.0f));
+        TEST_REQUIRE(*ret->FindUniformValue<glm::vec3>("vec3") == glm::vec3(1.0f, 2.0f, 3.0f));
+        TEST_REQUIRE(*ret->FindUniformValue<glm::vec4>("vec4") == glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
+        TEST_REQUIRE(*ret->FindUniformValue<gfx::Color4f>("color") == gfx::Color::DarkCyan);
 
         TEST_REQUIRE(ret->GetNumTextureMaps()   == 1);
         const auto* map = ret->GetTextureMap(0);
