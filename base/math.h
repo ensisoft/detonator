@@ -19,6 +19,9 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  if defined(MATH_SUPPORT_GLM)
+#    include <glm/glm.hpp>
+#  endif
 #include "warnpop.h"
 
 #include <algorithm>
@@ -321,6 +324,28 @@ namespace math
         // and also 1.0, 0.5, 0.25 etc.
         return std::abs(goal - value) <= epsilon;
     }
+
+#if defined(MATH_SUPPORT_GLM)
+    inline bool equals(const glm::vec2& lhs, const glm::vec2& rhs, float epsilon = 0.0001f) noexcept
+    {
+        return equals(lhs.x, rhs.x, epsilon) &&
+               equals(lhs.y, rhs.y, epsilon);
+    }
+    inline bool equals(const glm::vec3& lhs, const glm::vec3& rhs, float epsilon = 0.0001f) noexcept
+    {
+        return equals(lhs.x, rhs.x, epsilon) &&
+               equals(lhs.y, rhs.y, epsilon) &&
+               equals(lhs.z, rhs.z, epsilon);
+    }
+    inline bool equals(const glm::vec4& lhs, const glm::vec4& rhs, float epsilon = 0.0001f) noexcept
+    {
+        return equals(lhs.x, rhs.x, epsilon) &&
+               equals(lhs.y, rhs.y, epsilon) &&
+               equals(lhs.z, rhs.z, epsilon) &&
+               equals(lhs.w, rhs.w, epsilon);
+    }
+
+#endif
 
     // Generate pseudo random numbers based on the given seed.
     template<unsigned Seed, typename T>
