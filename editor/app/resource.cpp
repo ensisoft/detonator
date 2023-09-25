@@ -667,6 +667,112 @@ void MigrateResource(uik::Window& window, app::MigrationLog* log)
     }
 }
 
+void MigrateResource(gfx::MaterialClass& material, MigrationLog* log)
+{
+    // the uniform values were refactored inside the material class
+    // and they only exist now if they have been set explicitly.
+
+    // we can clean away the uniforms that have *not* been set by the
+    // user, i.e. have the same value as the default that takes place
+    // when the value isn't set.
+
+    DEBUG("Migrating material resource. [material='%1']", material.GetName());
+
+    using ColorIndex = gfx::MaterialClass::ColorIndex;
+
+    if (const auto* ptr = material.FindUniformValue<gfx::Color4f>("kBaseColor"))
+    {
+        if (Equals(*ptr, gfx::Color::White))
+        {
+            material.DeleteUniform("kBaseColor");
+            log->Log(material, "Material", "Removed unused default value on 'base color'.");
+        }
+    }
+
+    if (const auto* ptr = material.FindUniformValue<gfx::Color4f>("kColor0"))
+    {
+        if (Equals(*ptr, gfx::Color::White))
+        {
+            material.DeleteUniform("kColor0");
+            log->Log(material, "Material", "Removed unused default value on 'top left gradient color'.");
+        }
+    }
+
+    if (const auto* ptr = material.FindUniformValue<gfx::Color4f>("kColor1"))
+    {
+        if (Equals(*ptr, gfx::Color::White))
+        {
+            material.DeleteUniform("kColor1");
+            log->Log(material, "Material", "Removed unused default value on 'top right gradient color'.");
+        }
+    }
+
+    if (const auto* ptr = material.FindUniformValue<gfx::Color4f>("kColor2"))
+    {
+        if (Equals(*ptr, gfx::Color::White))
+        {
+            material.DeleteUniform("kColor2");
+            log->Log(material, "Material", "Removed unused default value on 'bottom left gradient color'.");
+        }
+    }
+
+    if (const auto* ptr = material.FindUniformValue<gfx::Color4f>("kColor3"))
+    {
+        if (Equals(*ptr, gfx::Color::White))
+        {
+            material.DeleteUniform("kColor3");
+            log->Log(material, "Material", "Removed unused default value on 'bottom right gradient color'.");
+        }
+    }
+
+    if (const auto* ptr = material.FindUniformValue<glm::vec3>("kTextureVelocity"))
+    {
+        if (math::equals(*ptr, glm::vec3(0.0f, 0.0f, 0.0f)))
+        {
+            material.DeleteUniform("kTextureVelocity");
+            log->Log(material, "Material", "Removed unused default value on 'texture velocity'.");
+        }
+    }
+
+    if (const auto* ptr = material.FindUniformValue<glm::vec2>("kTextureScale"))
+    {
+        if (math::equals(*ptr, glm::vec2(1.0f, 1.0f)))
+        {
+            material.DeleteUniform("kTextureScale");
+            log->Log(material, "Material", "Removed unused default value on 'texture scale'.");
+        }
+    }
+
+    if (const auto* ptr = material.FindUniformValue<float>("KTextureRotation"))
+    {
+        if (math::equals(*ptr, 0.0f))
+        {
+            material.DeleteUniform("kTextureRotation");
+            log->Log(material, "Material", "Removed unused default value on 'texture rotation'.");
+        }
+    }
+
+    if (const auto* ptr = material.FindUniformValue<float>("kGamma"))
+    {
+        if (math::equals(*ptr, 1.0f))
+        {
+            material.DeleteUniform("kGamma");
+            log->Log(material, "Material", "Removed unused default value on 'gamma'.");
+        }
+    }
+
+    if (const auto* ptr = material.FindUniformValue<glm::vec2>("kWeight"))
+    {
+        if (math::equals(*ptr, glm::vec2(0.5f, 0.5f)))
+        {
+            material.DeleteUniform("kWeight");
+            log->Log(material, "Material", "Removed unused default value on 'gradient mix weight'.");
+        }
+    }
+
+}
+
+
 } // namespace
 
 QVariant ResourceListModel::data(const QModelIndex& index, int role) const

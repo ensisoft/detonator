@@ -1785,6 +1785,7 @@ void unit_test_export_name_dupe()
         MakeDir("TestWorkspace");
         MakeDir("TestWorkspace/textures/foo");
         MakeDir("TestWorkspace/textures/bar");
+        DeleteFile("test-export2.zip");
 
         gfx::WritePNG(bitmap[0], "TestWorkspace/textures/foo/bitmap.png");
         gfx::WritePNG(bitmap[1], "TestWorkspace/textures/bar/bitmap.png");
