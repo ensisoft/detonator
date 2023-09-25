@@ -1377,17 +1377,17 @@ void MaterialWidget::SetMaterialProperties()
     for (auto* widget : mUniforms)
     {
         const auto& name = app::ToUtf8(widget->GetName());
-        if (auto* val = mMaterial->GetUniformValue<float>(name))
+        if (auto* val = mMaterial->FindUniformValue<float>(name))
             *val = widget->GetAsFloat();
-        else if (auto* val = mMaterial->GetUniformValue<glm::vec2>(name))
+        else if (auto* val = mMaterial->FindUniformValue<glm::vec2>(name))
             *val = widget->GetAsVec2();
-        else if (auto* val = mMaterial->GetUniformValue<glm::vec3>(name))
+        else if (auto* val = mMaterial->FindUniformValue<glm::vec3>(name))
             *val = widget->GetAsVec3();
-        else if (auto* val = mMaterial->GetUniformValue<glm::vec4>(name))
+        else if (auto* val = mMaterial->FindUniformValue<glm::vec4>(name))
             *val = widget->GetAsVec4();
-        else if (auto* val = mMaterial->GetUniformValue<gfx::Color4f>(name))
+        else if (auto* val = mMaterial->FindUniformValue<gfx::Color4f>(name))
             *val = ToGfx(widget->GetAsColor());
-        else if (auto* val = mMaterial->GetUniformValue<int>(name))
+        else if (auto* val = mMaterial->FindUniformValue<int>(name))
             *val = widget->GetAsInt();
         else BUG("No such uniform in material. UI and material are out of sync.");
     }
@@ -1508,17 +1508,17 @@ void MaterialWidget::GetMaterialProperties()
         for (auto* widget : mUniforms)
         {
             const auto& name = widget->GetName();
-            if (const auto* val = mMaterial->GetUniformValue<float>(name))
+            if (const auto* val = mMaterial->FindUniformValue<float>(name))
                 widget->SetValue(*val);
-            else if (const auto* val = mMaterial->GetUniformValue<glm::vec2>(name))
+            else if (const auto* val = mMaterial->FindUniformValue<glm::vec2>(name))
                 widget->SetValue(*val);
-            else if (const auto* val = mMaterial->GetUniformValue<glm::vec3>(name))
+            else if (const auto* val = mMaterial->FindUniformValue<glm::vec3>(name))
                 widget->SetValue(*val);
-            else if (const auto* val = mMaterial->GetUniformValue<glm::vec4>(name))
+            else if (const auto* val = mMaterial->FindUniformValue<glm::vec4>(name))
                 widget->SetValue(*val);
-            else if (const auto* val = mMaterial->GetUniformValue<gfx::Color4f>(name))
+            else if (const auto* val = mMaterial->FindUniformValue<gfx::Color4f>(name))
                 widget->SetValue(FromGfx(*val));
-            else if (const auto* val = mMaterial->GetUniformValue<int>(name))
+            else if (const auto* val = mMaterial->FindUniformValue<int>(name))
                 widget->SetValue(*val);
             else BUG("No such uniform in material. UI and material are out of sync.");
         }

@@ -999,14 +999,14 @@ namespace gfx
         inline const Uniform* FindUniform(const std::string& name) const noexcept
         { return base::SafeFind(mUniforms, name); }
         template<typename T>
-        T* GetUniformValue(const std::string& name) noexcept
+        T* FindUniformValue(const std::string& name) noexcept
         {
             if (auto* ptr = base::SafeFind(mUniforms, name))
                 return std::get_if<T>(ptr);
             return nullptr;
         }
         template<typename T>
-        const T* GetUniformValue(const std::string& name) const noexcept
+        const T* FindUniformValue(const std::string& name) const noexcept
         {
             if (auto* ptr = base::SafeFind(mUniforms, name))
                 return std::get_if<T>(ptr);
