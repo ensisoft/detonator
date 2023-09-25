@@ -552,18 +552,20 @@ void unit_test_material_uniforms()
         test.ApplyDynamicState(env, device, program);
 
         glm::vec1 gamma;
-        gfx::Color4f gradients[4];
+        gfx::Color4f color0;
+        gfx::Color4f color1;
+        gfx::Color4f color2;
+        gfx::Color4f color3;
         TEST_REQUIRE(program.GetUniform("kGamma", &gamma));
-        TEST_REQUIRE(program.GetUniform("kColor0", &gradients[0]));
-        TEST_REQUIRE(program.GetUniform("kColor1", &gradients[1]));
-        TEST_REQUIRE(program.GetUniform("kColor2", &gradients[2]));
-        TEST_REQUIRE(program.GetUniform("kColor3", &gradients[3]));
+        TEST_REQUIRE(program.GetUniform("kColor0", &color0));
+        TEST_REQUIRE(program.GetUniform("kColor1", &color1));
+        TEST_REQUIRE(program.GetUniform("kColor2", &color2));
+        TEST_REQUIRE(program.GetUniform("kColor3", &color3));
         TEST_REQUIRE(gamma == glm::vec1(2.0f));
-        TEST_REQUIRE(gradients[(int)gfx::GradientClass::ColorIndex::BottomLeft] == gfx::Color::DarkBlue);
-        TEST_REQUIRE(gradients[(int)gfx::GradientClass::ColorIndex::TopLeft] == gfx::Color::DarkGreen);
-        TEST_REQUIRE(gradients[(int)gfx::GradientClass::ColorIndex::BottomRight] == gfx::Color::DarkMagenta);
-        TEST_REQUIRE(gradients[(int)gfx::GradientClass::ColorIndex::TopRight] == gfx::Color::DarkGray);
-
+        TEST_REQUIRE(color0 == gfx::Color::DarkGreen);
+        TEST_REQUIRE(color1 == gfx::Color::DarkGray);
+        TEST_REQUIRE(color2 == gfx::Color::DarkBlue);
+        TEST_REQUIRE(color3 == gfx::Color::DarkMagenta);
     }
 
     {
@@ -708,17 +710,20 @@ void unit_test_material_uniforms()
 
         test.ApplyStaticState(env, device, program);
         glm::vec1 gamma;
-        gfx::Color4f gradients[4];
+        gfx::Color4f color0;
+        gfx::Color4f color1;
+        gfx::Color4f color2;
+        gfx::Color4f color3;
         TEST_REQUIRE(program.GetUniform("kGamma", &gamma));
-        TEST_REQUIRE(program.GetUniform("kColor0", &gradients[0]));
-        TEST_REQUIRE(program.GetUniform("kColor1", &gradients[1]));
-        TEST_REQUIRE(program.GetUniform("kColor2", &gradients[2]));
-        TEST_REQUIRE(program.GetUniform("kColor3", &gradients[3]));
+        TEST_REQUIRE(program.GetUniform("kColor0", &color0));
+        TEST_REQUIRE(program.GetUniform("kColor1", &color1));
+        TEST_REQUIRE(program.GetUniform("kColor2", &color2));
+        TEST_REQUIRE(program.GetUniform("kColor3", &color3));
         TEST_REQUIRE(gamma == glm::vec1(2.0f));
-        TEST_REQUIRE(gradients[(int)gfx::GradientClass::ColorIndex::BottomLeft] == gfx::Color::DarkBlue);
-        TEST_REQUIRE(gradients[(int)gfx::GradientClass::ColorIndex::TopLeft] == gfx::Color::DarkGreen);
-        TEST_REQUIRE(gradients[(int)gfx::GradientClass::ColorIndex::BottomRight] == gfx::Color::DarkMagenta);
-        TEST_REQUIRE(gradients[(int)gfx::GradientClass::ColorIndex::TopRight] == gfx::Color::DarkGray);
+        TEST_REQUIRE(color0 == gfx::Color::DarkGreen);
+        TEST_REQUIRE(color1 == gfx::Color::DarkGray);
+        TEST_REQUIRE(color2 == gfx::Color::DarkBlue);
+        TEST_REQUIRE(color3 == gfx::Color::DarkMagenta);
 
         program.Clear();
 

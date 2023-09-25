@@ -138,10 +138,11 @@ void unit_test_material_class()
     gfx::ColorClass klass(gfx::MaterialClass::Type::Color);
     klass.SetGamma(1.5f);
     klass.SetStatic(false);
-    klass.SetColor(gfx::Color::DarkBlue,    gfx::GradientClass::ColorIndex::BottomLeft);
-    klass.SetColor(gfx::Color::DarkGreen,   gfx::GradientClass::ColorIndex::TopLeft);
-    klass.SetColor(gfx::Color::DarkMagenta, gfx::GradientClass::ColorIndex::BottomRight);
-    klass.SetColor(gfx::Color::DarkGray,    gfx::GradientClass::ColorIndex::TopRight);
+    klass.SetColor(gfx::Color::HotPink,     gfx::MaterialClass::ColorIndex::BaseColor);
+    klass.SetColor(gfx::Color::DarkBlue,    gfx::MaterialClass::ColorIndex::BottomLeft);
+    klass.SetColor(gfx::Color::DarkGreen,   gfx::MaterialClass::ColorIndex::TopLeft);
+    klass.SetColor(gfx::Color::DarkMagenta, gfx::MaterialClass::ColorIndex::BottomRight);
+    klass.SetColor(gfx::Color::DarkGray,    gfx::MaterialClass::ColorIndex::TopRight);
     klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Emissive);
     klass.SetFlag(gfx::MaterialClass::Flags::PremultipliedAlpha, true);
     klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Trilinear);
@@ -182,15 +183,17 @@ void unit_test_material_class()
     {
         data::JsonObject json;
         klass.IntoJson(json);
+        std::cout << json.ToString();
         auto ret = gfx::MaterialClass::ClassFromJson(json);
         TEST_REQUIRE(ret);
         TEST_REQUIRE(ret->GetName() == klass.GetName());
         TEST_REQUIRE(ret->GetId()   == klass.GetId());
         TEST_REQUIRE(ret->GetHash() == klass.GetHash());
-        TEST_REQUIRE(ret->GetColor(gfx::GradientClass::ColorIndex::BottomLeft)  == gfx::Color::DarkBlue);
-        TEST_REQUIRE(ret->GetColor(gfx::GradientClass::ColorIndex::TopLeft)     == gfx::Color::DarkGreen);
-        TEST_REQUIRE(ret->GetColor(gfx::GradientClass::ColorIndex::BottomRight) == gfx::Color::DarkMagenta);
-        TEST_REQUIRE(ret->GetColor(gfx::GradientClass::ColorIndex::TopRight)    == gfx::Color::DarkGray);
+        TEST_REQUIRE(ret->GetColor(gfx::MaterialClass::ColorIndex::BaseColor)   == gfx::Color::HotPink);
+        TEST_REQUIRE(ret->GetColor(gfx::MaterialClass::ColorIndex::BottomLeft)  == gfx::Color::DarkBlue);
+        TEST_REQUIRE(ret->GetColor(gfx::MaterialClass::ColorIndex::TopLeft)     == gfx::Color::DarkGreen);
+        TEST_REQUIRE(ret->GetColor(gfx::MaterialClass::ColorIndex::BottomRight) == gfx::Color::DarkMagenta);
+        TEST_REQUIRE(ret->GetColor(gfx::MaterialClass::ColorIndex::TopRight)    == gfx::Color::DarkGray);
         TEST_REQUIRE(ret->IsStatic()            == false);
         TEST_REQUIRE(ret->GetSurfaceType()      == gfx::MaterialClass::SurfaceType::Emissive);
         TEST_REQUIRE(ret->GetParticleAction()   == gfx::MaterialClass::ParticleAction::Rotate);
@@ -239,7 +242,8 @@ void unit_test_material_class()
         TEST_REQUIRE(clone->GetHash() != klass.GetHash());
         TEST_REQUIRE(clone->GetId() != klass.GetId());
         TEST_REQUIRE(clone->GetSurfaceType() == gfx::MaterialClass::SurfaceType::Emissive);
-        TEST_REQUIRE(clone->GetBaseColor() == gfx::Color::DarkGreen);
+        TEST_REQUIRE(clone->GetBaseColor() == gfx::Color::HotPink);
+        TEST_REQUIRE(clone->GetColor(gfx::MaterialClass::ColorIndex::BaseColor) == gfx::Color::HotPink);
         TEST_REQUIRE(clone->GetGamma() == real::float32(1.5f));
         TEST_REQUIRE(clone->IsStatic() == false);
     }
