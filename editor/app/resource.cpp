@@ -46,8 +46,10 @@ namespace {
             list.push_back(app::FromUtf8(id));
     }
 
-    void PackUIStyleResources(engine::UIStyle& style, app::ResourcePacker& packer)
+    bool PackUIStyleResources(engine::UIStyle& style, app::ResourcePacker& packer)
     {
+        bool ok = true;
+
         std::vector<engine::UIStyle::PropertyKeyValue> props;
         style.GatherProperties("-font", &props);
         for (auto& p : props)
@@ -55,7 +57,7 @@ namespace {
             std::string src_font_uri;
             std::string dst_font_uri;
             p.prop.GetValue(&src_font_uri);
-            packer.CopyFile(src_font_uri, "fonts/");
+            ok &= packer.CopyFile(src_font_uri, "fonts/");
             dst_font_uri = packer.MapUri(src_font_uri);
             p.prop.SetValue(dst_font_uri);
             style.SetProperty(p.key, p.prop);
@@ -75,21 +77,22 @@ namespace {
             std::string src_texture_uri;
             std::string dst_texture_uri;
             src_texture_uri = texture->GetTextureUri();
-            packer.CopyFile(src_texture_uri, "/ui/textures/");
+            ok &= packer.CopyFile(src_texture_uri, "/ui/textures/");
             dst_texture_uri = packer.MapUri(src_texture_uri);
             texture->SetTextureUri(dst_texture_uri);
             src_texture_uri = texture->GetMetafileUri();
             if (src_texture_uri.empty())
                 continue;
-            packer.CopyFile(src_texture_uri, "/ui/textures/");
+            ok &= packer.CopyFile(src_texture_uri, "/ui/textures/");
             dst_texture_uri = packer.MapUri(src_texture_uri);
             texture->SetMetafileUri(dst_texture_uri);
         }
+        return ok;
     }
 
     // pack script with dependencies by recursively reading
     // the script files and looking for other scripts via require
-    void PackScriptRecursive(const app::AnyString& uri, app::ResourcePacker& packer)
+    bool PackScriptRecursive(const app::AnyString& uri, app::ResourcePacker& packer)
     {
         // Read the contents of the Lua script file and look for dependent scripts
         // somehow we need to resolve those dependent scripts in order to package
@@ -98,7 +101,7 @@ namespace {
         if (!packer.ReadFile(uri, &src_buffer))
         {
             ERROR("Failed to read script file. [uri='%1']", uri);
-            return;
+            return false;
         }
 
         QByteArray dst_buffer;
@@ -130,6 +133,8 @@ namespace {
             int mPosition = 0;
         } src_stream(src_buffer);
 
+        bool ok = true;
+
         while (!src_stream.AtEnd())
         {
             QString line = src_stream.ReadLine();
@@ -160,16 +165,16 @@ namespace {
                 // and we should just explore the requires first and then
                 // visit the files instead of keeping all the current state
                 // and then recursing.?
-                PackScriptRecursive(module, packer);
-
-                packer.CopyFile(module, "lua/");
+                ok &= PackScriptRecursive(module, packer);
+                ok &= packer.CopyFile(module, "lua/");
                 line.replace(module, packer.MapUri(module));
             }
             dst_stream << line;
         }
         dst_stream.flush();
 
-        packer.WriteFile(uri, "lua/", dst_buffer.constData(), dst_buffer.length());
+        ok &= packer.WriteFile(uri, "lua/", dst_buffer.constData(), dst_buffer.length());
+        return ok;
     }
 
 } // namespace
@@ -429,25 +434,35 @@ QStringList ListResourceDependencies(const uik::Window& window, const QVariantMa
     return ret;
 }
 
-void PackResource(app::Script& script, ResourcePacker& packer)
+bool PackResource(app::Script& script, ResourcePacker& packer)
 {
     const auto& uri = script.GetFileURI();
 
-    PackScriptRecursive(uri, packer);
+    bool ok = true;
+
+    ok &= PackScriptRecursive(uri, packer);
     //packer.CopyFile(uri, "lua/");
 
     script.SetFileURI(packer.MapUri(uri));
+
+    return ok;
 }
 
-void PackResource(app::DataFile& data, ResourcePacker& packer)
+bool PackResource(app::DataFile& data, ResourcePacker& packer)
 {
+    bool ok = true;
+
     const auto& uri = data.GetFileURI();
-    packer.CopyFile(uri, "data/");
+    ok &= packer.CopyFile(uri, "data/");
     data.SetFileURI(packer.MapUri(uri));
+
+    return ok;
 }
 
-void PackResource(audio::GraphClass& audio, ResourcePacker& packer)
+bool PackResource(audio::GraphClass& audio, ResourcePacker& packer)
 {
+    bool ok = true;
+
     // todo: this audio packing sucks a little bit since it needs
     // to know about the details of elements now. maybe this
     // should be refactored into the audio/ subsystem.. ?
@@ -466,14 +481,17 @@ void PackResource(audio::GraphClass& audio, ResourcePacker& packer)
                 WARN("Audio element doesn't have input file set. [graph='%1', elem='%2']", audio.GetName(), name);
                 continue;
             }
-            packer.CopyFile(*file_uri, "audio/");
+            ok &= packer.CopyFile(*file_uri, "audio/");
             *file_uri = packer.MapUri(*file_uri);
         }
     }
+    return ok;
 }
 
-void PackResource(game::EntityClass& entity, ResourcePacker& packer)
+bool PackResource(game::EntityClass& entity, ResourcePacker& packer)
 {
+    bool ok = true;
+
     for (size_t i=0; i<entity.GetNumNodes(); ++i)
     {
         auto& node = entity.GetNode(i);
@@ -481,12 +499,16 @@ void PackResource(game::EntityClass& entity, ResourcePacker& packer)
             continue;
         auto* text = node.GetTextItem();
         const auto& uri = text->GetFontName();
-        packer.CopyFile(uri, "fonts/");
+        ok &= packer.CopyFile(uri, "fonts/");
         text->SetFontName(packer.MapUri(uri));
     }
+
+    return ok;
 }
-void PackResource(game::TilemapClass& map, ResourcePacker& packer)
+bool PackResource(game::TilemapClass& map, ResourcePacker& packer)
 {
+    bool ok = true;
+
     // there's an important requirement regarding resource packing order.
     // The tilemap layer refers to a data object for the level data,
     // and when doing URI mapping this means that the packager must have
@@ -498,16 +520,19 @@ void PackResource(game::TilemapClass& map, ResourcePacker& packer)
         const auto& uri = layer.GetDataUri();
         layer.SetDataUri(packer.MapUri(uri));
     }
+    return ok;
 }
 
-void PackResource(uik::Window& window, ResourcePacker& packer)
+bool PackResource(uik::Window& window, ResourcePacker& packer)
 {
+    bool ok = true;
+
     engine::UIStyle style;
 
     const auto& keymap_uri = window.GetKeyMapFile();
     if (!keymap_uri.empty())
     {
-        packer.CopyFile(keymap_uri, "ui/keymap/");
+        ok &= packer.CopyFile(keymap_uri, "ui/keymap/");
         window.SetKeyMapFile(packer.MapUri(keymap_uri));
     }
 
@@ -518,12 +543,14 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
     if (!packer.ReadFile(style_uri, &style_array))
     {
         ERROR("Failed to load UI style file. [UI='%1', style='%2']", window.GetName(), style_uri);
+        ok = false;
     }
     if (!style.LoadStyle(app::EngineBuffer("style", std::move(style_array))))
     {
         ERROR("Failed to parse UI style. [UI='%1', style='%2']", window.GetName(), style_uri);
+        ok = false;
     }
-    PackUIStyleResources(style, packer);
+    ok &= PackUIStyleResources(style, packer);
 
     nlohmann::json style_json;
     style.SaveStyle(style_json);
@@ -533,7 +560,7 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
     window.SetStyleName(packer.MapUri(style_uri));
 
     // for each widget, parse the style string and see if there are more font-name props.
-    window.ForEachWidget([&packer](uik::Widget* widget) {
+    window.ForEachWidget([&packer, &ok](uik::Widget* widget) {
         auto style_string = widget->GetStyleString();
         if (style_string.empty())
             return;
@@ -541,7 +568,7 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
         engine::UIStyle style;
         style.ParseStyleString(widget->GetId(), style_string);
 
-        PackUIStyleResources(style, packer);
+        ok &= PackUIStyleResources(style, packer);
 
         style_string = style.MakeStyleString(widget->GetId());
         // this is a bit of a hack but we know that the style string
@@ -562,7 +589,7 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
         engine::UIStyle style;
         style.ParseStyleString("window", window_style_string);
 
-        PackUIStyleResources(style, packer);
+        ok &= PackUIStyleResources(style, packer);
 
         window_style_string = style.MakeStyleString("window");
         // this is a bit of a hack, but we know that the style string
@@ -575,10 +602,13 @@ void PackResource(uik::Window& window, ResourcePacker& packer)
         DEBUG("Updated window style string. [window='%1', style='%2']", window.GetName(), window_style_string);
         window.SetStyleString(std::move(window_style_string));
     }
+    return ok;
 }
 
-void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
+bool PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
 {
+    bool ok = true;
+
     for (size_t i=0; i<material.GetNumTextureMaps(); ++i)
     {
         auto* map = material.GetTextureMap(i);
@@ -589,13 +619,13 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
             {
                 auto& text_buffer = text_source->GetTextBuffer();
                 auto& text_chunk  = text_buffer.GetText();
-                packer.CopyFile(text_chunk.font, "fonts/");
+                ok &= packer.CopyFile(text_chunk.font, "fonts/");
                 text_chunk.font = packer.MapUri(text_chunk.font);
             }
             else if (auto* file_source = dynamic_cast<gfx::detail::TextureFileSource*>(src))
             {
                 const auto& uri = file_source->GetFilename();
-                packer.CopyFile(uri, "textures/");
+                ok &= packer.CopyFile(uri, "textures/");
                 file_source->SetFileName(packer.MapUri(uri));
             }
         }
@@ -603,14 +633,16 @@ void PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
 
     const auto& shader_glsl_uri = material.GetShaderUri();
     if (shader_glsl_uri.empty())
-        return;
+        return ok;
+
     const auto& shader_desc_uri = boost::replace_all_copy(shader_glsl_uri, ".glsl", ".json");
     // this only has significance when exporting/importing
     // a resource archive.
-    packer.CopyFile(shader_desc_uri, "shaders/es2/");
+    ok &= packer.CopyFile(shader_desc_uri, "shaders/es2/");
     // copy the actual shader glsl
-    packer.CopyFile(shader_glsl_uri, "shaders/es2/");
+    ok &= packer.CopyFile(shader_glsl_uri, "shaders/es2/");
     material.SetShaderUri(packer.MapUri(shader_glsl_uri));
+    return ok;
 }
 
 void MigrateResource(uik::Window& window, app::MigrationLog* log)

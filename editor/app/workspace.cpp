@@ -195,10 +195,11 @@ public:
        , mWorkspaceDir(workspace_dir)
        , mZip(zip)
     {}
-    virtual void CopyFile(const app::AnyString& uri, const std::string& dir) override
+    virtual bool CopyFile(const app::AnyString& uri, const std::string& dir) override
     {
+        // Skip resources that are part of the editor itself.
         if (base::StartsWith(uri, "app://"))
-            return;
+            return true;
 
         const auto& src_file = MapUriToZipFile(uri);
 
@@ -223,14 +224,15 @@ public:
             QString dst_png_name;
             CopyFile(src_png_file, dir, &dst_png_name);
         }
+        return true;
     }
-    virtual void WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) override
+    virtual bool WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) override
     {
         // write the file contents into the workspace directory.
 
         const auto& src_file = MapUriToZipFile(uri);
         if (!FindZipFile(src_file))
-            return;
+            return false;
 
         QuaZipFileInfo info;
         mZip.getCurrentFileInfo(&info);
@@ -243,7 +245,7 @@ public:
         if (!app::MakePath(dst_dir))
         {
             ERROR("Failed to create directory. [dir='%1']", dst_dir);
-            return;
+            return false;
         }
 
         QFile file;
@@ -251,13 +253,14 @@ public:
         if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
         {
             ERROR("Failed to open file for writing. [file='%1', error='%2']", dst_file, file.errorString());
-            return;
+            return false;
         }
         file.write((const char*)data, len);
         file.close();
         auto mapping = base::FormatString("ws://%1/%2", app::ToUtf8(mZipDir), app::ToUtf8(info.name));
         DEBUG("New zip URI mapping. [uri='%1', mapping='%2']", uri, mapping);
         mUriMapping[uri] = std::move(mapping);
+        return true;
     }
 
     virtual bool ReadFile(const app::AnyString& uri, QByteArray* array) const override
@@ -375,19 +378,19 @@ public:
         mZip.setUtf8Enabled(true);
         mZip.setZip64Enabled(true);
     }
-    virtual void CopyFile(const app::AnyString& uri, const std::string& dir) override
+    virtual bool CopyFile(const app::AnyString& uri, const std::string& dir) override
     {
         // don't package resources that are part of the editor.
         // todo: this would need some kind of versioning in order to
         // make sure that the resources under app:// then match between
         // the exporter and the importer.
         if (base::StartsWith(uri, "app://"))
-            return;
+            return true;
 
         if (const auto* dupe = base::SafeFind(mUriMapping, uri))
         {
             DEBUG("Skipping duplicate file copy. [file='%1']", uri);
-            return;
+            return true;
         }
 
         const auto& src_file = MapFileToFilesystem(uri);
@@ -395,7 +398,7 @@ public:
         if (!src_info.exists())
         {
             ERROR("Failed to find zip export source file. [file='%1']", src_file);
-            return;
+            return false;
         }
         const auto& src_path = src_info.absoluteFilePath();
         const auto& src_name = src_info.fileName();
@@ -411,7 +414,7 @@ public:
         }
 
         if (!CopyFile(src_file, dst_file))
-            return;
+            return false;
 
         mFileNames.insert(dst_name);
         mUriMapping[uri] = base::FormatString("zip://%1%2", dir, app::ToUtf8(dst_name));
@@ -428,20 +431,21 @@ public:
             png_name.replace(".json", ".png");
             CopyFile(src_png_file, app::JoinPath(dst_dir, png_name));
         }
+        return true;
     }
-    virtual void WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) override
+    virtual bool WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) override
     {
         if (const auto* dupe = base::SafeFind(mUriMapping, uri))
         {
             DEBUG("Skipping duplicate file replace. [file='%1']", uri);
-            return;
+            return true;
         }
         const auto& src_file = MapFileToFilesystem(uri);
         const auto& src_info = QFileInfo(src_file);
         if (!src_info.exists())
         {
             ERROR("Failed to find zip export source file. [file='%1']", src_file);
-            return;
+            return false;
         }
         const auto& src_name = src_info.fileName();
         const auto& dst_dir  = app::FromUtf8(dir);
@@ -454,6 +458,7 @@ public:
         ASSERT(base::EndsWith(dir, "/"));
         mUriMapping[uri] = base::FormatString("zip://%1%2", dir, app::ToUtf8(src_name));
         DEBUG("Wrote new file into zip archive. [file='%1']", dst_name);
+        return true;
     }
 
     virtual bool ReadFile(const app::AnyString& uri, QByteArray* bytes) const override
@@ -552,7 +557,7 @@ public:
       : mPackageDir(package_dir)
       , mWorkspaceDir(workspace_dir)
     {}
-    virtual void CopyFile(const app::AnyString& uri, const std::string& dir) override
+    virtual bool CopyFile(const app::AnyString& uri, const std::string& dir) override
     {
         // sort of hack here, probe the uri and skip the copy of a
         // custom shader .json descriptor. it's not needed in the
@@ -560,7 +565,7 @@ public:
         if (base::Contains(uri, "shaders/es2") && base::EndsWith(uri, ".json"))
         {
             DEBUG("Skipping copy of shader .json descriptor. [uri='%1']", uri);
-            return;
+            return true;
         }
 
         // if the target dir for packing is textures/ we skip this because
@@ -568,19 +573,19 @@ public:
         if (dir == "textures/")
         {
             mUriMapping[uri] = uri;
-            return;
+            return true;
         }
 
         if (const auto* dupe = base::SafeFind(mUriMapping, uri))
         {
             DEBUG("Skipping duplicate file copy. [file='%1']", uri);
-            return;
+            return true;
         }
 
         const auto& src_file = MapFileToFilesystem(uri);
         const auto& dst_file = CopyFile(src_file, app::FromUtf8(dir));
         if (dst_file.isEmpty())
-            return;
+            return false;
 
         const auto& dst_uri  = MapFileToPackage(dst_file);
         mUriMapping[uri] = dst_uri;
@@ -592,18 +597,23 @@ public:
             const auto& png_file = MapFileToFilesystem(png_uri);
             CopyFile(png_file, app::FromUtf8(dir));
         }
+        return true;
     }
-    virtual void WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) override
+    virtual bool WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) override
     {
         if (const auto* dupe = base::SafeFind(mUriMapping, uri))
         {
             DEBUG("Skipping duplicate file replace. [file='%1']", uri);
-            return;
+            return true;
         }
         const auto& src_file = MapFileToFilesystem(uri);
         const auto& dst_file = WriteFile(src_file, app::FromUtf8(dir), data, len);
+        if (dst_file.isEmpty())
+            return false;
+
         const auto& dst_uri  = MapFileToPackage(dst_file);
         mUriMapping[uri] = dst_uri;
+        return true;
     }
     virtual bool ReadFile(const app::AnyString& uri, QByteArray* bytes) const override
     {
@@ -2501,14 +2511,16 @@ QStringList Workspace::ListFileResources(const ModelIndexList& indices) const
           : mWorkspaceDir(workspace)
         {}
 
-        virtual void CopyFile(const app::AnyString& uri, const std::string& dir) override
+        virtual bool CopyFile(const app::AnyString& uri, const std::string& dir) override
         {
             RecordURI(uri);
+            return true;
         }
 
-        virtual void WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) override
+        virtual bool WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) override
         {
             RecordURI(uri);
+            return true;
         }
         virtual bool ReadFile(const app::AnyString& uri, QByteArray* bytes) const override
         {
@@ -3198,7 +3210,11 @@ bool Workspace::ExportResourceArchive(const std::vector<const Resource*>& resour
     data::JsonObject content;
     for (auto& resource: mutable_copies)
     {
-        resource->Pack(zip);
+        if (!resource->Pack(zip))
+        {
+            ERROR("Resource packing failed. [name='%1']", resource->GetName());
+            return false;
+        }
         resource->Serialize(content);
         resource->SaveProperties(properties);
     }
@@ -3223,7 +3239,11 @@ bool Workspace::ImportResourceArchive(ResourceArchive& zip)
         if (zip.IsIndexIgnored(i))
             continue;
         auto& resource = zip.mResources[i];
-        resource->Pack(importer);
+        if (!resource->Pack(importer))
+        {
+            ERROR("Resource import failed. [resource='%1']", resource->GetName());
+            return false;
+        }
         const auto& name = resource->GetName();
         resource->SetName(name_prefix + name);
     }
@@ -3309,7 +3329,10 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
     // resolution and mapping functionality.
     for (int i=0; i<mutable_copies.size(); ++i)
     {
-        mutable_copies[i]->Pack(file_packer);
+        if (!mutable_copies[i]->Pack(file_packer))
+        {
+            ERROR("Resource packing failed. [name='%1']", mutable_copies[i]->GetName());
+        }
     }
 
     texture_packer.PackTextures([this](const std::string& action, int step, int max) {
