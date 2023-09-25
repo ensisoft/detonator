@@ -144,6 +144,8 @@ namespace {
                     line = base::FormatString("const vec2 kTextureVelocityXY = %1;", ToConst(glm::vec2(data.texture_velocity)));
                 else if (base::Contains(line, "kTextureVelocityZ"))
                     line = base::FormatString("const float kTextureVelocityZ = %1;", ToConst(data.texture_velocity.z));
+                else if (base::Contains(line, "kTextureVelocity"))
+                    line = base::FormatString("const vec3 kTextureVelocity = %1;", ToConst(data.texture_velocity));
                 else if (base::Contains(line, "kTextureRotation"))
                     line = base::FormatString("const float kTextureRotation = %1;", ToConst(data.texture_rotation));
                 else if (base::Contains(line, "kColor0"))
@@ -1171,17 +1173,15 @@ void MaterialClass::ApplyStaticState(const State& state, Device& device, Program
         program.SetUniform("kGamma",             mGamma);
         program.SetUniform("kBaseColor",         mColorMap[ColorIndex::BaseColor]);
         program.SetUniform("kTextureScale",      mTextureScale.x, mTextureScale.y);
-        program.SetUniform("kTextureVelocityXY", mTextureVelocity.x, mTextureVelocity.y);
-        program.SetUniform("kTextureVelocityZ",  mTextureVelocity.z);
+        program.SetUniform("kTextureVelocity",   mTextureVelocity);
         program.SetUniform("kTextureRotation",   mTextureRotation);
     }
     else if (mType == Type::Texture)
     {
         program.SetUniform("kGamma",             mGamma);
         program.SetUniform("kBaseColor",         mColorMap[ColorIndex::BaseColor]);
-        program.SetUniform("kTextureScale",      mTextureScale.x, mTextureScale.y);
-        program.SetUniform("kTextureVelocityXY", mTextureVelocity.x, mTextureVelocity.y);
-        program.SetUniform("kTextureVelocityZ",  mTextureVelocity.z);
+        program.SetUniform("kTextureScale",      mTextureScale);
+        program.SetUniform("kTextureVelocity",   mTextureVelocity);
         program.SetUniform("kTextureRotation",   mTextureRotation);
     }
     else if (mType == Type::Custom)
@@ -1847,8 +1847,7 @@ uniform float kTime;
 uniform float kBlendCoeff;
 uniform float kApplyRandomParticleRotation;
 uniform vec2 kTextureScale;
-uniform vec2 kTextureVelocityXY;
-uniform float kTextureVelocityZ;
+uniform vec3 kTextureVelocity;
 uniform float kTextureRotation;
 uniform ivec2 kTextureWrap;
 uniform vec2 kAlphaMask;
@@ -1885,7 +1884,7 @@ vec2 WrapTextureCoords(vec2 coords, vec2 box)
 vec2 RotateCoords(vec2 coords)
 {
     float random_angle = mix(0.0, vParticleRandomValue, kApplyRandomParticleRotation);
-    float angle = kTextureRotation + kTextureVelocityZ * kTime + random_angle * 3.1415926;
+    float angle = kTextureRotation + kTextureVelocity.z * kTime + random_angle * 3.1415926;
     coords = coords - vec2(0.5, 0.5);
     coords = mat2(cos(angle), -sin(angle),
                   sin(angle),  cos(angle)) * coords;
@@ -1909,7 +1908,7 @@ void main()
     vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
     coords = RotateCoords(coords);
 
-    coords += kTextureVelocityXY * kTime;
+    coords += kTextureVelocity.xy * kTime;
     coords = coords * kTextureScale;
 
     // apply texture box transformation.
@@ -2023,9 +2022,8 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
     {
         SetUniform("kBaseColor",         state.uniforms, mColorMap[ColorIndex::BaseColor], program);
         SetUniform("kGamma",             state.uniforms, mGamma, program);
-        SetUniform("kTextureScale",      state.uniforms, glm::vec2(mTextureScale.x, mTextureScale.y), program);
-        SetUniform("kTextureVelocityXY", state.uniforms, glm::vec2(mTextureVelocity.x, mTextureVelocity.y), program);
-        SetUniform("kTextureVelocityZ",  state.uniforms, mTextureVelocity.z, program);
+        SetUniform("kTextureScale",      state.uniforms, mTextureScale, program);
+        SetUniform("kTextureVelocity",   state.uniforms, mTextureVelocity, program);
         SetUniform("kTextureRotation",   state.uniforms, mTextureRotation, program);
     }
     return true;
@@ -2046,8 +2044,7 @@ uniform float kGamma;
 uniform float kApplyRandomParticleRotation;
 uniform float kTime;
 uniform vec2 kTextureScale;
-uniform vec2 kTextureVelocityXY;
-uniform float kTextureVelocityZ;
+uniform vec3 kTextureVelocity;
 uniform float kTextureRotation;
 uniform vec4 kBaseColor;
 // 0 disabled, 1 clamp, 2 wrap
@@ -2085,7 +2082,7 @@ vec2 WrapTextureCoords(vec2 coords, vec2 box)
 vec2 RotateCoords(vec2 coords)
 {
     float random_angle = mix(0.0, vParticleRandomValue, kApplyRandomParticleRotation);
-    float angle = kTextureRotation + kTextureVelocityZ * kTime + random_angle * 3.1415926;
+    float angle = kTextureRotation + kTextureVelocity.z * kTime + random_angle * 3.1415926;
     coords = coords - vec2(0.5, 0.5);
     coords = mat2(cos(angle), -sin(angle),
                   sin(angle),  cos(angle)) * coords;
@@ -2108,7 +2105,7 @@ void main()
     // ranges from 0 to 1 across the point vertically top-to-bottom."
     vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
     coords = RotateCoords(coords);
-    coords += kTextureVelocityXY * kTime;
+    coords += kTextureVelocity.xy * kTime;
     coords = coords * kTextureScale;
 
     // apply texture box transformation.
@@ -2204,9 +2201,8 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
     {
         SetUniform("kGamma",             state.uniforms, mGamma, program);
         SetUniform("kBaseColor",         state.uniforms, mColorMap[ColorIndex::BaseColor], program);
-        SetUniform("kTextureScale",      state.uniforms, glm::vec2(mTextureScale.x, mTextureScale.y), program);
-        SetUniform("kTextureVelocityXY", state.uniforms, glm::vec2(mTextureVelocity.x, mTextureVelocity.y), program);
-        SetUniform("kTextureVelocityZ",  state.uniforms, mTextureVelocity.z, program);
+        SetUniform("kTextureScale",      state.uniforms, mTextureScale, program);
+        SetUniform("kTextureVelocity",   state.uniforms, mTextureVelocity, program);
         SetUniform("kTextureRotation",   state.uniforms, mTextureRotation, program);
     }
     return true;

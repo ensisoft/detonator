@@ -591,22 +591,19 @@ void unit_test_material_uniforms()
         test.ApplyDynamicState(env, device, program);
 
         glm::vec2 texture_scale;
-        glm::vec2 texture_velocity_xy;
-        glm::vec1 texture_velocity_z;
+        glm::vec3 texture_velocity;
         glm::vec1 gamma;
         glm::vec1 particle_rotation_flag;
         glm::vec1 render_points_flag;
         glm::vec1 runtime;
         TEST_REQUIRE(program.GetUniform("kGamma", &gamma));
         TEST_REQUIRE(program.GetUniform("kTextureScale", &texture_scale));
-        TEST_REQUIRE(program.GetUniform("kTextureVelocityXY", &texture_velocity_xy));
-        TEST_REQUIRE(program.GetUniform("kTextureVelocityZ", &texture_velocity_z));
+        TEST_REQUIRE(program.GetUniform("kTextureVelocity", &texture_velocity));
         TEST_REQUIRE(program.GetUniform("kApplyRandomParticleRotation", &particle_rotation_flag));
         TEST_REQUIRE(program.GetUniform("kRenderPoints", &render_points_flag));
         TEST_REQUIRE(program.GetUniform("kTime", &runtime));
         TEST_REQUIRE(texture_scale == glm::vec2(2.0f, 3.0f));
-        TEST_REQUIRE(texture_velocity_xy == glm::vec2(4.0f, 5.0f));
-        TEST_REQUIRE(texture_velocity_z == glm::vec1(-1.0f));
+        TEST_REQUIRE(texture_velocity == glm::vec3(4.0f, 5.0f, -1.0f));
         TEST_REQUIRE(gamma == glm::vec1(2.0f));
         TEST_REQUIRE(particle_rotation_flag == glm::vec1(0.0f));
         TEST_REQUIRE(render_points_flag == glm::vec1(0.0f));
@@ -641,8 +638,7 @@ void unit_test_material_uniforms()
         test.ApplyDynamicState(env, device, program);
 
         glm::vec2 texture_scale;
-        glm::vec2 texture_velocity_xy;
-        glm::vec1 texture_velocity_z;
+        glm::vec3 texture_velocity;
         glm::vec1 gamma;
         glm::vec1 particle_rotation_flag;
         glm::vec1 render_points_flag;
@@ -650,15 +646,13 @@ void unit_test_material_uniforms()
         gfx::Color4f base_color;
         TEST_REQUIRE(program.GetUniform("kGamma", &gamma));
         TEST_REQUIRE(program.GetUniform("kTextureScale", &texture_scale));
-        TEST_REQUIRE(program.GetUniform("kTextureVelocityXY", &texture_velocity_xy));
-        TEST_REQUIRE(program.GetUniform("kTextureVelocityZ", &texture_velocity_z));
+        TEST_REQUIRE(program.GetUniform("kTextureVelocity", &texture_velocity));
         TEST_REQUIRE(program.GetUniform("kApplyRandomParticleRotation", &particle_rotation_flag));
         TEST_REQUIRE(program.GetUniform("kRenderPoints", &render_points_flag));
         TEST_REQUIRE(program.GetUniform("kTime", &runtime));
         TEST_REQUIRE(program.GetUniform("kBaseColor", &base_color));
         TEST_REQUIRE(texture_scale == glm::vec2(2.0f, 3.0f));
-        TEST_REQUIRE(texture_velocity_xy == glm::vec2(4.0f, 5.0f));
-        TEST_REQUIRE(texture_velocity_z == glm::vec1(-1.0f));
+        TEST_REQUIRE(texture_velocity == glm::vec3(4.0f, 5.0f, -1.0f));
         TEST_REQUIRE(gamma == glm::vec1(2.0f));
         TEST_REQUIRE(particle_rotation_flag == glm::vec1(0.0f));
         TEST_REQUIRE(render_points_flag == glm::vec1(0.0f));
@@ -761,19 +755,16 @@ void unit_test_material_uniforms()
 
         test.ApplyStaticState(env, device, program);
         glm::vec2 texture_scale;
-        glm::vec2 texture_velocity_xy;
-        glm::vec1 texture_velocity_z;
+        glm::vec3 texture_velocity;
         glm::vec1 gamma;
         glm::vec1 particle_rotation_flag;
         glm::vec1 render_points_flag;
         glm::vec1 runtime;
         TEST_REQUIRE(program.GetUniform("kGamma", &gamma));
         TEST_REQUIRE(program.GetUniform("kTextureScale", &texture_scale));
-        TEST_REQUIRE(program.GetUniform("kTextureVelocityXY", &texture_velocity_xy));
-        TEST_REQUIRE(program.GetUniform("kTextureVelocityZ", &texture_velocity_z));
+        TEST_REQUIRE(program.GetUniform("kTextureVelocity", &texture_velocity));
         TEST_REQUIRE(texture_scale == glm::vec2(2.0f, 3.0f));
-        TEST_REQUIRE(texture_velocity_xy == glm::vec2(4.0f, 5.0f));
-        TEST_REQUIRE(texture_velocity_z == glm::vec1(-1.0f));
+        TEST_REQUIRE(texture_velocity == glm::vec3(4.0f, 5.0f, -1.0));
         TEST_REQUIRE(gamma == glm::vec1(2.0f));
 
         program.Clear();
@@ -812,18 +803,15 @@ void unit_test_material_uniforms()
 
         test.ApplyStaticState(env, device, program);
         glm::vec2 texture_scale;
-        glm::vec2 texture_velocity_xy;
-        glm::vec1 texture_velocity_z;
+        glm::vec3 texture_velocity;
         glm::vec1 gamma;
         gfx::Color4f base_color;
         TEST_REQUIRE(program.GetUniform("kGamma", &gamma));
         TEST_REQUIRE(program.GetUniform("kTextureScale", &texture_scale));
-        TEST_REQUIRE(program.GetUniform("kTextureVelocityXY", &texture_velocity_xy));
-        TEST_REQUIRE(program.GetUniform("kTextureVelocityZ", &texture_velocity_z));
+        TEST_REQUIRE(program.GetUniform("kTextureVelocity", &texture_velocity));
         TEST_REQUIRE(program.GetUniform("kBaseColor", &base_color));
         TEST_REQUIRE(texture_scale == glm::vec2(2.0f, 3.0f));
-        TEST_REQUIRE(texture_velocity_xy == glm::vec2(4.0f, 5.0f));
-        TEST_REQUIRE(texture_velocity_z == glm::vec1(-1.0f));
+        TEST_REQUIRE(texture_velocity == glm::vec3(4.0f, 5.0f, -1.0f));
         TEST_REQUIRE(gamma == glm::vec1(2.0f));
         TEST_REQUIRE(base_color == gfx::Color::Red);
 
@@ -1353,8 +1341,7 @@ void unit_test_material_uniform_folding()
         TEST_REQUIRE(base::Contains(source, "const float kGamma = 0.80;") == true);
         TEST_REQUIRE(base::Contains(source, "const vec4 kBaseColor = vec4(1.00,1.00,1.00,1.00);"));
         TEST_REQUIRE(base::Contains(source, "const vec2 kTextureScale = vec2(2.00,3.00);"));
-        TEST_REQUIRE(base::Contains(source, "const vec2 kTextureVelocityXY = vec2(4.00,5.00);"));
-        TEST_REQUIRE(base::Contains(source, "const float kTextureVelocityZ = -1.00;"));
+        TEST_REQUIRE(base::Contains(source, "const vec3 kTextureVelocity = vec3(4.00,5.00,-1.00);"));
     }
 
     {
@@ -1378,9 +1365,7 @@ void unit_test_material_uniform_folding()
         TEST_REQUIRE(base::Contains(source, "uniform float kTextureVelocityZ") == false);
         TEST_REQUIRE(base::Contains(source, "const float kGamma = 0.80;") == true);
         TEST_REQUIRE(base::Contains(source, "const vec2 kTextureScale = vec2(2.00,3.00);"));
-        TEST_REQUIRE(base::Contains(source, "const vec2 kTextureVelocityXY = vec2(4.00,5.00);"));
-        TEST_REQUIRE(base::Contains(source, "const float kTextureVelocityZ = -1.00;"));
-
+        TEST_REQUIRE(base::Contains(source, "const vec3 kTextureVelocity = vec3(4.00,5.00,-1.00);"));
     }
 }
 
