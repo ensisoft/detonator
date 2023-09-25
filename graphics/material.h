@@ -926,6 +926,8 @@ namespace gfx
         { return TestFlag(Flags::BlendFrames); }
 
         // Material uniform API for setting/getting "Known" uniforms.
+        inline void SetAlphaCutoff(float cutoff) noexcept
+        { SetUniform("kAlphaCutoff", cutoff); }
         inline void SetGamma(float gamma) noexcept
         { SetUniform("kGamma", gamma); }
         inline void SetColorWeight(glm::vec2 weight) noexcept
@@ -951,6 +953,8 @@ namespace gfx
         inline void SetTextureVelocity(const glm::vec2& linear, float angular) noexcept
         { GetUniformValue<glm::vec3>("kTextureVelocity", {0.0f, 0.0f, 0.0f}) = glm::vec3(linear, angular); }
 
+        inline float GetAlphaCutoff() const noexcept
+        { return GetUniformValue<float>("kAlphaCutoff", 0.0f); }
         inline float GetGamma() const noexcept
         { return GetUniformValue<float>("kGamma", 1.0f); }
         inline Color4f GetColor(ColorIndex index) const noexcept
