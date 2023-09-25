@@ -61,7 +61,7 @@ DlgMigrationLog::DlgMigrationLog(QWidget* parent, const app::MigrationLog& log)
     for (const auto& [key, foo] : messages)
     {
         ss << foo.type << " | " << foo.name << "\n";
-        ss << "-------------------------------\n";
+        ss << "--------------------------------------------------------------\n";
         for (const auto& msg : foo.messages)
         {
             ss << "* " << msg;

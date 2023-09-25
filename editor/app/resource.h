@@ -561,6 +561,7 @@ namespace app
         {}
 
         void MigrateResource(uik::Window& window, MigrationLog* log);
+        void MigrateResource(gfx::MaterialClass& material, MigrationLog* log);
 
     } // detail
 
