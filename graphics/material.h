@@ -47,8 +47,6 @@
 namespace gfx
 {
     class Device;
-    class Shader;
-    class ShaderPass;
 
     // Interface for acquiring texture data. Possible implementations
     // might load the data from a file or generate it on the fly.
@@ -852,10 +850,7 @@ namespace gfx
             // The instance uniforms will take precedence over the uniforms
             // set in the class whenever they're set.
             const UniformMap* uniforms = nullptr;
-            // the current render pass in which the material is used.
-            const ShaderPass* shader_pass = nullptr;
         };
-
 
         MaterialClass(Type type, std::string id = base::RandomString(10));
         MaterialClass(const MaterialClass& other, bool copy=true);
@@ -1067,15 +1062,15 @@ namespace gfx
         inline void SetTextureMap(unsigned index, TextureMap map) noexcept
         { base::SafeIndex(mTextureMaps, index) = std::make_unique<TextureMap>(std::move(map)); }
 
+        std::string GetShaderName(const State& state) const noexcept;
         // Get the program ID for the material that is used to map the
         // material to a device specific program object.
-        std::string GetProgramId(const State& state) const noexcept;
+        std::string GetShaderId(const State& state) const noexcept;
         // Get the material class hash value based on the current properties
         // of the class.
         std::size_t GetHash() const noexcept;
-        // Create the shader for this material on the given device.
-        // Returns the new shader object or nullptr if the shader fails to compile.
-        Shader* GetShader(const State& state, Device& device) const noexcept;
+
+        std::string GetShader(const State& state, const Device& device) const noexcept;
         // Apply the material properties onto the given program object based
         // on the material class and the material instance state.
         bool ApplyDynamicState(const State& state, Device& device, Program& program) const noexcept;
@@ -1158,11 +1153,11 @@ namespace gfx
 
     private:
         TextureMap* SelectTextureMap(const State& state) const noexcept;
-        std::string GetShaderSource(const State& state, Device& device) const;
-        std::string GetColorShaderSource(const State& state, Device& device) const;
-        std::string GetGradientShaderSource(const State& state, Device& device) const;
-        std::string GetSpriteShaderSource(const State& state, Device& device) const;
-        std::string GetTextureShaderSource(const State& state, Device& device) const;
+        std::string GetShaderSource(const State& state, const Device& device) const;
+        std::string GetColorShaderSource(const State& state, const Device& device) const;
+        std::string GetGradientShaderSource(const State& state, const Device& device) const;
+        std::string GetSpriteShaderSource(const State& state, const Device& device) const;
+        std::string GetTextureShaderSource(const State& state, const Device& device) const;
         bool ApplySpriteDynamicState(const State& state, Device& device, Program& program) const noexcept;
         bool ApplyCustomDynamicState(const State& state, Device& device, Program& program) const noexcept;
         bool ApplyTextureDynamicState(const State& state, Device& device, Program& program) const noexcept;
@@ -1202,7 +1197,6 @@ namespace gfx
         virtual ~Material() = default;
 
         struct Environment {
-            const ShaderPass* shader_pass = nullptr;
             // true if running in an "editing mode", which means that even
             // content marked static might have changed and should be checked
             // in case it has been modified and should be re-uploaded.
@@ -1225,12 +1219,16 @@ namespace gfx
         // Apply the static state, i.e. the material state that doesn't change
         // during the material's lifetime and need to be only set once.
         virtual void ApplyStaticState(const Environment& env, Device& device, Program& program) const = 0;
-        // Create the shader for this material on the given device.
-        // Returns the new shader object or nullptr if the shader failed to compile.
-        virtual Shader* GetShader(const Environment& env, Device& device) const = 0;
-        // Get the program ID for the material that is used to map the
-        // material to a device specific program object.
-        virtual std::string GetProgramId(const Environment& env) const = 0;
+        // Get the device specific shader source applicable for this material, its state
+        // and the given environment in which it should execute.
+        // Should return an empty string on any error.
+        virtual std::string GetShader(const Environment& env, const Device& device) const = 0;
+        // Get the shader ID applicable for this material, its state and the given
+        // environment in which it should execute.
+        virtual std::string GetShaderId(const Environment& env) const = 0;
+        // Get the human readable debug name that should be associated with the
+        // shader object generated from this drawable.
+        virtual std::string GetShaderName(const Environment& env) const = 0;
         // Get the material class id (if any).
         virtual std::string GetClassId() const = 0;
         // Update material time by a delta value (in seconds).
@@ -1269,9 +1267,10 @@ namespace gfx
 
         // Apply the material properties to the given program object and set the rasterizer state.
         virtual bool ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const override;
-        virtual Shader* GetShader(const Environment& env, Device& device) const override;
         virtual void ApplyStaticState(const Environment& env, Device& device, Program& program) const override;
-        virtual std::string GetProgramId(const Environment& env) const override;
+        virtual std::string GetShader(const Environment& env, const Device& device) const override;
+        virtual std::string GetShaderId(const Environment& env) const override;
+        virtual std::string GetShaderName(const Environment& env) const override;
 
         virtual std::string GetClassId() const override
         { return mClass->GetId(); }
@@ -1323,8 +1322,9 @@ namespace gfx
         TextMaterial(TextBuffer&& text);
         virtual bool ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const override;
         virtual void ApplyStaticState(const Environment& env, Device& device, Program& program) const override;
-        virtual Shader* GetShader(const Environment& env, Device& device) const override;
-        virtual std::string GetProgramId(const Environment&) const override;
+        virtual std::string GetShader(const Environment& env, const Device& device) const override;
+        virtual std::string GetShaderId(const Environment&) const override;
+        virtual std::string GetShaderName(const Environment&) const override;
         virtual std::string GetClassId() const override;
         virtual void Update(float dt) override;
         virtual void SetRuntime(double runtime) override;

@@ -66,12 +66,8 @@ std::string NameAspectRatio(float width, float height, RoundFunc Round, const ch
     return ret;
 }
 
-gfx::Shader* MakeGeneric2DVertexShader(gfx::Device& device)
+std::string MakeGeneric2DVertexShader(const gfx::Device& device)
 {
-    auto* shader = device.FindShader("vertex-array-2D-shader");
-    if (shader)
-        return shader;
-
     // the varyings vParticleRandomValue, vParticleAlpha and vParticleTime
     // are used to support per particle features.
     // This shader doesn't provide that data but writes these varyings
@@ -106,18 +102,11 @@ void main()
     gl_Position  = kProjectionMatrix * kModelViewMatrix * vertex;
 }
 )";
-    shader = device.MakeShader("vertex-array-2D-shader");
-    shader->SetName("Generic2DVertexShader");
-    shader->CompileSource(src);
-    return shader;
+    return src;
 }
 
-gfx::Shader* MakeGeneric3DVertexShader(gfx::Device& device)
+std::string MakeGeneric3DVertexShader(const gfx::Device& device)
 {
-    auto* shader = device.FindShader("vertex-array-3D-shader");
-    if (shader)
-        return shader;
-
 constexpr const auto* src = R"(
 #version 100
 attribute vec3 aPosition;
@@ -135,10 +124,7 @@ void main()
 }
 
 )";
-    shader = device.MakeShader("vertex-array-3D-shader");
-    shader->SetName("Generic3DVertexShader");
-    shader->CompileSource(src);
-    return shader;
+    return src;
 }
 
 } // namespace
@@ -1305,7 +1291,7 @@ void SimpleShapeInstance::ApplyDynamicState(const Environment& env, Program& pro
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
 }
-Shader* SimpleShapeInstance::GetShader(const Environment& env, Device& device) const
+std::string SimpleShapeInstance::GetShader(const Environment& env, const Device& device) const
 {
     if (mClass->GetShapeType() == SimpleShapeType::Cube)
         return MakeGeneric3DVertexShader(device);
@@ -1316,12 +1302,20 @@ Geometry* SimpleShapeInstance::Upload(const Environment& env, Device& device) co
 {
     return detail::ConstructShape(mClass->GetShapeArgs(), env, mStyle, mClass->GetShapeType(), device);
 }
-std::string SimpleShapeInstance::GetProgramId(const Environment& env) const
+std::string SimpleShapeInstance::GetShaderId(const Environment& env) const
 {
     if (mClass->GetShapeType() == SimpleShapeType::Cube)
         return "generic-3D-vertex-program";
 
     return "generic-2D-vertex-program";
+}
+
+std::string SimpleShapeInstance::GetShaderName(const Environment& env) const
+{
+    if (mClass->GetShapeType() == SimpleShapeType::Cube)
+        return "Generic3DVertexShader";
+
+    return "Generic2DVertexShader";
 }
 
 void SimpleShape::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
@@ -1331,24 +1325,34 @@ void SimpleShape::ApplyDynamicState(const Environment& env, Program& program, Ra
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
 }
-Shader* SimpleShape::GetShader(const Environment& env, Device& device) const
+std::string SimpleShape::GetShader(const Environment& env, const Device& device) const
 {
     if (mShape == SimpleShapeType::Cube)
         return MakeGeneric3DVertexShader(device);
 
     return MakeGeneric2DVertexShader(device);
 }
-Geometry* SimpleShape::Upload(const Environment& env, Device& device) const
-{
-    return detail::ConstructShape(mArgs, env, mStyle, mShape, device);
-}
-std::string SimpleShape::GetProgramId(const Environment& env) const
+std::string SimpleShape::GetShaderId(const Environment& env) const
 {
     if (mShape == SimpleShapeType::Cube)
         return "generic-3D-vertex-program";
 
     return "generic-2D-vertex-program";
 }
+
+std::string SimpleShape::GetShaderName(const Environment& env) const
+{
+    if (mShape == SimpleShapeType::Cube)
+        return "Generic3DVertexShader";
+
+    return "Generic2DVertexShader";
+}
+
+Geometry* SimpleShape::Upload(const Environment& env, Device& device) const
+{
+    return detail::ConstructShape(mArgs, env, mStyle, mShape, device);
+}
+
 
 void Grid::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
 {
@@ -1358,11 +1362,20 @@ void Grid::ApplyDynamicState(const Environment& env, Program& program, RasterSta
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
 }
 
-std::string Grid::GetProgramId(const Environment&) const
-{ return "generic-2D-vertex-program"; }
+std::string Grid::GetShaderId(const Environment&) const
+{
+    return "generic-2D-vertex-program";
+}
 
-Shader* Grid::GetShader(const Environment&, Device& device) const
-{ return MakeGeneric2DVertexShader(device); }
+std::string Grid::GetShader(const Environment&, const Device& device) const
+{
+    return MakeGeneric2DVertexShader(device);
+}
+
+std::string Grid::GetShaderName(const Environment& env) const
+{
+    return "Generic2DVertexShader";
+}
 
 Geometry* Grid::Upload(const Environment&, Device& device) const
 {
@@ -1699,7 +1712,7 @@ void PolygonInstance::ApplyDynamicState(const Environment& env, Program& program
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
 }
-Shader* PolygonInstance::GetShader(const Environment& env, Device& device) const
+std::string PolygonInstance::GetShader(const Environment& env, const Device& device) const
 {
     return MakeGeneric2DVertexShader(device);
 }
@@ -1708,11 +1721,15 @@ Geometry* PolygonInstance::Upload(const Environment& env, Device& device) const
 {
     return mClass->Upload(env, device);
 }
-std::string PolygonInstance::GetProgramId(const Environment& env) const
+std::string PolygonInstance::GetShaderId(const Environment& env) const
 {
     return "generic-2D-vertex-program";
 }
 
+std::string PolygonInstance::GetShaderName(const Environment& env) const
+{
+    return "Generic2DVertexShader";
+}
 
 std::string ParticleEngineClass::GetProgramId(const Environment& env) const
 {
@@ -1724,7 +1741,7 @@ std::string ParticleEngineClass::GetProgramId(const Environment& env) const
     return "";
 }
 
-Shader* ParticleEngineClass::GetShader(const Environment& env, Device& device) const
+std::string ParticleEngineClass::GetShader(const Environment& env, const Device& device) const
 {
     // this shader doesn't actually write to vTexCoord because when
     // particle (GL_POINTS) rasterization is done the fragment shader
@@ -1776,20 +1793,22 @@ void main()
   gl_Position  = kProjectionMatrix * kViewMatrix * vertex;
 }
     )";
+    if (mParams.coordinate_space == CoordinateSpace::Local)
+        return local_src;
+    else if (mParams.coordinate_space == CoordinateSpace::Global)
+        return global_src;
+    else BUG("Missing particle shader simulation space source.");
+    return "";
+}
 
-    const auto* shader_name = mParams.coordinate_space == CoordinateSpace::Local
-            ? "LocalParticleShader" : "GlobalParticleShader";
-    const auto* shader_src = mParams.coordinate_space == CoordinateSpace::Local
-            ? local_src : global_src;
-
-    Shader* shader = device.FindShader(shader_name);
-    if (!shader)
-    {
-        shader = device.MakeShader(shader_name);
-        shader->SetName(shader_name);
-        shader->CompileSource(shader_src);
-    }
-    return shader;
+std::string ParticleEngineClass::GetShaderName(const Environment& env) const
+{
+    if (mParams.coordinate_space == CoordinateSpace::Local)
+        return "LocalParticleShader";
+    else if (mParams.coordinate_space == CoordinateSpace::Global)
+        return "GlobalParticleShader";
+    else BUG("Missing particle shader name.");
+    return "";
 }
 
 Geometry* ParticleEngineClass::Upload(const Drawable::Environment& env, const InstanceState& state, Device& device) const
@@ -2414,17 +2433,22 @@ void ParticleEngineInstance::ApplyDynamicState(const Environment& env, Program& 
     mClass->ApplyDynamicState(env, program);
 }
 
-Shader* ParticleEngineInstance::GetShader(const Environment& env, Device& device) const
+std::string ParticleEngineInstance::GetShader(const Environment& env, const Device& device) const
 {
     return mClass->GetShader(env, device);
 }
+std::string ParticleEngineInstance::GetShaderId(const Environment&  env) const
+{
+    return mClass->GetProgramId(env);
+}
+std::string ParticleEngineInstance::GetShaderName(const Environment& env) const
+{
+    return mClass->GetShaderName(env);
+}
+
 Geometry* ParticleEngineInstance::Upload(const Environment& env, Device& device) const
 {
     return mClass->Upload(env, mState, device);
-}
-std::string ParticleEngineInstance::GetProgramId(const Environment&  env) const
-{
-    return mClass->GetProgramId(env);
 }
 
 Drawable::Style ParticleEngineInstance::GetStyle() const
@@ -2508,7 +2532,7 @@ void TileBatch::ApplyDynamicState(const Environment& env, Program& program, Rast
     program.SetUniform("kTileCoordinateSpaceTransform", *env.model_matrix);
 }
 
-Shader* TileBatch::GetShader(const Environment& env, Device& device) const
+std::string TileBatch::GetShader(const Environment& env, const Device& device) const
 {
     // the shader uses dummy varyings vParticleAlpha, vParticleRandomValue
     // and vTexCoord. Even though we're now rendering GL_POINTS this isn't
@@ -2588,22 +2612,35 @@ void main()
   vParticleRandomValue = 1.0;
 }
 )";
+    if (shape == TileShape::Square)
+        return square_tile_source;
+    else if (shape == TileShape::Rectangle)
+        return rectangle_tile_source;
+    else BUG("Missing tilebatch shader source.");
+    return "";
+}
 
+std::string TileBatch::GetShaderId(const Environment& env) const
+{
+    const auto shape = ResolveTileShape();
+    if (shape == TileShape::Square)
+        return "square-tile-batch-program";
+    else if (shape == TileShape::Rectangle)
+        return "rectangle-tile-batch-program";
+    else BUG("Missing tilebatch shader id.");
+    return "";
+}
 
-    const auto* name = shape == TileShape::Square
-                       ? "SquareTileBatchShader"
-                       : "RectangleTileBatchShader";
-    const auto* src = shape == TileShape::Square
-            ? square_tile_source
-            : rectangle_tile_source;
-    auto* shader = device.FindShader(name);
-    if (!shader)
-    {
-        shader = device.MakeShader(name);
-        shader->SetName(name);
-        shader->CompileSource(src);
-    }
-    return shader;
+std::string TileBatch::GetShaderName(const Environment& env) const
+{
+    const auto shape = ResolveTileShape();
+
+    if (shape == TileShape::Square)
+        return "SquareTileBatchShader";
+    else if (shape == TileShape::Rectangle)
+        return "RectangleTileBatchShader";
+    else BUG("Missing tilebatch shader name.");
+    return "";
 }
 
 Geometry* TileBatch::Upload(const Environment& env, Device& device) const
@@ -2670,16 +2707,7 @@ Drawable::Style TileBatch::GetStyle() const
     else BUG("Unknown tile shape");
     return Style::Points;
 }
-std::string TileBatch::GetProgramId(const Environment& env) const
-{
-    const auto shape = ResolveTileShape();
-    if (shape == TileShape::Square)
-        return "square-tile-batch-program";
-    else if (shape == TileShape::Rectangle)
-        return "rectangle-tile-batch-program";
-    else BUG("Unknown tile shape");
-    return "";
-}
+
 
 void DynamicLine3D::ApplyDynamicState(const Environment& environment, Program& program, RasterState& state) const
 {
@@ -2687,9 +2715,19 @@ void DynamicLine3D::ApplyDynamicState(const Environment& environment, Program& p
     program.SetUniform("kModelViewMatrix", *environment.view_matrix * *environment.model_matrix);
 }
 
-Shader* DynamicLine3D::GetShader(const Environment& environment, Device& device) const
+std::string DynamicLine3D::GetShader(const Environment& environment, const Device& device) const
 {
     return MakeGeneric3DVertexShader(device);
+}
+
+std::string DynamicLine3D::GetShaderId(const Environment& environment) const
+{
+    return "generic-3D-vertex-program";
+}
+
+std::string DynamicLine3D::GetShaderName(const Environment& environment) const
+{
+    return "Generic3DVertexShader";
 }
 
 Geometry* DynamicLine3D::Upload(const Environment& environment, Device& device) const
@@ -2717,11 +2755,6 @@ Geometry* DynamicLine3D::Upload(const Environment& environment, Device& device) 
     geom->ClearDraws();
     geom->AddDrawCmd(Geometry::DrawType::Lines);
     return geom;
-}
-
-std::string DynamicLine3D::GetProgramId(const Environment& environment) const
-{
-    return "generic-3D-vertex-program";
 }
 
 std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const DrawableClass>& klass)

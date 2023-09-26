@@ -19,20 +19,37 @@
 #include "graphics/device.h"
 
 namespace gfx {
-std::string ShaderPass::ModifyVertexSource(Device& device, std::string source) const
-{
-    return source;
-}
 
-std::string ShaderPass::ModifyFragmentSource(Device& device, std::string source) const
+std::string ShaderProgram::GetShaderId(const Material& material, const Material::Environment& env) const
 {
-    constexpr auto* src = R"(
+    return material.GetShaderId(env);
+}
+std::string ShaderProgram::GetShaderId(const Drawable& drawable, const Drawable::Environment& env) const
+{
+    return drawable.GetShaderId(env);
+}
+std::string ShaderProgram::GetShader(const Material& material, const Material::Environment& env, const Device& device) const
+{
+    std::string source = material.GetShader(env, device);
+
+    source += R"(
 vec4 ShaderPass(vec4 color) {
     return color;
 }
 )";
-    source += src;
     return source;
+}
+std::string ShaderProgram::GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const
+{
+    return drawable.GetShader(env, device);
+}
+std::string ShaderProgram::GetShaderName(const Material& material, const Material::Environment& env) const
+{
+    return material.GetShaderName(env);
+}
+std::string ShaderProgram::GetShaderName(const Drawable& drawable, const Drawable::Environment& env) const
+{
+    return drawable.GetShaderName(env);
 }
 
 } // namespace

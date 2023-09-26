@@ -183,7 +183,7 @@ void unit_test_material_class()
     {
         data::JsonObject json;
         klass.IntoJson(json);
-        std::cout << json.ToString();
+        //std::cout << json.ToString();
         auto ret = gfx::MaterialClass::ClassFromJson(json);
         TEST_REQUIRE(ret);
         TEST_REQUIRE(ret->GetName() == klass.GetName());

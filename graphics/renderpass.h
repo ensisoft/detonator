@@ -39,7 +39,7 @@ namespace gfx
           : mPainter(painter)
         {}
 
-        void Draw(const DrawList& list, const ShaderPass& pass = detail::GenericShaderPass()) const
+        void Draw(const DrawList& list, const ShaderProgram& pass = detail::GenericShaderProgram()) const
         {
             Painter::RenderPassState state;
             state.write_color  = true;
@@ -62,7 +62,7 @@ namespace gfx
             shape.transform = &mat;
             Painter::DrawList list;
             list.push_back(shape);
-            mPainter.Draw(list, state, detail::GenericShaderPass());
+            mPainter.Draw(list, state, detail::GenericShaderProgram());
         }
     private:
         Painter& mPainter;
@@ -99,7 +99,7 @@ namespace gfx
             Painter::RenderPassState state;
             SetState(state);
 
-            detail::StencilShaderPass pass;
+            detail::StencilShaderProgram pass;
             mPainter.Draw(drawable, transform, material, state, pass);
         }
         void Draw(const DrawList& list) const
@@ -107,7 +107,7 @@ namespace gfx
             Painter::RenderPassState state;
             SetState(state);
 
-            detail::StencilShaderPass pass;
+            detail::StencilShaderProgram pass;
             mPainter.Draw(list, state, pass);
         }
         void SetState(Painter::RenderPassState& state) const
@@ -163,7 +163,7 @@ namespace gfx
             state.stencil_ref   = mStencilRefValue;
             state.stencil_mask  = 0xff;
 
-            detail::GenericShaderPass pass;
+            detail::GenericShaderProgram pass;
             mPainter.Draw(drawable, transform, material, state, pass);
         }
         void Draw(const DrawList& list) const
@@ -177,7 +177,7 @@ namespace gfx
             state.stencil_ref   = mStencilRefValue;
             state.stencil_mask  = 0xff;
 
-            detail::GenericShaderPass pass;
+            detail::GenericShaderProgram pass;
             mPainter.Draw(list, state, pass);
         }
     private:

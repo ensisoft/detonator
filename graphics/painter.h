@@ -38,7 +38,7 @@ namespace gfx
     // fwd declarations
     class Drawable;
     class Material;
-    class ShaderPass;
+    class ShaderProgram;
     class Framebuffer;
 
     // Painter class implements some algorithms for
@@ -173,7 +173,7 @@ namespace gfx
             const Drawable* drawable   = nullptr;
             const Material* material   = nullptr;
             // This is a user defined object pointer that is passed to
-            // ShaderPass::FilterDraw for doing low level shape/draw filtering.
+            // ShaderProgram::FilterDraw for doing low level shape/draw filtering.
             // Using dodgy/Unsafe void* here for performance reasons. vs. std::any
             void* user = nullptr;
             // line width setting used to rasterize lines when the drawable style is Lines
@@ -190,7 +190,7 @@ namespace gfx
         // and finally a transform which defines the model-to-world transform.
         void Draw(const DrawList& shapes,
                   const RenderPassState& render_pass_state,
-                  const ShaderPass& shader_pass) const;
+                  const ShaderProgram& program) const;
 
         // legacy draw functions.
 
@@ -223,7 +223,7 @@ namespace gfx
                   const glm::mat4& model,
                   const Material& material,
                   const RenderPassState& render_pass_state,
-                  const ShaderPass& shader_pass,
+                  const ShaderProgram& program,
                   const LegacyDrawState& draw_state = LegacyDrawState()) const;
         // Legacy immediate mode draw function.
         // Draw the shape with the material and transformation immediately in the
@@ -248,7 +248,8 @@ namespace gfx
         IRect MapToDevice(const IRect& rect) const noexcept;
 
     private:
-        Program* GetProgram(const Drawable& drawable,
+        Program* GetProgram(const ShaderProgram& program,
+                            const Drawable& drawable,
                             const Material& material,
                             const Drawable::Environment& drawable_environment,
                             const Material::Environment& material_environment) const;

@@ -48,7 +48,6 @@ namespace gfx
     class Shader;
     class Geometry;
     class Program;
-    class ShaderPass;
 
     // DrawableClass defines a new type of drawable.
     class DrawableClass
@@ -78,7 +77,6 @@ namespace gfx
              Points
          };
          struct Environment {
-             const ShaderPass* shader_pass = nullptr;
              // true if running in an "editor mode", which means that even
              // content marked static might have changed and should be checked
              // in case it has been modified and should be re-uploaded.
@@ -154,10 +152,16 @@ namespace gfx
         virtual ~Drawable() = default;
         // Apply the drawable's state (if any) on the program and set the rasterizer state.
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const = 0;
-        // Get the device specific shader object.
-        // If the shader does not yet exist on the device it's created
-        // and compiled.  On any errors nullptr should be returned.
-        virtual Shader* GetShader(const Environment& env, Device& device) const = 0;
+        // Get the device specific shader source applicable for this drawable, its state
+        // and the given environment in which it should execute.
+        // Should return an empty string on any error.
+        virtual std::string GetShader(const Environment& env, const Device& device) const = 0;
+        // Get the shader ID applicable for this drawable, its state and the given
+        // environment in which it should execute.
+        virtual std::string GetShaderId(const Environment& env) const = 0;
+        // Get the human readable debug name that should be associated with the
+        // shader object generated from this material.
+        virtual std::string GetShaderName(const Environment& env) const = 0;
         // Get the device specific geometry object. If the geometry
         // does not yet exist on the device it's created and the
         // contents from this drawable object are uploaded in some
@@ -177,10 +181,7 @@ namespace gfx
         { return true; }
         // Restart the drawable, if applicable.
         virtual void Restart(const Environment& env) {}
-        // Get the vertex program ID for shape. The ID is Used to map the
-        // drawable to a device specific program object when combined with
-        // the material ID.
-        virtual std::string GetProgramId(const Environment& env) const = 0;
+
         // Execute drawable commands coming from the scripting environment.
         // The commands can be used to change the drawable, alter its parameters
         // or trigger its function such as particle emission.
@@ -386,9 +387,10 @@ namespace gfx
           , mStyle(style)
         {}
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
-        virtual Shader* GetShader(const Environment& env, Device& device) const override;
+        virtual std::string GetShader(const Environment& env, const Device& device) const override;
+        virtual std::string GetShaderId(const Environment& env) const override;
+        virtual std::string GetShaderName(const Environment& env) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
-        virtual std::string GetProgramId(const Environment& env) const override;
         virtual void SetStyle(Style style) override
         { mStyle = style; }
         virtual Style GetStyle() const override
@@ -417,9 +419,11 @@ namespace gfx
           , mStyle(style)
         {}
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
-        virtual Shader* GetShader(const Environment& env, Device& device) const override;
+        virtual std::string GetShader(const Environment& env, const Device& device) const override;
+        virtual std::string GetShaderId(const Environment& env) const override;
+        virtual std::string GetShaderName(const Environment& env) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
-        virtual std::string GetProgramId(const Environment& env) const override;
+
         virtual void SetStyle(Style style) override
         { mStyle = style; }
         virtual Style GetStyle() const override
@@ -533,9 +537,11 @@ namespace gfx
           , mBorderLines(border_lines)
         {}
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
-        virtual Shader* GetShader(const Environment& env, Device& device) const override;
+        virtual std::string GetShader(const Environment& env, const Device& device) const override;
+        virtual std::string GetShaderId(const Environment& env) const override;
+        virtual std::string GetShaderName(const Environment& env) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
-        virtual std::string GetProgramId(const Environment& env) const override;
+
         virtual Style GetStyle() const override
         { return Style::Outline; }
     private:
@@ -659,9 +665,11 @@ namespace gfx
         {}
 
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
-        virtual Shader* GetShader(const Environment& env, Device& device) const override;
+        virtual std::string GetShader(const Environment& env, const Device& device) const override;
+        virtual std::string GetShaderId(const Environment& env) const override;
+        virtual std::string GetShaderName(const Environment& env) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
-        virtual std::string GetProgramId(const Environment& env) const override;
+
         virtual Style GetStyle() const override
         { return Style::Solid; }
     private:
@@ -897,9 +905,10 @@ namespace gfx
           , mName(std::move(name))
         {}
 
-        Shader* GetShader(const Environment& env, Device& device) const;
         Geometry* Upload(const Environment& env, const InstanceState& state, Device& device) const;
+        std::string GetShader(const Environment& env, const Device& device) const;
         std::string GetProgramId(const Environment& env) const;
+        std::string GetShaderName(const Environment& env) const;
 
         void ApplyDynamicState(const Environment& env, Program& program) const;
         void Update(const Environment& env, InstanceState& state, float dt) const;
@@ -959,9 +968,10 @@ namespace gfx
           : mClass(std::make_shared<ParticleEngineClass>(params))
         {}
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
-        virtual Shader* GetShader(const Environment& env, Device& device) const override;
+        virtual std::string GetShader(const Environment& env, const Device& device) const override;
+        virtual std::string GetShaderId(const Environment&  env) const override;
+        virtual std::string GetShaderName(const Environment& env) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
-        virtual std::string GetProgramId(const Environment&  env) const override;
         virtual Style GetStyle() const override;
         virtual void Update(const Environment& env, float dt);
         virtual bool IsAlive() const override;
@@ -1002,10 +1012,11 @@ namespace gfx
         {}
 
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& raster) const override;
-        virtual Shader* GetShader(const Environment& env, Device& device) const override;
+        virtual std::string GetShader(const Environment& env, const Device& device) const override;
+        virtual std::string GetShaderId(const Environment& env) const override;
+        virtual std::string GetShaderName(const Environment& env) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual Style GetStyle() const override;
-        virtual std::string GetProgramId(const Environment& env) const override;
 
         inline void AddTile(const Tile& tile)
         { mTiles.push_back(tile); }
@@ -1067,11 +1078,12 @@ namespace gfx
           , mPointB(b)
         {}
         virtual void ApplyDynamicState(const Environment& environment, Program& program, RasterState& state) const override;
-        virtual Shader* GetShader(const Environment& environment, Device& device) const override;
+        virtual std::string GetShader(const Environment& environment, const Device& device) const override;
+        virtual std::string GetShaderId(const Environment& environment) const override;
+        virtual std::string GetShaderName(const Environment& environment) const override;
         virtual Geometry* Upload(const Environment& environment, Device& device) const override;
         virtual Style GetStyle() const override
         { return Style::Outline; }
-        virtual std::string GetProgramId(const Environment& environment) const override;
     private:
         glm::vec3 mPointA;
         glm::vec3 mPointB;
