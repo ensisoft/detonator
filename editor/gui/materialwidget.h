@@ -86,9 +86,9 @@ namespace gui
         void on_actionAddBitmap_triggered();
         void on_actionEditTexture_triggered();
         void on_actionRemoveTexture_triggered();
-        void on_btnSelectShader_clicked();
-        void on_btnCreateShader_clicked();
-        void on_btnEditShader_clicked();
+        void on_actionCreateShader_triggered();
+        void on_actionSelectShader_triggered();
+        void on_actionEditShader_triggered();
         void on_btnResetShader_clicked();
         void on_btnAddTextureMap_clicked();
         void on_btnResetTextureMap_clicked();
@@ -102,6 +102,7 @@ namespace gui
         void on_surfaceType_currentIndexChanged(int);
         void on_activeMap_currentIndexChanged(int);
         void on_gamma_valueChanged(double value);
+        void on_alphaCutoff_valueChanged(double value);
         void on_baseColor_colorChanged(QColor color);
         void on_particleAction_currentIndexChanged(int);
         void on_textureMapFps_valueChanged(double);

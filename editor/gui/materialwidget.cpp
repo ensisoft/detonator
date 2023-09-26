@@ -73,15 +73,24 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     mUI.actionPlay->setEnabled(true);
     mUI.actionStop->setEnabled(false);
 
-    QMenu* menu  = new QMenu(this);
-    QAction* add_texture_from_file = menu->addAction(QIcon("icons:folder.png"), "From File");
-    QAction* add_texture_from_text = menu->addAction(QIcon("icons:text.png"), "From Text");
-    QAction* add_texture_from_bitmap = menu->addAction(QIcon("icons:bitmap.png"), "From Bitmap");
-    connect(add_texture_from_file, &QAction::triggered, this, &MaterialWidget::AddNewTextureMapFromFile);
-    connect(add_texture_from_text, &QAction::triggered, this, &MaterialWidget::AddNewTextureMapFromText);
-    connect(add_texture_from_bitmap, &QAction::triggered, this, &MaterialWidget::AddNewTextureMapFromBitmap);
+    {
+        QMenu* menu = new QMenu(this);
+        QAction* add_texture_from_file = menu->addAction(QIcon("icons:folder.png"), "From File");
+        QAction* add_texture_from_text = menu->addAction(QIcon("icons:text.png"), "From Text");
+        QAction* add_texture_from_bitmap = menu->addAction(QIcon("icons:bitmap.png"), "From Bitmap");
+        connect(add_texture_from_file, &QAction::triggered, this, &MaterialWidget::AddNewTextureMapFromFile);
+        connect(add_texture_from_text, &QAction::triggered, this, &MaterialWidget::AddNewTextureMapFromText);
+        connect(add_texture_from_bitmap, &QAction::triggered, this, &MaterialWidget::AddNewTextureMapFromBitmap);
+        mUI.btnAddTextureMap->setMenu(menu);
+    }
 
-    mUI.btnAddTextureMap->setMenu(menu);
+    {
+        QMenu* menu = new QMenu(this);
+        menu->addAction(mUI.actionCreateShader);
+        menu->addAction(mUI.actionSelectShader);
+        menu->addAction(mUI.actionEditShader);
+        mUI.btnAddShader->setMenu(menu);
+    }
 
     PopulateFromEnum<gfx::MaterialClass::MinTextureFilter>(mUI.minFilter);
     PopulateFromEnum<gfx::MaterialClass::MagTextureFilter>(mUI.magFilter);
@@ -460,7 +469,7 @@ void MaterialWidget::on_actionReloadTextures_triggered()
     this->ReloadTextures();
 }
 
-void MaterialWidget::on_btnSelectShader_clicked()
+void MaterialWidget::on_actionSelectShader_triggered()
 {
     const auto& shader = QFileDialog::getOpenFileName(this,
         tr("Select Shader File"), "",
@@ -472,48 +481,45 @@ void MaterialWidget::on_btnSelectShader_clicked()
     ApplyShaderDescription();
     ReloadShaders();
     GetMaterialProperties();
-
 }
 
-void MaterialWidget::on_btnCreateShader_clicked()
+void MaterialWidget::on_actionCreateShader_triggered()
 {
-    if (mMaterial->GetType() == gfx::MaterialClass::Type::Custom)
+    QString name = GetValue(mUI.materialName);
+    name.replace(' ', '_');
+    const auto& glsl_uri = QString("ws://shaders/es2/%1.glsl").arg(name);
+    const auto& json_uri = QString("ws://shaders/es2/%1.json").arg(name);
+    const auto& glsl_file = mWorkspace->MapFileToFilesystem(glsl_uri);
+    const auto& json_file = mWorkspace->MapFileToFilesystem(json_uri);
+
+    const QString files[2] = {
+        glsl_file, json_file
+    };
+    for (int i=0; i<2; ++i)
     {
-        QString name = GetValue(mUI.materialName);
-        name.replace(' ', '_');
-        const auto& glsl_uri = QString("ws://shaders/es2/%1.glsl").arg(name);
-        const auto& json_uri = QString("ws://shaders/es2/%1.json").arg(name);
-        const auto& glsl_file = mWorkspace->MapFileToFilesystem(glsl_uri);
-        const auto& json_file = mWorkspace->MapFileToFilesystem(json_uri);
+        const auto& file = files[i];
+        if (!FileExists(file))
+            continue;
 
-        const QString files[2] = {
-            glsl_file, json_file
-        };
-        for (int i=0; i<2; ++i)
-        {
-            const auto& file = files[i];
-            if (!FileExists(file))
-                continue;
-
-            QMessageBox msg(this);
-            msg.setIcon(QMessageBox::Question);
-            msg.setWindowTitle("File Exists");
-            msg.setText(tr("A file by the same name already exists in the project folder.\n%1\nOverwrite file ?").arg(files[i]));
-            msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-            if (msg.exec() == QMessageBox::No)
-                return;
-        }
-        const auto& path = mWorkspace->MapFileToFilesystem(QString("ws://shaders/es2"));
-        if (!app::MakePath(path))
-        {
-            ERROR("Failed to create path. [path='%1']", path);
-            QMessageBox msg(this);
-            msg.setIcon(QMessageBox::Critical);
-            msg.setWindowTitle("Filesystem Error");
-            msg.setText(tr("Failed to create file system path.\n%1").arg(path));
-            msg.exec();
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Question);
+        msg.setWindowTitle("File Exists");
+        msg.setText(tr("A file by the same name already exists in the project folder.\n%1\nOverwrite file ?").arg(files[i]));
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        if (msg.exec() == QMessageBox::No)
             return;
-        }
+    }
+    const auto& path = mWorkspace->MapFileToFilesystem(QString("ws://shaders/es2"));
+    if (!app::MakePath(path))
+    {
+        ERROR("Failed to create path. [path='%1']", path);
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setWindowTitle("Filesystem Error");
+        msg.setText(tr("Failed to create file system path.\n%1").arg(path));
+        msg.exec();
+        return;
+    }
 constexpr auto glsl = R"(
 #version 100
 
@@ -579,52 +585,51 @@ constexpr auto json = R"(
   ]
 }
 )";
-        const char* content[2] = { glsl, json };
+    const char* content[2] = { glsl, json };
 
-        for (int i=0; i<2; ++i)
+    for (int i=0; i<2; ++i)
+    {
+        QString error_str;
+        QFile::FileError err_val = QFile::FileError::NoError;
+        if (!app::WriteTextFile(files[i], content[i], &err_val, &error_str))
         {
-            QString error_str;
-            QFile::FileError err_val = QFile::FileError::NoError;
-            if (!app::WriteTextFile(files[i], content[i], &err_val, &error_str))
-            {
-                ERROR("Failed to write shader glsl file. [file='%1', error=%2]", files[i], error_str);
-                QMessageBox msg(this);
-                msg.setIcon(QMessageBox::Critical);
-                msg.setWindowTitle("Filesystem Error");
-                msg.setText(tr("Failed to write file.\n%1\n%2").arg(files[i]).arg(error_str));
-                msg.exec();
-                return;
-            }
+            ERROR("Failed to write shader glsl file. [file='%1', error=%2]", files[i], error_str);
+            QMessageBox msg(this);
+            msg.setIcon(QMessageBox::Critical);
+            msg.setWindowTitle("Filesystem Error");
+            msg.setText(tr("Failed to write file.\n%1\n%2").arg(files[i]).arg(error_str));
+            msg.exec();
+            return;
         }
+    }
 
-        gfx::NoiseBitmapGenerator noise;
-        noise.SetWidth(100);
-        noise.SetHeight(100);
-        // todo: fix this
-        // the min/max prime indices need to be kept in sync with DlgBitmap!
-        noise.Randomize(1, 1000, 3);
+    gfx::NoiseBitmapGenerator noise;
+    noise.SetWidth(100);
+    noise.SetHeight(100);
+    // todo: fix this
+    // the min/max prime indices need to be kept in sync with DlgBitmap!
+    noise.Randomize(1, 1000, 3);
 
-        auto tex = gfx::GenerateNoiseTexture(std::move(noise));
-        tex->SetName("Noise");
+    auto tex = gfx::GenerateNoiseTexture(std::move(noise));
+    tex->SetName("Noise");
 
-        gfx::TextureMap2D map;
-        map.SetType(gfx::TextureMap::Type::Texture2D);
-        map.SetName("kNoise");
-        map.SetNumTextures(1);
-        map.SetTextureSource(0, std::move(tex));
-        map.SetRectUniformName("kNoiseRect");
-        map.SetSamplerName("kNoise");
-        mMaterial->SetShaderUri(app::ToUtf8(glsl_uri));
-        mMaterial->SetNumTextureMaps(1);
-        mMaterial->SetTextureMap(0, std::move(map));
+    gfx::TextureMap2D map;
+    map.SetType(gfx::TextureMap::Type::Texture2D);
+    map.SetName("kNoise");
+    map.SetNumTextures(1);
+    map.SetTextureSource(0, std::move(tex));
+    map.SetRectUniformName("kNoiseRect");
+    map.SetSamplerName("kNoise");
+    mMaterial->SetShaderUri(app::ToUtf8(glsl_uri));
+    mMaterial->SetNumTextureMaps(1);
+    mMaterial->SetTextureMap(0, std::move(map));
 
-        ApplyShaderDescription();
-        ReloadShaders();
-        GetMaterialProperties();
-    } // if
+    ApplyShaderDescription();
+    ReloadShaders();
+    GetMaterialProperties();
 }
 
-void MaterialWidget::on_btnEditShader_clicked()
+void MaterialWidget::on_actionEditShader_triggered()
 {
     const auto& uri = mMaterial->GetShaderUri();
     if (uri.empty())
@@ -638,7 +643,7 @@ void MaterialWidget::on_btnResetShader_clicked()
     if (mMaterial->HasShaderUri())
     {
         mMaterial->ClearShaderUri();
-        SetEnabled(mUI.btnEditShader, false);
+        SetEnabled(mUI.actionEditShader, false);
         SetEnabled(mUI.btnResetShader, false);
         SetValue(mUI.shaderFile, QString(""));
     }
@@ -810,6 +815,8 @@ void MaterialWidget::on_surfaceType_currentIndexChanged(int)
 void MaterialWidget::on_activeMap_currentIndexChanged(int)
 { SetMaterialProperties(); }
 void MaterialWidget::on_gamma_valueChanged(double)
+{ SetMaterialProperties(); }
+void MaterialWidget::on_alphaCutoff_valueChanged(double value)
 { SetMaterialProperties(); }
 void MaterialWidget::on_baseColor_colorChanged(QColor color)
 { SetMaterialProperties(); }
@@ -1346,33 +1353,70 @@ void MaterialWidget::SetMaterialProperties()
     mMaterial->SetStatic(GetValue(mUI.chkStaticInstance));
     mMaterial->SetSurfaceType(GetValue(mUI.surfaceType));
     mMaterial->SetParticleAction(GetValue(mUI.particleAction));
-    mMaterial->SetGamma(GetValue(mUI.gamma));
     mMaterial->SetTextureMinFilter(GetValue(mUI.minFilter));
     mMaterial->SetTextureMagFilter(GetValue(mUI.magFilter));
     mMaterial->SetTextureWrapX(GetValue(mUI.wrapX));
     mMaterial->SetTextureWrapY(GetValue(mUI.wrapY));
-    mMaterial->SetTextureScaleX(GetValue(mUI.scaleX));
-    mMaterial->SetTextureScaleY(GetValue(mUI.scaleY));
-    mMaterial->SetTextureRotation(GetAngle(mUI.rotation));
-    mMaterial->SetTextureVelocityX(GetValue(mUI.velocityX));
-    mMaterial->SetTextureVelocityY(GetValue(mUI.velocityY));
-    mMaterial->SetTextureVelocityZ(GetValue(mUI.velocityZ));
     mMaterial->SetBlendFrames(GetValue(mUI.chkBlendFrames));
     mMaterial->SetActiveTextureMap(GetItemId(mUI.activeMap));
 
-    if (mMaterial->GetType() == gfx::MaterialClass::Type::Gradient)
-    {
-        mMaterial->SetColor(GetValue(mUI.colorMap0), gfx::GradientClass::ColorIndex::TopLeft);
-        mMaterial->SetColor(GetValue(mUI.colorMap1), gfx::GradientClass::ColorIndex::TopRight);
-        mMaterial->SetColor(GetValue(mUI.colorMap2), gfx::GradientClass::ColorIndex::BottomLeft);
-        mMaterial->SetColor(GetValue(mUI.colorMap3), gfx::GradientClass::ColorIndex::BottomRight);
-    }
-    else mMaterial->SetColor(GetValue(mUI.baseColor), gfx::MaterialClass::ColorIndex::BaseColor);
+    // set of known uniforms if they differ from the defaults.
+    // todo: this assumes implicit knowledge about the internals
+    // of the material class. refactor these names away and the
+    // default values away
+    if (math::equals((float)GetValue(mUI.gamma), 1.0f))
+        mMaterial->DeleteUniform("kGamma");
+    else  mMaterial->SetGamma(GetValue(mUI.gamma));
 
-    glm::vec2 offset;
-    offset.x = GetNormalizedValue(mUI.gradientOffsetX);
-    offset.y = GetNormalizedValue(mUI.gradientOffsetY);
-    mMaterial->SetColorWeight(offset);
+    if (math::equals((float)GetValue(mUI.alphaCutoff), 0.0f))
+        mMaterial->DeleteUniform("kAlphaCutoff");
+    else  mMaterial->SetAlphaCutoff(GetValue(mUI.alphaCutoff));
+
+    glm::vec2 texture_scale;
+    texture_scale.x = GetValue(mUI.scaleX);
+    texture_scale.y = GetValue(mUI.scaleY);
+    if (math::equals(texture_scale, glm::vec2(1.0f, 1.0f)))
+        mMaterial->DeleteUniform("kTextureScale");
+    else mMaterial->SetTextureScale(texture_scale);
+
+    if (math::equals((float)GetValue(mUI.rotation), 0.0f))
+        mMaterial->DeleteUniform("kTextureRotation");
+    else mMaterial->SetTextureRotation(GetValue(mUI.rotation));
+
+    glm::vec2 linear_texture_velocity;
+    linear_texture_velocity.x = GetValue(mUI.velocityX);
+    linear_texture_velocity.y = GetValue(mUI.velocityY);
+    float angular_texture_velocity = GetValue(mUI.velocityZ);
+    if (math::equals(glm::vec3(linear_texture_velocity, angular_texture_velocity), glm::vec3(0.0f, 0.0f, 0.0f)))
+        mMaterial->DeleteUniform("kTextureVelocity");
+    else mMaterial->SetTextureVelocity(linear_texture_velocity, angular_texture_velocity);
+
+    if (Equals(GetValue(mUI.colorMap0), gfx::Color::White))
+        mMaterial->DeleteUniform("kColor0");
+    else mMaterial->SetUniform("kColor0", GetValue(mUI.colorMap0));
+
+    if (Equals(GetValue(mUI.colorMap1), gfx::Color::White))
+        mMaterial->DeleteUniform("kColor1");
+    else mMaterial->SetUniform("kColor1", GetValue(mUI.colorMap1));
+
+    if (Equals(GetValue(mUI.colorMap2), gfx::Color::White))
+        mMaterial->DeleteUniform("kColor2");
+    else mMaterial->SetUniform("kColor2", GetValue(mUI.colorMap2));
+
+    if (Equals(GetValue(mUI.colorMap3), gfx::Color::White))
+        mMaterial->DeleteUniform("kColor3");
+    else mMaterial->SetUniform("kColor3", GetValue(mUI.colorMap3));
+
+    if (Equals(GetValue(mUI.baseColor), gfx::Color::White))
+        mMaterial->DeleteUniform("kBaseColor");
+    else mMaterial->SetUniform("kBaseColor", GetValue(mUI.baseColor));
+
+    glm::vec2 gradient_offset;
+    gradient_offset.x = GetNormalizedValue(mUI.gradientOffsetX);
+    gradient_offset.y = GetNormalizedValue(mUI.gradientOffsetY);
+    if (math::equals(gradient_offset, glm::vec2(0.5f, 0.5f)))
+        mMaterial->DeleteUniform("kWeight");
+    else mMaterial->SetColorWeight(gradient_offset);
 
     for (auto* widget : mUniforms)
     {
@@ -1409,9 +1453,9 @@ void MaterialWidget::SetMaterialProperties()
 void MaterialWidget::GetMaterialProperties()
 {
     SetEnabled(mUI.shaderFile,         false);
-    SetEnabled(mUI.btnSelectShader,    false);
-    SetEnabled(mUI.btnCreateShader,    false);
-    SetEnabled(mUI.btnEditShader,      false);
+    SetEnabled(mUI.actionSelectShader, false);
+    SetEnabled(mUI.actionCreateShader, false);
+    SetEnabled(mUI.actionEditShader,   false);
     SetEnabled(mUI.baseColor,          false);
     SetEnabled(mUI.particleAction,     false);
     SetEnabled(mUI.activeMap,          false);
@@ -1437,6 +1481,7 @@ void MaterialWidget::GetMaterialProperties()
     SetValue(mUI.chkBlendPreMulAlpha, mMaterial->PremultipliedAlpha());
     SetValue(mUI.chkBlendFrames,      mMaterial->BlendFrames());
     SetValue(mUI.gamma,               mMaterial->GetGamma());
+    SetValue(mUI.alphaCutoff,         mMaterial->GetAlphaCutoff());
     SetValue(mUI.baseColor,           mMaterial->GetBaseColor());
     SetValue(mUI.particleAction,      mMaterial->GetParticleAction());
     SetValue(mUI.scaleX,              mMaterial->GetTextureScaleX());
@@ -1455,18 +1500,18 @@ void MaterialWidget::GetMaterialProperties()
     {
         SetPlaceholderText(mUI.shaderFile, "None Selected");
         SetEnabled(mUI.shaderFile,      true);
-        SetEnabled(mUI.btnSelectShader, true);
-        SetEnabled(mUI.btnCreateShader, true);
-        SetEnabled(mUI.btnEditShader,   mMaterial->HasShaderUri());
+        SetEnabled(mUI.actionSelectShader, true);
+        SetEnabled(mUI.actionCreateShader, true);
+        SetEnabled(mUI.actionEditShader,   mMaterial->HasShaderUri());
         SetEnabled(mUI.btnResetShader,  mMaterial->HasShaderUri());
     }
     else
     {
         SetPlaceholderText(mUI.shaderFile, "Built-in");
         SetEnabled(mUI.shaderFile,      true);
-        SetEnabled(mUI.btnSelectShader, true); // allow an alternative shader to be used from the file
-        SetEnabled(mUI.btnCreateShader, false); // todo.
-        SetEnabled(mUI.btnEditShader,   mMaterial->HasShaderUri());
+        SetEnabled(mUI.actionSelectShader, true); // allow an alternative shader to be used from the file
+        SetEnabled(mUI.actionCreateShader, true);
+        SetEnabled(mUI.actionEditShader,   mMaterial->HasShaderUri());
         SetEnabled(mUI.btnResetShader,  mMaterial->HasShaderUri());
 
         SetVisible(mUI.builtInProperties,   true);
