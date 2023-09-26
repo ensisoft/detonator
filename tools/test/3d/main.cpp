@@ -381,10 +381,44 @@ public:
         if (mDepthTest && depth_test)
             state.depth_test = gfx::Painter::DepthTest::LessOrEQual;
 
-        painter.Draw(drawable, model_to_world, material, state, gfx::detail::GenericShaderPass());
+        painter.Draw(drawable, model_to_world, material, state, gfx::detail::GenericShaderProgram());
     }
 private:
     const bool mDepthTest;
+};
+
+class DepthTextureShader : public gfx::ShaderProgram
+{
+public:
+    virtual std::string GetShaderId(const gfx::Material& material, const gfx::Material::Environment& env) const override
+    {
+        return "DepthToColor";
+    }
+    virtual std::string GetShader(const gfx::Material& material, const gfx::Material::Environment& env, const gfx::Device& device) const override
+    {
+        // this shader maps the interpolated fragment depth (the .z component)
+        // to a color value linearly. (important to keep this in mind when using
+        // the output values, if rendering to a texture if the sRGB encoding happens
+        // then the depth values are no longer linear!)
+        //
+        // Remember that in the OpenGL pipeline by default the NDC values (-1.0 to 1.0 on all axis)
+        // are mapped to depth values so that -1.0 is least depth and 1.0 is maximum depth.
+        // (OpenGL and ES3 have glDepthRange for modifying this mapping.)
+        constexpr const auto* depth_to_color = R"(
+#version 100
+precision highp float;
+
+void main() {
+   gl_FragColor.rgb = vec3(gl_FragCoord.z);
+   gl_FragColor.a = 1.0;
+}
+)";
+        return depth_to_color;
+    }
+    virtual std::string GetName() const override
+    { return "DepthTextureShader"; }
+private:
+
 };
 
 class DepthTexturePass : public RenderPass
@@ -400,7 +434,7 @@ public:
         state.write_color  = true; // writing depth to texture so this must be true!
         state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
         state.stencil_func = gfx::Painter::StencilFunc::Disabled;
-        painter.Draw(drawable, model_to_world, material, state, gfx::detail::DepthTextureShaderPass());
+        painter.Draw(drawable, model_to_world, material, state, DepthTextureShader());
     }
 private:
 };

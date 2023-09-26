@@ -29,10 +29,10 @@
 #include "graphics/algo.h"
 
 namespace {
-class BloomShaderPass : public gfx::ShaderPass
+class BloomShader : public gfx::ShaderProgram
 {
 public:
-    BloomShaderPass(const gfx::Color4f& color, float threshold)
+    BloomShader(const gfx::Color4f& color, float threshold)
       : mColor(color)
       , mThreshold(threshold)
     {}
@@ -41,8 +41,16 @@ public:
         const auto* packet = static_cast<const engine::DrawPacket*>(user);
         return packet->flags.test(engine::DrawPacket::Flags::PP_Bloom);
     }
-    virtual std::string ModifyFragmentSource(gfx::Device& device, std::string source) const override
+    virtual std::string GetShaderId(const gfx::Material& material, const gfx::Material::Environment& env) const override
     {
+        auto ret = material.GetShaderId(env);
+        ret += "+bloom";
+        return ret;
+    }
+    virtual std::string GetShader(const gfx::Material& material, const gfx::Material::Environment& env, const gfx::Device& device) const override
+    {
+        std::string source = material.GetShader(env, device);
+
         constexpr auto* src = R"(
 uniform float kBloomThreshold;
 uniform vec4  kBloomColor;
@@ -56,13 +64,9 @@ vec4 ShaderPass(vec4 color) {
         source += src;
         return source;
     }
-    virtual std::size_t GetHash() const override
-    { return base::hash_combine(0, "BloomShaderPass"); }
     virtual std::string GetName() const override
-    { return "BloomShaderPass"; }
-    virtual gfx::ShaderPass::Type GetType() const override
-    { return Type::Custom; }
-    virtual void ApplyDynamicState(gfx::Program& program, gfx::Device::State& state) const override
+    { return "BloomShader"; }
+    virtual void ApplyDynamicState(const gfx::Device& device, gfx::Program& program, gfx::Device::State& state) const override
     {
         program.SetUniform("kBloomThreshold", mThreshold);
         program.SetUniform("kBloomColor",     mColor);
@@ -127,7 +131,7 @@ void BloomPass::Draw(const SceneRenderLayerList& layers) const
     mPainter.SetFramebuffer(bloom_fbo);
     mPainter.ClearColor(gfx::Color::Transparent);
 
-    const BloomShaderPass bloom_shader_pass(mColor, mThreshold);
+    const BloomShader bloom_shader(mColor, mThreshold);
 
     for (const auto& scene_layer : layers)
     {
@@ -163,7 +167,7 @@ void BloomPass::Draw(const SceneRenderLayerList& layers) const
             else if (!entity_layer.draw_color_list.empty())
             {
                 const gfx::GenericRenderPass pass(mPainter);
-                pass.Draw(entity_layer.draw_color_list, bloom_shader_pass);
+                pass.Draw(entity_layer.draw_color_list, bloom_shader);
             }
         }
     }

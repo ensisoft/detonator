@@ -520,11 +520,10 @@ void unit_test_material_uniforms()
         // check that the dynamic state is set as expected.
         // this should mean that both static uniforms  and dynamic
         // uniforms are set.
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
         env.render_points = false;
         env.material_time = 0.0f;
-        env.shader_pass   = &pass;
         test.ApplyDynamicState(env, device, program);
 
         gfx::Color4f base_color;
@@ -544,11 +543,10 @@ void unit_test_material_uniforms()
         test.SetStatic(false);
         test.SetGamma(2.0f);
 
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
         env.render_points = false;
         env.material_time = 0.0f;
-        env.shader_pass   = &pass;
         test.ApplyDynamicState(env, device, program);
 
         glm::vec1 gamma;
@@ -585,11 +583,10 @@ void unit_test_material_uniforms()
         test.SetStatic(false);
         test.SetTexture(gfx::CreateTextureFromBitmap(bitmap));
 
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
         env.render_points = false;
         env.material_time = 2.0f;
-        env.shader_pass   = &pass;
         test.ApplyDynamicState(env, device, program);
 
         glm::vec2 texture_scale;
@@ -632,11 +629,10 @@ void unit_test_material_uniforms()
         test.AddTexture(gfx::CreateTextureFromBitmap(bitmap));
         test.AddTexture(gfx::CreateTextureFromBitmap(bitmap));
 
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
         env.render_points = false;
         env.material_time = 2.0f;
-        env.shader_pass   = &pass;
         test.ApplyDynamicState(env, device, program);
 
         glm::vec2 texture_scale;
@@ -674,11 +670,10 @@ void unit_test_material_uniforms()
         test.SetStatic(true);
         test.SetGamma(2.0f);
 
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
         env.render_points = false;
         env.material_time = 0.0f;
-        env.shader_pass   = &pass;
 
         test.ApplyStaticState(env, device, program);
         gfx::Color4f base_color;
@@ -702,11 +697,10 @@ void unit_test_material_uniforms()
         test.SetStatic(true);
         test.SetGamma(2.0f);
 
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
         env.render_points = false;
         env.material_time = 0.0f;
-        env.shader_pass   = &pass;
 
         test.ApplyStaticState(env, device, program);
         glm::vec1 gamma;
@@ -752,11 +746,10 @@ void unit_test_material_uniforms()
         test.SetStatic(true);
         test.SetTexture(gfx::CreateTextureFromBitmap(bitmap));
 
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
         env.render_points = false;
         env.material_time = 2.0f;
-        env.shader_pass   = &pass;
 
         test.ApplyStaticState(env, device, program);
         glm::vec2 texture_scale;
@@ -800,11 +793,10 @@ void unit_test_material_uniforms()
         test.AddTexture(gfx::CreateTextureFromBitmap(bitmap));
         test.AddTexture(gfx::CreateTextureFromBitmap(bitmap));
 
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
         env.render_points = false;
         env.material_time = 2.0f;
-        env.shader_pass   = &pass;
 
         test.ApplyStaticState(env, device, program);
         glm::vec2 texture_scale;
@@ -838,15 +830,14 @@ void unit_test_material_uniforms()
         foo.SetStatic(true);
         foo.SetBaseColor(gfx::Color::Red);
 
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State state;
-        state.shader_pass = &pass;
 
         auto bar = foo;
-        TEST_REQUIRE(foo.GetProgramId(state) == bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) == bar.GetShaderId(state));
 
         bar.SetBaseColor(gfx::Color::Green);
-        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
     }
 
 
@@ -858,24 +849,23 @@ void unit_test_material_uniforms()
         foo.SetColor(gfx::Color::DarkMagenta, gfx::GradientClass::ColorIndex::BottomRight);
         foo.SetColor(gfx::Color::DarkGray,    gfx::GradientClass::ColorIndex::TopRight);
 
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State state;
-        state.shader_pass = &pass;
 
         auto bar = foo;
-        TEST_REQUIRE(foo.GetProgramId(state) == bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) == bar.GetShaderId(state));
 
         foo.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::BottomLeft);
-        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
         foo.SetColor(gfx::Color::White,gfx::GradientClass::ColorIndex::TopLeft);
-        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
         foo.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::BottomRight);
-        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
         foo.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::TopRight);
-        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
     }
 
     {
@@ -888,29 +878,28 @@ void unit_test_material_uniforms()
         foo.SetTextureVelocityY(5.0f);
         foo.SetTextureVelocityZ(-1.0f);
 
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State state;
-        state.shader_pass = &pass;
 
         auto bar = foo;
-        TEST_REQUIRE(bar.GetProgramId(state) == foo.GetProgramId(state));
+        TEST_REQUIRE(bar.GetShaderId(state) == foo.GetShaderId(state));
         foo.SetGamma(2.5f);
-        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
         foo.SetTextureScaleX(2.2f);
-        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
         foo.SetTextureScaleY(2.0f);
-        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
         foo.SetTextureVelocityX(4.1f);
-        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
         foo.SetTextureVelocityY(-5.0f);
-        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
         foo.SetTextureVelocityZ(1.0f);
-        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
     }
 
     {
@@ -924,32 +913,31 @@ void unit_test_material_uniforms()
         foo.SetTextureVelocityZ(-1.0f);
         foo.SetBaseColor(gfx::Color::Red);
 
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State state;
-        state.shader_pass = &pass;
 
         auto bar = foo;
-        TEST_REQUIRE(bar.GetProgramId(state) == foo.GetProgramId(state));
+        TEST_REQUIRE(bar.GetShaderId(state) == foo.GetShaderId(state));
         foo.SetGamma(2.5f);
-        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
         foo.SetTextureScaleX(2.2f);
-        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
         foo.SetTextureScaleY(2.0f);
-        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
         foo.SetTextureVelocityX(4.1f);
-        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
         foo.SetTextureVelocityY(-5.0f);
-        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
         foo.SetTextureVelocityZ(1.0f);
-        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
         bar = foo;
         foo.SetBaseColor(gfx::Color::Blue);
-        TEST_REQUIRE(foo.GetProgramId(state) != bar.GetProgramId(state));
+        TEST_REQUIRE(foo.GetShaderId(state) != bar.GetShaderId(state));
     }
 }
 
@@ -972,10 +960,9 @@ void unit_test_material_textures()
         bitmap.Resize(100, 80);
         test.SetTexture(gfx::CreateTextureFromBitmap(bitmap));
 
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
         env.material_time = 1.0;
-        env.shader_pass   = &pass;
         test.ApplyDynamicState(env, device, program);
 
         const auto& texture = device.GetTexture(0);
@@ -1004,9 +991,8 @@ void unit_test_material_textures()
         TestDevice device;
         TestProgram program;
         {
-            gfx::detail::GenericShaderPass pass;
+            gfx::detail::GenericShaderProgram pass;
             gfx::MaterialClass::State env;
-            env.shader_pass   = &pass;
             env.material_time = 0.0f;
             test.ApplyDynamicState(env, device, program);
             const auto &texture = device.GetTexture(0);
@@ -1020,9 +1006,8 @@ void unit_test_material_textures()
         }
         program.Clear();
         {
-            gfx::detail::GenericShaderPass pass;
+            gfx::detail::GenericShaderProgram pass;
             gfx::MaterialClass::State env;
-            env.shader_pass   = &pass;
             env.material_time = 1.5f;
             test.ApplyDynamicState(env, device, program);
             const auto &texture = device.GetTexture(0);
@@ -1054,9 +1039,8 @@ void unit_test_material_textures()
         TestDevice device;
         TestProgram program;
         {
-            gfx::detail::GenericShaderPass pass;
+            gfx::detail::GenericShaderProgram pass;
             gfx::MaterialClass::State env;
-            env.shader_pass   = &pass;
             env.material_time = 0.0f;
             test.ApplyDynamicState(env, device, program);
             const auto& tex0 = device.GetTexture(0);
@@ -1068,9 +1052,8 @@ void unit_test_material_textures()
         }
         program.Clear();
         {
-            gfx::detail::GenericShaderPass pass;
+            gfx::detail::GenericShaderProgram pass;
             gfx::MaterialClass::State env;
-            env.shader_pass   = &pass;
             env.material_time = 1.0f;
             test.ApplyDynamicState(env, device, program);
             const auto& tex0 = device.GetTexture(0);
@@ -1104,9 +1087,8 @@ void unit_test_material_textures()
         TestDevice device;
         TestProgram program;
         {
-            gfx::detail::GenericShaderPass pass;
+            gfx::detail::GenericShaderProgram pass;
             gfx::MaterialClass::State env;
-            env.shader_pass   = &pass;
             env.material_time = 0.0f;
             test.ApplyDynamicState(env, device, program);
             const auto& tex0 = device.GetTexture(0);
@@ -1118,9 +1100,8 @@ void unit_test_material_textures()
         }
         program.Clear();
         {
-            gfx::detail::GenericShaderPass pass;
+            gfx::detail::GenericShaderProgram pass;
             gfx::MaterialClass::State env;
-            env.shader_pass   = &pass;
             env.material_time = 1.0f;
             test.ApplyDynamicState(env, device, program);
             const auto& tex0 = device.GetTexture(0);
@@ -1133,9 +1114,8 @@ void unit_test_material_textures()
         }
         program.Clear();
         {
-            gfx::detail::GenericShaderPass pass;
+            gfx::detail::GenericShaderProgram pass;
             gfx::MaterialClass::State env;
-            env.shader_pass   = &pass;
             env.material_time = 2.5f;
             test.ApplyDynamicState(env, device, program);
             const auto& tex0 = device.GetTexture(0);
@@ -1171,9 +1151,8 @@ void unit_test_material_textures()
         TestDevice device;
         TestProgram program;
         {
-            gfx::detail::GenericShaderPass pass;
+            gfx::detail::GenericShaderProgram pass;
             gfx::MaterialClass::State env;
-            env.shader_pass   = &pass;
             env.material_time = 0.0f;
             test.ApplyDynamicState(env, device, program);
             const auto& tex0 = device.GetTexture(0);
@@ -1186,9 +1165,8 @@ void unit_test_material_textures()
 
         program.Clear();
         {
-            gfx::detail::GenericShaderPass pass;
+            gfx::detail::GenericShaderProgram pass;
             gfx::MaterialClass::State env;
-            env.shader_pass   = &pass;
             env.material_time = 1.0f;
             test.ApplyDynamicState(env, device, program);
             const auto& tex0 = device.GetTexture(0);
@@ -1201,9 +1179,8 @@ void unit_test_material_textures()
         }
         program.Clear();
         {
-            gfx::detail::GenericShaderPass pass;
+            gfx::detail::GenericShaderProgram pass;
             gfx::MaterialClass::State env;
-            env.shader_pass   = &pass;
             env.material_time = 2.5f;
             test.ApplyDynamicState(env, device, program);
             const auto& tex0 = device.GetTexture(0);
@@ -1230,9 +1207,8 @@ void unit_test_material_textures_bind_fail()
         gfx::TextureMap2DClass test(gfx::MaterialClass::Type::Texture);
         test.SetTexture(gfx::LoadTextureFromFile("no-such-file.png"));
 
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
-        env.shader_pass   = &pass;
         env.material_time = 1.0;
         // no crash
         test.ApplyDynamicState(env, device, program);
@@ -1242,9 +1218,8 @@ void unit_test_material_textures_bind_fail()
         gfx::SpriteClass test(gfx::MaterialClass::Type::Sprite);
         test.AddTexture( gfx::LoadTextureFromFile("no-such-file.png"));
 
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
-        env.shader_pass   = &pass;
         env.material_time = 1.0;
         // no crash
         test.ApplyDynamicState(env, device, program);
@@ -1260,9 +1235,8 @@ void unit_test_material_textures_bind_fail()
         test.SetNumTextureMaps(1);
         test.SetTextureMap(0, sprite);
 
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
-        env.shader_pass   = &pass;
         env.material_time = 1.0;
         // no crash
         test.ApplyDynamicState(env, device, program);
@@ -1273,9 +1247,8 @@ void unit_test_material_uniform_folding()
 {
     TEST_CASE(test::Type::Feature)
 
-    gfx::detail::GenericShaderPass pass;
+    gfx::detail::GenericShaderProgram pass;
     gfx::MaterialClass::State state;
-    state.shader_pass = &pass;
 
     // fold uniforms into consts in the GLSL when the material is
     // marked static.
@@ -1286,10 +1259,7 @@ void unit_test_material_uniform_folding()
         klass.SetGamma(0.8f);
         klass.SetBaseColor(gfx::Color::White);
         klass.SetStatic(true);
-        klass.GetShader(state, device);
-
-        const auto& shader = device.GetShader(0);
-        const auto& source = shader.GetSource();
+        auto source = klass.GetShader(state, device);
         TEST_REQUIRE(base::Contains(source, "uniform float kGamma;") == false);
         TEST_REQUIRE(base::Contains(source, "uniform vec4 kBaseColor;") == false);
         TEST_REQUIRE(base::Contains(source, "const float kGamma = 0.80;"));
@@ -1306,10 +1276,7 @@ void unit_test_material_uniform_folding()
         klass.SetColor(gfx::Color::Red,   gfx::GradientClass::ColorIndex::BottomRight);
         klass.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::TopRight);
         klass.SetStatic(true);
-        klass.GetShader(state, device);
-
-        const auto& shader = device.GetShader(0);
-        const auto& source = shader.GetSource();
+        auto source = klass.GetShader(state, device);
         TEST_REQUIRE(base::Contains(source, "uniform float kGamma;") == false);
         TEST_REQUIRE(base::Contains(source, "uniform vec4 kColor0;") == false);
         TEST_REQUIRE(base::Contains(source, "uniform vec4 kColor1;") == false);
@@ -1334,10 +1301,7 @@ void unit_test_material_uniform_folding()
         klass.SetTextureVelocityZ(-1.0f);
         klass.SetTextureScaleX(2.0);
         klass.SetTextureScaleY(3.0);
-        klass.GetShader(state, device);
-
-        const auto& shader = device.GetShader(0);
-        const auto& source = shader.GetSource();
+        auto source = klass.GetShader(state, device);
         TEST_REQUIRE(base::Contains(source, "uniform float kGamma;") == false);
         TEST_REQUIRE(base::Contains(source, "uniform vec4 kBaseColor;") == false);
         TEST_REQUIRE(base::Contains(source, "uniform vec2 kTextureScale") == false);
@@ -1360,10 +1324,7 @@ void unit_test_material_uniform_folding()
         klass.SetTextureVelocityZ(-1.0f);
         klass.SetTextureScaleX(2.0);
         klass.SetTextureScaleY(3.0);
-        klass.GetShader(state, device);
-
-        const auto& shader = device.GetShader(0);
-        const auto& source = shader.GetSource();
+        auto source = klass.GetShader(state, device);
         TEST_REQUIRE(base::Contains(source, "uniform float kGamma;") == false);
         TEST_REQUIRE(base::Contains(source, "uniform vec2 kTextureScale") == false);
         TEST_REQUIRE(base::Contains(source, "uniform vec2 kTextureVelocityXY") == false);
@@ -1388,10 +1349,9 @@ void unit_test_custom_uniforms()
 
     TestDevice device;
     TestProgram program;
-    gfx::detail::GenericShaderPass pass;
+    gfx::detail::GenericShaderProgram pass;
     gfx::MaterialClass::State env;
     env.material_time = 0.0f;
-    env.shader_pass   = &pass;
     klass.ApplyDynamicState(env, device, program);
 
     glm::ivec1 ivec1_;
@@ -1461,9 +1421,8 @@ void unit_test_custom_textures()
     TestDevice device;
     TestProgram program;
 
-    gfx::detail::GenericShaderPass pass;
+    gfx::detail::GenericShaderProgram pass;
     gfx::MaterialClass::State env;
-    env.shader_pass = &pass;
     klass.ApplyDynamicState(env, device, program);
     // these textures should be bound to these samplers. check the textures based on their sizes.
     TEST_REQUIRE(program.FindTextureBinding("kFoobar")->texture->GetWidth() == 10);
@@ -1588,9 +1547,8 @@ void unit_test_local_particles()
         gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::DrawableClass::Environment env;
-        env.shader_pass = &pass;
         eng.Restart(env);
         auto* geom = (TestGeometry*)eng.Upload(env, dev);
         TEST_REQUIRE(geom->VertexCount<ParticleVertex>() == p.num_particles);
@@ -1621,9 +1579,8 @@ void unit_test_local_particles()
         gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::DrawableClass::Environment env;
-        env.shader_pass = &pass;
         eng.Restart(env);
         auto* geom = (TestGeometry*)eng.Upload(env, dev);
         TEST_REQUIRE(geom->VertexCount<ParticleVertex>() == p.num_particles);
@@ -1654,9 +1611,8 @@ void unit_test_local_particles()
         gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::DrawableClass::Environment env;
-        env.shader_pass = &pass;
         eng.Restart(env);
         auto* geom = (TestGeometry*)eng.Upload(env, dev);
         TEST_REQUIRE(geom->VertexCount<ParticleVertex>() == p.num_particles);
@@ -1689,9 +1645,8 @@ void unit_test_local_particles()
         gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::DrawableClass::Environment env;
-        env.shader_pass = &pass;
         eng.Restart(env);
         auto* geom = (TestGeometry*)eng.Upload(env, dev);
         TEST_REQUIRE(geom->VertexCount<ParticleVertex>() == p.num_particles);
@@ -1729,9 +1684,8 @@ void unit_test_local_particles()
             gfx::ParticleEngineInstance eng(klass);
 
             TestDevice dev;
-            gfx::detail::GenericShaderPass pass;
+            gfx::detail::GenericShaderProgram pass;
             gfx::DrawableClass::Environment env;
-            env.shader_pass = &pass;
             eng.Restart(env);
             auto* geom = (TestGeometry*) eng.Upload(env, dev);
             TEST_REQUIRE(geom->VertexCount<ParticleVertex>() == p.num_particles);
@@ -1772,9 +1726,8 @@ void unit_test_local_particles()
         gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::DrawableClass::Environment env;
-        env.shader_pass = &pass;
         eng.Restart(env);
         eng.Update(env, 1.0/60.0f);
         auto* geom = (TestGeometry*) eng.Upload(env, dev);
@@ -1808,9 +1761,8 @@ void unit_test_local_particles()
         gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::DrawableClass::Environment env;
-        env.shader_pass = &pass;
         eng.Restart(env);
         eng.Update(env, 1.0/60.0f);
         auto* geom = (TestGeometry*) eng.Upload(env, dev);
@@ -1846,9 +1798,8 @@ void unit_test_particles()
         gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::DrawableClass::Environment env;
-        env.shader_pass = &pass;
 
         eng.Restart(env);
         TEST_REQUIRE(eng.IsAlive());
@@ -1871,9 +1822,8 @@ void unit_test_particles()
         gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::DrawableClass::Environment env;
-        env.shader_pass = &pass;
 
         eng.Restart(env);
         TEST_REQUIRE(eng.IsAlive());
@@ -1900,9 +1850,8 @@ void unit_test_particles()
         gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::DrawableClass::Environment env;
-        env.shader_pass = &pass;
 
         // we're starting with 0 particles and on every update
         // spawn new particles within the spawn rate.
@@ -1934,9 +1883,8 @@ void unit_test_particles()
         gfx::ParticleEngineInstance eng(klass);
 
         TestDevice dev;
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::DrawableClass::Environment env;
-        env.shader_pass = &pass;
 
         eng.Restart(env);
         TEST_REQUIRE(eng.IsAlive());
@@ -2022,9 +1970,8 @@ void unit_test_packed_texture_bug()
 
         TestDevice device;
         TestProgram program;
-        gfx::detail::GenericShaderPass pass;
+        gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
-        env.shader_pass   = &pass;
         env.material_time = 0.0f;
         env.editing_mode  = false;
         material0.ApplyDynamicState(env, device, program);
@@ -2045,9 +1992,8 @@ void unit_test_packed_texture_bug()
 // however not having static should not generate new IDs
 void unit_test_gpu_id_bug()
 {
-    gfx::detail::GenericShaderPass pass;
+    gfx::detail::GenericShaderProgram pass;
     gfx::MaterialClass::State env;
-    env.shader_pass   = &pass;
     env.material_time = 0.0f;
     env.editing_mode  = false;
 
@@ -2066,10 +2012,10 @@ void unit_test_gpu_id_bug()
         klass.SetColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::BaseColor);
         klass.SetGamma(1.0f);
 
-        const auto& initial = klass.GetProgramId(env);
+        const auto& initial = klass.GetShaderId(env);
         klass.SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BaseColor);
         klass.SetGamma(1.5f);
-        TEST_REQUIRE(klass.GetProgramId(env) == initial);
+        TEST_REQUIRE(klass.GetShaderId(env) == initial);
     }
 
     {
@@ -2082,7 +2028,7 @@ void unit_test_gpu_id_bug()
         klass.SetTextureVelocityX(0.0f);
         klass.SetTextureVelocityY(0.0f);
         klass.SetTextureRotation(0.0f);
-        const auto& initial = klass.GetProgramId(env);
+        const auto& initial = klass.GetShaderId(env);
 
         klass.SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BaseColor);
         klass.SetGamma(1.5f);
@@ -2091,7 +2037,7 @@ void unit_test_gpu_id_bug()
         klass.SetTextureVelocityX(1.0f);
         klass.SetTextureVelocityY(1.0f);
         klass.SetTextureRotation(1.0f);
-        TEST_REQUIRE(klass.GetProgramId(env) == initial);
+        TEST_REQUIRE(klass.GetShaderId(env) == initial);
     }
 
     {
@@ -2104,7 +2050,7 @@ void unit_test_gpu_id_bug()
         klass.SetTextureVelocityX(0.0f);
         klass.SetTextureVelocityY(0.0f);
         klass.SetTextureRotation(0.0f);
-        const auto& initial = klass.GetProgramId(env);
+        const auto& initial = klass.GetShaderId(env);
 
         klass.SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BaseColor);
         klass.SetGamma(1.5f);
@@ -2113,7 +2059,7 @@ void unit_test_gpu_id_bug()
         klass.SetTextureVelocityX(1.0f);
         klass.SetTextureVelocityY(1.0f);
         klass.SetTextureRotation(1.0f);
-        TEST_REQUIRE(klass.GetProgramId(env) == initial);
+        TEST_REQUIRE(klass.GetShaderId(env) == initial);
     }
 
     // static
@@ -2123,10 +2069,10 @@ void unit_test_gpu_id_bug()
         klass.SetColor(gfx::Color::White, gfx::MaterialClass::ColorIndex::BaseColor);
         klass.SetGamma(1.0f);
 
-        const auto& initial = klass.GetProgramId(env);
+        const auto& initial = klass.GetShaderId(env);
         klass.SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BaseColor);
         klass.SetGamma(1.5f);
-        TEST_REQUIRE(klass.GetProgramId(env) != initial);
+        TEST_REQUIRE(klass.GetShaderId(env) != initial);
     }
 
     {
@@ -2139,7 +2085,7 @@ void unit_test_gpu_id_bug()
         klass.SetTextureVelocityX(0.0f);
         klass.SetTextureVelocityY(0.0f);
         klass.SetTextureRotation(0.0f);
-        const auto& initial = klass.GetProgramId(env);
+        const auto& initial = klass.GetShaderId(env);
 
         klass.SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BaseColor);
         klass.SetGamma(1.5f);
@@ -2148,7 +2094,7 @@ void unit_test_gpu_id_bug()
         klass.SetTextureVelocityX(1.0f);
         klass.SetTextureVelocityY(1.0f);
         klass.SetTextureRotation(1.0f);
-        TEST_REQUIRE(klass.GetProgramId(env) != initial);
+        TEST_REQUIRE(klass.GetShaderId(env) != initial);
     }
 
     {
@@ -2161,7 +2107,7 @@ void unit_test_gpu_id_bug()
         klass.SetTextureVelocityX(0.0f);
         klass.SetTextureVelocityY(0.0f);
         klass.SetTextureRotation(0.0f);
-        const auto& initial = klass.GetProgramId(env);
+        const auto& initial = klass.GetShaderId(env);
 
         klass.SetColor(gfx::Color::Red, gfx::MaterialClass::ColorIndex::BaseColor);
         klass.SetGamma(1.5f);
@@ -2170,7 +2116,7 @@ void unit_test_gpu_id_bug()
         klass.SetTextureVelocityX(1.0f);
         klass.SetTextureVelocityY(1.0f);
         klass.SetTextureRotation(1.0f);
-        TEST_REQUIRE(klass.GetProgramId(env) != initial);
+        TEST_REQUIRE(klass.GetShaderId(env) != initial);
     }
 
 }

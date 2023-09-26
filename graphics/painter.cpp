@@ -21,6 +21,7 @@
 
 #include <string>
 
+#include "base/format.h"
 #include "graphics/device.h"
 #include "graphics/shader.h"
 #include "graphics/program.h"
@@ -48,7 +49,7 @@ void Painter::ClearDepth(float depth) const
 
 void Painter::Draw(const std::vector<DrawShape>& shapes,
                    const RenderPassState& render_pass_state,
-                   const ShaderPass& shader_pass) const
+                   const ShaderProgram& program) const
 {
 
     Device::State device_state;
@@ -66,7 +67,7 @@ void Painter::Draw(const std::vector<DrawShape>& shapes,
     for (const auto& shape : shapes)
     {
         // Low level draw filtering.
-        if (!shader_pass.FilterDraw(shape.user))
+        if (!program.FilterDraw(shape.user))
             continue;
 
         Drawable::Environment drawable_env;
@@ -75,7 +76,6 @@ void Painter::Draw(const std::vector<DrawShape>& shapes,
         drawable_env.view_matrix  = &mViewMatrix;
         drawable_env.proj_matrix  = &mProjMatrix;
         drawable_env.model_matrix = shape.transform;
-        drawable_env.shader_pass  = &shader_pass;
         Geometry* geometry = shape.drawable->Upload(drawable_env, *mDevice);
         if (geometry == nullptr)
             continue;
@@ -83,13 +83,12 @@ void Painter::Draw(const std::vector<DrawShape>& shapes,
         Material::Environment material_env;
         material_env.editing_mode  = mEditingMode;
         material_env.render_points = shape.drawable->GetStyle() == Drawable::Style::Points;
-        material_env.shader_pass   = &shader_pass;
-        Program* program = GetProgram(*shape.drawable, *shape.material, drawable_env, material_env);
-        if (program == nullptr)
+        Program* gpu_program = GetProgram(program, *shape.drawable, *shape.material, drawable_env, material_env);
+        if (gpu_program == nullptr)
             continue;
 
         Material::RasterState material_raster_state;
-        if (!shape.material->ApplyDynamicState(material_env, *mDevice, *program, material_raster_state))
+        if (!shape.material->ApplyDynamicState(material_env, *mDevice, *gpu_program, material_raster_state))
             continue;
         device_state.blending    = material_raster_state.blending;
         device_state.premulalpha = material_raster_state.premultiplied_alpha;
@@ -98,15 +97,13 @@ void Painter::Draw(const std::vector<DrawShape>& shapes,
         drawable_raster_state.culling    = shape.culling;
         drawable_raster_state.line_width = shape.line_width;
 
-        shape.drawable->ApplyDynamicState(drawable_env, *program, drawable_raster_state);
+        shape.drawable->ApplyDynamicState(drawable_env, *gpu_program, drawable_raster_state);
         device_state.line_width = drawable_raster_state.line_width;
         device_state.culling    = drawable_raster_state.culling;
 
-        // Do final state setting here. The shader pass can then ultimately decide
-        // on the best program and device state for this draw.
-        shader_pass.ApplyDynamicState(*program, device_state);
+        program.ApplyDynamicState(*mDevice, *gpu_program, device_state);
 
-        mDevice->Draw(*program, *geometry, device_state, mFrameBuffer);
+        mDevice->Draw(*gpu_program, *geometry, device_state, mFrameBuffer);
     }
 }
 
@@ -114,7 +111,7 @@ void Painter::Draw(const Drawable& shape,
                    const glm::mat4& model,
                    const Material& material,
                    const RenderPassState& render_pass_state,
-                   const ShaderPass& shader_pass,
+                   const ShaderProgram& program,
                    const LegacyDrawState& draw_state) const
 {
     std::vector<DrawShape> shapes;
@@ -124,7 +121,7 @@ void Painter::Draw(const Drawable& shape,
     shapes[0].transform  = &model;
     shapes[0].line_width = draw_state.line_width;
     shapes[0].culling    = draw_state.culling;
-    Draw(shapes, render_pass_state, shader_pass);
+    Draw(shapes, render_pass_state, program);
 }
 
 void Painter::Draw(const Drawable& drawable,
@@ -136,7 +133,7 @@ void Painter::Draw(const Drawable& drawable,
     render_pass_state.write_color  = true;
     render_pass_state.stencil_func = StencilFunc::Disabled;
     render_pass_state.depth_test   = DepthTest::Disabled;
-    detail::GenericShaderPass shader_pass;
+    detail::GenericShaderProgram shader_pass;
     Draw(drawable, model, material, render_pass_state, shader_pass, draw_state);
 }
 
@@ -151,40 +148,69 @@ std::unique_ptr<Painter> Painter::Create(Device* device)
     return std::make_unique<Painter>(device);
 }
 
-Program* Painter::GetProgram(const Drawable& drawable,
+Program* Painter::GetProgram(const ShaderProgram& program,
+                             const Drawable& drawable,
                              const Material& material,
                              const Drawable::Environment& drawable_environment,
                              const Material::Environment& material_environment) const
 {
-    const auto& id = drawable.GetProgramId(drawable_environment) + "/" +
-                     material.GetProgramId(material_environment);
-    Program* program = mDevice->FindProgram(id);
-    if (!program)
+    const auto& material_gpu_id = program.GetShaderId(material, material_environment);
+    const auto& drawable_gpu_id = program.GetShaderId(drawable, drawable_environment);
+    const auto& program_gpu_id = drawable_gpu_id + "/" + material_gpu_id;
+
+    Program* gpu_program = mDevice->FindProgram(program_gpu_id);
+    if (!gpu_program)
     {
-        Shader* drawable_shader = drawable.GetShader(drawable_environment, *mDevice);
-        if (!drawable_shader || !drawable_shader->IsValid())
-            return nullptr;
-        Shader* material_shader = material.GetShader(material_environment, *mDevice);
-        if (!material_shader || !material_shader->IsValid())
+        gfx::Shader* material_shader = mDevice->FindShader(material_gpu_id);
+        if (material_shader == nullptr)
+        {
+            std::string material_shader_source = program.GetShader(material, material_environment, *mDevice);
+            if (material_shader_source.empty())
+                return nullptr;
+
+            material_shader = mDevice->MakeShader(material_gpu_id);
+            material_shader->SetName(material.GetShaderName(material_environment));
+            material_shader->CompileSource(std::move(material_shader_source));
+        }
+        if (!material_shader->IsValid())
             return nullptr;
 
-        const auto& name = drawable_shader->GetName() + "/" +
-                           material_shader->GetName();
+        gfx::Shader* drawable_shader = mDevice->FindShader(drawable_gpu_id);
+        if (drawable_shader == nullptr)
+        {
+            std::string drawable_shader_source = program.GetShader(drawable, drawable_environment, *mDevice);
+            if (drawable_shader_source.empty())
+                return nullptr;
 
+            drawable_shader = mDevice->MakeShader(drawable_gpu_id);
+            drawable_shader->SetName(drawable.GetShaderName(drawable_environment));
+            drawable_shader->CompileSource(std::move(drawable_shader_source));
+        }
+        if (!drawable_shader->IsValid())
+            return nullptr;
+
+        const auto& gpu_program_name = base::FormatString("%1(%2, %3)",
+                                              program.GetName(),
+                                              drawable_shader->GetName(),
+                                              material_shader->GetName());
         std::vector<const Shader*> shaders;
         shaders.push_back(drawable_shader);
         shaders.push_back(material_shader);
-        program = mDevice->MakeProgram(id);
-        program->SetName(name);
-        program->Build(shaders);
-        if (program->IsValid())
-        {
-            material.ApplyStaticState(material_environment, *mDevice, *program);
-        }
+
+        gpu_program = mDevice->MakeProgram(program_gpu_id);
+        gpu_program->SetName(gpu_program_name);
+        gpu_program->Build(shaders);
+        if (!gpu_program->IsValid())
+            return nullptr;
+
+        material.ApplyStaticState(material_environment, *mDevice, *gpu_program);
+
+        program.ApplyStaticState(*mDevice, *gpu_program);
     }
-    if (program->IsValid())
-        return program;
-    return nullptr;
+    if (!gpu_program->IsValid())
+        return nullptr;
+
+    return gpu_program;
 }
 
 IRect Painter::MapToDevice(const IRect& rect) const noexcept
