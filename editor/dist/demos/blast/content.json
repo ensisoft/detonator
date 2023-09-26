@@ -3582,40 +3582,11 @@
   "materials": [
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 0.5623559951782227,
-        "g": 0.5623559951782227,
-        "r": 0.5623559951782227
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": true
       },
-      "gamma": 1.0,
       "id": "lOfMr3YBtI",
       "name": "Asteroid",
       "particle_action": "None",
@@ -3663,56 +3634,40 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 4.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kColor0",
+          "value": {
+            "a": 1.0,
+            "b": 0.5623559951782227,
+            "g": 0.5623559951782227,
+            "r": 0.5623559951782227
+          }
+        },
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        },
+        {
+          "name": "kTextureVelocity",
+          "value": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 4.0
+          }
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": true
       },
-      "gamma": 1.0,
       "id": "TNyQSW6bB6",
       "name": "RedExplosion",
       "particle_action": "None",
@@ -4112,56 +4067,31 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 1.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Sprite"
+      "type": "Sprite",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        },
+        {
+          "name": "kTextureVelocity",
+          "value": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 1.0
+          }
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": true,
         "Static": true
       },
-      "gamma": 1.0,
       "id": "vg5yQskPIv",
       "name": "Rocket",
       "particle_action": "None",
@@ -4209,56 +4139,31 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 2.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Sprite"
+      "type": "Sprite",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        },
+        {
+          "name": "kTextureVelocity",
+          "value": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 2.0
+          }
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "2a488SIQsU",
       "name": "Shockwave",
       "particle_action": "None",
@@ -4313,16 +4218,6 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
       "type": "Custom",
@@ -4346,47 +4241,18 @@
           }
         },
         {
-          "name": "kGamma",
-          "value": 1.0
+          "name": "kTextureRotation",
+          "value": 0.0
         }
       ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": true
       },
-      "gamma": 1.0,
       "id": "CopZZzjQd4",
       "name": "Background",
       "particle_action": "None",
@@ -4434,56 +4300,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": true,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "Kb5sHrP5bL",
       "name": "Blast Title",
       "particle_action": "None",
@@ -4539,16 +4372,6 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
       "type": "Custom",
@@ -4563,47 +4386,18 @@
           }
         },
         {
-          "name": "kGamma",
-          "value": 1.0
+          "name": "kTextureRotation",
+          "value": 0.0
         }
       ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 0.9916075468063354,
-        "g": 0.9687647819519043,
-        "r": 0.9670100212097168
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "pGHzP0FH33",
       "name": "Cursor",
       "particle_action": "None",
@@ -4651,56 +4445,32 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kColor0",
+          "value": {
+            "a": 1.0,
+            "b": 0.9916075468063354,
+            "g": 0.9687647819519043,
+            "r": 0.9670100212097168
+          }
+        },
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "YL23jp6zHS",
       "name": "Star Particle",
       "particle_action": "None",
@@ -4748,16 +4518,6 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
       "type": "Custom",
@@ -4791,45 +4551,20 @@
             "g": 0.35559624433517456,
             "r": 0.9973449110984802
           }
+        },
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
         }
       ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "HyJsrevpdz",
       "name": "Smoke Particle",
       "particle_action": "None",
@@ -4877,16 +4612,6 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
       "type": "Custom",
@@ -4920,45 +4645,20 @@
             "g": 0.35559624433517456,
             "r": 0.9973449110984802
           }
+        },
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
         }
       ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "5YQ8ZqObX7",
       "name": "Smooth Round Particle",
       "particle_action": "None",
@@ -5006,56 +4706,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "gnzE0pkeXX",
       "name": "Health_Dot",
       "particle_action": "None",
@@ -5103,56 +4770,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": true,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "Z3Pe1h4eXI",
       "name": "Enemy/Pink",
       "particle_action": "None",
@@ -5200,56 +4834,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "PIhms7PpQT",
       "name": "Enemy/Green",
       "particle_action": "None",
@@ -5297,56 +4898,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "YJynSu6nqw",
       "name": "Enemy/Blue",
       "particle_action": "None",
@@ -5394,56 +4962,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "I8r504SSma",
       "name": "Bullet/Green",
       "particle_action": "None",
@@ -5491,56 +5026,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "EuyGHU1pbR",
       "name": "Bullet/Pink",
       "particle_action": "None",
@@ -5588,56 +5090,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "x6FkDk0TOK",
       "name": "Player/Base",
       "particle_action": "None",
@@ -5685,56 +5154,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "wEBG4Nwt8g",
       "name": "Player/Weapon 1",
       "particle_action": "None",
@@ -5782,56 +5218,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "miMdq5hPLK",
       "name": "Player/Weapon 2",
       "particle_action": "None",
@@ -5879,56 +5282,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "XLy89MFMgb",
       "name": "Laser/Green",
       "particle_action": "None",
@@ -5976,56 +5346,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "EtpQMNo1zx",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "MHJxCtplnp",
       "name": "Screenshot",
       "particle_action": "None",
@@ -6073,56 +5410,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "lLinWqCv1M",
       "name": "Shield",
       "particle_action": "None",
@@ -6170,56 +5474,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "hCinu6wgaC",
       "name": "HP",
       "particle_action": "None",
@@ -6267,19 +5538,15 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     }
   ],
   "particles": [

@@ -3280,40 +3280,11 @@
   "materials": [
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "vSs0xqS3fS",
       "name": "Blue Ball",
       "particle_action": "None",
@@ -3361,56 +3332,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "4zi9n5RIXq",
       "name": "Blue Brick",
       "particle_action": "None",
@@ -3458,56 +3396,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "KeITJIrx1I",
       "name": "Red Brick",
       "particle_action": "None",
@@ -3555,56 +3460,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "EtyRugQve2",
       "name": "Green Brick",
       "particle_action": "None",
@@ -3652,56 +3524,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "MUQDA03a25",
       "name": "Purple Brick",
       "particle_action": "None",
@@ -3749,56 +3588,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "gRY0JNbDCj",
       "name": "Yellow Brick",
       "particle_action": "None",
@@ -3846,56 +3652,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "9wG7A0qhYE",
       "name": "Gray Brick",
       "particle_action": "None",
@@ -3943,56 +3716,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 0.800000011920929,
       "id": "OgRnbBquEI",
       "name": "Background",
       "particle_action": "None",
@@ -4040,56 +3780,27 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kGamma",
+          "value": 0.800000011920929
+        },
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 0.23529411852359772,
-        "b": 0.0,
-        "g": 0.0,
-        "r": 0.0
-      },
-      "color_map1": {
-        "a": 0.5607843399047852,
-        "b": 0.0,
-        "g": 0.0,
-        "r": 0.0
-      },
-      "color_map2": {
-        "a": 0.30980393290519714,
-        "b": 0.0,
-        "g": 0.0,
-        "r": 0.0
-      },
-      "color_map3": {
-        "a": 0.29411765933036804,
-        "b": 0.0,
-        "g": 0.0,
-        "r": 0.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 0.800000011920929,
       "id": "1Oau6Iem5r",
       "name": "Dim",
       "particle_action": "None",
@@ -4100,56 +3811,63 @@
       "surface": "Transparent",
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Gradient"
+      "type": "Gradient",
+      "uniforms": [
+        {
+          "name": "kColor0",
+          "value": {
+            "a": 0.23529411852359772,
+            "b": 0.0,
+            "g": 0.0,
+            "r": 0.0
+          }
+        },
+        {
+          "name": "kColor1",
+          "value": {
+            "a": 0.5607843399047852,
+            "b": 0.0,
+            "g": 0.0,
+            "r": 0.0
+          }
+        },
+        {
+          "name": "kColor2",
+          "value": {
+            "a": 0.30980393290519714,
+            "b": 0.0,
+            "g": 0.0,
+            "r": 0.0
+          }
+        },
+        {
+          "name": "kColor3",
+          "value": {
+            "a": 0.29411765933036804,
+            "b": 0.0,
+            "g": 0.0,
+            "r": 0.0
+          }
+        },
+        {
+          "name": "kGamma",
+          "value": 0.800000011920929
+        },
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "rAn0G88CKj",
       "name": "Sliding Glint",
       "particle_action": "None",
@@ -4160,56 +3878,23 @@
       "surface": "Transparent",
       "texture_mag_filter": "Default",
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Custom"
+      "type": "Custom",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "xAdKk03Llg",
       "name": "Brick Wall",
       "particle_action": "None",
@@ -4257,56 +3942,30 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 25.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Repeat",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        },
+        {
+          "name": "kTextureScale",
+          "value": {
+            "x": 25.0,
+            "y": 1.0
+          }
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "AdiJbNNuTp",
       "name": "Gray Ball",
       "particle_action": "None",
@@ -4354,56 +4013,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "mJ0wHRoy15",
       "name": "Paddle Green",
       "particle_action": "None",
@@ -4451,56 +4077,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "hhgetGS5Y3",
       "name": "Paddle Red",
       "particle_action": "None",
@@ -4548,56 +4141,23 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     },
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "10togPdjU7",
       "name": "Paddle Blue",
       "particle_action": "None",
@@ -4645,19 +4205,15 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": 0.0,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Clamp",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureRotation",
+          "value": 0.0
+        }
+      ]
     }
   ],
   "scenes": [

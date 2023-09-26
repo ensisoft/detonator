@@ -40,40 +40,11 @@
   "materials": [
     {
       "active_texture_map": "",
-      "color_map0": {
-        "a": 1.0,
-        "b": 0.10824750363826752,
-        "g": 0.1902189701795578,
-        "r": 0.7007858157157898
-      },
-      "color_map1": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map2": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_map3": {
-        "a": 1.0,
-        "b": 1.0,
-        "g": 1.0,
-        "r": 1.0
-      },
-      "color_weight": {
-        "x": 0.5,
-        "y": 0.5
-      },
       "flags": {
         "BlendFrames": true,
         "PremultipliedAlpha": false,
         "Static": false
       },
-      "gamma": 1.0,
       "id": "yTsaLXKonJ",
       "name": "Top Secret",
       "particle_action": "None",
@@ -129,19 +100,24 @@
         }
       ],
       "texture_min_filter": "Default",
-      "texture_rotation": -0.593411922454834,
-      "texture_scale": {
-        "x": 1.0,
-        "y": 1.0
-      },
-      "texture_velocity": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
       "texture_wrap_x": "Repeat",
       "texture_wrap_y": "Clamp",
-      "type": "Texture"
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kColor0",
+          "value": {
+            "a": 1.0,
+            "b": 0.10824750363826752,
+            "g": 0.1902189701795578,
+            "r": 0.7007858157157898
+          }
+        },
+        {
+          "name": "kTextureRotation",
+          "value": -0.593411922454834
+        }
+      ]
     }
   ],
   "scripts": [
