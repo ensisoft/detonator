@@ -1,8 +1,3 @@
-
-#version 100
-
-precision highp float;
-
 #define EDGE_WIDTH  0.05
 
 // build-in uniforms
@@ -45,7 +40,8 @@ float Line(float width, float pos, float x)
            smoothstep(pos, pos+width*0.5, x);
 }
 
-void main() {
+void FragmentShaderMain()
+{
     vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
 
     float vert_width = EDGE_WIDTH * 1.0;
@@ -64,11 +60,5 @@ void main() {
         Line(hori_width, 1.0-hori_width*0.5, coords.y),
         0.0, 1.0);
 
-
-    gl_FragColor = kFColor * foreground +
-                   kBColor * background;
-
-
-    //vec4(kFColor.rgb, foreground) +
-    //               vec4(kBColor.rgb, background);
+    fs_out.color  = kFColor * foreground + kBColor * background;
 }

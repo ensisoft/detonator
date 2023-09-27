@@ -30,18 +30,40 @@ std::string ShaderProgram::GetShaderId(const Drawable& drawable, const Drawable:
 }
 std::string ShaderProgram::GetShader(const Material& material, const Material::Environment& env, const Device& device) const
 {
-    std::string source = material.GetShader(env, device);
+    std::string source(R"(
+#version 100
+precision highp float;
 
-    source += R"(
-vec4 ShaderPass(vec4 color) {
-    return color;
-}
-)";
+struct FS_OUT {
+   vec4 color;
+} fs_out;
+
+void FragmentShaderMain();
+
+void main() {
+  FragmentShaderMain();
+
+  gl_FragColor = fs_out.color;
+})");
+    source.append(material.GetShader(env, device));
     return source;
 }
 std::string ShaderProgram::GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const
 {
-    return drawable.GetShader(env, device);
+    std::string source(R"(
+#version 100
+
+struct VS_OUT {
+   vec4 position;
+} vs_out;
+
+void VertexShaderMain();
+
+void main() {
+   VertexShaderMain();
+})");
+    source.append(drawable.GetShader(env, device));
+    return source;
 }
 std::string ShaderProgram::GetShaderName(const Material& material, const Material::Environment& env) const
 {

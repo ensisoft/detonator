@@ -1898,17 +1898,15 @@ public:
     virtual void Render(gfx::Painter& painter) override
     {
         static gfx::CustomMaterialClass material(gfx::MaterialClass::Type::Custom);
-        material.SetShaderSrc(
-                R"(
-#version 100
-precision mediump float;
+        material.SetShaderSrc(R"(
 uniform float kGamma;
 varying vec2 vTexCoord;
-void main() {
+
+void FragmentShaderMain() {
   float block = 1.0 / 32.0;
   float index = floor(vTexCoord.x / block);
   float value = index * block;
-  gl_FragColor = vec4(pow(vec3(value), vec3(kGamma)), 1.0);
+  fs_out.color = vec4(pow(vec3(value), vec3(kGamma)), 1.0);
 }
         )");
         material.SetUniform("kGamma", 1.0f);
@@ -2074,13 +2072,12 @@ public:
     virtual void Start() override
     {
         const char* src = R"(
-#version 100
-precision highp float;
 uniform sampler2D kTexture;
 varying vec2 vTexCoord;
-void main() {
+
+void FragmentShaderMain() {
     vec4 foo = texture2D(kTexture, vTexCoord);
-    gl_FragColor = vec4(foo.rgb, foo.a);
+    fs_out.color = vec4(foo.rgb, foo.a);
 })";
         {
             gfx::TextureMap2D map;

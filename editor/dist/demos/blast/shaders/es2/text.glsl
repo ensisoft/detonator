@@ -1,8 +1,3 @@
-
-#version 100
-
-precision highp float;
-
 uniform float kTime;
 uniform float kRenderPoints;
 
@@ -28,9 +23,9 @@ float SlidingGlint()
     return v;
 }
 
-void main()
+void FragmentShaderMain()
 {
     float a = texture2D(kTexture0, vTexCoord).a;
     float g = SlidingGlint();
-    gl_FragColor.rgb = kBaseColor.rgb*a + g*a;
+    fs_out.color.rgb = kBaseColor.rgb*a + g*a;
 }
