@@ -521,10 +521,6 @@ void MaterialWidget::on_actionCreateShader_triggered()
         return;
     }
 constexpr auto glsl = R"(
-#version 100
-
-precision highp float;
-
 // build-in uniforms
 // material time in seconds.
 uniform float kTime;
@@ -555,14 +551,14 @@ varying float vParticleRandomValue;
 // normalized particle lifetime.
 varying float vParticleTime;
 
-void main() {
+void FragmentShaderMain() {
     vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
     float a = texture2D(kNoise, coords).a;
     float r = coords.x + a + kTime;
     float g = coords.y + a;
     float b = kTime;
     vec3 col = vec3(0.5) + 0.5*cos(vec3(r, g, b));
-    gl_FragColor = vec4(pow(col, vec3(kGamma)), 1.0);
+    fs_out.color = vec4(pow(col, vec3(kGamma)), 1.0);
 }
 )";
 constexpr auto json = R"(
