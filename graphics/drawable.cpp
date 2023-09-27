@@ -79,7 +79,6 @@ std::string MakeGeneric2DVertexShader(const gfx::Device& device)
     // y grows up to 1.0 to the top of the screen).
 
 constexpr auto* src = R"(
-#version 100
 attribute vec2 aPosition;
 attribute vec2 aTexCoord;
 
@@ -92,7 +91,7 @@ varying float vParticleRandomValue;
 varying float vParticleAlpha;
 varying float vParticleTime;
 
-void main()
+void VertexShaderMain()
 {
     vec4 vertex  = vec4(aPosition.x, aPosition.y * -1.0, 0.0, 1.0);
     vTexCoord    = aTexCoord;
@@ -108,7 +107,6 @@ void main()
 std::string MakeGeneric3DVertexShader(const gfx::Device& device)
 {
 constexpr const auto* src = R"(
-#version 100
 attribute vec3 aPosition;
 attribute vec2 aTexCoord;
 
@@ -117,7 +115,7 @@ uniform mat4 kModelViewMatrix;
 
 varying vec2 vTexCoord;
 
-void main()
+void VertexShaderMain()
 {
     vTexCoord = aTexCoord;
     gl_Position = kProjectionMatrix * kModelViewMatrix * vec4(aPosition.xyz, 1.0);
@@ -1747,7 +1745,6 @@ std::string ParticleEngineClass::GetShader(const Environment& env, const Device&
     // particle (GL_POINTS) rasterization is done the fragment shader
     // must use gl_PointCoord instead.
     constexpr auto* local_src = R"(
-#version 100
 attribute vec2 aPosition;
 attribute vec4 aData;
 
@@ -1759,7 +1756,7 @@ varying float vParticleRandomValue;
 varying float vParticleAlpha;
 varying float vParticleTime;
 
-void main()
+void VertexShaderMain()
 {
     vec4 vertex  = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
     gl_PointSize = aData.x;
@@ -1771,7 +1768,6 @@ void main()
     )";
 
     constexpr auto* global_src = R"(
-#version 100
 attribute vec2 aPosition;
 attribute vec4 aData;
 
@@ -1783,7 +1779,7 @@ varying float vParticleRandomValue;
 varying float vParticleAlpha;
 varying float vParticleTime;
 
-void main()
+void VertexShaderMain()
 {
   vec4 vertex = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
   gl_PointSize = aData.x;
@@ -2542,7 +2538,6 @@ std::string TileBatch::GetShader(const Environment& env, const Device& device) c
     const auto shape = ResolveTileShape();
 
     constexpr const auto*  square_tile_source = R"(
-#version 100
 attribute vec3 aTilePosition;
 
 uniform mat4 kTileTransform;
@@ -2556,7 +2551,7 @@ varying float vParticleAlpha;
 varying float vParticleRandomValue;
 varying vec2 vTexCoord;
 
-void main()
+void VertexShaderMain()
 {
   // transform tile row,col index into a tile position in units in the x,y plane,
   vec3 tile = aTilePosition * kTileWorldSize + kTilePointOffset;
@@ -2575,7 +2570,6 @@ void main()
 
 
     constexpr const auto* rectangle_tile_source = R"(
-#version 100
 attribute vec3 aTilePosition;
 attribute vec2 aTileCorner;
 
@@ -2590,7 +2584,7 @@ varying float vParticleAlpha;
 varying float vParticleRandomValue;
 varying vec2 vTexCoord;
 
-void main()
+void VertexShaderMain()
 {
   // transform tile col,row index into a tile position in tile world units in the tile x,y plane
   vec3 tile = aTilePosition * kTileWorldSize + kTilePointOffset;

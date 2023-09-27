@@ -49,19 +49,35 @@ public:
     }
     virtual std::string GetShader(const gfx::Material& material, const gfx::Material::Environment& env, const gfx::Device& device) const override
     {
-        std::string source = material.GetShader(env, device);
+        std::string source(R"(
+#version 100
+precision highp float;
 
-        constexpr auto* src = R"(
+struct FS_OUT {
+   vec4 color;
+} fs_out;
+
 uniform float kBloomThreshold;
 uniform vec4  kBloomColor;
-vec4 ShaderPass(vec4 color) {
+
+vec4 Bloom(vec4 color) {
     float brightness = dot(color.rgb, kBloomColor.rgb); //vec3(0.2126, 0.7252, 0.0722));
     if (brightness > kBloomThreshold)
        return color;
     return vec4(0.0, 0.0, 0.0, 0.0);
 }
-            )";
-        source += src;
+
+void FragmentShaderMain();
+
+void main() {
+    FragmentShaderMain();
+
+    vec4 color = Bloom(fs_out.color);
+
+    gl_FragColor = color;
+
+})");
+        source.append(material.GetShader(env, device));
         return source;
     }
     virtual std::string GetName() const override

@@ -1789,15 +1789,11 @@ std::string MaterialClass::GetShaderSource(const State& state, const Device& dev
 std::string MaterialClass::GetColorShaderSource(const State& state, const Device& device) const
 {
     constexpr const auto* source = R"(
-#version 100
-precision mediump float;
 uniform vec4 kBaseColor;
 uniform float kGamma;
 varying float vParticleAlpha;
 
-vec4 ShaderPass(vec4 color);
-
-void main()
+void FragmentShaderMain()
 {
   vec4 color = kBaseColor;
   color.a *= vParticleAlpha;
@@ -1805,7 +1801,7 @@ void main()
   // gamma (in)correction.
   color.rgb = pow(color.rgb, vec3(kGamma));
 
-  gl_FragColor = ShaderPass(color);
+  fs_out.color = color;
 
 }
 )";
@@ -1815,9 +1811,6 @@ void main()
 std::string MaterialClass::GetGradientShaderSource(const State& state, const Device& device) const
 {
     constexpr const auto* source = R"(
-#version 100
-precision highp float;
-
 uniform vec4 kColor0;
 uniform vec4 kColor1;
 uniform vec4 kColor2;
@@ -1829,8 +1822,6 @@ uniform float kRenderPoints;
 varying vec2 vTexCoord;
 varying float vParticleAlpha;
 
-vec4 ShaderPass(vec4 color);
-
 vec4 MixGradient(vec2 coords)
 {
   vec4 top = mix(kColor0, kColor1, coords.x);
@@ -1839,7 +1830,7 @@ vec4 MixGradient(vec2 coords)
   return color;
 }
 
-void main()
+void FragmentShaderMain()
 {
   vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
   coords = (coords - kOffset) + vec2(0.5, 0.5);
@@ -1851,7 +1842,7 @@ void main()
   // gamma (in)correction
   color.rgb = pow(color.rgb, vec3(kGamma));
 
-  gl_FragColor = ShaderPass(color);
+  fs_out.color = color;
 }
 )";
     return source;
@@ -1861,9 +1852,6 @@ std::string MaterialClass::GetSpriteShaderSource(const State& state, const Devic
 {
     // todo: maybe pack some of shader uniforms
     constexpr const auto* source = R"(
-#version 100
-precision highp float;
-
 uniform sampler2D kTexture0;
 uniform sampler2D kTexture1;
 uniform vec4 kTextureBox0;
@@ -1921,9 +1909,7 @@ vec2 RotateCoords(vec2 coords)
     return coords;
 }
 
-vec4 ShaderPass(vec4 color);
-
-void main()
+void FragmentShaderMain()
 {
     // for texture coords we need either the coords from the
     // vertex data or gl_PointCoord if the geometry is being
@@ -1967,7 +1953,7 @@ void main()
     // apply gamma (in)correction.
     color.rgb = pow(color.rgb, vec3(kGamma));
 
-    gl_FragColor = ShaderPass(color);
+    fs_out.color = color;
 }
 )";
     return source;
@@ -2066,9 +2052,6 @@ std::string MaterialClass::GetTextureShaderSource(const State& state, const Devi
 {
 // todo: pack some of the uniforms ?
     constexpr const auto* source = R"(
-#version 100
-precision highp float;
-
 uniform sampler2D kTexture;
 uniform vec4 kTextureBox;
 uniform float kAlphaMask;
@@ -2124,9 +2107,7 @@ vec2 RotateCoords(vec2 coords)
     return coords;
 }
 
-vec4 ShaderPass(vec4 color);
-
-void main()
+void FragmentShaderMain()
 {
     // for texture coords we need either the coords from the
     // vertex data or gl_PointCoord if the geometry is being
@@ -2165,7 +2146,7 @@ void main()
     // apply gamma (in)correction.
     color.rgb = pow(color.rgb, vec3(kGamma));
 
-    gl_FragColor = ShaderPass(color);
+    fs_out.color = color;
 }
 )";
     return source;
@@ -2446,32 +2427,28 @@ void TextMaterial::ApplyStaticState(const Environment& env, Device& device, gfx:
 std::string TextMaterial::GetShader(const Environment& env, const Device& device) const
 {
 constexpr auto* text_shader_bitmap = R"(
-#version 100
-precision highp float;
 uniform sampler2D kTexture;
 uniform vec4 kColor;
 uniform float kTime;
 varying vec2 vTexCoord;
-vec4 ShaderPass(vec4);
-void main() {
+
+void FragmentShaderMain() {
    float alpha = texture2D(kTexture, vTexCoord).a;
    vec4 color = vec4(kColor.r, kColor.g, kColor.b, kColor.a * alpha);
-   gl_FragColor = ShaderPass(color);
+   fs_out.color = color;
 }
         )";
 constexpr auto* text_shader_texture = R"(
-#version 100
-precision highp float;
 uniform sampler2D kTexture;
 varying vec2 vTexCoord;
-vec4 ShaderPass(vec4);
-void main() {
+
+void FragmentShaderMain() {
     mat3 flip = mat3(vec3(1.0,  0.0, 0.0),
                      vec3(0.0, -1.0, 0.0),
                      vec3(0.0,  1.0, 0.0));
     vec3 tex = flip * vec3(vTexCoord.xy, 1.0);
     vec4 color = texture2D(kTexture, tex.xy);
-    gl_FragColor = ShaderPass(color);
+    fs_out.color = color;
 }
     )";
 

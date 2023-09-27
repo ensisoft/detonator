@@ -1,12 +1,8 @@
-#version 100
-
-precision highp float;
-
 uniform float kTime;
 
 varying vec2 vTexCoord;
 
-void main()
+void FragmentShaderMain()
 {
     vec2 uv = vTexCoord;
 
@@ -22,7 +18,7 @@ void main()
 
     float d = (uv.x - left) / glint_width;
     float v = sin(radians(180.0*d));
-    gl_FragColor = vec4(v, v, v, v) * 0.9;
+    fs_out.color = vec4(v, v, v, v) * 0.9;
 }
 
 

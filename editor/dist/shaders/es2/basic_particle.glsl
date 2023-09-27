@@ -1,7 +1,3 @@
-#version 100
-
-precision highp float;
-
 // Built-in (from material system) uniforms
 // -------------------------------------------------
 // the monotonic material instance time in seconds.
@@ -41,7 +37,7 @@ varying float vParticleAlpha;
 // Particle random value. [0.0, 1.0]
 varying float vParticleRandomValue;
 
-void main()
+void FragmentShaderMain()
 {
     float angle = kTime * kRotationalVelocity * vParticleRandomValue + kBaseRotation * (vParticleRandomValue - 0.5);
 
@@ -76,7 +72,7 @@ void main()
     vec4 color = mix(kStartColor, kEndColor, vParticleTime);
 
     // blend with straight alpha and with transparent surface
-    gl_FragColor.rgb = color.rgb;
-    gl_FragColor.a   = (alpha * vParticleAlpha * color.a);
+    fs_out.color.rgb = color.rgb;
+    fs_out.color.a   = (alpha * vParticleAlpha * color.a);
 }
 

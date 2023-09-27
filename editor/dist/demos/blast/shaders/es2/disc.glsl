@@ -1,8 +1,3 @@
-
-#version 100
-
-precision highp float;
-
 // material system will provide these.
 // kTime will be the current material instance runtime in second.s
 uniform float kTime;
@@ -37,7 +32,7 @@ float ring_alpha(float ring_distance_from_origin, float fragment_distance_from_o
     return smoothstep(rd - ring_width, rd, fd) - smoothstep(rd, rd + ring_width, fd);
 }
 
-void main()
+void FragmentShaderMain()
 {
     float time = 0.6;
     float s = mod(kTime, time) / time;
@@ -65,5 +60,5 @@ void main()
 
     base_color.a = alpha * 0.8 * (1.0-s) * texture.r;
 
-    gl_FragColor =  base_color  + ring_color;
+    fs_out.color = base_color + ring_color;
 }
