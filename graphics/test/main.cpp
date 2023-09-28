@@ -1892,110 +1892,79 @@ public:
 private:
 };
 
-class sRGBColorGradientTest : public GraphicsTest
+class sRGBWindowTest : public GraphicsTest
 {
 public:
     virtual void Render(gfx::Painter& painter) override
     {
-        static gfx::CustomMaterialClass material(gfx::MaterialClass::Type::Custom);
-        material.SetShaderSrc(R"(
-uniform float kGamma;
-varying vec2 vTexCoord;
+        gfx::CustomMaterialClass srgb_out(gfx::MaterialClass::Type::Custom);
+        gfx::CustomMaterialClass linear_out(gfx::MaterialClass::Type::Custom);
+
+        // If we choose a reference value of #808080FF in GIMP this is approximately
+        // half way gray. But the value that the GIMP shows in the color picker is
+        // sRGB encoded, so the actual *linear* value is approx 0.18.
+        // If we then use the actual liner value in the shader and write it to the
+        // (supposedly) sRGB encoded color buffer then output should be such that
+        //
+        // IF the system does sRGB encoding
+        // => the shader that writes sRGB values should produce gray that is
+        //    too bright when compared to the GIMPs reference.
+        // => the shader that writes linear values should produce gray that
+        //    matches the reference gray. In other words reading back the value
+        //    should be 0.5 (or approx #808080 through a screenshot)
+        //
+        // IF the system doesn't do sRGB encoding
+        // => the shader that writes sRGB values should produce gray that
+        //    matches the reference gray.
+        // => the shader that writes linear values should produce gray that
+        //    is too dark.
+
+        // compute matching linear value for 0.5 and pass it to the shader
+        const float color = gfx::sRGB_decode(0.5f);
+
+        srgb_out.SetShaderSrc(R"(
+uniform float kColor;
+
+float sRGB_encode(float value)
+{
+   return value <= 0.0031308
+       ? value * 12.92
+       : pow(value, 1.0/2.4) * 1.055 - 0.055;
+}
+vec4 sRGB_encode(vec4 color)
+{
+   vec4 ret;
+   ret.r = sRGB_encode(color.r);
+   ret.g = sRGB_encode(color.g);
+   ret.b = sRGB_encode(color.b);
+   ret.a = color.a; // alpha is always linear
+   return ret;
+}
+void FragmentShaderMain() {
+  fs_out.color = sRGB_encode(vec4(kColor, kColor, kColor, 1.0));
+})");
+
+        linear_out.SetShaderSrc(R"(
+uniform float kColor;
 
 void FragmentShaderMain() {
-  float block = 1.0 / 32.0;
-  float index = floor(vTexCoord.x / block);
-  float value = index * block;
-  fs_out.color = vec4(pow(vec3(value), vec3(kGamma)), 1.0);
-}
-        )");
-        material.SetUniform("kGamma", 1.0f);
+  fs_out.color = vec4(kColor, kColor, kColor, 1.0);
+})");
+        srgb_out.SetUniform("kColor", color);
+        linear_out.SetUniform("kColor", color);
 
-        auto inst = gfx::MaterialClassInst(material);
+        gfx::FillRect(painter, gfx::FRect(20.0f, 20.0f, 256.0f, 256.0f), gfx::MaterialClassInst(srgb_out));
 
-        // This test might give some clues how incorrect the rendering is
-        // in regard to sRGB color space (and gamma in-correction).
-        //
-        // The shader always writes linear values. The OpenGL implementation
-        // and the current frame-buffer setting will then be used to determine
-        // the meaning of these values, i.e. whether they should be interpreted
-        // to mean perceptually linear values (in sRGB color space) or physically
-        // linear values (in "raw" RGB color space that drive the monitor's brightness).
-        //
-        // Whether sRGB is actually enabled or not depends on:
-        //  - whether we're writing to the default frame buffer or GL provided FBO
-        //  - what is the current rendering context, ES2, ES3, GLx
-        //  - what flags are enabled, GL_FRAMEBUFFER_SRGB (for big Gl)
-        //
-        // The test should be interpreted something like this:
-        //
-        // - if the physically linear gamma ramp looks *perceptually* linear
-        //   it means that the color buffer is written in perceptually linear
-        //   values using sRGB encoding. Thus, when the buffer is being displayed
-        //   and gamma decoding takes place (in the display system) RGB values
-        //   lose some brightness which is compensated by the visual sensory system
-        //   and thus become "perceptually linear". For example RGB value
-        //   v = (0.5, 0.5, 0.5) when gamma decoded becomes approx (0.22, 0.22, 0.22),
-        //   which in human visual sensory system appears half way bright between
-        //   0.0f and 1.0f giving us visually/perceptually linear ramp.
-        //
-        //   corollary => the explicitly g=2.2 encoded ramp should be too dark.
-        //
-        // - if the physically linear gamma ramp looks too bright and washed out
-        //   so that only the left edge is black and the brightness quickly becomes
-        //   very bright and white towards the right edge it means that the color
-        //   buffer is likely assumed to be in raw linear space driving the display
-        //   values directly. So when it gets displayed the actual value output by
-        //   the display reflects the value written by the shader. This means that the
-        //   0.5f "half way" bright value will then appear too bright to the human
-        //   perception and shades of darkness are lost.
-        //
-        //   corollary => the explicitly g=2.2 encoded ramp should look fine.
-        //
-        // The big problem here is that ES 2 does not have natively any clue about sRGB.
-        //
-        // The extension EGL_KHR_gl_colorspace is an EGL extension for asking for
-        // sRGB enabled/encoded window system render targets. However, the extensions
-        // explicitly says that:
-        //
-        //   "Only OpenGL and OpenGL ES contexts which support sRGB
-        //   rendering must respect requests for EGL_GL_COLORSPACE_SRGB_KHR, and
-        //   only to sRGB formats supported by the context (normally just SRGB8)
-        //   Older versions not supporting sRGB rendering will ignore this
-        //   surface attribute."
-        //
-        // So this means that with ES2 context even when using EGL with EGL_KHR_gl_colorspace
-        // there's no guarantee of any sRGB correct output.
-        //
-        // The GL_EXT_sRGB extension applies to ES1.0 or greater and brings support
-        // for sRGB encoded textures (GL_SRGB_EXT and GL_SRGB_EXT_ALPHA) and render
-        // buffers basically says the same thing as the EGL_KHR_gl_colorspace
-        // regarding the default frame buffer:
-        //
-        // "For the default framebuffer, color encoding is determined by the implementation."
-        //
-
-        // linear gradient ramp.
-        // each block grows by a constant amount in intensity.
-        inst.SetUniform("kGamma", 1.0f);
-        gfx::FillRect(painter, gfx::FRect(20, 20, 800, 300), inst);
-
-        // explicitly gamma decoded gradient ramp. the steps are adjusted by a gamma value
-        // that approximates the inverse of the human perception. I.e. small increase
-        // in input creates a large visual change. the gamma adjustment takes a large
-        // output adjustment and maps it to a small change in input.
-        inst.SetUniform("kGamma", 2.2f);
-        gfx::FillRect(painter, gfx::FRect(20, 420, 800, 300), inst);
-
+        gfx::FillRect(painter, gfx::FRect(296.0f, 20.0f, 256.0f, 256.0f), gfx::MaterialClassInst(linear_out));
     }
     virtual std::string GetName() const override
-    { return "sRGBColorGradientTest"; }
+    { return "sRGBWindowTest"; }
     virtual bool IsFeatureTest() const override
     { return false; }
 private:
 };
 
-class sRGBTextureTest : public GraphicsTest
+class sRGBTextureSampleTest : public GraphicsTest
 {
 public:
     virtual void Start() override
@@ -2032,6 +2001,73 @@ public:
         }
 
         {
+            gfx::MaterialClass material(gfx::MaterialClass::Type::Color);
+            material.SetShaderSrc(R"(
+varying vec2 vTexCoord;
+
+float sRGB_decode(float value)
+{
+    return value <= 0.04045
+        ? value / 12.92
+        : pow((value + 0.055) / 1.055, 2.4);
+}
+vec4 sRGB_decode(vec4 color)
+{
+   vec4 ret;
+   ret.r = sRGB_decode(color.r);
+   ret.g = sRGB_decode(color.g);
+   ret.b = sRGB_decode(color.b);
+   ret.a = color.a; // alpha is always linear
+   return ret;
+}
+
+void FragmentShaderMain()
+{
+    float color;
+
+    float x = vTexCoord.x;
+    float y = vTexCoord.y;
+    if (x < 0.5)
+    {
+      if (y < 0.5)
+        color = 0.0;
+      else color = 127.0;
+    }
+    else
+    {
+      if (y < 0.5)
+       color = 64.0;
+      else color = 255.0;
+    }
+    color = color / 255.0;
+
+    fs_out.color = sRGB_decode(vec4(color, color, color, 1.0));
+}
+)");
+            mMaterialReference = gfx::CreateMaterialInstance(material);
+
+        }
+
+        // have a reference image created in TEH GIMP! that has 4 pixels
+        // 0x00, 0x40, 0x80 and 0xff
+        // remember that these values are sRGB encoded values! Using a shader
+        // we can reproduce the same colors by using floating point approximations
+        // of the same sRBG values and then converting them to linear.
+        //
+        // We can then proceed to rasterize two rectangles with the reference texture.
+        // One with sRGB flag set and the other with sRGB flag NOT set (i.e. linear).
+        // These rectangles can then be overlaid by a a rectangle that is shaded
+        // with pixels  generated by the shader above that reproduces the values
+        // expected to be in the texture.
+        //
+        // If the overlay with the sRGB texture is *seamless* it means that sRGB
+        // texture is working.
+        //
+        // NOTE that this doesn't mean that the *actual* colors overall are correct
+        // since the representation of the render buffer can still be broken
+        // separately. !
+
+        {
             gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
             auto source = std::make_unique<gfx::detail::TextureFileSource>();
             source->SetFileName("textures/black-gray-white.png");
@@ -2055,15 +2091,19 @@ public:
     virtual void Render(gfx::Painter& painter) override
     {
         gfx::FillRect(painter, gfx::FRect(20.0f, 20.0f, 400.0f, 400.0f), *mMaterialSRGB);
+        gfx::FillRect(painter, gfx::FRect(20.0f + 72.0f, 20.0f + 72.0f, 256.0f, 256.0f), *mMaterialReference);
+
         gfx::FillRect(painter, gfx::FRect(520.0f, 20.0f, 400.0f, 400.0f), *mMaterialLinear);
+        gfx::FillRect(painter, gfx::FRect(520.0f + 72.0f, 20.0f + 72.0f, 256.0f, 256.0f), *mMaterialReference);
     }
     virtual std::string GetName() const override
-    { return "sRGBTextureTest"; }
+    { return "sRGBTextureSampleTest"; }
     virtual bool IsFeatureTest() const override
     { return false; }
 private:
     std::unique_ptr<gfx::Material> mMaterialSRGB;
     std::unique_ptr<gfx::Material> mMaterialLinear;
+    std::unique_ptr<gfx::Material> mMaterialReference;
 };
 
 class PremultiplyAlphaTest : public GraphicsTest
@@ -2325,8 +2365,8 @@ int main(int argc, char* argv[])
     tests.emplace_back(new NullTest);
     tests.emplace_back(new ScissorTest);
     tests.emplace_back(new ViewportTest);
-    tests.emplace_back(new sRGBColorGradientTest);
-    tests.emplace_back(new sRGBTextureTest);
+    tests.emplace_back(new sRGBWindowTest);
+    tests.emplace_back(new sRGBTextureSampleTest);
     tests.emplace_back(new PremultiplyAlphaTest);
     tests.emplace_back(new PrecisionTest);
 
