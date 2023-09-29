@@ -50,6 +50,9 @@ void main() {
 }
 std::string ShaderProgram::GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const
 {
+    // careful here, WebGL shits itself if the source is concatenated together
+    // so that the vertex source (with varyings) comes after the main.
+
     std::string source(R"(
 #version 100
 
@@ -59,10 +62,15 @@ struct VS_OUT {
 
 void VertexShaderMain();
 
+)");
+
+source.append(drawable.GetShader(env, device));
+source.append(R"(
+
 void main() {
    VertexShaderMain();
 })");
-    source.append(drawable.GetShader(env, device));
+
     return source;
 }
 std::string ShaderProgram::GetShaderName(const Material& material, const Material::Environment& env) const
