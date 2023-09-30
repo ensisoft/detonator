@@ -82,7 +82,8 @@ void ApplyBlur(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* de
 
     // Currently, this is the only supported format due to limitations on the
     // GL ES2 FBO color buffer target.
-    ASSERT(tex_format == gfx::Texture::Format::RGBA);
+    ASSERT(tex_format == gfx::Texture::Format::RGBA ||
+           tex_format == gfx::Texture::Format::sRGBA);
 
     // Since we're both sampling from and rendering to the input texture and
     // *not* generating any mips during the process the sampling must
@@ -373,7 +374,7 @@ void DetectSpriteEdges(const std::string& gpu_id, gfx::Texture* texture, gfx::De
 void CopyTexture(const gfx::Texture* src, gfx::Texture* dst, gfx::Device* device, const glm::mat3& matrix)
 {
     ASSERT(dst->GetFormat() == Texture::Format::RGBA ||
-           dst->GetFormat() == Texture::Format::sRGB);
+           dst->GetFormat() == Texture::Format::sRGBA);
 
     auto* fbo = device->FindFramebuffer("AlgoFBO");
     if (!fbo)
