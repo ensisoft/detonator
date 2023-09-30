@@ -988,12 +988,6 @@ namespace gfx
 
         inline void SetUniform(const std::string& name, const Uniform& value) noexcept
         { mUniforms[name] = value; }
-        inline void SetUniform(const std::string& name, Uniform&& value) noexcept
-        { mUniforms[name] = std::move(value); }
-        inline Uniform* FindUniform(const std::string& name) noexcept
-        { return base::SafeFind(mUniforms, name); }
-        inline const Uniform* FindUniform(const std::string& name) const noexcept
-        { return base::SafeFind(mUniforms, name); }
         template<typename T>
         T* FindUniformValue(const std::string& name) noexcept
         {
@@ -1130,24 +1124,8 @@ namespace gfx
         MaterialClass& operator=(const MaterialClass& other);
     private:
         template<typename T>
-        static bool SetUniform(const char* name, const UniformMap* uniforms, const T& backup, Program& program)
-        {
-            if (uniforms)
-            {
-                auto it = uniforms->find(name);
-                if (it == uniforms->end()) {
-                    program.SetUniform(name, backup);
-                    return true;
-                }
-                const auto& value = it->second;
-                if (const auto* ptr = std::get_if<T>(&value)) {
-                    program.SetUniform(name, *ptr);
-                    return true;
-                }
-            }
-            program.SetUniform(name, backup);
-            return false;
-        }
+        static bool SetUniform(const char* name, const UniformMap* uniforms, const T& backup, Program& program);
+
         template<typename T>
         bool ReadLegacyValue(const char* name, const char* uniform, const data::Reader& reader);
 

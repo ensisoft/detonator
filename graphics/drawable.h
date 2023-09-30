@@ -973,7 +973,7 @@ namespace gfx
         virtual std::string GetShaderName(const Environment& env) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual Style GetStyle() const override;
-        virtual void Update(const Environment& env, float dt);
+        virtual void Update(const Environment& env, float dt) override;
         virtual bool IsAlive() const override;
         virtual void Restart(const Environment& env) override;
         virtual void Execute(const Environment& env, const Command& cmd) override;
