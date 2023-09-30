@@ -1647,30 +1647,17 @@ private:
                 default: BUG("Unknown texture format."); break;
             }
 
-            // if the texture is sRGB it can be used as-is as long as sRGB
-            // extension is present. if no sRGB extension is available then
-            // the texture needs to be converted into linear color space.
-            // todo: convert to normalized linear floats ? converting to
-            // linear u8 loses perceptible precision
-            std::unique_ptr<gfx::IBitmap> linear;
-            if (bytes)
+            if (format == Format::sRGB && !mDevice.mExtensions.EXT_sRGB)
             {
-                if (format == Format::sRGB && !mDevice.mExtensions.EXT_sRGB)
-                {
-                    gfx::BitmapReadView<gfx::Pixel_RGB> view((const gfx::Pixel_RGB*) bytes, xres, yres);
-                    linear = ConvertToLinear(view);
-                    bytes = linear->GetDataPtr();
-                    sizeFormat = GL_RGB;
-                    baseFormat = GL_RGB;
-                }
-                else if (format == Format::sRGBA && !mDevice.mExtensions.EXT_sRGB)
-                {
-                    gfx::BitmapReadView<gfx::Pixel_RGBA> view((const gfx::Pixel_RGBA*) bytes, xres, yres);
-                    linear = ConvertToLinear(view);
-                    bytes = linear->GetDataPtr();
-                    sizeFormat = GL_RGBA;
-                    baseFormat = GL_RGBA;
-                }
+                sizeFormat = GL_RGB;
+                baseFormat = GL_RGB;
+                WARN("Treating sRGB texture as RGB texture in the absence of EXT_sRGB. [name='%1']", mName);
+            }
+            else if (format == Format::sRGBA && !mDevice.mExtensions.EXT_sRGB)
+            {
+                sizeFormat = GL_RGBA;
+                baseFormat = GL_RGBA;
+                WARN("Treating sRGBA texture as RGBA texture in the absence of EXT_sRGB. [name='%1']", mName);
             }
 
             GL_CALL(glActiveTexture(GL_TEXTURE0));
