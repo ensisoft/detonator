@@ -1249,6 +1249,28 @@ void MaterialClass::IntoJson(data::Writer& data) const
     }
 }
 
+template<typename T> // static
+bool MaterialClass::SetUniform(const char* name, const UniformMap* uniforms, const T& backup, Program& program)
+{
+    if (uniforms)
+    {
+        auto it = uniforms->find(name);
+        if (it == uniforms->end())
+        {
+            program.SetUniform(name, backup);
+            return true;
+        }
+        const auto& value = it->second;
+        if (const auto* ptr = std::get_if<T>(&value))
+        {
+            program.SetUniform(name, *ptr);
+            return true;
+        }
+    }
+    program.SetUniform(name, backup);
+    return false;
+}
+
 template<typename T>
 bool MaterialClass::ReadLegacyValue(const char* name, const char* uniform, const data::Reader& data)
 {

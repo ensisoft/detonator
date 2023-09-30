@@ -118,6 +118,9 @@ namespace gfx
         virtual size_t GetPendingUniformCount() const = 0;
 
         // helpers
+        inline void SetUniform(const char* name, const glm::ivec2& vec) noexcept
+        { SetUniform(name, vec.x, vec.y); }
+
         inline void SetUniform(const char* name, const glm::vec2& vec) noexcept
         { SetUniform(name, vec.x, vec.y); }
         inline void SetUniform(const char* name, const glm::vec3& vec) noexcept
