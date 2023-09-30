@@ -2220,6 +2220,7 @@ int main(int argc, char* argv[])
     bool debug_context = false;
     int swap_interval = 0;
     int test_result   = EXIT_SUCCESS;
+    int version = 2;
     std::string casename;
 
     for (int i=1; i<argc; ++i)
@@ -2248,6 +2249,8 @@ int main(int argc, char* argv[])
             user_interaction = false;
         else if (!std::strcmp(argv[i], "--no-srgb"))
             srgb = false;
+        else if (!std::strcmp(argv[i], "--es3"))
+            version = 3;
     }
 
     // context integration glue code that puts together
@@ -2255,7 +2258,7 @@ int main(int argc, char* argv[])
     class WindowContext : public dev::Context
     {
     public:
-        WindowContext(wdk::Config::Multisampling sampling, bool srgb, bool debug)
+        WindowContext(wdk::Config::Multisampling sampling, bool srgb, bool debug, int version)
         {
             wdk::Config::Attributes attrs;
             attrs.red_size        = 8;
@@ -2269,9 +2272,9 @@ int main(int argc, char* argv[])
             attrs.sampling        = sampling;
             attrs.srgb_buffer     = srgb;
 
+            mVersion  = version;
             mConfig   = std::make_unique<wdk::Config>(attrs);
-            mContext  = std::make_unique<wdk::Context>(*mConfig, 2, 0,  debug,
-                wdk::Context::Type::OpenGL_ES);
+            mContext  = std::make_unique<wdk::Context>(*mConfig, version, 0,  debug, wdk::Context::Type::OpenGL_ES);
             mVisualID = mConfig->GetVisualID();
             mDebug = debug;
         }
@@ -2289,7 +2292,11 @@ int main(int argc, char* argv[])
         }
         virtual Version GetVersion() const override
         {
-            return Version::OpenGL_ES2;
+            if (mVersion == 2)
+                return Version::OpenGL_ES2;
+            else if (mVersion ==3 )
+                return Version::OpenGL_ES3;
+            else BUG("Unknown OpenGL ES version");
         }
         virtual bool IsDebug() const override
         {
@@ -2321,9 +2328,10 @@ int main(int argc, char* argv[])
         std::unique_ptr<wdk::Config>  mConfig;
         wdk::uint_t mVisualID = 0;
         bool mDebug = false;
+        int mVersion = 0;
     };
 
-    auto context = std::make_shared<WindowContext>(sampling, srgb, debug_context);
+    auto context = std::make_shared<WindowContext>(sampling, srgb, debug_context, version);
     auto dev_device  = dev::CreateDevice(context);
     auto gfx_device = dev_device->GetSharedGraphicsDevice();
     auto painter = gfx::Painter::Create(gfx_device);

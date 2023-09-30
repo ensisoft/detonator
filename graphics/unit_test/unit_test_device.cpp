@@ -42,20 +42,22 @@
 class TestContext : public dev::Context
 {
 public:
+    static unsigned GL_ES_Version;
+
     TestContext(unsigned w, unsigned h)
     {
         wdk::Config::Attributes attrs;
-        attrs.red_size  = 8;
-        attrs.green_size = 8;
-        attrs.blue_size = 8;
-        attrs.alpha_size = 8;
-        attrs.stencil_size = 8;
+        attrs.red_size         = 8;
+        attrs.green_size       = 8;
+        attrs.blue_size        = 8;
+        attrs.alpha_size       = 8;
+        attrs.stencil_size     = 8;
         attrs.surfaces.pbuffer = true;
-        attrs.double_buffer = false;
-        attrs.srgb_buffer = true;
+        attrs.double_buffer    = false;
+        attrs.srgb_buffer      = true;
         constexpr auto debug_context = false;
         mConfig   = std::make_unique<wdk::Config>(attrs);
-        mContext  = std::make_unique<wdk::Context>(*mConfig, 2, 0, debug_context, wdk::Context::Type::OpenGL_ES);
+        mContext  = std::make_unique<wdk::Context>(*mConfig, GL_ES_Version, 0, debug_context, wdk::Context::Type::OpenGL_ES);
         mSurface  = std::make_unique<wdk::Surface>(*mConfig, w, h);
         mContext->MakeCurrent(mSurface.get());
     }
@@ -80,7 +82,11 @@ public:
     }
     virtual Version GetVersion() const override
     {
-        return Version::OpenGL_ES2;
+        if (GL_ES_Version == 2)
+            return Version::OpenGL_ES2;
+        else if (GL_ES_Version == 3)
+            return Version::OpenGL_ES3;
+        else BUG("Missing OpenGL ES version");
     }
 
 private:
@@ -88,6 +94,8 @@ private:
     std::unique_ptr<wdk::Surface> mSurface;
     std::unique_ptr<wdk::Config>  mConfig;
 };
+
+unsigned TestContext::GL_ES_Version = 2;
 
 gfx::Program* MakeTestProgram(gfx::Device& dev, const char* vssrc, const char* fssrc, const std::string name = "prog")
 {
@@ -2395,6 +2403,13 @@ void main() {
 
 int test_main(int argc, char* argv[])
 {
+    for (int i=1; i<argc; ++i)
+    {
+        if (!std::strcmp(argv[i], "--es3"))
+            TestContext::GL_ES_Version = 3;
+    }
+    test::Print(test::Color::Info, "Testing with GL ES%d\n", TestContext::GL_ES_Version);
+
     unit_test_device();
     unit_test_shader();
     unit_test_texture();
