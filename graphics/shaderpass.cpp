@@ -44,7 +44,8 @@ void main() {
   FragmentShaderMain();
 
   gl_FragColor = fs_out.color;
-})");
+}
+)");
     source.append(material.GetShader(env, device));
     return source;
 }
@@ -69,7 +70,8 @@ source.append(R"(
 
 void main() {
    VertexShaderMain();
-})");
+}
+)");
 
     return source;
 }
