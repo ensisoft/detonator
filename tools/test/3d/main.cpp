@@ -617,7 +617,7 @@ int main(int argc, char* argv[])
             attrs.sampling        = wdk::Config::Multisampling::MSAA4;
             attrs.srgb_buffer     = true;
             mConfig   = std::make_unique<wdk::Config>(attrs);
-            mContext  = std::make_unique<wdk::Context>(*mConfig, 2, 0,  false /*debug*/, wdk::Context::Type::OpenGL_ES);
+            mContext  = std::make_unique<wdk::Context>(*mConfig, 3, 0,  false /*debug*/, wdk::Context::Type::OpenGL_ES);
             mVisualID = mConfig->GetVisualID();
         }
         virtual void Display() override
@@ -634,7 +634,7 @@ int main(int argc, char* argv[])
         }
         virtual Version GetVersion() const override
         {
-            return Version::OpenGL_ES2;
+            return Version::OpenGL_ES3;
         }
         virtual bool IsDebug() const override
         {

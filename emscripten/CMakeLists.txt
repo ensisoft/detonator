@@ -150,6 +150,8 @@ target_link_options(GameEngine PRIVATE -sALLOW_MEMORY_GROWTH)
 target_link_options(GameEngine PRIVATE -lidbfs.js)
 target_link_options(GameEngine PRIVATE -sEXPORTED_FUNCTIONS=_main,_gui_set_flag)
 target_link_options(GameEngine PRIVATE -sEXPORTED_RUNTIME_METHODS=ccall)
+target_link_options(GameEngine PRIVATE -sUSE_WEBGL2)
+target_link_options(GameEngine PRIVATE -sFULL_ES3)
 
 # uncomment this in order to enable threading
 #target_link_options(GameEngine PRIVATE -pthread)

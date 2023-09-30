@@ -199,8 +199,7 @@ public:
     WindowContext(const wdk::Config::Attributes& attrs, bool debug)
     {
         mConfig  = std::make_unique<wdk::Config>(attrs);
-        mContext = std::make_unique<wdk::Context>(*mConfig, 2, 0, debug,
-            wdk::Context::Type::OpenGL_ES);
+        mContext = std::make_unique<wdk::Context>(*mConfig, 3, 0, debug, wdk::Context::Type::OpenGL_ES);
         mVisualID = mConfig->GetVisualID();
         mDebug = debug;
     }
@@ -218,7 +217,7 @@ public:
     }
     virtual Version GetVersion() const override
     {
-        return Version::OpenGL_ES2;
+        return Version::OpenGL_ES3;
     }
     virtual bool IsDebug() const override
     {

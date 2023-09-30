@@ -208,7 +208,7 @@ void Main(int argc, char* argv[])
     // whether the destination color buffer has alpha channel or 
     // not should be irrelevant. 
     QSurfaceFormat format;
-    format.setVersion(2, 0);
+    format.setVersion(3, 0);
     format.setProfile(QSurfaceFormat::CoreProfile);
     format.setRenderableType(QSurfaceFormat::OpenGLES);
     format.setDepthBufferSize(24);

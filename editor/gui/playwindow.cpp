@@ -214,7 +214,7 @@ public:
     }
     virtual Version GetVersion() const override
     {
-        return Version::OpenGL_ES2;
+        return Version::OpenGL_ES3;
     }
     void SetSurface(QWindow* surface)
     { mSurface = surface; }
