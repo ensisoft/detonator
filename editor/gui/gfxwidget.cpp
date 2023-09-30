@@ -411,7 +411,7 @@ void GfxWindow::doInit()
         }
         virtual Version GetVersion() const override
         {
-            return Version::OpenGL_ES2;
+            return Version::OpenGL_ES3;
         }
     private:
         QOpenGLContext* mContext = nullptr;

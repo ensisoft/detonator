@@ -114,7 +114,7 @@ public:
         attrs.depth                        = true;
         attrs.stencil                      = true;
         attrs.antialias                    = antialias;
-        attrs.majorVersion                 = 1; // WebGL 1.0 is based on OpenGL ES 2.0
+        attrs.majorVersion                 = 2; // WebGL 2.0 is based on OpenGL ES 3.0
         attrs.minorVersion                 = 0;
         attrs.preserveDrawingBuffer        = false;
         attrs.failIfMajorPerformanceCaveat = true;
@@ -161,7 +161,7 @@ public:
     }
     virtual Version GetVersion() const override
     {
-        return Version::WebGL_1;
+        return Version::WebGL_2;
     }
 private:
     EMSCRIPTEN_WEBGL_CONTEXT_HANDLE mContext = 0;
