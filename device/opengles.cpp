@@ -22,7 +22,7 @@
 #  undef BASE_TRACING_ENABLE_TRACING
 #endif
 
-#include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
 
 #include <cstdio>
 #include <cassert>
@@ -1619,17 +1619,39 @@ private:
                     DEBUG("Created new texture object. [name='%1', handle=%2]", mName, mHandle);
             }
 
+            const auto version = mDevice.mContext->GetVersion();
+
             GLenum sizeFormat = 0;
             GLenum baseFormat = 0;
             switch (format)
             {
                 case Format::sRGB:
-                    sizeFormat = GL_SRGB_EXT;
-                    baseFormat = GL_SRGB_EXT;
+                    if (version == dev::Context::Version::WebGL_1 ||
+                        version == dev::Context::Version::OpenGL_ES2)
+                    {
+                        sizeFormat = GL_SRGB_EXT;
+                        baseFormat = GL_RGB; //GL_SRGB_EXT;
+                    }
+                    else if (version == dev::Context::Version::WebGL_2 ||
+                             version == dev::Context::Version::OpenGL_ES3)
+                    {
+                        sizeFormat = GL_SRGB8;
+                        baseFormat = GL_RGB;
+                    } else BUG("Unknown OpenGL ES version.");
                     break;
                 case Format::sRGBA:
-                    sizeFormat = GL_SRGB_ALPHA_EXT;
-                    baseFormat = GL_SRGB_ALPHA_EXT;
+                    if (version == dev::Context::Version::WebGL_1 ||
+                        version == dev::Context::Version::OpenGL_ES2)
+                    {
+                        sizeFormat = GL_SRGB_ALPHA_EXT;
+                        baseFormat = GL_RGBA; //GL_SRGB_ALPHA_EXT;
+                    }
+                    else if (version == dev::Context::Version::WebGL_2 ||
+                             version == dev::Context::Version::OpenGL_ES3)
+                    {
+                        sizeFormat = GL_SRGB8_ALPHA8;
+                        baseFormat = GL_RGBA;
+                    } else BUG("Unknown OpenGL ES version.");
                     break;
                 case Format::RGB:
                     sizeFormat = GL_RGB;
@@ -1647,17 +1669,21 @@ private:
                 default: BUG("Unknown texture format."); break;
             }
 
-            if (format == Format::sRGB && !mDevice.mExtensions.EXT_sRGB)
+            if (version == dev::Context::Version::OpenGL_ES2 ||
+                version == dev::Context::Version::WebGL_1)
             {
-                sizeFormat = GL_RGB;
-                baseFormat = GL_RGB;
-                WARN("Treating sRGB texture as RGB texture in the absence of EXT_sRGB. [name='%1']", mName);
-            }
-            else if (format == Format::sRGBA && !mDevice.mExtensions.EXT_sRGB)
-            {
-                sizeFormat = GL_RGBA;
-                baseFormat = GL_RGBA;
-                WARN("Treating sRGBA texture as RGBA texture in the absence of EXT_sRGB. [name='%1']", mName);
+                if (format == Format::sRGB && !mDevice.mExtensions.EXT_sRGB)
+                {
+                    sizeFormat = GL_RGB;
+                    baseFormat = GL_RGB;
+                    WARN("Treating sRGB texture as RGB texture in the absence of EXT_sRGB. [name='%1']", mName);
+                }
+                else if (format == Format::sRGBA && !mDevice.mExtensions.EXT_sRGB)
+                {
+                    sizeFormat = GL_RGBA;
+                    baseFormat = GL_RGBA;
+                    WARN("Treating sRGBA texture as RGBA texture in the absence of EXT_sRGB. [name='%1']", mName);
+                }
             }
 
             GL_CALL(glActiveTexture(GL_TEXTURE0));
@@ -2634,6 +2660,7 @@ private:
             // to be reused with a different target texture.
             if (mConfig.format == Format::ColorRGBA8)
             {
+                // for posterity
                 //GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
             }
             else if (mConfig.format == Format::ColorRGBA8_Depth16)
@@ -2642,11 +2669,12 @@ private:
                 GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer));
                 GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, xres, yres));
                 GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
-                //GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
             }
             else if (mConfig.format == Format::ColorRGBA8_Depth24_Stencil8)
             {
-                if (mDevice.mContext->GetVersion() == dev::Context::Version::OpenGL_ES2)
+                const auto version = mDevice.mContext->GetVersion();
+
+                if (version == dev::Context::Version::OpenGL_ES2)
                 {
                     if (!mDevice.mExtensions.OES_packed_depth_stencil)
                     {
@@ -2658,9 +2686,8 @@ private:
                     GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, xres, yres));
                     GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
                     GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
-                    //GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
                 }
-                else
+                else if (version == dev::Context::Version::WebGL_1 || version == dev::Context::Version::WebGL_2)
                 {
                     // the WebGL spec doesn't actually mention the bit depths for the packed
                     // depth+stencil render buffer and the API exposed GLenum is GL_DEPTH_STENCIL 0x84F9
@@ -2670,7 +2697,14 @@ private:
                     GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer));
                     GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, WEBGL_DEPTH_STENCIL, xres, yres));
                     GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, WEBGL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
-                    //GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mColor->GetHandle(), 0));
+                }
+                else if (version == dev::Context::Version::OpenGL_ES3)
+                {
+                    GL_CALL(glGenRenderbuffers(1, &mDepthBuffer));
+                    GL_CALL(glBindRenderbuffer(GL_RENDERBUFFER, mDepthBuffer));
+                    GL_CALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, xres, yres));
+                    GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
+                    GL_CALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffer));
                 }
             }
             DEBUG("Created new frame buffer object. [name='%1', width=%2, height=%3, format=%4]", mName, xres, yres, mConfig.format);
@@ -2742,20 +2776,24 @@ namespace dev {
 
 std::shared_ptr<Device> CreateDevice(std::shared_ptr<dev::Context> context)
 {
-    if (context->GetVersion() == Context::Version::OpenGL_ES2)
+    if (context->GetVersion() == Context::Version::OpenGL_ES2 ||
+        context->GetVersion() == Context::Version::OpenGL_ES3)
         return std::make_shared<OpenGLES2GraphicsDevice>(context);
-    else if (context->GetVersion() == Context::Version::WebGL_1)
+    else if (context->GetVersion() == Context::Version::WebGL_1 ||
+             context->GetVersion() == Context::Version::WebGL_2)
         return std::make_shared<OpenGLES2GraphicsDevice>(context);
-
+    else BUG("No such device implemented.");
     return nullptr;
 }
 std::shared_ptr<Device> CreateDevice(dev::Context* context)
 {
-    if (context->GetVersion() == Context::Version::OpenGL_ES2)
+    if (context->GetVersion() == Context::Version::OpenGL_ES2 ||
+        context->GetVersion() == Context::Version::OpenGL_ES3)
         return std::make_shared<OpenGLES2GraphicsDevice>(context);
-    else if (context->GetVersion() == Context::Version::WebGL_1)
+    else if (context->GetVersion() == Context::Version::WebGL_1 ||
+             context->GetVersion() == Context::Version::WebGL_2)
         return std::make_shared<OpenGLES2GraphicsDevice>(context);
-
+    else BUG("No such device implemented.");
     return nullptr;
 }
 
