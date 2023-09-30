@@ -248,11 +248,9 @@ public:
         else if (id == "custom")
         {
 constexpr auto* src = R"(
-#version 100
-precision highp float;
 uniform vec4 kColor;
-void main() {
-  gl_FragColor = kColor;
+void FragmentShaderMain() {
+  fs_out.color = kColor;
 }
 )";
             gfx::CustomMaterialClass klass(gfx::MaterialClass::Type::Custom);
