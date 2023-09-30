@@ -1684,23 +1684,7 @@ private:
 
             if (bytes && mips)
             {
-                if (mDevice.mContext->GetVersion() == dev::Context::Version::WebGL_1)
-                {
-                    // WebGL only supports mips with POT textures.
-                    // This also means that with NPOT textures only linear or nearest
-                    // sampling can be used since mips are not available.
-                    // https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support
-                    if (base::IsPowerOfTwo(xres) && base::IsPowerOfTwo(yres))
-                    {
-                        GenerateMips(bytes, xres, yres, format);
-                        mHasMips = true;
-                    } else WARN("WebGL doesn't support mips on NPOT textures. [name='%1', size=%2x%3]", mName, xres, yres);
-                }
-                else
-                {
-                    GenerateMips(bytes, xres, yres, format);
-                    mHasMips = true;
-                }
+                GenerateMips();
             }
 
             mWidth  = xres;
@@ -1764,14 +1748,22 @@ private:
             {
                 if (!base::IsPowerOfTwo(mWidth) || !base::IsPowerOfTwo(mHeight))
                 {
-                    WARN("WebGL doesn't support mips on NPOT textures. [name='%1', size=%2x%3]", mName, mWidth, mHeight);
+                    WARN("WebGL1 doesn't support mips on NPOT texture. [name='%1', size=%2x%3]", mName, mWidth, mHeight);
+                    return false;
+                }
+                if (mFormat == Format::sRGB || mFormat == Format::sRGBA)
+                {
+                    WARN("WebGL1 doesn't support mips on sRGB/sRGBA texture. [name='%1', format=%2]", mName, mFormat);
                     return false;
                 }
             }
-            if (mFormat == Format::sRGB || mFormat == Format::sRGBA)
+            else if (mDevice.mContext->GetVersion() == dev::Context::Version::OpenGL_ES2)
             {
-                WARN("GL ES2 doesn't support mips on sRGB(A) textures. [name='%1']", mName);
-                return false;
+                if (mFormat == Format::sRGB || mFormat == Format::sRGBA)
+                {
+                    WARN("GL ES2 doesn't support mips on sRGB/sRGBA texture. [name='%1', format=%2]", mName, mFormat);
+                    return false;
+                }
             }
 
             const auto last_unit_index = mDevice.mTextureUnits.size() - 1;
@@ -1821,45 +1813,7 @@ private:
         { return mState; }
         void SetState(const GLState& state)
         { mState = state; }
-    private:
-        void GenerateMips(const void* bytes, unsigned xres, unsigned yres, Format format)
-        {
-            if (format == Format::sRGB)
-                GenerateMipsFrom_sRGB<gfx::Pixel_RGB>(bytes, xres, yres, GL_SRGB_EXT);
-            else if (format == Format::sRGBA)
-                GenerateMipsFrom_sRGB<gfx::Pixel_RGBA>(bytes, xres, yres, GL_SRGB_ALPHA_EXT);
-            else GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
-        }
-        template<typename T_rgb>
-        void GenerateMipsFrom_sRGB(const void* bytes, unsigned xres, unsigned yres, GLenum type)
-        {
-            // if the texture has sRGB format then according to GL_EXT_sRGB
-            // no mipmap generation is possible but glGenerateMipmap will return INVALID_OPERATION.
-            // Thus, with sRGB formats we need to generate the mipmaps manually ourselves.
-            // in this function we're expecting that the base level (level 0) has already
-            // been loaded, so the next level is level 1
 
-            // level 0 view
-            gfx::BitmapReadView<T_rgb> view((const T_rgb*)bytes, xres, yres);
-
-            auto level  = 1u;
-            auto mipmap = GenerateNextMipmap(view, true);
-            while (mipmap)
-            {
-                GL_CALL(glTexImage2D(GL_TEXTURE_2D,
-                    level,
-                    type,
-                    mipmap->GetWidth(),
-                    mipmap->GetHeight(),
-                    0, // border must be 0
-                    type,
-                    GL_UNSIGNED_BYTE,
-                    mipmap->GetDataPtr()));
-                auto view = mipmap->GetReadView();
-                mipmap = GenerateNextMipmap(*view, true);
-                level++;
-            }
-        }
     private:
         const OpenGLFunctions& mGL;
         OpenGLES2GraphicsDevice& mDevice;
