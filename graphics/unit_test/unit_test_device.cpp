@@ -55,7 +55,7 @@ public:
         attrs.surfaces.pbuffer = true;
         attrs.double_buffer    = false;
         attrs.srgb_buffer      = true;
-        constexpr auto debug_context = false;
+        constexpr auto debug_context = true;
         mConfig   = std::make_unique<wdk::Config>(attrs);
         mContext  = std::make_unique<wdk::Context>(*mConfig, GL_ES_Version, 0, debug_context, wdk::Context::Type::OpenGL_ES);
         mSurface  = std::make_unique<wdk::Surface>(*mConfig, w, h);
@@ -345,7 +345,7 @@ void main() {
     }
 }
 
-void unit_test_render_fbo(gfx::Framebuffer::Format format)
+void unit_test_render_fbo(gfx::Framebuffer::Format format, gfx::Framebuffer::MSAA msaa)
 {
     TEST_CASE(test::Type::Feature)
 
@@ -408,6 +408,7 @@ void main() {
         conf.format = format;
         conf.width  = 10;
         conf.height = 10;
+        conf.msaa   = msaa;
         auto* fbo = dev->MakeFramebuffer("test");
         fbo->SetConfig(conf);
 
@@ -451,6 +452,7 @@ void main() {
         conf.format = format;
         conf.width  = 10;
         conf.height = 10;
+        conf.msaa   = msaa;
         auto* fbo = dev->MakeFramebuffer("test");
         fbo->SetConfig(conf);
         fbo->SetColorTarget(target);
@@ -2415,9 +2417,13 @@ int test_main(int argc, char* argv[])
     unit_test_texture();
     unit_test_program();
 
-    unit_test_render_fbo(gfx::Framebuffer::Format::ColorRGBA8);
-    unit_test_render_fbo(gfx::Framebuffer::Format::ColorRGBA8_Depth16);
-    unit_test_render_fbo(gfx::Framebuffer::Format::ColorRGBA8_Depth24_Stencil8);
+    unit_test_render_fbo(gfx::Framebuffer::Format::ColorRGBA8, gfx::Framebuffer::MSAA::Disabled);
+    unit_test_render_fbo(gfx::Framebuffer::Format::ColorRGBA8_Depth16, gfx::Framebuffer::MSAA::Disabled);
+    unit_test_render_fbo(gfx::Framebuffer::Format::ColorRGBA8_Depth24_Stencil8, gfx::Framebuffer::MSAA::Disabled);
+
+    unit_test_render_fbo(gfx::Framebuffer::Format::ColorRGBA8, gfx::Framebuffer::MSAA::Enabled);
+    unit_test_render_fbo(gfx::Framebuffer::Format::ColorRGBA8_Depth16, gfx::Framebuffer::MSAA::Enabled);
+    unit_test_render_fbo(gfx::Framebuffer::Format::ColorRGBA8_Depth24_Stencil8, gfx::Framebuffer::MSAA::Enabled);
     unit_test_render_color_only();
     unit_test_render_with_single_texture();
     unit_test_render_with_multiple_textures();

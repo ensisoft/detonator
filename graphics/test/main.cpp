@@ -61,6 +61,8 @@ public:
     virtual std::string GetName() const = 0;
     virtual bool IsFeatureTest() const
     { return true; }
+    virtual void KeyDown(const wdk::WindowEventKeyDown& key)
+    {}
 private:
 };
 
@@ -2201,6 +2203,124 @@ public:
 private:
 };
 
+class FramebufferTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        auto* device = painter.GetDevice();
+
+        {
+            auto* fbo = device->FindFramebuffer("fbo_msaa_disabled");
+            if (fbo == nullptr)
+            {
+                gfx::Framebuffer::Config conf;
+                conf.format = gfx::Framebuffer::Format::ColorRGBA8;
+                conf.width = 512;
+                conf.height = 512;
+                conf.msaa = gfx::Framebuffer::MSAA::Disabled;
+                fbo = device->MakeFramebuffer("fbo_msaa_disabled");
+                fbo->SetConfig(conf);
+            }
+            gfx::Painter p(painter);
+            p.SetSurfaceSize(512, 512);
+            p.SetViewport(0, 0, 512, 512);
+            p.SetProjectionMatrix(gfx::MakeOrthographicProjection(512, 512));
+            p.ClearScissor();
+            p.ResetViewMatrix();
+
+            gfx::Transform transform;
+            transform.Resize(400.0f, 400.0f);
+            transform.Translate(-200.0f, -200.0f);
+            transform.RotateAroundZ(mTime);
+            transform.Translate(200.0f, 200.0f);
+            transform.Translate(56.0f, 56.0f);
+
+            p.SetFramebuffer(fbo);
+            p.ClearColor(gfx::Color::Transparent);
+            p.Draw(gfx::IsoscelesTriangle(), transform, gfx::CreateMaterialFromColor(gfx::Color::Green));
+
+            gfx::Texture* result = nullptr;
+            fbo->Resolve(&result);
+            ASSERT(result);
+
+            {
+                gfx::Transform transform;
+                transform.Resize(512.0f, 512.0f);
+                transform.MoveTo(0.0f, 20.0f);
+                gfx::MaterialClass klass(gfx::MaterialClass::Type::Texture);
+                klass.SetTexture(gfx::UseExistingTexture("fbo_msaa_disabled_out", result, ""));
+                klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+                painter.Draw(gfx::Rectangle(), transform, gfx::MaterialClassInst(klass));
+            }
+
+            {
+                auto* fbo = device->FindFramebuffer("fbo_msaa_enabled");
+                if (fbo == nullptr)
+                {
+                    gfx::Framebuffer::Config conf;
+                    conf.format = gfx::Framebuffer::Format::ColorRGBA8;
+                    conf.width = 512;
+                    conf.height = 512;
+                    conf.msaa = gfx::Framebuffer::MSAA::Enabled;
+                    fbo = device->MakeFramebuffer("fbo_msaa_enabled");
+                    fbo->SetConfig(conf);
+                }
+                gfx::Painter p(painter);
+                p.SetSurfaceSize(512, 512);
+                p.SetViewport(0, 0, 512, 512);
+                p.SetProjectionMatrix(gfx::MakeOrthographicProjection(512, 512));
+                p.ClearScissor();
+                p.ResetViewMatrix();
+
+                gfx::Transform transform;
+                transform.Resize(400.0f, 400.0f);
+                transform.Translate(-200.0f, -200.0f);
+                transform.RotateAroundZ(mTime);
+                transform.Translate(200.0f, 200.0f);
+                transform.Translate(56.0f, 56.0f);
+
+                p.SetFramebuffer(fbo);
+                p.ClearColor(gfx::Color::Transparent);
+                p.Draw(gfx::IsoscelesTriangle(), transform, gfx::CreateMaterialFromColor(gfx::Color::Green));
+
+                gfx::Texture* result = nullptr;
+                fbo->Resolve(&result);
+                ASSERT(result);
+
+                {
+                    gfx::Transform transform;
+                    transform.Resize(512.0f, 512.0f);
+                    transform.MoveTo(512.0f, 20.0f);
+                    gfx::MaterialClass klass(gfx::MaterialClass::Type::Texture);
+                    klass.SetTexture(gfx::UseExistingTexture("fbo_msaa_enabled_out", result, ""));
+                    klass.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+                    painter.Draw(gfx::Rectangle(), transform, gfx::MaterialClassInst(klass));
+                }
+            }
+        }
+    }
+    virtual std::string GetName() const override
+    { return "FramebufferTest"; }
+    virtual bool IsFeatureTest() const override
+    { return true;}
+    virtual void KeyDown(const wdk::WindowEventKeyDown& key) override
+    {
+        if (key.symbol == wdk::Keysym::Space)
+        {
+            mAccumulateTime = !mAccumulateTime;
+        }
+    }
+    virtual void Update(float dt) override
+    {
+        if (mAccumulateTime)
+            mTime += dt;
+    }
+private:
+    bool mAccumulateTime = true;
+    double mTime = 0.0;
+};
+
 int main(int argc, char* argv[])
 {
     base::OStreamLogger logger(std::cout);
@@ -2378,6 +2498,12 @@ int main(int argc, char* argv[])
     tests.emplace_back(new PremultiplyAlphaTest);
     tests.emplace_back(new PrecisionTest);
 
+    // GL ES3 specific tests
+    if (version == 3)
+    {
+        tests.emplace_back(new FramebufferTest);
+    }
+
     bool stop_for_input = false;
 
     wdk::Window window;
@@ -2413,6 +2539,10 @@ int main(int argc, char* argv[])
             tests[current_test_index]->End();
             tests[test_index]->Start();
             window.SetTitle(tests[test_index]->GetName());
+        }
+        else
+        {
+            tests[current_test_index]->KeyDown(key);
         }
         stop_for_input = false;
     };
