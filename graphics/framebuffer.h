@@ -36,6 +36,10 @@ namespace gfx
             ColorRGBA8_Depth24_Stencil8
         };
 
+        enum class MSAA {
+            Disabled, Enabled
+        };
+
         // Framebuffer configuration.
         struct Config {
             Format format = Format::ColorRGBA8;
@@ -43,6 +47,8 @@ namespace gfx
             unsigned width = 0;
             // The height of the fbo in pixels.
             unsigned height = 0;
+
+            MSAA msaa = MSAA::Disabled;
         };
         // Set the framebuffer configuration that will be used when drawing.
         virtual void SetConfig(const Config& conf) = 0;
@@ -52,10 +58,6 @@ namespace gfx
         // The texture format must match the FBO config, i.e. the dimension
         // of any other buffers and the configured color format.
         virtual void SetColorTarget(Texture* texture) = 0;
-        // Set the MSAA resolve texture target. If this is not set when the
-        // FBO is used to render one is created for you based on the width/height
-        // set in the FBO config.
-        virtual void SetResolveTarget(Texture* texture) = 0;
         // Resolve the framebuffer color buffer contents into a texture that can be
         // used to sample the rendered image.
         virtual void Resolve(Texture** color) const = 0;
