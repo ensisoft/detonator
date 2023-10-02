@@ -234,14 +234,15 @@ void main() {
 void DetectSpriteEdges(const gfx::Texture* src, gfx::Texture* dst, gfx::Device* device,
                        const gfx::Color4f& edge_color)
 {
-    auto* fbo = device->FindFramebuffer("AlgoFBO");
+    auto* fbo = device->FindFramebuffer("EdgeFBO");
     if (!fbo)
     {
-        fbo = device->MakeFramebuffer("AlgoFBO");
+        fbo = device->MakeFramebuffer("EdgeFBO");
         Framebuffer::Config conf;
         conf.width  = 0; // irrelevant since using texture target
         conf.height = 0; // irrelevant since using texture target.
         conf.format = Framebuffer::Format::ColorRGBA8;
+        conf.msaa   = Framebuffer::MSAA::Enabled;
         fbo->SetConfig(conf);
     }
     dst->SetFilter(gfx::Texture::MinFilter::Linear);
@@ -345,30 +346,30 @@ void main() {
     state.blending     = gfx::Device::State::BlendOp::None;
     state.viewport     = gfx::IRect(0, 0, dst_width, dst_height);
     device->Draw(*program, *quad, state, fbo);
-
+    fbo->Resolve(nullptr);
 }
 
 void DetectSpriteEdges(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* device, const gfx::Color4f& edge_color)
 {
-    auto* tmp = device->FindTexture(gpu_id + "/tmp-color");
-    if (!tmp)
+    auto* edges = device->FindTexture(gpu_id + "/edges");
+    if (!edges)
     {
-        tmp = device->MakeTexture(gpu_id + "/tmp-color");
+        edges = device->MakeTexture(gpu_id + "/edges");
 
-        tmp->Allocate(texture->GetWidth(),
+        edges->Allocate(texture->GetWidth(),
                       texture->GetHeight(),
                       gfx::Texture::Format::RGBA);
 
-        tmp->SetName("EdgeDetectionHelperTexture");
-        tmp->SetFilter(gfx::Texture::MinFilter::Linear);
-        tmp->SetFilter(gfx::Texture::MagFilter::Linear);
-        tmp->SetWrapX(gfx::Texture::Wrapping::Clamp);
-        tmp->SetWrapY(gfx::Texture::Wrapping::Clamp);
-        tmp->SetGarbageCollection(true);
-        tmp->SetTransient(true);
+        edges->SetName("EdgeDetectionHelperTexture");
+        edges->SetFilter(gfx::Texture::MinFilter::Linear);
+        edges->SetFilter(gfx::Texture::MagFilter::Linear);
+        edges->SetWrapX(gfx::Texture::Wrapping::Clamp);
+        edges->SetWrapY(gfx::Texture::Wrapping::Clamp);
+        edges->SetGarbageCollection(true);
+        edges->SetTransient(true);
     }
-    DetectSpriteEdges(texture, tmp, device, edge_color);
-    CopyTexture(tmp, texture, device);
+    DetectSpriteEdges(texture, edges, device, edge_color);
+    CopyTexture(edges, texture, device);
 }
 
 void CopyTexture(const gfx::Texture* src, gfx::Texture* dst, gfx::Device* device, const glm::mat3& matrix)
