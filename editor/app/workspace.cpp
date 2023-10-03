@@ -1815,6 +1815,15 @@ bool Workspace::LoadWorkspace(MigrationLog* log)
     // integrity of the workspace and its content.
     LoadUserSettings(JoinPath(mWorkspaceDir, ".workspace_private.json"));
 
+    // Invoke resource migration hook that allows us to perform one-off
+    // activities when the underlying data has changed between different
+    // data versions.
+    for (auto& res : mResources)
+    {
+        if (!res->IsPrimitive())
+            res->Migrate(log);
+    }
+
     INFO("Loaded workspace '%1'", mWorkspaceDir);
     return true;
 }
@@ -1976,15 +1985,6 @@ bool Workspace::LoadContent(const QString& filename, MigrationLog* log)
             return resource->IsPrimitive() == false;
         });
     mUserResourceCount = std::distance(mResources.begin(), primitives_start);
-
-    // Invoke resource migration hook that allows us to perform one-off
-    // activities when the underlying data has changed between different
-    // data versions.
-    for (auto& res : mResources)
-    {
-        if (!res->IsPrimitive())
-            res->Migrate(log);
-    }
 
     INFO("Loaded content file '%1'", filename);
     return true;
