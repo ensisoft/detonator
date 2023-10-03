@@ -182,10 +182,6 @@ namespace engine
                 ASSERT(index < 4);
                 return mColorMap[index];
             }
-            void SetGamma(float gamma)
-            { mGamma = gamma; }
-            float GetGamma() const
-            { return mGamma.value_or(1.0f); }
         private:
             gfx::Color4f mColorMap[4];
             std::optional<float> mGamma;

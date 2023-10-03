@@ -98,28 +98,6 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
         {
             if (mActuator)
             {
-                if (mItem->HasMaterialParam("kGamma"))
-                {
-                    if (const auto* param = mActuator->FindMaterialParam("kGamma"))
-                    {
-                        if (const auto* gamma = std::get_if<float>(param))
-                            SetValue(mUI.gamma, *gamma);
-                    }
-                    else if (const auto* param = mItem->FindMaterialParam("kGamma"))
-                    {
-                        if (const auto* gamma = std::get_if<float>(param))
-                            SetValue(mUI.gamma, *gamma);
-                    }
-                    SetVisible(mUI.lblGamma,      true);
-                    SetVisible(mUI.gamma,         true);
-                    SetVisible(mUI.btnResetGamma, true);
-                }
-                else
-                {
-                    SetVisible(mUI.lblGamma,      false);
-                    SetVisible(mUI.gamma,         false);
-                    SetVisible(mUI.btnResetGamma, false);
-                }
 
                 if (mItem->HasMaterialParam("kBaseColor"))
                 {
@@ -144,7 +122,7 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
                     SetVisible(mUI.btnResetBaseColor, false);
                 }
 
-                if (!mItem->HasMaterialParam("kGamma") && !mItem->HasMaterialParam("kBaseColor"))
+                if (!mItem->HasMaterialParam("kBaseColor"))
                 {
                     SetVisible(mUI.grpMessage, true);
                     SetValue(mUI.lblMessage, "This entity node has no material parameters available for changing.\n"
@@ -158,11 +136,6 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
             }
             else
             {
-                if (const auto* param = mItem->FindMaterialParam("kGamma"))
-                {
-                    if (const auto* gamma = std::get_if<float>(param))
-                        SetValue(mUI.gamma, *gamma);
-                }
                 if (const auto* param = mItem->FindMaterialParam("kBaseColor"))
                 {
                     if (const auto* color = std::get_if<game::Color4f>(param))
@@ -310,24 +283,6 @@ void DlgMaterialParams::AdaptInterface(const app::Workspace* workspace, const gf
     }
 }
 
-void DlgMaterialParams::on_btnResetGamma_clicked()
-{
-    SetValue(mUI.gamma, -0.1f);
-    if (mActuator)
-    {
-        mActuator->DeleteMaterialParam("kGamma");
-        if (const auto* param = mItem->FindMaterialParam("kGamma"))
-        {
-            if (const auto* val = std::get_if<float>(param))
-                SetValue(mUI.gamma, *val);
-        }
-    }
-    else
-    {
-        mItem->DeleteMaterialParam("kGamma");
-    }
-}
-
 void DlgMaterialParams::on_btnResetBaseColor_clicked()
 {
     mUI.baseColor->clearColor();
@@ -357,13 +312,6 @@ void DlgMaterialParams::on_btnResetActiveMap_clicked()
     {
         mItem->ResetActiveTextureMap();
     }
-}
-
-void DlgMaterialParams::on_gamma_valueChanged(double)
-{
-    if (mActuator)
-        mActuator->SetMaterialParam("kGamma", GetValue(mUI.gamma));
-    else mItem->SetMaterialParam("kGamma", GetValue(mUI.gamma));
 }
 
 void DlgMaterialParams::on_textureMaps_currentIndexChanged(int)

@@ -63,6 +63,7 @@ DlgFontMap::DlgFontMap(QWidget* parent) : QDialog(parent)
     connect(&mTimer, &QTimer::timeout, this, &DlgFontMap::timer);
 
     PopulateFromEnum<gfx::detail::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
+    SetValue(mUI.cmbColorSpace, gfx::detail::TextureFileSource::ColorSpace::sRGB);
     SetEnabled(mUI.btnExport, false);
     SetValue(mUI.zoom, 1.0f);
 }
@@ -104,7 +105,6 @@ void DlgFontMap::LoadImage(const QString& file)
     mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     mClass->SetTexture(std::move(source));
     mClass->SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
-    mClass->SetGamma(1.0f);
     mMaterial = gfx::CreateMaterialInstance(mClass);
     SetValue(mUI.imageFile, info.absoluteFilePath());
     SetValue(mUI.zoom, scale);

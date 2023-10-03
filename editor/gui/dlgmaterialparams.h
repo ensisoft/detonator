@@ -43,11 +43,9 @@ namespace gui
 
         void AdaptInterface(const app::Workspace* workspace, const gfx::MaterialClass* material);
     private slots:
-        void on_btnResetGamma_clicked();
         void on_btnResetBaseColor_clicked();
         void on_btnResetActiveMap_clicked();
         void on_baseColor_colorChanged(QColor);
-        void on_gamma_valueChanged(double);
         void on_textureMaps_currentIndexChanged(int);
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();

@@ -1840,7 +1840,7 @@ void main() {
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
 
-    prog->SetUniform("kColor", gfx::Color::HotPink);
+    prog->SetUniform("kColor", gfx::Color::Green);
 
     gfx::Device::State state;
     state.blending     = gfx::Device::State::BlendOp::None;
@@ -1871,14 +1871,14 @@ void main() {
     dev->ClearColor(gfx::Color::Red);
 
     // set color uniform again.
-    prog->SetUniform("kColor", gfx::Color::HotPink);
+    prog->SetUniform("kColor", gfx::Color::Green);
 
     dev->Draw(*prog, *geom, state);
     dev->EndFrame();
 
     // this has alpha in it.
     const auto& bmp = dev->ReadColorBuffer(10, 10);
-    TEST_REQUIRE(bmp.Compare(gfx::Color::HotPink));
+    TEST_REQUIRE(bmp.Compare(gfx::Color::Green));
 
 }
 

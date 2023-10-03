@@ -701,15 +701,31 @@ void MigrateResource(uik::Window& window, app::MigrationLog* log, unsigned old_v
 
 void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned old_version, unsigned new_version)
 {
+    DEBUG("Migrating material resource. [material='%1']", material.GetName());
+
+    if (old_version == 0)
+    {
+        for (unsigned i = 0; i < material.GetNumTextureMaps(); ++i)
+        {
+            auto* map = material.GetTextureMap(i);
+            for (unsigned j = 0; j < map->GetNumTextures(); ++j)
+            {
+                auto* source = map->GetTextureSource(j);
+                if (auto* ptr = dynamic_cast<gfx::detail::TextureFileSource*>(source))
+                {
+                    ptr->SetColorSpace(gfx::detail::TextureFileSource::ColorSpace::sRGB);
+                    DEBUG("Changing material texture color space to sRGB. [material='%1', texture='%2']", material.GetName(), source->GetName());
+                    log->Log(material, "Material", "Changed texture color space to sRGB from linear.");
+                }
+            }
+        }
+    }
+
     // the uniform values were refactored inside the material class
     // and they only exist now if they have been set explicitly.
-
     // we can clean away the uniforms that have *not* been set by the
     // user, i.e. have the same value as the default that takes place
     // when the value isn't set.
-
-    DEBUG("Migrating material resource. [material='%1']", material.GetName());
-
     using ColorIndex = gfx::MaterialClass::ColorIndex;
 
     if (const auto* ptr = material.FindUniformValue<gfx::Color4f>("kBaseColor"))
@@ -781,15 +797,6 @@ void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned o
         {
             material.DeleteUniform("kTextureRotation");
             log->Log(material, "Material", "Removed unused default value on 'texture rotation'.");
-        }
-    }
-
-    if (const auto* ptr = material.FindUniformValue<float>("kGamma"))
-    {
-        if (math::equals(*ptr, 1.0f))
-        {
-            material.DeleteUniform("kGamma");
-            log->Log(material, "Material", "Removed unused default value on 'gamma'.");
         }
     }
 

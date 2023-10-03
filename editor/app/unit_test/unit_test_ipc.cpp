@@ -110,7 +110,6 @@ void unit_test_ipc_send_recv()
         {
             gfx::ColorClass test(gfx::MaterialClass::Type::Color);
             test.SetBaseColor(gfx::Color::DarkGreen);
-            test.SetGamma(4.0f);
             test.SetName("foobar1234");
             id = test.GetId();
             hash = test.GetHash();

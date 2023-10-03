@@ -15,10 +15,7 @@ uniform float kTime;
 //   vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
 uniform float kRenderPoints;
 
-// custom uniforms that need to match the
-// json description
-uniform float kGamma;
-
+// custom uniforms that need to match the json description
 uniform vec4 kBaseColor;
 
 uniform sampler2D kTexture;

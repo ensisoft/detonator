@@ -521,7 +521,8 @@ void MaterialWidget::on_actionCreateShader_triggered()
         return;
     }
 constexpr auto glsl = R"(
-// build-in uniforms
+// built-in uniforms
+
 // material time in seconds.
 uniform float kTime;
 
@@ -533,10 +534,8 @@ uniform float kTime;
 //   vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
 uniform float kRenderPoints;
 
-// custom uniforms that need to match the
-// json description
-uniform float kGamma;
-
+// custom uniforms that need to match the json description
+uniform vec4 kColor;
 uniform sampler2D kNoise;
 uniform vec2 kNoiseRect;
 
@@ -558,17 +557,18 @@ void FragmentShaderMain() {
     float g = coords.y + a;
     float b = kTime;
     vec3 col = vec3(0.5) + 0.5*cos(vec3(r, g, b));
-    fs_out.color = vec4(pow(col, vec3(kGamma)), 1.0);
+    fs_out.color.rgb = col * kColor.rgb;
+    fs_out.color.a   = 1.0;
 }
 )";
 constexpr auto json = R"(
 {
   "uniforms": [
      {
-        "type": "Float",
-        "name": "kGamma",
-        "desc": "Gamma",
-        "value": 2.2
+        "type": "Color",
+        "name": "kColor",
+        "desc": "Color",
+        "value": {"r":1.0, "g":1.0, "b":1.0, "a":1.0}
      }
   ],
   "maps": [
@@ -1360,9 +1360,6 @@ void MaterialWidget::SetMaterialProperties()
     // todo: this assumes implicit knowledge about the internals
     // of the material class. refactor these names away and the
     // default values away
-    if (math::equals((float)GetValue(mUI.gamma), 1.0f))
-        mMaterial->DeleteUniform("kGamma");
-    else  mMaterial->SetGamma(GetValue(mUI.gamma));
 
     if (math::equals((float)GetValue(mUI.alphaCutoff), 0.0f))
         mMaterial->DeleteUniform("kAlphaCutoff");
@@ -1476,7 +1473,6 @@ void MaterialWidget::GetMaterialProperties()
     SetValue(mUI.chkStaticInstance,   mMaterial->IsStatic());
     SetValue(mUI.chkBlendPreMulAlpha, mMaterial->PremultipliedAlpha());
     SetValue(mUI.chkBlendFrames,      mMaterial->BlendFrames());
-    SetValue(mUI.gamma,               mMaterial->GetGamma());
     SetValue(mUI.alphaCutoff,         mMaterial->GetAlphaCutoff());
     SetValue(mUI.baseColor,           mMaterial->GetBaseColor());
     SetValue(mUI.particleAction,      mMaterial->GetParticleAction());

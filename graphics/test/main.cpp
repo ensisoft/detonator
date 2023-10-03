@@ -329,7 +329,6 @@ public:
         material.SetColor(gfx::Color::Yellow, gfx::GradientClass::ColorIndex::TopRight);
         material.SetColor(gfx::Color::Black,  gfx::GradientClass::ColorIndex::BottomLeft);
         material.SetColor(gfx::Color::Yellow, gfx::GradientClass::ColorIndex::BottomRight);
-        material.SetGamma(2.2f);
         painter.Draw(gfx::PolygonInstance(mPoly), transform, gfx::MaterialClassInst(material));
 
         // eye
@@ -471,7 +470,6 @@ public:
             material.SetColor(gfx::Color::Green, gfx::GradientClass::ColorIndex::BottomLeft);
             material.SetColor(gfx::Color::Blue,  gfx::GradientClass::ColorIndex::BottomRight);
             material.SetColor(gfx::Color::Black, gfx::GradientClass::ColorIndex::TopRight);
-            material.SetGamma(2.2f);
             gfx::Transform transform;
             transform.Resize(1024, 768);
             painter.Draw(gfx::Rectangle(), transform, gfx::MaterialClassInst(material));
@@ -637,7 +635,6 @@ public:
         material.SetColor(gfx::Color::Green, gfx::GradientClass::ColorIndex::BottomLeft);
         material.SetColor(gfx::Color::Blue,  gfx::GradientClass::ColorIndex::BottomRight);
         material.SetColor(gfx::Color::Black, gfx::GradientClass::ColorIndex::TopRight);
-        material.SetGamma(2.2f);
         gfx::FillRect(painter, gfx::FRect(0, 0, 400, 400), gfx::MaterialClassInst(material));
 
         // *perceptually* linear gradient ramp
@@ -1924,7 +1921,23 @@ public:
         // compute matching linear value for 0.5 and pass it to the shader
         const float color = gfx::sRGB_decode(0.5f);
 
+        class TestProgram : public gfx::ShaderProgram {
+        public:
+            virtual std::string GetName() const override
+            { return "TestProgram"; }
+            virtual std::string GetShader(const gfx::Material& material, const gfx::Material::Environment& env, const gfx::Device& device) const override
+            {
+                return material.GetShader(env, device);
+            }
+            //virtual
+
+        private:
+        } program;
+
         srgb_out.SetShaderSrc(R"(
+#version 100
+precision highp float;
+
 uniform float kColor;
 
 float sRGB_encode(float value)
@@ -1942,22 +1955,35 @@ vec4 sRGB_encode(vec4 color)
    ret.a = color.a; // alpha is always linear
    return ret;
 }
-void FragmentShaderMain() {
-  fs_out.color = sRGB_encode(vec4(kColor, kColor, kColor, 1.0));
+void main() {
+  gl_FragColor = sRGB_encode(vec4(kColor, kColor, kColor, 1.0));
 })");
 
         linear_out.SetShaderSrc(R"(
+#version 100
+precision highp float;
+
 uniform float kColor;
 
-void FragmentShaderMain() {
-  fs_out.color = vec4(kColor, kColor, kColor, 1.0);
+void main() {
+  gl_FragColor = vec4(kColor, kColor, kColor, 1.0);
 })");
         srgb_out.SetUniform("kColor", color);
         linear_out.SetUniform("kColor", color);
 
-        gfx::FillRect(painter, gfx::FRect(20.0f, 20.0f, 256.0f, 256.0f), gfx::MaterialClassInst(srgb_out));
+        gfx::Transform model_to_world;
+        model_to_world.Resize(256.0f, 256.0f);
+        model_to_world.Translate(20.0f, 20.0f);
 
-        gfx::FillRect(painter, gfx::FRect(296.0f, 20.0f, 256.0f, 256.0f), gfx::MaterialClassInst(linear_out));
+        gfx::Painter::RenderPassState state;
+        state.write_color  = true;
+        state.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        state.depth_test   = gfx::Painter::DepthTest ::Disabled;
+
+        painter.Draw(gfx::Rectangle(), model_to_world, gfx::MaterialClassInst(srgb_out), state, program, gfx::Painter::LegacyDrawState());
+        model_to_world.Translate(256.0f, 0.0f);
+        model_to_world.Translate(20.0f, 0.0f);
+        painter.Draw(gfx::Rectangle(), model_to_world, gfx::MaterialClassInst(linear_out), state, program, gfx::Painter::LegacyDrawState());
     }
     virtual std::string GetName() const override
     { return "sRGBWindowTest"; }
