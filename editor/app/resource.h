@@ -757,134 +757,6 @@ namespace app
         bool mPrimitive = false;
     };
 
-    class MaterialResource : public GameResourceBase<gfx::MaterialClass>
-    {
-    public:
-        MaterialResource() = default;
-        MaterialResource(const gfx::MaterialClass& klass, const AnyString& name)
-        {
-            mClass = klass.Copy();
-            SetName(name);
-        }
-        MaterialResource(std::shared_ptr<gfx::MaterialClass> klass, const AnyString& name)
-        {
-            mClass = klass;
-            SetName(name);
-        }
-        MaterialResource(std::unique_ptr<gfx::MaterialClass> klass, const AnyString& name)
-        {
-            mClass = std::move(klass);
-            SetName(name);
-        }
-        MaterialResource(const MaterialResource& other)
-        {
-            mClass = other.mClass->Copy();
-            mProps = other.mProps;
-            mUserProps = other.mUserProps;
-        }
-        virtual QString GetId() const override
-        { return app::FromUtf8(mClass->GetId());  }
-        virtual QString GetName() const override
-        { return app::FromUtf8(mClass->GetName()); }
-        virtual Resource::Type GetType() const override
-        { return Resource::Type::Material; }
-        virtual void SetName(const QString& name) override
-        { mClass->SetName(app::ToUtf8(name));  }
-        virtual void UpdateFrom(const Resource& other) override
-        {
-            const auto* ptr = dynamic_cast<const MaterialResource*>(&other);
-            ASSERT(ptr != nullptr);
-            mClass     = ptr->mClass->Copy();
-            mProps     = ptr->mProps;
-            mUserProps = ptr->mUserProps;
-        }
-        virtual void SetIsPrimitive(bool primitive) override
-        { mPrimitive = primitive; }
-        virtual bool IsPrimitive() const override
-        { return mPrimitive; }
-        virtual void Serialize(data::Writer& data) const override
-        {
-            auto chunk = data.NewWriteChunk();
-            mClass->IntoJson(*chunk);
-            chunk->Write("resource_name", mClass->GetName());
-            chunk->Write("resource_id",   mClass->GetId());
-            data.AppendChunk("materials", std::move(chunk));
-        }
-        virtual void SaveProperties(QJsonObject& json) const override
-        { json[GetId()] = QJsonObject::fromVariantMap(mProps); }
-        virtual void SaveUserProperties(QJsonObject& json) const override
-        { json[GetId()] = QJsonObject::fromVariantMap(mUserProps); }
-        virtual bool HasProperty(const PropertyKey& key) const override
-        { return mProps.contains(key); }
-        virtual bool HasUserProperty(const PropertyKey& key) const override
-        { return mUserProps.contains(key); }
-        virtual void LoadProperties(const QJsonObject& object) override
-        { mProps = object[GetId()].toObject().toVariantMap(); }
-        virtual void LoadUserProperties(const QJsonObject& object) override
-        { mUserProps = object[GetId()].toObject().toVariantMap(); }
-        virtual void DeleteProperty(const PropertyKey& key) override
-        { mProps.remove(key); }
-        virtual void DeleteUserProperty(const PropertyKey& key) override
-        { mUserProps.remove(key); }
-        virtual std::unique_ptr<Resource> Copy() const override
-        {
-            auto ret = std::make_unique<MaterialResource>();
-            ret->mClass     = mClass->Copy();
-            ret->mProps     = mProps;
-            ret->mUserProps = mUserProps;
-            ret->mPrimitive = mPrimitive;
-            return ret;
-        }
-        virtual std::unique_ptr<Resource> Clone() const override
-        {
-            auto ret = std::make_unique<MaterialResource>();
-            ret->mClass = mClass->Clone();
-            ret->mProps = mProps;
-            ret->mUserProps = mUserProps;
-            ret->mPrimitive = mPrimitive;
-            return ret;
-        }
-        virtual QStringList ListDependencies() const override
-        { return detail::ListResourceDependencies(*mClass, mProps); }
-        virtual bool Pack(ResourcePacker& packer) override
-        { return detail::PackResource(*mClass, packer); }
-        virtual void Migrate(MigrationLog* log) override
-        { detail::MigrateResource(*mClass, log); }
-
-        // GameResourceBase
-        virtual std::shared_ptr<const gfx::MaterialClass> GetSharedResource() const override
-        { return mClass; }
-        virtual std::shared_ptr<gfx::MaterialClass> GetSharedResource() override
-        { return mClass; }
-        MaterialResource& operator=(const MaterialResource&) = delete;
-    protected:
-        virtual void* GetIf(const std::type_info& expected_type) override
-        {
-            if (typeid(gfx::MaterialClass) == expected_type)
-                return (void*)mClass.get();
-            return nullptr;
-        }
-        virtual const void* GetIf(const std::type_info& expected_type) const override
-        {
-            if (typeid(gfx::MaterialClass) == expected_type)
-                return (const void*)mClass.get();
-            return nullptr;
-        }
-        virtual void SetVariantProperty(const PropertyKey& key, const QVariant& value) override
-        { mProps[key] = value; }
-        virtual void SetUserVariantProperty(const PropertyKey& key, const QVariant& value) override
-        { mUserProps[key] = value; }
-        virtual QVariant GetVariantProperty(const PropertyKey& key) const override
-        { return mProps[key]; }
-        virtual QVariant GetUserVariantProperty(const PropertyKey& key) const override
-        { return mUserProps[key]; }
-    private:
-        std::shared_ptr<gfx::MaterialClass> mClass;
-        QVariantMap mProps;
-        QVariantMap mUserProps;
-        bool mPrimitive = false;
-    };
-
     template<typename T> inline
     const GameResourceBase<T>& ResourceCast(const Resource& res)
     {
@@ -902,7 +774,7 @@ namespace app
         return *ptr;
     }
 
-    //using MaterialResource       = GameResource<gfx::MaterialClass>;
+    using MaterialResource       = GameResource<gfx::MaterialClass>;
     using ParticleSystemResource = GameResource<gfx::ParticleEngineClass>;
     using CustomShapeResource    = GameResource<gfx::PolygonClass>;
     using EntityResource         = GameResource<game::EntityClass>;
