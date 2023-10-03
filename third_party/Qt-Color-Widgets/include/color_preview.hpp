@@ -41,6 +41,7 @@ class QCP_EXPORT ColorPreview : public QWidget
     Q_PROPERTY(QBrush background READ background WRITE setBackground DESIGNABLE true)
     Q_PROPERTY(QString placeholderText READ placeholderText WRITE setPlaceholderText DESIGNABLE true)
     Q_PROPERTY(bool hascolor READ hasColor WRITE setHasColor DESIGNABLE true)
+    Q_PROPERTY(bool sRGB READ get_sRGB_flag WRITE set_sRGB_flag DESIGNABLE true)
     Q_ENUMS(DisplayMode)
 public:
     enum DisplayMode
@@ -74,6 +75,10 @@ public:
     void setHasColor(bool on_off);
 
     void clearColor();
+
+    bool get_sRGB_flag() const;
+
+    void set_sRGB_flag(bool on_off);
 
     QString placeholderText() const;
 

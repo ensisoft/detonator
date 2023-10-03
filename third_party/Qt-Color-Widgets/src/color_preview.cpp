@@ -38,6 +38,7 @@ public:
     QBrush back;///< Background brush, visible on a transparent color
     DisplayMode display_mode; ///< How the color(s) are to be shown
     bool has_color = true;
+    bool sRGB = false;
     QString placeholder_text;
     Private() : col(Qt::red), back(Qt::darkGray, Qt::DiagCrossPattern), display_mode(NoAlpha)
     {}
@@ -97,6 +98,17 @@ void ColorPreview::clearColor()
 {
     p->has_color = false;
     update();
+}
+
+
+bool ColorPreview::get_sRGB_flag() const
+{
+    return p->sRGB;
+}
+
+void ColorPreview::set_sRGB_flag(bool on_off)
+{
+    p->sRGB = on_off;
 }
 
 QColor ColorPreview::color() const
