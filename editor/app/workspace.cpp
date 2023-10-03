@@ -134,6 +134,9 @@ bool LoadResources(const char* type,
             success = false;
             continue;
         }
+        unsigned version = 0;
+        chunk->Read("resource_ver", &version);
+
         chunk = app::detail::MigrateResourceDataChunk<ClassType>(std::move(chunk), log);
 
         ClassType ret;
@@ -142,8 +145,9 @@ bool LoadResources(const char* type,
             WARN("Incomplete resource load from JSON. [type='%1', name='%2']", type, name);
             success = false;
         }
-
-        vector.push_back(std::make_unique<app::GameResource<ClassType>>(std::move(ret), name));
+        auto resource = std::make_unique<app::GameResource<ClassType>>(std::move(ret), name);
+        resource->SetProperty("__version", version);
+        vector.push_back(std::move(resource));
         DEBUG("Loaded workspace resource. [name='%1']", name);
     }
     return success;
@@ -169,6 +173,9 @@ bool LoadMaterials(const char* type,
             success = false;
             continue;
         }
+        unsigned version = 0;
+        chunk->Read("resource_ver", &version);
+
         chunk = app::detail::MigrateResourceDataChunk<ClassType>(std::move(chunk), log);
 
         auto ret = ClassType::ClassFromJson(*chunk);
@@ -178,8 +185,9 @@ bool LoadMaterials(const char* type,
             success = false;
             continue;
         }
-
-        vector.push_back(std::make_unique<app::MaterialResource>(std::move(ret), name));
+        auto resource = std::make_unique<app::MaterialResource>(std::move(ret), name);
+        resource->SetProperty("__version", version); // a small hack here.
+        vector.push_back(std::move(resource));
         DEBUG("Loaded workspace resource. [name='%1']", name);
     }
     return success;
@@ -2224,7 +2232,13 @@ bool Workspace::LoadProperties(const QString& filename)
     // properties from the workspace file.
     for (auto& resource : mResources)
     {
+        if (resource->IsPrimitive())
+            continue;
+
+        unsigned version = 0;
+        ASSERT(resource->GetProperty("__version", &version));
         resource->LoadProperties(docu.object());
+        resource->SetProperty("__version", version);
     }
 
     INFO("Loaded workspace file '%1'", filename);

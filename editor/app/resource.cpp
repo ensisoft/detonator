@@ -645,7 +645,7 @@ bool PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
     return ok;
 }
 
-void MigrateResource(uik::Window& window, app::MigrationLog* log)
+void MigrateResource(uik::Window& window, app::MigrationLog* log, unsigned old_version, unsigned  new_version)
 {
     // migration path for old data which doesn't yet have tab order values.
     const auto& keymap_uri = window.GetKeyMapFile();
@@ -699,7 +699,7 @@ void MigrateResource(uik::Window& window, app::MigrationLog* log)
     }
 }
 
-void MigrateResource(gfx::MaterialClass& material, MigrationLog* log)
+void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned old_version, unsigned new_version)
 {
     // the uniform values were refactored inside the material class
     // and they only exist now if they have been set explicitly.
