@@ -18,6 +18,8 @@
 
 #include "config.h"
 
+#include <cmath>
+
 #include "base/math.h"
 
 namespace base
@@ -222,5 +224,38 @@ namespace base
             return true;
         return false;
     }
+
+    inline float sRGB_Decode(float value) noexcept
+    {
+        return value <= 0.04045f
+               ? value / 12.92f
+               : std::pow((value + 0.055f) / 1.055f, 2.4f);
+    }
+
+    inline float sRGB_Encode(float value) noexcept
+    {
+        return value <= 0.0031308f
+               ? value * 12.92f
+               : std::pow(value, 1.0f/2.4f) * 1.055f - 0.055f;
+    }
+
+    // Encode a linear color value into sRGB encoded color.
+    inline Color4f sRGB_Encode(const Color4f& color) noexcept
+    {
+        return Color4f(sRGB_Encode(color.Red()),
+                       sRGB_Encode(color.Green()),
+                       sRGB_Encode(color.Blue()),
+                       color.Alpha());
+    }
+
+    // Decode a sRGB color value into a linear color.
+    inline Color4f sRGB_Decode(const Color4f& color) noexcept
+    {
+        return Color4f(sRGB_Decode(color.Red()),
+                       sRGB_Decode(color.Green()),
+                       sRGB_Decode(color.Blue()),
+                       color.Alpha());
+    }
+
 
 } // namespace
