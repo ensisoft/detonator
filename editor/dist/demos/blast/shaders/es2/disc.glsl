@@ -7,7 +7,6 @@ uniform float kTime;
 // vec2 pos = mix(vTexCoord, gl_PointCoord, kRenderPoints)
 uniform float kRenderPoints;
 
-uniform float kGamma;
 uniform vec4  kBaseColor;
 uniform vec4  kColor0;
 uniform sampler2D kTexture0;
@@ -53,7 +52,7 @@ void FragmentShaderMain()
     float alpha = clamp(disc_alpha - fadeout, 0.0, 1.0);
 
     vec4 texture = texture2D(kTexture0, TransformTextureCoords(vTexCoord));
-    vec4 base_color = pow(kBaseColor, vec4(kGamma));
+    vec4 base_color = kBaseColor;
 
     float ring_alpha = ring_alpha(disc_radius, dist) * 0.3 * (1.0-s);
     vec4 ring_color = kColor0 * ring_alpha;

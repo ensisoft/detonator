@@ -74,6 +74,7 @@ DlgImgView::DlgImgView(QWidget* parent) : QDialog(parent)
     SetVisible(mUI.btnAccept, false);
     SetVisible(mUI.progressBar, false);
     SetValue(mUI.zoom, 1.0f);
+    SetValue(mUI.cmbColorSpace, gfx::detail::TextureFileSource::ColorSpace::sRGB);
 
     mUI.zoom->installEventFilter(this);
     mUI.cmbColorSpace->installEventFilter(this);
@@ -115,7 +116,6 @@ void DlgImgView::LoadImage(const QString& file)
     mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     mClass->SetTexture(std::move(source));
     mClass->SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
-    mClass->SetGamma(1.0f);
     mClass->SetTextureMinFilter(GetValue(mUI.cmbMinFilter));
     mClass->SetTextureMagFilter(GetValue(mUI.cmbMagFilter));
     mMaterial = gfx::CreateMaterialInstance(mClass);

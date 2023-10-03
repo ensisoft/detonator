@@ -271,7 +271,7 @@ namespace gfx
             std::string mName;
             base::bitflag<Flags> mFlags;
             base::bitflag<Effect> mEffects;
-            ColorSpace mColorSpace = ColorSpace::Linear; // default to linear now for compatibility
+            ColorSpace mColorSpace = ColorSpace::sRGB;
         private:
         };
 
@@ -923,8 +923,6 @@ namespace gfx
         // Material uniform API for setting/getting "Known" uniforms.
         inline void SetAlphaCutoff(float cutoff) noexcept
         { SetUniform("kAlphaCutoff", cutoff); }
-        inline void SetGamma(float gamma) noexcept
-        { SetUniform("kGamma", gamma); }
         inline void SetColorWeight(glm::vec2 weight) noexcept
         { SetUniform("kWeight", weight); }
         inline void SetBaseColor(const Color4f& color) noexcept
@@ -950,8 +948,6 @@ namespace gfx
 
         inline float GetAlphaCutoff() const noexcept
         { return GetUniformValue<float>("kAlphaCutoff", 0.0f); }
-        inline float GetGamma() const noexcept
-        { return GetUniformValue<float>("kGamma", 1.0f); }
         inline Color4f GetColor(ColorIndex index) const noexcept
         { return GetUniformValue<Color4f>(GetColorUniformName(index), Color::White); }
         inline Color4f GetBaseColor() const noexcept

@@ -134,6 +134,11 @@ namespace gfx
     Pixel_RGBf sRGB_decode(const Pixel_RGBf& value);
     Pixel_RGBf sRGB_encode(const Pixel_RGBf& value);
 
+    inline Color4f sRGB_decode(const Color4f& value) noexcept
+    { return base::sRGB_Decode(value); }
+    inline Color4f sRGB_encode(const Color4f& value) noexcept
+    { return base::sRGB_Decode(value); }
+
     // transform between unsigned integer and floating
     // point pixel representations.
     Pixel_RGBAf Pixel_to_floats(const Pixel_RGBA& value);

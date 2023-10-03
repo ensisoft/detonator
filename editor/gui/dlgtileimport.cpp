@@ -119,6 +119,7 @@ DlgTileImport::DlgTileImport(QWidget* parent, app::Workspace* workspace)
     PopulateFromEnum<gfx::MaterialClass::MagTextureFilter>(mUI.cmbMagFilter);
     PopulateFromEnum<MaterialType>(mUI.materialType);
     SetValue(mUI.zoom, 1.0f);
+    SetValue(mUI.cmbColorSpace, gfx::detail::TextureFileSource::ColorSpace::sRGB);
 
     on_materialType_currentIndexChanged(0);
     mUI.renameTemplate->installEventFilter(this);
@@ -686,7 +687,6 @@ void DlgTileImport::LoadImageFile(const QString& ret)
     mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     mClass->SetTexture(std::move(source));
     mClass->SetTextureRect(gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
-    mClass->SetGamma(1.0f);
     mClass->SetTextureMinFilter(GetValue(mUI.cmbMinFilter));
     mClass->SetTextureMagFilter(GetValue(mUI.cmbMagFilter));
     mMaterial = gfx::CreateMaterialInstance(mClass);

@@ -135,9 +135,7 @@ namespace {
             if (base::Contains(line, "uniform"))
             {
                 const auto original = line;
-                if (base::Contains(line, "kGamma"))
-                    line = base::FormatString("const float kGamma = %1;", ToConst(data.gamma));
-                else if (base::Contains(line, "kAlphaCutoff"))
+                if (base::Contains(line, "kAlphaCutoff"))
                     line = base::FormatString("const float kAlphaCutoff = %1;", ToConst(data.alpha_cutoff));
                 else if (base::Contains(line, "kBaseColor"))
                     line = base::FormatString("const vec4 kBaseColor = %1;", ToConst(data.base_color));
@@ -556,7 +554,8 @@ Texture* detail::TextureTextBufferSource::Upload(const Environment& env, Device&
             texture->SetFilter(Texture::MagFilter::Linear);
             texture->SetContentHash(content_hash);
 
-            ASSERT(texture->GetFormat() == Texture::Format::RGBA);
+            ASSERT(texture->GetFormat() == Texture::Format::RGBA ||
+                   texture->GetFormat() == Texture::Format::sRGBA);
 
             // The frame buffer render produces a texture that doesn't play nice with
             // model space texture coordinates right now. Simplest solution for now is
@@ -995,7 +994,6 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
     {
         if (IsStatic())
         {
-            hash = base::hash_combine(hash, GetGamma());
             hash = base::hash_combine(hash, GetBaseColor());
         }
     }
@@ -1003,7 +1001,6 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
     {
         if (IsStatic())
         {
-            hash = base::hash_combine(hash, GetGamma());
             hash = base::hash_combine(hash, GetColor(ColorIndex::TopLeft));
             hash = base::hash_combine(hash, GetColor(ColorIndex::TopRight));
             hash = base::hash_combine(hash, GetColor(ColorIndex::BottomLeft));
@@ -1015,7 +1012,6 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
     {
         if (IsStatic())
         {
-            hash = base::hash_combine(hash, GetGamma());
             hash = base::hash_combine(hash, GetBaseColor());
             hash = base::hash_combine(hash, GetTextureScale());
             hash = base::hash_combine(hash, GetTextureVelocity());
@@ -1027,7 +1023,6 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
     {
         if (IsStatic())
         {
-            hash = base::hash_combine(hash, GetGamma());
             hash = base::hash_combine(hash, GetBaseColor());
             hash = base::hash_combine(hash, GetTextureScale());
             hash = base::hash_combine(hash, GetTextureVelocity());
@@ -1061,7 +1056,6 @@ std::size_t MaterialClass::GetHash() const noexcept
     hash = base::hash_combine(hash, mTextureWrapY);
     hash = base::hash_combine(hash, mFlags);
 
-    hash = base::hash_combine(hash, GetGamma());
     hash = base::hash_combine(hash, GetTextureRotation());
     hash = base::hash_combine(hash, GetTextureScale());
     hash = base::hash_combine(hash, GetTextureVelocity());
@@ -1108,7 +1102,6 @@ std::string MaterialClass::GetShader(const State& state, const Device& device) c
     {
         ShaderData data;
         data.alpha_cutoff     = GetAlphaCutoff();
-        data.gamma            = GetGamma();
         data.base_color       = GetColor(ColorIndex::BaseColor);
         data.color_map[0]     = GetColor(ColorIndex::TopLeft);
         data.color_map[1]     = GetColor(ColorIndex::TopRight);
@@ -1132,7 +1125,6 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
     {
         if (!IsStatic())
         {
-            SetUniform("kGamma",     state.uniforms, GetGamma(),       program);
             SetUniform("kBaseColor", state.uniforms, GetBaseColor(),   program);
         }
     }
@@ -1140,7 +1132,6 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
     {
         if (!IsStatic())
         {
-            SetUniform("kGamma",  state.uniforms, GetGamma(),                        program);
             SetUniform("kColor0", state.uniforms, GetColor(ColorIndex::TopLeft),     program);
             SetUniform("kColor1", state.uniforms, GetColor(ColorIndex::TopRight),    program);
             SetUniform("kColor2", state.uniforms, GetColor(ColorIndex::BottomLeft),  program);
@@ -1163,12 +1154,10 @@ void MaterialClass::ApplyStaticState(const State& state, Device& device, Program
 {
     if (mType == Type::Color)
     {
-        program.SetUniform("kGamma",     GetGamma());
         program.SetUniform("kBaseColor", GetBaseColor());
     }
     else if (mType == Type::Gradient)
     {
-        program.SetUniform("kGamma",  GetGamma());
         program.SetUniform("kColor0", GetColor(ColorIndex::TopLeft));
         program.SetUniform("kColor1", GetColor(ColorIndex::TopRight));
         program.SetUniform("kColor2", GetColor(ColorIndex::BottomLeft));
@@ -1177,7 +1166,6 @@ void MaterialClass::ApplyStaticState(const State& state, Device& device, Program
     }
     else if (mType == Type::Sprite)
     {
-        program.SetUniform("kGamma",             GetGamma());
         program.SetUniform("kBaseColor",         GetBaseColor());
         program.SetUniform("kTextureScale",      GetTextureScale());
         program.SetUniform("kTextureVelocity",   GetTextureVelocity());
@@ -1186,7 +1174,6 @@ void MaterialClass::ApplyStaticState(const State& state, Device& device, Program
     }
     else if (mType == Type::Texture)
     {
-        program.SetUniform("kGamma",             GetGamma());
         program.SetUniform("kBaseColor",         GetBaseColor());
         program.SetUniform("kTextureScale",      GetTextureScale());
         program.SetUniform("kTextureVelocity",   GetTextureVelocity());
@@ -1305,7 +1292,6 @@ bool MaterialClass::FromJson(const data::Reader& data)
     // these member variables have been folded into the generic uniform map.
     // this is the old way they were written out and this code migrates the
     // old materials from member variables -> uniform map.
-    ok &= ReadLegacyValue<float>("gamma", "kGamma", data);
     ok &= ReadLegacyValue<Color4f>("color_map0", "kColor0", data);
     ok &= ReadLegacyValue<Color4f>("color_map1", "kColor1", data);
     ok &= ReadLegacyValue<Color4f>("color_map2", "kColor2", data);
@@ -1812,19 +1798,13 @@ std::string MaterialClass::GetColorShaderSource(const State& state, const Device
 {
     constexpr const auto* source = R"(
 uniform vec4 kBaseColor;
-uniform float kGamma;
 varying float vParticleAlpha;
 
 void FragmentShaderMain()
 {
   vec4 color = kBaseColor;
   color.a *= vParticleAlpha;
-
-  // gamma (in)correction.
-  color.rgb = pow(color.rgb, vec3(kGamma));
-
   fs_out.color = color;
-
 }
 )";
     return source;
@@ -1838,7 +1818,6 @@ uniform vec4 kColor1;
 uniform vec4 kColor2;
 uniform vec4 kColor3;
 uniform vec2 kOffset;
-uniform float kGamma;
 uniform float kRenderPoints;
 
 varying vec2 vTexCoord;
@@ -1859,12 +1838,8 @@ void FragmentShaderMain()
   coords = clamp(coords, vec2(0.0, 0.0), vec2(1.0, 1.0));
   vec4 color  = MixGradient(coords);
 
-  color.a *= vParticleAlpha;
-
-  // gamma (in)correction
-  color.rgb = pow(color.rgb, vec3(kGamma));
-
-  fs_out.color = color;
+  fs_out.color.rgb = vec3(pow(color.rgb, vec3(2.2)));
+  fs_out.color.a   = color.a * vParticleAlpha;
 }
 )";
     return source;
@@ -1880,7 +1855,6 @@ uniform vec4 kTextureBox0;
 uniform vec4 kTextureBox1;
 uniform vec4 kBaseColor;
 uniform float kRenderPoints;
-uniform float kGamma;
 uniform float kAlphaCutoff;
 uniform float kTime;
 uniform float kBlendCoeff;
@@ -1972,9 +1946,6 @@ void FragmentShaderMain()
     if (color.a < kAlphaCutoff)
         discard;
 
-    // apply gamma (in)correction.
-    color.rgb = pow(color.rgb, vec3(kGamma));
-
     fs_out.color = color;
 }
 )";
@@ -2060,7 +2031,6 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
     }
     if (!IsStatic())
     {
-        SetUniform("kGamma",             state.uniforms, GetGamma(), program);
         SetUniform("kBaseColor",         state.uniforms, GetBaseColor(), program);
         SetUniform("kTextureScale",      state.uniforms, GetTextureScale(), program);
         SetUniform("kTextureVelocity",   state.uniforms, GetTextureVelocity(), program);
@@ -2078,7 +2048,6 @@ uniform sampler2D kTexture;
 uniform vec4 kTextureBox;
 uniform float kAlphaMask;
 uniform float kRenderPoints;
-uniform float kGamma;
 uniform float kAlphaCutoff;
 uniform float kApplyRandomParticleRotation;
 uniform float kTime;
@@ -2165,9 +2134,6 @@ void FragmentShaderMain()
     if (color.a < kAlphaCutoff)
         discard;
 
-    // apply gamma (in)correction.
-    color.rgb = pow(color.rgb, vec3(kGamma));
-
     fs_out.color = color;
 }
 )";
@@ -2239,7 +2205,6 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
     }
     if (!IsStatic())
     {
-        SetUniform("kGamma",             state.uniforms, GetGamma(), program);
         SetUniform("kBaseColor",         state.uniforms, GetBaseColor(), program);
         SetUniform("kTextureScale",      state.uniforms, GetTextureScale(), program);
         SetUniform("kTextureVelocity",   state.uniforms, GetTextureVelocity(), program);

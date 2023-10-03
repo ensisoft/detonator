@@ -121,7 +121,7 @@ void ApplyBlur(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* de
     const auto tmp_width  = tmp->GetWidth();
     const auto tmp_height = tmp->GetHeight();
     if (tmp_width != src_width || tmp_height != src_height)
-        tmp->Allocate(src_width, src_height, gfx::Texture::Format::RGBA);
+        tmp->Allocate(src_width, src_height, gfx::Texture::Format::sRGBA);
 
     constexpr auto* vertex_src = R"(
 #version 100
@@ -358,7 +358,7 @@ void DetectSpriteEdges(const std::string& gpu_id, gfx::Texture* texture, gfx::De
 
         edges->Allocate(texture->GetWidth(),
                       texture->GetHeight(),
-                      gfx::Texture::Format::RGBA);
+                      gfx::Texture::Format::sRGBA);
 
         edges->SetName("EdgeDetectionHelperTexture");
         edges->SetFilter(gfx::Texture::MinFilter::Linear);
@@ -474,7 +474,7 @@ void FlipTexture(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* 
     const auto tmp_width  = tmp->GetWidth();
     const auto tmp_height = tmp->GetHeight();
     if (tmp_width != src_width || tmp_height != src_height)
-        tmp->Allocate(src_width, src_height, gfx::Texture::Format::RGBA);
+        tmp->Allocate(src_width, src_height, gfx::Texture::Format::sRGBA);
 
     // copy the contents from the source texture into the temp texture.
     CopyTexture(texture, tmp, device);

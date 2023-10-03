@@ -1,11 +1,6 @@
 {
     "uniforms": [
         {
-            "desc": "Gamma",
-            "type": "Float",
-            "name": "kGamma"
-        },
-        {
             "desc": "BaseColor",
             "type": "Color",
             "name": "kBaseColor"

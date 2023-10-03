@@ -6,11 +6,6 @@
             "name": "kBaseColor"
         },
         {
-            "desc": "Gamma",
-            "type": "Float",
-            "name": "kGamma"
-        },
-        {
             "desc": "Ring Color",
             "type": "Color",
             "name": "kColor0"

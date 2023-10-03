@@ -136,7 +136,6 @@ void unit_test_material_class()
     TEST_CASE(test::Type::Feature)
 
     gfx::ColorClass klass(gfx::MaterialClass::Type::Color);
-    klass.SetGamma(1.5f);
     klass.SetStatic(false);
     klass.SetColor(gfx::Color::HotPink,     gfx::MaterialClass::ColorIndex::BaseColor);
     klass.SetColor(gfx::Color::DarkBlue,    gfx::MaterialClass::ColorIndex::BottomLeft);
@@ -201,7 +200,6 @@ void unit_test_material_class()
         TEST_REQUIRE(ret->GetTextureMagFilter() == gfx::MaterialClass::MagTextureFilter::Nearest);
         TEST_REQUIRE(ret->GetTextureWrapX()     == gfx::MaterialClass::TextureWrapping::Repeat);
         TEST_REQUIRE(ret->GetTextureWrapY()     == gfx::MaterialClass::TextureWrapping::Repeat);
-        TEST_REQUIRE(ret->GetGamma()            == real::float32(1.5f));
         TEST_REQUIRE(ret->GetTextureScaleX()    == real::float32(2.0f));
         TEST_REQUIRE(ret->GetTextureScaleY()    == real::float32(3.0f));
         TEST_REQUIRE(ret->GetTextureVelocityX() == real::float32(4.0f));
@@ -244,7 +242,6 @@ void unit_test_material_class()
         TEST_REQUIRE(clone->GetSurfaceType() == gfx::MaterialClass::SurfaceType::Emissive);
         TEST_REQUIRE(clone->GetBaseColor() == gfx::Color::HotPink);
         TEST_REQUIRE(clone->GetColor(gfx::MaterialClass::ColorIndex::BaseColor) == gfx::Color::HotPink);
-        TEST_REQUIRE(clone->GetGamma() == real::float32(1.5f));
         TEST_REQUIRE(clone->IsStatic() == false);
     }
 }

@@ -2,7 +2,6 @@ uniform float kTime;
 uniform float kRenderPoints;
 
 uniform sampler2D kTexture0;
-uniform float kGamma;
 uniform vec4  kBaseColor;
 
 varying vec2 vTexCoord;

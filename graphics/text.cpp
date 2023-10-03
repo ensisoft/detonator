@@ -827,7 +827,7 @@ Texture* TextBuffer::RasterizeTexture(const std::string& gpu_id, const std::stri
         ypos += mText.lineheight * mText.fontsize;
     }
 
-    result_texture->Allocate(buffer_width, buffer_height, gfx::Texture::Format::RGBA);
+    result_texture->Allocate(buffer_width, buffer_height, gfx::Texture::Format::sRGBA);
 
     auto* fbo = device.FindFramebuffer("BitmapFontCompositeFBO");
     if (fbo == nullptr)

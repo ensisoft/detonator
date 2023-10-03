@@ -2175,7 +2175,13 @@ private:
             const auto hash = base::hash_combine(0u, color);
             if (ret.hash != hash)
             {
-                mUniforms.push_back({ret.location, color});
+                // Assume sRGB encoded color values now. so this is a simple
+                // place to convert to linear and will catch all uses without
+                // breaking the higher level APIs
+                // the cost of the sRGB conversion should be mitigated due to
+                // the hash check to compare to the previous value.
+                mUniforms.push_back({ret.location, sRGB_Decode(color)});
+
                 ret.hash = hash;
             }
         }

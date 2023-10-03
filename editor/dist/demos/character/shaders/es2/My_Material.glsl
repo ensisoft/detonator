@@ -14,8 +14,6 @@ uniform float kRenderPoints;
 
 // custom uniforms that need to match the
 // json description
-uniform float kGamma;
-
 uniform float kValue;
 
 // foreground color (healthbar)
