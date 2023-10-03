@@ -168,6 +168,11 @@ namespace app
         bool IsEmpty() const
         { return mStr.isEmpty(); }
 
+        bool contains(const AnyString& filter, Qt::CaseSensitivity casing) const
+        {
+            return mStr.contains(filter, casing);
+        }
+
         AnyString& operator=(const QString& str)
         {
             mStr = str;
@@ -186,6 +191,7 @@ namespace app
     private:
         friend bool operator==(const AnyString&, const AnyString&);
         friend bool operator!=(const AnyString&, const AnyString&);
+        friend bool operator==(const AnyString&, const char*);
 
         friend bool operator==(const AnyString&, const QString&);
         friend bool operator!=(const AnyString&, const QString&);
@@ -197,6 +203,9 @@ namespace app
     private:
         QString mStr;
     };
+
+    inline bool operator==(const AnyString& lhs, const char* rhs)
+    { return lhs.mStr == FromUtf8(rhs); }
 
     inline bool operator==(const AnyString& lhs, const AnyString& rhs)
     { return lhs.mStr == rhs.mStr; }

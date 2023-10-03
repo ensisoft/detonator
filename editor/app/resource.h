@@ -139,9 +139,9 @@ namespace app
         };
         virtual ~Resource() = default;
         // Get the identifier of the class object type.
-        virtual QString GetId() const = 0;
+        virtual AnyString GetId() const = 0;
         // Get the human-readable name of the resource.
-        virtual QString GetName() const = 0;
+        virtual AnyString GetName() const = 0;
         // Get the type of the resource.
         virtual Type GetType() const = 0;
         // Update the content's of this resource based on
@@ -151,7 +151,7 @@ namespace app
         // the  and the properties.
         virtual void UpdateFrom(const Resource& other) = 0;
         // Set the name of the resource.
-        virtual void SetName(const QString& name) = 0;
+        virtual void SetName(const AnyString& name) = 0;
         // Mark the resource primitive or not.
         virtual void SetIsPrimitive(bool primitive) = 0;
         // Serialize the content into JSON
@@ -557,11 +557,11 @@ namespace app
         { return chunk; }
 
         template<typename ResourceType> inline
-        void MigrateResource(const ResourceType&, MigrationLog*)
+        void MigrateResource(const ResourceType&, MigrationLog*, unsigned old_version, unsigned new_version)
         {}
 
-        void MigrateResource(uik::Window& window, MigrationLog* log);
-        void MigrateResource(gfx::MaterialClass& material, MigrationLog* log);
+        void MigrateResource(uik::Window& window, MigrationLog* log, unsigned old_version, unsigned new_version);
+        void MigrateResource(gfx::MaterialClass& material, MigrationLog* log, unsigned old_version, unsigned new_version);
 
     } // detail
 
@@ -621,14 +621,14 @@ namespace app
             mPrimitive = other.mPrimitive;
         }
 
-        virtual QString GetId() const override
-        { return app::FromUtf8(mContent->GetId());  }
-        virtual QString GetName() const override
-        { return app::FromUtf8(mContent->GetName()); }
+        virtual AnyString GetId() const override
+        { return mContent->GetId();  }
+        virtual AnyString GetName() const override
+        { return mContent->GetName(); }
         virtual Resource::Type GetType() const override
         { return TypeValue; }
-        virtual void SetName(const QString& name) override
-        { mContent->SetName(app::ToUtf8(name)); }
+        virtual void SetName(const AnyString& name) override
+        { mContent->SetName(name); }
 
         virtual void UpdateFrom(const Resource& other) override
         {
@@ -651,6 +651,7 @@ namespace app
             //ASSERT(chunk->HasValue("resource_id") == false);
             chunk->Write("resource_name", mContent->GetName());
             chunk->Write("resource_id",   mContent->GetId());
+            chunk->Write("resource_ver",  1);
 
             if constexpr (TypeValue == Resource::Type::Material)
                 data.AppendChunk("materials", std::move(chunk));
@@ -704,7 +705,16 @@ namespace app
         virtual bool Pack(ResourcePacker& packer) override
         { return detail::PackResource(*mContent, packer); }
         virtual void Migrate(MigrationLog* log) override
-        { detail::MigrateResource(*mContent, log); }
+        {
+            if constexpr (TypeValue == Resource::Type::Material)
+            {
+                unsigned next_version = 1;
+                unsigned saved_version = 0;
+                ASSERT(Resource::GetProperty("__version", &saved_version));
+                if (saved_version < next_version)
+                    detail::MigrateResource(*mContent, log, saved_version, next_version);
+            }
+        }
 
         // GameResourceBase
         virtual std::shared_ptr<const BaseType> GetSharedResource() const override
