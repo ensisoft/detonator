@@ -41,8 +41,16 @@ Compile the library and install in
 (Qt SDK)/Tools/QtCreator/bin/designer/
 (Qt SDK)/(Qt Version)/(Toolchain)/plugins/designer
 
-cd build && cmake .. && make ColorWidgetsPlugin && make install
+~~cd build && cmake .. && make ColorWidgetsPlugin && make install~~
 
+```
+  $ cd third_party\Qt-Color-Widgets\
+  $ mkdir build
+  $ cd build 
+  $ cmake ..
+  $ make ColorWidgetsPlugin
+  $ sudo make ColorWidgetsPlugin_install
+```
 
 Latest Version
 --------------
