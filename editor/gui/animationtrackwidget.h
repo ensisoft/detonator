@@ -101,6 +101,7 @@ namespace gui
         void on_btnViewPlus90_clicked();
         void on_btnViewMinus90_clicked();
         void on_btnViewReset_clicked();
+        void on_btnMoreViewportSettings_clicked();
         void on_trackName_textChanged(const QString&);
         void on_duration_valueChanged(double value);
         void on_delay_valueChanged(double value);

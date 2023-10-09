@@ -155,6 +155,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.actionUsePhysics, settings.enable_physics);
     SetValue(mUI.zoom, 1.0f);
+    SetVisible(mUI.transform, false);
     setFocusPolicy(Qt::StrongFocus);
 
     mUI.widget->onZoomIn       = [this]() { MouseZoom(std::bind(&AnimationTrackWidget::ZoomIn, this)); };
@@ -1293,6 +1294,15 @@ void AnimationTrackWidget::on_btnViewReset_clicked()
     mUI.viewScaleX->setValue(1.0f);
     mUI.viewScaleY->setValue(1.0f);
     mUI.viewRotation->setValue(0);
+}
+
+void AnimationTrackWidget::on_btnMoreViewportSettings_clicked()
+{
+    const auto visible = mUI.transform->isVisible();
+    SetVisible(mUI.transform, !visible);
+    if (!visible)
+        mUI.btnMoreViewportSettings->setArrowType(Qt::ArrowType::DownArrow);
+    else mUI.btnMoreViewportSettings->setArrowType(Qt::ArrowType::UpArrow);
 }
 
 void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineItem* item)
