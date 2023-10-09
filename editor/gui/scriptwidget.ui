@@ -161,12 +161,18 @@
                 <property name="placeholderText">
                  <string>Replace text</string>
                 </property>
+                <property name="clearButtonEnabled">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item row="0" column="0">
                <widget class="QLineEdit" name="findText">
                 <property name="placeholderText">
                  <string>Find text</string>
+                </property>
+                <property name="clearButtonEnabled">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -357,6 +363,9 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
             <property name="readOnly">
              <bool>true</bool>
             </property>
@@ -378,6 +387,9 @@
           <property name="placeholderText">
            <string>Find in Help (Alt+H) </string>
           </property>
+          <property name="clearButtonEnabled">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item>
@@ -387,6 +399,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
           </property>
           <property name="selectionMode">
            <enum>QAbstractItemView::SingleSelection</enum>
@@ -419,6 +434,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
           </property>
           <property name="readOnly">
            <bool>true</bool>
