@@ -70,7 +70,7 @@ namespace gui
 
         // Load the game library and launch the game from the beginning.
         // Returns true if successful or false if some problem happened.
-        bool LoadGame();
+        bool LoadGame(bool clean_game_home);
         // Load the game library and begin a limited game launch in a
         // preview mode. In preview mode instead of running the main game
         // script, i.e. the actual game script we run another script, the
@@ -100,7 +100,7 @@ namespace gui
         void ActivateWindow();
 
     private slots:
-        void InitGame();
+        void InitGame(bool clean_game_home);
         void InitPreview(const QString& script);
         void SelectResolution();
         void on_actionPause_toggled(bool val);

@@ -787,7 +787,7 @@ void PlayWindow::NonGameTick()
     mLogger->Dispatch();
 }
 
-bool PlayWindow::LoadGame()
+bool PlayWindow::LoadGame(bool clean_game_home)
 {
     if (!LoadLibrary())
         return false;
@@ -797,7 +797,7 @@ bool PlayWindow::LoadGame()
     //QTimer::singleShot(10, this, &PlayWindow::InitGame);
 
     // call directly now.
-    InitGame();
+    InitGame(clean_game_home);
     return true;
 }
 
@@ -1017,7 +1017,7 @@ void PlayWindow::ShowWithWAR()
 
 // This function is very similar with InitPreview but subtly different
 // so make sure you cross-check changes properly.
-void PlayWindow::InitGame()
+void PlayWindow::InitGame(bool clean_game_home)
 {
     if (!mEngine)
         return;
@@ -1048,10 +1048,39 @@ void PlayWindow::InitGame()
 
         SetDebugOptions();
 
-        const auto& user_home = QDir::homePath();
-        const auto& game_home = app::JoinPath(".GameStudio", settings.application_identifier);
-        app::MakePath(app::JoinPath(user_home, ".GameStudio"));
-        app::MakePath(app::JoinPath(user_home, game_home));
+        QString user_home = QDir::homePath();
+        QString game_home = settings.game_home;
+        QString editor_home = app::JoinPath(user_home, ".GameStudio");
+        game_home.replace("${workspace}", mWorkspace.GetDir());
+        game_home.replace("${user-home}", user_home);
+        game_home.replace("${game-id}", settings.application_identifier);
+        game_home.replace("${game-ver}", settings.application_version);
+        game_home.replace("${game-home}", app::JoinPath(editor_home, settings.application_identifier));
+        DEBUG("User home is '%1'", user_home);
+        DEBUG("Game home is '%1'", game_home);
+
+        if (clean_game_home)
+        {
+            QDir dir(game_home);
+            if (dir.exists())
+            {
+                const auto& cant_hire = dir.canonicalPath();
+                if (cant_hire == user_home)
+                    WARN("Game home points to user home. Refusing to delete. You're welcome.");
+                else if (cant_hire == editor_home)
+                    WARN("Game home points to editor home. Refusing to delete. You're welcome.");
+                else if (cant_hire == mWorkspace.GetDir())
+                    WARN("Game home points to project workspace. Refusing to delete. You're welcome.");
+                else {
+                    DEBUG("Deleted game home directory. [dir='%1']", game_home);
+                    dir.removeRecursively();
+                }
+            }
+        }
+
+        app::MakePath(editor_home);
+        app::MakePath(game_home);
+
         engine::Engine::Environment env;
         env.classlib           = &mWorkspace;
         env.engine_loader      = mResourceLoader.get();
@@ -1060,7 +1089,7 @@ void PlayWindow::InitGame()
         env.game_loader        = mResourceLoader.get();
         env.directory          = app::ToUtf8(mGameWorkingDir);
         env.user_home          = app::ToUtf8(QDir::toNativeSeparators(user_home));
-        env.game_home          = app::ToUtf8(app::JoinPath(user_home, game_home));
+        env.game_home          = app::ToUtf8(QDir::toNativeSeparators(game_home));
         mEngine->SetEnvironment(env);
 
         engine::Engine::InitParams params;

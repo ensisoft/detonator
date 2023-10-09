@@ -2073,6 +2073,7 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "updates_per_second"      , mSettings.updates_per_second);
     JsonWrite(project, "working_folder"          , mSettings.working_folder);
     JsonWrite(project, "command_line_arguments"  , mSettings.command_line_arguments);
+    JsonWrite(project, "game_home"               , mSettings.game_home);
     JsonWrite(project, "use_gamehost_process"    , mSettings.use_gamehost_process);
     JsonWrite(project, "enable_physics"          , mSettings.enable_physics);
     JsonWrite(project, "num_velocity_iterations" , mSettings.num_velocity_iterations);
@@ -2195,6 +2196,7 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "ticks_per_second",         &mSettings.ticks_per_second);
     JsonReadSafe(project, "updates_per_second",       &mSettings.updates_per_second);
     JsonReadSafe(project, "working_folder",           &mSettings.working_folder);
+    JsonReadSafe(project, "game_home",                &mSettings.game_home);
     JsonReadSafe(project, "command_line_arguments",   &mSettings.command_line_arguments);
     JsonReadSafe(project, "use_gamehost_process",     &mSettings.use_gamehost_process);
     JsonReadSafe(project, "enable_physics",           &mSettings.enable_physics);

@@ -2139,141 +2139,12 @@ void MainWindow::on_actionProjectSettings_triggered()
 
 void MainWindow::on_actionProjectPlay_triggered()
 {
-    if (!mWorkspace)
-        return;
-    else if (mPlayWindow)
-        return;
-    else if (mGameProcess.IsRunning())
-        return;
+    LaunchGame(false);
+}
 
-    const auto& settings = mWorkspace->GetProjectSettings();
-    if (settings.GetApplicationLibrary().isEmpty())
-    {
-        QMessageBox msg(this);
-        msg.setStandardButtons(QMessageBox::Ok);
-        msg.setIcon(QMessageBox::Question);
-        msg.setText("You haven't set the application library for the project.\n"
-                    "The game should be built into a library (a .dll or .so file).\n"
-                    "You can change the application library in the workspace settings.");
-        msg.exec();
-        return;
-    }
-
-    std::vector<MainWidget*> unsaved;
-    for (int i=0; i<mUI.mainTab->count(); ++i)
-    {
-        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
-        if (widget->HasUnsavedChanges())
-        {
-            if (mSettings.save_automatically_on_play)
-                widget->Save();
-            else unsaved.push_back(widget);
-        }
-    }
-    for (auto* wnd : mChildWindows)
-    {
-        auto* widget = wnd->GetWidget();
-        if (widget->HasUnsavedChanges())
-        {
-            if (mSettings.save_automatically_on_play)
-                widget->Save();
-            else unsaved.push_back(widget);
-        }
-    }
-
-    // The actual saving of resources is in the dlgsave !
-    if (!unsaved.empty())
-    {
-        DlgSave dlg(this, unsaved);
-        if (dlg.exec() == QDialog::Rejected)
-            return;
-        const bool save_automatically = dlg.SaveAutomatically();
-        mSettings.save_automatically_on_play = save_automatically;
-    }
-
-
-    if (settings.use_gamehost_process)
-    {
-        // todo: maybe save to some temporary location ?
-        // Save workspace for the loading the initial content
-        // in the game host
-        if (!mWorkspace->SaveWorkspace())
-            return;
-
-        ASSERT(!mIPCHost);
-        app::IPCHost::CleanupSocket("gamestudio-local-socket");
-        auto ipc = std::make_unique<app::IPCHost>();
-        if (!ipc->Open("gamestudio-local-socket"))
-            return;
-
-        connect(mWorkspace.get(), &app::Workspace::ResourceUpdated, ipc.get(),
-                &app::IPCHost::ResourceUpdated);
-        connect(ipc.get(), &app::IPCHost::UserPropertyUpdated, mWorkspace.get(),
-                &app::Workspace::UpdateUserProperty);
-        DEBUG("Local socket is open.");
-
-        QStringList game_host_args;
-        game_host_args << "--no-term-colors";
-        game_host_args << "--workspace";
-        game_host_args << mWorkspace->GetDir();
-        game_host_args << "--app-style";
-        game_host_args << mSettings.style_name;
-
-        QString game_host_name = "EditorGameHost";
-#if defined(WINDOWS_OS)
-        game_host_name.append(".exe");
-#endif
-        const auto& game_host_file = app::JoinPath(QCoreApplication::applicationDirPath(), game_host_name);
-        const auto& game_host_log  = app::JoinPath(QCoreApplication::applicationDirPath(), "game_host.log");
-        const auto& game_host_cwd  = QDir::currentPath();
-        mGameProcess.EnableTimeout(false);
-        mGameProcess.onFinished = [this](){
-            DEBUG("Game process finished.");
-            if (mGameProcess.GetError() != app::Process::Error::None)
-                ERROR("Game process error: '%1'", mGameProcess.GetError());
-
-            mIPCHost->Close();
-            mIPCHost.reset();
-        };
-        mGameProcess.onStdOut = [](const QString& msg) {
-            if (msg.isEmpty())
-                return;
-            // read an encoded log message from the game host process.
-            // todo: for the debug message we might want to figure out the
-            // source file and line from the message itself by parsing the message.
-            // for the time being this is skipped.
-            if (msg[0] == "E")
-                app::EventLog::get().write(app::Event::Type::Error, msg, "game-host");
-            else if (msg[0] == "W")
-                app::EventLog::get().write(app::Event::Type::Warning, msg, "game-host");
-            else if (msg[0] == "I")
-                app::EventLog::get().write(app::Event::Type::Info, msg, "game-host");
-            else base::WriteLog(base::LogEvent::Debug, "game-host", 0, app::ToUtf8(msg));
-        };
-        mGameProcess.onStdErr = [](const QString& msg) {
-            app::EventLog::get().write(app::Event::Type::Error, msg, "game-host");
-        };
-        mGameProcess.Start(game_host_file, game_host_args, game_host_log, game_host_cwd);
-        mIPCHost = std::move(ipc);
-
-    }
-    else
-    {
-        if (!mPlayWindow)
-        {
-            auto window = std::make_unique<PlayWindow>(*mWorkspace);
-            window->LoadState("play_window");
-            window->ShowWithWAR();
-            window->LoadGame();
-
-            mPlayWindow = std::move(window);
-        }
-        else
-        {
-            // bring to the top of the window stack.
-            mPlayWindow->ActivateWindow();
-        }
-    }
+void MainWindow::on_actionProjectPlayClean_triggered()
+{
+    LaunchGame(true);
 }
 
 void MainWindow::on_actionProjectSync_triggered()
@@ -2918,6 +2789,148 @@ void MainWindow::dropEvent(QDropEvent* event)
     }
     ImportFiles(files);
 }
+
+void MainWindow::LaunchGame(bool clean)
+{
+    if (!mWorkspace)
+        return;
+    else if (mPlayWindow)
+        return;
+    else if (mGameProcess.IsRunning())
+        return;
+
+    const auto& settings = mWorkspace->GetProjectSettings();
+    if (settings.GetApplicationLibrary().isEmpty())
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setIcon(QMessageBox::Question);
+        msg.setText("You haven't set the application library for the project.\n"
+                    "The game should be built into a library (a .dll or .so file).\n"
+                    "You can change the application library in the workspace settings.");
+        msg.exec();
+        return;
+    }
+
+    std::vector<MainWidget*> unsaved;
+    for (int i=0; i<mUI.mainTab->count(); ++i)
+    {
+        auto* widget = static_cast<MainWidget*>(mUI.mainTab->widget(i));
+        if (widget->HasUnsavedChanges())
+        {
+            if (mSettings.save_automatically_on_play)
+                widget->Save();
+            else unsaved.push_back(widget);
+        }
+    }
+    for (auto* wnd : mChildWindows)
+    {
+        auto* widget = wnd->GetWidget();
+        if (widget->HasUnsavedChanges())
+        {
+            if (mSettings.save_automatically_on_play)
+                widget->Save();
+            else unsaved.push_back(widget);
+        }
+    }
+
+    // The actual saving of resources is in the dlgsave !
+    if (!unsaved.empty())
+    {
+        DlgSave dlg(this, unsaved);
+        if (dlg.exec() == QDialog::Rejected)
+            return;
+        const bool save_automatically = dlg.SaveAutomatically();
+        mSettings.save_automatically_on_play = save_automatically;
+    }
+
+
+    if (settings.use_gamehost_process)
+    {
+        // todo: maybe save to some temporary location ?
+        // Save workspace for the loading the initial content
+        // in the game host
+        if (!mWorkspace->SaveWorkspace())
+            return;
+
+        ASSERT(!mIPCHost);
+        app::IPCHost::CleanupSocket("gamestudio-local-socket");
+        auto ipc = std::make_unique<app::IPCHost>();
+        if (!ipc->Open("gamestudio-local-socket"))
+            return;
+
+        connect(mWorkspace.get(), &app::Workspace::ResourceUpdated, ipc.get(),
+                &app::IPCHost::ResourceUpdated);
+        connect(ipc.get(), &app::IPCHost::UserPropertyUpdated, mWorkspace.get(),
+                &app::Workspace::UpdateUserProperty);
+        DEBUG("Local socket is open.");
+
+        QStringList game_host_args;
+        game_host_args << "--no-term-colors";
+        game_host_args << "--workspace";
+        game_host_args << mWorkspace->GetDir();
+        game_host_args << "--app-style";
+        game_host_args << mSettings.style_name;
+        if (clean)
+            game_host_args << "--clean-home";
+
+        QString game_host_name = "EditorGameHost";
+#if defined(WINDOWS_OS)
+        game_host_name.append(".exe");
+#endif
+        const auto& game_host_file = app::JoinPath(QCoreApplication::applicationDirPath(), game_host_name);
+        const auto& game_host_log  = app::JoinPath(QCoreApplication::applicationDirPath(), "game_host.log");
+        const auto& game_host_cwd  = QDir::currentPath();
+        mGameProcess.EnableTimeout(false);
+        mGameProcess.onFinished = [this](){
+            DEBUG("Game process finished.");
+            if (mGameProcess.GetError() != app::Process::Error::None)
+                ERROR("Game process error: '%1'", mGameProcess.GetError());
+
+            mIPCHost->Close();
+            mIPCHost.reset();
+        };
+        mGameProcess.onStdOut = [](const QString& msg) {
+            if (msg.isEmpty())
+                return;
+            // read an encoded log message from the game host process.
+            // todo: for the debug message we might want to figure out the
+            // source file and line from the message itself by parsing the message.
+            // for the time being this is skipped.
+            if (msg[0] == "E")
+                app::EventLog::get().write(app::Event::Type::Error, msg, "game-host");
+            else if (msg[0] == "W")
+                app::EventLog::get().write(app::Event::Type::Warning, msg, "game-host");
+            else if (msg[0] == "I")
+                app::EventLog::get().write(app::Event::Type::Info, msg, "game-host");
+            else base::WriteLog(base::LogEvent::Debug, "game-host", 0, app::ToUtf8(msg));
+        };
+        mGameProcess.onStdErr = [](const QString& msg) {
+            app::EventLog::get().write(app::Event::Type::Error, msg, "game-host");
+        };
+        mGameProcess.Start(game_host_file, game_host_args, game_host_log, game_host_cwd);
+        mIPCHost = std::move(ipc);
+
+    }
+    else
+    {
+        if (!mPlayWindow)
+        {
+            auto window = std::make_unique<PlayWindow>(*mWorkspace);
+            window->LoadState("play_window");
+            window->ShowWithWAR();
+            window->LoadGame(clean);
+
+            mPlayWindow = std::move(window);
+        }
+        else
+        {
+            // bring to the top of the window stack.
+            mPlayWindow->ActivateWindow();
+        }
+    }
+}
+
 
 void MainWindow::BuildRecentWorkspacesMenu()
 {

@@ -1452,20 +1452,34 @@
           <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_11">
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="chkGameProcess">
             <property name="text">
-             <string>Arguments</string>
+             <string>Use separate process</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="2" column="1">
            <widget class="QLineEdit" name="edtArguments">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Runtime game working directory</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_39">
+            <property name="text">
+             <string>Runtime game home directory</string>
             </property>
            </widget>
           </item>
@@ -1497,19 +1511,40 @@
             </item>
            </layout>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_10">
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_11">
             <property name="text">
-             <string>Working folder</string>
+             <string>Arguments</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="chkGameProcess">
-            <property name="text">
-             <string>Use separate process</string>
-            </property>
-           </widget>
+          <item row="1" column="1">
+           <layout class="QHBoxLayout" name="horizontalLayout_10">
+            <item>
+             <widget class="QLineEdit" name="edtGameHome">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>${game-home}-dev</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="btnSelectGameHome">
+              <property name="text">
+               <string>Browse ...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../resource/resource.qrc">
+                <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -1815,6 +1850,8 @@
   <tabstop>hotspotY</tabstop>
   <tabstop>edtWorkingFolder</tabstop>
   <tabstop>btnSelectWorkingFolder</tabstop>
+  <tabstop>edtGameHome</tabstop>
+  <tabstop>btnSelectGameHome</tabstop>
   <tabstop>edtArguments</tabstop>
   <tabstop>chkGameProcess</tabstop>
   <tabstop>edtPreviewEntityScript</tabstop>
