@@ -237,7 +237,7 @@ void MainWindow::LoadSettings()
     Settings settings("Ensisoft", "Gamestudio Editor");
     if (!settings.Load())
     {
-        ERROR("Failed to load application settings.");
+        WARN("Failed to load application settings.");
         return;
     }
     settings.GetValue("Settings", "image_editor_executable",    &mSettings.image_editor_executable);
@@ -309,7 +309,7 @@ void MainWindow::LoadLastState()
     Settings settings(file);
     if (!settings.Load())
     {
-        ERROR("Failed to load application state.");
+        WARN("Failed to load application state.");
         return;
     }
     const auto log_bits       = settings.GetValue("MainWindow", "log_bits", mEventLog.GetShowBits());

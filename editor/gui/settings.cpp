@@ -370,17 +370,21 @@ void Settings::JsonFileSettingsStorage::SetValue(const QString& key, const QVari
 
 bool Settings::JsonFileSettingsStorage::Load()
 {
+    if (!app::FileExists(mFilename))
+        return true;
+
     QFile file(mFilename);
     if (!file.open(QIODevice::ReadOnly))
     {
-        ERROR("Failed to open settings file: '%1'", mFilename);
+        ERROR("Failed to open settings file. [file='%1', error='%2']", mFilename,
+            file.errorString());
         return false;
     }
 
     const QJsonDocument doc(QJsonDocument::fromJson(file.readAll()));
     if (doc.isNull())
     {
-        ERROR("JSON parse error in file: '%1'", mFilename);
+        ERROR("JSON parse error in settings file. [file='%1']", mFilename);
         return false;
     }
     mValues = doc.object().toVariantMap();
@@ -392,7 +396,8 @@ bool Settings::JsonFileSettingsStorage::Save()
     QFile file(mFilename);
     if (!file.open(QIODevice::WriteOnly))
     {
-        ERROR("Failed to open settings file: '%1'", mFilename);
+        ERROR("Failed to open settings file. [file='%1', error='%2']", mFilename,
+              file.errorString());
         return false;
     }
     const QJsonObject& json = QJsonObject::fromVariantMap(mValues);
