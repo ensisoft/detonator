@@ -276,10 +276,13 @@ Texture* detail::TextureFileSource::Upload(const Environment& env, Device& devic
         if (mEffects.any_bit() && format == Texture::Format::AlphaMask)
             algo::ColorTextureFromAlpha(gpu_id, texture, &device);
 
-        if (mEffects.test(Effect::Edges))
-            algo::DetectSpriteEdges(gpu_id, texture, &device);
-        if (mEffects.test(Effect::Blur))
-            algo::ApplyBlur(gpu_id, texture, &device);
+        if (format == Texture::Format::RGBA || format == Texture::Format::sRGBA)
+        {
+            if (mEffects.test(Effect::Edges))
+                algo::DetectSpriteEdges(gpu_id, texture, &device);
+            if (mEffects.test(Effect::Blur))
+                algo::ApplyBlur(gpu_id, texture, &device);
+        } else WARN("Texture effects not supported on texture format. [name='%1', format='%2']", mName, format);
 
         texture->GenerateMips();
         DEBUG("Uploaded texture file source texture. [name='%1', file='%2', effects=%3]", mName, mFile, mEffects);
