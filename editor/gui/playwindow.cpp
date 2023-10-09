@@ -573,7 +573,7 @@ PlayWindow::PlayWindow(app::Workspace& workspace, bool is_separate_process) : mW
     QSurfaceFormat format;
     format.setProfile(QSurfaceFormat::CoreProfile);
     format.setRenderableType(QSurfaceFormat::OpenGLES);
-    format.setVersion(2, 0);
+    format.setVersion(3, 0);
     format.setRedBufferSize(8);
     format.setGreenBufferSize(8);
     format.setBlueBufferSize(8);
