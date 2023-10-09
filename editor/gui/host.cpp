@@ -108,6 +108,7 @@ void Main(int argc, char* argv[])
     options.Add("--standalone", "Run as a standalone executable.");
     options.Add("--workspace", "Path to workspace content dir.", std::string(""));
     options.Add("--socket-name", "Name of the local socket to connect to.", std::string(""));
+    options.Add("--clean-home", "Clean the game home before game start.");
     options.Add("--help", "Print this help.");
 
     std::string arg_error;
@@ -123,7 +124,8 @@ void Main(int argc, char* argv[])
         return;
     }
     const bool term_colors = !options.WasGiven("--no-term-colors");
-    const bool standalone  =  options.WasGiven("--standalone");
+    const bool standalone  = options.WasGiven("--standalone");
+    const bool clean_home  = options.WasGiven("--clean-home");
     std::string wsdir;
     std::string socket;
     std::string style;
@@ -258,7 +260,7 @@ void Main(int argc, char* argv[])
     gui::PlayWindow window(workspace, is_separate_process);
     window.ShowWithWAR();
     window.LoadState("play_window");
-    if (!window.LoadGame())
+    if (!window.LoadGame(clean_home))
         return;
 
     if (!style.empty())

@@ -77,6 +77,7 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.updatesPerSecond, mSettings.updates_per_second);
     SetUIValue(mUI.edtWorkingFolder, mSettings.working_folder);
     SetUIValue(mUI.edtArguments, mSettings.command_line_arguments);
+    SetUIValue(mUI.edtGameHome, mSettings.game_home);
     SetUIValue(mUI.chkGameProcess, mSettings.use_gamehost_process);
     SetUIValue(mUI.grpPhysics, mSettings.enable_physics);
     SetUIValue(mUI.numVeloIterations, mSettings.num_velocity_iterations);
@@ -144,6 +145,7 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.updatesPerSecond, &mSettings.updates_per_second);
     GetUIValue(mUI.edtWorkingFolder, &mSettings.working_folder);
     GetUIValue(mUI.edtArguments, &mSettings.command_line_arguments);
+    GetUIValue(mUI.edtGameHome, &mSettings.game_home);
     GetUIValue(mUI.chkGameProcess, &mSettings.use_gamehost_process);
     GetUIValue(mUI.grpPhysics, &mSettings.enable_physics);
     GetUIValue(mUI.numVeloIterations, &mSettings.num_velocity_iterations);

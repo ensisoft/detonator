@@ -162,6 +162,7 @@ namespace gui
         void on_actionNewResource_triggered();
         void on_actionProjectSettings_triggered();
         void on_actionProjectPlay_triggered();
+        void on_actionProjectPlayClean_triggered();
         void on_actionProjectSync_triggered();
         void on_btnDemoBandit_clicked();
         void on_btnDemoBlast_clicked();
@@ -201,6 +202,7 @@ namespace gui
         void ViewerJsonMessageReceived(const QJsonObject& json);
 
     private:
+        void LaunchGame(bool clean);
         void BuildRecentWorkspacesMenu();
         void SaveSettings();
         bool SaveState();

@@ -1440,6 +1440,7 @@
     <addaction name="actionPackageResources"/>
     <addaction name="separator"/>
     <addaction name="actionProjectPlay"/>
+    <addaction name="actionProjectPlayClean"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -2385,6 +2386,21 @@
    </property>
    <property name="shortcut">
     <string>F9</string>
+   </property>
+  </action>
+  <action name="actionProjectPlayClean">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/play.png</normaloff>:/32x32_ico_png/play.png</iconset>
+   </property>
+   <property name="text">
+    <string>Clean Game Home &amp;&amp; Play</string>
+   </property>
+   <property name="toolTip">
+    <string>Clean game home and then play</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F4</string>
    </property>
   </action>
  </widget>

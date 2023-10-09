@@ -582,10 +582,12 @@ namespace app
             unsigned ticks_per_second = 1;
             // how many times the app updates per second.
             unsigned updates_per_second = 60;
-            // Working folder when playing the app in the editor.
+            // Working folder when playing the game in the editor.
             QString working_folder = "${workspace}";
-            // Arguments for when playing the app in the editor.
+            // Arguments for when playing the game in the editor.
             QString command_line_arguments;
+            // Game home when playing the game in the editor.
+            QString game_home = "${game-home}-dev";
             // Use a separate game host process for playing the app.
             // Using a separate process will protect the editor
             // process from errors in the game app but it might
