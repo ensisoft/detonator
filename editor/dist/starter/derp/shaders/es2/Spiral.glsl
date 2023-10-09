@@ -1,8 +1,3 @@
-
-#version 100
-
-precision highp float;
-
 // build-in uniforms
 // material time in seconds.
 uniform float kTime;
@@ -39,15 +34,15 @@ float spiral(vec2 m) {
 
 }
 
-void main() {
+void FragmentShaderMain() {
 
     float v = spiral(vTexCoord - vec2(0.5, 0.5));
 
     vec4 tex = texture2D(kTexture, vTexCoord);
 
-    gl_FragColor.rgb = mix(kBaseColor.rgb, tex.rgb, 1.0-v);
+    fs_out.color.rgb = mix(kBaseColor.rgb, tex.rgb, 1.0-v);
     //gl_FragColor.rgb = mix(tex.rgb, kBaseColor.rgb, 1.0-v);
-    gl_FragColor.a = 1.0;
+    fs_out.color.a = 1.0;
 
     //vec4(tex.rgb * kBaseColor.rgb, v)
 }
