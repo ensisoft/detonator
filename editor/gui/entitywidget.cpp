@@ -526,9 +526,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     GetUserProperty(resource, "variables_group", mUI.variables);
     GetUserProperty(resource, "animations_group", mUI.animations);
     GetUserProperty(resource, "joints_group", mUI.joints);
-    GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x);
-    GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
-    mCameraWasLoaded = true;
+    mCameraWasLoaded = GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
+                       GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
 
     mState.entity = std::make_shared<game::EntityClass>(*content);
 
@@ -723,6 +722,7 @@ bool EntityWidget::LoadState(const Settings& settings)
     settings.GetValue("Entity", "camera_offset_x", &mState.camera_offset_x);
     settings.GetValue("Entity", "camera_offset_y", &mState.camera_offset_y);
     mCameraWasLoaded = true;
+    mViewTranslationStart = glm::vec2 {mState.camera_offset_x, mState.camera_offset_y};
 
     settings.LoadWidget("Entity", mUI.scaleX);
     settings.LoadWidget("Entity", mUI.scaleY);
@@ -2914,6 +2914,7 @@ void EntityWidget::InitScene(unsigned width, unsigned height)
         // initial position for the camera.
         mState.camera_offset_x = mUI.widget->width()  * 0.5;
         mState.camera_offset_y = mUI.widget->height() * 0.5;
+        mViewTranslationStart  = glm::vec2 { mState.camera_offset_x, mState.camera_offset_y };
     }
     DisplayCurrentCameraLocation();
 }
