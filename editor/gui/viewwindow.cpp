@@ -405,8 +405,10 @@ void ViewWindow::LoadWorkspace(const QString& file)
         return;
     }
 
+    app::MigrationLog migration;
+
     auto workspace = std::make_unique<app::Workspace>(dir);
-    if (!workspace->LoadWorkspace())
+    if (!workspace->LoadWorkspace(&migration))
     {
         QMessageBox msg(this);
         msg.setIcon(QMessageBox::Critical);

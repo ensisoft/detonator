@@ -161,6 +161,8 @@ void MaterialWidget::SetViewerMode()
     SetVisible(mUI.textureMaps,       false);
     SetVisible(mUI.textureProp,       false);
     SetVisible(mUI.textureRect,       false);
+    SetVisible(mUI.textureMap,        false);
+    SetVisible(mUI.scrollArea,        false);
     on_actionPlay_triggered();
 }
 

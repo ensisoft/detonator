@@ -600,26 +600,33 @@ void EntityWidget::InitializeSettings(const UISettings& settings)
 
 void EntityWidget::SetViewerMode()
 {
-    SetVisible(mUI.baseProperties, false);
-    SetVisible(mUI.animator,       false);
-    SetVisible(mUI.entity,         false);
-    SetVisible(mUI.scrollArea,     false);
-    SetVisible(mUI.transform,      false);
-    SetVisible(mUI.lblHelp,        false);
-    SetVisible(mUI.renderTree,     false);
-    SetVisible(mUI.nodeProperties, false);
-    SetVisible(mUI.nodeTransform,  false);
-    SetVisible(mUI.nodeItems,      false);
-    SetValue(mUI.chkShowGrid,      false);
-    SetValue(mUI.chkShowOrigin,    false);
-    SetValue(mUI.chkShowViewport,  false);
-    SetValue(mUI.chkShowOrigin,    false);
-    SetValue(mUI.chkSnap,          false);
-    SetValue(mUI.chkShowComments,  false);
+    SetVisible(mUI.baseProperties,  false);
+    SetVisible(mUI.animator,        false);
+    SetVisible(mUI.entity,          false);
+    SetVisible(mUI.scrollArea,      false);
+    SetVisible(mUI.transform,       false);
+    SetVisible(mUI.lblHelp,         false);
+    SetVisible(mUI.renderTree,      false);
+    SetVisible(mUI.nodeProperties,  false);
+    SetVisible(mUI.nodeTransform,   false);
+    SetVisible(mUI.nodeItems,       false);
     SetVisible(mUI.chkShowComments, false);
     SetVisible(mUI.chkShowViewport, false);
-    SetVisible(mUI.chkSnap,        false);
-    SetVisible(mUI.chkShowOrigin,  false);
+    SetVisible(mUI.chkSnap,         false);
+    SetVisible(mUI.chkShowOrigin,   false);
+    SetVisible(mUI.help,            false);
+    SetVisible(mUI.renderTree,      false);
+    SetVisible(mUI.nodeProperties,  false);
+    SetVisible(mUI.nodeTransform,   false);
+    SetVisible(mUI.nodeItems,       false);
+    SetVisible(mUI.scrollArea_2,    false);
+
+    SetValue(mUI.chkShowGrid,       false);
+    SetValue(mUI.chkShowOrigin,     false);
+    SetValue(mUI.chkShowViewport,   false);
+    SetValue(mUI.chkShowOrigin,     false);
+    SetValue(mUI.chkSnap,           false);
+    SetValue(mUI.chkShowComments,   false);
 
     QTimer::singleShot(10, this, &EntityWidget::on_btnViewReset_clicked);
     on_actionPlay_triggered();
