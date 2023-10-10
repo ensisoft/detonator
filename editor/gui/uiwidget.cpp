@@ -668,6 +668,9 @@ void UIWidget::SetViewerMode()
     SetVisible(mUI.chkShowOrigin,    false);
     SetVisible(mUI.chkShowBounds,    false);
     SetVisible(mUI.chkShowTabOrder,  false);
+    SetVisible(mUI.help,             false);
+    SetVisible(mUI.scrollArea,       false);
+
     SetValue(mUI.chkSnap,            false);
     SetValue(mUI.chkShowOrigin,      false);
     SetValue(mUI.chkShowBounds,      false);

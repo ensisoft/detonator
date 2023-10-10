@@ -930,7 +930,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QGroupBox" name="groupBox">
+      <widget class="QGroupBox" name="help">
        <property name="title">
         <string>Did you know ...</string>
        </property>
