@@ -48,21 +48,21 @@ void Painter::ClearDepth(float depth) const
 }
 
 void Painter::Draw(const std::vector<DrawShape>& shapes,
-                   const RenderPassState& render_pass_state,
+                   const DrawState& state,
                    const ShaderProgram& program) const
 {
 
     Device::State device_state;
     device_state.viewport      = MapToDevice(mViewport);
     device_state.scissor       = MapToDevice(mScissor);
-    device_state.stencil_func  = render_pass_state.stencil_func;
-    device_state.stencil_dpass = render_pass_state.stencil_dpass;
-    device_state.stencil_dfail = render_pass_state.stencil_dfail;
-    device_state.stencil_fail  = render_pass_state.stencil_fail;
-    device_state.stencil_mask  = render_pass_state.stencil_mask;
-    device_state.stencil_ref   = render_pass_state.stencil_ref;
-    device_state.bWriteColor   = render_pass_state.write_color;
-    device_state.depth_test    = render_pass_state.depth_test;
+    device_state.stencil_func  = state.stencil_func;
+    device_state.stencil_dpass = state.stencil_dpass;
+    device_state.stencil_dfail = state.stencil_dfail;
+    device_state.stencil_fail  = state.stencil_fail;
+    device_state.stencil_mask  = state.stencil_mask;
+    device_state.stencil_ref   = state.stencil_ref;
+    device_state.bWriteColor   = state.write_color;
+    device_state.depth_test    = state.depth_test;
 
     for (const auto& shape : shapes)
     {
@@ -110,7 +110,7 @@ void Painter::Draw(const std::vector<DrawShape>& shapes,
 void Painter::Draw(const Drawable& shape,
                    const glm::mat4& model,
                    const Material& material,
-                   const RenderPassState& render_pass_state,
+                   const DrawState& state,
                    const ShaderProgram& program,
                    const LegacyDrawState& draw_state) const
 {
@@ -121,7 +121,7 @@ void Painter::Draw(const Drawable& shape,
     shapes[0].transform  = &model;
     shapes[0].line_width = draw_state.line_width;
     shapes[0].culling    = draw_state.culling;
-    Draw(shapes, render_pass_state, program);
+    Draw(shapes, state, program);
 }
 
 void Painter::Draw(const Drawable& drawable,
@@ -129,7 +129,7 @@ void Painter::Draw(const Drawable& drawable,
                    const Material& material,
                    const LegacyDrawState& draw_state) const
 {
-    RenderPassState render_pass_state;
+    DrawState render_pass_state;
     render_pass_state.write_color  = true;
     render_pass_state.stencil_func = StencilFunc::Disabled;
     render_pass_state.depth_test   = DepthTest::Disabled;

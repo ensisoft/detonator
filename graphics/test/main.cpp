@@ -1975,7 +1975,7 @@ void main() {
         model_to_world.Resize(256.0f, 256.0f);
         model_to_world.Translate(20.0f, 20.0f);
 
-        gfx::Painter::RenderPassState state;
+        gfx::Painter::DrawState state;
         state.write_color  = true;
         state.stencil_func = gfx::Painter::StencilFunc::Disabled;
         state.depth_test   = gfx::Painter::DepthTest ::Disabled;
