@@ -374,7 +374,7 @@ public:
                       gfx::Painter& painter,
                       bool depth_test) override
     {
-        gfx::Painter::RenderPassState state;
+        gfx::Painter::DrawState state;
         state.write_color  = true;
         state.depth_test   = gfx::Painter::DepthTest::Disabled;
         state.stencil_func = gfx::Painter::StencilFunc::Disabled;
@@ -430,7 +430,7 @@ public:
                       gfx::Painter& painter,
                       bool depth_test) override
     {
-        gfx::Painter::RenderPassState state;
+        gfx::Painter::DrawState state;
         state.write_color  = true; // writing depth to texture so this must be true!
         state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
         state.stencil_func = gfx::Painter::StencilFunc::Disabled;

@@ -41,7 +41,7 @@ namespace gfx
 
         void Draw(const DrawList& list, const ShaderProgram& pass = detail::GenericShaderProgram()) const
         {
-            Painter::RenderPassState state;
+            Painter::DrawState state;
             state.write_color  = true;
             state.stencil_func = Painter::StencilFunc::Disabled;
             state.depth_test   = Painter::DepthTest::Disabled;
@@ -49,7 +49,7 @@ namespace gfx
         }
         void Draw(const Drawable& drawable, const Transform& transform, const Material& material) const
         {
-            Painter::RenderPassState state;
+            Painter::DrawState state;
             state.write_color  = true;
             state.stencil_func = Painter::StencilFunc::Disabled;
             state.depth_test   = Painter::DepthTest::Disabled;
@@ -96,7 +96,7 @@ namespace gfx
         {}
         void Draw(const Drawable& drawable, const Transform& transform, const Material& material) const
         {
-            Painter::RenderPassState state;
+            Painter::DrawState state;
             SetState(state);
 
             detail::StencilShaderProgram pass;
@@ -104,13 +104,13 @@ namespace gfx
         }
         void Draw(const DrawList& list) const
         {
-            Painter::RenderPassState state;
+            Painter::DrawState state;
             SetState(state);
 
             detail::StencilShaderProgram pass;
             mPainter.Draw(list, state, pass);
         }
-        void SetState(Painter::RenderPassState& state) const
+        void SetState(Painter::DrawState& state) const
         {
             state.write_color   = false;
             state.depth_test    = Painter::DepthTest::Disabled;
@@ -154,7 +154,7 @@ namespace gfx
         {}
         void Draw(const Drawable& drawable, const Transform& transform, const Material& material) const
         {
-            Painter::RenderPassState state;
+            Painter::DrawState state;
             state.write_color   = true;
             state.depth_test    = Painter::DepthTest::Disabled;
             state.stencil_func  = Painter::StencilFunc::RefIsEqual;
@@ -168,7 +168,7 @@ namespace gfx
         }
         void Draw(const DrawList& list) const
         {
-            Painter::RenderPassState state;
+            Painter::DrawState state;
             state.write_color   = true;
             state.depth_test    = Painter::DepthTest::Disabled;
             state.stencil_func  = Painter::StencilFunc::RefIsEqual;

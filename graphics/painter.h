@@ -149,7 +149,7 @@ namespace gfx
         using DepthTest   = Device::State::DepthTest;
         using Culling     = Device::State::Culling;
 
-        struct RenderPassState {
+        struct DrawState {
             bool write_color = true;
             StencilOp stencil_op = StencilOp::DontModify;
             // the stencil test function.
@@ -189,7 +189,7 @@ namespace gfx
         // which provides the "look&feel" i.e. the surface properties for the shape
         // and finally a transform which defines the model-to-world transform.
         void Draw(const DrawList& shapes,
-                  const RenderPassState& render_pass_state,
+                  const DrawState& state,
                   const ShaderProgram& program) const;
 
         // legacy draw functions.
@@ -222,7 +222,7 @@ namespace gfx
         void Draw(const Drawable& shape,
                   const glm::mat4& model,
                   const Material& material,
-                  const RenderPassState& render_pass_state,
+                  const DrawState& state,
                   const ShaderProgram& program,
                   const LegacyDrawState& draw_state = LegacyDrawState()) const;
         // Legacy immediate mode draw function.
