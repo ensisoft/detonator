@@ -67,6 +67,10 @@ namespace base
         { return std::to_string(value); }
         inline std::string ToString(long double value)
         { return std::to_string(value); }
+
+        std::string ToString(const base::FDegrees& angle);
+        std::string ToString(const base::FRadians& angle);
+
 #if defined(BASE_FORMAT_SUPPORT_GLM)
         std::string ToString(const glm::mat4& m);
         std::string ToString(const glm::mat3& m);

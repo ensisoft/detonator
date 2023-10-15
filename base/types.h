@@ -749,4 +749,97 @@ namespace base
         return R(minX, minY, maxX - minX, maxY - minY);
     }
 
+    namespace detail {
+        struct Radians {};
+        struct Degrees {};
+
+        template<typename Real> static inline
+        Real ToRadians(Real radians, Radians tag) noexcept
+        { return radians; }
+
+        template<typename Real> static inline
+        Real ToRadians(Real degrees, Degrees tag) noexcept
+        { return degrees * (math::Pi / 180.0); }
+
+        template<typename Real> static inline
+        Real ToDegrees(Real radians, Radians tag) noexcept
+        { return radians * (180.0 / math::Pi); }
+
+        template<typename Real> static inline
+        Real ToDegrees(Real degrees, Degrees tag) noexcept
+        { return degrees; }
+
+        template<typename Real> inline
+        Real ConvertAngle(Real angle, Radians from, Radians to) noexcept
+        { return angle; }
+
+        template<typename Real> inline
+        Real ConvertAngle(Real angle, Radians from, Degrees to) noexcept
+        { return ToDegrees(angle, from); }
+
+        template<typename Real> inline
+        Real ConvertAngle(Real angle, Degrees from, Degrees to) noexcept
+        { return angle; }
+
+        template<typename Real> inline
+        Real ConvertAngle(Real angle, Degrees from, Radians to) noexcept
+        { return ToRadians(angle, from); }
+    } // namespace
+
+    template<typename Real, typename Unit>
+    class Angle
+    {
+    public:
+        explicit Angle(Real angle = 0.0) noexcept
+          : mAngle(angle)
+        {}
+
+        template<typename OtherUnit> inline
+        operator Angle<Real, OtherUnit> () const noexcept
+        {
+            return Angle<Real, OtherUnit> { detail::ConvertAngle(mAngle, Unit{}, OtherUnit{}) };
+        }
+
+        inline auto& operator +=(Real value) noexcept
+        {
+            mAngle += value;
+            return *this;
+        }
+
+        inline auto& operator -=(Real value) noexcept
+        {
+            mAngle -= value;
+            return *this;
+        }
+
+        inline Real ToRadians() const noexcept
+        { return detail::ToRadians(mAngle, Unit{} ); }
+        inline Real ToDegrees() const noexcept
+        { return detail::ToDegrees(mAngle, Unit{} ); }
+    private:
+        template<typename RealT, typename UnitT> friend
+        Angle<RealT, UnitT> operator + (Angle<RealT, UnitT> lhs, Angle<RealT, UnitT> rhs);
+
+        template<typename RealT, typename UnitT> friend
+        Angle<RealT, UnitT> operator - (Angle<RealT, UnitT> lhs, Angle<RealT, UnitT> rhs);
+
+    private:
+        Real mAngle = 0;
+    };
+
+    template<typename RealT, typename UnitT> inline
+    auto operator + (Angle<RealT, UnitT> lhs, Angle<RealT, UnitT> rhs) noexcept
+    {
+        return Angle<RealT, UnitT> { lhs.mAngle + rhs.mAngle };
+    }
+
+    template<typename RealT, typename UnitT> inline
+    auto operator - (Angle<RealT, UnitT> lhs, Angle<RealT, UnitT> rhs) noexcept
+    {
+        return Angle<RealT, UnitT> { lhs.mAngle - rhs.mAngle };
+    }
+
+    using FDegrees = Angle<float, detail::Degrees>;
+    using FRadians = Angle<float, detail::Radians>;
+
 } // namespace

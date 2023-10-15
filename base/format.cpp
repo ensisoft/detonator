@@ -140,6 +140,22 @@ std::string ToString(const std::wstring& s)
     return converted_str;
 }
 
+std::string ToString(const base::FRadians& angle)
+{
+    char buff[100];
+    std::memset(buff, 0, sizeof(buff));
+    std::snprintf(buff, sizeof(buff), "rad:%.2f | deg:%.2f", angle.ToRadians(), angle.ToDegrees());
+    return buff;
+}
+
+std::string ToString(const base::FDegrees& angle)
+{
+    char buff[100];
+    std::memset(buff, 0, sizeof(buff));
+    std::snprintf(buff, sizeof(buff), "rad:%.2f | deg:%.2f", angle.ToRadians(), angle.ToDegrees());
+    return buff;
+}
+
 } // detail
 } // namespace
 
