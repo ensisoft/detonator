@@ -550,7 +550,7 @@ Texture* detail::TextureTextBufferSource::Upload(const Environment& env, Device&
     }
     else if (format == TextBuffer::RasterFormat::Texture)
     {
-        if (auto* texture = mTextBuffer.RasterizeTexture(mId, mName, device))
+        if (texture = mTextBuffer.RasterizeTexture(mId, mName, device))
         {
             texture->SetName(mName);
             texture->SetFilter(Texture::MinFilter::Linear);
