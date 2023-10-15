@@ -1169,10 +1169,10 @@ void CubeGeometry::MakeFace(size_t vertex_offset, Index16* indices, Vertex3D* ve
                             const Vec3& v0, const Vec3& v1, const Vec3& v2, const Vec3& v3,
                             const Vec3& normal)
 {
-    constexpr const Vec2 TexBotLeft  = {0.0, 0.0};
-    constexpr const Vec2 TexTopLeft  = {0.0, 1.0};
-    constexpr const Vec2 TexTopRight = {1.0, 1.0};
-    constexpr const Vec2 TexBotRight = {1.0, 0.0};
+    constexpr const Vec2 TexBotLeft  = {0.0, 1.0};
+    constexpr const Vec2 TexTopLeft  = {0.0, 0.0};
+    constexpr const Vec2 TexTopRight = {1.0, 0.0};
+    constexpr const Vec2 TexBotRight = {1.0, 1.0};
 
     vertices[0].aPosition = v0;
     vertices[1].aPosition = v1;
