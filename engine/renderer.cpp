@@ -238,18 +238,19 @@ void Renderer::Draw(const EntityClass& entity,
 }
 
 void Renderer::Draw(const Scene& scene,
-                    gfx::Painter& painter,
+                    gfx::Device& device,
                     SceneInstanceDrawHook* scene_hook)
 {
-    DrawScene<Scene, Entity, Entity, EntityNode>(scene, nullptr, painter, scene_hook, false, false);
+    DrawScene<Scene, Entity, Entity, EntityNode>(scene, nullptr, device, scene_hook, false, false);
 }
 
 void Renderer::Draw(const SceneClass& scene, const game::Tilemap* map,
-                    gfx::Painter& painter,
+                    gfx::Device& device,
                     SceneClassDrawHook* scene_hook,
                     bool draw_map_render_layers, bool draw_map_data_layers)
 {
-    DrawScene<SceneClass, EntityPlacement, EntityClass, EntityNodeClass>(scene, map, painter, scene_hook, draw_map_render_layers, draw_map_data_layers);
+
+    DrawScene<SceneClass, EntityPlacement, EntityClass, EntityNodeClass>(scene, map, device, scene_hook, draw_map_render_layers, draw_map_data_layers);
 }
 
 void Renderer::Draw(const game::Tilemap& map,
@@ -574,7 +575,7 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
 template<typename SceneType,typename SceneNodeType,
          typename EntityType, typename EntityNodeType>
 void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
-                         gfx::Painter& scene_painter,
+                         gfx::Device& device,
                          SceneDrawHook<SceneNodeType>* scene_hook,
                          bool draw_map_render_layers,
                          bool draw_map_data_layers)
@@ -606,14 +607,15 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
     // should map directly to a layer index. Then each entity needs to be mapped from
     // entity world into tilemap and xy tile position computed.
 
+    const auto window_size = glm::vec2{mSurface.viewport.GetWidth(), mSurface.viewport.GetHeight()};
+    const auto logical_viewport_width = mCamera.viewport.GetWidth();
+    const auto logical_viewport_height = mCamera.viewport.GetHeight();
+
+    gfx::Painter scene_painter(&device);
     scene_painter.SetProjectionMatrix(CreateProjectionMatrix(game::Perspective::AxisAligned, mCamera.viewport));
     scene_painter.SetViewMatrix(CreateModelViewMatrix(game::Perspective::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
     scene_painter.SetViewport(mSurface.viewport);
     scene_painter.SetSurfaceSize(mSurface.size);
-
-    const auto window_size = glm::vec2{mSurface.viewport.GetWidth(), mSurface.viewport.GetHeight()};
-    const auto logical_viewport_width = mCamera.viewport.GetWidth();
-    const auto logical_viewport_height = mCamera.viewport.GetHeight();
     scene_painter.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
 
     const auto perspective          = map ? map->GetPerspective() : game::Perspective::AxisAligned;

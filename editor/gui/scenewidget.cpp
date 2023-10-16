@@ -1877,7 +1877,8 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
-    gfx::Painter scene_painter(painter.GetDevice());
+    gfx::Device* device = painter.GetDevice();
+    gfx::Painter scene_painter(device);
     scene_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, perspective));
     scene_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, perspective));
     scene_painter.SetPixelRatio(glm::vec2{xs*zoom, ys*zoom});
@@ -1903,9 +1904,6 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
             }
         }
 
-
-        gfx::Painter p(scene_painter);
-
         // setup a viewport rect for culling draw packets against
         // draw packets which don't intersect with the viewrect are culled
         // for improved perf.
@@ -1918,7 +1916,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         DrawHook hook(GetCurrentNode(), viewport);
         hook.SetIsPlaying(mPlayState == PlayState::Playing);
         hook.SetDrawVectors(true);
-        hook.SetViewMatrix(p.GetViewMatrix());
+        hook.SetViewMatrix(scene_painter.GetViewMatrix());
 
         engine::Renderer::Camera camera;
         camera.position.x = mState.camera_offset_x;
@@ -1942,7 +1940,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         const bool show_map = GetValue(mUI.chkShowMap);
 
         mState.renderer.BeginFrame();
-        mState.renderer.Draw(*mState.scene,  mTilemap.get(), p, &hook, show_map, show_map);
+        mState.renderer.Draw(*mState.scene,  mTilemap.get(), *device, &hook, show_map, show_map);
 
         if (mCurrentTool)
             mCurrentTool->Render(painter, scene_painter);
@@ -2572,13 +2570,6 @@ game::EntityPlacement* SceneWidget::SelectNode(const QPoint& click_point)
     const auto height = mUI.widget->height();
     const auto perspective = game::Perspective::AxisAligned;
 
-    gfx::Painter scene_painter(device);
-    scene_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, perspective));
-    scene_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, perspective));
-    scene_painter.SetPixelRatio(glm::vec2{xs*zoom, ys*zoom});
-    scene_painter.SetViewport(0, 0, width, height);
-    scene_painter.SetSurfaceSize(width, height);
-
     engine::Renderer::Camera camera;
     camera.position.x = mState.camera_offset_x;
     camera.position.y = mState.camera_offset_y;
@@ -2594,7 +2585,7 @@ game::EntityPlacement* SceneWidget::SelectNode(const QPoint& click_point)
     mState.renderer.SetSurface(surface);
 
     DrawHook hook(hit_nodes);
-    mState.renderer.Draw(*mState.scene, nullptr, scene_painter, &hook);
+    mState.renderer.Draw(*mState.scene, nullptr, *device, &hook);
 
     {
         // for debugging.
