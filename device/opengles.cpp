@@ -1791,6 +1791,14 @@ private:
                     return false;
                 }
             }
+            else if (mDevice.mContext->GetVersion() == dev::Context::Version::WebGL_2)
+            {
+                if (mFormat == Format::sRGB || mFormat == Format::sRGBA)
+                {
+                    WARN("WebGL2 doesn't support mips on sRGB/sRGBA texture. [name='%1', format=%2]", mName, mFormat);
+                    return false;
+                }
+            }
             else if (mDevice.mContext->GetVersion() == dev::Context::Version::OpenGL_ES2)
             {
                 if (mFormat == Format::sRGB || mFormat == Format::sRGBA)
