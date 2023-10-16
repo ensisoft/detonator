@@ -199,10 +199,10 @@ namespace engine
                   EntityClassDrawHook* hook = nullptr);
 
         void Draw(const game::Scene& scene,
-                  gfx::Painter& painter,
+                  gfx::Device& device,
                   SceneInstanceDrawHook* scene_hook = nullptr);
         void Draw(const game::SceneClass& scene, const game::Tilemap* map,
-                  gfx::Painter& painter,
+                  gfx::Device& device,
                   SceneClassDrawHook* scene_hook = nullptr,
                   bool draw_map_render_layers = true,
                   bool draw_map_data_layers = false);
@@ -232,7 +232,7 @@ namespace engine
         template<typename SceneType, typename SceneNodeType,
                  typename EntityType, typename EntityNodeType>
         void DrawScene(const SceneType& scene, const game::Tilemap* map,
-                       gfx::Painter& painter,
+                       gfx::Device& device,
                        SceneDrawHook<SceneNodeType>* scene_hook,
                        bool draw_map_render_layers, bool draw_map_data_layers);
 

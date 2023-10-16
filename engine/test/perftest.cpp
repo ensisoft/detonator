@@ -225,15 +225,24 @@ public:
         TRACE_START();
         TRACE_ENTER(Execute);
 
-        gfx::Transform transform;
-        transform.Translate(50.0f, 50.0f);
-        engine.graphics_painter->SetViewMatrix(transform.GetAsMatrix());
         engine.graphics_device->BeginFrame();
         engine.graphics_device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));
 
+        engine::Renderer::Surface surface;
+        surface.viewport = gfx::IRect(0, 0, 1024, 768);
+        surface.size     = gfx::USize(1024u, 768u);
+        engine.renderer->SetSurface(surface);
+
+        engine::Renderer::Camera camera;
+        camera.viewport = gfx::FRect(0.0f, 0.0f, 1024.0f, 768.0f);
+        camera.rotation = 0.0f;
+        camera.scale    = glm::vec2{1.0f, 1.0f};
+        camera.position = glm::vec2{-50.0f, -50.0f};
+        engine.renderer->SetCamera(camera);
+
         TRACE_CALL("Update",     engine.renderer->Update(*mScene, 0.0f, 0.0f));
         TRACE_CALL("BeginFrame", engine.renderer->BeginFrame());
-        TRACE_CALL("Draw",       engine.renderer->Draw(*mScene, *engine.graphics_painter));
+        TRACE_CALL("Draw",       engine.renderer->Draw(*mScene, *engine.graphics_device));
         TRACE_CALL("EndFrame",   engine.renderer->EndFrame());
 
         engine.graphics_device->EndFrame();
@@ -278,15 +287,24 @@ public:
         TRACE_START();
         TRACE_ENTER(Execute);
 
-        gfx::Transform transform;
-        transform.Translate(50.0f, 50.0f);
-        engine.graphics_painter->SetViewMatrix(transform.GetAsMatrix());
         engine.graphics_device->BeginFrame();
         engine.graphics_device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));
 
+        engine::Renderer::Surface surface;
+        surface.viewport = gfx::IRect(0, 0, 1024, 768);
+        surface.size     = gfx::USize(1024u, 768u);
+        engine.renderer->SetSurface(surface);
+
+        engine::Renderer::Camera camera;
+        camera.viewport = gfx::FRect(0.0f, 0.0f, 1024.0f, 768.0f);
+        camera.rotation = 0.0f;
+        camera.scale    = glm::vec2{1.0f, 1.0f};
+        camera.position = glm::vec2{-50.0f, -50.0f};
+        engine.renderer->SetCamera(camera);
+
         TRACE_CALL("Update",     engine.renderer->Update(*mScene, 0.0f, 0.0f));
         TRACE_CALL("BeginFrame", engine.renderer->BeginFrame());
-        TRACE_CALL("Draw",       engine.renderer->Draw(*mScene, *engine.graphics_painter));
+        TRACE_CALL("Draw",       engine.renderer->Draw(*mScene, *engine.graphics_device));
         TRACE_CALL("EndFrame",   engine.renderer->EndFrame());
 
         engine.graphics_device->EndFrame();
@@ -436,8 +454,8 @@ int test_main(int argc, char* argv[])
 
     if (!have_test)
     {
-        WARN("No tests were specified on the command line.");
-        WARN("Run again with --help in order to see test names.");
+        ERROR("No tests were specified on the command line.");
+        ERROR("Run again with --help in order to see test names.");
     }
 
     return 0;

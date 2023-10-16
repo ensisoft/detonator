@@ -314,7 +314,20 @@ class PhysicsTest : public TestCase
 public:
     virtual void Render(gfx::Painter& painter) override
     {
-        mRenderer.Draw(*mScene, painter);
+        auto* device = painter.GetDevice();
+        engine::Renderer::Surface surface;
+        surface.viewport = gfx::IRect(0, 0, 1024, 768);
+        surface.size     = gfx::USize(1024u, 768u);
+        mRenderer.SetSurface(surface);
+
+        engine::Renderer::Camera camera;
+        camera.viewport = gfx::FRect(0.0f, 0.0f, 1024.0f, 768.0f);
+        camera.rotation = 0.0f;
+        camera.scale    = glm::vec2{1.0f, 1.0f};
+        camera.position = glm::vec2{0.0f, 0.0f};
+        mRenderer.SetCamera(camera);
+
+        mRenderer.Draw(*mScene, *device);
         mPhysics.DebugDrawObjects(painter);
     }
     virtual void Update(float dt) override
@@ -419,7 +432,20 @@ public:
         //gfx::FRect test(0.0f, 0.0f, 100.0f, 100.0f);
         //gfx::FillRect(painter, test, gfx::Color::Yellow);
 
-        mRenderer.Draw(*mScene, painter);
+        auto* device = painter.GetDevice();
+        engine::Renderer::Surface surface;
+        surface.viewport = painter.GetViewport();
+        surface.size     = gfx::USize(1024u, 768u);
+        mRenderer.SetSurface(surface);
+
+        engine::Renderer::Camera camera;
+        camera.viewport = mViewport;
+        camera.rotation = 0.0f;
+        camera.scale    = glm::vec2{1.0f, 1.0f};
+        camera.position = glm::vec2{0.0f, 0.0f};
+        mRenderer.SetCamera(camera);
+
+        mRenderer.Draw(*mScene, *device);
     }
     virtual void Update(float dt) override
     {
@@ -511,7 +537,20 @@ public:
         transform.Translate(300.0f, 400.0f);
         painter.SetViewMatrix(transform.GetAsMatrix());
 
-        mRenderer.Draw(*mScene, painter);
+        auto* device = painter.GetDevice();
+        engine::Renderer::Surface surface;
+        surface.viewport = gfx::IRect(0, 0, 1024, 768);
+        surface.size     = gfx::USize(1024u, 768u);
+        mRenderer.SetSurface(surface);
+
+        engine::Renderer::Camera camera;
+        camera.viewport = gfx::FRect(0.0f, 0.0f, 1024.0f, 768.0f);
+        camera.rotation = 0.0f;
+        camera.scale    = glm::vec2{1.0f, 1.0f};
+        camera.position = glm::vec2{-300.0f, -400.0f};
+        mRenderer.SetCamera(camera);
+
+        mRenderer.Draw(*mScene, *device);
 
         for (size_t i=0; i<mScene->GetNumEntities(); ++i)
         {
