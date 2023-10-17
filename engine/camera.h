@@ -77,6 +77,8 @@ namespace engine
     //   transformed with a model and a camera transformation to a certain position
     //   relative to the camera.
     // - The scene plane is parallel to the orthographic projection plane.
+    // - This 2d plane is the is axis aligned game plane of the underlying 3D space,
+    //   in other words the game world takes place on this plane.
     //
     // Currently every vector in either space is assumed to live exactly on the
     // plane, i.e. there's no 3rd dimension (Z values are 0.0f).
@@ -89,45 +91,48 @@ namespace engine
     // used when we don't really care about which plane it is that we're dealing
     // with. This is mostly useful for the editor to transform for example mouse
     // and window coordinates to a coordinate on some plane for placing objects.
+    // In a tilemap editor the mouse is mapped to the tile plane which is either
+    // the dimetric plane or the axis aligned plane and in the scene / entity
+    // editors the plane is the xy plane.
 
     // Map a window (2D projection surface coordinate) to game plane
-    glm::vec4 WindowToWorldPlane(const glm::mat4& view_to_clip, // aka projection matrix/transform
-                                 const glm::mat4& world_to_view, // aka view/camera matrix/transform
-                                 const glm::vec2& window_coord,
-                                 const glm::vec2& window_size);
-    std::vector<glm::vec4> WindowToWorldPlane(const glm::mat4& view_to_clip,
-                                              const glm::mat4& world_to_view,
-                                              const glm::vec2& window_size,
-                                              const std::vector<glm::vec2>& coordinates);
+    glm::vec4 MapFromWindowToWorldPlane(const glm::mat4& view_to_clip, // aka projection matrix/transform
+                                        const glm::mat4& world_to_view, // aka view/camera matrix/transform
+                                        const glm::vec2& window_coord,
+                                        const glm::vec2& window_size);
+    std::vector<glm::vec4> MapFromWindowToWorldPlane(const glm::mat4& view_to_clip,
+                                                     const glm::mat4& world_to_view,
+                                                     const glm::vec2& window_size,
+                                                     const std::vector<glm::vec2>& coordinates);
     // Map a window (2D projection surface coordinate) to world space.
-    glm::vec4 WindowToWorld(const glm::mat4& view_to_clip,
-                            const glm::mat4& world_to_view,
-                            const glm::vec2& window_coord,
-                            const glm::vec2& window_size);
+    glm::vec4 MapFromWindowToWorld(const glm::mat4& view_to_clip,
+                                   const glm::mat4& world_to_view,
+                                   const glm::vec2& window_coord,
+                                   const glm::vec2& window_size);
 
     // Map a vector from scene plane to a vector on the tile plane.
-    glm::vec4 SceneToTilePlane(const glm::mat4& scene_view_to_clip,
-                               const glm::mat4& scene_world_to_view,
-                               const glm::mat4& plane_view_to_clip,
-                               const glm::mat4& plane_world_to_view,
-                               const glm::vec4& scene_pos);
+    glm::vec4 MapFromScenePlaneToTilePlane(const glm::mat4& scene_view_to_clip,
+                                           const glm::mat4& scene_world_to_view,
+                                           const glm::mat4& plane_view_to_clip,
+                                           const glm::mat4& plane_world_to_view,
+                                           const glm::vec4& scene_pos);
 
     // Map a vector from the tile plane coordinate space to scene plane.
-    glm::vec4 TilePlaneToScene(const glm::mat4& scene_view_to_clip,
-                               const glm::mat4& scene_world_to_view,
-                               const glm::mat4& plane_view_to_clip,
-                               const glm::mat4& plane_world_to_view,
-                               const glm::vec4& plane_pos);
+    glm::vec4 MapFromTilePlaneToScenePlane(const glm::mat4& scene_view_to_clip,
+                                           const glm::mat4& scene_world_to_view,
+                                           const glm::mat4& plane_view_to_clip,
+                                           const glm::mat4& plane_world_to_view,
+                                           const glm::vec4& plane_pos);
 
-    glm::vec4 PlaneToPlane(const glm::vec4& pos, game::Perspective src, game::Perspective dst);
+    glm::vec4 MapFromPlaneToPlane(const glm::vec4& pos, game::Perspective src, game::Perspective dst);
 
-    inline glm::vec4 TilePlaneToScene(const glm::vec4& tile_pos, game::Perspective tile_plane) noexcept
+    inline glm::vec4 MapFromTilePlaneToScenePlane(const glm::vec4& tile_pos, game::Perspective tile_plane) noexcept
     {
-        return PlaneToPlane(tile_pos, tile_plane, game::Perspective::AxisAligned);
+        return MapFromPlaneToPlane(tile_pos, tile_plane, game::Perspective::AxisAligned);
     }
-    inline glm::vec4 SceneToTilePlane(const glm::vec4& scene_pos, game::Perspective tile_plane) noexcept
+    inline glm::vec4 MapFromScenePlaneToTilePlane(const glm::vec4& scene_pos, game::Perspective tile_plane) noexcept
     {
-        return PlaneToPlane(scene_pos, game::Perspective::AxisAligned, tile_plane);
+        return MapFromPlaneToPlane(scene_pos, game::Perspective::AxisAligned, tile_plane);
     }
 
     // Produce a matrix that transforms a vertex from one coordinate space

@@ -152,19 +152,19 @@ glm::mat4 CreateModelViewMatrix(game::Perspective perspective,
     return view * CreateModelMatrix(perspective);
 }
 
-glm::vec4 WindowToWorldPlane(const glm::mat4& view_to_clip,
-                             const glm::mat4& world_to_view,
-                             const glm::vec2& window_coord,
-                             const glm::vec2& window_size)
+glm::vec4 MapFromWindowToWorldPlane(const glm::mat4& view_to_clip,
+                                    const glm::mat4& world_to_view,
+                                    const glm::vec2& window_coord,
+                                    const glm::vec2& window_size)
 {
 
-    return WindowToWorldPlane(view_to_clip, world_to_view, window_size, std::vector<glm::vec2>{window_coord})[0];
+    return MapFromWindowToWorldPlane(view_to_clip, world_to_view, window_size, std::vector<glm::vec2>{window_coord})[0];
 }
 
-std::vector<glm::vec4> WindowToWorldPlane(const glm::mat4& view_to_clip,
-                                          const glm::mat4& world_to_view,
-                                          const glm::vec2& window_size,
-                                          const std::vector<glm::vec2>& coordinates)
+std::vector<glm::vec4> MapFromWindowToWorldPlane(const glm::mat4& view_to_clip,
+                                                 const glm::mat4& world_to_view,
+                                                 const glm::vec2& window_size,
+                                                 const std::vector<glm::vec2>& coordinates)
 {
     constexpr const auto plane_origin_world = glm::vec4 {0.0f, 0.0f, 0.0f, 1.0f};
     constexpr const auto plane_normal_world = glm::vec4 {0.0f, 0.0f, 1.0f, 0.0f};
@@ -226,11 +226,11 @@ std::vector<glm::vec4> WindowToWorldPlane(const glm::mat4& view_to_clip,
     return ret;
 }
 
-glm::vec4 SceneToTilePlane(const glm::mat4& scene_view_to_clip,
-                           const glm::mat4& scene_world_to_view,
-                           const glm::mat4& plane_view_to_clip,
-                           const glm::mat4& plane_world_to_view,
-                           const glm::vec4& scene_pos)
+glm::vec4 MapFromScenePlaneToTilePlane(const glm::mat4& scene_view_to_clip,
+                                       const glm::mat4& scene_world_to_view,
+                                       const glm::mat4& plane_view_to_clip,
+                                       const glm::mat4& plane_world_to_view,
+                                       const glm::vec4& scene_pos)
 {
     constexpr const auto plane_origin_world = glm::vec4 {0.0f, 0.0f, 0.0f, 1.0f};
     constexpr const auto plane_normal_world = glm::vec4 {0.0f, 0.0f, 1.0f, 0.0f};
@@ -257,11 +257,11 @@ glm::vec4 SceneToTilePlane(const glm::mat4& scene_view_to_clip,
     return intersection_point_world;
 }
 
-glm::vec4 TilePlaneToScene(const glm::mat4& scene_view_to_clip,
-                           const glm::mat4& scene_world_to_view,
-                           const glm::mat4& plane_view_to_clip,
-                           const glm::mat4& plane_world_to_view,
-                           const glm::vec4& plane_pos)
+glm::vec4 MapFromTilePlaneToScenePlane(const glm::mat4& scene_view_to_clip,
+                                       const glm::mat4& scene_world_to_view,
+                                       const glm::mat4& plane_view_to_clip,
+                                       const glm::mat4& plane_world_to_view,
+                                       const glm::vec4& plane_pos)
 {
     glm::vec2 clip_space = plane_view_to_clip * plane_world_to_view * plane_pos;
 
@@ -271,7 +271,7 @@ glm::vec4 TilePlaneToScene(const glm::mat4& scene_view_to_clip,
     return glm::inverse(scene_view_to_clip * scene_world_to_view) * glm::vec4{clip_space, depth_value_at_near_plane, 1.0f};
 }
 
-glm::vec4 PlaneToPlane(const glm::vec4& pos, game::Perspective src, game::Perspective dst)
+glm::vec4 MapFromPlaneToPlane(const glm::vec4& pos, game::Perspective src, game::Perspective dst)
 {
     if (src == dst)
         return pos;
@@ -298,10 +298,10 @@ glm::vec4 PlaneToPlane(const glm::vec4& pos, game::Perspective src, game::Perspe
     return glm::inverse(dst_plane_to_world) * intersection_point_world;
 }
 
-glm::vec4 WindowToWorld(const glm::mat4& view_to_clip,
-                        const glm::mat4& world_to_view,
-                        const glm::vec2& window_coord,
-                        const glm::vec2& window_size)
+glm::vec4 MapFromWindowToWorld(const glm::mat4& view_to_clip,
+                               const glm::mat4& world_to_view,
+                               const glm::vec2& window_coord,
+                               const glm::vec2& window_size)
 {
 // normalize the window coordinate. remember to flip the Y axis.
     glm::vec2 norm;

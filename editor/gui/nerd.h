@@ -90,7 +90,7 @@ Point2Df MapWindowCoordinateToWorld(const UI& ui,
 
     const auto& proj_matrix = CreateProjectionMatrix(ui, perspective);
     const auto& view_matrix = CreateViewMatrix(ui, state, perspective);
-    const auto pos = engine::WindowToWorldPlane(proj_matrix, view_matrix, window_point, window_size);
+    const auto pos = engine::MapFromWindowToWorldPlane(proj_matrix, view_matrix, window_point, window_size);
     return {pos.x, pos.y};
 }
 
@@ -100,7 +100,7 @@ inline Point2Df MapWindowCoordinateToWorld(const glm::mat4& view_to_clip,
                                            const Size2Df& window_size,
                                            game::Perspective perspective = game::Perspective::AxisAligned)
 {
-    const auto pos = engine::WindowToWorldPlane(view_to_clip, world_to_view, window_point, window_size);
+    const auto pos = engine::MapFromWindowToWorldPlane(view_to_clip, world_to_view, window_point, window_size);
     return {pos.x, pos.y};
 }
 

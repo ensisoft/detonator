@@ -413,10 +413,10 @@ void DrawCoordinateGrid(gfx::Painter& painter,
     // basically this means that when we draw the grid at this position
     // it is always visible in the viewport. (this world position maps
     // to the center of the window!)
-    const auto world_pos = engine::WindowToWorldPlane(painter.GetProjMatrix(),
-                                                      painter.GetViewMatrix(),
-                                                      glm::vec2{width*0.5f, height*0.5f},
-                                                      glm::vec2{width, height});
+    const auto world_pos = engine::MapFromWindowToWorldPlane(painter.GetProjMatrix(),
+                                                             painter.GetViewMatrix(),
+                                                             glm::vec2{width * 0.5f, height * 0.5f},
+                                                             glm::vec2{width, height});
     // align the grid's world position on a coordinate that is a multiple of
     // the grid cell on both axis.
     const float grid_origin_x = (int)world_pos.x / cell_size_units * cell_size_units;
@@ -559,10 +559,10 @@ void PrintMousePos(const glm::mat4& view_to_clip,
         mickey.x() > width || mickey.y() > height)
         return;
 
-    const auto& world_pos = engine::WindowToWorldPlane(view_to_clip,
-                                                       world_to_view,
-                                                       glm::vec2{mickey.x(), mickey.y()},
-                                                       glm::vec2{width, height});
+    const auto& world_pos = engine::MapFromWindowToWorldPlane(view_to_clip,
+                                                              world_to_view,
+                                                              glm::vec2{mickey.x(), mickey.y()},
+                                                              glm::vec2{width, height});
     char hallelujah[128] = {};
     std::snprintf(hallelujah, sizeof(hallelujah), "%.2f, %.2f", world_pos.x, world_pos.y);
     ShowMessage(hallelujah, painter);
