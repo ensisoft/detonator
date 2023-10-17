@@ -277,7 +277,7 @@ void Renderer::PrepareMapTileBatches(const game::Tilemap& map,
     // The logical game world is mapped inside the device viewport
     // through projection and clip transformations. thus it should
     // be possible to map the viewport back to the world plane already
-    // with WindowToWorldPlane.
+    // with MapFromWindowToWorldPlane.
     const auto device_viewport_width   = mSurface.viewport.GetWidth();
     const auto device_viewport_height  = mSurface.viewport.GetHeight();
     const auto window_size = glm::vec2{device_viewport_width, device_viewport_height};
@@ -287,12 +287,12 @@ void Renderer::PrepareMapTileBatches(const game::Tilemap& map,
     const auto& world_to_view = CreateModelViewMatrix(perspective, mCamera.position, mCamera.scale, mCamera.rotation);
 
     // map the corners of the viewport onto the map plane.
-    const auto corners = WindowToWorldPlane(view_to_clip, world_to_view, window_size,
-                                            { window_size * glm::vec2{0.0f, 0.0f}, // top left
-                                              window_size * glm::vec2{1.0f, 0.0f}, // top right
-                                              window_size * glm::vec2{0.0f, 1.0f}, // bottom left
-                                              window_size * glm::vec2{1.0f, 1.0f}  // bottom right
-                                            });
+    const auto corners = MapFromWindowToWorldPlane(view_to_clip, world_to_view, window_size,
+                                                   {window_size * glm::vec2{0.0f, 0.0f}, // top left
+                                                    window_size * glm::vec2{1.0f, 0.0f}, // top right
+                                                    window_size * glm::vec2{0.0f, 1.0f}, // bottom left
+                                                    window_size * glm::vec2{1.0f, 1.0f}  // bottom right
+                                                   });
     // if the map has dimetric projection then simply taking the top left
     // and bottom right corners isn't enough. rather the top left gives the left,
     // top right gives the top, bottom left gives the bottom and bottom right gives the right.
@@ -1554,10 +1554,10 @@ void Renderer::ComputeTileCoordinates(const glm::mat4& scene_view_to_clip,
         // into world space in the scene.
         const auto scene_world_pos = packet.transform * glm::vec4{packet.sort_point, 0.0f, 1.0f}; //glm::vec4{0.5f, 1, 0.0f, 1.0f};
         // map the scene world pos to a tilemap plane position.
-        const auto map_plane_pos = SceneToTilePlane(scene_view_to_clip,
-                                                    scene_world_to_view,
-                                                    map_view_to_clip,
-                                                    map_world_to_view, scene_world_pos);
+        const auto map_plane_pos = MapFromScenePlaneToTilePlane(scene_view_to_clip,
+                                                                scene_world_to_view,
+                                                                map_view_to_clip,
+                                                                map_world_to_view, scene_world_pos);
         const auto map_plane_pos_xy = glm::vec2{map_plane_pos};
         const uint32_t map_row = math::clamp(0u, map_height-1, (unsigned)(map_plane_pos_xy.y / tile_height_units));
         const uint32_t map_col = math::clamp(0u, map_width-1,  (unsigned)(map_plane_pos_xy.x / tile_width_units));

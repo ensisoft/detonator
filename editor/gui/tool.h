@@ -151,7 +151,7 @@ namespace gui
             const auto& view_to_clip = engine::CreateProjectionMatrix(mPerspective, mWindowSize.x, mWindowSize.y);
             const auto& world_to_view = engine::CreateModelViewMatrix(mPerspective, mCameraPos, mCameraScale * mZoom,
                                                                       mCameraRotation);
-            const auto ret = engine::WindowToWorldPlane(view_to_clip, world_to_view, WindowPos(), mWindowSize);
+            const auto ret = engine::MapFromWindowToWorldPlane(view_to_clip, world_to_view, WindowPos(), mWindowSize);
             return {ret.x, ret.y};
         }
         inline Point2Df MapMouse(const gfx::Transform& old_view_transform) const
@@ -181,15 +181,15 @@ namespace gui
             glm::vec2 ret;
             if (src == game::Perspective::AxisAligned && dst == game::Perspective::Dimetric)
             {
-                ret = engine::SceneToTilePlane(src_view_to_clip, src_world_to_view,
-                                               dst_view_to_clip, dst_world_to_view,
-                                               glm::vec4{point.x(), point.y(), 0.0f, 1.0});
+                ret = engine::MapFromScenePlaneToTilePlane(src_view_to_clip, src_world_to_view,
+                                                           dst_view_to_clip, dst_world_to_view,
+                                                           glm::vec4{point.x(), point.y(), 0.0f, 1.0});
             }
             else if (src == game::Perspective::Dimetric && dst == game::Perspective::AxisAligned)
             {
-                ret = engine::TilePlaneToScene(src_view_to_clip, src_world_to_view,
-                                               dst_view_to_clip, dst_world_to_view,
-                                               glm::vec4{point.x(), point.y(), 0.0f, 1.0});
+                ret = engine::MapFromTilePlaneToScenePlane(src_view_to_clip, src_world_to_view,
+                                                           dst_view_to_clip, dst_world_to_view,
+                                                           glm::vec4{point.x(), point.y(), 0.0f, 1.0});
             }
             return ret;
         }
@@ -321,10 +321,10 @@ namespace gui
         {}
         virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& ) override
         {
-            const auto world_pos = engine::WindowToWorld(mViewToClip,
-                                                       mWorldToView,
-                                                       ToVec2(mickey->pos()),
-                                                       mWindowSize);
+            const auto world_pos = engine::MapFromWindowToWorld(mViewToClip,
+                                                                mWorldToView,
+                                                                ToVec2(mickey->pos()),
+                                                                mWindowSize);
             const auto world_delta = world_pos - mWorldPos;
             mState.camera_offset_x -= world_delta.x;
             mState.camera_offset_y -= world_delta.y;
@@ -332,10 +332,10 @@ namespace gui
         }
         virtual void MousePress(const MouseEvent& mickey, gfx::Transform& ) override
         {
-            mWorldPos = engine::WindowToWorld(mViewToClip,
-                                            mWorldToView,
-                                            ToVec2(mickey->pos()),
-                                            mWindowSize);
+            mWorldPos = engine::MapFromWindowToWorld(mViewToClip,
+                                                     mWorldToView,
+                                                     ToVec2(mickey->pos()),
+                                                     mWindowSize);
         }
         virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
         {
@@ -706,10 +706,10 @@ namespace gui
                                        const Point2Df& window_point,
                                        const Size2Df& window_size)
     {
-        const auto& world_pos = engine::WindowToWorldPlane(view_to_clip,
-                                                           world_to_view,
-                                                           window_point,
-                                                           window_size);
+        const auto& world_pos = engine::MapFromWindowToWorldPlane(view_to_clip,
+                                                                  world_to_view,
+                                                                  window_point,
+                                                                  window_size);
 
         // decompose the incoming view transformation matrix
         // in order to figure out the scaling factor. we'll use the inverse

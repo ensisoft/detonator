@@ -737,16 +737,18 @@ private:
                                                                       glm::vec2 { 1.0f, 1.0f }, // camera scale
                                                                       0.0f); // camera rotation
             event.over_scene  = true;
-            event.scene_coord = engine::WindowToWorldPlane(view_to_clip,
-                                                           world_to_view,
-                                                           glm::vec2 { point.GetX(), point.GetY() },
-                                                           glm::vec2 { device_viewport.GetWidth(), device_viewport.GetHeight() });
+            event.scene_coord = engine::MapFromWindowToWorldPlane(view_to_clip,
+                                                                  world_to_view,
+                                                                  glm::vec2{point.GetX(), point.GetY()},
+                                                                  glm::vec2{device_viewport.GetWidth(),
+                                                                            device_viewport.GetHeight()});
             event.map_coord = event.scene_coord;
             if (mTilemap)
             {
                 const auto perspective = mTilemap->GetPerspective();
                 if (perspective != game::Perspective::AxisAligned)
-                    event.map_coord = engine::SceneToTilePlane(glm::vec4{event.scene_coord.x, event.scene_coord.y, 0.0f, 1.0}, perspective);
+                    event.map_coord = engine::MapFromScenePlaneToTilePlane(
+                            glm::vec4{event.scene_coord.x, event.scene_coord.y, 0.0f, 1.0}, perspective);
             }
         }
 
