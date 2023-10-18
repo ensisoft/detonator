@@ -2155,7 +2155,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
             const gfx::Painter& mPainter;
         } hook(mState, GetCurrentLayerInstance(), painter);
 
-        gfx::Painter p(painter.GetDevice());
+        auto* device = painter.GetDevice();
 
         engine::Renderer::Camera camera;
         camera.position   = glm::vec2{mState.camera_offset_x, mState.camera_offset_y};
@@ -2173,7 +2173,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         const bool show_data_layers = GetValue(mUI.chkShowDataLayers);
 
         mState.renderer.BeginFrame();
-        mState.renderer.Draw(*mState.map, p, &hook, show_render_layers, show_data_layers);
+        mState.renderer.Draw(*mState.map, *device, &hook, show_render_layers, show_data_layers);
         mState.renderer.EndFrame();
     }
 
