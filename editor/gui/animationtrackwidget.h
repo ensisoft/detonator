@@ -31,6 +31,7 @@
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/treemodel.h"
 #include "editor/gui/drawing.h"
+#include "editor/gui/tool.h"
 #include "editor/app/workspace.h"
 #include "game/entity.h"
 #include "game/animation.h"
@@ -136,7 +137,6 @@ namespace gui
         void AddActuatorAction();
         void AddNodeTimelineAction();
     private:
-        void InitScene(unsigned width, unsigned height);
         void PaintScene(gfx::Painter& painter, double secs);
         void MouseZoom(std::function<void(void)> zoom_function);
         void MouseMove(QMouseEvent* mickey);
@@ -158,6 +158,7 @@ namespace gui
         gui::TimelineWidget::TimelineItem* GetCurrentTimelineItem();
     private:
         Ui::AnimationTrack mUI;
+        UIAnimator mAnimator;
     private:
         using TreeModel = RenderTreeModel<game::EntityClass>;
         class TimelineModel;
@@ -185,14 +186,10 @@ namespace gui
             std::vector<Timeline> timelines;
             std::unordered_map<std::string, std::string> actuator_to_timeline;
         } mState;
-        bool mCameraWasLoaded = false;
         // Time accumulator for animation playback only.
         double mAnimationTime = 0.0f;
         // Current time accumulator used by the widget itself.
         double mCurrentTime = 0.0f;
-        // Interpolation variables for smoothing view rotations.
-        double mViewTransformStartTime = 0.0f;
-        float mViewTransformRotation = 0.0f;
         // Entity object is used render the animation track
         // while it's being edited. We use an entity object
         // instead of the entity class object because there

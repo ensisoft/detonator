@@ -76,6 +76,8 @@ namespace gui
     public:
         using Tuple = std::tuple<float, float>;
 
+        Point2Df() = default;
+
         Point2Df(float x, float y) noexcept
           : mX(x)
           , mY(y)

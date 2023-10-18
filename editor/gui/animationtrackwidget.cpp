@@ -39,6 +39,7 @@
 #include "editor/gui/utility.h"
 #include "editor/gui/settings.h"
 #include "editor/gui/tool.h"
+#include "editor/gui/nerd.h"
 #include "game/animation.h"
 #include "graphics/transform.h"
 #include "graphics/painter.h"
@@ -163,8 +164,6 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     mUI.widget->onMouseMove    = std::bind(&AnimationTrackWidget::MouseMove, this, std::placeholders::_1);
     mUI.widget->onMousePress   = std::bind(&AnimationTrackWidget::MousePress, this, std::placeholders::_1);
     mUI.widget->onMouseRelease = std::bind(&AnimationTrackWidget::MouseRelease, this, std::placeholders::_1);
-    mUI.widget->onInitScene    = std::bind(&AnimationTrackWidget::InitScene, this,
-                                           std::placeholders::_1, std::placeholders::_2);
     mUI.widget->onPaintScene   = std::bind(&AnimationTrackWidget::PaintScene, this,
                                            std::placeholders::_1, std::placeholders::_2);
 
@@ -310,9 +309,9 @@ bool AnimationTrackWidget::SaveState(Settings& settings) const
         settings.SetValue("TrackWidget", app::FromUtf8(p.first), p.second);
     }
 
-    settings.SaveWidget("TrackWidget", mUI.viewScaleX);
-    settings.SaveWidget("TrackWidget", mUI.viewScaleY);
-    settings.SaveWidget("TrackWidget", mUI.viewRotation);
+    settings.SaveWidget("TrackWidget", mUI.scaleX);
+    settings.SaveWidget("TrackWidget", mUI.scaleY);
+    settings.SaveWidget("TrackWidget", mUI.rotation);
     settings.SaveWidget("TrackWidget", mUI.zoom);
     settings.SaveWidget("TrackWidget", mUI.cmbGrid);
     settings.SaveWidget("TrackWidget", mUI.chkShowOrigin);
@@ -337,7 +336,6 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
     settings.GetValue("TrackWidget", "num_timelines", &num_timelines);
     settings.GetValue("TrackWidget", "camera_offset_x", &mState.camera_offset_x);
     settings.GetValue("TrackWidget", "camera_offset_y", &mState.camera_offset_y);
-    mCameraWasLoaded = true;
 
     for (unsigned i=0; i<num_timelines; ++i)
     {
@@ -348,9 +346,9 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
     }
     mState.show_flags.set_from_value(show_bits);
 
-    settings.LoadWidget("TrackWidget", mUI.viewScaleX);
-    settings.LoadWidget("TrackWidget", mUI.viewScaleY);
-    settings.LoadWidget("TrackWidget", mUI.viewRotation);
+    settings.LoadWidget("TrackWidget", mUI.scaleX);
+    settings.LoadWidget("TrackWidget", mUI.scaleY);
+    settings.LoadWidget("TrackWidget", mUI.rotation);
     settings.LoadWidget("TrackWidget", mUI.zoom);
     settings.LoadWidget("TrackWidget", mUI.cmbGrid);
     settings.LoadWidget("TrackWidget", mUI.chkShowOrigin);
@@ -459,6 +457,8 @@ void AnimationTrackWidget::Render()
 void AnimationTrackWidget::Update(double secs)
 {
     mCurrentTime += secs;
+
+    mAnimator.Update(mUI, mState);
 
     // Playing back an animation track ?
     if (mPlayState != PlayState::Playing)
@@ -1266,34 +1266,17 @@ void AnimationTrackWidget::on_btnTransformReset_clicked()
 
 void AnimationTrackWidget::on_btnViewPlus90_clicked()
 {
-    const auto value = mUI.viewRotation->value();
-    mUI.viewRotation->setValue(math::clamp(-180.0, 180.0, value + 90.0f));
-    mViewTransformRotation = value;
-    mViewTransformStartTime = mCurrentTime;
+    mAnimator.Plus90(mUI, mState);
 }
 void AnimationTrackWidget::on_btnViewMinus90_clicked()
 {
-    const auto value = mUI.viewRotation->value();
-    mUI.viewRotation->setValue(math::clamp(-180.0, 180.0, value - 90.0f));
-    mViewTransformRotation = value;
-    mViewTransformStartTime = mCurrentTime;
+    mAnimator.Minus90(mUI, mState);
 }
 void AnimationTrackWidget::on_btnViewReset_clicked()
 {
-    const auto width = mUI.widget->width();
-    const auto height = mUI.widget->height();
-    const auto rotation = mUI.viewRotation->value();
-
-    mState.camera_offset_x = width * 0.5f;
-    mState.camera_offset_y = height * 0.5f;
-    mViewTransformRotation = rotation;
-    mViewTransformStartTime = mCurrentTime;
-    // this is camera offset to the center of the widget.
-    mUI.viewPosX->setValue(0);
-    mUI.viewPosY->setValue(0);
-    mUI.viewScaleX->setValue(1.0f);
-    mUI.viewScaleY->setValue(1.0f);
-    mUI.viewRotation->setValue(0);
+    mAnimator.Reset(mUI, mState);
+    SetValue(mUI.scaleX,     1.0f);
+    SetValue(mUI.scaleY,     1.0f);
 }
 
 void AnimationTrackWidget::on_btnMoreViewportSettings_clicked()
@@ -1490,86 +1473,80 @@ void AnimationTrackWidget::AddNodeTimelineAction()
     mUI.timeline->Rebuild();
 }
 
-void AnimationTrackWidget::InitScene(unsigned int width, unsigned int height)
-{
-    if (!mCameraWasLoaded)
-    {
-        // if the camera hasn't been loaded then compute now the
-        // initial position for the camera.
-        mState.camera_offset_x = mUI.widget->width()  * 0.5;
-        mState.camera_offset_y = mUI.widget->height() * 0.5;
-    }
-    DisplayCurrentCameraLocation();
-}
-
 void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
 {
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
     const auto zoom   = (float)GetValue(mUI.zoom);
-    const auto xs     = (float)GetValue(mUI.viewScaleX);
-    const auto ys     = (float)GetValue(mUI.viewScaleY);
+    const auto xs     = (float)GetValue(mUI.scaleX);
+    const auto ys     = (float)GetValue(mUI.scaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
-    const auto view_rotation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTransformStartTime);
-    const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.viewRotation->value(),
-        view_rotation_time, math::Interpolation::Cosine);
+    const auto perspective = game::Perspective::AxisAligned;
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
-    painter.SetViewport(0, 0, width, height);
-    painter.SetPixelRatio(glm::vec2(xs*zoom, ys*zoom));
-    painter.ResetViewMatrix();
-
-    gfx::Transform view;
-    view.Push();
-    view.Scale(xs, ys);
-    view.Scale(zoom, zoom);
-    view.RotateAroundZ(qDegreesToRadians(view_rotation_angle));
-    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+    gfx::Device* device = painter.GetDevice();
+    gfx::Painter entity_painter(device);
+    entity_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, perspective));
+    entity_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI,  perspective));
+    entity_painter.SetPixelRatio(glm::vec2{xs*zoom, ys*zoom});
+    entity_painter.SetViewport(0, 0, width, height);
+    entity_painter.SetSurfaceSize(width, height);
+    entity_painter.SetEditingMode(true);
 
     // render endless background grid.
     if (mUI.chkShowGrid->isChecked())
     {
-        DrawCoordinateGrid(painter, view, grid, zoom, xs, ys, width, height);
+        DrawCoordinateGrid(entity_painter, grid, zoom, xs, ys, width, height);
     }
 
+    engine::Renderer::Camera camera;
+    camera.position.x = mState.camera_offset_x;
+    camera.position.y = mState.camera_offset_y;
+    camera.rotation   = GetValue(mUI.rotation);
+    camera.scale.x    = xs * zoom;
+    camera.scale.y    = ys * zoom;
+    camera.viewport   = game::FRect(-width*0.5f, -height*0.5f, width, height);
+    mRenderer.SetCamera(camera);
 
-    painter.SetViewMatrix(view.GetAsMatrix());
+    engine::Renderer::Surface surface;
+    surface.viewport = gfx::IRect(0, 0, width, height);
+    surface.size     = gfx::USize(width, height);
+    mRenderer.SetSurface(surface);
 
     mRenderer.BeginFrame();
     if (mPlaybackAnimation)
     {
-        mRenderer.Draw(*mPlaybackAnimation, painter, nullptr);
+        mRenderer.Draw(*mPlaybackAnimation, *device, nullptr);
     }
     else
     {
         DrawHook hook(GetCurrentEntityNode());
         hook.SetIsPlaying(mPlayState == PlayState::Playing);
         hook.SetDrawVectors(false);
-        mRenderer.Draw(*mEntity, painter, &hook);
+        mRenderer.Draw(*mEntity, *device, &hook);
     }
     mRenderer.EndFrame();
 
-    painter.ResetViewMatrix();
-
-
+    // basis vectors
     if (GetValue(mUI.chkShowOrigin))
     {
-        DrawBasisVectors(painter, view);
+        gfx::Transform view;
+        DrawBasisVectors(entity_painter, view);
     }
 
+    // viewport
     if (GetValue(mUI.chkShowViewport))
     {
-        const auto& settings    = mWorkspace->GetProjectSettings();
-        const float game_width  = settings.viewport_width;
+        gfx::Transform view;
+        MakeViewTransform(mUI, mState, view);
+        const auto& settings = mWorkspace->GetProjectSettings();
+        const float game_width = settings.viewport_width;
         const float game_height = settings.viewport_height;
         DrawViewport(painter, view, game_width, game_height, width, height);
     }
 
-    PrintMousePos(view, painter, mUI.widget);
-
-    // pop view transformation
-    view.Pop();
+    PrintMousePos(mUI, mState, painter, perspective);
 }
 
 void AnimationTrackWidget::MouseZoom(std::function<void(void)> zoom_function)
@@ -1583,45 +1560,33 @@ void AnimationTrackWidget::MouseZoom(std::function<void(void)> zoom_function)
         mickey.y() > mUI.widget->height())
         return;
 
-    glm::vec4 mickey_pos_in_entity;
-    glm::vec4 mickey_pos_in_widget;
+    const auto perspective = game::Perspective::AxisAligned;
+    Point2Df mickey_world_before_zoom;
+    Point2Df mickey_world_after_zoom;
 
     {
-        gfx::Transform view;
-        view.Scale(GetValue(mUI.viewScaleX) , GetValue(mUI.viewScaleY));
-        view.Scale(GetValue(mUI.zoom) , GetValue(mUI.zoom));
-        view.RotateAroundZ(qDegreesToRadians(mUI.viewRotation->value()));
-        view.Translate(mState.camera_offset_x , mState.camera_offset_y);
-        const auto& mat = glm::inverse(view.GetAsMatrix());
-        mickey_pos_in_entity = mat * glm::vec4(mickey.x() , mickey.y() , 1.0f , 1.0f);
+        mickey_world_before_zoom = MapWindowCoordinateToWorld(mUI, mState, mickey, perspective);
     }
 
     zoom_function();
 
     {
-        gfx::Transform view;
-        view.Scale(GetValue(mUI.viewScaleX) , GetValue(mUI.viewScaleY));
-        view.Scale(GetValue(mUI.zoom) , GetValue(mUI.zoom));
-        view.RotateAroundZ(qDegreesToRadians(mUI.viewRotation->value()));
-        view.Translate(mState.camera_offset_x , mState.camera_offset_y);
-        const auto& mat = view.GetAsMatrix();
-        mickey_pos_in_widget = mat * mickey_pos_in_entity;
+        mickey_world_after_zoom = MapWindowCoordinateToWorld(mUI, mState, mickey, perspective);
     }
-    mState.camera_offset_x += (mickey.x() - mickey_pos_in_widget.x);
-    mState.camera_offset_y += (mickey.y() - mickey_pos_in_widget.y);
+    glm::vec2 before = mickey_world_before_zoom;
+    glm::vec2 after  = mickey_world_after_zoom;
+    mState.camera_offset_x += (before.x - after.x);
+    mState.camera_offset_y += (before.y - after.y);
     DisplayCurrentCameraLocation();
 }
 
-void AnimationTrackWidget::MouseMove(QMouseEvent* mickey)
+void AnimationTrackWidget::MouseMove(QMouseEvent* event)
 {
     if (mCurrentTool)
     {
-        gfx::Transform view;
-        view.Scale(GetValue(mUI.viewScaleX), GetValue(mUI.viewScaleY));
-        view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-        view.RotateAroundZ(qDegreesToRadians(mUI.viewRotation->value()));
-        view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-        mCurrentTool->MouseMove(mickey, view);
+        const MouseEvent mickey(event, mUI, mState);
+
+        mCurrentTool->MouseMove(mickey);
 
         // update the properties that might have changed as the result of application
         // of the current tool.
@@ -1630,72 +1595,55 @@ void AnimationTrackWidget::MouseMove(QMouseEvent* mickey)
         SetSelectedActuatorProperties();
     }
 }
-void AnimationTrackWidget::MousePress(QMouseEvent* mickey)
+void AnimationTrackWidget::MousePress(QMouseEvent* event)
 {
-    gfx::Transform view;
-    view.Scale(GetValue(mUI.viewScaleX), GetValue(mUI.viewScaleY));
-    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.RotateAroundZ(qDegreesToRadians(mUI.viewRotation->value()));
-    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+    const MouseEvent mickey(event, mUI, mState);
 
     if (!mCurrentTool &&
         (mPlayState == PlayState::Stopped) &&
         (mickey->button() == Qt::LeftButton))
     {
-        // don't allow node selection to change through mouse clicking since it's
-        // confusing. Rather only allow a timeline node to be selected which then
-        // selects the node and when that selected/active node is hit by mouse
-        // select the tool for transforming it.
-        auto* current = GetCurrentEntityNode();
-        auto [hitnode, hitpos] = SelectNode(mickey->pos(), view, *mEntity, current);
-        if ((hitnode == current) && current != nullptr)
-        {
-            view.Push(mEntity->FindNodeTransform(hitnode));
-                const auto mat = view.GetAsMatrix();
-                glm::vec3 scale;
-                glm::vec3 translation;
-                glm::vec3 skew;
-                glm::vec4 perspective;
-                glm::quat orientation;
-                glm::decompose(mat, scale, orientation, translation, skew,  perspective);
-            view.Pop();
-            const auto& size = hitnode->GetSize();
-            const auto& box_size = glm::vec2(10.0f/scale.x, 10.0f/scale.y);
-            // check if any particular special area of interest is being hit
-            const bool bottom_right_hitbox_hit = hitpos.x >= size.x - box_size.x &&
-                                                 hitpos.y >= size.y - box_size.y;
-            const bool top_left_hitbox_hit = hitpos.x >= 0 && hitpos.x <= box_size.x &&
-                                             hitpos.y >= 0 && hitpos.y <= box_size.y;
-            const auto snap = (bool)GetValue(mUI.chkSnap);
-            const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
-            const auto grid_size = (unsigned)grid;
+        const auto snap = (bool)GetValue(mUI.chkSnap);
+        const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
+        const auto grid_size = static_cast<unsigned>(grid);
+        const auto click_point = mickey->pos();
 
-            if (bottom_right_hitbox_hit)
-                mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mEntity, hitnode));
-            else if (top_left_hitbox_hit)
-                mCurrentTool.reset(new RotateRenderTreeNodeTool(*mEntity, hitnode));
-            else mCurrentTool.reset(new MoveRenderTreeNodeTool(*mEntity, hitnode, snap, grid_size));
+        // don't allow node selection to change through mouse clicking since it's
+        // confusing. Rather only allow a timeline actuator to be selected which then
+        // selects the entity node it applies on and only select an entity node
+        // transformation tool here.
+        if (auto* current = GetCurrentEntityNode())
+        {
+            const auto node_box_size = current->GetSize();
+            const auto node_to_world = mEntity->FindNodeTransform(current);
+            gfx::FRect box;
+            box.Resize(node_box_size.x, node_box_size.y);
+            box.Translate(-node_box_size.x*0.5f, -node_box_size.y*0.5f);
+            const auto hotspot = TestToolHotspot(mUI, mState, node_to_world, box, click_point);
+            if (hotspot == ToolHotspot::Resize)
+                mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mEntity, current));
+            else if (hotspot == ToolHotspot::Rotate)
+                mCurrentTool.reset(new RotateRenderTreeNodeTool(*mEntity, current));
+            else if (hotspot == ToolHotspot::Remove)
+                mCurrentTool.reset(new MoveRenderTreeNodeTool(*mEntity, current, snap, grid_size));
         }
     }
     else if (!mCurrentTool && (mickey->button() == Qt::RightButton))
     {
-        mCurrentTool.reset(new MoveCameraTool(mState));
+        mCurrentTool.reset(new PerspectiveCorrectCameraTool(mUI, mState));
     }
 
     if (mCurrentTool)
-        mCurrentTool->MousePress(mickey, view);
+        mCurrentTool->MousePress(mickey);
 }
-void AnimationTrackWidget::MouseRelease(QMouseEvent* mickey)
+void AnimationTrackWidget::MouseRelease(QMouseEvent* event)
 {
     if (!mCurrentTool)
         return;
-    gfx::Transform view;
-    view.Scale(GetValue(mUI.viewScaleX), GetValue(mUI.viewScaleY));
-    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.RotateAroundZ(qDegreesToRadians(mUI.viewRotation->value()));
-    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
 
-    if (mCurrentTool->MouseRelease(mickey, view))
+    const MouseEvent mickey(event, mUI, mState);
+
+    if (mCurrentTool->MouseRelease(mickey))
         mCurrentTool.reset();
 }
 bool AnimationTrackWidget::KeyPress(QKeyEvent* key)
@@ -1943,12 +1891,8 @@ void AnimationTrackWidget::ReturnToDefault()
 
 void AnimationTrackWidget::DisplayCurrentCameraLocation()
 {
-    const auto width  = mUI.widget->width();
-    const auto height = mUI.widget->height();
-    const auto dist_x = mState.camera_offset_x - (width / 2.0f);
-    const auto dist_y = mState.camera_offset_y - (height / 2.0f);
-    SetValue(mUI.viewPosX, dist_x);
-    SetValue(mUI.viewPosY, dist_y);
+    SetValue(mUI.translateX, -mState.camera_offset_x);
+    SetValue(mUI.translateY, -mState.camera_offset_y);
 }
 
 game::EntityNode* AnimationTrackWidget::GetCurrentEntityNode()

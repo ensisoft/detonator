@@ -224,17 +224,17 @@ void Renderer::Draw(gfx::Painter& painter, const game::Tilemap* map)
 }
 
 void Renderer::Draw(const Entity& entity,
-                    gfx::Painter& painter, gfx::Transform& model,
+                    gfx::Device& device, gfx::Transform& model,
                     EntityInstanceDrawHook* hook)
 {
-    DrawEntity<Entity, EntityNode>(entity, painter, model, hook);
+    DrawEntity<Entity, EntityNode>(entity, device, model, hook);
 }
 
 void Renderer::Draw(const EntityClass& entity,
-                    gfx::Painter& painter, gfx::Transform& model,
+                    gfx::Device& device, gfx::Transform& model,
                     EntityClassDrawHook* hook)
 {
-    DrawEntity<EntityClass, EntityNodeClass>(entity, painter, model, hook);
+    DrawEntity<EntityClass, EntityNodeClass>(entity, device, model, hook);
 }
 
 void Renderer::Draw(const Scene& scene,
@@ -617,6 +617,7 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
     scene_painter.SetViewport(mSurface.viewport);
     scene_painter.SetSurfaceSize(mSurface.size);
     scene_painter.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
+    scene_painter.SetEditingMode(true);
 
     const auto perspective          = map ? map->GetPerspective() : game::Perspective::AxisAligned;
     const auto& map_view_to_clip    = CreateProjectionMatrix(perspective, mCamera.viewport);
@@ -640,7 +641,7 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
     {
         // Setup painter to draw in whatever is the map perspective.
         // This is used to visualize the data layer tiles only.
-        gfx::Painter tile_painter(scene_painter.GetDevice());
+        gfx::Painter tile_painter(&device);
         tile_painter.SetViewMatrix(CreateModelViewMatrix(perspective, mCamera.position, mCamera.scale, mCamera.rotation));
         tile_painter.SetProjectionMatrix(CreateProjectionMatrix(perspective, mCamera.viewport));
         tile_painter.SetPixelRatio({1.0f, 1.0f});
@@ -848,7 +849,7 @@ void Renderer::MapEntity(const EntityType& entity, gfx::Transform& transform)
 
 template<typename EntityType, typename NodeType>
 void Renderer::DrawEntity(const EntityType& entity,
-                          gfx::Painter& painter,
+                          gfx::Device& device,
                           gfx::Transform& transform,
                           EntityDrawHook<NodeType>* hook)
 {
@@ -873,8 +874,20 @@ void Renderer::DrawEntity(const EntityType& entity,
 
     OffsetPacketLayers(packets);
 
-    DrawScenePackets(painter, packets);
-    DrawEditorPackets(painter, packets);
+    const auto window_size = glm::vec2{mSurface.viewport.GetWidth(), mSurface.viewport.GetHeight()};
+    const auto logical_viewport_width = mCamera.viewport.GetWidth();
+    const auto logical_viewport_height = mCamera.viewport.GetHeight();
+
+    gfx::Painter entity_painter(&device);
+    entity_painter.SetProjectionMatrix(CreateProjectionMatrix(game::Perspective::AxisAligned, mCamera.viewport));
+    entity_painter.SetViewMatrix(CreateModelViewMatrix(game::Perspective::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
+    entity_painter.SetViewport(mSurface.viewport);
+    entity_painter.SetSurfaceSize(mSurface.size);
+    entity_painter.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
+    entity_painter.SetEditingMode(true);
+
+    DrawScenePackets(entity_painter, packets);
+    DrawEditorPackets(entity_painter, packets);
 }
 
 template<typename EntityType, typename EntityNodeType>
