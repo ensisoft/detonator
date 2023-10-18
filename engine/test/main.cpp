@@ -649,7 +649,21 @@ public:
         gfx::Transform transform;
         transform.MoveTo(400, 400);
         painter.SetViewMatrix(transform.GetAsMatrix());
-        mRenderer.Draw(*mEntity, painter);
+
+        engine::Renderer::Surface surface;
+        surface.viewport = gfx::IRect(0, 0, 1024, 768);
+        surface.size     = gfx::USize(1024u, 768u);
+        mRenderer.SetSurface(surface);
+
+        engine::Renderer::Camera camera;
+        camera.viewport = gfx::FRect(0.0f, 0.0f, 1024.0f, 768.0f);
+        camera.rotation = 0.0f;
+        camera.scale    = glm::vec2{1.0f, 1.0f};
+        camera.position = glm::vec2{-400.0f, -400.0f};
+        mRenderer.SetCamera(camera);
+
+        auto* device = painter.GetDevice();
+        mRenderer.Draw(*mEntity, *device);
 
         for (size_t i=0; i<mEntity->GetNumNodes(); ++i)
         {

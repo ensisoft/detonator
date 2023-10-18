@@ -152,6 +152,18 @@ glm::mat4 CreateModelViewMatrix(game::Perspective perspective,
     return view * CreateModelMatrix(perspective);
 }
 
+glm::vec2 MapFromWorldPlaneToWindow(const glm::mat4& view_to_clip,
+                                    const glm::mat4& world_to_view,
+                                    const glm::vec2& world_coord,
+                                    const glm::vec2& window_size)
+{
+    const auto clip = view_to_clip * world_to_view * glm::vec4 {world_coord, 0.0f, 1.0f};
+
+    const auto x = (clip.x + 1.0f) * window_size.x*0.5f;
+    const auto y = window_size.y - (clip.y + 1.0f) * window_size.y*0.5f;
+    return glm::vec2 { x, y, };
+}
+
 glm::vec4 MapFromWindowToWorldPlane(const glm::mat4& view_to_clip,
                                     const glm::mat4& world_to_view,
                                     const glm::vec2& window_coord,

@@ -382,7 +382,7 @@ public:
             }
         }
     }
-    virtual void Render(gfx::Painter& window, gfx::Painter& scene_painter) const override
+    virtual void Render(gfx::Painter& painter, gfx::Painter& scene_painter) const override
     {
         const auto& rect = mClass->GetBoundingRect();
         const auto width = rect.GetWidth();
@@ -390,16 +390,18 @@ public:
         const auto right = rect.GetX() + width;
         const auto bottom = rect.GetY() + height;
 
+        gfx::Device* device = painter.GetDevice();
         gfx::Transform model;
         model.Translate(mWorldPos.x, mWorldPos.y);
-        mState.renderer.Draw(*mClass, scene_painter, model, nullptr);
+        mState.renderer.Draw(*mClass, *device, model, nullptr);
 
         const auto& pos = engine::ProjectPoint(scene_painter.GetProjMatrix(),
                                                scene_painter.GetViewMatrix(),
-                                               window.GetProjMatrix(),
-                                               window.GetViewMatrix(),
-                                               glm::vec3(right + 10.0f, bottom + 10.0f, 0.0f));
-        ShowMessage(mClass->GetName(), gfx::FRect(mWorldPos.x + pos.x, mWorldPos.y + pos.y, 200.0f, 20.0f), window);
+                                               painter.GetProjMatrix(),
+                                               painter.GetViewMatrix(),
+                                               glm::vec3(mWorldPos.x + right + 10.0f,
+                                                         mWorldPos.y + bottom + 10.0f, 0.0f));
+        ShowMessage(mClass->GetName(), gfx::FRect(pos.x, pos.y, 200.0f, 20.0f), painter);
     }
     virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
     {
@@ -1878,17 +1880,30 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
     gfx::Device* device = painter.GetDevice();
+
+    // painter for drawing in the tile domain/space. If perspective is axis aligned
+    // then this is the same as the scene painter below, but these are always
+    // conceptually different painters in different domains.
+    gfx::Painter tile_painter(device);
+    tile_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, perspective));
+    tile_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, perspective));
+    tile_painter.SetPixelRatio(glm::vec2{xs*zoom, ys*zoom});
+    tile_painter.SetViewport(0, 0, width, height);
+    tile_painter.SetSurfaceSize(width, height);
+    tile_painter.SetEditingMode(true);
+
     gfx::Painter scene_painter(device);
-    scene_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, perspective));
-    scene_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, perspective));
+    scene_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, game::Perspective::AxisAligned));
+    scene_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, game::Perspective::AxisAligned));
     scene_painter.SetPixelRatio(glm::vec2{xs*zoom, ys*zoom});
     scene_painter.SetViewport(0, 0, width, height);
     scene_painter.SetSurfaceSize(width, height);
+    scene_painter.SetEditingMode(true);
 
     // render endless background grid.
     if (GetValue(mUI.chkShowGrid))
     {
-        DrawCoordinateGrid(scene_painter, grid, zoom, xs, ys, width, height);
+        DrawCoordinateGrid(tile_painter, grid, zoom, xs, ys, width, height);
     }
 
     // render the actual scene
@@ -1916,7 +1931,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         DrawHook hook(GetCurrentNode(), viewport);
         hook.SetIsPlaying(mPlayState == PlayState::Playing);
         hook.SetDrawVectors(true);
-        hook.SetViewMatrix(scene_painter.GetViewMatrix());
+        hook.SetViewMatrix(CreateViewMatrix(mUI, mState, game::Perspective::AxisAligned));
 
         engine::Renderer::Camera camera;
         camera.position.x = mState.camera_offset_x;
@@ -1984,7 +1999,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     if (GetValue(mUI.chkShowOrigin))
     {
         gfx::Transform view;
-        DrawBasisVectors(scene_painter, view);
+        DrawBasisVectors(tile_painter, view);
     }
 
     if (GetValue(mUI.chkShowViewport))

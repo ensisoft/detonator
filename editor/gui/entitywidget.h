@@ -31,6 +31,7 @@
 
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/treemodel.h"
+#include "editor/gui/tool.h"
 #include "game/entity.h"
 #include "engine/renderer.h"
 
@@ -273,7 +274,6 @@ namespace gui
         void ToggleTilemapNode(bool on);
 
     private:
-        void InitScene(unsigned width, unsigned height);
         void PaintScene(gfx::Painter& painter, double secs);
         void MouseZoom(std::function<void(void)> zoom_function);
         void MouseMove(QMouseEvent* mickey);
@@ -302,6 +302,8 @@ namespace gui
         QMenu* mParticleSystems = nullptr;
         // menu for the custom shapes
         QMenu* mCustomShapes = nullptr;
+
+        UIAnimator mAnimator;
     private:
         class PlaceShapeTool;
         class ScriptVarModel;
@@ -330,11 +332,6 @@ namespace gui
         PlayState mPlayState = PlayState::Stopped;
         double mCurrentTime = 0.0;
         double mEntityTime   = 0.0;
-        double mViewRotationStartTime = 0.0;
-        double mViewTranslationStartTime = 0.0;
-        float mViewTransformRotation = 0.0f;
-        glm::vec2 mViewTranslationStart = {0.0f, 0.0f};
-        bool mCameraWasLoaded = false;
         // map animator to some properties
         std::unordered_map<std::string, QVariantMap> mAnimatorProperties;
         // map animation to some properties

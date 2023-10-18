@@ -354,7 +354,7 @@
                <number>0</number>
               </property>
               <item>
-               <widget class="QDoubleSpinBox" name="viewPosX">
+               <widget class="QDoubleSpinBox" name="translateX">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -376,7 +376,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QDoubleSpinBox" name="viewPosY">
+               <widget class="QDoubleSpinBox" name="translateY">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -398,7 +398,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QDoubleSpinBox" name="viewScaleX">
+               <widget class="QDoubleSpinBox" name="scaleX">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -426,7 +426,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QDoubleSpinBox" name="viewScaleY">
+               <widget class="QDoubleSpinBox" name="scaleY">
                 <property name="prefix">
                  <string>y = </string>
                 </property>
@@ -448,7 +448,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QDoubleSpinBox" name="viewRotation">
+               <widget class="QDoubleSpinBox" name="rotation">
                 <property name="wrapping">
                  <bool>true</bool>
                 </property>
@@ -1567,11 +1567,11 @@
   <tabstop>chkShowGrid</tabstop>
   <tabstop>widgetColor</tabstop>
   <tabstop>btnMoreViewportSettings</tabstop>
-  <tabstop>viewPosX</tabstop>
-  <tabstop>viewPosY</tabstop>
-  <tabstop>viewScaleX</tabstop>
-  <tabstop>viewScaleY</tabstop>
-  <tabstop>viewRotation</tabstop>
+  <tabstop>translateX</tabstop>
+  <tabstop>translateY</tabstop>
+  <tabstop>scaleX</tabstop>
+  <tabstop>scaleY</tabstop>
+  <tabstop>rotation</tabstop>
   <tabstop>btnViewPlus90</tabstop>
   <tabstop>btnViewMinus90</tabstop>
   <tabstop>btnViewReset</tabstop>

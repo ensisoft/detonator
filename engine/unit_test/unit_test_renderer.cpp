@@ -295,11 +295,6 @@ void unit_test_drawable_item()
     TEST_CASE(test::Type::Feature)
 
     auto device = CreateDevice();
-    auto painter = gfx::Painter::Create(device);
-    painter->SetEditingMode(false);
-    painter->SetProjectionMatrix(gfx::MakeOrthographicProjection(256, 256));
-    painter->SetViewport(0, 0, 256, 256);
-    painter->SetSurfaceSize(256, 256);
 
     auto klass = std::make_shared<game::EntityClass>();
     klass->SetName("entity");
@@ -322,6 +317,15 @@ void unit_test_drawable_item()
     engine::Renderer renderer(&classloader);
     renderer.SetEditingMode(true);
 
+    engine::Renderer::Surface surface;
+    surface.size     = gfx::USize(256, 256);
+    surface.viewport = gfx::IRect(0, 0, 256, 256);
+    renderer.SetSurface(surface);
+
+    engine::Renderer::Camera camera;
+    camera.viewport = gfx::FRect(0.0f, 0.0f, 256.0f, 256.0f);
+    renderer.SetCamera(camera);
+
     // test visibility flag
     {
         entity->GetNode(0).GetDrawable()->SetFlag(game::DrawableItem::Flags::VisibleInGame, true);
@@ -331,7 +335,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter);
+                renderer.Draw(*entity, *device);
             }
             renderer.EndFrame();
         }
@@ -346,7 +350,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter);
+                renderer.Draw(*entity, *device);
             }
             renderer.EndFrame();
         }
@@ -367,7 +371,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter);
+                renderer.Draw(*entity, *device);
             }
             renderer.EndFrame();
         }
@@ -385,7 +389,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter);
+                renderer.Draw(*entity, *device);
             }
             renderer.EndFrame();
         }
@@ -410,7 +414,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter);
+                renderer.Draw(*entity, *device);
             }
             renderer.EndFrame();
         }
@@ -427,7 +431,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter);
+                renderer.Draw(*entity, *device);
             }
             renderer.EndFrame();
         }
@@ -444,7 +448,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter);
+                renderer.Draw(*entity, *device);
             }
             renderer.EndFrame();
         }
@@ -463,7 +467,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter);
+                renderer.Draw(*entity, *device);
             }
             renderer.EndFrame();
         }
@@ -478,7 +482,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter);
+                renderer.Draw(*entity, *device);
             }
             renderer.EndFrame();
         }
@@ -498,7 +502,7 @@ void unit_test_drawable_item()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter);
+                renderer.Draw(*entity, *device);
             }
             renderer.EndFrame();
             device->EndFrame(true);
@@ -511,7 +515,7 @@ void unit_test_drawable_item()
             renderer.BeginFrame();
             {
                 renderer.Update(*entity, 0.0f, 1.0f / 60.0f);
-                renderer.Draw(*entity, *painter);
+                renderer.Draw(*entity, *device);
             }
             renderer.EndFrame();
         }
@@ -525,7 +529,7 @@ void unit_test_drawable_item()
              renderer.BeginFrame();
             {
                 renderer.Update(*entity, 0.0f, 1.0f / 60.0f);
-                renderer.Draw(*entity, *painter);
+                renderer.Draw(*entity, *device);
             }
             renderer.EndFrame();
         }
@@ -548,11 +552,6 @@ void unit_test_entity_layering()
     TEST_CASE(test::Type::Feature)
 
     auto device = CreateDevice();
-    auto painter = gfx::Painter::Create(device);
-    painter->SetEditingMode(false);
-    painter->SetProjectionMatrix(gfx::MakeOrthographicProjection(256, 256));
-    painter->SetViewport(0, 0, 256, 256);
-    painter->SetSurfaceSize(256, 256);
 
     auto klass = std::make_shared<game::EntityClass>();
     klass->SetName("entity");
@@ -588,6 +587,15 @@ void unit_test_entity_layering()
     engine::Renderer renderer(&classloader);
     renderer.SetEditingMode(true);
 
+    engine::Renderer::Surface surface;
+    surface.size     = gfx::USize(256, 256);
+    surface.viewport = gfx::IRect(0, 0, 256, 256);
+    renderer.SetSurface(surface);
+
+    engine::Renderer::Camera camera;
+    camera.viewport = gfx::FRect(0.0f, 0.0f, 256.0f, 256.0f);
+    renderer.SetCamera(camera);
+
     // green should be on top
     {
         device->BeginFrame();
@@ -595,7 +603,7 @@ void unit_test_entity_layering()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter);
+                renderer.Draw(*entity, *device);
             }
             renderer.EndFrame();
         }
@@ -614,7 +622,7 @@ void unit_test_entity_layering()
             device->ClearColor(gfx::Color::Blue);
             renderer.BeginFrame();
             {
-                renderer.Draw(*entity, *painter);
+                renderer.Draw(*entity, *device);
             }
             renderer.EndFrame();
         }
@@ -673,6 +681,8 @@ void unit_test_entity_lifecycle()
 
     DummyClassLib classloader;
     engine::Renderer renderer(&classloader);
+
+
 
     const float dt = 1.0f/60.0f;
 
@@ -754,11 +764,6 @@ void unit_test_transform_precision()
     TEST_CASE(test::Type::Feature)
 
     auto device = CreateDevice(1024, 1024);
-    auto painter = gfx::Painter::Create(device);
-    painter->SetEditingMode(false);
-    painter->SetProjectionMatrix(gfx::MakeOrthographicProjection(1024, 1024));
-    painter->SetViewport(0, 0, 1024, 1024);
-    painter->SetSurfaceSize(1024, 1024);
 
     game::EntityClass entity;
     // first node has a transformation without rotation.
@@ -799,12 +804,15 @@ void unit_test_transform_precision()
     engine::Renderer renderer(&classlib);
     renderer.SetEditingMode(false);
 
-    gfx::Transform view;
-    view.Scale(1.0f, 1.0f); // scaling
-    view.Scale(1.0f, 1.0f); // zoom
-    view.RotateAroundZ(0.0f);
-    view.Translate(512.0f, 512.0f);
-    painter->SetViewMatrix(view.GetAsMatrix());
+    engine::Renderer::Surface surface;
+    surface.size     = gfx::USize(1024, 1024);
+    surface.viewport = gfx::IRect(0, 0, 1024, 1024);
+    renderer.SetSurface(surface);
+
+    engine::Renderer::Camera camera;
+    camera.viewport = gfx::FRect(0.0f, 0.0f, 1024.0f, 1024.0f);
+    camera.position = glm::vec2{-512.0f, -512.0f};
+    renderer.SetCamera(camera);
 
     {
         class Hook : public engine::EntityClassDrawHook {
@@ -829,7 +837,7 @@ void unit_test_transform_precision()
         device->ClearColor(gfx::Color::Black);
 
         renderer.BeginFrame();
-            renderer.Draw(entity, *painter, &hook);
+            renderer.Draw(entity, *device, &hook);
         renderer.EndFrame();
 
         hook.Test();

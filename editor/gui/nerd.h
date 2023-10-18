@@ -28,6 +28,7 @@
 #include "graphics/transform.h"
 #include "engine/camera.h"
 #include "editor/gui/types.h"
+#include "editor/gui/utility.h"
 
 // this header was originally named math.h but that caused a weird
 // conflict in Box2D. Can't be bothered to spend time solving such
@@ -94,13 +95,17 @@ Point2Df MapWindowCoordinateToWorld(const UI& ui,
     return {pos.x, pos.y};
 }
 
-inline Point2Df MapWindowCoordinateToWorld(const glm::mat4& view_to_clip,
-                                           const glm::mat4& world_to_view,
-                                           const Point2Df& window_point,
-                                           const Size2Df& window_size,
-                                           game::Perspective perspective = game::Perspective::AxisAligned)
+template<typename UI, typename State>
+Point2Df MapWorldCoordinateToWindow(const UI& ui,
+                                    const State& state,
+                                    const Point2Df& world_point,
+                                    game::Perspective perspective = game::Perspective::AxisAligned)
 {
-    const auto pos = engine::MapFromWindowToWorldPlane(view_to_clip, world_to_view, window_point, window_size);
+    const Size2Df window_size = ui.widget->size();
+
+    const auto& proj_matrix = CreateProjectionMatrix(ui, perspective);
+    const auto& view_matrix = CreateViewMatrix(ui, state, perspective);
+    const auto pos = engine::MapFromWorldPlaneToWindow(proj_matrix, view_matrix, world_point, window_size);
     return {pos.x, pos.y};
 }
 

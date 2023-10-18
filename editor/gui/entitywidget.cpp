@@ -287,20 +287,23 @@ class EntityWidget::PlaceShapeTool : public MouseTool
 {
 public:
     PlaceShapeTool(EntityWidget::State& state, const QString& material, const QString& drawable)
-            : mState(state)
-            , mMaterialId(material)
-            , mDrawableId(drawable)
+        : mState(state)
+        , mMaterialId(material)
+        , mDrawableId(drawable)
     {
         mDrawableClass = mState.workspace->GetDrawableClassById(mDrawableId);
         mMaterialClass = mState.workspace->GetMaterialClassById(mMaterialId);
         mMaterial = gfx::CreateMaterialInstance(mMaterialClass);
         mDrawable = gfx::CreateDrawableInstance(mDrawableClass);
     }
-    virtual void Render(gfx::Painter& window, gfx::Painter&) const override
+    virtual void Render(gfx::Painter&, gfx::Painter& entity) const override
     {
         if (!mEngaged)
         {
-            ShowMessage("Click + hold to draw!", gfx::FRect(mCurrent.x+20.0f, mCurrent.y+20.0f, 200, 20), window);
+            gfx::FRect rect(0.0f, 0.0f, 200.0f, 20.0f);
+            rect.Translate(mCurrent.x, mCurrent.y);
+            rect.Translate(20.0f, 20.0f);
+            ShowMessage("Click + hold to draw!", rect, entity);
             return;
         }
 
@@ -317,26 +320,23 @@ public:
         gfx::Transform model;
         model.Scale(width, height);
         model.Translate(xpos, ypos);
-        window.Draw(*mDrawable, model, *mMaterial);
+        entity.Draw(*mDrawable, model, *mMaterial);
 
         // draw a selection rect around it.
-        window.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), model,
+        entity.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), model,
                     gfx::CreateMaterialFromColor(gfx::Color::Green));
     }
-    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform& view) override
+    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
     {
-        const auto& view_to_model = glm::inverse(view.GetAsMatrix());
-        mCurrent = view_to_model * ToVec4(mickey->pos());
+        mCurrent = mickey.MapToPlane();
         mAlwaysSquare = mickey->modifiers() & Qt::ControlModifier;
     }
-    virtual void MousePress(const MouseEvent& mickey, gfx::Transform& view) override
+    virtual void MousePress(const MouseEvent& mickey, gfx::Transform&) override
     {
         const auto button = mickey->button();
         if (button == Qt::LeftButton)
         {
-            const auto& view_to_model = glm::inverse(view.GetAsMatrix());
-            const auto& p = mickey->pos();
-            mStart = view_to_model * glm::vec4(p.x(), p.y(), 1.0f, 1.0f);
+            mStart = mickey.MapToPlane();
             mCurrent = mStart;
             mEngaged = true;
         }
@@ -401,14 +401,13 @@ private:
     EntityWidget::State& mState;
     // the starting object position in model coordinates of the placement
     // based on the mouse position at the time.
-    glm::vec4 mStart;
+    glm::vec2 mStart;
     // the current object ending position in model coordinates.
     // the object occupies the rectangular space between the start
     // and current positions on the X and Y axis.
-    glm::vec4 mCurrent;
+    glm::vec2 mCurrent;
     bool mEngaged = false;
     bool mAlwaysSquare = false;
-    QPoint mMousePos;
 private:
     QString mMaterialId;
     QString mDrawableId;
@@ -450,8 +449,6 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mUI.widget->onKeyPress     = std::bind(&EntityWidget::KeyPress, this, std::placeholders::_1);
     mUI.widget->onMouseDoubleClick = std::bind(&EntityWidget::MouseDoubleClick, this, std::placeholders::_1);
     mUI.widget->onPaintScene   = std::bind(&EntityWidget::PaintScene, this, std::placeholders::_1,
-                                           std::placeholders::_2);
-    mUI.widget->onInitScene    = std::bind(&EntityWidget::InitScene, this, std::placeholders::_1,
                                            std::placeholders::_2);
 
     // create the menu for creating instances of user defined drawables
@@ -526,8 +523,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     GetUserProperty(resource, "variables_group", mUI.variables);
     GetUserProperty(resource, "animations_group", mUI.animations);
     GetUserProperty(resource, "joints_group", mUI.joints);
-    mCameraWasLoaded = GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
-                       GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
+    GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
+    GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
 
     mState.entity = std::make_shared<game::EntityClass>(*content);
 
@@ -728,8 +725,6 @@ bool EntityWidget::LoadState(const Settings& settings)
     settings.GetValue("Entity", "hash", &mOriginalHash);
     settings.GetValue("Entity", "camera_offset_x", &mState.camera_offset_x);
     settings.GetValue("Entity", "camera_offset_y", &mState.camera_offset_y);
-    mCameraWasLoaded = true;
-    mViewTranslationStart = glm::vec2 {mState.camera_offset_x, mState.camera_offset_y};
 
     settings.LoadWidget("Entity", mUI.scaleX);
     settings.LoadWidget("Entity", mUI.scaleY);
@@ -1034,6 +1029,8 @@ void EntityWidget::Update(double secs)
         mEntityTime += secs;
     }
     mCurrentTime += secs;
+
+    mAnimator.Update(mUI, mState);
 }
 void EntityWidget::Render()
 {
@@ -1678,38 +1675,19 @@ void EntityWidget::on_btnEditAnimator_clicked()
 
 void EntityWidget::on_btnViewPlus90_clicked()
 {
-    const float value = GetValue(mUI.rotation);
-    mUI.rotation->setValue(math::clamp(-180.0f, 180.0f, value + 90.0f));
-    mViewTransformRotation  = value;
-    mViewRotationStartTime = mCurrentTime;
+    mAnimator.Plus90(mUI, mState);
 }
 
 void EntityWidget::on_btnViewMinus90_clicked()
 {
-    const float value = GetValue(mUI.rotation);
-    mUI.rotation->setValue(math::clamp(-180.0f, 180.0f, value - 90.0f));
-    mViewTransformRotation  = value;
-    mViewRotationStartTime = mCurrentTime;
+    mAnimator.Minus90(mUI, mState);
 }
 
 void EntityWidget::on_btnViewReset_clicked()
 {
-    const auto width = mUI.widget->width();
-    const auto height = mUI.widget->height();
-    const auto rotation = mUI.rotation->value();
-    mViewRotationStartTime    = mCurrentTime;
-    mViewTranslationStartTime = mCurrentTime;
-    mViewTranslationStart     = glm::vec2(mState.camera_offset_x, mState.camera_offset_y);
-    mViewTransformRotation    = rotation;
-    mState.camera_offset_x    = width * 0.5f;
-    mState.camera_offset_y    = height * 0.5f;
-
-    // set new camera offset to the center of the widget.
-    SetValue(mUI.translateX, 0.0f);
-    SetValue(mUI.translateY, 0.0f);
-    SetValue(mUI.scaleX,     1.0f);
-    SetValue(mUI.scaleY,     1.0f);
-    SetValue(mUI.rotation,   0.0f);
+    mAnimator.Reset(mUI, mState);
+    SetValue(mUI.scaleX, 1.0f);
+    SetValue(mUI.scaleY, 1.0f);
 }
 
 void EntityWidget::on_btnNewTrack_clicked()
@@ -2913,19 +2891,6 @@ void EntityWidget::PlaceNewCustomShape()
     mCustomShapes->menuAction()->setChecked(true);
 }
 
-void EntityWidget::InitScene(unsigned width, unsigned height)
-{
-    if (!mCameraWasLoaded)
-    {
-        // if the camera hasn't been loaded then compute now the
-        // initial position for the camera.
-        mState.camera_offset_x = mUI.widget->width()  * 0.5;
-        mState.camera_offset_y = mUI.widget->height() * 0.5;
-        mViewTranslationStart  = glm::vec2 { mState.camera_offset_x, mState.camera_offset_y };
-    }
-    DisplayCurrentCameraLocation();
-}
-
 void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
 {
     // WARNING, if you use the preview window here to draw the underlying
@@ -2938,43 +2903,46 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     const auto xs     = (float)GetValue(mUI.scaleX);
     const auto ys     = (float)GetValue(mUI.scaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
-    const auto view_rotation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewRotationStartTime);
-    const auto view_rotation_angle = math::interpolate(mViewTransformRotation, (float)mUI.rotation->value(),
-                                                       view_rotation_time, math::Interpolation::Cosine);
-    const auto view_translation_time = math::clamp(0.0, 1.0, mCurrentTime - mViewTranslationStartTime);
-    const auto view_translation = math::interpolate(mViewTranslationStart, glm::vec2(mState.camera_offset_x, mState.camera_offset_y),
-                                                    view_translation_time, math::Interpolation::Cosine);
+    const auto perspective = game::Perspective::AxisAligned;
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
-
-
-    gfx::Transform view;
-    view.Scale(xs, ys);
-    view.Scale(zoom, zoom);
-    view.RotateAroundZ(qDegreesToRadians(view_rotation_angle));
-    view.Translate(view_translation);
-
-    painter.SetViewport(0, 0, width, height);
-    painter.SetPixelRatio(glm::vec2(xs*zoom, ys*zoom));
-    painter.ResetViewMatrix();
+    gfx::Device* device = painter.GetDevice();
+    gfx::Painter entity_painter(device);
+    entity_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, perspective));
+    entity_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI,  perspective));
+    entity_painter.SetPixelRatio(glm::vec2{xs*zoom, ys*zoom});
+    entity_painter.SetViewport(0, 0, width, height);
+    entity_painter.SetSurfaceSize(width, height);
 
     // render endless background grid.
     if (GetValue(mUI.chkShowGrid))
     {
-        DrawCoordinateGrid(painter, view, grid, zoom, xs, ys, width, height);
+        DrawCoordinateGrid(entity_painter, grid, zoom, xs, ys, width, height);
     }
 
     DrawHook hook(GetCurrentNode());
     hook.SetDrawVectors(true);
     hook.SetIsPlaying(mPlayState == PlayState::Playing);
 
-    // Draw entity
-    painter.SetViewMatrix(view.GetAsMatrix());
+    engine::Renderer::Camera camera;
+    camera.position.x = mState.camera_offset_x;
+    camera.position.y = mState.camera_offset_y;
+    camera.rotation   = GetValue(mUI.rotation);
+    camera.scale.x    = xs * zoom;
+    camera.scale.y    = ys * zoom;
+    camera.viewport   = game::FRect(-width*0.5f, -height*0.5f, width, height);
+    mState.renderer.SetCamera(camera);
+
+    engine::Renderer::Surface surface;
+    surface.viewport = gfx::IRect(0, 0, width, height);
+    surface.size     = gfx::USize(width, height);
+    mState.renderer.SetSurface(surface);
 
     mState.renderer.BeginFrame();
-    mState.renderer.Draw(*mState.entity, painter, &hook);
+    mState.renderer.Draw(*mState.entity, *device, &hook);
     mState.renderer.EndFrame();
+
     // Draw joints, drawn in the entity space.
     for (size_t i=0; i<mState.entity->GetNumJoints(); ++i)
     {
@@ -2987,10 +2955,10 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
             const auto& dst_anchor_point = dst_node->GetSize() * 0.5f + joint.dst_node_anchor_point;
             const auto& src_point = mState.entity->MapCoordsFromNodeBox(src_anchor_point, src_node);
             const auto& dst_point = mState.entity->MapCoordsFromNodeBox(dst_anchor_point, dst_node);
-            DrawLine(painter, src_point, dst_point);
+            DrawLine(entity_painter, src_point, dst_point);
         }
     }
-    // Draw comments if any
+    // Draw comments, drawn in entity space
     if (GetValue(mUI.chkShowComments))
     {
         for (const auto&[id, comment]: mComments)
@@ -3001,7 +2969,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
             {
                 const auto& size = node->GetSize();
                 const auto& pos = mState.entity->MapCoordsFromNodeBox(size, node);
-                ShowMessage(app::ToUtf8(comment), gfx::FPoint(pos.x + 10, pos.y + 10), painter);
+                ShowMessage(comment, gfx::FPoint(pos.x + 10, pos.y + 10), entity_painter);
             }
         }
     }
@@ -3020,15 +2988,13 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
                 model.MoveTo(pos);
                 model.Resize(10.0f, 10.0f);
                 model.Translate(-5.0f, -5.0f);
-                painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+                entity_painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
             }
         }
     }
 
     if (mCurrentTool)
-        mCurrentTool->Render(painter, painter);
-
-    painter.ResetViewMatrix();
+        mCurrentTool->Render(painter, entity_painter);
 
     if (mState.entity->GetNumNodes() == 0)
     {
@@ -3050,20 +3016,21 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     // right arrow
     if (GetValue(mUI.chkShowOrigin))
     {
-        DrawBasisVectors(painter, view);
+        gfx::Transform view;
+        DrawBasisVectors(entity_painter, view);
     }
 
     if (GetValue(mUI.chkShowViewport))
     {
+        gfx::Transform view;
+        MakeViewTransform(mUI, mState, view);
         const auto& settings = mState.workspace->GetProjectSettings();
         const float game_width = settings.viewport_width;
         const float game_height = settings.viewport_height;
         DrawViewport(painter, view, game_width, game_height, width, height);
     }
 
-    PrintMousePos(view, painter, mUI.widget);
-
-
+    PrintMousePos(mUI, mState, painter, perspective);
 }
 
 void EntityWidget::MouseZoom(std::function<void(void)> zoom_function)
@@ -3077,45 +3044,33 @@ void EntityWidget::MouseZoom(std::function<void(void)> zoom_function)
         mickey.y() > mUI.widget->height())
         return;
 
-    glm::vec4 mickey_pos_in_entity;
-    glm::vec4 mickey_pos_in_widget;
+    const auto perspective = game::Perspective::AxisAligned;
+    Point2Df mickey_world_before_zoom;
+    Point2Df mickey_world_after_zoom;
 
     {
-        gfx::Transform view;
-        view.Scale(GetValue(mUI.scaleX) , GetValue(mUI.scaleY));
-        view.Scale(GetValue(mUI.zoom) , GetValue(mUI.zoom));
-        view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
-        view.Translate(mState.camera_offset_x , mState.camera_offset_y);
-        const auto& mat = glm::inverse(view.GetAsMatrix());
-        mickey_pos_in_entity = mat * glm::vec4(mickey.x() , mickey.y() , 1.0f , 1.0f);
+        mickey_world_before_zoom = MapWindowCoordinateToWorld(mUI, mState, mickey, perspective);
     }
 
     zoom_function();
 
     {
-        gfx::Transform view;
-        view.Scale(GetValue(mUI.scaleX) , GetValue(mUI.scaleY));
-        view.Scale(GetValue(mUI.zoom) , GetValue(mUI.zoom));
-        view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
-        view.Translate(mState.camera_offset_x , mState.camera_offset_y);
-        const auto& mat = view.GetAsMatrix();
-        mickey_pos_in_widget = mat * mickey_pos_in_entity;
+        mickey_world_after_zoom = MapWindowCoordinateToWorld(mUI, mState, mickey, perspective);
     }
-    mState.camera_offset_x += (mickey.x() - mickey_pos_in_widget.x);
-    mState.camera_offset_y += (mickey.y() - mickey_pos_in_widget.y);
+    glm::vec2 before = mickey_world_before_zoom;
+    glm::vec2 after  = mickey_world_after_zoom;
+    mState.camera_offset_x += (before.x - after.x);
+    mState.camera_offset_y += (before.y - after.y);
     DisplayCurrentCameraLocation();
 }
 
-void EntityWidget::MouseMove(QMouseEvent* mickey)
+void EntityWidget::MouseMove(QMouseEvent* event)
 {
     if (mCurrentTool)
     {
-        gfx::Transform view;
-        view.Scale(GetValue(mUI.scaleX) , GetValue(mUI.scaleY));
-        view.Scale(GetValue(mUI.zoom) , GetValue(mUI.zoom));
-        view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
-        view.Translate(mState.camera_offset_x , mState.camera_offset_y);
-        mCurrentTool->MouseMove(mickey , view);
+        const MouseEvent mickey(event, mUI, mState);
+
+        mCurrentTool->MouseMove(mickey);
 
         // update the properties that might have changed as the result of application
         // of the current tool.
@@ -3123,72 +3078,60 @@ void EntityWidget::MouseMove(QMouseEvent* mickey)
         DisplayCurrentNodeProperties();
     }
 }
-void EntityWidget::MousePress(QMouseEvent* mickey)
+void EntityWidget::MousePress(QMouseEvent* event)
 {
-    const auto snap = (bool)GetValue(mUI.chkSnap);
-    const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
-    const auto grid_size = (unsigned)grid;
-
-    gfx::Transform view;
-    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
-    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.RotateAroundZ((float) qDegreesToRadians(mUI.rotation->value()));
-    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+    const MouseEvent mickey(event, mUI, mState);
 
     if (!mCurrentTool && (mickey->button() == Qt::LeftButton))
     {
-        auto [hitnode, hitpos] = SelectNode(mickey->pos(), view, *mState.entity, GetCurrentNode());
-        if (hitnode)
-        {
-            view.Push(mState.entity->FindNodeTransform(hitnode));
-                const auto mat = view.GetAsMatrix();
-                glm::vec3 scale;
-                glm::vec3 translation;
-                glm::vec3 skew;
-                glm::vec4 perspective;
-                glm::quat orientation;
-                glm::decompose(mat, scale, orientation, translation, skew,  perspective);
-            view.Pop();
-            
-            const auto& size = hitnode->GetSize();
-            const auto& box_size = glm::vec2(10.0f/scale.x, 10.0f/scale.y);
-            // check if any particular special area of interest is being hit
-            const bool bottom_right_hitbox_hit = hitpos.x >= size.x - box_size.x &&
-                                                 hitpos.y >= size.y - box_size.y;
-            const bool top_left_hitbox_hit = hitpos.x >= 0 && hitpos.x <= box_size.x &&
-                                             hitpos.y >= 0 && hitpos.y <= box_size.y;
-            if (bottom_right_hitbox_hit)
-                mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.entity, hitnode, snap, grid_size));
-            else if (top_left_hitbox_hit)
-                mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.entity, hitnode));
-            else mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.entity, hitnode, snap, grid_size));
+        const auto snap = (bool)GetValue(mUI.chkSnap);
+        const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
+        const auto grid_size = static_cast<unsigned>(grid);
+        const auto click_point = mickey->pos();
 
-            mUI.tree->SelectItemById(app::FromUtf8(hitnode->GetId()));
-        }
-        else
+        if (auto* current = GetCurrentNode())
         {
-            mUI.tree->ClearSelection();
+            const auto node_box_size = current->GetSize();
+            const auto& node_to_world = mState.entity->FindNodeTransform(current);
+            gfx::FRect box;
+            box.Resize(node_box_size.x, node_box_size.y);
+            box.Translate(-node_box_size.x*0.5f, -node_box_size.y*0.5f);
+
+            const auto hotspot = TestToolHotspot(mUI, mState, node_to_world, box, click_point);
+            if (hotspot == ToolHotspot::Resize)
+                mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.entity, current, snap, grid_size));
+            else if (hotspot == ToolHotspot::Rotate)
+                mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.entity, current));
+        }
+        if (!mCurrentTool)
+        {
+            auto [hitnode, hitpos] = SelectNode(mUI, mState, click_point, *mState.entity, GetCurrentNode());
+            if (hitnode)
+            {
+                mUI.tree->SelectItemById(hitnode->GetId());
+                mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.entity, hitnode, snap, grid_size));
+            }
+            else
+            {
+                mUI.tree->ClearSelection();
+            }
         }
     }
     else if (!mCurrentTool && (mickey->button() == Qt::RightButton))
     {
-        mCurrentTool.reset(new MoveCameraTool(mState));
+        mCurrentTool.reset(new PerspectiveCorrectCameraTool(mUI, mState));
     }
     if (mCurrentTool)
-        mCurrentTool->MousePress(mickey, view);
+        mCurrentTool->MousePress(mickey);
 }
-void EntityWidget::MouseRelease(QMouseEvent* mickey)
+void EntityWidget::MouseRelease(QMouseEvent* event)
 {
     if (!mCurrentTool)
         return;
 
-    gfx::Transform view;
-    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
-    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.RotateAroundZ(qDegreesToRadians(mUI.rotation->value()));
-    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
+    const MouseEvent mickey(event, mUI, mState);
 
-    if (mCurrentTool->MouseRelease(mickey, view))
+    if (mCurrentTool->MouseRelease(mickey))
     {
         mCurrentTool.reset();
         UncheckPlacementActions();
@@ -3197,8 +3140,10 @@ void EntityWidget::MouseRelease(QMouseEvent* mickey)
     }
 }
 
-void EntityWidget::MouseDoubleClick(QMouseEvent* mickey)
+void EntityWidget::MouseDoubleClick(QMouseEvent* event)
 {
+    const MouseEvent mickey(event, mUI, mState);
+
     // double click is preceded by a regular click event and quick
     // googling suggests that there's really no way to filter out
     // single click when trying to react only to double click other
@@ -3206,27 +3151,18 @@ void EntityWidget::MouseDoubleClick(QMouseEvent* mickey)
     // Going to simply discard any tool selection here on double click.
     mCurrentTool.reset();
 
-    gfx::Transform view;
-    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
-    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.RotateAroundZ((float) qDegreesToRadians(mUI.rotation->value()));
-    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-
-    auto [hitnode, hitpos] = SelectNode(mickey->pos(), view, *mState.entity, GetCurrentNode());
-    if (!hitnode  || !hitnode->GetDrawable())
+    auto [hitnode, hitpos] = SelectNode(mUI, mState, mickey->pos(), *mState.entity, GetCurrentNode());
+    if (!hitnode)
         return;
 
-    auto* drawable = hitnode->GetDrawable();
-    DlgMaterial dlg(this, mState.workspace, drawable->GetMaterialId());
-    if (dlg.exec() == QDialog::Rejected)
-        return;
-    const auto& materialId = app::ToUtf8(dlg.GetSelectedMaterialId());
-    if (drawable->GetMaterialId() == materialId)
-        return;
-    drawable->ResetMaterial();
-    drawable->SetMaterialId(materialId);
-    DisplayCurrentNodeProperties();
-    RealizeEntityChange(mState.entity);
+    if (auto* drawable = hitnode->GetDrawable())
+    {
+        on_btnSelectMaterial_clicked();
+    }
+    else if (auto* text = hitnode->GetTextItem())
+    {
+        on_btnSelectFont_clicked();
+    }
 }
 
 bool EntityWidget::KeyPress(QKeyEvent* key)
@@ -3564,12 +3500,8 @@ void EntityWidget::DisplayCurrentNodeProperties()
 
 void EntityWidget::DisplayCurrentCameraLocation()
 {
-    const auto width  = mUI.widget->width();
-    const auto height = mUI.widget->height();
-    const auto dist_x = mState.camera_offset_x - (width / 2.0f);
-    const auto dist_y = mState.camera_offset_y - (height / 2.0f);
-    SetValue(mUI.translateX, dist_x);
-    SetValue(mUI.translateY, dist_y);
+    SetValue(mUI.translateX, -mState.camera_offset_x);
+    SetValue(mUI.translateY, -mState.camera_offset_y);
 }
 
 void EntityWidget::UncheckPlacementActions()

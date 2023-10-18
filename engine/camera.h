@@ -95,6 +95,11 @@ namespace engine
     // the dimetric plane or the axis aligned plane and in the scene / entity
     // editors the plane is the xy plane.
 
+    glm::vec2 MapFromWorldPlaneToWindow(const glm::mat4& view_to_clip,
+                                        const glm::mat4& world_to_view,
+                                        const glm::vec2& world_coord,
+                                        const glm::vec2& window_size);
+
     // Map a window (2D projection surface coordinate) to game plane
     glm::vec4 MapFromWindowToWorldPlane(const glm::mat4& view_to_clip, // aka projection matrix/transform
                                         const glm::mat4& world_to_view, // aka view/camera matrix/transform
