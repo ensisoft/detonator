@@ -484,7 +484,7 @@ namespace gfx
     using CircleInstance = SimpleShapeInstance;
     using Circle         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Circle>;
 
-    using CubeClass    = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Cube>;
+    using CubeClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::Cube>;
     using CubeInstance = SimpleShapeInstance;
     using Cube         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Cube>;
 
