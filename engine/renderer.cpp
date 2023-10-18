@@ -1173,7 +1173,7 @@ void Renderer::DrawScenePackets(gfx::Device& device, const std::vector<DrawPacke
         {
             gfx::Painter::DrawShape shape;
             shape.user       = (void*)&packet;
-            shape.transform  = &packet.transform;
+            shape.model      = &packet.transform;
             shape.drawable   = packet.drawable.get();
             shape.material   = packet.material.get();
             shape.culling    = packet.culling;
@@ -1184,7 +1184,7 @@ void Renderer::DrawScenePackets(gfx::Device& device, const std::vector<DrawPacke
         {
             gfx::Painter::DrawShape shape;
             shape.user       = (void*)&packet;
-            shape.transform  = &packet.transform;
+            shape.model      = &packet.transform;
             shape.drawable   = packet.drawable.get();
             shape.material   = packet.material.get();
             shape.culling    = packet.culling;
@@ -1195,7 +1195,7 @@ void Renderer::DrawScenePackets(gfx::Device& device, const std::vector<DrawPacke
         {
             gfx::Painter::DrawShape shape;
             shape.user       = (void*)&packet;
-            shape.transform  = &packet.transform;
+            shape.model      = &packet.transform;
             shape.drawable   = packet.drawable.get();
             shape.material   = packet.material.get();
             shape.culling    = packet.culling;
