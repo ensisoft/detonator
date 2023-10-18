@@ -59,7 +59,7 @@ namespace gfx
             Painter::DrawShape shape;
             shape.material  = &material;
             shape.drawable  = &drawable;
-            shape.transform = &mat;
+            shape.model = &mat;
             Painter::DrawList list;
             list.push_back(shape);
             mPainter.Draw(list, state, detail::GenericShaderProgram());

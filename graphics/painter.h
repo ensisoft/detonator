@@ -169,9 +169,16 @@ namespace gfx
         };
 
         struct DrawShape {
-            const glm::mat4* transform = nullptr;
-            const Drawable* drawable   = nullptr;
-            const Material* material   = nullptr;
+            // Optional projection matrix that will override the
+            // projection matrix set in the painter.
+            const glm::mat4* projection = nullptr;
+            // Optional view matrix that will override the
+            // view matrix set in the painter.
+            const glm::mat4* view = nullptr;
+            // The model to world transformation.
+            const glm::mat4* model = nullptr;
+            const Drawable* drawable = nullptr;
+            const Material* material = nullptr;
             // This is a user defined object pointer that is passed to
             // ShaderProgram::FilterDraw for doing low level shape/draw filtering.
             // Using dodgy/Unsafe void* here for performance reasons. vs. std::any

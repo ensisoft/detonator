@@ -73,9 +73,9 @@ void Painter::Draw(const std::vector<DrawShape>& shapes,
         Drawable::Environment drawable_env;
         drawable_env.editing_mode = mEditingMode;
         drawable_env.pixel_ratio  = mPixelRatio;
-        drawable_env.view_matrix  = &mViewMatrix;
-        drawable_env.proj_matrix  = &mProjMatrix;
-        drawable_env.model_matrix = shape.transform;
+        drawable_env.view_matrix  = shape.view ? shape.view : &mViewMatrix;
+        drawable_env.proj_matrix  = shape.projection ? shape.projection : &mProjMatrix;
+        drawable_env.model_matrix = shape.model;
         Geometry* geometry = shape.drawable->Upload(drawable_env, *mDevice);
         if (geometry == nullptr)
             continue;
@@ -118,7 +118,7 @@ void Painter::Draw(const Drawable& shape,
     shapes.resize(1);
     shapes[0].drawable   = &shape;
     shapes[0].material   = &material;
-    shapes[0].transform  = &model;
+    shapes[0].model      = &model;
     shapes[0].line_width = draw_state.line_width;
     shapes[0].culling    = draw_state.culling;
     Draw(shapes, state, program);
