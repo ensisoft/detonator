@@ -119,24 +119,13 @@ void Renderer::Update(float time, float dt)
 
 void Renderer::Draw(gfx::Device& device, const game::Tilemap* map)
 {
-    const auto window_size = glm::vec2{mSurface.viewport.GetWidth(), mSurface.viewport.GetHeight()};
-    const auto logical_viewport_width = mCamera.viewport.GetWidth();
-    const auto logical_viewport_height = mCamera.viewport.GetHeight();
-
-    gfx::Painter painter(&device);
-    painter.SetProjectionMatrix(CreateProjectionMatrix(game::Perspective::AxisAligned, mCamera.viewport));
-    painter.SetViewMatrix(CreateModelViewMatrix(game::Perspective::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
-    painter.SetViewport(mSurface.viewport);
-    painter.SetSurfaceSize(mSurface.size);
-    painter.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
-    painter.SetEditingMode(mEditingMode);
-
     const auto perspective          = map ? map->GetPerspective() : game::Perspective::AxisAligned;
     const auto& map_view_to_clip    = CreateProjectionMatrix(perspective, mCamera.viewport);
     const auto& map_world_to_view   = CreateModelViewMatrix(perspective, mCamera.position, mCamera.scale,
                                                             mCamera.rotation);
-    const auto& scene_view_to_clip  = painter.GetProjMatrix();
-    const auto& scene_world_to_view = painter.GetViewMatrix();
+    const auto& scene_view_to_clip  = CreateProjectionMatrix(game::Perspective::AxisAligned, mCamera.viewport);
+    const auto& scene_world_to_view = CreateModelViewMatrix(game::Perspective::AxisAligned, mCamera.position, mCamera.scale,
+                                                            mCamera.rotation);
 
     // this matrix will transform coordinates from scene's coordinate space
     // into map coordinate space. but keep in mind that the scene world coordinate
@@ -222,7 +211,7 @@ void Renderer::Draw(gfx::Device& device, const game::Tilemap* map)
         OffsetPacketLayers(packets);
     }
 
-    DrawScenePackets(painter, packets);
+    DrawScenePackets(device, packets);
 }
 
 void Renderer::Draw(const Entity& entity,
@@ -256,7 +245,7 @@ void Renderer::Draw(const SceneClass& scene, const game::Tilemap* map,
 }
 
 void Renderer::Draw(const game::Tilemap& map,
-                    gfx::Painter& painter,
+                    gfx::Device& device,
                     TileBatchDrawHook* hook,
                     bool draw_render_layer,
                     bool draw_data_layer)
@@ -266,7 +255,7 @@ void Renderer::Draw(const game::Tilemap& map,
     std::vector<TileBatch> batches;
     PrepareMapTileBatches(map, batches, draw_render_layer, draw_data_layer, obey_klass_flags);
     SortTileBatches(batches);
-    DrawTileBatches(map, hook, batches, painter);
+    DrawTileBatches(map, hook, batches, device);
 }
 
 void Renderer::PrepareMapTileBatches(const game::Tilemap& map,
@@ -609,24 +598,13 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
     // should map directly to a layer index. Then each entity needs to be mapped from
     // entity world into tilemap and xy tile position computed.
 
-    const auto window_size = glm::vec2{mSurface.viewport.GetWidth(), mSurface.viewport.GetHeight()};
-    const auto logical_viewport_width = mCamera.viewport.GetWidth();
-    const auto logical_viewport_height = mCamera.viewport.GetHeight();
-
-    gfx::Painter scene_painter(&device);
-    scene_painter.SetProjectionMatrix(CreateProjectionMatrix(game::Perspective::AxisAligned, mCamera.viewport));
-    scene_painter.SetViewMatrix(CreateModelViewMatrix(game::Perspective::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
-    scene_painter.SetViewport(mSurface.viewport);
-    scene_painter.SetSurfaceSize(mSurface.size);
-    scene_painter.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
-    scene_painter.SetEditingMode(true);
-
     const auto perspective          = map ? map->GetPerspective() : game::Perspective::AxisAligned;
     const auto& map_view_to_clip    = CreateProjectionMatrix(perspective, mCamera.viewport);
     const auto& map_world_to_view   = CreateModelViewMatrix(perspective, mCamera.position, mCamera.scale,
                                                             mCamera.rotation);
-    const auto& scene_view_to_clip  = scene_painter.GetProjMatrix();
-    const auto& scene_world_to_view = scene_painter.GetViewMatrix();
+    const auto& scene_view_to_clip  = CreateProjectionMatrix(game::Perspective::AxisAligned, mCamera.viewport);
+    const auto& scene_world_to_view = CreateModelViewMatrix(game::Perspective::AxisAligned, mCamera.position, mCamera.scale,
+                                                            mCamera.rotation);
 
     // this matrix will transform coordinates from scene's coordinate space
     // into map coordinate space. but keep in mind that the scene world coordinate
@@ -790,8 +768,8 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
         OffsetPacketLayers(packets);
     }
 
-    DrawScenePackets(scene_painter, packets);
-    DrawEditorPackets(scene_painter, packets);
+    DrawScenePackets(device, packets);
+    DrawEditorPackets(device, packets);
 }
 
 template<typename EntityType, typename NodeType>
@@ -875,21 +853,8 @@ void Renderer::DrawEntity(const EntityType& entity,
     }
 
     OffsetPacketLayers(packets);
-
-    const auto window_size = glm::vec2{mSurface.viewport.GetWidth(), mSurface.viewport.GetHeight()};
-    const auto logical_viewport_width = mCamera.viewport.GetWidth();
-    const auto logical_viewport_height = mCamera.viewport.GetHeight();
-
-    gfx::Painter entity_painter(&device);
-    entity_painter.SetProjectionMatrix(CreateProjectionMatrix(game::Perspective::AxisAligned, mCamera.viewport));
-    entity_painter.SetViewMatrix(CreateModelViewMatrix(game::Perspective::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
-    entity_painter.SetViewport(mSurface.viewport);
-    entity_painter.SetSurfaceSize(mSurface.size);
-    entity_painter.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
-    entity_painter.SetEditingMode(true);
-
-    DrawScenePackets(entity_painter, packets);
-    DrawEditorPackets(entity_painter, packets);
+    DrawScenePackets(device, packets);
+    DrawEditorPackets(device, packets);
 }
 
 template<typename EntityType, typename EntityNodeType>
@@ -1143,17 +1108,41 @@ void Renderer::OffsetPacketLayers(std::vector<DrawPacket>& packets) const
     }
 }
 
-void Renderer::DrawEditorPackets(gfx::Painter& painter, const std::vector<DrawPacket>& packets) const
+void Renderer::DrawEditorPackets(gfx::Device& device, const std::vector<DrawPacket>& packets) const
 {
+    const auto window_size = glm::vec2{mSurface.viewport.GetWidth(), mSurface.viewport.GetHeight()};
+    const auto logical_viewport_width = mCamera.viewport.GetWidth();
+    const auto logical_viewport_height = mCamera.viewport.GetHeight();
+
+    gfx::Painter painter_2D(&device);
+    painter_2D.SetProjectionMatrix(CreateProjectionMatrix(game::Perspective::AxisAligned, mCamera.viewport));
+    painter_2D.SetViewMatrix(CreateModelViewMatrix(game::Perspective::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
+    painter_2D.SetViewport(mSurface.viewport);
+    painter_2D.SetSurfaceSize(mSurface.size);
+    painter_2D.SetEditingMode(mEditingMode);
+    painter_2D.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
+
     for (const auto& packet : packets)
     {
         if (packet.domain == DrawPacket::Domain::Editor)
-            painter.Draw(*packet.drawable, packet.transform, *packet.material);
+            painter_2D.Draw(*packet.drawable, packet.transform, *packet.material);
     }
 }
 
-void Renderer::DrawScenePackets(gfx::Painter& painter, const std::vector<DrawPacket>& packets) const
+void Renderer::DrawScenePackets(gfx::Device& device, const std::vector<DrawPacket>& packets) const
 {
+    const auto window_size = glm::vec2{mSurface.viewport.GetWidth(), mSurface.viewport.GetHeight()};
+    const auto logical_viewport_width = mCamera.viewport.GetWidth();
+    const auto logical_viewport_height = mCamera.viewport.GetHeight();
+
+    gfx::Painter painter_2D(&device);
+    painter_2D.SetProjectionMatrix(CreateProjectionMatrix(game::Perspective::AxisAligned, mCamera.viewport));
+    painter_2D.SetViewMatrix(CreateModelViewMatrix(game::Perspective::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
+    painter_2D.SetViewport(mSurface.viewport);
+    painter_2D.SetSurfaceSize(mSurface.size);
+    painter_2D.SetEditingMode(mEditingMode);
+    painter_2D.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
+
     // Each entity in the scene is assigned to a scene/entity layer and each
     // entity node within an entity is assigned to an entity layer.
     // Thus, to have the right ordering both indices of each
@@ -1216,12 +1205,12 @@ void Renderer::DrawScenePackets(gfx::Painter& painter, const std::vector<DrawPac
     }
 
     const gfx::Color4f bloom_color(mBloom.red, mBloom.green, mBloom.blue, 1.0f);
-    const BloomPass bloom(mRendererName,  bloom_color, mBloom.threshold, painter);
+    const BloomPass bloom(mRendererName,  bloom_color, mBloom.threshold, painter_2D);
 
     if (IsEnabled(Effects::Bloom))
         bloom.Draw(layers);
 
-    MainRenderPass main(painter);
+    MainRenderPass main(painter_2D);
     main.Draw(layers);
     main.Composite(IsEnabled(Effects::Bloom) ? &bloom : nullptr);
 
@@ -1306,7 +1295,7 @@ void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
 void Renderer::DrawTileBatches(const game::Tilemap& map,
                                TileBatchDrawHook* hook,
                                std::vector<TileBatch>& batches,
-                               gfx::Painter& painter)
+                               gfx::Device& device)
 {
     // The isometric tile rendering is quite complicated assuming pre-rendered tiles.
     // Conceptually the tiles are 2D squares in the "tile world space",
@@ -1338,24 +1327,25 @@ void Renderer::DrawTileBatches(const game::Tilemap& map,
     //   value in the texture. then discard or write. Would work for alpha cut-outs (?)
     //   but not for semi-transparent objects(!)
 
-    // this is the device viewport. not the logical game viewport.
-    painter.SetViewport(mSurface.viewport);
-    painter.SetSurfaceSize(mSurface.size);
-
     const auto device_viewport_width   = mSurface.viewport.GetWidth();
     const auto device_viewport_height  = mSurface.viewport.GetHeight();
     const auto logical_viewport_width  = mCamera.viewport.GetWidth();
     const auto logical_viewport_height = mCamera.viewport.GetHeight();
-    painter.SetPixelRatio(glm::vec2{device_viewport_width, device_viewport_height} / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
-    painter.SetProjectionMatrix(CreateProjectionMatrix(game::Perspective::AxisAligned, mCamera.viewport));
-    painter.SetViewMatrix(CreateModelViewMatrix(game::Perspective::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
+
+    gfx::Painter painter_2D(&device);
+    // this is the device viewport. not the logical game viewport.
+    painter_2D.SetViewport(mSurface.viewport);
+    painter_2D.SetSurfaceSize(mSurface.size);
+    painter_2D.SetProjectionMatrix(CreateProjectionMatrix(game::Perspective::AxisAligned, mCamera.viewport));
+    painter_2D.SetViewMatrix(CreateModelViewMatrix(game::Perspective::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
+    painter_2D.SetPixelRatio(glm::vec2{device_viewport_width, device_viewport_height} / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
 
     const auto perspective = map->GetPerspective();
     const auto& map_view_to_clip = CreateProjectionMatrix(perspective, mCamera.viewport);
     const auto& map_world_to_view = CreateModelViewMatrix(perspective, mCamera.position, mCamera.scale, mCamera.rotation);
 
-    const auto& view_to_clip = painter.GetProjMatrix();
-    const auto& world_to_view = painter.GetViewMatrix();
+    const auto& view_to_clip = CreateProjectionMatrix(game::Perspective::AxisAligned, mCamera.viewport);
+    const auto& world_to_view = CreateModelViewMatrix(game::Perspective::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation);
     // This matrix will project a coordinate in tilemap coordinate space into
     // axis aligned game/scene/entity world. (If map has axis aligned perspective then
     // this should actually reduce to an identify matrix... something to optimize for)
@@ -1365,7 +1355,7 @@ void Renderer::DrawTileBatches(const game::Tilemap& map,
                                                                                 world_to_view);
 
     // Setup painter to draw in whatever is the map perspective.
-    gfx::Painter tile_painter(painter.GetDevice());
+    gfx::Painter tile_painter(&device);
     tile_painter.SetViewMatrix(map_world_to_view);
     tile_painter.SetProjectionMatrix(map_view_to_clip);
     tile_painter.SetPixelRatio({1.0f, 1.0f});
@@ -1390,7 +1380,7 @@ void Renderer::DrawTileBatches(const game::Tilemap& map,
             batch.render_size = glm::vec2 {tile_width_render_units, tile_height_render_units};
 
             if (hook)
-                hook->BeginDrawBatch(batch, tile_projection_transform_matrix, painter);
+                hook->BeginDrawBatch(batch, tile_projection_transform_matrix, painter_2D);
 
             gfx::TileBatch tiles(batch.tiles);
             tiles.SetTileWorldSize(batch.tile_size);
@@ -1402,10 +1392,10 @@ void Renderer::DrawTileBatches(const game::Tilemap& map,
                 tiles.SetProjection(gfx::TileBatch::Projection::Dimetric);
             else BUG("unknown projection");
 
-            painter.Draw(tiles, tile_projection_transform_matrix, *batch.material);
+            painter_2D.Draw(tiles, tile_projection_transform_matrix, *batch.material);
 
             if (hook)
-                hook->EndDrawBatch(batch, tile_projection_transform_matrix, painter);
+                hook->EndDrawBatch(batch, tile_projection_transform_matrix, painter_2D);
         }
         else if (batch.type == TileBatch::Type::Data)
         {
@@ -1420,7 +1410,7 @@ void Renderer::DrawTileBatches(const game::Tilemap& map,
             const auto model = glm::mat4(1.0f);
 
             if (hook)
-                hook->BeginDrawBatch(batch, model, painter);
+                hook->BeginDrawBatch(batch, model, painter_2D);
 
             tile_painter.Draw(tiles, model, *batch.material);
 

@@ -208,7 +208,7 @@ namespace engine
                   bool draw_map_data_layers = false);
 
         void Draw(const game::Tilemap& map,
-                  gfx::Painter& painter,
+                  gfx::Device& device,
                   TileBatchDrawHook* hook,
                   bool draw_render_layer,
                   bool draw_data_layer);
@@ -258,8 +258,8 @@ namespace engine
                                  EntityDrawHook<EntityNodeType>* hook);
 
         void OffsetPacketLayers(std::vector<DrawPacket>& packets) const;
-        void DrawScenePackets(gfx::Painter& painter, const std::vector<DrawPacket>& packets) const;
-        void DrawEditorPackets(gfx::Painter& painter, const std::vector<DrawPacket>& packets) const;
+        void DrawScenePackets(gfx::Device& device, const std::vector<DrawPacket>& packets) const;
+        void DrawEditorPackets(gfx::Device& device, const std::vector<DrawPacket>& packets) const;
 
         void PrepareMapTileBatches(const game::Tilemap& map,
                                    std::vector<TileBatch>& batches,
@@ -282,7 +282,7 @@ namespace engine
         void DrawTileBatches(const game::Tilemap& map,
                              TileBatchDrawHook* hook,
                              std::vector<TileBatch>& batches,
-                             gfx::Painter& painter);
+                             gfx::Device& device);
         void SortTileBatches(std::vector<TileBatch>& batches) const;
 
         void SortTilePackets(std::vector<DrawPacket>& packets) const;
