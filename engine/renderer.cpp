@@ -117,17 +117,19 @@ void Renderer::Update(float time, float dt)
     }
 }
 
-void Renderer::Draw(gfx::Painter& painter, const game::Tilemap* map)
+void Renderer::Draw(gfx::Device& device, const game::Tilemap* map)
 {
+    const auto window_size = glm::vec2{mSurface.viewport.GetWidth(), mSurface.viewport.GetHeight()};
+    const auto logical_viewport_width = mCamera.viewport.GetWidth();
+    const auto logical_viewport_height = mCamera.viewport.GetHeight();
+
+    gfx::Painter painter(&device);
     painter.SetProjectionMatrix(CreateProjectionMatrix(game::Perspective::AxisAligned, mCamera.viewport));
     painter.SetViewMatrix(CreateModelViewMatrix(game::Perspective::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
     painter.SetViewport(mSurface.viewport);
     painter.SetSurfaceSize(mSurface.size);
-
-    const auto window_size = glm::vec2{mSurface.viewport.GetWidth(), mSurface.viewport.GetHeight()};
-    const auto logical_viewport_width = mCamera.viewport.GetWidth();
-    const auto logical_viewport_height = mCamera.viewport.GetHeight();
     painter.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
+    painter.SetEditingMode(mEditingMode);
 
     const auto perspective          = map ? map->GetPerspective() : game::Perspective::AxisAligned;
     const auto& map_view_to_clip    = CreateProjectionMatrix(perspective, mCamera.viewport);

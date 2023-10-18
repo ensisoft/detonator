@@ -60,8 +60,6 @@
 #include "uikit/painter.h"
 #include "uikit/state.h"
 
-
-
 namespace
 {
 
@@ -295,7 +293,7 @@ public:
             }
 
             TRACE_CALL("Renderer::BeginFrame", mRenderer.BeginFrame());
-            TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mPainter, mTilemap.get()));
+            TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mDevice, mTilemap.get()));
             TRACE_CALL("Renderer::EndFrame", mRenderer.EndFrame());
             TRACE_CALL("DebugDraw", DrawDebugObjects());
         }
