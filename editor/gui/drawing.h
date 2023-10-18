@@ -41,11 +41,7 @@ namespace gui
 {
 
 void DrawLine(gfx::Painter& painter, const glm::vec2& src, const glm::vec2& dst);
-
 void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans);
-void DrawSelectionBox(gfx::Painter& painter, gfx::Transform& trans, const gfx::FRect& rect);
-void DrawInvisibleItemBox(gfx::Painter& painter, gfx::Transform& trans, const gfx::FRect& rect);
-
 void DrawBasisVectors(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets);
 void DrawSelectionBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect);
 void DrawInvisibleItemBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect);
