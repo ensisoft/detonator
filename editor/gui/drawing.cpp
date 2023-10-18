@@ -49,60 +49,6 @@ void DrawLine(gfx::Painter& painter, const glm::vec2& src, const glm::vec2& dst)
     gfx::DebugDrawLine(painter, gfx::FPoint(src.x, src.y), gfx::FPoint(dst.x, dst.y), gfx::Color::DarkYellow, 2.0f);
 }
 
-void DrawSelectionBox(gfx::Painter& painter, gfx::Transform& trans, const gfx::FRect& box)
-{
-    // all the transformations below are relative to the scene node
-    // (the incoming transformation)
-
-    // decompose the incoming transformation matrix
-    // in order to figure out the scaling factor. we'll use the inverse
-    // scale for the indicators in order to keep them a constant size
-    // regardless of the scene node's scaling.
-    glm::vec3 scale;
-    glm::vec3 translation;
-    glm::vec3 skew;
-    glm::vec4 perspective;
-    glm::quat orientation;
-    glm::decompose(trans.GetAsMatrix(), scale, orientation, translation, skew, perspective);
-
-    // selection rect
-    trans.Push();
-        trans.Scale(box.GetSize());
-        trans.Translate(box.GetPosition());
-        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), trans,
-                     gfx::CreateMaterialFromColor(gfx::Color::Green), 2.0f);
-    trans.Pop();
-
-    // rotation circle
-    trans.Push();
-        trans.Scale(10.0f/scale.x, 10.0f/scale.y);
-        trans.Translate(box.GetPosition());
-        painter.Draw(gfx::Circle(gfx::Drawable::Style::Outline), trans,
-                     gfx::CreateMaterialFromColor(gfx::Color::Green), 2.0f);
-    trans.Pop();
-
-    const auto [_0, _1, _2, bottom_right] = box.GetCorners();
-
-    // resize box
-    trans.Push();
-        trans.Scale(10.0f/scale.x, 10.0f/scale.y);
-        trans.Translate(bottom_right);
-        trans.Translate(-10.0f/scale.x, -10.0f/scale.y);
-        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), trans,
-                     gfx::CreateMaterialFromColor(gfx::Color::Green), 2.0f);
-    trans.Pop();
-}
-
-void DrawInvisibleItemBox(gfx::Painter& painter, gfx::Transform& trans, const gfx::FRect& box)
-{
-    trans.Push();
-        trans.Scale(box.GetSize());
-        trans.Translate(box.GetPosition());
-        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), trans,
-                     gfx::CreateMaterialFromColor(gfx::Color::DarkYellow), 2.0f);
-    trans.Pop();
-}
-
 void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans)
 {
     // draw the X vector
