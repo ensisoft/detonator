@@ -645,11 +645,6 @@ void unit_test_entity_lifecycle()
     TEST_CASE(test::Type::Feature)
 
     auto device = CreateDevice();
-    auto painter = gfx::Painter::Create(device);
-    painter->SetEditingMode(false);
-    painter->SetProjectionMatrix(gfx::MakeOrthographicProjection(256, 256));
-    painter->SetViewport(0, 0, 256, 256);
-    painter->SetSurfaceSize(256, 256);
 
     auto entity_klass = std::make_shared<game::EntityClass>();
     {
@@ -682,13 +677,19 @@ void unit_test_entity_lifecycle()
     DummyClassLib classloader;
     engine::Renderer renderer(&classloader);
 
-
-
     const float dt = 1.0f/60.0f;
-
 
     renderer.CreateRenderStateFromScene(*scene);
     TEST_REQUIRE(renderer.GetNumPaintNodes() == 1);
+
+    engine::Renderer::Surface surface;
+    surface.size     = gfx::USize(256, 256);
+    surface.viewport = gfx::IRect(0, 0, 256, 256);
+    renderer.SetSurface(surface);
+
+    engine::Renderer::Camera camera;
+    camera.viewport = gfx::FRect(0.0f, 0.0f, 256.0f, 256.0f);
+    renderer.SetCamera(camera);
 
     // start frame looping
     {
@@ -706,7 +707,7 @@ void unit_test_entity_lifecycle()
 
             renderer.BeginFrame();
             {
-                renderer.Draw(*painter);
+                renderer.Draw(*device);
             }
             renderer.EndFrame();
         }
@@ -732,7 +733,7 @@ void unit_test_entity_lifecycle()
 
             renderer.BeginFrame();
             {
-                renderer.Draw(*painter);
+                renderer.Draw(*device);
             }
             renderer.EndFrame();
         }
@@ -751,7 +752,7 @@ void unit_test_entity_lifecycle()
 
             renderer.BeginFrame();
             {
-                renderer.Draw(*painter);
+                renderer.Draw(*device);
             }
             renderer.EndFrame();
         }

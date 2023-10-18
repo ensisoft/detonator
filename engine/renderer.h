@@ -169,7 +169,7 @@ namespace engine
         // representing the contents of the given scene.
         void UpdateRenderStateFromScene(const game::Scene& scene);
         // Draw the current rendering state.
-        void Draw(gfx::Painter& painter, const game::Tilemap* map = nullptr);
+        void Draw(gfx::Device& painter, const game::Tilemap* map = nullptr);
         // Update the renderer state, i.e. update/animate materials etc.
         void Update(float time, float dt);
 
