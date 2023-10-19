@@ -47,59 +47,57 @@ void Painter::ClearDepth(float depth) const
     mDevice->ClearDepth(depth, mFrameBuffer);
 }
 
-void Painter::Draw(const std::vector<DrawShape>& shapes,
-                   const DrawState& state,
-                   const ShaderProgram& program) const
+void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
 {
 
     Device::State device_state;
-    device_state.viewport      = MapToDevice(mViewport);
-    device_state.scissor       = MapToDevice(mScissor);
-    device_state.stencil_func  = state.stencil_func;
-    device_state.stencil_dpass = state.stencil_dpass;
-    device_state.stencil_dfail = state.stencil_dfail;
-    device_state.stencil_fail  = state.stencil_fail;
-    device_state.stencil_mask  = state.stencil_mask;
-    device_state.stencil_ref   = state.stencil_ref;
-    device_state.bWriteColor   = state.write_color;
-    device_state.depth_test    = state.depth_test;
+    device_state.viewport = MapToDevice(mViewport);
+    device_state.scissor  = MapToDevice(mScissor);
 
-    for (const auto& shape : shapes)
+    for (const auto& draw : list)
     {
         // Low level draw filtering.
-        if (!program.FilterDraw(shape.user))
+        if (!program.FilterDraw(draw.user))
             continue;
 
         Drawable::Environment drawable_env;
         drawable_env.editing_mode = mEditingMode;
         drawable_env.pixel_ratio  = mPixelRatio;
-        drawable_env.view_matrix  = shape.view ? shape.view : &mViewMatrix;
-        drawable_env.proj_matrix  = shape.projection ? shape.projection : &mProjMatrix;
-        drawable_env.model_matrix = shape.model;
-        Geometry* geometry = shape.drawable->Upload(drawable_env, *mDevice);
+        drawable_env.view_matrix  = draw.view ? draw.view : &mViewMatrix;
+        drawable_env.proj_matrix  = draw.projection ? draw.projection : &mProjMatrix;
+        drawable_env.model_matrix = draw.model;
+        Geometry* geometry = draw.drawable->Upload(drawable_env, *mDevice);
         if (geometry == nullptr)
             continue;
 
         Material::Environment material_env;
         material_env.editing_mode  = mEditingMode;
-        material_env.render_points = shape.drawable->GetStyle() == Drawable::Style::Points;
-        Program* gpu_program = GetProgram(program, *shape.drawable, *shape.material, drawable_env, material_env);
+        material_env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
+        Program* gpu_program = GetProgram(program, *draw.drawable, *draw.material, drawable_env, material_env);
         if (gpu_program == nullptr)
             continue;
 
         Material::RasterState material_raster_state;
-        if (!shape.material->ApplyDynamicState(material_env, *mDevice, *gpu_program, material_raster_state))
+        if (!draw.material->ApplyDynamicState(material_env, *mDevice, *gpu_program, material_raster_state))
             continue;
-        device_state.blending    = material_raster_state.blending;
-        device_state.premulalpha = material_raster_state.premultiplied_alpha;
 
         Drawable::RasterState drawable_raster_state;
-        drawable_raster_state.culling    = shape.culling;
-        drawable_raster_state.line_width = shape.line_width;
+        drawable_raster_state.culling    = draw.state.culling;
+        drawable_raster_state.line_width = draw.state.line_width;
+        draw.drawable->ApplyDynamicState(drawable_env, *gpu_program, drawable_raster_state);
 
-        shape.drawable->ApplyDynamicState(drawable_env, *gpu_program, drawable_raster_state);
-        device_state.line_width = drawable_raster_state.line_width;
-        device_state.culling    = drawable_raster_state.culling;
+        device_state.blending      = material_raster_state.blending;
+        device_state.premulalpha   = material_raster_state.premultiplied_alpha;
+        device_state.line_width    = drawable_raster_state.line_width;
+        device_state.culling       = drawable_raster_state.culling;
+        device_state.stencil_func  = draw.state.stencil_func;
+        device_state.stencil_dpass = draw.state.stencil_dpass;
+        device_state.stencil_dfail = draw.state.stencil_dfail;
+        device_state.stencil_fail  = draw.state.stencil_fail;
+        device_state.stencil_mask  = draw.state.stencil_mask;
+        device_state.stencil_ref   = draw.state.stencil_ref;
+        device_state.bWriteColor   = draw.state.write_color;
+        device_state.depth_test    = draw.state.depth_test;
 
         program.ApplyDynamicState(*mDevice, *gpu_program, device_state);
 
@@ -112,16 +110,17 @@ void Painter::Draw(const Drawable& shape,
                    const Material& material,
                    const DrawState& state,
                    const ShaderProgram& program,
-                   const LegacyDrawState& draw_state) const
+                   const LegacyDrawState& legacy_draw_state) const
 {
-    std::vector<DrawShape> shapes;
-    shapes.resize(1);
-    shapes[0].drawable   = &shape;
-    shapes[0].material   = &material;
-    shapes[0].model      = &model;
-    shapes[0].line_width = draw_state.line_width;
-    shapes[0].culling    = draw_state.culling;
-    Draw(shapes, state, program);
+    std::vector<DrawCommand> list;
+    list.resize(1);
+    list[0].drawable = &shape;
+    list[0].material = &material;
+    list[0].model    = &model;
+    list[0].state    = state;
+    list[0].state.line_width = legacy_draw_state.line_width;
+    list[0].state.culling    = legacy_draw_state.culling;
+    Draw(list, program);
 }
 
 void Painter::Draw(const Drawable& drawable,
@@ -129,12 +128,13 @@ void Painter::Draw(const Drawable& drawable,
                    const Material& material,
                    const LegacyDrawState& draw_state) const
 {
-    DrawState render_pass_state;
-    render_pass_state.write_color  = true;
-    render_pass_state.stencil_func = StencilFunc::Disabled;
-    render_pass_state.depth_test   = DepthTest::Disabled;
-    detail::GenericShaderProgram shader_pass;
-    Draw(drawable, model, material, render_pass_state, shader_pass, draw_state);
+    DrawState state;
+    state.write_color  = true;
+    state.stencil_func = StencilFunc::Disabled;
+    state.depth_test   = DepthTest::Disabled;
+
+    detail::GenericShaderProgram program;
+    Draw(drawable, model, material, state, program, draw_state);
 }
 
 // static

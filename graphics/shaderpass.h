@@ -39,7 +39,7 @@ namespace gfx
     public:
         virtual ~ShaderProgram() = default;
         // Inspect the current draw and its associated user object.
-        // The void* user maps to void* user in the Painter's DrawShape.
+        // The void* user maps to void* user in the Painter's DrawCommand.
         // If the function returns false the draw is skipped.
         virtual bool FilterDraw(void* user) const { return true; }
         // Get the material object fragment shader device ID.

@@ -33,36 +33,17 @@ namespace gfx
     class GenericRenderPass
     {
     public:
-        using DrawList = Painter::DrawList;
-
         GenericRenderPass(Painter& painter)
           : mPainter(painter)
         {}
-
-        void Draw(const DrawList& list, const ShaderProgram& pass = detail::GenericShaderProgram()) const
-        {
-            Painter::DrawState state;
-            state.write_color  = true;
-            state.stencil_func = Painter::StencilFunc::Disabled;
-            state.depth_test   = Painter::DepthTest::Disabled;
-            mPainter.Draw(list, state, pass);
-        }
         void Draw(const Drawable& drawable, const Transform& transform, const Material& material) const
         {
             Painter::DrawState state;
             state.write_color  = true;
             state.stencil_func = Painter::StencilFunc::Disabled;
             state.depth_test   = Painter::DepthTest::Disabled;
-
-            const auto& mat = transform.GetAsMatrix();
-
-            Painter::DrawShape shape;
-            shape.material  = &material;
-            shape.drawable  = &drawable;
-            shape.model = &mat;
-            Painter::DrawList list;
-            list.push_back(shape);
-            mPainter.Draw(list, state, detail::GenericShaderProgram());
+            detail::GenericShaderProgram program;
+            mPainter.Draw(drawable, transform, material, state, program);
         }
     private:
         Painter& mPainter;
@@ -73,15 +54,11 @@ namespace gfx
     public:
         using ClearValue = StencilClearValue;
         using WriteValue = StencilWriteValue;
-        using DrawShape  = Painter::DrawShape;
-        using DrawList   = Painter::DrawList;
-
         enum class StencilFunc {
             Overwrite,
             BitwiseAnd,
             OverlapIncrement
         };
-
         StencilMaskPass(StencilClearValue clear_value, StencilWriteValue write_value, Painter& painter, StencilFunc func = StencilFunc::Overwrite)
           : mStencilWriteValue(write_value)
           , mStencilFunc(func)
@@ -97,21 +74,6 @@ namespace gfx
         void Draw(const Drawable& drawable, const Transform& transform, const Material& material) const
         {
             Painter::DrawState state;
-            SetState(state);
-
-            detail::StencilShaderProgram pass;
-            mPainter.Draw(drawable, transform, material, state, pass);
-        }
-        void Draw(const DrawList& list) const
-        {
-            Painter::DrawState state;
-            SetState(state);
-
-            detail::StencilShaderProgram pass;
-            mPainter.Draw(list, state, pass);
-        }
-        void SetState(Painter::DrawState& state) const
-        {
             state.write_color   = false;
             state.depth_test    = Painter::DepthTest::Disabled;
             state.stencil_dpass = Painter::StencilOp::WriteRef;
@@ -135,6 +97,9 @@ namespace gfx
                 state.stencil_dpass = Painter::StencilOp::Increment;
                 state.stencil_fail  = Painter::StencilOp::WriteZero;
             }
+
+            detail::StencilShaderProgram program;
+            mPainter.Draw(drawable, transform, material, state, program);
         }
     private:
         const WriteValue mStencilWriteValue = 1;
@@ -145,7 +110,6 @@ namespace gfx
     class StencilTestColorWritePass
     {
     public:
-        using DrawList = Painter::DrawList;
         using PassValue = StencilPassValue;
 
         explicit StencilTestColorWritePass(PassValue stencil_pass_value, Painter& painter)
@@ -163,22 +127,8 @@ namespace gfx
             state.stencil_ref   = mStencilRefValue;
             state.stencil_mask  = 0xff;
 
-            detail::GenericShaderProgram pass;
-            mPainter.Draw(drawable, transform, material, state, pass);
-        }
-        void Draw(const DrawList& list) const
-        {
-            Painter::DrawState state;
-            state.write_color   = true;
-            state.depth_test    = Painter::DepthTest::Disabled;
-            state.stencil_func  = Painter::StencilFunc::RefIsEqual;
-            state.stencil_dpass = Painter::StencilOp::DontModify;
-            state.stencil_dfail = Painter::StencilOp::DontModify;
-            state.stencil_ref   = mStencilRefValue;
-            state.stencil_mask  = 0xff;
-
-            detail::GenericShaderProgram pass;
-            mPainter.Draw(list, state, pass);
+            detail::GenericShaderProgram program;
+            mPainter.Draw(drawable, transform, material, state, program);
         }
     private:
         const PassValue mStencilRefValue;
