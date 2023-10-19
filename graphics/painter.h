@@ -166,38 +166,40 @@ namespace gfx
             std::uint8_t stencil_ref   = 0x0;
 
             DepthTest  depth_test = DepthTest::LessOrEQual;
+
+            Culling culling = Culling::Back;
+
+            // line width setting used to rasterize lines when the drawable style is Lines
+            float line_width = 1.0f;
         };
 
-        struct DrawShape {
-            // Optional projection matrix that will override the
-            // projection matrix set in the painter.
+        struct DrawCommand {
+            // Optional projection matrix that will override the painter's projection matrix.
             const glm::mat4* projection = nullptr;
-            // Optional view matrix that will override the
-            // view matrix set in the painter.
+            // Optional view matrix that will override the painter's view matrix.
             const glm::mat4* view = nullptr;
-            // The model to world transformation.
+            // The model to world transformation. Used to transform the
+            // associated shape's vertices into the world space.
             const glm::mat4* model = nullptr;
+            // The drawable object that will be drawn.
             const Drawable* drawable = nullptr;
+            // The material that is applied on the drawable shape.
             const Material* material = nullptr;
             // This is a user defined object pointer that is passed to
             // ShaderProgram::FilterDraw for doing low level shape/draw filtering.
             // Using dodgy/Unsafe void* here for performance reasons. vs. std::any
             void* user = nullptr;
-            // line width setting used to rasterize lines when the drawable style is Lines
-            float line_width = 1.0f;
-
-            Culling culling = Culling::Back;
-
+            // State aggregate for the device state for depth testing
+            // stencil testing etc.
+            DrawState state;
         };
-        using DrawList = std::vector<DrawShape>;
+        using DrawList = std::vector<DrawCommand>;
 
         // Draw multiple objects inside a render pass. Each object has a drawable shape,
         // which provides the geometrical information of the object to be drawn, a material,
         // which provides the "look&feel" i.e. the surface properties for the shape
         // and finally a transform which defines the model-to-world transform.
-        void Draw(const DrawList& shapes,
-                  const DrawState& state,
-                  const ShaderProgram& program) const;
+        void Draw(const DrawList& list, const ShaderProgram& program) const;
 
         // legacy draw functions.
 
@@ -231,7 +233,7 @@ namespace gfx
                   const Material& material,
                   const DrawState& state,
                   const ShaderProgram& program,
-                  const LegacyDrawState& draw_state = LegacyDrawState()) const;
+                  const LegacyDrawState& legacy_draw_state = LegacyDrawState()) const;
         // Legacy immediate mode draw function.
         // Draw the shape with the material and transformation immediately in the
         // current render target. The following default render target state is used:

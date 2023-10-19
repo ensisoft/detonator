@@ -155,35 +155,32 @@ void BloomPass::Draw(const SceneRenderLayerList& layers) const
         {
             if (!entity_layer.mask_cover_list.empty() && !entity_layer.mask_expose_list.empty())
             {
-                const gfx::StencilMaskPass stencil_cover(gfx::StencilClearValue(1),
-                                                         gfx::StencilWriteValue(0), mPainter);
-                const gfx::StencilMaskPass stencil_expose(gfx::StencilWriteValue(1), mPainter);
-                const gfx::StencilTestColorWritePass cover(gfx::StencilPassValue(1), mPainter);
+                gfx::detail::StencilShaderProgram stencil_program;
 
-                stencil_cover.Draw(entity_layer.mask_cover_list);
-                stencil_expose.Draw(entity_layer.mask_expose_list);
-                cover.Draw(entity_layer.draw_color_list);
+                mPainter.ClearStencil(gfx::StencilClearValue(1));
+                mPainter.Draw(entity_layer.mask_cover_list, stencil_program);
+                mPainter.Draw(entity_layer.mask_expose_list, stencil_program);
+                mPainter.Draw(entity_layer.draw_color_list, bloom_shader);
             }
             else if (!entity_layer.mask_cover_list.empty())
             {
-                const gfx::StencilMaskPass stencil_cover(gfx::StencilClearValue(1),
-                                                         gfx::StencilWriteValue(0), mPainter);
-                const gfx::StencilTestColorWritePass cover(gfx::StencilPassValue(1), mPainter);
-                stencil_cover.Draw(entity_layer.mask_cover_list);
-                cover.Draw(entity_layer.draw_color_list);
+                gfx::detail::StencilShaderProgram stencil_program;
+
+                mPainter.ClearStencil(gfx::StencilClearValue(1));
+                mPainter.Draw(entity_layer.mask_cover_list, stencil_program);
+                mPainter.Draw(entity_layer.draw_color_list, bloom_shader);
             }
             else if (!entity_layer.mask_expose_list.empty())
             {
-                const gfx::StencilMaskPass stencil_expose(gfx::StencilClearValue(0),
-                                                          gfx::StencilWriteValue(1), mPainter);
-                const gfx::StencilTestColorWritePass cover(gfx::StencilPassValue(1), mPainter);
-                stencil_expose.Draw(entity_layer.mask_expose_list);
-                cover.Draw(entity_layer.draw_color_list);
+                gfx::detail::StencilShaderProgram stencil_program;
+
+                mPainter.ClearStencil(gfx::StencilClearValue(0));
+                mPainter.Draw(entity_layer.mask_expose_list, stencil_program);
+                mPainter.Draw(entity_layer.draw_color_list, bloom_shader);
             }
             else if (!entity_layer.draw_color_list.empty())
             {
-                const gfx::GenericRenderPass pass(mPainter);
-                pass.Draw(entity_layer.draw_color_list, bloom_shader);
+                mPainter.Draw(entity_layer.draw_color_list, bloom_shader);
             }
         }
     }
@@ -205,35 +202,37 @@ void MainRenderPass::Draw(const SceneRenderLayerList& layers) const
         {
             if (!entity_layer.mask_cover_list.empty() && !entity_layer.mask_expose_list.empty())
             {
-                const gfx::StencilMaskPass stencil_cover(gfx::StencilClearValue(1),
-                                                         gfx::StencilWriteValue(0), mPainter);
-                const gfx::StencilMaskPass stencil_expose(gfx::StencilWriteValue(1), mPainter);
-                const gfx::StencilTestColorWritePass cover(gfx::StencilPassValue(1), mPainter);
+                gfx::detail::StencilShaderProgram stencil_program;
+                gfx::detail::GenericShaderProgram generic_program;
 
-                stencil_cover.Draw(entity_layer.mask_cover_list);
-                stencil_expose.Draw(entity_layer.mask_expose_list);
-                cover.Draw(entity_layer.draw_color_list);
+                mPainter.ClearStencil(gfx::StencilClearValue(1));
+                mPainter.Draw(entity_layer.mask_cover_list, stencil_program);
+                mPainter.Draw(entity_layer.mask_expose_list, stencil_program);
+                mPainter.Draw(entity_layer.draw_color_list, generic_program);
             }
             else if (!entity_layer.mask_cover_list.empty())
             {
-                const gfx::StencilMaskPass stencil_cover(gfx::StencilClearValue(1),
-                                                         gfx::StencilWriteValue(0), mPainter);
-                const gfx::StencilTestColorWritePass cover(gfx::StencilPassValue(1), mPainter);
-                stencil_cover.Draw(entity_layer.mask_cover_list);
-                cover.Draw(entity_layer.draw_color_list);
+                gfx::detail::StencilShaderProgram stencil_program;
+                gfx::detail::GenericShaderProgram generic_program;
+
+                mPainter.ClearStencil(gfx::StencilClearValue(1));
+                mPainter.Draw(entity_layer.mask_cover_list, stencil_program);
+                mPainter.Draw(entity_layer.draw_color_list, generic_program);
             }
             else if (!entity_layer.mask_expose_list.empty())
             {
-                const gfx::StencilMaskPass stencil_expose(gfx::StencilClearValue(0),
-                                                          gfx::StencilWriteValue(1), mPainter);
-                const gfx::StencilTestColorWritePass cover(gfx::StencilPassValue(1), mPainter);
-                stencil_expose.Draw(entity_layer.mask_expose_list);
-                cover.Draw(entity_layer.draw_color_list);
+                gfx::detail::StencilShaderProgram stencil_program;
+                gfx::detail::GenericShaderProgram generic_program;
+
+                mPainter.ClearStencil(gfx::StencilClearValue(0));
+                mPainter.Draw(entity_layer.mask_expose_list, stencil_program);
+                mPainter.Draw(entity_layer.draw_color_list, generic_program);
+
             }
             else if (!entity_layer.draw_color_list.empty())
             {
-                const gfx::GenericRenderPass pass(mPainter);
-                pass.Draw(entity_layer.draw_color_list);
+                gfx::detail::GenericShaderProgram generic_program;
+                mPainter.Draw(entity_layer.draw_color_list, generic_program);
             }
         }
     }

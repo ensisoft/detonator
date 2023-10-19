@@ -1168,39 +1168,64 @@ void Renderer::DrawScenePackets(gfx::Device& device, const std::vector<DrawPacke
         if (packet_index >= render_layer.size())
             render_layer.resize(packet_index + 1);
 
+        gfx::Painter::DrawCommand draw;
+        draw.user               = (void*)&packet;
+        draw.model              = &packet.transform;
+        draw.drawable           = packet.drawable.get();
+        draw.material           = packet.material.get();
+        draw.state.culling      = packet.culling;
+        draw.state.line_width   = packet.line_width;
+        draw.state.write_color  = true;
+        draw.state.depth_test   = gfx::Painter::DepthTest::Disabled;
+        draw.state.stencil_func = gfx::Painter::StencilFunc ::Disabled;
+
         RenderLayer& layer = render_layer[packet_index];
         if (packet.pass == RenderPass::DrawColor)
-        {
-            gfx::Painter::DrawShape shape;
-            shape.user       = (void*)&packet;
-            shape.model      = &packet.transform;
-            shape.drawable   = packet.drawable.get();
-            shape.material   = packet.material.get();
-            shape.culling    = packet.culling;
-            shape.line_width = packet.line_width;
-            layer.draw_color_list.push_back(shape);
-        }
+            layer.draw_color_list.push_back(draw);
         else if (packet.pass == RenderPass::MaskCover)
-        {
-            gfx::Painter::DrawShape shape;
-            shape.user       = (void*)&packet;
-            shape.model      = &packet.transform;
-            shape.drawable   = packet.drawable.get();
-            shape.material   = packet.material.get();
-            shape.culling    = packet.culling;
-            shape.line_width = packet.line_width;
-            layer.mask_cover_list.push_back(shape);
-        }
+            layer.mask_cover_list.push_back(draw);
         else if (packet.pass == RenderPass::MaskExpose)
+            layer.mask_expose_list.push_back(draw);
+        else BUG("Missing packet render pass.");
+    }
+
+    // set the state for each draw packet.
+    for (auto& scene_layer : layers)
+    {
+        for (auto& entity_layer : scene_layer)
         {
-            gfx::Painter::DrawShape shape;
-            shape.user       = (void*)&packet;
-            shape.model      = &packet.transform;
-            shape.drawable   = packet.drawable.get();
-            shape.material   = packet.material.get();
-            shape.culling    = packet.culling;
-            shape.line_width = packet.line_width;
-            layer.mask_expose_list.push_back(shape);
+            const auto needs_stencil = !entity_layer.mask_cover_list.empty() ||
+                                       !entity_layer.mask_expose_list.empty();
+            if (needs_stencil)
+            {
+                for (auto& draw : entity_layer.mask_expose_list)
+                {
+                    draw.state.write_color   = false;
+                    draw.state.stencil_ref   = 1;
+                    draw.state.stencil_mask  = 0xff;
+                    draw.state.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
+                    draw.state.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
+                    draw.state.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
+                }
+                for (auto& draw : entity_layer.mask_cover_list)
+                {
+                    draw.state.write_color   = false;
+                    draw.state.stencil_ref   = 0;
+                    draw.state.stencil_mask  = 0xff;
+                    draw.state.stencil_dpass = gfx::Painter::StencilOp::WriteRef;
+                    draw.state.stencil_dfail = gfx::Painter::StencilOp::WriteRef;
+                    draw.state.stencil_func  = gfx::Painter::StencilFunc::PassAlways;
+                }
+                for (auto& draw : entity_layer.draw_color_list)
+                {
+                    draw.state.write_color   = true;
+                    draw.state.stencil_ref   = 1;
+                    draw.state.stencil_mask  = 0xff;
+                    draw.state.stencil_func  = gfx::Painter::StencilFunc::RefIsEqual;
+                    draw.state.stencil_dpass = gfx::Painter::StencilOp::DontModify;
+                    draw.state.stencil_dfail = gfx::Painter::StencilOp::DontModify;
+                }
+            }
         }
     }
 

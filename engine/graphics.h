@@ -110,9 +110,9 @@ namespace engine
     };
 
     struct RenderLayer {
-        std::vector<gfx::Painter::DrawShape> draw_color_list;
-        std::vector<gfx::Painter::DrawShape> mask_cover_list;
-        std::vector<gfx::Painter::DrawShape> mask_expose_list;
+        std::vector<gfx::Painter::DrawCommand> draw_color_list;
+        std::vector<gfx::Painter::DrawCommand> mask_cover_list;
+        std::vector<gfx::Painter::DrawCommand> mask_expose_list;
     };
 
     using EntityRenderLayerList = std::vector<RenderLayer>;
