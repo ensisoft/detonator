@@ -762,7 +762,12 @@ namespace game
     class TilemapClass
     {
     public:
-        using Perspective = game::Perspective;
+        enum class Perspective {
+            // Map from top down or side-on view
+            AxisAligned,
+            // Dimetric orthographic view from a fixed angle.
+            Dimetric
+        };
 
         TilemapClass();
         TilemapClass(const TilemapClass& other);
@@ -873,6 +878,7 @@ namespace game
     {
     public:
         using Class = TilemapClass;
+        using Perspective = TilemapClass::Perspective;
 
         Tilemap(const std::shared_ptr<const TilemapClass>& klass);
         Tilemap(const TilemapClass& klass);
@@ -918,7 +924,7 @@ namespace game
         inline float GetTileDepth() const noexcept
         { return mClass->GetTileDepth(); }
         inline Perspective GetPerspective() const noexcept
-        { return mClass->GetPerspective();}
+        { return mClass->GetPerspective(); }
         inline float GetTileRenderWidthScale() const noexcept
         { return mClass->GetTileRenderWidthScale(); }
         inline float GetTileRenderHeightScale() const noexcept
