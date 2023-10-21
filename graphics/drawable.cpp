@@ -86,7 +86,6 @@ uniform mat4 kProjectionMatrix;
 uniform mat4 kModelViewMatrix;
 
 varying vec2 vTexCoord;
-
 varying float vParticleRandomValue;
 varying float vParticleAlpha;
 varying float vParticleTime;
@@ -114,11 +113,18 @@ uniform mat4 kProjectionMatrix;
 uniform mat4 kModelViewMatrix;
 
 varying vec2 vTexCoord;
+varying float vParticleRandomValue;
+varying float vParticleAlpha;
+varying float vParticleTime;
 
 void VertexShaderMain()
 {
     vTexCoord = aTexCoord;
+    vParticleRandomValue = 0.0;
+    vParticleAlpha       = 1.0;
+    vParticleTime        = 0.0;
     gl_Position = kProjectionMatrix * kModelViewMatrix * vec4(aPosition.xyz, 1.0);
+
 }
 
 )";
