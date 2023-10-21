@@ -59,7 +59,7 @@ void MakeViewTransform(const UI& ui, const State& state, gfx::Transform& view, f
 
 template<typename UI, typename State>
 glm::mat4 CreateViewMatrix(const UI& ui, const State& state,
-                           game::Perspective perspective = game::Perspective::AxisAligned)
+                           engine::Perspective perspective = engine::Perspective::AxisAligned)
 {
     const float zoom = GetValue(ui.zoom);
     const float xs = GetValue(ui.scaleX);
@@ -74,7 +74,7 @@ glm::mat4 CreateViewMatrix(const UI& ui, const State& state,
 }
 
 template<typename UI>
-glm::mat4 CreateProjectionMatrix(const UI& ui, game::Perspective perspective = game::Perspective::AxisAligned)
+glm::mat4 CreateProjectionMatrix(const UI& ui, engine::Perspective perspective = engine::Perspective::AxisAligned)
 {
     const auto width  = ui.widget->width();
     const auto height = ui.widget->height();
@@ -85,7 +85,7 @@ template<typename UI, typename State>
 Point2Df MapWindowCoordinateToWorld(const UI& ui,
                                    const State& state,
                                    const Point2Df& window_point,
-                                   game::Perspective perspective = game::Perspective::AxisAligned)
+                                   engine::Perspective perspective = engine::Perspective::AxisAligned)
 {
     const Size2Df window_size = ui.widget->size();
 
@@ -99,7 +99,7 @@ template<typename UI, typename State>
 Point2Df MapWorldCoordinateToWindow(const UI& ui,
                                     const State& state,
                                     const Point2Df& world_point,
-                                    game::Perspective perspective = game::Perspective::AxisAligned)
+                                    engine::Perspective perspective = engine::Perspective::AxisAligned)
 {
     const Size2Df window_size = ui.widget->size();
 

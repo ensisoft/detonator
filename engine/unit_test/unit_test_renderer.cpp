@@ -858,7 +858,7 @@ void unit_test_axis_aligned_map()
     map->SetTileDepth(50.0f);
     map->SetMapWidth(2);
     map->SetMapHeight(2);
-    map->SetPerspective(game::Perspective::AxisAligned);
+    map->SetPerspective(game::TilemapClass::Perspective::AxisAligned);
 
     auto layer0 = std::make_shared<game::TilemapLayerClass>();
     layer0->SetName("layer0");

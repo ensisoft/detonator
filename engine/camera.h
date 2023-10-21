@@ -25,26 +25,121 @@
 
 #include "game/enum.h"
 #include "game/types.h"
+#include "game/tilemap.h"
 
 namespace engine
 {
-    glm::mat4 CreateProjectionMatrix(game::Perspective perspective, const glm::vec2& surface_size);
-    glm::mat4 CreateProjectionMatrix(game::Perspective perspective, const game::FRect& viewport);
-    glm::mat4 CreateProjectionMatrix(game::Perspective perspective, float surface_width, float surface_height);
+    // Graphical projections can be classified as follows:
+    //
+    // - Perspective projection (aka linear projection)
+    //    - normally the projection ray through the center of the projection plane
+    //      is perpendicular to the plane but it doesn't have to be.
+    //
+    //  - Parallel projection.
+    //    In parallel projection the projection rays are all parallel. I.e. they all point at
+    //    at the same direction from the projection plane. The angle of each vector wrt the
+    //    projection plane can be perpendicular (orthographic projection) or at some angle (oblique projection)
+    //
+    //    - Orthographic projection.
+    //        In orthogonal all projection rays are parallel *and* perpendicular to the projection plane.
+    //        Depending on the view angles this projection can further be split into:
+    //        - "Plan" or "Elevation" projection. The view is directly aligned (projection rays are
+    //          parallel to one axis) which shortens one axis away when projected. The two remaining projected
+    //          axis are at 90 degree angle.
+    //       - Axonometric projections. The view is at some angle that lets all 3 (x,y,z) axis be projected onto
+    //         the projection plane at various projection angles (i.e. the angles of the axis after projection).
+    //         - Isometric projection.
+    //            Angles between all projected axis vectors is 120 degrees. 1.732:1 pixel ratio.
+    //         - Dimetric projection
+    //            Two angles between projected vectors are 105 degrees and the third angle is 150.
+    //             This creates a pixel ratio of 2:1 width:height. Tiles will be 2 as wide as they're
+    //             high and lines parallel with the x, y rays in the coordinate grid move up/down 1 pixels
+    //             for every 1 pixel horizontally (when projected)
+    //         - Trimetric projection
+    //            todo
+
+    //    - Oblique projection.
+    //        In oblique projection all projection rays are parallel but non perpendicular. In other words
+    //        the projection rays are at slanted/skewed wrt the projection plane.
+    //        - Military
+    //        - Cavalier
+    //        - Topdown
+    //
+
+    // High level perspective (view point, vantage point) defines how
+    // game objects are displayed when rendered.
+    // Each perspective requires a combination of a specific view/camera
+    // vantage point and the right graphical projection in order to produce
+    // the desired rendering. For example the dimetric perspective (typically
+    // referred to as 'isometric' in 2D games) is a camera angle of 45 deg
+    // around UP axis and 30 deg down tilt combined with orthographic projection.
+    struct Perspective
+    {
+        // NOTE: no *class* on purpose, the outer struct is the class
+        enum EnumValue {
+            // Orthographic axis aligned projection infers a camera position that
+            // is perpendicular to one of the coordinate space axis. This can be
+            // used to produce "top down" or "side on" views.
+            // When used in games this view can be used for example for side-scrollers,
+            // top-down shooters, platform and puzzle games.
+            AxisAligned,
+            // Orthographic dimetric perspective infers a camera position that is
+            // angled at a fixed yaw and tilt (pitch) to look in a certain direction.
+            // This camera vantage point is then combined with an orthographic
+            // projection to produce a 2D rendering where multiple sides of an
+            // object are visible but without any perspective foreshortening.
+            // This type of perspective is common in strategy and simulation games.
+            // This is often (incorrectly) called "isometric" even though mathematically
+            // isometric and dimetric are not the same projections.
+            Dimetric,
+            // todo: ObliqueTopDown
+            //Oblique
+        };
+        Perspective(EnumValue value)
+          : value(value)
+        {}
+        Perspective(game::Tilemap::Perspective perspective)
+        {
+            if (perspective == game::Tilemap::Perspective::AxisAligned)
+                value = EnumValue::AxisAligned;
+            else if (perspective == game::Tilemap::Perspective::Dimetric)
+                value = EnumValue::Dimetric;
+            else BUG("Unknown tilemap perspective.");
+        }
+        inline operator EnumValue () const noexcept
+        { return value; }
+
+        EnumValue value;
+    };
+
+    inline bool operator==(Perspective lhs, Perspective rhs)
+    { return lhs.value == rhs.value; }
+    inline bool operator==(Perspective perspective, Perspective::EnumValue value)
+    { return perspective.value == value; }
+    inline bool operator!=(Perspective perspective, Perspective::EnumValue value)
+    { return perspective.value != value; }
+    inline bool operator==(Perspective::EnumValue value, Perspective perspective)
+    { return perspective.value == value; }
+    inline bool operator!=(Perspective::EnumValue value, Perspective perspective)
+    { return perspective.value != value; }
+
+    glm::mat4 CreateProjectionMatrix(Perspective perspective, const glm::vec2& surface_size);
+    glm::mat4 CreateProjectionMatrix(Perspective perspective, const game::FRect& viewport);
+    glm::mat4 CreateProjectionMatrix(Perspective perspective, float surface_width, float surface_height);
 
     // Create model transformation matrix for a certain type of game perspective.
     // This matrix adds a perspective specific rotation to the model transformation.
-    glm::mat4 CreateModelMatrix(game::Perspective perspective);
+    glm::mat4 CreateModelMatrix(Perspective perspective);
 
     // Create view transformation matrix for a certain type of game perspective
     // assuming a world translation and world scale. In other words this matrix
     // transforms the world space objects into "view/eye/camera" space.
-    glm::mat4 CreateModelViewMatrix(game::Perspective perspective,
+    glm::mat4 CreateModelViewMatrix(Perspective perspective,
                                     const glm::vec2& camera_pos,
                                     const glm::vec2& camera_scale,
                                     float camera_rotation = 0.0f); // rotation around the Z axis in degrees
 
-    inline glm::mat4 CreateModelViewMatrix(game::Perspective perspective,
+    inline glm::mat4 CreateModelViewMatrix(Perspective perspective,
                                            float camera_pos_x,
                                            float camera_pos_y,
                                            float world_scale_x,
@@ -129,15 +224,15 @@ namespace engine
                                            const glm::mat4& plane_world_to_view,
                                            const glm::vec4& plane_pos);
 
-    glm::vec4 MapFromPlaneToPlane(const glm::vec4& pos, game::Perspective src, game::Perspective dst);
+    glm::vec4 MapFromPlaneToPlane(const glm::vec4& pos, Perspective src, Perspective dst);
 
-    inline glm::vec4 MapFromTilePlaneToScenePlane(const glm::vec4& tile_pos, game::Perspective tile_plane) noexcept
+    inline glm::vec4 MapFromTilePlaneToScenePlane(const glm::vec4& tile_pos, Perspective tile_plane) noexcept
     {
-        return MapFromPlaneToPlane(tile_pos, tile_plane, game::Perspective::AxisAligned);
+        return MapFromPlaneToPlane(tile_pos, tile_plane, Perspective::AxisAligned);
     }
-    inline glm::vec4 MapFromScenePlaneToTilePlane(const glm::vec4& scene_pos, game::Perspective tile_plane) noexcept
+    inline glm::vec4 MapFromScenePlaneToTilePlane(const glm::vec4& scene_pos, Perspective tile_plane) noexcept
     {
-        return MapFromPlaneToPlane(scene_pos, game::Perspective::AxisAligned, tile_plane);
+        return MapFromPlaneToPlane(scene_pos, Perspective::AxisAligned, tile_plane);
     }
 
     // Produce a matrix that transforms a vertex from one coordinate space
@@ -168,8 +263,8 @@ namespace engine
 
     glm::vec2 ComputeTileRenderSize(const glm::mat4& tile_to_render,
                                     const glm::vec2& tile_size,
-                                    game::Perspective perspective);
+                                    Perspective perspective);
 
-    glm::vec3 GetTileCuboidFactors(game::Perspective perspective);
+    glm::vec3 GetTileCuboidFactors(game::Tilemap::Perspective perspective);
 
 } // namespace

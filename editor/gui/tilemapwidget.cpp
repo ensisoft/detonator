@@ -52,9 +52,9 @@ namespace{
     gui::Size2Df GetMaterialPreviewScale(const game::TilemapClass& klass)
     {
         const auto perspective = klass.GetPerspective();
-        if (perspective == game::Perspective::AxisAligned)
+        if (perspective == game::TilemapClass::Perspective::AxisAligned)
             return {1.0f, 1.0};
-        else if (perspective == game::Perspective::Dimetric)
+        else if (perspective == game::TilemapClass::Perspective::Dimetric)
             return {1.0f, 2.0f};
         else BUG("Unknown perspective");
         return {1.0f, 1.0f};
@@ -459,9 +459,9 @@ public:
         batch.SetTileRenderWidth(render_size.x * tile_render_width_scale);
         batch.SetTileRenderHeight(render_size.y * tile_render_height_scale);
         batch.SetTileShape(gfx::TileBatch::TileShape::Automatic);
-        if (perspective == game::Perspective::AxisAligned)
+        if (perspective == game::Tilemap::Perspective::AxisAligned)
             batch.SetProjection(gfx::TileBatch::Projection::AxisAligned);
-        else if (perspective == game::Perspective::Dimetric)
+        else if (perspective == game::Tilemap::Perspective::Dimetric)
             batch.SetProjection(gfx::TileBatch::Projection::Dimetric);
         else BUG("missing tile projection.");
 
@@ -2090,8 +2090,8 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
     tile_painter.SetSurfaceSize(width, height);
 
     gfx::Painter scene_painter(painter.GetDevice());
-    scene_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, game::Perspective::AxisAligned));
-    scene_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, game::Perspective::AxisAligned));
+    scene_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, engine::Perspective::AxisAligned));
+    scene_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, engine::Perspective::AxisAligned));
     scene_painter.SetPixelRatio({1.0f*xs*zoom, 1.0f*ys*zoom});
     scene_painter.SetViewport(0, 0, width, height);
     scene_painter.SetSurfaceSize(width, height);
@@ -2140,9 +2140,9 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                     tiles.SetTileWorldSize(batch.tile_size);
                     tiles.SetTileRenderSize(batch.render_size);
                     tiles.SetTileShape(gfx::TileBatch::TileShape::Automatic);
-                    if (perspective == game::Perspective::AxisAligned)
+                    if (perspective == game::Tilemap::Perspective::AxisAligned)
                         tiles.SetProjection(gfx::TileBatch::Projection::AxisAligned);
-                    else if (perspective == game::Perspective::Dimetric)
+                    else if (perspective == game::Tilemap::Perspective::Dimetric)
                         tiles.SetProjection(gfx::TileBatch::Projection::Dimetric);
                     else BUG("unknown projection");
 

@@ -1481,7 +1481,7 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     const auto xs     = (float)GetValue(mUI.scaleX);
     const auto ys     = (float)GetValue(mUI.scaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
-    const auto perspective = game::Perspective::AxisAligned;
+    const auto perspective = engine::Perspective::AxisAligned;
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
@@ -1560,7 +1560,7 @@ void AnimationTrackWidget::MouseZoom(std::function<void(void)> zoom_function)
         mickey.y() > mUI.widget->height())
         return;
 
-    const auto perspective = game::Perspective::AxisAligned;
+    const auto perspective = engine::Perspective::AxisAligned;
     Point2Df mickey_world_before_zoom;
     Point2Df mickey_world_after_zoom;
 

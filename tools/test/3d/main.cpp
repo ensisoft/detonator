@@ -59,10 +59,8 @@ namespace  engine {
     class Camera
     {
     public:
-        using Perspective = game::Perspective;
-
         Camera() = default;
-        explicit Camera(game::Perspective perspective)
+        explicit Camera(engine::Perspective perspective)
         {
             SetFromPerspective(perspective);
             Update();
@@ -73,9 +71,9 @@ namespace  engine {
         // perspective is not by itself enough to create the final rendering.
         // For example with dimetric rendering the projection matrix also needs
         // to be set to a orthographic projection.
-        inline void SetFromPerspective(game::Perspective perspective) noexcept
+        inline void SetFromPerspective(engine::Perspective perspective) noexcept
         {
-            if (perspective == Perspective::Dimetric)
+            if (perspective == engine::Perspective::Dimetric)
             {
                 // jump to a position for dimetric projection.
                 // 45 degrees around the UP axis (yaw) and 30 degrees down (pitch)
@@ -83,7 +81,7 @@ namespace  engine {
                 SetYaw(-90.0f - 45.0f);
                 SetPitch(-30.0f);
             }
-            else if (perspective == Perspective::AxisAligned)
+            else if (perspective == engine::Perspective::AxisAligned)
             {
                 SetPosition({0.0f, 0.0f, 0.0f});
                 SetDirection({0.0f, 0.0f, -1.0f});
@@ -212,7 +210,7 @@ struct State{
     glm::vec3 cube_rotation = {0.0f, 0.0f, 0.0f};
     GridDensity grid = GridDensity::Grid100x100;
 
-    std::optional<game::Perspective> perspective;
+    std::optional<engine::Perspective> perspective;
     glm::mat4 projection;
 
     glm::vec3 mouse_pos = {0.0f, 0.0f, 0.0f};
@@ -261,7 +259,7 @@ glm::mat4 GetViewMatrix(const State& state, bool translate_camera = true, bool a
 
     if (const auto* p = base::GetOpt(state.perspective))
     {
-        if (*p == game::Perspective::Dimetric)
+        if (*p == engine::Perspective::Dimetric)
             mat = glm::rotate(mat, glm::radians(90.0f), glm::vec3{1.0f, 0.0f, 0.0f});
     }
     return mat;
@@ -477,12 +475,12 @@ void DrawScene(RenderPass& pass, gfx::Painter& painter, const State& state)
         float grid_origin_x = 0.0f;
         float grid_origin_y = 0.0f;
         const auto* perspective = base::GetOpt(state.perspective);
-        if (perspective && *perspective == game::Perspective::Dimetric)
+        if (perspective && *perspective == engine::Perspective::Dimetric)
         {
             grid_origin_x = (int)state.camera_pos.x / cell_size_units * cell_size_units;
             grid_origin_y = (int)state.camera_pos.z / cell_size_units * cell_size_units;
         }
-        else if (perspective && *perspective == game::Perspective::AxisAligned)
+        else if (perspective && *perspective == engine::Perspective::AxisAligned)
         {
             grid_origin_x = (int)state.camera_pos.x / cell_size_units * cell_size_units;
             grid_origin_y = (int)state.camera_pos.y / cell_size_units * cell_size_units;
@@ -705,15 +703,15 @@ int main(int argc, char* argv[])
         }
         else if (key.symbol == wdk::Keysym::F2)
         {
-            state.camera.SetFromPerspective(engine::Camera::Perspective::Dimetric);
+            state.camera.SetFromPerspective(engine::Perspective::Dimetric);
             state.camera_pos = {0.0f, 0.0f, 0.0f};
-            state.perspective = game::Perspective::Dimetric;
+            state.perspective = engine::Perspective::Dimetric;
         }
         else if (key.symbol == wdk::Keysym::F3)
         {
-            state.camera.SetFromPerspective(engine::Camera::Perspective::AxisAligned);
+            state.camera.SetFromPerspective(engine::Perspective::AxisAligned);
             state.camera_pos = {0.0f, 0.0f, 0.0f};
-            state.perspective = game::Perspective::AxisAligned;
+            state.perspective = engine::Perspective::AxisAligned;
         }
         else if (key.symbol == wdk::Keysym::KeyW && key.modifiers.test(wdk::Keymod::Control))
             window.Destroy();
@@ -796,12 +794,12 @@ int main(int argc, char* argv[])
                 {
                     const auto mouse_move = mouse_pos_plane - state.mouse_pos;
                     const auto& perspective = state.perspective.value();
-                    if (perspective == game::Perspective::Dimetric)
+                    if (perspective == engine::Perspective::Dimetric)
                     {
                         state.camera_pos.x -= mouse_move.x;
                         state.camera_pos.z -= mouse_move.y;
                     }
-                    else if (perspective == game::Perspective::AxisAligned)
+                    else if (perspective == engine::Perspective::AxisAligned)
                     {
                         state.camera_pos.x -= mouse_move.x;
                         state.camera_pos.y -= mouse_move.y;
@@ -967,13 +965,13 @@ int main(int argc, char* argv[])
 
         if (const auto* perspective = base::GetOpt(state.perspective))
         {
-            if (*perspective == game::Perspective::Dimetric)
+            if (*perspective == engine::Perspective::Dimetric)
             {
                 //state.projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, -10000.0f, 10000.0f);
                 //state.projection = glm::ortho(-5.0f, 5.0f, 5.0f, -5.0f, -10000.0f, 10000.0f);
                 state.projection = glm::ortho(-state.window.x*0.5f, state.window.x*0.5f, -state.window.y*0.5f, state.window.y*0.5f, -10000.0f, 10000.0f);
             }
-            else if (*perspective == game::Perspective::AxisAligned)
+            else if (*perspective == engine::Perspective::AxisAligned)
             {
                 //state.projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 1.0f, 100.0f);
                 //state.projection = glm::ortho(-5.0f, 5.0f, 5.0f, -5.0f, -1.0f, 1.0f); // !!
