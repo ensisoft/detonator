@@ -65,7 +65,7 @@ namespace gui
             if constexpr (std::is_enum<T>::value)
             {
                 const auto& str = value.toString();
-                T foo;
+                T foo = T();
                 bool success = false;
                 *out = app::EnumFromString(str, foo, &success);
                 return success;
