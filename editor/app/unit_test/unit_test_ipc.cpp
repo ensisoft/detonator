@@ -34,6 +34,8 @@
 
 void unit_test_ipc_host()
 {
+    TEST_CASE(test::Type::Feature)
+
     app::IPCHost::CleanupSocket("test-socket");
 
     app::IPCHost host;
@@ -50,6 +52,8 @@ void unit_test_ipc_host()
 
 void unit_test_ipc_client()
 {
+    TEST_CASE(test::Type::Feature)
+
     app::IPCHost::CleanupSocket("test-socket");
 
     app::IPCClient client;
@@ -86,6 +90,8 @@ void unit_test_ipc_client()
 
 void unit_test_ipc_send_recv()
 {
+    TEST_CASE(test::Type::Feature)
+
     app::IPCHost::CleanupSocket("test_socket_name");
 
     app::IPCHost host;
@@ -153,6 +159,8 @@ void unit_test_ipc_send_recv()
 
 void unit_test_ipc_json_send_recv()
 {
+    TEST_CASE(test::Type::Feature)
+
     app::IPCHost::CleanupSocket("test_socket_name");
 
     app::IPCHost host;
@@ -225,6 +233,7 @@ void unit_test_ipc_json_send_recv()
     }
 }
 
+EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     QCoreApplication app(argc, argv);
@@ -243,3 +252,4 @@ int test_main(int argc, char* argv[])
     unit_test_ipc_json_send_recv();
     return 0;
 }
+) // TEST_MAIN
