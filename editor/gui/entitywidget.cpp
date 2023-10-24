@@ -925,17 +925,11 @@ void EntityWidget::Paste(const Clipboard& clipboard)
         mickey.y() < 0 || mickey.y() > mUI.widget->height())
         mickey = QPoint(mUI.widget->width() * 0.5, mUI.widget->height() * 0.5);
 
-    gfx::Transform view;
-    view.Scale(GetValue(mUI.scaleX), GetValue(mUI.scaleY));
-    view.Scale(GetValue(mUI.zoom), GetValue(mUI.zoom));
-    view.RotateAroundZ(qDegreesToRadians((float) GetValue(mUI.rotation)));
-    view.Translate(mState.camera_offset_x, mState.camera_offset_y);
-    const auto& view_to_scene   = glm::inverse(view.GetAsMatrix());
-    const auto& mouse_pos_view  = ToVec4(mickey);
-    const auto& mouse_pos_scene = view_to_scene * mouse_pos_view;
+    const auto perspective = engine::Perspective::AxisAligned;
+    const auto& mouse_pos_scene = MapWindowCoordinateToWorld(mUI, mState, mickey, perspective);
 
     auto* paste_root = nodes[0].get();
-    paste_root->SetTranslation(glm::vec2(mouse_pos_scene.x, mouse_pos_scene.y));
+    paste_root->SetTranslation(mouse_pos_scene);
     tree.LinkChild(nullptr, paste_root);
 
     // if we got this far, nodes should contain the nodes to be added
