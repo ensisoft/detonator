@@ -24,6 +24,8 @@
 
 void unit_test_settings_json()
 {
+    TEST_CASE(test::Type::Feature)
+
     enum class Fruits {
         Bananana, Kiwi, Watermelon
     };
@@ -64,9 +66,10 @@ void unit_test_settings_json()
     }
 }
 
+EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     unit_test_settings_json();
-
     return 0;
 }
+) // TEST_MAIN
