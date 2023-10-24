@@ -1,83 +1,106 @@
 {
     "124YMG3023": {
+        "__version": 1,
         "checked_for_packing": 1,
         "elem_Q7EeMBu72q_pos_x": 0,
         "elem_Q7EeMBu72q_pos_y": 0,
         "mapping_count": 0
     },
     "26DgI88X5u": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "w26YsP04pJ"
     },
     "2Q2vkLGDEg": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "2sWxF1jCqU": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_S17SJNDFPG": ""
     },
     "2ynNMbWOK3": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "4NMFT9hs0Y": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "4rBCnTGuXK": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "90E8gRgYDP"
     },
     "5GPKkIzzUf": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "7WjAKJb7hY": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_z91WmstalU": ""
     },
     "7lSTOyhTqF": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "7qhE9P3Lno": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "7uTDp9S0mt": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "8636ofEjei": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "RnL44evfW5"
     },
     "8Prh114uxP": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_KTWTPjswtn": ""
     },
     "90E8gRgYDP": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "9LU4RC9DH0": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_RaWnULHEHq": ""
     },
     "9aRwE7zov7": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "AgxrO05Kqg": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "Ca4GgRWjP2": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "DOzd15fNMX": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_C8Zo9jLx2t": ""
     },
     "Dm9UM2yky9": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "EXQWh9Zz2B": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "Bush (2)"
     },
     "FNUUxWSBTe": {
+        "__version": 1,
         "checked_for_packing": 1,
         "track_4FKDqoTRqr": {
             "JByFlM7KOG": "FqRgn3KqOb",
@@ -221,21 +244,26 @@
         }
     },
     "FW5N4w5d3Z": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "FgJP6uJzoG": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "bvJqe9fGu5"
     },
     "Fm5ByqI6xo": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_2X1vo3R61U": ""
     },
     "GaQT22N3OL": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_066mSwAYNb": ""
     },
     "HFSA8Yezdr": {
+        "__version": 1,
         "checked_for_packing": 1,
         "track_Kyi3Hzs1Lr": {
             "hJ7fkd0GBS": "tNpxGZm4ET",
@@ -245,27 +273,34 @@
         }
     },
     "HpAo2l11sT": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_uZd3FvpM9D": ""
     },
     "IM3dwFG7wS": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "IPqp1SooOX": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "IfEi7dQdbW": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "QR14nEb7T3"
     },
     "ImTnUuKMDu": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "JQAP7v0ZUJ": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "gzjp7PwMQd"
     },
     "Jn0SpbgGSY": {
+        "__version": 1,
         "checked_for_packing": 1,
         "track_NmRjjTphCH": {
             "15Uo6BfvUA": "56q3P8RS3n",
@@ -303,18 +338,23 @@
         }
     },
     "M3GBwLlWRp": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "MBEoxQ9SGX": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "MDomkaGQRL": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "MYaj1na7M4": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "MiA8FWNEaF": {
+        "__version": 1,
         "checked_for_packing": 1,
         "track_0nrM22fbCl": {
             "56sCux3qYZ": "FrKYWYnLrb",
@@ -335,81 +375,105 @@
         }
     },
     "NY4Of7DfnI": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "O5QefURbEM": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "PBPIRCm9MB": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "9aRwE7zov7"
     },
     "PiCFlSf9Gm": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "QCvtiZTp3b": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "QR14nEb7T3": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "QwLaM5bEqx": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "IM3dwFG7wS"
     },
     "RhslGRtQQR": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "RnL44evfW5": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "SFrJwO771l": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_gLEkpUMPMY": ""
     },
     "SId1upp3XQ": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "TyE5N8JWlx": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "UJKQNRymuO": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "UTfmL76ml0": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "W27ZFgJKAJ": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "f2rOXhvzDy"
     },
     "WKsCpHkbNw": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "WTNfneUmHx": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "WtCkGlPDwf": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "X6Q2aN3uWm": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "XJz8lK4sSZ": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "nLUoQRjXrg"
     },
     "Y3nvZp6DaX": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "YFMYNa7lU4": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "YkK6SEnX2R": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "xrUzM3pdBZ"
     },
     "Yq50Y5iaj6": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_0BEu7bmIj7": "",
         "comment_8FQMqZtbZH": "",
@@ -417,39 +481,50 @@
         "comment_wI6nyLEiCZ": ""
     },
     "Yyg2eMPHlt": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "ZNaUsmn31R": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "b2lU3gYIwf": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "bBSpmT5CN0": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "bEAIWd3ESl": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "bOtC7Fnmmp": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_WxXttNKwyJ": ""
     },
     "bvJqe9fGu5": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "d8ZPi5y9Ps": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_aky1XfEBAy": ""
     },
     "dJKagvO0jM": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "dWDAODzq3M": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "Ca4GgRWjP2"
     },
     "dfb84OzuRo": {
+        "__version": 1,
         "checked_for_packing": 1,
         "track_dYWb7lvShr": {
             "num_timelines": 2,
@@ -461,27 +536,34 @@
         }
     },
     "ezvBTHxrAX": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "f2rOXhvzDy": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "fW1kOmDCo0": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "wrSRezqUfj"
     },
     "fmxJ24RhUE": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "g3TRakI9ob": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_nyU7LB2bT7": ""
     },
     "gUmNEBelRm": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "bBSpmT5CN0"
     },
     "gwm3bTflRn": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_KIiKgUK0Dg": "",
         "comment_UIbYC5M3Iq": "",
@@ -489,37 +571,48 @@
         "comment_l2p8ir9ZhN": ""
     },
     "gzjp7PwMQd": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "iFATbhg5NM": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "jqIuU0kASH": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "kyLTH2YAJY": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "l6vR7abMmW": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "l9oab5XQTK": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "IPqp1SooOX"
     },
     "loHDpIgprb": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "mgo2XI2toK": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "nLUoQRjXrg": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "nR73zKx341": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "nnXiuEEnwL": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "2ynNMbWOK3",
         "transform_height": 500,
@@ -532,17 +625,21 @@
         "use_size_derivatives": 0
     },
     "oDE09YOPk9": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "zgwqXHtABU"
     },
     "oNJA4jNZF9": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "pQ2O7Ekypd"
     },
     "oTLKJxJ07d": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "pQ2O7Ekypd": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "project": {
@@ -571,6 +668,7 @@
         "desktop_audio_io_strategy": "Automatic",
         "enable_audio_pcm_caching": false,
         "enable_physics": true,
+        "game_home": "${game-home}-dev",
         "game_script": "ws://lua/game.lua",
         "game_viewport_height": 800,
         "game_viewport_width": 1200,
@@ -618,29 +716,40 @@
         "working_folder": "${workspace}"
     },
     "sX94tG9WhR": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "tdYbKt5I5Q": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "te9JjLzdlp": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "tqF7brLL08": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "uLZlHEU5XW": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "vWm1hXNdOD": {
+        "__version": 1,
+        "checked_for_packing": 1
     },
     "vYm7CMPRrJ": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "vq6v6WdXwZ": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "w26YsP04pJ": {
+        "__version": 1,
+        "checked_for_packing": 1
     },
     "workspace": {
         "packing_param_combine_textures": true,
@@ -661,21 +770,27 @@
         "packing_param_write_content": true
     },
     "wrSRezqUfj": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "xrUzM3pdBZ": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "y7bWvFuoie": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "z3qBPdpAGa": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "zgwqXHtABU": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "zoqnFP5Gvz": {
+        "__version": 1,
         "checked_for_packing": 1,
         "material": "mgo2XI2toK"
     }

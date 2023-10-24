@@ -1,5 +1,6 @@
 {
     "02kw3C4wix": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -14,6 +15,7 @@
         "use_lifetime": 1
     },
     "0BT4ANr30T": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 0.38,
         "local_emitter_w": 0.38,
@@ -28,17 +30,21 @@
         "use_lifetime": 1
     },
     "0xydhM7UqW": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "1RlBexDBsu": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "1XgDNiDXTz": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_58zAWbfzpR": "",
         "comment_AXp3uJ3dLF": ""
     },
     "28lGaDWqAm": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 0.1,
         "local_emitter_w": 1,
@@ -53,9 +59,11 @@
         "use_lifetime": 1
     },
     "2JJndZoBDS": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "3Y7QCvLmnD": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 0.13,
         "local_emitter_w": 1,
@@ -70,12 +78,15 @@
         "use_lifetime": 1
     },
     "4POqhfHWQE": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "4ZgNL1JNfD": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "6604Fhgq27": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 0.05,
         "local_emitter_w": 0.02,
@@ -90,6 +101,7 @@
         "use_lifetime": 1
     },
     "6PwXHnbnzY": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -104,26 +116,33 @@
         "use_lifetime": 1
     },
     "7D4iRC0ogE": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "8qJeAKQFtw": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "96IAS00DCm": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "BbEpeqHSYG": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_WP4oD64913": "",
         "comment_fo1iBtE2PJ": ""
     },
     "BkQRl3PzCr": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "BtXKsAOnPr": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "DEnBflg7Re": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 0.13,
         "local_emitter_w": 1,
@@ -138,6 +157,7 @@
         "use_lifetime": 1
     },
     "DX5iTPFmEZ": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -152,12 +172,15 @@
         "use_lifetime": 1
     },
     "EJtsMLLYa9": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "HA5M7RGQpK": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "HG7v1manRC": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -172,9 +195,11 @@
         "use_lifetime": 1
     },
     "J8J3JM8rC8": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "JUOysDXYJL": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_lvqGGnspNa": "",
         "track_zH8aNnYeSH": {
@@ -186,6 +211,7 @@
         }
     },
     "Jv6CJCIheq": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 0.01,
         "local_emitter_w": 1,
@@ -200,6 +226,7 @@
         "use_lifetime": 1
     },
     "K5fmwRUujU": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -214,14 +241,17 @@
         "use_lifetime": 1
     },
     "K9D27CRUwq": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "KALE2Cn77Q": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_2QmI7rXsbZ": "",
         "comment_loTkslEBZQ": ""
     },
     "KSwh4OhJxA": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 0.14,
         "local_emitter_w": 0.17,
@@ -236,6 +266,7 @@
         "use_lifetime": 1
     },
     "LnUnRULvIo": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -250,6 +281,7 @@
         "use_lifetime": 1
     },
     "MSCSkjl4Su": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -264,9 +296,11 @@
         "use_lifetime": 0
     },
     "N5AZXzLO89": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "OpgNJAMhhQ": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -281,6 +315,7 @@
         "use_lifetime": 1
     },
     "R0XaXuWEBU": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 0.26,
         "local_emitter_w": 0.25,
@@ -295,11 +330,13 @@
         "use_lifetime": 1
     },
     "RDi65JlZls": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_ECfe9aS5xS": "",
         "comment_REyT7HYYhL": ""
     },
     "SX0ABkBEq9": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_6hZs8iMUZy": "",
         "comment_AdZCosqgbx": "",
@@ -307,9 +344,11 @@
         "comment_bO0zByQW4b": ""
     },
     "SXaZ6dfqlS": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "UEHaD6hTOe": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_EFLTpOBTxf": "",
         "comment_N2fp3IHYEM": "",
@@ -317,6 +356,7 @@
         "comment_wLFbL7zKvp": ""
     },
     "X983sNLRSh": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -331,27 +371,34 @@
         "use_lifetime": 1
     },
     "Xg0GdRiaQU": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "ZnvR8kE3vD": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_7hGhRTTZC5": ""
     },
     "bBESp9pEw3": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "bQyCGOw7tW": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_DKjYlWCCSk": "",
         "comment_ISPnm2QqYE": ""
     },
     "dFl9nHNaNT": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "dZDA63fz8X": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "dpnADuNTa0": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_8iMd3g8RxH": "",
         "comment_GroRP5vz1A": "",
@@ -370,17 +417,21 @@
         }
     },
     "eySa2QEq4I": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "f3llpkZaRE": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "jaXpNTpHBe": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_e4q4k8PhOs": "this is the launch point for rockets",
         "comment_qs1jYIlq3l": ""
     },
     "n6ykHi9xRi": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -395,12 +446,15 @@
         "use_lifetime": 1
     },
     "nIkywmIbBJ": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "nZkUdw95Ds": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "obukJs0rJC": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 0.01,
         "local_emitter_w": 0.01,
@@ -415,14 +469,17 @@
         "use_lifetime": 1
     },
     "om7tHo4XiA": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_ZUCdMli3MR": "",
         "comment_pfkeOSHYlD": ""
     },
     "pEBDeuBGgb": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "pTbMGuziXE": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_2dRqezf2Ot": "",
         "comment_S3msAki3LW": ""
@@ -453,6 +510,7 @@
         "desktop_audio_io_strategy": "Automatic",
         "enable_audio_pcm_caching": false,
         "enable_physics": true,
+        "game_home": "${game-home}-dev",
         "game_script": "ws://lua/game.lua",
         "game_viewport_height": 800,
         "game_viewport_width": 1200,
@@ -500,6 +558,7 @@
         "working_folder": "${workspace}"
     },
     "q2YkyQYmdd": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -514,12 +573,15 @@
         "use_lifetime": 1
     },
     "qGhg1ub3rt": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "qOf1KOOSpS": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "rAxSklk4hv": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_28sWoyHNTX": "",
         "comment_Prgaus7Ure": "",
@@ -527,6 +589,7 @@
         "comment_wz8y0ZBNW1": ""
     },
     "rBqJ2LlkXC": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 0.12,
         "local_emitter_w": 0.13,
@@ -541,15 +604,18 @@
         "use_lifetime": 1
     },
     "sv05U2SGGE": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "tyNkXUoRPJ": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_L30Ob5LLSH": "",
         "comment_PLozCzYgnd": "",
         "comment_daXCUJOp0z": ""
     },
     "vIf7bfadSt": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -564,6 +630,7 @@
         "use_lifetime": 1
     },
     "w3S1bxiRIU": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -595,6 +662,7 @@
         "packing_param_write_content": true
     },
     "y0ZBwlFRes": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 0.35,
         "local_emitter_w": 0.46,
@@ -609,9 +677,11 @@
         "use_lifetime": 1
     },
     "y6vxOLdMaI": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "y7WyC5UeQM": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -626,9 +696,11 @@
         "use_lifetime": 1
     },
     "yE2AzTSvif": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "yMhrtzh9Pp": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,

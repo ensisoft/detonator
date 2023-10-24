@@ -18,6 +18,7 @@
       "name": "MenuMusic",
       "resource_id": "lQlseaZOEX",
       "resource_name": "MenuMusic",
+      "resource_ver": 1,
       "src_elem_id": "NwwdP8ZHwL",
       "src_elem_port": "out"
     },
@@ -54,6 +55,7 @@
       "name": "Click",
       "resource_id": "HwObefYJNC",
       "resource_name": "Click",
+      "resource_ver": 1,
       "src_elem_id": "EGGlghTtgy",
       "src_elem_port": "out"
     },
@@ -103,6 +105,7 @@
       "name": "Boing",
       "resource_id": "nQu4kueY9z",
       "resource_name": "Boing",
+      "resource_ver": 1,
       "src_elem_id": "hs5HughOro",
       "src_elem_port": "out"
     }
@@ -316,6 +319,7 @@
       },
       "resource_id": "tqHo3nK0b9",
       "resource_name": "FlappyBird",
+      "resource_ver": 1,
       "script_file": "zJgI2SZT3X",
       "tag": "",
       "tracks": [
@@ -504,6 +508,7 @@
       },
       "resource_id": "Ytj4tDET1a",
       "resource_name": "Spike",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -576,6 +581,7 @@
       },
       "resource_id": "qv7w7J7Aiv",
       "resource_name": "Background",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -647,6 +653,7 @@
       },
       "resource_id": "IxyHIKNMIn",
       "resource_name": "Ground",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     }
@@ -664,6 +671,7 @@
       "particle_action": "None",
       "resource_id": "Fj66N4PDUG",
       "resource_name": "FlappyBird Flying",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -680,7 +688,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -702,7 +710,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -724,7 +732,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -746,7 +754,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -768,7 +776,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -790,7 +798,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -812,7 +820,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -834,7 +842,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -882,6 +890,7 @@
       "particle_action": "None",
       "resource_id": "LPH6tgo9eN",
       "resource_name": "Background",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -898,7 +907,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -946,6 +955,7 @@
       "particle_action": "None",
       "resource_id": "sUAHqYkAPp",
       "resource_name": "FlappyBird Hurt",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -962,7 +972,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -984,7 +994,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -1032,6 +1042,7 @@
       "particle_action": "None",
       "resource_id": "8UZOHE5ijx",
       "resource_name": "Spike",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -1048,7 +1059,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -1096,6 +1107,7 @@
       "particle_action": "None",
       "resource_id": "E0qZ7nA8br",
       "resource_name": "Spiral",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "ws://shaders/es2/Spiral.glsl",
       "surface": "Transparent",
@@ -1112,7 +1124,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -1354,6 +1366,7 @@
       },
       "resource_id": "iiKBwhkDbI",
       "resource_name": "My Scene",
+      "resource_ver": 1,
       "script_file": "",
       "tilemap": ""
     }
@@ -1365,6 +1378,7 @@
       "owner": "",
       "resource_id": "SfDYJTRhGz",
       "resource_name": "game",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/game.lua"
     },
@@ -1374,6 +1388,7 @@
       "owner": "",
       "resource_id": "zJgI2SZT3X",
       "resource_name": "FlappyBird",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/zJgI2SZT3X.lua"
     }
@@ -1391,6 +1406,7 @@
       "name": "FlappyBird",
       "resource_id": "e1zlPY8HTm",
       "resource_name": "FlappyBird",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -1564,6 +1580,7 @@
       "name": "MainMenu",
       "resource_id": "id5BsoCSrO",
       "resource_name": "MainMenu",
+      "resource_ver": 1,
       "script_file": "",
       "style_file": "ws://ui/style.json",
       "style_string": "",

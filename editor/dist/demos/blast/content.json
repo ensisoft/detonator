@@ -18,6 +18,7 @@
       "name": "Player Weapon",
       "resource_id": "SJmzdnESeH",
       "resource_name": "Player Weapon",
+      "resource_ver": 1,
       "src_elem_id": "XUF0N9uLfD",
       "src_elem_port": "out"
     },
@@ -39,6 +40,7 @@
       "name": "Menu Click",
       "resource_id": "O2WDv7PduL",
       "resource_name": "Menu Click",
+      "resource_ver": 1,
       "src_elem_id": "AruPmKN2WY",
       "src_elem_port": "out"
     },
@@ -75,6 +77,7 @@
       "name": "Rocket Launch",
       "resource_id": "asMmhdCBBw",
       "resource_name": "Rocket Launch",
+      "resource_ver": 1,
       "src_elem_id": "sRv9omsQNF",
       "src_elem_port": "out"
     },
@@ -163,6 +166,7 @@
       "name": "Rocket Explosion",
       "resource_id": "qHa3OPkRrg",
       "resource_name": "Rocket Explosion",
+      "resource_ver": 1,
       "src_elem_id": "0bDiXIAGRF",
       "src_elem_port": "out"
     },
@@ -184,6 +188,7 @@
       "name": "Menu Music",
       "resource_id": "0tJOf84hBU",
       "resource_name": "Menu Music",
+      "resource_ver": 1,
       "src_elem_id": "D79A5NORKR",
       "src_elem_port": "out"
     },
@@ -287,6 +292,7 @@
       "name": "Game Music",
       "resource_id": "2Tg09vx9Yf",
       "resource_name": "Game Music",
+      "resource_ver": 1,
       "src_elem_id": "R4vRj4xxUb",
       "src_elem_port": "out"
     },
@@ -308,6 +314,7 @@
       "name": "Ending",
       "resource_id": "gD6Z1YvKbI",
       "resource_name": "Ending",
+      "resource_ver": 1,
       "src_elem_id": "BpdAYwxrEY",
       "src_elem_port": "out"
     },
@@ -329,6 +336,7 @@
       "name": "Rocket Fail",
       "resource_id": "JnQz1XnpaF",
       "resource_name": "Rocket Fail",
+      "resource_ver": 1,
       "src_elem_id": "7ET20Y11sb",
       "src_elem_port": "out"
     },
@@ -365,6 +373,7 @@
       "name": "Victory",
       "resource_id": "IAJrgwvwpO",
       "resource_name": "Victory",
+      "resource_ver": 1,
       "src_elem_id": "aJsrCvIyQ1",
       "src_elem_port": "out"
     }
@@ -869,6 +878,7 @@
       },
       "resource_id": "diUlEeS5JH",
       "resource_name": "Player",
+      "resource_ver": 1,
       "script_file": "rvZg0UT77h",
       "tag": "",
       "tracks": [
@@ -1042,6 +1052,7 @@
       },
       "resource_id": "iH79uGdYNY",
       "resource_name": "Bullet/Player",
+      "resource_ver": 1,
       "script_file": "4KwMiHn2Zz",
       "tag": "",
       "vars": [
@@ -1203,6 +1214,7 @@
       },
       "resource_id": "pNT0bA0bpw",
       "resource_name": "Enemy",
+      "resource_ver": 1,
       "script_file": "FXdfIUPul3",
       "tag": "#enemy",
       "tracks": [
@@ -1481,6 +1493,7 @@
       },
       "resource_id": "7NAD3QgFlq",
       "resource_name": "Background",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1588,6 +1601,7 @@
       },
       "resource_id": "qOIpuPbyL1",
       "resource_name": "Asteroid",
+      "resource_ver": 1,
       "script_file": "bjZ0TrwuxI",
       "tag": "",
       "vars": [
@@ -1697,6 +1711,7 @@
       },
       "resource_id": "OkteghMHhq",
       "resource_name": "Player Explosion",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1780,6 +1795,7 @@
       },
       "resource_id": "gMY5RFLgyd",
       "resource_name": "Enemy Explosion",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1852,6 +1868,7 @@
       },
       "resource_id": "5LKG2wBRGq",
       "resource_name": "Bullet/Enemy",
+      "resource_ver": 1,
       "script_file": "4KwMiHn2Zz",
       "tag": "",
       "vars": [
@@ -2016,6 +2033,7 @@
       },
       "resource_id": "A7Z5jfJF38",
       "resource_name": "Rocket",
+      "resource_ver": 1,
       "script_file": "QldASNFLIb",
       "tag": "",
       "tracks": [
@@ -2220,6 +2238,7 @@
       },
       "resource_id": "q4pUEDx2rE",
       "resource_name": "Score",
+      "resource_ver": 1,
       "script_file": "",
       "tag": "",
       "tracks": [
@@ -2390,6 +2409,7 @@
       },
       "resource_id": "wXtbrxNRpX",
       "resource_name": "GameScore",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -2512,6 +2532,7 @@
       },
       "resource_id": "NtNnX1kgNp",
       "resource_name": "Mine Status",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -2584,6 +2605,7 @@
       },
       "resource_id": "XExwRNFj8H",
       "resource_name": "Stars",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -2667,6 +2689,7 @@
       },
       "resource_id": "rTHIeIzO8G",
       "resource_name": "Stats Bar",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -2959,6 +2982,7 @@
       },
       "resource_id": "p5r5vfQHG6",
       "resource_name": "Health",
+      "resource_ver": 1,
       "script_file": "WyTgkP5Z7I",
       "tag": ""
     },
@@ -3037,6 +3061,7 @@
       },
       "resource_id": "flFywvWC88",
       "resource_name": "Info",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -3164,6 +3189,7 @@
       },
       "resource_id": "NjY2ow9Mfy",
       "resource_name": "Rocket Explosion",
+      "resource_ver": 1,
       "script_file": "",
       "tag": "",
       "tracks": [
@@ -3359,6 +3385,7 @@
       },
       "resource_id": "JC7z1URQ70",
       "resource_name": "Menu",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -3431,6 +3458,7 @@
       },
       "resource_id": "HSH0115zhS",
       "resource_name": "Enemy/Blue",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -3503,6 +3531,7 @@
       },
       "resource_id": "iydoxbMPEg",
       "resource_name": "Shield",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -3575,6 +3604,7 @@
       },
       "resource_id": "uEUkHdeqOW",
       "resource_name": "HP",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     }
@@ -3592,6 +3622,7 @@
       "particle_action": "None",
       "resource_id": "lOfMr3YBtI",
       "resource_name": "Asteroid",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -3608,7 +3639,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3673,6 +3704,7 @@
       "particle_action": "None",
       "resource_id": "TNyQSW6bB6",
       "resource_name": "RedExplosion",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -3689,7 +3721,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3711,7 +3743,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3733,7 +3765,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3755,7 +3787,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3777,7 +3809,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3799,7 +3831,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3821,7 +3853,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3843,7 +3875,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3865,7 +3897,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3887,7 +3919,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3909,7 +3941,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3931,7 +3963,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3953,7 +3985,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3975,7 +4007,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3997,7 +4029,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4019,7 +4051,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4041,7 +4073,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4097,6 +4129,7 @@
       "particle_action": "None",
       "resource_id": "vg5yQskPIv",
       "resource_name": "Rocket",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4113,7 +4146,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4169,6 +4202,7 @@
       "particle_action": "None",
       "resource_id": "2a488SIQsU",
       "resource_name": "Shockwave",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "ws://shaders/es2/disc.glsl",
       "surface": "Transparent",
@@ -4258,6 +4292,7 @@
       "particle_action": "None",
       "resource_id": "CopZZzjQd4",
       "resource_name": "Background",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4274,7 +4309,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4322,6 +4357,7 @@
       "particle_action": "None",
       "resource_id": "Kb5sHrP5bL",
       "resource_name": "Blast Title",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "ws://shaders/es2/text.glsl",
       "surface": "Emissive",
@@ -4403,6 +4439,7 @@
       "particle_action": "None",
       "resource_id": "pGHzP0FH33",
       "resource_name": "Cursor",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4419,7 +4456,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4476,6 +4513,7 @@
       "particle_action": "None",
       "resource_id": "YL23jp6zHS",
       "resource_name": "Star Particle",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
@@ -4492,7 +4530,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4570,6 +4608,7 @@
       "particle_action": "None",
       "resource_id": "HyJsrevpdz",
       "resource_name": "Smoke Particle",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
@@ -4586,7 +4625,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4664,6 +4703,7 @@
       "particle_action": "None",
       "resource_id": "5YQ8ZqObX7",
       "resource_name": "Smooth Round Particle",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4680,7 +4720,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4728,6 +4768,7 @@
       "particle_action": "None",
       "resource_id": "gnzE0pkeXX",
       "resource_name": "Health_Dot",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4744,7 +4785,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4792,6 +4833,7 @@
       "particle_action": "None",
       "resource_id": "Z3Pe1h4eXI",
       "resource_name": "Enemy/Pink",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4808,7 +4850,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4856,6 +4898,7 @@
       "particle_action": "None",
       "resource_id": "PIhms7PpQT",
       "resource_name": "Enemy/Green",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4872,7 +4915,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4920,6 +4963,7 @@
       "particle_action": "None",
       "resource_id": "YJynSu6nqw",
       "resource_name": "Enemy/Blue",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4936,7 +4980,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4984,6 +5028,7 @@
       "particle_action": "None",
       "resource_id": "I8r504SSma",
       "resource_name": "Bullet/Green",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5000,7 +5045,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -5048,6 +5093,7 @@
       "particle_action": "None",
       "resource_id": "EuyGHU1pbR",
       "resource_name": "Bullet/Pink",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5064,7 +5110,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -5112,6 +5158,7 @@
       "particle_action": "None",
       "resource_id": "x6FkDk0TOK",
       "resource_name": "Player/Base",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5128,7 +5175,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -5176,6 +5223,7 @@
       "particle_action": "None",
       "resource_id": "wEBG4Nwt8g",
       "resource_name": "Player/Weapon 1",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5192,7 +5240,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -5240,6 +5288,7 @@
       "particle_action": "None",
       "resource_id": "miMdq5hPLK",
       "resource_name": "Player/Weapon 2",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5256,7 +5305,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -5304,6 +5353,7 @@
       "particle_action": "None",
       "resource_id": "XLy89MFMgb",
       "resource_name": "Laser/Green",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5320,7 +5370,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -5368,6 +5418,7 @@
       "particle_action": "None",
       "resource_id": "MHJxCtplnp",
       "resource_name": "Screenshot",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Opaque",
@@ -5384,7 +5435,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -5432,6 +5483,7 @@
       "particle_action": "None",
       "resource_id": "lLinWqCv1M",
       "resource_name": "Shield",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5448,7 +5500,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -5496,6 +5548,7 @@
       "particle_action": "None",
       "resource_id": "hCinu6wgaC",
       "resource_name": "HP",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5512,7 +5565,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -5589,6 +5642,7 @@
       "placement": "Inside",
       "resource_id": "qklhbbEm10",
       "resource_name": "BulletTrail",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -5630,6 +5684,7 @@
       "placement": "Center",
       "resource_id": "8exJylNDfi",
       "resource_name": "Mine Explosion",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -5671,6 +5726,7 @@
       "placement": "Inside",
       "resource_id": "9o7zbhlIlp",
       "resource_name": "Stars",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -5712,6 +5768,7 @@
       "placement": "Center",
       "resource_id": "7pLg2qp4Pp",
       "resource_name": "Exhaust Particles",
+      "resource_ver": 1,
       "shape": "Circle"
     },
     {
@@ -5753,6 +5810,7 @@
       "placement": "Center",
       "resource_id": "4Ckmwoylp6",
       "resource_name": "My Particle System",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -5794,6 +5852,7 @@
       "placement": "Center",
       "resource_id": "FF0aZIpHbj",
       "resource_name": "Gun Particles",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -5835,6 +5894,7 @@
       "placement": "Center",
       "resource_id": "LZ34N4wOGn",
       "resource_name": "Little Stars",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -5876,6 +5936,7 @@
       "placement": "Center",
       "resource_id": "Gk8mjavP85",
       "resource_name": "Player Explosion",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -5917,6 +5978,7 @@
       "placement": "Center",
       "resource_id": "sBjTBK97Mf",
       "resource_name": "Enemy Explosion",
+      "resource_ver": 1,
       "shape": "Rectangle"
     }
   ],
@@ -6289,6 +6351,7 @@
       },
       "resource_id": "UWF4u1fYHa",
       "resource_name": "Game",
+      "resource_ver": 1,
       "script_file": "OiyvAkqpIL",
       "tilemap": "",
       "top_boundary": -500.0,
@@ -6937,6 +7000,7 @@
       },
       "resource_id": "Z2zrRug3HP",
       "resource_name": "Screenshot",
+      "resource_ver": 1,
       "script_file": "IEMBmyYrGj",
       "tilemap": ""
     },
@@ -7041,6 +7105,7 @@
       },
       "resource_id": "u7zlrYWxAM",
       "resource_name": "Menu",
+      "resource_ver": 1,
       "script_file": "",
       "tilemap": ""
     }
@@ -7052,6 +7117,7 @@
       "owner": "",
       "resource_id": "OtyRiUrsTd",
       "resource_name": "game",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/game.lua"
     },
@@ -7061,6 +7127,7 @@
       "owner": "",
       "resource_id": "rvZg0UT77h",
       "resource_name": "Player",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/rvZg0UT77h.lua"
     },
@@ -7070,6 +7137,7 @@
       "owner": "",
       "resource_id": "4KwMiHn2Zz",
       "resource_name": "Bullet",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/4KwMiHn2Zz.lua"
     },
@@ -7079,6 +7147,7 @@
       "owner": "",
       "resource_id": "FXdfIUPul3",
       "resource_name": "Enemy",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/FXdfIUPul3.lua"
     },
@@ -7088,6 +7157,7 @@
       "owner": "",
       "resource_id": "bjZ0TrwuxI",
       "resource_name": "Asteroid",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/bjZ0TrwuxI.lua"
     },
@@ -7097,6 +7167,7 @@
       "owner": "",
       "resource_id": "QldASNFLIb",
       "resource_name": "Rocket",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/QldASNFLIb.lua"
     },
@@ -7106,6 +7177,7 @@
       "owner": "",
       "resource_id": "AA5C8qjoDb",
       "resource_name": "common",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/common.lua"
     },
@@ -7115,6 +7187,7 @@
       "owner": "",
       "resource_id": "OiyvAkqpIL",
       "resource_name": "Game",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/OiyvAkqpIL.lua"
     },
@@ -7124,6 +7197,7 @@
       "owner": "",
       "resource_id": "yk8YmvFHRn",
       "resource_name": "Options",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/yk8YmvFHRn.lua"
     },
@@ -7133,6 +7207,7 @@
       "owner": "",
       "resource_id": "6Smomrh9yG",
       "resource_name": "MainMenu",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/6Smomrh9yG.lua"
     },
@@ -7142,6 +7217,7 @@
       "owner": "",
       "resource_id": "ZnF7vN4aPO",
       "resource_name": "Credits",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/ZnF7vN4aPO.lua"
     },
@@ -7151,6 +7227,7 @@
       "owner": "",
       "resource_id": "uSnI4p97YC",
       "resource_name": "GameOver",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/uSnI4p97YC.lua"
     },
@@ -7160,6 +7237,7 @@
       "owner": "",
       "resource_id": "IEMBmyYrGj",
       "resource_name": "Menu",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/IEMBmyYrGj.lua"
     },
@@ -7169,6 +7247,7 @@
       "owner": "",
       "resource_id": "WyTgkP5Z7I",
       "resource_name": "Health",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/WyTgkP5Z7I.lua"
     }
@@ -7185,6 +7264,7 @@
       "name": "GameOver",
       "resource_id": "RoGbL91JLQ",
       "resource_name": "GameOver",
+      "resource_ver": 1,
       "script_file": "uSnI4p97YC",
       "style_file": "app://ui/style/default.json",
       "style_string": "",
@@ -7326,6 +7406,7 @@
       "name": "Credits",
       "resource_id": "4eIBhHhK0W",
       "resource_name": "Credits",
+      "resource_ver": 1,
       "script_file": "ZnF7vN4aPO",
       "style_file": "ws://ui/style.json",
       "style_string": "",
@@ -7562,6 +7643,7 @@
       "name": "Options",
       "resource_id": "PYYxBsykKG",
       "resource_name": "Options",
+      "resource_ver": 1,
       "script_file": "yk8YmvFHRn",
       "style_file": "ws://ui/style.json",
       "style_string": "",
@@ -7846,6 +7928,7 @@
       "name": "MainMenu",
       "resource_id": "enGG9GJgb4",
       "resource_name": "MainMenu",
+      "resource_ver": 1,
       "script_file": "6Smomrh9yG",
       "style_file": "ws://ui/style.json",
       "style_string": "",

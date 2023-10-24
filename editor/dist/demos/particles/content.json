@@ -97,6 +97,7 @@
       },
       "resource_id": "BbEpeqHSYG",
       "resource_name": "Basic Flame",
+      "resource_ver": 1,
       "script_file": "nIkywmIbBJ",
       "tag": "",
       "vars": [
@@ -319,6 +320,7 @@
       },
       "resource_id": "UEHaD6hTOe",
       "resource_name": "Pixel Flame",
+      "resource_ver": 1,
       "script_file": "nIkywmIbBJ",
       "tag": "",
       "vars": [
@@ -521,6 +523,7 @@
       },
       "resource_id": "SX0ABkBEq9",
       "resource_name": "Basic Flame + Sparks + Smoke",
+      "resource_ver": 1,
       "script_file": "nIkywmIbBJ",
       "tag": "",
       "vars": [
@@ -679,6 +682,7 @@
       },
       "resource_id": "BtXKsAOnPr",
       "resource_name": "Basic Flame + Sparks",
+      "resource_ver": 1,
       "script_file": "nIkywmIbBJ",
       "tag": "",
       "vars": [
@@ -921,6 +925,7 @@
       },
       "resource_id": "BkQRl3PzCr",
       "resource_name": "Basic Explosion",
+      "resource_ver": 1,
       "script_file": "nIkywmIbBJ",
       "tag": "",
       "vars": [
@@ -1007,6 +1012,7 @@
       },
       "resource_id": "JUOysDXYJL",
       "resource_name": "Background",
+      "resource_ver": 1,
       "script_file": "",
       "tag": "",
       "tracks": [
@@ -1241,6 +1247,7 @@
       },
       "resource_id": "7D4iRC0ogE",
       "resource_name": "Energy Explosion",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1469,6 +1476,7 @@
       },
       "resource_id": "4POqhfHWQE",
       "resource_name": "Magic",
+      "resource_ver": 1,
       "script_file": "nIkywmIbBJ",
       "tag": "",
       "vars": [
@@ -1711,6 +1719,7 @@
       },
       "resource_id": "1RlBexDBsu",
       "resource_name": "Dark Magic",
+      "resource_ver": 1,
       "script_file": "nIkywmIbBJ",
       "tag": "",
       "vars": [
@@ -1885,6 +1894,7 @@
       },
       "resource_id": "96IAS00DCm",
       "resource_name": "Basic Snow + Flakes",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -2001,6 +2011,7 @@
       },
       "resource_id": "4ZgNL1JNfD",
       "resource_name": "Basic Snow",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -2139,6 +2150,7 @@
       },
       "resource_id": "pTbMGuziXE",
       "resource_name": "Basic Waterfall",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -2327,6 +2339,7 @@
       },
       "resource_id": "qGhg1ub3rt",
       "resource_name": "Summoning Circle",
+      "resource_ver": 1,
       "script_file": "nIkywmIbBJ",
       "tag": "",
       "vars": [
@@ -2505,6 +2518,7 @@
       },
       "resource_id": "tyNkXUoRPJ",
       "resource_name": "Blood Impact",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -2719,6 +2733,7 @@
       },
       "resource_id": "rAxSklk4hv",
       "resource_name": "Spaceship",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -2846,6 +2861,7 @@
       },
       "resource_id": "bQyCGOw7tW",
       "resource_name": "Basic Rain",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -3017,6 +3033,7 @@
       },
       "resource_id": "dpnADuNTa0",
       "resource_name": "Basic Rain + Lightning",
+      "resource_ver": 1,
       "script_file": "",
       "tag": "",
       "tracks": [
@@ -3233,6 +3250,7 @@
       },
       "resource_id": "om7tHo4XiA",
       "resource_name": "Firework Rocket",
+      "resource_ver": 1,
       "script_file": "nZkUdw95Ds",
       "tag": ""
     },
@@ -3313,6 +3331,7 @@
       },
       "resource_id": "jaXpNTpHBe",
       "resource_name": "Fireworks",
+      "resource_ver": 1,
       "script_file": "f3llpkZaRE",
       "tag": ""
     },
@@ -3449,6 +3468,7 @@
       },
       "resource_id": "KALE2Cn77Q",
       "resource_name": "Fireworks Explosion Green",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -3605,6 +3625,7 @@
       },
       "resource_id": "RDi65JlZls",
       "resource_name": "Fireworks Explosion Blue",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -3752,6 +3773,7 @@
       },
       "resource_id": "1XgDNiDXTz",
       "resource_name": "Fireworks Explosion Red",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -3824,6 +3846,7 @@
       },
       "resource_id": "ZnvR8kE3vD",
       "resource_name": "My Entity",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     }
@@ -3841,6 +3864,7 @@
       "particle_action": "None",
       "resource_id": "N5AZXzLO89",
       "resource_name": "Star Particle",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "app://shaders/es2/basic_particle.glsl",
       "surface": "Transparent",
@@ -3857,7 +3881,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3935,6 +3959,7 @@
       "particle_action": "None",
       "resource_id": "0xydhM7UqW",
       "resource_name": "Lightning Particle",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
@@ -3951,7 +3976,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4029,6 +4054,7 @@
       "particle_action": "None",
       "resource_id": "bBESp9pEw3",
       "resource_name": "Rain Particle",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "app://shaders/es2/basic_particle.glsl",
       "surface": "Transparent",
@@ -4045,7 +4071,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4123,6 +4149,7 @@
       "particle_action": "None",
       "resource_id": "eySa2QEq4I",
       "resource_name": "Magic Particle",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
@@ -4139,7 +4166,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4217,6 +4244,7 @@
       "particle_action": "None",
       "resource_id": "EJtsMLLYa9",
       "resource_name": "Energy Particle",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
@@ -4233,7 +4261,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4311,6 +4339,7 @@
       "particle_action": "None",
       "resource_id": "J8J3JM8rC8",
       "resource_name": "Water Particle",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "app://shaders/es2/basic_particle.glsl",
       "surface": "Transparent",
@@ -4327,7 +4356,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4405,6 +4434,7 @@
       "particle_action": "None",
       "resource_id": "8qJeAKQFtw",
       "resource_name": "Smoke Particle",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
@@ -4421,7 +4451,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4499,6 +4529,7 @@
       "particle_action": "None",
       "resource_id": "SXaZ6dfqlS",
       "resource_name": "Blocky Particle",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
@@ -4515,7 +4546,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4593,6 +4624,7 @@
       "particle_action": "None",
       "resource_id": "dZDA63fz8X",
       "resource_name": "Round Particle",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
@@ -4609,7 +4641,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4687,6 +4719,7 @@
       "particle_action": "None",
       "resource_id": "y6vxOLdMaI",
       "resource_name": "Background",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Opaque",
@@ -4703,7 +4736,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4751,6 +4784,7 @@
       "particle_action": "Rotate",
       "resource_id": "sv05U2SGGE",
       "resource_name": "Snowflake",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4767,7 +4801,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4823,6 +4857,7 @@
       "particle_action": "None",
       "resource_id": "HA5M7RGQpK",
       "resource_name": "Summoning Circle",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "app://shaders/es2/emissive_particle.glsl",
       "surface": "Emissive",
@@ -4839,7 +4874,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4917,6 +4952,7 @@
       "particle_action": "None",
       "resource_id": "K9D27CRUwq",
       "resource_name": "Blood Splatter",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4933,7 +4969,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4981,6 +5017,7 @@
       "particle_action": "None",
       "resource_id": "pEBDeuBGgb",
       "resource_name": "Spaceship",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4997,7 +5034,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -5074,6 +5111,7 @@
       "placement": "Edge",
       "resource_id": "DX5iTPFmEZ",
       "resource_name": "Basic Explosion Smoke",
+      "resource_ver": 1,
       "shape": "Circle"
     },
     {
@@ -5115,6 +5153,7 @@
       "placement": "Inside",
       "resource_id": "vIf7bfadSt",
       "resource_name": "Basic Flame Smoke",
+      "resource_ver": 1,
       "shape": "Circle"
     },
     {
@@ -5156,6 +5195,7 @@
       "placement": "Edge",
       "resource_id": "q2YkyQYmdd",
       "resource_name": "Basic Explosion Sparks",
+      "resource_ver": 1,
       "shape": "Circle"
     },
     {
@@ -5197,6 +5237,7 @@
       "placement": "Edge",
       "resource_id": "OpgNJAMhhQ",
       "resource_name": "Basic Flame Sparks",
+      "resource_ver": 1,
       "shape": "Circle"
     },
     {
@@ -5238,6 +5279,7 @@
       "placement": "Center",
       "resource_id": "02kw3C4wix",
       "resource_name": "Fireworks Explosion",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -5279,6 +5321,7 @@
       "placement": "Edge",
       "resource_id": "yMhrtzh9Pp",
       "resource_name": "Basic Explosion",
+      "resource_ver": 1,
       "shape": "Circle"
     },
     {
@@ -5320,6 +5363,7 @@
       "placement": "Inside",
       "resource_id": "w3S1bxiRIU",
       "resource_name": "Basic Flame",
+      "resource_ver": 1,
       "shape": "Circle"
     },
     {
@@ -5361,6 +5405,7 @@
       "placement": "Inside",
       "resource_id": "obukJs0rJC",
       "resource_name": "Energy Explosion Plasma",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -5402,6 +5447,7 @@
       "placement": "Edge",
       "resource_id": "R0XaXuWEBU",
       "resource_name": "Energy Explosion",
+      "resource_ver": 1,
       "shape": "Circle"
     },
     {
@@ -5443,6 +5489,7 @@
       "placement": "Edge",
       "resource_id": "0BT4ANr30T",
       "resource_name": "Energy Explosion Smoke",
+      "resource_ver": 1,
       "shape": "Circle"
     },
     {
@@ -5484,6 +5531,7 @@
       "placement": "Edge",
       "resource_id": "K5fmwRUujU",
       "resource_name": "Magic",
+      "resource_ver": 1,
       "shape": "Circle"
     },
     {
@@ -5525,6 +5573,7 @@
       "placement": "Center",
       "resource_id": "6PwXHnbnzY",
       "resource_name": "Magic Core",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -5566,6 +5615,7 @@
       "placement": "Inside",
       "resource_id": "y7WyC5UeQM",
       "resource_name": "Water Vapor",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -5607,6 +5657,7 @@
       "placement": "Center",
       "resource_id": "X983sNLRSh",
       "resource_name": "Magic Smoke",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -5648,6 +5699,7 @@
       "placement": "Inside",
       "resource_id": "DEnBflg7Re",
       "resource_name": "Snow Flakes",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -5689,6 +5741,7 @@
       "placement": "Inside",
       "resource_id": "3Y7QCvLmnD",
       "resource_name": "Basic Snow",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -5730,6 +5783,7 @@
       "placement": "Inside",
       "resource_id": "n6ykHi9xRi",
       "resource_name": "Basic Waterfall",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -5771,6 +5825,7 @@
       "placement": "Center",
       "resource_id": "y0ZBwlFRes",
       "resource_name": "Summoning Circle",
+      "resource_ver": 1,
       "shape": "Circle"
     },
     {
@@ -5812,6 +5867,7 @@
       "placement": "Inside",
       "resource_id": "KSwh4OhJxA",
       "resource_name": "Blood Splatter",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -5853,6 +5909,7 @@
       "placement": "Inside",
       "resource_id": "LnUnRULvIo",
       "resource_name": "Blood",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -5894,6 +5951,7 @@
       "placement": "Center",
       "resource_id": "HG7v1manRC",
       "resource_name": "Spaceship Exhaust",
+      "resource_ver": 1,
       "shape": "Circle"
     },
     {
@@ -5935,6 +5993,7 @@
       "placement": "Inside",
       "resource_id": "MSCSkjl4Su",
       "resource_name": "Star Field",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -5976,6 +6035,7 @@
       "placement": "Inside",
       "resource_id": "Jv6CJCIheq",
       "resource_name": "Rain",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -6017,6 +6077,7 @@
       "placement": "Inside",
       "resource_id": "28lGaDWqAm",
       "resource_name": "Lightning",
+      "resource_ver": 1,
       "shape": "Rectangle"
     },
     {
@@ -6058,6 +6119,7 @@
       "placement": "Edge",
       "resource_id": "rBqJ2LlkXC",
       "resource_name": "Fireworks Sparks",
+      "resource_ver": 1,
       "shape": "Circle"
     },
     {
@@ -6099,6 +6161,7 @@
       "placement": "Center",
       "resource_id": "6604Fhgq27",
       "resource_name": "Rocket Sparks",
+      "resource_ver": 1,
       "shape": "Rectangle"
     }
   ],
@@ -6166,6 +6229,7 @@
       },
       "resource_id": "dFl9nHNaNT",
       "resource_name": "Demo",
+      "resource_ver": 1,
       "script_file": "",
       "tilemap": ""
     }
@@ -6177,6 +6241,7 @@
       "owner": "",
       "resource_id": "Xg0GdRiaQU",
       "resource_name": "game",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/game.lua"
     },
@@ -6186,6 +6251,7 @@
       "owner": "",
       "resource_id": "2JJndZoBDS",
       "resource_name": "UI",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/2JJndZoBDS.lua"
     },
@@ -6195,6 +6261,7 @@
       "owner": "",
       "resource_id": "qOf1KOOSpS",
       "resource_name": "data",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/data.lua"
     },
@@ -6204,6 +6271,7 @@
       "owner": "",
       "resource_id": "nIkywmIbBJ",
       "resource_name": "Entity Script",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/nIkywmIbBJ.lua"
     },
@@ -6213,6 +6281,7 @@
       "owner": "",
       "resource_id": "nZkUdw95Ds",
       "resource_name": "Firework Rocket",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/nZkUdw95Ds.lua"
     },
@@ -6222,6 +6291,7 @@
       "owner": "",
       "resource_id": "f3llpkZaRE",
       "resource_name": "Fireworks",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/f3llpkZaRE.lua"
     }
@@ -6238,9 +6308,10 @@
       "name": "UI",
       "resource_id": "yE2AzTSvif",
       "resource_name": "UI",
+      "resource_ver": 1,
       "script_file": "2JJndZoBDS",
       "style_file": "app://ui/style/default.json",
-      "style_string": "{\"materials\":[{\"color\":{\"a\":1.0,\"b\":0.29019609093666077,\"g\":0.29019609093666077,\"r\":0.29019609093666077},\"key\":\"push-button/button-border\",\"type\":\"Color\"},{\"color\":{\"a\":0.2235294133424759,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"push-button/pressed/button-background\",\"type\":\"Color\"},{\"color\":{\"a\":0.2235294133424759,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"push-button/button-background\",\"type\":\"Color\"},{\"color\":{\"a\":0.2235294133424759,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"push-button/mouse-over/button-background\",\"type\":\"Color\"}]}",
+      "style_string": "{\"materials\":[{\"color\":{\"a\":0.2235294133424759,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"push-button/mouse-over/button-background\",\"type\":\"Color\"},{\"color\":{\"a\":0.2235294133424759,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"push-button/button-background\",\"type\":\"Color\"},{\"color\":{\"a\":0.2235294133424759,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"push-button/pressed/button-background\",\"type\":\"Color\"},{\"color\":{\"a\":1.0,\"b\":0.29019609093666077,\"g\":0.29019609093666077,\"r\":0.29019609093666077},\"key\":\"push-button/button-border\",\"type\":\"Color\"}]}",
       "widgets": [
         {
           "widgets": [
@@ -6262,7 +6333,7 @@
                 "h": 800.0,
                 "w": 1200.0
               },
-              "style": "{\"materials\":[{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"background\",\"type\":\"Null\"}]}",
+              "style": "{\"materials\":[{\"key\":\"background\",\"type\":\"Null\"},{\"key\":\"border\",\"type\":\"Null\"}]}",
               "tab_index": 0,
               "type": "Form",
               "widgets": [
@@ -6284,7 +6355,7 @@
                     "h": 147.0,
                     "w": 603.0
                   },
-                  "style": "{\"materials\":[{\"color\":{\"a\":0.41960784792900085,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"background\",\"type\":\"Color\"},{\"color\":{\"a\":0.16470588743686676,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"key\":\"border\",\"type\":\"Color\"}]}",
+                  "style": "{\"materials\":[{\"color\":{\"a\":0.16470588743686676,\"b\":1.0,\"g\":1.0,\"r\":1.0},\"key\":\"border\",\"type\":\"Color\"},{\"color\":{\"a\":0.41960784792900085,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"background\",\"type\":\"Color\"}]}",
                   "tab_index": 0,
                   "text": "GroupBox",
                   "type": "GroupBox",
@@ -6331,7 +6402,7 @@
                         "h": 50.0,
                         "w": 50.0
                       },
-                      "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":24},{\"key\":\"edit-text-size\",\"value\":24}]}",
+                      "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":24},{\"key\":\"text-size\",\"value\":24}]}",
                       "tab_index": 0,
                       "text": "<",
                       "type": "PushButton"
@@ -6354,7 +6425,7 @@
                         "h": 50.0,
                         "w": 50.0
                       },
-                      "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":24},{\"key\":\"text-size\",\"value\":24}]}",
+                      "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":24},{\"key\":\"edit-text-size\",\"value\":24}]}",
                       "tab_index": 3,
                       "text": ">",
                       "type": "PushButton"
