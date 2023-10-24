@@ -102,7 +102,6 @@ public:
         mRuntime->SetSurfaceSize(init.surface_width, init.surface_height);
         mUIStyle.SetClassLibrary(mClasslib);
         mUIStyle.SetDataLoader(mEngineDataLoader);
-        mUIPainter.SetPainter(mPainter.get());
         mUIPainter.SetStyle(&mUIStyle);
         mUIPainter.SetFlag(engine::UIPainter::Flags::ClipWidgets, true);
         mRenderer.SetClassLibrary(mClasslib);
@@ -302,27 +301,32 @@ public:
         {
             TRACE_SCOPE("DrawUI");
 
-            const auto& window_rect   = ui->GetBoundingRect();
+            // the viewport retains the UI's aspect ratio and is centered in the middle
+            // of the rendering surface.
+            const auto& window_rect = ui->GetBoundingRect();
             const float width  = window_rect.GetWidth();
             const float height = window_rect.GetHeight();
             const float scale  = std::min(surf_width / width, surf_height / height);
             const float device_viewport_width = width * scale;
             const float device_viewport_height = height * scale;
 
-            mPainter->SetPixelRatio(glm::vec2(1.0f, 1.0f));
-            mPainter->SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, width, height));
-            mPainter->ResetViewMatrix();
-
             gfx::IRect device_viewport;
             device_viewport.Move((surf_width - device_viewport_width)*0.5,
                                  (surf_height - device_viewport_height)*0.5);
             device_viewport.Resize(device_viewport_width, device_viewport_height);
 
-            // Set the actual device viewport for rendering into the window surface.
-            // the viewport retains the UI's aspect ratio and is centered in the middle
-            // of the rendering surface.
-            mPainter->SetViewport(device_viewport);
+            gfx::Painter painter(mDevice);
+            painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
+            painter.SetPixelRatio(glm::vec2(1.0f, 1.0f));
+            painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, width, height));
+            painter.ResetViewMatrix();
+            painter.SetViewport(device_viewport);
+            painter.SetEditingMode(mFlags.test(Flags::EditingMode));
+
+            mUIPainter.SetPainter(&painter);
+            mUIPainter.SetStyle(&mUIStyle);
             TRACE_CALL("UI::Paint", ui->Paint(mUIState, mUIPainter, base::GetTime(), nullptr));
+            mUIPainter.SetPainter(nullptr);
         }
 
         TRACE_ENTER(DebugDrawing);
