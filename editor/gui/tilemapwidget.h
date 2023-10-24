@@ -90,6 +90,7 @@ namespace gui
         void on_btnViewReset_clicked();
         void on_btnViewMinus90_clicked();
         void on_btnViewPlus90_clicked();
+        void on_btnMoreViewportSettings_clicked();
         void on_widgetColor_colorChanged(QColor color);
         void on_cmbTool_currentIndexChanged(int);
         void on_cmbTool_editTextChanged(const QString& text);
