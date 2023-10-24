@@ -33,6 +33,7 @@
 #include <functional>
 #include <variant>
 
+#include "base/platform.h"
 #include "base/test_float.h"
 #include "base/test_minimal.h"
 #include "base/color4f.h"
