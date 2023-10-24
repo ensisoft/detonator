@@ -1,8 +1,8 @@
 DETONATOR 2D 💥💣
 ===================
 
-![HUD](screens/screenshot.png "Widgets with default styling.")  
-Widgets with (mostly) default styling.
+![Screenshot](screens/derp.gif "Starter demo")    
+Menu with some simple easing curve based animations.
 
 ## User Interface Kit (UIK For Short) ##
 UIK is a system to create  in-game user interfaces using a retained mode widget model. 
@@ -104,6 +104,9 @@ to virtual keys recognized by the uikit.
 ## Screenshots 
 
 Below are some screenshots demonstrating the capabilities of the skinning system.
+
+![HUD](screens/screenshot.png "Widgets with default styling.")  
+Widgets with (mostly) default styling.
 
 ![Custom Style](screens/jungle.png "UI system screenshot with custom style")  
 https://opengameart.org/content/jungle-cartoon-gui
