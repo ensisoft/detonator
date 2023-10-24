@@ -59,7 +59,8 @@ namespace gfx
             ParticleEngine,
             Polygon,
             TileBatch,
-            SimpleShape
+            SimpleShape,
+            Undefined
         };
          // Style of the drawable's geometry determines how the geometry
          // is to be rasterized.
@@ -132,6 +133,8 @@ namespace gfx
         // generation and update in some way.
         using Environment = DrawableClass::Environment;
 
+        using Type = DrawableClass::Type;
+
         // Rasterizer state that the geometry can manipulate.
         struct RasterState {
             // rasterizer setting for line width when the geometry
@@ -175,6 +178,9 @@ namespace gfx
         virtual void SetStyle(Style style) {}
         // Get the current style.
         virtual Style GetStyle() const = 0;
+        // Get the drawable type.
+        virtual Type GetType() const
+        { return Type::Undefined; }
         // Returns true if the drawable is still considered to be alive.
         // For example a particle simulation still has live particles.
         virtual bool IsAlive() const
@@ -372,6 +378,7 @@ namespace gfx
     {
     public:
         using Class = SimpleShapeClass;
+        using Shape = SimpleShapeClass::Shape;
         using Style = Drawable::Style;
 
         explicit SimpleShapeInstance(const std::shared_ptr<const Class>& klass, Style style = Style::Solid) noexcept
@@ -395,7 +402,11 @@ namespace gfx
         { mStyle = style; }
         virtual Style GetStyle() const override
         { return mStyle; }
+        virtual Type GetType() const override
+        { return Type::SimpleShape; }
 
+        inline Shape GetShape() const noexcept
+        { return mClass->GetShapeType(); }
     private:
         std::shared_ptr<const Class> mClass;
         Style mStyle;
@@ -428,6 +439,11 @@ namespace gfx
         { mStyle = style; }
         virtual Style GetStyle() const override
         { return mStyle; }
+        virtual Type GetType() const override
+        { return Type::SimpleShape; }
+
+        inline Shape GetShape() const noexcept
+        { return mShape; }
     private:
         SimpleShapeType mShape;
         detail::SimpleShapeArgs mArgs;
@@ -672,6 +688,8 @@ namespace gfx
 
         virtual Style GetStyle() const override
         { return Style::Solid; }
+        virtual Type GetType() const override
+        { return Type::Polygon; }
     private:
         std::shared_ptr<const PolygonClass> mClass;
     };
@@ -977,6 +995,8 @@ namespace gfx
         virtual bool IsAlive() const override;
         virtual void Restart(const Environment& env) override;
         virtual void Execute(const Environment& env, const Command& cmd) override;
+        virtual Type GetType() const override
+        { return Type::ParticleEngine; }
 
         // Get the current number of alive particles.
         inline size_t GetNumParticlesAlive() const noexcept
@@ -1017,6 +1037,8 @@ namespace gfx
         virtual std::string GetShaderName(const Environment& env) const override;
         virtual Geometry* Upload(const Environment& env, Device& device) const override;
         virtual Style GetStyle() const override;
+        virtual Type GetType() const override
+        { return Type::TileBatch; }
 
         inline void AddTile(const Tile& tile)
         { mTiles.push_back(tile); }
@@ -1090,5 +1112,24 @@ namespace gfx
     };
 
     std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const DrawableClass>& klass);
+
+    inline bool Is3DShape(SimpleShapeType shape) noexcept
+    {
+        if (shape == SimpleShapeType::Cube)
+            return true;
+        return false;
+    }
+
+    inline bool Is3DShape(const Drawable& drawable) noexcept
+    {
+        const auto type = drawable.GetType();
+        if (type != Drawable::Type::SimpleShape)
+            return false;
+        if (const auto* instance = dynamic_cast<const SimpleShapeInstance*>(&drawable))
+            return Is3DShape(instance->GetShape());
+        else if (const auto* instance = dynamic_cast<const SimpleShape*>(&drawable))
+            return Is3DShape(instance->GetShape());
+        else BUG("Unknown drawable shape type.");
+    }
 
 } // namespace
