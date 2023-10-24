@@ -1346,7 +1346,33 @@ private:
     void DrawDebugObjects()
     {
         if (!mDebug.debug_draw)
-            goto beach;
+        {
+            mDebugDraws.clear();
+            return;
+        }
+
+        const auto device_viewport  = GetViewport();
+        const auto game_view        = mRuntime->GetViewport();
+        const auto game_view_width  = (float)game_view.GetWidth();
+        const auto game_view_height = (float)game_view.GetHeight();
+        const auto game_viewport    = gfx::FRect(0.0f, 0.0f, game_view_width, game_view_height);
+        const auto camera_position  = glm::vec2 { game_view.GetX(), game_view.GetY() };
+        const auto camera_scale     = glm::vec2 { 1.0f, 1.0f };
+        const auto camera_rotation  = 0.0f;
+
+        const auto surface_width  = (float)mSurfaceWidth;
+        const auto surface_height = (float)mSurfaceHeight;
+        const auto surface_size = glm::vec2 { surface_width, surface_height };
+        const auto game_viewport_size = glm::vec2 { game_view_width, game_view_height };
+
+        gfx::Painter painter(mDevice);
+        painter.SetProjectionMatrix(engine::CreateProjectionMatrix(game::Perspective::AxisAligned, game_viewport));
+        painter.SetViewMatrix(engine::CreateModelViewMatrix(game::Perspective::AxisAligned, camera_position,
+                                                            camera_scale, camera_rotation));
+        painter.SetViewport(device_viewport);
+        painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
+        painter.SetEditingMode(mFlags.test(Flags::EditingMode));
+        painter.SetPixelRatio(glm::vec2 { 1.0f, 1.0f });
 
          TRACE_BLOCK("DebugDrawLines",
             if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::GameDebugDraw))
@@ -1354,12 +1380,12 @@ private:
                 for (const auto& draw: mDebugDraws)
                 {
                     if (const auto* ptr = std::get_if<engine::DebugDrawLine>(&draw))
-                        gfx::DebugDrawLine(*mPainter, ptr->a, ptr->b, ptr->color, ptr->width);
+                        gfx::DebugDrawLine(painter, ptr->a, ptr->b, ptr->color, ptr->width);
                     else if (const auto* ptr = std::get_if<engine::DebugDrawRect>(&draw))
-                        gfx::DebugDrawRect(*mPainter, gfx::FRect(ptr->top_left, ptr->bottom_right), ptr->color,
+                        gfx::DebugDrawRect(painter, gfx::FRect(ptr->top_left, ptr->bottom_right), ptr->color,
                                            ptr->width);
                     else if (const auto* ptr = std::get_if<engine::DebugDrawCircle>(&draw))
-                        gfx::DebugDrawCircle(*mPainter, gfx::FCircle(ptr->center, ptr->radius), ptr->color, ptr->width);
+                        gfx::DebugDrawCircle(painter, gfx::FCircle(ptr->center, ptr->radius), ptr->color, ptr->width);
                     else BUG("Missing debug draw implementation");
                 }
             }
@@ -1370,21 +1396,10 @@ private:
             {
                 if (mPhysics.HaveWorld())
                 {
-                    mPhysics.DebugDrawObjects(*mPainter);
+                    mPhysics.DebugDrawObjects(painter);
                 }
             }
         );
-
-        TRACE_CALL("DebugDrawScene", DebugDrawScene());
-
-        beach:
-            mDebugDraws.clear();
-    }
-
-    void DebugDrawScene() const
-    {
-        if (!mScene)
-            return;
 
         // this debug drawing is provided for the game developer to help them
         // see where the spatial nodes are, not for the engine developer to
@@ -1393,33 +1408,39 @@ private:
         // and their positions. Thus the debug drawing can be based on the
         // entity/node iteration instead of iterating over the items in the
         // spatial index. (Which is a function that doesn't event exist yet).
-        for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
-        {
-            const auto& entity = mScene->GetEntity(i);
-            for (size_t j = 0; j < entity.GetNumNodes(); ++j)
+        TRACE_BLOCK("DebugDrawScene",
+            if (mScene)
             {
-                const auto& node = entity.GetNode(j);
-                if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::SpatialIndex))
+                for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
                 {
-                    if (!node.HasSpatialNode())
-                        continue;
+                    const auto& entity = mScene->GetEntity(i);
+                    for (size_t j = 0; j < entity.GetNumNodes(); ++j)
+                    {
+                        const auto& node = entity.GetNode(j);
+                        if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::SpatialIndex))
+                        {
+                            if (!node.HasSpatialNode())
+                                continue;
 
-                    const auto& aabb = mScene->FindEntityNodeBoundingRect(&entity, &node);
-                    gfx::DebugDrawRect(*mPainter, aabb, gfx::Color::Gray, 1.0f);
+                            const auto& aabb = mScene->FindEntityNodeBoundingRect(&entity, &node);
+                            gfx::DebugDrawRect(painter, aabb, gfx::Color::Gray, 1.0f);
+                        }
+                    }
+                    if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::BoundingRect))
+                    {
+                        const auto rect = mScene->FindEntityBoundingRect(&entity);
+                        gfx::DrawRectOutline(painter, rect, gfx::Color::Yellow, 1.0f);
+                    }
+                    if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::BoundingBox))
+                    {
+                        // todo: need to implement the minimum bounding box computation first
+                    }
                 }
             }
-            if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::BoundingRect))
-            {
-                const auto rect = mScene->FindEntityBoundingRect(&entity);
-                gfx::DrawRectOutline(*mPainter, rect, gfx::Color::Yellow, 1.0f);
-            }
-            if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::BoundingBox))
-            {
-                // todo: need to implement the minimum bounding box computation first
-            }
-        }
-    }
+        );
 
+        mDebugDraws.clear();
+    }
 private:
     enum class Flags {
         // flag to indicate editing mode, i.e. run by the editor and
