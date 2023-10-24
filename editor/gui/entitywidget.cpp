@@ -2759,14 +2759,16 @@ void EntityWidget::on_tree_customContextMenuRequested(QPoint)
 {
     const auto* node = GetCurrentNode();
     const auto* item = node ? node->GetDrawable() : nullptr;
+    const auto count = mState.entity->GetNumNodes();
 
-    mUI.actionNodeMoveDownLayer->setEnabled(item != nullptr);
-    mUI.actionNodeMoveUpLayer->setEnabled(item != nullptr);
-    mUI.actionNodeDelete->setEnabled(node != nullptr);
-    mUI.actionNodeDuplicate->setEnabled(node != nullptr);
-    mUI.actionNodeVarRef->setEnabled(node != nullptr);
-    mUI.actionNodeComment->setEnabled(node != nullptr);
-    mUI.actionNodeRename->setEnabled(node != nullptr);
+    SetEnabled(mUI.actionNodeMoveDownLayer, item != nullptr);
+    SetEnabled(mUI.actionNodeMoveUpLayer, item != nullptr);
+    SetEnabled(mUI.actionNodeDelete, node != nullptr);
+    SetEnabled(mUI.actionNodeDuplicate, node != nullptr);
+    SetEnabled(mUI.actionNodeVarRef, node != nullptr);
+    SetEnabled(mUI.actionNodeComment, node != nullptr);
+    SetEnabled(mUI.actionNodeRename, node != nullptr);
+    SetEnabled(mUI.actionNodeRenameAll, count > 0);
 
     QMenu menu(this);
     menu.addAction(mUI.actionNodeMoveUpLayer);
