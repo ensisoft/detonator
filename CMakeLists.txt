@@ -866,12 +866,20 @@ target_include_directories(unit_test_resource  PRIVATE "${CMAKE_CURRENT_LIST_DIR
 target_include_directories(unit_test_workspace PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_include_directories(unit_test_event_log PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor/app/unit_test")
 target_link_libraries(unit_test_lua_tool Qt5::Widgets Qt5::Core tree-sitter)
-target_link_libraries(unit_test_gui QtColorWidgets Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
+
+# FIX RANDOM RUNTIME GLIB VOMIT STATIC ASSERTION FAILURE BY RANDOMLY CHANGING THE
+# ORDER OF THE LIBRARIES HERE!
 target_link_libraries(unit_test_gui EngineLib AudioLib UiLib GfxLib DataLib BaseLib ${CONAN_LIBS})
+target_link_libraries(unit_test_gui QtColorWidgets Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
+
+# FIX RANDOM RUNTIME GLIB VOMIT STATIC ASSERTION FAILURE BY RANDOMLY CHANGING THE
+# ORDER OF THE LIBRARIES HERE!
+target_link_libraries(unit_test_ipc EngineLib AudioLib UiLib GfxLib DataLib BaseLib ${CONAN_LIBS})
 target_link_libraries(unit_test_ipc Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network)
 target_link_libraries(unit_test_ipc QuaZip)
-target_link_libraries(unit_test_ipc EngineLib AudioLib UiLib GfxLib DataLib BaseLib ${CONAN_LIBS})
+
 target_link_libraries(unit_test_resource Qt5::Core Qt5::Widgets UiLib DataLib BaseLib)
+
 target_link_libraries(unit_test_workspace EngineLib AudioLib UiLib GfxLib DataLib BaseLib)
 target_link_libraries(unit_test_workspace QuaZip)
 target_link_libraries(unit_test_workspace Qt5::Core Qt5::Widgets Qt5::CorePrivate Qt5::Network ${CONAN_LIBS})

@@ -19,6 +19,54 @@ $ pulseaudio -k
 $ pulseaudio --start
 ```
 
+Random glib failure (seen when running unit tests such as unit_test_gui and unit_test_ipc)
+```
+[enska@arch build]$ ./unit_test_gui
+
+(process:17817): GLib-CRITICAL **: 13:03:37.700: g_hash_table_lookup: assertion 'hash_table != NULL' failed
+
+(process:17817): GLib-CRITICAL **: 13:03:37.701: g_hash_table_insert_internal: assertion 'hash_table != NULL' failed
+
+(process:17817): GLib-CRITICAL **: 13:03:37.701: g_hash_table_lookup: assertion 'hash_table != NULL' failed
+
+(process:17817): GLib-CRITICAL **: 13:03:37.701: g_hash_table_insert_internal: assertion 'hash_table != NULL' failed
+
+(process:17817): GLib-CRITICAL **: 13:03:37.701: g_hash_table_lookup: assertion 'hash_table != NULL' failed
+
+(process:17817): GLib-CRITICAL **: 13:03:37.701: g_hash_table_insert_internal: assertion 'hash_table != NULL' failed
+
+(process:17817): GLib-CRITICAL **: 13:03:37.701: g_hash_table_lookup: assertion 'hash_table != NULL' failed
+
+(process:17817): GLib-CRITICAL **: 13:03:37.701: g_hash_table_insert_internal: assertion 'hash_table != NULL' failed
+
+(process:17817): GLib-CRITICAL **: 13:03:37.701: g_hash_table_lookup: assertion 'hash_table != NULL' failed
+
+(process:17817): GLib-CRITICAL **: 13:03:37.701: g_hash_table_insert_internal: assertion 'hash_table != NULL' failed
+
+(process:17817): GLib-CRITICAL **: 13:03:37.701: g_hash_table_lookup: assertion 'hash_table != NULL' failed
+
+(process:17817): GLib-CRITICAL **: 13:03:37.701: g_hash_table_insert_internal: assertion 'hash_table != NULL' failed
+
+(process:17817): GLib-CRITICAL **: 13:03:37.701: g_hash_table_lookup: assertion 'hash_table != NULL' failed
+
+(process:17817): GLib-CRITICAL **: 13:03:37.701: g_hash_table_insert_internal: assertion 'hash_table != NULL' failed
+
+(process:17817): GLib-CRITICAL **: 13:03:37.701: g_hash_table_lookup: assertion 'hash_table != NULL' failed
+
+(process:17817): GLib-CRITICAL **: 13:03:37.701: g_hash_table_insert_internal: assertion 'hash_table != NULL' failed
+**
+GLib-GObject:ERROR:../glib/gobject/gtype.c:2876:g_type_register_static: assertion failed: (static_quark_type_flags)
+Bail out! GLib-GObject:ERROR:../glib/gobject/gtype.c:2876:g_type_register_static: assertion failed: (static_quark_type_flags)
+Aborted (core dumped)
+```
+
+This smells like GIANT FUCKING DOOKIE regarding some global state and associated initialization order that is undefined
+and randomly starts failing. 
+
+The "fix" is to try to shuffle some target_link_libraries in the CMakeList.txt around to see if the issue resolves.
+The real fix would be to remove amateurs from ever contributing any fucking code anywhere in the world. If you can't
+do better than this just do everyone a fucking favour and don't ever write any publicly released code. Thank you!
+
 ### Windows
 
 ### HTML5/WASM
