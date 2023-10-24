@@ -57,6 +57,8 @@ namespace gfx
     using IRect  = base::IRect;
     using URect  = base::URect;
     using FCircle = base::FCircle;
+    using FRadians = base::FRadians;
+    using FDegrees = base::FDegrees;
 
     struct Quad {
         glm::vec4 top_left;
