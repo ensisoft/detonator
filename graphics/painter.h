@@ -33,6 +33,8 @@
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 
+#include "base/snafu.h"
+
 namespace gfx
 {
     // fwd declarations
