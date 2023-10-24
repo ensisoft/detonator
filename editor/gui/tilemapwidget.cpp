@@ -619,6 +619,7 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
     SetRange(mUI.toolValue, -0x800000, 0xffffff); // min is 24 bit signed and max is 24bit unsigned
     SetRange(mUI.tileValue, -0x800000, 0xffffff); // min is 24 bit signed and max is 24bit unsigned
     SetEnabled(mUI.actionPalette, false);
+    SetVisible(mUI.transform, false);
 
     // generate a list of widgets for the layer color palette.
     for (int i=0; i<256; ++i)
@@ -1349,6 +1350,15 @@ void TilemapWidget::on_btnViewMinus90_clicked()
 void TilemapWidget::on_btnViewPlus90_clicked()
 {
     mAnimator.Plus90(mUI, mState);
+}
+
+void TilemapWidget::on_btnMoreViewportSettings_clicked()
+{
+    const auto visible = mUI.transform->isVisible();
+    SetVisible(mUI.transform, !visible);
+    if (!visible)
+        mUI.btnMoreViewportSettings->setArrowType(Qt::ArrowType::DownArrow);
+    else mUI.btnMoreViewportSettings->setArrowType(Qt::ArrowType::UpArrow);
 }
 
 void TilemapWidget::on_widgetColor_colorChanged(QColor color)
