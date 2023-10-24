@@ -2229,6 +2229,69 @@ public:
 private:
 };
 
+class Draw3DTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        constexpr auto const aspect = 1024.0 / 768.0f;
+
+        gfx::Painter p(painter);
+        p.ResetViewMatrix();
+        p.SetProjectionMatrix(gfx::MakePerspectiveProjection(gfx::FDegrees { 45.0f }, aspect, 1.0f, 100.0f));
+
+        gfx::detail::GenericShaderProgram program;
+
+        gfx::Painter::DrawState state;
+        state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
+        state.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        state.write_color  = true;
+
+        const auto t = base::GetTime();
+
+        {
+            gfx::Transform transform;
+
+            transform.Resize(2.0f, -2.0f, 2.0f);
+            transform.RotateAroundY(std::sin(t));
+            transform.RotateAroundX(std::cos(t));
+            transform.MoveTo(2.5f, 0.0f, -10.0f);
+            transform.Push();
+               transform.Translate(-0.5f, -0.5f, 0.0f);
+
+            p.Draw(gfx::Rectangle(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
+                   state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::None));
+
+            /*
+            gfx::TextBuffer::Text text;
+            text.font = "fonts/nuskool_krome_64x64.json";
+            text.fontsize = 32;
+            text.text = "hello\n";
+            text.lineheight = 1.0f;
+            gfx::TextBuffer buffer(100, 100);
+            buffer.SetText(std::move(text));
+            p.Draw(gfx::Rectangle(), transform, gfx::CreateMaterialFromText(std::move(buffer)),
+                   state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::None));
+                   */
+        }
+
+        // cube reference
+        {
+            gfx::Transform transform;
+            transform.Resize(2.0f, 2.0f, 2.0f);
+            transform.RotateAroundY(std::sin(t));
+            transform.RotateAroundX(std::cos(t));
+            transform.MoveTo(-2.5f, 0.0f, -10.0f);
+            p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
+                   state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+        }
+    }
+    virtual std::string GetName() const override
+    { return "Draw3DTest"; }
+    virtual bool IsFeatureTest() const override
+    { return false; }
+};
+
 class FramebufferTest : public GraphicsTest
 {
 public:
@@ -2523,6 +2586,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new sRGBTextureSampleTest);
     tests.emplace_back(new PremultiplyAlphaTest);
     tests.emplace_back(new PrecisionTest);
+    tests.emplace_back(new Draw3DTest);
 
     // GL ES3 specific tests
     if (version == 3)
@@ -2738,6 +2802,7 @@ int main(int argc, char* argv[])
 
             gfx_device->BeginFrame();
             gfx_device->ClearColor(gfx::Color4f(0.2f, 0.3f, 0.4f, 1.0f));
+            gfx_device->ClearDepth(1.0f);
             painter->SetViewport(0, 0, surface_width, surface_height);
             painter->SetSurfaceSize(surface_width, surface_height);
             painter->SetProjectionMatrix(gfx::MakeOrthographicProjection(surface_width , surface_height));

@@ -60,5 +60,11 @@ glm::mat4 MakeOrthographicProjection(float width, float height);
 // the distance from the camera for the near/far planes. Not Z axis values.
 glm::mat4 MakeOrthographicProjection(float left, float right, float top, float bottom, float near, float far);
 
+// this allows ambiguous conversion on purpose so that code that uses
+// a raw literal or raw floating point won't compile without explicitly
+// mentioning the desired type
+glm::mat4 MakePerspectiveProjection(FDegrees fov, float aspect, float znear, float zfar);
+glm::mat4 MakePerspectiveProjection(FRadians fov, float aspect, float znear, float zfar);
+
 } // namespace
 

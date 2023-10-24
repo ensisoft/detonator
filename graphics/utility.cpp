@@ -94,5 +94,14 @@ glm::mat4 MakeOrthographicProjection(float left, float right, float top, float b
     return glm::ortho(left, right, bottom, top, near, far);
 }
 
+glm::mat4 MakePerspectiveProjection(FDegrees fov, float aspect, float znear, float zfar)
+{
+    return glm::perspective(fov.ToRadians(),  aspect, znear, zfar);
+}
+
+glm::mat4 MakePerspectiveProjection(FRadians fov, float aspect, float znear, float zfar)
+{
+    return glm::perspective(fov.ToRadians(), aspect, znear, zfar);
+}
 
 } // namespace
