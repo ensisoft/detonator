@@ -2324,6 +2324,24 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
     }
 #endif
 
+    if (!mState.klass->GetNumLayers())
+    {
+        ShowInstruction(R"(
+Create a new map with render and data layers.
+
+INSTRUCTIONS
+1. Adjust the tile size, map width and height on the left.
+2. Add a new layer on the right under Layers, New Layer...
+3. Select layer type as 'Render_xxx' for a visual layer.
+4. Select layer type as 'Data_xxx' for a logical data layer.
+
+Hit 'Save' to save the map.
+        )",
+        gfx::FRect(0, 0, width, height),
+        painter, 28);
+        return;
+    }
+
     // draw the origin vectors in tilespace and project with the map perspective
     if (GetValue(mUI.chkShowOrigin))
     {
@@ -2339,12 +2357,6 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         const float game_width  = settings.viewport_width;
         const float game_height = settings.viewport_height;
         DrawViewport(painter, view, game_width, game_height, width, height);
-    }
-
-    if (!mState.klass->GetNumLayers())
-    {
-        ShowMessage("Map has no layers to visualize.", painter);
-        return;
     }
 
     PrintMousePos(mUI, mState, painter, perspective);

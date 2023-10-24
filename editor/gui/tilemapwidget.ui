@@ -1037,7 +1037,7 @@
           <item>
            <widget class="QPushButton" name="btnNewLayer">
             <property name="text">
-             <string>New ...</string>
+             <string>New Layer...</string>
             </property>
             <property name="icon">
              <iconset resource="../resource/resource.qrc">
@@ -1051,7 +1051,7 @@
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>Edit ...</string>
+             <string>Edit Layer ...</string>
             </property>
             <property name="icon">
              <iconset resource="../resource/resource.qrc">
@@ -1065,7 +1065,7 @@
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>Delete</string>
+             <string>Delete Layer</string>
             </property>
             <property name="icon">
              <iconset resource="../resource/resource.qrc">
@@ -1353,8 +1353,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>308</width>
-                 <height>417</height>
+                 <width>335</width>
+                 <height>425</height>
                 </rect>
                </property>
                <property name="sizePolicy">
