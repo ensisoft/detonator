@@ -334,7 +334,7 @@ inline bool JsonReadSafe(const QJsonObject& object, const char* name, Enum* out)
     if (!JsonReadSafe(object, name, &str))
         return false;
     bool ok = false;
-    Enum e;
+    Enum e = Enum();
     e = EnumFromString(str, e, &ok);
     if (!ok)
         return false;
