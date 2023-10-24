@@ -1813,14 +1813,21 @@ private:
 
             GL_CALL(glActiveTexture(texture_unit));
             GL_CALL(glBindTexture(GL_TEXTURE_2D, mHandle));
-            GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
+            // seems that driver bugs are common regarding sRGB mipmap generation
+            // so we're going to unwrap this GL call and assume any error 
+            // is an error about failing to generate mips because of driver bugs
+            mGL.glGenerateMipmap(GL_TEXTURE_2D);
+            const auto error = mGL.glGetError();
+
             mDevice.mTextureUnits[last_unit_index].texture = this;
-            mHasMips = true;
+            mHasMips = error == GL_NO_ERROR;
             if (!IsTransient())
             {
-                DEBUG("Generated mip maps on texture. [name='%1']", mName);
+                if (mHasMips)
+                    DEBUG("Generated mip maps on texture. [name='%1']", mName);
+                else WARN("Failed to generate mips on texture. [name='%1']", mName);
             }
-            return true;
+            return mHasMips;
         }
         virtual bool HasMips() const override
         { return mHasMips; }
