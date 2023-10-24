@@ -12,3 +12,4 @@
 #undef GetClassName
 #undef CopyFile
 #undef GetCurrentTime
+#undef DrawState
