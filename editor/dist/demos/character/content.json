@@ -183,6 +183,7 @@
       },
       "resource_id": "UdhtSlNfiN",
       "resource_name": "8-dir-char-template/Dummy",
+      "resource_ver": 1,
       "script_file": "KHnqtB85vy",
       "tag": ""
     },
@@ -616,6 +617,7 @@
       },
       "resource_id": "69nkia7uBG",
       "resource_name": "LPC/Character/Human",
+      "resource_ver": 1,
       "script_file": "J4xx3ThJjX",
       "tag": "",
       "vars": [
@@ -918,6 +920,7 @@
       },
       "resource_id": "AWExQiuWgf",
       "resource_name": "LPC/Prop/Arrow",
+      "resource_ver": 1,
       "script_file": "Agn7Ll853d",
       "tag": "",
       "vars": [
@@ -1150,6 +1153,7 @@
       },
       "resource_id": "5FdaYIIRiM",
       "resource_name": "LPC/Character/Combat Dummy",
+      "resource_ver": 1,
       "script_file": "oaRCIQk650",
       "tag": "",
       "vars": [
@@ -1486,6 +1490,7 @@
       },
       "resource_id": "U1XmAR70Dj",
       "resource_name": "LPC/Character/Skeleton",
+      "resource_ver": 1,
       "script_file": "JuKilpgDfP",
       "tag": "",
       "vars": [
@@ -1808,6 +1813,7 @@
       },
       "resource_id": "HBSEmKKuug",
       "resource_name": "LPC/Background",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     }
@@ -1825,6 +1831,7 @@
       "particle_action": "None",
       "resource_id": "t1YfjyevnO",
       "resource_name": "8-dir-char-template/Dummy/Idle",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -1843,7 +1850,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -1880,7 +1887,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -1917,7 +1924,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -1954,7 +1961,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -1991,7 +1998,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2028,7 +2035,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2065,7 +2072,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2102,7 +2109,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2150,6 +2157,7 @@
       "particle_action": "None",
       "resource_id": "6UXWgkX59N",
       "resource_name": "8-dir-char-template/Dummy/Run",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -2168,7 +2176,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2205,7 +2213,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2242,7 +2250,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2279,7 +2287,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2316,7 +2324,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2353,7 +2361,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2390,7 +2398,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2427,7 +2435,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2475,6 +2483,7 @@
       "particle_action": "None",
       "resource_id": "f85ZCt9KqW",
       "resource_name": "LPC/Character/Human/Walk",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -2493,7 +2502,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2530,7 +2539,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2567,7 +2576,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2604,7 +2613,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2652,6 +2661,7 @@
       "particle_action": "None",
       "resource_id": "qiYGxNXLTv",
       "resource_name": "LPC/Character/Human/Slash",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -2670,7 +2680,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2707,7 +2717,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2744,7 +2754,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2781,7 +2791,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2829,6 +2839,7 @@
       "particle_action": "None",
       "resource_id": "FSj7l9Dgwl",
       "resource_name": "LPC/Character/Human/Shoot",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -2847,7 +2858,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2884,7 +2895,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2921,7 +2932,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -2958,7 +2969,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3006,6 +3017,7 @@
       "particle_action": "None",
       "resource_id": "XOtk86rK7p",
       "resource_name": "LPC/Character/Human/Thrust",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -3024,7 +3036,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3061,7 +3073,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3098,7 +3110,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3135,7 +3147,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3183,6 +3195,7 @@
       "particle_action": "None",
       "resource_id": "vSNBrbf7Uu",
       "resource_name": "LPC/Clothing/Shirt+Pants/Thrust",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -3201,7 +3214,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3238,7 +3251,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3275,7 +3288,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3312,7 +3325,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3360,6 +3373,7 @@
       "particle_action": "None",
       "resource_id": "2ohLK3pIux",
       "resource_name": "LPC/Clothing/Shirt+Pants/Walk",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -3378,7 +3392,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3415,7 +3429,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3452,7 +3466,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3489,7 +3503,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3537,6 +3551,7 @@
       "particle_action": "None",
       "resource_id": "LLq889I6UO",
       "resource_name": "LPC/Weapon/Spear/Thrust",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -3555,7 +3570,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3592,7 +3607,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3629,7 +3644,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3666,7 +3681,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3714,6 +3729,7 @@
       "particle_action": "None",
       "resource_id": "MaeqFLv5eg",
       "resource_name": "LPC/Clothing/Shirt+Pants/Shoot",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -3732,7 +3748,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3769,7 +3785,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3806,7 +3822,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3843,7 +3859,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3891,6 +3907,7 @@
       "particle_action": "None",
       "resource_id": "u9p9Izh8rv",
       "resource_name": "LPC/Weapon/Bow+Arrow/Shoot",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -3909,7 +3926,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3946,7 +3963,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3983,7 +4000,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4020,7 +4037,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4068,6 +4085,7 @@
       "particle_action": "None",
       "resource_id": "57djXhQN4Z",
       "resource_name": "LPC/Prop/Arrow",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4084,7 +4102,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4132,6 +4150,7 @@
       "particle_action": "None",
       "resource_id": "wrQHZ3iizg",
       "resource_name": "LPC/Character/CombatDummy/Spin",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4150,7 +4169,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4198,6 +4217,7 @@
       "particle_action": "None",
       "resource_id": "r7XlZHD5We",
       "resource_name": "LPC/Health Bar",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "ws://shaders/es2/My_Material.glsl",
       "surface": "Transparent",
@@ -4247,6 +4267,7 @@
       "particle_action": "None",
       "resource_id": "Ne7xKkxWtm",
       "resource_name": "LPC/Character/CombatDummy/Die",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4265,7 +4286,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4313,6 +4334,7 @@
       "particle_action": "None",
       "resource_id": "rDpZrE3UuD",
       "resource_name": "LPC/Character/Skeleton/Walk",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4331,7 +4353,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4368,7 +4390,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4405,7 +4427,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4442,7 +4464,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4490,6 +4512,7 @@
       "particle_action": "None",
       "resource_id": "kYDARs1JwJ",
       "resource_name": "LPC/Character/Skeleton/Slash",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4508,7 +4531,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4545,7 +4568,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4582,7 +4605,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4619,7 +4642,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4667,6 +4690,7 @@
       "particle_action": "None",
       "resource_id": "NaRoLPQ4E5",
       "resource_name": "LPC/Character/Skeleton/Die",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4685,7 +4709,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4733,6 +4757,7 @@
       "particle_action": "None",
       "resource_id": "KnPvBZqDs4",
       "resource_name": "LPC/Weapon/Dagger/Slash",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4751,7 +4776,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4788,7 +4813,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4825,7 +4850,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4862,7 +4887,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4910,6 +4935,7 @@
       "particle_action": "None",
       "resource_id": "528LJjXXAA",
       "resource_name": "LPC/Clothing/Shirt+Pants/Slash",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4928,7 +4954,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4965,7 +4991,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -5002,7 +5028,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -5039,7 +5065,7 @@
           "spritesheet_rows": 1,
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -5087,6 +5113,7 @@
       "particle_action": "None",
       "resource_id": "jS7kGm3IkK",
       "resource_name": "LPC/Grass",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -5402,6 +5429,7 @@
       },
       "resource_id": "s89fX2XxBH",
       "resource_name": "LPC",
+      "resource_ver": 1,
       "script_file": "",
       "tilemap": ""
     }
@@ -5413,6 +5441,7 @@
       "owner": "",
       "resource_id": "Xg0GdRiaQU",
       "resource_name": "game",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/game.lua"
     },
@@ -5422,6 +5451,7 @@
       "owner": "",
       "resource_id": "KHnqtB85vy",
       "resource_name": "8-dir-char-template/Dummy",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://8-directional-character-template/lua/KHnqtB85vy.lua"
     },
@@ -5431,6 +5461,7 @@
       "owner": "",
       "resource_id": "DFRO8f967k",
       "resource_name": "8-dir-char-template/Dummy/Animator",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://8-directional-character-template/lua/DFRO8f967k.lua"
     },
@@ -5440,6 +5471,7 @@
       "owner": "",
       "resource_id": "J4xx3ThJjX",
       "resource_name": "LPC/Entity/Player",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/J4xx3ThJjX.lua"
     },
@@ -5449,6 +5481,7 @@
       "owner": "",
       "resource_id": "7lLEJ9i9vM",
       "resource_name": "LPC/Entity/Animator",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/7lLEJ9i9vM.lua"
     },
@@ -5458,6 +5491,7 @@
       "owner": "",
       "resource_id": "Agn7Ll853d",
       "resource_name": "LPC/Prop/Arrow",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/Agn7Ll853d.lua"
     },
@@ -5467,6 +5501,7 @@
       "owner": "",
       "resource_id": "oaRCIQk650",
       "resource_name": "LPC/Entity/Combat Dummy",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/oaRCIQk650.lua"
     },
@@ -5476,6 +5511,7 @@
       "owner": "",
       "resource_id": "JuKilpgDfP",
       "resource_name": "LPC/Character/Skeleton",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/JuKilpgDfP.lua"
     },
@@ -5485,6 +5521,7 @@
       "owner": "",
       "resource_id": "1AKD9P4vQ6",
       "resource_name": "LPC/walking",
+      "resource_ver": 1,
       "type": "ScriptData",
       "uri": "ws://lua/walking.lua"
     },
@@ -5494,6 +5531,7 @@
       "owner": "",
       "resource_id": "HJ2GwxRGzv",
       "resource_name": "LPC/utility",
+      "resource_ver": 1,
       "type": "ScriptData",
       "uri": "ws://lua/utility.lua"
     },
@@ -5503,6 +5541,7 @@
       "owner": "",
       "resource_id": "TWDXebwTRx",
       "resource_name": "LPC/weapon",
+      "resource_ver": 1,
       "type": "ScriptData",
       "uri": "ws://lua/weapon.lua"
     },
@@ -5512,6 +5551,7 @@
       "owner": "",
       "resource_id": "kYIT5fZnX8",
       "resource_name": "LPC/damage",
+      "resource_ver": 1,
       "type": "ScriptData",
       "uri": "ws://lua/damage.lua"
     }
@@ -5534,6 +5574,7 @@
       "name": "8-dir-char-template/Pointer",
       "resource_id": "ZOW84mNSWm",
       "resource_name": "8-dir-char-template/Pointer",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {

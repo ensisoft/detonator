@@ -86,6 +86,7 @@
       },
       "resource_id": "zFZFKpipES",
       "resource_name": "Kinematic Constant Speed Ball",
+      "resource_ver": 1,
       "script_file": "67oHYYDttT",
       "tag": ""
     },
@@ -175,6 +176,7 @@
       },
       "resource_id": "a8UWU1fUNZ",
       "resource_name": "Dynamic Constant Speed Ball",
+      "resource_ver": 1,
       "script_file": "9jMLWUyAWj",
       "tag": ""
     },
@@ -264,6 +266,7 @@
       },
       "resource_id": "dK1EdyK1h8",
       "resource_name": "Vertical Wall",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -405,6 +408,7 @@
       },
       "resource_id": "Fwn9yS1gWF",
       "resource_name": "Static Block",
+      "resource_ver": 1,
       "script_file": "QCSIpWak63",
       "tag": "",
       "vars": [
@@ -515,6 +519,7 @@
       },
       "resource_id": "6M7kjbtJOK",
       "resource_name": "Dynamic Ball",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -604,6 +609,7 @@
       },
       "resource_id": "dgq5ss7Iy9",
       "resource_name": "User Ball",
+      "resource_ver": 1,
       "script_file": "kppKkQuA0g",
       "tag": ""
     },
@@ -827,6 +833,7 @@
       },
       "resource_id": "kpR98Mlxaz",
       "resource_name": "Distance Joint Balls",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -916,6 +923,7 @@
       },
       "resource_id": "ETnTKLXRXi",
       "resource_name": "Horizontal Wall",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1012,6 +1020,7 @@
       },
       "resource_id": "EsFlY7oEfM",
       "resource_name": "Dynamic Block",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1181,6 +1190,7 @@
       },
       "resource_id": "lCSj0gMTqU",
       "resource_name": "Wrecking Ball",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1253,6 +1263,7 @@
       },
       "resource_id": "pK3rRC7a5h",
       "resource_name": "Marker",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1448,6 +1459,7 @@
       },
       "resource_id": "TfojPSWQmJ",
       "resource_name": "Fixture Widget",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1526,6 +1538,7 @@
       },
       "resource_id": "EnPRIQkKBO",
       "resource_name": "message",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1604,6 +1617,7 @@
       },
       "resource_id": "oC0fUUJnzk",
       "resource_name": "message",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1682,6 +1696,7 @@
       },
       "resource_id": "fy5aapEM0F",
       "resource_name": "message",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     }
@@ -2492,6 +2507,7 @@
       },
       "resource_id": "n9hH3dGv20",
       "resource_name": "Kinematic C Velocity Balls",
+      "resource_ver": 1,
       "script_file": "",
       "tilemap": ""
     },
@@ -2948,6 +2964,7 @@
       },
       "resource_id": "lTi7YXjdsz",
       "resource_name": "Dynamic C Velocity Balls",
+      "resource_ver": 1,
       "script_file": "",
       "tilemap": ""
     },
@@ -4284,6 +4301,7 @@
       },
       "resource_id": "XwQTFkhxPJ",
       "resource_name": "Dynamic Balls",
+      "resource_ver": 1,
       "script_file": "",
       "tilemap": ""
     },
@@ -4564,6 +4582,7 @@
       },
       "resource_id": "7zQLUleDer",
       "resource_name": "Distance Joint",
+      "resource_ver": 1,
       "script_file": "",
       "tilemap": ""
     },
@@ -5108,6 +5127,7 @@
       },
       "resource_id": "pATaRMBTR7",
       "resource_name": "Downhill Balls",
+      "resource_ver": 1,
       "script_file": "",
       "tilemap": "",
       "vars": [
@@ -5715,6 +5735,7 @@
       },
       "resource_id": "v8AR2h5m8R",
       "resource_name": "Wrecking Ball",
+      "resource_ver": 1,
       "script_file": "",
       "tilemap": "",
       "vars": [
@@ -6676,6 +6697,7 @@
       },
       "resource_id": "UWnXOsuD6o",
       "resource_name": "Spatial Query",
+      "resource_ver": 1,
       "script_file": "uhYlthZ4sC",
       "tilemap": ""
     },
@@ -7264,6 +7286,7 @@
       },
       "resource_id": "2rSIWqteXS",
       "resource_name": "Raycast",
+      "resource_ver": 1,
       "script_file": "k4Stm2rLJJ",
       "tilemap": ""
     },
@@ -7544,6 +7567,7 @@
       },
       "resource_id": "f7S1HTDAgE",
       "resource_name": "Fixture Widget",
+      "resource_ver": 1,
       "script_file": "",
       "tilemap": ""
     }
@@ -7555,6 +7579,7 @@
       "owner": "",
       "resource_id": "Xg0GdRiaQU",
       "resource_name": "game",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/game.lua"
     },
@@ -7564,6 +7589,7 @@
       "owner": "",
       "resource_id": "9jMLWUyAWj",
       "resource_name": "Dynamic Constant Speed Ball",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/9jMLWUyAWj.lua"
     },
@@ -7573,6 +7599,7 @@
       "owner": "",
       "resource_id": "kppKkQuA0g",
       "resource_name": "User Ball",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/kppKkQuA0g.lua"
     },
@@ -7582,6 +7609,7 @@
       "owner": "",
       "resource_id": "QCSIpWak63",
       "resource_name": "Static Block",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/QCSIpWak63.lua"
     },
@@ -7591,6 +7619,7 @@
       "owner": "",
       "resource_id": "k4Stm2rLJJ",
       "resource_name": "Phys Test 5",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/k4Stm2rLJJ.lua"
     },
@@ -7600,6 +7629,7 @@
       "owner": "",
       "resource_id": "uhYlthZ4sC",
       "resource_name": "Spatial Query",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/uhYlthZ4sC.lua"
     },
@@ -7609,6 +7639,7 @@
       "owner": "",
       "resource_id": "67oHYYDttT",
       "resource_name": "Kinematic Constant Speed Ball",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/67oHYYDttT.lua"
     }

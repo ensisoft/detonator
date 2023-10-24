@@ -18,6 +18,7 @@
       "name": "Rise04",
       "resource_id": "124YMG3023",
       "resource_name": "Rise04",
+      "resource_ver": 1,
       "src_elem_id": "Q7EeMBu72q",
       "src_elem_port": "out"
     },
@@ -39,6 +40,7 @@
       "name": "Rise07",
       "resource_id": "Yyg2eMPHlt",
       "resource_name": "Rise07",
+      "resource_ver": 1,
       "src_elem_id": "ndvxN7xpG1",
       "src_elem_port": "out"
     }
@@ -130,6 +132,7 @@
       },
       "resource_id": "HFSA8Yezdr",
       "resource_name": "StoneBlock",
+      "resource_ver": 1,
       "script_file": "4NMFT9hs0Y",
       "tag": "",
       "tracks": [
@@ -249,6 +252,7 @@
       },
       "resource_id": "DOzd15fNMX",
       "resource_name": "Tile1",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -338,6 +342,7 @@
       },
       "resource_id": "7WjAKJb7hY",
       "resource_name": "Tile2",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -427,6 +432,7 @@
       },
       "resource_id": "SFrJwO771l",
       "resource_name": "Tile4",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -516,6 +522,7 @@
       },
       "resource_id": "Fm5ByqI6xo",
       "resource_name": "Tile3",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -588,6 +595,7 @@
       },
       "resource_id": "y7bWvFuoie",
       "resource_name": "Tree",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -677,6 +685,7 @@
       },
       "resource_id": "b2lU3gYIwf",
       "resource_name": "Tile8",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -766,6 +775,7 @@
       },
       "resource_id": "ImTnUuKMDu",
       "resource_name": "Tile7",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -855,6 +865,7 @@
       },
       "resource_id": "GaQT22N3OL",
       "resource_name": "Tile6",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -944,6 +955,7 @@
       },
       "resource_id": "9LU4RC9DH0",
       "resource_name": "Tile15",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1033,6 +1045,7 @@
       },
       "resource_id": "d8ZPi5y9Ps",
       "resource_name": "Tile14",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1122,6 +1135,7 @@
       },
       "resource_id": "bOtC7Fnmmp",
       "resource_name": "Tile13",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1211,6 +1225,7 @@
       },
       "resource_id": "g3TRakI9ob",
       "resource_name": "Tile12",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1300,6 +1315,7 @@
       },
       "resource_id": "8Prh114uxP",
       "resource_name": "Tile11",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1389,6 +1405,7 @@
       },
       "resource_id": "dJKagvO0jM",
       "resource_name": "Tile10",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1478,6 +1495,7 @@
       },
       "resource_id": "nR73zKx341",
       "resource_name": "Tile9",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1567,6 +1585,7 @@
       },
       "resource_id": "vYm7CMPRrJ",
       "resource_name": "Tile5",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1639,6 +1658,7 @@
       },
       "resource_id": "bEAIWd3ESl",
       "resource_name": "Bush (1)",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1728,6 +1748,7 @@
       },
       "resource_id": "2Q2vkLGDEg",
       "resource_name": "Crate",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1800,6 +1821,7 @@
       },
       "resource_id": "HpAo2l11sT",
       "resource_name": "Cactus (1)",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1872,6 +1894,7 @@
       },
       "resource_id": "2sWxF1jCqU",
       "resource_name": "Cactus (2)",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -1944,6 +1967,7 @@
       },
       "resource_id": "Y3nvZp6DaX",
       "resource_name": "Cactus (3)",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -2016,6 +2040,7 @@
       },
       "resource_id": "WKsCpHkbNw",
       "resource_name": "Billboard",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -2421,6 +2446,7 @@
       },
       "resource_id": "FNUUxWSBTe",
       "resource_name": "Player",
+      "resource_ver": 1,
       "script_file": "vq6v6WdXwZ",
       "tag": "",
       "tracks": [
@@ -3316,6 +3342,7 @@
       },
       "resource_id": "MiA8FWNEaF",
       "resource_name": "Horizontal Elevator",
+      "resource_ver": 1,
       "script_file": "",
       "tag": "",
       "tracks": [
@@ -3652,6 +3679,7 @@
       },
       "resource_id": "Jn0SpbgGSY",
       "resource_name": "Vertical Elevator",
+      "resource_ver": 1,
       "script_file": "",
       "tag": "",
       "tracks": [
@@ -3913,6 +3941,7 @@
       },
       "resource_id": "te9JjLzdlp",
       "resource_name": "Tile16",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -4250,6 +4279,7 @@
       },
       "resource_id": "z3qBPdpAGa",
       "resource_name": "Small Island",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -4322,6 +4352,7 @@
       },
       "resource_id": "O5QefURbEM",
       "resource_name": "Grass (2)",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -4394,6 +4425,7 @@
       },
       "resource_id": "TyE5N8JWlx",
       "resource_name": "Grass (1)",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -5127,6 +5159,7 @@
       },
       "resource_id": "ZNaUsmn31R",
       "resource_name": "Plateu",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -5199,6 +5232,7 @@
       },
       "resource_id": "WtCkGlPDwf",
       "resource_name": "Skeleton",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -5271,6 +5305,7 @@
       },
       "resource_id": "tqF7brLL08",
       "resource_name": "Stone",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -5457,6 +5492,7 @@
       },
       "resource_id": "gwm3bTflRn",
       "resource_name": "Parallax Background",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -5574,6 +5610,7 @@
       },
       "resource_id": "dfb84OzuRo",
       "resource_name": "Coin",
+      "resource_ver": 1,
       "script_file": "7lSTOyhTqF",
       "tag": "",
       "tracks": [
@@ -5684,6 +5721,7 @@
       },
       "resource_id": "iFATbhg5NM",
       "resource_name": "Coins Particles",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -5773,6 +5811,7 @@
       },
       "resource_id": "Dm9UM2yky9",
       "resource_name": "Violet Diamond",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -5989,6 +6028,7 @@
       },
       "resource_id": "Yq50Y5iaj6",
       "resource_name": "Static Background",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     }
@@ -6006,6 +6046,7 @@
       "particle_action": "None",
       "resource_id": "gzjp7PwMQd",
       "resource_name": "StoneBlock",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6022,7 +6063,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -6070,6 +6111,7 @@
       "particle_action": "None",
       "resource_id": "ezvBTHxrAX",
       "resource_name": "tile1",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6086,7 +6128,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -6134,6 +6176,7 @@
       "particle_action": "None",
       "resource_id": "tdYbKt5I5Q",
       "resource_name": "tile2",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6150,7 +6193,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -6198,6 +6241,7 @@
       "particle_action": "None",
       "resource_id": "WTNfneUmHx",
       "resource_name": "tile3",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6214,7 +6258,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -6262,6 +6306,7 @@
       "particle_action": "None",
       "resource_id": "NY4Of7DfnI",
       "resource_name": "tile4",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6278,7 +6323,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -6326,6 +6371,7 @@
       "particle_action": "None",
       "resource_id": "PiCFlSf9Gm",
       "resource_name": "tile5",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6342,7 +6388,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -6390,6 +6436,7 @@
       "particle_action": "None",
       "resource_id": "5GPKkIzzUf",
       "resource_name": "tile6",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6406,7 +6453,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -6454,6 +6501,7 @@
       "particle_action": "None",
       "resource_id": "uLZlHEU5XW",
       "resource_name": "tile7",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6470,7 +6518,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -6518,6 +6566,7 @@
       "particle_action": "None",
       "resource_id": "7uTDp9S0mt",
       "resource_name": "tile8",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6534,7 +6583,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -6582,6 +6631,7 @@
       "particle_action": "None",
       "resource_id": "kyLTH2YAJY",
       "resource_name": "tile9",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6598,7 +6648,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -6646,6 +6696,7 @@
       "particle_action": "None",
       "resource_id": "FW5N4w5d3Z",
       "resource_name": "tile10",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6662,7 +6713,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -6710,6 +6761,7 @@
       "particle_action": "None",
       "resource_id": "jqIuU0kASH",
       "resource_name": "tile11",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6726,7 +6778,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -6774,6 +6826,7 @@
       "particle_action": "None",
       "resource_id": "sX94tG9WhR",
       "resource_name": "tile12",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6790,7 +6843,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -6838,6 +6891,7 @@
       "particle_action": "None",
       "resource_id": "MBEoxQ9SGX",
       "resource_name": "tile13",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6854,7 +6908,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -6902,6 +6956,7 @@
       "particle_action": "None",
       "resource_id": "UJKQNRymuO",
       "resource_name": "tile14",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6918,7 +6973,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -6966,6 +7021,7 @@
       "particle_action": "None",
       "resource_id": "UTfmL76ml0",
       "resource_name": "tile15",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -6982,7 +7038,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -7030,6 +7086,7 @@
       "particle_action": "None",
       "resource_id": "QCvtiZTp3b",
       "resource_name": "tile16",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7046,7 +7103,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -7094,6 +7151,7 @@
       "particle_action": "None",
       "resource_id": "zgwqXHtABU",
       "resource_name": "Bush (1)",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7110,7 +7168,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -7158,6 +7216,7 @@
       "particle_action": "None",
       "resource_id": "MYaj1na7M4",
       "resource_name": "Bush (2)",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7174,7 +7233,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -7222,6 +7281,7 @@
       "particle_action": "None",
       "resource_id": "wrSRezqUfj",
       "resource_name": "Cactus (1)",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7238,7 +7298,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -7286,6 +7346,7 @@
       "particle_action": "None",
       "resource_id": "QR14nEb7T3",
       "resource_name": "Cactus (2)",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7302,7 +7363,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -7350,6 +7411,7 @@
       "particle_action": "None",
       "resource_id": "IPqp1SooOX",
       "resource_name": "Cactus (3)",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7366,7 +7428,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -7414,6 +7476,7 @@
       "particle_action": "None",
       "resource_id": "RhslGRtQQR",
       "resource_name": "Crate",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7430,7 +7493,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -7478,6 +7541,7 @@
       "particle_action": "None",
       "resource_id": "bvJqe9fGu5",
       "resource_name": "Grass (1)",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7494,7 +7558,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -7542,6 +7606,7 @@
       "particle_action": "None",
       "resource_id": "IM3dwFG7wS",
       "resource_name": "Grass (2)",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7558,7 +7623,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -7606,6 +7671,7 @@
       "particle_action": "None",
       "resource_id": "bBSpmT5CN0",
       "resource_name": "Sign",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7622,7 +7688,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -7670,6 +7736,7 @@
       "particle_action": "None",
       "resource_id": "MDomkaGQRL",
       "resource_name": "SignArrow",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7686,7 +7753,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -7734,6 +7801,7 @@
       "particle_action": "None",
       "resource_id": "Ca4GgRWjP2",
       "resource_name": "Skeleton",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7750,7 +7818,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -7798,6 +7866,7 @@
       "particle_action": "None",
       "resource_id": "xrUzM3pdBZ",
       "resource_name": "Stone",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7814,7 +7883,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -7862,6 +7931,7 @@
       "particle_action": "None",
       "resource_id": "pQ2O7Ekypd",
       "resource_name": "Tree",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7878,7 +7948,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -7926,6 +7996,7 @@
       "particle_action": "None",
       "resource_id": "AgxrO05Kqg",
       "resource_name": "BG_Layer_0",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -7942,7 +8013,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -7998,6 +8069,7 @@
       "particle_action": "None",
       "resource_id": "RnL44evfW5",
       "resource_name": "Bandit Idle",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8014,7 +8086,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8036,7 +8108,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8058,7 +8130,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8080,7 +8152,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8102,7 +8174,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8124,7 +8196,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8146,7 +8218,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8168,7 +8240,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8190,7 +8262,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8212,7 +8284,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8234,7 +8306,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8256,7 +8328,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8304,6 +8376,7 @@
       "particle_action": "None",
       "resource_id": "w26YsP04pJ",
       "resource_name": "Bandit Walk",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8320,7 +8393,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8342,7 +8415,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8364,7 +8437,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8386,7 +8459,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8408,7 +8481,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8430,7 +8503,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8452,7 +8525,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8474,7 +8547,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8522,6 +8595,7 @@
       "particle_action": "None",
       "resource_id": "f2rOXhvzDy",
       "resource_name": "Bandit Jump",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8538,7 +8612,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8560,7 +8634,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8582,7 +8656,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8604,7 +8678,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8626,7 +8700,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8648,7 +8722,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8670,7 +8744,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8692,7 +8766,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8740,6 +8814,7 @@
       "particle_action": "None",
       "resource_id": "mgo2XI2toK",
       "resource_name": "Bandit Attack",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8756,7 +8831,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8778,7 +8853,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8800,7 +8875,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8822,7 +8897,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8844,7 +8919,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8866,7 +8941,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8888,7 +8963,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8910,7 +8985,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8958,6 +9033,7 @@
       "particle_action": "None",
       "resource_id": "90E8gRgYDP",
       "resource_name": "Bandit Fall",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -8974,7 +9050,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -8996,7 +9072,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9018,7 +9094,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9040,7 +9116,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9062,7 +9138,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9084,7 +9160,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9106,7 +9182,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9128,7 +9204,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9176,6 +9252,7 @@
       "particle_action": "None",
       "resource_id": "fmxJ24RhUE",
       "resource_name": "Bandit Hurt",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9192,7 +9269,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9214,7 +9291,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9236,7 +9313,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9258,7 +9335,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9280,7 +9357,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9302,7 +9379,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9324,7 +9401,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9346,7 +9423,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9394,6 +9471,7 @@
       "particle_action": "None",
       "resource_id": "9aRwE7zov7",
       "resource_name": "Bandit Die",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9410,7 +9488,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9432,7 +9510,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9454,7 +9532,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9476,7 +9554,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9498,7 +9576,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9520,7 +9598,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9542,7 +9620,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9564,7 +9642,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9612,6 +9690,7 @@
       "particle_action": "None",
       "resource_id": "l6vR7abMmW",
       "resource_name": "BG_Layer_1",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9628,7 +9707,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9684,6 +9763,7 @@
       "particle_action": "None",
       "resource_id": "X6Q2aN3uWm",
       "resource_name": "BG_Layer_2",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9700,7 +9780,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9756,6 +9836,7 @@
       "particle_action": "None",
       "resource_id": "2ynNMbWOK3",
       "resource_name": "Coin Spin",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9772,7 +9853,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9794,7 +9875,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9816,7 +9897,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9838,7 +9919,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9860,7 +9941,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9882,7 +9963,7 @@
               "type": "Filesystem"
             },
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9930,6 +10011,7 @@
       "particle_action": "None",
       "resource_id": "nLUoQRjXrg",
       "resource_name": "Violet Diamond",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -9946,7 +10028,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -9994,6 +10076,7 @@
       "particle_action": "None",
       "resource_id": "oTLKJxJ07d",
       "resource_name": "Background",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Opaque",
@@ -10010,7 +10093,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -10087,6 +10170,7 @@
       "placement": "Inside",
       "resource_id": "nnXiuEEnwL",
       "resource_name": "Coins",
+      "resource_ver": 1,
       "shape": "Rectangle"
     }
   ],
@@ -14781,6 +14865,7 @@
       },
       "resource_id": "vWm1hXNdOD",
       "resource_name": "Level 0",
+      "resource_ver": 1,
       "script_file": "",
       "tilemap": "",
       "vars": [
@@ -15561,6 +15646,7 @@
       },
       "resource_id": "loHDpIgprb",
       "resource_name": "Menu Scene",
+      "resource_ver": 1,
       "right_boundary": 600.0,
       "script_file": "",
       "tilemap": "",
@@ -15574,6 +15660,7 @@
       "owner": "",
       "resource_id": "SId1upp3XQ",
       "resource_name": "game",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/game.lua"
     },
@@ -15583,6 +15670,7 @@
       "owner": "",
       "resource_id": "vq6v6WdXwZ",
       "resource_name": "Player",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/vq6v6WdXwZ.lua"
     },
@@ -15592,6 +15680,7 @@
       "owner": "",
       "resource_id": "4NMFT9hs0Y",
       "resource_name": "StoneBlock",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/4NMFT9hs0Y.lua"
     },
@@ -15601,6 +15690,7 @@
       "owner": "",
       "resource_id": "7lSTOyhTqF",
       "resource_name": "Coin",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/7lSTOyhTqF.lua"
     }
@@ -15618,6 +15708,7 @@
       "name": "StoneBlock",
       "resource_id": "JQAP7v0ZUJ",
       "resource_name": "StoneBlock",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -15700,6 +15791,7 @@
       "name": "Tree",
       "resource_id": "oNJA4jNZF9",
       "resource_name": "Tree",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -15884,6 +15976,7 @@
       "name": "Sign",
       "resource_id": "gUmNEBelRm",
       "resource_name": "Sign",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -15966,6 +16059,7 @@
       "name": "Bush (1)",
       "resource_id": "oDE09YOPk9",
       "resource_name": "Bush (1)",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -16088,6 +16182,7 @@
       "name": "Cactus (1)",
       "resource_id": "fW1kOmDCo0",
       "resource_name": "Cactus (1)",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -16290,6 +16385,7 @@
       "name": "Cactus (2)",
       "resource_id": "IfEi7dQdbW",
       "resource_name": "Cactus (2)",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -16394,6 +16490,7 @@
       "name": "Cactus (3)",
       "resource_id": "l9oab5XQTK",
       "resource_name": "Cactus (3)",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -16608,6 +16705,7 @@
       "name": "Bush (2)",
       "resource_id": "EXQWh9Zz2B",
       "resource_name": "Bush (2)",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -16744,6 +16842,7 @@
       "name": "Grass (2)",
       "resource_id": "QwLaM5bEqx",
       "resource_name": "Grass (2)",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -16898,6 +16997,7 @@
       "name": "Grass (1)",
       "resource_id": "FgJP6uJzoG",
       "resource_name": "Grass (1)",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -17052,6 +17152,7 @@
       "name": "Skeleton",
       "resource_id": "dWDAODzq3M",
       "resource_name": "Skeleton",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -17158,6 +17259,7 @@
       "name": "Stone",
       "resource_id": "YkK6SEnX2R",
       "resource_name": "Stone",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -17246,6 +17348,7 @@
       "name": "Bandit Idle",
       "resource_id": "8636ofEjei",
       "resource_name": "Bandit Idle",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -17376,6 +17479,7 @@
       "name": "Bandit Walk",
       "resource_id": "26DgI88X5u",
       "resource_name": "Bandit Walk",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -17494,6 +17598,7 @@
       "name": "Bandit Attack",
       "resource_id": "zoqnFP5Gvz",
       "resource_name": "Bandit Attack",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -17606,6 +17711,7 @@
       "name": "Bandit Jump",
       "resource_id": "W27ZFgJKAJ",
       "resource_name": "Bandit Jump",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -17736,6 +17842,7 @@
       "name": "Bandit",
       "resource_id": "YFMYNa7lU4",
       "resource_name": "Bandit",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -17788,6 +17895,7 @@
       "name": "Bandit Fall",
       "resource_id": "4rBCnTGuXK",
       "resource_name": "Bandit Fall",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -17918,6 +18026,7 @@
       "name": "Bandit Die",
       "resource_id": "PBPIRCm9MB",
       "resource_name": "Bandit Die",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -18060,6 +18169,7 @@
       "name": "Diamond",
       "resource_id": "XJz8lK4sSZ",
       "resource_name": "Diamond",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -18149,6 +18259,7 @@
       "name": "Game UI",
       "resource_id": "7qhE9P3Lno",
       "resource_name": "Game UI",
+      "resource_ver": 1,
       "script_file": "",
       "style_file": "app://ui/style/default.json",
       "style_string": "",
@@ -18315,6 +18426,7 @@
       "name": "Menu UI",
       "resource_id": "M3GBwLlWRp",
       "resource_name": "Menu UI",
+      "resource_ver": 1,
       "script_file": "",
       "style_file": "ws://ui/style.json",
       "style_string": "",

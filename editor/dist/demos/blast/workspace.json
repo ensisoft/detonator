@@ -1,11 +1,13 @@
 {
     "0tJOf84hBU": {
+        "__version": 1,
         "checked_for_packing": 1,
         "elem_D79A5NORKR_pos_x": 0,
         "elem_D79A5NORKR_pos_y": 0,
         "mapping_count": 0
     },
     "2Tg09vx9Yf": {
+        "__version": 1,
         "checked_for_packing": 1,
         "elem_EEfBsJfH7U_pos_x": -558,
         "elem_EEfBsJfH7U_pos_y": 356,
@@ -54,9 +56,11 @@
         "mapping_count": 6
     },
     "2a488SIQsU": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "4Ckmwoylp6": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -71,27 +75,34 @@
         "use_lifetime": 1
     },
     "4KwMiHn2Zz": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "4eIBhHhK0W": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "5LKG2wBRGq": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_UIG3lUtmPm": ""
     },
     "5YQ8ZqObX7": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "6Smomrh9yG": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "7NAD3QgFlq": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_QnlQ7xD1kW": "",
         "comment_n9QIMigZH2": "Extra size so that it can be moved when ship moves"
     },
     "7pLg2qp4Pp": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -106,6 +117,7 @@
         "use_lifetime": 1
     },
     "8exJylNDfi": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 0,
         "local_emitter_w": 0,
@@ -120,6 +132,7 @@
         "use_lifetime": 1
     },
     "9o7zbhlIlp": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -134,6 +147,7 @@
         "use_lifetime": 0
     },
     "A7Z5jfJF38": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_bhTMTzzFAN": "",
         "comment_zaQ8SYuKGL": "",
@@ -150,15 +164,19 @@
         }
     },
     "AA5C8qjoDb": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "CopZZzjQd4": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "EuyGHU1pbR": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "FF0aZIpHbj": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -173,9 +191,11 @@
         "use_lifetime": 1
     },
     "FXdfIUPul3": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "Gk8mjavP85": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -190,15 +210,19 @@
         "use_lifetime": 1
     },
     "HSH0115zhS": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "HyJsrevpdz": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "I8r504SSma": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "IAJrgwvwpO": {
+        "__version": 1,
         "checked_for_packing": 1,
         "elem_aJsrCvIyQ1_pos_x": -62,
         "elem_aJsrCvIyQ1_pos_y": -85,
@@ -215,9 +239,11 @@
         "mapping_count": 2
     },
     "IEMBmyYrGj": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "JC7z1URQ70": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_4JdUSBRAGP": "",
         "comment_9ZoC5YS3Fi": "",
@@ -226,15 +252,18 @@
         "comment_TTJWA53RBw": ""
     },
     "JnQz1XnpaF": {
+        "__version": 1,
         "checked_for_packing": 1,
         "elem_7ET20Y11sb_pos_x": -38,
         "elem_7ET20Y11sb_pos_y": -41,
         "mapping_count": 0
     },
     "Kb5sHrP5bL": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "LZ34N4wOGn": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -249,9 +278,11 @@
         "use_lifetime": 1
     },
     "MHJxCtplnp": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "NjY2ow9Mfy": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_WUKFECQ7pF": "",
         "track_LGJpWFPyzG": {
@@ -263,75 +294,96 @@
         }
     },
     "NtNnX1kgNp": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_6FUm4sZ0NR": "",
         "comment_oroPtAUiYl": ""
     },
     "O2WDv7PduL": {
+        "__version": 1,
         "checked_for_packing": 1,
         "elem_AruPmKN2WY_pos_x": 10,
         "elem_AruPmKN2WY_pos_y": -219,
         "mapping_count": 0
     },
     "OiyvAkqpIL": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "OkteghMHhq": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_NFWxjou9hO": ""
     },
     "OtyRiUrsTd": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "PIhms7PpQT": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "PYYxBsykKG": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "QldASNFLIb": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "RoGbL91JLQ": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "SJmzdnESeH": {
+        "__version": 1,
         "checked_for_packing": 1,
         "elem_XUF0N9uLfD_pos_x": -12,
         "elem_XUF0N9uLfD_pos_y": -48,
         "mapping_count": 0
     },
     "TNyQSW6bB6": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "UWF4u1fYHa": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "WyTgkP5Z7I": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "XExwRNFj8H": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "XLy89MFMgb": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "YJynSu6nqw": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "YL23jp6zHS": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "Z2zrRug3HP": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "Z3Pe1h4eXI": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "ZnF7vN4aPO": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "asMmhdCBBw": {
+        "__version": 1,
         "checked_for_packing": 1,
         "elem_pmax6QpW2W_pos_x": -587,
         "elem_pmax6QpW2W_pos_y": -389,
@@ -348,9 +400,11 @@
         "mapping_count": 2
     },
     "bjZ0TrwuxI": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "diUlEeS5JH": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_2LJhfhUCPC": "",
         "comment_37wPuCDipF": "",
@@ -414,43 +468,55 @@
         }
     },
     "enGG9GJgb4": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "flFywvWC88": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_3WI152B0Yu": ""
     },
     "gD6Z1YvKbI": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "gMY5RFLgyd": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_5LD6mi4JIR": "",
         "comment_J6Iz1GtmLH": ""
     },
     "gnzE0pkeXX": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "hCinu6wgaC": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "iH79uGdYNY": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_pfOmm2UnnY": ""
     },
     "iydoxbMPEg": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "lLinWqCv1M": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "lOfMr3YBtI": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "miMdq5hPLK": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "p5r5vfQHG6": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_0dhxImGdKA": "",
         "comment_RyFSCUI5d3": "",
@@ -460,9 +526,11 @@
         "comment_unlprExuKx": ""
     },
     "pGHzP0FH33": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "pNT0bA0bpw": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_2tozdk6Tzf": "",
         "comment_WOIwH6Bxgh": "",
@@ -508,6 +576,7 @@
         "desktop_audio_io_strategy": "Automatic",
         "enable_audio_pcm_caching": true,
         "enable_physics": false,
+        "game_home": "${game-home}-dev",
         "game_script": "ws://lua/game.lua",
         "game_viewport_height": 800,
         "game_viewport_width": 1200,
@@ -555,6 +624,7 @@
         "working_folder": "${workspace}"
     },
     "q4pUEDx2rE": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_E5w4haXq1s": "",
         "comment_FwndgajgOa": "",
@@ -572,6 +642,7 @@
         }
     },
     "qHa3OPkRrg": {
+        "__version": 1,
         "checked_for_packing": 1,
         "elem_0bDiXIAGRF_pos_x": 418,
         "elem_0bDiXIAGRF_pos_y": -148,
@@ -618,11 +689,13 @@
         "mapping_count": 8
     },
     "qOIpuPbyL1": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_kp7A9ShK5w": "",
         "comment_z5Hf9L3Qvp": ""
     },
     "qklhbbEm10": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 0,
         "local_emitter_w": 0,
@@ -637,13 +710,16 @@
         "use_lifetime": 1
     },
     "rTHIeIzO8G": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_9fgBTSU1MT": ""
     },
     "rvZg0UT77h": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "sBjTBK97Mf": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -658,21 +734,27 @@
         "use_lifetime": 1
     },
     "u7zlrYWxAM": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "uEUkHdeqOW": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "uSnI4p97YC": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "vg5yQskPIv": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "wEBG4Nwt8g": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "wXtbrxNRpX": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_TdZawTgkXO": ""
     },
@@ -695,9 +777,11 @@
         "packing_param_write_content": true
     },
     "x6FkDk0TOK": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "yk8YmvFHRn": {
+        "__version": 1,
         "checked_for_packing": 1
     }
 }

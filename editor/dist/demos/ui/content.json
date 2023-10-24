@@ -33,6 +33,7 @@
       "name": "click",
       "resource_id": "zNOWw04fYZ",
       "resource_name": "click",
+      "resource_ver": 1,
       "src_elem_id": "0sroSvwwzT",
       "src_elem_port": "out"
     }
@@ -50,6 +51,7 @@
       "particle_action": "None",
       "resource_id": "yTsaLXKonJ",
       "resource_name": "Top Secret",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -127,6 +129,7 @@
       "owner": "",
       "resource_id": "Xg0GdRiaQU",
       "resource_name": "game",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/game.lua"
     },
@@ -136,6 +139,7 @@
       "owner": "",
       "resource_id": "hz6w2tG1gv",
       "resource_name": "Kenney",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/hz6w2tG1gv.lua"
     },
@@ -145,6 +149,7 @@
       "owner": "",
       "resource_id": "PJjQktY8ud",
       "resource_name": "Jungle",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/PJjQktY8ud.lua"
     }
@@ -161,6 +166,7 @@
       "name": "Widgets Demo",
       "resource_id": "x8itAE59QO",
       "resource_name": "Widgets Demo",
+      "resource_ver": 1,
       "script_file": "",
       "style_file": "app://ui/style/default.json",
       "style_string": "",
@@ -852,6 +858,7 @@
       "name": "Kenney",
       "resource_id": "qNrtwb1b52",
       "resource_name": "Kenney",
+      "resource_ver": 1,
       "script_file": "hz6w2tG1gv",
       "style_file": "app://ui/style/default.json",
       "style_string": "{\"materials\":[{\"key\":\"radiobutton/check-mark\",\"material\":\"fQLKKyNYYt\",\"type\":\"Reference\"},{\"key\":\"checkbox/check-mark\",\"material\":\"XFp2yP7TDj\",\"type\":\"Reference\"},{\"key\":\"push-button/pressed/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_button05.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"spinbox/text-edit-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_sliderHorizontal.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"spinbox/mouse-over/button-background\",\"type\":\"Null\"},{\"key\":\"spinbox/button-icon-arrow-down\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_arrowDownWhite.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"push-button/mouse-over/button-border\",\"type\":\"Null\"},{\"key\":\"spinbox/pressed/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_button05.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"slider/slider-knob-border\",\"type\":\"Null\"},{\"key\":\"push-button/mouse-over/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_button04.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"push-button/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_button04.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"spinbox/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_button04.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"color0\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.7137255072593689,\"r\":0.1921568661928177},\"color1\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.7137255072593689,\"r\":0.1921568661928177},\"color2\":{\"a\":1.0,\"b\":0.8901960849761963,\"g\":0.6627146005630493,\"r\":0.12941177189350128},\"color3\":{\"a\":1.0,\"b\":0.8901960849761963,\"g\":0.6627146005630493,\"r\":0.12941177189350128},\"key\":\"progress-bar/progress-bar-fill\",\"type\":\"Gradient\"},{\"key\":\"slider/mouse-over/slider-knob\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_sliderUp.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"slider/pressed/slider-knob\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_sliderUp.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"spinbox/button-icon-arrow-up\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_arrowUpWhite.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"slider/slider-knob\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_sliderUp.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"radiobutton/check-border\",\"type\":\"Null\"},{\"key\":\"slider/slider-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_sliderHorizontal.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"push-button/pressed/button-border\",\"type\":\"Null\"},{\"key\":\"push-button/button-border\",\"type\":\"Null\"},{\"key\":\"progress-bar/progress-bar-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_sliderHorizontal.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"checkbox/check-border\",\"type\":\"Null\"},{\"key\":\"checkbox/check-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_box.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"checkbox/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_checkmark.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"radiobutton/check-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"grey_box.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"radiobutton/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"blue_tick.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"}],\"properties\":[{\"key\":\"slider/slider-knob-shape\",\"value\":\"Rectangle\"},{\"key\":\"spinbox/edit-text-color\",\"value\":{\"a\":1.0,\"b\":0.009048599749803543,\"g\":0.009048599749803543,\"r\":0.14763103425502777}},{\"key\":\"widget/text-font\",\"value\":\"ws://textures/KenneyUI/font/kenvector_future.ttf\"},{\"key\":\"widget/text-color\",\"value\":{\"a\":1.0,\"b\":0.48627451062202454,\"g\":0.48627451062202454,\"r\":0.48627451062202454}},{\"key\":\"spinbox/edit-text-font\",\"value\":\"ws://textures/KenneyUI/font/kenvector_future.ttf\"},{\"key\":\"spinbox/edit-text-size\",\"value\":28},{\"key\":\"slider/slider-background-shape\",\"value\":\"RoundRect\"},{\"key\":\"radiobutton/check-background-shape\",\"value\":\"RoundRect\"},{\"key\":\"widget/text-size\",\"value\":22}]}",
@@ -899,7 +906,7 @@
                     "h": 50.0,
                     "w": 150.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"f3pExwKO8T/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"glassPanel.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"f3pExwKO8T/mouse-over/button-background\",\"type\":\"Null\"},{\"key\":\"f3pExwKO8T/pressed/button-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"f3pExwKO8T/text-color\",\"value\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.9372549057006836,\"r\":0.9686274528503418}}]}",
+                  "style": "{\"materials\":[{\"key\":\"f3pExwKO8T/mouse-over/button-background\",\"type\":\"Null\"},{\"key\":\"f3pExwKO8T/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"glassPanel.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"f3pExwKO8T/pressed/button-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"f3pExwKO8T/text-color\",\"value\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.9372549057006836,\"r\":0.9686274528503418}}]}",
                   "tab_index": 0,
                   "text": "YES",
                   "type": "PushButton"
@@ -922,7 +929,7 @@
                     "h": 50.0,
                     "w": 150.0
                   },
-                  "style": "{\"materials\":[{\"key\":\"WdZs5kkUvt/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"glassPanel.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"WdZs5kkUvt/pressed/button-background\",\"type\":\"Null\"},{\"key\":\"WdZs5kkUvt/mouse-over/button-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"WdZs5kkUvt/text-color\",\"value\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.9372549057006836,\"r\":0.9686274528503418}}]}",
+                  "style": "{\"materials\":[{\"key\":\"WdZs5kkUvt/pressed/button-background\",\"type\":\"Null\"},{\"key\":\"WdZs5kkUvt/button-background\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"glassPanel.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"WdZs5kkUvt/mouse-over/button-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"WdZs5kkUvt/text-color\",\"value\":{\"a\":1.0,\"b\":0.9372549057006836,\"g\":0.9372549057006836,\"r\":0.9686274528503418}}]}",
                   "tab_index": 1,
                   "text": "NOPE",
                   "type": "PushButton"
@@ -1043,7 +1050,7 @@
                         "h": 40.0,
                         "w": 340.0
                       },
-                      "style": "{\"materials\":[{\"key\":\"b6uiNuwOYp/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotGreen.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"b6uiNuwOYp/check-mark-unchecked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotRed.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"b6uiNuwOYp/check-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"b6uiNuwOYp/text-horizontal-align\",\"value\":\"Right\"}]}",
+                      "style": "{\"materials\":[{\"key\":\"b6uiNuwOYp/check-mark-unchecked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotRed.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"b6uiNuwOYp/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotGreen.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"b6uiNuwOYp/check-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"b6uiNuwOYp/text-horizontal-align\",\"value\":\"Right\"}]}",
                       "tab_index": 2,
                       "text": "engine",
                       "type": "CheckBox"
@@ -1093,7 +1100,7 @@
                         "h": 40.0,
                         "w": 340.0
                       },
-                      "style": "{\"materials\":[{\"key\":\"aUfAqhyOsT/check-mark-unchecked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotRed.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"aUfAqhyOsT/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotGreen.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"aUfAqhyOsT/check-background\",\"type\":\"Null\"}],\"properties\":[{\"key\":\"aUfAqhyOsT/text-horizontal-align\",\"value\":\"Right\"}]}",
+                      "style": "{\"materials\":[{\"key\":\"aUfAqhyOsT/check-background\",\"type\":\"Null\"},{\"key\":\"aUfAqhyOsT/check-mark-checked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotGreen.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"aUfAqhyOsT/check-mark-unchecked\",\"metafile\":\"ws://textures/KenneyUI/pack/untitled.png.json\",\"name\":\"dotRed.png\",\"texture\":\"ws://textures/KenneyUI/pack/untitled.png\",\"type\":\"Texture\"}],\"properties\":[{\"key\":\"aUfAqhyOsT/text-horizontal-align\",\"value\":\"Right\"}]}",
                       "tab_index": 4,
                       "text": "flux capacitor",
                       "type": "CheckBox"
@@ -1411,6 +1418,7 @@
       "name": "Jungle",
       "resource_id": "oTENvjff4e",
       "resource_name": "Jungle",
+      "resource_ver": 1,
       "script_file": "PJjQktY8ud",
       "style_file": "app://ui/style/default.json",
       "style_string": "{\"materials\":[{\"key\":\"push-button/mouse-over/button-background\",\"type\":\"Null\"},{\"key\":\"push-button/button-background\",\"type\":\"Null\"},{\"key\":\"togglebox/toggle-knob-on\",\"type\":\"Null\"},{\"key\":\"togglebox/toggle-knob-off\",\"type\":\"Null\"},{\"key\":\"push-button/background\",\"metafile\":\"ws://textures/JungleUI/pack/untitled.png.json\",\"name\":\"btn_green.png\",\"texture\":\"ws://textures/JungleUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"togglebox/toggle-background-on\",\"metafile\":\"ws://textures/JungleUI/pack/untitled.png.json\",\"name\":\"toggle_on.png\",\"texture\":\"ws://textures/JungleUI/pack/untitled.png\",\"type\":\"Texture\"},{\"key\":\"push-button/pressed/button-border\",\"type\":\"Null\"},{\"key\":\"push-button/pressed/button-background\",\"type\":\"Null\"},{\"key\":\"togglebox/toggle-background-off\",\"metafile\":\"ws://textures/JungleUI/pack/untitled.png.json\",\"name\":\"toggle_off.png\",\"texture\":\"ws://textures/JungleUI/pack/untitled.png\",\"type\":\"Texture\"}],\"properties\":[{\"key\":\"label/text-horizontal-align\",\"value\":\"Left\"},{\"key\":\"label/text-size\",\"value\":28},{\"key\":\"label/text-color\",\"value\":{\"a\":1.0,\"b\":0.3773708641529083,\"g\":0.3773708641529083,\"r\":0.3773708641529083}},{\"key\":\"label/text-font\",\"value\":\"app://fonts/KomikaTitle-Wide.ttf\"}]}",
@@ -1420,7 +1428,7 @@
             {
               "animation": "",
               "flags": {
-                "ClipChildren": true,
+                "ClipChildren": false,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
@@ -1462,30 +1470,6 @@
                   "text": "GroupBox",
                   "type": "GroupBox",
                   "widgets": [
-                    {
-                      "animation": "",
-                      "flags": {
-                        "ClipChildren": true,
-                        "Enabled": true,
-                        "VisibleInEditor": true,
-                        "VisibleInGame": true
-                      },
-                      "id": "xbCN5ifllS",
-                      "line_height": 1.0,
-                      "name": "Label_1",
-                      "position": {
-                        "x": 80.0,
-                        "y": -100.0
-                      },
-                      "size": {
-                        "h": 150.0,
-                        "w": 400.0
-                      },
-                      "style": "{\"materials\":[{\"key\":\"background\",\"metafile\":\"ws://textures/JungleUI/pack/untitled.png.json\",\"name\":\"header_shop.png\",\"texture\":\"ws://textures/JungleUI/pack/untitled.png\",\"type\":\"Texture\"}]}",
-                      "tab_index": 0,
-                      "text": "",
-                      "type": "Label"
-                    },
                     {
                       "animation": "",
                       "flags": {
@@ -1651,13 +1635,37 @@
                   "tab_index": 0,
                   "text": "",
                   "type": "PushButton"
+                },
+                {
+                  "animation": "",
+                  "flags": {
+                    "ClipChildren": true,
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "xbCN5ifllS",
+                  "line_height": 1.0,
+                  "name": "Label_1",
+                  "position": {
+                    "x": 120.0,
+                    "y": -60.0
+                  },
+                  "size": {
+                    "h": 150.0,
+                    "w": 400.0
+                  },
+                  "style": "{\"materials\":[{\"key\":\"background\",\"metafile\":\"ws://textures/JungleUI/pack/untitled.png.json\",\"name\":\"header_shop.png\",\"texture\":\"ws://textures/JungleUI/pack/untitled.png\",\"type\":\"Texture\"}]}",
+                  "tab_index": 0,
+                  "text": "",
+                  "type": "Label"
                 }
               ]
             },
             {
               "animation": "",
               "flags": {
-                "ClipChildren": true,
+                "ClipChildren": false,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true
@@ -1699,30 +1707,6 @@
                   "text": "GroupBox",
                   "type": "GroupBox",
                   "widgets": [
-                    {
-                      "animation": "",
-                      "flags": {
-                        "ClipChildren": true,
-                        "Enabled": true,
-                        "VisibleInEditor": true,
-                        "VisibleInGame": true
-                      },
-                      "id": "O69WZTUI3Z",
-                      "line_height": 1.0,
-                      "name": "Label_1",
-                      "position": {
-                        "x": 80.0,
-                        "y": -100.0
-                      },
-                      "size": {
-                        "h": 150.0,
-                        "w": 400.0
-                      },
-                      "style": "{\"materials\":[{\"key\":\"background\",\"metafile\":\"ws://textures/JungleUI/pack/untitled.png.json\",\"name\":\"header_settings.png\",\"texture\":\"ws://textures/JungleUI/pack/untitled.png\",\"type\":\"Texture\"}]}",
-                      "tab_index": 0,
-                      "text": "",
-                      "type": "Label"
-                    },
                     {
                       "animation": "",
                       "checked": true,
@@ -2029,13 +2013,37 @@
                   "tab_index": 4,
                   "text": "",
                   "type": "PushButton"
+                },
+                {
+                  "animation": "",
+                  "flags": {
+                    "ClipChildren": true,
+                    "Enabled": true,
+                    "VisibleInEditor": true,
+                    "VisibleInGame": true
+                  },
+                  "id": "O69WZTUI3Z",
+                  "line_height": 1.0,
+                  "name": "Label_1",
+                  "position": {
+                    "x": 120.0,
+                    "y": -60.0
+                  },
+                  "size": {
+                    "h": 150.0,
+                    "w": 400.0
+                  },
+                  "style": "{\"materials\":[{\"key\":\"background\",\"metafile\":\"ws://textures/JungleUI/pack/untitled.png.json\",\"name\":\"header_settings.png\",\"texture\":\"ws://textures/JungleUI/pack/untitled.png\",\"type\":\"Texture\"}]}",
+                  "tab_index": 0,
+                  "text": "",
+                  "type": "Label"
                 }
               ]
             },
             {
               "animation": "",
               "flags": {
-                "ClipChildren": true,
+                "ClipChildren": false,
                 "Enabled": true,
                 "VisibleInEditor": true,
                 "VisibleInGame": true

@@ -18,6 +18,7 @@
       "name": "ctr_title",
       "resource_id": "2yOBoPmBaI",
       "resource_name": "ctr_title",
+      "resource_ver": 1,
       "src_elem_id": "HWXOWk3B4g",
       "src_elem_port": "out"
     },
@@ -39,6 +40,7 @@
       "name": "Kill Brick",
       "resource_id": "mCZ77Xsgvh",
       "resource_name": "Kill Brick",
+      "resource_ver": 1,
       "src_elem_id": "lI3HDnTgut",
       "src_elem_port": "out"
     },
@@ -60,6 +62,7 @@
       "name": "Level Clear",
       "resource_id": "4RNSFQ1Pyg",
       "resource_name": "Level Clear",
+      "resource_ver": 1,
       "src_elem_id": "2Qlif27snN",
       "src_elem_port": "out"
     },
@@ -81,6 +84,7 @@
       "name": "Fail",
       "resource_id": "HjhabB4y2A",
       "resource_name": "Fail",
+      "resource_ver": 1,
       "src_elem_id": "hsNS566ktU",
       "src_elem_port": "out"
     },
@@ -102,6 +106,7 @@
       "name": "Win",
       "resource_id": "REfs8QQaG3",
       "resource_name": "Win",
+      "resource_ver": 1,
       "src_elem_id": "ah1Mpk1Bw3",
       "src_elem_port": "out"
     },
@@ -138,6 +143,7 @@
       "name": "Menu Confirm",
       "resource_id": "noUSSIDS18",
       "resource_name": "Menu Confirm",
+      "resource_ver": 1,
       "src_elem_id": "0qj7loZ69Z",
       "src_elem_port": "out"
     },
@@ -174,6 +180,7 @@
       "name": "Power Up",
       "resource_id": "UThqytvfHf",
       "resource_name": "Power Up",
+      "resource_ver": 1,
       "src_elem_id": "iaIUp48Qzz",
       "src_elem_port": "out"
     },
@@ -210,6 +217,7 @@
       "name": "Collect Points",
       "resource_id": "vH008bpGRC",
       "resource_name": "Collect Points",
+      "resource_ver": 1,
       "src_elem_id": "dDQXZTtI14",
       "src_elem_port": "out"
     }
@@ -417,6 +425,7 @@
       },
       "resource_id": "ltMbxDy6wk",
       "resource_name": "Paddle",
+      "resource_ver": 1,
       "script_file": "HRXSPeXFUN",
       "tag": "",
       "tracks": [
@@ -762,6 +771,7 @@
       },
       "resource_id": "KA0GT192DW",
       "resource_name": "Wall",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -906,6 +916,7 @@
       },
       "resource_id": "9G2p8G3zMT",
       "resource_name": "Ball",
+      "resource_ver": 1,
       "script_file": "8xZogKY3K1",
       "tag": "",
       "vars": [
@@ -1052,6 +1063,7 @@
       },
       "resource_id": "mSF0NAZ4A5",
       "resource_name": "Gray Brick",
+      "resource_ver": 1,
       "script_file": "viXTDKHRIB",
       "tag": "",
       "vars": [
@@ -1174,6 +1186,7 @@
       },
       "resource_id": "Jw14oLX1CD",
       "resource_name": "Yellow Brick",
+      "resource_ver": 1,
       "script_file": "viXTDKHRIB",
       "tag": "",
       "vars": [
@@ -1279,6 +1292,7 @@
       },
       "resource_id": "eX85urYgUe",
       "resource_name": "Green Brick",
+      "resource_ver": 1,
       "script_file": "viXTDKHRIB",
       "tag": "",
       "vars": [
@@ -1384,6 +1398,7 @@
       },
       "resource_id": "YOZ0Sp88fq",
       "resource_name": "Red Brick",
+      "resource_ver": 1,
       "script_file": "viXTDKHRIB",
       "tag": "",
       "vars": [
@@ -1489,6 +1504,7 @@
       },
       "resource_id": "kkBOwiYNRn",
       "resource_name": "Purple Brick",
+      "resource_ver": 1,
       "script_file": "viXTDKHRIB",
       "tag": "",
       "vars": [
@@ -1594,6 +1610,7 @@
       },
       "resource_id": "J160KPStMB",
       "resource_name": "Blue Brick",
+      "resource_ver": 1,
       "script_file": "viXTDKHRIB",
       "tag": "",
       "vars": [
@@ -1880,6 +1897,7 @@
       },
       "resource_id": "ijOB1QBrNK",
       "resource_name": "Background",
+      "resource_ver": 1,
       "script_file": "",
       "tag": "",
       "tracks": [
@@ -2185,6 +2203,7 @@
       },
       "resource_id": "xttv1jSmTp",
       "resource_name": "Powerup Shrink",
+      "resource_ver": 1,
       "script_file": "",
       "tag": "",
       "tracks": [
@@ -2346,6 +2365,7 @@
       },
       "resource_id": "p1xeOon2ua",
       "resource_name": "Powerup Sticky",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -2488,6 +2508,7 @@
       },
       "resource_id": "Gou7Wgfk1C",
       "resource_name": "Powerup Heavy Ball",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -2674,6 +2695,7 @@
       },
       "resource_id": "dJCYf3a5vx",
       "resource_name": "Powerup Double Ball",
+      "resource_ver": 1,
       "script_file": "",
       "tag": ""
     },
@@ -2860,6 +2882,7 @@
       },
       "resource_id": "3IA4wv52oL",
       "resource_name": "Powerup Enlarge",
+      "resource_ver": 1,
       "script_file": "",
       "tag": "",
       "tracks": [
@@ -3027,6 +3050,7 @@
       },
       "resource_id": "CaLjAijfzQ",
       "resource_name": "Points 100",
+      "resource_ver": 1,
       "script_file": "",
       "tag": "",
       "vars": [
@@ -3143,6 +3167,7 @@
       },
       "resource_id": "hu9jOD5B5Z",
       "resource_name": "Points 500",
+      "resource_ver": 1,
       "script_file": "",
       "tag": "",
       "vars": [
@@ -3259,6 +3284,7 @@
       },
       "resource_id": "A37AEUMH3I",
       "resource_name": "Points 250",
+      "resource_ver": 1,
       "script_file": "",
       "tag": "",
       "vars": [
@@ -3290,6 +3316,7 @@
       "particle_action": "None",
       "resource_id": "vSs0xqS3fS",
       "resource_name": "Blue Ball",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -3306,7 +3333,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3354,6 +3381,7 @@
       "particle_action": "None",
       "resource_id": "4zi9n5RIXq",
       "resource_name": "Blue Brick",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Opaque",
@@ -3370,7 +3398,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3418,6 +3446,7 @@
       "particle_action": "None",
       "resource_id": "KeITJIrx1I",
       "resource_name": "Red Brick",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Opaque",
@@ -3434,7 +3463,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3482,6 +3511,7 @@
       "particle_action": "None",
       "resource_id": "EtyRugQve2",
       "resource_name": "Green Brick",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Opaque",
@@ -3498,7 +3528,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3546,6 +3576,7 @@
       "particle_action": "None",
       "resource_id": "MUQDA03a25",
       "resource_name": "Purple Brick",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Opaque",
@@ -3562,7 +3593,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3610,6 +3641,7 @@
       "particle_action": "None",
       "resource_id": "gRY0JNbDCj",
       "resource_name": "Yellow Brick",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Opaque",
@@ -3626,7 +3658,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3674,6 +3706,7 @@
       "particle_action": "None",
       "resource_id": "9wG7A0qhYE",
       "resource_name": "Gray Brick",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Opaque",
@@ -3690,7 +3723,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3738,6 +3771,7 @@
       "particle_action": "None",
       "resource_id": "OgRnbBquEI",
       "resource_name": "Background",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Opaque",
@@ -3754,7 +3788,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3806,6 +3840,7 @@
       "particle_action": "None",
       "resource_id": "1Oau6Iem5r",
       "resource_name": "Dim",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -3873,6 +3908,7 @@
       "particle_action": "None",
       "resource_id": "rAn0G88CKj",
       "resource_name": "Sliding Glint",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "ws://shaders/es2/sliding_glint_effect.glsl",
       "surface": "Transparent",
@@ -3900,6 +3936,7 @@
       "particle_action": "None",
       "resource_id": "xAdKk03Llg",
       "resource_name": "Brick Wall",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Opaque",
@@ -3916,7 +3953,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -3971,6 +4008,7 @@
       "particle_action": "None",
       "resource_id": "AdiJbNNuTp",
       "resource_name": "Gray Ball",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -3987,7 +4025,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4035,6 +4073,7 @@
       "particle_action": "None",
       "resource_id": "mJ0wHRoy15",
       "resource_name": "Paddle Green",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4051,7 +4090,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4099,6 +4138,7 @@
       "particle_action": "None",
       "resource_id": "hhgetGS5Y3",
       "resource_name": "Paddle Red",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4115,7 +4155,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -4163,6 +4203,7 @@
       "particle_action": "None",
       "resource_id": "10togPdjU7",
       "resource_name": "Paddle Blue",
+      "resource_ver": 1,
       "shader_src": "",
       "shader_uri": "",
       "surface": "Transparent",
@@ -4179,7 +4220,7 @@
           "sampler_name1": "",
           "textures": [
             {
-              "colorspace": "Linear",
+              "colorspace": "sRGB",
               "effects": {
                 "Blur": false,
                 "Edges": false
@@ -7005,6 +7046,7 @@
       },
       "resource_id": "q9wPieFpP5",
       "resource_name": "Level 4",
+      "resource_ver": 1,
       "script_file": "WGNKEJwulf",
       "tilemap": ""
     },
@@ -9224,6 +9266,7 @@
       },
       "resource_id": "EjfqiKs7A1",
       "resource_name": "Level 2",
+      "resource_ver": 1,
       "script_file": "WGNKEJwulf",
       "tilemap": ""
     },
@@ -12147,6 +12190,7 @@
       },
       "resource_id": "xZLaeqWePM",
       "resource_name": "Level 3",
+      "resource_ver": 1,
       "script_file": "WGNKEJwulf",
       "tilemap": ""
     },
@@ -14762,6 +14806,7 @@
       },
       "resource_id": "7kkLq83FnE",
       "resource_name": "Level 1",
+      "resource_ver": 1,
       "script_file": "WGNKEJwulf",
       "tilemap": ""
     },
@@ -23764,6 +23809,7 @@
       },
       "resource_id": "kZPKqhUrT6",
       "resource_name": "MainMenu",
+      "resource_ver": 1,
       "script_file": "ZadrbaYdqx",
       "tilemap": ""
     },
@@ -23824,6 +23870,7 @@
       },
       "resource_id": "ZnDr4JGpLL",
       "resource_name": "_Ball_preview_scene_",
+      "resource_ver": 1,
       "script_file": "",
       "tilemap": ""
     }
@@ -23835,6 +23882,7 @@
       "owner": "",
       "resource_id": "Xg0GdRiaQU",
       "resource_name": "game",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/game.lua"
     },
@@ -23844,6 +23892,7 @@
       "owner": "",
       "resource_id": "HRXSPeXFUN",
       "resource_name": "Paddle",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/HRXSPeXFUN.lua"
     },
@@ -23853,6 +23902,7 @@
       "owner": "",
       "resource_id": "viXTDKHRIB",
       "resource_name": "Brick",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/viXTDKHRIB.lua"
     },
@@ -23862,6 +23912,7 @@
       "owner": "",
       "resource_id": "WGNKEJwulf",
       "resource_name": "Level",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/WGNKEJwulf.lua"
     },
@@ -23871,6 +23922,7 @@
       "owner": "",
       "resource_id": "8xZogKY3K1",
       "resource_name": "Ball",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/8xZogKY3K1.lua"
     },
@@ -23880,6 +23932,7 @@
       "owner": "",
       "resource_id": "ZadrbaYdqx",
       "resource_name": "MainMenu",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/ZadrbaYdqx.lua"
     },
@@ -23889,6 +23942,7 @@
       "owner": "",
       "resource_id": "Bl5XaXGkl0",
       "resource_name": "Powerup",
+      "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/Bl5XaXGkl0.lua"
     }
@@ -23911,6 +23965,7 @@
       "name": "Arrow",
       "resource_id": "yZllA8JJYo",
       "resource_name": "Arrow",
+      "resource_ver": 1,
       "static": true,
       "vertices": [
         {
@@ -23970,6 +24025,7 @@
       "name": "MainMenu",
       "resource_id": "847gBr2NKv",
       "resource_name": "MainMenu",
+      "resource_ver": 1,
       "script_file": "",
       "style_file": "ws://ui/style.json",
       "style_string": "",
@@ -24182,6 +24238,7 @@
       "name": "HUD",
       "resource_id": "3J49aF64Jm",
       "resource_name": "HUD",
+      "resource_ver": 1,
       "script_file": "",
       "style_file": "app://ui/style/default.json",
       "style_string": "",

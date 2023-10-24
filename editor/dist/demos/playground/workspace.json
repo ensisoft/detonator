@@ -1,105 +1,133 @@
 {
     "2rSIWqteXS": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "67oHYYDttT": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "6M7kjbtJOK": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_FXED8Wa7Of": ""
     },
     "7zQLUleDer": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "9jMLWUyAWj": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "ETnTKLXRXi": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_fTLOPJMsQ3": ""
     },
     "EnPRIQkKBO": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_vY9O53eRKB": ""
     },
     "EsFlY7oEfM": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_1MPsnG38m5": ""
     },
     "Fwn9yS1gWF": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_a0Pfoh2tIx": "",
         "comment_xw2qQ4qDJe": ""
     },
     "QCSIpWak63": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "TfojPSWQmJ": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_SGHkKNqZ8G": "",
         "comment_mh4szTs1tr": "",
         "comment_uNSbgrIAfJ": ""
     },
     "UWnXOsuD6o": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "Xg0GdRiaQU": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "XwQTFkhxPJ": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "a8UWU1fUNZ": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_x5LUp0CItR": ""
     },
     "dK1EdyK1h8": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_6w1qxl64Dk": ""
     },
     "dgq5ss7Iy9": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_xPnegFZrhB": ""
     },
     "f7S1HTDAgE": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "fy5aapEM0F": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_jpk3WllX74": ""
     },
     "k4Stm2rLJJ": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "kpR98Mlxaz": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_FFW46rIdfi": "",
         "comment_QeRCmrPDmR": "",
         "comment_kMOWg6MbOn": ""
     },
     "kppKkQuA0g": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "lCSj0gMTqU": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_fBdB6MvNul": "",
         "comment_xAMylSIBUS": ""
     },
     "lTi7YXjdsz": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "n9hH3dGv20": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "oC0fUUJnzk": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_OWBR9G82wD": ""
     },
     "pATaRMBTR7": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "pK3rRC7a5h": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_dqzf0vCHTn": ""
     },
@@ -129,6 +157,7 @@
         "desktop_audio_io_strategy": "Automatic",
         "enable_audio_pcm_caching": false,
         "enable_physics": true,
+        "game_home": "${game-home}-dev",
         "game_script": "ws://lua/game.lua",
         "game_viewport_height": 800,
         "game_viewport_width": 1000,
@@ -176,9 +205,11 @@
         "working_folder": "${workspace}"
     },
     "uhYlthZ4sC": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "v8AR2h5m8R": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "workspace": {
@@ -199,6 +230,7 @@
         "packing_param_write_content": true
     },
     "zFZFKpipES": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_BAaFunDDPL": ""
     }
