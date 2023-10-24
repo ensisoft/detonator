@@ -85,9 +85,6 @@ public:
         mAudio->SetLoader(mAudioLoader);
         mAudio->Start();
         mDevice  = dev::CreateDevice(init.context)->GetSharedGraphicsDevice();
-        mPainter = gfx::Painter::Create(mDevice);
-        mPainter->SetSurfaceSize(init.surface_width, init.surface_height);
-        mPainter->SetEditingMode(init.editing_mode);
         mSurfaceWidth  = init.surface_width;
         mSurfaceHeight = init.surface_height;
         mRuntime = std::make_unique<engine::LuaRuntime>("lua", init.game_script, mGameHome, init.application_name);
@@ -329,13 +326,19 @@ public:
             mUIPainter.SetPainter(nullptr);
         }
 
+        // this painter will be configured to draw directly in the window
+        // coordinates. Used to draw debug text and the mouse cursor.
+        gfx::Painter painter;
+
         TRACE_ENTER(DebugDrawing);
         if (mDebug.debug_show_fps || mDebug.debug_show_msg || mDebug.debug_draw || mFlags.test(Flags::ShowMouseCursor))
         {
-            mPainter->SetPixelRatio(glm::vec2(1.0f, 1.0f));
-            mPainter->SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, surf_width, surf_height));
-            mPainter->SetViewport(0, 0, surf_width, surf_height);
-            mPainter->ResetViewMatrix();
+            painter.SetDevice(mDevice);
+            painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
+            painter.SetPixelRatio(glm::vec2(1.0f, 1.0f));
+            painter.SetViewport(0, 0, surf_width, surf_height);
+            painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, surf_width, surf_height));
+            painter.SetEditingMode(mFlags.test(Flags::EditingMode));
         }
         if (mDebug.debug_show_fps)
         {
@@ -345,8 +348,8 @@ public:
                 mLastStats.current_fps, mLastStats.total_wall_time, mLastStats.num_frames_rendered);
 
             const gfx::FRect rect(10, 10, 500, 20);
-            gfx::FillRect(*mPainter, rect, gfx::Color4f(gfx::Color::Black, 0.6f));
-            gfx::DrawTextRect(*mPainter, hallelujah,
+            gfx::FillRect(painter, rect, gfx::Color4f(gfx::Color::Black, 0.6f));
+            gfx::DrawTextRect(painter, hallelujah,
                 mDebug.debug_font, 14, rect, gfx::Color::HotPink,
                 gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
         }
@@ -355,8 +358,8 @@ public:
             gfx::FRect rect(10, 30, 500, 20);
             for (const auto& print : mDebugPrints)
             {
-                gfx::FillRect(*mPainter, rect, gfx::Color4f(gfx::Color::Black, 0.6f));
-                gfx::DrawTextRect(*mPainter, print.message,
+                gfx::FillRect(painter, rect, gfx::Color4f(gfx::Color::Black, 0.6f));
+                gfx::DrawTextRect(painter, print.message,
                     mDebug.debug_font, 14, rect, gfx::Color::HotPink,
                    gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
                 rect.Translate(0, 20);
@@ -365,7 +368,7 @@ public:
         if (mDebug.debug_draw)
         {
             // visualize the game's logical viewport in the window.
-            gfx::DrawRectOutline(*mPainter, gfx::FRect(GetViewport()), gfx::Color::Green, 1.0f);
+            gfx::DrawRectOutline(painter, gfx::FRect(GetViewport()), gfx::Color::Green, 1.0f);
         }
         TRACE_LEAVE(DebugDrawing);
 
@@ -380,7 +383,7 @@ public:
             rect.Resize(size.x, size.y);
             rect.Move(mCursorPos.x, mCursorPos.y);
             rect.Translate(offset.x, offset.y);
-            gfx::FillShape(*mPainter, rect, *mMouseDrawable, *mMouseMaterial);
+            gfx::FillShape(painter, rect, *mMouseDrawable, *mMouseMaterial);
         }
 
         TRACE_CALL("Device::Swap", mDevice->EndFrame(true));
@@ -606,8 +609,6 @@ public:
         DEBUG("Rendering surface resized. [width=%1, height=%2]", width, height);
         mSurfaceWidth = width;
         mSurfaceHeight = height;
-        mPainter->SetSurfaceSize(width, height);
-        mRuntime->SetSurfaceSize(width, height);
     }
     virtual void OnEnterFullScreen() override
     {
@@ -1500,8 +1501,6 @@ private:
     audio::Loader* mAudioLoader = nullptr;
     // Game data loader.
     game::Loader* mGameLoader = nullptr;
-    // The graphics painter device.
-    std::unique_ptr<gfx::Painter> mPainter;
     // The graphics device.
     std::shared_ptr<gfx::Device> mDevice;
     // The rendering subsystem.
