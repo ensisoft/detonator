@@ -58,15 +58,14 @@ void MakeViewTransform(const UI& ui, const State& state, gfx::Transform& view, f
 
 
 template<typename UI, typename State>
-glm::mat4 CreateViewMatrix(const UI& ui, const State& state,
-                           engine::Perspective perspective = engine::Perspective::AxisAligned)
+glm::mat4 CreateViewMatrix(const UI& ui, const State& state, engine::GameView view = engine::GameView::AxisAligned)
 {
     const float zoom = GetValue(ui.zoom);
     const float xs = GetValue(ui.scaleX);
     const float ys = GetValue(ui.scaleY);
     const float rotation = GetValue(ui.rotation);
 
-    return engine::CreateModelViewMatrix(perspective,
+    return engine::CreateModelViewMatrix(view,
                                          state.camera_offset_x,
                                          state.camera_offset_y,
                                          zoom * xs, zoom * ys,
@@ -74,23 +73,24 @@ glm::mat4 CreateViewMatrix(const UI& ui, const State& state,
 }
 
 template<typename UI>
-glm::mat4 CreateProjectionMatrix(const UI& ui, engine::Perspective perspective = engine::Perspective::AxisAligned)
+glm::mat4 CreateProjectionMatrix(const UI& ui, engine::Projection projection = engine::Projection::Orthographic)
 {
     const auto width  = ui.widget->width();
     const auto height = ui.widget->height();
-    return engine::CreateProjectionMatrix(perspective, width, height);
+    return engine::CreateProjectionMatrix(projection, width, height);
 }
 
 template<typename UI, typename State>
 Point2Df MapWindowCoordinateToWorld(const UI& ui,
                                    const State& state,
                                    const Point2Df& window_point,
-                                   engine::Perspective perspective = engine::Perspective::AxisAligned)
+                                   engine::GameView view = engine::GameView::AxisAligned,
+                                   engine::Projection proj = engine::Projection::Orthographic)
 {
     const Size2Df window_size = ui.widget->size();
 
-    const auto& proj_matrix = CreateProjectionMatrix(ui, perspective);
-    const auto& view_matrix = CreateViewMatrix(ui, state, perspective);
+    const auto& proj_matrix = CreateProjectionMatrix(ui, proj);
+    const auto& view_matrix = CreateViewMatrix(ui, state, view);
     const auto pos = engine::MapFromWindowToWorldPlane(proj_matrix, view_matrix, window_point, window_size);
     return {pos.x, pos.y};
 }
@@ -99,12 +99,13 @@ template<typename UI, typename State>
 Point2Df MapWorldCoordinateToWindow(const UI& ui,
                                     const State& state,
                                     const Point2Df& world_point,
-                                    engine::Perspective perspective = engine::Perspective::AxisAligned)
+                                    engine::GameView view = engine::GameView::AxisAligned,
+                                    engine::Projection proj = engine::Projection::Orthographic)
 {
     const Size2Df window_size = ui.widget->size();
 
-    const auto& proj_matrix = CreateProjectionMatrix(ui, perspective);
-    const auto& view_matrix = CreateViewMatrix(ui, state, perspective);
+    const auto& proj_matrix = CreateProjectionMatrix(ui, proj);
+    const auto& view_matrix = CreateViewMatrix(ui, state, view);
     const auto pos = engine::MapFromWorldPlaneToWindow(proj_matrix, view_matrix, world_point, window_size);
     return {pos.x, pos.y};
 }

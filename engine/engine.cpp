@@ -734,8 +734,8 @@ private:
         {
             const auto game_viewport = game::FRect(0.0f, 0.0f, logical_width, logical_height);
             const auto& point  = device_viewport.MapToLocal(mickey.window_x, mickey.window_y);
-            const auto& view_to_clip  = engine::CreateProjectionMatrix(engine::Perspective::AxisAligned, game_viewport);
-            const auto& world_to_view = engine::CreateModelViewMatrix(engine::Perspective::AxisAligned,
+            const auto& view_to_clip  = engine::CreateProjectionMatrix(engine::Projection::Orthographic, game_viewport);
+            const auto& world_to_view = engine::CreateModelViewMatrix(engine::GameView::AxisAligned,
                                                                       glm::vec2 { logical_viewport.GetX(), logical_viewport.GetY() },
                                                                       glm::vec2 { 1.0f, 1.0f }, // camera scale
                                                                       0.0f); // camera rotation
@@ -749,7 +749,7 @@ private:
             if (mTilemap)
             {
                 const auto perspective = mTilemap->GetPerspective();
-                if (perspective != engine::Perspective::AxisAligned)
+                if (perspective != engine::GameView::AxisAligned)
                     event.map_coord = engine::MapFromScenePlaneToTilePlane(
                             glm::vec4{event.scene_coord.x, event.scene_coord.y, 0.0f, 1.0}, perspective);
             }
@@ -1369,8 +1369,8 @@ private:
         const auto game_viewport_size = glm::vec2 { game_view_width, game_view_height };
 
         gfx::Painter painter(mDevice);
-        painter.SetProjectionMatrix(engine::CreateProjectionMatrix(engine::Perspective::AxisAligned, game_viewport));
-        painter.SetViewMatrix(engine::CreateModelViewMatrix(engine::Perspective::AxisAligned, camera_position,
+        painter.SetProjectionMatrix(engine::CreateProjectionMatrix(engine::Projection::Orthographic, game_viewport));
+        painter.SetViewMatrix(engine::CreateModelViewMatrix(engine::GameView::AxisAligned, camera_position,
                                                             camera_scale, camera_rotation));
         painter.SetViewport(device_viewport);
         painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);

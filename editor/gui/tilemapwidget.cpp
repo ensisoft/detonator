@@ -2090,18 +2090,18 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
-    const auto perspective = mState.klass->GetPerspective();
+    const auto map_view = mState.klass->GetPerspective();
     // Create tile painter for drawing in tile coordinate space.
     gfx::Painter tile_painter(painter.GetDevice());
-    tile_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, perspective));
-    tile_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, perspective));
+    tile_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, map_view));
+    tile_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, engine::Projection::Orthographic));
     tile_painter.SetPixelRatio({1.0f*xs*zoom, 1.0f*ys*zoom});
     tile_painter.SetViewport(0, 0, width, height);
     tile_painter.SetSurfaceSize(width, height);
 
     gfx::Painter scene_painter(painter.GetDevice());
-    scene_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, engine::Perspective::AxisAligned));
-    scene_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, engine::Perspective::AxisAligned));
+    scene_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, engine::GameView::AxisAligned));
+    scene_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, engine::Projection::Orthographic));
     scene_painter.SetPixelRatio({1.0f*xs*zoom, 1.0f*ys*zoom});
     scene_painter.SetViewport(0, 0, width, height);
     scene_painter.SetSurfaceSize(width, height);
@@ -2199,7 +2199,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         const auto layer_tile_height = tile_height * tile_scaler;
         const auto layer_tile_depth  = tile_depth * tile_scaler;
         const auto layer_tile_size   = glm::vec3{layer_tile_width, layer_tile_height, layer_tile_depth};
-        const auto cuboid_scale = engine::GetTileCuboidFactors(perspective);
+        const auto cuboid_scale = engine::GetTileCuboidFactors(map_view);
 
         // draw the map boundary
         {
@@ -2232,7 +2232,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         if (mickey.x() >= 0 && mickey.x() < width &&
             mickey.y() >= 0 && mickey.y() < height && !mCurrentTool)
         {
-            const glm::vec2 tile_coord = MapWindowCoordinateToWorld(mUI, mState, mickey, perspective);
+            const glm::vec2 tile_coord = MapWindowCoordinateToWorld(mUI, mState, mickey, map_view);
             const unsigned tile_col = tile_coord.x / layer_tile_width;
             const unsigned tile_row = tile_coord.y / layer_tile_height;
             if (tile_col < layer->GetWidth() && tile_row < layer->GetHeight())
@@ -2359,7 +2359,7 @@ Hit 'Save' to save the map.
         DrawViewport(painter, view, game_width, game_height, width, height);
     }
 
-    PrintMousePos(mUI, mState, painter, perspective);
+    PrintMousePos(mUI, mState, painter, map_view);
 }
 
 void TilemapWidget::MouseMove(QMouseEvent* event)

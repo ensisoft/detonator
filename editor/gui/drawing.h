@@ -105,10 +105,12 @@ void PrintMousePos(const glm::mat4& view_to_clip,
                    QWidget* widget);
 
 template<typename UI, typename State>
-void PrintMousePos(const UI& ui, const State& state, gfx::Painter& painter, engine::Perspective perspective = engine::Perspective::AxisAligned)
+void PrintMousePos(const UI& ui, const State& state, gfx::Painter& painter,
+                   engine::GameView view = engine::GameView::AxisAligned,
+                   engine::Projection proj = engine::Projection::Orthographic)
 {
-    PrintMousePos(CreateProjectionMatrix(ui, perspective),
-                  CreateViewMatrix(ui, state, perspective),
+    PrintMousePos(CreateProjectionMatrix(ui, proj),
+                  CreateViewMatrix(ui, state, view),
                   painter, ui.widget);
 }
 

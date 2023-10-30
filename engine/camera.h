@@ -73,7 +73,7 @@ namespace engine
     // the desired rendering. For example the dimetric perspective (typically
     // referred to as 'isometric' in 2D games) is a camera angle of 45 deg
     // around UP axis and 30 deg down tilt combined with orthographic projection.
-    struct Perspective
+    struct GameView
     {
         // NOTE: no *class* on purpose, the outer struct is the class
         enum EnumValue {
@@ -95,10 +95,10 @@ namespace engine
             // todo: ObliqueTopDown
             //Oblique
         };
-        Perspective(EnumValue value)
+        GameView(EnumValue value)
           : value(value)
         {}
-        Perspective(game::Tilemap::Perspective perspective)
+        GameView(game::Tilemap::Perspective perspective)
         {
             if (perspective == game::Tilemap::Perspective::AxisAligned)
                 value = EnumValue::AxisAligned;
@@ -112,45 +112,44 @@ namespace engine
         EnumValue value;
     };
 
-    inline bool operator==(Perspective lhs, Perspective rhs)
+    inline bool operator==(GameView lhs, GameView rhs)
     { return lhs.value == rhs.value; }
-    inline bool operator==(Perspective perspective, Perspective::EnumValue value)
+    inline bool operator==(GameView perspective, GameView::EnumValue value)
     { return perspective.value == value; }
-    inline bool operator!=(Perspective perspective, Perspective::EnumValue value)
+    inline bool operator!=(GameView perspective, GameView::EnumValue value)
     { return perspective.value != value; }
-    inline bool operator==(Perspective::EnumValue value, Perspective perspective)
+    inline bool operator==(GameView::EnumValue value, GameView perspective)
     { return perspective.value == value; }
-    inline bool operator!=(Perspective::EnumValue value, Perspective perspective)
+    inline bool operator!=(GameView::EnumValue value, GameView perspective)
     { return perspective.value != value; }
 
-    glm::mat4 CreateProjectionMatrix(Perspective perspective, const glm::vec2& surface_size);
-    glm::mat4 CreateProjectionMatrix(Perspective perspective, const game::FRect& viewport);
-    glm::mat4 CreateProjectionMatrix(Perspective perspective, float surface_width, float surface_height);
+    enum class Projection {
+        Orthographic,
+        Perspective
+    };
+
+    glm::mat4 CreateProjectionMatrix(Projection projection, const glm::vec2& surface_size);
+    glm::mat4 CreateProjectionMatrix(Projection projection, const game::FRect& viewport);
+    glm::mat4 CreateProjectionMatrix(Projection projection, float surface_width, float surface_height);
 
     // Create model transformation matrix for a certain type of game perspective.
     // This matrix adds a perspective specific rotation to the model transformation.
-    glm::mat4 CreateModelMatrix(Perspective perspective);
+    glm::mat4 CreateModelMatrix(GameView view);
 
     // Create view transformation matrix for a certain type of game perspective
     // assuming a world translation and world scale. In other words this matrix
     // transforms the world space objects into "view/eye/camera" space.
-    glm::mat4 CreateModelViewMatrix(Perspective perspective,
+    glm::mat4 CreateModelViewMatrix(GameView view,
                                     const glm::vec2& camera_pos,
                                     const glm::vec2& camera_scale,
                                     float camera_rotation = 0.0f); // rotation around the Z axis in degrees
 
-    inline glm::mat4 CreateModelViewMatrix(Perspective perspective,
-                                           float camera_pos_x,
-                                           float camera_pos_y,
-                                           float world_scale_x,
-                                           float world_scale_y,
-                                           float rotation = 0.0f)
-    {
-        return CreateModelViewMatrix(perspective,
-                                     glm::vec2{camera_pos_x, camera_pos_y},
-                                     glm::vec2{world_scale_x, world_scale_y},
-                                     rotation);
-    }
+    glm::mat4 CreateModelViewMatrix(GameView view,
+                                    float camera_pos_x,
+                                    float camera_pos_y,
+                                    float world_scale_x,
+                                    float world_scale_y,
+                                    float rotation = 0.0f);
 
     // We have 2 noteworthy and relevant planes/spaces in the game world
     // and actually you should consider them separate spaces. I.e the tile
@@ -224,15 +223,15 @@ namespace engine
                                            const glm::mat4& plane_world_to_view,
                                            const glm::vec4& plane_pos);
 
-    glm::vec4 MapFromPlaneToPlane(const glm::vec4& pos, Perspective src, Perspective dst);
+    glm::vec4 MapFromPlaneToPlane(const glm::vec4& pos, GameView src, GameView dst);
 
-    inline glm::vec4 MapFromTilePlaneToScenePlane(const glm::vec4& tile_pos, Perspective tile_plane) noexcept
+    inline glm::vec4 MapFromTilePlaneToScenePlane(const glm::vec4& tile_pos, GameView tile_plane) noexcept
     {
-        return MapFromPlaneToPlane(tile_pos, tile_plane, Perspective::AxisAligned);
+        return MapFromPlaneToPlane(tile_pos, tile_plane, GameView::AxisAligned);
     }
-    inline glm::vec4 MapFromScenePlaneToTilePlane(const glm::vec4& scene_pos, Perspective tile_plane) noexcept
+    inline glm::vec4 MapFromScenePlaneToTilePlane(const glm::vec4& scene_pos, GameView tile_plane) noexcept
     {
-        return MapFromPlaneToPlane(scene_pos, Perspective::AxisAligned, tile_plane);
+        return MapFromPlaneToPlane(scene_pos, GameView::AxisAligned, tile_plane);
     }
 
     // Produce a matrix that transforms a vertex from one coordinate space
@@ -263,7 +262,7 @@ namespace engine
 
     glm::vec2 ComputeTileRenderSize(const glm::mat4& tile_to_render,
                                     const glm::vec2& tile_size,
-                                    Perspective perspective);
+                                    GameView perspective);
 
     glm::vec3 GetTileCuboidFactors(game::Tilemap::Perspective perspective);
 
