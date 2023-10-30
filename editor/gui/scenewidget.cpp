@@ -541,10 +541,10 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     connect(workspace, &app::Workspace::ResourceUpdated, this, &SceneWidget::ResourceUpdated);
 
     PopulateFromEnum<game::SceneClass::SpatialIndex>(mUI.cmbSpatialIndex);
-    PopulateFromEnum<engine::Perspective::EnumValue>(mUI.cmbPerspective);
+    PopulateFromEnum<engine::GameView::EnumValue>(mUI.cmbPerspective);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
-    SetValue(mUI.cmbPerspective, engine::Perspective::AxisAligned);
+    SetValue(mUI.cmbPerspective, engine::GameView::AxisAligned);
     SetValue(mUI.zoom, 1.0f);
     SetValue(mUI.ID, mState.scene->GetId());
     SetValue(mUI.name, mState.scene->GetName());
@@ -1875,7 +1875,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     const auto xs     = (float)GetValue(mUI.scaleX);
     const auto ys     = (float)GetValue(mUI.scaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
-    const auto perspective = (engine::Perspective::EnumValue)GetValue(mUI.cmbPerspective);
+    const auto view   = (engine::GameView::EnumValue)GetValue(mUI.cmbPerspective);
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
@@ -1885,16 +1885,16 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     // then this is the same as the scene painter below, but these are always
     // conceptually different painters in different domains.
     gfx::Painter tile_painter(device);
-    tile_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, perspective));
-    tile_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, perspective));
+    tile_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, view));
+    tile_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, engine::Projection::Orthographic));
     tile_painter.SetPixelRatio(glm::vec2{xs*zoom, ys*zoom});
     tile_painter.SetViewport(0, 0, width, height);
     tile_painter.SetSurfaceSize(width, height);
     tile_painter.SetEditingMode(true);
 
     gfx::Painter scene_painter(device);
-    scene_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, engine::Perspective::AxisAligned));
-    scene_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, engine::Perspective::AxisAligned));
+    scene_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, engine::GameView::AxisAligned));
+    scene_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, engine::Projection::Orthographic));
     scene_painter.SetPixelRatio(glm::vec2{xs*zoom, ys*zoom});
     scene_painter.SetViewport(0, 0, width, height);
     scene_painter.SetSurfaceSize(width, height);
@@ -1931,7 +1931,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         DrawHook hook(GetCurrentNode(), viewport);
         hook.SetIsPlaying(mPlayState == PlayState::Playing);
         hook.SetDrawVectors(true);
-        hook.SetViewMatrix(CreateViewMatrix(mUI, mState, engine::Perspective::AxisAligned));
+        hook.SetViewMatrix(CreateViewMatrix(mUI, mState, engine::GameView::AxisAligned));
 
         engine::Renderer::Camera camera;
         camera.position.x = mState.camera_offset_x;
@@ -2011,7 +2011,8 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         const float game_height = settings.viewport_height;
         DrawViewport(painter, view, game_width, game_height, width, height);
     }
-    PrintMousePos(mUI, mState, painter, perspective);
+    PrintMousePos(mUI, mState, painter, view,
+                  engine::Projection::Orthographic);
 }
 
 void SceneWidget::MouseMove(QMouseEvent* event)
@@ -2499,7 +2500,7 @@ void SceneWidget::FindNode(const game::EntityPlacement* node)
     if (!entity_klass)
         return;
 
-    const auto view = engine::CreateModelViewMatrix(engine::Perspective::AxisAligned,
+    const auto view = engine::CreateModelViewMatrix(engine::GameView::AxisAligned,
                                                     mState.camera_offset_x,
                                                     mState.camera_offset_y,
                                                     1.0f, 1.0f,
@@ -2583,7 +2584,7 @@ game::EntityPlacement* SceneWidget::SelectNode(const QPoint& click_point)
     const auto ys     = (float)GetValue(mUI.scaleY);
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
-    const auto perspective = engine::Perspective::AxisAligned;
+    const auto perspective = engine::GameView::AxisAligned;
 
     engine::Renderer::Camera camera;
     camera.position.x = mState.camera_offset_x;

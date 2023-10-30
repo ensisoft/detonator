@@ -925,8 +925,9 @@ void EntityWidget::Paste(const Clipboard& clipboard)
         mickey.y() < 0 || mickey.y() > mUI.widget->height())
         mickey = QPoint(mUI.widget->width() * 0.5, mUI.widget->height() * 0.5);
 
-    const auto perspective = engine::Perspective::AxisAligned;
-    const auto& mouse_pos_scene = MapWindowCoordinateToWorld(mUI, mState, mickey, perspective);
+    const auto view = engine::GameView::AxisAligned;
+    const auto proj = engine::Projection::Orthographic;
+    const auto& mouse_pos_scene = MapWindowCoordinateToWorld(mUI, mState, mickey, view, proj);
 
     auto* paste_root = nodes[0].get();
     paste_root->SetTranslation(mouse_pos_scene);
@@ -2899,14 +2900,13 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     const auto xs     = (float)GetValue(mUI.scaleX);
     const auto ys     = (float)GetValue(mUI.scaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
-    const auto perspective = engine::Perspective::AxisAligned;
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
     gfx::Device* device = painter.GetDevice();
     gfx::Painter entity_painter(device);
-    entity_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, perspective));
-    entity_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI,  perspective));
+    entity_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, engine::GameView::AxisAligned));
+    entity_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI,  engine::Projection::Orthographic));
     entity_painter.SetPixelRatio(glm::vec2{xs*zoom, ys*zoom});
     entity_painter.SetViewport(0, 0, width, height);
     entity_painter.SetSurfaceSize(width, height);
@@ -3026,7 +3026,9 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         DrawViewport(painter, view, game_width, game_height, width, height);
     }
 
-    PrintMousePos(mUI, mState, painter, perspective);
+    PrintMousePos(mUI, mState, painter,
+                  engine::GameView::AxisAligned,
+                  engine::Projection::Orthographic);
 }
 
 void EntityWidget::MouseZoom(std::function<void(void)> zoom_function)
@@ -3040,18 +3042,19 @@ void EntityWidget::MouseZoom(std::function<void(void)> zoom_function)
         mickey.y() > mUI.widget->height())
         return;
 
-    const auto perspective = engine::Perspective::AxisAligned;
+    const auto view = engine::GameView::AxisAligned;
+    const auto proj = engine::Projection::Orthographic;
     Point2Df mickey_world_before_zoom;
     Point2Df mickey_world_after_zoom;
 
     {
-        mickey_world_before_zoom = MapWindowCoordinateToWorld(mUI, mState, mickey, perspective);
+        mickey_world_before_zoom = MapWindowCoordinateToWorld(mUI, mState, mickey, view, proj);
     }
 
     zoom_function();
 
     {
-        mickey_world_after_zoom = MapWindowCoordinateToWorld(mUI, mState, mickey, perspective);
+        mickey_world_after_zoom = MapWindowCoordinateToWorld(mUI, mState, mickey, view, proj);
     }
     glm::vec2 before = mickey_world_before_zoom;
     glm::vec2 after  = mickey_world_after_zoom;

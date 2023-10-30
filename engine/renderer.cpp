@@ -119,12 +119,12 @@ void Renderer::Update(float time, float dt)
 
 void Renderer::Draw(gfx::Device& device, const game::Tilemap* map)
 {
-    const auto perspective          = map ? map->GetPerspective() : game::Tilemap::Perspective::AxisAligned;
-    const auto& map_view_to_clip    = CreateProjectionMatrix(perspective, mCamera.viewport);
-    const auto& map_world_to_view   = CreateModelViewMatrix(perspective, mCamera.position, mCamera.scale,
+    const auto map_view = map ? map->GetPerspective() : game::Tilemap::Perspective::AxisAligned;
+    const auto& map_view_to_clip    = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
+    const auto& map_world_to_view   = CreateModelViewMatrix(map_view, mCamera.position, mCamera.scale,
                                                             mCamera.rotation);
-    const auto& scene_view_to_clip  = CreateProjectionMatrix(Perspective::AxisAligned, mCamera.viewport);
-    const auto& scene_world_to_view = CreateModelViewMatrix(Perspective::AxisAligned, mCamera.position, mCamera.scale,
+    const auto& scene_view_to_clip  = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
+    const auto& scene_world_to_view = CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale,
                                                             mCamera.rotation);
 
     // this matrix will transform coordinates from scene's coordinate space
@@ -149,7 +149,7 @@ void Renderer::Draw(gfx::Device& device, const game::Tilemap* map)
 
         for (auto& batch : batches)
         {
-            const auto tile_render_size = ComputeTileRenderSize(from_map_to_scene, batch.tile_size, perspective);
+            const auto tile_render_size = ComputeTileRenderSize(from_map_to_scene, batch.tile_size, map_view);
             const auto tile_render_width_scale = map->GetTileRenderWidthScale();
             const auto tile_render_height_scale = map->GetTileRenderHeightScale();
             const auto tile_width_render_units = tile_render_size.x * tile_render_width_scale;
@@ -160,9 +160,9 @@ void Renderer::Draw(gfx::Device& device, const game::Tilemap* map)
             tiles->SetTileRenderWidth(tile_width_render_units);
             tiles->SetTileRenderHeight(tile_height_render_units);
             tiles->SetTileShape(gfx::TileBatch::TileShape::Automatic);
-            if (perspective == game::Tilemap::Perspective::AxisAligned)
+            if (map_view == game::Tilemap::Perspective::AxisAligned)
                 tiles->SetProjection(gfx::TileBatch::Projection::AxisAligned);
-            else if (perspective == game::Tilemap::Perspective::Dimetric)
+            else if (map_view == game::Tilemap::Perspective::Dimetric)
                 tiles->SetProjection(gfx::TileBatch::Projection::Dimetric);
             else BUG("unknown projection");
 
@@ -273,9 +273,9 @@ void Renderer::PrepareMapTileBatches(const game::Tilemap& map,
     const auto device_viewport_height  = mSurface.viewport.GetHeight();
     const auto window_size = glm::vec2{device_viewport_width, device_viewport_height};
 
-    const auto perspective = map.GetPerspective();
-    const auto& view_to_clip = CreateProjectionMatrix(perspective, mCamera.viewport);
-    const auto& world_to_view = CreateModelViewMatrix(perspective, mCamera.position, mCamera.scale, mCamera.rotation);
+    const auto map_view = map.GetPerspective();
+    const auto& view_to_clip = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
+    const auto& world_to_view = CreateModelViewMatrix(map_view, mCamera.position, mCamera.scale, mCamera.rotation);
 
     // map the corners of the viewport onto the map plane.
     const auto corners = MapFromWindowToWorldPlane(view_to_clip, world_to_view, window_size,
@@ -598,12 +598,12 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
     // should map directly to a layer index. Then each entity needs to be mapped from
     // entity world into tilemap and xy tile position computed.
 
-    const auto perspective          = map ? map->GetPerspective() : game::Tilemap::Perspective::AxisAligned;
-    const auto& map_view_to_clip    = CreateProjectionMatrix(perspective, mCamera.viewport);
-    const auto& map_world_to_view   = CreateModelViewMatrix(perspective, mCamera.position, mCamera.scale,
+    const auto map_view = map ? map->GetPerspective() : game::Tilemap::Perspective::AxisAligned;
+    const auto& map_view_to_clip    = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
+    const auto& map_world_to_view   = CreateModelViewMatrix(map_view, mCamera.position, mCamera.scale,
                                                             mCamera.rotation);
-    const auto& scene_view_to_clip  = CreateProjectionMatrix(Perspective::AxisAligned, mCamera.viewport);
-    const auto& scene_world_to_view = CreateModelViewMatrix(Perspective::AxisAligned, mCamera.position, mCamera.scale,
+    const auto& scene_view_to_clip  = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
+    const auto& scene_world_to_view = CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale,
                                                             mCamera.rotation);
 
     // this matrix will transform coordinates from scene's coordinate space
@@ -622,8 +622,8 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
         // Setup painter to draw in whatever is the map perspective.
         // This is used to visualize the data layer tiles only.
         gfx::Painter tile_painter(&device);
-        tile_painter.SetViewMatrix(CreateModelViewMatrix(perspective, mCamera.position, mCamera.scale, mCamera.rotation));
-        tile_painter.SetProjectionMatrix(CreateProjectionMatrix(perspective, mCamera.viewport));
+        tile_painter.SetViewMatrix(CreateModelViewMatrix(map_view, mCamera.position, mCamera.scale, mCamera.rotation));
+        tile_painter.SetProjectionMatrix(CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport));
         tile_painter.SetPixelRatio({1.0f, 1.0f});
         tile_painter.SetViewport(mSurface.viewport);
         tile_painter.SetSurfaceSize(mSurface.size);
@@ -639,7 +639,7 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
         {
             if (batch.type == TileBatch::Type::Render)
             {
-                const auto tile_render_size = ComputeTileRenderSize(from_map_to_scene, batch.tile_size, perspective);
+                const auto tile_render_size = ComputeTileRenderSize(from_map_to_scene, batch.tile_size, map_view);
                 const auto tile_render_width_scale = map->GetTileRenderWidthScale();
                 const auto tile_render_height_scale = map->GetTileRenderHeightScale();
                 const auto tile_width_render_units = tile_render_size.x * tile_render_width_scale;
@@ -650,9 +650,9 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
                 tiles->SetTileRenderWidth(tile_width_render_units);
                 tiles->SetTileRenderHeight(tile_height_render_units);
                 tiles->SetTileShape(gfx::TileBatch::TileShape::Automatic);
-                if (perspective == game::Tilemap::Perspective::AxisAligned)
+                if (map_view == game::Tilemap::Perspective::AxisAligned)
                     tiles->SetProjection(gfx::TileBatch::Projection::AxisAligned);
-                else if (perspective == game::Tilemap::Perspective::Dimetric)
+                else if (map_view == game::Tilemap::Perspective::Dimetric)
                     tiles->SetProjection(gfx::TileBatch::Projection::Dimetric);
                 else BUG("unknown projection");
 
@@ -1115,8 +1115,8 @@ void Renderer::DrawEditorPackets(gfx::Device& device, const std::vector<DrawPack
     const auto logical_viewport_height = mCamera.viewport.GetHeight();
 
     gfx::Painter painter_2D(&device);
-    painter_2D.SetProjectionMatrix(CreateProjectionMatrix(Perspective::AxisAligned, mCamera.viewport));
-    painter_2D.SetViewMatrix(CreateModelViewMatrix(Perspective::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
+    painter_2D.SetProjectionMatrix(CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport));
+    painter_2D.SetViewMatrix(CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
     painter_2D.SetViewport(mSurface.viewport);
     painter_2D.SetSurfaceSize(mSurface.size);
     painter_2D.SetEditingMode(mEditingMode);
@@ -1136,8 +1136,8 @@ void Renderer::DrawScenePackets(gfx::Device& device, const std::vector<DrawPacke
     const auto logical_viewport_height = mCamera.viewport.GetHeight();
 
     gfx::Painter painter_2D(&device);
-    painter_2D.SetProjectionMatrix(CreateProjectionMatrix(Perspective::AxisAligned, mCamera.viewport));
-    painter_2D.SetViewMatrix(CreateModelViewMatrix(Perspective::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
+    painter_2D.SetProjectionMatrix(CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport));
+    painter_2D.SetViewMatrix(CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
     painter_2D.SetViewport(mSurface.viewport);
     painter_2D.SetSurfaceSize(mSurface.size);
     painter_2D.SetEditingMode(mEditingMode);
@@ -1361,16 +1361,16 @@ void Renderer::DrawTileBatches(const game::Tilemap& map,
     // this is the device viewport. not the logical game viewport.
     painter_2D.SetViewport(mSurface.viewport);
     painter_2D.SetSurfaceSize(mSurface.size);
-    painter_2D.SetProjectionMatrix(CreateProjectionMatrix(Perspective::AxisAligned, mCamera.viewport));
-    painter_2D.SetViewMatrix(CreateModelViewMatrix(Perspective::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
+    painter_2D.SetProjectionMatrix(CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport));
+    painter_2D.SetViewMatrix(CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
     painter_2D.SetPixelRatio(glm::vec2{device_viewport_width, device_viewport_height} / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
 
-    const auto perspective = map->GetPerspective();
-    const auto& map_view_to_clip = CreateProjectionMatrix(perspective, mCamera.viewport);
-    const auto& map_world_to_view = CreateModelViewMatrix(perspective, mCamera.position, mCamera.scale, mCamera.rotation);
+    const auto map_view = map->GetPerspective();
+    const auto& map_view_to_clip = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
+    const auto& map_world_to_view = CreateModelViewMatrix(map_view, mCamera.position, mCamera.scale, mCamera.rotation);
 
-    const auto& view_to_clip = CreateProjectionMatrix(Perspective::AxisAligned, mCamera.viewport);
-    const auto& world_to_view = CreateModelViewMatrix(Perspective::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation);
+    const auto& view_to_clip = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
+    const auto& world_to_view = CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation);
     // This matrix will project a coordinate in tilemap coordinate space into
     // axis aligned game/scene/entity world. (If map has axis aligned perspective then
     // this should actually reduce to an identify matrix... something to optimize for)
@@ -1397,7 +1397,7 @@ void Renderer::DrawTileBatches(const game::Tilemap& map,
 
         if (batch.type == TileBatch::Type::Render)
         {
-            const auto tile_render_size = ComputeTileRenderSize(tile_projection_transform_matrix, batch.tile_size,  perspective);
+            const auto tile_render_size = ComputeTileRenderSize(tile_projection_transform_matrix, batch.tile_size,  map_view);
             const auto tile_render_width_scale  = map->GetTileRenderWidthScale();
             const auto tile_render_height_scale = map->GetTileRenderHeightScale();
             const auto tile_width_render_units  = tile_render_size.x * tile_render_width_scale;
@@ -1411,9 +1411,9 @@ void Renderer::DrawTileBatches(const game::Tilemap& map,
             tiles.SetTileWorldSize(batch.tile_size);
             tiles.SetTileRenderSize(batch.render_size);
             tiles.SetTileShape(gfx::TileBatch::TileShape::Automatic);
-            if (perspective == game::Tilemap::Perspective::AxisAligned)
+            if (map_view == game::Tilemap::Perspective::AxisAligned)
                 tiles.SetProjection(gfx::TileBatch::Projection::AxisAligned);
-            else if (perspective == game::Tilemap::Perspective::Dimetric)
+            else if (map_view == game::Tilemap::Perspective::Dimetric)
                 tiles.SetProjection(gfx::TileBatch::Projection::Dimetric);
             else BUG("unknown projection");
 

@@ -85,14 +85,14 @@ namespace engine
 
     // glm::ortho, left, right, bottom, top, near, far
 
-glm::mat4 CreateProjectionMatrix(Perspective perspective, const glm::vec2& surface_size)
+glm::mat4 CreateProjectionMatrix(Projection projection, const glm::vec2& surface_size)
 {
     const auto half_width  = surface_size.x*0.5f;
     const auto half_height = surface_size.y*0.5f;
     return glm::ortho(-half_width, half_width, -half_height, half_height, -10000.0f, 10000.0f);
 }
 
-glm::mat4 CreateProjectionMatrix(Perspective perspective, const game::FRect& viewport)
+glm::mat4 CreateProjectionMatrix(Projection projection, const game::FRect& viewport)
 {
     // the incoming game viewport is defined assuming the axis-aligned (Y points downwards)
     // projection matrix.
@@ -107,19 +107,19 @@ glm::mat4 CreateProjectionMatrix(Perspective perspective, const game::FRect& vie
 
     return glm::ortho(left, right, -bottom, -top, -10000.0f, 10000.0f);
 }
-glm::mat4 CreateProjectionMatrix(Perspective perspective, float surface_width, float surface_height)
+glm::mat4 CreateProjectionMatrix(Projection projection, float surface_width, float surface_height)
 {
-    return CreateProjectionMatrix(perspective, glm::vec2{surface_width, surface_height});
+    return CreateProjectionMatrix(projection, glm::vec2{surface_width, surface_height});
 }
 
-glm::mat4 CreateModelMatrix(Perspective perspective)
+glm::mat4 CreateModelMatrix(GameView view)
 {
-    if (perspective == Perspective::AxisAligned)
+    if (view == GameView::AxisAligned)
     {
         const static auto model_rotation = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3{1.0f,  0.0f, 0.0f});
         return model_rotation;
     }
-    else if (perspective == Perspective::Dimetric)
+    else if (view == GameView::Dimetric)
     {
         const static auto dimetric_rotation = CreateDimetricModelTransform();
         const static auto plane_rotation = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3 { 1.0f, 0.0f, 0.0f });
@@ -130,7 +130,7 @@ glm::mat4 CreateModelMatrix(Perspective perspective)
     return glm::mat4(1.0f);
 }
 
-glm::mat4 CreateModelViewMatrix(Perspective perspective,
+glm::mat4 CreateModelViewMatrix(GameView game_view,
                                 const glm::vec2& camera_pos,
                                 const glm::vec2& camera_scale,
                                 float camera_rotation)
@@ -149,7 +149,20 @@ glm::mat4 CreateModelViewMatrix(Perspective perspective,
     view = glm::translate(view, glm::vec3{-camera_pos.x, camera_pos.y, 0.0f});
     view = glm::rotate(view, glm::radians(-camera_rotation), glm::vec3{0.0f, 0.0f, 1.0f});
 
-    return view * CreateModelMatrix(perspective);
+    return view * CreateModelMatrix(game_view);
+}
+
+glm::mat4 CreateModelViewMatrix(GameView game_view,
+                                float camera_pos_x,
+                                float camera_pos_y,
+                                float world_scale_x,
+                                float world_scale_y,
+                                float rotation)
+{
+    return CreateModelViewMatrix(game_view,
+                                 glm::vec2 { camera_pos_x, camera_pos_y },
+                                 glm::vec2 { world_scale_x, world_scale_y },
+                                 rotation);
 }
 
 glm::vec2 MapFromWorldPlaneToWindow(const glm::mat4& view_to_clip,
@@ -283,7 +296,7 @@ glm::vec4 MapFromTilePlaneToScenePlane(const glm::mat4& scene_view_to_clip,
     return glm::inverse(scene_view_to_clip * scene_world_to_view) * glm::vec4{clip_space, depth_value_at_near_plane, 1.0f};
 }
 
-glm::vec4 MapFromPlaneToPlane(const glm::vec4& pos, Perspective src, Perspective dst)
+glm::vec4 MapFromPlaneToPlane(const glm::vec4& pos, GameView src, GameView dst)
 {
     if (src == dst)
         return pos;
@@ -336,7 +349,7 @@ glm::vec4 MapFromWindowToWorld(const glm::mat4& view_to_clip,
 
 glm::vec2 ComputeTileRenderSize(const glm::mat4& tile_to_render,
                                 const glm::vec2& tile_size,
-                                Perspective perspective)
+                                GameView perspective)
 {
     const auto tile_width_units  = tile_size.x;
     const auto tile_height_units = tile_size.y;
@@ -346,13 +359,13 @@ glm::vec2 ComputeTileRenderSize(const glm::mat4& tile_to_render,
     const auto tile_left_top     = tile_to_render * glm::vec4{0.0f, 0.0f, 0.0f, 1.0f};
     const auto tile_right_bottom = tile_to_render * glm::vec4{tile_width_units, tile_height_units, 0.0f, 1.0f};
 
-    if (perspective == Perspective::Dimetric)
+    if (perspective == GameView::Dimetric)
     {
         const auto tile_width_render_units  = glm::length(tile_left_bottom - tile_right_top);
         const auto tile_height_render_units = glm::length(tile_left_top - tile_right_bottom);
         return {tile_width_render_units, tile_height_render_units};
     }
-    else if (perspective == Perspective::AxisAligned)
+    else if (perspective == GameView::AxisAligned)
     {
         const auto tile_width_render_units  = glm::length(tile_left_top - tile_right_top);
         const auto tile_height_render_units = glm::length(tile_left_top - tile_left_bottom);

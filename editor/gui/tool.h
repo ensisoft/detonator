@@ -131,7 +131,7 @@ namespace gui
           : mMickey(mickey)
         {}
         template<typename UI, typename State>
-        MouseEvent(const QMouseEvent* mickey, const UI& ui, const State& state, engine::Perspective perspective = engine::Perspective::AxisAligned)
+        MouseEvent(const QMouseEvent* mickey, const UI& ui, const State& state, engine::GameView view = engine::GameView::AxisAligned)
           : mMickey(mickey)
           , mWindowSize(ToVec2(ui.widget->size()))
           , mCameraPos(state.camera_offset_x, state.camera_offset_y)
@@ -139,7 +139,7 @@ namespace gui
           , mZoom(GetValue(ui.zoom))
           , mCameraRotation(GetValue(ui.rotation))
           , mCanTransform(true)
-          , mPerspective(perspective)
+          , mGameView(view)
         {}
         inline Point2Df WindowPos() const noexcept
         { return mMickey->pos(); }
@@ -148,8 +148,8 @@ namespace gui
 
         inline Point2Df MapToPlane() const noexcept
         {
-            const auto& view_to_clip = engine::CreateProjectionMatrix(mPerspective, mWindowSize.x, mWindowSize.y);
-            const auto& world_to_view = engine::CreateModelViewMatrix(mPerspective, mCameraPos, mCameraScale * mZoom,
+            const auto& view_to_clip = engine::CreateProjectionMatrix(engine::Projection::Orthographic, mWindowSize);
+            const auto& world_to_view = engine::CreateModelViewMatrix(mGameView, mCameraPos, mCameraScale * mZoom,
                                                                       mCameraRotation);
             const auto ret = engine::MapFromWindowToWorldPlane(view_to_clip, world_to_view, WindowPos(), mWindowSize);
             return {ret.x, ret.y};
@@ -165,27 +165,27 @@ namespace gui
             return {mouse_pos_in_view.x, mouse_pos_in_view.y};
         }
         inline Point2Df MapBetweenPerspectives(const Point2Df& point,
-                                               engine::Perspective src,
-                                               engine::Perspective dst) const
+                                               engine::GameView src,
+                                               engine::GameView dst) const
         {
             if (src == dst)
                 return point;
 
-            const auto src_view_to_clip = engine::CreateProjectionMatrix(engine::Perspective::AxisAligned, mWindowSize.x, mWindowSize.y);
-            const auto src_world_to_view = engine::CreateModelViewMatrix(engine::Perspective::AxisAligned, mCameraPos,
+            const auto src_view_to_clip = engine::CreateProjectionMatrix(engine::Projection::Orthographic, mWindowSize.x, mWindowSize.y);
+            const auto src_world_to_view = engine::CreateModelViewMatrix(engine::GameView::AxisAligned, mCameraPos,
                                                                          mCameraScale * mZoom, mCameraRotation);
-            const auto dst_view_to_clip = engine::CreateProjectionMatrix(engine::Perspective::Dimetric, mWindowSize.x, mWindowSize.y);
-            const auto dst_world_to_view = engine::CreateModelViewMatrix(engine::Perspective::Dimetric, mCameraPos,
+            const auto dst_view_to_clip = engine::CreateProjectionMatrix(engine::Projection::Orthographic, mWindowSize.x, mWindowSize.y);
+            const auto dst_world_to_view = engine::CreateModelViewMatrix(engine::GameView::Dimetric, mCameraPos,
                                                                          mCameraScale * mZoom, mCameraRotation);
 
             glm::vec2 ret;
-            if (src == engine::Perspective::AxisAligned && dst == engine::Perspective::Dimetric)
+            if (src == engine::GameView::AxisAligned && dst == engine::GameView::Dimetric)
             {
                 ret = engine::MapFromScenePlaneToTilePlane(src_view_to_clip, src_world_to_view,
                                                            dst_view_to_clip, dst_world_to_view,
                                                            glm::vec4{point.x(), point.y(), 0.0f, 1.0});
             }
-            else if (src == engine::Perspective::Dimetric && dst == engine::Perspective::AxisAligned)
+            else if (src == engine::GameView::Dimetric && dst == engine::GameView::AxisAligned)
             {
                 ret = engine::MapFromTilePlaneToScenePlane(src_view_to_clip, src_world_to_view,
                                                            dst_view_to_clip, dst_world_to_view,
@@ -204,7 +204,7 @@ namespace gui
         const float mZoom            = 1.0f;
         const float mCameraRotation  = 0.0f;
         const bool mCanTransform     = false;
-        const engine::Perspective mPerspective = engine::Perspective::AxisAligned;
+        const engine::GameView mGameView = engine::GameView::AxisAligned;
     };
 
     // Interface for transforming simple mouse actions
@@ -309,8 +309,8 @@ namespace gui
             const float rotation = 0.0f; // ignored so that the camera movement stays
                                          // irrespective of the camera rotation
 
-            mViewToClip  = engine::CreateProjectionMatrix(engine::Perspective::AxisAligned, width, height);
-            mWorldToView = engine::CreateModelViewMatrix(engine::Perspective::AxisAligned,
+            mViewToClip  = engine::CreateProjectionMatrix(engine::Projection::Orthographic, width, height);
+            mWorldToView = engine::CreateModelViewMatrix(engine::GameView::AxisAligned,
                                                          mState.camera_offset_x,
                                                          mState.camera_offset_y,
                                                          zoom * xs, zoom * ys,
@@ -356,7 +356,7 @@ namespace gui
     {
     public:
         MoveRenderTreeNodeTool(TreeModel& model, TreeNode* selected, bool snap = false, unsigned grid = 0,
-                               engine::Perspective::EnumValue mapping = engine::Perspective::AxisAligned)
+                               engine::GameView::EnumValue mapping = engine::GameView::AxisAligned)
             : mModel(model)
             , mNode(selected)
             , mSnapToGrid(snap)
@@ -431,10 +431,10 @@ namespace gui
             if (mSnapToGrid)
             {
                 glm::vec2 position = mNode->GetTranslation();
-                position = mickey.MapBetweenPerspectives(position, engine::Perspective::AxisAligned, mMapping);
+                position = mickey.MapBetweenPerspectives(position, engine::GameView::AxisAligned, mMapping);
                 position.x = std::round(position.x / mGridSize) * mGridSize;
                 position.y = std::round(position.y / mGridSize) * mGridSize;
-                position = mickey.MapBetweenPerspectives(position, mMapping, engine::Perspective::AxisAligned);
+                position = mickey.MapBetweenPerspectives(position, mMapping, engine::GameView::AxisAligned);
                 mNode->SetTranslation(position);
             }
             // we're done.
@@ -450,7 +450,7 @@ namespace gui
         bool mSnapToGrid = false;
         bool mWasMoved = false;
         unsigned mGridSize = 0;
-        engine::Perspective mMapping = engine::Perspective::AxisAligned;
+        engine::GameView mMapping = engine::GameView::AxisAligned;
     };
 
     template<typename TreeModel, typename TreeNode>
