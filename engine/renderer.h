@@ -98,9 +98,9 @@ namespace engine
     class TileBatchDrawHook
     {
     public:
-        virtual bool FilterBatch(const TileBatch& batch) { return true; }
-        virtual void BeginDrawBatch(const TileBatch& batch, const glm::mat4& model, gfx::Painter& painter) {};
-        virtual void EndDrawBatch(const TileBatch& batch, const glm::mat4& model, gfx::Painter& painter) {}
+        virtual bool FilterBatch(const DrawPacket& batch) { return true; }
+        virtual void BeginDrawBatch(const DrawPacket& batch, gfx::Painter& painter) {};
+        virtual void EndDrawBatch(const DrawPacket& batch, gfx::Painter& painter) {}
     };
 
     using EntityClassDrawHook     = EntityDrawHook<game::EntityNodeClass>;
@@ -203,9 +203,7 @@ namespace engine
                   SceneInstanceDrawHook* scene_hook = nullptr);
         void Draw(const game::SceneClass& scene, const game::Tilemap* map,
                   gfx::Device& device,
-                  SceneClassDrawHook* scene_hook = nullptr,
-                  bool draw_map_render_layers = true,
-                  bool draw_map_data_layers = false);
+                  SceneClassDrawHook* scene_hook = nullptr);
 
         void Draw(const game::Tilemap& map,
                   gfx::Device& device,
@@ -233,8 +231,7 @@ namespace engine
                  typename EntityType, typename EntityNodeType>
         void DrawScene(const SceneType& scene, const game::Tilemap* map,
                        gfx::Device& device,
-                       SceneDrawHook<SceneNodeType>* scene_hook,
-                       bool draw_map_render_layers, bool draw_map_data_layers);
+                       SceneDrawHook<SceneNodeType>* scene_hook);
 
         template<typename EntityType, typename NodeType>
         void MapEntity(const EntityType& entity, gfx::Transform& transform);
@@ -258,40 +255,39 @@ namespace engine
                                  EntityDrawHook<EntityNodeType>* hook);
 
         void OffsetPacketLayers(std::vector<DrawPacket>& packets) const;
-        void DrawScenePackets(gfx::Device& device, const std::vector<DrawPacket>& packets) const;
+        void DrawTilemapPackets(gfx::Device& device, const std::vector<DrawPacket>& packets,
+                                const game::Tilemap& map, TileBatchDrawHook* hook) const;
         void DrawEditorPackets(gfx::Device& device, const std::vector<DrawPacket>& packets) const;
+        void DrawScenePackets(gfx::Device& device, const std::vector<DrawPacket>& packets) const;
+
+        void GenerateMapDrawPackets(const game::Tilemap& map,
+                                    const std::vector<TileBatch>& batches,
+                                    std::vector<DrawPacket>& packets) const;
 
         void PrepareMapTileBatches(const game::Tilemap& map,
                                    std::vector<TileBatch>& batches,
                                    bool draw_render_layer,
                                    bool draw_data_layer,
-                                   bool obey_klass_flags);
+                                   bool obey_klass_flags,
+                                   bool use_batching);
         template<typename LayerType>
         void PrepareDataLayerTileBatches(const game::Tilemap& map,
                                          const game::TilemapLayer& layer,
                                          const game::URect& visible_region,
                                          std::vector<TileBatch>& batches,
-                                         std::uint16_t layer_index);
+                                         std::uint16_t layer_index,
+                                         bool use_batching);
         template<typename LayerType>
         void PrepareRenderLayerTileBatches(const game::Tilemap& map,
                                            const game::TilemapLayer& layer,
                                            const game::URect& visible_region,
                                            std::vector<TileBatch>& batches,
-                                           std::uint16_t layer_index);
-
-        void DrawTileBatches(const game::Tilemap& map,
-                             TileBatchDrawHook* hook,
-                             std::vector<TileBatch>& batches,
-                             gfx::Device& device);
-        void SortTileBatches(std::vector<TileBatch>& batches) const;
+                                           std::uint16_t layer_index,
+                                           bool use_batching);
 
         void SortTilePackets(std::vector<DrawPacket>& packets) const;
 
-        void ComputeTileCoordinates(const glm::mat4& scene_view_to_clip,
-                                    const glm::mat4& scene_world_to_view,
-                                    const glm::mat4& map_view_to_clip,
-                                    const glm::mat4& map_world_to_view,
-                                    const game::Tilemap& map,
+        void ComputeTileCoordinates(const game::Tilemap& map,
                                     std::size_t packet_start_index,
                                     std::vector<DrawPacket>& packets) const;
 

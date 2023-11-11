@@ -119,7 +119,108 @@ void Renderer::Update(float time, float dt)
 
 void Renderer::Draw(gfx::Device& device, const game::Tilemap* map)
 {
-    const auto map_view = map ? map->GetPerspective() : game::Tilemap::Perspective::AxisAligned;
+    std::vector<DrawPacket> packets;
+
+    if (map)
+    {
+        std::vector<TileBatch> batches;
+
+        constexpr auto obey_klass_flags   = false;
+        constexpr auto draw_render_layers = true;
+        constexpr auto draw_data_layers   = false;
+        constexpr auto use_tile_batching = true;
+        PrepareMapTileBatches(*map, batches, draw_render_layers, draw_data_layers, obey_klass_flags, use_tile_batching);
+        GenerateMapDrawPackets(*map, batches, packets);
+    }
+
+    const auto scene_packet_start_index = packets.size();
+
+    // create the draw packets based on the scene's paint nodes.
+    for (auto& [key, paint] : mPaintNodes)
+    {
+        CreateDrawResources<Entity, EntityNode>(paint);
+        GenerateDrawPackets<Entity, EntityNode>(paint, packets, nullptr);
+        paint.visited = true;
+    }
+
+    if (map)
+    {
+        // Compute map coordinates for all packets coming from scene rendering.
+        // In other words, whenever a draw packet is generated from a scene's paint
+        // node map that node to a position on the map tile grid for combining it
+        // with the map's tile rendering.
+        ComputeTileCoordinates(*map, scene_packet_start_index, packets);
+        // Sort all packets based on the map based sorting criteria
+        SortTilePackets(packets);
+    }
+    else
+    {
+        OffsetPacketLayers(packets);
+    }
+
+    DrawScenePackets(device, packets);
+}
+
+void Renderer::Draw(const Entity& entity,
+                    gfx::Device& device, gfx::Transform& model,
+                    EntityInstanceDrawHook* hook)
+{
+    DrawEntity<Entity, EntityNode>(entity, device, model, hook);
+}
+
+void Renderer::Draw(const EntityClass& entity,
+                    gfx::Device& device, gfx::Transform& model,
+                    EntityClassDrawHook* hook)
+{
+    DrawEntity<EntityClass, EntityNodeClass>(entity, device, model, hook);
+}
+
+void Renderer::Draw(const Scene& scene,
+                    gfx::Device& device,
+                    SceneInstanceDrawHook* scene_hook)
+{
+    DrawScene<Scene, Entity, Entity, EntityNode>(scene, nullptr, device, scene_hook);
+}
+
+void Renderer::Draw(const SceneClass& scene, const game::Tilemap* map,
+                    gfx::Device& device,
+                    SceneClassDrawHook* scene_hook)
+{
+
+    DrawScene<SceneClass, EntityPlacement, EntityClass, EntityNodeClass>(scene, map, device, scene_hook);
+}
+
+void Renderer::Draw(const game::Tilemap& map,
+                    gfx::Device& device,
+                    TileBatchDrawHook* hook,
+                    bool draw_render_layer,
+                    bool draw_data_layer)
+{
+    constexpr auto obey_klass_flags = true;
+    constexpr auto use_tile_batching = false;
+
+    std::vector<TileBatch> batches;
+    PrepareMapTileBatches(map, batches, draw_render_layer, draw_data_layer, obey_klass_flags, use_tile_batching);
+
+    std::vector<DrawPacket> packets;
+    GenerateMapDrawPackets(map, batches,packets);
+
+    SortTilePackets(packets);
+
+    // put the data packets (indicated by editor) first
+    std::stable_partition(packets.begin(), packets.end(),
+                          [](const auto& packet) {
+        return packet.domain == DrawPacket::Domain::Editor;
+    });
+
+    DrawTilemapPackets(device, packets, map, hook);
+}
+
+void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
+                                      const std::vector<TileBatch>& batches,
+                                      std::vector<DrawPacket>& packets) const
+{
+    const auto map_view = map.GetPerspective();
     const auto& map_view_to_clip    = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
     const auto& map_world_to_view   = CreateModelViewMatrix(map_view, mCamera.position, mCamera.scale,
                                                             mCamera.rotation);
@@ -130,24 +231,18 @@ void Renderer::Draw(gfx::Device& device, const game::Tilemap* map)
     // this matrix will transform coordinates from scene's coordinate space
     // into map coordinate space. but keep in mind that the scene world coordinate
     // is a coordinate in a 3D space not on the tile plane.
-    const auto& from_scene_to_map = GetProjectionTransformMatrix(scene_view_to_clip,
-                                                                 scene_world_to_view,
-                                                                 map_view_to_clip,
-                                                                 map_world_to_view);
-    const auto& from_map_to_scene = glm::inverse(from_scene_to_map);
+    const auto& from_map_to_scene = GetProjectionTransformMatrix(map_view_to_clip,
+                                                                 map_world_to_view,
+                                                                 scene_view_to_clip,
+                                                                 scene_world_to_view);
 
-    std::vector<DrawPacket> packets;
-
-    if (map)
+    // Create draw packets out of tile batches
+    for (auto& batch : batches)
     {
-        std::vector<TileBatch> batches;
+        if (batch.material == nullptr)
+            continue;
 
-        constexpr auto obey_klass_flags   = false;
-        constexpr auto draw_render_layers = true;
-        constexpr auto draw_data_layers   = false;
-        PrepareMapTileBatches(*map, batches, draw_render_layers, draw_data_layers, obey_klass_flags);
-
-        for (auto& batch : batches)
+        if (batch.type == TileBatch::Type::Render)
         {
             const auto tile_render_size = ComputeTileRenderSize(from_map_to_scene, batch.tile_size, map_view);
             const auto tile_render_width_scale = map->GetTileRenderWidthScale();
@@ -178,91 +273,39 @@ void Renderer::Draw(gfx::Device& device, const game::Tilemap* map)
             packet.render_layer = 0;
             packet.packet_index = 0;
             packet.pass         = RenderPass::DrawColor;
-            packets.push_back(packet);
+            packets.push_back(std::move(packet));
         }
+        else if (batch.type == TileBatch::Type::Data)
+        {
+            auto tiles = std::make_unique<gfx::TileBatch>(std::move(batch.tiles));
+            tiles->SetTileWorldSize(batch.tile_size);
+            tiles->SetTileRenderSize(batch.tile_size);
+            tiles->SetTileShape(gfx::TileBatch::TileShape::Rectangle);
+            tiles->SetProjection(gfx::TileBatch::Projection::AxisAligned);
+
+            DrawPacket packet;
+            packet.source       = DrawPacket::Source::Map;
+            packet.domain       = DrawPacket::Domain::Editor;
+            packet.material     = batch.material;
+            packet.drawable     = std::move(tiles);
+            packet.transform    = glm::mat4(1.0f);
+            packet.map_row      = batch.row;
+            packet.map_col      = batch.col;
+            packet.map_layer    = batch.layer;
+            packet.render_layer = 0;
+            packet.packet_index = 0;
+            packet.pass         = RenderPass::DrawColor;
+            packets.push_back(std::move(packet));
+        } else BUG("Unhandled tile batch type.");
     }
-
-    const auto scene_packet_start_index = packets.size();
-
-    // create the draw packets based on the scene's paint nodes.
-    for (auto& [key, paint] : mPaintNodes)
-    {
-        CreateDrawResources<Entity, EntityNode>(paint);
-        GenerateDrawPackets<Entity, EntityNode>(paint, packets, nullptr);
-        paint.visited = true;
-    }
-
-    if (map)
-    {
-        // Compute map coordinates for all packets coming from scene rendering.
-        // In other words, whenever a draw packet is generated from a scene's paint
-        // node map that node to a position on the map tile grid for combining it
-        // with the map's tile rendering.
-        ComputeTileCoordinates(scene_view_to_clip,
-                               scene_world_to_view,
-                               map_view_to_clip,
-                               map_world_to_view,
-                               *map, scene_packet_start_index, packets);
-        // Sort all packets based on the map based sorting criteria
-        SortTilePackets(packets);
-    }
-    else
-    {
-        OffsetPacketLayers(packets);
-    }
-
-    DrawScenePackets(device, packets);
-}
-
-void Renderer::Draw(const Entity& entity,
-                    gfx::Device& device, gfx::Transform& model,
-                    EntityInstanceDrawHook* hook)
-{
-    DrawEntity<Entity, EntityNode>(entity, device, model, hook);
-}
-
-void Renderer::Draw(const EntityClass& entity,
-                    gfx::Device& device, gfx::Transform& model,
-                    EntityClassDrawHook* hook)
-{
-    DrawEntity<EntityClass, EntityNodeClass>(entity, device, model, hook);
-}
-
-void Renderer::Draw(const Scene& scene,
-                    gfx::Device& device,
-                    SceneInstanceDrawHook* scene_hook)
-{
-    DrawScene<Scene, Entity, Entity, EntityNode>(scene, nullptr, device, scene_hook, false, false);
-}
-
-void Renderer::Draw(const SceneClass& scene, const game::Tilemap* map,
-                    gfx::Device& device,
-                    SceneClassDrawHook* scene_hook,
-                    bool draw_map_render_layers, bool draw_map_data_layers)
-{
-
-    DrawScene<SceneClass, EntityPlacement, EntityClass, EntityNodeClass>(scene, map, device, scene_hook, draw_map_render_layers, draw_map_data_layers);
-}
-
-void Renderer::Draw(const game::Tilemap& map,
-                    gfx::Device& device,
-                    TileBatchDrawHook* hook,
-                    bool draw_render_layer,
-                    bool draw_data_layer)
-{
-    constexpr auto obey_klass_flags = true;
-
-    std::vector<TileBatch> batches;
-    PrepareMapTileBatches(map, batches, draw_render_layer, draw_data_layer, obey_klass_flags);
-    SortTileBatches(batches);
-    DrawTileBatches(map, hook, batches, device);
 }
 
 void Renderer::PrepareMapTileBatches(const game::Tilemap& map,
                                      std::vector<TileBatch>& batches,
                                      bool draw_render_layer,
                                      bool draw_data_layer,
-                                     bool obey_klass_flags)
+                                     bool obey_klass_flags,
+                                     bool use_batching)
 
 {
     // The logical game world is mapped inside the device viewport
@@ -339,44 +382,44 @@ void Renderer::PrepareMapTileBatches(const game::Tilemap& map,
         if (draw_render_layer && layer->HasRenderComponent())
         {
             if (type == game::TilemapLayer::Type::Render)
-                PrepareRenderLayerTileBatches<game::TilemapLayer_Render>(map, layer, visible_region, batches, layer_index);
+                PrepareRenderLayerTileBatches<game::TilemapLayer_Render>(map, layer, visible_region, batches, layer_index, use_batching);
             else if (type == game::TilemapLayer::Type::Render_DataUInt4)
-                PrepareRenderLayerTileBatches<game::TilemapLayer_Render_DataUInt4>(map, layer, visible_region, batches, layer_index);
+                PrepareRenderLayerTileBatches<game::TilemapLayer_Render_DataUInt4>(map, layer, visible_region, batches, layer_index, use_batching);
             else if (type == game::TilemapLayer::Type::Render_DataSInt4)
-                PrepareRenderLayerTileBatches<game::TilemapLayer_Render_DataSInt4>(map, layer, visible_region, batches, layer_index);
+                PrepareRenderLayerTileBatches<game::TilemapLayer_Render_DataSInt4>(map, layer, visible_region, batches, layer_index, use_batching);
             else if (type == game::TilemapLayer::Type::Render_DataSInt8)
-                PrepareRenderLayerTileBatches<game::TilemapLayer_Render_DataSInt8>(map, layer, visible_region, batches, layer_index);
+                PrepareRenderLayerTileBatches<game::TilemapLayer_Render_DataSInt8>(map, layer, visible_region, batches, layer_index, use_batching);
             else if (type == game::TilemapLayer::Type::Render_DataUInt8)
-                PrepareRenderLayerTileBatches<game::TilemapLayer_Render_DataUInt8>(map, layer, visible_region, batches, layer_index);
+                PrepareRenderLayerTileBatches<game::TilemapLayer_Render_DataUInt8>(map, layer, visible_region, batches, layer_index, use_batching);
             else if (type == game::TilemapLayer::Type::Render_DataUInt24)
-                PrepareRenderLayerTileBatches<game::TilemapLayer_Render_DataUInt24>(map, layer,visible_region, batches, layer_index);
+                PrepareRenderLayerTileBatches<game::TilemapLayer_Render_DataUInt24>(map, layer,visible_region, batches, layer_index, use_batching);
             else if (type == game::TilemapLayer::Type::Render_DataSInt24)
-                PrepareRenderLayerTileBatches<game::TilemapLayer_Render_DataSInt24>(map, layer,visible_region, batches, layer_index);
+                PrepareRenderLayerTileBatches<game::TilemapLayer_Render_DataSInt24>(map, layer,visible_region, batches, layer_index, use_batching);
             else BUG("Unknown render layer type.");
         }
 
         if (draw_data_layer && layer->HasDataComponent())
         {
             if (type == game::TilemapLayer::Type::Render_DataUInt4)
-                PrepareDataLayerTileBatches<game::TilemapLayer_Render_DataUInt4>(map, layer, visible_region, batches, layer_index);
+                PrepareDataLayerTileBatches<game::TilemapLayer_Render_DataUInt4>(map, layer, visible_region, batches, layer_index, use_batching);
             else if (type == game::TilemapLayer::Type::Render_DataSInt4)
-                PrepareDataLayerTileBatches<game::TilemapLayer_Render_DataSInt4>(map, layer, visible_region, batches, layer_index);
+                PrepareDataLayerTileBatches<game::TilemapLayer_Render_DataSInt4>(map, layer, visible_region, batches, layer_index, use_batching);
             else if (type == game::TilemapLayer::Type::Render_DataSInt8)
-                PrepareDataLayerTileBatches<game::TilemapLayer_Render_DataSInt8>(map, layer, visible_region, batches, layer_index);
+                PrepareDataLayerTileBatches<game::TilemapLayer_Render_DataSInt8>(map, layer, visible_region, batches, layer_index, use_batching);
             else if (type == game::TilemapLayer::Type::Render_DataUInt8)
-                PrepareDataLayerTileBatches<game::TilemapLayer_Render_DataUInt8>(map, layer, visible_region, batches, layer_index);
+                PrepareDataLayerTileBatches<game::TilemapLayer_Render_DataUInt8>(map, layer, visible_region, batches, layer_index, use_batching);
             else if (type == game::TilemapLayer::Type::Render_DataUInt24)
-                PrepareDataLayerTileBatches<game::TilemapLayer_Render_DataUInt24>(map, layer, visible_region, batches, layer_index);
+                PrepareDataLayerTileBatches<game::TilemapLayer_Render_DataUInt24>(map, layer, visible_region, batches, layer_index, use_batching);
             else if (type == game::TilemapLayer::Type::Render_DataSInt24)
-                PrepareDataLayerTileBatches<game::TilemapLayer_Render_DataSInt24>(map, layer, visible_region, batches, layer_index);
+                PrepareDataLayerTileBatches<game::TilemapLayer_Render_DataSInt24>(map, layer, visible_region, batches, layer_index, use_batching);
             else if (type == game::TilemapLayer::Type::DataSInt8)
-                PrepareDataLayerTileBatches<game::TilemapLayer_Data_SInt8>(map, layer, visible_region, batches, layer_index);
+                PrepareDataLayerTileBatches<game::TilemapLayer_Data_SInt8>(map, layer, visible_region, batches, layer_index, use_batching);
             else if (type == game::TilemapLayer::Type::DataUInt8)
-                PrepareDataLayerTileBatches<game::TilemapLayer_Data_UInt8>(map, layer, visible_region, batches, layer_index);
+                PrepareDataLayerTileBatches<game::TilemapLayer_Data_UInt8>(map, layer, visible_region, batches, layer_index, use_batching);
             else if (type == game::TilemapLayer::Type::DataSInt16)
-                PrepareDataLayerTileBatches<game::TilemapLayer_Data_SInt16>(map, layer, visible_region, batches, layer_index);
+                PrepareDataLayerTileBatches<game::TilemapLayer_Data_SInt16>(map, layer, visible_region, batches, layer_index, use_batching);
             else if (type == game::TilemapLayer::Type::DataUInt16)
-                PrepareDataLayerTileBatches<game::TilemapLayer_Data_UInt16>(map, layer, visible_region, batches, layer_index);
+                PrepareDataLayerTileBatches<game::TilemapLayer_Data_UInt16>(map, layer, visible_region, batches, layer_index, use_batching);
             else BUG("Unknown data layer type.");
         }
     }
@@ -567,9 +610,7 @@ template<typename SceneType,typename SceneNodeType,
          typename EntityType, typename EntityNodeType>
 void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
                          gfx::Device& device,
-                         SceneDrawHook<SceneNodeType>* scene_hook,
-                         bool draw_map_render_layers,
-                         bool draw_map_data_layers)
+                         SceneDrawHook<SceneNodeType>* scene_hook)
 {
 
     // When we're combining the map with a scene everything that is to be drawn
@@ -598,90 +639,18 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
     // should map directly to a layer index. Then each entity needs to be mapped from
     // entity world into tilemap and xy tile position computed.
 
-    const auto map_view = map ? map->GetPerspective() : game::Tilemap::Perspective::AxisAligned;
-    const auto& map_view_to_clip    = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
-    const auto& map_world_to_view   = CreateModelViewMatrix(map_view, mCamera.position, mCamera.scale,
-                                                            mCamera.rotation);
-    const auto& scene_view_to_clip  = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
-    const auto& scene_world_to_view = CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale,
-                                                            mCamera.rotation);
-
-    // this matrix will transform coordinates from scene's coordinate space
-    // into map coordinate space. but keep in mind that the scene world coordinate
-    // is a coordinate in a 3D space not on the tile plane.
-    const auto& from_scene_to_map = GetProjectionTransformMatrix(scene_view_to_clip,
-                                                                 scene_world_to_view,
-                                                                 map_view_to_clip,
-                                                                 map_world_to_view);
-    const auto& from_map_to_scene = glm::inverse(from_scene_to_map);
-
     std::vector<DrawPacket> packets;
 
     if (map)
     {
-        // Setup painter to draw in whatever is the map perspective.
-        // This is used to visualize the data layer tiles only.
-        gfx::Painter tile_painter(&device);
-        tile_painter.SetViewMatrix(CreateModelViewMatrix(map_view, mCamera.position, mCamera.scale, mCamera.rotation));
-        tile_painter.SetProjectionMatrix(CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport));
-        tile_painter.SetPixelRatio({1.0f, 1.0f});
-        tile_painter.SetViewport(mSurface.viewport);
-        tile_painter.SetSurfaceSize(mSurface.size);
-
         std::vector<TileBatch> batches;
-        // The scene editor has no UI to control individual map layer visibility right now
-        // so we must rely on the class settings. :-(
-        constexpr auto obey_klass_flags = true;
-        PrepareMapTileBatches(*map, batches, draw_map_render_layers, draw_map_data_layers, obey_klass_flags);
 
-        // Create draw packets out of tile batches
-        for (auto& batch : batches)
-        {
-            if (batch.type == TileBatch::Type::Render)
-            {
-                const auto tile_render_size = ComputeTileRenderSize(from_map_to_scene, batch.tile_size, map_view);
-                const auto tile_render_width_scale = map->GetTileRenderWidthScale();
-                const auto tile_render_height_scale = map->GetTileRenderHeightScale();
-                const auto tile_width_render_units = tile_render_size.x * tile_render_width_scale;
-                const auto tile_height_render_units = tile_render_size.y * tile_render_height_scale;
-
-                auto tiles = std::make_unique<gfx::TileBatch>(std::move(batch.tiles));
-                tiles->SetTileWorldSize(batch.tile_size);
-                tiles->SetTileRenderWidth(tile_width_render_units);
-                tiles->SetTileRenderHeight(tile_height_render_units);
-                tiles->SetTileShape(gfx::TileBatch::TileShape::Automatic);
-                if (map_view == game::Tilemap::Perspective::AxisAligned)
-                    tiles->SetProjection(gfx::TileBatch::Projection::AxisAligned);
-                else if (map_view == game::Tilemap::Perspective::Dimetric)
-                    tiles->SetProjection(gfx::TileBatch::Projection::Dimetric);
-                else BUG("unknown projection");
-
-                DrawPacket packet;
-                packet.source       = DrawPacket::Source::Map;
-                packet.domain       = DrawPacket::Domain::Scene;
-                packet.material     = batch.material;
-                packet.drawable     = std::move(tiles);
-                packet.transform    = from_map_to_scene;
-                packet.map_row      = batch.row;
-                packet.map_col      = batch.col;
-                packet.map_layer    = batch.layer;
-                packet.render_layer = 0;
-                packet.packet_index = 0;
-                packet.pass         = RenderPass::DrawColor;
-                packets.push_back(packet);
-            }
-            else
-            {
-                gfx::TileBatch tiles(std::move(batch.tiles));
-                tiles.SetTileWorldSize(batch.tile_size);
-                tiles.SetTileRenderSize(batch.tile_size);
-                tiles.SetTileShape(gfx::TileBatch::TileShape::Rectangle);
-                tiles.SetProjection(gfx::TileBatch::Projection::AxisAligned);
-                // scheduling the batches are draw packets doesn't work yet.
-                // so painting directly here with the tile painter.
-                tile_painter.Draw(tiles, glm::mat4(1.0f), *batch.material);
-            }
-        }
+        constexpr auto obey_klass_flags   = false;
+        constexpr auto draw_render_layers = true;
+        constexpr auto draw_data_layers   = false;
+        constexpr auto use_tile_batching = true;
+        PrepareMapTileBatches(*map, batches, draw_render_layers, draw_data_layers, obey_klass_flags, use_tile_batching);
+        GenerateMapDrawPackets(*map, batches, packets);
     }
 
     const auto& nodes = scene.CollectNodes();
@@ -732,11 +701,7 @@ void Renderer::DrawScene(const SceneType& scene, const game::Tilemap* map,
             // Compute tile coordinates for each draw packet created by the entity.
             if (map)
             {
-                ComputeTileCoordinates(scene_view_to_clip,
-                                       scene_world_to_view,
-                                       map_view_to_clip,
-                                       map_world_to_view,
-                                       *map, 0, entity_packets);
+                ComputeTileCoordinates(*map, 0, entity_packets);
             }
 
             if (scene_hook)
@@ -1107,6 +1072,85 @@ void Renderer::OffsetPacketLayers(std::vector<DrawPacket>& packets) const
         ASSERT(packet.packet_index >= 0 && packet.render_layer >= 0);
     }
 }
+void Renderer::DrawTilemapPackets(gfx::Device& device,
+                                  const std::vector<DrawPacket>& packets,
+                                  const game::Tilemap& map,TileBatchDrawHook* hook) const
+{
+    // The isometric tile rendering is quite complicated assuming pre-rendered tiles.
+    // Conceptually the tiles are 2D squares in the "tile world space",
+    // which is on the XY plane in a 3D coordinate space. When such a tile is
+    // projected onto the 2D projection plane with dimetric projection the outline
+    // shape that is produced is a rhombus. Finally the shape of the object that
+    // is actually rendered to represent the tile visually in screen space is
+    // either a square or a rectangle depending on the tileset.
+    // The correct rendering position is computed by selecting some point on the
+    // tile or inside the tile (such as one of the corners or the center point)
+    // and projecting it from the tile world to render world and then aligning
+    // a rectangle around this point.
+    //
+    // Another complication is the correct rendering order to solve for the
+    // visibility problem. If the rendering is dimetric the rendering order
+    // must be from left to right, top to bottom in tile grid coordinates
+    // because the rendered tiles are actually overlapping. (This doesn't work
+    // with tile batching based on material index when using multiple materials.
+    // If there's a single material and all tiles inside the batch are sorted
+    // to their correct order then it works as expected)
+    // Random thoughts...
+    // - depth buffering doesn't work out of the box since the vertex depth
+    //   (distance from camera) is useless with orthographic projection.
+    //   Rather a depth value for a tile would need to be fabricated from the
+    //   tile x,y coordinates.
+    //  - OpenGL ES2 doesn't have gl_FragDepth
+    //  - Do a depth pre-pass, render the tile depth to a texture, when doing
+    //   the color pass compute the depth again and compare against the depth
+    //   value in the texture. then discard or write. Would work for alpha cut-outs (?)
+    //   but not for semi-transparent objects(!)
+
+    const auto window_size = glm::vec2{mSurface.viewport.GetWidth(), mSurface.viewport.GetHeight()};
+    const auto logical_viewport_width = mCamera.viewport.GetWidth();
+    const auto logical_viewport_height = mCamera.viewport.GetHeight();
+    const auto& orthographic = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
+
+    gfx::Painter scene_painter(&device);
+    scene_painter.SetProjectionMatrix(orthographic);
+    scene_painter.SetViewMatrix(CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
+    scene_painter.SetViewport(mSurface.viewport);
+    scene_painter.SetSurfaceSize(mSurface.size);
+    scene_painter.SetEditingMode(mEditingMode);
+    scene_painter.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
+
+    // Setup painter to draw in whatever is the map perspective.
+    gfx::Painter tile_painter(&device);
+    tile_painter.SetProjectionMatrix(orthographic);
+    tile_painter.SetViewMatrix(CreateModelViewMatrix(map.GetPerspective(), mCamera.position, mCamera.scale, mCamera.rotation));
+    tile_painter.SetPixelRatio({1.0f, 1.0f});
+    tile_painter.SetViewport(mSurface.viewport);
+    tile_painter.SetSurfaceSize(mSurface.size);
+
+    for (const auto& packet : packets)
+    {
+        if (packet.source != DrawPacket::Source::Map)
+            continue;
+
+        if (hook && !hook->FilterBatch(packet))
+            continue;
+
+        gfx::Painter* painter = nullptr;
+        if (packet.domain == DrawPacket::Domain::Scene)
+            painter = &scene_painter;
+        else if (packet.domain == DrawPacket::Domain::Editor)
+            painter = &tile_painter;
+        else BUG("Unhandled draw packet domain.");
+
+        if (hook)
+            hook->BeginDrawBatch(packet, *painter);
+
+        painter->Draw(*packet.drawable, packet.transform, *packet.material);
+
+        if (hook)
+            hook->EndDrawBatch(packet, *painter);
+    }
+}
 
 void Renderer::DrawEditorPackets(gfx::Device& device, const std::vector<DrawPacket>& packets) const
 {
@@ -1246,7 +1290,8 @@ void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
                                              const game::TilemapLayer& layer,
                                              const game::URect& visible_region,
                                              std::vector<TileBatch>& batches,
-                                             std::uint16_t layer_index)
+                                             std::uint16_t layer_index,
+                                             bool use_batching)
 
 {
     using TileType = typename LayerType::TileType;
@@ -1311,138 +1356,8 @@ void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
             batch.tiles.push_back(tile);
 
             // keep track of the last material used.
-            last_material_index  = material_index;
+            last_material_index  = use_batching ? material_index : LayerTraits::MaxPaletteIndex;
         }
-    }
-}
-
-
-void Renderer::DrawTileBatches(const game::Tilemap& map,
-                               TileBatchDrawHook* hook,
-                               std::vector<TileBatch>& batches,
-                               gfx::Device& device)
-{
-    // The isometric tile rendering is quite complicated assuming pre-rendered tiles.
-    // Conceptually the tiles are 2D squares in the "tile world space",
-    // which is on the XY plane in a 3D coordinate space. When such a tile is
-    // projected onto the 2D projection plane with dimetric projection the outline
-    // shape that is produced is a rhombus. Finally the shape of the object that
-    // is actually rendered to represent the tile visually in screen space is
-    // either a square or a rectangle depending on the tileset.
-    // The correct rendering position is computed by selecting some point on the
-    // tile or inside the tile (such as one of the corners or the center point)
-    // and projecting it from the tile world to render world and then aligning
-    // a rectangle around this point.
-    //
-    // Another complication is the correct rendering order to solve for the
-    // visibility problem. If the rendering is dimetric the rendering order
-    // must be from left to right, top to bottom in tile grid coordinates
-    // because the rendered tiles are actually overlapping. (This doesn't work
-    // with tile batching based on material index when using multiple materials.
-    // If there's a single material and all tiles inside the batch are sorted
-    // to their correct order then it works as expected)
-    // Random thoughts...
-    // - depth buffering doesn't work out of the box since the vertex depth
-    //   (distance from camera) is useless with orthographic projection.
-    //   Rather a depth value for a tile would need to be fabricated from the
-    //   tile x,y coordinates.
-    //  - OpenGL ES2 doesn't have gl_FragDepth
-    //  - Do a depth pre-pass, render the tile depth to a texture, when doing
-    //   the color pass compute the depth again and compare against the depth
-    //   value in the texture. then discard or write. Would work for alpha cut-outs (?)
-    //   but not for semi-transparent objects(!)
-
-    const auto device_viewport_width   = mSurface.viewport.GetWidth();
-    const auto device_viewport_height  = mSurface.viewport.GetHeight();
-    const auto logical_viewport_width  = mCamera.viewport.GetWidth();
-    const auto logical_viewport_height = mCamera.viewport.GetHeight();
-
-    gfx::Painter painter_2D(&device);
-    // this is the device viewport. not the logical game viewport.
-    painter_2D.SetViewport(mSurface.viewport);
-    painter_2D.SetSurfaceSize(mSurface.size);
-    painter_2D.SetProjectionMatrix(CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport));
-    painter_2D.SetViewMatrix(CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
-    painter_2D.SetPixelRatio(glm::vec2{device_viewport_width, device_viewport_height} / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
-
-    const auto map_view = map->GetPerspective();
-    const auto& map_view_to_clip = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
-    const auto& map_world_to_view = CreateModelViewMatrix(map_view, mCamera.position, mCamera.scale, mCamera.rotation);
-
-    const auto& view_to_clip = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
-    const auto& world_to_view = CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation);
-    // This matrix will project a coordinate in tilemap coordinate space into
-    // axis aligned game/scene/entity world. (If map has axis aligned perspective then
-    // this should actually reduce to an identify matrix... something to optimize for)
-    const auto& tile_projection_transform_matrix = GetProjectionTransformMatrix(map_view_to_clip,
-                                                                                map_world_to_view,
-                                                                                view_to_clip,
-                                                                                world_to_view);
-
-    // Setup painter to draw in whatever is the map perspective.
-    gfx::Painter tile_painter(&device);
-    tile_painter.SetViewMatrix(map_world_to_view);
-    tile_painter.SetProjectionMatrix(map_view_to_clip);
-    tile_painter.SetPixelRatio({1.0f, 1.0f});
-    tile_painter.SetViewport(mSurface.viewport);
-    tile_painter.SetSurfaceSize(mSurface.size);
-
-    for (auto& batch : batches)
-    {
-        if (batch.material == nullptr)
-            continue;
-
-        if (hook && !hook->FilterBatch(batch))
-            continue;
-
-        if (batch.type == TileBatch::Type::Render)
-        {
-            const auto tile_render_size = ComputeTileRenderSize(tile_projection_transform_matrix, batch.tile_size,  map_view);
-            const auto tile_render_width_scale  = map->GetTileRenderWidthScale();
-            const auto tile_render_height_scale = map->GetTileRenderHeightScale();
-            const auto tile_width_render_units  = tile_render_size.x * tile_render_width_scale;
-            const auto tile_height_render_units = tile_render_size.y * tile_render_height_scale;
-            batch.render_size = glm::vec2 {tile_width_render_units, tile_height_render_units};
-
-            if (hook)
-                hook->BeginDrawBatch(batch, tile_projection_transform_matrix, painter_2D);
-
-            gfx::TileBatch tiles(batch.tiles);
-            tiles.SetTileWorldSize(batch.tile_size);
-            tiles.SetTileRenderSize(batch.render_size);
-            tiles.SetTileShape(gfx::TileBatch::TileShape::Automatic);
-            if (map_view == game::Tilemap::Perspective::AxisAligned)
-                tiles.SetProjection(gfx::TileBatch::Projection::AxisAligned);
-            else if (map_view == game::Tilemap::Perspective::Dimetric)
-                tiles.SetProjection(gfx::TileBatch::Projection::Dimetric);
-            else BUG("unknown projection");
-
-            painter_2D.Draw(tiles, tile_projection_transform_matrix, *batch.material);
-
-            if (hook)
-                hook->EndDrawBatch(batch, tile_projection_transform_matrix, painter_2D);
-        }
-        else if (batch.type == TileBatch::Type::Data)
-        {
-            batch.render_size = batch.tile_size;
-
-            gfx::TileBatch tiles(batch.tiles);
-            tiles.SetTileWorldSize(batch.tile_size);
-            tiles.SetTileRenderSize(batch.tile_size);
-            tiles.SetTileShape(gfx::TileBatch::TileShape::Rectangle);
-            tiles.SetProjection(gfx::TileBatch::Projection::AxisAligned);
-
-            const auto model = glm::mat4(1.0f);
-
-            if (hook)
-                hook->BeginDrawBatch(batch, model, painter_2D);
-
-            tile_painter.Draw(tiles, model, *batch.material);
-
-            if (hook)
-                hook->EndDrawBatch(batch, model, tile_painter);
-
-        } else BUG("Unhandled tile batch type.");
     }
 }
 
@@ -1451,7 +1366,8 @@ void Renderer::PrepareDataLayerTileBatches(const game::Tilemap& map,
                                            const game::TilemapLayer& layer,
                                            const game::URect& visible_region,
                                            std::vector<TileBatch>& batches,
-                                           std::uint16_t layer_index)
+                                           std::uint16_t layer_index,
+                                           bool use_batching)
 {
     // Data render drawing is not optimized in any way and it doesn't need to be
     // since this is only for the visualization of data layer data during design.
@@ -1511,26 +1427,6 @@ void Renderer::PrepareDataLayerTileBatches(const game::Tilemap& map,
     }
 }
 
-void Renderer::SortTileBatches(std::vector<TileBatch>& batches) const
-{
-    std::sort(batches.begin(), batches.end(), [](const auto& lhs, const auto& rhs) {
-        if (lhs.row < rhs.row)
-            return true;
-        else if (lhs.row == rhs.row)
-        {
-            if (lhs.col < rhs.col)
-                return true;
-            else if (lhs.col == rhs.col)
-                return lhs.layer < rhs.layer;
-        }
-        return false;
-    });
-
-    std::stable_partition(batches.begin(), batches.end(), [](const auto& batch) {
-        return batch.type == TileBatch::Type::Render;
-    });
-}
-
 void Renderer::SortTilePackets(std::vector<DrawPacket>& packets) const
 {
     std::sort(packets.begin(), packets.end(), [](const auto& lhs, const auto& rhs) {
@@ -1563,14 +1459,19 @@ void Renderer::SortTilePackets(std::vector<DrawPacket>& packets) const
     }
 }
 
-void Renderer::ComputeTileCoordinates(const glm::mat4& scene_view_to_clip,
-                                      const glm::mat4& scene_world_to_view,
-                                      const glm::mat4& map_view_to_clip,
-                                      const glm::mat4& map_world_to_view,
-                                      const game::Tilemap& map,
+void Renderer::ComputeTileCoordinates(const game::Tilemap& map,
                                       std::size_t packet_start_index,
                                       std::vector<DrawPacket>& packets) const
 {
+
+    const auto map_view = map.GetPerspective();
+    const auto& map_view_to_clip    = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
+    const auto& map_world_to_view   = CreateModelViewMatrix(map_view, mCamera.position, mCamera.scale,
+                                                            mCamera.rotation);
+    const auto& scene_view_to_clip  = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
+    const auto& scene_world_to_view = CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale,
+                                                            mCamera.rotation);
+
     const unsigned map_width  = map->GetMapWidth(); // tiles
     const unsigned map_height = map->GetMapHeight(); // tiles
     const auto tile_width_units   = map->GetTileWidth();

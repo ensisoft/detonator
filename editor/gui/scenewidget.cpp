@@ -1953,9 +1953,10 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         // by the map klass setting (which are available currently only in the
         // map editor...)
         const bool show_map = GetValue(mUI.chkShowMap);
+        const auto* map = show_map ? mTilemap.get() : nullptr;
 
         mState.renderer.BeginFrame();
-        mState.renderer.Draw(*mState.scene,  mTilemap.get(), *device, &hook, show_map, show_map);
+        mState.renderer.Draw(*mState.scene,  map, *device, &hook);
 
         if (mCurrentTool)
             mCurrentTool->Render(painter, scene_painter);

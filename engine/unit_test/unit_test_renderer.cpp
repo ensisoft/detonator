@@ -959,19 +959,15 @@ void unit_test_axis_aligned_map()
 
     class MapHook : public engine::TileBatchDrawHook {
     public:
-        virtual void BeginDrawBatch(const engine::TileBatch& batch, const glm::mat4& model, gfx::Painter&) override
+        virtual void BeginDrawBatch(const engine::DrawPacket& packet, gfx::Painter&) override
         {
-            batches.push_back(batch);
-            matrices.push_back(model);
+            batches.push_back(packet);
         }
         void Clear()
         {
             batches.clear();
-            matrices.clear();
         }
-
-        std::vector<engine::TileBatch> batches;
-        std::vector<glm::mat4> matrices;
+        std::vector<engine::DrawPacket> batches;
     } hook;
 
     renderer.Draw(*map_instance, *device, &hook, true, false);
@@ -1014,9 +1010,9 @@ void unit_test_axis_aligned_map()
         };
         for (size_t i=0; i<batches.size(); ++i)
         {
-            TEST_REQUIRE(batches[i].row   == expected[i].row);
-            TEST_REQUIRE(batches[i].col   == expected[i].col);
-            TEST_REQUIRE(batches[i].layer == expected[i].layer);
+            TEST_REQUIRE(batches[i].map_row   == expected[i].row);
+            TEST_REQUIRE(batches[i].map_col   == expected[i].col);
+            TEST_REQUIRE(batches[i].map_layer == expected[i].layer);
         }
     }
 
@@ -1029,8 +1025,8 @@ void unit_test_axis_aligned_map()
         renderer.Draw(*map_instance, *device, &hook, true, false);
         for (size_t i=0; i<hook.batches.size(); ++i)
         {
-            const auto& batch = hook.batches[i];
-            TEST_REQUIRE(batch.render_size == glm::vec2(50.0f, 50.0f));
+            const auto* tiles = dynamic_cast<const gfx::TileBatch*>(hook.batches[i].drawable.get());
+            TEST_REQUIRE(tiles->GetTileRenderSize() == glm::vec2(50.0f, 50.0f));
         }
 
         hook.Clear();
@@ -1042,9 +1038,8 @@ void unit_test_axis_aligned_map()
 
         for (size_t i=0; i<hook.batches.size(); ++i)
         {
-            const auto& batch = hook.batches[i];
-            const auto& model = hook.matrices[i];
-            TEST_REQUIRE(batch.render_size == glm::vec2(100.0f, 50.0f));
+            const auto* tiles = dynamic_cast<const gfx::TileBatch*>(hook.batches[i].drawable.get());
+            TEST_REQUIRE(tiles->GetTileRenderSize() == glm::vec2(100.0f, 50.0f));
         }
 
         hook.Clear();
@@ -1054,9 +1049,8 @@ void unit_test_axis_aligned_map()
         renderer.Draw(*map_instance, *device, &hook, true, false);
         for (size_t i=0; i<hook.batches.size(); ++i)
         {
-            const auto& batch = hook.batches[i];
-            const auto& model = hook.matrices[i];
-            TEST_REQUIRE(batch.render_size == glm::vec2(50.0f, 100.0f));
+            const auto* tiles = dynamic_cast<const gfx::TileBatch*>(hook.batches[i].drawable.get());
+            TEST_REQUIRE(tiles->GetTileRenderSize() == glm::vec2(50.0f, 100.0f));
         }
     }
 }

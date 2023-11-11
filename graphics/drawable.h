@@ -1052,6 +1052,10 @@ namespace gfx
         { return mTiles[index]; }
         inline Tile& GetTile(size_t index) noexcept
         { return mTiles[index]; }
+        inline glm::vec3 GetTileWorldSize() const noexcept
+        { return mTileWorldSize; }
+        inline glm::vec2 GetTileRenderSize() const noexcept
+        { return mTileRenderSize; }
 
         // Set the tile width in tile world units.
         inline void SetTileWorldWidth(float width) noexcept

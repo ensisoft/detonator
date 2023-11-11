@@ -2124,20 +2124,31 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
             {
                 auto klass = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Texture);
             }
-            virtual void EndDrawBatch(const engine::TileBatch& batch, const glm::mat4& model, gfx::Painter& painter) override
+            virtual void EndDrawBatch(const engine::DrawPacket& packet, gfx::Painter& painter) override
             {
                 if (!mState.selection.has_value() || !mLayer)
                     return;
 
+                const auto* batch = dynamic_cast<const gfx::TileBatch*>(packet.drawable.get());
+
                 const auto layer_index = mState.map->FindLayerIndex(mLayer);
-                if (batch.layer != layer_index)
+                if (packet.map_layer != layer_index)
                     return;
 
                 const auto perspective = mState.map->GetPerspective();
                 const auto& selection = mState.selection.value();
 
-                for (const auto& tile : batch.tiles)
+                const auto tile_width  = mState.klass->GetTileWidth();
+                const auto tile_height = mState.klass->GetTileHeight();
+                const auto tile_depth  = mState.klass->GetTileDepth();
+                const auto tile_scaler = mLayer->GetTileSizeScaler();
+                const auto layer_tile_width  = tile_width * tile_scaler;
+                const auto layer_tile_height = tile_height * tile_scaler;
+                const auto layer_tile_depth  = tile_depth * tile_scaler;
+
+                for (size_t i=0; i<batch->GetNumTiles(); ++i)
                 {
+                    const auto& tile = batch->GetTile(i);
                     if (tile.pos.x < selection.start_col ||
                         tile.pos.x >= selection.start_col + selection.width)
                         continue;
@@ -2145,18 +2156,30 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                              tile.pos.y >= selection.start_row + selection.height)
                         continue;
 
-                    gfx::TileBatch tiles;
-                    tiles.AddTile(tile);
-                    tiles.SetTileWorldSize(batch.tile_size);
-                    tiles.SetTileRenderSize(batch.render_size);
-                    tiles.SetTileShape(gfx::TileBatch::TileShape::Automatic);
-                    if (perspective == game::Tilemap::Perspective::AxisAligned)
-                        tiles.SetProjection(gfx::TileBatch::Projection::AxisAligned);
-                    else if (perspective == game::Tilemap::Perspective::Dimetric)
-                        tiles.SetProjection(gfx::TileBatch::Projection::Dimetric);
-                    else BUG("unknown projection");
+                    // indicates data layer packet
+                    if (packet.domain == engine::DrawPacket::Domain::Editor)
+                    {
+                        gfx::Transform model;
+                        model.Scale(layer_tile_width, layer_tile_height);
+                        model.MoveTo(layer_tile_width * tile.pos.x, layer_tile_height * tile.pos.y);
+                        painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline), model,
+                                     gfx::CreateMaterialFromColor(gfx::Color::HotPink), 2.0f);
+                    }
+                    else if (packet.domain == engine::DrawPacket::Domain::Scene)
+                    {
+                        gfx::TileBatch tiles;
+                        tiles.AddTile(tile);
+                        tiles.SetTileWorldSize(batch->GetTileWorldSize());
+                        tiles.SetTileRenderSize(batch->GetTileRenderSize());
+                        tiles.SetTileShape(gfx::TileBatch::TileShape::Rectangle);
+                        if (perspective == game::Tilemap::Perspective::AxisAligned)
+                            tiles.SetProjection(gfx::TileBatch::Projection::AxisAligned);
+                        else if (perspective == game::Tilemap::Perspective::Dimetric)
+                            tiles.SetProjection(gfx::TileBatch::Projection::Dimetric);
+                        else BUG("unknown projection");
 
-                    DrawEdges(painter, mPainter, tiles, *batch.material, model, mState.klass->GetId());
+                        DrawEdges(painter, mPainter, tiles, *packet.material, packet.transform, mState.klass->GetId());
+                    }
                 }
             }
         private:
