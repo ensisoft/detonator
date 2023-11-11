@@ -262,7 +262,7 @@ namespace engine
 
     glm::vec2 ComputeTileRenderSize(const glm::mat4& tile_to_render,
                                     const glm::vec2& tile_size,
-                                    GameView perspective);
+                                    game::Tilemap::Perspective perspective);
 
     glm::vec3 GetTileCuboidFactors(game::Tilemap::Perspective perspective);
 

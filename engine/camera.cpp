@@ -349,7 +349,7 @@ glm::vec4 MapFromWindowToWorld(const glm::mat4& view_to_clip,
 
 glm::vec2 ComputeTileRenderSize(const glm::mat4& tile_to_render,
                                 const glm::vec2& tile_size,
-                                GameView perspective)
+                                game::Tilemap::Perspective perspective)
 {
     const auto tile_width_units  = tile_size.x;
     const auto tile_height_units = tile_size.y;
@@ -359,13 +359,13 @@ glm::vec2 ComputeTileRenderSize(const glm::mat4& tile_to_render,
     const auto tile_left_top     = tile_to_render * glm::vec4{0.0f, 0.0f, 0.0f, 1.0f};
     const auto tile_right_bottom = tile_to_render * glm::vec4{tile_width_units, tile_height_units, 0.0f, 1.0f};
 
-    if (perspective == GameView::Dimetric)
+    if (perspective == game::Tilemap::Perspective::Dimetric)
     {
         const auto tile_width_render_units  = glm::length(tile_left_bottom - tile_right_top);
         const auto tile_height_render_units = glm::length(tile_left_top - tile_right_bottom);
         return {tile_width_render_units, tile_height_render_units};
     }
-    else if (perspective == GameView::AxisAligned)
+    else if (perspective == game::Tilemap::Perspective::AxisAligned)
     {
         const auto tile_width_render_units  = glm::length(tile_left_top - tile_right_top);
         const auto tile_height_render_units = glm::length(tile_left_top - tile_left_bottom);
