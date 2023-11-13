@@ -1465,13 +1465,6 @@ void Renderer::ComputeTileCoordinates(const game::Tilemap& map,
 {
 
     const auto map_view = map.GetPerspective();
-    const auto& map_view_to_clip    = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
-    const auto& map_world_to_view   = CreateModelViewMatrix(map_view, mCamera.position, mCamera.scale,
-                                                            mCamera.rotation);
-    const auto& scene_view_to_clip  = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
-    const auto& scene_world_to_view = CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale,
-                                                            mCamera.rotation);
-
     const unsigned map_width  = map->GetMapWidth(); // tiles
     const unsigned map_height = map->GetMapHeight(); // tiles
     const auto tile_width_units   = map->GetTileWidth();
@@ -1483,12 +1476,10 @@ void Renderer::ComputeTileCoordinates(const game::Tilemap& map,
 
         // take a model space coordinate and transform by the packet's model transform
         // into world space in the scene.
-        const auto scene_world_pos = packet.transform * glm::vec4{packet.sort_point, 0.0f, 1.0f}; //glm::vec4{0.5f, 1, 0.0f, 1.0f};
+        const auto scene_world_pos =  packet.transform * glm::vec4{packet.sort_point, 0.0f, 1.0f}; 
+        //DEBUG("Scene pos = %1", scene_world_pos);
         // map the scene world pos to a tilemap plane position.
-        const auto map_plane_pos = MapFromScenePlaneToTilePlane(scene_view_to_clip,
-                                                                scene_world_to_view,
-                                                                map_view_to_clip,
-                                                                map_world_to_view, scene_world_pos);
+        const auto map_plane_pos = MapFromScenePlaneToTilePlane(scene_world_pos, map_view);
         const auto map_plane_pos_xy = glm::vec2{map_plane_pos};
         const uint32_t map_row = math::clamp(0u, map_height-1, (unsigned)(map_plane_pos_xy.y / tile_height_units));
         const uint32_t map_col = math::clamp(0u, map_width-1,  (unsigned)(map_plane_pos_xy.x / tile_width_units));
@@ -1496,6 +1487,8 @@ void Renderer::ComputeTileCoordinates(const game::Tilemap& map,
         packet.map_row   = map_row;
         packet.map_col   = map_col;
         packet.map_layer = std::max(0, packet.render_layer);
+        // DEBUG("map pos = %1", map_plane_pos_xy);
+        // DEBUG("map row = %1, col = %2", map_row, map_col);
     }
 }
 
