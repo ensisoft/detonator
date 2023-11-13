@@ -53,6 +53,7 @@
 #include "engine/renderer.h"
 #include "engine/physics.h"
 #include "engine/ui.h"
+#include "engine/camera.h"
 
 #include "test-shared.h"
 
@@ -969,6 +970,119 @@ private:
     boost::circular_buffer<std::string> mMessageQueue;
 };
 
+class TileCoordinateMappingTest : public TestCase
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        const auto cells = 5;
+        const auto lines = cells -1;
+
+        glm::vec4 world_plane;
+        glm::vec4 tile_plane_from_scene_plane;
+        glm::vec3 scene_plane_from_tile_plane;
+
+        // map from window to scene / (world) plane
+        {
+            const auto& projection =engine::CreateProjectionMatrix(engine::Projection::Orthographic,
+                                                                   glm::vec2{1024.0, 768.0f});
+            const auto& modelview = engine::CreateModelViewMatrix(engine::GameView::AxisAligned,
+                                                                  glm::vec2{0.0f, 0.0f},
+                                                                  glm::vec2{1.0f, 1.0f}, 0.0f);
+            gfx::Painter scene(painter);
+            scene.SetViewMatrix(modelview);
+            scene.SetProjectionMatrix(projection);
+
+            gfx::Transform model;
+            model.Resize(500.0f, 500.0f);
+            scene.Draw(gfx::Grid(lines, lines, true), model, gfx::CreateMaterialFromColor(gfx::Color::DarkGreen));
+
+            model.Translate(0.0f, -500.0f);
+            scene.Draw(gfx::Grid(lines, lines, true), model, gfx::CreateMaterialFromColor(gfx::Color::DarkGreen));
+
+            model.Translate(-500.0f, 0.0f);
+            scene.Draw(gfx::Grid(lines, lines, true), model, gfx::CreateMaterialFromColor(gfx::Color::DarkGreen));
+
+            model.Translate(0.0f, 500.0f);
+            scene.Draw(gfx::Grid(lines, lines, true), model, gfx::CreateMaterialFromColor(gfx::Color::DarkGreen));
+
+            world_plane = engine::MapFromWindowToWorldPlane(projection, modelview, mMickey,
+                                                 glm::vec2{ 1024.0f, 768.0f });
+        }
+
+        // then map from scene (world) plane to tile plane
+        // and then map from tile plane back to scene plane
+        {
+            gfx::Painter tile(painter);
+            tile.SetProjectionMatrix(engine::CreateProjectionMatrix(engine::Projection::Orthographic,
+                                                                    glm::vec2{1024.0, 768.0f}));
+            tile.SetViewMatrix(engine::CreateModelViewMatrix(mPlane,
+                                                              glm::vec2{0.0f, 0.0f},
+                                                              glm::vec2{1.0f, 1.0f}, 0.0f));
+            gfx::Transform model;
+            model.Resize(500.0f, 500.0f);
+            tile.Draw(gfx::Grid(lines, lines, true), model, gfx::CreateMaterialFromColor(gfx::Color::DarkGray));
+
+            model.Translate(0.0f, -500.0f);
+            tile.Draw(gfx::Grid(lines, lines, true), model, gfx::CreateMaterialFromColor(gfx::Color::DarkGray));
+
+            model.Translate(-500.0f, 0.0f);
+            tile.Draw(gfx::Grid(lines, lines, true), model, gfx::CreateMaterialFromColor(gfx::Color::DarkGray));
+
+            model.Translate(0.0f, 500.0f);
+            tile.Draw(gfx::Grid(lines, lines, true), model, gfx::CreateMaterialFromColor(gfx::Color::DarkGray));
+
+            tile_plane_from_scene_plane = engine::MapFromScenePlaneToTilePlane(world_plane, mPlane);
+            scene_plane_from_tile_plane = engine::MapFromTilePlaneToScenePlane(tile_plane_from_scene_plane, mPlane);
+        }
+
+        const auto x = mMickey.x;
+        const auto y = mMickey.y;
+        gfx::DebugDrawLine(painter, gfx::FPoint(x, 0.0f), gfx::FPoint(x, 768.0f), gfx::Color::HotPink);
+        gfx::DebugDrawLine(painter, gfx::FPoint(0, y), gfx::FPoint(1024.0, y), gfx::Color::HotPink);
+
+        gfx::FRect rect(20.0f, 20.0f, 700.0f, 30.0f);
+        gfx::DrawTextRect(painter,
+            base::FormatString("%1", world_plane),
+            "assets/fonts/anonymous.ttf", 18, rect,
+            gfx::Color::Green,
+            gfx::TextAlign::AlignLeft | gfx::AlignTop);
+
+        rect.Translate(0.0f, 30.0f);
+        gfx::DrawTextRect(painter,
+            base::FormatString("%1", tile_plane_from_scene_plane),
+            "assets/fonts/anonymous.ttf", 18, rect,
+            gfx::Color::Gray,
+            gfx::TextAlign::AlignLeft | gfx::AlignTop);
+
+        rect.Translate(0.0f, 30.0f);
+        gfx::DrawTextRect(painter,
+            base::FormatString("%1", scene_plane_from_tile_plane),
+            "assets/fonts/anonymous.ttf", 18, rect,
+            gfx::Color::Red,
+            gfx::TextAlign::AlignLeft | gfx::AlignTop);
+
+    }
+    virtual void OnMouseMove(const wdk::WindowEventMouseMove& mickey) override
+    {
+        mMickey = glm::vec2{ mickey.window_x, mickey.window_y };
+    }
+
+    virtual void OnKeydown(const wdk::WindowEventKeyDown& key) override
+    {
+        if (key.symbol == wdk::Keysym::KeyA)
+            mPlane = engine::GameView::AxisAligned;
+        else if (key.symbol == wdk::Keysym::KeyD)
+            mPlane = engine::GameView::Dimetric;
+    }
+
+    virtual std::string GetName() const override
+    { return "TileCoordinateMappingTest"; }
+private:
+    glm::vec2 mMickey = {0.0f, 0.0f};
+    engine::GameView mPlane = engine::GameView::Dimetric;
+};
+
 
 class MyApp : public engine::Engine, public wdk::WindowListener
 {
@@ -1001,6 +1115,7 @@ public:
         mTestList.emplace_back(new EntityTest);
         mTestList.emplace_back(new SceneTest);
         mTestList.emplace_back(new UITest);
+        mTestList.emplace_back(new TileCoordinateMappingTest);
         mTestList[mTestIndex]->Start(&mClassLib);
         INFO("Test case: '%1'", mTestList[mTestIndex]->GetName());
     }
@@ -1019,6 +1134,7 @@ public:
     {
         mDevice->BeginFrame();
         mDevice->ClearColor(gfx::Color4f(0.2, 0.3, 0.4, 1.0f));
+        mDevice->ClearDepth(1.0f);
         mPainter->SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
         mPainter->SetProjectionMatrix(gfx::MakeOrthographicProjection(mSurfaceWidth , mSurfaceHeight));
         mPainter->ResetViewMatrix();
@@ -1079,6 +1195,10 @@ public:
             TakeScreenshot();
         else if (key.symbol == wdk::Keysym::Space)
             mRequests.ToggleFullScreen();
+        else if (key.symbol == wdk::Keysym::F1)
+            mRequests.ShowMouseCursor(false);
+        else if (key.symbol == wdk::Keysym::F2)
+            mRequests.ShowMouseCursor(true);
 
         if (mTestIndex != current_test_index)
         {
