@@ -336,6 +336,8 @@ namespace game
         using MaterialParamMap = std::unordered_map<std::string, MaterialParam>;
         using RenderPass  = game::RenderPass;
         using RenderStyle = game::RenderStyle;
+        using RenderView = game::RenderView;
+        using RenderProjection = game::RenderProjection;
         enum class Flags {
             // Whether the item is currently visible or not.
             VisibleInGame,
@@ -381,6 +383,10 @@ namespace game
         { mRenderPass = pass; }
         void SetRenderStyle(RenderStyle style) noexcept
         { mRenderStyle = style; }
+        void SetRenderView(RenderView view) noexcept
+        { mRenderView = view;  }
+        void SetRenderProjection(RenderProjection projection) noexcept
+        { mRenderProjection = projection; }
         void SetTimeScale(float scale) noexcept
         { mTimeScale = scale; }
         void SetMaterialParam(const std::string& name, const MaterialParam& value)
@@ -407,6 +413,10 @@ namespace game
         { return mRenderPass; }
         RenderStyle GetRenderStyle() const noexcept
         { return mRenderStyle; }
+        RenderView GetRenderView() const noexcept
+        { return mRenderView; }
+        RenderProjection GetRenderProjection() const noexcept
+        { return mRenderProjection; }
         base::bitflag<Flags> GetFlags() const noexcept
         { return mBitFlags; }
         MaterialParamMap GetMaterialParams() noexcept
@@ -469,6 +479,8 @@ namespace game
         float mTimeScale = 1.0f;
         RenderPass mRenderPass = RenderPass::DrawColor;
         RenderStyle  mRenderStyle = RenderStyle::Solid;
+        RenderView mRenderView = RenderView::AxisAligned;
+        RenderProjection mRenderProjection = RenderProjection::Orthographic;
         MaterialParamMap mMaterialParams;
     };
 
@@ -612,6 +624,8 @@ namespace game
         using Flags            = DrawableItemClass::Flags;
         using RenderPass       = DrawableItemClass::RenderPass;
         using RenderStyle      = DrawableItemClass::RenderStyle;
+        using RenderView       = DrawableItemClass::RenderView;
+        using RenderProjection = DrawableItemClass::RenderProjection;
 
         using CommandArg = std::variant<float, int, std::string>;
         struct Command {
@@ -646,6 +660,10 @@ namespace game
         { return mClass->GetRenderPass(); }
         RenderStyle GetRenderStyle() const noexcept
         { return mClass->GetRenderStyle(); }
+        RenderView GetRenderView() const noexcept
+        { return mClass->GetRenderView(); }
+        RenderProjection GetRenderProjection() const noexcept
+        { return mClass->GetRenderProjection(); }
         bool TestFlag(Flags flag) const noexcept
         { return mInstanceFlags.test(flag); }
         bool IsVisible() const noexcept

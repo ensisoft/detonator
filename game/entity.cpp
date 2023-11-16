@@ -188,6 +188,8 @@ std::size_t DrawableItemClass::GetHash() const
     hash = base::hash_combine(hash, mLineWidth);
     hash = base::hash_combine(hash, mRenderPass);
     hash = base::hash_combine(hash, mRenderStyle);
+    hash = base::hash_combine(hash, mRenderView);
+    hash = base::hash_combine(hash, mRenderProjection);
     hash = base::hash_combine(hash, mTimeScale);
 
     // remember the *unordered* nature of unordered_map
@@ -213,6 +215,8 @@ void DrawableItemClass::IntoJson(data::Writer& data) const
     data.Write("linewidth",   mLineWidth);
     data.Write("renderpass",  mRenderPass);
     data.Write("renderstyle", mRenderStyle);
+    data.Write("renderview",  mRenderView);
+    data.Write("renderproj",  mRenderProjection);
     data.Write("timescale",   mTimeScale);
 
     // use an ordered set for persisting the data to make sure
@@ -254,6 +258,8 @@ bool DrawableItemClass::FromJson(const data::Reader& data)
     ok &= data.Read("linewidth",   &mLineWidth);
     ok &= data.Read("renderpass",  &mRenderPass);
     ok &= data.Read("renderstyle", &mRenderStyle);
+    ok &= data.Read("renderview",  &mRenderView);
+    ok &= data.Read("renderproj",  &mRenderProjection);
     ok &= data.Read("timescale",   &mTimeScale);
 
     for (unsigned i=0; i<data.GetNumChunks("material_params"); ++i)

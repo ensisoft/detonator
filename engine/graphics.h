@@ -53,6 +53,7 @@ namespace engine
     struct DrawPacket {
         using Culling = gfx::Painter::Culling;
         using RenderPass = game::RenderPass;
+        using Projection  = game::RenderProjection;
 
         enum class Flags {
             PP_Bloom
@@ -63,7 +64,9 @@ namespace engine
         enum class Source {
             Map, Scene
         };
-        RenderPass  pass = RenderPass::DrawColor;
+
+        RenderPass pass = RenderPass::DrawColor;
+        Projection projection = Projection::Orthographic;
 
         Culling culling = Culling::Back;
 

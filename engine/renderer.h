@@ -36,6 +36,7 @@
 #include "game/entity.h"
 #include "game/scene.h"
 #include "game/tree.h"
+#include "engine/camera.h"
 #include "engine/graphics.h"
 #include "engine/types.h"
 

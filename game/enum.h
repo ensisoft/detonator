@@ -40,4 +40,12 @@ namespace game {
         Points
     };
 
+    enum class RenderView {
+        AxisAligned, Dimetric
+    };
+
+    enum class RenderProjection {
+        Orthographic, Perspective
+    };
+
 } // namespace

@@ -269,10 +269,10 @@ void orthographic_projection_center()
         glm::vec4 point;
     };
     Point points[] = {
-            {"Top left at near plane", {-500.0f, 500.0f,   -27.0f, 1.0f}},
-            {"Top left at far plane",  {-500.0f, 500.0f, -100.0f,  1.0f}},
-            {"Center at near plane",   {   0.0f,   0.0f,   -27.0f, 1.0f}},
-            {"Center at far plane",    {   0.0f,   0.0f, -100.0f,  1.0f}}
+        {"Top left at near plane", {-500.0f, 500.0f,   -27.0f, 1.0f}},
+        {"Top left at far plane",  {-500.0f, 500.0f, -100.0f,  1.0f}},
+        {"Center at near plane",   {   0.0f,   0.0f,   -27.0f, 1.0f}},
+        {"Center at far plane",    {   0.0f,   0.0f, -100.0f,  1.0f}}
     };
     for (const auto& p : points)
     {
@@ -283,6 +283,54 @@ void orthographic_projection_center()
         std::cout << "NDC:   " << ToString(p_ / p_.w)  << std::endl;
         std::cout << std::endl;
     }
+}
+
+void match_orthographic_and_perspective()
+{
+    std::cout << "Ortho + Perspective matching.\n";
+    std::cout << "=======================\n";
+
+    const auto left   = -500.0f;
+    const auto top    =  500.0f;
+    const auto right  =  500.0f;
+    const auto bottom = -500.0f;
+
+    //
+    // -500,500
+    //       _________
+    //      |         |
+    //      |    +    |
+    //      |_________|,
+    //                 500,-500
+    //
+
+    const auto near = 500.0f;
+    const auto far  = 1000.0f;
+
+    const auto& ortho = glm::ortho(left, right, bottom, top, near, far);
+
+    const auto aspect = 1.0f;
+    const float dist = 500.0f / tan(glm::radians(22.5f));
+    std::cout << "\ndist:" << dist << "\n";
+
+    const auto& proj = glm::perspective(glm::radians(45.0f), aspect, dist, far);
+
+    const glm::vec4 world = glm::vec4{500.0f, 500.0f, -dist, 1.0f};
+    std::cout << "World: "  << ToString(world) << "\n";
+
+    {
+        const auto p = ortho * world;
+        //std::cout << "Ortho Clip: " << ToString(p) << "\n";
+        //std::cout << "Ortho NDC: "  << ToString(p / p.w) << "\n";
+    }
+
+    {
+        const auto p = proj * world;
+        std::cout << "Proj Clip: " << ToString(p) << "\n";
+        std::cout << "Proj NDC: " << ToString(p / p.w) << "\n";
+        std::cout << std::endl;
+    }
+
 }
 
 int main()
@@ -304,5 +352,7 @@ int main()
     perspective_projection();
     orthographic_projection_top_left();
     orthographic_projection_center();
+
+    match_orthographic_and_perspective();
     return 0;
 }

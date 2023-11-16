@@ -128,13 +128,17 @@ namespace engine
         Perspective
     };
 
-    glm::mat4 CreateProjectionMatrix(Projection projection, const glm::vec2& surface_size);
     glm::mat4 CreateProjectionMatrix(Projection projection, const game::FRect& viewport);
+    glm::mat4 CreateProjectionMatrix(Projection projection, const glm::vec2& surface_size);
     glm::mat4 CreateProjectionMatrix(Projection projection, float surface_width, float surface_height);
 
     // Create model transformation matrix for a certain type of game perspective.
     // This matrix adds a perspective specific rotation to the model transformation.
     glm::mat4 CreateModelMatrix(GameView view);
+
+    glm::mat4 CreateViewMatrix(const glm::vec2& camera_pos,
+                               const glm::vec2& camera_scale,
+                               float camera_rotation = 0.0f); // rotation around the Z axis in degrees
 
     // Create view transformation matrix for a certain type of game perspective
     // assuming a world translation and world scale. In other words this matrix

@@ -83,30 +83,89 @@ namespace {
 namespace engine
 {
 
-    // glm::ortho, left, right, bottom, top, near, far
-
-glm::mat4 CreateProjectionMatrix(Projection projection, const glm::vec2& surface_size)
-{
-    const auto half_width  = surface_size.x*0.5f;
-    const auto half_height = surface_size.y*0.5f;
-    return glm::ortho(-half_width, half_width, -half_height, half_height, -10000.0f, 10000.0f);
-}
-
 glm::mat4 CreateProjectionMatrix(Projection projection, const game::FRect& viewport)
 {
-    // the incoming game viewport is defined assuming the axis-aligned (Y points downwards)
-    // projection matrix.
+    constexpr auto zFar  = 10000.0f;
+    constexpr auto zNear = 1.0f;
+    constexpr auto Fov   = 45.0f;
+    // glm::ortho, left, right, bottom, top, near, far
+
     const auto width  = viewport.GetWidth();
     const auto height = viewport.GetHeight();
     const auto xpos   = viewport.GetX();
     const auto ypos   = viewport.GetY();
-    const auto left   = xpos;
-    const auto right  = xpos + width;
-    const auto top    = ypos;
-    const auto bottom = ypos + height;
 
-    return glm::ortho(left, right, -bottom, -top, -10000.0f, 10000.0f);
+    // the incoming game viewport is defined with positive Y growing down.
+    //
+    // -x,-y
+    //    ---------
+    //    |       |
+    //    |       |
+    //    |       |
+    //    ---------
+    //            -x+w, -y+h
+    //
+    // we're flipping that here in order to have the axis the same
+    // way for both orthographic and perspective projection, which
+    // simplifies the camera movement.
+
+    const auto left = xpos;
+    const auto right = xpos + width;
+    const auto top = ypos;
+    const auto bottom = ypos + height;
+    auto ortho = glm::ortho(left, right, -bottom, -top, -10000.0f, 10000.0f);
+
+    if (projection == Projection::Orthographic)
+    {
+        return ortho;
+    }
+    else if (projection == Projection::Perspective)
+    {
+        // with perspective projection we want to map the drawable shape to the screen so
+        // that the center of the shape aligns at the same screen coordinate in both
+        // orthographic and perspective projections. The way we can achieve this (without
+        // changing the objects X,Y position and only manipulating the the Z, i.e. the
+        // distance from the camera) is by setting up the projection transformation so
+        // that the near plane half height equals the half height of the orthographic
+        // projection plane and then by translating the object to a depth value which maps
+        // it to the near plane.
+        //
+        // tan(f)     = h / x
+        // tan(f) * x = h
+        //          x = h / tan(f)
+        //
+        // Remember that the FOV (Field of View) angle includes above and below the "horizon"
+        // i.e. above and below y=0.0f.
+        //
+        // This all works except that placing objects at the near plane has a problem with
+        // clipping since the front part of the object might get clipped.
+        // So this fix this we transform the vertices from clipping space back into world
+        // space and add another translate and then perform the clip space mapping again.
+        // Using an orthographic transformation avoids issues with perspective transformation
+        // since we just want to offset on the Z axis after all perspective transformation
+        // has already been done!
+
+        const auto aspect = width / height;
+        const auto near = (height*0.5f) / std::tan(glm::radians(Fov*0.5f));
+        return ortho *
+                 glm::translate(glm::mat4(1.0f), glm::vec3 { 0.0f, 0.0f, -10000} ) *
+                   glm::inverse(ortho) *
+                     glm::perspective(glm::radians(Fov), aspect, near, zFar) *
+                       glm::translate(glm::mat4(1.0f), glm::vec3 { 0.0f, 0.0f, -near });
+    }
+    else BUG("Missing projection matrix setup.");
+    return glm::mat4(1.0f);
 }
+
+glm::mat4 CreateProjectionMatrix(Projection projection, const glm::vec2& surface_size)
+{
+    const auto xpos = surface_size.x / -2.0f;
+    const auto ypos = surface_size.y / -2.0f;
+    const auto width = surface_size.x;
+    const auto height = surface_size.y;
+    return CreateProjectionMatrix(projection, game::FRect(xpos, ypos, width, height));
+}
+
 glm::mat4 CreateProjectionMatrix(Projection projection, float surface_width, float surface_height)
 {
     return CreateProjectionMatrix(projection, glm::vec2{surface_width, surface_height});
@@ -130,6 +189,25 @@ glm::mat4 CreateModelMatrix(GameView view)
     return glm::mat4(1.0f);
 }
 
+glm::mat4 CreateViewMatrix(const glm::vec2& camera_pos,
+                           const glm::vec2& camera_scale,
+                           float camera_rotation)
+{
+    // remember the camera generates a "model to view" which is conceptually
+    // the inverse of camera's "logical" transform.
+    // I.e. if the camera is moving to the left it's the same as if the camera
+    // stays still and the world moves to the right
+
+    glm::mat4 model_to_view(1.0f);
+    model_to_view = glm::scale(model_to_view, glm::vec3{camera_scale.x, camera_scale.y, 1.0f});
+
+    // Y is here flipped because in the renderer we have Y going up and -Y down
+    // but in the logical game world Y grows down.
+    model_to_view = glm::translate(model_to_view, glm::vec3{-camera_pos.x, camera_pos.y, 0.0f});
+    model_to_view = glm::rotate(model_to_view, glm::radians(-camera_rotation), glm::vec3{0.0f, 0.0f, 1.0f});
+    return model_to_view;
+}
+
 glm::mat4 CreateModelViewMatrix(GameView game_view,
                                 const glm::vec2& camera_pos,
                                 const glm::vec2& camera_scale,
@@ -143,13 +221,8 @@ glm::mat4 CreateModelViewMatrix(GameView game_view,
     // will be the same as mat = foo * bar. This means that when this matrix
     // is used to transform the vertices the bar operation will take place
     // first, then followed by foo.
-
-    glm::mat4 view(1.0f);
-    view = glm::scale(view, glm::vec3{camera_scale.x, camera_scale.y, 1.0f});
-    view = glm::translate(view, glm::vec3{-camera_pos.x, camera_pos.y, 0.0f});
-    view = glm::rotate(view, glm::radians(-camera_rotation), glm::vec3{0.0f, 0.0f, 1.0f});
-
-    return view * CreateModelMatrix(game_view);
+    return CreateViewMatrix(camera_pos, camera_scale, camera_rotation) *
+            CreateModelMatrix(game_view);
 }
 
 glm::mat4 CreateModelViewMatrix(GameView game_view,
