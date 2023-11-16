@@ -1480,15 +1480,16 @@ void Renderer::ComputeTileCoordinates(const game::Tilemap& map,
         //DEBUG("Scene pos = %1", scene_world_pos);
         // map the scene world pos to a tilemap plane position.
         const auto map_plane_pos = MapFromScenePlaneToTilePlane(scene_world_pos, map_view);
-        const auto map_plane_pos_xy = glm::vec2{map_plane_pos};
+        const auto map_plane_pos_xy = glm::vec2{math::clamp(0.0f, map_width * tile_width_units, map_plane_pos.x),
+                                                math::clamp(0.0f, map_height * tile_height_units, map_plane_pos.y)};
         const uint32_t map_row = math::clamp(0u, map_height-1, (unsigned)(map_plane_pos_xy.y / tile_height_units));
         const uint32_t map_col = math::clamp(0u, map_width-1,  (unsigned)(map_plane_pos_xy.x / tile_width_units));
         ASSERT(map_row < map_height && map_col < map_width);
         packet.map_row   = map_row;
         packet.map_col   = map_col;
         packet.map_layer = std::max(0, packet.render_layer);
-        // DEBUG("map pos = %1", map_plane_pos_xy);
-        // DEBUG("map row = %1, col = %2", map_row, map_col);
+        //DEBUG("map pos = %1", map_plane_pos);
+        //DEBUG("map row = %1, col = %2", map_row, map_col);
     }
 }
 
