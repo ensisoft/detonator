@@ -214,6 +214,7 @@ public:
     {
         mDevice->BeginFrame();
         mDevice->ClearColor(mClearColor);
+        mDevice->ClearDepth(1.0f);
         // rendering surface dimensions.
         const float surf_width  = (float)mSurfaceWidth;
         const float surf_height = (float)mSurfaceHeight;
