@@ -2355,8 +2355,28 @@ bool ParticleEngineClass::UpdateParticle(const Environment& env, InstanceState& 
         p.position += (p.direction * dt);
     else if (mParams.motion == Motion::Projectile)
     {
+        glm::vec2 gravity = mParams.gravity;
+
+        // transform the gravity vector associated with the particle engine
+        // to world space. For example when the rendering system uses dimetric
+        // rendering for some shape (we're looking at it at on a xy plane at
+        // a certain angle) the gravity vector needs to be transformed so that
+        // the local gravity vector makes sense in this dimetric world.
+        if (env.world_matrix && mParams.coordinate_space == CoordinateSpace::Global)
+        {
+            if (env.editing_mode || !state.cached_world_gravity.has_value())
+            {
+                const auto local_gravity_dir = glm::normalize(mParams.gravity);
+                const auto world_gravity_dir = glm::normalize(*env.world_matrix * glm::vec4 { local_gravity_dir, 0.0f, 0.0f });
+                const auto world_gravity = glm::vec2 { world_gravity_dir.x * std::abs(mParams.gravity.x),
+                                                       world_gravity_dir.y * std::abs(mParams.gravity.y) };
+                state.cached_world_gravity = world_gravity;
+            }
+            gravity = state.cached_world_gravity.value();
+        }
+
         p.position += (p.direction * dt);
-        p.direction += (dt * mParams.gravity);
+        p.direction += (dt * gravity);
     }
 
     const auto& p1 = p.position;

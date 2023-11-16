@@ -94,6 +94,9 @@ namespace gfx
              // the current model matrix that will be used to transform the
              // vertices from the local space to the world space.
              const glm::mat4* model_matrix = nullptr;
+             // the current world matrix that will be used to transform
+             // vectors, such as gravity vector, to world space.
+             const glm::mat4* world_matrix = nullptr;
          };
 
         virtual ~DrawableClass() = default;
@@ -903,6 +906,9 @@ namespace gfx
 
         // State of any instance of ParticleEngineInstance.
         struct InstanceState {
+            // cached world gravity vector for this particle system instance.
+            // exists only to avoid recomputing the gravity on every update.
+            std::optional<glm::vec2> cached_world_gravity;
             // the simulation particles.
             std::vector<Particle> particles;
             // delay until the particles are first initially emitted.
