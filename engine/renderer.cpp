@@ -264,6 +264,7 @@ void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
             DrawPacket packet;
             packet.source       = DrawPacket::Source::Map;
             packet.domain       = DrawPacket::Domain::Scene;
+            packet.projection   = DrawPacket::Projection::Orthographic;
             packet.material     = batch.material;
             packet.drawable     = std::move(tiles);
             packet.transform    = from_map_to_scene;
@@ -286,6 +287,7 @@ void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
             DrawPacket packet;
             packet.source       = DrawPacket::Source::Map;
             packet.domain       = DrawPacket::Domain::Editor;
+            packet.projection   = DrawPacket::Projection::Orthographic;
             packet.material     = batch.material;
             packet.drawable     = std::move(tiles);
             packet.transform    = glm::mat4(1.0f);
@@ -524,8 +526,6 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
     transform.RotateAroundZ(paint_node.world_rotation);
     transform.Translate(paint_node.world_pos);
 
-    transform.Push(node.GetModelTransform());
-
     if (item && paint_node.item_material)
     {
         const auto time_scale = item->GetTimeScale();
@@ -549,21 +549,49 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
     }
     if (item && paint_node.item_drawable)
     {
-        if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
+        const auto horizontal_flip = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
+        const auto vertical_flip   = item->TestFlag(DrawableItemType::Flags::FlipVertically);
+        const auto& shape = paint_node.item_drawable;
+        const auto view = item->GetRenderView();
+        const auto size = node.GetSize();
+
+        if (view == game::RenderView::Dimetric)
+        {
+            transform.Push(CreateModelMatrix(GameView::AxisAligned));
+            transform.Push(CreateModelMatrix(GameView::Dimetric));
+        }
+
+        {
+            // model transform.
+            transform.Push();
+                transform.Scale(size);
+                transform.Translate(-size.x*0.5f, -size.y*0.5f);
+        }
+
+        if (horizontal_flip)
         {
             transform.Push();
-            transform.Scale(-1.0f, 1.0f);
-            transform.Translate(1.0f, 0.0f);
+                transform.Scale(-1.0f, 1.0f);
+                transform.Translate(1.0f, 0.0f);
         }
-        if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+        if (vertical_flip)
         {
             transform.Push();
-            transform.Scale(1.0f, -1.0f);
-            transform.Translate(0.0f, 1.0f);
+                transform.Scale(1.0f, -1.0f);
+                transform.Translate(0.0f, 1.0f);
         }
+
+        glm::mat4 world(1.0f);
+        if (view == game::RenderView::Dimetric)
+        {
+            world =  CreateModelMatrix(GameView::Dimetric) *
+                     CreateModelMatrix(GameView::AxisAligned);
+        }
+
         const auto& model = transform.GetAsMatrix();
         gfx::Drawable::Environment env;
         env.model_matrix = &model;
+        env.world_matrix = &world;
         // todo: other env matrices?
 
         const auto time_scale = item->GetTimeScale();
@@ -585,10 +613,20 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
             item->ClearCommands();
         }
 
-        if (item->TestFlag(DrawableItemType::Flags::FlipHorizontally))
+        if (vertical_flip)
             transform.Pop();
-        if (item->TestFlag(DrawableItemType::Flags::FlipVertically))
+        if (horizontal_flip)
             transform.Pop();
+
+        // pop model transform.
+        transform.Pop();
+
+        if (view == game::RenderView::Dimetric)
+        {
+            // pop view based model transform
+            transform.Pop();
+            transform.Pop();
+        }
     }
 
     if (text && paint_node.text_material)
@@ -597,12 +635,18 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
     }
     if (text && paint_node.text_drawable)
     {
+        // push the actual model transform
+        transform.Push(node.GetModelTransform());
+
         const auto& model = transform.GetAsMatrix();
         gfx::Drawable::Environment env;
         env.model_matrix = &model;
         // todo: other env matrices?
 
         paint_node.text_drawable->Update(env, dt);
+
+        // pop model transform
+        transform.Pop();
     }
 }
 
@@ -963,8 +1007,6 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
     transform.RotateAroundZ(paint_node.world_rotation);
     transform.Translate(paint_node.world_pos);
 
-    transform.Push(node.GetModelTransform());
-
     glm::vec2 sort_point = {0.5f, 1.0f};
     if (const auto* map = node.GetMapNode())
         sort_point = map->GetSortPoint();
@@ -983,6 +1025,9 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
         }
         if (text->TestFlag(TextItemClass::Flags::VisibleInGame) && entity_visible && visible_now)
         {
+            // push the actual model transform
+            transform.Push(node.GetModelTransform());
+
             DrawPacket packet;
             packet.flags.set(DrawPacket::Flags::PP_Bloom, text->TestFlag(TextItemClass::Flags::PP_EnableBloom));
             packet.source       = DrawPacket::Source::Scene;
@@ -996,6 +1041,9 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
             packet.render_layer = entity.GetLayer();
             if (!hook || hook->InspectPacket(&node, packet))
                 packets.push_back(std::move(packet));
+
+            // pop model transform
+            transform.Pop();
         }
     }
 
@@ -1003,18 +1051,35 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
     {
         const auto horizontal_flip = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
         const auto vertical_flip   = item->TestFlag(DrawableItemType::Flags::FlipVertically);
+        const auto& shape = paint_node.item_drawable;
+        const auto size = node.GetSize();
+        const auto view = item->GetRenderView();
 
+        if (view == game::RenderView::Dimetric)
+        {
+            transform.Push(CreateModelMatrix(GameView::AxisAligned));
+            transform.Push(CreateModelMatrix(GameView::Dimetric));
+        }
+
+        {
+            // model transform.
+            transform.Push();
+                transform.Scale(size);
+                transform.Translate(-size.x*0.5f, -size.y*0.5f);
+        }
+
+        // in model space now
         if (horizontal_flip)
         {
             transform.Push();
-            transform.Scale(-1.0f , 1.0f);
-            transform.Translate(1.0f , 0.0f);
+                transform.Scale(-1.0f , 1.0f);
+                transform.Translate(1.0f , 0.0f);
         }
         if (vertical_flip)
         {
             transform.Push();
-            transform.Scale(1.0f, -1.0f);
-            transform.Translate(0.0f, 1.0f);
+                transform.Scale(1.0f, -1.0f);
+                transform.Translate(0.0f, 1.0f);
         }
         // if it doesn't render then no draw packets are generated
         if (item->TestFlag(DrawableItemType::Flags::VisibleInGame) && entity_visible)
@@ -1028,6 +1093,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
             packet.transform    = transform;
             packet.sort_point   = sort_point;
             packet.pass         = item->GetRenderPass();
+            packet.projection   = item->GetRenderProjection();
             packet.packet_index = item->GetLayer();
             packet.render_layer = entity.GetLayer();
             packet.line_width   = item->GetLineWidth();
@@ -1037,13 +1103,21 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
             if (!hook || hook->InspectPacket(&node , packet))
                 packets.push_back(std::move(packet));
         }
-        if (horizontal_flip)
-            transform.Pop();
         if (vertical_flip)
             transform.Pop();
-    }
+        if (horizontal_flip)
+            transform.Pop();
 
-    transform.Pop();
+        // pop model transform
+        transform.Pop();
+
+        if (view == game::RenderView::Dimetric)
+        {
+            // pop view based model transform
+            transform.Pop();
+            transform.Pop();
+        }
+    }
 
     // append any extra packets if needed.
     if (hook)
@@ -1158,18 +1232,18 @@ void Renderer::DrawEditorPackets(gfx::Device& device, const std::vector<DrawPack
     const auto logical_viewport_width = mCamera.viewport.GetWidth();
     const auto logical_viewport_height = mCamera.viewport.GetHeight();
 
-    gfx::Painter painter_2D(&device);
-    painter_2D.SetProjectionMatrix(CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport));
-    painter_2D.SetViewMatrix(CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
-    painter_2D.SetViewport(mSurface.viewport);
-    painter_2D.SetSurfaceSize(mSurface.size);
-    painter_2D.SetEditingMode(mEditingMode);
-    painter_2D.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
+    gfx::Painter painter(&device);
+    painter.SetProjectionMatrix(CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport));
+    painter.SetViewMatrix(CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
+    painter.SetViewport(mSurface.viewport);
+    painter.SetSurfaceSize(mSurface.size);
+    painter.SetEditingMode(mEditingMode);
+    painter.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
 
     for (const auto& packet : packets)
     {
         if (packet.domain == DrawPacket::Domain::Editor)
-            painter_2D.Draw(*packet.drawable, packet.transform, *packet.material);
+            painter.Draw(*packet.drawable, packet.transform, *packet.material);
     }
 }
 
@@ -1179,13 +1253,15 @@ void Renderer::DrawScenePackets(gfx::Device& device, const std::vector<DrawPacke
     const auto logical_viewport_width = mCamera.viewport.GetWidth();
     const auto logical_viewport_height = mCamera.viewport.GetHeight();
 
-    gfx::Painter painter_2D(&device);
-    painter_2D.SetProjectionMatrix(CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport));
-    painter_2D.SetViewMatrix(CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation));
-    painter_2D.SetViewport(mSurface.viewport);
-    painter_2D.SetSurfaceSize(mSurface.size);
-    painter_2D.SetEditingMode(mEditingMode);
-    painter_2D.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
+    const auto& model_view = CreateModelViewMatrix(GameView::AxisAligned, mCamera.position, mCamera.scale, mCamera.rotation);
+    const auto& orthographic = CreateProjectionMatrix(Projection::Orthographic, mCamera.viewport);
+    const auto& perspective  = CreateProjectionMatrix(Projection::Perspective, mCamera.viewport);
+
+    gfx::Painter painter(&device);
+    painter.SetViewport(mSurface.viewport);
+    painter.SetSurfaceSize(mSurface.size);
+    painter.SetEditingMode(mEditingMode);
+    painter.SetPixelRatio(window_size / glm::vec2{logical_viewport_width, logical_viewport_height} * mCamera.scale);
 
     // Each entity in the scene is assigned to a scene/entity layer and each
     // entity node within an entity is assigned to an entity layer.
@@ -1222,6 +1298,13 @@ void Renderer::DrawScenePackets(gfx::Device& device, const std::vector<DrawPacke
         draw.state.write_color  = true;
         draw.state.depth_test   = gfx::Painter::DepthTest::Disabled;
         draw.state.stencil_func = gfx::Painter::StencilFunc ::Disabled;
+        draw.view = &model_view;
+
+        if (packet.projection == DrawPacket::Projection::Orthographic)
+            draw.projection = &orthographic;
+        else if (packet.projection == DrawPacket::Projection::Perspective)
+            draw.projection = &perspective;
+        else BUG("Missing draw packet projection mapping.");
 
         RenderLayer& layer = render_layer[packet_index];
         if (packet.pass == RenderPass::DrawColor)
@@ -1230,7 +1313,7 @@ void Renderer::DrawScenePackets(gfx::Device& device, const std::vector<DrawPacke
             layer.mask_cover_list.push_back(draw);
         else if (packet.pass == RenderPass::MaskExpose)
             layer.mask_expose_list.push_back(draw);
-        else BUG("Missing packet render pass.");
+        else BUG("Missing packet render pass mapping.");
     }
 
     // set the state for each draw packet.
@@ -1274,12 +1357,12 @@ void Renderer::DrawScenePackets(gfx::Device& device, const std::vector<DrawPacke
     }
 
     const gfx::Color4f bloom_color(mBloom.red, mBloom.green, mBloom.blue, 1.0f);
-    const BloomPass bloom(mRendererName,  bloom_color, mBloom.threshold, painter_2D);
+    const BloomPass bloom(mRendererName,  bloom_color, mBloom.threshold, painter);
 
     if (IsEnabled(Effects::Bloom))
         bloom.Draw(layers);
 
-    MainRenderPass main(painter_2D);
+    MainRenderPass main(painter);
     main.Draw(layers);
     main.Composite(IsEnabled(Effects::Bloom) ? &bloom : nullptr);
 
