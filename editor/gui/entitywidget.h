@@ -181,6 +181,8 @@ namespace gui
         void on_dsMaterial_currentIndexChanged(const QString& name);
         void on_dsRenderPass_currentIndexChanged(const QString&);
         void on_dsRenderStyle_currentIndexChanged(const QString&);
+        void on_dsRenderView_currentIndexChanged(int);
+        void on_dsRenderProj_currentIndexChanged(int);
         void on_dsLayer_valueChanged(int layer);
         void on_dsLineWidth_valueChanged(double value);
         void on_dsTimeScale_valueChanged(double value);

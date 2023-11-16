@@ -479,6 +479,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     PopulateFromEnum<game::DrawableItemClass::RenderPass>(mUI.dsRenderPass);
     PopulateFromEnum<game::DrawableItemClass::RenderStyle>(mUI.dsRenderStyle);
+    PopulateFromEnum<game::DrawableItemClass::RenderView>(mUI.dsRenderView);
+    PopulateFromEnum<game::DrawableItemClass::RenderProjection>(mUI.dsRenderProj);
     PopulateFromEnum<game::RigidBodyItemClass::Simulation>(mUI.rbSimulation);
     PopulateFromEnum<game::RigidBodyItemClass::CollisionShape>(mUI.rbShape);
     PopulateFromEnum<game::TextItemClass::VerticalTextAlign>(mUI.tiVAlign);
@@ -2178,6 +2180,15 @@ void EntityWidget::on_dsRenderStyle_currentIndexChanged(const QString&)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_dsRenderView_currentIndexChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_dsRenderProj_currentIndexChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_dsLayer_valueChanged(int value)
 {
     UpdateCurrentNodeProperties();
@@ -2900,12 +2911,13 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     const auto xs     = (float)GetValue(mUI.scaleX);
     const auto ys     = (float)GetValue(mUI.scaleY);
     const auto grid   = (GridDensity)GetValue(mUI.cmbGrid);
+    const auto view   = engine::GameView::AxisAligned;
 
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
 
     gfx::Device* device = painter.GetDevice();
     gfx::Painter entity_painter(device);
-    entity_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, engine::GameView::AxisAligned));
+    entity_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, view));
     entity_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI,  engine::Projection::Orthographic));
     entity_painter.SetPixelRatio(glm::vec2{xs*zoom, ys*zoom});
     entity_painter.SetViewport(0, 0, width, height);
@@ -3026,9 +3038,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         DrawViewport(painter, view, game_width, game_height, width, height);
     }
 
-    PrintMousePos(mUI, mState, painter,
-                  engine::GameView::AxisAligned,
-                  engine::Projection::Orthographic);
+    PrintMousePos(mUI, mState, painter,view, engine::Projection::Orthographic);
 }
 
 void EntityWidget::MouseZoom(std::function<void(void)> zoom_function)
@@ -3295,6 +3305,8 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.dsDrawable, QString(""));
     SetValue(mUI.dsLayer, 0);
     SetValue(mUI.dsRenderPass, -1);
+    SetValue(mUI.dsRenderView, -1);
+    SetValue(mUI.dsRenderProj, -1);
     SetValue(mUI.dsRenderStyle, -1);
     SetValue(mUI.dsLineWidth, 1.0f);
     SetValue(mUI.dsTimeScale, 1.0f);
@@ -3384,6 +3396,8 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsDrawable, ListItemId(item->GetDrawableId()));
             SetValue(mUI.dsRenderPass, item->GetRenderPass());
             SetValue(mUI.dsRenderStyle, item->GetRenderStyle());
+            SetValue(mUI.dsRenderView, item->GetRenderView());
+            SetValue(mUI.dsRenderProj, item->GetRenderProjection());
             SetValue(mUI.dsLayer, item->GetLayer());
             SetValue(mUI.dsLineWidth, item->GetLineWidth());
             SetValue(mUI.dsTimeScale, item->GetTimeScale());
@@ -3566,6 +3580,8 @@ void EntityWidget::UpdateCurrentNodeProperties()
         item->SetLayer(GetValue(mUI.dsLayer));
         item->SetRenderStyle(GetValue(mUI.dsRenderStyle));
         item->SetRenderPass(GetValue(mUI.dsRenderPass));
+        item->SetRenderView(GetValue(mUI.dsRenderView));
+        item->SetRenderProjection(GetValue(mUI.dsRenderProj));
 
         item->SetFlag(game::DrawableItemClass::Flags::VisibleInGame, GetValue(mUI.dsVisible));
         item->SetFlag(game::DrawableItemClass::Flags::UpdateDrawable, GetValue(mUI.dsUpdateDrawable));
