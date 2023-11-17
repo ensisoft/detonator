@@ -790,9 +790,10 @@ namespace base
     class Angle
     {
     public:
-        explicit Angle(Real angle = 0.0) noexcept
+        explicit Angle(Real angle) noexcept
           : mAngle(angle)
         {}
+        Angle() = default;
 
         template<typename OtherUnit> inline
         operator Angle<Real, OtherUnit> () const noexcept
@@ -816,27 +817,23 @@ namespace base
         { return detail::ToRadians(mAngle, Unit{} ); }
         inline Real ToDegrees() const noexcept
         { return detail::ToDegrees(mAngle, Unit{} ); }
-    private:
-        template<typename RealT, typename UnitT> friend
-        Angle<RealT, UnitT> operator + (Angle<RealT, UnitT> lhs, Angle<RealT, UnitT> rhs);
-
-        template<typename RealT, typename UnitT> friend
-        Angle<RealT, UnitT> operator - (Angle<RealT, UnitT> lhs, Angle<RealT, UnitT> rhs);
+        inline Real GetValue() const noexcept
+        { return mAngle; }
 
     private:
         Real mAngle = 0;
     };
 
-    template<typename RealT, typename UnitT> inline
-    auto operator + (Angle<RealT, UnitT> lhs, Angle<RealT, UnitT> rhs) noexcept
+    template<typename Real, typename Unit> inline
+    auto operator + (Angle<Real, Unit> lhs, Angle<Real, Unit> rhs) noexcept
     {
-        return Angle<RealT, UnitT> { lhs.mAngle + rhs.mAngle };
+        return Angle<Real, Unit> { lhs.GetValue() + rhs.GetValue() };
     }
 
-    template<typename RealT, typename UnitT> inline
-    auto operator - (Angle<RealT, UnitT> lhs, Angle<RealT, UnitT> rhs) noexcept
+    template<typename Real, typename Unit> inline
+    auto operator - (Angle<Real, Unit> lhs, Angle<Real, Unit> rhs) noexcept
     {
-        return Angle<RealT, UnitT> { lhs.mAngle - rhs.mAngle };
+        return Angle<Real, Unit> { lhs.GetValue() - rhs.GetValue() };
     }
 
     using FDegrees = Angle<float, detail::Degrees>;
