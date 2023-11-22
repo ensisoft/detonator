@@ -2204,6 +2204,37 @@ void EntityWidget::on_dsTimeScale_valueChanged(double value)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_dsDepth_valueChanged(double value)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_dsXRotation_valueChanged(double value)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_dsYRotation_valueChanged(double value)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_dsZRotation_valueChanged(double value)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_dsXOffset_valueChanged(double value)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_dsYOffset_valueChanged(double value)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_dsZOffset_valueChanged(double value)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_dsVisible_stateChanged(int)
 {
     UpdateCurrentNodeProperties();
@@ -3310,6 +3341,13 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.dsRenderStyle, -1);
     SetValue(mUI.dsLineWidth, 1.0f);
     SetValue(mUI.dsTimeScale, 1.0f);
+    SetValue(mUI.dsDepth, 0.0f);
+    SetValue(mUI.dsXRotation, 0.0f);
+    SetValue(mUI.dsYRotation, 0.0f);
+    SetValue(mUI.dsZRotation, 0.0f);
+    SetValue(mUI.dsXOffset, 0.0f);
+    SetValue(mUI.dsYOffset, 0.0f);
+    SetValue(mUI.dsZOffset, 0.0f);
     SetValue(mUI.rbShape, -1);
     SetValue(mUI.rbFriction, 0.0f);
     SetValue(mUI.rbRestitution, 0.0f);
@@ -3401,6 +3439,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsLayer, item->GetLayer());
             SetValue(mUI.dsLineWidth, item->GetLineWidth());
             SetValue(mUI.dsTimeScale, item->GetTimeScale());
+            SetValue(mUI.dsDepth, item->GetDepth());
             SetValue(mUI.dsVisible, item->TestFlag(game::DrawableItemClass::Flags::VisibleInGame));
             SetValue(mUI.dsUpdateDrawable, item->TestFlag(game::DrawableItemClass::Flags::UpdateDrawable));
             SetValue(mUI.dsUpdateMaterial, item->TestFlag(game::DrawableItemClass::Flags::UpdateMaterial));
@@ -3408,6 +3447,17 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsFlipHorizontally, item->TestFlag(game::DrawableItemClass::Flags::FlipHorizontally));
             SetValue(mUI.dsFlipVertically, item->TestFlag(game::DrawableItemClass::Flags::FlipVertically));
             SetValue(mUI.dsBloom, item->TestFlag(game::DrawableItemClass::Flags::PP_EnableBloom));
+
+            const auto& rotator = item->GetRotator();
+            const auto [x, y, z] = rotator.GetEulerAngles();
+            SetValue(mUI.dsXRotation, x.ToDegrees());
+            SetValue(mUI.dsYRotation, y.ToDegrees());
+            SetValue(mUI.dsZRotation, z.ToDegrees());
+
+            const auto& offset = item->GetOffset();
+            SetValue(mUI.dsXOffset, offset.x);
+            SetValue(mUI.dsYOffset, offset.y);
+            SetValue(mUI.dsZOffset, offset.z);
 
             const auto& material = mState.workspace->GetResourceById(GetItemId(mUI.dsMaterial));
             const auto& drawable = mState.workspace->GetResourceById(GetItemId(mUI.dsDrawable));
@@ -3582,6 +3632,19 @@ void EntityWidget::UpdateCurrentNodeProperties()
         item->SetRenderPass(GetValue(mUI.dsRenderPass));
         item->SetRenderView(GetValue(mUI.dsRenderView));
         item->SetRenderProjection(GetValue(mUI.dsRenderProj));
+        item->SetDepth(GetValue(mUI.dsDepth));
+
+        game::Rotator rotator = base::Rotator::FromEulerXYZ(
+                base::FDegrees((float)GetValue(mUI.dsXRotation)),
+                base::FDegrees((float)GetValue(mUI.dsYRotation)),
+                base::FDegrees((float)GetValue(mUI.dsZRotation)));
+        item->SetRotator(rotator);
+
+        glm::vec3 offset;
+        offset.x = GetValue(mUI.dsXOffset);
+        offset.y = GetValue(mUI.dsYOffset);
+        offset.z = GetValue(mUI.dsZOffset);
+        item->SetOffset(offset);
 
         item->SetFlag(game::DrawableItemClass::Flags::VisibleInGame, GetValue(mUI.dsVisible));
         item->SetFlag(game::DrawableItemClass::Flags::UpdateDrawable, GetValue(mUI.dsUpdateDrawable));

@@ -16,6 +16,8 @@
 
 #include "config.h"
 
+#define BASE_TEST_HELP_SUPPORT_GLM
+
 #include <string>
 #include <cstddef>
 #include <iostream>
@@ -79,6 +81,8 @@ void unit_test_entity_node()
     draw.SetMaterialParam("kVec3", glm::vec3(1.0f, 2.0f, 3.0f));
     draw.SetMaterialParam("kColor", game::Color::DarkCyan);
     draw.SetActiveTextureMap("map123");
+    draw.SetRotator(game::Rotator(1.0f, 2.0f, 3.0f, 4.0f));
+    draw.SetOffset(glm::vec3(1.0f, 2.0f, 3.0f));
 
     game::RigidBodyItemClass body;
     body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Circle);
@@ -154,6 +158,8 @@ void unit_test_entity_node()
     TEST_REQUIRE(*node.GetDrawable()->GetMaterialParamValue<glm::vec3>("kVec3") == glm::vec3(1.0f, 2.0f, 3.0f));
     TEST_REQUIRE(*node.GetDrawable()->GetMaterialParamValue<game::Color4f>("kColor") == game::Color::DarkCyan);
     TEST_REQUIRE(node.GetDrawable()->GetActiveTextureMap() == "map123");
+    TEST_REQUIRE(node.GetDrawable()->GetRotator() == game::Rotator(1.0f, 2.0f, 3.0f, 4.0f));
+    TEST_REQUIRE(node.GetDrawable()->GetOffset() == glm::vec3(1.0f, 2.0f, 3.0f));
     TEST_REQUIRE(node.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::UpdateDrawable) == true);
     TEST_REQUIRE(node.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::RestartDrawable) == false);
     TEST_REQUIRE(node.GetRigidBody()->GetCollisionShape() == game::RigidBodyItemClass::CollisionShape::Circle);
@@ -201,6 +207,8 @@ void unit_test_entity_node()
         TEST_REQUIRE(ret.GetDrawable()->GetRenderPass() == game::DrawableItemClass::RenderPass::MaskCover);
         TEST_REQUIRE(ret.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::UpdateDrawable) == true);
         TEST_REQUIRE(ret.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::RestartDrawable) == false);
+        TEST_REQUIRE(ret.GetDrawable()->GetRotator() == game::Rotator(1.0f, 2.0f, 3.0f, 4.0f));
+        TEST_REQUIRE(ret.GetDrawable()->GetOffset() == glm::vec3(1.0f, 2.0f, 3.0f));
         TEST_REQUIRE(ret.GetRigidBody()->GetCollisionShape() == game::RigidBodyItemClass::CollisionShape::Circle);
         TEST_REQUIRE(ret.GetRigidBody()->GetSimulation() == game::RigidBodyItemClass::Simulation::Dynamic);
         TEST_REQUIRE(ret.GetRigidBody()->TestFlag(game::RigidBodyItemClass::Flags::Bullet));

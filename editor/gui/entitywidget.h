@@ -186,6 +186,13 @@ namespace gui
         void on_dsLayer_valueChanged(int layer);
         void on_dsLineWidth_valueChanged(double value);
         void on_dsTimeScale_valueChanged(double value);
+        void on_dsDepth_valueChanged(double value);
+        void on_dsXRotation_valueChanged(double value);
+        void on_dsYRotation_valueChanged(double value);
+        void on_dsZRotation_valueChanged(double value);
+        void on_dsXOffset_valueChanged(double value);
+        void on_dsYOffset_valueChanged(double value);
+        void on_dsZOffset_valueChanged(double value);
         void on_dsVisible_stateChanged(int);
         void on_dsUpdateDrawable_stateChanged(int);
         void on_dsUpdateMaterial_stateChanged(int);

@@ -191,6 +191,9 @@ std::size_t DrawableItemClass::GetHash() const
     hash = base::hash_combine(hash, mRenderView);
     hash = base::hash_combine(hash, mRenderProjection);
     hash = base::hash_combine(hash, mTimeScale);
+    hash = base::hash_combine(hash, mDepth);
+    hash = base::hash_combine(hash, mRotator);
+    hash = base::hash_combine(hash, mOffset);
 
     // remember the *unordered* nature of unordered_map
     std::set<std::string> keys;
@@ -218,6 +221,9 @@ void DrawableItemClass::IntoJson(data::Writer& data) const
     data.Write("renderview",  mRenderView);
     data.Write("renderproj",  mRenderProjection);
     data.Write("timescale",   mTimeScale);
+    data.Write("depth",       mDepth);
+    data.Write("rotator",     mRotator);
+    data.Write("offset",      mOffset);
 
     // use an ordered set for persisting the data to make sure
     // that the order in which the uniforms are written out is
@@ -261,6 +267,9 @@ bool DrawableItemClass::FromJson(const data::Reader& data)
     ok &= data.Read("renderview",  &mRenderView);
     ok &= data.Read("renderproj",  &mRenderProjection);
     ok &= data.Read("timescale",   &mTimeScale);
+    ok &= data.Read("depth",       &mDepth);
+    ok &= data.Read("rotator",     &mRotator);
+    ok &= data.Read("offset",      &mOffset);
 
     for (unsigned i=0; i<data.GetNumChunks("material_params"); ++i)
     {
