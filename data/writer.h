@@ -31,6 +31,7 @@
 #include "base/types.h"
 #include "base/color4f.h"
 #include "base/bitflag.h"
+#include "base/rotator.h"
 
 namespace data
 {
@@ -55,6 +56,7 @@ namespace data
         virtual void Write(const char* name, const base::FPoint& point) = 0;
         virtual void Write(const char* name, const base::FSize& point) = 0;
         virtual void Write(const char* name, const base::Color4f& color) = 0;
+        virtual void Write(const char* name, const base::Rotator& rotator) = 0;
         virtual void Write(const char* name, const Writer& chunk) = 0;
         virtual void Write(const char* name, std::unique_ptr<Writer> chunk) = 0;
         // array writing for primitive types (object types should be done through chunks)

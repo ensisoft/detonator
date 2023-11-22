@@ -839,4 +839,7 @@ namespace base
     using FDegrees = Angle<float, detail::Degrees>;
     using FRadians = Angle<float, detail::Radians>;
 
+    template<typename Unit>
+    using FAngle = Angle<float, Unit>;
+
 } // namespace

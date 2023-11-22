@@ -16,6 +16,8 @@
 
 #include "config.h"
 
+#define BASE_TEST_HELP_SUPPORT_GLM
+
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -56,6 +58,7 @@ void unit_test_basic()
     json.Write("point", base::FPoint(-50.0f, -50.0f));
     json.Write("size", base::FSize(50.0f, 50.0f));
     json.Write("color", base::Color4f(base::Color::HotPink));
+    json.Write("rotation", base::Rotator(1.0f, 2.0f, 3.0f, 4.0f));
 
     TEST_REQUIRE(json.HasValue("double"));
     TEST_REQUIRE(json.HasValue("float"));
@@ -71,6 +74,7 @@ void unit_test_basic()
     TEST_REQUIRE(json.HasValue("point"));
     TEST_REQUIRE(json.HasValue("size"));
     TEST_REQUIRE(json.HasValue("color"));
+    TEST_REQUIRE(json.HasValue("rotation"));
     TEST_REQUIRE(json.HasValue("huhu") == false);
     TEST_REQUIRE(json.IsEmpty() == false);
 
@@ -87,6 +91,7 @@ void unit_test_basic()
     TestValue("point", json, base::FPoint(-50.0f, -50.0f));
     TestValue("size", json, base::FSize(50.0f, 50.0f));
     TestValue("color", json, base::Color4f(base::Color::HotPink));
+    TestValue("rotation", json, base::Rotator(1.0f, 2.0f, 3.0f, 4.0f));
 }
 
 void unit_test_bitflag()

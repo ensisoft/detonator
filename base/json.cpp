@@ -21,6 +21,7 @@
 #  include <glm/vec2.hpp>
 #  include <glm/vec3.hpp>
 #  include <glm/vec4.hpp>
+#  include <glm/gtc/quaternion.hpp>
 #include "warnpop.h"
 
 #include <fstream>
@@ -28,6 +29,7 @@
 #include "base/json.h"
 #include "base/types.h"
 #include "base/utility.h" // for FromUtf8 for win32
+#include "base/rotator.h"
 
 namespace base {
 namespace detail {
@@ -168,6 +170,26 @@ bool JsonReadSafe(const nlohmann::json& object, const char* name, glm::vec4* out
     return true;
 }
 
+bool JsonReadSafe(const nlohmann::json& object, const char* name, glm::quat* out)
+{
+    if (!object.contains(name) || !object[name].is_object())
+        return false;
+    const auto& vector = object[name];
+    if (!vector.contains("x") || !vector["x"].is_number_float())
+        return false;
+    if (!vector.contains("y") || !vector["y"].is_number_float())
+        return false;
+    if (!vector.contains("z") || !vector["z"].is_number_float())
+        return false;
+    if (!vector.contains("q") || !vector["q"].is_number_float())
+        return false;
+    out->x = vector["x"];
+    out->y = vector["y"];
+    out->z = vector["z"];
+    out->w = vector["q"];
+    return true;
+}
+
 bool JsonReadSafe(const nlohmann::json& json, const char* name, FRect* rect)
 {
     if (!json.contains(name) || !json[name].is_object())
@@ -224,6 +246,16 @@ bool JsonReadSafe(const nlohmann::json& json, const char* name, Color4f* color)
         !base::JsonReadSafe(object, "a", &a))
         return false;
     *color = Color4f(r, g, b, a);
+    return true;
+}
+
+bool JsonReadSafe(const nlohmann::json& json, const char* name, Rotator* rotator)
+{
+    glm::quat quaternion;
+    if (!JsonReadSafe(json, name, &quaternion))
+        return false;
+
+    *rotator = Rotator(quaternion);
     return true;
 }
 
@@ -319,6 +351,25 @@ bool JsonReadSafe(const nlohmann::json& value, glm::vec4* out)
     out->w = value["w"];
     return true;
 }
+bool JsonReadSafe(const nlohmann::json& value, glm::quat* out)
+{
+    if (!value.is_object())
+        return false;
+    if (!value.contains("x") || !value["x"].is_number_float())
+        return false;
+    if (!value.contains("y") || !value["y"].is_number_float())
+        return false;
+    if (!value.contains("z") || !value["z"].is_number_float())
+        return false;
+    if (!value.contains("q") || !value["q"].is_number_float())
+        return false;
+    out->x = value["x"];
+    out->y = value["y"];
+    out->z = value["z"];
+    out->w = value["q"];
+    return true;
+}
+
 
 void JsonWrite(nlohmann::json& object, const char* name, int value)
 { object[name] = value; }
@@ -368,6 +419,16 @@ void JsonWrite(nlohmann::json& object, const char* name, const glm::vec4& vec)
     object[name] = std::move(json);
 }
 
+void JsonWrite(nlohmann::json& object, const char* name, const glm::quat& quat)
+{
+    nlohmann::json json;
+    JsonWrite(json, "x", quat.x);
+    JsonWrite(json, "y", quat.y);
+    JsonWrite(json, "z", quat.z);
+    JsonWrite(json, "q", quat.w);
+    object[name] = std::move(json);
+}
+
 void JsonWrite(nlohmann::json& object, const char* name, const FRect& rect)
 {
     nlohmann::json json;
@@ -400,6 +461,10 @@ void JsonWrite(nlohmann::json& json, const char* name, const Color4f& color)
     JsonWrite(object, "b", color.Blue());
     JsonWrite(object, "a", color.Alpha());
     json[name] = std::move(object);
+}
+void JsonWrite(nlohmann::json& json, const char* name, const Rotator& rotator)
+{
+    JsonWrite(json, name, rotator.GetAsQuaternion());
 }
 
 void JsonWrite(nlohmann::json& json, const char* name, const nlohmann::json& js)

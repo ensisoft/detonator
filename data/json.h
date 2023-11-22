@@ -64,6 +64,7 @@ namespace data
         virtual bool Read(const char* name, base::FPoint* point) const override;
         virtual bool Read(const char* name, base::FSize* point) const override;
         virtual bool Read(const char* name, base::Color4f* color) const override;
+        virtual bool Read(const char* name, base::Rotator* rotator) const override;
         virtual bool HasValue(const char* name) const override;
         virtual bool HasChunk(const char* name) const override;
         virtual bool HasArray(const char* name) const override;
@@ -87,6 +88,7 @@ namespace data
         virtual void Write(const char* name, const base::FPoint& value) override;
         virtual void Write(const char* name, const base::FSize& value) override;
         virtual void Write(const char* name, const base::Color4f& value) override;
+        virtual void Write(const char* name, const base::Rotator& value) override;
         virtual void Write(const char* name, const Writer& chunk) override;
         virtual void Write(const char* name, std::unique_ptr<Writer> chunk) override;
         virtual void Write(const char* name, const int* array, size_t size) override;
