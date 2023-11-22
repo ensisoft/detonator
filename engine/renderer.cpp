@@ -564,8 +564,10 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
         {
             // model transform.
             transform.Push();
+                transform.Translate(-0.5f, -0.5f);
                 transform.Scale(size);
-                transform.Translate(-size.x*0.5f, -size.y*0.5f);
+                transform.Rotate(item->GetRotator());
+                transform.Translate(item->GetOffset());
         }
 
         if (horizontal_flip)
@@ -1064,8 +1066,10 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
         {
             // model transform.
             transform.Push();
+                transform.Translate(-0.5f, -0.5f);
                 transform.Scale(size);
-                transform.Translate(-size.x*0.5f, -size.y*0.5f);
+                transform.Rotate(item->GetRotator());
+                transform.Translate(item->GetOffset());
         }
 
         // in model space now

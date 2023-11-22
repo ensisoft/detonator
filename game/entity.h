@@ -389,6 +389,12 @@ namespace game
         { mRenderProjection = projection; }
         void SetTimeScale(float scale) noexcept
         { mTimeScale = scale; }
+        void SetDepth(float depth) noexcept
+        { mDepth = depth; }
+        void SetRotator(const Rotator& rotator) noexcept
+        { mRotator = rotator; }
+        void SetOffset(const glm::vec3& offset) noexcept
+        { mOffset = offset; }
         void SetMaterialParam(const std::string& name, const MaterialParam& value)
         { mMaterialParams[name] = value; }
         void SetMaterialParams(const MaterialParamMap& params)
@@ -407,8 +413,14 @@ namespace game
         { return mLineWidth; }
         float GetTimeScale() const noexcept
         { return mTimeScale; }
+        float GetDepth() const noexcept
+        { return mDepth; }
         bool TestFlag(Flags flag) const noexcept
         { return mBitFlags.test(flag); }
+        glm::vec3 GetOffset() const noexcept
+        { return mOffset; }
+        Rotator GetRotator() const noexcept
+        { return mRotator; }
         RenderPass GetRenderPass() const noexcept
         { return mRenderPass; }
         RenderStyle GetRenderStyle() const noexcept
@@ -477,6 +489,15 @@ namespace game
         // scaler value for changing the time delta values
         // applied to the drawable (material)
         float mTimeScale = 1.0f;
+        // For 3D objects depth value gives the 3rd dimension
+        // that isn't available in the node itself.
+        float mDepth = 1.0f;
+        // drawable 3D rotator that encodes the rotational
+        // transformation for producing the desired orientation.
+        Rotator mRotator;
+        // drawable offset in local drawable space.
+        glm::vec3 mOffset = {0.0f, 0.0f, 0.0f};
+
         RenderPass mRenderPass = RenderPass::DrawColor;
         RenderStyle  mRenderStyle = RenderStyle::Solid;
         RenderView mRenderView = RenderView::AxisAligned;
@@ -638,6 +659,8 @@ namespace game
           , mMaterialId(mClass->GetMaterialId())
           , mInstanceFlags(mClass->GetFlags())
           , mInstanceTimeScale(mClass->GetTimeScale())
+          , mInstanceDepth(mClass->GetDepth())
+          , mInstanceRotator(mClass->GetRotator())
           , mMaterialParams(mClass->GetMaterialParams())
         {}
         bool HasMaterialTimeAdjustment() const noexcept
@@ -664,6 +687,10 @@ namespace game
         { return mClass->GetRenderView(); }
         RenderProjection GetRenderProjection() const noexcept
         { return mClass->GetRenderProjection(); }
+        Rotator GetRotator() const noexcept
+        { return mInstanceRotator; }
+        glm::vec3 GetOffset() const noexcept
+        { return mClass->GetOffset(); }
         bool TestFlag(Flags flag) const noexcept
         { return mInstanceFlags.test(flag); }
         bool IsVisible() const noexcept
@@ -672,10 +699,17 @@ namespace game
         { mInstanceFlags.set(Flags::VisibleInGame, visible); }
         float GetTimeScale() const noexcept
         { return mInstanceTimeScale; }
+        float GetDepth() const noexcept
+        { return mInstanceDepth; }
         void SetFlag(Flags flag, bool on_off) noexcept
         { mInstanceFlags.set(flag, on_off); }
         void SetTimeScale(float scale) noexcept
         { mInstanceTimeScale = scale; }
+        void SetDepth(float depth) noexcept
+        { mInstanceDepth = depth; }
+        void SetRotator(const Rotator& rotator) noexcept
+        { mInstanceRotator = rotator; }
+
         // When you set the material ID to another material remember
         // to consider whether you should also
         // - clear the material uniforms (parameters)
@@ -753,6 +787,8 @@ namespace game
         mutable std::vector<Command> mCommands;
         base::bitflag<Flags> mInstanceFlags;
         float mInstanceTimeScale = 1.0f;
+        float mInstanceDepth = 1.0f;
+        Rotator mInstanceRotator;
         mutable double mMaterialTime = 0.0f;
         MaterialParamMap mMaterialParams;
     };

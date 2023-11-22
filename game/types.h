@@ -21,6 +21,7 @@
 #include "base/box.h"
 #include "base/types.h"
 #include "base/color4f.h"
+#include "base/rotator.h"
 
 namespace game
 {
@@ -35,6 +36,8 @@ namespace game
     using FSize  = base::FSize;
     using ISize  = base::ISize;
     using Color4f = base::Color4f;
+    using Rotator = base::Rotator;
+
 } // namespace
 
 
