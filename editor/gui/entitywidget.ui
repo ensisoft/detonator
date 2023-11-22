@@ -1644,7 +1644,7 @@
                  <string>Set the node's height in game units</string>
                 </property>
                 <property name="minimum">
-                 <double>-10000.000000000000000</double>
+                 <double>0.000000000000000</double>
                 </property>
                 <property name="maximum">
                  <double>10000.000000000000000</double>
@@ -1810,7 +1810,7 @@
                  <string>Set the node's width in game units</string>
                 </property>
                 <property name="minimum">
-                 <double>-10000.000000000000000</double>
+                 <double>0.000000000000000</double>
                 </property>
                 <property name="maximum">
                  <double>10000.000000000000000</double>
