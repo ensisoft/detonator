@@ -138,6 +138,18 @@ namespace base
         inline void RotateAroundZ(float radians) noexcept
         { Accumulate(glm::eulerAngleZ(radians)); }
 
+        template<typename Unit>
+        inline void RotateAroundX(FAngle<Unit> angle) noexcept
+        { RotateAroundX(angle.ToRadians()); }
+
+        template<typename Unit>
+        inline void RotateAroundY(FAngle<Unit> angle) noexcept
+        { RotateAroundY(angle.ToRadians()); }
+
+        template<typename Unit>
+        inline void RotateAroundZ(FAngle<Unit> angle) noexcept
+        { RotateAroundZ(angle.ToRadians()); }
+
         inline void Rotate(const Rotator& rotator) noexcept
         { Accumulate(rotator.GetAsMatrix()); }
 
