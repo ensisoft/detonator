@@ -37,6 +37,7 @@
 #include "base/bitflag.h"
 #include "base/types.h"
 #include "base/color4f.h"
+#include "base/rotator.h"
 
 // minimalistic string formatting. doesn't support anything fancy such as escaping.
 // uses a simple "foobar %1 %2" syntax where %-digit pairs are replaced by
@@ -77,6 +78,9 @@ namespace base
         std::string ToString(const glm::vec4& v);
         std::string ToString(const glm::vec3& v);
         std::string ToString(const glm::vec2& v);
+        std::string ToString(const glm::quat& q);
+        // Rotator is inside here because we can't have Rotator without glm
+        std::string ToString(const Rotator& rotator);
 #endif // BASE_FORMAT_SUPPORT_GLM
         std::string ToString(const FRect& rect);
         std::string ToString(const FSize& size);

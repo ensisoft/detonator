@@ -93,6 +93,21 @@ std::string ToString(const glm::vec2& v)
         "[%.2f %.2f]", v[0], v[1]);
     return buff;
 }
+
+std::string ToString(const glm::quat& q)
+{
+    char buff[1024];
+    std::memset(buff, 0, sizeof(buff));
+    std::snprintf(buff, sizeof(buff),
+        "[%.2f %.2f %.2f %.2f]", q.x, q.y, q.z, q.w);
+    return buff;
+}
+
+std::string ToString(const Rotator& rotator)
+{
+    return ToString(rotator.GetAsQuaternion());
+}
+
 #endif // BASE_FORMAT_SUPPORT_GLM
 
 std::string ToString(const FRect& rect)

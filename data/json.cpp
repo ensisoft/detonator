@@ -118,6 +118,11 @@ bool JsonObject::Read(const char* name, base::Color4f* out) const
 {
     return base::JsonReadSafe(*mJson, name, out);
 }
+bool JsonObject::Read(const char* name, base::Rotator* out) const
+{
+    return base::JsonReadSafe(*mJson, name, out);
+}
+
 bool JsonObject::Read(const char* name, unsigned index, double* out) const
 {
     return read_array(name, index, out);
@@ -223,6 +228,11 @@ void JsonObject::Write(const char* name, const base::Color4f& value)
 {
     base::JsonWrite(*mJson, name, value);
 }
+void JsonObject::Write(const char* name, const base::Rotator& value)
+{
+    base::JsonWrite(*mJson, name, value);
+}
+
 void JsonObject::Write(const char* name, const Writer& chunk)
 {
     const auto* json = dynamic_cast<const JsonObject*>(&chunk);

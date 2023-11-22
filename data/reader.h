@@ -31,6 +31,7 @@
 #include "base/types.h"
 #include "base/color4f.h"
 #include "base/bitflag.h"
+#include "base/rotator.h"
 
 namespace data
 {
@@ -61,6 +62,7 @@ namespace data
         virtual bool Read(const char* name, base::FPoint* point) const = 0;
         virtual bool Read(const char* name, base::FSize* point) const = 0;
         virtual bool Read(const char* name, base::Color4f* color) const = 0;
+        virtual bool Read(const char* name, base::Rotator* rotator) const = 0;
         virtual bool HasValue(const char* name) const = 0;
         virtual bool HasChunk(const char* name) const = 0;
         virtual bool HasArray(const char* name) const = 0;

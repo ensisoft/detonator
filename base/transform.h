@@ -30,6 +30,7 @@
 
 #include "base/assert.h"
 #include "base/types.h"
+#include "base/rotator.h"
 
 namespace base
 {
@@ -137,6 +138,37 @@ namespace base
         inline void RotateAroundZ(float radians) noexcept
         { Accumulate(glm::eulerAngleZ(radians)); }
 
+        inline void Rotate(const Rotator& rotator) noexcept
+        { Accumulate(rotator.GetAsMatrix()); }
+
+        // Get the number of individual transformation scopes.
+        inline std::size_t GetNumTransforms() noexcept
+        { return mTransform.size(); }
+
+        // Begin a new scope for the next transformation using an identity matrix.
+        // Pushing and popping transformations allows transformations
+        // to be "stacked" i.e. become relative to each other.
+        inline void Push()
+        { mTransform.push_back(glm::mat4(1.0f)); }
+        // Begin a new scope for the next transformation using the given matrix.
+        // Pushing and popping transformations allows transformations
+        // to be "stacked" i.e. become relative to each other.
+        inline void Push(const glm::mat4& mat)
+        { mTransform.push_back(mat); }
+        inline void Push(glm::mat4&& mat)
+        { mTransform.push_back(std::move(mat)); }
+
+        // Pop the latest transform off of the transform stack.
+        void Pop()
+        {
+            // we always have the base level at 0 index.
+            ASSERT(mTransform.size() > 1);
+            mTransform.pop_back();
+        }
+        void Accumulate(const glm::mat4& mat) noexcept
+        { mTransform.back() = mat * mTransform.back(); }
+
+
         // Reset any transformation to identity, i.e. no transformation.
         void Reset() noexcept
         {
@@ -164,34 +196,6 @@ namespace base
         {
             return GetAsMatrix();
         }
-
-        // Begin a new scope for the next transformation using an identity matrix.
-        // Pushing and popping transformations allows transformations
-        // to be "stacked" i.e. become relative to each other.
-        void Push()
-        { mTransform.push_back(glm::mat4(1.0f)); }
-        // Begin a new scope for the next transformation using the given matrix.
-        // Pushing and popping transformations allows transformations
-        // to be "stacked" i.e. become relative to each other.
-        void Push(const glm::mat4& mat)
-        { mTransform.push_back(mat); }
-        void Push(glm::mat4&& mat)
-        { mTransform.push_back(std::move(mat)); }
-
-        // Pop the latest transform off of the transform stack.
-        void Pop()
-        {
-            // we always have the base level at 0 index.
-            ASSERT(mTransform.size() > 1);
-            mTransform.pop_back();
-        }
-
-        // Get the number of individual transformation scopes.
-        std::size_t GetNumTransforms()
-        { return mTransform.size(); }
-
-        void Accumulate(const glm::mat4& mat)
-        {  mTransform.back() = mat * mTransform.back(); }
     private:
         std::vector<glm::mat4> mTransform;
     };

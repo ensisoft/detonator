@@ -42,6 +42,9 @@
 // todo: refactor the object templates away.
 
 namespace base {
+
+class Rotator;
+
 namespace detail {
     // helpers for trying to hide the impl in the translation unit
     void JsonWriteJson(nlohmann::json& json, const char* name, const nlohmann::json& object);
@@ -75,6 +78,7 @@ bool JsonReadSafe(const nlohmann::json& object, const char* name, std::string* o
 bool JsonReadSafe(const nlohmann::json& object, const char* name, glm::vec2* out);
 bool JsonReadSafe(const nlohmann::json& object, const char* name, glm::vec3* out);
 bool JsonReadSafe(const nlohmann::json& object, const char* name, glm::vec4* out);
+bool JsonReadSafe(const nlohmann::json& object, const char* name, glm::quat* out);
 bool JsonReadSafe(const nlohmann::json& value, double* out);
 bool JsonReadSafe(const nlohmann::json& value, float* out);
 bool JsonReadSafe(const nlohmann::json& value, int* out);
@@ -84,11 +88,13 @@ bool JsonReadSafe(const nlohmann::json& value, std::string* out);
 bool JsonReadSafe(const nlohmann::json& value, glm::vec2* out);
 bool JsonReadSafe(const nlohmann::json& value, glm::vec3* out);
 bool JsonReadSafe(const nlohmann::json& value, glm::vec4* out);
+bool JsonReadSafe(const nlohmann::json& value, glm::quat* out);
 // todo: if needed provide wrappers for writing the the U and I types too.
 bool JsonReadSafe(const nlohmann::json& json, const char* name, FRect* rect);
 bool JsonReadSafe(const nlohmann::json& json, const char* name, FPoint* point);
 bool JsonReadSafe(const nlohmann::json& json, const char* name, FSize* point);
 bool JsonReadSafe(const nlohmann::json& json, const char* name, Color4f* color);
+bool JsonReadSafe(const nlohmann::json& json, const char* name, Rotator* rotator);
 
 void JsonWrite(nlohmann::json& object, const char* name, int value);
 void JsonWrite(nlohmann::json& object, const char* name, unsigned value);
@@ -100,11 +106,13 @@ void JsonWrite(nlohmann::json& object, const char* name, const std::string& valu
 void JsonWrite(nlohmann::json& object, const char* name, const glm::vec2& vec);
 void JsonWrite(nlohmann::json& object, const char* name, const glm::vec3& vec);
 void JsonWrite(nlohmann::json& object, const char* name, const glm::vec4& vec);
+void JsonWrite(nlohmann::json& object, const char* name, const glm::quat& quat);
 // todo: if needed provide wrappers for writing the the U and I types too.
 void JsonWrite(nlohmann::json& json, const char* name, const FRect& rect);
 void JsonWrite(nlohmann::json& json, const char* name, const FPoint& point);
 void JsonWrite(nlohmann::json& json, const char* name, const FSize& point);
 void JsonWrite(nlohmann::json& json, const char* name, const Color4f& color);
+void JsonWrite(nlohmann::json& json, const char* name, const Rotator& rotator);
 
 void JsonWrite(nlohmann::json& json, const char* name, const nlohmann::json& js);
 void JsonWrite(nlohmann::json& json, const char* name, nlohmann::json&& js);

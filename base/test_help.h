@@ -21,6 +21,7 @@
 #include "warnpush.h"
 #if defined(BASE_TEST_HELP_SUPPORT_GLM)
 #  include <glm/vec2.hpp>
+#  include <glm/gtc/quaternion.hpp>
 #endif
 #include "warnpop.h"
 
@@ -38,6 +39,7 @@
 #include "base/test_minimal.h"
 #include "base/color4f.h"
 #include "base/types.h"
+#include "base/rotator.h"
 #include "base/utility.h"
 
 #include "base/snafu.h"
@@ -48,6 +50,18 @@ static bool operator==(const glm::vec2& lhs, const glm::vec2& rhs)
 { return real::equals(lhs.x, rhs.x) && real::equals(lhs.y, rhs.y); }
 static bool operator!=(const glm::vec2& lhs, const glm::vec2& rhs)
 { return !(lhs == rhs); }
+
+static bool operator==(const glm::quat& lhs, const glm::quat& rhs)
+{
+    return real::equals(lhs.x, rhs.x) &&
+           real::equals(lhs.y, rhs.y) &&
+           real::equals(lhs.z, rhs.z) &&
+           real::equals(lhs.w, rhs.w);
+}
+static bool operator!=(const glm::quat& lhs, const glm::quat& rhs)
+{
+    return !(lhs == rhs);
+}
 } // glm
 #endif
 
@@ -87,6 +101,18 @@ static bool operator==(const FPoint& lhs, const FPoint& rhs)
 }
 static bool operator!=(const FPoint& lhs, const FPoint& rhs)
 { return !(lhs == rhs); }
+
+// rotator requires glm
+#if defined(BASE_TEST_HELP_SUPPORT_GLM)
+static bool operator==(const base::Rotator& lhs, const base::Rotator& rhs)
+{
+    return lhs.GetAsQuaternion() == rhs.GetAsQuaternion();
+}
+static bool operator!=(const base::Rotator& lhs, const base::Rotator& rhs)
+{
+    return lhs.GetAsQuaternion() != rhs.GetAsQuaternion();
+}
+#endif
 
 } // base
 
