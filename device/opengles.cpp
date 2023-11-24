@@ -1086,7 +1086,7 @@ public:
         // When an element array (i.e. an index buffer) is used the pointer argument in the
         // glDrawElements call changes from being pointer to the client side index data to
         // an offset into the element/index buffer.
-        const void* index_buffer_offset = (const void*)mygeom->GetIndexBufferByteOffset();
+        const uint8_t* index_buffer_offset = (const uint8_t*)mygeom->GetIndexBufferByteOffset();
 
         const auto* vertex_buffer = &mBuffers[0][mygeom->GetVertexBufferIndex()];
         const auto* index_buffer = mygeom->UsesIndexBuffer() ? &mBuffers[1][mygeom->GetIndexBufferIndex()] : nullptr;
@@ -1147,7 +1147,13 @@ public:
                 else if (index_buffer_type == gfx::Geometry::IndexType::Index32)
                     index_type = GL_UNSIGNED_INT;
                 else BUG("missing index type");
-                GL_CALL(glDrawElements(draw_mode, count, index_type, index_buffer_offset));
+
+                // the byte offset from where to source the indices for the
+                // draw is the base index buffer offset assigned for the geometry
+                // the draw offset that is relative to the base offset.
+                const uint8_t* draw_offset = index_buffer_offset + offset * index_byte_size;
+
+                GL_CALL(glDrawElements(draw_mode, count, index_type, (const void*)draw_offset));
             }
             else
             {
