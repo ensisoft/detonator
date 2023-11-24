@@ -36,7 +36,9 @@
 
 namespace math
 {
-    const auto Pi = 3.14159265358979323846;
+    constexpr auto Pi = 3.14159265358979323846;
+    constexpr auto Circle = Pi*2.0;
+    constexpr auto SemiCircle = Pi;
 
     namespace detail {
         template <typename T> inline constexpr
