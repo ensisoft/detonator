@@ -1297,7 +1297,7 @@ void SimpleShapeInstance::ApplyDynamicState(const Environment& env, Program& pro
 }
 std::string SimpleShapeInstance::GetShader(const Environment& env, const Device& device) const
 {
-    if (mClass->GetShapeType() == SimpleShapeType::Cube)
+    if (Is3DShape(mClass->GetShapeType()))
         return MakeGeneric3DVertexShader(device);
 
     return MakeGeneric2DVertexShader(device);
@@ -1308,7 +1308,7 @@ Geometry* SimpleShapeInstance::Upload(const Environment& env, Device& device) co
 }
 std::string SimpleShapeInstance::GetShaderId(const Environment& env) const
 {
-    if (mClass->GetShapeType() == SimpleShapeType::Cube)
+    if (Is3DShape(mClass->GetShapeType()))
         return "generic-3D-vertex-program";
 
     return "generic-2D-vertex-program";
@@ -1316,7 +1316,7 @@ std::string SimpleShapeInstance::GetShaderId(const Environment& env) const
 
 std::string SimpleShapeInstance::GetShaderName(const Environment& env) const
 {
-    if (mClass->GetShapeType() == SimpleShapeType::Cube)
+    if (Is3DShape(mClass->GetShapeType()))
         return "Generic3DVertexShader";
 
     return "Generic2DVertexShader";
@@ -1331,14 +1331,14 @@ void SimpleShape::ApplyDynamicState(const Environment& env, Program& program, Ra
 }
 std::string SimpleShape::GetShader(const Environment& env, const Device& device) const
 {
-    if (mShape == SimpleShapeType::Cube)
+    if (Is3DShape(mShape))
         return MakeGeneric3DVertexShader(device);
 
     return MakeGeneric2DVertexShader(device);
 }
 std::string SimpleShape::GetShaderId(const Environment& env) const
 {
-    if (mShape == SimpleShapeType::Cube)
+    if (Is3DShape(mShape))
         return "generic-3D-vertex-program";
 
     return "generic-2D-vertex-program";
@@ -1346,7 +1346,7 @@ std::string SimpleShape::GetShaderId(const Environment& env) const
 
 std::string SimpleShape::GetShaderName(const Environment& env) const
 {
-    if (mShape == SimpleShapeType::Cube)
+    if (Is3DShape(mShape))
         return "Generic3DVertexShader";
 
     return "Generic2DVertexShader";
