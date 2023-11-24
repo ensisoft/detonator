@@ -1213,6 +1213,383 @@ void CubeGeometry::AddLine(const Vec3& v0, const Vec3& v1, std::vector<Vertex3D>
     vertex.push_back(b);
 }
 
+// static
+Geometry* CylinderGeometry::Generate(const Environment& env, Style style, Device& device, unsigned slices)
+{
+    if (style != Style::Solid)
+        return nullptr;
+
+    Geometry* geom = device.FindGeometry("CylinderGeometry");
+    if (geom)
+        return geom;
+
+    const auto vertex_count = slices + 1;
+
+    std::vector<Vertex3D> vertices;
+    std::vector<Index16> indices;
+
+    for (unsigned i=0; i<slices; ++i)
+    {
+        const float increment = math::Circle / slices;
+        const float angle = i * increment;
+
+        // multiplying by a negative number has winding order significance
+        const auto x = std::cos(angle) *  0.5f;
+        const auto z = std::sin(angle) * -0.5f;
+        const auto normal = glm::normalize(glm::vec3(x, 0.0f, z));
+
+        const auto dist = angle / math::Circle;
+
+        Vertex3D top;
+        top.aPosition.x = x;
+        top.aPosition.y = 0.5f;
+        top.aPosition.z = z;
+        top.aNormal.x = normal.x;
+        top.aNormal.y = normal.y;
+        top.aNormal.z = normal.z;
+        top.aTexCoord.x = dist;
+        top.aTexCoord.y = 0.0f;
+
+        Vertex3D bottom;
+        bottom.aPosition.x = x;
+        bottom.aPosition.y = -0.5f;
+        bottom.aPosition.z = z;
+        bottom.aNormal.x = normal.x;
+        bottom.aNormal.y = normal.y;
+        bottom.aNormal.z = normal.z;
+        bottom.aTexCoord.x = dist;
+        bottom.aTexCoord.y = 1.0f;
+
+        vertices.push_back(top);
+        vertices.push_back(bottom);
+    }
+
+    const auto body_start = indices.size();
+
+    // note the -1 here so that we don't go out of bounds on the vertex vector.
+    for (unsigned i=0; i<slices-1; ++i)
+    {
+        const auto slice = i * 2;
+        ASSERT(slice+3 < vertices.size());
+
+        indices.push_back(slice+0);
+        indices.push_back(slice+1);
+        indices.push_back(slice+2);
+
+        indices.push_back(slice+2);
+        indices.push_back(slice+1);
+        indices.push_back(slice+3);
+    }
+    //the last slice wraps over
+    indices.push_back((slices-1)*2 + 0);
+    indices.push_back((slices-1)*2 + 1);
+    indices.push_back(0);
+    indices.push_back(0);
+    indices.push_back((slices-1)*2 + 1);
+    indices.push_back(1);
+
+    const auto body_count = indices.size() - body_start;
+    const auto top_start = indices.size();
+    {
+
+        Vertex3D top;
+        top.aPosition = Vec3 { 0.0f, 0.5f, 0.0f };
+        top.aNormal   = Vec3 { 0.0f, 1.0f, 0.0f };
+        top.aTexCoord = Vec2 {0.5f, 0.5f};
+        vertices.push_back(top);
+        indices.push_back(vertices.size()-1);
+
+        for (unsigned i = 0; i < vertex_count; ++i)
+        {
+            const float increment = math::Circle / slices;
+            const float vertex_angle = i * increment;
+            const float texture_angle = i * increment; // + math::Pi;
+
+            // multiplying by a negative number has winding order significance
+            const float x = std::cos(vertex_angle) *  0.5f;
+            const float z = std::sin(vertex_angle) * -0.5f;
+
+            const float tx = std::cos(texture_angle) *  0.5f;
+            const float ty = std::sin(texture_angle) * -0.5f;
+
+            Vertex3D vertex;
+            vertex.aPosition = Vec3 { x, 0.5f, z };
+            vertex.aNormal   = Vec3 { 0.0f, 1.0f, 0.0f };
+            vertex.aTexCoord = Vec2 { 0.5f + tx, 0.5f + ty };
+            vertices.push_back(vertex);
+            indices.push_back(vertices.size()-1);
+        }
+    }
+    const auto top_count = indices.size() - top_start;
+    const auto bot_start = indices.size();
+    {
+        Vertex3D bottom;
+        bottom.aPosition = Vec3 { 0.0f, -0.5f, 0.0f };
+        bottom.aNormal   = Vec3 { 0.0f, -1.0f, 0.0f };
+        bottom.aTexCoord = Vec2 {0.5f, 0.5f};
+        vertices.push_back(bottom);
+        indices.push_back(vertices.size()-1);
+
+        for (unsigned i = 0; i < vertex_count; ++i)
+        {
+            const float increment = math::Circle / slices;
+            const float vertex_angle = i * increment;
+            const float texture_angle = i * increment; // + math::Pi;
+
+            // multiplying by a negative number has winding order significance
+            const float x = std::cos(vertex_angle) *  0.5f;
+            const float z = std::sin(vertex_angle) *  0.5f; // -0.5f
+            const auto normal = glm::normalize(glm::vec3{x, 0.0f, z});
+
+            const float tx = std::cos(texture_angle) *  0.5f;
+            const float ty = std::sin(texture_angle) *  0.5f; // -0.5f;
+
+            Vertex3D vertex;
+            vertex.aPosition = Vec3 { x, -0.5f, z };
+            vertex.aNormal   = Vec3 { 0.0f, -1.0f, 0.0f };
+            vertex.aTexCoord = Vec2 { 0.5f + tx, 0.5f + ty };
+            vertices.push_back(vertex);
+            indices.push_back(vertices.size()-1);
+        }
+    }
+    const auto bot_count = indices.size() - bot_start;
+
+
+    geom = device.MakeGeometry("CylinderGeometry");
+    geom->SetVertexBuffer(std::move(vertices));
+    geom->SetIndexBuffer(std::move(indices));
+    geom->SetVertexLayout(GetVertexLayout<Vertex3D>());
+    geom->AddDrawCmd(Geometry::DrawType::Triangles, body_start, body_count);
+    geom->AddDrawCmd(Geometry::DrawType::TriangleFan, top_start, top_count);
+    geom->AddDrawCmd(Geometry::DrawType::TriangleFan, bot_start, bot_count);
+    return geom;
+}
+
+// static
+Geometry* ConeGeometry::Generate(const Environment& env, Style style, Device& device, unsigned int slices)
+{
+    if (style != Style::Solid)
+        return nullptr;
+
+    Geometry* geom = device.FindGeometry("Cone");
+    if (geom)
+        return geom;
+
+    const auto vertex_count = slices + 1;
+
+    std::vector<Vertex3D> vertices;
+
+    Vertex3D apex;
+    apex.aPosition = Vec3{0.0f, 0.5f, 0.0f};
+    apex.aNormal   = Vec3{0.0f, 1.0f, 0.0f};
+    apex.aTexCoord = Vec2{0.5f, 0.5f};
+    vertices.push_back(apex);
+
+    for (unsigned i=0; i<vertex_count; ++i)
+    {
+        const auto angle_increment = math::Circle / slices;
+        const auto vertex_start_angle = angle_increment * -0.5f;
+        const auto vertex_angle = vertex_start_angle + angle_increment * i;
+        const auto texture_angle = angle_increment * i;
+
+        // multiplying by a negative number has winding order significance
+        const float x = std::cos(vertex_angle) *  0.5f;
+        const float z = std::sin(vertex_angle) * -0.5f;
+
+        const auto position = glm::vec3 { std::cos(vertex_angle) *  0.5f, -0.5f,
+                                          std::sin(vertex_angle) * -0.5f };
+
+        const auto next = glm::vec3 { std::cos(vertex_angle + angle_increment) *  0.5f, -0.5f,
+                                      std::sin(vertex_angle + angle_increment) * -0.5f };
+        const auto apex = glm::vec3 {0.0f, 0.5f, 0.0f };
+
+        const auto to_apex = glm::normalize(apex - position);
+        const auto to_next = glm::normalize(next - position);
+        const auto normal = glm::normalize(glm::cross(to_next, to_apex));
+
+        const float tx = std::cos(texture_angle) *  0.5f;
+        const float ty = std::sin(texture_angle) * -0.5f;
+
+        Vertex3D vertex;
+        vertex.aPosition = ToVec(position);
+        vertex.aNormal   = ToVec(normal);
+        vertex.aTexCoord = Vec2{ 0.5f + tx, 0.5f + ty };
+        vertices.push_back(vertex);
+    }
+
+    const auto cone_start   = 0;
+    const auto cone_count   = vertices.size();
+    const auto bottom_start = vertices.size();
+
+    Vertex3D bottom;
+    bottom.aPosition = Vec3{0.0f, -0.5f, 0.0f};
+    bottom.aNormal   = Vec3{0.0f, -1.0f, 0.0f};
+    bottom.aTexCoord = Vec2{0.5f, 0.5f};
+    vertices.push_back(bottom);
+
+    for (unsigned i=0; i<vertex_count; ++i)
+    {
+        const auto angle_increment = math::Circle / slices;
+        const auto vertex_start_angle = angle_increment * -0.5f;
+        const auto vertex_angle = vertex_start_angle + angle_increment * i;
+        const auto texture_angle = angle_increment * i;
+
+        // multiplying by a negative number has winding order significance
+        const float x = std::cos(vertex_angle) * 0.5f;
+        const float z = std::sin(vertex_angle) * 0.5f; //-0.5f;
+
+        const float tx = std::cos(texture_angle) * 0.5f;
+        const float ty = std::sin(texture_angle) * 0.5f; //-0.5f;
+
+        Vertex3D vertex;
+        vertex.aPosition = Vec3 { x, -0.5f, z };
+        vertex.aNormal   = Vec3 { 0.0f, -1.0f, 0.0f };
+        vertex.aTexCoord = Vec2 { 0.5f + tx, 0.5f + ty };
+        vertices.push_back(vertex);
+    }
+
+    const auto bottom_count = vertices.size() - bottom_start;
+
+    geom = device.MakeGeometry("Cone");
+    geom->SetVertexBuffer(std::move(vertices));
+    geom->SetVertexLayout(GetVertexLayout<Vertex3D>());
+    geom->AddDrawCmd(Geometry::DrawType::TriangleFan, cone_start, cone_count);
+    geom->AddDrawCmd(Geometry::DrawType::TriangleFan, bottom_start, bottom_count);
+    return geom;
+
+}
+
+// static
+Geometry* SphereGeometry::Generate(const Environment& env, Style style, Device& device, unsigned int slices)
+{
+    if (style != Style::Solid)
+        return nullptr;
+
+    Geometry* geom = device.FindGeometry("Sphere");
+    if (geom)
+        return geom;
+
+
+    const float radius = 0.5f;
+
+    const int numSlices    = slices;
+    const int numParallels = slices / 2;
+    const int numVertices  = (numParallels + 1) * (slices + 1);
+    const int numIndices   = numParallels * slices * 6;
+    const float angleStep  = math::Circle / slices;
+
+    std::vector<Vertex3D> vertices;
+    std::vector<Index16> indices;
+
+    for (int i=0; i<numParallels+1; ++i)
+    {
+        for (int j=0; j<numSlices+1; ++j)
+        {
+            glm::vec3 position;
+            position.x = radius * sinf (angleStep * (float)i) *
+                         sinf (angleStep * (float)j);
+            position.y = radius * cosf (angleStep * (float)i);
+            position.z = radius * sinf (angleStep * (float)i) *
+                         cosf (angleStep * (float)j);
+
+            glm::vec3 normal;
+            normal = position / radius;
+
+            glm::vec2 texcoord;
+            texcoord.x = (float)j / (float)numSlices;
+            texcoord.y = (float)i / (float)(numParallels - 1);
+
+            Vertex3D vertex;
+            vertex.aPosition = ToVec(position);
+            vertex.aNormal   = ToVec(normal);
+            vertex.aTexCoord = ToVec(texcoord);
+            vertices.push_back(std::move(vertex));
+        }
+    }
+
+    // generate indices
+    for (int i=0; i<numParallels; ++i)
+    {
+        for (int j=0; j<numSlices; ++j)
+        {
+            indices.push_back( (i + 0) * (numSlices + 1) + (j + 0) );
+            indices.push_back( (i + 1) * (numSlices + 1) + (j + 0) );
+            indices.push_back( (i + 1) * (numSlices + 1) + (j + 1) );
+
+            indices.push_back( (i + 0) * (numSlices + 1 ) + (j + 0) );
+            indices.push_back( (i + 1) * (numSlices + 1 ) + (j + 1) );
+            indices.push_back( (i + 0) * (numSlices + 1 ) + (j + 1) );
+        }
+    }
+
+    geom = device.MakeGeometry("Sphere");
+    geom->SetVertexBuffer(std::move(vertices));
+    geom->SetIndexBuffer(std::move(indices));
+    geom->SetVertexLayout(GetVertexLayout<Vertex3D>());
+    geom->AddDrawCmd(Geometry::DrawType::Triangles);
+    return geom;
+}
+
+// static
+Geometry* PyramidGeometry::Generate(const Environment& env, Style style, Device& device)
+{
+    if (style != Style::Solid)
+        return nullptr;
+
+    Geometry* geom = device.FindGeometry("Pyramid");
+    if (geom)
+        return geom;
+
+    Vertex3D apex;
+    apex.aPosition = Vec3 {0.0f, 0.5f, 0.0f};
+    apex.aNormal   = Vec3 {0.0f, 1.0f, 0.0f};
+    apex.aTexCoord = Vec2 {0.5f, 0.5f};
+
+    Vertex3D base[4];
+    base[0].aPosition = Vec3{-0.5f, -0.5f,  0.5f};
+    base[0].aTexCoord = Vec2{0.0f, 1.0f};
+    base[1].aPosition = Vec3{ 0.5f, -0.5f,  0.5f};
+    base[1].aTexCoord = Vec2{1.0f, 1.0f};
+    base[2].aPosition = Vec3{ 0.5f, -0.5f, -0.5f};
+    base[2].aTexCoord = Vec2{1.0f, 0.0f};
+    base[3].aPosition = Vec3{-0.5f, -0.5f, -0.5f};
+    base[3].aTexCoord = Vec2{0.0f, 0.0f};
+
+    std::vector<Vertex3D> verts;
+    MakeFace(verts, apex, base[0], base[1]);
+    MakeFace(verts, apex, base[1], base[2]);
+    MakeFace(verts, apex, base[2], base[3]);
+    MakeFace(verts, apex, base[3], base[0]);
+    MakeFace(verts, base[0], base[3], base[2]);
+    MakeFace(verts, base[0], base[2], base[1]);
+
+    geom = device.MakeGeometry("Pyramid");
+    geom->AddDrawCmd(Geometry::DrawType::Triangles);
+    geom->SetVertexBuffer(std::move(verts));
+    geom->SetVertexLayout(GetVertexLayout<Vertex3D>());
+    return geom;
+}
+
+void PyramidGeometry::MakeFace(std::vector<Vertex3D>& vertices, const Vertex3D& apex, const Vertex3D& base0,
+                               const Vertex3D& base1)
+{
+    const auto this_position = ToVec(base0.aPosition);
+    const auto next_position = ToVec(base1.aPosition);
+    const auto apex_position = ToVec(apex.aPosition);
+    const auto to_apex = glm::normalize(apex_position - this_position);
+    const auto to_next = glm::normalize(next_position - this_position);
+    const auto normal = glm::normalize(glm::cross(to_next, to_apex));
+
+    vertices.push_back(apex);
+    vertices.back().aNormal = ToVec(normal);
+
+    vertices.push_back(base0);
+    vertices.back().aNormal = ToVec(normal);
+
+    vertices.push_back(base1);
+    vertices.back().aNormal = ToVec(normal);
+}
+
 Geometry* ConstructShape(const SimpleShapeArgs& args,
                          const SimpleShapeEnvironment& environment,
                          SimpleShapeStyle style,
@@ -1231,10 +1608,16 @@ Geometry* ConstructShape(const SimpleShapeArgs& args,
         return detail::CircleGeometry::Generate(environment, style, device);
     else if (type == SimpleShapeType::Cube)
         return detail::CubeGeometry::Generate(environment, style, device);
+    else if (type == SimpleShapeType::Cone)
+        return detail::ConeGeometry::Generate(environment, style, device, std::get<ConeShapeArgs>(args).slices);
+    else if (type == SimpleShapeType::Cylinder)
+        return detail::CylinderGeometry::Generate(environment, style, device, std::get<CylinderShapeArgs>(args).slices);
     else if (type == SimpleShapeType::IsoscelesTriangle)
         return detail::IsoscelesTriangleGeometry::Generate(environment, style, device);
     else if (type == SimpleShapeType::Parallelogram)
         return detail::ParallelogramGeometry::Generate(environment, style, device);
+    else if (type == SimpleShapeType::Pyramid)
+        return detail::PyramidGeometry::Generate(environment, style, device);
     else if (type == SimpleShapeType::Rectangle)
         return detail::RectangleGeometry::Generate(environment, style, device);
     else if (type == SimpleShapeType::RightTriangle)
@@ -1245,6 +1628,8 @@ Geometry* ConstructShape(const SimpleShapeArgs& args,
         return detail::SemiCircleGeometry::Generate(environment, style, device);
     else if (type == SimpleShapeType::Sector)
         return detail::SectorGeometry::Generate(environment, style, device, std::get<SectorShapeArgs>(args).fill_percentage);
+    else if (type == SimpleShapeType::Sphere)
+        return detail::SphereGeometry::Generate(environment, style, device, std::get<SphereShapeArgs>(args).slices);
     else if (type == SimpleShapeType::StaticLine)
         return detail::StaticLineGeometry::Generate(environment, style, device);
     else if (type == SimpleShapeType::Trapezoid)
