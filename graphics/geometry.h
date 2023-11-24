@@ -18,6 +18,12 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <glm/vec2.hpp>
+#  include <glm/vec3.hpp>
+#  include <glm/vec4.hpp>
+#include "warnpop.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <vector>
@@ -51,6 +57,20 @@ namespace gfx
         float z = 0.0f;
         float w = 0.0f;
     };
+
+    inline Vec2 ToVec(const glm::vec2& vector) noexcept
+    { return { vector.x, vector.y }; }
+    inline Vec3 ToVec(const glm::vec3& vector) noexcept
+    { return { vector.x, vector.y, vector.z }; }
+    inline Vec4 ToVec(const glm::vec4& vector) noexcept
+    { return { vector.x, vector.y, vector.z, vector.w }; }
+
+    inline glm::vec2 ToVec(const Vec2& vec) noexcept
+    { return { vec.x, vec.y }; }
+    inline glm::vec3 ToVec(const Vec3& vec) noexcept
+    { return { vec.x, vec.y, vec.z }; }
+    inline glm::vec4 ToVec(const Vec4& vec) noexcept
+    { return { vec.x, vec.y, vec.z, vec.w }; }
 
     // About texture coordinates.
     // In OpenGL the Y axis for texture coordinates goes so that
@@ -93,6 +113,14 @@ namespace gfx
         // Texture coordinate for the vertex.
         Vec2 aTexCoord;
     };
+
+    // The offsetof macro is guaranteed to be usable only with types with standard layout.
+    static_assert(std::is_standard_layout<Vertex3D>::value, "Vertex3D must meet standard layout.");
+    static_assert(std::is_standard_layout<Vertex2D>::value, "Vertex2D must meet standard layout.");
+
+    // memcpy, binary read/write as-is require trivially_copyable.
+    static_assert(std::is_trivially_copyable<Vertex3D>::value, "Vertex3D must be trivial to copy.");
+    static_assert(std::is_trivially_copyable<Vertex2D>::value, "Vertex2D must be trivial to copy.");
 
     struct VertexLayout {
         struct Attribute {
