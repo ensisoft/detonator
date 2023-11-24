@@ -2402,6 +2402,66 @@ void main() {
     TEST_REQUIRE(result_green.Compare(gfx::Color::Green));
 }
 
+void unit_test_index_draw_cmd_bug()
+{
+    TEST_CASE(test::Type::Feature)
+
+    auto dev = CreateDevice();
+
+    constexpr const char* fragment_src =
+R"(#version 100
+precision mediump float;
+void main() {
+  gl_FragColor = vec4(1.0);
+})";
+
+    constexpr const char* vertex_src =
+R"(#version 100
+attribute vec2 aPosition;
+void main() {
+  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
+})";
+
+    auto* prog = MakeTestProgram(*dev, vertex_src, fragment_src);
+
+    gfx::Device::State state;
+    state.bWriteColor  = true;
+    state.blending     = gfx::Device::State::BlendOp::None;
+    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+    state.viewport     = gfx::IRect(0, 0, 10, 10);
+
+    auto* geom = dev->MakeGeometry("geom");
+    constexpr const gfx::Vertex2D vertices[] = {
+        { {-1,  1}, {0, 1} },
+        { {-1, -1}, {0, 0} },
+        { { 1, -1}, {1, 0} },
+        { { 1,  1}, {1, 1} }
+    };
+    constexpr const gfx::Index16 indices[] = {
+        0, 1, 2, // bottom triangle
+        0, 2, 3  // top triangle
+    };
+
+    geom->SetVertexBuffer(vertices, 4);
+    geom->SetIndexBuffer(indices, 6);
+
+    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles, 3, 3);
+
+    dev->BeginFrame();
+       dev->ClearColor(gfx::Color::Red);
+       dev->Draw(*prog, *geom, state);
+    dev->EndFrame();
+
+    // this has alpha in it.
+    const auto& bmp = dev->ReadColorBuffer(10, 10);
+
+    // the draw should draw the second (top) triangle
+    // which means the right top corner should be white
+    // and the bottom left corner should be clear color (red)
+    TEST_REQUIRE(bmp.GetPixel(9, 0) == gfx::Color::Red);
+    TEST_REQUIRE(bmp.GetPixel(0, 9) == gfx::Color::White);
+}
+
 
 int test_main(int argc, char* argv[])
 {
@@ -2448,5 +2508,6 @@ int test_main(int argc, char* argv[])
     unit_test_repeated_uniform_bug();
     unit_test_fbo_texture_delete_bug();
     unit_test_fbo_change_color_target_bug();
+    unit_test_index_draw_cmd_bug();
     return 0;
 }
