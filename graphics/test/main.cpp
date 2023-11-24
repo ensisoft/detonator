@@ -2292,6 +2292,71 @@ public:
     { return false; }
 };
 
+
+class Shape3DTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        constexpr auto const aspect = 1024.0f / 768.0f;
+        constexpr auto Fov = 45.0f;
+        constexpr auto Far = 10000.0f;
+        const auto half_width = 1024.0f*0.5f;
+        const auto half_height = 768.0f*0.5f;
+        const auto ortho = glm::ortho(-half_width, half_height, -half_height, half_height, -1000.0f, 1000.0f);
+        const auto near = half_height / std::tan(glm::radians(Fov*0.5f));
+        const auto projection = ortho *
+                glm::translate(glm::mat4(1.0f), glm::vec3 { 0.0f, 0.0f, -1000.0f} ) *
+                  glm::inverse(ortho) *
+                    glm::perspective(glm::radians(Fov), aspect, near, Far) *
+                      glm::translate(glm::mat4(1.0f), glm::vec3 { 0.0f, 0.0f, -near });
+
+
+        gfx::Painter p(painter);
+        p.ResetViewMatrix();
+        p.SetProjectionMatrix(projection);
+
+        gfx::detail::GenericShaderProgram program;
+
+        gfx::Painter::DrawState state;
+        state.depth_test   = gfx::Painter::DepthTest::LessOrEQual;
+        state.stencil_func = gfx::Painter::StencilFunc::Disabled;
+        state.write_color  = true;
+
+        const auto t = base::GetTime();
+
+        gfx::Transform transform;
+        transform.Resize(100.0f, 100.0f, 100.0f);
+        transform.RotateAroundY(std::sin(t));
+        transform.RotateAroundX(std::cos(t));
+        transform.Translate(-half_width, half_height);
+        transform.Translate(100.0f, -100.0f);
+        p.Draw(gfx::Pyramid(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+
+        transform.Translate(200.0f, 0.0f);
+        p.Draw(gfx::Cube(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+
+        transform.Translate(200.0f, 0.0f);
+        p.Draw(gfx::Cylinder(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::None));
+
+        transform.Translate(200.0f, 0.0f);
+        p.Draw(gfx::Cone(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+
+        transform.Translate(200.0f, 0.0f);
+        p.Draw(gfx::Sphere(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+
+    }
+    virtual std::string GetName() const override
+    { return "Shape3DTest"; }
+    virtual bool IsFeatureTest() const override
+    { return false; }
+};
+
 class FramebufferTest : public GraphicsTest
 {
 public:
@@ -2587,6 +2652,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new PremultiplyAlphaTest);
     tests.emplace_back(new PrecisionTest);
     tests.emplace_back(new Draw3DTest);
+    tests.emplace_back(new Shape3DTest);
 
     // GL ES3 specific tests
     if (version == 3)

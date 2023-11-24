@@ -254,6 +254,20 @@ namespace gfx
                                  const Vec3& normal);
             static void AddLine(const Vec3& v0, const Vec3& v1, std::vector<Vertex3D>& vertex);
         };
+        struct CylinderGeometry {
+            static Geometry* Generate(const Environment& env, Style style, Device& device, unsigned slices);
+        };
+        struct PyramidGeometry {
+            static Geometry* Generate(const Environment& env, Style style, Device& device);
+            static void MakeFace(std::vector<Vertex3D>& verts, const Vertex3D& apex, const Vertex3D& base0, const Vertex3D& base1);
+        };
+        struct ConeGeometry {
+            static Geometry* Generate(const Environment& env, Style style, Device& device, unsigned slices);
+        };
+        struct SphereGeometry {
+            static Geometry* Generate(const Environment& env, Style style, Device& device, unsigned slices);
+        };
+
     } // namespace
 
     enum class SimpleShapeType {
@@ -261,14 +275,18 @@ namespace gfx
         ArrowCursor,
         BlockCursor,
         Capsule,
-        Cube,
         Circle,
+        Cone,
+        Cube,
+        Cylinder,
         IsoscelesTriangle,
         Parallelogram,
+        Pyramid,
         Rectangle,
         RightTriangle,
         RoundRect,
         Sector,
+        Sphere,
         SemiCircle,
         StaticLine,
         Trapezoid,
@@ -282,8 +300,18 @@ namespace gfx
         struct RoundRectShapeArgs {
             float corner_radius = 0.05f;
         };
+        struct CylinderShapeArgs {
+            unsigned slices = 100;
+        };
+        struct ConeShapeArgs {
+            unsigned slices = 100;
+        };
+        struct SphereShapeArgs {
+            unsigned slices = 100;
+        };
 
-        using SimpleShapeArgs = std::variant<std::monostate, SectorShapeArgs, RoundRectShapeArgs>;
+        using SimpleShapeArgs = std::variant<std::monostate, SectorShapeArgs, RoundRectShapeArgs,
+                CylinderShapeArgs, ConeShapeArgs, SphereShapeArgs>;
         using SimpleShapeEnvironment = DrawableClass::Environment;
         using SimpleShapeStyle       = DrawableClass::Style;
         
@@ -367,6 +395,33 @@ namespace gfx
                                      std::string name = "",
                                      float corner_radius = 0.05f) noexcept
               : SimpleShapeClass(SimpleShapeType::RoundRect, RoundRectShapeArgs{corner_radius}, std::move(id), std::move(name))
+            {}
+        };
+
+        template<>
+        struct SimpleShapeClassTypeShim<SimpleShapeType::Cylinder> : public SimpleShapeClass {
+            SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
+                                     std::string name = "",
+                                     unsigned  slices = 100) noexcept
+              : SimpleShapeClass(SimpleShapeType::Cylinder, CylinderShapeArgs{slices}, std::move(id), std::move(name))
+            {}
+        };
+
+        template<>
+        struct SimpleShapeClassTypeShim<SimpleShapeType::Cone> : public SimpleShapeClass {
+            SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
+                                     std::string name = "",
+                                     unsigned  slices = 100) noexcept
+                    : SimpleShapeClass(SimpleShapeType::Cone, ConeShapeArgs{slices}, std::move(id), std::move(name))
+            {}
+        };
+
+        template<>
+        struct SimpleShapeClassTypeShim<SimpleShapeType::Sphere> : public SimpleShapeClass {
+            SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
+                                     std::string name = "",
+                                     unsigned  slices = 100) noexcept
+                    : SimpleShapeClass(SimpleShapeType::Sphere, SphereShapeArgs{slices}, std::move(id), std::move(name))
             {}
         };
 
@@ -481,6 +536,30 @@ namespace gfx
             {}
         };
 
+        template<>
+        struct SimpleShapeInstanceTypeShim<SimpleShapeType::Cylinder> : public SimpleShape
+        {
+            explicit SimpleShapeInstanceTypeShim(Style style = Style::Solid, unsigned slices = 100) noexcept
+              : SimpleShape(SimpleShapeType::Cylinder, CylinderShapeArgs { slices }, style)
+            {}
+        };
+
+        template<>
+        struct SimpleShapeInstanceTypeShim<SimpleShapeType::Cone> : public SimpleShape
+        {
+            explicit SimpleShapeInstanceTypeShim(Style style = Style::Solid, unsigned slices = 100) noexcept
+                    : SimpleShape(SimpleShapeType::Cone, ConeShapeArgs { slices }, style)
+            {}
+        };
+
+        template<>
+        struct SimpleShapeInstanceTypeShim<SimpleShapeType::Sphere> : public SimpleShape
+        {
+            explicit SimpleShapeInstanceTypeShim(Style style = Style::Solid, unsigned slices = 100) noexcept
+                    : SimpleShape(SimpleShapeType::Sphere, SphereShapeArgs { slices }, style)
+            {}
+        };
+
     } // namespace
 
     using ArrowClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::Arrow>;
@@ -503,9 +582,17 @@ namespace gfx
     using CircleInstance = SimpleShapeInstance;
     using Circle         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Circle>;
 
+    using ConeClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::Cone>;
+    using ConeInstance = SimpleShapeInstance;
+    using Cone         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Cone>;
+
     using CubeClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::Cube>;
     using CubeInstance = SimpleShapeInstance;
     using Cube         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Cube>;
+
+    using CylinderClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::Cylinder>;
+    using CylinderInstance = SimpleShapeInstance;
+    using Cylinder         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Cylinder>;
 
     using IsoscelesTriangleClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::IsoscelesTriangle>;
     using IsoscelesTriangleInstance = SimpleShapeInstance;
@@ -514,6 +601,10 @@ namespace gfx
     using ParallelogramClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::Parallelogram>;
     using ParallelogramInstance = SimpleShapeInstance;
     using Parallelogram         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Parallelogram>;
+
+    using PyramidClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::Pyramid>;
+    using PyramidInstance = SimpleShapeInstance;
+    using Pyramid         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Pyramid>;
 
     using RectangleClass         = detail::SimpleShapeClassTypeShim<SimpleShapeType::Rectangle>;
     using RectangleClassInstance = SimpleShapeInstance;
@@ -530,6 +621,10 @@ namespace gfx
     using RoundRectangleClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::RoundRect>;
     using RoundRectangleInstance = SimpleShapeInstance;
     using RoundRectangle         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::RoundRect>;
+
+    using SphereClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::Sphere>;
+    using SphereInstance = SimpleShapeInstance;
+    using Sphere         = detail::SimpleShapeInstanceTypeShim<SimpleShapeType::Sphere>;
 
     using StaticLineClass    = detail::SimpleShapeClassTypeShim<SimpleShapeType::StaticLine>;
     using StaticLineInstance = SimpleShapeInstance;
@@ -1125,7 +1220,11 @@ namespace gfx
 
     inline bool Is3DShape(SimpleShapeType shape) noexcept
     {
-        if (shape == SimpleShapeType::Cube)
+        if (shape == SimpleShapeType::Cone ||
+            shape == SimpleShapeType::Cube ||
+            shape == SimpleShapeType::Cylinder ||
+            shape == SimpleShapeType::Pyramid ||
+            shape == SimpleShapeType::Sphere)
             return true;
         return false;
     }
