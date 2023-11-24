@@ -99,6 +99,25 @@ void AppendVector(std::vector<T>& head, std::vector<T>&& tail)
                 std::make_move_iterator(tail.end()));
 }
 
+template<typename T>
+std::vector<T> CombineVectors(const std::vector<T>& first, const std::vector<T>& second)
+{
+    std::vector<T> ret;
+    AppendVector(ret, first);
+    AppendVector(ret, second);
+    return ret;
+}
+
+template<typename T>
+std::vector<T> CombineVectors(std::vector<T>&& first, std::vector<T>&& second)
+{
+    std::vector<T> ret;
+    ret = std::move(first);
+    AppendVector(ret, std::move(second));
+    return ret;
+}
+
+
 template<typename T, typename Predicate> inline
 void EraseRemove(std::vector<T>& vector, Predicate pred)
 {

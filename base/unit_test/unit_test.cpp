@@ -25,6 +25,7 @@
 #include "base/color4f.h"
 #include "base/types.h"
 #include "base/trace.h"
+#include "base/utility.h"
 
 #if !defined(UNIT_TEST_BUNDLE)
 #  include "base/json.cpp"
@@ -350,6 +351,26 @@ void unit_test_trace()
     }
 }
 
+
+void unit_test_util()
+{
+    TEST_CASE(test::Type::Feature)
+
+    {
+        std::vector<int> foo = {1, 2, 3};
+        std::vector<int> bar = {4, 5, 6};
+
+        const auto& ret = base::CombineVectors(std::move(foo), std::move(bar));
+        TEST_REQUIRE(ret.size() == 6);
+        TEST_REQUIRE(ret[0] == 1);
+        TEST_REQUIRE(ret[1] == 2);
+        TEST_REQUIRE(ret[2] == 3);
+        TEST_REQUIRE(ret[3] == 4);
+        TEST_REQUIRE(ret[4] == 5);
+        TEST_REQUIRE(ret[5] == 6);
+    }
+}
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
@@ -363,6 +384,8 @@ int test_main(int argc, char* argv[])
     unit_test_rect_test_point<float>();
     unit_test_rect_mapping();
     unit_test_trace();
+
+    unit_test_util();
     return 0;
 }
 ) // TEST_MAIN
