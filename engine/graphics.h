@@ -34,9 +34,10 @@
 namespace engine
 {
     struct DrawPacket {
-        using Culling = gfx::Painter::Culling;
+        using DepthTest  = gfx::Painter::DepthTest;
+        using Culling    = gfx::Painter::Culling;
         using RenderPass = game::RenderPass;
-        using Projection  = game::RenderProjection;
+        using Projection = game::RenderProjection;
 
         enum class Flags {
             PP_Bloom
@@ -47,6 +48,8 @@ namespace engine
         enum class Source {
             Map, Scene
         };
+
+        DepthTest depth_test = DepthTest::Disabled;
 
         RenderPass pass = RenderPass::DrawColor;
         Projection projection = Projection::Orthographic;

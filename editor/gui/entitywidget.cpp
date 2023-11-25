@@ -2266,6 +2266,16 @@ void EntityWidget::on_dsBloom_stateChanged(int)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_dsDoubleSided_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_dsDepthTest_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_rbSimulation_currentIndexChanged(const QString&)
 {
     UpdateCurrentNodeProperties();
@@ -3447,6 +3457,8 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.dsFlipHorizontally, item->TestFlag(game::DrawableItemClass::Flags::FlipHorizontally));
             SetValue(mUI.dsFlipVertically, item->TestFlag(game::DrawableItemClass::Flags::FlipVertically));
             SetValue(mUI.dsBloom, item->TestFlag(game::DrawableItemClass::Flags::PP_EnableBloom));
+            SetValue(mUI.dsDoubleSided, item->TestFlag(game::DrawableItemClass::Flags::DoubleSided));
+            SetValue(mUI.dsDepthTest, item->TestFlag(game::DrawableItemClass::Flags::DepthTest));
 
             const auto& rotator = item->GetRotator();
             const auto [x, y, z] = rotator.GetEulerAngles();
@@ -3653,6 +3665,8 @@ void EntityWidget::UpdateCurrentNodeProperties()
         item->SetFlag(game::DrawableItemClass::Flags::FlipHorizontally, GetValue(mUI.dsFlipHorizontally));
         item->SetFlag(game::DrawableItemClass::Flags::FlipVertically, GetValue(mUI.dsFlipVertically));
         item->SetFlag(game::DrawableItemClass::Flags::PP_EnableBloom, GetValue(mUI.dsBloom));
+        item->SetFlag(game::DrawableItemClass::Flags::DoubleSided, GetValue(mUI.dsDoubleSided));
+        item->SetFlag(game::DrawableItemClass::Flags::DepthTest, GetValue(mUI.dsDepthTest));
     }
 
     if (auto* body = node->GetRigidBody())
