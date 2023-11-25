@@ -565,22 +565,14 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
             // model transform.
             transform.Push();
                 transform.Translate(-0.5f, -0.5f);
+                if (horizontal_flip)
+                    transform.Scale(-1.0f, 1.0f);
+                if (vertical_flip)
+                    transform.Scale(1.0f, -1.0f);
+
                 transform.Scale(size);
                 transform.Rotate(item->GetRotator());
                 transform.Translate(item->GetOffset());
-        }
-
-        if (horizontal_flip)
-        {
-            transform.Push();
-                transform.Scale(-1.0f, 1.0f);
-                transform.Translate(1.0f, 0.0f);
-        }
-        if (vertical_flip)
-        {
-            transform.Push();
-                transform.Scale(1.0f, -1.0f);
-                transform.Translate(0.0f, 1.0f);
         }
 
         glm::mat4 world(1.0f);
@@ -614,11 +606,6 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
             }
             item->ClearCommands();
         }
-
-        if (vertical_flip)
-            transform.Pop();
-        if (horizontal_flip)
-            transform.Pop();
 
         // pop model transform.
         transform.Pop();
@@ -1069,24 +1056,16 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
             // model transform.
             transform.Push();
                 transform.Translate(-0.5f, -0.5f);
+                if (horizontal_flip)
+                    transform.Scale(-1.0f, 1.0f);
+                if (vertical_flip)
+                    transform.Scale(1.0f, -1.0f);
+
                 transform.Scale(size);
                 transform.Rotate(item->GetRotator());
                 transform.Translate(item->GetOffset());
         }
 
-        // in model space now
-        if (horizontal_flip)
-        {
-            transform.Push();
-                transform.Scale(-1.0f , 1.0f);
-                transform.Translate(1.0f , 0.0f);
-        }
-        if (vertical_flip)
-        {
-            transform.Push();
-                transform.Scale(1.0f, -1.0f);
-                transform.Translate(0.0f, 1.0f);
-        }
         // if it doesn't render then no draw packets are generated
         if (item->TestFlag(DrawableItemType::Flags::VisibleInGame) && entity_visible)
         {
@@ -1117,10 +1096,6 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
             if (!hook || hook->InspectPacket(&node , packet))
                 packets.push_back(std::move(packet));
         }
-        if (vertical_flip)
-            transform.Pop();
-        if (horizontal_flip)
-            transform.Pop();
 
         // pop model transform
         transform.Pop();
