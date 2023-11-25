@@ -554,6 +554,7 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
         const auto& shape = paint_node.item_drawable;
         const auto view = item->GetRenderView();
         const auto size = node.GetSize();
+        const auto is3d = Is3DShape(*shape);
 
         if (view == game::RenderView::Dimetric)
         {
@@ -561,6 +562,24 @@ void Renderer::UpdateNode(PaintNode& paint_node, float time, float dt)
             transform.Push(CreateModelMatrix(GameView::Dimetric));
         }
 
+        if (is3d)
+        {
+            // model transform. keep in mind 3D only applies to the
+            // renderable item (so it's visual only) thus the 3rd dimension
+            // comes from the renderable item instead of the node!
+            transform.Push();
+                transform.RotateAroundX(gfx::FDegrees(180.0f));
+                if (horizontal_flip)
+                    transform.Scale(-1.0f, 1.0f);
+                if (vertical_flip)
+                    transform.Scale(1.0f, -1.0f);
+
+                transform.Scale(size.x, size.y, item->GetDepth());
+                transform.Rotate(item->GetRotator());
+                transform.Translate(item->GetOffset());
+
+        }
+        else
         {
             // model transform.
             transform.Push();
@@ -1044,6 +1063,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
         const auto depth_test      = item->TestFlag(DrawableItemType::Flags::DepthTest);
         const auto& shape = paint_node.item_drawable;
         const auto size = node.GetSize();
+        const auto is3d = Is3DShape(*shape);
         const auto view = item->GetRenderView();
 
         if (view == game::RenderView::Dimetric)
@@ -1052,6 +1072,34 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
             transform.Push(CreateModelMatrix(GameView::Dimetric));
         }
 
+        // The 2D and 3D shapes are different so that the 2D shapes are laid out in
+        // the XY quadrant and one corner is aligned with local coordinate space origin,
+        // but the 3D shapes are centered around the local origin.
+        //
+        // Entity node's model transform then assumes a 2D shape and does a small
+        // translation step in order to center the shape's vertices around its local
+        // origin. But when the shape is a 3D shape this step is actually wrong.
+        //
+        // Probably best way to fix this would be to make all the shapes consistent
+        // and then fix the 2D drawing to do an offset adjustment to get simple 2D
+        // drawing coordinates.
+        if (is3d)
+        {
+            // model transform. keep in mind 3D only applies to the
+            // renderable item (so it's visual only) thus the 3rd dimension
+            // comes from the renderable item instead of the node!
+            transform.Push();
+               transform.RotateAroundX(gfx::FDegrees(180.0f));
+               if (horizontal_flip)
+                   transform.Scale(-1.0f, 1.0f);
+               if (vertical_flip)
+                   transform.Scale(1.0f, -1.0f);
+
+               transform.Scale(size.x, size.y, item->GetDepth());
+               transform.Rotate(item->GetRotator());
+               transform.Translate(item->GetOffset());
+        }
+        else
         {
             // model transform.
             transform.Push();
