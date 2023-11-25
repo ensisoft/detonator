@@ -1408,6 +1408,12 @@ Workspace::Workspace(const QString& dir)
     mResources.emplace_back(new DrawableResource<gfx::ArrowCursorClass>(gfx::ArrowCursorClass("_arrow_cursor"), "Arrow Cursor"));
     mResources.emplace_back(new DrawableResource<gfx::BlockCursorClass>(gfx::BlockCursorClass("_block_cursor"), "Block Cursor"));
 
+    mResources.emplace_back(new DrawableResource<gfx::ConeClass>(gfx::ConeClass("_cone", "", 100), "Cone"));
+    mResources.emplace_back(new DrawableResource<gfx::CubeClass>(gfx::CubeClass("_cube"), "Cube"));
+    mResources.emplace_back(new DrawableResource<gfx::CylinderClass>(gfx::CylinderClass("_cylinder", "", 100), "Cylinder"));
+    mResources.emplace_back(new DrawableResource<gfx::PyramidClass>(gfx::PyramidClass("_pyramid"), "Pyramid"));
+    mResources.emplace_back(new DrawableResource<gfx::SphereClass>(gfx::SphereClass("_sphere", "", 100), "Sphere"));
+
     for (auto& resource : mResources)
     {
         resource->SetIsPrimitive(true);

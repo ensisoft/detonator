@@ -737,6 +737,11 @@ ContentLoaderImpl::ContentLoaderImpl()
     mDrawables["_parallelogram"]      = std::make_shared<gfx::ParallelogramClass>("_parallelogram");
     mDrawables["_arrow_cursor"]       = std::make_shared<gfx::ArrowCursorClass>("_arrow_cursor");
     mDrawables["_block_cursor"]       = std::make_shared<gfx::BlockCursorClass>("_block_cursor");
+    mDrawables["_cone"]               = std::make_shared<gfx::ConeClass>("_cone", "", 100);
+    mDrawables["_cube"]               = std::make_shared<gfx::CubeClass>("_cube");
+    mDrawables["_cylinder"]           = std::make_shared<gfx::CylinderClass>("_cylinder", "", 100);
+    mDrawables["_pyramid"]            = std::make_shared<gfx::PyramidClass>("_pyramid");
+    mDrawables["_sphere"]             = std::make_shared<gfx::SphereClass>("_sphere", "", 100);
 }
 
 ClassHandle<const audio::GraphClass> ContentLoaderImpl::FindAudioGraphClassById(const std::string& id) const
