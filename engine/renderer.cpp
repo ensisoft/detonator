@@ -1053,6 +1053,8 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
     {
         const auto horizontal_flip = item->TestFlag(DrawableItemType::Flags::FlipHorizontally);
         const auto vertical_flip   = item->TestFlag(DrawableItemType::Flags::FlipVertically);
+        const auto double_sided    = item->TestFlag(DrawableItemType::Flags::DoubleSided);
+        const auto depth_test      = item->TestFlag(DrawableItemType::Flags::DepthTest);
         const auto& shape = paint_node.item_drawable;
         const auto size = node.GetSize();
         const auto view = item->GetRenderView();
@@ -1092,17 +1094,25 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
             packet.flags.set(DrawPacket::Flags::PP_Bloom, item->TestFlag(DrawableItemType::Flags::PP_EnableBloom));
             packet.source       = DrawPacket::Source::Scene;
             packet.domain       = DrawPacket::Domain::Scene;
+            packet.culling      = DrawPacket::Culling::Back;
+            packet.depth_test   = DrawPacket::DepthTest::Disabled;
             packet.material     = paint_node.item_material;
             packet.drawable     = paint_node.item_drawable;
             packet.transform    = transform;
             packet.sort_point   = sort_point;
+            packet.render_layer = entity.GetLayer();
             packet.pass         = item->GetRenderPass();
             packet.projection   = item->GetRenderProjection();
             packet.packet_index = item->GetLayer();
-            packet.render_layer = entity.GetLayer();
             packet.line_width   = item->GetLineWidth();
-            if (horizontal_flip ^ vertical_flip)
+
+            if (double_sided)
+                packet.culling = DrawPacket::Culling::None;
+            else if (horizontal_flip ^ vertical_flip)
                 packet.culling = DrawPacket::Culling::Front;
+
+            if (depth_test)
+                packet.depth_test = DrawPacket::DepthTest::LessOrEQual;
 
             if (!hook || hook->InspectPacket(&node , packet))
                 packets.push_back(std::move(packet));
@@ -1299,8 +1309,8 @@ void Renderer::DrawScenePackets(gfx::Device& device, const std::vector<DrawPacke
         draw.material           = packet.material.get();
         draw.state.culling      = packet.culling;
         draw.state.line_width   = packet.line_width;
+        draw.state.depth_test   = packet.depth_test;
         draw.state.write_color  = true;
-        draw.state.depth_test   = gfx::Painter::DepthTest::Disabled;
         draw.state.stencil_func = gfx::Painter::StencilFunc ::Disabled;
         draw.view = &model_view;
 

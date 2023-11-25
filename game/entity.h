@@ -334,10 +334,11 @@ namespace game
                 glm::vec2, glm::vec3, glm::vec4>;
         // Key-value map of material params.
         using MaterialParamMap = std::unordered_map<std::string, MaterialParam>;
-        using RenderPass  = game::RenderPass;
-        using RenderStyle = game::RenderStyle;
-        using RenderView = game::RenderView;
+        using RenderPass       = game::RenderPass;
+        using RenderStyle      = game::RenderStyle;
+        using RenderView       = game::RenderView;
         using RenderProjection = game::RenderProjection;
+
         enum class Flags {
             // Whether the item is currently visible or not.
             VisibleInGame,
@@ -354,6 +355,10 @@ namespace game
             // Whether to flip (mirror) the item about the central horizontal axis.
             // This changes the rendering on the direction from top to bottom.
             FlipVertically,
+            // Render both front and back faces.
+            DoubleSided,
+            // Perform depth testing when rendering.
+            DepthTest,
             // Contribute to bloom post-processing effect.
             PP_EnableBloom
         };

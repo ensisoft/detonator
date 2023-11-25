@@ -200,6 +200,8 @@ namespace gui
         void on_dsFlipHorizontally_stateChanged(int);
         void on_dsFlipVertically_stateChanged(int);
         void on_dsBloom_stateChanged(int);
+        void on_dsDoubleSided_stateChanged(int);
+        void on_dsDepthTest_stateChanged(int);
         void on_rbSimulation_currentIndexChanged(const QString&);
         void on_rbShape_currentIndexChanged(const QString&);
         void on_rbPolygon_currentIndexChanged(const QString&);

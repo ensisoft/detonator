@@ -175,6 +175,8 @@ DrawableItemClass::DrawableItemClass()
     mBitFlags.set(Flags::RestartDrawable,  true);
     mBitFlags.set(Flags::FlipHorizontally, false);
     mBitFlags.set(Flags::FlipVertically,   false);
+    mBitFlags.set(Flags::DoubleSided,      false);
+    mBitFlags.set(Flags::DepthTest,        false);
     mBitFlags.set(Flags::PP_EnableBloom,   true);
 }
 
