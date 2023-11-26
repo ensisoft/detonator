@@ -678,15 +678,15 @@ namespace gfx
 
         using Vertex = gfx::Vertex2D;
 
-        PolygonClass(std::string id = base::RandomString(10),
+        explicit PolygonClass(std::string id = base::RandomString(10),
                      std::string name = "") noexcept
           : mId(std::move(id))
           , mName(std::move(name))
         {}
 
-        void Clear();
-        void ClearDrawCommands();
-        void ClearVertices();
+        void Clear() noexcept;
+        void ClearDrawCommands() noexcept;
+        void ClearVertices() noexcept;
 
         // Add the array of vertices to the existing vertex buffer.
         void AddVertices(const std::vector<Vertex>& vertices);
@@ -714,6 +714,12 @@ namespace gfx
         // Returns index to the draw command.
         const size_t FindDrawCommand(size_t vertex_index) const;
 
+        // Compute a hash value based on the content only, i.e. the
+        // vertices and the draw commands.
+        // The hash value is used to realize changes done to a polygon
+        // with dynamic content and then to re-upload the data to the GPU.
+        size_t GetContentHash() const noexcept;
+
         // Return whether the polygon's data is considered to be
         // static or not. Static content is not assumed to change
         // often and will map the polygon to a geometry object
@@ -724,22 +730,20 @@ namespace gfx
         // In this case static can be set to false and the polygon
         // will map to a (single) dynamic geometry object more optimized
         // for draw/discard type of use.
-        bool IsStatic() const
+        inline bool IsStatic() const noexcept
         { return mStatic; }
-
-        size_t GetContentHash() const;
-        size_t GetNumVertices() const
+        inline size_t GetNumVertices() const noexcept
         { return mVertices.size(); }
-        size_t GetNumDrawCommands() const
+        inline size_t GetNumDrawCommands() const noexcept
         { return mDrawCommands.size(); }
-        const DrawCommand& GetDrawCommand(size_t index) const
+        inline const DrawCommand& GetDrawCommand(size_t index) const noexcept
         { return mDrawCommands[index]; }
-        const Vertex& GetVertex(size_t index) const
+        inline const Vertex& GetVertex(size_t index) const noexcept
         { return mVertices[index]; }
         // Set the polygon static or not. See comments in IsStatic.
-        void SetStatic(bool on_off)
+        inline void SetStatic(bool on_off) noexcept
         { mStatic = on_off; }
-        void SetDynamic(bool on_off)
+        inline void SetDynamic(bool on_off) noexcept
         { mStatic = !on_off; }
 
         Geometry* Upload(const Environment& env, Device& device) const;

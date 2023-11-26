@@ -1623,16 +1623,16 @@ Geometry* Grid::Upload(const Environment&, Device& device) const
     return geom;
 }
 
-void PolygonClass::Clear()
+void PolygonClass::Clear() noexcept
 {
     mVertices.clear();
     mDrawCommands.clear();
 }
-void PolygonClass::ClearDrawCommands()
+void PolygonClass::ClearDrawCommands() noexcept
 {
     mDrawCommands.clear();
 }
-void PolygonClass::ClearVertices()
+void PolygonClass::ClearVertices() noexcept
 {
     mVertices.clear();
 }
@@ -1694,7 +1694,7 @@ Geometry* PolygonClass::Upload(const Environment& env, Device& device) const
     return geom;
 }
 
-std::size_t PolygonClass::GetContentHash() const
+std::size_t PolygonClass::GetContentHash() const noexcept
 {
     size_t hash = 0;
     for (const auto& vertex : mVertices)
