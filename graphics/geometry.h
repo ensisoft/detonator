@@ -221,6 +221,12 @@ namespace gfx
             Index16, Index32
         };
 
+        struct DrawCommand {
+            DrawType type = DrawType::Triangles;
+            size_t count  = 0;
+            size_t offset = 0;
+        };
+
         virtual ~Geometry() = default;
         // Clear previous draw commands.
         virtual void ClearDraws() = 0;
