@@ -372,7 +372,7 @@ namespace gfx
     namespace detail {
         template<SimpleShapeType type>
         struct SimpleShapeClassTypeShim : public SimpleShapeClass {
-            SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
+            explicit SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
                                      std::string name = "") noexcept
               : SimpleShapeClass(type, std::monostate(), std::move(id), std::move(name))
             {}
@@ -380,7 +380,7 @@ namespace gfx
 
         template<>
         struct SimpleShapeClassTypeShim<SimpleShapeType::Sector> : public SimpleShapeClass {
-            SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
+            explicit SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
                                      std::string name = "",
                                      float fill_percentage = 0.25f) noexcept
               : SimpleShapeClass(SimpleShapeType::Sector, SectorShapeArgs{fill_percentage}, std::move(id), std::move(name))
@@ -389,7 +389,7 @@ namespace gfx
 
         template<>
         struct SimpleShapeClassTypeShim<SimpleShapeType::RoundRect> : public SimpleShapeClass {
-            SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
+            explicit SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
                                      std::string name = "",
                                      float corner_radius = 0.05f) noexcept
               : SimpleShapeClass(SimpleShapeType::RoundRect, RoundRectShapeArgs{corner_radius}, std::move(id), std::move(name))
@@ -398,7 +398,7 @@ namespace gfx
 
         template<>
         struct SimpleShapeClassTypeShim<SimpleShapeType::Cylinder> : public SimpleShapeClass {
-            SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
+            explicit SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
                                      std::string name = "",
                                      unsigned  slices = 100) noexcept
               : SimpleShapeClass(SimpleShapeType::Cylinder, CylinderShapeArgs{slices}, std::move(id), std::move(name))
@@ -407,7 +407,7 @@ namespace gfx
 
         template<>
         struct SimpleShapeClassTypeShim<SimpleShapeType::Cone> : public SimpleShapeClass {
-            SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
+            explicit SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
                                      std::string name = "",
                                      unsigned  slices = 100) noexcept
                     : SimpleShapeClass(SimpleShapeType::Cone, ConeShapeArgs{slices}, std::move(id), std::move(name))
@@ -416,7 +416,7 @@ namespace gfx
 
         template<>
         struct SimpleShapeClassTypeShim<SimpleShapeType::Sphere> : public SimpleShapeClass {
-            SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
+            explicit SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
                                      std::string name = "",
                                      unsigned  slices = 100) noexcept
                     : SimpleShapeClass(SimpleShapeType::Sphere, SphereShapeArgs{slices}, std::move(id), std::move(name))
@@ -1012,12 +1012,12 @@ namespace gfx
             float hatching = 0.0f;
         };
 
-        ParticleEngineClass(const Params& init, std::string id = base::RandomString(10), std::string name = "") noexcept
+        explicit ParticleEngineClass(const Params& init, std::string id = base::RandomString(10), std::string name = "") noexcept
           : mId(std::move(id))
           , mName(std::move(name))
           , mParams(init)
         {}
-        ParticleEngineClass(std::string id = base::RandomString(10), std::string name = "") noexcept
+        explicit ParticleEngineClass(std::string id = base::RandomString(10), std::string name = "") noexcept
           : mId(std::move(id))
           , mName(std::move(name))
         {}
@@ -1141,8 +1141,6 @@ namespace gfx
 
         inline void AddTile(const Tile& tile)
         { mTiles.push_back(tile); }
-        inline void AddTile(Tile&& tile) noexcept
-        { mTiles.push_back(std::move(tile));}
         inline void ClearTiles() noexcept
         { mTiles.clear(); }
         inline size_t GetNumTiles() const noexcept
