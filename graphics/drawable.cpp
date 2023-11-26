@@ -136,117 +136,87 @@ void VertexShaderMain()
 namespace gfx {
 namespace detail {
 
-Geometry* ArrowGeometry::Generate(const Environment& env, Style style, Device& device)
+void ArrowGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
 {
-    if (style == Style::Points)
-        return nullptr;
-
-   Geometry* geom = nullptr;
-
     if (style == Style::Outline)
     {
-        geom = device.FindGeometry("ArrowOutline");
-        if (!geom)
-        {
-            const Vertex2D verts[] = {
-                {{0.0f, -0.25f}, {0.0f, 0.25f}},
-                {{0.0f, -0.75f}, {0.0f, 0.75f}},
-                {{0.7f, -0.75f}, {0.7f, 0.75f}},
-                {{0.7f, -1.0f},  {0.7f, 1.0f}},
-                {{1.0f, -0.5f},  {1.0f, 0.5f}},
-                {{0.7f, -0.0f},  {0.7f, 0.0f}},
-                {{0.7f, -0.25f}, {0.7f, 0.25f}},
-            };
-            geom = device.MakeGeometry("ArrowOutline");
-            geom->SetVertexBuffer(verts, 7);
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop);
-        }
+        const Vertex2D verts[] = {
+            {{0.0f, -0.25f}, {0.0f, 0.25f}},
+            {{0.0f, -0.75f}, {0.0f, 0.75f}},
+            {{0.7f, -0.75f}, {0.7f, 0.75f}},
+            {{0.7f, -1.0f},  {0.7f, 1.0f}},
+            {{1.0f, -0.5f},  {1.0f, 0.5f}},
+            {{0.7f, -0.0f},  {0.7f, 0.0f}},
+            {{0.7f, -0.25f}, {0.7f, 0.25f}},
+        };
+        geometry.SetVertexBuffer(verts, 7);
+        geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
     }
     else if (style == Style::Solid)
     {
-        geom = device.FindGeometry("Arrow");
-        if (!geom)
-        {
-            const Vertex2D verts[] = {
-                // body
-                {{0.0f, -0.25f}, {0.0f, 0.25f}},
-                {{0.0f, -0.75f}, {0.0f, 0.75f}},
-                {{0.7f, -0.25f}, {0.7f, 0.25f}},
-                // body
-                {{0.7f, -0.25f}, {0.7f, 0.25f}},
-                {{0.0f, -0.75f}, {0.0f, 0.75f}},
-                {{0.7f, -0.75f}, {0.7f, 0.75f}},
+        const Vertex2D verts[] = {
+            // body
+            {{0.0f, -0.25f}, {0.0f, 0.25f}},
+            {{0.0f, -0.75f}, {0.0f, 0.75f}},
+            {{0.7f, -0.25f}, {0.7f, 0.25f}},
+            // body
+            {{0.7f, -0.25f}, {0.7f, 0.25f}},
+            {{0.0f, -0.75f}, {0.0f, 0.75f}},
+            {{0.7f, -0.75f}, {0.7f, 0.75f}},
 
-                // arrow head
-                {{0.7f, -0.0f}, {0.7f, 0.0f}},
-                {{0.7f, -1.0f}, {0.7f, 1.0f}},
-                {{1.0f, -0.5f}, {1.0f, 0.5f}},
-            };
-            geom = device.MakeGeometry("Arrow");
-            geom->SetVertexBuffer(verts, 9);
-            geom->AddDrawCmd(Geometry::DrawType::Triangles);
-        }
+            // arrow head
+            {{0.7f, -0.0f}, {0.7f, 0.0f}},
+            {{0.7f, -1.0f}, {0.7f, 1.0f}},
+            {{1.0f, -0.5f}, {1.0f, 0.5f}},
+        };
+        geometry.SetVertexBuffer(verts, 9);
+        geometry.AddDrawCmd(Geometry::DrawType::Triangles);
     }
     else if (style == Style::Wireframe)
     {
-        geom = device.FindGeometry("ArrowWireframe");
-        if (!geom)
-        {
-            const Vertex2D verts[] = {
-                // body
-                {{0.0f, -0.25f}, {0.0f, 0.25f}},
-                {{0.0f, -0.75f}, {0.0f, 0.75f}},
-                {{0.0f, -0.75f}, {0.0f, 0.75f}},
-                {{0.7f, -0.25f}, {0.7f, 0.25f}},
-                {{0.7f, -0.25f}, {0.7f, 0.25f}},
-                {{0.0f, -0.25f}, {0.0f, 0.25f}},
+        const Vertex2D verts[] = {
+            // body
+            {{0.0f, -0.25f}, {0.0f, 0.25f}},
+            {{0.0f, -0.75f}, {0.0f, 0.75f}},
+            {{0.0f, -0.75f}, {0.0f, 0.75f}},
+            {{0.7f, -0.25f}, {0.7f, 0.25f}},
+            {{0.7f, -0.25f}, {0.7f, 0.25f}},
+            {{0.0f, -0.25f}, {0.0f, 0.25f}},
 
-                // body
-                {{0.0f, -0.75f}, {0.0f, 0.75f}},
-                {{0.7f, -0.75f}, {0.7f, 0.75f}},
-                {{0.7f, -0.75f}, {0.7f, 0.75f}},
-                {{0.7f, -0.25f}, {0.0f, 0.25f}},
+            // body
+            {{0.0f, -0.75f}, {0.0f, 0.75f}},
+            {{0.7f, -0.75f}, {0.7f, 0.75f}},
+            {{0.7f, -0.75f}, {0.7f, 0.75f}},
+            {{0.7f, -0.25f}, {0.0f, 0.25f}},
 
-                // arrow head
-                {{0.7f, -0.0f}, {0.7f, 0.0f}},
-                {{0.7f, -1.0f}, {0.7f, 1.0f}},
-                {{0.7f, -1.0f}, {0.7f, 1.0f}},
-                {{1.0f, -0.5f}, {1.0f, 0.5f}},
-                {{1.0f, -0.5f}, {1.0f, 0.5f}},
-                {{0.7f, -0.0f}, {0.7f, 0.0f}},
-            };
-            geom = device.MakeGeometry("ArrowWireframe");
-            geom->SetVertexBuffer(verts, 16);
-            geom->AddDrawCmd(Geometry::DrawType::Lines);
-        }
-    }
-    return geom;
-}
-
-// static
-Geometry* StaticLineGeometry::Generate(const Environment& env, Style style, Device& device)
-{
-    Geometry* geom = device.FindGeometry("LineSegment");
-    if (geom == nullptr)
-    {
-        // horizontal line.
-        constexpr const gfx::Vertex2D verts[2] = {
-            {{0.0f,  -0.5f}, {0.0f, 0.5f}},
-            {{1.0f,  -0.5f}, {1.0f, 0.5f}}
+            // arrow head
+            {{0.7f, -0.0f}, {0.7f, 0.0f}},
+            {{0.7f, -1.0f}, {0.7f, 1.0f}},
+            {{0.7f, -1.0f}, {0.7f, 1.0f}},
+            {{1.0f, -0.5f}, {1.0f, 0.5f}},
+            {{1.0f, -0.5f}, {1.0f, 0.5f}},
+            {{0.7f, -0.0f}, {0.7f, 0.0f}},
         };
-        geom = device.MakeGeometry("LineSegment");
-        geom->SetVertexBuffer(verts, 2);
-        geom->AddDrawCmd(Geometry::DrawType::Lines);
+        geometry.SetVertexBuffer(verts, 16);
+        geometry.AddDrawCmd(Geometry::DrawType::Lines);
     }
-    return geom;
 }
 
 // static
-Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device& device)
+void StaticLineGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
 {
-    if (style == Style::Points)
-        return nullptr;
+    // horizontal line.
+    constexpr const gfx::Vertex2D verts[2] = {
+        {{0.0f,  -0.5f}, {0.0f, 0.5f}},
+        {{1.0f,  -0.5f}, {1.0f, 0.5f}}
+    };
+    geometry.SetVertexBuffer(verts, 2);
+    geometry.AddDrawCmd(Geometry::DrawType::Lines);
+}
 
+// static
+void CapsuleGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+{
     // todo LOD information
     const auto slices = 50;
     const auto radius = 0.25f;
@@ -266,35 +236,33 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
         w = h / (rect_width/rect_height);
     else h = w / (rect_height/rect_width);
 
-    std::string name;
-    if (style == Style::Outline)
-        name = "CapsuleOutline";
-    else if (style == Style::Wireframe)
-        name = "CapsuleWireframe";
-    else if (style == Style::Solid)
-        name = "Capsule";
-    else BUG("???");
-    name += NameAspectRatio(rect_width, rect_height, HalfRound, "%1.1f:%1.1f");
+    std::vector<Vertex2D> vs;
+    auto offset = 0;
 
-    Geometry* geom = device.FindGeometry(name);
-    if (!geom)
+    // semi-circle at the left end.
+    Vertex2D left_center;
+    left_center.aPosition.x =  w;
+    left_center.aPosition.y = -0.5f;
+    left_center.aTexCoord.x =  w;
+    left_center.aTexCoord.y =  0.5f;
+    if (style == Style::Solid)
+        vs.push_back(left_center);
+
+    float left_angle = math::Pi * 0.5;
+    for (unsigned i=0; i<max_slice; ++i)
     {
-        geom = device.MakeGeometry(name);
+        const auto x = std::cos(left_angle) * w;
+        const auto y = std::sin(left_angle) * h;
+        Vertex2D v;
+        v.aPosition.x =  w + x;
+        v.aPosition.y = -0.5f + y;
+        v.aTexCoord.x =  w + x;
+        v.aTexCoord.y =  0.5f - y;
+        vs.push_back(v);
 
-        std::vector<Vertex2D> vs;
-        auto offset = 0;
+        left_angle += angle_increment;
 
-        // semi-circle at the left end.
-        Vertex2D left_center;
-        left_center.aPosition.x =  w;
-        left_center.aPosition.y = -0.5f;
-        left_center.aTexCoord.x =  w;
-        left_center.aTexCoord.y =  0.5f;
-        if (style == Style::Solid)
-            vs.push_back(left_center);
-
-        float left_angle = math::Pi * 0.5;
-        for (unsigned i=0; i<max_slice; ++i)
+        if (style == Style::Wireframe)
         {
             const auto x = std::cos(left_angle) * w;
             const auto y = std::sin(left_angle) * h;
@@ -304,71 +272,71 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
             v.aTexCoord.x =  w + x;
             v.aTexCoord.y =  0.5f - y;
             vs.push_back(v);
-
-            left_angle += angle_increment;
-
-            if (style == Style::Wireframe)
-            {
-                const auto x = std::cos(left_angle) * w;
-                const auto y = std::sin(left_angle) * h;
-                Vertex2D v;
-                v.aPosition.x =  w + x;
-                v.aPosition.y = -0.5f + y;
-                v.aTexCoord.x =  w + x;
-                v.aTexCoord.y =  0.5f - y;
-                vs.push_back(v);
-                vs.push_back(left_center);
-            }
+            vs.push_back(left_center);
         }
-        if (style == Style::Solid)
-            geom->AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size()-offset);
-        else if (style == Style::Wireframe)
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size()-offset);
+    }
+    if (style == Style::Solid)
+        geometry.AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size()-offset);
+    else if (style == Style::Wireframe)
+        geometry.AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size()-offset);
 
-        if (style != Style::Outline)
-        {
-            // center box.
-            const Vertex2D box[6] = {
-                {{     w, -0.5f+h}, {     w, 0.5f-h}},
-                {{     w, -0.5f-h}, {     w, 0.5f+h}},
-                {{1.0f-w, -0.5f-h}, {1.0f-w, 0.5f+h}},
+    if (style != Style::Outline)
+    {
+        // center box.
+        const Vertex2D box[6] = {
+            {{     w, -0.5f+h}, {     w, 0.5f-h}},
+            {{     w, -0.5f-h}, {     w, 0.5f+h}},
+            {{1.0f-w, -0.5f-h}, {1.0f-w, 0.5f+h}},
 
-                {{     w, -0.5f+h}, {     w, 0.5f-h}},
-                {{1.0f-w, -0.5f-h}, {1.0f-w, 0.5f+h}},
-                {{1.0f-w, -0.5f+h}, {1.0f-w, 0.5f-h}}
-            };
-            offset = vs.size();
-            vs.push_back(box[0]);
-            vs.push_back(box[1]);
-            vs.push_back(box[2]);
-            vs.push_back(box[3]);
-            vs.push_back(box[4]);
-            vs.push_back(box[5]);
-            if (style == Style::Solid)
-            {
-                geom->AddDrawCmd(Geometry::DrawType::Triangles, offset, 6);
-            }
-            else
-            {
-                geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset + 0, 3);
-                geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset + 3, 3);
-            }
-        }
-
+            {{     w, -0.5f+h}, {     w, 0.5f-h}},
+            {{1.0f-w, -0.5f-h}, {1.0f-w, 0.5f+h}},
+            {{1.0f-w, -0.5f+h}, {1.0f-w, 0.5f-h}}
+        };
         offset = vs.size();
-
-        // semi circle at the right end
-        Vertex2D right_center;
-        right_center.aPosition.x =  1.0f - w;
-        right_center.aPosition.y = -0.5f;
-        right_center.aTexCoord.x =  1.0f - w;
-        right_center.aTexCoord.y =  0.5f;
+        vs.push_back(box[0]);
+        vs.push_back(box[1]);
+        vs.push_back(box[2]);
+        vs.push_back(box[3]);
+        vs.push_back(box[4]);
+        vs.push_back(box[5]);
         if (style == Style::Solid)
-            vs.push_back(right_center);
+        {
+            geometry.AddDrawCmd(Geometry::DrawType::Triangles, offset, 6);
+        }
+        else
+        {
+            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, offset + 0, 3);
+            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, offset + 3, 3);
+        }
+    }
 
-        const float right_angle_increment = math::Pi / slices;
-        float right_angle = math::Pi * -0.5;
-        for (unsigned i=0; i<max_slice; ++i)
+    offset = vs.size();
+
+    // semi circle at the right end
+    Vertex2D right_center;
+    right_center.aPosition.x =  1.0f - w;
+    right_center.aPosition.y = -0.5f;
+    right_center.aTexCoord.x =  1.0f - w;
+    right_center.aTexCoord.y =  0.5f;
+    if (style == Style::Solid)
+        vs.push_back(right_center);
+
+    const float right_angle_increment = math::Pi / slices;
+    float right_angle = math::Pi * -0.5;
+    for (unsigned i=0; i<max_slice; ++i)
+    {
+        const auto x = std::cos(right_angle) * w;
+        const auto y = std::sin(right_angle) * h;
+        Vertex2D v;
+        v.aPosition.x =  1.0f - w + x;
+        v.aPosition.y = -0.5f + y;
+        v.aTexCoord.x =  1.0f - w + x;
+        v.aTexCoord.y =  0.5f - y;
+        vs.push_back(v);
+
+        right_angle += right_angle_increment;
+
+        if (style == Style::Wireframe)
         {
             const auto x = std::cos(right_angle) * w;
             const auto y = std::sin(right_angle) * h;
@@ -378,69 +346,59 @@ Geometry* CapsuleGeometry::Generate(const Environment& env, Style style, Device&
             v.aTexCoord.x =  1.0f - w + x;
             v.aTexCoord.y =  0.5f - y;
             vs.push_back(v);
-
-            right_angle += right_angle_increment;
-
-            if (style == Style::Wireframe)
-            {
-                const auto x = std::cos(right_angle) * w;
-                const auto y = std::sin(right_angle) * h;
-                Vertex2D v;
-                v.aPosition.x =  1.0f - w + x;
-                v.aPosition.y = -0.5f + y;
-                v.aTexCoord.x =  1.0f - w + x;
-                v.aTexCoord.y =  0.5f - y;
-                vs.push_back(v);
-                vs.push_back(right_center);
-            }
+            vs.push_back(right_center);
         }
-        if (style == Style::Solid)
-            geom->AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size()-offset);
-        else if (style == Style::Wireframe)
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size()-offset);
-
-        if (style == Style::Outline)
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop);
-
-        geom->SetVertexBuffer(std::move(vs));
     }
-    return geom;
+    if (style == Style::Solid)
+        geometry.AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size()-offset);
+    else if (style == Style::Wireframe)
+        geometry.AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size()-offset);
+
+    if (style == Style::Outline)
+        geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
+
+    geometry.SetVertexBuffer(std::move(vs));
 }
 
 // static
-Geometry* SemiCircleGeometry::Generate(const Environment& env, Style style, Device& device)
+void SemiCircleGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
 {
-    if (style == Style::Points)
-        return nullptr;
-
     // todo: we could use some information here about the
     // eventual transform on the screen and use that to compute
     // some kind of "LOD" value for figuring out how many slices we should have.
     const auto slices = 50;
-    const auto* name = style == Style::Outline   ? "SemiCircleOutline" :
-                       (style == Style::Wireframe ? "SemiCircleWireframe" : "SemiCircle");
 
-    Geometry* geom = device.FindGeometry(name);
-    if (!geom)
+    std::vector<Vertex2D> vs;
+
+    // center point for triangle fan.
+    Vertex2D center;
+    center.aPosition.x =  0.5;
+    center.aPosition.y = -0.5;
+    center.aTexCoord.x =  0.5;
+    center.aTexCoord.y =  0.5;
+    if (style == Style::Solid)
     {
-        std::vector<Vertex2D> vs;
+        vs.push_back(center);
+    }
 
-        // center point for triangle fan.
-        Vertex2D center;
-        center.aPosition.x =  0.5;
-        center.aPosition.y = -0.5;
-        center.aTexCoord.x =  0.5;
-        center.aTexCoord.y =  0.5;
-        if (style == Style::Solid)
-        {
-            vs.push_back(center);
-        }
+    const float angle_increment = (float)math::Pi / slices;
+    const auto max_slice = style == Style::Wireframe ? slices : slices + 1;
+    float angle = 0.0f;
 
-        const float angle_increment = (float)math::Pi / slices;
-        const auto max_slice = style == Style::Wireframe ? slices : slices + 1;
-        float angle = 0.0f;
+    for (unsigned i=0; i<max_slice; ++i)
+    {
+        const auto x = std::cos(angle) * 0.5f;
+        const auto y = std::sin(angle) * 0.5f;
+        Vertex2D v;
+        v.aPosition.x = x + 0.5f;
+        v.aPosition.y = y - 0.5f;
+        v.aTexCoord.x = x + 0.5f;
+        v.aTexCoord.y = 1.0 - (y + 0.5f);
+        vs.push_back(v);
 
-        for (unsigned i=0; i<max_slice; ++i)
+        angle += angle_increment;
+
+        if (style == Style::Wireframe)
         {
             const auto x = std::cos(angle) * 0.5f;
             const auto y = std::sin(angle) * 0.5f;
@@ -450,70 +408,59 @@ Geometry* SemiCircleGeometry::Generate(const Environment& env, Style style, Devi
             v.aTexCoord.x = x + 0.5f;
             v.aTexCoord.y = 1.0 - (y + 0.5f);
             vs.push_back(v);
-
-            angle += angle_increment;
-
-            if (style == Style::Wireframe)
-            {
-                const auto x = std::cos(angle) * 0.5f;
-                const auto y = std::sin(angle) * 0.5f;
-                Vertex2D v;
-                v.aPosition.x = x + 0.5f;
-                v.aPosition.y = y - 0.5f;
-                v.aTexCoord.x = x + 0.5f;
-                v.aTexCoord.y = 1.0 - (y + 0.5f);
-                vs.push_back(v);
-                vs.push_back(center);
-            }
+            vs.push_back(center);
         }
-        geom = device.MakeGeometry(name);
-        geom->SetVertexBuffer(&vs[0], vs.size());
     }
-    geom->ClearDraws();
+    geometry.SetVertexBuffer(&vs[0], vs.size());
+    geometry.ClearDraws();
 
     if (style == Style::Solid)
-        geom->AddDrawCmd(Geometry::DrawType::TriangleFan);
+        geometry.AddDrawCmd(Geometry::DrawType::TriangleFan);
     else if (style == Style::Outline)
-        geom->AddDrawCmd(Geometry::DrawType::LineLoop);
+        geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
     else if (style == Style::Wireframe)
-        geom->AddDrawCmd(Geometry::DrawType::LineLoop);
-    return geom;
+        geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
 
 }
 
 // static
-Geometry* CircleGeometry::Generate(const Environment& env, Style style, Device& device)
+void CircleGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
 {
-    if (style == Style::Points)
-        return nullptr;
-
     // todo: we could use some information here about the
     // eventual transform on the screen and use that to compute
     // some kind of "LOD" value for figuring out how many slices we should have.
     const auto slices = 100;
-    const auto* name = style == Style::Outline   ? "CircleOutline" :
-                      (style == Style::Wireframe ? "CircleWireframe" : "Circle");
 
-    Geometry* geom = device.FindGeometry(name);
-    if (!geom)
+    std::vector<Vertex2D> vs;
+
+    // center point for triangle fan.
+    Vertex2D center;
+    center.aPosition.x =  0.5;
+    center.aPosition.y = -0.5;
+    center.aTexCoord.x = 0.5;
+    center.aTexCoord.y = 0.5;
+    if (style == Style::Solid)
     {
-        std::vector<Vertex2D> vs;
+        vs.push_back(center);
+    }
 
-        // center point for triangle fan.
-        Vertex2D center;
-        center.aPosition.x =  0.5;
-        center.aPosition.y = -0.5;
-        center.aTexCoord.x = 0.5;
-        center.aTexCoord.y = 0.5;
-        if (style == Style::Solid)
-        {
-            vs.push_back(center);
-        }
+    const float angle_increment = (float)(math::Pi * 2.0f) / slices;
+    float angle = 0.0f;
 
-        const float angle_increment = (float)(math::Pi * 2.0f) / slices;
-        float angle = 0.0f;
+    for (unsigned i=0; i<=slices; ++i)
+    {
+        const auto x = std::cos(angle) * 0.5f;
+        const auto y = std::sin(angle) * 0.5f;
+        Vertex2D v;
+        v.aPosition.x = x + 0.5f;
+        v.aPosition.y = y - 0.5f;
+        v.aTexCoord.x = x + 0.5f;
+        v.aTexCoord.y = 1.0 - (y + 0.5f);
+        vs.push_back(v);
 
-        for (unsigned i=0; i<=slices; ++i)
+        angle += angle_increment;
+
+        if (style == Style::Wireframe)
         {
             const auto x = std::cos(angle) * 0.5f;
             const auto y = std::sin(angle) * 0.5f;
@@ -523,286 +470,213 @@ Geometry* CircleGeometry::Generate(const Environment& env, Style style, Device& 
             v.aTexCoord.x = x + 0.5f;
             v.aTexCoord.y = 1.0 - (y + 0.5f);
             vs.push_back(v);
-
-            angle += angle_increment;
-
-            if (style == Style::Wireframe)
-            {
-                const auto x = std::cos(angle) * 0.5f;
-                const auto y = std::sin(angle) * 0.5f;
-                Vertex2D v;
-                v.aPosition.x = x + 0.5f;
-                v.aPosition.y = y - 0.5f;
-                v.aTexCoord.x = x + 0.5f;
-                v.aTexCoord.y = 1.0 - (y + 0.5f);
-                vs.push_back(v);
-                vs.push_back(center);
-            }
-        }
-        geom = device.MakeGeometry(name);
-        geom->SetVertexBuffer(&vs[0], vs.size());
-
-    }
-    geom->ClearDraws();
-
-    if (style == Style::Solid)
-        geom->AddDrawCmd(Geometry::DrawType::TriangleFan);
-    else if (style == Style::Outline)
-        geom->AddDrawCmd(Geometry::DrawType::LineLoop);
-    else if (style == Style::Wireframe)
-        geom->AddDrawCmd(Geometry::DrawType::LineLoop);
-    return geom;
-}
-
-// static
-Geometry* RectangleGeometry::Generate(const Environment& env, Style style, Device& device)
-{
-    if (style == Style::Points)
-        return nullptr;
-
-    Geometry* geom = nullptr;
-
-    if (style == Style::Outline)
-    {
-        geom = device.FindGeometry("RectangleOutline");
-        if (geom == nullptr)
-        {
-            const Vertex2D verts[] = {
-                { {0.0f,  0.0f}, {0.0f, 0.0f} },
-                { {0.0f, -1.0f}, {0.0f, 1.0f} },
-                { {1.0f, -1.0f}, {1.0f, 1.0f} },
-                { {1.0f,  0.0f}, {1.0f, 0.0f} }
-            };
-            geom = device.MakeGeometry("RectangleOutline");
-            geom->SetVertexBuffer(verts, 4);
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop);
-        }
-    }
-    else if (style == Style::Solid || style == Style::Wireframe)
-    {
-        geom = device.FindGeometry("Rectangle");
-        if (geom == nullptr)
-        {
-            const Vertex2D verts[6] = {
-                { {0.0f,  0.0f}, {0.0f, 0.0f} },
-                { {0.0f, -1.0f}, {0.0f, 1.0f} },
-                { {1.0f, -1.0f}, {1.0f, 1.0f} },
-
-                { {0.0f,  0.0f}, {0.0f, 0.0f} },
-                { {1.0f, -1.0f}, {1.0f, 1.0f} },
-                { {1.0f,  0.0f}, {1.0f, 0.0f} }
-            };
-            geom = device.MakeGeometry("Rectangle");
-            geom->SetVertexBuffer(verts, 6);
-        }
-        geom->ClearDraws();
-        if (style == Style::Solid)
-            geom->AddDrawCmd(Geometry::DrawType::Triangles);
-        else if (style == Style::Wireframe)
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop);
-    }
-    return geom;
-}
-
-// static
-Geometry* IsoscelesTriangleGeometry::Generate(const Environment& env, Style style, Device& device)
-{
-    if (style == Style::Points)
-        return nullptr;
-
-    Geometry* geom = device.FindGeometry("IsoscelesTriangle");
-    if (!geom)
-    {
-        const Vertex2D verts[3] = {
-                { {0.5f,  0.0f}, {0.5f, 0.0f} },
-                { {0.0f, -1.0f}, {0.0f, 1.0f} },
-                { {1.0f, -1.0f}, {1.0f, 1.0f} }
-        };
-        geom = device.MakeGeometry("IsoscelesTriangle");
-        geom->SetVertexBuffer(verts, 3);
-    }
-    geom->ClearDraws();
-    if (style == Style::Solid)
-        geom->AddDrawCmd(Geometry::DrawType::Triangles);
-    else if (style == Style::Outline)
-        geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
-    else if (style == Style::Wireframe)
-        geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
-    return geom;
-}
-
-// static
-Geometry* RightTriangleGeometry::Generate(const Environment& env, Style style, Device& device)
-{
-    if (style == Style::Points)
-        return nullptr;
-
-    Geometry* geom = device.FindGeometry("RightTriangle");
-    if (!geom)
-    {
-        const Vertex2D verts[3] = {
-                { {0.0f,  0.0f}, {0.0f, 0.0f} },
-                { {0.0f, -1.0f}, {0.0f, 1.0f} },
-                { {1.0f, -1.0f}, {1.0f, 1.0f} }
-        };
-        geom = device.MakeGeometry("RightTriangle");
-        geom->SetVertexBuffer(verts, 3);
-    }
-    geom->ClearDraws();
-    if (style == Style::Solid)
-        geom->AddDrawCmd(Geometry::DrawType::Triangles);
-    else if (style == Style::Outline)
-        geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
-    else if (style == Style::Wireframe)
-        geom->AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
-    return geom;
-}
-
-// static
-Geometry* TrapezoidGeometry::Generate(const Environment& env, Style style, Device& device)
-{
-    if (style == Style::Points)
-        return nullptr;
-
-    Geometry* geom = nullptr;
-    if (style == Style::Outline)
-    {
-        geom = device.FindGeometry("TrapezoidOutline");
-        if (!geom)
-        {
-            const Vertex2D verts[] = {
-                    { {0.2f,  0.0f}, {0.2f, 0.0f} },
-                    { {0.0f, -1.0f}, {0.0f, 1.0f} },
-                    { {1.0f, -1.0f}, {1.0f, 1.0f} },
-                    { {0.8f,  0.0f}, {0.8f, 0.0f} }
-            };
-
-            geom = device.MakeGeometry("TrapezoidOutline");
-            geom->SetVertexBuffer(verts, 4);
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop);
-        }
-    }
-    else if (style == Style::Solid || style == Style::Wireframe)
-    {
-        geom = device.FindGeometry("Trapezoid");
-        if (!geom)
-        {
-            const Vertex2D verts[] = {
-                    {{0.2f,  0.0f}, {0.2f, 0.0f}},
-                    {{0.0f, -1.0f}, {0.0f, 1.0f}},
-                    {{0.2f, -1.0f}, {0.2f, 1.0f}},
-
-                    {{0.2f,  0.0f}, {0.2f, 0.0f}},
-                    {{0.2f, -1.0f}, {0.2f, 1.0f}},
-                    {{0.8f, -1.0f}, {0.8f, 1.0f}},
-
-                    {{0.8f, -1.0f}, {0.8f, 1.0f}},
-                    {{0.8f,  0.0f}, {0.8f, 0.0f}},
-                    {{0.2f,  0.0f}, {0.2f, 0.0f}},
-
-                    {{0.8f,  0.0f}, {0.8f, 0.0f}},
-                    {{0.8f, -1.0f}, {0.8f, 1.0f}},
-                    {{1.0f, -1.0f}, {1.0f, 1.0f}}
-            };
-            geom = device.MakeGeometry("Trapezoid");
-            geom->SetVertexBuffer(verts, 12);
-        }
-        geom->ClearDraws();
-        if (style == Style::Solid)
-            geom->AddDrawCmd(Geometry::DrawType::Triangles);
-        else if (style == Style::Wireframe)
-        {
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 0, 3);
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 3, 3);
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 6, 3);
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 9, 3);
-        }
-    }
-    return geom;
-}
-
-// static
-Geometry* ParallelogramGeometry::Generate(const Environment& env, Style style, Device& device)
-{
-    if (style == Style::Points)
-        return nullptr;
-
-    Geometry* geom = nullptr;
-    if (style == Style::Outline)
-    {
-        geom = device.FindGeometry("ParallelogramOutline");
-        if (!geom)
-        {
-            const Vertex2D verts[] = {
-                    { {0.2f,  0.0f}, {0.2f, 0.0f} },
-                    { {0.0f, -1.0f}, {0.0f, 1.0f} },
-                    { {0.8f, -1.0f}, {0.8f, 1.0f} },
-                    { {1.0f,  0.0f}, {1.0f, 0.0f} }
-            };
-            geom = device.MakeGeometry("ParallelogramOutline");
-            geom->SetVertexBuffer(verts, 4);
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop);
-        }
-    }
-    else if (style == Style::Solid || style == Style::Wireframe)
-    {
-        geom = device.FindGeometry("Parallelogram");
-        if (!geom)
-        {
-            const Vertex2D verts[] = {
-                    {{0.2f,  0.0f}, {0.2f, 0.0f}},
-                    {{0.0f, -1.0f}, {0.0f, 1.0f}},
-                    {{0.8f, -1.0f}, {0.8f, 1.0f}},
-
-                    {{0.8f, -1.0f}, {0.8f, 1.0f}},
-                    {{1.0f,  0.0f}, {1.0f, 0.0f}},
-                    {{0.2f,  0.0f}, {0.2f, 0.0f}}
-            };
-            geom = device.MakeGeometry("Parallelogram");
-            geom->SetVertexBuffer(verts, 6);
-        }
-        geom->ClearDraws();
-        if (style == Style::Solid)
-            geom->AddDrawCmd(Geometry::DrawType::Triangles);
-        else if (style == Style::Wireframe)
-        {
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 0, 3);
-            geom->AddDrawCmd(Geometry::DrawType::LineLoop, 3, 3);
-        }
-    }
-    return geom;
-}
-
-// static
-Geometry* SectorGeometry::Generate(const Environment& env, Style style, Device& device, float fill_percentage)
-{
-    if (style == Style::Points)
-        return nullptr;
-
-    const auto* name = style == Style::Outline   ? "SectorOutline"   :
-                      (style == Style::Wireframe ? "SectorWireframe" : "Sector");
-    Geometry* geom = device.FindGeometry(name);
-    if (!geom)
-    {
-        std::vector<Vertex2D> vs;
-
-        // center point for triangle fan.
-        Vertex2D center;
-        center.aPosition.x =  0.5;
-        center.aPosition.y = -0.5;
-        center.aTexCoord.x =  0.5;
-        center.aTexCoord.y =  0.5;
-        if (style == Style::Solid || style == Style::Outline)
-        {
             vs.push_back(center);
         }
-        const auto slices    = 100 * fill_percentage;
-        const auto angle_max = math::Pi * 2.0 * fill_percentage;
-        const auto angle_inc = angle_max / slices;
-        const auto max_slice = style == Style::Wireframe ? slices : slices + 1;
+    }
+    geometry.SetVertexBuffer(&vs[0], vs.size());
+    geometry.ClearDraws();
 
-        float angle = 0.0f;
-        for (unsigned i=0; i<max_slice; ++i)
+    if (style == Style::Solid)
+        geometry.AddDrawCmd(Geometry::DrawType::TriangleFan);
+    else if (style == Style::Outline)
+        geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
+    else if (style == Style::Wireframe)
+        geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
+
+}
+
+// static
+void RectangleGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+{
+    if (style == Style::Outline)
+    {
+        const Vertex2D verts[] = {
+            { {0.0f,  0.0f}, {0.0f, 0.0f} },
+            { {0.0f, -1.0f}, {0.0f, 1.0f} },
+            { {1.0f, -1.0f}, {1.0f, 1.0f} },
+            { {1.0f,  0.0f}, {1.0f, 0.0f} }
+        };
+        geometry.SetVertexBuffer(verts, 4);
+        geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
+    }
+    else if (style == Style::Solid || style == Style::Wireframe)
+    {
+        const Vertex2D verts[6] = {
+            { {0.0f,  0.0f}, {0.0f, 0.0f} },
+            { {0.0f, -1.0f}, {0.0f, 1.0f} },
+            { {1.0f, -1.0f}, {1.0f, 1.0f} },
+
+            { {0.0f,  0.0f}, {0.0f, 0.0f} },
+            { {1.0f, -1.0f}, {1.0f, 1.0f} },
+            { {1.0f,  0.0f}, {1.0f, 0.0f} }
+        };
+        geometry.SetVertexBuffer(verts, 6);
+        geometry.ClearDraws();
+        if (style == Style::Solid)
+            geometry.AddDrawCmd(Geometry::DrawType::Triangles);
+        else if (style == Style::Wireframe)
+            geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
+    }
+}
+
+// static
+void IsoscelesTriangleGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+{
+    const Vertex2D verts[3] = {
+        { {0.5f,  0.0f}, {0.5f, 0.0f} },
+        { {0.0f, -1.0f}, {0.0f, 1.0f} },
+        { {1.0f, -1.0f}, {1.0f, 1.0f} }
+    };
+
+    geometry.SetVertexBuffer(verts, 3);
+    geometry.ClearDraws();
+    if (style == Style::Solid)
+        geometry.AddDrawCmd(Geometry::DrawType::Triangles);
+    else if (style == Style::Outline)
+        geometry.AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
+    else if (style == Style::Wireframe)
+        geometry.AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
+}
+
+// static
+void RightTriangleGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+{
+    const Vertex2D verts[3] = {
+        { {0.0f,  0.0f}, {0.0f, 0.0f} },
+        { {0.0f, -1.0f}, {0.0f, 1.0f} },
+        { {1.0f, -1.0f}, {1.0f, 1.0f} }
+    };
+    geometry.SetVertexBuffer(verts, 3);
+    geometry.ClearDraws();
+    if (style == Style::Solid)
+        geometry.AddDrawCmd(Geometry::DrawType::Triangles);
+    else if (style == Style::Outline)
+        geometry.AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
+    else if (style == Style::Wireframe)
+        geometry.AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
+}
+
+// static
+void TrapezoidGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+{
+    if (style == Style::Outline)
+    {
+        const Vertex2D verts[] = {
+            { {0.2f,  0.0f}, {0.2f, 0.0f} },
+            { {0.0f, -1.0f}, {0.0f, 1.0f} },
+            { {1.0f, -1.0f}, {1.0f, 1.0f} },
+            { {0.8f,  0.0f}, {0.8f, 0.0f} }
+        };
+        geometry.SetVertexBuffer(verts, 4);
+        geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
+
+    }
+    else if (style == Style::Solid || style == Style::Wireframe)
+    {
+        const Vertex2D verts[] = {
+            {{0.2f,  0.0f}, {0.2f, 0.0f}},
+            {{0.0f, -1.0f}, {0.0f, 1.0f}},
+            {{0.2f, -1.0f}, {0.2f, 1.0f}},
+
+            {{0.2f,  0.0f}, {0.2f, 0.0f}},
+            {{0.2f, -1.0f}, {0.2f, 1.0f}},
+            {{0.8f, -1.0f}, {0.8f, 1.0f}},
+
+            {{0.8f, -1.0f}, {0.8f, 1.0f}},
+            {{0.8f,  0.0f}, {0.8f, 0.0f}},
+            {{0.2f,  0.0f}, {0.2f, 0.0f}},
+
+            {{0.8f,  0.0f}, {0.8f, 0.0f}},
+            {{0.8f, -1.0f}, {0.8f, 1.0f}},
+            {{1.0f, -1.0f}, {1.0f, 1.0f}}
+        };
+        geometry.SetVertexBuffer(verts, 12);
+        geometry.ClearDraws();
+
+        if (style == Style::Solid)
+            geometry.AddDrawCmd(Geometry::DrawType::Triangles);
+        else if (style == Style::Wireframe)
+        {
+            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 0, 3);
+            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 3, 3);
+            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 6, 3);
+            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 9, 3);
+        }
+    }
+}
+
+// static
+void ParallelogramGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+{
+    if (style == Style::Outline)
+    {
+        const Vertex2D verts[] = {
+            { {0.2f,  0.0f}, {0.2f, 0.0f} },
+            { {0.0f, -1.0f}, {0.0f, 1.0f} },
+            { {0.8f, -1.0f}, {0.8f, 1.0f} },
+            { {1.0f,  0.0f}, {1.0f, 0.0f} }
+        };
+        geometry.SetVertexBuffer(verts, 4);
+        geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
+    }
+    else if (style == Style::Solid || style == Style::Wireframe)
+    {
+        const Vertex2D verts[] = {
+            {{0.2f,  0.0f}, {0.2f, 0.0f}},
+            {{0.0f, -1.0f}, {0.0f, 1.0f}},
+            {{0.8f, -1.0f}, {0.8f, 1.0f}},
+
+            {{0.8f, -1.0f}, {0.8f, 1.0f}},
+            {{1.0f,  0.0f}, {1.0f, 0.0f}},
+            {{0.2f,  0.0f}, {0.2f, 0.0f}}
+        };
+        geometry.SetVertexBuffer(verts, 6);
+        geometry.ClearDraws();
+        if (style == Style::Solid)
+            geometry.AddDrawCmd(Geometry::DrawType::Triangles);
+        else if (style == Style::Wireframe)
+        {
+            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 0, 3);
+            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 3, 3);
+        }
+    }
+}
+
+// static
+void SectorGeometry::Generate(const Environment& env, Style style, Geometry& geometry, float fill_percentage)
+{
+    std::vector<Vertex2D> vs;
+
+    // center point for triangle fan.
+    Vertex2D center;
+    center.aPosition.x =  0.5;
+    center.aPosition.y = -0.5;
+    center.aTexCoord.x =  0.5;
+    center.aTexCoord.y =  0.5;
+    if (style == Style::Solid || style == Style::Outline)
+    {
+        vs.push_back(center);
+    }
+    const auto slices    = 100 * fill_percentage;
+    const auto angle_max = math::Pi * 2.0 * fill_percentage;
+    const auto angle_inc = angle_max / slices;
+    const auto max_slice = style == Style::Wireframe ? slices : slices + 1;
+
+    float angle = 0.0f;
+    for (unsigned i=0; i<max_slice; ++i)
+    {
+        const auto x = std::cos(angle) * 0.5f;
+        const auto y = std::sin(angle) * 0.5f;
+        Vertex2D v;
+        v.aPosition.x = x + 0.5f;
+        v.aPosition.y = y - 0.5f;
+        v.aTexCoord.x = x + 0.5f;
+        v.aTexCoord.y = 1.0 - (y + 0.5f);
+        vs.push_back(v);
+
+        angle += angle_inc;
+
+        if (style == Style::Wireframe)
         {
             const auto x = std::cos(angle) * 0.5f;
             const auto y = std::sin(angle) * 0.5f;
@@ -812,43 +686,23 @@ Geometry* SectorGeometry::Generate(const Environment& env, Style style, Device& 
             v.aTexCoord.x = x + 0.5f;
             v.aTexCoord.y = 1.0 - (y + 0.5f);
             vs.push_back(v);
-
-            angle += angle_inc;
-
-            if (style == Style::Wireframe)
-            {
-                const auto x = std::cos(angle) * 0.5f;
-                const auto y = std::sin(angle) * 0.5f;
-                Vertex2D v;
-                v.aPosition.x = x + 0.5f;
-                v.aPosition.y = y - 0.5f;
-                v.aTexCoord.x = x + 0.5f;
-                v.aTexCoord.y = 1.0 - (y + 0.5f);
-                vs.push_back(v);
-                vs.push_back(center);
-            }
+            vs.push_back(center);
         }
-        geom = device.MakeGeometry(name);
-        geom->SetVertexBuffer(&vs[0], vs.size());
     }
-    geom->ClearDraws();
+    geometry.SetVertexBuffer(&vs[0], vs.size());
+    geometry.ClearDraws();
 
     if (style == Style::Solid)
-        geom->AddDrawCmd(Geometry::DrawType::TriangleFan);
+        geometry.AddDrawCmd(Geometry::DrawType::TriangleFan);
     else if (style == Style::Outline)
-        geom->AddDrawCmd(Geometry::DrawType::LineLoop);
+        geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
     else if (style == Style::Wireframe)
-        geom->AddDrawCmd(Geometry::DrawType::LineLoop);
-    return geom;
+        geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
 }
 
 // static
-Geometry* RoundRectGeometry::Generate(const Environment& env, Style style, Device& device, float corner_radius)
+void RoundRectGeometry::Generate(const Environment& env, Style style, Geometry& geometry, float corner_radius)
 {
-    using Style = Drawable::Style;
-
-    if (style == Style::Points)
-        return nullptr;
 
     // try to figure out if the model matrix will distort the
     // round rectangle out of it's square shape which would then
@@ -866,8 +720,6 @@ Geometry* RoundRectGeometry::Generate(const Environment& env, Style style, Devic
     const auto slices    = 20;
     const auto increment = (float)(math::Pi * 0.5  / slices); // each corner is a quarter circle, i.e. half pi rad
 
-    Geometry* geom = nullptr;
-
     // each corner contains one quadrant of a circle with radius r
     struct CornerOrigin {
         // x, y pos of the origin
@@ -879,138 +731,128 @@ Geometry* RoundRectGeometry::Generate(const Environment& env, Style style, Devic
         {1.0f-w, -1.0f+h}, // bottom right
     };
 
-    std::string name;
-    if (style == Style::Outline)
-        name = "RoundRectOutline";
-    else if (style == Style::Wireframe)
-        name = "RoundRectWireframe";
-    else if (style == Style::Solid)
-        name = "RoundRect";
-    else BUG("???");
-    // use the aspect ratio up to some precision to derive a name
-    // for the generated geometry so that we can keep some of these
-    // around and not have to regenerate the geometry all the time.
-    name += NameAspectRatio(rect_width, rect_height, Truncate, "%d:%d");
-
     if (style == Style::Outline)
     {
-        geom = device.FindGeometry(name);
-        if (geom == nullptr)
+
+        // outline of the box body
+        std::vector<Vertex2D> vs = {
+            // left box
+            {{0.0f,      -h}, {0.0f,      h}},
+            {{0.0f, -1.0f+h}, {0.0f, 1.0f-h}},
+            // center box
+            {{w,       0.0f}, {w,      0.0f}},
+            {{1.0f-w,  0.0f}, {1.0f-w, 0.0f}},
+            {{w,      -1.0f}, {w,      1.0f}},
+            {{1.0f-w, -1.0f}, {w,      1.0f}},
+            // right box
+            {{1.0f,      -h}, {1.0f,        h}},
+            {{1.0f, -1.0f+h}, {1.0f,   1.0f-h}},
+        };
+
+        // generate corners
+        for (int i=0; i<4; ++i)
         {
-            // outline of the box body
-            std::vector<Vertex2D> vs = {
-                // left box
-                {{0.0f,      -h}, {0.0f,      h}},
-                {{0.0f, -1.0f+h}, {0.0f, 1.0f-h}},
-                // center box
-                {{w,       0.0f}, {w,      0.0f}},
-                {{1.0f-w,  0.0f}, {1.0f-w, 0.0f}},
-                {{w,      -1.0f}, {w,      1.0f}},
-                {{1.0f-w, -1.0f}, {w,      1.0f}},
-                // right box
-                {{1.0f,      -h}, {1.0f,        h}},
-                {{1.0f, -1.0f+h}, {1.0f,   1.0f-h}},
-            };
-
-            // generate corners
-            for (int i=0; i<4; ++i)
+            float angle = math::Pi * 0.5 * i;
+            for (unsigned s = 0; s<=slices; ++s)
             {
-                float angle = math::Pi * 0.5 * i;
-                for (unsigned s = 0; s<=slices; ++s)
-                {
-                    const auto x0 = std::cos(angle) * w;
-                    const auto y0 = std::sin(angle) * h;
-                    Vertex2D v0, v1;
-                    v0.aPosition.x = corners[i].x + x0;
-                    v0.aPosition.y = corners[i].y + y0;
-                    v0.aTexCoord.x = corners[i].x + x0;
-                    v0.aTexCoord.y = (corners[i].y + y0) * -1.0f;
+                const auto x0 = std::cos(angle) * w;
+                const auto y0 = std::sin(angle) * h;
+                Vertex2D v0, v1;
+                v0.aPosition.x = corners[i].x + x0;
+                v0.aPosition.y = corners[i].y + y0;
+                v0.aTexCoord.x = corners[i].x + x0;
+                v0.aTexCoord.y = (corners[i].y + y0) * -1.0f;
 
-                    angle += increment;
+                angle += increment;
 
-                    const auto x1 = std::cos(angle) * w;
-                    const auto y1 = std::sin(angle) * h;
-                    v1.aPosition.x = corners[i].x + x1;
-                    v1.aPosition.y = corners[i].y + y1;
-                    v1.aTexCoord.x = corners[i].x + x1;
-                    v1.aTexCoord.y = (corners[i].y + y1) * -1.0f;
+                const auto x1 = std::cos(angle) * w;
+                const auto y1 = std::sin(angle) * h;
+                v1.aPosition.x = corners[i].x + x1;
+                v1.aPosition.y = corners[i].y + y1;
+                v1.aTexCoord.x = corners[i].x + x1;
+                v1.aTexCoord.y = (corners[i].y + y1) * -1.0f;
 
-                    vs.push_back(v0);
-                    vs.push_back(v1);
-                }
+                vs.push_back(v0);
+                vs.push_back(v1);
             }
-            geom = device.MakeGeometry(name);
-            geom->SetVertexBuffer(std::move(vs));
-            geom->AddDrawCmd(Geometry::DrawType::Lines);
         }
+        geometry.SetVertexBuffer(std::move(vs));
+        geometry.AddDrawCmd(Geometry::DrawType::Lines);
     }
     else if (style == Style::Solid || style == Style::Wireframe)
     {
-        geom = device.FindGeometry(name);
-        if (geom == nullptr)
+        // center body
+        std::vector<Vertex2D> vs = {
+            // left box
+            {{0.0f,      -h}, {0.0f,      h}},
+            {{0.0f, -1.0f+h}, {0.0f, 1.0f-h}},
+            {{w,    -1.0f+h}, {w,    1.0f-h}},
+            {{w,    -1.0f+h}, {w,    1.0f-h}},
+            {{w,         -h}, {w,         h}},
+            {{0.0f,      -h}, {0.0f,      h}},
+
+            // center box
+            {{w,       0.0f}, {w,      0.0f}},
+            {{w,      -1.0f}, {w,      1.0f}},
+            {{1.0f-w, -1.0f}, {1.0f-w, 1.0f}},
+            {{1.0f-w, -1.0f}, {1.0f-w, 1.0f}},
+            {{1.0f-w,  0.0f}, {1.0f-w, 0.0f}},
+            {{w,       0.0f}, {w,      0.0f}},
+
+            // right box.
+            {{1.0f-w,       -h}, {1.0f-w,      h}},
+            {{1.0f-w,  -1.0f+h}, {1.0f-w, 1.0f-h}},
+            {{1.0f,    -1.0f+h}, {1.0f,   1.0f-h}},
+            {{1.0f,    -1.0f+h}, {1.0f,   1.0f-h}},
+            {{1.0f,         -h}, {1.0f,        h}},
+            {{1.0f-w,       -h}, {1.0f-w,      h}},
+        };
+
+        if (style == Style::Solid)
         {
-            geom = device.MakeGeometry(name);
+            geometry.AddDrawCmd(Geometry::DrawType::Triangles, 0, 18);
+        }
+        else
+        {
+            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 0, 3);
+            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 3, 3);
+            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 6, 3);
+            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 9, 3);
+            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 12, 3);
+            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 15, 3);
+        }
 
-            // center body
-            std::vector<Vertex2D> vs = {
-                // left box
-                {{0.0f,      -h}, {0.0f,      h}},
-                {{0.0f, -1.0f+h}, {0.0f, 1.0f-h}},
-                {{w,    -1.0f+h}, {w,    1.0f-h}},
-                {{w,    -1.0f+h}, {w,    1.0f-h}},
-                {{w,         -h}, {w,         h}},
-                {{0.0f,      -h}, {0.0f,      h}},
+        // generate corners
+        for (int i=0; i<4; ++i)
+        {
+            const auto offset = vs.size();
 
-                // center box
-                {{w,       0.0f}, {w,      0.0f}},
-                {{w,      -1.0f}, {w,      1.0f}},
-                {{1.0f-w, -1.0f}, {1.0f-w, 1.0f}},
-                {{1.0f-w, -1.0f}, {1.0f-w, 1.0f}},
-                {{1.0f-w,  0.0f}, {1.0f-w, 0.0f}},
-                {{w,       0.0f}, {w,      0.0f}},
-
-                // right box.
-                {{1.0f-w,       -h}, {1.0f-w,      h}},
-                {{1.0f-w,  -1.0f+h}, {1.0f-w, 1.0f-h}},
-                {{1.0f,    -1.0f+h}, {1.0f,   1.0f-h}},
-                {{1.0f,    -1.0f+h}, {1.0f,   1.0f-h}},
-                {{1.0f,         -h}, {1.0f,        h}},
-                {{1.0f-w,       -h}, {1.0f-w,      h}},
-            };
+            Vertex2D center;
+            center.aPosition.x = corners[i].x;
+            center.aPosition.y = corners[i].y;
+            center.aTexCoord.x = corners[i].x;
+            center.aTexCoord.y = corners[i].y * -1.0f;
 
             if (style == Style::Solid)
             {
-                geom->AddDrawCmd(Geometry::DrawType::Triangles, 0, 18);
-            }
-            else
-            {
-                geom->AddDrawCmd(Geometry::DrawType::LineLoop, 0, 3);
-                geom->AddDrawCmd(Geometry::DrawType::LineLoop, 3, 3);
-                geom->AddDrawCmd(Geometry::DrawType::LineLoop, 6, 3);
-                geom->AddDrawCmd(Geometry::DrawType::LineLoop, 9, 3);
-                geom->AddDrawCmd(Geometry::DrawType::LineLoop, 12, 3);
-                geom->AddDrawCmd(Geometry::DrawType::LineLoop, 15, 3);
+                // triangle fan center point
+                vs.push_back(center);
             }
 
-            // generate corners
-            for (int i=0; i<4; ++i)
+            float angle = math::Pi * 0.5 * i;
+            for (unsigned s = 0; s<=slices; ++s)
             {
-                const auto offset = vs.size();
+                const auto x = std::cos(angle) * w;
+                const auto y = std::sin(angle) * h;
+                Vertex2D v;
+                v.aPosition.x = corners[i].x + x;
+                v.aPosition.y = corners[i].y + y;
+                v.aTexCoord.x = corners[i].x + x;
+                v.aTexCoord.y = (corners[i].y + y) * -1.0f;
+                vs.push_back(v);
 
-                Vertex2D center;
-                center.aPosition.x = corners[i].x;
-                center.aPosition.y = corners[i].y;
-                center.aTexCoord.x = corners[i].x;
-                center.aTexCoord.y = corners[i].y * -1.0f;
-
-                if (style == Style::Solid)
-                {
-                    // triangle fan center point
-                    vs.push_back(center);
-                }
-
-                float angle = math::Pi * 0.5 * i;
-                for (unsigned s = 0; s<=slices; ++s)
+                angle += increment;
+                if (style == Style::Wireframe)
                 {
                     const auto x = std::cos(angle) * w;
                     const auto y = std::sin(angle) * h;
@@ -1018,88 +860,62 @@ Geometry* RoundRectGeometry::Generate(const Environment& env, Style style, Devic
                     v.aPosition.x = corners[i].x + x;
                     v.aPosition.y = corners[i].y + y;
                     v.aTexCoord.x = corners[i].x + x;
-                    v.aTexCoord.y = (corners[i].y + y) * -1.0f;
+                    v.aTexCoord.y = (corners[i].y + y)  * -1.0f;
                     vs.push_back(v);
-
-                    angle += increment;
-                    if (style == Style::Wireframe)
-                    {
-                        const auto x = std::cos(angle) * w;
-                        const auto y = std::sin(angle) * h;
-                        Vertex2D v;
-                        v.aPosition.x = corners[i].x + x;
-                        v.aPosition.y = corners[i].y + y;
-                        v.aTexCoord.x = corners[i].x + x;
-                        v.aTexCoord.y = (corners[i].y + y)  * -1.0f;
-                        vs.push_back(v);
-                        vs.push_back(center);
-                    }
-                }
-                if (style == Style::Solid)
-                {
-                    geom->AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size() - offset);
-                }
-                else if (style == Style::Wireframe)
-                {
-                    geom->AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size() - offset);
+                    vs.push_back(center);
                 }
             }
-            geom->SetVertexBuffer(std::move(vs));
+            if (style == Style::Solid)
+            {
+                geometry.AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size() - offset);
+            }
+            else if (style == Style::Wireframe)
+            {
+                geometry.AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size() - offset);
+            }
         }
+        geometry.SetVertexBuffer(std::move(vs));
     }
-    return geom;
 }
 
 // static
-Geometry* ArrowCursorGeometry::Generate(const Environment& env, Style style, Device& device)
+void ArrowCursorGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
 {
-    Geometry* geom = device.FindGeometry("ArrowCursor");
-    if (!geom)
-    {
-        const Vertex2D verts[] = {
-            {{0.0f,  0.0f}, {0.0f, 0.0f}},
-            {{0.0f, -0.6f}, {0.0f, 0.6f}},
-            {{0.6f, 0.0f}, {0.6f, 0.0f}},
+    const Vertex2D verts[] = {
+        {{0.0f,  0.0f}, {0.0f, 0.0f}},
+        {{0.0f, -0.6f}, {0.0f, 0.6f}},
+        {{0.6f, 0.0f}, {0.6f, 0.0f}},
 
-            {{0.3f, 0.0f}, {0.3f, 0.0f}},
-            {{0.0f, -0.3f}, {0.0f, 0.3f}},
-            {{0.7f, -1.0f}, {0.7f, 1.0f}},
+        {{0.3f, 0.0f}, {0.3f, 0.0f}},
+        {{0.0f, -0.3f}, {0.0f, 0.3f}},
+        {{0.7f, -1.0f}, {0.7f, 1.0f}},
 
-            {{0.3f, 0.0f}, {0.3f, 0.0f}},
-            {{0.7f, -1.0f}, {0.7f, 1.0f}},
-            {{1.0f, -0.7f}, {1.0f, 0.7f}}
-        };
-        geom = device.MakeGeometry("ArrowCursor");
-        geom->SetVertexBuffer(verts, 9);
-        geom->AddDrawCmd(Geometry::DrawType::Triangles);
-    }
-    return geom;
+        {{0.3f, 0.0f}, {0.3f, 0.0f}},
+        {{0.7f, -1.0f}, {0.7f, 1.0f}},
+        {{1.0f, -0.7f}, {1.0f, 0.7f}}
+    };
+    geometry.SetVertexBuffer(verts, 9);
+    geometry.AddDrawCmd(Geometry::DrawType::Triangles);
 }
 
 // static
-Geometry* BlockCursorGeometry::Generate(const Environment& env, Style style, Device& device)
+void BlockCursorGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
 {
-    Geometry* geom = device.FindGeometry("BlockCursor");
-    if (!geom)
-    {
-        const Vertex2D verts[] = {
-            { {0.0f,  0.0f}, {0.0f, 0.0f} },
-            { {0.0f, -1.0f}, {0.0f, 1.0f} },
-            { {1.0f, -1.0f}, {1.0f, 1.0f} },
+    const Vertex2D verts[] = {
+        { {0.0f,  0.0f}, {0.0f, 0.0f} },
+        { {0.0f, -1.0f}, {0.0f, 1.0f} },
+        { {1.0f, -1.0f}, {1.0f, 1.0f} },
 
-            { {0.0f,  0.0f}, {0.0f, 0.0f} },
-            { {1.0f, -1.0f}, {1.0f, 1.0f} },
-            { {1.0f,  0.0f}, {1.0f, 0.0f} }
-        };
-        geom = device.MakeGeometry("BlockCursor");
-        geom->SetVertexBuffer(verts, 6);
-        geom->AddDrawCmd(Geometry::DrawType::Triangles);
-    }
-    return geom;
+        { {0.0f,  0.0f}, {0.0f, 0.0f} },
+        { {1.0f, -1.0f}, {1.0f, 1.0f} },
+        { {1.0f,  0.0f}, {1.0f, 0.0f} }
+    };
+    geometry.SetVertexBuffer(verts, 6);
+    geometry.AddDrawCmd(Geometry::DrawType::Triangles);
 }
 
 // static
-Geometry* CubeGeometry::Generate(const Environment& env, Style style, Device& device)
+void CubeGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
 {
     // all corners of the cube.
     constexpr const Vec3 FrontTopLeft =  {-0.5f,  0.5f,  0.5f};
@@ -1113,62 +929,48 @@ Geometry* CubeGeometry::Generate(const Environment& env, Style style, Device& de
 
     if (style == Style::Solid)
     {
-        Geometry* geom = device.FindGeometry("SolidCube");
-        if (geom == nullptr)
-        {
-            geom = device.MakeGeometry("SolidCube");
+        Vertex3D vertices[4 * 6];
+        Index16 indices[6 * 6];
 
-            Vertex3D vertices[4 * 6];
-            Index16 indices[6 * 6];
+        // front face
+        MakeFace(0, &indices[0], &vertices[0], FrontTopLeft, FrontBotLeft, FrontBotRight, FrontTopRight, Vec3 {0.0, 0.0, 1.0} );
+        // left face
+        MakeFace(4, &indices[6], &vertices[4], BackTopLeft, BackBotLeft, FrontBotLeft, FrontTopLeft, Vec3 {-1.0, 0.0, 0.0});
+        // right face
+        MakeFace(8, &indices[12], &vertices[8], FrontTopRight, FrontBotRight, BackBotRight, BackTopRight, Vec3 {1.0, 0.0, 0.0});
+        // top face
+        MakeFace(12, &indices[18], &vertices[12], BackTopLeft, FrontTopLeft, FrontTopRight, BackTopRight, Vec3 {0.0, 1.0, 0.0});
+        // bottom face
+        MakeFace(16, &indices[24], &vertices[16], FrontBotLeft, BackBotLeft, BackBotRight, FrontBotRight, Vec3{0.0, -1.0, 0.0});
+        // back face
+        MakeFace(20, &indices[30], &vertices[20], BackTopRight, BackBotRight, BackBotLeft, BackTopLeft, Vec3{0.0, 0.0, -1.0});
 
-            // front face
-            MakeFace(0, &indices[0], &vertices[0], FrontTopLeft, FrontBotLeft, FrontBotRight, FrontTopRight, Vec3 {0.0, 0.0, 1.0} );
-            // left face
-            MakeFace(4, &indices[6], &vertices[4], BackTopLeft, BackBotLeft, FrontBotLeft, FrontTopLeft, Vec3 {-1.0, 0.0, 0.0});
-            // right face
-            MakeFace(8, &indices[12], &vertices[8], FrontTopRight, FrontBotRight, BackBotRight, BackTopRight, Vec3 {1.0, 0.0, 0.0});
-            // top face
-            MakeFace(12, &indices[18], &vertices[12], BackTopLeft, FrontTopLeft, FrontTopRight, BackTopRight, Vec3 {0.0, 1.0, 0.0});
-            // bottom face
-            MakeFace(16, &indices[24], &vertices[16], FrontBotLeft, BackBotLeft, BackBotRight, FrontBotRight, Vec3{0.0, -1.0, 0.0});
-            // back face
-            MakeFace(20, &indices[30], &vertices[20], BackTopRight, BackBotRight, BackBotLeft, BackTopLeft, Vec3{0.0, 0.0, -1.0});
-
-            geom->UploadVertices(vertices, sizeof(vertices), Geometry::Usage::Static);
-            geom->UploadIndices(indices, sizeof(indices), Geometry::IndexType::Index16, Geometry::Usage::Static);
-            geom->SetVertexLayout(GetVertexLayout<Vertex3D>());
-            geom->AddDrawCmd(Geometry::DrawType::Triangles);
-        }
-        return geom;
+        geometry.UploadVertices(vertices, sizeof(vertices), Geometry::Usage::Static);
+        geometry.UploadIndices(indices, sizeof(indices), Geometry::IndexType::Index16, Geometry::Usage::Static);
+        geometry.SetVertexLayout(GetVertexLayout<Vertex3D>());
+        geometry.AddDrawCmd(Geometry::DrawType::Triangles);
     }
     else if (style == Style::Outline)
     {
-        Geometry* geom = device.FindGeometry("CubeOutline");
-        if (geom == nullptr)
-        {
-            geom = device.MakeGeometry("CubeOutline");
+        std::vector<Vertex3D> verts;
+        AddLine(FrontTopLeft,  FrontBotLeft, verts);
+        AddLine(FrontBotLeft,  FrontBotRight, verts);
+        AddLine(FrontBotRight, FrontTopRight, verts);
+        AddLine(FrontTopRight, FrontTopLeft, verts);
+        AddLine(BackTopLeft,  BackBotLeft, verts);
+        AddLine(BackBotLeft,  BackBotRight, verts);
+        AddLine(BackBotRight, BackTopRight, verts);
+        AddLine(BackTopRight, BackTopLeft, verts);
+        AddLine(FrontTopLeft, BackTopLeft, verts);
+        AddLine(FrontTopRight, BackTopRight, verts);
+        AddLine(FrontBotLeft, BackBotLeft, verts);
+        AddLine(FrontBotRight, BackBotRight, verts);
 
-            std::vector<Vertex3D> verts;
-            AddLine(FrontTopLeft,  FrontBotLeft, verts);
-            AddLine(FrontBotLeft,  FrontBotRight, verts);
-            AddLine(FrontBotRight, FrontTopRight, verts);
-            AddLine(FrontTopRight, FrontTopLeft, verts);
-            AddLine(BackTopLeft,  BackBotLeft, verts);
-            AddLine(BackBotLeft,  BackBotRight, verts);
-            AddLine(BackBotRight, BackTopRight, verts);
-            AddLine(BackTopRight, BackTopLeft, verts);
-            AddLine(FrontTopLeft, BackTopLeft, verts);
-            AddLine(FrontTopRight, BackTopRight, verts);
-            AddLine(FrontBotLeft, BackBotLeft, verts);
-            AddLine(FrontBotRight, BackBotRight, verts);
-
-            geom->SetVertexBuffer(std::move(verts));
-            geom->SetVertexLayout(GetVertexLayout<Vertex3D>());
-            geom->AddDrawCmd(Geometry::DrawType::Lines);
-        }
-        return geom;
+        geometry.SetVertexBuffer(std::move(verts));
+        geometry.SetVertexLayout(GetVertexLayout<Vertex3D>());
+        geometry.AddDrawCmd(Geometry::DrawType::Lines);
     }
-    return nullptr;
+
 }
 // static
 void CubeGeometry::MakeFace(size_t vertex_offset, Index16* indices, Vertex3D* vertices,
@@ -1214,15 +1016,8 @@ void CubeGeometry::AddLine(const Vec3& v0, const Vec3& v1, std::vector<Vertex3D>
 }
 
 // static
-Geometry* CylinderGeometry::Generate(const Environment& env, Style style, Device& device, unsigned slices)
+void CylinderGeometry::Generate(const Environment& env, Style style, Geometry& geometry, unsigned slices)
 {
-    if (style != Style::Solid)
-        return nullptr;
-
-    Geometry* geom = device.FindGeometry("CylinderGeometry");
-    if (geom)
-        return geom;
-
     const auto vertex_count = slices + 1;
 
     std::vector<Vertex3D> vertices;
@@ -1354,27 +1149,17 @@ Geometry* CylinderGeometry::Generate(const Environment& env, Style style, Device
     }
     const auto bot_count = indices.size() - bot_start;
 
-
-    geom = device.MakeGeometry("CylinderGeometry");
-    geom->SetVertexBuffer(std::move(vertices));
-    geom->SetIndexBuffer(std::move(indices));
-    geom->SetVertexLayout(GetVertexLayout<Vertex3D>());
-    geom->AddDrawCmd(Geometry::DrawType::Triangles, body_start, body_count);
-    geom->AddDrawCmd(Geometry::DrawType::TriangleFan, top_start, top_count);
-    geom->AddDrawCmd(Geometry::DrawType::TriangleFan, bot_start, bot_count);
-    return geom;
+    geometry.SetVertexBuffer(std::move(vertices));
+    geometry.SetIndexBuffer(std::move(indices));
+    geometry.SetVertexLayout(GetVertexLayout<Vertex3D>());
+    geometry.AddDrawCmd(Geometry::DrawType::Triangles, body_start, body_count);
+    geometry.AddDrawCmd(Geometry::DrawType::TriangleFan, top_start, top_count);
+    geometry.AddDrawCmd(Geometry::DrawType::TriangleFan, bot_start, bot_count);
 }
 
 // static
-Geometry* ConeGeometry::Generate(const Environment& env, Style style, Device& device, unsigned int slices)
+void ConeGeometry::Generate(const Environment& env, Style style, Geometry& geometry, unsigned int slices)
 {
-    if (style != Style::Solid)
-        return nullptr;
-
-    Geometry* geom = device.FindGeometry("Cone");
-    if (geom)
-        return geom;
-
     const auto vertex_count = slices + 1;
 
     std::vector<Vertex3D> vertices;
@@ -1450,28 +1235,16 @@ Geometry* ConeGeometry::Generate(const Environment& env, Style style, Device& de
 
     const auto bottom_count = vertices.size() - bottom_start;
 
-    geom = device.MakeGeometry("Cone");
-    geom->SetVertexBuffer(std::move(vertices));
-    geom->SetVertexLayout(GetVertexLayout<Vertex3D>());
-    geom->AddDrawCmd(Geometry::DrawType::TriangleFan, cone_start, cone_count);
-    geom->AddDrawCmd(Geometry::DrawType::TriangleFan, bottom_start, bottom_count);
-    return geom;
-
+    geometry.SetVertexBuffer(std::move(vertices));
+    geometry.SetVertexLayout(GetVertexLayout<Vertex3D>());
+    geometry.AddDrawCmd(Geometry::DrawType::TriangleFan, cone_start, cone_count);
+    geometry.AddDrawCmd(Geometry::DrawType::TriangleFan, bottom_start, bottom_count);
 }
 
 // static
-Geometry* SphereGeometry::Generate(const Environment& env, Style style, Device& device, unsigned int slices)
+void SphereGeometry::Generate(const Environment& env, Style style, Geometry& geometry, unsigned int slices)
 {
-    if (style != Style::Solid)
-        return nullptr;
-
-    Geometry* geom = device.FindGeometry("Sphere");
-    if (geom)
-        return geom;
-
-
-    const float radius = 0.5f;
-
+    const float radius     = 0.5f;
     const int numSlices    = slices;
     const int numParallels = slices / 2;
     const int numVertices  = (numParallels + 1) * (slices + 1);
@@ -1522,24 +1295,15 @@ Geometry* SphereGeometry::Generate(const Environment& env, Style style, Device& 
         }
     }
 
-    geom = device.MakeGeometry("Sphere");
-    geom->SetVertexBuffer(std::move(vertices));
-    geom->SetIndexBuffer(std::move(indices));
-    geom->SetVertexLayout(GetVertexLayout<Vertex3D>());
-    geom->AddDrawCmd(Geometry::DrawType::Triangles);
-    return geom;
+    geometry.SetVertexBuffer(std::move(vertices));
+    geometry.SetIndexBuffer(std::move(indices));
+    geometry.SetVertexLayout(GetVertexLayout<Vertex3D>());
+    geometry.AddDrawCmd(Geometry::DrawType::Triangles);
 }
 
 // static
-Geometry* PyramidGeometry::Generate(const Environment& env, Style style, Device& device)
+void PyramidGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
 {
-    if (style != Style::Solid)
-        return nullptr;
-
-    Geometry* geom = device.FindGeometry("Pyramid");
-    if (geom)
-        return geom;
-
     Vertex3D apex;
     apex.aPosition = Vec3 {0.0f, 0.5f, 0.0f};
     apex.aNormal   = Vec3 {0.0f, 1.0f, 0.0f};
@@ -1563,11 +1327,9 @@ Geometry* PyramidGeometry::Generate(const Environment& env, Style style, Device&
     MakeFace(verts, base[0], base[3], base[2]);
     MakeFace(verts, base[0], base[2], base[1]);
 
-    geom = device.MakeGeometry("Pyramid");
-    geom->AddDrawCmd(Geometry::DrawType::Triangles);
-    geom->SetVertexBuffer(std::move(verts));
-    geom->SetVertexLayout(GetVertexLayout<Vertex3D>());
-    return geom;
+    geometry.AddDrawCmd(Geometry::DrawType::Triangles);
+    geometry.SetVertexBuffer(std::move(verts));
+    geometry.SetVertexLayout(GetVertexLayout<Vertex3D>());
 }
 
 void PyramidGeometry::MakeFace(std::vector<Vertex3D>& vertices, const Vertex3D& apex, const Vertex3D& base0,
@@ -1590,53 +1352,82 @@ void PyramidGeometry::MakeFace(std::vector<Vertex3D>& vertices, const Vertex3D& 
     vertices.back().aNormal = ToVec(normal);
 }
 
-Geometry* ConstructShape(const SimpleShapeArgs& args,
-                         const SimpleShapeEnvironment& environment,
-                         SimpleShapeStyle style,
-                         SimpleShapeType type,
-                         Device& device)
+Geometry* ConstructSimpleShape(const SimpleShapeArgs& args,
+                               const SimpleShapeEnvironment& environment,
+                               SimpleShapeStyle style,
+                               SimpleShapeType type,
+                               Device& device)
 {
+    if (style == Style::Points)
+        style = Style::Solid;
+
+    if (Is3DShape(type))
+        style = Style::Solid;
+
+    std::string name;
+    name += base::ToString(type);
+    name += base::ToString(style);
+    if (type == SimpleShapeType::Capsule || type == SimpleShapeType::RoundRect)
+    {
+        // try to figure out if the model matrix will distort the
+        // round rectangle out of it's square shape which would then
+        // distort the rounded corners out of the shape too.
+        const auto& model_matrix = *environment.model_matrix;
+        const auto rect_width    = glm::length(model_matrix * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+        const auto rect_height   = glm::length(model_matrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+        const auto aspect_ratio  = rect_width / rect_height;
+        if (type == SimpleShapeType::Capsule)
+            name += NameAspectRatio(rect_width, rect_height, HalfRound, "%1.1f:%1.1f");
+        else if (type == SimpleShapeType::RoundRect)
+            name += NameAspectRatio(rect_width, rect_height, Truncate, "%d:%d");
+    }
+
+    if (auto* geometry = device.FindGeometry(name))
+        return geometry;
+
+    auto* geometry = device.MakeGeometry(name);
+
     if (type == SimpleShapeType::Arrow)
-        return detail::ArrowGeometry::Generate(environment, style, device);
-    if (type == SimpleShapeType::ArrowCursor)
-        return detail::ArrowCursorGeometry::Generate(environment, style, device);
+        detail::ArrowGeometry::Generate(environment, style, *geometry);
+    else if (type == SimpleShapeType::ArrowCursor)
+        detail::ArrowCursorGeometry::Generate(environment, style, *geometry);
     else if (type == SimpleShapeType::BlockCursor)
-        return detail::BlockCursorGeometry::Generate(environment, style, device);
+        detail::BlockCursorGeometry::Generate(environment, style, *geometry);
     else if (type == SimpleShapeType::Capsule)
-        return detail::CapsuleGeometry::Generate(environment, style, device);
+        detail::CapsuleGeometry::Generate(environment, style, *geometry);
     else if (type == SimpleShapeType::Circle)
-        return detail::CircleGeometry::Generate(environment, style, device);
+        detail::CircleGeometry::Generate(environment, style, *geometry);
     else if (type == SimpleShapeType::Cube)
-        return detail::CubeGeometry::Generate(environment, style, device);
+        detail::CubeGeometry::Generate(environment, style, *geometry);
     else if (type == SimpleShapeType::Cone)
-        return detail::ConeGeometry::Generate(environment, style, device, std::get<ConeShapeArgs>(args).slices);
+        detail::ConeGeometry::Generate(environment, style, *geometry, std::get<ConeShapeArgs>(args).slices);
     else if (type == SimpleShapeType::Cylinder)
-        return detail::CylinderGeometry::Generate(environment, style, device, std::get<CylinderShapeArgs>(args).slices);
+        detail::CylinderGeometry::Generate(environment, style, *geometry, std::get<CylinderShapeArgs>(args).slices);
     else if (type == SimpleShapeType::IsoscelesTriangle)
-        return detail::IsoscelesTriangleGeometry::Generate(environment, style, device);
+        detail::IsoscelesTriangleGeometry::Generate(environment, style, *geometry);
     else if (type == SimpleShapeType::Parallelogram)
-        return detail::ParallelogramGeometry::Generate(environment, style, device);
+        detail::ParallelogramGeometry::Generate(environment, style, *geometry);
     else if (type == SimpleShapeType::Pyramid)
-        return detail::PyramidGeometry::Generate(environment, style, device);
+        detail::PyramidGeometry::Generate(environment, style, *geometry);
     else if (type == SimpleShapeType::Rectangle)
-        return detail::RectangleGeometry::Generate(environment, style, device);
+        detail::RectangleGeometry::Generate(environment, style, *geometry);
     else if (type == SimpleShapeType::RightTriangle)
-        return detail::RightTriangleGeometry::Generate(environment, style, device);
+        detail::RightTriangleGeometry::Generate(environment, style, *geometry);
     else if (type == SimpleShapeType::RoundRect)
-        return detail::RoundRectGeometry::Generate(environment, style, device, std::get<RoundRectShapeArgs>(args).corner_radius);
+        detail::RoundRectGeometry::Generate(environment, style, *geometry, std::get<RoundRectShapeArgs>(args).corner_radius);
     else if (type == SimpleShapeType::SemiCircle)
-        return detail::SemiCircleGeometry::Generate(environment, style, device);
+        detail::SemiCircleGeometry::Generate(environment, style, *geometry);
     else if (type == SimpleShapeType::Sector)
-        return detail::SectorGeometry::Generate(environment, style, device, std::get<SectorShapeArgs>(args).fill_percentage);
+        detail::SectorGeometry::Generate(environment, style, *geometry, std::get<SectorShapeArgs>(args).fill_percentage);
     else if (type == SimpleShapeType::Sphere)
-        return detail::SphereGeometry::Generate(environment, style, device, std::get<SphereShapeArgs>(args).slices);
+        detail::SphereGeometry::Generate(environment, style, *geometry, std::get<SphereShapeArgs>(args).slices);
     else if (type == SimpleShapeType::StaticLine)
-        return detail::StaticLineGeometry::Generate(environment, style, device);
+        detail::StaticLineGeometry::Generate(environment, style, *geometry);
     else if (type == SimpleShapeType::Trapezoid)
-        return detail::TrapezoidGeometry::Generate(environment, style, device);
+        detail::TrapezoidGeometry::Generate(environment, style, *geometry);
     else BUG("Missing geometry.");
 
-    return nullptr;
+    return geometry;
 }
 
 } // detail
@@ -1689,7 +1480,7 @@ std::string SimpleShapeInstance::GetShader(const Environment& env, const Device&
 }
 Geometry* SimpleShapeInstance::Upload(const Environment& env, Device& device) const
 {
-    return detail::ConstructShape(mClass->GetShapeArgs(), env, mStyle, mClass->GetShapeType(), device);
+    return detail::ConstructSimpleShape(mClass->GetShapeArgs(), env, mStyle, mClass->GetShapeType(), device);
 }
 std::string SimpleShapeInstance::GetShaderId(const Environment& env) const
 {
@@ -1739,7 +1530,7 @@ std::string SimpleShape::GetShaderName(const Environment& env) const
 
 Geometry* SimpleShape::Upload(const Environment& env, Device& device) const
 {
-    return detail::ConstructShape(mArgs, env, mStyle, mShape, device);
+    return detail::ConstructSimpleShape(mArgs, env, mStyle, mShape, device);
 }
 
 

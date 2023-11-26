@@ -204,68 +204,66 @@ namespace gfx
         using Style = Drawable::Style;
 
         struct ArrowGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device);
+            static void Generate(const Environment& env, Style style, Geometry& geometry);
         };
         struct StaticLineGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device);
+            static void Generate(const Environment& env, Style style, Geometry& geometry);
         };
         struct CapsuleGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device);
+            static void Generate(const Environment& env, Style style, Geometry& geometry);
         };
         struct SemiCircleGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device);
+            static void Generate(const Environment& env, Style style, Geometry& geometry);
         };
         struct CircleGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device);
+            static void Generate(const Environment& env, Style style, Geometry& geometry);
         };
         struct RectangleGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device);
+            static void Generate(const Environment& env, Style style, Geometry& geometry);
         };
         struct IsoscelesTriangleGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device);
+            static void Generate(const Environment& env, Style style, Geometry& device);
         };
         struct RightTriangleGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device);
+            static void Generate(const Environment& env, Style style, Geometry& geometry);
         };
         struct TrapezoidGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device);
+            static void Generate(const Environment& env, Style style, Geometry& device);
         };
         struct ParallelogramGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device);
+            static void Generate(const Environment& env, Style style, Geometry& geometry);
         };
         struct SectorGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device,
-                                      float fill_percentage);
+            static void Generate(const Environment& env, Style style, Geometry& geometry, float fill_percentage);
         };
         struct RoundRectGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device,
-                                      float corner_radius);
+            static void Generate(const Environment& env, Style style, Geometry& geometry, float corner_radius);
         };
         struct ArrowCursorGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device);
+            static void Generate(const Environment& env, Style style, Geometry& geometry);
         };
         struct BlockCursorGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device);
+            static void Generate(const Environment& env, Style style, Geometry& geometry);
         };
         struct CubeGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device);
+            static void Generate(const Environment& env, Style style, Geometry& geometry);
             static void MakeFace(size_t vertex_offset, Index16* indices, Vertex3D* vertices,
                                  const Vec3& v0, const Vec3& v1, const Vec3& v2, const Vec3& v3,
                                  const Vec3& normal);
             static void AddLine(const Vec3& v0, const Vec3& v1, std::vector<Vertex3D>& vertex);
         };
         struct CylinderGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device, unsigned slices);
+            static void Generate(const Environment& env, Style style, Geometry& geometry, unsigned slices);
         };
         struct PyramidGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device);
+            static void Generate(const Environment& env, Style style, Geometry& geometry);
             static void MakeFace(std::vector<Vertex3D>& verts, const Vertex3D& apex, const Vertex3D& base0, const Vertex3D& base1);
         };
         struct ConeGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device, unsigned slices);
+            static void Generate(const Environment& env, Style style, Geometry& geometry, unsigned slices);
         };
         struct SphereGeometry {
-            static Geometry* Generate(const Environment& env, Style style, Device& device, unsigned slices);
+            static void Generate(const Environment& env, Style style, Geometry& geometry, unsigned slices);
         };
 
     } // namespace
@@ -315,11 +313,11 @@ namespace gfx
         using SimpleShapeEnvironment = DrawableClass::Environment;
         using SimpleShapeStyle       = DrawableClass::Style;
         
-        Geometry* ConstructShape(const SimpleShapeArgs& args,
-                                 const SimpleShapeEnvironment& environment,
-                                 SimpleShapeStyle style,
-                                 SimpleShapeType type,
-                                 Device& device);
+        Geometry* ConstructSimpleShape(const SimpleShapeArgs& args,
+                                       const SimpleShapeEnvironment& environment,
+                                       SimpleShapeStyle style,
+                                       SimpleShapeType type,
+                                       Device& device);
 
     } // detail
 
