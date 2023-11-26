@@ -1989,12 +1989,6 @@ private:
 
         inline void SetFrameStamp(size_t frame_number) const noexcept
         { mFrameNumber = frame_number; }
-
-        struct DrawCommand {
-            DrawType type = DrawType::Triangles;
-            size_t count  = 0;
-            size_t offset = 0;
-        };
         inline size_t GetFrameStamp() const noexcept
         { return mFrameNumber; }
         inline size_t GetVertexBufferIndex() const noexcept
@@ -2013,7 +2007,6 @@ private:
         { return mIndexBufferType; }
         inline bool UsesIndexBuffer() const noexcept
         { return mIndexBufferSize != 0; }
-
         inline size_t GetNumDrawCmds() const noexcept
         { return mDrawCommands.size(); }
         inline const DrawCommand& GetDrawCommand(size_t index) const noexcept
