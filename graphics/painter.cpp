@@ -66,8 +66,8 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
         drawable_env.view_matrix  = draw.view ? draw.view : &mViewMatrix;
         drawable_env.proj_matrix  = draw.projection ? draw.projection : &mProjMatrix;
         drawable_env.model_matrix = draw.model;
-        Geometry* geometry = draw.drawable->Upload(drawable_env, *mDevice);
-        if (geometry == nullptr)
+        Geometry* geometry = GetGeometry(*draw.drawable, drawable_env);
+        if (!geometry)
             continue;
 
         Material::Environment material_env;
@@ -211,6 +211,27 @@ Program* Painter::GetProgram(const ShaderProgram& program,
         return nullptr;
 
     return gpu_program;
+}
+
+Geometry* Painter::GetGeometry(const Drawable& drawable,
+                               const Drawable::Environment& env) const
+{
+    const auto& name = drawable.GetGeometryName(env);
+    if (auto* geom = mDevice->FindGeometry(name))
+    {
+        if (drawable.IsDynamic(env))
+        {
+            if (!drawable.Upload(env, *geom))
+                return nullptr;
+        }
+        return geom;
+    }
+
+    auto* geom = mDevice->MakeGeometry(name);
+    if (!drawable.Upload(env, *geom))
+        return nullptr;
+
+    return geom;
 }
 
 IRect Painter::MapToDevice(const IRect& rect) const noexcept

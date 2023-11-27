@@ -168,11 +168,12 @@ namespace gfx
         // Get the human readable debug name that should be associated with the
         // shader object generated from this material.
         virtual std::string GetShaderName(const Environment& env) const = 0;
-        // Get the device specific geometry object. If the geometry
-        // does not yet exist on the device it's created and the
-        // contents from this drawable object are uploaded in some
-        // device specific data format.
-        virtual Geometry* Upload(const Environment& env, Device& device) const = 0;
+        // Get the geometry name that will be used to identify the
+        // drawable geometry on the device.
+        virtual std::string GetGeometryName(const Environment& env) const = 0;
+        // Upload drawable state onto a geometry object.
+        // Returns true if successful or false if geometry is unavailable.
+        virtual bool Upload(const Environment& env, Geometry& geometry) const = 0;
         // Update the state of the drawable object. dt is the
         // elapsed (delta) time in seconds.
         virtual void Update(const Environment& env, float dt) {}
@@ -188,6 +189,10 @@ namespace gfx
         // For example a particle simulation still has live particles.
         virtual bool IsAlive() const
         { return true; }
+        // Returns true if the drawable can change dynamically and
+        // new geometry object must be generated.
+        virtual bool IsDynamic(const Environment& env) const
+        { return false; }
         // Restart the drawable, if applicable.
         virtual void Restart(const Environment& env) {}
 
@@ -313,12 +318,15 @@ namespace gfx
         using SimpleShapeEnvironment = DrawableClass::Environment;
         using SimpleShapeStyle       = DrawableClass::Style;
         
-        Geometry* ConstructSimpleShape(const SimpleShapeArgs& args,
-                                       const SimpleShapeEnvironment& environment,
-                                       SimpleShapeStyle style,
-                                       SimpleShapeType type,
-                                       Device& device);
-
+        void ConstructSimpleShape(const SimpleShapeArgs& args,
+                                  const SimpleShapeEnvironment& environment,
+                                  SimpleShapeStyle style,
+                                  SimpleShapeType type,
+                                  Geometry& geometry);
+        std::string GetSimpleShapeGeometryName(const SimpleShapeArgs& args,
+                                               const SimpleShapeEnvironment& env,
+                                               SimpleShapeStyle style,
+                                               SimpleShapeType type);
     } // detail
 
 
@@ -453,7 +461,8 @@ namespace gfx
         virtual std::string GetShader(const Environment& env, const Device& device) const override;
         virtual std::string GetShaderId(const Environment& env) const override;
         virtual std::string GetShaderName(const Environment& env) const override;
-        virtual Geometry* Upload(const Environment& env, Device& device) const override;
+        virtual std::string GetGeometryName(const Environment& env) const override;
+        virtual bool Upload(const Environment& env, Geometry& geometry) const override;
         virtual void SetStyle(Style style) override
         { mStyle = style; }
         virtual Style GetStyle() const override
@@ -489,7 +498,8 @@ namespace gfx
         virtual std::string GetShader(const Environment& env, const Device& device) const override;
         virtual std::string GetShaderId(const Environment& env) const override;
         virtual std::string GetShaderName(const Environment& env) const override;
-        virtual Geometry* Upload(const Environment& env, Device& device) const override;
+        virtual std::string GetGeometryName(const Environment& env) const override;
+        virtual bool Upload(const Environment& env, Geometry& geometry) const override;
 
         virtual void SetStyle(Style style) override
         { mStyle = style; }
@@ -652,7 +662,8 @@ namespace gfx
         virtual std::string GetShader(const Environment& env, const Device& device) const override;
         virtual std::string GetShaderId(const Environment& env) const override;
         virtual std::string GetShaderName(const Environment& env) const override;
-        virtual Geometry* Upload(const Environment& env, Device& device) const override;
+        virtual std::string GetGeometryName(const Environment& env) const override;
+        virtual bool Upload(const Environment& env, Geometry& geometry) const override;
 
         virtual Style GetStyle() const override
         { return Style::Outline; }
@@ -746,7 +757,9 @@ namespace gfx
         inline void SetDynamic(bool on_off) noexcept
         { mStatic = !on_off; }
 
-        Geometry* Upload(const Environment& env, Device& device) const;
+        std::string GetGeometryName(const Environment& env) const;
+        bool IsDynamic(const Environment& env) const;
+        bool Upload(const Environment& env, Geometry& geometry) const;
 
         virtual Type GetType() const override
         { return Type::Polygon; }
@@ -784,7 +797,11 @@ namespace gfx
         virtual std::string GetShader(const Environment& env, const Device& device) const override;
         virtual std::string GetShaderId(const Environment& env) const override;
         virtual std::string GetShaderName(const Environment& env) const override;
-        virtual Geometry* Upload(const Environment& env, Device& device) const override;
+        virtual std::string GetGeometryName(const Environment& env) const override;
+        virtual bool Upload(const Environment& env, Geometry& geometry) const override;
+
+        virtual bool IsDynamic(const Environment& env) const override
+        { return mClass->IsDynamic(env); }
 
         virtual Style GetStyle() const override
         { return Style::Solid; }
@@ -1026,10 +1043,11 @@ namespace gfx
           , mName(std::move(name))
         {}
 
-        Geometry* Upload(const Environment& env, const InstanceState& state, Device& device) const;
+        bool Upload(const Environment& env, const InstanceState& state, Geometry& geometry) const;
         std::string GetShader(const Environment& env, const Device& device) const;
         std::string GetProgramId(const Environment& env) const;
         std::string GetShaderName(const Environment& env) const;
+        std::string GetGeometryName(const Environment& env) const;
 
         void ApplyDynamicState(const Environment& env, Program& program) const;
         void Update(const Environment& env, InstanceState& state, float dt) const;
@@ -1092,10 +1110,12 @@ namespace gfx
         virtual std::string GetShader(const Environment& env, const Device& device) const override;
         virtual std::string GetShaderId(const Environment&  env) const override;
         virtual std::string GetShaderName(const Environment& env) const override;
-        virtual Geometry* Upload(const Environment& env, Device& device) const override;
+        virtual std::string GetGeometryName(const Environment& env) const override;
+        virtual bool Upload(const Environment& env, Geometry& geometry) const override;
         virtual Style GetStyle() const override;
         virtual void Update(const Environment& env, float dt) override;
         virtual bool IsAlive() const override;
+        virtual bool IsDynamic(const Environment& env) const override;
         virtual void Restart(const Environment& env) override;
         virtual void Execute(const Environment& env, const Command& cmd) override;
         virtual Type GetType() const override
@@ -1138,10 +1158,13 @@ namespace gfx
         virtual std::string GetShader(const Environment& env, const Device& device) const override;
         virtual std::string GetShaderId(const Environment& env) const override;
         virtual std::string GetShaderName(const Environment& env) const override;
-        virtual Geometry* Upload(const Environment& env, Device& device) const override;
+        virtual std::string GetGeometryName(const Environment& env) const override;
+        virtual bool Upload(const Environment& env, Geometry& geometry) const override;
         virtual Style GetStyle() const override;
         virtual Type GetType() const override
         { return Type::TileBatch; }
+        virtual bool IsDynamic(const Environment& env) const override
+        { return true; }
 
         inline void AddTile(const Tile& tile)
         { mTiles.push_back(tile); }
@@ -1208,7 +1231,8 @@ namespace gfx
         virtual std::string GetShader(const Environment& environment, const Device& device) const override;
         virtual std::string GetShaderId(const Environment& environment) const override;
         virtual std::string GetShaderName(const Environment& environment) const override;
-        virtual Geometry* Upload(const Environment& environment, Device& device) const override;
+        virtual std::string GetGeometryName(const Environment& environment) const override;
+        virtual bool Upload(const Environment& environment, Geometry& geometry) const override;
         virtual Style GetStyle() const override
         { return Style::Outline; }
     private:
