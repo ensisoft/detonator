@@ -203,6 +203,7 @@ add_library(GfxLib
     graphics/bitmap.cpp
     graphics/drawing.cpp
     graphics/drawable.cpp
+    graphics/geometry.cpp
     graphics/material.cpp
     graphics/shaderpass.cpp
     graphics/image.cpp
@@ -238,6 +239,7 @@ add_library(GfxLibTesting
     graphics/utility.cpp
     graphics/drawing.cpp
     graphics/drawable.cpp
+    graphics/geometry.cpp
     graphics/material.cpp
     graphics/shaderpass.cpp
     graphics/image.cpp
@@ -679,6 +681,7 @@ add_executable(graphics_test
     graphics/material.cpp
     graphics/shaderpass.cpp
     graphics/drawable.cpp
+    graphics/geometry.cpp
     graphics/drawing.cpp
     graphics/painter.cpp
     graphics/text.cpp
