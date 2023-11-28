@@ -2982,6 +2982,58 @@ bool DynamicLine3D::Upload(const Environment& environment, Geometry& geometry) c
     return true;
 }
 
+void DebugDrawableBase::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
+{
+    mDrawable->ApplyDynamicState(env, program, state);
+}
+
+std::string DebugDrawableBase::GetShader(const Environment& env, const Device& device) const
+{
+    return mDrawable->GetShader(env, device);
+}
+std::string DebugDrawableBase::GetShaderId(const Environment& env) const
+{
+    return mDrawable->GetShaderId(env);
+}
+std::string DebugDrawableBase::GetShaderName(const Environment& env) const
+{
+    return mDrawable->GetShaderName(env);
+}
+std::string DebugDrawableBase::GetGeometryName(const Environment& env) const
+{
+    std::string name;
+    name += mDrawable->GetGeometryName(env);
+    name += base::ToString(mFeature);
+    return name;
+}
+
+bool DebugDrawableBase::Upload(const Environment& env, Geometry& geom) const
+{
+    if (mFeature == Feature::Wireframe)
+    {
+        GeometryBuffer buffer;
+        buffer.SetDataHash(geom.GetDataHash());
+
+        if (!mDrawable->Upload(env, buffer))
+            return false;
+
+        if (buffer.HasData())
+        {
+            GeometryBuffer wireframe;
+            CreateWireframe(buffer, wireframe);
+
+            wireframe.Transfer(geom);
+            geom.SetDataHash(buffer.GetDataHash());
+        }
+    }
+    return true;
+}
+
+bool DebugDrawableBase::IsDynamic(const Environment& env) const
+{
+    return mDrawable->IsDynamic(env);
+}
+
 std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const DrawableClass>& klass)
 {
     // factory function based on type switching.
