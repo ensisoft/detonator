@@ -20,6 +20,13 @@
 #include "base/test_float.h"
 #include "data/json.h"
 #include "graphics/drawable.h"
+#include "graphics/geometry.h"
+
+bool operator==(const gfx::Vec2& lhs, const gfx::Vec2& rhs)
+{
+    return real::equals(lhs.x, rhs.x) &&
+           real::equals(lhs.y, rhs.y);
+}
 
 bool operator==(const gfx::Vertex2D& lhs, const gfx::Vertex2D& rhs)
 {
@@ -29,8 +36,150 @@ bool operator==(const gfx::Vertex2D& lhs, const gfx::Vertex2D& rhs)
            real::equals(lhs.aTexCoord.y, rhs.aTexCoord.y);
 }
 
+void unit_test_geometry()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // vertex stream
+    {
+        std::vector<gfx::Vertex2D> verts;
+        verts.resize(3);
+        verts[0].aPosition = gfx::Vec2 {  1.0f,  2.0f };
+        verts[0].aTexCoord = gfx::Vec2 {  0.5f,  0.5f };
+        verts[1].aPosition = gfx::Vec2 { -1.0f, -2.0f };
+        verts[1].aTexCoord = gfx::Vec2 {  1.0f,  1.0f };
+        verts[2].aPosition = gfx::Vec2 {  0.0f,  0.0f };
+        verts[2].aTexCoord = gfx::Vec2 { -0.5f, -0.5f };
+
+        gfx::VertexStream stream(gfx::GetVertexLayout<gfx::Vertex2D>(),
+                                 verts.data(), verts.size() * sizeof(gfx::Vertex2D));
+        TEST_REQUIRE(stream.IsValid());
+        TEST_REQUIRE(stream.GetCount() == 3);
+        TEST_REQUIRE(stream.HasAttribute("aPosition"));
+        TEST_REQUIRE(stream.HasAttribute("aTexCoord"));
+        TEST_REQUIRE(stream.HasAttribute("aFoobar") == false);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 0) == verts[0].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 1) == verts[1].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 2) == verts[2].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aTexCoord", 0) == verts[0].aTexCoord);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aTexCoord", 1) == verts[1].aTexCoord);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aTexCoord", 2) == verts[2].aTexCoord);
+
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(0) == verts[0]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(1) == verts[1]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(2) == verts[2]);
+    }
+
+    {
+        std::vector<gfx::Vertex2D> verts;
+        verts.resize(6);
+        verts[0].aPosition = gfx::Vec2 { -1.0f,  1.0f };
+        verts[1].aPosition = gfx::Vec2 { -1.0f, -1.0f };
+        verts[2].aPosition = gfx::Vec2 {  1.0f, -1.0f };
+        verts[3].aPosition = gfx::Vec2 { -1.0f,  1.0f };
+        verts[4].aPosition = gfx::Vec2 {  1.0f, -1.0f };
+        verts[5].aPosition = gfx::Vec2 {  1.0f,  1.0f };
+
+        gfx::GeometryBuffer buffer;
+        buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+        buffer.UploadVertices(verts.data(), verts.size() * sizeof(gfx::Vertex2D), gfx::Geometry::Usage::Static);
+        buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles, 0, 3);
+        buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles, 3, 3);
+
+        gfx::GeometryBuffer wireframe;
+        gfx::CreateWireframe(buffer, wireframe);
+        TEST_REQUIRE(wireframe.GetVertexBytes() == 12 * sizeof(gfx::Vertex2D));
+        TEST_REQUIRE(wireframe.GetNumDrawCommands() == 1);
+        TEST_REQUIRE(wireframe.GetDrawCmd(0).type == gfx::Geometry::DrawType::Lines);
+        TEST_REQUIRE(wireframe.GetDrawCmd(0).offset == 0);
+        TEST_REQUIRE(wireframe.GetDrawCmd(0).count == std::numeric_limits<size_t>::max());
+
+        const gfx::VertexStream stream(wireframe.GetLayout(),
+                                 wireframe.GetVertexDataPtr(),
+                                 wireframe.GetVertexBytes());
+        TEST_REQUIRE(stream.GetCount() == 12);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 0) == verts[0].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 1) == verts[1].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 2) == verts[1].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 3) == verts[2].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 4) == verts[2].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 5) == verts[0].aPosition);
+
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 6) == verts[0].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 7) == verts[2].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 8) == verts[2].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 9) == verts[5].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 10) == verts[5].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 11) == verts[0].aPosition);
+    }
+
+    {
+        std::vector<gfx::Vertex2D> verts;
+        verts.resize(6);
+        verts[0].aPosition = gfx::Vec2 {  0.0f,  0.0f };
+        verts[1].aPosition = gfx::Vec2 { -1.0f,  1.0f };
+        verts[2].aPosition = gfx::Vec2 { -1.0f, -1.0f };
+        verts[3].aPosition = gfx::Vec2 {  1.0f, -1.0f };
+        verts[4].aPosition = gfx::Vec2 {  1.0f,  1.0f };
+        verts[5].aPosition = gfx::Vec2 { -1.0f,  1.0f };
+
+        gfx::GeometryBuffer buffer;
+        buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+        buffer.UploadVertices(verts.data(), verts.size() * sizeof(gfx::Vertex2D), gfx::Geometry::Usage::Static);
+        buffer.AddDrawCmd(gfx::Geometry::DrawType::TriangleFan);
+
+        gfx::GeometryBuffer wireframe;
+        gfx::CreateWireframe(buffer, wireframe);
+        TEST_REQUIRE(wireframe.GetVertexBytes() == 18 * sizeof(gfx::Vertex2D));
+        TEST_REQUIRE(wireframe.GetNumDrawCommands() == 1);
+        TEST_REQUIRE(wireframe.GetDrawCmd(0).type == gfx::Geometry::DrawType::Lines);
+        TEST_REQUIRE(wireframe.GetDrawCmd(0).offset == 0);
+        TEST_REQUIRE(wireframe.GetDrawCmd(0).count == std::numeric_limits<size_t>::max());
+
+        const gfx::VertexStream stream(wireframe.GetLayout(),
+                                       wireframe.GetVertexDataPtr(),
+                                       wireframe.GetVertexBytes());
+        TEST_REQUIRE(stream.GetCount() == 18);
+
+        struct Line {
+            gfx::Vec2 a;
+            gfx::Vec2 b;
+        };
+        std::vector<Line> lines;
+
+        auto AddLine = [&lines](const auto& v0, const auto& v1) {
+            Line line;
+            line.a = v0.aPosition;
+            line.b = v1.aPosition;
+            lines.push_back(line);
+        };
+
+        AddLine(verts[0], verts[1]);
+        AddLine(verts[1], verts[2]);
+        AddLine(verts[2], verts[0]);
+        AddLine(verts[3], verts[2]);
+        AddLine(verts[3], verts[0]);
+        AddLine(verts[4], verts[3]);
+        AddLine(verts[4], verts[0]);
+        AddLine(verts[5], verts[4]);
+        AddLine(verts[5], verts[0]);
+
+        for (size_t i=0; i<lines.size(); ++i)
+        {
+            const auto& line = lines[i];
+            const auto start = i * 2;
+            const auto& p0 = *stream.GetAttribute<gfx::Vec2>("aPosition", start+0);
+            const auto& p1 = *stream.GetAttribute<gfx::Vec2>("aPosition", start+1);
+            TEST_REQUIRE((p0 == line.a && p1 == line.b) || (p1 == line.a && p0 == line.b));
+        }
+    }
+
+}
+
 void unit_test_polygon_data()
 {
+    TEST_CASE(test::Type::Feature)
+
     std::vector<gfx::Vertex2D> verts;
     gfx::Vertex2D v0;
     v0.aPosition.x = 1.0f;
@@ -66,6 +215,8 @@ void unit_test_polygon_data()
 
 void unit_test_polygon_vertex_operations()
 {
+    TEST_CASE(test::Type::Feature)
+
     // some test vertices.
     std::vector<gfx::PolygonClass::Vertex> verts;
     verts.resize(6);
@@ -258,6 +409,8 @@ void unit_test_polygon_vertex_operations()
 
 void unit_test_particle_engine_data()
 {
+    TEST_CASE(test::Type::Feature)
+
     gfx::ParticleEngineClass::Params params;
     params.motion   = gfx::ParticleEngineClass::Motion::Projectile;
     params.mode     = gfx::ParticleEngineClass::SpawnPolicy::Continuous;
@@ -348,11 +501,13 @@ void unit_test_particle_engine_data()
     }
 }
 
-
+EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
+    unit_test_geometry();
     unit_test_polygon_data();
     unit_test_polygon_vertex_operations();
     unit_test_particle_engine_data();
     return 0;
 }
+) // TEST_MAIN

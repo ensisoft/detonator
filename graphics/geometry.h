@@ -26,6 +26,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -282,4 +283,236 @@ namespace gfx
         }
     private:
     };
+
+    class GeometryBuffer : public Geometry
+    {
+    public:
+        virtual void ClearDraws() override
+        { mDrawCmds.clear(); }
+        virtual void AddDrawCmd(DrawType type) override
+        {
+            DrawCommand cmd;
+            cmd.type   = type;
+            cmd.offset = 0;
+            cmd.count  = std::numeric_limits<size_t>::max();
+            mDrawCmds.push_back(cmd);
+        }
+        virtual void AddDrawCmd(DrawType type, size_t offset, size_t count) override
+        {
+            DrawCommand cmd;
+            cmd.type   = type;
+            cmd.offset = offset;
+            cmd.count  = count;
+            mDrawCmds.push_back(cmd);
+        }
+        virtual void SetVertexLayout(const VertexLayout& layout) override
+        { mVertexLayout = layout; }
+        virtual void UploadVertices(const void* data, size_t bytes, Usage usage) override
+        {
+            ASSERT(data && bytes);
+            mVertexData.resize(bytes);
+            std::memcpy(&mVertexData[0], data, bytes);
+            mVertexUsage = usage;
+        }
+        virtual void UploadIndices(const void* data, size_t bytes, IndexType type, Usage usage) override
+        {
+            ASSERT(data && bytes);
+            mIndexData.resize(bytes);
+            std::memcpy(&mIndexData[0], data, bytes);
+            mIndexUsage = usage;
+            mIndexType  = type;
+        }
+        virtual void SetDataHash(size_t hash) override
+        { mDataHash = hash; }
+        virtual size_t GetDataHash() const override
+        { return mDataHash; }
+
+        inline size_t GetVertexBytes() const noexcept
+        { return mVertexData.size(); }
+        inline size_t GetIndexBytes() const noexcept
+        { return mIndexData.size(); }
+        inline const void* GetVertexDataPtr() const noexcept
+        { return mVertexData.empty() ? nullptr : &mVertexData[0]; }
+        inline const void* GetIndexDataPtr() const noexcept
+        { return mIndexData.empty() ? nullptr : &mIndexData[0]; }
+        inline const VertexLayout& GetLayout() const noexcept
+        { return mVertexLayout; }
+        inline size_t GetNumDrawCommands() const noexcept
+        { return mDrawCmds.size(); }
+        inline const auto& GetDrawCmd(size_t index) const noexcept
+        { return mDrawCmds[index]; }
+        inline Usage GetVertexUsage() const noexcept
+        { return mVertexUsage; }
+        inline Usage GetIndexUsage() const noexcept
+        { return mIndexUsage; }
+        inline IndexType GetIndexType() const noexcept
+        { return mIndexType; }
+
+        inline void SetVertexBuffer(std::vector<uint8_t>&& data) noexcept
+        { mVertexData = std::move(data); }
+        inline void SetIndexData(std::vector<uint8_t>&& data) noexcept
+        { mIndexData = std::move(data); }
+
+        void Transfer(Geometry& other) const
+        {
+            other.SetVertexLayout(mVertexLayout);
+            if (!mVertexData.empty())
+                other.UploadVertices(mVertexData.data(), mVertexData.size(), mVertexUsage);
+            if (mIndexData.empty())
+                other.UploadIndices(mIndexData.data(), mIndexData.size(), mIndexType, mIndexUsage);
+
+            other.SetDataHash(mDataHash);
+
+            other.ClearDraws();
+            for (const auto& cmd : mDrawCmds)
+                other.AddDrawCmd(cmd.type, cmd.offset, cmd.count);
+        }
+        inline bool HasData() const noexcept
+        { return !mVertexData.empty(); }
+
+    private:
+        VertexLayout mVertexLayout;
+        size_t mDataHash = 0;
+        std::vector<DrawCommand> mDrawCmds;
+        std::vector<uint8_t> mVertexData;
+        std::vector<uint8_t> mIndexData;
+        Usage mVertexUsage = Usage::Static;
+        Usage mIndexUsage  = Usage::Static;
+        IndexType mIndexType = IndexType::Index16;
+    };
+
+    class IndexStream
+    {
+    public:
+        using Type = Geometry::IndexType;
+
+        IndexStream(const void* buffer, size_t bytes, Type type)
+          : mBuffer((const uint8_t*)buffer)
+          , mCount(GetCount(bytes, type))
+          , mType(type)
+        {}
+        inline uint32_t GetIndex(size_t index) const noexcept
+        {
+            ASSERT(index < mCount);
+
+            if (mType == Type::Index16)
+            {
+                uint16_t ret =0;
+                memcpy(&ret, mBuffer + index * 2, 2);
+                return ret;
+            }
+            else if (mType == Type::Index32)
+            {
+                uint32_t ret = 0;
+                memcpy(&ret, mBuffer + index * 4, 4);
+                return ret;
+            } else BUG("Missing index type.");
+        }
+        inline size_t GetCount() const noexcept
+        { return mCount; }
+        inline bool IsValid() const noexcept
+        { return mBuffer != nullptr; }
+    private:
+        static size_t GetCount(size_t bytes, Type type)
+        {
+            const auto size = Geometry::GetIndexByteSize(type);
+            ASSERT((bytes % size) == 0);
+            return bytes / size;
+        }
+    private:
+        const uint8_t* mBuffer = nullptr;
+        const size_t mCount = 0;
+        const Type mType;
+    };
+
+    class VertexStream
+    {
+    public:
+        VertexStream(const VertexLayout& layout,
+                     const void* buffer, size_t bytes)
+          : mLayout(layout)
+          , mBuffer((const uint8_t*)buffer)
+          , mCount(GetCount(layout.vertex_struct_size, bytes))
+        {}
+        template<typename A>
+        const A* GetAttribute(const char* name, size_t index) const noexcept
+        {
+            ASSERT(index < mCount);
+            const auto& attribute = GetAttribute(name);
+            const auto offset = attribute.offset + index * mLayout.vertex_struct_size;
+            const auto size   = attribute.num_vector_components * sizeof(float);
+            ASSERT(sizeof(A) == size);
+            return reinterpret_cast<const A*>(mBuffer + offset);
+        }
+        template<typename T>
+        const T* GetVertex(size_t index) const noexcept
+        {
+            ASSERT(index < mCount);
+            ASSERT(sizeof(T) == mLayout.vertex_struct_size);
+            const auto offset = index * mLayout.vertex_struct_size;
+            return reinterpret_cast<const T*>(mBuffer + offset);
+        }
+        const void* GetVertexPtr(size_t index) const noexcept
+        {
+            ASSERT(index < mCount);
+            const auto offset = index * mLayout.vertex_struct_size;
+            return static_cast<const void*>(mBuffer + offset);
+        }
+        inline bool HasAttribute(const char* name) noexcept
+        {  return FindAttribute(name) != nullptr; }
+        inline size_t GetCount() const noexcept
+        { return mCount; }
+        inline bool IsValid() const noexcept
+        { return mBuffer != nullptr; }
+    private:
+        static size_t GetCount(size_t vertex_size_bytes, size_t buffer_size_bytes)
+        {
+            ASSERT((buffer_size_bytes % vertex_size_bytes) == 0);
+            return buffer_size_bytes / vertex_size_bytes;
+        }
+        const VertexLayout::Attribute& GetAttribute(const char* name) const noexcept
+        {
+            for (const auto& attr : mLayout.attributes)
+            {
+                if (attr.name == name)
+                    return attr;
+            }
+            BUG("No such vertex attribute was found.");
+        }
+        const VertexLayout::Attribute* FindAttribute(const char* name) const noexcept
+        {
+            for (const auto& attr : mLayout.attributes)
+            {
+                if (attr.name == name)
+                    return &attr;
+            }
+            return nullptr;
+        }
+    private:
+        const VertexLayout mLayout;
+        const uint8_t* mBuffer = nullptr;
+        const size_t mCount = 0;
+    };
+
+    class VertexBuffer
+    {
+    public:
+        VertexBuffer(const VertexLayout& layout, std::vector<uint8_t>* buffer)
+          : mLayout(layout)
+          , mBuffer(buffer)
+        {}
+        inline void PushBack(const void* ptr)
+        {
+            const auto byte_offset = mBuffer->size();
+            const auto byte_size = mLayout.vertex_struct_size;
+            mBuffer->resize(byte_offset + byte_size);
+            std::memcpy(&(*mBuffer)[byte_offset], ptr, byte_size);
+        }
+    private:
+        const VertexLayout mLayout;
+        std::vector<uint8_t>* mBuffer = nullptr;
+    };
+
+    void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe);
+
 } // namespace
