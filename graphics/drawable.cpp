@@ -2833,6 +2833,11 @@ std::string DebugDrawableBase::GetGeometryName(const Environment& env) const
 
 bool DebugDrawableBase::Upload(const Environment& env, Geometry& geom) const
 {
+    if (mDrawable->GetPrimitive() != Primitive::Triangles)
+    {
+        return mDrawable->Upload(env, geom);
+    }
+
     if (mFeature == Feature::Wireframe)
     {
         GeometryBuffer buffer;
