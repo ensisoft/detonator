@@ -172,34 +172,6 @@ void ArrowGeometry::Generate(const Environment& env, Style style, Geometry& geom
         geometry.SetVertexBuffer(verts, 9);
         geometry.AddDrawCmd(Geometry::DrawType::Triangles);
     }
-    else if (style == Style::Wireframe)
-    {
-        const Vertex2D verts[] = {
-            // body
-            {{0.0f, -0.25f}, {0.0f, 0.25f}},
-            {{0.0f, -0.75f}, {0.0f, 0.75f}},
-            {{0.0f, -0.75f}, {0.0f, 0.75f}},
-            {{0.7f, -0.25f}, {0.7f, 0.25f}},
-            {{0.7f, -0.25f}, {0.7f, 0.25f}},
-            {{0.0f, -0.25f}, {0.0f, 0.25f}},
-
-            // body
-            {{0.0f, -0.75f}, {0.0f, 0.75f}},
-            {{0.7f, -0.75f}, {0.7f, 0.75f}},
-            {{0.7f, -0.75f}, {0.7f, 0.75f}},
-            {{0.7f, -0.25f}, {0.0f, 0.25f}},
-
-            // arrow head
-            {{0.7f, -0.0f}, {0.7f, 0.0f}},
-            {{0.7f, -1.0f}, {0.7f, 1.0f}},
-            {{0.7f, -1.0f}, {0.7f, 1.0f}},
-            {{1.0f, -0.5f}, {1.0f, 0.5f}},
-            {{1.0f, -0.5f}, {1.0f, 0.5f}},
-            {{0.7f, -0.0f}, {0.7f, 0.0f}},
-        };
-        geometry.SetVertexBuffer(verts, 16);
-        geometry.AddDrawCmd(Geometry::DrawType::Lines);
-    }
 }
 
 // static
@@ -261,24 +233,9 @@ void CapsuleGeometry::Generate(const Environment& env, Style style, Geometry& ge
         vs.push_back(v);
 
         left_angle += angle_increment;
-
-        if (style == Style::Wireframe)
-        {
-            const auto x = std::cos(left_angle) * w;
-            const auto y = std::sin(left_angle) * h;
-            Vertex2D v;
-            v.aPosition.x =  w + x;
-            v.aPosition.y = -0.5f + y;
-            v.aTexCoord.x =  w + x;
-            v.aTexCoord.y =  0.5f - y;
-            vs.push_back(v);
-            vs.push_back(left_center);
-        }
     }
     if (style == Style::Solid)
         geometry.AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size()-offset);
-    else if (style == Style::Wireframe)
-        geometry.AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size()-offset);
 
     if (style != Style::Outline)
     {
@@ -335,26 +292,10 @@ void CapsuleGeometry::Generate(const Environment& env, Style style, Geometry& ge
         vs.push_back(v);
 
         right_angle += right_angle_increment;
-
-        if (style == Style::Wireframe)
-        {
-            const auto x = std::cos(right_angle) * w;
-            const auto y = std::sin(right_angle) * h;
-            Vertex2D v;
-            v.aPosition.x =  1.0f - w + x;
-            v.aPosition.y = -0.5f + y;
-            v.aTexCoord.x =  1.0f - w + x;
-            v.aTexCoord.y =  0.5f - y;
-            vs.push_back(v);
-            vs.push_back(right_center);
-        }
     }
     if (style == Style::Solid)
         geometry.AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size()-offset);
-    else if (style == Style::Wireframe)
-        geometry.AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size()-offset);
-
-    if (style == Style::Outline)
+    else if (style == Style::Outline)
         geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
 
     geometry.SetVertexBuffer(std::move(vs));
@@ -382,7 +323,7 @@ void SemiCircleGeometry::Generate(const Environment& env, Style style, Geometry&
     }
 
     const float angle_increment = (float)math::Pi / slices;
-    const auto max_slice = style == Style::Wireframe ? slices : slices + 1;
+    const auto max_slice = slices + 1;
     float angle = 0.0f;
 
     for (unsigned i=0; i<max_slice; ++i)
@@ -397,19 +338,6 @@ void SemiCircleGeometry::Generate(const Environment& env, Style style, Geometry&
         vs.push_back(v);
 
         angle += angle_increment;
-
-        if (style == Style::Wireframe)
-        {
-            const auto x = std::cos(angle) * 0.5f;
-            const auto y = std::sin(angle) * 0.5f;
-            Vertex2D v;
-            v.aPosition.x = x + 0.5f;
-            v.aPosition.y = y - 0.5f;
-            v.aTexCoord.x = x + 0.5f;
-            v.aTexCoord.y = 1.0 - (y + 0.5f);
-            vs.push_back(v);
-            vs.push_back(center);
-        }
     }
     geometry.SetVertexBuffer(&vs[0], vs.size());
     geometry.ClearDraws();
@@ -418,9 +346,6 @@ void SemiCircleGeometry::Generate(const Environment& env, Style style, Geometry&
         geometry.AddDrawCmd(Geometry::DrawType::TriangleFan);
     else if (style == Style::Outline)
         geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
-    else if (style == Style::Wireframe)
-        geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
-
 }
 
 // static
@@ -459,19 +384,6 @@ void CircleGeometry::Generate(const Environment& env, Style style, Geometry& geo
         vs.push_back(v);
 
         angle += angle_increment;
-
-        if (style == Style::Wireframe)
-        {
-            const auto x = std::cos(angle) * 0.5f;
-            const auto y = std::sin(angle) * 0.5f;
-            Vertex2D v;
-            v.aPosition.x = x + 0.5f;
-            v.aPosition.y = y - 0.5f;
-            v.aTexCoord.x = x + 0.5f;
-            v.aTexCoord.y = 1.0 - (y + 0.5f);
-            vs.push_back(v);
-            vs.push_back(center);
-        }
     }
     geometry.SetVertexBuffer(&vs[0], vs.size());
     geometry.ClearDraws();
@@ -480,9 +392,6 @@ void CircleGeometry::Generate(const Environment& env, Style style, Geometry& geo
         geometry.AddDrawCmd(Geometry::DrawType::TriangleFan);
     else if (style == Style::Outline)
         geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
-    else if (style == Style::Wireframe)
-        geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
-
 }
 
 // static
@@ -499,7 +408,7 @@ void RectangleGeometry::Generate(const Environment& env, Style style, Geometry& 
         geometry.SetVertexBuffer(verts, 4);
         geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
     }
-    else if (style == Style::Solid || style == Style::Wireframe)
+    else if (style == Style::Solid )
     {
         const Vertex2D verts[6] = {
             { {0.0f,  0.0f}, {0.0f, 0.0f} },
@@ -512,10 +421,7 @@ void RectangleGeometry::Generate(const Environment& env, Style style, Geometry& 
         };
         geometry.SetVertexBuffer(verts, 6);
         geometry.ClearDraws();
-        if (style == Style::Solid)
-            geometry.AddDrawCmd(Geometry::DrawType::Triangles);
-        else if (style == Style::Wireframe)
-            geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
+        geometry.AddDrawCmd(Geometry::DrawType::Triangles);
     }
 }
 
@@ -534,8 +440,6 @@ void IsoscelesTriangleGeometry::Generate(const Environment& env, Style style, Ge
         geometry.AddDrawCmd(Geometry::DrawType::Triangles);
     else if (style == Style::Outline)
         geometry.AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
-    else if (style == Style::Wireframe)
-        geometry.AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
 }
 
 // static
@@ -551,8 +455,6 @@ void RightTriangleGeometry::Generate(const Environment& env, Style style, Geomet
     if (style == Style::Solid)
         geometry.AddDrawCmd(Geometry::DrawType::Triangles);
     else if (style == Style::Outline)
-        geometry.AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
-    else if (style == Style::Wireframe)
         geometry.AddDrawCmd(Geometry::DrawType::LineLoop); // this is not a mistake.
 }
 
@@ -571,7 +473,7 @@ void TrapezoidGeometry::Generate(const Environment& env, Style style, Geometry& 
         geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
 
     }
-    else if (style == Style::Solid || style == Style::Wireframe)
+    else if (style == Style::Solid)
     {
         const Vertex2D verts[] = {
             {{0.2f,  0.0f}, {0.2f, 0.0f}},
@@ -592,16 +494,7 @@ void TrapezoidGeometry::Generate(const Environment& env, Style style, Geometry& 
         };
         geometry.SetVertexBuffer(verts, 12);
         geometry.ClearDraws();
-
-        if (style == Style::Solid)
-            geometry.AddDrawCmd(Geometry::DrawType::Triangles);
-        else if (style == Style::Wireframe)
-        {
-            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 0, 3);
-            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 3, 3);
-            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 6, 3);
-            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 9, 3);
-        }
+        geometry.AddDrawCmd(Geometry::DrawType::Triangles);
     }
 }
 
@@ -619,7 +512,7 @@ void ParallelogramGeometry::Generate(const Environment& env, Style style, Geomet
         geometry.SetVertexBuffer(verts, 4);
         geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
     }
-    else if (style == Style::Solid || style == Style::Wireframe)
+    else if (style == Style::Solid)
     {
         const Vertex2D verts[] = {
             {{0.2f,  0.0f}, {0.2f, 0.0f}},
@@ -632,13 +525,7 @@ void ParallelogramGeometry::Generate(const Environment& env, Style style, Geomet
         };
         geometry.SetVertexBuffer(verts, 6);
         geometry.ClearDraws();
-        if (style == Style::Solid)
-            geometry.AddDrawCmd(Geometry::DrawType::Triangles);
-        else if (style == Style::Wireframe)
-        {
-            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 0, 3);
-            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 3, 3);
-        }
+        geometry.AddDrawCmd(Geometry::DrawType::Triangles);
     }
 }
 
@@ -660,7 +547,7 @@ void SectorGeometry::Generate(const Environment& env, Style style, Geometry& geo
     const auto slices    = 100 * fill_percentage;
     const auto angle_max = math::Pi * 2.0 * fill_percentage;
     const auto angle_inc = angle_max / slices;
-    const auto max_slice = style == Style::Wireframe ? slices : slices + 1;
+    const auto max_slice = slices + 1;
 
     float angle = 0.0f;
     for (unsigned i=0; i<max_slice; ++i)
@@ -675,19 +562,6 @@ void SectorGeometry::Generate(const Environment& env, Style style, Geometry& geo
         vs.push_back(v);
 
         angle += angle_inc;
-
-        if (style == Style::Wireframe)
-        {
-            const auto x = std::cos(angle) * 0.5f;
-            const auto y = std::sin(angle) * 0.5f;
-            Vertex2D v;
-            v.aPosition.x = x + 0.5f;
-            v.aPosition.y = y - 0.5f;
-            v.aTexCoord.x = x + 0.5f;
-            v.aTexCoord.y = 1.0 - (y + 0.5f);
-            vs.push_back(v);
-            vs.push_back(center);
-        }
     }
     geometry.SetVertexBuffer(&vs[0], vs.size());
     geometry.ClearDraws();
@@ -695,8 +569,6 @@ void SectorGeometry::Generate(const Environment& env, Style style, Geometry& geo
     if (style == Style::Solid)
         geometry.AddDrawCmd(Geometry::DrawType::TriangleFan);
     else if (style == Style::Outline)
-        geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
-    else if (style == Style::Wireframe)
         geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
 }
 
@@ -779,7 +651,7 @@ void RoundRectGeometry::Generate(const Environment& env, Style style, Geometry& 
         geometry.SetVertexBuffer(std::move(vs));
         geometry.AddDrawCmd(Geometry::DrawType::Lines);
     }
-    else if (style == Style::Solid || style == Style::Wireframe)
+    else if (style == Style::Solid)
     {
         // center body
         std::vector<Vertex2D> vs = {
@@ -807,20 +679,6 @@ void RoundRectGeometry::Generate(const Environment& env, Style style, Geometry& 
             {{1.0f,         -h}, {1.0f,        h}},
             {{1.0f-w,       -h}, {1.0f-w,      h}},
         };
-
-        if (style == Style::Solid)
-        {
-            geometry.AddDrawCmd(Geometry::DrawType::Triangles, 0, 18);
-        }
-        else
-        {
-            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 0, 3);
-            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 3, 3);
-            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 6, 3);
-            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 9, 3);
-            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 12, 3);
-            geometry.AddDrawCmd(Geometry::DrawType::LineLoop, 15, 3);
-        }
 
         // generate corners
         for (int i=0; i<4; ++i)
@@ -852,27 +710,10 @@ void RoundRectGeometry::Generate(const Environment& env, Style style, Geometry& 
                 vs.push_back(v);
 
                 angle += increment;
-                if (style == Style::Wireframe)
-                {
-                    const auto x = std::cos(angle) * w;
-                    const auto y = std::sin(angle) * h;
-                    Vertex2D v;
-                    v.aPosition.x = corners[i].x + x;
-                    v.aPosition.y = corners[i].y + y;
-                    v.aTexCoord.x = corners[i].x + x;
-                    v.aTexCoord.y = (corners[i].y + y)  * -1.0f;
-                    vs.push_back(v);
-                    vs.push_back(center);
-                }
             }
-            if (style == Style::Solid)
-            {
-                geometry.AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size() - offset);
-            }
-            else if (style == Style::Wireframe)
-            {
-                geometry.AddDrawCmd(Geometry::DrawType::LineLoop, offset, vs.size() - offset);
-            }
+
+            geometry.AddDrawCmd(Geometry::DrawType::Triangles, 0, 18); // body
+            geometry.AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size() - offset); // corners
         }
         geometry.SetVertexBuffer(std::move(vs));
     }
@@ -1357,9 +1198,6 @@ std::string GetSimpleShapeGeometryName(const SimpleShapeArgs& args,
                                        SimpleShapeStyle style,
                                        SimpleShapeType type)
 {
-    if (style == Style::Points)
-        style = Style::Solid;
-
     if (Is3DShape(type))
         style = Style::Solid;
 
