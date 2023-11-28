@@ -1337,7 +1337,7 @@ public:
         transform.Translate(250.0f, 0.0f);
         painter.Draw(Shape(gfx::SimpleShapeStyle::Solid), transform, material);
         transform.Translate(250.0f, 0.0f);
-        painter.Draw(gfx::Wireframe<Shape>(gfx::Drawable::Style::Solid), transform, material, 2.0);
+        painter.Draw(gfx::Wireframe<Shape>(gfx::SimpleShapeStyle::Solid), transform, material, 2.0);
 
         transform.MoveTo(60.0f, 400.0f);
         transform.Resize(100.0f, 200.0f);
