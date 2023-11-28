@@ -121,8 +121,8 @@ void DrawSelectionBox(gfx::Transform& model, std::vector<engine::DrawPacket>& pa
 {
     static const auto green  = std::make_shared<gfx::MaterialClassInst>(
             gfx::CreateMaterialClassFromColor(gfx::Color::Green));
-    static const auto outline = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline);
-    static const auto circle  = std::make_shared<gfx::Circle>(gfx::Drawable::Style::Outline);
+    static const auto outline = std::make_shared<gfx::Rectangle>(gfx::SimpleShapeStyle::Outline);
+    static const auto circle  = std::make_shared<gfx::Circle>(gfx::SimpleShapeStyle::Outline);
 
     const auto width  = rect.GetWidth();
     const auto height = rect.GetHeight();
@@ -187,7 +187,7 @@ void DrawInvisibleItemBox(gfx::Transform& model, std::vector<engine::DrawPacket>
 {
     static const auto yellow = std::make_shared<gfx::MaterialClassInst>(
             gfx::CreateMaterialClassFromColor(gfx::Color::DarkYellow));
-    static const auto shape  = std::make_shared<gfx::Rectangle>(gfx::Drawable::Style::Outline);
+    static const auto shape  = std::make_shared<gfx::Rectangle>(gfx::SimpleShapeStyle::Outline);
 
     const auto width  = rect.GetWidth();
     const auto height = rect.GetHeight();

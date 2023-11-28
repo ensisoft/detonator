@@ -2672,11 +2672,6 @@ bool ParticleEngineInstance::Upload(const Environment& env, Geometry& geometry) 
     return mClass->Upload(env, mState, geometry);
 }
 
-Drawable::Style ParticleEngineInstance::GetStyle() const
-{
-    return Style::Points;
-}
-
 void ParticleEngineInstance::Update(const Environment& env, float dt)
 {
     mClass->Update(env, mState, dt);
@@ -2922,17 +2917,16 @@ bool TileBatch::Upload(const Environment& env, Geometry& geometry) const
     return true;
 }
 
-Drawable::Style TileBatch::GetStyle() const
+Drawable::Primitive TileBatch::GetPrimitive() const
 {
     const auto shape = ResolveTileShape();
     if (shape == TileShape::Square)
-        return Style::Points;
+        return Primitive::Points;
     else if (shape == TileShape::Rectangle)
-        return Style::Solid;
+        return Primitive::Triangles;
     else BUG("Unknown tile batch tile shape");
-    return Style::Points;
+    return Primitive::Points;
 }
-
 
 void DynamicLine3D::ApplyDynamicState(const Environment& environment, Program& program, RasterState& state) const
 {

@@ -1321,31 +1321,31 @@ public:
         transform.Scale(200.0f, 200.0f);
 
         transform.Translate(10.0f, 10.0f);
-        painter.Draw(gfx::Wireframe<Shape>(gfx::Drawable::Style::Solid), transform, material);
+        painter.Draw(gfx::Wireframe<Shape>(gfx::SimpleShapeStyle::Solid), transform, material);
         transform.Translate(250.0f, 0.0f);
-        painter.Draw(Shape(gfx::Drawable::Style::Outline), transform, material);
+        painter.Draw(Shape(gfx::SimpleShapeStyle::Outline), transform, material);
         transform.Translate(250.0f, 0.0f);
-        painter.Draw(Shape(gfx::Drawable::Style::Solid), transform, material);
+        painter.Draw(Shape(gfx::SimpleShapeStyle::Solid), transform, material);
         transform.Translate(250.0f, 0.0f);
-        painter.Draw(Shape(gfx::Drawable::Style::Outline), transform, material, 10.0f);
+        painter.Draw(Shape(gfx::SimpleShapeStyle::Outline), transform, material, 10.0f);
 
         transform.MoveTo(10.0f, 250.0f);
         transform.Resize(200.0f, 100.0f);
-        painter.Draw(gfx::Wireframe<Shape>(gfx::Drawable::Style::Solid), transform, material);
+        painter.Draw(gfx::Wireframe<Shape>(gfx::SimpleShapeStyle::Solid), transform, material);
         transform.Translate(250.0f, 0.0f);
-        painter.Draw(Shape(gfx::Drawable::Style::Outline), transform, material);
+        painter.Draw(Shape(gfx::SimpleShapeStyle::Outline), transform, material);
         transform.Translate(250.0f, 0.0f);
-        painter.Draw(Shape(gfx::Drawable::Style::Solid), transform, material);
+        painter.Draw(Shape(gfx::SimpleShapeStyle::Solid), transform, material);
         transform.Translate(250.0f, 0.0f);
         painter.Draw(gfx::Wireframe<Shape>(gfx::Drawable::Style::Solid), transform, material, 2.0);
 
         transform.MoveTo(60.0f, 400.0f);
         transform.Resize(100.0f, 200.0f);
-        painter.Draw(gfx::Wireframe<Shape>(gfx::Drawable::Style::Solid), transform, material);
+        painter.Draw(gfx::Wireframe<Shape>(gfx::SimpleShapeStyle::Solid), transform, material);
         transform.Translate(250.0f, 0.0f);
-        painter.Draw(Shape(gfx::Drawable::Style::Outline), transform, material);
+        painter.Draw(Shape(gfx::SimpleShapeStyle::Outline), transform, material);
         transform.Translate(250.0f, 0.0f);
-        painter.Draw(Shape(gfx::Drawable::Style::Solid), transform, material);
+        painter.Draw(Shape(gfx::SimpleShapeStyle::Solid), transform, material);
     }
     virtual void Update(float dt) override
     {}

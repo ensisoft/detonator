@@ -323,7 +323,7 @@ public:
         entity.Draw(*mDrawable, model, *mMaterial);
 
         // draw a selection rect around it.
-        entity.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), model,
+        entity.Draw(gfx::Rectangle(gfx::SimpleShapeStyle::Outline), model,
                     gfx::CreateMaterialFromColor(gfx::Color::Green));
     }
     virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override

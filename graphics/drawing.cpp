@@ -227,7 +227,7 @@ void DebugDrawCircle(Painter& painter, const FCircle & circle, const Material& m
     trans.Resize(circle.Inscribe());
     trans.Translate(circle.GetCenter());
     trans.Translate(-radius, -radius);
-    painter.Draw(Circle(Drawable::Style::Outline), trans, material, line_width);
+    painter.Draw(Circle(SimpleShapeStyle::Outline), trans, material, line_width);
 }
 
 void DebugDrawRect(Painter& painter, const FRect& rect, const Color4f& color, float line_width)

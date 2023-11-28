@@ -32,12 +32,8 @@ namespace game {
         // Line width setting is applied to determine the width
         // of the lines.
         Outline,
-        // Rasterize the individual triangles as lines.
-        Wireframe,
         // Rasterize the interior of the drawable. This is the default
-        Solid,
-        // Rasterize the shape's vertices as individual points.
-        Points
+        Solid
     };
 
     enum class RenderView {

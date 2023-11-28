@@ -465,7 +465,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     }
     else
     {
-        painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), view,
+        painter.Draw(gfx::Rectangle(gfx::SimpleShapeStyle::Outline), view,
                      gfx::CreateMaterialFromColor(gfx::Color::LightGray));
     }
 
