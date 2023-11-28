@@ -468,17 +468,8 @@ namespace gfx
         virtual std::string GetShaderName(const Environment& env) const override;
         virtual std::string GetGeometryName(const Environment& env) const override;
         virtual bool Upload(const Environment& env, Geometry& geometry) const override;
-
-        virtual Type GetType() const override
-        {
-            return Type::SimpleShape;
-        }
-        virtual Primitive GetPrimitive() const override
-        {
-            if (mStyle == Style::Outline)
-                return Primitive::Lines;
-            else return Primitive::Triangles;
-        }
+        virtual Type GetType() const override;
+        virtual Primitive GetPrimitive() const override;
 
         inline Shape GetShape() const noexcept
         { return mClass->GetShapeType(); }
@@ -514,17 +505,8 @@ namespace gfx
         virtual std::string GetShaderName(const Environment& env) const override;
         virtual std::string GetGeometryName(const Environment& env) const override;
         virtual bool Upload(const Environment& env, Geometry& geometry) const override;
-
-        virtual Type GetType() const override
-        {
-            return Type::SimpleShape;
-        }
-        virtual Primitive GetPrimitive() const override
-        {
-            if (mStyle == Style::Outline)
-                return Primitive::Lines;
-            return Primitive::Triangles;
-        }
+        virtual Type GetType() const override;
+        virtual Primitive GetPrimitive() const override;
 
         inline Shape GetShape() const noexcept
         { return mShape; }
