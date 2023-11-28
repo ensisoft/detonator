@@ -1312,6 +1312,22 @@ std::string SimpleShapeInstance::GetShaderName(const Environment& env) const
     return "Generic2DVertexShader";
 }
 
+Drawable::Type SimpleShapeInstance::GetType() const
+{
+    return Type::SimpleShape;
+}
+
+Drawable::Primitive SimpleShapeInstance::GetPrimitive() const
+{
+    if (Is3DShape(mClass->GetShapeType()))
+        return Primitive::Triangles;
+
+    if (mStyle == Style::Outline)
+        return Primitive::Lines;
+
+    return Primitive::Triangles;
+}
+
 void SimpleShape::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
 {
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
@@ -1353,6 +1369,21 @@ bool SimpleShape::Upload(const Environment& env, Geometry& geometry) const
     return true;
 }
 
+Drawable::Type SimpleShape::GetType() const
+{
+    return Type::SimpleShape;
+}
+
+Drawable::Primitive SimpleShape::GetPrimitive() const
+{
+    if (Is3DShape(mShape))
+        return Primitive::Triangles;
+
+    if (mStyle == Style::Outline)
+        return Primitive::Lines;
+
+    return Primitive::Triangles;
+}
 
 void Grid::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
 {
