@@ -50,6 +50,8 @@
 #include "wdk/events.h"
 #include "wdk/system.h"
 
+#include "base/snafu.h"
+
 class GraphicsTest
 {
 public:

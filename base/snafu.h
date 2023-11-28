@@ -13,3 +13,7 @@
 #undef CopyFile
 #undef GetCurrentTime
 #undef DrawState
+#undef near
+
+// this is needed by some headers such as zlib
+// #undef far
