@@ -768,49 +768,27 @@ void CubeGeometry::Generate(const Environment& env, Style style, Geometry& geome
     constexpr const Vec3 BackBotRight  = { 0.5f, -0.5f, -0.5f};
     constexpr const Vec3 BackTopRight  = { 0.5f,  0.5f, -0.5f};
 
-    if (style == Style::Solid)
-    {
-        Vertex3D vertices[4 * 6];
-        Index16 indices[6 * 6];
 
-        // front face
-        MakeFace(0, &indices[0], &vertices[0], FrontTopLeft, FrontBotLeft, FrontBotRight, FrontTopRight, Vec3 {0.0, 0.0, 1.0} );
-        // left face
-        MakeFace(4, &indices[6], &vertices[4], BackTopLeft, BackBotLeft, FrontBotLeft, FrontTopLeft, Vec3 {-1.0, 0.0, 0.0});
-        // right face
-        MakeFace(8, &indices[12], &vertices[8], FrontTopRight, FrontBotRight, BackBotRight, BackTopRight, Vec3 {1.0, 0.0, 0.0});
-        // top face
-        MakeFace(12, &indices[18], &vertices[12], BackTopLeft, FrontTopLeft, FrontTopRight, BackTopRight, Vec3 {0.0, 1.0, 0.0});
-        // bottom face
-        MakeFace(16, &indices[24], &vertices[16], FrontBotLeft, BackBotLeft, BackBotRight, FrontBotRight, Vec3{0.0, -1.0, 0.0});
-        // back face
-        MakeFace(20, &indices[30], &vertices[20], BackTopRight, BackBotRight, BackBotLeft, BackTopLeft, Vec3{0.0, 0.0, -1.0});
+    Vertex3D vertices[4 * 6];
+    Index16 indices[6 * 6];
 
-        geometry.UploadVertices(vertices, sizeof(vertices), Geometry::Usage::Static);
-        geometry.UploadIndices(indices, sizeof(indices), Geometry::IndexType::Index16, Geometry::Usage::Static);
-        geometry.SetVertexLayout(GetVertexLayout<Vertex3D>());
-        geometry.AddDrawCmd(Geometry::DrawType::Triangles);
-    }
-    else if (style == Style::Outline)
-    {
-        std::vector<Vertex3D> verts;
-        AddLine(FrontTopLeft,  FrontBotLeft, verts);
-        AddLine(FrontBotLeft,  FrontBotRight, verts);
-        AddLine(FrontBotRight, FrontTopRight, verts);
-        AddLine(FrontTopRight, FrontTopLeft, verts);
-        AddLine(BackTopLeft,  BackBotLeft, verts);
-        AddLine(BackBotLeft,  BackBotRight, verts);
-        AddLine(BackBotRight, BackTopRight, verts);
-        AddLine(BackTopRight, BackTopLeft, verts);
-        AddLine(FrontTopLeft, BackTopLeft, verts);
-        AddLine(FrontTopRight, BackTopRight, verts);
-        AddLine(FrontBotLeft, BackBotLeft, verts);
-        AddLine(FrontBotRight, BackBotRight, verts);
+    // front face
+    MakeFace(0, &indices[0], &vertices[0], FrontTopLeft, FrontBotLeft, FrontBotRight, FrontTopRight, Vec3 {0.0, 0.0, 1.0} );
+    // left face
+    MakeFace(4, &indices[6], &vertices[4], BackTopLeft, BackBotLeft, FrontBotLeft, FrontTopLeft, Vec3 {-1.0, 0.0, 0.0});
+    // right face
+    MakeFace(8, &indices[12], &vertices[8], FrontTopRight, FrontBotRight, BackBotRight, BackTopRight, Vec3 {1.0, 0.0, 0.0});
+    // top face
+    MakeFace(12, &indices[18], &vertices[12], BackTopLeft, FrontTopLeft, FrontTopRight, BackTopRight, Vec3 {0.0, 1.0, 0.0});
+    // bottom face
+    MakeFace(16, &indices[24], &vertices[16], FrontBotLeft, BackBotLeft, BackBotRight, FrontBotRight, Vec3{0.0, -1.0, 0.0});
+    // back face
+    MakeFace(20, &indices[30], &vertices[20], BackTopRight, BackBotRight, BackBotLeft, BackTopLeft, Vec3{0.0, 0.0, -1.0});
 
-        geometry.SetVertexBuffer(std::move(verts));
-        geometry.SetVertexLayout(GetVertexLayout<Vertex3D>());
-        geometry.AddDrawCmd(Geometry::DrawType::Lines);
-    }
+    geometry.UploadVertices(vertices, sizeof(vertices), Geometry::Usage::Static);
+    geometry.UploadIndices(indices, sizeof(indices), Geometry::IndexType::Index16, Geometry::Usage::Static);
+    geometry.SetVertexLayout(GetVertexLayout<Vertex3D>());
+    geometry.AddDrawCmd(Geometry::DrawType::Triangles);
 
 }
 // static
