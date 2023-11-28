@@ -72,7 +72,7 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
 
         Material::Environment material_env;
         material_env.editing_mode  = mEditingMode;
-        material_env.render_points = draw.drawable->GetStyle() == Drawable::Style::Points;
+        material_env.render_points = draw.drawable->GetPrimitive() == Drawable::Primitive::Points;
         Program* gpu_program = GetProgram(program, *draw.drawable, *draw.material, drawable_env, material_env);
         if (gpu_program == nullptr)
             continue;

@@ -64,18 +64,8 @@ namespace gfx
         };
          // Style of the drawable's geometry determines how the geometry
          // is to be rasterized.
-         enum class Style {
-             // Rasterize the outline of the shape as lines.
-             // Only the fragments that are within the line are shaded.
-             // Line width setting is applied to determine the width
-             // of the lines.
-             Outline,
-             // Rasterize the individual triangles as lines.
-             Wireframe,
-             // Rasterize the interior of the drawable. This is the default
-             Solid,
-             // Rasterize the shape's vertices as individual points.
-             Points
+         enum class Primitive {
+             Points, Lines, Triangles
          };
          struct Environment {
              // true if running in an "editor mode", which means that even
@@ -128,7 +118,7 @@ namespace gfx
     class Drawable
     {
     public:
-        using Style = DrawableClass::Style;
+        using Primitive = DrawableClass::Primitive;
         // Which polygon faces to cull. Note that this only applies
         // to polygons, not to lines or points.
         using Culling = DrawableClass::Culling;
@@ -177,11 +167,11 @@ namespace gfx
         // Update the state of the drawable object. dt is the
         // elapsed (delta) time in seconds.
         virtual void Update(const Environment& env, float dt) {}
-        // Set the style to be used for generating the drawable geometry.
-        // Not all drawables support all Styles.
-        virtual void SetStyle(Style style) {}
-        // Get the current style.
-        virtual Style GetStyle() const = 0;
+        // Get the expected type of primitive used to rasterize the
+        // geometry produced by the drawable. This is essentially the
+        // "summary" of the draw commands in the geometry object.
+        virtual Primitive GetPrimitive() const
+        { return Primitive::Triangles; }
         // Get the drawable type.
         virtual Type GetType() const
         { return Type::Undefined; }
@@ -204,9 +194,26 @@ namespace gfx
     private:
     };
 
+    // Style of the drawable's geometry determines how the geometry
+    // is to be rasterized.
+    enum class SimpleShapeStyle {
+        // Rasterize the outline of the shape as lines.
+        // Only the fragments that are within the line are shaded.
+        // Line width setting is applied to determine the width
+        // of the lines.
+        Outline,
+        // Rasterize the individual triangles as lines.
+        Wireframe,
+        // Rasterize the interior of the drawable. This is the default
+        Solid,
+        // Rasterize the shape's vertices as individual points.
+        Points
+    };
+
+
     namespace detail {
         using Environment = Drawable::Environment;
-        using Style = Drawable::Style;
+        using Style = SimpleShapeStyle;
 
         struct ArrowGeometry {
             static void Generate(const Environment& env, Style style, Geometry& geometry);
@@ -296,6 +303,8 @@ namespace gfx
         Triangle
     };
 
+
+
     namespace detail {
         struct SectorShapeArgs {
             float fill_percentage = 0.25f;
@@ -316,8 +325,7 @@ namespace gfx
         using SimpleShapeArgs = std::variant<std::monostate, SectorShapeArgs, RoundRectShapeArgs,
                 CylinderShapeArgs, ConeShapeArgs, SphereShapeArgs>;
         using SimpleShapeEnvironment = DrawableClass::Environment;
-        using SimpleShapeStyle       = DrawableClass::Style;
-        
+
         void ConstructSimpleShape(const SimpleShapeArgs& args,
                                   const SimpleShapeEnvironment& environment,
                                   SimpleShapeStyle style,
@@ -333,6 +341,7 @@ namespace gfx
     class SimpleShapeClass : public DrawableClass
     {
     public:
+        using Style = SimpleShapeStyle;
         using Shape = SimpleShapeType;
 
         SimpleShapeClass() = default;
@@ -443,7 +452,7 @@ namespace gfx
     public:
         using Class = SimpleShapeClass;
         using Shape = SimpleShapeClass::Shape;
-        using Style = Drawable::Style;
+        using Style = SimpleShapeClass::Style;
 
         explicit SimpleShapeInstance(const std::shared_ptr<const Class>& klass, Style style = Style::Solid) noexcept
           : mClass(klass)
@@ -463,15 +472,24 @@ namespace gfx
         virtual std::string GetShaderName(const Environment& env) const override;
         virtual std::string GetGeometryName(const Environment& env) const override;
         virtual bool Upload(const Environment& env, Geometry& geometry) const override;
-        virtual void SetStyle(Style style) override
-        { mStyle = style; }
-        virtual Style GetStyle() const override
-        { return mStyle; }
+
         virtual Type GetType() const override
-        { return Type::SimpleShape; }
+        {
+            return Type::SimpleShape;
+        }
+        virtual Primitive GetPrimitive() const override
+        {
+            if (mStyle == Style::Outline)
+                return Primitive::Lines;
+            else return Primitive::Triangles;
+        }
 
         inline Shape GetShape() const noexcept
         { return mClass->GetShapeType(); }
+        inline Style GetStyle() const noexcept
+        { return mStyle; }
+        inline void SetStyle(Style style) noexcept
+        { mStyle = style; }
     private:
         std::shared_ptr<const Class> mClass;
         Style mStyle;
@@ -484,7 +502,7 @@ namespace gfx
     {
     public:
         using Shape = SimpleShapeType;
-        using Style = Drawable::Style;
+        using Style = SimpleShapeStyle;
         explicit SimpleShape(SimpleShapeType shape, Style style = Style::Solid) noexcept
           : mShape(shape)
           , mStyle(style)
@@ -501,15 +519,23 @@ namespace gfx
         virtual std::string GetGeometryName(const Environment& env) const override;
         virtual bool Upload(const Environment& env, Geometry& geometry) const override;
 
-        virtual void SetStyle(Style style) override
-        { mStyle = style; }
-        virtual Style GetStyle() const override
-        { return mStyle; }
         virtual Type GetType() const override
-        { return Type::SimpleShape; }
+        {
+            return Type::SimpleShape;
+        }
+        virtual Primitive GetPrimitive() const override
+        {
+            if (mStyle == Style::Outline)
+                return Primitive::Lines;
+            return Primitive::Triangles;
+        }
 
         inline Shape GetShape() const noexcept
         { return mShape; }
+        inline Style GetStyle() const noexcept
+        { return mStyle; }
+        inline void SetStyle(Style style) noexcept
+        { mStyle = style; }
     private:
         SimpleShapeType mShape;
         detail::SimpleShapeArgs mArgs;
@@ -665,8 +691,8 @@ namespace gfx
         virtual std::string GetGeometryName(const Environment& env) const override;
         virtual bool Upload(const Environment& env, Geometry& geometry) const override;
 
-        virtual Style GetStyle() const override
-        { return Style::Outline; }
+        virtual Primitive GetPrimitive() const override
+        { return Primitive::Lines; }
     private:
         unsigned mNumVerticalLines = 1;
         unsigned mNumHorizontalLines = 1;
@@ -803,8 +829,8 @@ namespace gfx
         virtual bool IsDynamic(const Environment& env) const override
         { return mClass->IsDynamic(env); }
 
-        virtual Style GetStyle() const override
-        { return Style::Solid; }
+        virtual Primitive GetPrimitive() const override
+        { return Primitive::Triangles; }
         virtual Type GetType() const override
         { return Type::Polygon; }
     private:
@@ -1112,7 +1138,6 @@ namespace gfx
         virtual std::string GetShaderName(const Environment& env) const override;
         virtual std::string GetGeometryName(const Environment& env) const override;
         virtual bool Upload(const Environment& env, Geometry& geometry) const override;
-        virtual Style GetStyle() const override;
         virtual void Update(const Environment& env, float dt) override;
         virtual bool IsAlive() const override;
         virtual bool IsDynamic(const Environment& env) const override;
@@ -1120,6 +1145,8 @@ namespace gfx
         virtual void Execute(const Environment& env, const Command& cmd) override;
         virtual Type GetType() const override
         { return Type::ParticleEngine; }
+        virtual Primitive  GetPrimitive() const override
+        { return Primitive::Points; }
 
         // Get the current number of alive particles.
         inline size_t GetNumParticlesAlive() const noexcept
@@ -1160,7 +1187,7 @@ namespace gfx
         virtual std::string GetShaderName(const Environment& env) const override;
         virtual std::string GetGeometryName(const Environment& env) const override;
         virtual bool Upload(const Environment& env, Geometry& geometry) const override;
-        virtual Style GetStyle() const override;
+        virtual Primitive GetPrimitive() const override;
         virtual Type GetType() const override
         { return Type::TileBatch; }
         virtual bool IsDynamic(const Environment& env) const override
@@ -1233,8 +1260,8 @@ namespace gfx
         virtual std::string GetShaderName(const Environment& environment) const override;
         virtual std::string GetGeometryName(const Environment& environment) const override;
         virtual bool Upload(const Environment& environment, Geometry& geometry) const override;
-        virtual Style GetStyle() const override
-        { return Style::Outline; }
+        virtual Primitive GetPrimitive() const override
+        { return Primitive::Lines; }
     private:
         glm::vec3 mPointA;
         glm::vec3 mPointB;
@@ -1256,8 +1283,8 @@ namespace gfx
         virtual std::string GetGeometryName(const Environment& env) const override;
         virtual bool Upload(const Environment& env, Geometry& geom) const override;
         virtual bool IsDynamic(const Environment& env) const override;
-        virtual Style GetStyle() const override
-        { return Style::Solid; }
+        virtual Primitive GetPrimitive() const override
+        { return Primitive::Lines; }
     protected:
         DebugDrawableBase(const Drawable* drawable, Feature feature)
           : mDrawable(drawable)

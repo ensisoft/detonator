@@ -983,18 +983,19 @@ void Renderer::CreateDrawResources(PaintNode& paint_node)
         }
         if (paint_node.item_drawable)
         {
-            gfx::Drawable::Style style;
-            if (item->GetRenderStyle() == RenderStyle::Solid)
-                style = gfx::Drawable::Style::Solid;
-            else if (item->GetRenderStyle() == RenderStyle::Wireframe)
-                style = gfx::Drawable::Style::Wireframe;
-            else if (item->GetRenderStyle() == RenderStyle::Outline)
-                style = gfx::Drawable::Style::Outline;
-            else if (item->GetRenderStyle() == RenderStyle::Points)
-                style = gfx::Drawable::Style::Points;
-            else BUG("Unsupported rendering style.");
+            if (paint_node.item_drawable->GetType() == gfx::Drawable::Type::SimpleShape)
+            {
+                auto simple = std::static_pointer_cast<gfx::SimpleShapeInstance>(paint_node.item_drawable);
 
-            paint_node.item_drawable->SetStyle(style);
+                gfx::SimpleShapeStyle style;
+                if (item->GetRenderStyle() == RenderStyle::Solid)
+                    style = gfx::SimpleShapeStyle::Solid;
+                else if (item->GetRenderStyle() == RenderStyle::Outline)
+                    style = gfx::SimpleShapeStyle::Outline;
+                else BUG("Unsupported rendering style.");
+
+                simple->SetStyle(style);
+            }
         }
     }
 }

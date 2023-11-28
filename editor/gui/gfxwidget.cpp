@@ -294,7 +294,7 @@ void GfxWindow::paintGL()
             // going to use some hardcoded blue here for now.
             material->SetBaseColor(gfx::Color4f(0x14, 0x8c, 0xD2, 0xFF));
         }
-        gfx::Rectangle rect(gfx::Drawable::Style::Outline);
+        gfx::Rectangle rect(gfx::SimpleShapeStyle::Outline);
         gfx::Transform transform;
         transform.Resize(width()-2.0f, height()-2.0f);
         transform.Translate(1.0f, 1.0f);

@@ -2213,7 +2213,7 @@
                        </sizepolicy>
                       </property>
                       <property name="text">
-                       <string>Style</string>
+                       <string>Style hint</string>
                       </property>
                      </widget>
                     </item>

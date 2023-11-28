@@ -341,7 +341,7 @@ public:
         gfx::Transform model;
         model.Scale(movement.x, movement.y);
         model.MoveTo(mWorldStartPos.x, mWorldStartPos.y);
-        tile_painter.Draw(gfx::Rectangle(gfx::Drawable::Style::Outline), model,
+        tile_painter.Draw(gfx::Rectangle(gfx::SimpleShapeStyle::Outline), model,
                     gfx::CreateMaterialFromColor(gfx::Color::Green));
 
     }
