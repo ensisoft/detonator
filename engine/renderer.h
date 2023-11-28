@@ -112,6 +112,11 @@ namespace engine
     class Renderer
     {
     public:
+        enum class RenderingStyle {
+            Normal,
+            Wireframe
+        };
+
         enum class Effects {
             Bloom
         };
@@ -156,8 +161,10 @@ namespace engine
         { mCamera = camera; }
         inline void SetSurface(const Surface& surface) noexcept
         { mSurface = surface; }
-        inline void SetPacketFilter(PacketFilter* filter)
+        inline void SetPacketFilter(PacketFilter* filter) noexcept
         { mPacketFilter = filter; }
+        inline void SetStyle(RenderingStyle style) noexcept
+        { mStyle = style; }
 
         void BeginFrame();
 
@@ -356,6 +363,7 @@ namespace engine
         BloomParams mBloom;
         Camera mCamera;
         Surface mSurface;
+        RenderingStyle mStyle = RenderingStyle::Normal;
 
         PacketFilter* mPacketFilter = nullptr;
     };

@@ -1134,6 +1134,18 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
             packet.packet_index = item->GetLayer();
             packet.line_width   = item->GetLineWidth();
 
+            if (mEditingMode)
+            {
+                if (mStyle == RenderingStyle::Wireframe &&
+                    packet.drawable->GetPrimitive() == gfx::Drawable::Primitive::Triangles)
+                {
+                    static auto wireframe_color = std::make_shared<gfx::MaterialClassInst>(
+                            gfx::CreateMaterialClassFromColor(gfx::Color::Gray));
+                    packet.drawable = std::make_shared<gfx::WireframeInstance>(packet.drawable);
+                    packet.material = wireframe_color;
+                }
+            }
+
             if (double_sided)
                 packet.culling = DrawPacket::Culling::None;
             else if (horizontal_flip ^ vertical_flip)
@@ -1397,8 +1409,19 @@ void Renderer::DrawScenePackets(gfx::Device& device, const std::vector<DrawPacke
     const gfx::Color4f bloom_color(mBloom.red, mBloom.green, mBloom.blue, 1.0f);
     const BloomPass bloom(mRendererName,  bloom_color, mBloom.threshold, painter);
 
-    if (IsEnabled(Effects::Bloom))
-        bloom.Draw(layers);
+    if (mEditingMode)
+    {
+        if (mStyle == RenderingStyle::Normal)
+        {
+            if (IsEnabled(Effects::Bloom))
+                bloom.Draw(layers);
+        }
+    }
+    else
+    {
+        if (IsEnabled(Effects::Bloom))
+            bloom.Draw(layers);
+    }
 
     MainRenderPass main(painter);
     main.Draw(layers);

@@ -477,6 +477,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     connect(workspace, &app::Workspace::ResourceUpdated, this, &EntityWidget::ResourceUpdated);
 
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
+    PopulateFromEnum<engine::Renderer::RenderingStyle>(mUI.cmbStyle);
     PopulateFromEnum<game::DrawableItemClass::RenderPass>(mUI.dsRenderPass);
     PopulateFromEnum<game::DrawableItemClass::RenderStyle>(mUI.dsRenderStyle);
     PopulateFromEnum<game::DrawableItemClass::RenderView>(mUI.dsRenderView);
@@ -490,6 +491,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFontNames(mUI.tiFontName);
     PopulateFontSizes(mUI.tiFontSize);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
+    SetValue(mUI.cmbStyle, engine::Renderer::RenderingStyle::Normal);
     SetValue(mUI.zoom, 1.0f);
     SetVisible(mUI.transform, false);
 
@@ -513,6 +515,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     resource.GetContent(&content);
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "grid", mUI.cmbGrid);
+    GetUserProperty(resource, "style", mUI.cmbStyle);
     GetUserProperty(resource, "snap", mUI.chkSnap);
     GetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
@@ -619,6 +622,7 @@ void EntityWidget::SetViewerMode()
     SetVisible(mUI.nodeTransform,   false);
     SetVisible(mUI.nodeItems,       false);
     SetVisible(mUI.scrollArea_2,    false);
+    SetVisible(mUI.cmbStyle,        false);
 
     SetValue(mUI.chkShowGrid,       false);
     SetValue(mUI.chkShowOrigin,     false);
@@ -713,6 +717,7 @@ bool EntityWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Entity", mUI.chkShowComments);
     settings.SaveWidget("Entity", mUI.chkSnap);
     settings.SaveWidget("Entity", mUI.cmbGrid);
+    settings.SaveWidget("Entity", mUI.cmbStyle);
     settings.SaveWidget("Entity", mUI.zoom);
     settings.SaveWidget("Entity", mUI.widget);
     settings.SaveWidget("Entity", mUI.variables);
@@ -737,6 +742,7 @@ bool EntityWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Entity", mUI.chkShowComments);
     settings.LoadWidget("Entity", mUI.chkSnap);
     settings.LoadWidget("Entity", mUI.cmbGrid);
+    settings.LoadWidget("Entity", mUI.cmbStyle);
     settings.LoadWidget("Entity", mUI.zoom);
     settings.LoadWidget("Entity", mUI.widget);
     settings.LoadWidget("Entity", mUI.variables);
@@ -1241,6 +1247,7 @@ void EntityWidget::on_actionSave_triggered()
     SetUserProperty(resource, "camera_rotation", mUI.rotation);
     SetUserProperty(resource, "zoom", mUI.zoom);
     SetUserProperty(resource, "grid", mUI.cmbGrid);
+    SetUserProperty(resource, "style", mUI.cmbStyle);
     SetUserProperty(resource, "snap", mUI.chkSnap);
     SetUserProperty(resource, "show_origin", mUI.chkShowOrigin);
     SetUserProperty(resource, "show_comments", mUI.chkShowComments);
@@ -2987,6 +2994,8 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     surface.viewport = gfx::IRect(0, 0, width, height);
     surface.size     = gfx::USize(width, height);
     mState.renderer.SetSurface(surface);
+
+    mState.renderer.SetStyle(GetValue(mUI.cmbStyle));
 
     mState.renderer.BeginFrame();
     mState.renderer.Draw(*mState.entity, *device, &hook);

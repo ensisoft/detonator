@@ -1018,6 +1018,9 @@
             <widget class="QComboBox" name="cmbGrid"/>
            </item>
            <item>
+            <widget class="QComboBox" name="cmbStyle"/>
+           </item>
+           <item>
             <spacer name="horizontalSpacer_2">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -4215,6 +4218,7 @@
   <tabstop>btnDeleteJoint</tabstop>
   <tabstop>zoom</tabstop>
   <tabstop>cmbGrid</tabstop>
+  <tabstop>cmbStyle</tabstop>
   <tabstop>chkSnap</tabstop>
   <tabstop>chkShowViewport</tabstop>
   <tabstop>chkShowOrigin</tabstop>
