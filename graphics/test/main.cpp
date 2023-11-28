@@ -2330,6 +2330,7 @@ public:
         transform.RotateAroundY(std::sin(t));
         transform.RotateAroundX(std::cos(t));
         transform.Translate(-half_width, half_height);
+
         transform.Translate(100.0f, -100.0f);
         p.Draw(gfx::Pyramid(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
                state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
@@ -2348,6 +2349,29 @@ public:
 
         transform.Translate(200.0f, 0.0f);
         p.Draw(gfx::Sphere(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+
+        // wireframes
+
+        transform.MoveTo(-half_width, half_height);
+        transform.Translate(100.0f, -300.0f);
+        p.Draw(gfx::Wireframe<gfx::Pyramid>(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+
+        transform.Translate(200.0f, 0.0f);
+        p.Draw(gfx::Wireframe<gfx::Cube>(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+
+        transform.Translate(200.0f, 0.0f);
+        p.Draw(gfx::Wireframe<gfx::Cylinder>(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::None));
+
+        transform.Translate(200.0f, 0.0f);
+        p.Draw(gfx::Wireframe<gfx::Cone>(), transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
+               state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
+
+        transform.Translate(200.0f, 0.0f);
+        p.Draw(gfx::Wireframe<gfx::Sphere>(),transform, gfx::CreateMaterialFromImage("textures/uv_test_512.png"),
                state, program, gfx::Painter::LegacyDrawState(gfx::Painter::Culling::Back));
 
     }
