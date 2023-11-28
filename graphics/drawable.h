@@ -1240,6 +1240,85 @@ namespace gfx
         glm::vec3 mPointB;
     };
 
+
+    class DebugDrawableBase : public Drawable
+    {
+    public:
+        enum class Feature {
+            Normals,
+            Wireframe
+        };
+
+        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState&  state) const override;
+        virtual std::string GetShader(const Environment& env, const Device& device) const override;
+        virtual std::string GetShaderId(const Environment& env) const override;
+        virtual std::string GetShaderName(const Environment& env) const override;
+        virtual std::string GetGeometryName(const Environment& env) const override;
+        virtual bool Upload(const Environment& env, Geometry& geom) const override;
+        virtual bool IsDynamic(const Environment& env) const override;
+        virtual Style GetStyle() const override
+        { return Style::Solid; }
+    protected:
+        DebugDrawableBase(const Drawable* drawable, Feature feature)
+          : mDrawable(drawable)
+          , mFeature(feature)
+        {}
+        DebugDrawableBase() = default;
+
+        const Drawable* mDrawable = nullptr;
+        Feature mFeature;
+    };
+
+    class DebugDrawableInstance : public DebugDrawableBase
+    {
+    public:
+        DebugDrawableInstance(const std::shared_ptr<const Drawable> drawable, Feature feature)
+          : DebugDrawableBase(drawable.get(), feature)
+        {
+            mSharedDrawable = drawable;
+        }
+    private:
+        std::shared_ptr<const Drawable> mSharedDrawable;
+    };
+
+    class WireframeInstance : public DebugDrawableInstance
+    {
+    public:
+        WireframeInstance(const std::shared_ptr<const Drawable>& drawable)
+          : DebugDrawableInstance(drawable, Feature::Wireframe)
+        {}
+    };
+
+    template<typename T>
+    class DebugDrawable : public DebugDrawableBase
+    {
+    public:
+        using Feature = DebugDrawableBase::Feature;
+
+        template<typename... Args>
+        DebugDrawable(Feature feature, Args&&... args) : mObject(std::forward<Args>(args)...)
+        {
+            mDrawable = &mObject;
+            mFeature  = feature;
+        }
+    private:
+        T mObject;
+    };
+    template<typename T>
+    class Wireframe : public DebugDrawableBase
+    {
+    public:
+        template<typename... Args>
+        Wireframe(Args&&... args) : mObject(std::forward<Args>(args)...)
+        {
+            mDrawable = &mObject;
+            mFeature  = Feature::Wireframe;
+        }
+    private:
+        T mObject;
+    };
+
+
     std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const DrawableClass>& klass);
 
     inline bool Is3DShape(SimpleShapeType shape) noexcept
