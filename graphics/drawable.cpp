@@ -1284,10 +1284,6 @@ void SimpleShapeClass::IntoJson(data::Writer& data) const
     data.Write("id", mId);
     data.Write("name", mName);
     data.Write("shape", mShape);
-
-    //if (const auto* ptr = std::get_if<SectorShapeArgs>(&mArgs))
-    //    data.Write("sector_fill", ptr->fill_percentage);
-
 }
 bool SimpleShapeClass::FromJson(const data::Reader& data)
 {
@@ -1295,10 +1291,6 @@ bool SimpleShapeClass::FromJson(const data::Reader& data)
     ok &= data.Read("id", &mId);
     ok &= data.Read("name", &mName);
     ok &= data.Read("shape", &mShape);
-
-    //if (mShape == SimpleShapeType::Sector)
-    //    ok &= data.Read("sector_fill", )
-
     return ok;
 }
 
