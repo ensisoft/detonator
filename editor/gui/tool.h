@@ -52,7 +52,7 @@ namespace gui
         void Jump(const UI& ui, const State& state, const glm::vec2& target)
         {
             mViewTransformRotationStart  = GetValue(ui.rotation);
-            mViewTransformRotationStop   = GetValue(ui.rotation);
+            mViewTransformRotationStop   = 0.0f; //GetValue(ui.rotation);
             mViewTransformTranslateStart = glm::vec2{state.camera_offset_x, state.camera_offset_y};
             mViewTransformTranslateStop  = target;
             mViewTransformStartTime      = base::GetTime();
