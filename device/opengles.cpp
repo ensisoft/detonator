@@ -1046,7 +1046,7 @@ public:
                 continue;
             }
 
-            if (!texture->IsTransient())
+            if (!texture->IsTransient() && texture->WarnOnce())
             {
                 if (force_min_linear)
                     WARN("Forcing GL_LINEAR on texture without mip maps. [texture='%1']", texture_name);
@@ -1839,6 +1839,13 @@ private:
         { return mHasMips; }
 
         // internal
+        bool WarnOnce() const
+        {
+            auto ret = mWarnOnce;
+            mWarnOnce = false;
+            return ret;
+        }
+
         bool IsTransient() const
         { return mFlags.test(Flags::Transient); }
         bool GarbageCollect() const
@@ -1890,6 +1897,7 @@ private:
         base::bitflag<Flags> mFlags;
         bool mHasMips   = false;
         bool mFBOBound  = false;
+        mutable bool mWarnOnce  = true;
     };
 
     class GeomImpl : public gfx::Geometry
