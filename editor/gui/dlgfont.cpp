@@ -106,7 +106,10 @@ void DlgFont::PaintScene(gfx::Painter& painter, double secs)
     const auto time_milliseconds = mElapsedTimer.elapsed();
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
-    painter.SetViewport(0, 0, width, height);
+    // don't render if the window is too small
+    if (width < (mBoxWidth + BoxMargin) ||
+        height < (mBoxHeight + BoxMargin))
+        return;
 
     const auto num_visible_cols = width / (mBoxWidth + BoxMargin);
     const auto num_visible_rows = height / (mBoxHeight + BoxMargin);
