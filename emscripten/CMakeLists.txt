@@ -101,6 +101,7 @@ add_executable(GameEngine
     ../engine/graphics.cpp
     ../device/opengles.cpp
     ../graphics/algo.cpp
+    ../graphics/geometry.cpp
     ../graphics/shaderpass.cpp
     ../graphics/painter.cpp
     ../graphics/material.cpp
