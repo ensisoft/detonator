@@ -94,7 +94,17 @@ public:
     {
 
     }
-    bool ParseStyle(const WidgetId& id, const std::string& style) override
+
+    virtual void PushMask(const MaskStruct& mask) override
+    {
+        mClipMaskStack.push(mask);
+    }
+    virtual void PopMask() override
+    {
+        TEST_REQUIRE(!mClipMaskStack.empty());
+    }
+
+    virtual bool ParseStyle(const WidgetId& id, const std::string& style) override
     {
         StyleInfo s;
         s.widget = id;
@@ -103,6 +113,7 @@ public:
         return true;
     }
 private:
+    std::stack<MaskStruct> mClipMaskStack;
 };
 
 class TestWidget : public uik::Widget
@@ -1400,6 +1411,40 @@ loops 1
     }
 }
 
+void bug_clipmask_when_parent_invisible()
+{
+    // clipmask pop is not matched correctly when the parent is actually not visible.
+
+    TEST_CASE(test::Type::Feature)
+
+    uik::Window window;
+
+    {
+        uik::Form  form;
+        form.SetName("form");
+        form.SetSize(100.0f, 100.0f);
+        form.SetVisible(false);
+        window.AddWidget(std::move(form));
+        window.LinkChild(nullptr, window.FindWidgetByName("form"));
+    }
+
+    {
+        uik::PushButton btn;
+        btn.SetName("button");
+        window.AddWidget(std::move(btn));
+        window.LinkChild(window.FindWidgetByName("form"),
+                         window.FindWidgetByName("button"));
+
+    }
+
+    uik::TransientState state;
+
+    Painter p;
+
+    window.Paint(state, p);
+
+}
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
@@ -1417,6 +1462,8 @@ int test_main(int argc, char* argv[])
     unit_test_keyboard_radiobutton_select();
     unit_test_animation_parse();
     unit_test_widget_animation();
+
+    bug_clipmask_when_parent_invisible();
     return 0;
 }
 ) // TEST_MAIN
