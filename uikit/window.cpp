@@ -386,9 +386,17 @@ void Window::Paint(TransientState& state, Painter& painter, double time, PaintHo
             mParentWidgetOrigin -= widget->GetPosition();
             mState.pop();
 
-            if (widget->IsContainer() && widget->ClipChildren() &&
-                mWindow.mRenderTree.HasChildren(widget))
-                mPainter.PopMask();
+            const auto state = mState.top();
+            const bool visible = state.visible && widget->TestFlag(Widget::Flags::VisibleInGame) &&
+                                                  widget->TestFlag(Widget::Flags::VisibleInEditor);
+            const bool enabled = state.enabled && widget->TestFlag(Widget::Flags::Enabled);
+
+            if (visible)
+            {
+                if (widget->IsContainer() && widget->ClipChildren() &&
+                    mWindow.mRenderTree.HasChildren(widget))
+                    mPainter.PopMask();
+            }
         }
     private:
         const Widget* mFocusedWidget = nullptr;
