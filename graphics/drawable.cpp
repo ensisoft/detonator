@@ -680,6 +680,8 @@ void RoundRectGeometry::Generate(const Environment& env, Style style, Geometry& 
             {{1.0f-w,       -h}, {1.0f-w,      h}},
         };
 
+        geometry.AddDrawCmd(Geometry::DrawType::Triangles, 0, 18); // body
+
         // generate corners
         for (int i=0; i<4; ++i)
         {
@@ -711,8 +713,6 @@ void RoundRectGeometry::Generate(const Environment& env, Style style, Geometry& 
 
                 angle += increment;
             }
-
-            geometry.AddDrawCmd(Geometry::DrawType::Triangles, 0, 18); // body
             geometry.AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size() - offset); // corners
         }
         geometry.SetVertexBuffer(std::move(vs));
