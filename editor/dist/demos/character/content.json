@@ -54,8 +54,11 @@
         {
           "class": "bRJsbUq08P",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -73,8 +76,21 @@
                 "value": "9MbuYRL6P9"
               }
             ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -99,8 +115,11 @@
         {
           "class": "jDW6aXJ5PZ",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "ZOW84mNSWm",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -112,8 +131,21 @@
             "layer": 1,
             "linewidth": 1.0,
             "material": "_Red",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -270,8 +302,11 @@
         {
           "class": "s6vk1lnag9",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_circle",
             "flags": {
+              "DepthTest": true,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -283,8 +318,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "_Black",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -309,8 +357,11 @@
         {
           "class": "twJ4I5Q7kK",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -322,8 +373,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "f85ZCt9KqW",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -348,8 +412,11 @@
         {
           "class": "eg9rhBamyt",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -361,8 +428,21 @@
             "layer": 1,
             "linewidth": 1.0,
             "material": "2ohLK3pIux",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -387,8 +467,11 @@
         {
           "class": "LWhWAOSjyx",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -400,8 +483,21 @@
             "layer": 2,
             "linewidth": 1.0,
             "material": "LLq889I6UO",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -426,8 +522,11 @@
         {
           "class": "0hLkkYFQPJ",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_capsule",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -450,8 +549,21 @@
                 }
               }
             ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -459,8 +571,8 @@
           },
           "name": "Hello",
           "position": {
-            "x": 195.2354736328125,
-            "y": -215.92538452148438
+            "x": 195.24000549316406,
+            "y": -215.92999267578125
           },
           "rotation": 0.0,
           "scale": {
@@ -468,7 +580,7 @@
             "y": 1.0
           },
           "size": {
-            "x": 418.7599792480469,
+            "x": 418.760009765625,
             "y": 322.6199951171875
           },
           "tag": "#prop",
@@ -500,8 +612,11 @@
         {
           "class": "sXZ285TbuM",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": true,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -519,8 +634,21 @@
                 "value": 1.0
               }
             ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -792,8 +920,11 @@
         {
           "class": "r9FDrnBXL1",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_capsule",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -805,8 +936,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "57djXhQN4Z",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -831,8 +975,11 @@
         {
           "class": "l3DH0ryh1Q",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_capsule",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -844,8 +991,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "_Black",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -975,8 +1135,11 @@
         {
           "class": "4RPa0LW6RA",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_circle",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -988,8 +1151,21 @@
             "layer": -1,
             "linewidth": 1.0,
             "material": "_Black",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1014,8 +1190,11 @@
         {
           "class": "X3GTqzIPkk",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1027,8 +1206,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "wrQHZ3iizg",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1053,8 +1245,11 @@
         {
           "class": "2YG2JES08A",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1072,8 +1267,21 @@
                 "value": 1.0
               }
             ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1268,8 +1476,11 @@
         {
           "class": "gIxo4Tn7Q0",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_circle",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1281,8 +1492,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "_Black",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1307,8 +1531,11 @@
         {
           "class": "Ev2HUk2eXz",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1320,8 +1547,21 @@
             "layer": 1,
             "linewidth": 1.0,
             "material": "rDpZrE3UuD",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1346,8 +1586,11 @@
         {
           "class": "pqNFaHvqyI",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1365,8 +1608,21 @@
                 "value": 1.0
               }
             ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1419,8 +1675,11 @@
         {
           "class": "I5uXgDruJd",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1432,8 +1691,21 @@
             "layer": 2,
             "linewidth": 1.0,
             "material": "KnPvBZqDs4",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1632,8 +1904,11 @@
         {
           "class": "1deYiyAPoI",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1645,8 +1920,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "jS7kGm3IkK",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1671,8 +1959,11 @@
         {
           "class": "r6rHwdeB4E",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": true,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1684,8 +1975,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "jS7kGm3IkK",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1710,8 +2014,11 @@
         {
           "class": "u4eaMJE9HS",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": true,
               "FlipVertically": true,
               "PP_EnableBloom": true,
@@ -1723,8 +2030,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "jS7kGm3IkK",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1749,8 +2069,11 @@
         {
           "class": "Y6ri5dGm5B",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": true,
               "PP_EnableBloom": true,
@@ -1762,8 +2085,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "jS7kGm3IkK",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
