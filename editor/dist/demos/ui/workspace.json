@@ -1,17 +1,18 @@
 {
     "PJjQktY8ud": {
-        "__version": 0,
+        "__version": 1,
         "checked_for_packing": 1
     },
     "Xg0GdRiaQU": {
-        "__version": 0,
+        "__version": 1,
         "checked_for_packing": 1
     },
     "hz6w2tG1gv": {
-        "__version": 0,
+        "__version": 1,
         "checked_for_packing": 1
     },
     "oTENvjff4e": {
+        "__version": 1
     },
     "project": {
         "application_identifier": "nzHsJhRp8RDr",
@@ -87,6 +88,7 @@
         "working_folder": "${workspace}"
     },
     "qNrtwb1b52": {
+        "__version": 1
     },
     "workspace": {
         "packing_param_combine_textures": true,
@@ -106,15 +108,15 @@
         "packing_param_write_content": true
     },
     "x8itAE59QO": {
-        "__version": 0,
+        "__version": 1,
         "checked_for_packing": 1
     },
     "yTsaLXKonJ": {
-        "__version": 0,
+        "__version": 1,
         "checked_for_packing": 1
     },
     "zNOWw04fYZ": {
-        "__version": 0,
+        "__version": 1,
         "checked_for_packing": 1,
         "elem_0sroSvwwzT_pos_x": -292,
         "elem_0sroSvwwzT_pos_y": -134,
