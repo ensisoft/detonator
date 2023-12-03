@@ -396,6 +396,16 @@ glm::vec4 MapFromPlaneToPlane(const glm::vec4& pos, GameView src, GameView dst)
     return glm::inverse(dst_plane_to_world) * intersection_point_world;
 }
 
+glm::vec4 MapFromTilePlaneToScenePlane(const glm::vec4& tile_pos, GameView tile_plane) noexcept
+{
+    return MapFromPlaneToPlane(tile_pos, tile_plane, GameView::AxisAligned);
+}
+
+glm::vec4 MapFromScenePlaneToTilePlane(const glm::vec4& scene_pos, GameView tile_plane) noexcept
+{
+    return MapFromPlaneToPlane(scene_pos, GameView::AxisAligned, tile_plane);
+}
+
 glm::vec4 MapFromWindowToWorld(const glm::mat4& view_to_clip,
                                const glm::mat4& world_to_view,
                                const glm::vec2& window_coord,

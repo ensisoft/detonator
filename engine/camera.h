@@ -229,14 +229,8 @@ namespace engine
 
     glm::vec4 MapFromPlaneToPlane(const glm::vec4& pos, GameView src, GameView dst);
 
-    inline glm::vec4 MapFromTilePlaneToScenePlane(const glm::vec4& tile_pos, GameView tile_plane) noexcept
-    {
-        return MapFromPlaneToPlane(tile_pos, tile_plane, GameView::AxisAligned);
-    }
-    inline glm::vec4 MapFromScenePlaneToTilePlane(const glm::vec4& scene_pos, GameView tile_plane) noexcept
-    {
-        return MapFromPlaneToPlane(scene_pos, GameView::AxisAligned, tile_plane);
-    }
+    glm::vec4 MapFromTilePlaneToScenePlane(const glm::vec4& tile_pos, GameView tile_plane) noexcept;
+    glm::vec4 MapFromScenePlaneToTilePlane(const glm::vec4& scene_pos, GameView tile_plane) noexcept;
 
     // Produce a matrix that transforms a vertex from one coordinate space
     // to another. But remember that this transforms *any* coordinate inside
