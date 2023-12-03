@@ -25,6 +25,7 @@
 #include <cstdio>
 
 #include "base/math.h"
+#include "base/logging.h"
 #include "engine/camera.h"
 #include "game/types.h"
 #include "editor/app/utility.h"
@@ -333,13 +334,15 @@ void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
     view.Pop();
 }
 
-void DrawCoordinateGrid(gfx::Painter& painter,
-    GridDensity grid,
-    float zoom,
-    float xs,
-    float ys,
-    unsigned width,
-    unsigned height)
+void DrawCoordinateGrid(gfx::Painter& scene,
+                        gfx::Painter& tile,
+                        GridDensity grid,
+                        float zoom,
+                        float xs,
+                        float ys,
+                        unsigned width,
+                        unsigned height,
+                        engine::GameView view)
 {
     const int grid_size = std::max(width/xs, height/ys) / zoom * 2.0f;
 
@@ -355,34 +358,96 @@ void DrawCoordinateGrid(gfx::Painter& painter,
     const gfx::Grid grid_1(num_grid_lines, num_grid_lines, false);
     const auto material = gfx::CreateMaterialFromColor(DefaultGridColor);
 
-    // map the center of the screen to a position on the world plane.
-    // basically this means that when we draw the grid at this position
-    // it is always visible in the viewport. (this world position maps
-    // to the center of the window!)
-    const auto world_pos = engine::MapFromWindowToWorldPlane(painter.GetProjMatrix(),
-                                                             painter.GetViewMatrix(),
-                                                             glm::vec2{width * 0.5f, height * 0.5f},
-                                                             glm::vec2{width, height});
-    // align the grid's world position on a coordinate that is a multiple of
-    // the grid cell on both axis.
-    const float grid_origin_x = (int)world_pos.x / cell_size_units * cell_size_units;
-    const float grid_origin_y = (int)world_pos.y / cell_size_units * cell_size_units;
 
-    // draw 4 quadrants of the grid around the grid origin
-    gfx::Transform transform;
-    transform.Scale(cell_scale_factor, cell_scale_factor);
+    if (view == engine::GameView::Dimetric)
+    {
+        // map the center of the screen to a position on the world plane.
+        // basically this means that when we draw the grid at this position
+        // it is always visible in the viewport => this world position maps
+        // to the center of the window.
+        const auto world_pos = engine::MapFromWindowToWorldPlane(tile.GetProjMatrix(),
+                                                                 tile.GetViewMatrix(),
+                                                                 glm::vec2{width * 0.5f, height * 0.5f},
+                                                                 glm::vec2{width, height});
+        // align the grid's world position on a coordinate that is a multiple of
+        // the grid cell on both axis.
+        const float grid_origin_x = (int)world_pos.x / cell_size_units * cell_size_units;
+        const float grid_origin_y = (int)world_pos.y / cell_size_units * cell_size_units;
 
-    transform.Translate(grid_origin_x, grid_origin_y);
-    painter.Draw(grid_0, transform, material);
+        const auto paint_pos = engine::MapFromTilePlaneToScenePlane(glm::vec4{grid_origin_x,
+                                                                              grid_origin_y, 0.0f, 0.0f},
+                                                                    view);
+        gfx::Transform transform;
+        transform.Scale(cell_scale_factor, cell_scale_factor);
+        transform.Translate(paint_pos.x, paint_pos.y);
 
-    transform.Translate(-grid_width, 0.0f, 0.0f);
-    painter.Draw(grid_1, transform, material);
+        // we're faking the isometric grid here by applying a simple non-isometric
+        // scaling factor to squish the grid and to rotate by 45 degrees.
+        // visually the outcome is the same as if we were rendering a grid on the
+        // tile plane.
+        // the reason why this is done this way is because if the grid is on the
+        // tile plane we can have clipping issues regarding the near and far
+        // clipping planes.
+        //
+        // As the camera moves up/down in order to pan more of the scene the
+        // ray cast solution that solves the tile map position intersects the tile
+        // plane further and further away.
+        //
+        // But rendering the plane in "2D" on the scene plane (parallel to the
+        // projection plane itself) the clipping problem doesn't exist.
 
-    transform.Translate(0.0f, -grid_height, 0.0f);
-    painter.Draw(grid_0, transform, material);
+        transform.Push();
+        transform.RotateAroundZ(gfx::FDegrees(45.0f));
+        transform.Scale(1.0f, 0.5f);
 
-    transform.Translate(grid_width, 0.0f, 0.0f);
-    painter.Draw(grid_1, transform, material);
+        transform.Push();
+        transform.Translate(0.0f, 0.0f);
+        scene.Draw(grid_0, transform, material);
+
+        transform.Translate(-1.0f, 0.0f);
+        scene.Draw(grid_1, transform, material);
+
+        transform.Translate(0.0f, -1.0f);
+        scene.Draw(grid_0, transform, material);
+
+        transform.Translate(1.0f, 0.0f);
+        scene.Draw(grid_1, transform, material);
+
+    }
+    else if (view == engine::GameView::AxisAligned)
+    {
+        // map the center of the screen to a position on the world plane.
+        // basically this means that when we draw the grid at this position
+        // it is always visible in the viewport => this world position maps
+        // to the center of the window.
+        const auto world_pos = engine::MapFromWindowToWorldPlane(scene.GetProjMatrix(),
+                                                                 scene.GetViewMatrix(),
+                                                                 glm::vec2{width * 0.5f, height * 0.5f},
+                                                                 glm::vec2{width, height});
+        // align the grid's world position on a coordinate that is a multiple of
+        // the grid cell on both axis.
+        const float grid_origin_x = (int)world_pos.x / cell_size_units * cell_size_units;
+        const float grid_origin_y = (int)world_pos.y / cell_size_units * cell_size_units;
+
+        // draw 4 quadrants of the grid around the grid origin
+
+        gfx::Transform transform;
+        transform.Scale(cell_scale_factor, cell_scale_factor);
+        transform.Translate(grid_origin_x, grid_origin_y);
+
+        transform.Push();
+        transform.Translate(0.0f, 0.0f);
+        scene.Draw(grid_0, transform, material);
+
+        transform.Translate(-1.0f, 0.0f);
+        scene.Draw(grid_1, transform, material);
+
+        transform.Translate(0.0f, -1.0f);
+        scene.Draw(grid_0, transform, material);
+
+        transform.Translate(1.0f, 0.0f);
+        scene.Draw(grid_1, transform, material);
+    }
 
     // debug, draw a little dot to indicate the grid's world position
 #if 0

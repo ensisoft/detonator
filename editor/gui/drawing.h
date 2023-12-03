@@ -71,14 +71,26 @@ void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
     unsigned height // viewport (widget) size
     );
 
-void DrawCoordinateGrid(gfx::Painter& painter,
+void DrawCoordinateGrid(
+    gfx::Painter& scene,
+    gfx::Painter& tile,
     GridDensity grid,   // grid density setting.
     float zoom,         // overall zoom level
     float xs,
     float ys, // scaling factors for the axis
     unsigned width, // viewport (widget) size
-    unsigned height // viewport (widget) size
+    unsigned height, // viewport (widget) size
+    engine::GameView view
 );
+inline void DrawCoordinateGrid(
+    gfx::Painter& scene,
+    GridDensity grid,
+    float zoom,
+    float xs, float ys,
+    unsigned width, unsigned height)
+{
+    DrawCoordinateGrid(scene, scene, grid, zoom, xs, ys, width, height, engine::GameView::AxisAligned);
+}
 
 // Draw an overlay of viewport illustration. The viewport is the logical
 // game viewport that the game can adjust in order to define the view

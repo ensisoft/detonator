@@ -2109,7 +2109,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
     // draw the background grid in tilespace and project with the map perspective
     if (GetValue(mUI.chkShowGrid))
     {
-        DrawCoordinateGrid(tile_painter, grid, zoom, xs, ys, width, height);
+        DrawCoordinateGrid(scene_painter, tile_painter, grid, zoom, xs, ys, width, height, map_view);
     }
 
     // render the actual tilemap
@@ -2314,7 +2314,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
             gfx::Transform model;
             model.Translate(0.5f, 0.5f, -0.5f);
             model.Scale(base_size * size_factors);
-            tile_painter.Draw(gfx::Cube(), model, gfx::MaterialClassInst(checkerboard));
+            //tile_painter.Draw(gfx::Cube(), model, gfx::MaterialClassInst(checkerboard));
         }
 
 
@@ -2336,12 +2336,12 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
             }
 
             {
-                const auto& p = engine::TilePlaneToScene(glm::vec4{point.x, point.y, point.z, 1.0f}, mState.klass->GetPerspective());
+                const auto& p = engine::MapFromTilePlaneToScenePlane(glm::vec4{point.x, point.y, point.z, 1.0f}, mState.klass->GetPerspective());
                 gfx::Transform model;
                 model.Scale(10.0f, 10.0f);
                 model.Translate(p.x, p.y);
                 model.Translate(-5.0f, -5.0f);
-                //scene_painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
+                scene_painter.Draw(gfx::Circle(), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
             }
         }
     }
