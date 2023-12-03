@@ -1083,6 +1083,112 @@ private:
     engine::GameView mPlane = engine::GameView::Dimetric;
 };
 
+class TileGridTest : public TestCase
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        const auto cells = 5;
+        const auto lines = cells - 1;
+
+        gfx::Painter tile(painter);
+        tile.SetProjectionMatrix(engine::CreateProjectionMatrix(engine::Projection::Orthographic,
+                                 glm::vec2 { 1024.0f, 768.0f }));
+        tile.SetViewMatrix(engine::CreateModelViewMatrix(engine::GameView::Dimetric,
+                                                         glm::vec2 { 0.0f, 0.0f },
+                                                         glm::vec2 { 1.0f, 1.0f }));
+        gfx::Transform model;
+        model.Resize(500.0f, 500.0f);
+        tile.Draw(gfx::Grid(lines, lines, true), model, gfx::CreateMaterialFromColor(gfx::Color::DarkGray));
+
+        model.Translate(0.0f, -500.0f);
+        tile.Draw(gfx::Grid(lines, lines, true), model, gfx::CreateMaterialFromColor(gfx::Color::DarkGray));
+
+        model.Translate(-500.0f, 0.0f);
+        tile.Draw(gfx::Grid(lines, lines, true), model, gfx::CreateMaterialFromColor(gfx::Color::DarkGray));
+
+        model.Translate(0.0f, 500.0f);
+        tile.Draw(gfx::Grid(lines, lines, true), model, gfx::CreateMaterialFromColor(gfx::Color::DarkGray));
+
+
+        gfx::Painter scene(painter);
+        scene.SetProjectionMatrix(engine::CreateProjectionMatrix(engine::Projection::Orthographic,
+                                  glm::vec2 { 1024.0f, 768.0f }));
+        scene.SetViewMatrix(engine::CreateModelViewMatrix(engine::GameView::AxisAligned,
+                                                          glm::vec2 { 0.0f, 0.0f },
+                                                          glm::vec2 { 1.0f, 1.0f }));
+
+                // figure out the x and y "squish" (scale factors) for a square tile
+        // when projected onto the orthographic projection plane.
+        const auto tile_bottom_right = engine::MapFromTilePlaneToScenePlane(glm::vec4 {100.0f, 100.0f, 0.0f, 0.0f}, engine::GameView::Dimetric);
+        const auto tile_top_right = engine::MapFromTilePlaneToScenePlane(glm::vec4 { 100.0f, 0.0f, 0.0f, 0.0f}, engine::GameView::Dimetric);
+
+        float xs = 1.0f;
+        float ys = 1.0f;
+
+        {
+            gfx::Transform t;
+            t.Resize(10.0f, 10.0f);
+            t.MoveTo(tile_bottom_right.x, tile_bottom_right.y);
+            t.Translate(-5.0f, -5.0f);
+            scene.Draw(gfx::Circle(), t, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+
+            const auto real_len     = std::sqrt(100.0f*100.0f + 100.0f*100.0f);
+            const auto dimetric_len = glm::length(tile_bottom_right);
+            ys = dimetric_len / real_len;
+            //DEBUG("ys = %1", ys);
+
+        }
+
+        {
+            gfx::Transform t;
+            t.Resize(10.0f, 10.0f);
+            t.MoveTo(tile_top_right.x, tile_top_right.y);
+            t.Translate(-5.0f, -5.0f);
+            scene.Draw(gfx::Circle(), t, gfx::CreateMaterialFromColor(gfx::Color::HotPink));
+
+            const auto real_len = std::sqrt(100.0f*100.0f + 100.0f*100.0f);
+            const auto dimetric_len = 2 * tile_top_right.x;
+            xs = dimetric_len / real_len;
+        }
+
+
+        {
+
+            gfx::Transform model;
+            model.RotateAroundZ(gfx::FDegrees(45.0f));
+            model.Resize(500.0f, 500.0f);
+            model.Scale(1.0f, ys);
+
+            model.Push();
+            model.Translate(0.0f, 0.0f);
+            scene.Draw(gfx::Grid(lines, lines, true), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
+
+            model.Translate(0.0f, -1.0f);
+            scene.Draw(gfx::Grid(lines, lines, true), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
+
+            model.Translate(-1.0f, 0.0f);
+            scene.Draw(gfx::Grid(lines, lines, true), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
+
+
+            // this would cover the last quadrant of the grid but we leave
+            // this commented out so that the tile space grid shows through
+
+            //model.Translate(0.0f, 1.0f);
+            //scene.Draw(gfx::Grid(lines, lines, true), model, gfx::CreateMaterialFromColor(gfx::Color::Green));
+
+        }
+
+    }
+
+
+    virtual std::string GetName() const override
+    { return "TileGridTest"; }
+private:
+
+
+};
+
 
 class MyApp : public engine::Engine, public wdk::WindowListener
 {
@@ -1116,6 +1222,7 @@ public:
         mTestList.emplace_back(new SceneTest);
         mTestList.emplace_back(new UITest);
         mTestList.emplace_back(new TileCoordinateMappingTest);
+        mTestList.emplace_back(new TileGridTest);
         mTestList[mTestIndex]->Start(&mClassLib);
         INFO("Test case: '%1'", mTestList[mTestIndex]->GetName());
     }
