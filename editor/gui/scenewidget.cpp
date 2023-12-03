@@ -1903,7 +1903,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     // render endless background grid.
     if (GetValue(mUI.chkShowGrid))
     {
-        DrawCoordinateGrid(tile_painter, grid, zoom, xs, ys, width, height);
+        DrawCoordinateGrid(scene_painter, tile_painter, grid, zoom, xs, ys, width, height, view);
     }
 
     // render the actual scene
