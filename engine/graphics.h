@@ -40,7 +40,7 @@ namespace engine
         using Projection = game::RenderProjection;
 
         enum class Flags {
-            PP_Bloom
+            PP_Bloom, CullPacket
         };
         enum class Domain {
             Scene, Editor

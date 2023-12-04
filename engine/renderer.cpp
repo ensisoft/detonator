@@ -22,6 +22,7 @@
 #include <type_traits>
 #include <algorithm>
 #include <unordered_set>
+#include <limits>
 
 #include "base/logging.h"
 #include "base/utility.h"
@@ -1297,7 +1298,7 @@ void Renderer::DrawEditorPackets(gfx::Device& device, const std::vector<DrawPack
     }
 }
 
-void Renderer::DrawScenePackets(gfx::Device& device, const std::vector<DrawPacket>& packets) const
+void Renderer::DrawScenePackets(gfx::Device& device, std::vector<DrawPacket>& packets) const
 {
     const auto window_size = glm::vec2{mSurface.viewport.GetWidth(), mSurface.viewport.GetHeight()};
     const auto logical_viewport_width = mCamera.viewport.GetWidth();
@@ -1319,24 +1320,31 @@ void Renderer::DrawScenePackets(gfx::Device& device, const std::vector<DrawPacke
     // render packet must be considered!
     std::vector<std::vector<RenderLayer>> layers;
 
-    for (const auto& packet : packets)
+    for (auto& packet : packets)
     {
         if (!packet.material || !packet.drawable)
             continue;
         else if (packet.domain != DrawPacket::Domain::Scene)
             continue;
-        else if (mPacketFilter && !mPacketFilter->InspectPacket(packet))
+
+        const glm::mat4* projection = nullptr;
+        if (packet.projection == DrawPacket::Projection::Orthographic)
+            projection = &orthographic;
+        else if (packet.projection == DrawPacket::Projection::Perspective)
+            projection = &perspective;
+        else BUG("Missing draw packet projection mapping.");
+
+        if (CullDrawPacket(packet, *projection, model_view))
+        {
+            packet.flags.set(DrawPacket::Flags::CullPacket, true);
+            //DEBUG("culled packet %1", packet.name);
+        }
+
+        if (mPacketFilter && !mPacketFilter->InspectPacket(packet))
             continue;
 
-        const auto render_layer_index = packet.render_layer;
-        if (render_layer_index >= layers.size())
-            layers.resize(render_layer_index + 1);
-
-        auto& render_layer = layers[render_layer_index];
-
-        const auto packet_index = packet.packet_index;
-        if (packet_index >= render_layer.size())
-            render_layer.resize(packet_index + 1);
+        if (packet.flags.test(DrawPacket::Flags::CullPacket))
+            continue;
 
         gfx::Painter::DrawCommand draw;
         draw.user               = (void*)&packet;
@@ -1348,13 +1356,18 @@ void Renderer::DrawScenePackets(gfx::Device& device, const std::vector<DrawPacke
         draw.state.depth_test   = packet.depth_test;
         draw.state.write_color  = true;
         draw.state.stencil_func = gfx::Painter::StencilFunc ::Disabled;
-        draw.view = &model_view;
+        draw.view               = &model_view;
+        draw.projection         = projection;
 
-        if (packet.projection == DrawPacket::Projection::Orthographic)
-            draw.projection = &orthographic;
-        else if (packet.projection == DrawPacket::Projection::Perspective)
-            draw.projection = &perspective;
-        else BUG("Missing draw packet projection mapping.");
+        const auto render_layer_index = packet.render_layer;
+        if (render_layer_index >= layers.size())
+            layers.resize(render_layer_index + 1);
+
+        auto& render_layer = layers[render_layer_index];
+
+        const auto packet_index = packet.packet_index;
+        if (packet_index >= render_layer.size())
+            render_layer.resize(packet_index + 1);
 
         RenderLayer& layer = render_layer[packet_index];
         if (packet.pass == RenderPass::DrawColor)
@@ -1601,6 +1614,80 @@ void Renderer::SortTilePackets(std::vector<DrawPacket>& packets) const
         current_row = packets[i].map_row;
         current_col = packets[i].map_col;
     }
+}
+
+bool Renderer::CullDrawPacket(const DrawPacket& packet, const glm::mat4& projection, const glm::mat4& modelview) const
+{
+    // the draw packets for the map are only generated for the visible part
+    // of the map already. so culling check is not needed.
+    if (packet.source == DrawPacket::Source::Map)
+        return false;
+
+    const auto& shape = packet.drawable;
+
+    // don't cull global particle engines since the particles can be "where-ever"
+    if (shape->GetType() == gfx::Drawable::Type::ParticleEngine)
+    {
+        const auto& particle = std::static_pointer_cast<const gfx::ParticleEngineInstance>(shape);
+        const auto& params   = particle->GetParams();
+        if (params.coordinate_space == gfx::ParticleEngineClass::CoordinateSpace::Global)
+            return false;
+    }
+
+    // take the model view bounding box (which we should probably get from the drawable)
+    // and project all the 6 corners on the rendering plane. cull the packet if it's
+    // outside the NDC the X, Y axis.
+    std::vector<glm::vec4> corners;
+
+    if (Is3DShape(*shape))
+    {
+        corners.resize(8);
+        corners[0] = glm::vec4 { -0.5f,  0.5f, 0.5f, 1.0f };
+        corners[1] = glm::vec4 { -0.5f, -0.5f, 0.5f, 1.0f };
+        corners[2] = glm::vec4 {  0.5f,  0.5f, 0.5f, 1.0f };
+        corners[3] = glm::vec4 {  0.5f, -0.5f, 0.5f, 1.0f };
+        corners[4] = glm::vec4 { -0.5f,  0.5f, -0.5f, 1.0f };
+        corners[5] = glm::vec4 { -0.5f, -0.5f, -0.5f, 1.0f };
+        corners[6] = glm::vec4 {  0.5f,  0.5f, -0.5f, 1.0f };
+        corners[7] = glm::vec4 {  0.5f, -0.5f, -0.5f, 1.0f };
+    }
+    else
+    {
+        // regarding the Y value, remember the complication
+        // in the 2D vertex shader. huhu.. should really fix
+        // this one soon...
+        corners.resize(4);
+        corners[0] = glm::vec4 { 0.0f,  0.0f, 0.0f, 1.0f };
+        corners[1] = glm::vec4 { 0.0f,  1.0f, 0.0f, 1.0f };
+        corners[2] = glm::vec4 { 1.0f,  1.0f, 0.0f, 1.0f };
+        corners[3] = glm::vec4 { 1.0f,  0.0f, 0.0f, 1.0f };
+    }
+
+    const auto& transform = projection * modelview;
+
+    float min_x = std::numeric_limits<float>::max();
+    float max_x = std::numeric_limits<float>::lowest();
+    float min_y = std::numeric_limits<float>::max();
+    float max_y = std::numeric_limits<float>::lowest();
+    for (const auto& p0 : corners)
+    {
+        auto p1 = transform * packet.transform * p0;
+        p1 /= p1.w;
+        min_x = std::min(min_x, p1.x);
+        max_x = std::max(max_x, p1.x);
+        min_y = std::min(min_y, p1.y);
+        max_y = std::max(max_y, p1.y);
+    }
+    // completely above or below the NDC
+    if (max_y < -1.0f || min_y > 1.0f)
+        return true;
+
+    // completely to the left of to the right of the NDC
+    if (max_x < -1.0f || min_x > 1.0f)
+        return true;
+
+    return false;
+
 }
 
 void Renderer::ComputeTileCoordinates(const game::Tilemap& map,

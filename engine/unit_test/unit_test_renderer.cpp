@@ -1055,6 +1055,151 @@ void unit_test_axis_aligned_map()
     }
 }
 
+void unit_test_scene_culling()
+{
+    TEST_CASE(test::Type::Feature)
+
+    auto device = CreateDevice(600, 600);
+
+    DummyClassLib classlib;
+
+    engine::Renderer renderer(&classlib);
+    renderer.SetEditingMode(false);
+
+    engine::Renderer::Surface surface;
+    surface.size     = gfx::USize(600.0f, 600.0f);
+    surface.viewport = gfx::IRect(0, 0, 600, 600);
+    renderer.SetSurface(surface);
+
+    engine::Renderer::Camera camera;
+    camera.viewport = gfx::FRect(-300.0f, -300.0f, 600.0f, 600.0f);
+    camera.position = glm::vec2{0.0f, 0.0f};
+    renderer.SetCamera(camera);
+
+    class PacketFilter : public engine::PacketFilter {
+    public:
+        virtual bool InspectPacket(engine::DrawPacket& packet) override
+        {
+            culling = packet.flags.test(engine::DrawPacket::Flags::CullPacket);
+            counter++;
+            return true;
+        }
+    public:
+        bool culling = true;
+        size_t counter = 0;
+    } filter;
+
+    renderer.SetPacketFilter(&filter);
+
+    // 2D orthographic, axis aligned
+    {
+        game::EntityClass entity;
+
+        {
+            game::DrawableItemClass drawable;
+            drawable.SetMaterialId("red");
+            drawable.SetDrawableId("circle");
+            drawable.SetLayer(0);
+            drawable.SetRenderProjection(game::DrawableItem::RenderProjection::Orthographic);
+            drawable.SetRenderView(game::DrawableItem::RenderView::AxisAligned);
+
+            game::EntityNodeClass node;
+            node.SetName("node");
+            node.SetSize(glm::vec2(200.0f, 200.0f));
+            node.SetScale(glm::vec2(1.0f, 1.0f));
+            node.SetRotation(0.0f); // radians
+            node.SetDrawable(drawable);
+            entity.LinkChild(nullptr, entity.AddNode(std::move(node)));
+        }
+        auto* node = entity.FindNodeByName("node");
+
+        node->SetTranslation(410.0f, 0.0f);
+        renderer.Draw(entity, *device);
+        TEST_REQUIRE(filter.culling == true);
+        TEST_REQUIRE(filter.counter == 1);
+
+        node->SetTranslation(-410.0f, 0.0f);
+        renderer.Draw(entity, *device);
+        TEST_REQUIRE(filter.culling == true);
+        TEST_REQUIRE(filter.counter == 2);
+
+        node->SetTranslation(0.0f, 410.0f);
+        renderer.Draw(entity, *device);
+        TEST_REQUIRE(filter.culling == true);
+        TEST_REQUIRE(filter.counter == 3);
+
+        node->SetTranslation(0.0f, -410.0f);
+        renderer.Draw(entity, *device);
+        TEST_REQUIRE(filter.culling == true);
+        TEST_REQUIRE(filter.counter == 4);
+
+        node->SetTranslation(0.0f, 0.0f);
+        renderer.Draw(entity, *device);
+        TEST_REQUIRE(filter.culling == false);
+        TEST_REQUIRE(filter.counter == 5);
+    }
+
+    filter.culling = false;
+    filter.counter = 0;
+
+    // 2D orthographic, dimetric
+    {
+        game::EntityClass entity;
+
+        {
+            game::DrawableItemClass drawable;
+            drawable.SetMaterialId("red");
+            drawable.SetDrawableId("circle");
+            drawable.SetLayer(0);
+            drawable.SetRenderProjection(game::DrawableItem::RenderProjection::Orthographic);
+            drawable.SetRenderView(game::DrawableItem::RenderView::Dimetric);
+
+            game::EntityNodeClass node;
+            node.SetName("node");
+            node.SetSize(glm::vec2(200.0f, 200.0f));
+            node.SetScale(glm::vec2(1.0f, 1.0f));
+            node.SetRotation(0.0f); // radians
+            node.SetDrawable(drawable);
+            entity.LinkChild(nullptr, entity.AddNode(std::move(node)));
+        }
+        auto* node = entity.FindNodeByName("node");
+
+        node->SetTranslation(450.0f, 0.0f);
+        renderer.Draw(entity, *device);
+        TEST_REQUIRE(filter.culling == true);
+        TEST_REQUIRE(filter.counter == 1);
+
+        node->SetTranslation(-450.0f, 0.0f);
+        renderer.Draw(entity, *device);
+        TEST_REQUIRE(filter.culling == true);
+        TEST_REQUIRE(filter.counter == 2);
+
+        node->SetTranslation(0.0f, 450.0f);
+        renderer.Draw(entity, *device);
+        TEST_REQUIRE(filter.culling == true);
+        TEST_REQUIRE(filter.counter == 3);
+
+        node->SetTranslation(0.0f, -450.0f);
+        renderer.Draw(entity, *device);
+        TEST_REQUIRE(filter.culling == true);
+        TEST_REQUIRE(filter.counter == 4);
+
+        node->SetTranslation(0.0f, 0.0f);
+        renderer.Draw(entity, *device);
+        TEST_REQUIRE(filter.culling == false);
+        TEST_REQUIRE(filter.counter == 5);
+    }
+
+    // 3D orthographic, axis aligned
+
+    // todo:
+
+    // 3D orthographic, dimetric
+
+    // todo:
+}
+
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
@@ -1066,6 +1211,9 @@ int test_main(int argc, char* argv[])
     unit_test_transform_precision();
 
     unit_test_axis_aligned_map();
+
+    unit_test_scene_culling();
+
     return 0;
 }
 ) // TEST_MAIN

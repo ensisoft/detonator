@@ -1099,6 +1099,8 @@ namespace gfx
                                    public ParticleEngine
     {
     public:
+        using Params = ParticleEngineClass::Params;
+
         // Create a new particle engine based on an existing particle engine
         // class definition.
         explicit ParticleEngineInstance(const std::shared_ptr<const ParticleEngineClass>& klass) noexcept
@@ -1129,6 +1131,9 @@ namespace gfx
         // Get the current number of alive particles.
         inline size_t GetNumParticlesAlive() const noexcept
         { return mState.particles.size(); }
+
+        inline const Params& GetParams() const noexcept
+        { return mClass->GetParams(); }
 
     private:
         // this is the "class" object for this particle engine type.

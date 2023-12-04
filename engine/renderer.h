@@ -93,7 +93,7 @@ namespace engine
     {
     public:
         virtual ~PacketFilter() = default;
-        virtual bool InspectPacket(const DrawPacket& packet) { return true; }
+        virtual bool InspectPacket(DrawPacket& packet) { return true; }
     };
 
     class TileBatchDrawHook
@@ -282,7 +282,7 @@ namespace engine
         void DrawTilemapPackets(gfx::Device& device, const std::vector<DrawPacket>& packets,
                                 const game::Tilemap& map, TileBatchDrawHook* hook) const;
         void DrawEditorPackets(gfx::Device& device, const std::vector<DrawPacket>& packets) const;
-        void DrawScenePackets(gfx::Device& device, const std::vector<DrawPacket>& packets) const;
+        void DrawScenePackets(gfx::Device& device, std::vector<DrawPacket>& packets) const;
 
         void GenerateMapDrawPackets(const game::Tilemap& map,
                                     const std::vector<TileBatch>& batches,
@@ -310,6 +310,10 @@ namespace engine
                                            bool use_batching);
 
         void SortTilePackets(std::vector<DrawPacket>& packets) const;
+
+        bool CullDrawPacket(const DrawPacket& packet,
+                            const glm::mat4& projection,
+                            const glm::mat4& modelview) const;
 
         void ComputeTileCoordinates(const game::Tilemap& map,
                                     std::size_t packet_start_index,
