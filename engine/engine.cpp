@@ -245,30 +245,7 @@ public:
             // moving the objects in the opposite direction relative to the viewport.
             view.Translate(-game_view.GetX(), -game_view.GetY());
 
-            // low level draw packet filter for culling draw packets
-            // that fall outside the current viewport.
-            class Culler : public engine::PacketFilter {
-            public:
-                Culler(const engine::FRect& view_rect, const glm::mat4& view_matrix)
-                  : mViewRect(view_rect)
-                  , mViewMatrix(view_matrix)
-                {}
-                virtual bool InspectPacket(const engine::DrawPacket& packet) override
-                {
-                    if (packet.source == engine::DrawPacket::Source::Map)
-                        return true;
-
-                    const auto& rect = game::ComputeBoundingRect(mViewMatrix * packet.transform);
-                    if (!DoesIntersect(rect, mViewRect))
-                        return false;
-                    return true;
-                }
-            private:
-                const engine::FRect mViewRect;
-                const glm::mat4 mViewMatrix;
-            };
             const gfx::FRect viewport(0.0f, 0.0f, game_view_width, game_view_height);
-            Culler cull(viewport, view.GetAsMatrix());
 
             engine::Renderer::Surface surface;
             surface.viewport = GetViewport();
@@ -281,8 +258,6 @@ public:
             camera.scale    = glm::vec2{1.0f, 1.0f};
             camera.position = glm::vec2{game_view.GetX(), game_view.GetY()};
             mRenderer.SetCamera(camera);
-
-            mRenderer.SetPacketFilter(&cull);
 
             if (mFlags.test(Flags::EditingMode))
             {
