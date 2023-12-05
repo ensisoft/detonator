@@ -2623,6 +2623,7 @@ void VertexShaderMain()
   vec4 vertex = kTileCoordinateSpaceTransform * vec4(tile.xyz, 1.0);
 
   gl_Position = kTileTransform * vertex;
+  gl_Position.z = 0.0;
 
   gl_PointSize = kTileRenderSize.x;
 
@@ -2662,6 +2663,7 @@ void VertexShaderMain()
   vertex.xy += (aTileCorner * kTileRenderSize);
 
   gl_Position = kTileTransform * vertex;
+  gl_Position.z = 0.0;
 
   vTexCoord = aTileCorner + vec2(0.5, 1.0);
 
