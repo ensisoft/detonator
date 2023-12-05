@@ -507,15 +507,26 @@ void LuaRuntime::Init()
         self.mActionQueue.push(action);
     };
 
+    engine["MoveCamera"] = sol::overload(
+         [](LuaRuntime& self, float x, float y) {
+             self.mCamera.position = glm::vec2 { x, y };
+         },
+         [](LuaRuntime& self, const glm::vec2& position) {
+             self.mCamera.position = position;
+         },
+         [](LuaRuntime& self, const base::FPoint& point) {
+             self.mCamera.position = glm::vec2 { point.GetX(), point.GetY() };
+         });
+
     engine["SetViewport"] = sol::overload(
         [](LuaRuntime& self, const FRect& view) {
-            self.mView = view;
+            self.mCamera.viewport = view;
         },
         [](LuaRuntime& self, float x, float y, float width, float height) {
-            self.mView = base::FRect(x, y, width, height);
+            self.mCamera.viewport = base::FRect(x, y, width, height);
         },
         [](LuaRuntime& self, float width, float height) {
-            self.mView = base::FRect(0.0f,  0.0f, width, height);
+            self.mCamera.viewport = base::FRect(0.0f,  0.0f, width, height);
         });
     engine["GetTopUI"] = [](LuaRuntime& self, sol::this_state state) {
         sol::state_view lua(state);
