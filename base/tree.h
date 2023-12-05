@@ -327,8 +327,12 @@ namespace base
             {
                 // if the object is not completely within this node's rect
                 // then fail
-                if (!base::Contains(mRect, rect))
-                    return false;
+
+                // this is too strict and fails sometimes because of numerical
+                // precision issues regarding floats!
+
+                //if (!base::Contains(mRect, rect))
+                //    return false;
 
                 // if this node holds less than max capacity items store here.
                 if (!HasChildren() && mItems.size() < max_items)
