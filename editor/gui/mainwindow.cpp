@@ -512,6 +512,7 @@ bool MainWindow::LoadWorkspace(const QString& dir)
                 widget = new UIWidget(mWorkspace.get());
             else if (klass == AudioWidget::staticMetaObject.className())
                 widget = new AudioWidget(mWorkspace.get());
+            else if (klass.isEmpty()) continue;
             else BUG("Unhandled widget type.");
 
             widget->setWindowTitle(title);
