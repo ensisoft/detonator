@@ -218,8 +218,9 @@ public:
         // rendering surface dimensions.
         const float surf_width  = (float)mSurfaceWidth;
         const float surf_height = (float)mSurfaceHeight;
+        const auto& camera = mRuntime->GetCamera();
         // get the game's logical viewport into the game world.
-        const auto& game_view = mRuntime->GetViewport();
+        const auto& game_view = camera.viewport;
         // map the logical viewport to some area in the rendering surface
         // so that the rendering area (the device viewport) has the same
         // aspect ratio as the logical viewport.
@@ -240,23 +241,16 @@ public:
         {
             TRACE_SCOPE("DrawScene");
 
-            gfx::Transform view;
-            // set the game view transform. moving the viewport is the same as
-            // moving the objects in the opposite direction relative to the viewport.
-            view.Translate(-game_view.GetX(), -game_view.GetY());
-
-            const gfx::FRect viewport(0.0f, 0.0f, game_view_width, game_view_height);
-
             engine::Renderer::Surface surface;
             surface.viewport = GetViewport();
             surface.size     = base::USize(mSurfaceWidth, mSurfaceHeight);
             mRenderer.SetSurface(surface);
 
             engine::Renderer::Camera camera;
-            camera.viewport = viewport;
+            camera.viewport = game_view;
             camera.rotation = 0.0f;
-            camera.scale    = glm::vec2{1.0f, 1.0f};
-            camera.position = glm::vec2{game_view.GetX(), game_view.GetY()};
+            camera.scale    = camera.scale;
+            camera.position = camera.position;
             mRenderer.SetCamera(camera);
 
             if (mFlags.test(Flags::EditingMode))
@@ -670,7 +664,7 @@ private:
     engine::IRect GetViewport() const
     {
         // get the game's logical viewport into the game world.
-        const auto& view = mRuntime->GetViewport();
+        const auto& view = mRuntime->GetCamera().viewport;
         // map the logical viewport to some area in the rendering surface
         // so that the rendering area (the device viewport) has the same
         // aspect ratio as the logical viewport.
@@ -697,10 +691,8 @@ private:
     template<typename WdkMouseEvent>
     engine::MouseEvent MapGameMouseEvent(const WdkMouseEvent& mickey) const
     {
+        const auto& camera = mRuntime->GetCamera();
         const auto& device_viewport  = GetViewport();
-        const auto& logical_viewport = mRuntime->GetViewport();
-        const auto logical_width  = logical_viewport.GetWidth();
-        const auto logical_height = logical_viewport.GetHeight();
 
         engine::MouseEvent event;
         event.window_coord = glm::vec2(mickey.window_x, mickey.window_y);
@@ -708,12 +700,11 @@ private:
         event.mods         = mickey.modifiers;
         if (device_viewport.TestPoint(mickey.window_x, mickey.window_y))
         {
-            const auto game_viewport = game::FRect(0.0f, 0.0f, logical_width, logical_height);
             const auto& point  = device_viewport.MapToLocal(mickey.window_x, mickey.window_y);
-            const auto& view_to_clip  = engine::CreateProjectionMatrix(engine::Projection::Orthographic, game_viewport);
+            const auto& view_to_clip  = engine::CreateProjectionMatrix(engine::Projection::Orthographic, camera.viewport);
             const auto& world_to_view = engine::CreateModelViewMatrix(engine::GameView::AxisAligned,
-                                                                      glm::vec2 { logical_viewport.GetX(), logical_viewport.GetY() },
-                                                                      glm::vec2 { 1.0f, 1.0f }, // camera scale
+                                                                      camera.position,
+                                                                      camera.scale,
                                                                       0.0f); // camera rotation
             event.over_scene  = true;
             event.scene_coord = engine::MapFromWindowToWorldPlane(view_to_clip,
@@ -1330,24 +1321,17 @@ private:
             return;
         }
 
+        const auto& camera = mRuntime->GetCamera();
         const auto device_viewport  = GetViewport();
-        const auto game_view        = mRuntime->GetViewport();
-        const auto game_view_width  = (float)game_view.GetWidth();
-        const auto game_view_height = (float)game_view.GetHeight();
-        const auto game_viewport    = gfx::FRect(0.0f, 0.0f, game_view_width, game_view_height);
-        const auto camera_position  = glm::vec2 { game_view.GetX(), game_view.GetY() };
-        const auto camera_scale     = glm::vec2 { 1.0f, 1.0f };
-        const auto camera_rotation  = 0.0f;
-
         const auto surface_width  = (float)mSurfaceWidth;
         const auto surface_height = (float)mSurfaceHeight;
-        const auto surface_size = glm::vec2 { surface_width, surface_height };
-        const auto game_viewport_size = glm::vec2 { game_view_width, game_view_height };
 
         gfx::Painter painter(mDevice);
-        painter.SetProjectionMatrix(engine::CreateProjectionMatrix(engine::Projection::Orthographic, game_viewport));
-        painter.SetViewMatrix(engine::CreateModelViewMatrix(engine::GameView::AxisAligned, camera_position,
-                                                            camera_scale, camera_rotation));
+        painter.SetProjectionMatrix(engine::CreateProjectionMatrix(engine::Projection::Orthographic, camera.viewport));
+        painter.SetViewMatrix(engine::CreateModelViewMatrix(engine::GameView::AxisAligned,
+                                                            camera.position,
+                                                            camera.scale,
+                                                            0.0f));
         painter.SetViewport(device_viewport);
         painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
         painter.SetEditingMode(mFlags.test(Flags::EditingMode));

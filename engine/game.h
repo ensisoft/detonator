@@ -148,15 +148,22 @@ namespace engine
         // and the action should be copied into out.
         virtual bool GetNextAction(Action* out)
         { return false; }
-        // Get the game's logical viewport into the game world.
-        // The viewport is defined in the same units as the game itself
-        // and has no direct relation to pixels or to the graphics device
-        // viewport. Instead, it's completely game related and is managed by
-        // the game. The engine will then use the viewport information to
-        // render the contents within the game's viewport into some area
-        // in some rendering surface such as a window. If your game returns
-        // an empty viewport (width and height are 0) *nothing* will be shown.
-        virtual FRect GetViewport() const = 0;
+
+        struct Camera {
+            // Get the game's logical viewport into the game world.
+            // The viewport is defined in the same units as the game itself
+            // and has no direct relation to pixels or to the graphics device
+            // viewport. Instead, it's completely game related and is managed by
+            // the game. The engine will then use the viewport information to
+            // render the contents within the game's viewport into some area
+            // in some rendering surface such as a window. If your game returns
+            // an empty viewport (width and height are 0) *nothing* will be shown.
+            FRect viewport;
+            glm::vec2 position = {0.0f, 0.0f};
+            glm::vec2 scale    = {1.0f, 1.0f};
+        };
+
+        virtual Camera GetCamera() const = 0;
 
         // Event listeners.
 

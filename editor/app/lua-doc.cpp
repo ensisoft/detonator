@@ -940,6 +940,14 @@ void InitLuaDoc()
                                         "The initial viewport is a viewport without any dimensions.<br>"
                                         "This function keeps the viewport at 0,0 and resizes it to the given width and height.",
                  "float", "width", "float", "height");
+    DOC_METHOD_2("void", "MoveCamera", "Set the camera's game world position in game units.<br>"
+                                      "Initially the camera is at 0.0, 0.0.",
+                 "float", "x", "float", "y");
+    DOC_METHOD_1("void", "MoveCamera", "Set the camera's game world position in game units.<br>"
+                                      "Initially the camera is at 0.0, 0.0.",
+                 "glm.vec2|base.FPoint", "position");
+
+
     DOC_METHOD_0("uik.Window", "GetTopUI", "Get the topmost UI Window from the window stack. If no window is currently open then nil is returned.<br>");
 
     DOC_TABLE("game.ClassLibrary");
