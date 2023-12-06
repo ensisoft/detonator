@@ -303,6 +303,10 @@ public:
     // Get the hash value that was used in the latest data upload.
     virtual size_t GetDataHash() const  override
     { return mHash; }
+    virtual size_t GetNumDrawCmds() const override
+    { return 0; }
+    virtual DrawCommand GetDrawCmd(size_t index) const override
+    { return {}; }
 
     template<typename T>
     const T* AsVertexArray() const

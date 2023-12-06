@@ -89,7 +89,7 @@ void unit_test_geometry()
         gfx::GeometryBuffer wireframe;
         gfx::CreateWireframe(buffer, wireframe);
         TEST_REQUIRE(wireframe.GetVertexBytes() == 12 * sizeof(gfx::Vertex2D));
-        TEST_REQUIRE(wireframe.GetNumDrawCommands() == 1);
+        TEST_REQUIRE(wireframe.GetNumDrawCmds() == 1);
         TEST_REQUIRE(wireframe.GetDrawCmd(0).type == gfx::Geometry::DrawType::Lines);
         TEST_REQUIRE(wireframe.GetDrawCmd(0).offset == 0);
         TEST_REQUIRE(wireframe.GetDrawCmd(0).count == std::numeric_limits<size_t>::max());
@@ -131,7 +131,7 @@ void unit_test_geometry()
         gfx::GeometryBuffer wireframe;
         gfx::CreateWireframe(buffer, wireframe);
         TEST_REQUIRE(wireframe.GetVertexBytes() == 18 * sizeof(gfx::Vertex2D));
-        TEST_REQUIRE(wireframe.GetNumDrawCommands() == 1);
+        TEST_REQUIRE(wireframe.GetNumDrawCmds() == 1);
         TEST_REQUIRE(wireframe.GetDrawCmd(0).type == gfx::Geometry::DrawType::Lines);
         TEST_REQUIRE(wireframe.GetDrawCmd(0).offset == 0);
         TEST_REQUIRE(wireframe.GetDrawCmd(0).count == std::numeric_limits<size_t>::max());
