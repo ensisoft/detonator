@@ -1121,7 +1121,7 @@ public:
             // number of index elements, otherwise consider the number of vertices.
             const auto buffer_element_count = index_buffer ? buffer_index_count : buffer_vertex_count;
 
-            const auto& draw  = mygeom->GetDrawCommand(i);
+            const auto& draw  = mygeom->GetDrawCmd(i);
             const auto count  = draw.count == std::numeric_limits<std::size_t>::max() ? buffer_element_count : draw.count;
             const auto type   = draw.type;
             const auto offset = draw.offset;
@@ -1994,6 +1994,10 @@ private:
         { mHash = hash; }
         virtual size_t GetDataHash() const  override
         { return mHash; }
+        virtual size_t GetNumDrawCmds() const override
+        { return mDrawCommands.size(); }
+        virtual DrawCommand GetDrawCmd(size_t index) const override
+        { return mDrawCommands[index]; }
 
         inline void SetFrameStamp(size_t frame_number) const noexcept
         { mFrameNumber = frame_number; }
@@ -2015,10 +2019,7 @@ private:
         { return mIndexBufferType; }
         inline bool UsesIndexBuffer() const noexcept
         { return mIndexBufferSize != 0; }
-        inline size_t GetNumDrawCmds() const noexcept
-        { return mDrawCommands.size(); }
-        inline const DrawCommand& GetDrawCommand(size_t index) const noexcept
-        { return mDrawCommands[index]; }
+
         inline const gfx::VertexLayout& GetVertexLayout() const noexcept
         { return mLayout; }
     private:

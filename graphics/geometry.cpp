@@ -44,7 +44,7 @@ void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe)
     const auto index_count  = indices.GetCount();
     const auto has_index = indices.IsValid();
 
-    for (size_t i=0; i<geometry.GetNumDrawCommands(); ++i)
+    for (size_t i=0; i<geometry.GetNumDrawCmds(); ++i)
     {
         const auto& cmd = geometry.GetDrawCmd(i);
         const auto primitive_count = cmd.count != std::numeric_limits<size_t>::max()

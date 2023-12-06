@@ -247,6 +247,10 @@ namespace gfx
         virtual void SetDataHash(size_t hash) = 0;
         // Get the hash value that was used in the latest data upload.
         virtual size_t GetDataHash() const  = 0;
+        // Get the number of draw commands set on the geometry.
+        virtual size_t GetNumDrawCmds() const = 0;
+        // Get the draw command at the specified index.
+        virtual DrawCommand GetDrawCmd(size_t index) const = 0;
 
         // Update the geometry object's data buffer contents.
         template<typename Vertex>
@@ -326,6 +330,10 @@ namespace gfx
         { mDataHash = hash; }
         virtual size_t GetDataHash() const override
         { return mDataHash; }
+        virtual size_t GetNumDrawCmds() const override
+        { return mDrawCmds.size(); }
+        virtual DrawCommand GetDrawCmd(size_t index) const override
+        { return mDrawCmds[index]; }
 
         inline size_t GetVertexBytes() const noexcept
         { return mVertexData.size(); }
@@ -337,17 +345,12 @@ namespace gfx
         { return mIndexData.empty() ? nullptr : &mIndexData[0]; }
         inline const VertexLayout& GetLayout() const noexcept
         { return mVertexLayout; }
-        inline size_t GetNumDrawCommands() const noexcept
-        { return mDrawCmds.size(); }
-        inline const auto& GetDrawCmd(size_t index) const noexcept
-        { return mDrawCmds[index]; }
         inline Usage GetVertexUsage() const noexcept
         { return mVertexUsage; }
         inline Usage GetIndexUsage() const noexcept
         { return mIndexUsage; }
         inline IndexType GetIndexType() const noexcept
         { return mIndexType; }
-
         inline void SetVertexBuffer(std::vector<uint8_t>&& data) noexcept
         { mVertexData = std::move(data); }
         inline void SetIndexData(std::vector<uint8_t>&& data) noexcept
