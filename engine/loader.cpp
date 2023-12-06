@@ -866,7 +866,7 @@ bool ContentLoaderImpl::LoadClasses(const data::Reader& data)
         return false;
     if (!LoadContent<gfx::DrawableClass, gfx::ParticleEngineClass>(data, "particles", mDrawables, nullptr))
         return false;
-   if (!LoadContent<gfx::DrawableClass, gfx::PolygonClass>(data, "shapes", mDrawables, nullptr))
+   if (!LoadContent<gfx::DrawableClass, gfx::PolygonMeshClass>(data, "shapes", mDrawables, nullptr))
        return false;
    if (!LoadContent<game::EntityClass>(data, "entities", mEntities, &mEntityNameTable))
        return false;

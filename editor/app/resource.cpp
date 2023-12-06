@@ -325,7 +325,7 @@ QVariantMap DuplicateResourceProperties(const game::EntityClass& src, const game
     return ret;
 }
 
-QStringList ListResourceDependencies(const gfx::PolygonClass& poly, const QVariantMap& props)
+QStringList ListResourceDependencies(const gfx::PolygonMeshClass& poly, const QVariantMap& props)
 {
     // soft dependency
     QStringList ret;

@@ -160,7 +160,7 @@ void unit_test_resource()
     TEST_REQUIRE(workspace.GetPrimitiveResource(0).GetId() == first_primitive->GetId());
     TEST_REQUIRE(workspace.GetPrimitiveResource(primitives-1).GetId() == last_primitive->GetId());
 
-    gfx::PolygonClass poly;
+    gfx::PolygonMeshClass poly;
     app::CustomShapeResource shape_resource(poly, "poly");
     gfx::ParticleEngineClass particles;
     app::ParticleSystemResource  particle_resource(particles, "particles");
@@ -369,7 +369,7 @@ R"(
     gfx::CustomMaterialClass material(gfx::MaterialClass::Type::Custom);
     material.SetShaderUri(workspace.MapFileToWorkspace(std::string("shaders/es2/my_material.glsl")));
     app::MaterialResource material_resource(material, "material");
-    gfx::PolygonClass poly;
+    gfx::PolygonMeshClass poly;
     app::CustomShapeResource shape_resource(poly, "poly");
     gfx::ParticleEngineClass particles;
     app::ParticleSystemResource  particle_resource(particles, "particles");
@@ -1452,7 +1452,7 @@ void unit_test_list_deps()
     }
 
     {
-        gfx::PolygonClass poly;
+        gfx::PolygonMeshClass poly;
         app::CustomShapeResource shape_resource(poly, "poly");
         workspace.SaveResource(shape_resource);
     }
@@ -1692,7 +1692,7 @@ void unit_test_export_import_basic()
         material.SetShaderUri(workspace.MapFileToWorkspace(std::string("TestWorkspace/shaders/es2/my_material.glsl")));
         app::MaterialResource material_resource(material, "material");
 
-        gfx::PolygonClass poly;
+        gfx::PolygonMeshClass poly;
         app::CustomShapeResource shape_resource(poly, "poly");
         gfx::ParticleEngineClass particles;
         app::ParticleSystemResource particle_resource(particles, "particles");

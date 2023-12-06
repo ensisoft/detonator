@@ -679,7 +679,7 @@ namespace gfx
 
     // Combines multiple primitive draw commands into a single
     // drawable shape.
-    class PolygonClass : public DrawableClass
+    class PolygonMeshClass : public DrawableClass
     {
     public:
         // Define how the geometry is to be rasterized.
@@ -693,8 +693,8 @@ namespace gfx
 
         using Vertex = gfx::Vertex2D;
 
-        explicit PolygonClass(std::string id = base::RandomString(10),
-                     std::string name = "") noexcept
+        explicit PolygonMeshClass(std::string id = base::RandomString(10),
+                                  std::string name = "") noexcept
           : mId(std::move(id))
           , mName(std::move(name))
         {}
@@ -787,14 +787,14 @@ namespace gfx
     };
 
 
-    class PolygonInstance : public Drawable
+    class PolygonMeshInstance : public Drawable
     {
     public:
-        explicit PolygonInstance(const std::shared_ptr<const PolygonClass>& klass) noexcept
+        explicit PolygonMeshInstance(const std::shared_ptr<const PolygonMeshClass>& klass) noexcept
           : mClass(klass)
         {}
-        explicit PolygonInstance(const PolygonClass& klass)
-          : mClass(std::make_shared<PolygonClass>(klass))
+        explicit PolygonMeshInstance(const PolygonMeshClass& klass)
+          : mClass(std::make_shared<PolygonMeshClass>(klass))
         {}
 
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
@@ -812,7 +812,7 @@ namespace gfx
         virtual Type GetType() const override
         { return Type::Polygon; }
     private:
-        std::shared_ptr<const PolygonClass> mClass;
+        std::shared_ptr<const PolygonMeshClass> mClass;
     };
 
 

@@ -331,7 +331,7 @@ public:
         material.SetColor(gfx::Color::Yellow, gfx::GradientClass::ColorIndex::TopRight);
         material.SetColor(gfx::Color::Black,  gfx::GradientClass::ColorIndex::BottomLeft);
         material.SetColor(gfx::Color::Yellow, gfx::GradientClass::ColorIndex::BottomRight);
-        painter.Draw(gfx::PolygonInstance(mPoly), transform, gfx::MaterialClassInst(material));
+        painter.Draw(gfx::PolygonMeshInstance(mPoly), transform, gfx::MaterialClassInst(material));
 
         // eye
         transform.Resize(40, 40);
@@ -357,12 +357,12 @@ public:
         mTime += dts * velocity;
     }
 private:
-    void AddPacman(gfx::PolygonClass& poly,  float x, float y, float r)
+    void AddPacman(gfx::PolygonMeshClass& poly, float x, float y, float r)
     {
-        gfx::PolygonClass::Vertex center = {
+        gfx::PolygonMeshClass::Vertex center = {
             {x, y}, {x, -y}
         };
-        std::vector<gfx::PolygonClass::Vertex> verts;
+        std::vector<gfx::PolygonMeshClass::Vertex> verts;
         verts.push_back(center);
 
         const auto slices = 200;
@@ -371,27 +371,27 @@ private:
         for (int i=mouth; i<=slices-mouth; ++i)
         {
             const float a = i * angle;
-            gfx::PolygonClass::Vertex v;
+            gfx::PolygonMeshClass::Vertex v;
             v.aPosition.x = x + std::cos(a) * r;
             v.aPosition.y = y + std::sin(a) * r;
             v.aTexCoord.x = v.aPosition.x;
             v.aTexCoord.y = v.aPosition.y * -1.0f;
             verts.push_back(v);
         }
-        gfx::PolygonClass::DrawCommand cmd;
-        cmd.type   = gfx::PolygonClass::DrawType::TriangleFan;
+        gfx::PolygonMeshClass::DrawCommand cmd;
+        cmd.type   = gfx::PolygonMeshClass::DrawType::TriangleFan;
         cmd.offset = poly.GetNumVertices();
         cmd.count  = verts.size();
         poly.AddVertices(std::move(verts));
         poly.AddDrawCommand(cmd);
     }
 
-    void AddCircleShape(gfx::PolygonClass& poly,  float x, float y, float r)
+    void AddCircleShape(gfx::PolygonMeshClass& poly, float x, float y, float r)
     {
-        gfx::PolygonClass::Vertex center = {
+        gfx::PolygonMeshClass::Vertex center = {
             {x, y}, {x, -y}
         };
-        std::vector<gfx::PolygonClass::Vertex> verts;
+        std::vector<gfx::PolygonMeshClass::Vertex> verts;
         verts.push_back(center);
 
         const auto slices = 200;
@@ -399,15 +399,15 @@ private:
         for (int i=0; i<=slices; ++i)
         {
             const float a = i * angle;
-            gfx::PolygonClass::Vertex v;
+            gfx::PolygonMeshClass::Vertex v;
             v.aPosition.x = x + std::cos(a) * r;
             v.aPosition.y = y + std::sin(a) * r;
             v.aTexCoord.x = v.aPosition.x;
             v.aTexCoord.y = v.aPosition.y * -1.0f;
             verts.push_back(v);
         }
-        gfx::PolygonClass::DrawCommand cmd;
-        cmd.type   = gfx::PolygonClass::DrawType::TriangleFan;
+        gfx::PolygonMeshClass::DrawCommand cmd;
+        cmd.type   = gfx::PolygonMeshClass::DrawType::TriangleFan;
         cmd.offset = poly.GetNumVertices();
         cmd.count  = verts.size();
         poly.AddVertices(std::move(verts));
@@ -415,7 +415,7 @@ private:
     }
 private:
     float mTime = 0.0f;
-    gfx::PolygonClass mPoly;
+    gfx::PolygonMeshClass mPoly;
 };
 
 class TileBatchTest : public GraphicsTest

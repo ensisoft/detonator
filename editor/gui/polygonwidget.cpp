@@ -36,13 +36,13 @@
 
 namespace {
 
-std::vector<gfx::PolygonClass::Vertex> MakeVerts(const std::vector<QPoint>& points,
-    float width, float height)
+std::vector<gfx::PolygonMeshClass::Vertex> MakeVerts(const std::vector<QPoint>& points,
+                                                     float width, float height)
 {
-    std::vector<gfx::PolygonClass::Vertex> verts;
+    std::vector<gfx::PolygonMeshClass::Vertex> verts;
     for (const auto& p : points)
     {
-        gfx::PolygonClass::Vertex vertex;
+        gfx::PolygonMeshClass::Vertex vertex;
         vertex.aPosition.x = p.x() / width;
         vertex.aPosition.y = p.y() / height * -1.0;
         vertex.aTexCoord.x = p.x() / width;
@@ -53,7 +53,7 @@ std::vector<gfx::PolygonClass::Vertex> MakeVerts(const std::vector<QPoint>& poin
 }
 
 // Map vertex to widget space.
-QPoint MapVertexToWidget(const gfx::PolygonClass::Vertex& vertex,
+QPoint MapVertexToWidget(const gfx::PolygonMeshClass::Vertex& vertex,
     float width, float height)
 {
     return QPoint(vertex.aPosition.x * width, vertex.aPosition.y * height * -1.0f);
@@ -109,7 +109,7 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace) : mWorkspace(workspace)
 ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resource) : ShapeWidget(workspace)
 {
     DEBUG("Editing shape '%1'", resource.GetName());
-    mPolygon = *resource.GetContent<gfx::PolygonClass>();
+    mPolygon = *resource.GetContent<gfx::PolygonMeshClass>();
     mOriginalHash = mPolygon.GetHash();
 
     QString material;
@@ -474,7 +474,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     static gfx::ColorClass color(gfx::MaterialClass::Type::Color);
     color.SetBaseColor(gfx::Color4f(gfx::Color::LightGray, alpha));
     color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-    painter.Draw(gfx::PolygonInstance(mPolygon), view, gfx::MaterialClassInst(color));
+    painter.Draw(gfx::PolygonMeshInstance(mPolygon), view, gfx::MaterialClassInst(color));
 
     // visualize the vertices.
     view.Resize(6, 6);
@@ -511,15 +511,15 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     view.Resize(width-2, height-2);
     view.MoveTo(1, 1);
 
-    gfx::PolygonClass::DrawCommand cmd;
-    cmd.type   = gfx::PolygonClass::DrawType::TriangleFan;
+    gfx::PolygonMeshClass::DrawCommand cmd;
+    cmd.type   = gfx::PolygonMeshClass::DrawType::TriangleFan;
     cmd.offset = 0;
     cmd.count  = points.size();
     mCurrentDraw.ClearDrawCommands();
     mCurrentDraw.ClearVertices();
     mCurrentDraw.AddVertices(MakeVerts(points, width, height));
     mCurrentDraw.AddDrawCommand(cmd);
-    painter.Draw(gfx::PolygonInstance(mCurrentDraw), view, gfx::MaterialClassInst(color));
+    painter.Draw(gfx::PolygonMeshInstance(mCurrentDraw), view, gfx::MaterialClassInst(color));
 }
 
 void ShapeWidget::OnMousePress(QMouseEvent* mickey)
@@ -695,7 +695,7 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
 
     const auto cmd_vertex_index = vertex_index - cmd.offset;
 
-    gfx::PolygonClass::Vertex vertex;
+    gfx::PolygonMeshClass::Vertex vertex;
     vertex.aPosition.x = point.x() / (float)width;
     vertex.aPosition.y = point.y() / (float)height * -1.0f;
     vertex.aTexCoord.x = vertex.aPosition.x;
@@ -732,8 +732,8 @@ bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
 
     if (key->key() == Qt::Key_Escape && mActive)
     {
-        gfx::PolygonClass::DrawCommand cmd;
-        cmd.type   = gfx::PolygonClass::DrawType::TriangleFan;
+        gfx::PolygonMeshClass::DrawCommand cmd;
+        cmd.type   = gfx::PolygonMeshClass::DrawType::TriangleFan;
         cmd.count  = mPoints.size();
         cmd.offset = mPolygon.GetNumVertices();
         mPolygon.AddVertices(MakeVerts(mPoints, width, height));

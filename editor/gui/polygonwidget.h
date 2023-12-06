@@ -93,9 +93,9 @@ namespace gui
         // the current workspace.
         app::Workspace* mWorkspace = nullptr;
         // the current polygon we're editing.
-        gfx::PolygonClass mPolygon;
+        gfx::PolygonMeshClass mPolygon;
         // the current draw being added.
-        gfx::PolygonClass mCurrentDraw;
+        gfx::PolygonMeshClass mCurrentDraw;
         // the current material for the blueprint (the background image)
         std::unique_ptr<gfx::Material> mBlueprint;
         // the list of points for adding the next draw command.
