@@ -173,7 +173,7 @@ std::unique_ptr<b2Shape> CreateCollisionShape(const engine::ClassLibrary& classl
             WARN("No polygon class found for rigid body. [node='%1']", debug_name);
             return collision_shape;
         }
-        const auto& polygon = std::static_pointer_cast<const gfx::PolygonClass>(drawable);
+        const auto& polygon = std::static_pointer_cast<const gfx::PolygonMeshClass>(drawable);
 
         std::vector<b2Vec2> verts;
         for (size_t i=0; i<polygon->GetNumVertices(); ++i)

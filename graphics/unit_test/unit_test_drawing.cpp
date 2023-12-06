@@ -1402,7 +1402,7 @@ void unit_test_static_poly()
 {
     TEST_CASE(test::Type::Feature)
 
-    gfx::PolygonClass poly;
+    gfx::PolygonMeshClass poly;
 
     // polygon is marked static, but we're in edit mode so the
     // contents should get re-uploaded as needed.
@@ -1413,10 +1413,10 @@ void unit_test_static_poly()
        {{-10.0f, -10.0f}, {0.0f, 0.0f}},
        {{10.0f, 10.0f}, {1.0f, 0.0f}}
     };
-    gfx::PolygonClass::DrawCommand cmd;
+    gfx::PolygonMeshClass::DrawCommand cmd;
     cmd.offset = 0;
     cmd.count  = 3;
-    cmd.type   = gfx::PolygonClass::DrawType::TriangleFan;
+    cmd.type   = gfx::PolygonMeshClass::DrawType::TriangleFan;
     poly.AddVertices(verts, 3);
     poly.AddDrawCommand(cmd);
 

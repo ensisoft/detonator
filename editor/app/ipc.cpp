@@ -380,7 +380,7 @@ void IPCClient::ReadMessage()
         else if (type == Resource::Type::Material)
             resource = CreateResource<gfx::MaterialClass>("materials", json, name);
         else if (type == Resource::Type::Shape)
-            resource = CreateResource<gfx::PolygonClass>("shapes", json, name);
+            resource = CreateResource<gfx::PolygonMeshClass>("shapes", json, name);
         else if (type == Resource::Type::ParticleSystem)
             resource = CreateResource<gfx::ParticleEngineClass>("particles", json, name);
         else if (type == Resource::Type::Script)

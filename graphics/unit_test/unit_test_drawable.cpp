@@ -188,9 +188,9 @@ void unit_test_polygon_data()
     v0.aTexCoord.y = -0.5f;
     verts.push_back(v0);
 
-    gfx::PolygonClass klass;
-    gfx::PolygonClass::DrawCommand cmd;
-    cmd.type = gfx::PolygonClass::DrawType::TriangleFan;
+    gfx::PolygonMeshClass klass;
+    gfx::PolygonMeshClass::DrawCommand cmd;
+    cmd.type = gfx::PolygonMeshClass::DrawType::TriangleFan;
     cmd.offset = 1243;
     cmd.count = 555;
     klass.AddVertices(std::move(verts));
@@ -200,12 +200,12 @@ void unit_test_polygon_data()
     {
         data::JsonObject json;
         klass.IntoJson(json);
-        gfx::PolygonClass copy;
+        gfx::PolygonMeshClass copy;
         TEST_REQUIRE(copy.FromJson(json));
         TEST_REQUIRE(copy.GetNumVertices() == 1);
         TEST_REQUIRE(copy.GetNumDrawCommands() == 1);
         TEST_REQUIRE(copy.GetVertex(0) == v0);
-        TEST_REQUIRE(copy.GetDrawCommand(0).type == gfx::PolygonClass::DrawType::TriangleFan);
+        TEST_REQUIRE(copy.GetDrawCommand(0).type == gfx::PolygonMeshClass::DrawType::TriangleFan);
         TEST_REQUIRE(copy.GetDrawCommand(0).offset == 1243);
         TEST_REQUIRE(copy.GetDrawCommand(0).count == 555);
         TEST_REQUIRE(copy.GetId() == klass.GetId());
@@ -218,7 +218,7 @@ void unit_test_polygon_vertex_operations()
     TEST_CASE(test::Type::Feature)
 
     // some test vertices.
-    std::vector<gfx::PolygonClass::Vertex> verts;
+    std::vector<gfx::PolygonMeshClass::Vertex> verts;
     verts.resize(6);
     verts[0].aPosition.x = 0.0f;
     verts[1].aPosition.x = 1.0f;
@@ -229,10 +229,10 @@ void unit_test_polygon_vertex_operations()
 
     // test finding the right draw command.
     {
-        gfx::PolygonClass poly;
+        gfx::PolygonMeshClass poly;
         poly.AddVertices(verts);
 
-        gfx::PolygonClass::DrawCommand cmd;
+        gfx::PolygonMeshClass::DrawCommand cmd;
         cmd.offset = 0;
         cmd.count  = 3;
         poly.AddDrawCommand(cmd);
@@ -263,10 +263,10 @@ void unit_test_polygon_vertex_operations()
 
     // test erase/insert with only one draw cmd
     {
-        gfx::PolygonClass poly;
+        gfx::PolygonMeshClass poly;
         poly.AddVertices(verts);
 
-        gfx::PolygonClass::DrawCommand cmd;
+        gfx::PolygonMeshClass::DrawCommand cmd;
         cmd.offset = 0;
         cmd.count  = 6;
         poly.AddDrawCommand(cmd);
@@ -293,10 +293,10 @@ void unit_test_polygon_vertex_operations()
 
     // test erase/insert first draw command first index
     {
-        gfx::PolygonClass poly;
+        gfx::PolygonMeshClass poly;
         poly.AddVertices(verts);
 
-        gfx::PolygonClass::DrawCommand cmd;
+        gfx::PolygonMeshClass::DrawCommand cmd;
         cmd.offset = 0;
         cmd.count  = 3;
         poly.AddDrawCommand(cmd);
@@ -333,10 +333,10 @@ void unit_test_polygon_vertex_operations()
 
     // test erase/insert first draw command last index
     {
-        gfx::PolygonClass poly;
+        gfx::PolygonMeshClass poly;
         poly.AddVertices(verts);
 
-        gfx::PolygonClass::DrawCommand cmd;
+        gfx::PolygonMeshClass::DrawCommand cmd;
         cmd.offset = 0;
         cmd.count  = 3;
         poly.AddDrawCommand(cmd);
@@ -373,10 +373,10 @@ void unit_test_polygon_vertex_operations()
 
     // test erase/insert from/into second draw command.
     {
-        gfx::PolygonClass poly;
+        gfx::PolygonMeshClass poly;
         poly.AddVertices(verts);
 
-        gfx::PolygonClass::DrawCommand cmd;
+        gfx::PolygonMeshClass::DrawCommand cmd;
         cmd.offset = 0;
         cmd.count  = 3;
         poly.AddDrawCommand(cmd);

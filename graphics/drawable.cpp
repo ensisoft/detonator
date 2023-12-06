@@ -1472,43 +1472,43 @@ bool Grid::Upload(const Environment&, Geometry& geometry) const
     return true;
 }
 
-void PolygonClass::Clear() noexcept
+void PolygonMeshClass::Clear() noexcept
 {
     mVertices.clear();
     mDrawCommands.clear();
 }
-void PolygonClass::ClearDrawCommands() noexcept
+void PolygonMeshClass::ClearDrawCommands() noexcept
 {
     mDrawCommands.clear();
 }
-void PolygonClass::ClearVertices() noexcept
+void PolygonMeshClass::ClearVertices() noexcept
 {
     mVertices.clear();
 }
-void PolygonClass::AddVertices(const std::vector<Vertex>& vertices)
+void PolygonMeshClass::AddVertices(const std::vector<Vertex>& vertices)
 {
     std::copy(std::begin(vertices), std::end(vertices), std::back_inserter(mVertices));
 }
-void PolygonClass::AddVertices(std::vector<Vertex>&& vertices)
+void PolygonMeshClass::AddVertices(std::vector<Vertex>&& vertices)
 {
     std::move(std::begin(vertices), std::end(vertices), std::back_inserter(mVertices));
 }
-void PolygonClass::AddVertices(const Vertex* vertices, size_t num_vertices)
+void PolygonMeshClass::AddVertices(const Vertex* vertices, size_t num_vertices)
 {
     for (size_t i=0; i<num_vertices; ++i)
         mVertices.push_back(vertices[i]);
 }
-void PolygonClass::AddDrawCommand(const DrawCommand& cmd)
+void PolygonMeshClass::AddDrawCommand(const DrawCommand& cmd)
 {
     mDrawCommands.push_back(cmd);
 }
 
-std::string PolygonClass::GetGeometryName(const Environment& env) const
+std::string PolygonMeshClass::GetGeometryName(const Environment& env) const
 {
     return mId;
 }
 
-bool PolygonClass::IsDynamic(const Environment& env) const
+bool PolygonMeshClass::IsDynamic(const Environment& env) const
 {
     // editing mode overrides static
     if (env.editing_mode)
@@ -1517,7 +1517,7 @@ bool PolygonClass::IsDynamic(const Environment& env) const
     return !mStatic;
 }
 
-bool PolygonClass::Upload(const Environment& env, Geometry& geometry) const
+bool PolygonMeshClass::Upload(const Environment& env, Geometry& geometry) const
 {
     const auto dynamic = IsDynamic(env);
     const auto usage   = dynamic ? Geometry::Usage::Dynamic
@@ -1547,7 +1547,7 @@ bool PolygonClass::Upload(const Environment& env, Geometry& geometry) const
     return true;
 }
 
-std::size_t PolygonClass::GetContentHash() const noexcept
+std::size_t PolygonMeshClass::GetContentHash() const noexcept
 {
     size_t hash = 0;
     for (const auto& vertex : mVertices)
@@ -1566,7 +1566,7 @@ std::size_t PolygonClass::GetContentHash() const noexcept
     return hash;
 }
 
-std::size_t PolygonClass::GetHash() const
+std::size_t PolygonMeshClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
@@ -1588,18 +1588,18 @@ std::size_t PolygonClass::GetHash() const
     return hash;
 }
 
-std::unique_ptr<DrawableClass> PolygonClass::Clone() const
+std::unique_ptr<DrawableClass> PolygonMeshClass::Clone() const
 {
-    auto ret = std::make_unique<PolygonClass>(*this);
+    auto ret = std::make_unique<PolygonMeshClass>(*this);
     ret->mId = base::RandomString(10);
     return ret;
 }
-std::unique_ptr<DrawableClass> PolygonClass::Copy() const
+std::unique_ptr<DrawableClass> PolygonMeshClass::Copy() const
 {
-    return std::make_unique<PolygonClass>(*this);
+    return std::make_unique<PolygonMeshClass>(*this);
 }
 
-void PolygonClass::IntoJson(data::Writer& data) const
+void PolygonMeshClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",     mId);
     data.Write("name",   mName);
@@ -1623,7 +1623,7 @@ void PolygonClass::IntoJson(data::Writer& data) const
     }
 }
 
-bool PolygonClass::FromJson(const data::Reader& data)
+bool PolygonMeshClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
     ok &= data.Read("id",     &mId);
@@ -1663,13 +1663,13 @@ bool PolygonClass::FromJson(const data::Reader& data)
     return ok;
 }
 
-void PolygonClass::UpdateVertex(const Vertex& vert, size_t index)
+void PolygonMeshClass::UpdateVertex(const Vertex& vert, size_t index)
 {
     ASSERT(index < mVertices.size());
     mVertices[index] = vert;
 }
 
-void PolygonClass::EraseVertex(size_t index)
+void PolygonMeshClass::EraseVertex(size_t index)
 {
     ASSERT(index < mVertices.size());
     auto it = mVertices.begin();
@@ -1694,7 +1694,7 @@ void PolygonClass::EraseVertex(size_t index)
     }
 }
 
-void PolygonClass::InsertVertex(const Vertex& vertex, size_t cmd_index, size_t index)
+void PolygonMeshClass::InsertVertex(const Vertex& vertex, size_t cmd_index, size_t index)
 {
     ASSERT(cmd_index < mDrawCommands.size());
     ASSERT(index <= mDrawCommands[cmd_index].count);
@@ -1717,13 +1717,13 @@ void PolygonClass::InsertVertex(const Vertex& vertex, size_t cmd_index, size_t i
     }
 }
 
-void PolygonClass::UpdateDrawCommand(const DrawCommand& cmd, size_t index)
+void PolygonMeshClass::UpdateDrawCommand(const DrawCommand& cmd, size_t index)
 {
     ASSERT(index < mDrawCommands.size());
     mDrawCommands[index] = cmd;
 }
 
-const size_t PolygonClass::FindDrawCommand(size_t vertex_index) const
+const size_t PolygonMeshClass::FindDrawCommand(size_t vertex_index) const
 {
     for (size_t i=0; i<mDrawCommands.size(); ++i)
     {
@@ -1738,33 +1738,33 @@ const size_t PolygonClass::FindDrawCommand(size_t vertex_index) const
     BUG("no draw command found.");
 }
 
-void PolygonInstance::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
+void PolygonMeshInstance::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
 {
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
 }
-std::string PolygonInstance::GetShader(const Environment& env, const Device& device) const
+std::string PolygonMeshInstance::GetShader(const Environment& env, const Device& device) const
 {
     return MakeGeneric2DVertexShader(device);
 }
 
-std::string PolygonInstance::GetGeometryName(const Environment& env) const
+std::string PolygonMeshInstance::GetGeometryName(const Environment& env) const
 {
     return mClass->GetGeometryName(env);
 }
 
-bool PolygonInstance::Upload(const Environment& env, Geometry& geometry) const
+bool PolygonMeshInstance::Upload(const Environment& env, Geometry& geometry) const
 {
     return mClass->Upload(env, geometry);
 }
-std::string PolygonInstance::GetShaderId(const Environment& env) const
+std::string PolygonMeshInstance::GetShaderId(const Environment& env) const
 {
     return "generic-2D-vertex-program";
 }
 
-std::string PolygonInstance::GetShaderName(const Environment& env) const
+std::string PolygonMeshInstance::GetShaderName(const Environment& env) const
 {
     return "Generic2DVertexShader";
 }
@@ -2890,7 +2890,7 @@ std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const Dra
     else if (type == DrawableClass::Type::ParticleEngine)
         return std::make_unique<ParticleEngineInstance>(std::static_pointer_cast<const ParticleEngineClass>(klass));
     else if (type == DrawableClass::Type::Polygon)
-        return std::make_unique<PolygonInstance>(std::static_pointer_cast<const PolygonClass>(klass));
+        return std::make_unique<PolygonMeshInstance>(std::static_pointer_cast<const PolygonMeshClass>(klass));
     else BUG("Unhandled drawable class type");
     return nullptr;
 }

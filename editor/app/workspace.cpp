@@ -1300,7 +1300,7 @@ bool ResourceArchive::Open(const QString& zip_file)
 
     LoadMaterials<gfx::MaterialClass>("materials", content, mResources);
     LoadResources<gfx::ParticleEngineClass>("particles", content, mResources);
-    LoadResources<gfx::PolygonClass>("shapes", content, mResources);
+    LoadResources<gfx::PolygonMeshClass>("shapes", content, mResources);
     LoadResources<game::EntityClass>("entities", content, mResources);
     LoadResources<game::SceneClass>("scenes", content, mResources);
     LoadResources<game::TilemapClass>("tilemaps", content, mResources);
@@ -1536,7 +1536,7 @@ std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassByName(cons
         if (resource->GetType() == Resource::Type::ParticleSystem)
             return ResourceCast<gfx::ParticleEngineClass>(*resource).GetSharedResource();
         else if (resource->GetType() == Resource::Type::Shape)
-            return ResourceCast<gfx::PolygonClass>(*resource).GetSharedResource();
+            return ResourceCast<gfx::PolygonMeshClass>(*resource).GetSharedResource();
     }
     BUG("No such drawable class.");
     return nullptr;
@@ -1558,7 +1558,7 @@ std::shared_ptr<const gfx::DrawableClass> Workspace::GetDrawableClassById(const 
         if (resource->GetType() == Resource::Type::ParticleSystem)
             return ResourceCast<gfx::ParticleEngineClass>(*resource).GetSharedResource();
         else if (resource->GetType() == Resource::Type::Shape)
-            return ResourceCast<gfx::PolygonClass>(*resource).GetSharedResource();
+            return ResourceCast<gfx::PolygonMeshClass>(*resource).GetSharedResource();
     }
     BUG("No such drawable class.");
     return nullptr;
@@ -1643,7 +1643,7 @@ engine::ClassHandle<const gfx::DrawableClass> Workspace::FindDrawableClassById(c
         else if (resource->GetType() == Resource::Type::ParticleSystem)
             return ResourceCast<gfx::ParticleEngineClass>(*resource).GetSharedResource();
         else if (resource->GetType() == Resource::Type::Shape)
-            return ResourceCast<gfx::PolygonClass>(*resource).GetSharedResource();
+            return ResourceCast<gfx::PolygonMeshClass>(*resource).GetSharedResource();
     }
     return nullptr;
 }
@@ -1979,7 +1979,7 @@ bool Workspace::LoadContent(const QString& filename, MigrationLog* log)
     bool ok = true;
     ok &= LoadMaterials<gfx::MaterialClass>("materials", root, mResources, log);
     ok &= LoadResources<gfx::ParticleEngineClass>("particles", root, mResources, log);
-    ok &= LoadResources<gfx::PolygonClass>("shapes", root, mResources, log);
+    ok &= LoadResources<gfx::PolygonMeshClass>("shapes", root, mResources, log);
     ok &= LoadResources<game::EntityClass>("entities", root, mResources, log);
     ok &= LoadResources<game::SceneClass>("scenes", root, mResources, log);
     ok &= LoadResources<game::TilemapClass>("tilemaps", root, mResources, log);
@@ -3084,7 +3084,7 @@ bool Workspace::ImportResourcesFromJson(const QString& filename, std::vector<std
     success = true;
     success = success && LoadMaterials<gfx::MaterialClass>("materials", root, resources);
     success = success && LoadResources<gfx::ParticleEngineClass>("particles", root, resources);
-    success = success && LoadResources<gfx::PolygonClass>("shapes", root, resources);
+    success = success && LoadResources<gfx::PolygonMeshClass>("shapes", root, resources);
     success = success && LoadResources<game::EntityClass>("entities", root, resources);
     success = success && LoadResources<game::SceneClass>("scenes", root, resources);
     success = success && LoadResources<game::TilemapClass>("tilemaps", root, resources);
