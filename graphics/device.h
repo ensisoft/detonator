@@ -31,6 +31,7 @@ namespace gfx
     class Shader;
     class Program;
     class Geometry;
+    class GeometryDrawCommand;
     class Texture;
     class Framebuffer;
 
@@ -187,7 +188,7 @@ namespace gfx
         virtual void DeleteFramebuffers() = 0;
 
         // Draw the given geometry using the given program with the specified state applied.
-        virtual void Draw(const Program& program, const Geometry& geometry, const State& state, Framebuffer* fbo = nullptr) const = 0;
+        virtual void Draw(const Program& program, const GeometryDrawCommand& geometry, const State& state, Framebuffer* fbo = nullptr) const = 0;
 
         enum GCFlags {
             Textures   = 0x1,

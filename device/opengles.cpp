@@ -711,13 +711,13 @@ public:
         mFBOs.clear();
     }
 
-    virtual void Draw(const gfx::Program& program, const gfx::Geometry& geometry, const State& state, gfx::Framebuffer* fbo) const override
+    virtual void Draw(const gfx::Program& program, const gfx::GeometryDrawCommand& geometry, const State& state, gfx::Framebuffer* fbo) const override
     {
         if (!SetupFBO(fbo))
             return;
 
         const auto* myprog = static_cast<const ProgImpl*>(&program);
-        const auto* mygeom = static_cast<const GeomImpl*>(&geometry);
+        const auto* mygeom = static_cast<const GeomImpl*>(geometry.GetGeometry());
         myprog->SetFrameStamp(mFrameNumber);
         mygeom->SetFrameStamp(mFrameNumber);
 

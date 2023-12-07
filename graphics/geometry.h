@@ -288,6 +288,41 @@ namespace gfx
     private:
     };
 
+    class GeometryDrawCommand
+    {
+    public:
+        using DrawCommand = Geometry::DrawCommand;
+
+        GeometryDrawCommand(const Geometry& geometry) noexcept
+          : mGeometry(&geometry)
+          , mCmdStart(0)
+          , mCmdCount(geometry.GetNumDrawCmds())
+        {}
+        GeometryDrawCommand(const Geometry& geometry, size_t cmd_start, size_t cmd_count)
+          : mGeometry(&geometry)
+          , mCmdStart(cmd_start)
+          , mCmdCount(ResolveCount(geometry, cmd_count))
+         {}
+        inline size_t GetNumDrawCmds() const noexcept
+        { return mCmdCount; }
+        inline DrawCommand GetDrawCmd(size_t index) const noexcept
+        { return mGeometry->GetDrawCmd(mCmdStart + index); }
+        inline const Geometry* GetGeometry() const noexcept
+        { return mGeometry;}
+
+        static size_t ResolveCount(const Geometry& geometry, size_t count) noexcept
+        {
+            if (count == std::numeric_limits<size_t>::max())
+                return geometry.GetNumDrawCmds();
+            return count;
+        }
+
+    private:
+        const Geometry* mGeometry = nullptr;
+        const size_t mCmdStart = 0;
+        const size_t mCmdCount = 0;
+    };
+
     class GeometryBuffer : public Geometry
     {
     public:

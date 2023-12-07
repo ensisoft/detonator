@@ -191,6 +191,18 @@ namespace gfx
         // or trigger its function such as particle emission.
         virtual void Execute(const Environment& env, const Command& command)
         {}
+
+        struct DrawCmd {
+            size_t draw_cmd_start = 0;
+            size_t draw_cmd_count = std::numeric_limits<size_t>::max();
+        };
+        virtual DrawCmd  GetDrawCmd() const
+        {
+            // return the defaults which will then draw every draw
+            // low level command associated with the geometry itself.
+            return {};
+        }
+
     private:
     };
 
