@@ -433,7 +433,7 @@ public:
     {}
     virtual void DeleteFramebuffers() override
     {}
-    virtual void Draw(const gfx::Program& program, const gfx::Geometry& geometry, const State& state, gfx::Framebuffer* fbo) const override
+    virtual void Draw(const gfx::Program& program, const gfx::GeometryDrawCommand& geometry, const State& state, gfx::Framebuffer* fbo) const override
     {}
 
     virtual void CleanGarbage(size_t, unsigned) override

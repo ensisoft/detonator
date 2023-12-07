@@ -101,7 +101,16 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
 
         program.ApplyDynamicState(*mDevice, *gpu_program, device_state);
 
-        mDevice->Draw(*gpu_program, *geometry, device_state, mFrameBuffer);
+        // The drawable provides the draw command which identifies the
+        // sequence of more primitive draw commands set on the geometry
+        // in order to render only a part of the geometry. i.e. a sub-mesh.
+        const auto& cmd_params = draw.drawable->GetDrawCmd();
+
+        mDevice->Draw(*gpu_program,
+                      GeometryDrawCommand(*geometry,
+                                          cmd_params.draw_cmd_start,
+                                          cmd_params.draw_cmd_count),
+                      device_state, mFrameBuffer);
     }
 }
 
