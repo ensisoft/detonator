@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <cstring>
+
+#include "warnpush.h"
+#  include <base64/base64.h>
+#include "warnpop.h"
+
+#include "base/logging.h"
+#include "data/reader.h"
+#include "data/writer.h"
 #include "graphics/geometry.h"
 
 namespace {
@@ -26,6 +35,106 @@ namespace {
 
 namespace gfx
 {
+
+bool operator==(const VertexLayout& lhs, const VertexLayout& rhs) noexcept
+{
+    if (lhs.vertex_struct_size != rhs.vertex_struct_size)
+        return false;
+    if (lhs.attributes.size() != rhs.attributes.size())
+        return false;
+    for (size_t i=0; i<lhs.attributes.size(); ++i)
+    {
+        const auto& l = lhs.attributes[i];
+        const auto& r = rhs.attributes[i];
+
+        if (l.num_vector_components != r.num_vector_components) return false;
+        else if (l.name != r.name) return false;
+        else if (l.offset != r.offset) return false;
+        else if (l.divisor != r.divisor) return false;
+        else if (l.index != r.index) return false;
+    }
+    return true;
+}
+
+bool VertexLayout::FromJson(const data::Reader& reader) noexcept
+{
+    const auto& layout = reader.GetReadChunk("vertex_layout");
+    if (!layout)
+        return false;
+
+    bool ok = true;
+    ok &= layout->Read("bytes", &vertex_struct_size);
+
+    for (unsigned i=0; i<layout->GetNumChunks("attributes"); ++i)
+    {
+        const auto& chunk = layout->GetReadChunk("attributes", i);
+        Attribute attr;
+        ok &= chunk->Read("name",    &attr.name);
+        ok &= chunk->Read("index",   &attr.index);
+        ok &= chunk->Read("size",    &attr.num_vector_components);
+        ok &= chunk->Read("divisor", &attr.divisor);
+        ok &= chunk->Read("offset",  &attr.offset);
+        attributes.push_back(std::move(attr));
+    }
+    return ok;
+}
+
+void VertexLayout::IntoJson(data::Writer& writer) const
+{
+    auto layout = writer.NewWriteChunk();
+
+    layout->Write("bytes", vertex_struct_size);
+
+    for (const auto& attr : attributes)
+    {
+        auto chunk = layout->NewWriteChunk();
+        chunk->Write("name",    attr.name);
+        chunk->Write("index",   attr.index);
+        chunk->Write("size",    attr.num_vector_components);
+        chunk->Write("divisor", attr.divisor);
+        chunk->Write("offset",  attr.offset);
+        layout->AppendChunk("attributes", std::move(chunk));
+    }
+    writer.Write("vertex_layout", std::move(layout));
+}
+
+
+void VertexStream::IntoJson(data::Writer& writer) const
+{
+    mLayout.IntoJson(writer);
+    writer.Write("vertex_data", base64::Encode((const unsigned char*)mBuffer,
+                                               mCount * mLayout.vertex_struct_size));
+}
+
+bool VertexBuffer::Validate() const noexcept
+{
+    if (mLayout.vertex_struct_size == 0 ||
+        mLayout.vertex_struct_size > 10 * sizeof(Vec4))
+        return false;
+
+    const auto bytes = mBuffer->size();
+    if (bytes % mLayout.vertex_struct_size)
+        return false;
+
+    // todo: check attribute offsets
+
+    return true;
+}
+
+bool VertexBuffer::FromJson(const data::Reader& reader)
+{
+    bool ok = true;
+
+    std::string data;
+    ok &= mLayout.FromJson(reader);
+    ok &= reader.Read("vertex_data", &data);
+    data = base64::Decode(data);
+
+    // todo: get rid of this temporary copy..
+    mBuffer->resize(data.size());
+    std::memcpy(mBuffer->data(), data.data(), data.size());
+    return ok;
+}
 
 void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe)
 {

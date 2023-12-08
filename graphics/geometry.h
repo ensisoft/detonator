@@ -32,6 +32,7 @@
 #include <algorithm>
 
 #include "base/assert.h"
+#include "data/fwd.h"
 
 namespace gfx
 {
@@ -39,6 +40,10 @@ namespace gfx
     using Index16 = std::uint16_t;
     // 32bit vertex index for indexed drawing.
     using Index32 = std::uint32_t;
+
+    struct Vec1 {
+        float x = 0.0f;
+    };
 
     // 2 float vector data object. Use glm::vec2 for math.
     struct Vec2 {
@@ -140,9 +145,9 @@ namespace gfx
             unsigned divisor = 0;
             // relative offset in the vertex data
             // typically offsetof(MyVertex, member)
-            std::size_t offset = 0;
+            unsigned offset = 0;
         };
-        std::size_t vertex_struct_size = 0;
+        unsigned vertex_struct_size = 0;
         std::vector<Attribute> attributes;
 
         VertexLayout() = default;
@@ -151,7 +156,12 @@ namespace gfx
                      : vertex_struct_size(struct_size)
                      , attributes(std::move(attrs))
         {}
+
+        bool FromJson(const data::Reader& reader) noexcept;
+        void IntoJson(data::Writer& writer) const;
     };
+
+    bool operator==(const VertexLayout& lhs, const VertexLayout& rhs) noexcept;
 
     template<typename Vertex>
     const VertexLayout& GetVertexLayout();
@@ -502,6 +512,9 @@ namespace gfx
         { return mCount; }
         inline bool IsValid() const noexcept
         { return mBuffer != nullptr; }
+
+        void IntoJson(data::Writer& writer) const;
+
     private:
         static size_t GetCount(size_t vertex_size_bytes, size_t buffer_size_bytes)
         {
@@ -539,6 +552,13 @@ namespace gfx
           : mLayout(layout)
           , mBuffer(buffer)
         {}
+        explicit VertexBuffer(std::vector<uint8_t>* buffer)
+          : mBuffer(buffer)
+        {}
+        VertexBuffer()
+          : mBuffer(&mStorage)
+        {}
+
         inline void PushBack(const void* ptr)
         {
             const auto byte_offset = mBuffer->size();
@@ -546,8 +566,20 @@ namespace gfx
             mBuffer->resize(byte_offset + byte_size);
             std::memcpy(&(*mBuffer)[byte_offset], ptr, byte_size);
         }
+
+        inline const VertexLayout& GetLayout() const noexcept
+        { return mLayout; }
+        inline const void* GetBufferPtr() const noexcept
+        { return mBuffer->empty() ? nullptr : mBuffer->data(); }
+        inline std::size_t GetSize() const noexcept
+        { return mBuffer->size(); }
+
+        bool Validate() const noexcept;
+
+        bool FromJson(const data::Reader& reader);
     private:
-        const VertexLayout mLayout;
+        VertexLayout mLayout;
+        std::vector<uint8_t> mStorage;
         std::vector<uint8_t>* mBuffer = nullptr;
     };
 
