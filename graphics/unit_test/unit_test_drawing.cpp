@@ -253,33 +253,21 @@ private:
 class TestGeometry : public gfx::Geometry
 {
 public:
-    struct Draw {
-        gfx::Geometry::DrawType type;
-        std::size_t offset = 0;
-        std::size_t count  = 0;
-    };
-    std::vector<Draw> mDrawCmds;
+    std::vector<DrawCommand> mDrawCmds;
 
     gfx::VertexLayout mLayout;
+
+    using Geometry::AddDrawCmd;
 
     virtual void ClearDraws() override
     {
         mDrawCmds.clear();
     }
-    virtual void AddDrawCmd(DrawType type) override
+    virtual void AddDrawCmd(const DrawCommand& cmd) override
     {
-        Draw d;
-        d.type = type;
-        mDrawCmds.push_back(d);
+        mDrawCmds.push_back(cmd);
     }
-    virtual void AddDrawCmd(DrawType type, size_t offset, size_t count) override
-    {
-        Draw d;
-        d.type = type;
-        d.count = count;
-        d.offset = offset;
-        mDrawCmds.push_back(d);
-    }
+
     virtual void SetVertexLayout(const gfx::VertexLayout& layout) override
     {
         mLayout = layout;
