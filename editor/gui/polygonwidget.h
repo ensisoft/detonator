@@ -29,6 +29,7 @@
 #include "editor/app/workspace.h"
 #include "graphics/painter.h"
 #include "graphics/drawable.h"
+#include "graphics/tool/geometry.h"
 
 namespace gui
 {
@@ -94,8 +95,8 @@ namespace gui
         app::Workspace* mWorkspace = nullptr;
         // the current polygon we're editing.
         gfx::PolygonMeshClass mPolygon;
-        // the current draw being added.
-        gfx::PolygonMeshClass mCurrentDraw;
+        // the builder tool for editing the shape
+        gfx::tool::PolygonBuilder mBuilder;
         // the current material for the blueprint (the background image)
         std::unique_ptr<gfx::Material> mBlueprint;
         // the list of points for adding the next draw command.

@@ -246,6 +246,7 @@ add_library(GfxLibTesting
     graphics/painter.cpp
     graphics/text.cpp
     graphics/loader.cpp
+    graphics/tool/geometry.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
     third_party/base64/base64.cpp)
@@ -363,6 +364,7 @@ target_include_directories(tree-sitter PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_
 
 # Editor application.
 add_executable(Detonator
+    graphics/tool/geometry.cpp
     editor/app/event.h
     editor/app/eventlog.h
     editor/app/eventlog.cpp
@@ -688,12 +690,13 @@ add_executable(graphics_test
     graphics/loader.cpp
     graphics/image.cpp
     graphics/test/main.cpp
+    graphics/tool/geometry.cpp
     third_party/stb/stb_image.c
     third_party/stb/stb_image_write.c
     third_party/base64/base64.cpp
 )
 target_include_directories(graphics_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/graphics/test")
-target_link_libraries(graphics_test BaseLib)
+target_link_libraries(graphics_test BaseLib DataLib)
 target_link_libraries(graphics_test ${CONAN_LIBS})
 target_link_libraries(graphics_test wdk_system wdk_desktop_gl)
 install(TARGETS graphics_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/graphics/test/dist")
@@ -939,7 +942,7 @@ target_link_libraries(unit_test_entity    GameLibTesting DataLib BaseLib)
 target_link_libraries(unit_test_scene     GameLibTesting DataLib BaseLib)
 target_link_libraries(unit_test_anim      GameLibTesting DataLib BaseLib ${CONAN_LIBS})
 target_link_libraries(unit_test_tree      GameLibTesting DataLib BaseLib)
-target_link_libraries(unit_test_lua       EngineLibTesting GameLibTesting DataLib UiLib AudioLib BaseLib wdk_system Lua ${CONAN_LIBS})
+target_link_libraries(unit_test_lua       EngineLibTesting GameLibTesting GfxLib DataLib UiLib AudioLib BaseLib wdk_system Lua ${CONAN_LIBS})
 target_link_libraries(unit_test_settings  EngineLibTesting DataLib BaseLib)
 target_link_libraries(unit_test_renderer  EngineLibTesting GameLibTesting GfxLib DataLib BaseLib wdk_system wdk_desktop_gl ${CONAN_LIBS})
 

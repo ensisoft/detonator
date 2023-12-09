@@ -694,59 +694,11 @@ namespace gfx
     class PolygonMeshClass : public DrawableClass
     {
     public:
-        // Define how the geometry is to be rasterized.
-        using DrawType = Geometry::DrawType;
-
-        struct DrawCommand {
-            DrawType type = DrawType::Triangles;
-            size_t offset = 0;
-            size_t count  = 0;
-        };
-
-        using Vertex = gfx::Vertex2D;
-
         explicit PolygonMeshClass(std::string id = base::RandomString(10),
                                   std::string name = "") noexcept
           : mId(std::move(id))
           , mName(std::move(name))
         {}
-
-        void Clear() noexcept;
-        void ClearDrawCommands() noexcept;
-        void ClearVertices() noexcept;
-
-        // Add the array of vertices to the existing vertex buffer.
-        void AddVertices(const std::vector<Vertex>& vertices);
-        void AddVertices(std::vector<Vertex>&& vertices);
-        void AddVertices(const Vertex* vertices, size_t num_vertices);
-        // Update the vertex at the given index.
-        void UpdateVertex(const Vertex& vert, size_t index);
-        // Erase the vertex at the given index.
-        void EraseVertex(size_t index);
-        // Insert a vertex into the vertex array where the index is
-        // an index within the given draw command. Index can be in
-        // the range [0, cmd.count].
-        // After the new vertex has been inserted the list of draw
-        // commands is then modified to include the new vertex.
-        // I.e. the draw command that includes the
-        // new vertex will grow its count by 1 and all draw commands
-        // that come after the will have their starting offsets
-        // incremented by 1.
-        void InsertVertex(const Vertex& vertex, size_t cmd_index, size_t index);
-
-        void AddDrawCommand(const DrawCommand& cmd);
-
-        void UpdateDrawCommand(const DrawCommand& cmd, size_t index);
-        // Find the draw command that contains the vertex at the given index.
-        // Returns index to the draw command.
-        const size_t FindDrawCommand(size_t vertex_index) const;
-
-        // Compute a hash value based on the content only, i.e. the
-        // vertices and the draw commands.
-        // The hash value is used to realize changes done to a polygon
-        // with dynamic content and then to re-upload the data to the GPU.
-        size_t GetContentHash() const noexcept;
-
         // Return whether the polygon's data is considered to be
         // static or not. Static content is not assumed to change
         // often and will map the polygon to a geometry object
@@ -759,19 +711,30 @@ namespace gfx
         // for draw/discard type of use.
         inline bool IsStatic() const noexcept
         { return mStatic; }
-        inline size_t GetNumVertices() const noexcept
-        { return mVertices.size(); }
-        inline size_t GetNumDrawCommands() const noexcept
-        { return mDrawCommands.size(); }
-        inline const DrawCommand& GetDrawCommand(size_t index) const noexcept
-        { return mDrawCommands[index]; }
-        inline const Vertex& GetVertex(size_t index) const noexcept
-        { return mVertices[index]; }
         // Set the polygon static or not. See comments in IsStatic.
         inline void SetStatic(bool on_off) noexcept
         { mStatic = on_off; }
         inline void SetDynamic(bool on_off) noexcept
         { mStatic = !on_off; }
+        inline void SetContentHash(size_t hash) noexcept
+        { mContentHash = hash; }
+        inline size_t GetContentHash() const noexcept
+        { return mContentHash; }
+        inline bool HasInlineData() const noexcept
+        { return mData.has_value(); }
+
+        void SetVertexBuffer(std::vector<uint8_t> buffer) noexcept;
+        void SetVertexLayout(VertexLayout layout) noexcept;
+        void SetCommandBuffer(std::vector<Geometry::DrawCommand> cmds) noexcept;
+
+        void SetVertexBuffer(VertexBuffer&& buffer) noexcept;
+        void SetVertexBuffer(const VertexBuffer& buffer) noexcept;
+
+        const VertexLayout* GetVertexLayout() const noexcept;
+        const void* GetVertexBufferPtr() const noexcept;
+        size_t GetVertexBufferSize() const noexcept;
+        size_t GetNumDrawCmds() const noexcept;
+        const Geometry::DrawCommand* GetDrawCmd(size_t index) const noexcept;
 
         std::string GetGeometryName(const Environment& env) const;
         bool IsDynamic(const Environment& env) const;
@@ -791,10 +754,24 @@ namespace gfx
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson(const data::Reader& data) override;
     private:
+        bool UploadGeometry(const Environment& env, Geometry& geometry) const;
+    private:
         std::string mId;
         std::string mName;
-        std::vector<Vertex> mVertices;
-        std::vector<DrawCommand> mDrawCommands;
+        std::size_t mContentHash = 0;
+
+        // this is to support the simple 2D geometry with
+        // only a few vertices. Could be migrated to use
+        // a separate file but this is simply just so much
+        // simpler for the time being even though it wastes
+        // a bit of space since the data is kep around all
+        // the time.
+        struct InlineData {
+            std::vector<uint8_t> vertices;
+            std::vector<Geometry::DrawCommand> cmds;
+            VertexLayout layout;
+        };
+        std::optional<InlineData> mData;
         bool mStatic = true;
     };
 

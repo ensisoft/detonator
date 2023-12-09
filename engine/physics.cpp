@@ -174,15 +174,29 @@ std::unique_ptr<b2Shape> CreateCollisionShape(const engine::ClassLibrary& classl
             return collision_shape;
         }
         const auto& polygon = std::static_pointer_cast<const gfx::PolygonMeshClass>(drawable);
+        if (!polygon->HasInlineData())
+        {
+            WARN("Polygon class has no inline vertex data. [node='%1']", debug_name);
+            return collision_shape;
+        }
+        if (*polygon->GetVertexLayout() != gfx::GetVertexLayout<gfx::Vertex2D>())
+        {
+            WARN("Polygon has non 2D vertex type.");
+            return collision_shape;
+        }
+
+        const gfx::VertexStream stream(*polygon->GetVertexLayout(),
+                                        polygon->GetVertexBufferPtr(),
+                                        polygon->GetVertexBufferSize());
 
         std::vector<b2Vec2> verts;
-        for (size_t i=0; i<polygon->GetNumVertices(); ++i)
+        for (size_t i=0; i<stream.GetCount(); ++i)
         {
-            const auto& vertex = polygon->GetVertex(i);
+            const auto* vertex = stream.GetVertex<gfx::Vertex2D>(i);
             // polygon vertices are in normalized coordinate space in the lower
             // right quadrant, i.e. x = [0, 1] and y = [0, -1], flip about x axis
-            const auto x = vertex.aPosition.x *  1.0;
-            const auto y = vertex.aPosition.y * -1.0;
+            const auto x = vertex->aPosition.x *  1.0;
+            const auto y = vertex->aPosition.y * -1.0;
             b2Vec2 vert;
             // offset the vertices to be around origin.
             // the vertices must be relative to the body when the shape

@@ -27,6 +27,7 @@
 #include <functional>
 #include <variant>
 #include <optional>
+#include <vector>
 
 #include "base/types.h"
 #include "base/color4f.h"
@@ -141,6 +142,16 @@ S hash_combine(S seed, const std::optional<T>& value)
     seed = hash_combine(seed, value.has_value());
     if (value.has_value())
         seed = hash_combine(seed, value.value());
+    return seed;
+}
+
+template<typename S, typename T>
+S hash_combine(S seed, const std::vector<T>& vector)
+{
+    for (const auto& val : vector)
+    {
+        seed = hash_combine(seed, val);
+    }
     return seed;
 }
 
