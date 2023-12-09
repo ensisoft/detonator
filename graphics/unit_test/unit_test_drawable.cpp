@@ -21,6 +21,7 @@
 #include "data/json.h"
 #include "graphics/drawable.h"
 #include "graphics/geometry.h"
+#include "graphics/tool/geometry.h"
 
 bool operator==(const gfx::Vec2& lhs, const gfx::Vec2& rhs)
 {
@@ -216,7 +217,7 @@ void unit_test_vertex_save_load()
 
 }
 
-void unit_test_polygon_data()
+void unit_test_polygon_builder_json()
 {
     TEST_CASE(test::Type::Feature)
 
@@ -228,37 +229,37 @@ void unit_test_polygon_data()
     v0.aTexCoord.y = -0.5f;
     verts.push_back(v0);
 
-    gfx::PolygonMeshClass klass;
-    gfx::PolygonMeshClass::DrawCommand cmd;
-    cmd.type = gfx::PolygonMeshClass::DrawType::TriangleFan;
+    gfx::tool::PolygonBuilder builder;
+    gfx::tool::PolygonBuilder::DrawCommand cmd;
+    cmd.type = gfx::Geometry::DrawType::TriangleFan;
     cmd.offset = 1243;
     cmd.count = 555;
-    klass.AddVertices(std::move(verts));
-    klass.AddDrawCommand(cmd);
+    builder.AddVertices(std::move(verts));
+    builder.AddDrawCommand(cmd);
 
     // to/from json
     {
         data::JsonObject json;
-        klass.IntoJson(json);
-        gfx::PolygonMeshClass copy;
+        builder.IntoJson(json);
+
+        gfx::tool::PolygonBuilder copy;
         TEST_REQUIRE(copy.FromJson(json));
         TEST_REQUIRE(copy.GetNumVertices() == 1);
         TEST_REQUIRE(copy.GetNumDrawCommands() == 1);
         TEST_REQUIRE(copy.GetVertex(0) == v0);
-        TEST_REQUIRE(copy.GetDrawCommand(0).type == gfx::PolygonMeshClass::DrawType::TriangleFan);
+        TEST_REQUIRE(copy.GetDrawCommand(0).type   == gfx::Geometry::DrawType::TriangleFan);
         TEST_REQUIRE(copy.GetDrawCommand(0).offset == 1243);
-        TEST_REQUIRE(copy.GetDrawCommand(0).count == 555);
-        TEST_REQUIRE(copy.GetId() == klass.GetId());
-        TEST_REQUIRE(copy.GetHash() == klass.GetHash());
+        TEST_REQUIRE(copy.GetDrawCommand(0).count  == 555);
+        TEST_REQUIRE(copy.GetContentHash() == builder.GetContentHash());
     }
 }
 
-void unit_test_polygon_vertex_operations()
+void unit_test_polygon_builder_build()
 {
     TEST_CASE(test::Type::Feature)
 
     // some test vertices.
-    std::vector<gfx::PolygonMeshClass::Vertex> verts;
+    std::vector<gfx::Vertex2D> verts;
     verts.resize(6);
     verts[0].aPosition.x = 0.0f;
     verts[1].aPosition.x = 1.0f;
@@ -269,10 +270,10 @@ void unit_test_polygon_vertex_operations()
 
     // test finding the right draw command.
     {
-        gfx::PolygonMeshClass poly;
+        gfx::tool::PolygonBuilder poly;
         poly.AddVertices(verts);
 
-        gfx::PolygonMeshClass::DrawCommand cmd;
+        gfx::Geometry::DrawCommand cmd;
         cmd.offset = 0;
         cmd.count  = 3;
         poly.AddDrawCommand(cmd);
@@ -303,10 +304,10 @@ void unit_test_polygon_vertex_operations()
 
     // test erase/insert with only one draw cmd
     {
-        gfx::PolygonMeshClass poly;
+        gfx::tool::PolygonBuilder poly;
         poly.AddVertices(verts);
 
-        gfx::PolygonMeshClass::DrawCommand cmd;
+        gfx::Geometry::DrawCommand cmd;
         cmd.offset = 0;
         cmd.count  = 6;
         poly.AddDrawCommand(cmd);
@@ -333,10 +334,10 @@ void unit_test_polygon_vertex_operations()
 
     // test erase/insert first draw command first index
     {
-        gfx::PolygonMeshClass poly;
+        gfx::tool::PolygonBuilder poly;
         poly.AddVertices(verts);
 
-        gfx::PolygonMeshClass::DrawCommand cmd;
+        gfx::Geometry::DrawCommand cmd;
         cmd.offset = 0;
         cmd.count  = 3;
         poly.AddDrawCommand(cmd);
@@ -373,10 +374,10 @@ void unit_test_polygon_vertex_operations()
 
     // test erase/insert first draw command last index
     {
-        gfx::PolygonMeshClass poly;
+        gfx::tool::PolygonBuilder poly;
         poly.AddVertices(verts);
 
-        gfx::PolygonMeshClass::DrawCommand cmd;
+        gfx::Geometry::DrawCommand cmd;
         cmd.offset = 0;
         cmd.count  = 3;
         poly.AddDrawCommand(cmd);
@@ -413,10 +414,10 @@ void unit_test_polygon_vertex_operations()
 
     // test erase/insert from/into second draw command.
     {
-        gfx::PolygonMeshClass poly;
+        gfx::tool::PolygonBuilder poly;
         poly.AddVertices(verts);
 
-        gfx::PolygonMeshClass::DrawCommand cmd;
+        gfx::Geometry::DrawCommand cmd;
         cmd.offset = 0;
         cmd.count  = 3;
         poly.AddDrawCommand(cmd);
@@ -541,15 +542,75 @@ void unit_test_particle_engine_data()
     }
 }
 
+void unit_test_polygon_data()
+{
+    TEST_CASE(test::Type::Feature)
+
+    gfx::Vertex2D verts[3];
+    verts[0].aPosition = gfx::Vec2 {  1.0f,  2.0f };
+    verts[0].aTexCoord = gfx::Vec2 {  0.5f,  0.5f };
+    verts[1].aPosition = gfx::Vec2 { -1.0f, -2.0f };
+    verts[1].aTexCoord = gfx::Vec2 {  1.0f,  1.0f };
+    verts[2].aPosition = gfx::Vec2 {  0.0f,  0.0f };
+    verts[2].aTexCoord = gfx::Vec2 { -0.5f, -0.5f };
+
+    gfx::VertexBuffer buffer(gfx::GetVertexLayout<gfx::Vertex2D>());
+    buffer.PushBack(&verts[0]);
+    buffer.PushBack(&verts[1]);
+    buffer.PushBack(&verts[2]);
+
+    gfx::PolygonMeshClass klass;
+    klass.SetName("foo");
+    klass.SetContentHash(0xffaabbee001177ff);
+    klass.SetStatic(false);
+    klass.SetVertexBuffer(std::move(buffer));
+
+    std::vector<gfx::Geometry::DrawCommand> cmds;
+    cmds.resize(1);
+    cmds[0].type   = gfx::Geometry::DrawType::TriangleFan;
+    cmds[0].offset = 123;
+    cmds[0].count  = 5;
+    klass.SetCommandBuffer(std::move(cmds));
+
+    // to/from json
+    {
+        data::JsonObject json;
+        klass.IntoJson(json);
+
+        gfx::PolygonMeshClass ret;
+        TEST_REQUIRE(ret.FromJson(json));
+        TEST_REQUIRE(ret.HasInlineData());
+        TEST_REQUIRE(ret.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(ret.GetVertexBufferSize() == sizeof(gfx::Vertex2D) * 3);
+        TEST_REQUIRE(*ret.GetVertexLayout() == gfx::GetVertexLayout<gfx::Vertex2D>());
+        TEST_REQUIRE(ret.GetDrawCmd(0)->type == gfx::Geometry::DrawType::TriangleFan);
+        TEST_REQUIRE(ret.GetDrawCmd(0)->offset == 123);
+        TEST_REQUIRE(ret.GetDrawCmd(0)->count == 5);
+
+        const gfx::VertexStream stream(*ret.GetVertexLayout(),
+                                        ret.GetVertexBufferPtr(),
+                                        ret.GetVertexBufferSize());
+        TEST_REQUIRE(stream.GetCount() == 3);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(0) == verts[0]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(1) == verts[1]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(2) == verts[2]);
+
+        TEST_REQUIRE(ret.GetContentHash() == klass.GetContentHash());
+        TEST_REQUIRE(ret.GetName() == klass.GetName());
+        TEST_REQUIRE(ret.IsStatic() == klass.IsStatic());
+        TEST_REQUIRE(ret.GetHash() == klass.GetHash());
+    }
+}
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     unit_test_wireframe();
     unit_test_vertex_save_load();
-
-    unit_test_polygon_data();
-    unit_test_polygon_vertex_operations();
+    unit_test_polygon_builder_json();
+    unit_test_polygon_builder_build();
     unit_test_particle_engine_data();
+    unit_test_polygon_data();
     return 0;
 }
 ) // TEST_MAIN

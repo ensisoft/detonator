@@ -20,6 +20,7 @@
 #  include <base64/base64.h>
 #include "warnpop.h"
 
+#include "base/hash.h"
 #include "base/logging.h"
 #include "data/reader.h"
 #include "data/writer.h"
@@ -54,6 +55,11 @@ bool operator==(const VertexLayout& lhs, const VertexLayout& rhs) noexcept
         else if (l.index != r.index) return false;
     }
     return true;
+}
+
+bool operator!=(const VertexLayout& lhs, const VertexLayout& rhs) noexcept
+{
+    return !(lhs == rhs);
 }
 
 bool VertexLayout::FromJson(const data::Reader& reader) noexcept
@@ -98,6 +104,21 @@ void VertexLayout::IntoJson(data::Writer& writer) const
     writer.Write("vertex_layout", std::move(layout));
 }
 
+
+size_t VertexLayout::GetHash() const noexcept
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, vertex_struct_size);
+    for (const auto& attr : attributes)
+    {
+        hash = base::hash_combine(hash, attr.name);
+        hash = base::hash_combine(hash, attr.index);
+        hash = base::hash_combine(hash, attr.num_vector_components);
+        hash = base::hash_combine(hash, attr.divisor);
+        hash = base::hash_combine(hash, attr.offset);
+    }
+    return hash;
+}
 
 void VertexStream::IntoJson(data::Writer& writer) const
 {

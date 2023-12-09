@@ -36,13 +36,13 @@
 
 namespace {
 
-std::vector<gfx::PolygonMeshClass::Vertex> MakeVerts(const std::vector<QPoint>& points,
+std::vector<gfx::Vertex2D> MakeVerts(const std::vector<QPoint>& points,
                                                      float width, float height)
 {
-    std::vector<gfx::PolygonMeshClass::Vertex> verts;
+    std::vector<gfx::Vertex2D> verts;
     for (const auto& p : points)
     {
-        gfx::PolygonMeshClass::Vertex vertex;
+        gfx::Vertex2D vertex;
         vertex.aPosition.x = p.x() / width;
         vertex.aPosition.y = p.y() / height * -1.0;
         vertex.aTexCoord.x = p.x() / width;
@@ -53,8 +53,7 @@ std::vector<gfx::PolygonMeshClass::Vertex> MakeVerts(const std::vector<QPoint>& 
 }
 
 // Map vertex to widget space.
-QPoint MapVertexToWidget(const gfx::PolygonMeshClass::Vertex& vertex,
-    float width, float height)
+QPoint MapVertexToWidget(const gfx::Vertex2D& vertex, float width, float height)
 {
     return QPoint(vertex.aPosition.x * width, vertex.aPosition.y * height * -1.0f);
 }
@@ -112,6 +111,9 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
     mPolygon = *resource.GetContent<gfx::PolygonMeshClass>();
     mOriginalHash = mPolygon.GetHash();
 
+    mBuilder.InitFrom(mPolygon);
+
+
     QString material;
     GetProperty(resource, "material", &material);
     GetUserProperty(resource, "alpha",        mUI.alpha);
@@ -125,8 +127,7 @@ ShapeWidget::ShapeWidget(app::Workspace* workspace, const app::Resource& resourc
     SetValue(mUI.staticInstance, mPolygon.IsStatic());
     SetValue(mUI.blueprints, ListItemId(material));
 
-    mUI.actionClear->setEnabled(mPolygon.GetNumVertices() ||
-                                mPolygon.GetNumDrawCommands());
+    SetEnabled(mUI.actionClear, mPolygon.HasInlineData());
 
     if (!material.isEmpty())
     {
@@ -201,7 +202,10 @@ void ShapeWidget::AddActions(QMenu& menu)
 bool ShapeWidget::SaveState(Settings& settings) const
 {
     data::JsonObject json;
+
+    mBuilder.BuildPoly(const_cast<gfx::PolygonMeshClass&>(mPolygon));
     mPolygon.IntoJson(json);
+
     settings.SetValue("Polygon", "content", json);
     settings.SetValue("Polygon", "material", (QString)GetItemId(mUI.blueprints));
     settings.SetValue("Polygon", "hash", mOriginalHash);
@@ -233,7 +237,9 @@ bool ShapeWidget::LoadState(const Settings& settings)
     SetValue(mUI.ID, mPolygon.GetId());
     SetValue(mUI.staticInstance, mPolygon.IsStatic());
     SetValue(mUI.blueprints, ListItemId(material));
-    SetEnabled(mUI.actionClear, mPolygon.GetNumVertices());
+    SetEnabled(mUI.actionClear, mPolygon.HasInlineData());
+
+    mBuilder.InitFrom(mPolygon);
 
     on_blueprints_currentIndexChanged(0);
     return true;
@@ -359,6 +365,8 @@ void ShapeWidget::on_actionSave_triggered()
     if (!MustHaveInput(mUI.name))
         return;
 
+    mBuilder.BuildPoly(mPolygon);
+
     app::CustomShapeResource resource(mPolygon, GetValue(mUI.name));
     SetProperty(resource, "material", (QString)GetItemId(mUI.blueprints));
     SetUserProperty(resource, "alpha",        mUI.alpha);
@@ -386,8 +394,8 @@ void ShapeWidget::on_actionNewTriangleFan_toggled(bool checked)
 
 void ShapeWidget::on_actionClear_triggered()
 {
-    mPolygon.ClearVertices();
-    mPolygon.ClearDrawCommands();
+    mBuilder.ClearVertices();
+    mBuilder.ClearDrawCommands();
     mUI.actionClear->setEnabled(false);
 }
 
@@ -409,7 +417,7 @@ void ShapeWidget::on_btnResetBlueprint_clicked()
 
 void ShapeWidget::on_staticInstance_stateChanged(int)
 {
-    mPolygon.SetStatic(GetValue(mUI.staticInstance));
+    mBuilder.SetStatic(GetValue(mUI.staticInstance));
 }
 
 void ShapeWidget::ResourceAdded(const app::Resource* resource)
@@ -474,13 +482,17 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     static gfx::ColorClass color(gfx::MaterialClass::Type::Color);
     color.SetBaseColor(gfx::Color4f(gfx::Color::LightGray, alpha));
     color.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
-    painter.Draw(gfx::PolygonMeshInstance(mPolygon), view, gfx::MaterialClassInst(color));
+
+    gfx::PolygonMeshClass poly(mPolygon.GetId());
+    mBuilder.BuildPoly(poly);
+
+    painter.Draw(gfx::PolygonMeshInstance(poly), view, gfx::MaterialClassInst(color));
 
     // visualize the vertices.
     view.Resize(6, 6);
-    for (size_t i=0; i<mPolygon.GetNumVertices(); ++i)
+    for (size_t i=0; i<mBuilder.GetNumVertices(); ++i)
     {
-        const auto& vert = mPolygon.GetVertex(i);
+        const auto& vert = mBuilder.GetVertex(i);
         const auto x = width * vert.aPosition.x;
         const auto y = height * -vert.aPosition.y;
         view.MoveTo(x+1, y+1);
@@ -511,15 +523,19 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     view.Resize(width-2, height-2);
     view.MoveTo(1, 1);
 
-    gfx::PolygonMeshClass::DrawCommand cmd;
-    cmd.type   = gfx::PolygonMeshClass::DrawType::TriangleFan;
+    gfx::Geometry::DrawCommand cmd;
+    cmd.type   = gfx::Geometry::DrawType::TriangleFan;
     cmd.offset = 0;
     cmd.count  = points.size();
-    mCurrentDraw.ClearDrawCommands();
-    mCurrentDraw.ClearVertices();
-    mCurrentDraw.AddVertices(MakeVerts(points, width, height));
-    mCurrentDraw.AddDrawCommand(cmd);
-    painter.Draw(gfx::PolygonMeshInstance(mCurrentDraw), view, gfx::MaterialClassInst(color));
+
+    gfx::tool::PolygonBuilder builder;
+    builder.AddVertices(MakeVerts(points, width, height));
+    builder.AddDrawCommand(cmd);
+
+    gfx::PolygonMeshClass current(mPolygon.GetId() + "_2");
+    builder.BuildPoly(current);
+
+    painter.Draw(gfx::PolygonMeshInstance(current), view, gfx::MaterialClassInst(color));
 }
 
 void ShapeWidget::OnMousePress(QMouseEvent* mickey)
@@ -534,9 +550,9 @@ void ShapeWidget::OnMousePress(QMouseEvent* mickey)
 
     const auto& point = mickey->pos() - QPoint(xoffset, yoffset);
 
-    for (size_t i=0; i<mPolygon.GetNumVertices(); ++i)
+    for (size_t i=0; i<mBuilder.GetNumVertices(); ++i)
     {
-        const auto& vert = mPolygon.GetVertex(i);
+        const auto& vert = mBuilder.GetVertex(i);
         const auto x = width * vert.aPosition.x;
         const auto y = height * -vert.aPosition.y;
         const auto r = QPoint(x, y) - point;
@@ -597,7 +613,7 @@ void ShapeWidget::OnMouseMove(QMouseEvent* mickey)
 
     if (mDragging)
     {
-        auto vertex = mPolygon.GetVertex(mVertexIndex);
+        auto vertex = mBuilder.GetVertex(mVertexIndex);
         if (GetValue(mUI.chkSnap))
         {
             const GridDensity grid = GetValue(mUI.cmbGrid);
@@ -628,7 +644,7 @@ void ShapeWidget::OnMouseMove(QMouseEvent* mickey)
         }
         vertex.aTexCoord.x  = vertex.aPosition.x;
         vertex.aTexCoord.y  = -vertex.aPosition.y;
-        mPolygon.UpdateVertex(vertex, mVertexIndex);
+        mBuilder.UpdateVertex(vertex, mVertexIndex);
     }
     else
     {
@@ -650,7 +666,7 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     const auto height = size;
     const auto& pos = mickey->pos() - QPoint(xoffset, yoffset);
 
-    const auto num_vertices = mPolygon.GetNumVertices();
+    const auto num_vertices = mBuilder.GetNumVertices();
 
     QPoint point = pos;
     if (GetValue(mUI.chkSnap))
@@ -670,7 +686,7 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     size_t vertex_index = 0;
     for (size_t i=0; i<num_vertices; ++i)
     {
-        const auto vert = MapVertexToWidget(mPolygon.GetVertex(i), width, height);
+        const auto vert = MapVertexToWidget(mBuilder.GetVertex(i), width, height);
         const auto len  = PointDist(point, vert);
         if (len < distance)
         {
@@ -682,20 +698,20 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     // not found ?
     if (vertex_index == num_vertices)
         return;
-    const auto cmd_index = mPolygon.FindDrawCommand(vertex_index);
+    const auto cmd_index = mBuilder.FindDrawCommand(vertex_index);
     if (cmd_index == std::numeric_limits<size_t>::max())
         return;
 
     DEBUG("Closest vertex: index %1 draw cmd %2", vertex_index, cmd_index);
 
     // degenerate left over triangle ?
-    const auto& cmd = mPolygon.GetDrawCommand(cmd_index);
+    const auto& cmd = mBuilder.GetDrawCommand(cmd_index);
     if (cmd.count < 3)
         return;
 
     const auto cmd_vertex_index = vertex_index - cmd.offset;
 
-    gfx::PolygonMeshClass::Vertex vertex;
+    gfx::Vertex2D vertex;
     vertex.aPosition.x = point.x() / (float)width;
     vertex.aPosition.y = point.y() / (float)height * -1.0f;
     vertex.aTexCoord.x = vertex.aPosition.x;
@@ -714,12 +730,12 @@ void ShapeWidget::OnMouseDoubleClick(QMouseEvent* mickey)
     // note that there's still a possibility for a degenerate
     // case (such as when any of the two vertices are collinear)
     // and this isn't properly handled yet.
-    const auto first = mPolygon.GetVertex(cmd.offset);
-    const auto closest = mPolygon.GetVertex(vertex_index);
+    const auto first = mBuilder.GetVertex(cmd.offset);
+    const auto closest = mBuilder.GetVertex(vertex_index);
     const auto winding = math::FindTriangleWindingOrder(first.aPosition, closest.aPosition, vertex.aPosition);
     if (winding == math::TriangleWindingOrder::CounterClockwise)
-         mPolygon.InsertVertex(vertex, cmd_index, cmd_vertex_index + 1);
-    else mPolygon.InsertVertex(vertex, cmd_index, cmd_vertex_index);
+         mBuilder.InsertVertex(vertex, cmd_index, cmd_vertex_index + 1);
+    else mBuilder.InsertVertex(vertex, cmd_index, cmd_vertex_index);
 }
 
 bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
@@ -732,12 +748,12 @@ bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
 
     if (key->key() == Qt::Key_Escape && mActive)
     {
-        gfx::PolygonMeshClass::DrawCommand cmd;
-        cmd.type   = gfx::PolygonMeshClass::DrawType::TriangleFan;
+        gfx::Geometry::DrawCommand cmd;
+        cmd.type   = gfx::Geometry::DrawType::TriangleFan;
         cmd.count  = mPoints.size();
-        cmd.offset = mPolygon.GetNumVertices();
-        mPolygon.AddVertices(MakeVerts(mPoints, width, height));
-        mPolygon.AddDrawCommand(cmd);
+        cmd.offset = mBuilder.GetNumVertices();
+        mBuilder.AddVertices(MakeVerts(mPoints, width, height));
+        mBuilder.AddDrawCommand(cmd);
         mPoints.clear();
 
         mUI.actionNewTriangleFan->setChecked(false);
@@ -747,9 +763,9 @@ bool ShapeWidget::OnKeyPressEvent(QKeyEvent* key)
     else if (key->key() == Qt::Key_Delete ||
              key->key() == Qt::Key_D)
     {
-        if (mVertexIndex < mPolygon.GetNumVertices())
-            mPolygon.EraseVertex(mVertexIndex);
-        if (mPolygon.GetNumVertices() == 0)
+        if (mVertexIndex < mBuilder.GetNumVertices())
+            mBuilder.EraseVertex(mVertexIndex);
+        if (mBuilder.GetNumVertices() == 0)
             mUI.actionClear->setEnabled(false);
     }
     else if (key->key() == Qt::Key_E)

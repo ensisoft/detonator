@@ -159,9 +159,11 @@ namespace gfx
 
         bool FromJson(const data::Reader& reader) noexcept;
         void IntoJson(data::Writer& writer) const;
+        size_t GetHash() const noexcept;
     };
 
     bool operator==(const VertexLayout& lhs, const VertexLayout& rhs) noexcept;
+    bool operator!=(const VertexLayout& lhs, const VertexLayout& rhs) noexcept;
 
     template<typename Vertex>
     const VertexLayout& GetVertexLayout();
@@ -556,6 +558,10 @@ namespace gfx
           : mLayout(layout)
           , mBuffer(buffer)
         {}
+        explicit VertexBuffer(const VertexLayout& layout)
+          : mLayout(layout)
+          , mBuffer(&mStorage)
+        {}
         explicit VertexBuffer(std::vector<uint8_t>* buffer)
           : mBuffer(buffer)
         {}
@@ -565,18 +571,30 @@ namespace gfx
 
         inline void PushBack(const void* ptr)
         {
+            ASSERT(mLayout.vertex_struct_size);
             const auto byte_offset = mBuffer->size();
             const auto byte_size = mLayout.vertex_struct_size;
             mBuffer->resize(byte_offset + byte_size);
             std::memcpy(&(*mBuffer)[byte_offset], ptr, byte_size);
         }
 
-        inline const VertexLayout& GetLayout() const noexcept
+        inline const auto& GetLayout() const &  noexcept
         { return mLayout; }
+        inline auto&& GetLayout() && noexcept
+        { return std::move(mLayout); }
+
         inline const void* GetBufferPtr() const noexcept
         { return mBuffer->empty() ? nullptr : mBuffer->data(); }
         inline std::size_t GetSize() const noexcept
         { return mBuffer->size(); }
+        inline void SetVertexLayout(VertexLayout layout) noexcept
+        { mLayout = std::move(layout); }
+
+        inline const auto& GetVertexBuffer() const & noexcept
+        { return *mBuffer; }
+
+        inline auto&& GetVertexBuffer() && noexcept
+        { return std::move(*mBuffer); }
 
         bool Validate() const noexcept;
 

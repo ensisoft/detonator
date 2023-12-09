@@ -16,6 +16,11 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  include <nlohmann/json.hpp>
+#  include <base64/base64.h>
+#include "warnpop.h"
+
 #include <functional> // for hash
 #include <cmath>
 #include <cstdio>
@@ -23,14 +28,17 @@
 #include "base/logging.h"
 #include "base/utility.h"
 #include "base/math.h"
+#include "base/json.h"
 #include "data/reader.h"
 #include "data/writer.h"
+#include "data/json.h"
 #include "graphics/drawable.h"
 #include "graphics/device.h"
 #include "graphics/shader.h"
 #include "graphics/geometry.h"
 #include "graphics/resource.h"
 #include "graphics/transform.h"
+#include "graphics/loader.h"
 
 namespace {
 float HalfRound(float value)
@@ -1472,35 +1480,94 @@ bool Grid::Upload(const Environment&, Geometry& geometry) const
     return true;
 }
 
-void PolygonMeshClass::Clear() noexcept
+void PolygonMeshClass::SetVertexBuffer(std::vector<uint8_t> buffer) noexcept
 {
-    mVertices.clear();
-    mDrawCommands.clear();
+    if (!mData.has_value())
+        mData = InlineData {};
+
+    auto& data = mData.value();
+    data.vertices = std::move(buffer);
 }
-void PolygonMeshClass::ClearDrawCommands() noexcept
+
+void PolygonMeshClass::SetVertexLayout(VertexLayout layout) noexcept
 {
-    mDrawCommands.clear();
+    if (!mData.has_value())
+        mData = InlineData {};
+
+    auto& data = mData.value();
+    data.layout = std::move(layout);
 }
-void PolygonMeshClass::ClearVertices() noexcept
+
+void PolygonMeshClass::SetCommandBuffer(std::vector<Geometry::DrawCommand> cmds) noexcept
 {
-    mVertices.clear();
+    if (!mData.has_value())
+        mData = InlineData {};
+
+    auto& data = mData.value();
+    data.cmds = std::move(cmds);
 }
-void PolygonMeshClass::AddVertices(const std::vector<Vertex>& vertices)
+
+void PolygonMeshClass::SetVertexBuffer(VertexBuffer&& buffer) noexcept
 {
-    std::copy(std::begin(vertices), std::end(vertices), std::back_inserter(mVertices));
+    if (!mData.has_value())
+        mData = InlineData {};
+
+    auto& data = mData.value();
+    data.vertices = std::move(buffer).GetVertexBuffer();
+    data.layout   = std::move(buffer).GetLayout();
 }
-void PolygonMeshClass::AddVertices(std::vector<Vertex>&& vertices)
+void PolygonMeshClass::SetVertexBuffer(const VertexBuffer& buffer) noexcept
 {
-    std::move(std::begin(vertices), std::end(vertices), std::back_inserter(mVertices));
+    if (!mData.has_value())
+        mData = InlineData {};
+
+    auto& data = mData.value();
+    data.vertices = buffer.GetVertexBuffer();
+    data.layout   = buffer.GetLayout();
 }
-void PolygonMeshClass::AddVertices(const Vertex* vertices, size_t num_vertices)
+
+const VertexLayout* PolygonMeshClass::GetVertexLayout() const noexcept
 {
-    for (size_t i=0; i<num_vertices; ++i)
-        mVertices.push_back(vertices[i]);
+    if (mData.has_value())
+        return &mData.value().layout;
+
+    return nullptr;
 }
-void PolygonMeshClass::AddDrawCommand(const DrawCommand& cmd)
+
+const void* PolygonMeshClass::GetVertexBufferPtr() const noexcept
 {
-    mDrawCommands.push_back(cmd);
+    if (mData.has_value())
+    {
+        if (!mData.value().vertices.empty())
+            return mData.value().vertices.data();
+    }
+    return nullptr;
+}
+
+size_t PolygonMeshClass::GetNumDrawCmds() const noexcept
+{
+    if (mData.has_value())
+        return mData.value().cmds.size();
+
+    return 0;
+}
+
+size_t PolygonMeshClass::GetVertexBufferSize() const noexcept
+{
+    if (mData.has_value())
+        return mData.value().vertices.size();
+
+    return 0;
+}
+
+const Geometry::DrawCommand* PolygonMeshClass::GetDrawCmd(size_t index) const noexcept
+{
+    if (mData.has_value())
+    {
+        const auto& draws = mData.value().cmds;
+        return &draws[index];
+    }
+    return nullptr;
 }
 
 std::string PolygonMeshClass::GetGeometryName(const Environment& env) const
@@ -1519,51 +1586,20 @@ bool PolygonMeshClass::IsDynamic(const Environment& env) const
 
 bool PolygonMeshClass::Upload(const Environment& env, Geometry& geometry) const
 {
-    const auto dynamic = IsDynamic(env);
-    const auto usage   = dynamic ? Geometry::Usage::Dynamic
-                                 : Geometry::Usage::Static;
     if (!geometry.GetDataHash())
     {
-        geometry.SetDataHash(GetContentHash());
-        geometry.ClearDraws();
-        geometry.SetVertexBuffer(mVertices, usage);
-        for (const auto& cmd : mDrawCommands)
-            geometry.AddDrawCmd(cmd.type, cmd.offset, cmd.count);
-
+        return UploadGeometry(env, geometry);
     }
-    else if (dynamic)
+    else if (IsDynamic(env))
     {
         const auto content_hash  = GetContentHash();
         const auto geometry_hash = geometry.GetDataHash();
         if (content_hash != geometry_hash)
         {
-            geometry.SetDataHash(content_hash);
-            geometry.ClearDraws();
-            geometry.SetVertexBuffer(mVertices, usage);
-            for (const auto& cmd : mDrawCommands)
-                geometry.AddDrawCmd(cmd.type, cmd.offset, cmd.count);
+            return UploadGeometry(env, geometry);
         }
     }
     return true;
-}
-
-std::size_t PolygonMeshClass::GetContentHash() const noexcept
-{
-    size_t hash = 0;
-    for (const auto& vertex : mVertices)
-    {
-        hash = base::hash_combine(hash, vertex.aTexCoord.x);
-        hash = base::hash_combine(hash, vertex.aTexCoord.y);
-        hash = base::hash_combine(hash, vertex.aPosition.x);
-        hash = base::hash_combine(hash, vertex.aPosition.y);
-    }
-    for (const auto& draw : mDrawCommands)
-    {
-        hash = base::hash_combine(hash, draw.type);
-        hash = base::hash_combine(hash, draw.count);
-        hash = base::hash_combine(hash, draw.offset);
-    }
-    return hash;
 }
 
 std::size_t PolygonMeshClass::GetHash() const
@@ -1572,18 +1608,23 @@ std::size_t PolygonMeshClass::GetHash() const
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mStatic);
-    for (const auto& vertex : mVertices)
+    hash = base::hash_combine(hash, mContentHash);
+
+    if (mData.has_value())
     {
-        hash = base::hash_combine(hash, vertex.aTexCoord.x);
-        hash = base::hash_combine(hash, vertex.aTexCoord.y);
-        hash = base::hash_combine(hash, vertex.aPosition.x);
-        hash = base::hash_combine(hash, vertex.aPosition.y);
-    }
-    for (const auto& draw : mDrawCommands)
-    {
-        hash = base::hash_combine(hash, draw.type);
-        hash = base::hash_combine(hash, draw.count);
-        hash = base::hash_combine(hash, draw.offset);
+        const auto& data = mData.value();
+        hash = base::hash_combine(hash, data.layout.GetHash());
+        hash = base::hash_combine(hash, data.vertices);
+
+        // BE-AWARE, padding might make this non-deterministic!
+        //hash = base::hash_combine(hash, data.cmds);
+
+        for (const auto& cmd : data.cmds)
+        {
+            hash = base::hash_combine(hash, cmd.type);
+            hash = base::hash_combine(hash, cmd.count);
+            hash = base::hash_combine(hash, cmd.offset);
+        }
     }
     return hash;
 }
@@ -1599,143 +1640,164 @@ std::unique_ptr<DrawableClass> PolygonMeshClass::Copy() const
     return std::make_unique<PolygonMeshClass>(*this);
 }
 
-void PolygonMeshClass::IntoJson(data::Writer& data) const
+void PolygonMeshClass::IntoJson(data::Writer& writer) const
 {
-    data.Write("id",     mId);
-    data.Write("name",   mName);
-    data.Write("static", mStatic);
-    for (const auto& v : mVertices)
+    writer.Write("id",     mId);
+    writer.Write("name",   mName);
+    writer.Write("static", mStatic);
+
+    if (mData.has_value())
     {
-        auto chunk = data.NewWriteChunk();
-        chunk->Write("x", v.aPosition.x);
-        chunk->Write("y", v.aPosition.y);
-        chunk->Write("s", v.aTexCoord.x);
-        chunk->Write("t", v.aTexCoord.y);
-        data.AppendChunk("vertices", std::move(chunk));
+        const auto& data = mData.value();
+
+        auto inline_chunk = writer.NewWriteChunk();
+        data.layout.IntoJson(*inline_chunk);
+        inline_chunk->Write("vertex_data", base64::Encode((const unsigned char*)data.vertices.data(),
+                                                          data.vertices.size()));
+        for (const auto& cmd : data.cmds)
+        {
+            auto chunk = writer.NewWriteChunk();
+            chunk->Write("type",   cmd.type);
+            chunk->Write("offset", (unsigned)cmd.offset);
+            chunk->Write("count",  (unsigned)cmd.count);
+            inline_chunk->AppendChunk("draws", std::move(chunk));
+        }
+        writer.Write("inline_data", std::move(inline_chunk));
     }
-    for (const auto& cmd : mDrawCommands)
+
+    static_assert(sizeof(unsigned) == 4, "4 bytes required for unsigned.");
+
+    if constexpr (sizeof(mContentHash) == 4)
     {
-        auto chunk = data.NewWriteChunk();
-        chunk->Write("type", cmd.type);
-        chunk->Write("offset", (unsigned)cmd.offset);
-        chunk->Write("count",  (unsigned)cmd.count);
-        data.AppendChunk("draws", std::move(chunk));
+        writer.Write("content_hash", (unsigned)mContentHash);
+    }
+    else if (sizeof(mContentHash) == 8)
+    {
+        const unsigned hi = (mContentHash >> 32) & 0xffffffff;
+        const unsigned lo = (mContentHash >> 0 ) & 0xffffffff;
+        writer.Write("content_hash_lo", lo);
+        writer.Write("content_hash_hi", hi);
     }
 }
 
-bool PolygonMeshClass::FromJson(const data::Reader& data)
+bool PolygonMeshClass::FromJson(const data::Reader& reader)
 {
     bool ok = true;
-    ok &= data.Read("id",     &mId);
-    ok &= data.Read("name",   &mName);
-    ok &= data.Read("static", &mStatic);
+    ok &= reader.Read("id",     &mId);
+    ok &= reader.Read("name",   &mName);
+    ok &= reader.Read("static", &mStatic);
 
-    for (unsigned i=0; i<data.GetNumChunks("vertices"); ++i)
+    if (const auto& inline_chunk = reader.GetReadChunk("inline_data"))
     {
-        const auto& chunk = data.GetReadChunk("vertices", i);
-        float x, y, s, t;
-        ok &= chunk->Read("x", &x);
-        ok &= chunk->Read("y", &y);
-        ok &= chunk->Read("s", &s);
-        ok &= chunk->Read("t", &t);
+        std::string vertex_data;
 
-        Vertex vertex;
-        vertex.aPosition.x = x;
-        vertex.aPosition.y = y;
-        vertex.aTexCoord.x = s;
-        vertex.aTexCoord.y = t;
-        mVertices.push_back(vertex);
+        InlineData data;
+        ok &= data.layout.FromJson(*inline_chunk);
+        ok &= inline_chunk->Read("vertex_data", &vertex_data);
+        vertex_data = base64::Decode(vertex_data);
+        data.vertices.resize(vertex_data.size());
+        std::memcpy(data.vertices.data(), vertex_data.data(), vertex_data.size());
+        for (unsigned i=0; i<inline_chunk->GetNumChunks("draws"); ++i)
+        {
+            const auto& chunk = inline_chunk->GetReadChunk("draws", i);
+
+            unsigned offset = 0;
+            unsigned count  = 0;
+
+            Geometry::DrawCommand cmd;
+            ok &= chunk->Read("type",   &cmd.type);
+            ok &= chunk->Read("offset", &offset);
+            ok &= chunk->Read("count",  &count);
+            cmd.count  = count;
+            cmd.offset = offset;
+            data.cmds.push_back(cmd);
+        }
+        mData = std::move(data);
     }
-    for (unsigned i=0; i<data.GetNumChunks("draws"); ++i)
-    {
-        const auto& chunk = data.GetReadChunk("draws", i);
-        unsigned offset = 0;
-        unsigned count  = 0;
-        DrawCommand cmd;
-        ok &=  chunk->Read("type",   &cmd.type);
-        ok &=  chunk->Read("offset", &offset);
-        ok &=  chunk->Read("count",  &count);
 
-        cmd.offset = offset;
-        cmd.count  = count;
-        mDrawCommands.push_back(cmd);
+    // legacy load
+    if (reader.HasArray("vertices") && reader.HasArray("draws"))
+    {
+        VertexBuffer vertexBuffer(gfx::GetVertexLayout<Vertex2D>());
+
+        for (unsigned i=0; i<reader.GetNumChunks("vertices"); ++i)
+        {
+            const auto& chunk = reader.GetReadChunk("vertices", i);
+            float x, y, s, t;
+            ok &= chunk->Read("x", &x);
+            ok &= chunk->Read("y", &y);
+            ok &= chunk->Read("s", &s);
+            ok &= chunk->Read("t", &t);
+
+            Vertex2D vertex;
+            vertex.aPosition.x = x;
+            vertex.aPosition.y = y;
+            vertex.aTexCoord.x = s;
+            vertex.aTexCoord.y = t;
+            vertexBuffer.PushBack(&vertex);
+        }
+
+        std::vector<Geometry::DrawCommand> cmds;
+        for (unsigned i=0; i<reader.GetNumChunks("draws"); ++i)
+        {
+            const auto& chunk = reader.GetReadChunk("draws", i);
+            unsigned offset = 0;
+            unsigned count  = 0;
+            Geometry::DrawCommand cmd;
+            ok &=  chunk->Read("type",   &cmd.type);
+            ok &=  chunk->Read("offset", &offset);
+            ok &=  chunk->Read("count",  &count);
+
+            cmd.offset = offset;
+            cmd.count  = count;
+            cmds.push_back(cmd);
+        }
+        InlineData data;
+        data.vertices = std::move(vertexBuffer).GetVertexBuffer();
+        data.cmds     = std::move(cmds);
+        data.layout   = gfx::GetVertexLayout<gfx::Vertex2D>();
+        mData = std::move(data);
+    }
+
+    static_assert(sizeof(unsigned) == 4, "4 bytes required for unsigned.");
+
+    if constexpr(sizeof(mContentHash) == 4)
+    {
+        unsigned value = 0;
+        ok &= reader.Read("content_hash", &value);
+        mContentHash = value;
+    }
+    else if (sizeof(mContentHash) == 8)
+    {
+        unsigned hi = 0;
+        unsigned lo = 0;
+        ok &= reader.Read("content_hash_lo", &lo);
+        ok &= reader.Read("content_hash_hi", &hi);
+        mContentHash = (size_t(hi) << 32) | size_t(lo);
     }
     return ok;
 }
 
-void PolygonMeshClass::UpdateVertex(const Vertex& vert, size_t index)
+bool PolygonMeshClass::UploadGeometry(const Environment& env, Geometry& geometry) const
 {
-    ASSERT(index < mVertices.size());
-    mVertices[index] = vert;
-}
-
-void PolygonMeshClass::EraseVertex(size_t index)
-{
-    ASSERT(index < mVertices.size());
-    auto it = mVertices.begin();
-    std::advance(it, index);
-    mVertices.erase(it);
-    // remove the vertex from the draw commands.
-    for (size_t i=0; i<mDrawCommands.size();)
+    const auto dynamic = IsDynamic(env);
+    const auto usage   = dynamic ? Geometry::Usage::Dynamic
+                                 : Geometry::Usage::Static;
+    if (mData.has_value())
     {
-        auto& cmd = mDrawCommands[i];
-        if (index >= cmd.offset && index < cmd.offset + cmd.count) {
-            if (--cmd.count == 0)
-            {
-                auto it = mDrawCommands.begin();
-                std::advance(it, i);
-                mDrawCommands.erase(it);
-                continue;
-            }
+        const auto& data = mData.value();
+
+        geometry.SetDataHash(GetContentHash());
+        geometry.UploadVertices(data.vertices.data(), data.vertices.size(), usage);
+        geometry.SetVertexLayout(data.layout);
+        geometry.ClearDraws();
+
+        for (const auto& cmd : data.cmds)
+        {
+            geometry.AddDrawCmd(cmd);
         }
-        else if (index < cmd.offset)
-            cmd.offset--;
-        ++i;
     }
-}
-
-void PolygonMeshClass::InsertVertex(const Vertex& vertex, size_t cmd_index, size_t index)
-{
-    ASSERT(cmd_index < mDrawCommands.size());
-    ASSERT(index <= mDrawCommands[cmd_index].count);
-
-    // figure out the index where the put the new vertex in the vertex
-    // array.
-    auto& cmd = mDrawCommands[cmd_index];
-    cmd.count = cmd.count + 1;
-
-    const auto vertex_index = cmd.offset + index;
-    mVertices.insert(mVertices.begin() + vertex_index, vertex);
-
-    for (size_t i=0; i<mDrawCommands.size(); ++i)
-    {
-        if (i == cmd_index)
-            continue;
-        auto& cmd = mDrawCommands[i];
-        if (vertex_index <= cmd.offset)
-            cmd.offset++;
-    }
-}
-
-void PolygonMeshClass::UpdateDrawCommand(const DrawCommand& cmd, size_t index)
-{
-    ASSERT(index < mDrawCommands.size());
-    mDrawCommands[index] = cmd;
-}
-
-const size_t PolygonMeshClass::FindDrawCommand(size_t vertex_index) const
-{
-    for (size_t i=0; i<mDrawCommands.size(); ++i)
-    {
-        const auto& cmd = mDrawCommands[i];
-        // first and last index in the vertex buffer
-        // for this draw command.
-        const auto vertex_index_first = cmd.offset;
-        const auto vertex_index_last  = cmd.offset + cmd.count;
-        if (vertex_index >= vertex_index_first && vertex_index < vertex_index_last)
-            return i;
-    }
-    BUG("no draw command found.");
+    return true;
 }
 
 void PolygonMeshInstance::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const

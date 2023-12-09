@@ -39,6 +39,7 @@
 #include "graphics/painter.h"
 #include "graphics/transform.h"
 #include "graphics/shaderpass.h"
+#include "graphics/tool/geometry.h"
 
 class TestShader : public gfx::Shader
 {
@@ -1394,6 +1395,7 @@ void unit_test_static_poly()
 {
     TEST_CASE(test::Type::Feature)
 
+    gfx::tool::PolygonBuilder builder;
     gfx::PolygonMeshClass poly;
 
     // polygon is marked static, but we're in edit mode so the
@@ -1405,12 +1407,13 @@ void unit_test_static_poly()
        {{-10.0f, -10.0f}, {0.0f, 0.0f}},
        {{10.0f, 10.0f}, {1.0f, 0.0f}}
     };
-    gfx::PolygonMeshClass::DrawCommand cmd;
+    gfx::Geometry::DrawCommand cmd;
     cmd.offset = 0;
     cmd.count  = 3;
-    cmd.type   = gfx::PolygonMeshClass::DrawType::TriangleFan;
-    poly.AddVertices(verts, 3);
-    poly.AddDrawCommand(cmd);
+    cmd.type   = gfx::Geometry::DrawType::TriangleFan;
+    builder.AddVertices(verts, 3);
+    builder.AddDrawCommand(cmd);
+    builder.BuildPoly(poly);
 
     gfx::DrawableClass::Environment env;
     env.editing_mode = true;
@@ -1426,14 +1429,16 @@ void unit_test_static_poly()
     TEST_REQUIRE(geom.mDrawCmds[0].type == gfx::Geometry::DrawType::TriangleFan);
 
     geom.mVertexUploaded = false;
+    builder.BuildPoly(poly);
 
     TEST_REQUIRE(poly.Upload(env, geom));
     TEST_REQUIRE(geom.mVertexUploaded == false);
     TEST_REQUIRE(geom.mVertexBytes == sizeof(verts));
 
     // change the content (simulate editing)
-    poly.AddVertices(verts, 3);
-    poly.AddDrawCommand(cmd);
+    builder.AddVertices(verts, 3);
+    builder.AddDrawCommand(cmd);
+    builder.BuildPoly(poly);
 
     TEST_REQUIRE(poly.Upload(env, geom));
     TEST_REQUIRE(geom.mVertexUploaded == true);
@@ -1442,8 +1447,9 @@ void unit_test_static_poly()
     geom.mVertexUploaded = false;
 
     // change the content (simulate editing)
-    poly.AddVertices(verts, 3);
-    poly.AddDrawCommand(cmd);
+    builder.AddVertices(verts, 3);
+    builder.AddDrawCommand(cmd);
+    builder.BuildPoly(poly);
 
     // upload when edit mode is false should not re-upload anything.
     env.editing_mode = false;
