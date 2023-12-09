@@ -241,12 +241,8 @@ namespace gfx
         virtual ~Geometry() = default;
         // Clear previous draw commands.
         virtual void ClearDraws() = 0;
-        // Add a draw command that starts at offset 0 and covers the whole
-        // current vertex buffer (i.e. count = num of vertices)
-        virtual void AddDrawCmd(DrawType type) = 0;
-        // Add a draw command for some particular set of vertices within
-        // the current vertex buffer.
-        virtual void AddDrawCmd(DrawType type, size_t offset, size_t count) = 0;
+        // Add a draw command to the geometry.
+        virtual void AddDrawCmd(const DrawCommand& cmd) = 0;
         // Set the layout object that describes the contents of the vertex buffer vertices.
         virtual void SetVertexLayout(const VertexLayout& layout) = 0;
         // Upload the vertex data that defines the geometry.
@@ -261,6 +257,27 @@ namespace gfx
         virtual size_t GetNumDrawCmds() const = 0;
         // Get the draw command at the specified index.
         virtual DrawCommand GetDrawCmd(size_t index) const = 0;
+
+        // Add a draw command that starts at offset 0 and covers the whole
+        // current vertex buffer (i.e. count = num of vertices)
+        inline void AddDrawCmd(DrawType type)
+        {
+            DrawCommand cmd;
+            cmd.type   = type;
+            cmd.offset = 0;
+            cmd.count  = std::numeric_limits<size_t>::max();
+            AddDrawCmd(cmd);
+        }
+        // Add a draw command for some particular set of vertices within
+        // the current vertex buffer.
+        inline void AddDrawCmd(DrawType type, size_t offset, size_t count)
+        {
+            DrawCommand cmd;
+            cmd.type   = type;
+            cmd.offset = offset;
+            cmd.count  = count;
+            AddDrawCmd(cmd);
+        }
 
         // Update the geometry object's data buffer contents.
         template<typename Vertex>
@@ -336,24 +353,12 @@ namespace gfx
     class GeometryBuffer : public Geometry
     {
     public:
+        using Geometry::AddDrawCmd;
+
         virtual void ClearDraws() override
         { mDrawCmds.clear(); }
-        virtual void AddDrawCmd(DrawType type) override
-        {
-            DrawCommand cmd;
-            cmd.type   = type;
-            cmd.offset = 0;
-            cmd.count  = std::numeric_limits<size_t>::max();
-            mDrawCmds.push_back(cmd);
-        }
-        virtual void AddDrawCmd(DrawType type, size_t offset, size_t count) override
-        {
-            DrawCommand cmd;
-            cmd.type   = type;
-            cmd.offset = offset;
-            cmd.count  = count;
-            mDrawCmds.push_back(cmd);
-        }
+        virtual void AddDrawCmd(const DrawCommand& cmd) override
+        {  mDrawCmds.push_back(cmd); }
         virtual void SetVertexLayout(const VertexLayout& layout) override
         { mVertexLayout = layout; }
         virtual void UploadVertices(const void* data, size_t bytes, Usage usage) override
@@ -417,7 +422,6 @@ namespace gfx
         }
         inline bool HasData() const noexcept
         { return !mVertexData.empty(); }
-
     private:
         VertexLayout mVertexLayout;
         size_t mDataHash = 0;

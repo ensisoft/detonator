@@ -1919,26 +1919,11 @@ private:
             }
         }
         virtual void ClearDraws() override
-        {
-            mDrawCommands.clear();
-        }
-        virtual void AddDrawCmd(DrawType type) override
-        {
-            DrawCommand cmd;
-            cmd.type   = type;
-            cmd.offset = 0;
-            cmd.count  = std::numeric_limits<size_t>::max();
-            mDrawCommands.push_back(cmd);
-        }
+        { mDrawCommands.clear(); }
 
-        virtual void AddDrawCmd(DrawType type, size_t offset, size_t count) override
-        {
-            DrawCommand cmd;
-            cmd.type   = type;
-            cmd.offset = offset;
-            cmd.count  = count;
-            mDrawCommands.push_back(cmd);
-        }
+        virtual void AddDrawCmd(const DrawCommand& cmd) override
+        { mDrawCommands.push_back(cmd); }
+
         virtual void SetVertexLayout(const gfx::VertexLayout& layout) override
         { mLayout = layout; }
 
