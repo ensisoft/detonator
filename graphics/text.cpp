@@ -89,7 +89,10 @@ public:
     };
     bool ParseFont(const std::string& uri)
     {
-        const auto& fontbuff = gfx::LoadResource(uri);
+        gfx::Loader::ResourceDesc desc;
+        desc.type = gfx::Loader::Type::Font;
+        desc.uri  = uri;
+        const auto& fontbuff = gfx::LoadResource(desc);
         if (!fontbuff || !fontbuff->GetByteSize())
             ERROR_RETURN(false, "Failed to load font file. [file='%1']", uri);
 
@@ -609,8 +612,12 @@ std::shared_ptr<AlphaMask> TextBuffer::RasterizeBitmap() const
     if (mText.font.empty())
         return nullptr;
 
+    gfx::Loader::ResourceDesc desc;
+    desc.uri  = mText.font;
+    desc.type = gfx::Loader::Type::Font;
+
     // make sure to keep the font data buffer around while the face exists.
-    auto fontbuff = gfx::LoadResource(mText.font);
+    auto fontbuff = gfx::LoadResource(desc);
     if (!fontbuff)
         ERROR_RETURN(nullptr, "Failed to load font file. [font='%1]", mText.font);
 

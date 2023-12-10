@@ -150,8 +150,10 @@ namespace gui
 
 class MainWindow::GfxResourceLoader : public gfx::Loader {
 public:
-    virtual gfx::ResourceHandle LoadResource(const std::string& URI) override
+    virtual gfx::ResourceHandle LoadResource(const gfx::Loader::ResourceDesc& desc) override
     {
+        const auto& URI = desc.uri;
+
         if (base::StartsWith(URI, "app://")) {
             return app::Workspace::LoadAppResource(URI);
         }

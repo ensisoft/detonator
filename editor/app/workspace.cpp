@@ -1767,8 +1767,10 @@ engine::EngineDataHandle Workspace::LoadEngineDataId(const std::string& id) cons
     return nullptr;
 }
 
-gfx::ResourceHandle Workspace::LoadResource(const std::string& URI)
+gfx::ResourceHandle Workspace::LoadResource(const gfx::Loader::ResourceDesc& desc)
 {
+    const auto& URI = desc.uri;
+
     if (base::StartsWith(URI, "app://"))
         return LoadAppResource(URI);
 

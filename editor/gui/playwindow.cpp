@@ -239,8 +239,10 @@ public:
         , mHostDir(hostdir)
     {}
     // Resource loader implementation
-    virtual gfx::ResourceHandle LoadResource(const std::string& URI) override
+    virtual gfx::ResourceHandle LoadResource(const gfx::Loader::ResourceDesc& desc) override
     {
+        const auto& URI = desc.uri;
+
         auto it = mGraphicsBuffers.find(URI);
         if (it != mGraphicsBuffers.end())
             return it->second;

@@ -1773,7 +1773,11 @@ std::string MaterialClass::GetShaderSource(const State& state, const Device& dev
 
     if (!mShaderUri.empty())
     {
-        const auto& buffer = gfx::LoadResource(mShaderUri);
+        Loader::ResourceDesc desc;
+        desc.uri  = mShaderUri;
+        desc.id   = mClassId;
+        desc.type = Loader::Type::Shader;
+        const auto& buffer = gfx::LoadResource(desc);
         if (!buffer)
         {
             ERROR("Failed to load custom material shader source file. [name='%1', uri='%2']", mName, mShaderUri);
