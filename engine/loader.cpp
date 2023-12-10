@@ -370,8 +370,10 @@ class FileResourceLoaderImpl : public FileResourceLoader
 {
 public:
     // gfx::resource loader impl
-    virtual gfx::ResourceHandle LoadResource(const std::string& uri) override
+    virtual gfx::ResourceHandle LoadResource(const gfx::Loader::ResourceDesc& desc) override
     {
+        const auto& uri = desc.uri;
+
         const auto& filename = ResolveURI(uri);
         auto it = mGraphicsFileBufferCache.find(filename);
         if (it != mGraphicsFileBufferCache.end())

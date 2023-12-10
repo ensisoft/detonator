@@ -30,7 +30,10 @@ namespace gfx
 
 Image::Image(const std::string& URI)
 {
-    const auto& buffer = gfx::LoadResource(URI);
+    Loader::ResourceDesc desc;
+    desc.uri  = URI;
+    desc.type = Loader::Type::Image;
+    const auto& buffer = gfx::LoadResource(desc);
     if (!buffer)
         return;
 

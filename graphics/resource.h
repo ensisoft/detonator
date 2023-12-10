@@ -34,17 +34,7 @@ namespace gfx
     class Resource
     {
     public:
-        // Expected Type of the resource to be loaded.
-        enum class Type {
-            // Image file with the purpose of being used as a texture.
-            Texture,
-            // A glsl shader file (text)
-            Shader,
-            // Font (.otf) file.
-            Font,
-            // Compressed image such as .png or .jpeg
-            Image
-        };
+
         virtual ~Resource() = default;
         // Get the immutable data content pointer.
         virtual const void* GetData() const = 0;

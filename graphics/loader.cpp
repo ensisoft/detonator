@@ -116,15 +116,15 @@ void SetResourceLoader(Loader* loader)
 Loader* GetResourceLoader()
 { return gLoader; }
 
-std::shared_ptr<const Resource> LoadResource(const std::string& URI)
+std::shared_ptr<const Resource> LoadResource(const Loader::ResourceDesc& desc)
 {
     if (gLoader)
-        return gLoader->LoadResource(URI);
+        return gLoader->LoadResource(desc);
     // if there's no resolver and the URI is actually an URI
     // the load will fail. if the application is using URIs
     // (instead of just file system paths directly) it should
     // set the loader.
-    return DefaultLoadFile(URI);
+    return DefaultLoadFile(desc.uri);
 }
 
 } // namespace

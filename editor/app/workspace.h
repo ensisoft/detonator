@@ -142,8 +142,10 @@ namespace app
         virtual engine::EngineDataHandle LoadEngineDataUri(const std::string& URI) const override;
         virtual engine::EngineDataHandle LoadEngineDataFile(const std::string& filename) const override;
         virtual engine::EngineDataHandle LoadEngineDataId(const std::string& id) const override;
+
         // gfx::ResourceLoader implementation
-        virtual gfx::ResourceHandle LoadResource(const std::string& URI) override;
+        virtual gfx::ResourceHandle LoadResource(const gfx::Loader::ResourceDesc& desc) override;
+
         // audio::Loader implementation
         virtual audio::SourceStreamHandle OpenAudioStream(const std::string& URI,
             AudioIOStrategy strategy, bool enable_file_caching) const override;

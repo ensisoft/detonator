@@ -25,7 +25,6 @@
 namespace gfx
 {
     using ResourceHandle = std::shared_ptr<const Resource>;
-    using ResourceType   = Resource::Type;
 
     // Loader is the interface for accessing actual gfx resources
     // such as textures (.png, .jpg), fonts (.ttf and .otf) and shader
@@ -34,10 +33,30 @@ namespace gfx
     {
     public:
         using ResourceHandle = gfx::ResourceHandle;
+
+        // Expected Type of the resource to be loaded.
+        enum class Type {
+            // Image file with the purpose of being used as a texture.
+            Image,
+            // A glsl shader file (text)
+            Shader,
+            // Font (.otf) file.
+            Font,
+            //
+            Mesh
+        };
+
+        struct ResourceDesc {
+            std::string uri;
+            std::string id;
+            Type type;
+        };
+
         virtual ~Loader() = default;
+
         // Load the contents of the given resource and return a pointer to the actual
         // contents of the resource. If the load fails a nullptr is returned.
-        virtual ResourceHandle LoadResource(const std::string& URI) = 0;
+        virtual ResourceHandle LoadResource(const ResourceDesc& desc) = 0;
     protected:
     private:
     };
@@ -51,6 +70,6 @@ namespace gfx
     // Shortcut for loading the contents of a file through a the resource loader if any is set.
     // If resource loader is not set then performs a default file loader operation.
     // Returns nullptr on any error.
-    ResourceHandle LoadResource(const std::string& URI);
+    ResourceHandle LoadResource(const Loader::ResourceDesc& desc);
 
 } // namespace
