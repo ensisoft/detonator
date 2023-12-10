@@ -1648,20 +1648,17 @@ void PolygonMeshClass::IntoJson(data::Writer& writer) const
 
     if (mData.has_value())
     {
-        const auto& data = mData.value();
-
         auto inline_chunk = writer.NewWriteChunk();
+
+        const auto& data = mData.value();
         data.layout.IntoJson(*inline_chunk);
-        inline_chunk->Write("vertex_data", base64::Encode((const unsigned char*)data.vertices.data(),
-                                                          data.vertices.size()));
-        for (const auto& cmd : data.cmds)
-        {
-            auto chunk = writer.NewWriteChunk();
-            chunk->Write("type",   cmd.type);
-            chunk->Write("offset", (unsigned)cmd.offset);
-            chunk->Write("count",  (unsigned)cmd.count);
-            inline_chunk->AppendChunk("draws", std::move(chunk));
-        }
+
+        const VertexStream vertex_stream(data.layout, data.vertices);
+        vertex_stream.IntoJson(*inline_chunk);
+
+        const CommandStream command_stream(data.cmds);
+        command_stream.IntoJson(*inline_chunk);
+
         writer.Write("inline_data", std::move(inline_chunk));
     }
 
@@ -1689,29 +1686,15 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
 
     if (const auto& inline_chunk = reader.GetReadChunk("inline_data"))
     {
-        std::string vertex_data;
-
         InlineData data;
         ok &= data.layout.FromJson(*inline_chunk);
-        ok &= inline_chunk->Read("vertex_data", &vertex_data);
-        vertex_data = base64::Decode(vertex_data);
-        data.vertices.resize(vertex_data.size());
-        std::memcpy(data.vertices.data(), vertex_data.data(), vertex_data.size());
-        for (unsigned i=0; i<inline_chunk->GetNumChunks("draws"); ++i)
-        {
-            const auto& chunk = inline_chunk->GetReadChunk("draws", i);
 
-            unsigned offset = 0;
-            unsigned count  = 0;
+        VertexBuffer vertex_buffer(&data.vertices);
+        ok &= vertex_buffer.FromJson(*inline_chunk);
 
-            Geometry::DrawCommand cmd;
-            ok &= chunk->Read("type",   &cmd.type);
-            ok &= chunk->Read("offset", &offset);
-            ok &= chunk->Read("count",  &count);
-            cmd.count  = count;
-            cmd.offset = offset;
-            data.cmds.push_back(cmd);
-        }
+        CommandBuffer command_buffer(&data.cmds);
+        ok &= command_buffer.FromJson(*inline_chunk);
+
         mData = std::move(data);
     }
 
