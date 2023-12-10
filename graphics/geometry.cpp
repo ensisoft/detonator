@@ -123,8 +123,8 @@ size_t VertexLayout::GetHash() const noexcept
 void VertexStream::IntoJson(data::Writer& writer) const
 {
     mLayout.IntoJson(writer);
-    writer.Write("vertex_data", base64::Encode((const unsigned char*)mBuffer,
-                                               mCount * mLayout.vertex_struct_size));
+    writer.Write("vertex_buffer", base64::Encode((const unsigned char*)mBuffer,
+                                                 mCount * mLayout.vertex_struct_size));
 }
 
 bool VertexBuffer::Validate() const noexcept
@@ -148,11 +148,38 @@ bool VertexBuffer::FromJson(const data::Reader& reader)
 
     std::string data;
     ok &= mLayout.FromJson(reader);
-    ok &= reader.Read("vertex_data", &data);
+    ok &= reader.Read("vertex_buffer", &data);
     data = base64::Decode(data);
 
     // todo: get rid of this temporary copy..
     mBuffer->resize(data.size());
+    if (mBuffer->size() == 0)
+        return ok;
+
+    std::memcpy(mBuffer->data(), data.data(), data.size());
+    return ok;
+}
+
+void CommandStream::IntoJson(data::Writer& writer) const
+{
+    const auto bytes = mCount * sizeof(DrawCommand);
+    writer.Write("command_buffer", base64::Encode((const unsigned char*)mCommands, bytes));
+}
+
+bool CommandBuffer::FromJson(const data::Reader& reader)
+{
+    bool ok = true;
+
+    std::string data;
+    ok &= reader.Read("command_buffer", &data);
+    data = base64::Decode(data);
+
+    const auto count = data.size() / sizeof(DrawCommand);
+    mBuffer->resize(count);
+
+    if (count == 0)
+        return ok;
+
     std::memcpy(mBuffer->data(), data.data(), data.size());
     return ok;
 }

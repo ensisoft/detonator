@@ -149,53 +149,28 @@ size_t PolygonBuilder::GetContentHash() const noexcept
 
 void PolygonBuilder::IntoJson(data::Writer& writer) const
 {
-    const VertexStream stream(gfx::GetVertexLayout<Vertex>(),
-                              (const void*)mVertices.data(), mVertices.size() * sizeof(Vertex));
-    stream.IntoJson(writer);
+    const VertexStream  vertex_stream(gfx::GetVertexLayout<Vertex>(), mVertices);
+    const CommandStream command_stream(mDrawCommands);
+
+    vertex_stream.IntoJson(writer);
+    command_stream.IntoJson(writer);
 
     writer.Write("static", mStatic);
-
-    for (const auto& cmd : mDrawCommands)
-    {
-        auto chunk = writer.NewWriteChunk();
-        chunk->Write("type",   cmd.type);
-        chunk->Write("offset", (unsigned)cmd.offset);
-        chunk->Write("count",  (unsigned)cmd.count);
-        writer.AppendChunk("draws", std::move(chunk));
-    }
 }
 
 bool PolygonBuilder::FromJson(const data::Reader& reader)
 {
     bool ok = true;
 
-    std::vector<uint8_t> buff;
-    VertexBuffer buffer(&buff);
-    ok &= buffer.FromJson(reader);
+    VertexBuffer vertex_buffer;
 
+    CommandBuffer command_buffer(&mDrawCommands);
+
+    ok &= vertex_buffer.FromJson(reader);
+    ok &= command_buffer.FromJson(reader);
     ok &= reader.Read("static", &mStatic);
 
-    for (unsigned i=0; i<reader.GetNumChunks("draws"); ++i)
-    {
-        const auto& chunk = reader.GetReadChunk("draws", i);
-
-        unsigned offset = 0;
-        unsigned count = 0;
-
-        DrawCommand cmd;
-        ok &= chunk->Read("type",   &cmd.type);
-        ok &= chunk->Read("offset", &offset);
-        ok &= chunk->Read("count",  &count);
-        cmd.offset = offset;
-        cmd.count  = count;
-        mDrawCommands.push_back(cmd);
-    }
-
-    const auto bytes = buff.size();
-    const auto count = bytes / sizeof(Vertex);
-    mVertices.resize(count);
-    std::memcpy(mVertices.data(), buff.data(), bytes);
-
+    mVertices = vertex_buffer.Copy<Vertex2D>();
     return ok;
 }
 
@@ -206,7 +181,9 @@ void PolygonBuilder::BuildPoly(PolygonMeshClass& polygon) const
 
     std::vector<uint8_t> buffer;
     buffer.resize(bytes);
-    std::memcpy(buffer.data(), mVertices.data(), bytes);
+
+    if (bytes)
+        std::memcpy(buffer.data(), mVertices.data(), bytes);
 
     polygon.SetVertexBuffer(std::move(buffer));
     polygon.SetContentHash(GetContentHash());
@@ -226,7 +203,8 @@ void PolygonBuilder::InitFrom(const PolygonMeshClass& polygon)
         const auto count = bytes / sizeof(Vertex2D);
 
         mVertices.resize(count);
-        std::memcpy(mVertices.data(), ptr, bytes);
+        if (count)
+            std::memcpy(mVertices.data(), ptr, bytes);
 
         for (size_t i=0; i<polygon.GetNumDrawCmds(); ++i)
         {
