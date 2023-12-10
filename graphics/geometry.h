@@ -234,11 +234,15 @@ namespace gfx
             Index16, Index32
         };
 
+        // the structure is packed for more compact and simpler
+        // serialization purposes
+#pragma pack(push, 1)
         struct DrawCommand {
             DrawType type = DrawType::Triangles;
             size_t count  = 0;
             size_t offset = 0;
         };
+#pragma pack(pop)
 
         virtual ~Geometry() = default;
         // Clear previous draw commands.
@@ -482,12 +486,30 @@ namespace gfx
     class VertexStream
     {
     public:
-        VertexStream(const VertexLayout& layout,
-                     const void* buffer, size_t bytes)
+        VertexStream(const VertexLayout& layout, const void* buffer, size_t bytes)
           : mLayout(layout)
           , mBuffer((const uint8_t*)buffer)
           , mCount(GetCount(layout.vertex_struct_size, bytes))
         {}
+        VertexStream(const VertexLayout& layout, const std::vector<uint8_t>& buffer)
+          : mLayout(layout)
+          , mBuffer(buffer.data())
+          , mCount(GetCount(layout.vertex_struct_size, buffer.size()))
+        {}
+
+        template<typename Vertex>
+        VertexStream(const VertexLayout& layout, const Vertex* buffer, size_t count)
+          : mLayout(layout)
+          , mBuffer((const uint8_t*)buffer)
+          , mCount(count)
+        {}
+        template<typename Vertex>
+        VertexStream(const VertexLayout& layout, const std::vector<Vertex>& buffer)
+          : mLayout(layout)
+          , mBuffer((const uint8_t*)buffer.data())
+          , mCount(buffer.size())
+        {}
+
         template<typename A>
         const A* GetAttribute(const char* name, size_t index) const noexcept
         {
@@ -512,7 +534,7 @@ namespace gfx
             const auto offset = index * mLayout.vertex_struct_size;
             return static_cast<const void*>(mBuffer + offset);
         }
-        inline bool HasAttribute(const char* name) noexcept
+        inline bool HasAttribute(const char* name) const noexcept
         {  return FindAttribute(name) != nullptr; }
         inline size_t GetCount() const noexcept
         { return mCount; }
@@ -585,16 +607,38 @@ namespace gfx
 
         inline const void* GetBufferPtr() const noexcept
         { return mBuffer->empty() ? nullptr : mBuffer->data(); }
-        inline std::size_t GetSize() const noexcept
+        inline std::size_t GetBufferSize() const noexcept
         { return mBuffer->size(); }
+        inline std::size_t GetCount() const noexcept
+        { return mBuffer->size() / mLayout.vertex_struct_size; };
         inline void SetVertexLayout(VertexLayout layout) noexcept
         { mLayout = std::move(layout); }
 
         inline const auto& GetVertexBuffer() const & noexcept
         { return *mBuffer; }
-
         inline auto&& GetVertexBuffer() && noexcept
         { return std::move(*mBuffer); }
+
+
+        template<typename T>
+        const T* GetVertex(size_t index) const noexcept
+        {
+            ASSERT(index < GetCount());
+            ASSERT(sizeof(T) == mLayout.vertex_struct_size);
+            const auto offset = index * mLayout.vertex_struct_size;
+            return reinterpret_cast<const T*>(mBuffer->data() + offset);
+        }
+
+        template<typename T>
+        std::vector<T> Copy() const
+        {
+            ASSERT(sizeof(T) == mLayout.vertex_struct_size);
+            std::vector<T> ret;
+            ret.resize(GetCount());
+            if (!ret.empty())
+                std::memcpy(ret.data(), mBuffer->data(), mBuffer->size());
+            return ret;
+        }
 
         bool Validate() const noexcept;
 
@@ -604,6 +648,69 @@ namespace gfx
         std::vector<uint8_t> mStorage;
         std::vector<uint8_t>* mBuffer = nullptr;
     };
+
+    class CommandStream
+    {
+    public:
+        using DrawCommand = Geometry::DrawCommand;
+
+        explicit CommandStream(const std::vector<DrawCommand>& commands)
+          : mCommands(commands.data())
+          , mCount(commands.size())
+        {}
+        CommandStream(const DrawCommand* commands, size_t count)
+          : mCommands(commands)
+          , mCount(count)
+        {}
+
+        inline size_t GetCount() const noexcept
+        { return mCount; }
+        inline DrawCommand GetCommand(size_t index) const noexcept
+        {
+            ASSERT(index < mCount);
+            return mCommands[index];
+        }
+
+        void IntoJson(data::Writer& writer) const;
+
+    private:
+        const DrawCommand* mCommands = nullptr;
+        const size_t mCount = 0;
+    };
+
+    class CommandBuffer
+    {
+    public:
+        using DrawCommand = Geometry::DrawCommand;
+
+        explicit CommandBuffer(std::vector<DrawCommand>* commands)
+          : mBuffer(commands)
+        {}
+        CommandBuffer()
+          : mBuffer(&mStorage)
+        {}
+
+        inline size_t GetCount() const noexcept
+        { return mBuffer->size(); }
+
+        inline DrawCommand GetCommand(size_t index) const noexcept
+        {
+            ASSERT(index < mBuffer->size());
+            return (*mBuffer)[index];
+        }
+
+        inline const auto& GetCommandBuffer() const & noexcept
+        { return *mBuffer; }
+        inline auto&& GetCommandBuffer() && noexcept
+        { return std::move(*mBuffer); }
+
+        bool FromJson(const data::Reader& reader);
+
+    private:
+        std::vector<DrawCommand> mStorage;
+        std::vector<DrawCommand>* mBuffer = nullptr;
+    };
+
 
     void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe);
 

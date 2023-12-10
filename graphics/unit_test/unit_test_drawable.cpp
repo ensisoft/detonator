@@ -37,11 +37,11 @@ bool operator==(const gfx::Vertex2D& lhs, const gfx::Vertex2D& rhs)
            real::equals(lhs.aTexCoord.y, rhs.aTexCoord.y);
 }
 
-void unit_test_wireframe()
+void unit_test_vertex_stream()
 {
     TEST_CASE(test::Type::Feature)
 
-    // vertex stream
+    // vertex stream with vector
     {
         std::vector<gfx::Vertex2D> verts;
         verts.resize(3);
@@ -52,8 +52,7 @@ void unit_test_wireframe()
         verts[2].aPosition = gfx::Vec2 {  0.0f,  0.0f };
         verts[2].aTexCoord = gfx::Vec2 { -0.5f, -0.5f };
 
-        gfx::VertexStream stream(gfx::GetVertexLayout<gfx::Vertex2D>(),
-                                 verts.data(), verts.size() * sizeof(gfx::Vertex2D));
+        const gfx::VertexStream stream(gfx::GetVertexLayout<gfx::Vertex2D>(), verts);
         TEST_REQUIRE(stream.IsValid());
         TEST_REQUIRE(stream.GetCount() == 3);
         TEST_REQUIRE(stream.HasAttribute("aPosition"));
@@ -75,6 +74,150 @@ void unit_test_wireframe()
         TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(1) == verts[1]);
         TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(2) == verts[2]);
     }
+
+    // vertex stream with typed array
+    {
+        gfx::Vertex2D verts[3];
+        verts[0].aPosition = gfx::Vec2 {  1.0f,  2.0f };
+        verts[0].aTexCoord = gfx::Vec2 {  0.5f,  0.5f };
+        verts[1].aPosition = gfx::Vec2 { -1.0f, -2.0f };
+        verts[1].aTexCoord = gfx::Vec2 {  1.0f,  1.0f };
+        verts[2].aPosition = gfx::Vec2 {  0.0f,  0.0f };
+        verts[2].aTexCoord = gfx::Vec2 { -0.5f, -0.5f };
+
+        const gfx::VertexStream stream(gfx::GetVertexLayout<gfx::Vertex2D>(), verts, 3);
+        TEST_REQUIRE(stream.IsValid());
+        TEST_REQUIRE(stream.GetCount() == 3);
+        TEST_REQUIRE(stream.HasAttribute("aPosition"));
+        TEST_REQUIRE(stream.HasAttribute("aTexCoord"));
+        TEST_REQUIRE(stream.HasAttribute("aFoobar") == false);
+
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(0) == verts[0]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(1) == verts[1]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(2) == verts[2]);
+
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 0) == verts[0].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 1) == verts[1].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 2) == verts[2].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aTexCoord", 0) == verts[0].aTexCoord);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aTexCoord", 1) == verts[1].aTexCoord);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aTexCoord", 2) == verts[2].aTexCoord);
+
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(0) == verts[0]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(1) == verts[1]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(2) == verts[2]);
+    }
+
+    // vertex stream with opaque void* array
+    {
+        gfx::Vertex2D verts[3];
+        verts[0].aPosition = gfx::Vec2 {  1.0f,  2.0f };
+        verts[0].aTexCoord = gfx::Vec2 {  0.5f,  0.5f };
+        verts[1].aPosition = gfx::Vec2 { -1.0f, -2.0f };
+        verts[1].aTexCoord = gfx::Vec2 {  1.0f,  1.0f };
+        verts[2].aPosition = gfx::Vec2 {  0.0f,  0.0f };
+        verts[2].aTexCoord = gfx::Vec2 { -0.5f, -0.5f };
+
+        const gfx::VertexStream stream(gfx::GetVertexLayout<gfx::Vertex2D>(), (const void*)verts, sizeof(verts));
+        TEST_REQUIRE(stream.IsValid());
+        TEST_REQUIRE(stream.GetCount() == 3);
+        TEST_REQUIRE(stream.HasAttribute("aPosition"));
+        TEST_REQUIRE(stream.HasAttribute("aTexCoord"));
+        TEST_REQUIRE(stream.HasAttribute("aFoobar") == false);
+
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(0) == verts[0]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(1) == verts[1]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(2) == verts[2]);
+
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 0) == verts[0].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 1) == verts[1].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aPosition", 2) == verts[2].aPosition);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aTexCoord", 0) == verts[0].aTexCoord);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aTexCoord", 1) == verts[1].aTexCoord);
+        TEST_REQUIRE(*stream.GetAttribute<gfx::Vec2>("aTexCoord", 2) == verts[2].aTexCoord);
+
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(0) == verts[0]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(1) == verts[1]);
+        TEST_REQUIRE(*stream.GetVertex<gfx::Vertex2D>(2) == verts[2]);
+    }
+
+
+    // serialize
+    {
+        std::vector<gfx::Vertex2D> src;
+        src.resize(3);
+        src[0].aPosition = gfx::Vec2 {  1.0f,  2.0f };
+        src[1].aPosition = gfx::Vec2 { -1.0f, -2.0f };
+        src[2].aPosition = gfx::Vec2 {  4.0f,  5.0f };
+
+        const gfx::VertexStream src_stream(gfx::GetVertexLayout<gfx::Vertex2D>(), src);
+
+        data::JsonObject json;
+        src_stream.IntoJson(json);
+
+        gfx::VertexBuffer buffer;
+        TEST_REQUIRE(buffer.FromJson(json));
+        TEST_REQUIRE(buffer.GetLayout() == gfx::GetVertexLayout<gfx::Vertex2D>());
+        TEST_REQUIRE(buffer.GetCount() == 3);
+        TEST_REQUIRE(*buffer.GetVertex<gfx::Vertex2D>(0) == src[0]);
+        TEST_REQUIRE(*buffer.GetVertex<gfx::Vertex2D>(1) == src[1]);
+        TEST_REQUIRE(*buffer.GetVertex<gfx::Vertex2D>(2) == src[2]);
+    }
+
+}
+
+
+void unit_test_command_stream()
+{
+    TEST_CASE(test::Type::Feature)
+
+    {
+        std::vector<gfx::Geometry::DrawCommand> vector;
+
+        {
+            gfx::Geometry::DrawCommand cmd;
+            cmd.type   = gfx::Geometry::DrawType::TriangleFan;
+            cmd.offset = 123;
+            cmd.count  = 321;
+            vector.push_back(cmd);
+        }
+
+        {
+            gfx::Geometry::DrawCommand cmd;
+            cmd.type   = gfx::Geometry::DrawType::LineLoop;
+            cmd.offset = 0;
+            cmd.count  = 10;
+            vector.push_back(cmd);
+        }
+
+        gfx::CommandStream stream(vector);
+        TEST_REQUIRE(stream.GetCount() == 2);
+        TEST_REQUIRE(stream.GetCommand(0).count  == 321);
+        TEST_REQUIRE(stream.GetCommand(0).offset == 123);
+        TEST_REQUIRE(stream.GetCommand(0).type   == gfx::Geometry::DrawType::TriangleFan);
+        TEST_REQUIRE(stream.GetCommand(1).count  == 10);
+        TEST_REQUIRE(stream.GetCommand(1).offset == 0);
+        TEST_REQUIRE(stream.GetCommand(1).type   == gfx::Geometry::DrawType::LineLoop);
+
+        data::JsonObject json;
+        stream.IntoJson(json);
+
+        gfx::CommandBuffer buffer;
+        TEST_REQUIRE(buffer.FromJson(json));
+        TEST_REQUIRE(buffer.GetCount() == 2);
+        TEST_REQUIRE(buffer.GetCommand(0).count  == 321);
+        TEST_REQUIRE(buffer.GetCommand(0).offset == 123);
+        TEST_REQUIRE(buffer.GetCommand(0).type   == gfx::Geometry::DrawType::TriangleFan);
+        TEST_REQUIRE(buffer.GetCommand(1).count  == 10);
+        TEST_REQUIRE(buffer.GetCommand(1).offset == 0);
+        TEST_REQUIRE(buffer.GetCommand(1).type   == gfx::Geometry::DrawType::LineLoop);
+    }
+}
+
+
+void unit_test_wireframe()
+{
+    TEST_CASE(test::Type::Feature)
 
     {
         std::vector<gfx::Vertex2D> verts;
@@ -178,41 +321,6 @@ void unit_test_wireframe()
             const auto& p1 = *stream.GetAttribute<gfx::Vec2>("aPosition", start+1);
             TEST_REQUIRE((p0 == line.a && p1 == line.b) || (p1 == line.a && p0 == line.b));
         }
-    }
-
-}
-
-void unit_test_vertex_save_load()
-{
-    TEST_CASE(test::Type::Feature)
-
-    {
-        std::vector<gfx::Vertex2D> src;
-        src.resize(3);
-        src[0].aPosition = gfx::Vec2 {  1.0f,  2.0f };
-        src[1].aPosition = gfx::Vec2 { -1.0f, -2.0f };
-        src[2].aPosition = gfx::Vec2 {  4.0f,  5.0f };
-
-        data::JsonObject json;
-        const gfx::VertexStream src_stream(gfx::GetVertexLayout<gfx::Vertex2D>(),
-                                       src.data(), src.size() * sizeof(gfx::Vertex2D));
-        TEST_REQUIRE(*src_stream.GetVertex<gfx::Vertex2D>(0) == src[0]);
-        TEST_REQUIRE(*src_stream.GetVertex<gfx::Vertex2D>(1) == src[1]);
-        TEST_REQUIRE(*src_stream.GetVertex<gfx::Vertex2D>(2) == src[2]);
-
-        src_stream.IntoJson(json);
-
-        gfx::VertexBuffer buffer;
-        TEST_REQUIRE(buffer.FromJson(json));
-        TEST_REQUIRE(buffer.GetLayout() == gfx::GetVertexLayout<gfx::Vertex2D>());
-
-        const gfx::VertexStream dst_stream(gfx::GetVertexLayout<gfx::Vertex2D>(),
-                                           buffer.GetBufferPtr(), buffer.GetSize());
-
-        TEST_REQUIRE(dst_stream.GetCount() == 3);
-        TEST_REQUIRE(*dst_stream.GetVertex<gfx::Vertex2D>(0) == src[0]);
-        TEST_REQUIRE(*dst_stream.GetVertex<gfx::Vertex2D>(1) == src[1]);
-        TEST_REQUIRE(*dst_stream.GetVertex<gfx::Vertex2D>(2) == src[2]);
     }
 
 }
@@ -605,8 +713,9 @@ void unit_test_polygon_data()
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
+    unit_test_vertex_stream();
+    unit_test_command_stream();
     unit_test_wireframe();
-    unit_test_vertex_save_load();
     unit_test_polygon_builder_json();
     unit_test_polygon_builder_build();
     unit_test_particle_engine_data();
