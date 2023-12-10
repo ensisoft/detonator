@@ -1609,6 +1609,7 @@ std::size_t PolygonMeshClass::GetHash() const
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mStatic);
     hash = base::hash_combine(hash, mContentHash);
+    hash = base::hash_combine(hash, mContentUri);
 
     if (mData.has_value())
     {
@@ -1645,6 +1646,7 @@ void PolygonMeshClass::IntoJson(data::Writer& writer) const
     writer.Write("id",     mId);
     writer.Write("name",   mName);
     writer.Write("static", mStatic);
+    writer.Write("uri",    mContentUri);
 
     if (mData.has_value())
     {
@@ -1683,6 +1685,7 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
     ok &= reader.Read("id",     &mId);
     ok &= reader.Read("name",   &mName);
     ok &= reader.Read("static", &mStatic);
+    ok &= reader.Read("uri",    &mContentUri);
 
     if (const auto& inline_chunk = reader.GetReadChunk("inline_data"))
     {
@@ -1780,6 +1783,65 @@ bool PolygonMeshClass::UploadGeometry(const Environment& env, Geometry& geometry
             geometry.AddDrawCmd(cmd);
         }
     }
+
+    if (mContentUri.empty())
+        return true;
+
+    gfx::Loader::ResourceDesc desc;
+    desc.uri  = mContentUri;
+    desc.id   = mId;
+    desc.type = gfx::Loader::Type::Mesh;
+    const auto& buffer = LoadResource(desc);
+    if (!buffer)
+    {
+        ERROR("Failed to load polygon mesh. [uri='%1']", mContentUri);
+        return false;
+    }
+
+    const char* beg = (const char*)buffer->GetData();
+    const char* end = (const char*)buffer->GetData() + buffer->GetByteSize();
+    const auto& [success, json, error] = base::JsonParse(beg, end);
+    if (!success)
+    {
+        ERROR("Failed to parse geometry buffer. [uri='%1', error='%2'].", mContentUri, error);
+        return false;
+    }
+
+    data::JsonObject reader(std::move(json));
+
+    VertexBuffer vertex_buffer;
+    if (!vertex_buffer.FromJson(reader))
+    {
+        ERROR("Failed to load polygon mesh vertex buffer. [uri='%1']", mContentUri);
+        return false;
+    }
+    if (!vertex_buffer.Validate())
+    {
+        ERROR("Polygon mesh vertex buffer is not valid. [uri='%1']", mContentUri);
+        return false;
+    }
+
+    CommandBuffer command_buffer;
+    if (!command_buffer.FromJson(reader))
+    {
+        ERROR("Failed to load polygon mesh command buffer. [uri='%1']", mContentUri);
+        return false;
+    }
+
+    IndexBuffer index_buffer;
+    if (!index_buffer.FromJson(reader))
+    {
+        ERROR("Failed to load polygon mesh index buffer. [uri='%1']", mContentUri);
+        return false;
+    }
+
+    geometry.SetVertexLayout(vertex_buffer.GetLayout());
+    geometry.UploadVertices(vertex_buffer.GetBufferPtr(), vertex_buffer.GetBufferSize(), usage);
+    geometry.UploadIndices(index_buffer.GetBufferPtr(), index_buffer.GetBufferSize(),
+                           index_buffer.GetType(), usage);
+    geometry.SetDataHash(GetContentHash());
+    geometry.ClearDraws();
+    geometry.SetDrawCommands(command_buffer.GetCommandBuffer());
     return true;
 }
 

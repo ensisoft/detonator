@@ -722,6 +722,14 @@ namespace gfx
         { return mContentHash; }
         inline bool HasInlineData() const noexcept
         { return mData.has_value(); }
+        inline bool HasContentUri() const noexcept
+        { return !mContentUri.empty(); }
+        inline void ResetContentUri() noexcept
+        { mContentUri.clear(); }
+        inline void SetContentUri(std::string uri) noexcept
+        { mContentUri = std::move(uri); }
+        inline std::string GetContentUri() const noexcept
+        { return mContentUri; }
 
         void SetVertexBuffer(std::vector<uint8_t> buffer) noexcept;
         void SetVertexLayout(VertexLayout layout) noexcept;
@@ -759,7 +767,8 @@ namespace gfx
         std::string mId;
         std::string mName;
         std::size_t mContentHash = 0;
-
+        // Content URI for a larger mesh (see InlineData)
+        std::string mContentUri;
         // this is to support the simple 2D geometry with
         // only a few vertices. Could be migrated to use
         // a separate file but this is simply just so much
