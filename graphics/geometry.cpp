@@ -120,6 +120,34 @@ size_t VertexLayout::GetHash() const noexcept
     return hash;
 }
 
+void IndexStream::IntoJson(data::Writer& writer) const
+{
+    writer.Write("index_type", mType);
+    writer.Write("index_buffer", base64::Encode((const unsigned char*)mBuffer,
+                                                mCount * Geometry::GetIndexByteSize(mType)));
+}
+
+bool IndexBuffer::FromJson(const data::Reader& reader)
+{
+    bool ok = true;
+
+    std::string data;
+    ok &= reader.Read("index_type", &mType);
+    ok &= reader.Read("index_buffer", &data);
+    data = base64::Decode(data);
+
+    const auto bytes = data.size();
+    const auto count = bytes / Geometry::GetIndexByteSize(mType);
+
+    if (count == 0)
+        return ok;
+
+    mBuffer->resize(bytes);
+    std::memcpy(mBuffer->data(), data.data(), data.size());
+    return ok;
+}
+
+
 void VertexStream::IntoJson(data::Writer& writer) const
 {
     mLayout.IntoJson(writer);

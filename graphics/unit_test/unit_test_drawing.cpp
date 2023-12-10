@@ -28,6 +28,8 @@
 #include "base/test_minimal.h"
 #include "base/test_float.h"
 #include "base/test_help.h"
+#include "data/json.h"
+#include "data/io.h"
 #include "graphics/types.h"
 #include "graphics/material.h"
 #include "graphics/device.h"
@@ -40,6 +42,22 @@
 #include "graphics/transform.h"
 #include "graphics/shaderpass.h"
 #include "graphics/tool/geometry.h"
+
+bool operator==(const gfx::Vertex2D& lhs, const gfx::Vertex2D& rhs)
+{
+    return real::equals(lhs.aPosition.x, rhs.aPosition.x) &&
+           real::equals(lhs.aPosition.y, rhs.aPosition.y) &&
+           real::equals(lhs.aTexCoord.x, rhs.aTexCoord.x) &&
+           real::equals(lhs.aTexCoord.y, rhs.aTexCoord.y);
+}
+
+bool operator==(const gfx::Geometry::DrawCommand& lhs, const gfx::Geometry::DrawCommand& rhs)
+{
+    return lhs.type == rhs.type &&
+           lhs.count == rhs.count &&
+           lhs.offset == rhs.offset;
+
+}
 
 class TestShader : public gfx::Shader
 {
@@ -1391,7 +1409,7 @@ void unit_test_custom_textures()
     TEST_REQUIRE(kTextureRect1 == glm::vec4(4.0f, 3.0f, 2.0f, 1.0f));
 }
 
-void unit_test_static_poly()
+void unit_test_polygon_inline_data()
 {
     TEST_CASE(test::Type::Feature)
 
@@ -1457,6 +1475,66 @@ void unit_test_static_poly()
     TEST_REQUIRE(poly.Upload(env, geom));
     TEST_REQUIRE(geom.mVertexUploaded == false);
     TEST_REQUIRE(geom.mVertexBytes == sizeof(verts) + sizeof(verts));
+}
+
+void unit_test_polygon_mesh()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // generate some content
+    gfx::Vertex2D verts[3];
+    verts[0].aPosition = gfx::Vec2 {  1.0f,  2.0f };
+    verts[0].aTexCoord = gfx::Vec2 {  0.5f,  0.5f };
+    verts[1].aPosition = gfx::Vec2 { -1.0f, -2.0f };
+    verts[1].aTexCoord = gfx::Vec2 {  1.0f,  1.0f };
+    verts[2].aPosition = gfx::Vec2 {  0.0f,  0.0f };
+    verts[2].aTexCoord = gfx::Vec2 { -0.5f, -0.5f };
+
+    gfx::Index16 indices[3];
+    indices[0] = 123;
+    indices[1] = 100;
+    indices[3] = 1;
+
+    gfx::Geometry::DrawCommand cmds[1];
+    cmds[0].type   = gfx::Geometry::DrawType::TriangleFan;
+    cmds[0].count  = 123;
+    cmds[0].offset = 0;
+
+    {
+        const gfx::VertexStream vertex_stream(gfx::GetVertexLayout<gfx::Vertex2D>(), verts, 3);
+        const gfx::IndexStream index_stream(indices, sizeof(indices), gfx::Geometry::IndexType::Index16);
+        const gfx::CommandStream command_stream(cmds, 1);
+
+        data::JsonObject json;
+        vertex_stream.IntoJson(json);
+        index_stream.IntoJson(json);
+        command_stream.IntoJson(json);
+
+        data::FileDevice file;
+        file.Open("mesh-test.json");
+        json.Dump(file);
+
+        file.Close();
+    }
+
+    {
+        gfx::PolygonMeshClass poly;
+        poly.SetContentUri("mesh-test.json");
+
+        gfx::DrawableClass::Environment env;
+        env.editing_mode = false;
+
+        TestGeometry geom;
+        TEST_REQUIRE(poly.Upload(env, geom));
+        TEST_REQUIRE(geom.mVertexUploaded == true);
+        TEST_REQUIRE(geom.mVertexBytes == sizeof(verts));
+        TEST_REQUIRE(geom.mDrawCmds.size() == 1);
+        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(0) == verts[0]);
+        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(1) == verts[1]);
+        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(2) == verts[2]);
+        TEST_REQUIRE(geom.mDrawCmds[0] == cmds[0]);
+    }
+
 }
 
 void unit_test_local_particles()
@@ -2066,7 +2144,8 @@ int test_main(int argc, char* argv[])
     unit_test_material_uniform_folding();
     unit_test_custom_uniforms();
     unit_test_custom_textures();
-    unit_test_static_poly();
+    unit_test_polygon_inline_data();
+    unit_test_polygon_mesh();
     unit_test_local_particles();
     unit_test_global_particles();
     unit_test_particles();

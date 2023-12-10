@@ -285,6 +285,12 @@ namespace gfx
             AddDrawCmd(cmd);
         }
 
+        void SetDrawCommands(const std::vector<DrawCommand>& commands)
+        {
+            for (const auto& cmd : commands)
+                AddDrawCmd(cmd);
+        }
+
         // Update the geometry object's data buffer contents.
         template<typename Vertex>
         void SetVertexBuffer(const Vertex* vertices, std::size_t count, Usage usage = Usage::Static)
@@ -439,6 +445,7 @@ namespace gfx
         IndexType mIndexType = IndexType::Index16;
     };
 
+
     class IndexStream
     {
     public:
@@ -470,6 +477,9 @@ namespace gfx
         { return mCount; }
         inline bool IsValid() const noexcept
         { return mBuffer != nullptr; }
+
+        void IntoJson(data::Writer& writer) const;
+
     private:
         static size_t GetCount(size_t bytes, Type type)
         {
@@ -481,6 +491,41 @@ namespace gfx
         const uint8_t* mBuffer = nullptr;
         const size_t mCount = 0;
         const Type mType;
+    };
+
+    class IndexBuffer
+    {
+    public:
+        explicit IndexBuffer(Geometry::IndexType type, std::vector<uint8_t>* buffer)
+          : mType(type)
+          , mBuffer(buffer)
+        {}
+        explicit IndexBuffer(Geometry::IndexType type)
+          : mType(type)
+          , mBuffer(&mStorage)
+        {}
+        IndexBuffer()
+          : mBuffer(&mStorage)
+        {}
+
+        inline size_t GetCount() const noexcept
+        { return mBuffer->size() / Geometry::GetIndexByteSize(mType); }
+
+        const void* GetBufferPtr() const noexcept
+        { return mBuffer->data(); }
+
+        size_t GetBufferSize() const noexcept
+        { return mBuffer->size(); }
+
+        Geometry::IndexType GetType()  const noexcept
+        { return mType; }
+
+        bool FromJson(const data::Reader& reader);
+
+    private:
+        Geometry::IndexType mType = Geometry::IndexType::Index16;
+        std::vector<uint8_t> mStorage;
+        std::vector<uint8_t>* mBuffer = nullptr;
     };
 
     class VertexStream
