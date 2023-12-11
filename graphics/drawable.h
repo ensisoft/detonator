@@ -741,14 +741,20 @@ namespace gfx
         inline MeshType GetMeshType() const noexcept
         { return mMesh; }
 
+        void SetIndexBuffer(IndexBuffer&& buffer) noexcept;
+        void SetIndexBuffer(const IndexBuffer& buffer);
 
-
-        void SetVertexBuffer(std::vector<uint8_t> buffer) noexcept;
         void SetVertexLayout(VertexLayout layout) noexcept;
-        void SetCommandBuffer(std::vector<Geometry::DrawCommand> cmds) noexcept;
 
         void SetVertexBuffer(VertexBuffer&& buffer) noexcept;
-        void SetVertexBuffer(const VertexBuffer& buffer) noexcept;
+        void SetVertexBuffer(std::vector<uint8_t>&& buffer) noexcept;
+        void SetVertexBuffer(const VertexBuffer& buffer);
+        void SetVertexBuffer(const std::vector<uint8_t>& buffer);
+
+        void SetCommandBuffer(CommandBuffer&& buffer) noexcept;
+        void SetCommandBuffer(std::vector<Geometry::DrawCommand>&& buffer) noexcept;
+        void SetCommandBuffer(const CommandBuffer& buffer);
+        void SetCommandBuffer(const std::vector<Geometry::DrawCommand>& buffer);
 
         const VertexLayout* GetVertexLayout() const noexcept;
         const void* GetVertexBufferPtr() const noexcept;

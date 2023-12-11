@@ -1510,13 +1510,24 @@ bool Grid::Upload(const Environment&, Geometry& geometry) const
     return true;
 }
 
-void PolygonMeshClass::SetVertexBuffer(std::vector<uint8_t> buffer) noexcept
+void PolygonMeshClass::SetIndexBuffer(IndexBuffer&& buffer) noexcept
 {
     if (!mData.has_value())
         mData = InlineData {};
 
     auto& data = mData.value();
-    data.vertices = std::move(buffer);
+    data.indices    = std::move(buffer).GetIndexBuffer();
+    data.index_type = buffer.GetType();
+}
+
+void PolygonMeshClass::SetIndexBuffer(const IndexBuffer& buffer)
+{
+    if (!mData.has_value())
+        mData = InlineData {};
+
+    auto& data = mData.value();
+    data.indices    = buffer.GetIndexBuffer();
+    data.index_type = buffer.GetType();
 }
 
 void PolygonMeshClass::SetVertexLayout(VertexLayout layout) noexcept
@@ -1528,7 +1539,16 @@ void PolygonMeshClass::SetVertexLayout(VertexLayout layout) noexcept
     data.layout = std::move(layout);
 }
 
-void PolygonMeshClass::SetCommandBuffer(std::vector<Geometry::DrawCommand> cmds) noexcept
+void PolygonMeshClass::SetCommandBuffer(const std::vector<Geometry::DrawCommand>& cmds)
+{
+    if (!mData.has_value())
+        mData = InlineData {};
+
+    auto& data = mData.value();
+    data.cmds = cmds;
+}
+
+void PolygonMeshClass::SetCommandBuffer(std::vector<Geometry::DrawCommand>&& cmds) noexcept
 {
     if (!mData.has_value())
         mData = InlineData {};
@@ -1537,23 +1557,44 @@ void PolygonMeshClass::SetCommandBuffer(std::vector<Geometry::DrawCommand> cmds)
     data.cmds = std::move(cmds);
 }
 
+void PolygonMeshClass::SetCommandBuffer(CommandBuffer&& buffer) noexcept
+{
+    SetCommandBuffer(std::move(buffer).GetCommandBuffer());
+}
+
+void PolygonMeshClass::SetCommandBuffer(const CommandBuffer& buffer)
+{
+    SetCommandBuffer(buffer.GetCommandBuffer());
+}
+
 void PolygonMeshClass::SetVertexBuffer(VertexBuffer&& buffer) noexcept
 {
-    if (!mData.has_value())
-        mData = InlineData {};
-
-    auto& data = mData.value();
-    data.vertices = std::move(buffer).GetVertexBuffer();
-    data.layout   = std::move(buffer).GetLayout();
+    SetVertexBuffer(std::move(buffer).GetVertexBuffer());
+    SetVertexLayout(buffer.GetLayout());
 }
-void PolygonMeshClass::SetVertexBuffer(const VertexBuffer& buffer) noexcept
+
+void PolygonMeshClass::SetVertexBuffer(std::vector<uint8_t>&& buffer) noexcept
 {
     if (!mData.has_value())
         mData = InlineData {};
 
     auto& data = mData.value();
-    data.vertices = buffer.GetVertexBuffer();
-    data.layout   = buffer.GetLayout();
+    data.vertices = std::move(buffer);
+}
+
+void PolygonMeshClass::SetVertexBuffer(const VertexBuffer& buffer)
+{
+    SetVertexBuffer(buffer.GetVertexBuffer());
+    SetVertexLayout(buffer.GetLayout());
+}
+
+void PolygonMeshClass::SetVertexBuffer(const std::vector<uint8_t>& buffer)
+{
+    if (!mData.has_value())
+        mData = InlineData {};
+
+    auto& data = mData.value();
+    data.vertices = buffer;
 }
 
 const VertexLayout* PolygonMeshClass::GetVertexLayout() const noexcept
