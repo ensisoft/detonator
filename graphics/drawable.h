@@ -694,6 +694,12 @@ namespace gfx
     class PolygonMeshClass : public DrawableClass
     {
     public:
+        enum class MeshType {
+            Simple2D,
+            Simple3D,
+            Model3D
+        };
+
         explicit PolygonMeshClass(std::string id = base::RandomString(10),
                                   std::string name = "") noexcept
           : mId(std::move(id))
@@ -728,8 +734,14 @@ namespace gfx
         { mContentUri.clear(); }
         inline void SetContentUri(std::string uri) noexcept
         { mContentUri = std::move(uri); }
-        inline std::string GetContentUri() const noexcept
+        inline void SetMeshType(MeshType type) noexcept
+        { mMesh = type; }
+        inline std::string GetContentUri() const
         { return mContentUri; }
+        inline MeshType GetMeshType() const noexcept
+        { return mMesh; }
+
+
 
         void SetVertexBuffer(std::vector<uint8_t> buffer) noexcept;
         void SetVertexLayout(VertexLayout layout) noexcept;
@@ -781,6 +793,7 @@ namespace gfx
             VertexLayout layout;
         };
         std::optional<InlineData> mData;
+        MeshType mMesh = MeshType::Simple2D;
         bool mStatic = true;
     };
 
@@ -788,12 +801,17 @@ namespace gfx
     class PolygonMeshInstance : public Drawable
     {
     public:
+        using MeshType = PolygonMeshClass::MeshType;
+
         explicit PolygonMeshInstance(const std::shared_ptr<const PolygonMeshClass>& klass) noexcept
           : mClass(klass)
         {}
         explicit PolygonMeshInstance(const PolygonMeshClass& klass)
           : mClass(std::make_shared<PolygonMeshClass>(klass))
         {}
+
+        inline MeshType GetMeshType() const noexcept
+        { return mClass->GetMeshType(); }
 
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
         virtual std::string GetShader(const Environment& env, const Device& device) const override;
@@ -1343,6 +1361,17 @@ namespace gfx
     inline bool Is3DShape(const Drawable& drawable) noexcept
     {
         const auto type = drawable.GetType();
+        if (type == Drawable::Type::Polygon)
+        {
+            if (const auto* instance = dynamic_cast<const PolygonMeshInstance*>(&drawable))
+            {
+                const auto mesh = instance->GetMeshType();
+                if (mesh == PolygonMeshInstance::MeshType::Simple3D ||
+                    mesh == PolygonMeshInstance::MeshType::Model3D)
+                    return true;
+            }
+        }
+
         if (type != Drawable::Type::SimpleShape)
             return false;
         if (const auto* instance = dynamic_cast<const SimpleShapeInstance*>(&drawable))

@@ -139,6 +139,36 @@ void VertexShaderMain()
     return src;
 }
 
+std::string MakeModel3DVertexShader(const gfx::Device& device)
+{
+constexpr const auto* src = R"(
+attribute vec3 aPosition;
+attribute vec2 aTexCoord;
+attribute vec3 aNormal;
+
+uniform mat4 kProjectionMatrix;
+uniform mat4 kModelViewMatrix;
+
+varying vec2 vTexCoord;
+varying float vParticleRandomValue;
+varying float vParticleAlpha;
+varying float vParticleTime;
+
+void VertexShaderMain()
+{
+    vTexCoord = aTexCoord;
+    vParticleRandomValue = 0.0;
+    vParticleAlpha       = 1.0;
+    vParticleTime        = 0.0;
+    gl_Position = kProjectionMatrix * kModelViewMatrix * vec4(aPosition.xyz, 1.0);
+
+}
+
+)";
+
+    return src;
+}
+
 } // namespace
 
 namespace gfx {
@@ -1610,6 +1640,7 @@ std::size_t PolygonMeshClass::GetHash() const
     hash = base::hash_combine(hash, mStatic);
     hash = base::hash_combine(hash, mContentHash);
     hash = base::hash_combine(hash, mContentUri);
+    hash = base::hash_combine(hash, mMesh);
 
     if (mData.has_value())
     {
@@ -1647,6 +1678,7 @@ void PolygonMeshClass::IntoJson(data::Writer& writer) const
     writer.Write("name",   mName);
     writer.Write("static", mStatic);
     writer.Write("uri",    mContentUri);
+    writer.Write("mesh",   mMesh);
 
     if (mData.has_value())
     {
@@ -1686,6 +1718,7 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
     ok &= reader.Read("name",   &mName);
     ok &= reader.Read("static", &mStatic);
     ok &= reader.Read("uri",    &mContentUri);
+    ok &= reader.Read("mesh",   &mMesh);
 
     if (const auto& inline_chunk = reader.GetReadChunk("inline_data"))
     {
@@ -1854,7 +1887,15 @@ void PolygonMeshInstance::ApplyDynamicState(const Environment& env, Program& pro
 }
 std::string PolygonMeshInstance::GetShader(const Environment& env, const Device& device) const
 {
-    return MakeSimple2DVertexShader(device);
+    const auto mesh = GetMeshType();
+    if (mesh == MeshType::Simple2D)
+        return MakeSimple2DVertexShader(device);
+    else if (mesh == MeshType::Simple3D)
+        return MakeSimple3DVertexShader(device);
+    else if (mesh == MeshType::Model3D)
+        return MakeModel3DVertexShader(device); // todo:
+    else BUG("No such vertex shader");
+    return "";
 }
 
 std::string PolygonMeshInstance::GetGeometryName(const Environment& env) const
@@ -1868,12 +1909,28 @@ bool PolygonMeshInstance::Upload(const Environment& env, Geometry& geometry) con
 }
 std::string PolygonMeshInstance::GetShaderId(const Environment& env) const
 {
-    return "simple-2D-vertex-shader";
+    const auto mesh = GetMeshType();
+    if (mesh == MeshType::Simple2D)
+        return "simple-2D-vertex-program";
+    else if (mesh == MeshType::Simple3D)
+        return "simple-3D-vertex-program";
+    else if (mesh == MeshType::Model3D) // todo
+        return "model-3D-vertex-shader";
+    else BUG("No such vertex shader.");
+    return "";
 }
 
 std::string PolygonMeshInstance::GetShaderName(const Environment& env) const
 {
-    return "Simple2DVertexShader";
+    const auto mesh = GetMeshType();
+    if (mesh == MeshType::Simple2D)
+        return "Simple2DVertexShader";
+    else if (mesh == MeshType::Simple3D)
+        return "Simple2DVertexShader";
+    else if (mesh == MeshType::Model3D)
+        return "Model3DVertexShader";
+    else BUG("No such vertex shader");
+    return "";
 }
 
 std::string ParticleEngineClass::GetProgramId(const Environment& env) const

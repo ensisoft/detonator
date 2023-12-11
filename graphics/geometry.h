@@ -120,6 +120,14 @@ namespace gfx
         Vec2 aTexCoord;
     };
 
+    struct ModelVertex3D {
+        Vec3 aPosition;
+        Vec3 aNormal;
+        Vec2 aTexCoord;
+        Vec3 aTangent;
+        Vec3 aBitangent;
+    };
+
     // The offsetof macro is guaranteed to be usable only with types with standard layout.
     static_assert(std::is_standard_layout<Vertex3D>::value, "Vertex3D must meet standard layout.");
     static_assert(std::is_standard_layout<Vertex2D>::value, "Vertex2D must meet standard layout.");
@@ -189,6 +197,19 @@ namespace gfx
             {"aPosition", 0, 3, 0, offsetof(Vertex3D, aPosition)},
             {"aNormal",   0, 3, 0, offsetof(Vertex3D, aNormal)},
             {"aTexCoord", 0, 2, 0, offsetof(Vertex3D, aTexCoord)}
+        });
+        return layout;
+    }
+
+    template<> inline
+    const VertexLayout& GetVertexLayout<ModelVertex3D>()
+    {
+        static const VertexLayout layout(sizeof(ModelVertex3D), {
+            {"aPosition",  0, 3, 0, offsetof(ModelVertex3D, aPosition)},
+            {"aNormal",    0, 3, 0, offsetof(ModelVertex3D, aNormal)},
+            {"aTexCoord",  0, 2, 0, offsetof(ModelVertex3D, aTexCoord)},
+            {"aTangent",   0, 3, 0, offsetof(ModelVertex3D, aTangent)},
+            {"aBitangent", 0, 3, 0, offsetof(ModelVertex3D, aBitangent)},
         });
         return layout;
     }
