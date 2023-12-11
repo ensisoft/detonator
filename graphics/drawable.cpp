@@ -74,7 +74,7 @@ std::string NameAspectRatio(float width, float height, RoundFunc Round, const ch
     return ret;
 }
 
-std::string MakeGeneric2DVertexShader(const gfx::Device& device)
+std::string MakeSimple2DVertexShader(const gfx::Device& device)
 {
     // the varyings vParticleRandomValue, vParticleAlpha and vParticleTime
     // are used to support per particle features.
@@ -111,7 +111,7 @@ void VertexShaderMain()
     return src;
 }
 
-std::string MakeGeneric3DVertexShader(const gfx::Device& device)
+std::string MakeSimple3DVertexShader(const gfx::Device& device)
 {
 constexpr const auto* src = R"(
 attribute vec3 aPosition;
@@ -1290,9 +1290,9 @@ void SimpleShapeInstance::ApplyDynamicState(const Environment& env, Program& pro
 std::string SimpleShapeInstance::GetShader(const Environment& env, const Device& device) const
 {
     if (Is3DShape(mClass->GetShapeType()))
-        return MakeGeneric3DVertexShader(device);
+        return MakeSimple3DVertexShader(device);
 
-    return MakeGeneric2DVertexShader(device);
+    return MakeSimple2DVertexShader(device);
 }
 std::string SimpleShapeInstance::GetGeometryName(const Environment& env) const
 {
@@ -1307,17 +1307,17 @@ bool SimpleShapeInstance::Upload(const Environment& env, Geometry& geometry) con
 std::string SimpleShapeInstance::GetShaderId(const Environment& env) const
 {
     if (Is3DShape(mClass->GetShapeType()))
-        return "generic-3D-vertex-program";
+        return "simple-3D-vertex-shader";
 
-    return "generic-2D-vertex-program";
+    return "simple-2D-vertex-shader";
 }
 
 std::string SimpleShapeInstance::GetShaderName(const Environment& env) const
 {
     if (Is3DShape(mClass->GetShapeType()))
-        return "Generic3DVertexShader";
+        return "Simple3DVertexShader";
 
-    return "Generic2DVertexShader";
+    return "Simple2DVertexShader";
 }
 
 Drawable::Type SimpleShapeInstance::GetType() const
@@ -1346,24 +1346,24 @@ void SimpleShape::ApplyDynamicState(const Environment& env, Program& program, Ra
 std::string SimpleShape::GetShader(const Environment& env, const Device& device) const
 {
     if (Is3DShape(mShape))
-        return MakeGeneric3DVertexShader(device);
+        return MakeSimple3DVertexShader(device);
 
-    return MakeGeneric2DVertexShader(device);
+    return MakeSimple2DVertexShader(device);
 }
 std::string SimpleShape::GetShaderId(const Environment& env) const
 {
     if (Is3DShape(mShape))
-        return "generic-3D-vertex-program";
+        return "simple-3D-vertex-shader";
 
-    return "generic-2D-vertex-program";
+    return "simple-2D-vertex-shader";
 }
 
 std::string SimpleShape::GetShaderName(const Environment& env) const
 {
     if (Is3DShape(mShape))
-        return "Generic3DVertexShader";
+        return "Simple3DVertexShader";
 
-    return "Generic2DVertexShader";
+    return "Simple2DVertexShader";
 }
 
 std::string SimpleShape::GetGeometryName(const Environment& env) const
@@ -1403,17 +1403,17 @@ void Grid::ApplyDynamicState(const Environment& env, Program& program, RasterSta
 
 std::string Grid::GetShaderId(const Environment&) const
 {
-    return "generic-2D-vertex-program";
+    return "simple-2D-vertex-shader";
 }
 
 std::string Grid::GetShader(const Environment&, const Device& device) const
 {
-    return MakeGeneric2DVertexShader(device);
+    return MakeSimple2DVertexShader(device);
 }
 
 std::string Grid::GetShaderName(const Environment& env) const
 {
-    return "Generic2DVertexShader";
+    return "Simple2DVertexShader";
 }
 
 std::string Grid::GetGeometryName(const Environment& env) const
@@ -1854,7 +1854,7 @@ void PolygonMeshInstance::ApplyDynamicState(const Environment& env, Program& pro
 }
 std::string PolygonMeshInstance::GetShader(const Environment& env, const Device& device) const
 {
-    return MakeGeneric2DVertexShader(device);
+    return MakeSimple2DVertexShader(device);
 }
 
 std::string PolygonMeshInstance::GetGeometryName(const Environment& env) const
@@ -1868,12 +1868,12 @@ bool PolygonMeshInstance::Upload(const Environment& env, Geometry& geometry) con
 }
 std::string PolygonMeshInstance::GetShaderId(const Environment& env) const
 {
-    return "generic-2D-vertex-program";
+    return "simple-2D-vertex-shader";
 }
 
 std::string PolygonMeshInstance::GetShaderName(const Environment& env) const
 {
-    return "Generic2DVertexShader";
+    return "Simple2DVertexShader";
 }
 
 std::string ParticleEngineClass::GetProgramId(const Environment& env) const
@@ -2884,17 +2884,17 @@ void DynamicLine3D::ApplyDynamicState(const Environment& environment, Program& p
 
 std::string DynamicLine3D::GetShader(const Environment& environment, const Device& device) const
 {
-    return MakeGeneric3DVertexShader(device);
+    return MakeSimple3DVertexShader(device);
 }
 
 std::string DynamicLine3D::GetShaderId(const Environment& environment) const
 {
-    return "generic-3D-vertex-program";
+    return "simple-3D-vertex-shader";
 }
 
 std::string DynamicLine3D::GetShaderName(const Environment& environment) const
 {
-    return "Generic3DVertexShader";
+    return "Simple3DVertexShader";
 }
 
 std::string DynamicLine3D::GetGeometryName(const Environment& environment) const
