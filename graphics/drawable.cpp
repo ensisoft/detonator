@@ -1693,6 +1693,9 @@ void PolygonMeshClass::IntoJson(data::Writer& writer) const
         const CommandStream command_stream(data.cmds);
         command_stream.IntoJson(*inline_chunk);
 
+        const IndexStream index_stream(data.indices, data.index_type);
+        index_stream.IntoJson(*inline_chunk);
+
         writer.Write("inline_data", std::move(inline_chunk));
     }
 
@@ -1730,6 +1733,10 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
 
         CommandBuffer command_buffer(&data.cmds);
         ok &= command_buffer.FromJson(*inline_chunk);
+
+        IndexBuffer index_buffer(&data.indices);
+        ok &= index_buffer.FromJson(*inline_chunk);
+        mData->index_type = index_buffer.GetType();
 
         mData = std::move(data);
     }
@@ -1807,8 +1814,13 @@ bool PolygonMeshClass::UploadGeometry(const Environment& env, Geometry& geometry
         const auto& data = mData.value();
 
         geometry.SetDataHash(GetContentHash());
-        geometry.UploadVertices(data.vertices.data(), data.vertices.size(), usage);
+
         geometry.SetVertexLayout(data.layout);
+        geometry.UploadVertices(data.vertices.data(), data.vertices.size(), usage);
+
+        if (!data.indices.empty())
+            geometry.UploadIndices(data.indices.data(), data.indices.size(), data.index_type, usage);
+
         geometry.ClearDraws();
 
         for (const auto& cmd : data.cmds)

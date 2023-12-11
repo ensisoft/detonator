@@ -789,8 +789,10 @@ namespace gfx
         // the time.
         struct InlineData {
             std::vector<uint8_t> vertices;
+            std::vector<uint8_t> indices;
             std::vector<Geometry::DrawCommand> cmds;
             VertexLayout layout;
+            Geometry::IndexType index_type = Geometry::IndexType::Index16;
         };
         std::optional<InlineData> mData;
         MeshType mMesh = MeshType::Simple2D;
