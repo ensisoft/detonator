@@ -132,14 +132,12 @@ void OStreamLogger::Write(LogEvent type, const char* msg)
     */
 #if defined(LINUX_OS)
     // output terminal escape code to change text color.
-    if (type == LogEvent::Debug)
-        *m_out << "\033[" << 36 << "m";
-    else if (type == LogEvent::Error)
+    if (type == LogEvent::Error)
         *m_out << "\033[" << 31 << "m";
     else if (type == LogEvent::Warning)
         *m_out << "\033[" << 33 << "m";
-    //else if (type == LogEvent::Info)
-    //    m_out << "\033[" << 32 << "m";
+    else if (type == LogEvent::Info)
+        *m_out << "\033[" << 36 << "m";
 
     // print the actual message
     *m_out << msg;
