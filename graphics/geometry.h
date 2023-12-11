@@ -477,6 +477,12 @@ namespace gfx
           , mCount(GetCount(bytes, type))
           , mType(type)
         {}
+        IndexStream(const std::vector<uint8_t>& buffer, Type type)
+          : mBuffer(buffer.data())
+          , mCount(GetCount(buffer.size(), type))
+          , mType(type)
+        {}
+
         inline uint32_t GetIndex(size_t index) const noexcept
         {
             ASSERT(index < mCount);
@@ -525,9 +531,15 @@ namespace gfx
           : mType(type)
           , mBuffer(&mStorage)
         {}
+        IndexBuffer(std::vector<uint8_t>* buffer)
+          : mBuffer(buffer)
+        {}
         IndexBuffer()
           : mBuffer(&mStorage)
         {}
+
+        inline void SetType(Geometry::IndexType type) noexcept
+        { mType = type;}
 
         inline size_t GetCount() const noexcept
         { return mBuffer->size() / Geometry::GetIndexByteSize(mType); }
@@ -540,6 +552,29 @@ namespace gfx
 
         Geometry::IndexType GetType()  const noexcept
         { return mType; }
+
+        inline const auto& GetIndexBuffer() const & noexcept
+        { return *mBuffer; }
+
+        inline auto&& GetIndexBuffer() && noexcept
+        { return std::move(*mBuffer); }
+
+        void PushBack(Index16 value) noexcept
+        {
+            ASSERT(mType == Geometry::IndexType::Index16);
+            const auto offset = mBuffer->size();
+            mBuffer->resize(offset + sizeof(value));
+            std::memcpy(&(*mBuffer)[offset], &value, sizeof(value));
+        }
+
+        void PushBack(Index32 value) noexcept
+        {
+            ASSERT(mType == Geometry::IndexType::Index32);
+            const auto offset = mBuffer->size();
+            mBuffer->resize(offset + sizeof(value));
+            std::memcpy(&(*mBuffer)[offset], &value, sizeof(value));
+        }
+
 
         bool FromJson(const data::Reader& reader);
 
@@ -769,6 +804,9 @@ namespace gfx
         { return *mBuffer; }
         inline auto&& GetCommandBuffer() && noexcept
         { return std::move(*mBuffer); }
+
+        inline void PushBack(const DrawCommand& cmd)
+        { mBuffer->push_back(cmd); }
 
         bool FromJson(const data::Reader& reader);
 
