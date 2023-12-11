@@ -34,7 +34,15 @@ namespace gfx
     class Loader;
     class Resource;
     class Framebuffer;
-    class BuiltInMaterialClass;
+    class PolygonMeshClass;
+    class VertexStream;
+    class VertexBuffer;
+    class IndexStream;
+    class IndexBuffer;
+    class CommandStream;
+    class CommandBuffer;
+    class Texture;
+    class Geometry;
 
 } // namespace
 
