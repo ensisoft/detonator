@@ -32,6 +32,53 @@ namespace {
         buffer.PushBack(v0);
         buffer.PushBack(v1);
     }
+
+    enum class ByteOrder {
+        LE, BE
+    };
+
+    ByteOrder GetByteOrder() noexcept
+    {
+        constexpr uint32_t value = 1;
+        if (*(const char*)&value == 1)
+            return ByteOrder::LE;
+
+        return ByteOrder::BE;
+    }
+
+    template<typename T>
+    void SwizzleBuffer(void* buffer, size_t bytes)
+    {
+        const auto count = bytes / sizeof(T);
+
+        auto* ptr = reinterpret_cast<T*>(buffer);
+
+        for (size_t i=0; i<count; ++i)
+        {
+            unsigned char buffer[sizeof(T)];
+            std::memcpy(buffer, &ptr[i], sizeof(T));
+
+            if constexpr (sizeof(T) == 8)
+            {
+                std::swap(buffer[0], buffer[7]);
+                std::swap(buffer[1], buffer[6]);
+                std::swap(buffer[2], buffer[5]);
+                std::swap(buffer[3], buffer[4]);
+            }
+            else if constexpr (sizeof(T) == 4)
+            {
+                std::swap(buffer[0], buffer[3]);
+                std::swap(buffer[1], buffer[2]);
+            }
+            else if constexpr (sizeof(T) == 2)
+            {
+                std::swap(buffer[0], buffer[1]);
+            }
+            std::memcpy(&ptr[i], buffer, sizeof(T));
+        }
+
+    }
+
 } // namespace
 
 namespace gfx
@@ -122,6 +169,7 @@ size_t VertexLayout::GetHash() const noexcept
 
 void IndexStream::IntoJson(data::Writer& writer) const
 {
+    writer.Write("byte_order", GetByteOrder());
     writer.Write("index_type", mType);
     writer.Write("index_buffer", base64::Encode((const unsigned char*)mBuffer,
                                                 mCount * Geometry::GetIndexByteSize(mType)));
@@ -131,7 +179,10 @@ bool IndexBuffer::FromJson(const data::Reader& reader)
 {
     bool ok = true;
 
+    ByteOrder byte_order = ByteOrder::LE;
+
     std::string data;
+    ok &= reader.Read("byte_order", &byte_order);
     ok &= reader.Read("index_type", &mType);
     ok &= reader.Read("index_buffer", &data);
     data = base64::Decode(data);
@@ -144,6 +195,15 @@ bool IndexBuffer::FromJson(const data::Reader& reader)
 
     mBuffer->resize(bytes);
     std::memcpy(mBuffer->data(), data.data(), data.size());
+
+    if (byte_order != GetByteOrder())
+    {
+        if (mType == Geometry::IndexType::Index16)
+            SwizzleBuffer<uint16_t>(mBuffer->data(), mBuffer->size());
+        else if (mType == Geometry::IndexType::Index32)
+            SwizzleBuffer<uint32_t>(mBuffer->data(), mBuffer->size());
+        else BUG("Missing index type in index buffer swizzle.");
+    }
     return ok;
 }
 
@@ -151,6 +211,8 @@ bool IndexBuffer::FromJson(const data::Reader& reader)
 void VertexStream::IntoJson(data::Writer& writer) const
 {
     mLayout.IntoJson(writer);
+
+    writer.Write("byte_order", GetByteOrder());
     writer.Write("vertex_buffer", base64::Encode((const unsigned char*)mBuffer,
                                                  mCount * mLayout.vertex_struct_size));
 }
@@ -174,9 +236,12 @@ bool VertexBuffer::FromJson(const data::Reader& reader)
 {
     bool ok = true;
 
+    ByteOrder byte_order = ByteOrder::LE;
+
     std::string data;
     ok &= mLayout.FromJson(reader);
     ok &= reader.Read("vertex_buffer", &data);
+    ok &= reader.Read("byte_order", &byte_order);
     data = base64::Decode(data);
 
     // todo: get rid of this temporary copy..
@@ -185,12 +250,21 @@ bool VertexBuffer::FromJson(const data::Reader& reader)
         return ok;
 
     std::memcpy(mBuffer->data(), data.data(), data.size());
+
+    if (byte_order != GetByteOrder())
+        SwizzleBuffer<uint32_t>(mBuffer->data(), mBuffer->size());
+
     return ok;
 }
 
 void CommandStream::IntoJson(data::Writer& writer) const
 {
+    // expect tightly packed and 32bits for the type enum
+    // in order to make the serialization simple
+    static_assert(sizeof(DrawCommand) == sizeof(uint32_t) * 3);
+
     const auto bytes = mCount * sizeof(DrawCommand);
+    writer.Write("byte_order", GetByteOrder());
     writer.Write("command_buffer", base64::Encode((const unsigned char*)mCommands, bytes));
 }
 
@@ -198,7 +272,10 @@ bool CommandBuffer::FromJson(const data::Reader& reader)
 {
     bool ok = true;
 
+    ByteOrder byte_order = ByteOrder::LE;
+
     std::string data;
+    ok &= reader.Read("byte_order", &byte_order);
     ok &= reader.Read("command_buffer", &data);
     data = base64::Decode(data);
 
@@ -208,7 +285,14 @@ bool CommandBuffer::FromJson(const data::Reader& reader)
     if (count == 0)
         return ok;
 
+    // expect tightly packed and 32bits for the type enum
+    // in order to make the serialization simple
+    static_assert(sizeof(Geometry::DrawCommand) == sizeof(uint32_t) * 3);
+
     std::memcpy(mBuffer->data(), data.data(), data.size());
+
+    if (byte_order != GetByteOrder())
+        SwizzleBuffer<uint32_t>(mBuffer->data(), mBuffer->size() * sizeof(DrawCommand));
     return ok;
 }
 
@@ -232,7 +316,7 @@ void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe)
     for (size_t i=0; i<geometry.GetNumDrawCmds(); ++i)
     {
         const auto& cmd = geometry.GetDrawCmd(i);
-        const auto primitive_count = cmd.count != std::numeric_limits<size_t>::max()
+        const auto primitive_count = cmd.count != std::numeric_limits<uint32_t>::max()
                            ? (cmd.count)
                            : (has_index ? index_count : vertex_count);
 
