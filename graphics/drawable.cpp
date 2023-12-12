@@ -1742,17 +1742,12 @@ void PolygonMeshClass::IntoJson(data::Writer& writer) const
 
     static_assert(sizeof(unsigned) == 4, "4 bytes required for unsigned.");
 
-    if constexpr (sizeof(mContentHash) == 4)
-    {
-        writer.Write("content_hash", (unsigned)mContentHash);
-    }
-    else if (sizeof(mContentHash) == 8)
-    {
-        const unsigned hi = (mContentHash >> 32) & 0xffffffff;
-        const unsigned lo = (mContentHash >> 0 ) & 0xffffffff;
-        writer.Write("content_hash_lo", lo);
-        writer.Write("content_hash_hi", hi);
-    }
+    const uint64_t hash = mContentHash;
+    const unsigned hi = (hash >> 32) & 0xffffffff;
+    const unsigned lo = (hash >> 0 ) & 0xffffffff;
+    writer.Write("content_hash_lo", lo);
+    writer.Write("content_hash_hi", hi);
+
 }
 
 bool PolygonMeshClass::FromJson(const data::Reader& reader)
@@ -1828,20 +1823,14 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
 
     static_assert(sizeof(unsigned) == 4, "4 bytes required for unsigned.");
 
-    if constexpr(sizeof(mContentHash) == 4)
-    {
-        unsigned value = 0;
-        ok &= reader.Read("content_hash", &value);
-        mContentHash = value;
-    }
-    else if (sizeof(mContentHash) == 8)
-    {
-        unsigned hi = 0;
-        unsigned lo = 0;
-        ok &= reader.Read("content_hash_lo", &lo);
-        ok &= reader.Read("content_hash_hi", &hi);
-        mContentHash = (size_t(hi) << 32) | size_t(lo);
-    }
+    uint64_t hash = 0;
+    unsigned hi = 0;
+    unsigned lo = 0;
+    ok &= reader.Read("content_hash_lo", &lo);
+    ok &= reader.Read("content_hash_hi", &hi);
+    hash = (uint64_t(hi) << 32) | uint64_t(lo);
+    mContentHash = hash;
+
     return ok;
 }
 
