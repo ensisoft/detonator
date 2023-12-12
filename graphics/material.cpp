@@ -242,7 +242,7 @@ Texture* detail::TextureFileSource::Upload(const Environment& env, Device& devic
     if (!texture)
     {
         texture = device.MakeTexture(gpu_id);
-        texture->SetName(mName);
+        texture->SetName(mName.empty() ? mFile : mName);
         texture->SetContentHash(0);
     }
     else if (texture->GetContentHash() == 0)
