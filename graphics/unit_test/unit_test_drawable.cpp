@@ -241,7 +241,7 @@ void unit_test_wireframe()
         TEST_REQUIRE(wireframe.GetNumDrawCmds() == 1);
         TEST_REQUIRE(wireframe.GetDrawCmd(0).type == gfx::Geometry::DrawType::Lines);
         TEST_REQUIRE(wireframe.GetDrawCmd(0).offset == 0);
-        TEST_REQUIRE(wireframe.GetDrawCmd(0).count == std::numeric_limits<size_t>::max());
+        TEST_REQUIRE(wireframe.GetDrawCmd(0).count == std::numeric_limits<uint32_t>::max());
 
         const gfx::VertexStream stream(wireframe.GetLayout(),
                                  wireframe.GetVertexDataPtr(),
@@ -283,7 +283,7 @@ void unit_test_wireframe()
         TEST_REQUIRE(wireframe.GetNumDrawCmds() == 1);
         TEST_REQUIRE(wireframe.GetDrawCmd(0).type == gfx::Geometry::DrawType::Lines);
         TEST_REQUIRE(wireframe.GetDrawCmd(0).offset == 0);
-        TEST_REQUIRE(wireframe.GetDrawCmd(0).count == std::numeric_limits<size_t>::max());
+        TEST_REQUIRE(wireframe.GetDrawCmd(0).count == std::numeric_limits<uint32_t>::max());
 
         const gfx::VertexStream stream(wireframe.GetLayout(),
                                        wireframe.GetVertexDataPtr(),

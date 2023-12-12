@@ -1122,7 +1122,7 @@ public:
             const auto buffer_element_count = index_buffer ? buffer_index_count : buffer_vertex_count;
 
             const auto& draw  = mygeom->GetDrawCmd(i);
-            const auto count  = draw.count == std::numeric_limits<std::size_t>::max() ? buffer_element_count : draw.count;
+            const auto count  = draw.count == std::numeric_limits<uint32_t>::max() ? buffer_element_count : draw.count;
             const auto type   = draw.type;
             const auto offset = draw.offset;
 

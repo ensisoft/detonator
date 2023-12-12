@@ -41,6 +41,7 @@ namespace gfx
     // 32bit vertex index for indexed drawing.
     using Index32 = std::uint32_t;
 
+#pragma pack(push, 1)
     struct Vec1 {
         float x = 0.0f;
     };
@@ -63,6 +64,7 @@ namespace gfx
         float z = 0.0f;
         float w = 0.0f;
     };
+#pragma pack(pop)
 
     inline Vec2 ToVec(const glm::vec2& vector) noexcept
     { return { vector.x, vector.y }; }
@@ -102,6 +104,7 @@ namespace gfx
     // part (which produces the texturing) understand and agree on
     // this.
 
+#pragma pack(push, 1)
     // Vertex for 2D drawing on the XY plane.
     struct Vertex2D {
         // Coordinate / position of the vertex in the model space.
@@ -127,6 +130,7 @@ namespace gfx
         Vec3 aTangent;
         Vec3 aBitangent;
     };
+#pragma pack(pop)
 
     // The offsetof macro is guaranteed to be usable only with types with standard layout.
     static_assert(std::is_standard_layout<Vertex3D>::value, "Vertex3D must meet standard layout.");
@@ -222,7 +226,7 @@ namespace gfx
     {
     public:
         // Define how the geometry is to be rasterized.
-        enum class DrawType {
+        enum class DrawType : uint32_t {
             // Draw the given vertices as triangles, i.e.
             // each 3 vertices make a single triangle.
             Triangles,
@@ -260,8 +264,8 @@ namespace gfx
 #pragma pack(push, 1)
         struct DrawCommand {
             DrawType type = DrawType::Triangles;
-            size_t count  = 0;
-            size_t offset = 0;
+            uint32_t count  = 0;
+            uint32_t offset = 0;
         };
 #pragma pack(pop)
 
@@ -292,12 +296,12 @@ namespace gfx
             DrawCommand cmd;
             cmd.type   = type;
             cmd.offset = 0;
-            cmd.count  = std::numeric_limits<size_t>::max();
+            cmd.count  = std::numeric_limits<uint32_t>::max();
             AddDrawCmd(cmd);
         }
         // Add a draw command for some particular set of vertices within
         // the current vertex buffer.
-        inline void AddDrawCmd(DrawType type, size_t offset, size_t count)
+        inline void AddDrawCmd(DrawType type, uint32_t offset, size_t count)
         {
             DrawCommand cmd;
             cmd.type   = type;
