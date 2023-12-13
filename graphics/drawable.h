@@ -89,6 +89,11 @@ namespace gfx
              const glm::mat4* world_matrix = nullptr;
          };
 
+        struct DrawCmd {
+            size_t draw_cmd_start = 0;
+            size_t draw_cmd_count = std::numeric_limits<size_t>::max();
+        };
+
         virtual ~DrawableClass() = default;
         // Get the type of the drawable.
         virtual Type GetType() const = 0;
@@ -127,6 +132,8 @@ namespace gfx
         using Environment = DrawableClass::Environment;
 
         using Type = DrawableClass::Type;
+
+        using DrawCmd = DrawableClass::DrawCmd;
 
         // Rasterizer state that the geometry can manipulate.
         struct RasterState {
@@ -192,10 +199,6 @@ namespace gfx
         virtual void Execute(const Environment& env, const Command& command)
         {}
 
-        struct DrawCmd {
-            size_t draw_cmd_start = 0;
-            size_t draw_cmd_count = std::numeric_limits<size_t>::max();
-        };
         virtual DrawCmd  GetDrawCmd() const
         {
             // return the defaults which will then draw every draw
@@ -766,6 +769,10 @@ namespace gfx
         bool IsDynamic(const Environment& env) const;
         bool Upload(const Environment& env, Geometry& geometry) const;
 
+        void SetSubMeshDrawCmd(const std::string& key, const DrawCmd& cmd);
+
+        const DrawCmd* GetSubMeshDrawCmd(const std::string& key) const noexcept;
+
         virtual Type GetType() const override
         { return Type::Polygon; }
         virtual std::string GetId() const override
@@ -802,6 +809,7 @@ namespace gfx
         };
         std::optional<InlineData> mData;
         MeshType mMesh = MeshType::Simple2D;
+        std::unordered_map<std::string, DrawCmd> mSubMeshes;
         bool mStatic = true;
     };
 
@@ -811,15 +819,22 @@ namespace gfx
     public:
         using MeshType = PolygonMeshClass::MeshType;
 
-        explicit PolygonMeshInstance(const std::shared_ptr<const PolygonMeshClass>& klass) noexcept
+        explicit PolygonMeshInstance(const std::shared_ptr<const PolygonMeshClass>& klass,
+                                     std::string sub_mesh_key = "")
           : mClass(klass)
+          , mSubMeshKey(std::move(sub_mesh_key))
         {}
-        explicit PolygonMeshInstance(const PolygonMeshClass& klass)
+        explicit PolygonMeshInstance(const PolygonMeshClass& klass, std::string sub_mesh_key = "")
           : mClass(std::make_shared<PolygonMeshClass>(klass))
+          , mSubMeshKey(std::move(sub_mesh_key))
         {}
 
         inline MeshType GetMeshType() const noexcept
         { return mClass->GetMeshType(); }
+        inline std::string GetSubMeshKey() const
+        { return mSubMeshKey; }
+        inline void SetSubMeshKey(std::string key) noexcept
+        { mSubMeshKey = std::move(key); }
 
         virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
         virtual std::string GetShader(const Environment& env, const Device& device) const override;
@@ -828,6 +843,8 @@ namespace gfx
         virtual std::string GetGeometryName(const Environment& env) const override;
         virtual bool Upload(const Environment& env, Geometry& geometry) const override;
 
+        virtual DrawCmd GetDrawCmd() const override;
+
         virtual bool IsDynamic(const Environment& env) const override
         { return mClass->IsDynamic(env); }
 
@@ -835,8 +852,11 @@ namespace gfx
         { return Primitive::Triangles; }
         virtual Type GetType() const override
         { return Type::Polygon; }
+
     private:
         std::shared_ptr<const PolygonMeshClass> mClass;
+        std::string mSubMeshKey;
+        mutable bool mError = false;
     };
 
 
