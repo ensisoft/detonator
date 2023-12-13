@@ -1673,6 +1673,16 @@ bool PolygonMeshClass::Upload(const Environment& env, Geometry& geometry) const
     return true;
 }
 
+void PolygonMeshClass::SetSubMeshDrawCmd(const std::string& key, const DrawCmd& cmd)
+{
+    mSubMeshes[key] = cmd;
+}
+
+const PolygonMeshClass::DrawCmd* PolygonMeshClass::GetSubMeshDrawCmd(const std::string& key) const noexcept
+{
+    return base::SafeFind(mSubMeshes, key);
+}
+
 std::size_t PolygonMeshClass::GetHash() const
 {
     size_t hash = 0;
@@ -1682,6 +1692,18 @@ std::size_t PolygonMeshClass::GetHash() const
     hash = base::hash_combine(hash, mContentHash);
     hash = base::hash_combine(hash, mContentUri);
     hash = base::hash_combine(hash, mMesh);
+
+    std::set<std::string> keys;
+    for (const auto& it : mSubMeshes)
+        keys.insert(it.first);
+
+    for (const auto key : keys)
+    {
+        const auto& cmd = mSubMeshes.find(key);
+        hash = base::hash_combine(hash, key);
+        hash = base::hash_combine(hash, cmd->second.draw_cmd_start);
+        hash = base::hash_combine(hash, cmd->second.draw_cmd_count);
+    }
 
     if (mData.has_value())
     {
@@ -1747,6 +1769,15 @@ void PolygonMeshClass::IntoJson(data::Writer& writer) const
     const unsigned lo = (hash >> 0 ) & 0xffffffff;
     writer.Write("content_hash_lo", lo);
     writer.Write("content_hash_hi", hi);
+
+    for (const auto& it : mSubMeshes)
+    {
+        auto chunk = writer.NewWriteChunk();
+        chunk->Write("key", it.first);
+        chunk->Write("start", (unsigned)it.second.draw_cmd_start);
+        chunk->Write("count", (unsigned)it.second.draw_cmd_count);
+        writer.AppendChunk("meshes", std::move(chunk));
+    }
 
 }
 
@@ -1830,6 +1861,21 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
     ok &= reader.Read("content_hash_hi", &hi);
     hash = (uint64_t(hi) << 32) | uint64_t(lo);
     mContentHash = hash;
+
+    for (unsigned i=0; i<reader.GetNumChunks("meshes"); ++i)
+    {
+        const auto& chunk = reader.GetReadChunk("meshes", i);
+        std::string key;
+        unsigned count = 0;
+        unsigned start = 0;
+        ok &= chunk->Read("key", &key);
+        ok &= chunk->Read("count", &count);
+        ok &= chunk->Read("start", &start);
+        DrawCmd cmd;
+        cmd.draw_cmd_count = count;
+        cmd.draw_cmd_start = start;
+        mSubMeshes[key] = cmd;
+    }
 
     return ok;
 }
@@ -1949,6 +1995,24 @@ bool PolygonMeshInstance::Upload(const Environment& env, Geometry& geometry) con
 {
     return mClass->Upload(env, geometry);
 }
+
+Drawable::DrawCmd PolygonMeshInstance::GetDrawCmd() const
+{
+    if (mSubMeshKey.empty())
+        return Drawable::GetDrawCmd();
+
+    if (const auto* cmd = mClass->GetSubMeshDrawCmd(mSubMeshKey))
+        return *cmd;
+
+    if (!mError)
+    {
+        WARN("No such polygon-mesh sub-mesh was found. [key='%1']", mSubMeshKey);
+    }
+
+    mError = true;
+    return {0, 0};
+}
+
 std::string PolygonMeshInstance::GetShaderId(const Environment& env) const
 {
     const auto mesh = GetMeshType();

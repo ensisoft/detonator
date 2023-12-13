@@ -680,6 +680,9 @@ void unit_test_polygon_data()
     cmds[0].count  = 5;
     klass.SetCommandBuffer(std::move(cmds));
 
+    klass.SetSubMeshDrawCmd("foo", gfx::DrawableClass::DrawCmd { 0, 10 });
+    klass.SetSubMeshDrawCmd("bar", gfx::DrawableClass::DrawCmd { 10, 1 });
+
     // to/from json
     {
         data::JsonObject json;
@@ -707,6 +710,12 @@ void unit_test_polygon_data()
         TEST_REQUIRE(ret.GetName() == klass.GetName());
         TEST_REQUIRE(ret.IsStatic() == klass.IsStatic());
         TEST_REQUIRE(ret.GetHash() == klass.GetHash());
+
+        TEST_REQUIRE(ret.GetSubMeshDrawCmd("foo")->draw_cmd_start == 0);
+        TEST_REQUIRE(ret.GetSubMeshDrawCmd("foo")->draw_cmd_count == 10);
+        TEST_REQUIRE(ret.GetSubMeshDrawCmd("bar")->draw_cmd_start == 10);
+        TEST_REQUIRE(ret.GetSubMeshDrawCmd("bar")->draw_cmd_count == 1);
+
     }
 }
 
