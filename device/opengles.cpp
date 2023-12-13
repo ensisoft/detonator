@@ -1113,7 +1113,7 @@ public:
 
         TRACE_ENTER(DrawGeometry);
         // go through the draw commands and submit the calls
-        const auto& cmds = mygeom->GetNumDrawCmds();
+        const auto& cmds = geometry.GetNumDrawCmds();
         for (size_t i=0; i<cmds; ++i)
         {
             // the number of buffer elements to draw by default if the draw doesn't specify
@@ -1121,7 +1121,7 @@ public:
             // number of index elements, otherwise consider the number of vertices.
             const auto buffer_element_count = index_buffer ? buffer_index_count : buffer_vertex_count;
 
-            const auto& draw  = mygeom->GetDrawCmd(i);
+            const auto& draw  = geometry.GetDrawCmd(i);
             const auto count  = draw.count == std::numeric_limits<uint32_t>::max() ? buffer_element_count : draw.count;
             const auto type   = draw.type;
             const auto offset = draw.offset;
