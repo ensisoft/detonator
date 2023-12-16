@@ -339,7 +339,7 @@ void DlgFontMap::OnPaintScene(gfx::Painter& painter, double secs)
     auto selection_material_class = gfx::CreateMaterialClassFromImage("app://textures/accept_icon.png");
     selection_material_class.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     selection_material_class.SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
-    auto selection_material = gfx::MaterialClassInst(selection_material_class);
+    auto selection_material = gfx::MaterialInstance(selection_material_class);
 
     for (unsigned row=0; row<max_rows; ++row)
     {

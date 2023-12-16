@@ -193,7 +193,7 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double secs)
         if (!DoesIntersect(rect, gfx::FRect(0.0f, 0.0f, width, height)))
             continue;
 
-        gfx::MaterialClassInst material(klass);
+        gfx::MaterialInstance material(klass);
         material.SetRuntime(time_milliseconds / 1000.0);
         gfx::FillRect(painter, rect, material);
 

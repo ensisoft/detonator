@@ -2314,7 +2314,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
             gfx::Transform model;
             model.Translate(0.5f, 0.5f, -0.5f);
             model.Scale(base_size * size_factors);
-            //tile_painter.Draw(gfx::Cube(), model, gfx::MaterialClassInst(checkerboard));
+            //tile_painter.Draw(gfx::Cube(), model, gfx::MaterialInstance(checkerboard));
         }
 
 

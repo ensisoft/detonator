@@ -31,7 +31,7 @@
 #include "graphics/renderpass.h"
 
 namespace {
-gfx::MaterialClassInst MakeMaterial(const gfx::Color4f& color)
+gfx::MaterialInstance MakeMaterial(const gfx::Color4f& color)
 {
     static std::shared_ptr<gfx::ColorClass> klass;
     if (!klass)
@@ -42,7 +42,7 @@ gfx::MaterialClassInst MakeMaterial(const gfx::Color4f& color)
     klass->SetSurfaceType(alpha == 1.0f
                        ? gfx::MaterialClass::SurfaceType::Opaque
                        : gfx::MaterialClass::SurfaceType::Transparent);
-    return gfx::MaterialClassInst(klass);
+    return gfx::MaterialInstance(klass);
 }
 } // namespace
 

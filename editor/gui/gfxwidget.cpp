@@ -298,7 +298,7 @@ void GfxWindow::paintGL()
         gfx::Transform transform;
         transform.Resize(width()-2.0f, height()-2.0f);
         transform.Translate(1.0f, 1.0f);
-        mCustomGraphicsPainter->Draw(rect, transform, gfx::MaterialClassInst(material), 2.0f);
+        mCustomGraphicsPainter->Draw(rect, transform, gfx::MaterialInstance(material), 2.0f);
     }
 
     if (WindowMouseCursor == MouseCursor::Custom)
@@ -320,7 +320,7 @@ void GfxWindow::paintGL()
             transform.Resize(20.0f, 20.0f);
             transform.MoveTo(mickey.x(), mickey.y());
             mCustomGraphicsPainter->Draw(gfx::ArrowCursor(), transform,
-                                         gfx::MaterialClassInst(cursor_material));
+                                         gfx::MaterialInstance(cursor_material));
         }
     }
 

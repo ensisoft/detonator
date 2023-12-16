@@ -77,9 +77,9 @@ void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans)
 
 void DrawBasisVectors(gfx::Transform& model, std::vector<engine::DrawPacket>& packets)
 {
-    static auto green = std::make_shared<gfx::MaterialClassInst>(
+    static auto green = std::make_shared<gfx::MaterialInstance>(
             gfx::CreateMaterialClassFromColor(gfx::Color::Green));
-    static auto red   = std::make_shared<gfx::MaterialClassInst>(
+    static auto red   = std::make_shared<gfx::MaterialInstance>(
             gfx::CreateMaterialClassFromColor(gfx::Color::Red));
     static auto arrow = std::make_shared<gfx::Arrow>();
 
@@ -120,7 +120,7 @@ void DrawBasisVectors(gfx::Transform& model, std::vector<engine::DrawPacket>& pa
 
 void DrawSelectionBox(gfx::Transform& model, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect)
 {
-    static const auto green  = std::make_shared<gfx::MaterialClassInst>(
+    static const auto green  = std::make_shared<gfx::MaterialInstance>(
             gfx::CreateMaterialClassFromColor(gfx::Color::Green));
     static const auto outline = std::make_shared<gfx::Rectangle>(gfx::SimpleShapeStyle::Outline);
     static const auto circle  = std::make_shared<gfx::Circle>(gfx::SimpleShapeStyle::Outline);
@@ -186,7 +186,7 @@ void DrawSelectionBox(gfx::Transform& model, std::vector<engine::DrawPacket>& pa
 
 void DrawInvisibleItemBox(gfx::Transform& model, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect)
 {
-    static const auto yellow = std::make_shared<gfx::MaterialClassInst>(
+    static const auto yellow = std::make_shared<gfx::MaterialInstance>(
             gfx::CreateMaterialClassFromColor(gfx::Color::DarkYellow));
     static const auto shape  = std::make_shared<gfx::Rectangle>(gfx::SimpleShapeStyle::Outline);
 

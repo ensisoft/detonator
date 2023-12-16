@@ -2284,7 +2284,7 @@ bool MaterialClass::ApplyCustomDynamicState(const State& state, Device& device, 
     return true;
 }
 
-bool MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const
+bool MaterialInstance::ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const
 {
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
@@ -2314,7 +2314,7 @@ bool MaterialClassInst::ApplyDynamicState(const Environment& env, Device& device
     return true;
 }
 
-void MaterialClassInst::ApplyStaticState(const Environment& env, Device& device, Program& program) const
+void MaterialInstance::ApplyStaticState(const Environment& env, Device& device, Program& program) const
 {
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
@@ -2322,7 +2322,7 @@ void MaterialClassInst::ApplyStaticState(const Environment& env, Device& device,
     return mClass->ApplyStaticState(state, device, program);
 }
 
-std::string MaterialClassInst::GetShaderId(const Environment& env) const
+std::string MaterialInstance::GetShaderId(const Environment& env) const
 {
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
@@ -2330,7 +2330,7 @@ std::string MaterialClassInst::GetShaderId(const Environment& env) const
     return mClass->GetShaderId(state);
 }
 
-std::string MaterialClassInst::GetShaderName(const Environment& env) const
+std::string MaterialInstance::GetShaderName(const Environment& env) const
 {
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
@@ -2338,7 +2338,7 @@ std::string MaterialClassInst::GetShaderName(const Environment& env) const
     return mClass->GetShaderName(state);
 }
 
-std::string MaterialClassInst::GetShader(const Environment& env, const Device& device) const
+std::string MaterialInstance::GetShader(const Environment& env, const Device& device) const
 {
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
@@ -2626,50 +2626,50 @@ TextureMap2DClass CreateMaterialClassFromText(TextBuffer&& text)
 }
 
 
-MaterialClassInst CreateMaterialFromColor(const Color4f& top_left,
-                                          const Color4f& top_right,
-                                          const Color4f& bottom_left,
-                                          const Color4f& bottom_right)
+MaterialInstance CreateMaterialFromColor(const Color4f& top_left,
+                                         const Color4f& top_right,
+                                         const Color4f& bottom_left,
+                                         const Color4f& bottom_right)
 {
-    return MaterialClassInst(CreateMaterialClassFromColor(top_left, top_right, bottom_left, bottom_right));
+    return MaterialInstance(CreateMaterialClassFromColor(top_left, top_right, bottom_left, bottom_right));
 }
 
-MaterialClassInst CreateMaterialFromColor(const Color4f& color)
+MaterialInstance CreateMaterialFromColor(const Color4f& color)
 {
-    return MaterialClassInst(CreateMaterialClassFromColor(color));
+    return MaterialInstance(CreateMaterialClassFromColor(color));
 }
 
-MaterialClassInst CreateMaterialFromImage(const std::string& uri)
+MaterialInstance CreateMaterialFromImage(const std::string& uri)
 {
-    return MaterialClassInst(CreateMaterialClassFromImage(uri));
+    return MaterialInstance(CreateMaterialClassFromImage(uri));
 }
 
-MaterialClassInst CreateMaterialFromImages(const std::initializer_list<std::string>& uris)
+MaterialInstance CreateMaterialFromImages(const std::initializer_list<std::string>& uris)
 {
-    return MaterialClassInst(CreateMaterialClassFromImages(uris));
+    return MaterialInstance(CreateMaterialClassFromImages(uris));
 }
 
-MaterialClassInst CreateMaterialFromImages(const std::vector<std::string>& uris)
+MaterialInstance CreateMaterialFromImages(const std::vector<std::string>& uris)
 {
-    return MaterialClassInst(CreateMaterialClassFromImages(uris));
+    return MaterialInstance(CreateMaterialClassFromImages(uris));
 }
 
-MaterialClassInst CreateMaterialFromSpriteAtlas(const std::string& uri, const std::vector<FRect>& frames)
+MaterialInstance CreateMaterialFromSpriteAtlas(const std::string& uri, const std::vector<FRect>& frames)
 {
-    return MaterialClassInst(CreateMaterialClassFromSpriteAtlas(uri, frames));
+    return MaterialInstance(CreateMaterialClassFromSpriteAtlas(uri, frames));
 }
 
-MaterialClassInst CreateMaterialFromText(const TextBuffer& text)
+MaterialInstance CreateMaterialFromText(const TextBuffer& text)
 {
-    return MaterialClassInst(CreateMaterialClassFromText(text));
+    return MaterialInstance(CreateMaterialClassFromText(text));
 }
 
-MaterialClassInst CreateMaterialFromText(TextBuffer&& text)
+MaterialInstance CreateMaterialFromText(TextBuffer&& text)
 {
-    return MaterialClassInst(CreateMaterialClassFromText(std::move(text)));
+    return MaterialInstance(CreateMaterialClassFromText(std::move(text)));
 }
 
-MaterialClassInst CreateMaterialFromTexture(std::string gpu_id, Texture* texture)
+MaterialInstance CreateMaterialFromTexture(std::string gpu_id, Texture* texture)
 {
     auto map = std::make_unique<TextureMap>("");
     map->SetType(TextureMap::Type::Texture2D);
@@ -2682,7 +2682,7 @@ MaterialClassInst CreateMaterialFromTexture(std::string gpu_id, Texture* texture
     material.SetNumTextureMaps(1);
     material.SetTextureMap(0, std::move(map));
 
-    return MaterialClassInst(material);
+    return MaterialInstance(material);
 }
 
 TextMaterial CreateMaterialFromText(const std::string& text,
@@ -2731,12 +2731,12 @@ TextMaterial CreateMaterialFromText(const std::string& text,
 
 std::unique_ptr<Material> CreateMaterialInstance(const MaterialClass& klass)
 {
-    return std::make_unique<MaterialClassInst>(klass);
+    return std::make_unique<MaterialInstance>(klass);
 }
 
 std::unique_ptr<Material> CreateMaterialInstance(const std::shared_ptr<const MaterialClass>& klass)
 {
-    return std::make_unique<MaterialClassInst>(klass);
+    return std::make_unique<MaterialInstance>(klass);
 }
 
 std::unique_ptr<TextMaterial> CreateMaterialInstance(const TextBuffer& text)

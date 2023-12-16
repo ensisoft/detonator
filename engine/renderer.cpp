@@ -1140,7 +1140,7 @@ void Renderer::GenerateDrawPackets(PaintNode& paint_node,
                 if (mStyle == RenderingStyle::Wireframe &&
                     packet.drawable->GetPrimitive() == gfx::Drawable::Primitive::Triangles)
                 {
-                    static auto wireframe_color = std::make_shared<gfx::MaterialClassInst>(
+                    static auto wireframe_color = std::make_shared<gfx::MaterialInstance>(
                             gfx::CreateMaterialClassFromColor(gfx::Color::Gray));
                     packet.drawable = std::make_shared<gfx::WireframeInstance>(packet.drawable);
                     packet.material = wireframe_color;

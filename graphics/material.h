@@ -1226,15 +1226,15 @@ namespace gfx
     };
 
     // Material instance that represents an instance of some material class.
-    class MaterialClassInst : public Material
+    class MaterialInstance : public Material
     {
     public:
         // Create new material instance based on the given material class.
-        MaterialClassInst(const std::shared_ptr<const MaterialClass>& klass, double time = 0.0)
+        MaterialInstance(const std::shared_ptr<const MaterialClass>& klass, double time = 0.0)
             : mClass(klass)
             , mRuntime(time)
         {}
-        MaterialClassInst(const MaterialClass& klass, double time = 0.0)
+        MaterialInstance(const MaterialClass& klass, double time = 0.0)
            : mClass(klass.Copy())
            , mRuntime(time)
         {}
@@ -1362,18 +1362,18 @@ namespace gfx
     // That means that the all the materials of some particular type *may*
     // share the material class which gets modified.
 
-    MaterialClassInst CreateMaterialFromColor(const Color4f& top_left,
-                                              const Color4f& top_right,
-                                              const Color4f& bottom_left,
-                                              const Color4f& bottom_right);
-    MaterialClassInst CreateMaterialFromColor(const Color4f& color);
-    MaterialClassInst CreateMaterialFromImage(const std::string& uri);
-    MaterialClassInst CreateMaterialFromImages(const std::initializer_list<std::string>& uris);
-    MaterialClassInst CreateMaterialFromImages(const std::vector<std::string>& uris);
-    MaterialClassInst CreateMaterialFromSpriteAtlas(const std::string& uri, const std::vector<FRect>& frames);
-    MaterialClassInst CreateMaterialFromText(const TextBuffer& text);
-    MaterialClassInst CreateMaterialFromText(TextBuffer&& text);
-    MaterialClassInst CreateMaterialFromTexture(std::string gpu_id, Texture* texture = nullptr);
+    MaterialInstance CreateMaterialFromColor(const Color4f& top_left,
+                                             const Color4f& top_right,
+                                             const Color4f& bottom_left,
+                                             const Color4f& bottom_right);
+    MaterialInstance CreateMaterialFromColor(const Color4f& color);
+    MaterialInstance CreateMaterialFromImage(const std::string& uri);
+    MaterialInstance CreateMaterialFromImages(const std::initializer_list<std::string>& uris);
+    MaterialInstance CreateMaterialFromImages(const std::vector<std::string>& uris);
+    MaterialInstance CreateMaterialFromSpriteAtlas(const std::string& uri, const std::vector<FRect>& frames);
+    MaterialInstance CreateMaterialFromText(const TextBuffer& text);
+    MaterialInstance CreateMaterialFromText(TextBuffer&& text);
+    MaterialInstance CreateMaterialFromTexture(std::string gpu_id, Texture* texture = nullptr);
 
     TextMaterial CreateMaterialFromText(const std::string& text,
                                         const std::string& font,

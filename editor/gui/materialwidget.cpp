@@ -1778,14 +1778,14 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
         if (dummy)
         {
             static auto dummy = gfx::CreateMaterialClassFromImage("app://textures/Checkerboard.png");
-            painter.Draw(*mDrawable, transform, gfx::MaterialClassInst(dummy));
+            painter.Draw(*mDrawable, transform, gfx::MaterialInstance(dummy));
         }
         ShowMessage(message, painter);
         return;
     }
 
     if (!mMaterialInst)
-        mMaterialInst = std::make_unique<gfx::MaterialClassInst>(mMaterial);
+        mMaterialInst = std::make_unique<gfx::MaterialInstance>(mMaterial);
 
     const auto time = mState == PlayState::Playing ? mTime : GetValue(mUI.kTime);
     mMaterialInst->SetRuntime(time);
