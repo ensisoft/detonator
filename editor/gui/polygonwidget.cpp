@@ -486,7 +486,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     gfx::PolygonMeshClass poly(mPolygon.GetId());
     mBuilder.BuildPoly(poly);
 
-    painter.Draw(gfx::PolygonMeshInstance(poly), view, gfx::MaterialClassInst(color));
+    painter.Draw(gfx::PolygonMeshInstance(poly), view, gfx::MaterialInstance(color));
 
     // visualize the vertices.
     view.Resize(6, 6);
@@ -535,7 +535,7 @@ void ShapeWidget::PaintScene(gfx::Painter& painter, double secs)
     gfx::PolygonMeshClass current(mPolygon.GetId() + "_2");
     builder.BuildPoly(current);
 
-    painter.Draw(gfx::PolygonMeshInstance(current), view, gfx::MaterialClassInst(color));
+    painter.Draw(gfx::PolygonMeshInstance(current), view, gfx::MaterialInstance(color));
 }
 
 void ShapeWidget::OnMousePress(QMouseEvent* mickey)

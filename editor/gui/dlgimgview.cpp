@@ -794,7 +794,7 @@ void DlgImgView::OnPaintScene(gfx::Painter& painter, double secs)
     static auto selection_material_class = gfx::CreateMaterialClassFromImage("app://textures/accept_icon.png");
     selection_material_class.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     selection_material_class.SetBaseColor(gfx::Color4f(1.0f, 1.0f, 1.0f, 1.0f));
-    static auto selection_material = gfx::MaterialClassInst(selection_material_class);
+    static auto selection_material = gfx::MaterialInstance(selection_material_class);
 
     for (size_t index=0; index<mPack.images.size(); ++index)
     {

@@ -166,7 +166,7 @@ namespace gui
         app::Workspace* mWorkspace = nullptr;
         // the material class we're editing
         std::shared_ptr<gfx::MaterialClass> mMaterial;
-        std::unique_ptr<gfx::MaterialClassInst> mMaterialInst;
+        std::unique_ptr<gfx::MaterialInstance> mMaterialInst;
         std::unique_ptr<gfx::Drawable> mDrawable;
         // play state
         enum PlayState {

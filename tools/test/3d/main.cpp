@@ -447,11 +447,11 @@ void DrawBasisVectors(RenderPass& pass, gfx::Painter& painter, const glm::mat4& 
     const glm::vec3 y = {0.0f, 100.0f, 0.0f};
     const glm::vec3 z = {0.0f, 0.0f, 100.0f};
     pass.Draw(model_to_world, gfx::DynamicLine3D(origin, x, 1.0f),
-         gfx::MaterialClassInst(gfx::CreateMaterialClassFromColor(gfx::Color::Green)), painter, false);
+              gfx::MaterialInstance(gfx::CreateMaterialClassFromColor(gfx::Color::Green)), painter, false);
     pass.Draw(model_to_world, gfx::DynamicLine3D(origin, y, 1.0f),
-         gfx::MaterialClassInst(gfx::CreateMaterialClassFromColor(gfx::Color::Red)), painter, false);
+              gfx::MaterialInstance(gfx::CreateMaterialClassFromColor(gfx::Color::Red)), painter, false);
     pass.Draw(model_to_world, gfx::DynamicLine3D(origin, z, 1.0f),
-         gfx::MaterialClassInst(gfx::CreateMaterialClassFromColor(gfx::Color::Blue)), painter, false);
+              gfx::MaterialInstance(gfx::CreateMaterialClassFromColor(gfx::Color::Blue)), painter, false);
 }
 
 void DrawScene(RenderPass& pass, gfx::Painter& painter, const State& state)
@@ -470,7 +470,7 @@ void DrawScene(RenderPass& pass, gfx::Painter& painter, const State& state)
 
         gfx::Grid grid_0(num_grid_lines, num_grid_lines, true);
         gfx::Grid grid_1(num_grid_lines, num_grid_lines, false);
-        static gfx::MaterialClassInst material(gfx::CreateMaterialClassFromColor(gfx::Color::HotPink));
+        static gfx::MaterialInstance material(gfx::CreateMaterialClassFromColor(gfx::Color::HotPink));
 
         float grid_origin_x = 0.0f;
         float grid_origin_y = 0.0f;
@@ -513,7 +513,7 @@ void DrawScene(RenderPass& pass, gfx::Painter& painter, const State& state)
 
     // cube
     {
-        static gfx::MaterialClassInst material(gfx::CreateMaterialClassFromImage("textures/Checkerboard.png"));
+        static gfx::MaterialInstance material(gfx::CreateMaterialClassFromImage("textures/Checkerboard.png"));
 
         gfx::Transform transform;
         transform.Push();

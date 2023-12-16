@@ -35,10 +35,10 @@ private:
    // ... uniforms, samplers
 }
 
-class MaterialClassInst
+class MaterialInstance
 {
 public:
-  MaterialClassInst(std::shared_ptr<const MaterialClass> klass)
+  MaterialInstance(std::shared_ptr<const MaterialClass> klass)
   {...}
 
    // the public *instance* API
@@ -70,14 +70,14 @@ m1->SetTime(game_time);
 
 
 To re-iterate, at runtime a user defined material type is represented by a *single* instance of MaterialClass and instances
-of that type are represented by instances of MaterialClassInst which each point to the type instance. (Confusing, right?)
+of that type are represented by instances of MaterialInstance which each point to the type instance. (Confusing, right?)
 
 This design allows the following:
 - Static type information is separate from the instance information.
   This allows many lightweight instances to refer to the same static data without repeating the data per each instance.
 - It's clear which information is static and which is runtime only. I.e. when loading/saving classes from/to JSON
   each MaterialClass member is loaded/saved.
-- Game runtime operations only apply to MaterialClassInst and all MaterialClass objects are immutable.
+- Game runtime operations only apply to MaterialInstance and all MaterialClass objects are immutable.
 - Design time operations apply only to MaterialClass objects.
 
 

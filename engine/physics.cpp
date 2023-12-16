@@ -650,7 +650,7 @@ std::tuple<bool, float> PhysicsEngine::FindMass(const std::string& node) const
 #if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
 void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter) const
 {
-    static gfx::MaterialClassInst mat(gfx::CreateMaterialClassFromColor(gfx::Color4f(gfx::Color::HotPink, 0.6)));
+    static gfx::MaterialInstance mat(gfx::CreateMaterialClassFromColor(gfx::Color4f(gfx::Color::HotPink, 0.6)));
 
     gfx::Transform model;
     model.Scale(mScale);
