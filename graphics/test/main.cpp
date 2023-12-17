@@ -638,6 +638,86 @@ private:
     std::unique_ptr<gfx::Material> mClear512x512;
 };
 
+class TextureColorExtractTest : public GraphicsTest
+{
+public:
+    TextureColorExtractTest()
+    {
+        gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
+        material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Opaque);
+        {
+            auto source = gfx::LoadTextureFromFile("textures/rgbw_512x512.png");
+            source->SetName("rgbw_512x512.png");
+            material.SetTexture(std::move(source));
+            mSource = gfx::CreateMaterialInstance(material);
+        }
+    }
+    virtual void Render(gfx::Painter& painter) override
+    {
+        gfx::FillRect(painter, gfx::FRect(100.0f, 200.0f, 256.0f, 256.0f), *mSource);
+
+        auto* device = painter.GetDevice();
+
+        if (!mColorR)
+        {
+            mColorR = gfx::CreateMaterialInstance(MakeMaterial("R", gfx::Color::Red, 0.75f, device));
+        }
+        if (!mColorG)
+        {
+            mColorG = gfx::CreateMaterialInstance(MakeMaterial("G", gfx::Color::Green, 0.75f, device));
+        }
+        if (!mColorB)
+        {
+            mColorB = gfx::CreateMaterialInstance(MakeMaterial("B", gfx::Color::Blue, 0.75f, device));
+        }
+
+        gfx::FillRect(painter, gfx::FRect(500.0f, 200.0f, 128.0f, 128.0f), *mColorR);
+        gfx::FillRect(painter, gfx::FRect(650.0f, 200.0f, 128.0f, 128.0f), *mColorG);
+        gfx::FillRect(painter, gfx::FRect(800.0f, 200.0f, 128.0f, 128.0f), *mColorB);
+
+    }
+    virtual std::string GetName() const override
+    {
+        return "TextureColorExtractTest";
+    }
+
+private:
+    gfx::MaterialClass MakeMaterial(const std::string& id, const gfx::Color4f& color_value, float threshold, gfx::Device* device) const
+    {
+        const auto& klass = mSource->GetClass();
+        const auto& map   = klass->GetTextureMap(0);
+        const auto* src   = map->GetTextureSource(0);
+
+        gfx::TextureSource::Environment env;
+        env.dynamic_content = false;
+        // get the source texture handle
+        gfx::Texture* src_texture = src->Upload(env, *device);
+        gfx::Texture* dst_texture = device->MakeTexture(src_texture->GetId() + "/" + id);
+        dst_texture->SetName(src_texture->GetName() + "/" + id);
+        dst_texture->Allocate(src_texture->GetWidth(),
+                              src_texture->GetHeight(),
+                              gfx::Texture::Format::sRGBA);
+        // disallow garbage collection since we're using the handle
+        // in the material.
+        dst_texture->SetGarbageCollection(false);
+
+        gfx::algo::ExtractColor(src_texture, dst_texture, device, color_value, threshold);
+
+        gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
+        material.SetSurfaceType(gfx::MaterialClass::SurfaceType::Opaque);
+        material.AddTexture(gfx::UseExistingTexture(dst_texture->GetId(), dst_texture, ""));
+        return material;
+    }
+
+private:
+    std::unique_ptr<gfx::Material> mSource;
+    std::unique_ptr<gfx::Material> mColorR;
+    std::unique_ptr<gfx::Material> mColorG;
+    std::unique_ptr<gfx::Material> mColorB;
+
+};
+
+
 class GradientTest : public GraphicsTest
 {
 public:
@@ -2672,6 +2752,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new TextureTest);
     tests.emplace_back(new TextureBlurTest);
     tests.emplace_back(new TextureEdgeTest);
+    tests.emplace_back(new TextureColorExtractTest);
     tests.emplace_back(new GradientTest);
     tests.emplace_back(new SpriteTest);
     tests.emplace_back(new SpriteSheetTest);
