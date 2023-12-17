@@ -2202,6 +2202,10 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
         surface.size     = gfx::USize(width, height);
         mState.renderer.SetSurface(surface);
 
+        mState.renderer.SetEditingMode(true);
+        mState.renderer.SetName("TilemapWidgetRenderer/" + mState.klass->GetId());
+        mState.renderer.SetClassLibrary(mState.workspace);
+
         const bool show_render_layers = GetValue(mUI.chkShowRenderLayers);
         const bool show_data_layers = GetValue(mUI.chkShowDataLayers);
 
