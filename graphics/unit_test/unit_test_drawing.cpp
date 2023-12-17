@@ -136,6 +136,8 @@ public:
     { return ""; }
     virtual std::string GetGroup() const override
     { return ""; }
+    virtual std::string GetId() const override
+    { return "";}
 private:
     unsigned mWidth  = 0;
     unsigned mHeight = 0;

@@ -658,7 +658,7 @@ public:
 
     virtual gfx::Texture* MakeTexture(const std::string& name) override
     {
-        auto texture = std::make_unique<TextureImpl>(mGL, *this);
+        auto texture = std::make_unique<TextureImpl>(name, mGL, *this);
         auto* ret = texture.get();
         mTextures[name] = std::move(texture);
         // technically not "use" but we need to track the number of frames
@@ -1607,9 +1607,10 @@ private:
     class TextureImpl : public gfx::Texture
     {
     public:
-        TextureImpl(const OpenGLFunctions& funcs, OpenGLES2GraphicsDevice& device)
+        TextureImpl(const std::string& id, const OpenGLFunctions& funcs, OpenGLES2GraphicsDevice& device)
            : mGL(funcs)
            , mDevice(device)
+           , mGpuId(id)
         {
             mFlags.set(Flags::Transient, false);
             mFlags.set(Flags::GarbageCollect, true);
@@ -1782,6 +1783,8 @@ private:
         { return mName; }
         virtual std::string GetGroup() const override
         { return mGroup; }
+        virtual std::string GetId() const override
+        { return mGpuId; }
 
         virtual bool GenerateMips() override
         {
@@ -1894,6 +1897,7 @@ private:
         std::size_t mHash = 0;
         std::string mName;
         std::string mGroup;
+        std::string mGpuId;
         base::bitflag<Flags> mFlags;
         bool mHasMips   = false;
         bool mFBOBound  = false;
@@ -2612,7 +2616,7 @@ private:
                 // texture object in the resolve step.
                 if (!mTexture)
                 {
-                    mTexture = std::make_unique<TextureImpl>(mGL, mDevice);
+                    mTexture = std::make_unique<TextureImpl>(mName + "/Color0", mGL, mDevice);
                     mTexture->SetName("FBO/" + mName + "/color0");
                     mTexture->Allocate(mConfig.width, mConfig.height, gfx::Texture::Format::sRGBA);
                     mTexture->SetFilter(gfx::Texture::MinFilter::Linear);
