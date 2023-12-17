@@ -528,6 +528,7 @@ SceneWidget::SceneWidget(app::Workspace* workspace) : mUndoStack(3)
     mState.workspace = workspace;
     mState.renderer.SetClassLibrary(workspace);
     mState.renderer.SetEditingMode(true);
+    mState.renderer.SetName("SceneWidgetRenderer/" + mState.scene->GetId());
     mState.view = mUI.tree;
     mOriginalHash = mState.scene->GetHash();
 

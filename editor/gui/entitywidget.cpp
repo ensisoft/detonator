@@ -2996,6 +2996,9 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     mState.renderer.SetSurface(surface);
 
     mState.renderer.SetStyle(GetValue(mUI.cmbStyle));
+    mState.renderer.SetClassLibrary(mState.workspace);
+    mState.renderer.SetEditingMode(true);
+    mState.renderer.SetName("EntityWidgetRenderer/" + mState.entity->GetId());
 
     mState.renderer.BeginFrame();
     mState.renderer.Draw(*mState.entity, *device, &hook);

@@ -1513,6 +1513,10 @@ void AnimationTrackWidget::PaintScene(gfx::Painter& painter, double secs)
     surface.size     = gfx::USize(width, height);
     mRenderer.SetSurface(surface);
 
+    mRenderer.SetEditingMode(true);
+    mRenderer.SetClassLibrary(mWorkspace);
+    mRenderer.SetName("AnimationWidgetRenderer/" + mState.entity->GetId());
+
     mRenderer.BeginFrame();
     if (mPlaybackAnimation)
     {
