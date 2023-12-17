@@ -16833,11 +16833,14 @@
   ],
   "shapes": [
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 395180659,
+      "content_hash_lo": 3932344216,
       "id": "JQAP7v0ZUJ",
       "inline_data": {
-        "command_buffer": "AgAAAAsAAAAAAAAAAAAAAAAAAAA=",
+        "byte_order": "LE",
+        "command_buffer": "AgAAAAsAAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "uRb2Pla08r65FvY+VrTyPmqj9D4Iine6aqP0PgiKdzrNzMw9AAAAgM3MzD0AAAAAAAAAAArXo70AAAAACtejPQAAAACZwmm/AAAAAJnCaT8i/K89WEZ/vyL8rz1YRn8/BvhqPzuEf78G+Go/O4R/P1hGfz/eGWe/WEZ/P94ZZz8dwn8/+h2svR3Cfz/6Haw9VCJmPwiKd7pUImY/CIp3Ohsw8z4Iine6GzDzPgiKdzo=",
         "vertex_layout": {
           "attributes": [
@@ -16859,6 +16862,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "StoneBlock",
       "resource_id": "JQAP7v0ZUJ",
       "resource_name": "StoneBlock",
@@ -16867,11 +16871,14 @@
       "uri": ""
     },
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 2700417379,
+      "content_hash_lo": 2837211076,
       "id": "oNJA4jNZF9",
       "inline_data": {
-        "command_buffer": "AgAAABwAAAAAAAAAAAAAAAAAAAA=",
+        "byte_order": "LE",
+        "command_buffer": "AgAAABwAAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "9LAMP9mAGb/0sAw/2YAZP2dm5j4AAAAAZ2bmPgAAAID2Qpk+AAAAgPZCmT4AAAAAxQZMPicgSb3FBkw+JyBJPTHHGD47D8u9MccYPjsPyz07D8s9Ow/LvTsPyz07D8s9AAAAADHHGL4AAAAAMccYPgAAAADA4rK+AAAAAMDisj4xxxg+VCLmvjHHGD5UIuY+xQZMPh3C/77FBkw+HcL/PsDisj70sAy/wOKyPvSwDD+Kgsw+2YAZv4qCzD7ZgBk/VCLmPr5QJr9UIuY+vlAmP2dm5j4AAEC/Z2bmPgAAQD+amZk+AACAv5qZmT4AAIA/zcxMPwAAgL/NzEw/AACAP4fwPz9swEy/h/A/P2zATD+iIDM/oiAzv6IgMz+iIDM/Z2YmP5qZGb9nZiY/mpkZP1GQWT8dwv++UZBZPx3C/z42YGY/VCLmvjZgZj9UIuY+GzBzP4qCzL4bMHM/ioLMPgAAgD/A4rK+AACAP8Disj4AAIA/MccYvgAAgD8xxxg+GzBzPzHHGL4bMHM/MccYPjZgZj87D8u9NmBmPzsPyz2H8D8/AAAAgIfwPz8AAAAAZ2bmPgAAAIBnZuY+AAAAAA==",
         "vertex_layout": {
           "attributes": [
@@ -16893,6 +16900,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Tree",
       "resource_id": "oNJA4jNZF9",
       "resource_name": "Tree",
@@ -16901,11 +16909,14 @@
       "uri": ""
     },
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 1916754222,
+      "content_hash_lo": 2650145745,
       "id": "gUmNEBelRm",
       "inline_data": {
-        "command_buffer": "AgAAAAsAAAAAAAAAAAAAAAAAAAA=",
+        "byte_order": "LE",
+        "command_buffer": "AgAAAAsAAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "HcL/PsDisr4dwv8+wOKyPh3C/z4AAACAHcL/PgAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAKIgM78AAAAAoiAzP4qCzD6iIDO/ioLMPqIgMz+Kgsw+AACAv4qCzD4AAIA/2YAZPwAAgL/ZgBk/AACAP9mAGT+iIDO/2YAZP6IgMz8AAIA/oiAzvwAAgD+iIDM/AACAPwAAAIAAAIA/AAAAAB3C/z4AAACAHcL/PgAAAAA=",
         "vertex_layout": {
           "attributes": [
@@ -16927,6 +16938,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Sign",
       "resource_id": "gUmNEBelRm",
       "resource_name": "Sign",
@@ -16935,11 +16947,14 @@
       "uri": ""
     },
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 3547901735,
+      "content_hash_lo": 3763813502,
       "id": "oDE09YOPk9",
       "inline_data": {
-        "command_buffer": "AgAAABAAAAAAAAAAAAAAAAAAAAA=",
+        "byte_order": "LE",
+        "command_buffer": "AgAAABAAAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "HcL/PvSwDL8dwv8+9LAMP2dm5j4AAAAAZ2bmPgAAAIAxxxg+Ow/LvTHHGD47D8s9JyBJPfZCmb4nIEk99kKZPgAAAAAdwv++AAAAAB3C/z4AAAAAbMBMvwAAAABswEw/MccYPgAAgL8xxxg+AACAP6IgMz8AAIC/oiAzPwAAgD+H8D8/NmBmv4fwPz82YGY/UZBZP2zATL9RkFk/bMBMPwAAgD9swEy/AACAP2zATD8AAIA/VCLmvgAAgD9UIuY+bMBMP8UGTL5swEw/xQZMPofwPz87D8u9h/A/PzsPyz30sAw/AAAAgPSwDD8AAAAAZ2bmPgAAAIBnZuY+AAAAAA==",
         "vertex_layout": {
           "attributes": [
@@ -16961,6 +16976,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Bush (1)",
       "resource_id": "oDE09YOPk9",
       "resource_name": "Bush (1)",
@@ -16969,11 +16985,14 @@
       "uri": ""
     },
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 1372392836,
+      "content_hash_lo": 3352594871,
       "id": "fW1kOmDCo0",
       "inline_data": {
-        "command_buffer": "AgAAAA0AAAAAAAAAAAAAAAAAAAACAAAACQAAAAAAAAANAAAAAAAAAAIAAAAJAAAAAAAAABYAAAAAAAAA",
+        "byte_order": "LE",
+        "command_buffer": "AgAAAA0AAAAAAAAAAgAAAAkAAAANAAAAAgAAAAkAAAAWAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "HcL/Ph3C/74dwv8+HcL/Ph3C/z4AAACAHcL/PgAAAADA4rI+AAAAgMDisj4AAAAA9kKZPicgSb32Qpk+JyBJPZqZmT6amRm+mpmZPpqZGT6amZk+mpkZv5qZmT6amRk/AACAPmdmJr8AAIA+Z2YmP5qZmT4AAEC/mpmZPgAAQD/2Qpk+AACAv/ZCmT4AAIA/oiAzPwAAgL+iIDM/AACAPzMzMz/NzEy9MzMzP83MTD3ZgBk/AAAAgNmAGT8AAAAAHcL/PgAAAIAdwv8+AAAAAPZCmT4dwv++9kKZPh3C/z72Qpk+xQZMvvZCmT7FBkw+MccYPjsPy70xxxg+Ow/LPQAAAADFBky+AAAAAMUGTD4AAAAAioLMvgAAAACKgsw+JyBJPR3C/74nIEk9HcL/PjHHGD70sAy/MccYPvSwDD9YRn8+9LAMv1hGfz70sAw/9kKZPvSwDL/2Qpk+9LAMPzMzMz8AAEC/MzMzPwAAQD82YGY/h/A/vzZgZj+H8D8/GzBzP75QJr8bMHM/vlAmPwAAgD/ZgBm/AACAP9mAGT8AAIA/wOKyvgAAgD/A4rI+GzBzP1hGf74bMHM/WEZ/PmzATD9YRn++bMBMP1hGfz6H8D8/WEZ/vofwPz9YRn8+oiAzP1hGf76iIDM/WEZ/Pg==",
         "vertex_layout": {
           "attributes": [
@@ -16995,6 +17014,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Cactus (1)",
       "resource_id": "fW1kOmDCo0",
       "resource_name": "Cactus (1)",
@@ -17003,11 +17023,14 @@
       "uri": ""
     },
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 3468705215,
+      "content_hash_lo": 127945510,
       "id": "IfEi7dQdbW",
       "inline_data": {
-        "command_buffer": "AgAAAA0AAAAAAAAAAAAAAAAAAAA=",
+        "byte_order": "LE",
+        "command_buffer": "AgAAAA0AAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "HcL/PvSwDL8dwv8+9LAMPx3C/z4AAACAHcL/PgAAAADA4rI+AAAAgMDisj4AAAAAxQZMPjsPy73FBkw+Ow/LPQAAAABUIua+AAAAAFQi5j4AAAAA2YAZvwAAAADZgBk/Ow/LPQAAgL87D8s9AACAPzZgZj8AAIC/NmBmPwAAgD8AAIA/h/A/vwAAgD+H8D8/GzBzPx3C/74bMHM/HcL/PlGQWT/FBky+UZBZP8UGTD7ZgBk/AAAAgNmAGT8AAAAAHcL/PgAAAIAdwv8+AAAAAA==",
         "vertex_layout": {
           "attributes": [
@@ -17029,6 +17052,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Cactus (2)",
       "resource_id": "IfEi7dQdbW",
       "resource_name": "Cactus (2)",
@@ -17037,11 +17061,14 @@
       "uri": ""
     },
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 2825558143,
+      "content_hash_lo": 2320901268,
       "id": "l9oab5XQTK",
       "inline_data": {
-        "command_buffer": "AgAAABUAAAAAAAAAAAAAAAAAAAACAAAAAQAAAAAAAAAVAAAAAAAAAAIAAAALAAAAAAAAABYAAAAAAAAA",
+        "byte_order": "LE",
+        "command_buffer": "AgAAABUAAAAAAAAAAgAAAAEAAAAVAAAAAgAAAAsAAAAWAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "VCLmPlGQWb9UIuY+UZBZP1Qi5j70sAy/VCLmPvSwDD/A4rI+9LAMv8Disj70sAw/AACAPmdmJr8AAIA+Z2YmPzHHGD6H8D+/MccYPofwPz8nIEk9bMBMvycgST1swEw/MccYPgAAgL8xxxg+AACAP4fwPz8AAIC/h/A/PwAAgD9RkFk/NmBmv1GQWT82YGY/UZBZP2zATL9RkFk/bMBMP2zATD+H8D+/bMBMP4fwPz9RkFk/vlAmv1GQWT++UCY/GzBzP/SwDL8bMHM/9LAMPxswcz/A4rK+GzBzP8Disj4AAIA/xQZMvgAAgD/FBkw+AACAPzsPy70AAIA/Ow/LPTZgZj8AAACANmBmPwAAAAC+UCY/AAAAgL5QJj8AAAAA9LAMPzHHGL70sAw/MccYPh3C/z7A4rK+HcL/PsDisj5UIuY+VCLmvlQi5j5UIuY+WEZ/Pr5QJr9YRn8+vlAmP8UGTD70sAy/xQZMPvSwDD/2Qpk+VCLmvvZCmT5UIuY+9kKZPlhGf772Qpk+WEZ/PjsPyz3FBky+Ow/LPcUGTD4AAAAA9kKZvgAAAAD2Qpk+AAAAAB3C/74AAAAAHcL/PgAAAACiIDO/AAAAAKIgMz8xxxg+h/A/vzHHGD6H8D8/wOKyPvSwDL/A4rI+9LAMP8Disj5UIua+wOKyPlQi5j72Qpk+VCLmvvZCmT5UIuY+",
         "vertex_layout": {
           "attributes": [
@@ -17063,6 +17090,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Cactus (3)",
       "resource_id": "l9oab5XQTK",
       "resource_name": "Cactus (3)",
@@ -17071,11 +17099,14 @@
       "uri": ""
     },
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 3756997995,
+      "content_hash_lo": 2626853818,
       "id": "EXQWh9Zz2B",
       "inline_data": {
-        "command_buffer": "AgAAABQAAAAAAAAAAAAAAAAAAAA=",
+        "byte_order": "LE",
+        "command_buffer": "AgAAABQAAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "k2cZP5NnGb+TZxk/k2cZPwAAQD+4Nky+AABAP7g2TD4AAEA/lTzLvQAAQD+VPMs9rg0zP5U8S72uDTM/lTxLPWdmJj8AAAAAZ2YmPwAAAIDJsww/AAAAgMmzDD8AAAAAAACAPpU8S70AAIA+lTxLPZU8Sz0AAIC+lTxLPQAAgD4AAAAAAAAAvwAAAAAAAAA/AAAAAMmzTL8AAAAAybNMP5NnGT6TZ1m/k2cZPpNnWT+4Nkw+AACAv7g2TD4AAIA/rg0zPwAAgL+uDTM/AACAP8mzTD/lWWa/ybNMP+VZZj/Js0w/ybNMv8mzTD/Js0w/AACAP8mzTL8AAIA/ybNMPwAAgD9cG+a+AACAP1wb5j6uDXM/Jc+yvq4Ncz8lz7I+NDNzPwAAgL40M3M/AACAPgAAQD+4Nky+AABAP7g2TD4=",
         "vertex_layout": {
           "attributes": [
@@ -17097,6 +17128,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Bush (2)",
       "resource_id": "EXQWh9Zz2B",
       "resource_name": "Bush (2)",
@@ -17105,11 +17137,14 @@
       "uri": ""
     },
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 71988665,
+      "content_hash_lo": 4090419310,
       "id": "QwLaM5bEqx",
       "inline_data": {
-        "command_buffer": "AgAAABcAAAAAAAAAAAAAAAAAAAA=",
+        "byte_order": "LE",
+        "command_buffer": "AgAAABcAAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "ybMMP5NnGb/Jsww/k2cZPwAAAD+amRm+AAAAP5qZGT7Js8w+lTxLvcmzzD6VPEs9k2eZPgAAAICTZ5k+AAAAALg2TD4AAACAuDZMPgAAAAC4Nkw+AACAvrg2TD4AAIA+AAAAAFwb5r4AAAAAXBvmPrg2TD7Js0y/uDZMPsmzTD+TZ5k+AACAv5NnmT4AAIA/rg0zPwAAgL+uDTM/AACAP8mzTD/Js0y/ybNMP8mzTD/lWWY/AABAv+VZZj8AAEA/5VlmP5NnGb/lWWY/k2cZPwAAgD/Jswy/AACAP8mzDD+uDXM/XBvmvq4Ncz9cG+Y+k2dZP8mzzL6TZ1k/ybPMPsmzTD8lz7K+ybNMPyXPsj7Js0w/k2eZvsmzTD+TZ5k+5VlmP5NnGb7lWWY/k2cZPuVZZj+VPMu95VlmP5U8yz0AAEA/lTxLvQAAQD+VPEs9rg0zPwAAAICuDTM/AAAAAAAAAD+TZxm+AAAAP5NnGT4=",
         "vertex_layout": {
           "attributes": [
@@ -17131,6 +17166,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Grass (2)",
       "resource_id": "QwLaM5bEqx",
       "resource_name": "Grass (2)",
@@ -17139,11 +17175,14 @@
       "uri": ""
     },
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 71988665,
+      "content_hash_lo": 4090419310,
       "id": "FgJP6uJzoG",
       "inline_data": {
-        "command_buffer": "AgAAABcAAAAAAAAAAAAAAAAAAAA=",
+        "byte_order": "LE",
+        "command_buffer": "AgAAABcAAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "ybMMP5NnGb/Jsww/k2cZPwAAAD+amRm+AAAAP5qZGT7Js8w+lTxLvcmzzD6VPEs9k2eZPgAAAICTZ5k+AAAAALg2TD4AAACAuDZMPgAAAAC4Nkw+AACAvrg2TD4AAIA+AAAAAFwb5r4AAAAAXBvmPrg2TD7Js0y/uDZMPsmzTD+TZ5k+AACAv5NnmT4AAIA/rg0zPwAAgL+uDTM/AACAP8mzTD/Js0y/ybNMP8mzTD/lWWY/AABAv+VZZj8AAEA/5VlmP5NnGb/lWWY/k2cZPwAAgD/Jswy/AACAP8mzDD+uDXM/XBvmvq4Ncz9cG+Y+k2dZP8mzzL6TZ1k/ybPMPsmzTD8lz7K+ybNMPyXPsj7Js0w/k2eZvsmzTD+TZ5k+5VlmP5NnGb7lWWY/k2cZPuVZZj+VPMu95VlmP5U8yz0AAEA/lTxLvQAAQD+VPEs9rg0zPwAAAICuDTM/AAAAAAAAAD+TZxm+AAAAP5NnGT4=",
         "vertex_layout": {
           "attributes": [
@@ -17165,6 +17204,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Grass (1)",
       "resource_id": "FgJP6uJzoG",
       "resource_name": "Grass (1)",
@@ -17173,11 +17213,14 @@
       "uri": ""
     },
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 3390137878,
+      "content_hash_lo": 4120486692,
       "id": "dWDAODzq3M",
       "inline_data": {
-        "command_buffer": "AgAAAA8AAAAAAAAAAAAAAAAAAAA=",
+        "byte_order": "LE",
+        "command_buffer": "AgAAAA8AAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "ybMMP+VZJr/Jsww/5VkmP8mzDD+4Nky+ybMMP7g2TD5nZuY+zcxMvmdm5j7NzEw+Jc+yPgAAAIAlz7I+AAAAAAAAgD4AAACAAACAPgAAAACTZxk+uDZMvpNnGT64Nkw+lTzLPQAAAL+VPMs9AAAAPwAAAADlWSa/AAAAAOVZJj8AAAAAAACAvwAAAAAAAIA/AACAPwAAgL8AAIA/AACAPwAAgD/Jswy/AACAP8mzDD8AAEA/AACAvgAAQD8AAIA+5VkmP5U8y73lWSY/lTzLPZNnGT+VPMu9k2cZP5U8yz3Jsww/uDZMvsmzDD+4Nkw+",
         "vertex_layout": {
           "attributes": [
@@ -17199,6 +17242,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Skeleton",
       "resource_id": "dWDAODzq3M",
       "resource_name": "Skeleton",
@@ -17207,11 +17251,14 @@
       "uri": ""
     },
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 233388912,
+      "content_hash_lo": 3842895155,
       "id": "YkK6SEnX2R",
       "inline_data": {
-        "command_buffer": "AgAAAAwAAAAAAAAAAAAAAAAAAAA=",
+        "byte_order": "LE",
+        "command_buffer": "AgAAAAwAAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "ybMMP5NnGb/Jsww/k2cZP8mzDD8AAACAybMMPwAAAAAlz7I+AAAAgCXPsj4AAAAAAACAPrg2TL4AAIA+uDZMPpU8Sz0AAAC/lTxLPQAAAD8AAAAA5VlmvwAAAADlWWY/AAAAAAAAgL8AAAAAAACAPwAAgD8AAIC/AACAPwAAgD+uDXM/AAAAv64Ncz8AAAA/k2dZP7g2TL6TZ1k/uDZMPgAAQD+TZxm+AABAP5NnGT7Jsww/AAAAgMmzDD8AAAAA",
         "vertex_layout": {
           "attributes": [
@@ -17233,6 +17280,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Stone",
       "resource_id": "YkK6SEnX2R",
       "resource_name": "Stone",
@@ -17241,11 +17289,14 @@
       "uri": ""
     },
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 2939189127,
+      "content_hash_lo": 1542389226,
       "id": "8636ofEjei",
       "inline_data": {
-        "command_buffer": "AgAAABMAAAAAAAAAAAAAAAAAAAA=",
+        "byte_order": "LE",
+        "command_buffer": "AgAAABMAAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "k2cZPwAAAL+TZxk/AAAAPwAAQD8AAIC+AABAPwAAgD7rUTg/CtcjvutROD8K1yM+k2cZP5U8y72TZxk/lTzLPcmzzD6VPMu9ybPMPpU8yz0AAIA+uDZMvgAAgD64Nkw+j8J1Po/Cdb6PwnU+j8J1PgAAgD4lz7K+AACAPiXPsj4lz7I+ybMMvyXPsj7Jsww/ybPMPpNnGb/Js8w+k2cZP8mzzD7Js0y/ybPMPsmzTD+uDTM/ybNMv64NMz/Js0w/AABAP64NM78AAEA/rg0zP64Ncz/lWSa/rg1zP+VZJj8AAIA/AAAAvwAAgD8AAAA/rg1zP8mzzL6uDXM/ybPMPsmzTD/Js8y+ybNMP8mzzD4AAEA/Jc+yvgAAQD8lz7I+AABAPwAAgL4AAEA/AACAPg==",
         "vertex_layout": {
           "attributes": [
@@ -17267,6 +17318,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Bandit Idle",
       "resource_id": "8636ofEjei",
       "resource_name": "Bandit Idle",
@@ -17275,11 +17327,14 @@
       "uri": ""
     },
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 2432834577,
+      "content_hash_lo": 1747425978,
       "id": "26DgI88X5u",
       "inline_data": {
-        "command_buffer": "AgAAABEAAAAAAAAAAAAAAAAAAAA=",
+        "byte_order": "LE",
+        "command_buffer": "AgAAABEAAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "k2cZPwAAAL+TZxk/AAAAP5NnGT+VPMu9k2cZP5U8yz2TZ5k+lTzLvZNnmT6VPMs9uDZMPrg2TL64Nkw+uDZMPpNnmT4AAAC/k2eZPgAAAD/Js8w+k2cZv8mzzD6TZxk/ybPMPsmzTL/Js8w+ybNMP64NMz/Js0y/rg0zP8mzTD/lWWY/rg0zv+VZZj+uDTM/AACAP5NnGb8AAIA/k2cZPwAAgD/Js8y+AACAP8mzzD7lWWY/ybPMvuVZZj/Js8w+ybNMP8mzzL7Js0w/ybPMPsmzTD+TZ5m+ybNMP5NnmT7Js0w/uDZMvsmzTD+4Nkw+rg0zP5U8y72uDTM/lTzLPZNnGT+VPMu9k2cZP5U8yz0=",
         "vertex_layout": {
           "attributes": [
@@ -17301,6 +17356,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Bandit Walk",
       "resource_id": "26DgI88X5u",
       "resource_name": "Bandit Walk",
@@ -17309,11 +17365,14 @@
       "uri": ""
     },
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 1348646919,
+      "content_hash_lo": 886347444,
       "id": "zoqnFP5Gvz",
       "inline_data": {
-        "command_buffer": "AgAAABAAAAAAAAAAAAAAAAAAAAA=",
+        "byte_order": "LE",
+        "command_buffer": "AgAAABAAAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "k2cZPwAAAL+TZxk/AAAAP5NnGT+VPMu9k2cZP5U8yz24Nkw+lTzLvbg2TD6VPMs9uDZMPpNnmb64Nkw+k2eZPpNnmT4AAAC/k2eZPgAAAD+TZ5k+k2cZv5NnmT6TZxk/ybPMPpNnGb/Js8w+k2cZP8mzzD7Js0y/ybPMPsmzTD+uDTM/ybNMv64NMz/Js0w/ybNMP64NM7/Js0w/rg0zPwAAgD+uDTO/AACAP64NMz8AAIA/ybPMvgAAgD/Js8w+5VlmP5Nnmb7lWWY/k2eZPsmzTD+4Nky+ybNMP7g2TD6uDTM/lTzLva4NMz+VPMs9k2cZP5U8y72TZxk/lTzLPQ==",
         "vertex_layout": {
           "attributes": [
@@ -17335,6 +17394,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Bandit Attack",
       "resource_id": "zoqnFP5Gvz",
       "resource_name": "Bandit Attack",
@@ -17343,11 +17403,14 @@
       "uri": ""
     },
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 2398502918,
+      "content_hash_lo": 239199540,
       "id": "W27ZFgJKAJ",
       "inline_data": {
-        "command_buffer": "AgAAABMAAAAAAAAAAAAAAAAAAAA=",
+        "byte_order": "LE",
+        "command_buffer": "AgAAABMAAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "k2cZP8mzzL6TZxk/ybPMPpNnGT+VPMu9k2cZP5U8yz2TZ5k+lTzLvZNnmT6VPMs9uDZMPrg2TL64Nkw+uDZMPrg2TD6TZ5m+uDZMPpNnmT6TZ5k+AAAAv5NnmT4AAAA/ybPMPpNnGb/Js8w+k2cZP8mzzD6uDTO/ybPMPq4NMz/Js8w+ybNMv8mzzD7Js0w/rg0zP8mzTL+uDTM/ybNMP8mzTD+uDTO/ybNMP64NMz/Js0w/k2cZv8mzTD+TZxk/5VlmPwAAAL/lWWY/AAAAPwAAgD/Js8y+AACAP8mzzD7lWWY/k2eZvuVZZj+TZ5k+ybNMP5Nnmb7Js0w/k2eZPsmzTD+4Nky+ybNMP7g2TD6uDTM/lTzLva4NMz+VPMs9k2cZP5U8y72TZxk/lTzLPQ==",
         "vertex_layout": {
           "attributes": [
@@ -17369,6 +17432,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Bandit Jump",
       "resource_id": "W27ZFgJKAJ",
       "resource_name": "Bandit Jump",
@@ -17381,7 +17445,10 @@
       "content_hash_lo": 0,
       "id": "YFMYNa7lU4",
       "inline_data": {
-        "command_buffer": "AgAAAAYAAAAAAAAAAAAAAAAAAAA=",
+        "byte_order": "LE",
+        "command_buffer": "AgAAAAYAAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "5VkmP8mzDL/lWSY/ybMMP5iZWT8AAACAmJlZPwAAAACZmRk+AAAAgJmZGT4AAAAAmpmZPgAAgL+amZk+AACAPzQzMz8AAIC/NDMzPwAAgD+YmVk/AAAAgJiZWT8AAAAA",
         "vertex_layout": {
           "attributes": [
@@ -17403,6 +17470,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Bandit",
       "resource_id": "YFMYNa7lU4",
       "resource_name": "Bandit",
@@ -17411,11 +17479,14 @@
       "uri": ""
     },
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 1718775255,
+      "content_hash_lo": 3476181196,
       "id": "4rBCnTGuXK",
       "inline_data": {
-        "command_buffer": "AgAAABMAAAAAAAAAAAAAAAAAAAA=",
+        "byte_order": "LE",
+        "command_buffer": "AgAAABMAAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "k2cZP1wb5r6TZxk/XBvmPuVZJj+VPMu95VkmP5U8yz1cG+Y+lTzLvVwb5j6VPMs9k2eZPpNnGb6TZ5k+k2cZPgAAgD64Nky+AACAPrg2TD4lz7I+AAAAvyXPsj4AAAA/Jc+yPuVZJr8lz7I+5VkmP1wb5j4AAEC/XBvmPgAAQD8AAAA/ybNMvwAAAD/Js0w/5VkmP8mzTL/lWSY/ybNMP64NMz8AAEC/rg0zPwAAQD8AAEA/rg0zvwAAQD+uDTM/ybNMP+VZJr/Js0w/5VkmP64Ncz9cG+a+rg1zP1wb5j6uDXM/Jc+yvq4Ncz8lz7I+5VlmP5Nnmb7lWWY/k2eZPsmzTD8AAIC+ybNMPwAAgD4AAEA/k2cZvgAAQD+TZxk+5VkmP5U8y73lWSY/lTzLPQ==",
         "vertex_layout": {
           "attributes": [
@@ -17437,6 +17508,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Bandit Fall",
       "resource_id": "4rBCnTGuXK",
       "resource_name": "Bandit Fall",
@@ -17445,11 +17517,14 @@
       "uri": ""
     },
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 2553545459,
+      "content_hash_lo": 2249961978,
       "id": "PBPIRCm9MB",
       "inline_data": {
-        "command_buffer": "AgAAABUAAAAAAAAAAAAAAAAAAAA=",
+        "byte_order": "LE",
+        "command_buffer": "AgAAABUAAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "k2cZP5NnGb+TZxk/k2cZPwAAQD+amRm+AABAP5qZGT6TZxk/lTzLvZNnGT+VPMs9k2eZPpU8y72TZ5k+lTzLPZNnGT6TZ5m+k2cZPpNnmT6VPMs9Jc+yvpU8yz0lz7I+lTzLPQAAAL+VPMs9AAAAP5U8Sz3lWSa/lTxLPeVZJj+VPMs9AABAv5U8yz0AAEA/k2cZPq4Nc7+TZxk+rg1zPyXPsj6uDXO/Jc+yPq4Ncz8AAAA/k2dZvwAAAD+TZ1k/k2cZP8mzTL+TZxk/ybNMP64NMz/Js0y/rg0zP8mzTD/Js0w/rg0zv8mzTD+uDTM/5VlmP+VZJr/lWWY/5VkmPwAAgD+TZxm/AACAP5NnGT8AAIA/XBvmvgAAgD9cG+Y+rg1zPyXPsr6uDXM/Jc+yPpqZWT/NzEy+mplZP83MTD4AAEA/mpkZvgAAQD+amRk+",
         "vertex_layout": {
           "attributes": [
@@ -17471,6 +17546,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Bandit Die",
       "resource_id": "PBPIRCm9MB",
       "resource_name": "Bandit Die",
@@ -17479,11 +17555,14 @@
       "uri": ""
     },
     {
-      "content_hash_hi": 0,
-      "content_hash_lo": 0,
+      "content_hash_hi": 4103271433,
+      "content_hash_lo": 1612221035,
       "id": "XJz8lK4sSZ",
       "inline_data": {
-        "command_buffer": "AgAAAAwAAAAAAAAAAAAAAAAAAAA=",
+        "byte_order": "LE",
+        "command_buffer": "AgAAAAwAAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
         "vertex_buffer": "AAAAP9AVs74AAAA/0BWzPgAAAD8AAACAAAAAPwAAAADNzEw+AAAAgM3MTD4AAAAAAAAAgJqZmb4AAACAmpmZPgAAAADQFbO+AAAAANAVsz6bXOY+AACAv5tc5j4AAIA/AAAAPwAAgL8AAAA/AACAP7igDD8AAIC/uKAMPwAAgD8AAIA/NDOzvgAAgD80M7M+AACAP2pymb4AAIA/anKZPjW5TD8AAACANblMPwAAAAAAAAA/AAAAgAAAAD8AAAAA",
         "vertex_layout": {
           "attributes": [
@@ -17505,6 +17584,7 @@
           "bytes": 16
         }
       },
+      "mesh": "Simple2D",
       "name": "Diamond",
       "resource_id": "XJz8lK4sSZ",
       "resource_name": "Diamond",
