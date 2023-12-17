@@ -38,6 +38,16 @@ enum class BlurDirection {
     Vertical
 };
 
+
+// Extract source color values that exceed the threshold magnitude on the color axis.
+// This is the basis of bloom effect. Extract the color map, then blur it it and blend
+// with the source image.
+void ExtractColor(const gfx::Texture* src, gfx::Texture* dst, gfx::Device* device,
+                  const gfx::Color4f& color, float threshold);
+
+void ExtractColor(const gfx::Texture* src, gfx::Texture** dst, gfx::Device* device,
+                  const gfx::Color4f& color, float threshold);
+
 // Create a color texture from alpha texture. In other words expand a texture which originally
 // only has alpha channel into a RGBA texture while keeping it as a "logical alpha" mask
 void ColorTextureFromAlpha(const std::string& gpu_id, gfx::Texture* texture, gfx::Device* device);
