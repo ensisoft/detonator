@@ -1243,6 +1243,8 @@ void ConstructSimpleShape(const SimpleShapeArgs& args,
                           SimpleShapeType type,
                           Geometry& geometry)
 {
+    geometry.SetName(base::ToString(type));
+
     if (type == SimpleShapeType::Arrow)
         detail::ArrowGeometry::Generate(environment, style, geometry);
     else if (type == SimpleShapeType::ArrowCursor)
@@ -1505,6 +1507,7 @@ bool Grid::Upload(const Environment&, Geometry& geometry) const
         verts.push_back(corners[1]);
         verts.push_back(corners[3]);
     }
+    geometry.SetName(base::FormatString("Grid %1x%2", mNumVerticalLines+1, mNumHorizontalLines+1));
     geometry.SetVertexBuffer(std::move(verts));
     geometry.AddDrawCmd(Geometry::DrawType::Lines);
     return true;
@@ -1956,6 +1959,7 @@ bool PolygonMeshClass::UploadGeometry(const Environment& env, Geometry& geometry
         return false;
     }
 
+    geometry.SetName(mName);
     geometry.SetVertexLayout(vertex_buffer.GetLayout());
     geometry.UploadVertices(vertex_buffer.GetBufferPtr(), vertex_buffer.GetBufferSize(), usage);
     geometry.UploadIndices(index_buffer.GetBufferPtr(), index_buffer.GetBufferSize(),
@@ -2164,6 +2168,7 @@ bool ParticleEngineClass::Upload(const Drawable::Environment& env, const Instanc
         verts.push_back(v);
     }
 
+    geometry.SetName(mName);
     geometry.SetVertexBuffer(std::move(verts), Geometry::Usage::Stream);
     geometry.SetVertexLayout(layout);
     geometry.ClearDraws();
@@ -2988,6 +2993,7 @@ bool TileBatch::Upload(const Environment& env, Geometry& geometry) const
             {"aTilePosition", 0, 3, 0, offsetof(TileVertex, pos)},
         });
 
+        geometry.SetName("TileBatch");
         geometry.SetVertexBuffer(mTiles, Geometry::Usage::Stream);
         geometry.SetVertexLayout(layout);
         geometry.ClearDraws();
@@ -3019,6 +3025,7 @@ bool TileBatch::Upload(const Environment& env, Geometry& geometry) const
             vertices.push_back(bot_right);
             vertices.push_back(top_right);
         }
+        geometry.SetName("TileBatch");
         geometry.ClearDraws();
         geometry.SetVertexBuffer(vertices, Geometry::Usage::Stream);
         geometry.SetVertexLayout(layout);
@@ -3132,6 +3139,7 @@ bool DebugDrawableBase::Upload(const Environment& env, Geometry& geom) const
             GeometryBuffer wireframe;
             CreateWireframe(buffer, wireframe);
 
+            geom.SetName("Wireframe/" + buffer.GetName());
             wireframe.Transfer(geom);
             geom.SetDataHash(buffer.GetDataHash());
         }

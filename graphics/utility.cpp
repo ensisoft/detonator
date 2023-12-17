@@ -67,6 +67,7 @@ Geometry* MakeFullscreenQuad(Device& device)
         { { 1, -1}, {1, 0} },
         { { 1,  1}, {1, 1} }
     };
+    geometry->SetName("FullscreenQuad");
     geometry->SetVertexBuffer(verts, 6, gfx::Geometry::Usage::Static);
     geometry->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
     return geometry;
