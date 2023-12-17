@@ -171,6 +171,10 @@ namespace gfx
         virtual bool GenerateMips() = 0;
         // Check whether the texture has mip maps or not.
         virtual bool HasMips() const = 0;
+        // Get the (human-readable) name given for the texture object.
+        virtual std::string GetName() const = 0;
+        // Get the name of the texture group this texture belongs to (if any)
+        virtual std::string GetGroup() const = 0;
 
         // helpers.
         inline void SetTransient(bool on_off)

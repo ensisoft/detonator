@@ -1778,6 +1778,10 @@ private:
         { return mHash; }
         virtual bool TestFlag(Flags flag) const override
         { return mFlags.test(flag); }
+        virtual std::string GetName() const override
+        { return mName; }
+        virtual std::string GetGroup() const override
+        { return mGroup; }
 
         virtual bool GenerateMips() override
         {
@@ -1860,10 +1864,6 @@ private:
         { mFrameNumber = frame_number; }
         std::size_t GetFrameStamp() const
         { return mFrameNumber; }
-        const std::string& GetName() const
-        { return mName; }
-        const std::string& GetGroup() const
-        { return mGroup; }
 
         struct GLState {
             GLenum wrap_x = GL_NONE;

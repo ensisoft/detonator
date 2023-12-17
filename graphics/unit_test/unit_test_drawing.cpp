@@ -132,6 +132,10 @@ public:
     {
         return false;
     }
+    virtual std::string GetName() const override
+    { return ""; }
+    virtual std::string GetGroup() const override
+    { return ""; }
 private:
     unsigned mWidth  = 0;
     unsigned mHeight = 0;
