@@ -125,6 +125,7 @@ namespace gui
         void on_actionNewUI_triggered();
         void on_actionNewTilemap_triggered();
         void on_actionNewAudioGraph_triggered();
+        void on_actionImportModel_triggered();
         void on_actionImportFiles_triggered();
         void on_actionImportTiles_triggered();
         void on_actionExportJSON_triggered();
@@ -229,7 +230,7 @@ namespace gui
 
     private:
         Ui::MainWindow mUI;
-
+        QMenu* mImportMenu = nullptr;
     private:
         class GfxResourceLoader;
 

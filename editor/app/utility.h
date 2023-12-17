@@ -81,6 +81,10 @@ std::vector<Resolution> ListResolutions();
 // Simply returns 0 if the file could not be read.
 std::uint64_t GetFileHash(const QString& file);
 
+// Get the canonical clean file path
+// If the file is not a file returns an empty string.
+QString GetFilePath(const QString& file);
+
 // Concatenate two strings as file system path.
 // Returns the path formatted with native separators.
 QString JoinPath(const QString& lhs, const QString& rhs);

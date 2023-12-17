@@ -1318,7 +1318,7 @@
      <x>0</x>
      <y>0</y>
      <width>1872</width>
-     <height>36</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1413,6 +1413,7 @@
       <iconset resource="../resource/resource.qrc">
        <normaloff>:/16x16_ico_png/import.png</normaloff>:/16x16_ico_png/import.png</iconset>
      </property>
+     <addaction name="actionImportModel"/>
      <addaction name="actionImportTiles"/>
      <addaction name="actionImportFiles"/>
      <addaction name="actionImportJSON"/>
@@ -2106,7 +2107,7 @@
      <normaloff>:/32x32_ico_png/folder.png</normaloff>:/32x32_ico_png/folder.png</iconset>
    </property>
    <property name="text">
-    <string>From Files</string>
+    <string>From Audio and Image Files</string>
    </property>
    <property name="toolTip">
     <string>Import files as resources</string>
@@ -2190,7 +2191,7 @@
      <normaloff>:/16x16_ico_png/tag.png</normaloff>:/16x16_ico_png/tag.png</iconset>
    </property>
    <property name="text">
-    <string>From JSON</string>
+    <string>From Raw JSON</string>
    </property>
    <property name="toolTip">
     <string>Import resources from JSON</string>
@@ -2401,6 +2402,21 @@
    </property>
    <property name="shortcut">
     <string>Shift+F4</string>
+   </property>
+  </action>
+  <action name="actionImportModel">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/object.png</normaloff>:/32x32_ico_png/object.png</iconset>
+   </property>
+   <property name="text">
+    <string>From 3D Model File</string>
+   </property>
+   <property name="toolTip">
+    <string>Import 3D model from file such as FBX or OBJ</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+Shift+M</string>
    </property>
   </action>
  </widget>

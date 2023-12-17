@@ -1,6 +1,7 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
   <qresource>
+    <file>16x16_ico_png/object.png</file>
     <file>16x16_ico_png/bricks.png</file>
     <file>16x16_ico_png/deptree.png</file>
     <file>16x16_ico_png/move_up.png</file>
@@ -94,6 +95,7 @@
     <file>16x16_ico_png/transmit_error.png</file>
     <file>16x16_ico_png/transmit_go.png</file>
 
+    <file>32x32_ico_png/object.png</file>
     <file>32x32_ico_png/folder.png</file>
     <file>32x32_ico_png/tileset.png</file>
     <file>32x32_ico_png/tilemap.png</file>

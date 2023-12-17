@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DlgModelImport</class>
+ <widget class="QWidget" name="DlgModelImport">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>783</width>
+    <height>787</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Import 3D Model</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../resource/resource.qrc">
+    <normaloff>:/16x16_ico_png/object.png</normaloff>:/16x16_ico_png/object.png</iconset>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_3">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>3D Model</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLineEdit" name="modelFile">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="placeholderText">
+           <string>Select model file *.fbx, *.obj (none selected)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="btnFile">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resource/resource.qrc">
+            <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
+          </property>
+          <property name="toolButtonStyle">
+           <enum>Qt::ToolButtonIconOnly</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <property name="tabBarAutoHide">
+         <bool>false</bool>
+        </property>
+        <widget class="QWidget" name="tabView">
+         <attribute name="title">
+          <string>view</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="gui::GfxWidget" name="widget" native="true"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tabDetails">
+         <attribute name="title">
+          <string>Details</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <widget class="QGroupBox" name="groupBox_2">
+            <property name="title">
+             <string>Drawables</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <item>
+              <widget class="QTableView" name="drawables">
+               <property name="editTriggers">
+                <set>QAbstractItemView::NoEditTriggers</set>
+               </property>
+               <property name="showGrid">
+                <bool>false</bool>
+               </property>
+               <attribute name="horizontalHeaderStretchLastSection">
+                <bool>true</bool>
+               </attribute>
+               <attribute name="verticalHeaderVisible">
+                <bool>false</bool>
+               </attribute>
+               <attribute name="verticalHeaderDefaultSectionSize">
+                <number>27</number>
+               </attribute>
+               <attribute name="verticalHeaderStretchLastSection">
+                <bool>false</bool>
+               </attribute>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="groupBox_3">
+            <property name="title">
+             <string>Materials</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_5">
+             <item>
+              <widget class="QTableView" name="materials">
+               <property name="editTriggers">
+                <set>QAbstractItemView::NoEditTriggers</set>
+               </property>
+               <property name="showGrid">
+                <bool>false</bool>
+               </property>
+               <attribute name="horizontalHeaderStretchLastSection">
+                <bool>true</bool>
+               </attribute>
+               <attribute name="verticalHeaderVisible">
+                <bool>false</bool>
+               </attribute>
+               <attribute name="verticalHeaderDefaultSectionSize">
+                <number>27</number>
+               </attribute>
+               <attribute name="verticalHeaderStretchLastSection">
+                <bool>false</bool>
+               </attribute>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tabImport">
+         <attribute name="title">
+          <string>Import</string>
+         </attribute>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QDoubleSpinBox" name="zoom">
+          <property name="minimum">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>5.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="stepType">
+           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cmbGrid"/>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::MinimumExpanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="chkShowGrid">
+          <property name="text">
+           <string>Show grid</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="color_widgets::ColorSelector" name="widgetColor">
+          <property name="minimumSize">
+           <size>
+            <width>30</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::TabFocus</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnClose">
+       <property name="text">
+        <string>Close</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>color_widgets::ColorPreview</class>
+   <extends>QWidget</extends>
+   <header>color_preview.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>color_widgets::ColorSelector</class>
+   <extends>color_widgets::ColorPreview</extends>
+   <header>color_selector.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>gui::GfxWidget</class>
+   <extends>QWidget</extends>
+   <header>gfxwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../resource/resource.qrc"/>
+ </resources>
+ <connections/>
+</ui>
