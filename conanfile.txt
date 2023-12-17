@@ -4,6 +4,7 @@ harfbuzz/7.3.0
 freetype/2.13.0
 mpg123/1.26.4
 boost/1.79.0
+assimp/5.2.2
 
 [generators]
 CMakeDeps

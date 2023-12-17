@@ -66,8 +66,11 @@
         {
           "class": "WyKYhKjCKB",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "JQAP7v0ZUJ",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -79,8 +82,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "gzjp7PwMQd",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -186,8 +202,11 @@
         {
           "class": "C8Zo9jLx2t",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -199,8 +218,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "ezvBTHxrAX",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -276,8 +308,11 @@
         {
           "class": "z91WmstalU",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -289,8 +324,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "tdYbKt5I5Q",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -366,8 +414,11 @@
         {
           "class": "gLEkpUMPMY",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -379,8 +430,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "NY4Of7DfnI",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -456,8 +520,11 @@
         {
           "class": "2X1vo3R61U",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -469,8 +536,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "WTNfneUmHx",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -546,8 +626,11 @@
         {
           "class": "2n7nlbnAPk",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "oNJA4jNZF9",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -559,8 +642,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "pQ2O7Ekypd",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -619,8 +715,11 @@
         {
           "class": "pbStBifQYT",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -632,8 +731,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "7uTDp9S0mt",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -709,8 +821,11 @@
         {
           "class": "r2t3TrFkvU",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -722,8 +837,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "uLZlHEU5XW",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -799,8 +927,11 @@
         {
           "class": "066mSwAYNb",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -812,8 +943,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "5GPKkIzzUf",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -889,8 +1033,11 @@
         {
           "class": "RaWnULHEHq",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -902,8 +1049,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UTfmL76ml0",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -979,8 +1139,11 @@
         {
           "class": "aky1XfEBAy",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -992,8 +1155,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UJKQNRymuO",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1069,8 +1245,11 @@
         {
           "class": "WxXttNKwyJ",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1082,8 +1261,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "MBEoxQ9SGX",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1159,8 +1351,11 @@
         {
           "class": "nyU7LB2bT7",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1172,8 +1367,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "sX94tG9WhR",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1249,8 +1457,11 @@
         {
           "class": "KTWTPjswtn",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1262,8 +1473,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "jqIuU0kASH",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1339,8 +1563,11 @@
         {
           "class": "DmMR4O2G87",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1352,8 +1579,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "FW5N4w5d3Z",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1429,8 +1669,11 @@
         {
           "class": "BeQmNI8QiC",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1442,8 +1685,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "kyLTH2YAJY",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1519,8 +1775,11 @@
         {
           "class": "nPGxaHayQR",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1532,8 +1791,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "PiCFlSf9Gm",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1609,8 +1881,11 @@
         {
           "class": "qjYux7bo6E",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "oDE09YOPk9",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1622,8 +1897,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "zgwqXHtABU",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1682,8 +1970,11 @@
         {
           "class": "zuTdSa5Lgw",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1695,8 +1986,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "RhslGRtQQR",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1772,8 +2076,11 @@
         {
           "class": "uZd3FvpM9D",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "fW1kOmDCo0",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1785,8 +2092,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "wrSRezqUfj",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1845,8 +2165,11 @@
         {
           "class": "S17SJNDFPG",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "IfEi7dQdbW",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1858,8 +2181,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "QR14nEb7T3",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1918,8 +2254,11 @@
         {
           "class": "alg3H187iN",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "l9oab5XQTK",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -1931,8 +2270,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "IPqp1SooOX",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -1991,8 +2343,11 @@
         {
           "class": "xvyFXQZnfr",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -2004,8 +2359,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "AgxrO05Kqg",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -2102,8 +2470,11 @@
         {
           "class": "E5g8vRsJGU",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "8636ofEjei",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -2115,8 +2486,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "RnL44evfW5",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -2141,8 +2525,11 @@
         {
           "class": "lLQQND6Zx7",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "26DgI88X5u",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -2154,8 +2541,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "w26YsP04pJ",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -2180,8 +2580,11 @@
         {
           "class": "KWkjjMvdpN",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "zoqnFP5Gvz",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -2193,8 +2596,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "mgo2XI2toK",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -2219,8 +2635,11 @@
         {
           "class": "yF3GzMv8OR",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "W27ZFgJKAJ",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -2232,8 +2651,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "f2rOXhvzDy",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -2258,8 +2690,11 @@
         {
           "class": "ysQmAZ8shT",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "4rBCnTGuXK",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -2271,8 +2706,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "90E8gRgYDP",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -2297,8 +2745,11 @@
         {
           "class": "uEzZkNIIJv",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "PBPIRCm9MB",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -2310,8 +2761,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "9aRwE7zov7",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -3154,8 +3618,11 @@
         {
           "class": "mWsaHvOmn4",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -3167,8 +3634,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UJKQNRymuO",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -3193,8 +3673,11 @@
         {
           "class": "FHZRIiFzib",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -3206,8 +3689,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UTfmL76ml0",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -3232,8 +3728,11 @@
         {
           "class": "ZzIQmqytjU",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -3245,8 +3744,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UTfmL76ml0",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -3271,8 +3783,11 @@
         {
           "class": "831jqJ3JvU",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -3284,8 +3799,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "QCvtiZTp3b",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -3491,8 +4019,11 @@
         {
           "class": "DyP6DobEdy",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -3504,8 +4035,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UJKQNRymuO",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -3530,8 +4074,11 @@
         {
           "class": "KIvBW7vhZx",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -3543,8 +4090,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UTfmL76ml0",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -3569,8 +4129,11 @@
         {
           "class": "q3uHAiODGR",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -3582,8 +4145,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UTfmL76ml0",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -3608,8 +4184,11 @@
         {
           "class": "6NRIamZYFq",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -3621,8 +4200,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "QCvtiZTp3b",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -3875,8 +4467,11 @@
         {
           "class": "pm2yoCXW5N",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -3888,8 +4483,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "QCvtiZTp3b",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4003,8 +4611,11 @@
         {
           "class": "AnEyPNZmoX",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4016,8 +4627,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UJKQNRymuO",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4042,8 +4666,11 @@
         {
           "class": "Ueafg3xmjx",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4055,8 +4682,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UTfmL76ml0",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4081,8 +4721,11 @@
         {
           "class": "G9dSSrd7QQ",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4094,8 +4737,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UTfmL76ml0",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4120,8 +4776,11 @@
         {
           "class": "9wQFYrlhoB",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4133,8 +4792,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UTfmL76ml0",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4159,8 +4831,11 @@
         {
           "class": "Wzr4KHfipN",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4172,8 +4847,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "UTfmL76ml0",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4198,8 +4886,11 @@
         {
           "class": "KbswSKw9Ol",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4211,8 +4902,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "QCvtiZTp3b",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4303,8 +5007,11 @@
         {
           "class": "eWGWJAZIMO",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "FgJP6uJzoG",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4316,8 +5023,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "IM3dwFG7wS",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4376,8 +5096,11 @@
         {
           "class": "simUyPhpXK",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "FgJP6uJzoG",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4389,8 +5112,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "bvJqe9fGu5",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4449,8 +5185,11 @@
         {
           "class": "Im3L9TD9NG",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4462,8 +5201,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "PiCFlSf9Gm",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4488,8 +5240,11 @@
         {
           "class": "xIir5FvI0b",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4501,8 +5256,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "ezvBTHxrAX",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4527,8 +5295,11 @@
         {
           "class": "ZrIIsrDZih",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4540,8 +5311,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "tdYbKt5I5Q",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4566,8 +5350,11 @@
         {
           "class": "BQuel1SLPP",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4579,8 +5366,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "NY4Of7DfnI",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4605,8 +5405,11 @@
         {
           "class": "wMp7xOqWwq",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4618,8 +5421,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "PiCFlSf9Gm",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4644,8 +5460,11 @@
         {
           "class": "8MLbMo0t2a",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4657,8 +5476,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "PiCFlSf9Gm",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4683,8 +5515,11 @@
         {
           "class": "tldjq8ZAxW",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4696,8 +5531,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "5GPKkIzzUf",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4722,8 +5570,11 @@
         {
           "class": "H8mpf49ZWy",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4735,8 +5586,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "tdYbKt5I5Q",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4761,8 +5625,11 @@
         {
           "class": "lyZMq4P1OB",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4774,8 +5641,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "tdYbKt5I5Q",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4800,8 +5680,11 @@
         {
           "class": "gwf216fO5y",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4813,8 +5696,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "WTNfneUmHx",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4877,8 +5773,11 @@
         {
           "class": "NMXPN7q6Nr",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4890,8 +5789,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "NY4Of7DfnI",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4916,8 +5828,11 @@
         {
           "class": "RvqEqHyEIM",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4929,8 +5844,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "5GPKkIzzUf",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4955,8 +5883,11 @@
         {
           "class": "iY8NoGOsJt",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -4968,8 +5899,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "PiCFlSf9Gm",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -4994,8 +5938,11 @@
         {
           "class": "50qgHmpvrf",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -5007,8 +5954,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "PiCFlSf9Gm",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -5033,8 +5993,11 @@
         {
           "class": "9gPpq9P8rg",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -5046,8 +6009,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "PiCFlSf9Gm",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -5183,8 +6159,11 @@
         {
           "class": "hHxxMDUpsE",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "dWDAODzq3M",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -5196,8 +6175,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "Ca4GgRWjP2",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -5256,8 +6248,11 @@
         {
           "class": "GRBemQtTuY",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "YkK6SEnX2R",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -5269,8 +6264,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "xrUzM3pdBZ",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -5329,8 +6337,11 @@
         {
           "class": "Y0gBBtChIX",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -5342,8 +6353,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "AgxrO05Kqg",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -5368,8 +6392,11 @@
         {
           "class": "UIbYC5M3Iq",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -5381,8 +6408,21 @@
             "layer": 1,
             "linewidth": 1.0,
             "material": "l6vR7abMmW",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -5407,8 +6447,11 @@
         {
           "class": "l2p8ir9ZhN",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -5420,8 +6463,21 @@
             "layer": 2,
             "linewidth": 1.0,
             "material": "X6Q2aN3uWm",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -5516,8 +6572,11 @@
         {
           "class": "w7ahuB3YZx",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_circle",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -5529,8 +6588,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "2ynNMbWOK3",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -5672,8 +6744,11 @@
         {
           "class": "1fdD8q2fC9",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "nnXiuEEnwL",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -5685,8 +6760,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "2ynNMbWOK3",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -5745,8 +6833,11 @@
         {
           "class": "A5I4ZqrACG",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "XJz8lK4sSZ",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -5758,8 +6849,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "nLUoQRjXrg",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -5835,8 +6939,11 @@
         {
           "class": "0BEu7bmIj7",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "_rect",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -5848,8 +6955,21 @@
             "layer": 0,
             "linewidth": 1.0,
             "material": "oTLKJxJ07d",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -5919,8 +7039,11 @@
         {
           "class": "8FQMqZtbZH",
           "drawable_item": {
+            "depth": 1.0,
             "drawable": "XJz8lK4sSZ",
             "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
               "FlipHorizontally": false,
               "FlipVertically": false,
               "PP_EnableBloom": true,
@@ -5932,8 +7055,21 @@
             "layer": 1,
             "linewidth": 1.0,
             "material": "nLUoQRjXrg",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
             "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
             "timescale": 1.0
           },
           "flags": {
@@ -15697,2554 +16833,684 @@
   ],
   "shapes": [
     {
-      "draws": [
-        {
-          "count": 11,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "JQAP7v0ZUJ",
+      "inline_data": {
+        "command_buffer": "AgAAAAsAAAAAAAAAAAAAAAAAAAA=",
+        "vertex_buffer": "uRb2Pla08r65FvY+VrTyPmqj9D4Iine6aqP0PgiKdzrNzMw9AAAAgM3MzD0AAAAAAAAAAArXo70AAAAACtejPQAAAACZwmm/AAAAAJnCaT8i/K89WEZ/vyL8rz1YRn8/BvhqPzuEf78G+Go/O4R/P1hGfz/eGWe/WEZ/P94ZZz8dwn8/+h2svR3Cfz/6Haw9VCJmPwiKd7pUImY/CIp3Ohsw8z4Iine6GzDzPgiKdzo=",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "StoneBlock",
       "resource_id": "JQAP7v0ZUJ",
       "resource_name": "StoneBlock",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.4806421101093292,
-          "t": 0.47403210401535034,
-          "x": 0.4806421101093292,
-          "y": -0.47403210401535034
-        },
-        {
-          "s": 0.47780925035476685,
-          "t": 0.0009442870505154133,
-          "x": 0.47780925035476685,
-          "y": -0.0009442870505154133
-        },
-        {
-          "s": 0.10000000149011612,
-          "t": 0.0,
-          "x": 0.10000000149011612,
-          "y": -0.0
-        },
-        {
-          "s": 0.0,
-          "t": 0.07999999821186066,
-          "x": 0.0,
-          "y": -0.07999999821186066
-        },
-        {
-          "s": 0.0,
-          "t": 0.9131255745887756,
-          "x": 0.0,
-          "y": -0.9131255745887756
-        },
-        {
-          "s": 0.08593012392520905,
-          "t": 0.9971671104431152,
-          "x": 0.08593012392520905,
-          "y": -0.9971671104431152
-        },
-        {
-          "s": 0.9178470373153687,
-          "t": 0.9981114268302917,
-          "x": 0.9178470373153687,
-          "y": -0.9981114268302917
-        },
-        {
-          "s": 0.9971671104431152,
-          "t": 0.9027384519577026,
-          "x": 0.9971671104431152,
-          "y": -0.9027384519577026
-        },
-        {
-          "s": 0.9990556836128235,
-          "t": 0.0840415507555008,
-          "x": 0.9990556836128235,
-          "y": -0.0840415507555008
-        },
-        {
-          "s": 0.8989613056182861,
-          "t": 0.0009442870505154133,
-          "x": 0.8989613056182861,
-          "y": -0.0009442870505154133
-        },
-        {
-          "s": 0.47497639060020447,
-          "t": 0.0009442870505154133,
-          "x": 0.47497639060020447,
-          "y": -0.0009442870505154133
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 28,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "oNJA4jNZF9",
+      "inline_data": {
+        "command_buffer": "AgAAABwAAAAAAAAAAAAAAAAAAAA=",
+        "vertex_buffer": "9LAMP9mAGb/0sAw/2YAZP2dm5j4AAAAAZ2bmPgAAAID2Qpk+AAAAgPZCmT4AAAAAxQZMPicgSb3FBkw+JyBJPTHHGD47D8u9MccYPjsPyz07D8s9Ow/LvTsPyz07D8s9AAAAADHHGL4AAAAAMccYPgAAAADA4rK+AAAAAMDisj4xxxg+VCLmvjHHGD5UIuY+xQZMPh3C/77FBkw+HcL/PsDisj70sAy/wOKyPvSwDD+Kgsw+2YAZv4qCzD7ZgBk/VCLmPr5QJr9UIuY+vlAmP2dm5j4AAEC/Z2bmPgAAQD+amZk+AACAv5qZmT4AAIA/zcxMPwAAgL/NzEw/AACAP4fwPz9swEy/h/A/P2zATD+iIDM/oiAzv6IgMz+iIDM/Z2YmP5qZGb9nZiY/mpkZP1GQWT8dwv++UZBZPx3C/z42YGY/VCLmvjZgZj9UIuY+GzBzP4qCzL4bMHM/ioLMPgAAgD/A4rK+AACAP8Disj4AAIA/MccYvgAAgD8xxxg+GzBzPzHHGL4bMHM/MccYPjZgZj87D8u9NmBmPzsPyz2H8D8/AAAAgIfwPz8AAAAAZ2bmPgAAAIBnZuY+AAAAAA==",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Tree",
       "resource_id": "oNJA4jNZF9",
       "resource_name": "Tree",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.5495750904083252,
-          "t": 0.5996223092079163,
-          "x": 0.5495750904083252,
-          "y": -0.5996223092079163
-        },
-        {
-          "s": 0.45000001788139343,
-          "t": -0.0,
-          "x": 0.45000001788139343,
-          "y": 0.0
-        },
-        {
-          "s": 0.2993389964103699,
-          "t": 0.0,
-          "x": 0.2993389964103699,
-          "y": -0.0
-        },
-        {
-          "s": 0.19924457371234894,
-          "t": 0.04910292848944664,
-          "x": 0.19924457371234894,
-          "y": -0.04910292848944664
-        },
-        {
-          "s": 0.14919735491275787,
-          "t": 0.0991501435637474,
-          "x": 0.14919735491275787,
-          "y": -0.0991501435637474
-        },
-        {
-          "s": 0.0991501435637474,
-          "t": 0.0991501435637474,
-          "x": 0.0991501435637474,
-          "y": -0.0991501435637474
-        },
-        {
-          "s": 0.0,
-          "t": 0.14919735491275787,
-          "x": 0.0,
-          "y": -0.14919735491275787
-        },
-        {
-          "s": 0.0,
-          "t": 0.34938621520996094,
-          "x": 0.0,
-          "y": -0.34938621520996094
-        },
-        {
-          "s": 0.14919735491275787,
-          "t": 0.44948065280914307,
-          "x": 0.14919735491275787,
-          "y": -0.44948065280914307
-        },
-        {
-          "s": 0.19924457371234894,
-          "t": 0.49952784180641174,
-          "x": 0.19924457371234894,
-          "y": -0.49952784180641174
-        },
-        {
-          "s": 0.34938621520996094,
-          "t": 0.5495750904083252,
-          "x": 0.34938621520996094,
-          "y": -0.5495750904083252
-        },
-        {
-          "s": 0.399433434009552,
-          "t": 0.5996223092079163,
-          "x": 0.399433434009552,
-          "y": -0.5996223092079163
-        },
-        {
-          "s": 0.44948065280914307,
-          "t": 0.6496695280075073,
-          "x": 0.44948065280914307,
-          "y": -0.6496695280075073
-        },
-        {
-          "s": 0.45000001788139343,
-          "t": 0.75,
-          "x": 0.45000001788139343,
-          "y": -0.75
-        },
-        {
-          "s": 0.30000001192092896,
-          "t": 1.0,
-          "x": 0.30000001192092896,
-          "y": -1.0
-        },
-        {
-          "s": 0.800000011920929,
-          "t": 1.0,
-          "x": 0.800000011920929,
-          "y": -1.0
-        },
-        {
-          "s": 0.7497639060020447,
-          "t": 0.7998111248016357,
-          "x": 0.7497639060020447,
-          "y": -0.7998111248016357
-        },
-        {
-          "s": 0.6997166872024536,
-          "t": 0.6997166872024536,
-          "x": 0.6997166872024536,
-          "y": -0.6997166872024536
-        },
-        {
-          "s": 0.6500000357627869,
-          "t": 0.6000000238418579,
-          "x": 0.6500000357627869,
-          "y": -0.6000000238418579
-        },
-        {
-          "s": 0.8498583436012268,
-          "t": 0.49952784180641174,
-          "x": 0.8498583436012268,
-          "y": -0.49952784180641174
-        },
-        {
-          "s": 0.8999055624008179,
-          "t": 0.44948065280914307,
-          "x": 0.8999055624008179,
-          "y": -0.44948065280914307
-        },
-        {
-          "s": 0.9499527812004089,
-          "t": 0.399433434009552,
-          "x": 0.9499527812004089,
-          "y": -0.399433434009552
-        },
-        {
-          "s": 1.0,
-          "t": 0.34938621520996094,
-          "x": 1.0,
-          "y": -0.34938621520996094
-        },
-        {
-          "s": 1.0,
-          "t": 0.14919735491275787,
-          "x": 1.0,
-          "y": -0.14919735491275787
-        },
-        {
-          "s": 0.9499527812004089,
-          "t": 0.14919735491275787,
-          "x": 0.9499527812004089,
-          "y": -0.14919735491275787
-        },
-        {
-          "s": 0.8999055624008179,
-          "t": 0.0991501435637474,
-          "x": 0.8999055624008179,
-          "y": -0.0991501435637474
-        },
-        {
-          "s": 0.7497639060020447,
-          "t": 0.0,
-          "x": 0.7497639060020447,
-          "y": -0.0
-        },
-        {
-          "s": 0.45000001788139343,
-          "t": 0.0,
-          "x": 0.45000001788139343,
-          "y": -0.0
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 11,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "gUmNEBelRm",
+      "inline_data": {
+        "command_buffer": "AgAAAAsAAAAAAAAAAAAAAAAAAAA=",
+        "vertex_buffer": "HcL/PsDisr4dwv8+wOKyPh3C/z4AAACAHcL/PgAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAKIgM78AAAAAoiAzP4qCzD6iIDO/ioLMPqIgMz+Kgsw+AACAv4qCzD4AAIA/2YAZPwAAgL/ZgBk/AACAP9mAGT+iIDO/2YAZP6IgMz8AAIA/oiAzvwAAgD+iIDM/AACAPwAAAIAAAIA/AAAAAB3C/z4AAACAHcL/PgAAAAA=",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Sign",
       "resource_id": "gUmNEBelRm",
       "resource_name": "Sign",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.49952784180641174,
-          "t": 0.34938621520996094,
-          "x": 0.49952784180641174,
-          "y": -0.34938621520996094
-        },
-        {
-          "s": 0.49952784180641174,
-          "t": 0.0,
-          "x": 0.49952784180641174,
-          "y": -0.0
-        },
-        {
-          "s": 0.0,
-          "t": 0.0,
-          "x": 0.0,
-          "y": -0.0
-        },
-        {
-          "s": 0.0,
-          "t": 0.6997166872024536,
-          "x": 0.0,
-          "y": -0.6997166872024536
-        },
-        {
-          "s": 0.399433434009552,
-          "t": 0.6997166872024536,
-          "x": 0.399433434009552,
-          "y": -0.6997166872024536
-        },
-        {
-          "s": 0.399433434009552,
-          "t": 1.0,
-          "x": 0.399433434009552,
-          "y": -1.0
-        },
-        {
-          "s": 0.5996223092079163,
-          "t": 1.0,
-          "x": 0.5996223092079163,
-          "y": -1.0
-        },
-        {
-          "s": 0.5996223092079163,
-          "t": 0.6997166872024536,
-          "x": 0.5996223092079163,
-          "y": -0.6997166872024536
-        },
-        {
-          "s": 1.0,
-          "t": 0.6997166872024536,
-          "x": 1.0,
-          "y": -0.6997166872024536
-        },
-        {
-          "s": 1.0,
-          "t": 0.0,
-          "x": 1.0,
-          "y": -0.0
-        },
-        {
-          "s": 0.49952784180641174,
-          "t": 0.0,
-          "x": 0.49952784180641174,
-          "y": -0.0
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 16,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "oDE09YOPk9",
+      "inline_data": {
+        "command_buffer": "AgAAABAAAAAAAAAAAAAAAAAAAAA=",
+        "vertex_buffer": "HcL/PvSwDL8dwv8+9LAMP2dm5j4AAAAAZ2bmPgAAAIAxxxg+Ow/LvTHHGD47D8s9JyBJPfZCmb4nIEk99kKZPgAAAAAdwv++AAAAAB3C/z4AAAAAbMBMvwAAAABswEw/MccYPgAAgL8xxxg+AACAP6IgMz8AAIC/oiAzPwAAgD+H8D8/NmBmv4fwPz82YGY/UZBZP2zATL9RkFk/bMBMPwAAgD9swEy/AACAP2zATD8AAIA/VCLmvgAAgD9UIuY+bMBMP8UGTL5swEw/xQZMPofwPz87D8u9h/A/PzsPyz30sAw/AAAAgPSwDD8AAAAAZ2bmPgAAAIBnZuY+AAAAAA==",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Bush (1)",
       "resource_id": "oDE09YOPk9",
       "resource_name": "Bush (1)",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.49952784180641174,
-          "t": 0.5495750904083252,
-          "x": 0.49952784180641174,
-          "y": -0.5495750904083252
-        },
-        {
-          "s": 0.45000001788139343,
-          "t": -0.0,
-          "x": 0.45000001788139343,
-          "y": 0.0
-        },
-        {
-          "s": 0.14919735491275787,
-          "t": 0.0991501435637474,
-          "x": 0.14919735491275787,
-          "y": -0.0991501435637474
-        },
-        {
-          "s": 0.04910292848944664,
-          "t": 0.2993389964103699,
-          "x": 0.04910292848944664,
-          "y": -0.2993389964103699
-        },
-        {
-          "s": 0.0,
-          "t": 0.49952784180641174,
-          "x": 0.0,
-          "y": -0.49952784180641174
-        },
-        {
-          "s": 0.0,
-          "t": 0.7998111248016357,
-          "x": 0.0,
-          "y": -0.7998111248016357
-        },
-        {
-          "s": 0.14919735491275787,
-          "t": 1.0,
-          "x": 0.14919735491275787,
-          "y": -1.0
-        },
-        {
-          "s": 0.6997166872024536,
-          "t": 1.0,
-          "x": 0.6997166872024536,
-          "y": -1.0
-        },
-        {
-          "s": 0.7497639060020447,
-          "t": 0.8999055624008179,
-          "x": 0.7497639060020447,
-          "y": -0.8999055624008179
-        },
-        {
-          "s": 0.8498583436012268,
-          "t": 0.7998111248016357,
-          "x": 0.8498583436012268,
-          "y": -0.7998111248016357
-        },
-        {
-          "s": 1.0,
-          "t": 0.7998111248016357,
-          "x": 1.0,
-          "y": -0.7998111248016357
-        },
-        {
-          "s": 1.0,
-          "t": 0.44948065280914307,
-          "x": 1.0,
-          "y": -0.44948065280914307
-        },
-        {
-          "s": 0.7998111248016357,
-          "t": 0.19924457371234894,
-          "x": 0.7998111248016357,
-          "y": -0.19924457371234894
-        },
-        {
-          "s": 0.7497639060020447,
-          "t": 0.0991501435637474,
-          "x": 0.7497639060020447,
-          "y": -0.0991501435637474
-        },
-        {
-          "s": 0.5495750904083252,
-          "t": 0.0,
-          "x": 0.5495750904083252,
-          "y": -0.0
-        },
-        {
-          "s": 0.45000001788139343,
-          "t": 0.0,
-          "x": 0.45000001788139343,
-          "y": -0.0
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 13,
-          "offset": 0,
-          "type": "TriangleFan"
-        },
-        {
-          "count": 9,
-          "offset": 13,
-          "type": "TriangleFan"
-        },
-        {
-          "count": 9,
-          "offset": 22,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "fW1kOmDCo0",
+      "inline_data": {
+        "command_buffer": "AgAAAA0AAAAAAAAAAAAAAAAAAAACAAAACQAAAAAAAAANAAAAAAAAAAIAAAAJAAAAAAAAABYAAAAAAAAA",
+        "vertex_buffer": "HcL/Ph3C/74dwv8+HcL/Ph3C/z4AAACAHcL/PgAAAADA4rI+AAAAgMDisj4AAAAA9kKZPicgSb32Qpk+JyBJPZqZmT6amRm+mpmZPpqZGT6amZk+mpkZv5qZmT6amRk/AACAPmdmJr8AAIA+Z2YmP5qZmT4AAEC/mpmZPgAAQD/2Qpk+AACAv/ZCmT4AAIA/oiAzPwAAgL+iIDM/AACAPzMzMz/NzEy9MzMzP83MTD3ZgBk/AAAAgNmAGT8AAAAAHcL/PgAAAIAdwv8+AAAAAPZCmT4dwv++9kKZPh3C/z72Qpk+xQZMvvZCmT7FBkw+MccYPjsPy70xxxg+Ow/LPQAAAADFBky+AAAAAMUGTD4AAAAAioLMvgAAAACKgsw+JyBJPR3C/74nIEk9HcL/PjHHGD70sAy/MccYPvSwDD9YRn8+9LAMv1hGfz70sAw/9kKZPvSwDL/2Qpk+9LAMPzMzMz8AAEC/MzMzPwAAQD82YGY/h/A/vzZgZj+H8D8/GzBzP75QJr8bMHM/vlAmPwAAgD/ZgBm/AACAP9mAGT8AAIA/wOKyvgAAgD/A4rI+GzBzP1hGf74bMHM/WEZ/PmzATD9YRn++bMBMP1hGfz6H8D8/WEZ/vofwPz9YRn8+oiAzP1hGf76iIDM/WEZ/Pg==",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Cactus (1)",
       "resource_id": "fW1kOmDCo0",
       "resource_name": "Cactus (1)",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.49952784180641174,
-          "t": 0.49952784180641174,
-          "x": 0.49952784180641174,
-          "y": -0.49952784180641174
-        },
-        {
-          "s": 0.49952784180641174,
-          "t": 0.0,
-          "x": 0.49952784180641174,
-          "y": -0.0
-        },
-        {
-          "s": 0.34938621520996094,
-          "t": 0.0,
-          "x": 0.34938621520996094,
-          "y": -0.0
-        },
-        {
-          "s": 0.2993389964103699,
-          "t": 0.04910292848944664,
-          "x": 0.2993389964103699,
-          "y": -0.04910292848944664
-        },
-        {
-          "s": 0.30000001192092896,
-          "t": 0.15000000596046448,
-          "x": 0.30000001192092896,
-          "y": -0.15000000596046448
-        },
-        {
-          "s": 0.30000001192092896,
-          "t": 0.6000000238418579,
-          "x": 0.30000001192092896,
-          "y": -0.6000000238418579
-        },
-        {
-          "s": 0.25,
-          "t": 0.6500000357627869,
-          "x": 0.25,
-          "y": -0.6500000357627869
-        },
-        {
-          "s": 0.30000001192092896,
-          "t": 0.75,
-          "x": 0.30000001192092896,
-          "y": -0.75
-        },
-        {
-          "s": 0.2993389964103699,
-          "t": 1.0,
-          "x": 0.2993389964103699,
-          "y": -1.0
-        },
-        {
-          "s": 0.6997166872024536,
-          "t": 1.0,
-          "x": 0.6997166872024536,
-          "y": -1.0
-        },
-        {
-          "s": 0.699999988079071,
-          "t": 0.05000000074505806,
-          "x": 0.699999988079071,
-          "y": -0.05000000074505806
-        },
-        {
-          "s": 0.5996223092079163,
-          "t": 0.0,
-          "x": 0.5996223092079163,
-          "y": -0.0
-        },
-        {
-          "s": 0.49952784180641174,
-          "t": 0.0,
-          "x": 0.49952784180641174,
-          "y": -0.0
-        },
-        {
-          "s": 0.2993389964103699,
-          "t": 0.49952784180641174,
-          "x": 0.2993389964103699,
-          "y": -0.49952784180641174
-        },
-        {
-          "s": 0.2993389964103699,
-          "t": 0.19924457371234894,
-          "x": 0.2993389964103699,
-          "y": -0.19924457371234894
-        },
-        {
-          "s": 0.14919735491275787,
-          "t": 0.0991501435637474,
-          "x": 0.14919735491275787,
-          "y": -0.0991501435637474
-        },
-        {
-          "s": 0.0,
-          "t": 0.19924457371234894,
-          "x": 0.0,
-          "y": -0.19924457371234894
-        },
-        {
-          "s": 0.0,
-          "t": 0.399433434009552,
-          "x": 0.0,
-          "y": -0.399433434009552
-        },
-        {
-          "s": 0.04910292848944664,
-          "t": 0.49952784180641174,
-          "x": 0.04910292848944664,
-          "y": -0.49952784180641174
-        },
-        {
-          "s": 0.14919735491275787,
-          "t": 0.5495750904083252,
-          "x": 0.14919735491275787,
-          "y": -0.5495750904083252
-        },
-        {
-          "s": 0.2492917776107788,
-          "t": 0.5495750904083252,
-          "x": 0.2492917776107788,
-          "y": -0.5495750904083252
-        },
-        {
-          "s": 0.2993389964103699,
-          "t": 0.5495750904083252,
-          "x": 0.2993389964103699,
-          "y": -0.5495750904083252
-        },
-        {
-          "s": 0.699999988079071,
-          "t": 0.75,
-          "x": 0.699999988079071,
-          "y": -0.75
-        },
-        {
-          "s": 0.8999055624008179,
-          "t": 0.7497639060020447,
-          "x": 0.8999055624008179,
-          "y": -0.7497639060020447
-        },
-        {
-          "s": 0.9499527812004089,
-          "t": 0.6496695280075073,
-          "x": 0.9499527812004089,
-          "y": -0.6496695280075073
-        },
-        {
-          "s": 1.0,
-          "t": 0.5996223092079163,
-          "x": 1.0,
-          "y": -0.5996223092079163
-        },
-        {
-          "s": 1.0,
-          "t": 0.34938621520996094,
-          "x": 1.0,
-          "y": -0.34938621520996094
-        },
-        {
-          "s": 0.9499527812004089,
-          "t": 0.2492917776107788,
-          "x": 0.9499527812004089,
-          "y": -0.2492917776107788
-        },
-        {
-          "s": 0.7998111248016357,
-          "t": 0.2492917776107788,
-          "x": 0.7998111248016357,
-          "y": -0.2492917776107788
-        },
-        {
-          "s": 0.7497639060020447,
-          "t": 0.2492917776107788,
-          "x": 0.7497639060020447,
-          "y": -0.2492917776107788
-        },
-        {
-          "s": 0.6997166872024536,
-          "t": 0.2492917776107788,
-          "x": 0.6997166872024536,
-          "y": -0.2492917776107788
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 13,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "IfEi7dQdbW",
+      "inline_data": {
+        "command_buffer": "AgAAAA0AAAAAAAAAAAAAAAAAAAA=",
+        "vertex_buffer": "HcL/PvSwDL8dwv8+9LAMPx3C/z4AAACAHcL/PgAAAADA4rI+AAAAgMDisj4AAAAAxQZMPjsPy73FBkw+Ow/LPQAAAABUIua+AAAAAFQi5j4AAAAA2YAZvwAAAADZgBk/Ow/LPQAAgL87D8s9AACAPzZgZj8AAIC/NmBmPwAAgD8AAIA/h/A/vwAAgD+H8D8/GzBzPx3C/74bMHM/HcL/PlGQWT/FBky+UZBZP8UGTD7ZgBk/AAAAgNmAGT8AAAAAHcL/PgAAAIAdwv8+AAAAAA==",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Cactus (2)",
       "resource_id": "IfEi7dQdbW",
       "resource_name": "Cactus (2)",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.49952784180641174,
-          "t": 0.5495750904083252,
-          "x": 0.49952784180641174,
-          "y": -0.5495750904083252
-        },
-        {
-          "s": 0.49952784180641174,
-          "t": 0.0,
-          "x": 0.49952784180641174,
-          "y": -0.0
-        },
-        {
-          "s": 0.34938621520996094,
-          "t": 0.0,
-          "x": 0.34938621520996094,
-          "y": -0.0
-        },
-        {
-          "s": 0.19924457371234894,
-          "t": 0.0991501435637474,
-          "x": 0.19924457371234894,
-          "y": -0.0991501435637474
-        },
-        {
-          "s": 0.0,
-          "t": 0.44948065280914307,
-          "x": 0.0,
-          "y": -0.44948065280914307
-        },
-        {
-          "s": 0.0,
-          "t": 0.5996223092079163,
-          "x": 0.0,
-          "y": -0.5996223092079163
-        },
-        {
-          "s": 0.0991501435637474,
-          "t": 1.0,
-          "x": 0.0991501435637474,
-          "y": -1.0
-        },
-        {
-          "s": 0.8999055624008179,
-          "t": 1.0,
-          "x": 0.8999055624008179,
-          "y": -1.0
-        },
-        {
-          "s": 1.0,
-          "t": 0.7497639060020447,
-          "x": 1.0,
-          "y": -0.7497639060020447
-        },
-        {
-          "s": 0.9499527812004089,
-          "t": 0.49952784180641174,
-          "x": 0.9499527812004089,
-          "y": -0.49952784180641174
-        },
-        {
-          "s": 0.8498583436012268,
-          "t": 0.19924457371234894,
-          "x": 0.8498583436012268,
-          "y": -0.19924457371234894
-        },
-        {
-          "s": 0.5996223092079163,
-          "t": 0.0,
-          "x": 0.5996223092079163,
-          "y": -0.0
-        },
-        {
-          "s": 0.49952784180641174,
-          "t": 0.0,
-          "x": 0.49952784180641174,
-          "y": -0.0
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 21,
-          "offset": 0,
-          "type": "TriangleFan"
-        },
-        {
-          "count": 1,
-          "offset": 21,
-          "type": "TriangleFan"
-        },
-        {
-          "count": 11,
-          "offset": 22,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "l9oab5XQTK",
+      "inline_data": {
+        "command_buffer": "AgAAABUAAAAAAAAAAAAAAAAAAAACAAAAAQAAAAAAAAAVAAAAAAAAAAIAAAALAAAAAAAAABYAAAAAAAAA",
+        "vertex_buffer": "VCLmPlGQWb9UIuY+UZBZP1Qi5j70sAy/VCLmPvSwDD/A4rI+9LAMv8Disj70sAw/AACAPmdmJr8AAIA+Z2YmPzHHGD6H8D+/MccYPofwPz8nIEk9bMBMvycgST1swEw/MccYPgAAgL8xxxg+AACAP4fwPz8AAIC/h/A/PwAAgD9RkFk/NmBmv1GQWT82YGY/UZBZP2zATL9RkFk/bMBMP2zATD+H8D+/bMBMP4fwPz9RkFk/vlAmv1GQWT++UCY/GzBzP/SwDL8bMHM/9LAMPxswcz/A4rK+GzBzP8Disj4AAIA/xQZMvgAAgD/FBkw+AACAPzsPy70AAIA/Ow/LPTZgZj8AAACANmBmPwAAAAC+UCY/AAAAgL5QJj8AAAAA9LAMPzHHGL70sAw/MccYPh3C/z7A4rK+HcL/PsDisj5UIuY+VCLmvlQi5j5UIuY+WEZ/Pr5QJr9YRn8+vlAmP8UGTD70sAy/xQZMPvSwDD/2Qpk+VCLmvvZCmT5UIuY+9kKZPlhGf772Qpk+WEZ/PjsPyz3FBky+Ow/LPcUGTD4AAAAA9kKZvgAAAAD2Qpk+AAAAAB3C/74AAAAAHcL/PgAAAACiIDO/AAAAAKIgMz8xxxg+h/A/vzHHGD6H8D8/wOKyPvSwDL/A4rI+9LAMP8Disj5UIua+wOKyPlQi5j72Qpk+VCLmvvZCmT5UIuY+",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Cactus (3)",
       "resource_id": "l9oab5XQTK",
       "resource_name": "Cactus (3)",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.44948065280914307,
-          "t": 0.8498583436012268,
-          "x": 0.44948065280914307,
-          "y": -0.8498583436012268
-        },
-        {
-          "s": 0.44948065280914307,
-          "t": 0.5495750904083252,
-          "x": 0.44948065280914307,
-          "y": -0.5495750904083252
-        },
-        {
-          "s": 0.34938621520996094,
-          "t": 0.5495750904083252,
-          "x": 0.34938621520996094,
-          "y": -0.5495750904083252
-        },
-        {
-          "s": 0.25,
-          "t": 0.6500000357627869,
-          "x": 0.25,
-          "y": -0.6500000357627869
-        },
-        {
-          "s": 0.14919735491275787,
-          "t": 0.7497639060020447,
-          "x": 0.14919735491275787,
-          "y": -0.7497639060020447
-        },
-        {
-          "s": 0.04910292848944664,
-          "t": 0.7998111248016357,
-          "x": 0.04910292848944664,
-          "y": -0.7998111248016357
-        },
-        {
-          "s": 0.14919735491275787,
-          "t": 1.0,
-          "x": 0.14919735491275787,
-          "y": -1.0
-        },
-        {
-          "s": 0.7497639060020447,
-          "t": 1.0,
-          "x": 0.7497639060020447,
-          "y": -1.0
-        },
-        {
-          "s": 0.8498583436012268,
-          "t": 0.8999055624008179,
-          "x": 0.8498583436012268,
-          "y": -0.8999055624008179
-        },
-        {
-          "s": 0.8498583436012268,
-          "t": 0.7998111248016357,
-          "x": 0.8498583436012268,
-          "y": -0.7998111248016357
-        },
-        {
-          "s": 0.7998111248016357,
-          "t": 0.7497639060020447,
-          "x": 0.7998111248016357,
-          "y": -0.7497639060020447
-        },
-        {
-          "s": 0.8498583436012268,
-          "t": 0.6496695280075073,
-          "x": 0.8498583436012268,
-          "y": -0.6496695280075073
-        },
-        {
-          "s": 0.9499527812004089,
-          "t": 0.5495750904083252,
-          "x": 0.9499527812004089,
-          "y": -0.5495750904083252
-        },
-        {
-          "s": 0.9499527812004089,
-          "t": 0.34938621520996094,
-          "x": 0.9499527812004089,
-          "y": -0.34938621520996094
-        },
-        {
-          "s": 1.0,
-          "t": 0.19924457371234894,
-          "x": 1.0,
-          "y": -0.19924457371234894
-        },
-        {
-          "s": 1.0,
-          "t": 0.0991501435637474,
-          "x": 1.0,
-          "y": -0.0991501435637474
-        },
-        {
-          "s": 0.8999055624008179,
-          "t": 0.0,
-          "x": 0.8999055624008179,
-          "y": -0.0
-        },
-        {
-          "s": 0.6496695280075073,
-          "t": 0.0,
-          "x": 0.6496695280075073,
-          "y": -0.0
-        },
-        {
-          "s": 0.5495750904083252,
-          "t": 0.14919735491275787,
-          "x": 0.5495750904083252,
-          "y": -0.14919735491275787
-        },
-        {
-          "s": 0.49952784180641174,
-          "t": 0.34938621520996094,
-          "x": 0.49952784180641174,
-          "y": -0.34938621520996094
-        },
-        {
-          "s": 0.44948065280914307,
-          "t": 0.44948065280914307,
-          "x": 0.44948065280914307,
-          "y": -0.44948065280914307
-        },
-        {
-          "s": 0.2492917776107788,
-          "t": 0.6496695280075073,
-          "x": 0.2492917776107788,
-          "y": -0.6496695280075073
-        },
-        {
-          "s": 0.19924457371234894,
-          "t": 0.5495750904083252,
-          "x": 0.19924457371234894,
-          "y": -0.5495750904083252
-        },
-        {
-          "s": 0.2993389964103699,
-          "t": 0.44948065280914307,
-          "x": 0.2993389964103699,
-          "y": -0.44948065280914307
-        },
-        {
-          "s": 0.2993389964103699,
-          "t": 0.2492917776107788,
-          "x": 0.2993389964103699,
-          "y": -0.2492917776107788
-        },
-        {
-          "s": 0.0991501435637474,
-          "t": 0.19924457371234894,
-          "x": 0.0991501435637474,
-          "y": -0.19924457371234894
-        },
-        {
-          "s": 0.0,
-          "t": 0.2993389964103699,
-          "x": 0.0,
-          "y": -0.2993389964103699
-        },
-        {
-          "s": 0.0,
-          "t": 0.49952784180641174,
-          "x": 0.0,
-          "y": -0.49952784180641174
-        },
-        {
-          "s": 0.0,
-          "t": 0.6997166872024536,
-          "x": 0.0,
-          "y": -0.6997166872024536
-        },
-        {
-          "s": 0.14919735491275787,
-          "t": 0.7497639060020447,
-          "x": 0.14919735491275787,
-          "y": -0.7497639060020447
-        },
-        {
-          "s": 0.34938621520996094,
-          "t": 0.5495750904083252,
-          "x": 0.34938621520996094,
-          "y": -0.5495750904083252
-        },
-        {
-          "s": 0.34938621520996094,
-          "t": 0.44948065280914307,
-          "x": 0.34938621520996094,
-          "y": -0.44948065280914307
-        },
-        {
-          "s": 0.2993389964103699,
-          "t": 0.44948065280914307,
-          "x": 0.2993389964103699,
-          "y": -0.44948065280914307
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 20,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "EXQWh9Zz2B",
+      "inline_data": {
+        "command_buffer": "AgAAABQAAAAAAAAAAAAAAAAAAAA=",
+        "vertex_buffer": "k2cZP5NnGb+TZxk/k2cZPwAAQD+4Nky+AABAP7g2TD4AAEA/lTzLvQAAQD+VPMs9rg0zP5U8S72uDTM/lTxLPWdmJj8AAAAAZ2YmPwAAAIDJsww/AAAAgMmzDD8AAAAAAACAPpU8S70AAIA+lTxLPZU8Sz0AAIC+lTxLPQAAgD4AAAAAAAAAvwAAAAAAAAA/AAAAAMmzTL8AAAAAybNMP5NnGT6TZ1m/k2cZPpNnWT+4Nkw+AACAv7g2TD4AAIA/rg0zPwAAgL+uDTM/AACAP8mzTD/lWWa/ybNMP+VZZj/Js0w/ybNMv8mzTD/Js0w/AACAP8mzTL8AAIA/ybNMPwAAgD9cG+a+AACAP1wb5j6uDXM/Jc+yvq4Ncz8lz7I+NDNzPwAAgL40M3M/AACAPgAAQD+4Nky+AABAP7g2TD4=",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Bush (2)",
       "resource_id": "EXQWh9Zz2B",
       "resource_name": "Bush (2)",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.5992366671562195,
-          "t": 0.5992366671562195,
-          "x": 0.5992366671562195,
-          "y": -0.5992366671562195
-        },
-        {
-          "s": 0.75,
-          "t": 0.19942748546600342,
-          "x": 0.75,
-          "y": -0.19942748546600342
-        },
-        {
-          "s": 0.75,
-          "t": 0.09923664480447769,
-          "x": 0.75,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.6994274854660034,
-          "t": 0.049618322402238846,
-          "x": 0.6994274854660034,
-          "y": -0.049618322402238846
-        },
-        {
-          "s": 0.6500000357627869,
-          "t": -0.0,
-          "x": 0.6500000357627869,
-          "y": 0.0
-        },
-        {
-          "s": 0.5496183037757874,
-          "t": 0.0,
-          "x": 0.5496183037757874,
-          "y": -0.0
-        },
-        {
-          "s": 0.25,
-          "t": 0.049618322402238846,
-          "x": 0.25,
-          "y": -0.049618322402238846
-        },
-        {
-          "s": 0.049618322402238846,
-          "t": 0.25,
-          "x": 0.049618322402238846,
-          "y": -0.25
-        },
-        {
-          "s": 0.0,
-          "t": 0.5,
-          "x": 0.0,
-          "y": -0.5
-        },
-        {
-          "s": 0.0,
-          "t": 0.7996183037757874,
-          "x": 0.0,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 0.14980916678905487,
-          "t": 0.8492366671562195,
-          "x": 0.14980916678905487,
-          "y": -0.8492366671562195
-        },
-        {
-          "s": 0.19942748546600342,
-          "t": 1.0,
-          "x": 0.19942748546600342,
-          "y": -1.0
-        },
-        {
-          "s": 0.6994274854660034,
-          "t": 1.0,
-          "x": 0.6994274854660034,
-          "y": -1.0
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.8998091816902161,
-          "x": 0.7996183037757874,
-          "y": -0.8998091816902161
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.7996183037757874,
-          "x": 0.7996183037757874,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 1.0,
-          "t": 0.7996183037757874,
-          "x": 1.0,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 1.0,
-          "t": 0.4494274854660034,
-          "x": 1.0,
-          "y": -0.4494274854660034
-        },
-        {
-          "s": 0.9494274854660034,
-          "t": 0.3492366373538971,
-          "x": 0.9494274854660034,
-          "y": -0.3492366373538971
-        },
-        {
-          "s": 0.9500000476837158,
-          "t": 0.25,
-          "x": 0.9500000476837158,
-          "y": -0.25
-        },
-        {
-          "s": 0.75,
-          "t": 0.19942748546600342,
-          "x": 0.75,
-          "y": -0.19942748546600342
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 23,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "QwLaM5bEqx",
+      "inline_data": {
+        "command_buffer": "AgAAABcAAAAAAAAAAAAAAAAAAAA=",
+        "vertex_buffer": "ybMMP5NnGb/Jsww/k2cZPwAAAD+amRm+AAAAP5qZGT7Js8w+lTxLvcmzzD6VPEs9k2eZPgAAAICTZ5k+AAAAALg2TD4AAACAuDZMPgAAAAC4Nkw+AACAvrg2TD4AAIA+AAAAAFwb5r4AAAAAXBvmPrg2TD7Js0y/uDZMPsmzTD+TZ5k+AACAv5NnmT4AAIA/rg0zPwAAgL+uDTM/AACAP8mzTD/Js0y/ybNMP8mzTD/lWWY/AABAv+VZZj8AAEA/5VlmP5NnGb/lWWY/k2cZPwAAgD/Jswy/AACAP8mzDD+uDXM/XBvmvq4Ncz9cG+Y+k2dZP8mzzL6TZ1k/ybPMPsmzTD8lz7K+ybNMPyXPsj7Js0w/k2eZvsmzTD+TZ5k+5VlmP5NnGb7lWWY/k2cZPuVZZj+VPMu95VlmP5U8yz0AAEA/lTxLvQAAQD+VPEs9rg0zPwAAAICuDTM/AAAAAAAAAD+TZxm+AAAAP5NnGT4=",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Grass (2)",
       "resource_id": "QwLaM5bEqx",
       "resource_name": "Grass (2)",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.5496183037757874,
-          "t": 0.5992366671562195,
-          "x": 0.5496183037757874,
-          "y": -0.5992366671562195
-        },
-        {
-          "s": 0.5,
-          "t": 0.15000000596046448,
-          "x": 0.5,
-          "y": -0.15000000596046448
-        },
-        {
-          "s": 0.3998091518878937,
-          "t": 0.049618322402238846,
-          "x": 0.3998091518878937,
-          "y": -0.049618322402238846
-        },
-        {
-          "s": 0.29961833357810974,
-          "t": 0.0,
-          "x": 0.29961833357810974,
-          "y": -0.0
-        },
-        {
-          "s": 0.19942748546600342,
-          "t": 0.0,
-          "x": 0.19942748546600342,
-          "y": -0.0
-        },
-        {
-          "s": 0.19942748546600342,
-          "t": 0.25,
-          "x": 0.19942748546600342,
-          "y": -0.25
-        },
-        {
-          "s": 0.0,
-          "t": 0.4494274854660034,
-          "x": 0.0,
-          "y": -0.4494274854660034
-        },
-        {
-          "s": 0.19942748546600342,
-          "t": 0.7996183037757874,
-          "x": 0.19942748546600342,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 0.29961833357810974,
-          "t": 1.0,
-          "x": 0.29961833357810974,
-          "y": -1.0
-        },
-        {
-          "s": 0.6994274854660034,
-          "t": 1.0,
-          "x": 0.6994274854660034,
-          "y": -1.0
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.7996183037757874,
-          "x": 0.7996183037757874,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 0.8998091816902161,
-          "t": 0.75,
-          "x": 0.8998091816902161,
-          "y": -0.75
-        },
-        {
-          "s": 0.8998091816902161,
-          "t": 0.5992366671562195,
-          "x": 0.8998091816902161,
-          "y": -0.5992366671562195
-        },
-        {
-          "s": 1.0,
-          "t": 0.5496183037757874,
-          "x": 1.0,
-          "y": -0.5496183037757874
-        },
-        {
-          "s": 0.9494274854660034,
-          "t": 0.4494274854660034,
-          "x": 0.9494274854660034,
-          "y": -0.4494274854660034
-        },
-        {
-          "s": 0.8492366671562195,
-          "t": 0.3998091518878937,
-          "x": 0.8492366671562195,
-          "y": -0.3998091518878937
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.3492366373538971,
-          "x": 0.7996183037757874,
-          "y": -0.3492366373538971
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.29961833357810974,
-          "x": 0.7996183037757874,
-          "y": -0.29961833357810974
-        },
-        {
-          "s": 0.8998091816902161,
-          "t": 0.14980916678905487,
-          "x": 0.8998091816902161,
-          "y": -0.14980916678905487
-        },
-        {
-          "s": 0.8998091816902161,
-          "t": 0.09923664480447769,
-          "x": 0.8998091816902161,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.75,
-          "t": 0.049618322402238846,
-          "x": 0.75,
-          "y": -0.049618322402238846
-        },
-        {
-          "s": 0.6994274854660034,
-          "t": 0.0,
-          "x": 0.6994274854660034,
-          "y": -0.0
-        },
-        {
-          "s": 0.5,
-          "t": 0.14980916678905487,
-          "x": 0.5,
-          "y": -0.14980916678905487
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 23,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "FgJP6uJzoG",
+      "inline_data": {
+        "command_buffer": "AgAAABcAAAAAAAAAAAAAAAAAAAA=",
+        "vertex_buffer": "ybMMP5NnGb/Jsww/k2cZPwAAAD+amRm+AAAAP5qZGT7Js8w+lTxLvcmzzD6VPEs9k2eZPgAAAICTZ5k+AAAAALg2TD4AAACAuDZMPgAAAAC4Nkw+AACAvrg2TD4AAIA+AAAAAFwb5r4AAAAAXBvmPrg2TD7Js0y/uDZMPsmzTD+TZ5k+AACAv5NnmT4AAIA/rg0zPwAAgL+uDTM/AACAP8mzTD/Js0y/ybNMP8mzTD/lWWY/AABAv+VZZj8AAEA/5VlmP5NnGb/lWWY/k2cZPwAAgD/Jswy/AACAP8mzDD+uDXM/XBvmvq4Ncz9cG+Y+k2dZP8mzzL6TZ1k/ybPMPsmzTD8lz7K+ybNMPyXPsj7Js0w/k2eZvsmzTD+TZ5k+5VlmP5NnGb7lWWY/k2cZPuVZZj+VPMu95VlmP5U8yz0AAEA/lTxLvQAAQD+VPEs9rg0zPwAAAICuDTM/AAAAAAAAAD+TZxm+AAAAP5NnGT4=",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Grass (1)",
       "resource_id": "FgJP6uJzoG",
       "resource_name": "Grass (1)",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.5496183037757874,
-          "t": 0.5992366671562195,
-          "x": 0.5496183037757874,
-          "y": -0.5992366671562195
-        },
-        {
-          "s": 0.5,
-          "t": 0.15000000596046448,
-          "x": 0.5,
-          "y": -0.15000000596046448
-        },
-        {
-          "s": 0.3998091518878937,
-          "t": 0.049618322402238846,
-          "x": 0.3998091518878937,
-          "y": -0.049618322402238846
-        },
-        {
-          "s": 0.29961833357810974,
-          "t": 0.0,
-          "x": 0.29961833357810974,
-          "y": -0.0
-        },
-        {
-          "s": 0.19942748546600342,
-          "t": 0.0,
-          "x": 0.19942748546600342,
-          "y": -0.0
-        },
-        {
-          "s": 0.19942748546600342,
-          "t": 0.25,
-          "x": 0.19942748546600342,
-          "y": -0.25
-        },
-        {
-          "s": 0.0,
-          "t": 0.4494274854660034,
-          "x": 0.0,
-          "y": -0.4494274854660034
-        },
-        {
-          "s": 0.19942748546600342,
-          "t": 0.7996183037757874,
-          "x": 0.19942748546600342,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 0.29961833357810974,
-          "t": 1.0,
-          "x": 0.29961833357810974,
-          "y": -1.0
-        },
-        {
-          "s": 0.6994274854660034,
-          "t": 1.0,
-          "x": 0.6994274854660034,
-          "y": -1.0
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.7996183037757874,
-          "x": 0.7996183037757874,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 0.8998091816902161,
-          "t": 0.75,
-          "x": 0.8998091816902161,
-          "y": -0.75
-        },
-        {
-          "s": 0.8998091816902161,
-          "t": 0.5992366671562195,
-          "x": 0.8998091816902161,
-          "y": -0.5992366671562195
-        },
-        {
-          "s": 1.0,
-          "t": 0.5496183037757874,
-          "x": 1.0,
-          "y": -0.5496183037757874
-        },
-        {
-          "s": 0.9494274854660034,
-          "t": 0.4494274854660034,
-          "x": 0.9494274854660034,
-          "y": -0.4494274854660034
-        },
-        {
-          "s": 0.8492366671562195,
-          "t": 0.3998091518878937,
-          "x": 0.8492366671562195,
-          "y": -0.3998091518878937
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.3492366373538971,
-          "x": 0.7996183037757874,
-          "y": -0.3492366373538971
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.29961833357810974,
-          "x": 0.7996183037757874,
-          "y": -0.29961833357810974
-        },
-        {
-          "s": 0.8998091816902161,
-          "t": 0.14980916678905487,
-          "x": 0.8998091816902161,
-          "y": -0.14980916678905487
-        },
-        {
-          "s": 0.8998091816902161,
-          "t": 0.09923664480447769,
-          "x": 0.8998091816902161,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.75,
-          "t": 0.049618322402238846,
-          "x": 0.75,
-          "y": -0.049618322402238846
-        },
-        {
-          "s": 0.6994274854660034,
-          "t": 0.0,
-          "x": 0.6994274854660034,
-          "y": -0.0
-        },
-        {
-          "s": 0.5,
-          "t": 0.14980916678905487,
-          "x": 0.5,
-          "y": -0.14980916678905487
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 15,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "dWDAODzq3M",
+      "inline_data": {
+        "command_buffer": "AgAAAA8AAAAAAAAAAAAAAAAAAAA=",
+        "vertex_buffer": "ybMMP+VZJr/Jsww/5VkmP8mzDD+4Nky+ybMMP7g2TD5nZuY+zcxMvmdm5j7NzEw+Jc+yPgAAAIAlz7I+AAAAAAAAgD4AAACAAACAPgAAAACTZxk+uDZMvpNnGT64Nkw+lTzLPQAAAL+VPMs9AAAAPwAAAADlWSa/AAAAAOVZJj8AAAAAAACAvwAAAAAAAIA/AACAPwAAgL8AAIA/AACAPwAAgD/Jswy/AACAP8mzDD8AAEA/AACAvgAAQD8AAIA+5VkmP5U8y73lWSY/lTzLPZNnGT+VPMu9k2cZP5U8yz3Jsww/uDZMvsmzDD+4Nkw+",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Skeleton",
       "resource_id": "dWDAODzq3M",
       "resource_name": "Skeleton",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.5496183037757874,
-          "t": 0.6498091816902161,
-          "x": 0.5496183037757874,
-          "y": -0.6498091816902161
-        },
-        {
-          "s": 0.5496183037757874,
-          "t": 0.19942748546600342,
-          "x": 0.5496183037757874,
-          "y": -0.19942748546600342
-        },
-        {
-          "s": 0.45000001788139343,
-          "t": 0.20000000298023224,
-          "x": 0.45000001788139343,
-          "y": -0.20000000298023224
-        },
-        {
-          "s": 0.3492366373538971,
-          "t": 0.0,
-          "x": 0.3492366373538971,
-          "y": -0.0
-        },
-        {
-          "s": 0.25,
-          "t": 0.0,
-          "x": 0.25,
-          "y": -0.0
-        },
-        {
-          "s": 0.14980916678905487,
-          "t": 0.19942748546600342,
-          "x": 0.14980916678905487,
-          "y": -0.19942748546600342
-        },
-        {
-          "s": 0.09923664480447769,
-          "t": 0.5,
-          "x": 0.09923664480447769,
-          "y": -0.5
-        },
-        {
-          "s": 0.0,
-          "t": 0.6498091816902161,
-          "x": 0.0,
-          "y": -0.6498091816902161
-        },
-        {
-          "s": 0.0,
-          "t": 1.0,
-          "x": 0.0,
-          "y": -1.0
-        },
-        {
-          "s": 1.0,
-          "t": 1.0,
-          "x": 1.0,
-          "y": -1.0
-        },
-        {
-          "s": 1.0,
-          "t": 0.5496183037757874,
-          "x": 1.0,
-          "y": -0.5496183037757874
-        },
-        {
-          "s": 0.75,
-          "t": 0.25,
-          "x": 0.75,
-          "y": -0.25
-        },
-        {
-          "s": 0.6498091816902161,
-          "t": 0.09923664480447769,
-          "x": 0.6498091816902161,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.5992366671562195,
-          "t": 0.09923664480447769,
-          "x": 0.5992366671562195,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.5496183037757874,
-          "t": 0.19942748546600342,
-          "x": 0.5496183037757874,
-          "y": -0.19942748546600342
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 12,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "YkK6SEnX2R",
+      "inline_data": {
+        "command_buffer": "AgAAAAwAAAAAAAAAAAAAAAAAAAA=",
+        "vertex_buffer": "ybMMP5NnGb/Jsww/k2cZP8mzDD8AAACAybMMPwAAAAAlz7I+AAAAgCXPsj4AAAAAAACAPrg2TL4AAIA+uDZMPpU8Sz0AAAC/lTxLPQAAAD8AAAAA5VlmvwAAAADlWWY/AAAAAAAAgL8AAAAAAACAPwAAgD8AAIC/AACAPwAAgD+uDXM/AAAAv64Ncz8AAAA/k2dZP7g2TL6TZ1k/uDZMPgAAQD+TZxm+AABAP5NnGT7Jsww/AAAAgMmzDD8AAAAA",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Stone",
       "resource_id": "YkK6SEnX2R",
       "resource_name": "Stone",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.5496183037757874,
-          "t": 0.5992366671562195,
-          "x": 0.5496183037757874,
-          "y": -0.5992366671562195
-        },
-        {
-          "s": 0.5496183037757874,
-          "t": 0.0,
-          "x": 0.5496183037757874,
-          "y": -0.0
-        },
-        {
-          "s": 0.3492366373538971,
-          "t": 0.0,
-          "x": 0.3492366373538971,
-          "y": -0.0
-        },
-        {
-          "s": 0.25,
-          "t": 0.19942748546600342,
-          "x": 0.25,
-          "y": -0.19942748546600342
-        },
-        {
-          "s": 0.049618322402238846,
-          "t": 0.5,
-          "x": 0.049618322402238846,
-          "y": -0.5
-        },
-        {
-          "s": 0.0,
-          "t": 0.8998091816902161,
-          "x": 0.0,
-          "y": -0.8998091816902161
-        },
-        {
-          "s": 0.0,
-          "t": 1.0,
-          "x": 0.0,
-          "y": -1.0
-        },
-        {
-          "s": 1.0,
-          "t": 1.0,
-          "x": 1.0,
-          "y": -1.0
-        },
-        {
-          "s": 0.9494274854660034,
-          "t": 0.5,
-          "x": 0.9494274854660034,
-          "y": -0.5
-        },
-        {
-          "s": 0.8492366671562195,
-          "t": 0.19942748546600342,
-          "x": 0.8492366671562195,
-          "y": -0.19942748546600342
-        },
-        {
-          "s": 0.75,
-          "t": 0.14980916678905487,
-          "x": 0.75,
-          "y": -0.14980916678905487
-        },
-        {
-          "s": 0.5496183037757874,
-          "t": 0.0,
-          "x": 0.5496183037757874,
-          "y": -0.0
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 19,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "8636ofEjei",
+      "inline_data": {
+        "command_buffer": "AgAAABMAAAAAAAAAAAAAAAAAAAA=",
+        "vertex_buffer": "k2cZPwAAAL+TZxk/AAAAPwAAQD8AAIC+AABAPwAAgD7rUTg/CtcjvutROD8K1yM+k2cZP5U8y72TZxk/lTzLPcmzzD6VPMu9ybPMPpU8yz0AAIA+uDZMvgAAgD64Nkw+j8J1Po/Cdb6PwnU+j8J1PgAAgD4lz7K+AACAPiXPsj4lz7I+ybMMvyXPsj7Jsww/ybPMPpNnGb/Js8w+k2cZP8mzzD7Js0y/ybPMPsmzTD+uDTM/ybNMv64NMz/Js0w/AABAP64NM78AAEA/rg0zP64Ncz/lWSa/rg1zP+VZJj8AAIA/AAAAvwAAgD8AAAA/rg1zP8mzzL6uDXM/ybPMPsmzTD/Js8y+ybNMP8mzzD4AAEA/Jc+yvgAAQD8lz7I+AABAPwAAgL4AAEA/AACAPg==",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Bandit Idle",
       "resource_id": "8636ofEjei",
       "resource_name": "Bandit Idle",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.5992366671562195,
-          "t": 0.5,
-          "x": 0.5992366671562195,
-          "y": -0.5
-        },
-        {
-          "s": 0.75,
-          "t": 0.25,
-          "x": 0.75,
-          "y": -0.25
-        },
-        {
-          "s": 0.7199999690055847,
-          "t": 0.1599999964237213,
-          "x": 0.7199999690055847,
-          "y": -0.1599999964237213
-        },
-        {
-          "s": 0.5992366671562195,
-          "t": 0.09923664480447769,
-          "x": 0.5992366671562195,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.3998091518878937,
-          "t": 0.09923664480447769,
-          "x": 0.3998091518878937,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.25,
-          "t": 0.19942748546600342,
-          "x": 0.25,
-          "y": -0.19942748546600342
-        },
-        {
-          "s": 0.23999999463558197,
-          "t": 0.23999999463558197,
-          "x": 0.23999999463558197,
-          "y": -0.23999999463558197
-        },
-        {
-          "s": 0.25,
-          "t": 0.3492366373538971,
-          "x": 0.25,
-          "y": -0.3492366373538971
-        },
-        {
-          "s": 0.3492366373538971,
-          "t": 0.5496183037757874,
-          "x": 0.3492366373538971,
-          "y": -0.5496183037757874
-        },
-        {
-          "s": 0.3998091518878937,
-          "t": 0.5992366671562195,
-          "x": 0.3998091518878937,
-          "y": -0.5992366671562195
-        },
-        {
-          "s": 0.3998091518878937,
-          "t": 0.7996183037757874,
-          "x": 0.3998091518878937,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 0.6994274854660034,
-          "t": 0.7996183037757874,
-          "x": 0.6994274854660034,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 0.75,
-          "t": 0.6994274854660034,
-          "x": 0.75,
-          "y": -0.6994274854660034
-        },
-        {
-          "s": 0.9494274854660034,
-          "t": 0.6498091816902161,
-          "x": 0.9494274854660034,
-          "y": -0.6498091816902161
-        },
-        {
-          "s": 1.0,
-          "t": 0.5,
-          "x": 1.0,
-          "y": -0.5
-        },
-        {
-          "s": 0.9494274854660034,
-          "t": 0.3998091518878937,
-          "x": 0.9494274854660034,
-          "y": -0.3998091518878937
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.3998091518878937,
-          "x": 0.7996183037757874,
-          "y": -0.3998091518878937
-        },
-        {
-          "s": 0.75,
-          "t": 0.3492366373538971,
-          "x": 0.75,
-          "y": -0.3492366373538971
-        },
-        {
-          "s": 0.75,
-          "t": 0.25,
-          "x": 0.75,
-          "y": -0.25
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 17,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "26DgI88X5u",
+      "inline_data": {
+        "command_buffer": "AgAAABEAAAAAAAAAAAAAAAAAAAA=",
+        "vertex_buffer": "k2cZPwAAAL+TZxk/AAAAP5NnGT+VPMu9k2cZP5U8yz2TZ5k+lTzLvZNnmT6VPMs9uDZMPrg2TL64Nkw+uDZMPpNnmT4AAAC/k2eZPgAAAD/Js8w+k2cZv8mzzD6TZxk/ybPMPsmzTL/Js8w+ybNMP64NMz/Js0y/rg0zP8mzTD/lWWY/rg0zv+VZZj+uDTM/AACAP5NnGb8AAIA/k2cZPwAAgD/Js8y+AACAP8mzzD7lWWY/ybPMvuVZZj/Js8w+ybNMP8mzzL7Js0w/ybPMPsmzTD+TZ5m+ybNMP5NnmT7Js0w/uDZMvsmzTD+4Nkw+rg0zP5U8y72uDTM/lTzLPZNnGT+VPMu9k2cZP5U8yz0=",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Bandit Walk",
       "resource_id": "26DgI88X5u",
       "resource_name": "Bandit Walk",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.5992366671562195,
-          "t": 0.5,
-          "x": 0.5992366671562195,
-          "y": -0.5
-        },
-        {
-          "s": 0.5992366671562195,
-          "t": 0.09923664480447769,
-          "x": 0.5992366671562195,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.29961833357810974,
-          "t": 0.09923664480447769,
-          "x": 0.29961833357810974,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.19942748546600342,
-          "t": 0.19942748546600342,
-          "x": 0.19942748546600342,
-          "y": -0.19942748546600342
-        },
-        {
-          "s": 0.29961833357810974,
-          "t": 0.5,
-          "x": 0.29961833357810974,
-          "y": -0.5
-        },
-        {
-          "s": 0.3998091518878937,
-          "t": 0.5992366671562195,
-          "x": 0.3998091518878937,
-          "y": -0.5992366671562195
-        },
-        {
-          "s": 0.3998091518878937,
-          "t": 0.7996183037757874,
-          "x": 0.3998091518878937,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 0.6994274854660034,
-          "t": 0.7996183037757874,
-          "x": 0.6994274854660034,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 0.8998091816902161,
-          "t": 0.6994274854660034,
-          "x": 0.8998091816902161,
-          "y": -0.6994274854660034
-        },
-        {
-          "s": 1.0,
-          "t": 0.5992366671562195,
-          "x": 1.0,
-          "y": -0.5992366671562195
-        },
-        {
-          "s": 1.0,
-          "t": 0.3998091518878937,
-          "x": 1.0,
-          "y": -0.3998091518878937
-        },
-        {
-          "s": 0.8998091816902161,
-          "t": 0.3998091518878937,
-          "x": 0.8998091816902161,
-          "y": -0.3998091518878937
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.3998091518878937,
-          "x": 0.7996183037757874,
-          "y": -0.3998091518878937
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.29961833357810974,
-          "x": 0.7996183037757874,
-          "y": -0.29961833357810974
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.19942748546600342,
-          "x": 0.7996183037757874,
-          "y": -0.19942748546600342
-        },
-        {
-          "s": 0.6994274854660034,
-          "t": 0.09923664480447769,
-          "x": 0.6994274854660034,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.5992366671562195,
-          "t": 0.09923664480447769,
-          "x": 0.5992366671562195,
-          "y": -0.09923664480447769
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 16,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "zoqnFP5Gvz",
+      "inline_data": {
+        "command_buffer": "AgAAABAAAAAAAAAAAAAAAAAAAAA=",
+        "vertex_buffer": "k2cZPwAAAL+TZxk/AAAAP5NnGT+VPMu9k2cZP5U8yz24Nkw+lTzLvbg2TD6VPMs9uDZMPpNnmb64Nkw+k2eZPpNnmT4AAAC/k2eZPgAAAD+TZ5k+k2cZv5NnmT6TZxk/ybPMPpNnGb/Js8w+k2cZP8mzzD7Js0y/ybPMPsmzTD+uDTM/ybNMv64NMz/Js0w/ybNMP64NM7/Js0w/rg0zPwAAgD+uDTO/AACAP64NMz8AAIA/ybPMvgAAgD/Js8w+5VlmP5Nnmb7lWWY/k2eZPsmzTD+4Nky+ybNMP7g2TD6uDTM/lTzLva4NMz+VPMs9k2cZP5U8y72TZxk/lTzLPQ==",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Bandit Attack",
       "resource_id": "zoqnFP5Gvz",
       "resource_name": "Bandit Attack",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.5992366671562195,
-          "t": 0.5,
-          "x": 0.5992366671562195,
-          "y": -0.5
-        },
-        {
-          "s": 0.5992366671562195,
-          "t": 0.09923664480447769,
-          "x": 0.5992366671562195,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.19942748546600342,
-          "t": 0.09923664480447769,
-          "x": 0.19942748546600342,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.19942748546600342,
-          "t": 0.29961833357810974,
-          "x": 0.19942748546600342,
-          "y": -0.29961833357810974
-        },
-        {
-          "s": 0.29961833357810974,
-          "t": 0.5,
-          "x": 0.29961833357810974,
-          "y": -0.5
-        },
-        {
-          "s": 0.29961833357810974,
-          "t": 0.5992366671562195,
-          "x": 0.29961833357810974,
-          "y": -0.5992366671562195
-        },
-        {
-          "s": 0.3998091518878937,
-          "t": 0.5992366671562195,
-          "x": 0.3998091518878937,
-          "y": -0.5992366671562195
-        },
-        {
-          "s": 0.3998091518878937,
-          "t": 0.7996183037757874,
-          "x": 0.3998091518878937,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 0.6994274854660034,
-          "t": 0.7996183037757874,
-          "x": 0.6994274854660034,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.6994274854660034,
-          "x": 0.7996183037757874,
-          "y": -0.6994274854660034
-        },
-        {
-          "s": 1.0,
-          "t": 0.6994274854660034,
-          "x": 1.0,
-          "y": -0.6994274854660034
-        },
-        {
-          "s": 1.0,
-          "t": 0.3998091518878937,
-          "x": 1.0,
-          "y": -0.3998091518878937
-        },
-        {
-          "s": 0.8998091816902161,
-          "t": 0.29961833357810974,
-          "x": 0.8998091816902161,
-          "y": -0.29961833357810974
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.19942748546600342,
-          "x": 0.7996183037757874,
-          "y": -0.19942748546600342
-        },
-        {
-          "s": 0.6994274854660034,
-          "t": 0.09923664480447769,
-          "x": 0.6994274854660034,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.5992366671562195,
-          "t": 0.09923664480447769,
-          "x": 0.5992366671562195,
-          "y": -0.09923664480447769
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 19,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "W27ZFgJKAJ",
+      "inline_data": {
+        "command_buffer": "AgAAABMAAAAAAAAAAAAAAAAAAAA=",
+        "vertex_buffer": "k2cZP8mzzL6TZxk/ybPMPpNnGT+VPMu9k2cZP5U8yz2TZ5k+lTzLvZNnmT6VPMs9uDZMPrg2TL64Nkw+uDZMPrg2TD6TZ5m+uDZMPpNnmT6TZ5k+AAAAv5NnmT4AAAA/ybPMPpNnGb/Js8w+k2cZP8mzzD6uDTO/ybPMPq4NMz/Js8w+ybNMv8mzzD7Js0w/rg0zP8mzTL+uDTM/ybNMP8mzTD+uDTO/ybNMP64NMz/Js0w/k2cZv8mzTD+TZxk/5VlmPwAAAL/lWWY/AAAAPwAAgD/Js8y+AACAP8mzzD7lWWY/k2eZvuVZZj+TZ5k+ybNMP5Nnmb7Js0w/k2eZPsmzTD+4Nky+ybNMP7g2TD6uDTM/lTzLva4NMz+VPMs9k2cZP5U8y72TZxk/lTzLPQ==",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Bandit Jump",
       "resource_id": "W27ZFgJKAJ",
       "resource_name": "Bandit Jump",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.5992366671562195,
-          "t": 0.3998091518878937,
-          "x": 0.5992366671562195,
-          "y": -0.3998091518878937
-        },
-        {
-          "s": 0.5992366671562195,
-          "t": 0.09923664480447769,
-          "x": 0.5992366671562195,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.29961833357810974,
-          "t": 0.09923664480447769,
-          "x": 0.29961833357810974,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.19942748546600342,
-          "t": 0.19942748546600342,
-          "x": 0.19942748546600342,
-          "y": -0.19942748546600342
-        },
-        {
-          "s": 0.19942748546600342,
-          "t": 0.29961833357810974,
-          "x": 0.19942748546600342,
-          "y": -0.29961833357810974
-        },
-        {
-          "s": 0.29961833357810974,
-          "t": 0.5,
-          "x": 0.29961833357810974,
-          "y": -0.5
-        },
-        {
-          "s": 0.3998091518878937,
-          "t": 0.5992366671562195,
-          "x": 0.3998091518878937,
-          "y": -0.5992366671562195
-        },
-        {
-          "s": 0.3998091518878937,
-          "t": 0.6994274854660034,
-          "x": 0.3998091518878937,
-          "y": -0.6994274854660034
-        },
-        {
-          "s": 0.3998091518878937,
-          "t": 0.7996183037757874,
-          "x": 0.3998091518878937,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 0.6994274854660034,
-          "t": 0.7996183037757874,
-          "x": 0.6994274854660034,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.6994274854660034,
-          "x": 0.7996183037757874,
-          "y": -0.6994274854660034
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.5992366671562195,
-          "x": 0.7996183037757874,
-          "y": -0.5992366671562195
-        },
-        {
-          "s": 0.8998091816902161,
-          "t": 0.5,
-          "x": 0.8998091816902161,
-          "y": -0.5
-        },
-        {
-          "s": 1.0,
-          "t": 0.3998091518878937,
-          "x": 1.0,
-          "y": -0.3998091518878937
-        },
-        {
-          "s": 0.8998091816902161,
-          "t": 0.29961833357810974,
-          "x": 0.8998091816902161,
-          "y": -0.29961833357810974
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.29961833357810974,
-          "x": 0.7996183037757874,
-          "y": -0.29961833357810974
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.19942748546600342,
-          "x": 0.7996183037757874,
-          "y": -0.19942748546600342
-        },
-        {
-          "s": 0.6994274854660034,
-          "t": 0.09923664480447769,
-          "x": 0.6994274854660034,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.5992366671562195,
-          "t": 0.09923664480447769,
-          "x": 0.5992366671562195,
-          "y": -0.09923664480447769
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 6,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "YFMYNa7lU4",
+      "inline_data": {
+        "command_buffer": "AgAAAAYAAAAAAAAAAAAAAAAAAAA=",
+        "vertex_buffer": "5VkmP8mzDL/lWSY/ybMMP5iZWT8AAACAmJlZPwAAAACZmRk+AAAAgJmZGT4AAAAAmpmZPgAAgL+amZk+AACAPzQzMz8AAIC/NDMzPwAAgD+YmVk/AAAAgJiZWT8AAAAA",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Bandit",
       "resource_id": "YFMYNa7lU4",
       "resource_name": "Bandit",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.6498091816902161,
-          "t": 0.5496183037757874,
-          "x": 0.6498091816902161,
-          "y": -0.5496183037757874
-        },
-        {
-          "s": 0.8499999046325684,
-          "t": 0.0,
-          "x": 0.8499999046325684,
-          "y": -0.0
-        },
-        {
-          "s": 0.14999999105930328,
-          "t": 0.0,
-          "x": 0.14999999105930328,
-          "y": -0.0
-        },
-        {
-          "s": 0.30000001192092896,
-          "t": 1.0,
-          "x": 0.30000001192092896,
-          "y": -1.0
-        },
-        {
-          "s": 0.7000000476837158,
-          "t": 1.0,
-          "x": 0.7000000476837158,
-          "y": -1.0
-        },
-        {
-          "s": 0.8499999046325684,
-          "t": 0.0,
-          "x": 0.8499999046325684,
-          "y": -0.0
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 19,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "4rBCnTGuXK",
+      "inline_data": {
+        "command_buffer": "AgAAABMAAAAAAAAAAAAAAAAAAAA=",
+        "vertex_buffer": "k2cZP1wb5r6TZxk/XBvmPuVZJj+VPMu95VkmP5U8yz1cG+Y+lTzLvVwb5j6VPMs9k2eZPpNnGb6TZ5k+k2cZPgAAgD64Nky+AACAPrg2TD4lz7I+AAAAvyXPsj4AAAA/Jc+yPuVZJr8lz7I+5VkmP1wb5j4AAEC/XBvmPgAAQD8AAAA/ybNMvwAAAD/Js0w/5VkmP8mzTL/lWSY/ybNMP64NMz8AAEC/rg0zPwAAQD8AAEA/rg0zvwAAQD+uDTM/ybNMP+VZJr/Js0w/5VkmP64Ncz9cG+a+rg1zP1wb5j6uDXM/Jc+yvq4Ncz8lz7I+5VlmP5Nnmb7lWWY/k2eZPsmzTD8AAIC+ybNMPwAAgD4AAEA/k2cZvgAAQD+TZxk+5VkmP5U8y73lWSY/lTzLPQ==",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Bandit Fall",
       "resource_id": "4rBCnTGuXK",
       "resource_name": "Bandit Fall",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.5992366671562195,
-          "t": 0.4494274854660034,
-          "x": 0.5992366671562195,
-          "y": -0.4494274854660034
-        },
-        {
-          "s": 0.6498091816902161,
-          "t": 0.09923664480447769,
-          "x": 0.6498091816902161,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.4494274854660034,
-          "t": 0.09923664480447769,
-          "x": 0.4494274854660034,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.29961833357810974,
-          "t": 0.14980916678905487,
-          "x": 0.29961833357810974,
-          "y": -0.14980916678905487
-        },
-        {
-          "s": 0.25,
-          "t": 0.19942748546600342,
-          "x": 0.25,
-          "y": -0.19942748546600342
-        },
-        {
-          "s": 0.3492366373538971,
-          "t": 0.5,
-          "x": 0.3492366373538971,
-          "y": -0.5
-        },
-        {
-          "s": 0.3492366373538971,
-          "t": 0.6498091816902161,
-          "x": 0.3492366373538971,
-          "y": -0.6498091816902161
-        },
-        {
-          "s": 0.4494274854660034,
-          "t": 0.75,
-          "x": 0.4494274854660034,
-          "y": -0.75
-        },
-        {
-          "s": 0.5,
-          "t": 0.7996183037757874,
-          "x": 0.5,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 0.6498091816902161,
-          "t": 0.7996183037757874,
-          "x": 0.6498091816902161,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 0.6994274854660034,
-          "t": 0.75,
-          "x": 0.6994274854660034,
-          "y": -0.75
-        },
-        {
-          "s": 0.75,
-          "t": 0.6994274854660034,
-          "x": 0.75,
-          "y": -0.6994274854660034
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.6498091816902161,
-          "x": 0.7996183037757874,
-          "y": -0.6498091816902161
-        },
-        {
-          "s": 0.9494274854660034,
-          "t": 0.4494274854660034,
-          "x": 0.9494274854660034,
-          "y": -0.4494274854660034
-        },
-        {
-          "s": 0.9494274854660034,
-          "t": 0.3492366373538971,
-          "x": 0.9494274854660034,
-          "y": -0.3492366373538971
-        },
-        {
-          "s": 0.8998091816902161,
-          "t": 0.29961833357810974,
-          "x": 0.8998091816902161,
-          "y": -0.29961833357810974
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.25,
-          "x": 0.7996183037757874,
-          "y": -0.25
-        },
-        {
-          "s": 0.75,
-          "t": 0.14980916678905487,
-          "x": 0.75,
-          "y": -0.14980916678905487
-        },
-        {
-          "s": 0.6498091816902161,
-          "t": 0.09923664480447769,
-          "x": 0.6498091816902161,
-          "y": -0.09923664480447769
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 21,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "PBPIRCm9MB",
+      "inline_data": {
+        "command_buffer": "AgAAABUAAAAAAAAAAAAAAAAAAAA=",
+        "vertex_buffer": "k2cZP5NnGb+TZxk/k2cZPwAAQD+amRm+AABAP5qZGT6TZxk/lTzLvZNnGT+VPMs9k2eZPpU8y72TZ5k+lTzLPZNnGT6TZ5m+k2cZPpNnmT6VPMs9Jc+yvpU8yz0lz7I+lTzLPQAAAL+VPMs9AAAAP5U8Sz3lWSa/lTxLPeVZJj+VPMs9AABAv5U8yz0AAEA/k2cZPq4Nc7+TZxk+rg1zPyXPsj6uDXO/Jc+yPq4Ncz8AAAA/k2dZvwAAAD+TZ1k/k2cZP8mzTL+TZxk/ybNMP64NMz/Js0y/rg0zP8mzTD/Js0w/rg0zv8mzTD+uDTM/5VlmP+VZJr/lWWY/5VkmPwAAgD+TZxm/AACAP5NnGT8AAIA/XBvmvgAAgD9cG+Y+rg1zPyXPsr6uDXM/Jc+yPpqZWT/NzEy+mplZP83MTD4AAEA/mpkZvgAAQD+amRk+",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Bandit Die",
       "resource_id": "PBPIRCm9MB",
       "resource_name": "Bandit Die",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.5992366671562195,
-          "t": 0.5992366671562195,
-          "x": 0.5992366671562195,
-          "y": -0.5992366671562195
-        },
-        {
-          "s": 0.75,
-          "t": 0.15000000596046448,
-          "x": 0.75,
-          "y": -0.15000000596046448
-        },
-        {
-          "s": 0.5992366671562195,
-          "t": 0.09923664480447769,
-          "x": 0.5992366671562195,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.29961833357810974,
-          "t": 0.09923664480447769,
-          "x": 0.29961833357810974,
-          "y": -0.09923664480447769
-        },
-        {
-          "s": 0.14980916678905487,
-          "t": 0.29961833357810974,
-          "x": 0.14980916678905487,
-          "y": -0.29961833357810974
-        },
-        {
-          "s": 0.09923664480447769,
-          "t": 0.3492366373538971,
-          "x": 0.09923664480447769,
-          "y": -0.3492366373538971
-        },
-        {
-          "s": 0.09923664480447769,
-          "t": 0.5,
-          "x": 0.09923664480447769,
-          "y": -0.5
-        },
-        {
-          "s": 0.049618322402238846,
-          "t": 0.6498091816902161,
-          "x": 0.049618322402238846,
-          "y": -0.6498091816902161
-        },
-        {
-          "s": 0.09923664480447769,
-          "t": 0.75,
-          "x": 0.09923664480447769,
-          "y": -0.75
-        },
-        {
-          "s": 0.14980916678905487,
-          "t": 0.9494274854660034,
-          "x": 0.14980916678905487,
-          "y": -0.9494274854660034
-        },
-        {
-          "s": 0.3492366373538971,
-          "t": 0.9494274854660034,
-          "x": 0.3492366373538971,
-          "y": -0.9494274854660034
-        },
-        {
-          "s": 0.5,
-          "t": 0.8492366671562195,
-          "x": 0.5,
-          "y": -0.8492366671562195
-        },
-        {
-          "s": 0.5992366671562195,
-          "t": 0.7996183037757874,
-          "x": 0.5992366671562195,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 0.6994274854660034,
-          "t": 0.7996183037757874,
-          "x": 0.6994274854660034,
-          "y": -0.7996183037757874
-        },
-        {
-          "s": 0.7996183037757874,
-          "t": 0.6994274854660034,
-          "x": 0.7996183037757874,
-          "y": -0.6994274854660034
-        },
-        {
-          "s": 0.8998091816902161,
-          "t": 0.6498091816902161,
-          "x": 0.8998091816902161,
-          "y": -0.6498091816902161
-        },
-        {
-          "s": 1.0,
-          "t": 0.5992366671562195,
-          "x": 1.0,
-          "y": -0.5992366671562195
-        },
-        {
-          "s": 1.0,
-          "t": 0.4494274854660034,
-          "x": 1.0,
-          "y": -0.4494274854660034
-        },
-        {
-          "s": 0.9494274854660034,
-          "t": 0.3492366373538971,
-          "x": 0.9494274854660034,
-          "y": -0.3492366373538971
-        },
-        {
-          "s": 0.8500000238418579,
-          "t": 0.20000000298023224,
-          "x": 0.8500000238418579,
-          "y": -0.20000000298023224
-        },
-        {
-          "s": 0.75,
-          "t": 0.15000000596046448,
-          "x": 0.75,
-          "y": -0.15000000596046448
-        }
-      ]
+      "uri": ""
     },
     {
-      "draws": [
-        {
-          "count": 12,
-          "offset": 0,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "XJz8lK4sSZ",
+      "inline_data": {
+        "command_buffer": "AgAAAAwAAAAAAAAAAAAAAAAAAAA=",
+        "vertex_buffer": "AAAAP9AVs74AAAA/0BWzPgAAAD8AAACAAAAAPwAAAADNzEw+AAAAgM3MTD4AAAAAAAAAgJqZmb4AAACAmpmZPgAAAADQFbO+AAAAANAVsz6bXOY+AACAv5tc5j4AAIA/AAAAPwAAgL8AAAA/AACAP7igDD8AAIC/uKAMPwAAgD8AAIA/NDOzvgAAgD80M7M+AACAP2pymb4AAIA/anKZPjW5TD8AAACANblMPwAAAAAAAAA/AAAAgAAAAD8AAAAA",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
       "name": "Diamond",
       "resource_id": "XJz8lK4sSZ",
       "resource_name": "Diamond",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.5,
-          "t": 0.3497757911682129,
-          "x": 0.5,
-          "y": -0.3497757911682129
-        },
-        {
-          "s": 0.5,
-          "t": 0.0,
-          "x": 0.5,
-          "y": -0.0
-        },
-        {
-          "s": 0.20000000298023224,
-          "t": 0.0,
-          "x": 0.20000000298023224,
-          "y": -0.0
-        },
-        {
-          "s": -0.0,
-          "t": 0.30000001192092896,
-          "x": -0.0,
-          "y": -0.30000001192092896
-        },
-        {
-          "s": 0.0,
-          "t": 0.3497757911682129,
-          "x": 0.0,
-          "y": -0.3497757911682129
-        },
-        {
-          "s": 0.4499252736568451,
-          "t": 1.0,
-          "x": 0.4499252736568451,
-          "y": -1.0
-        },
-        {
-          "s": 0.5,
-          "t": 1.0,
-          "x": 0.5,
-          "y": -1.0
-        },
-        {
-          "s": 0.5493273735046387,
-          "t": 1.0,
-          "x": 0.5493273735046387,
-          "y": -1.0
-        },
-        {
-          "s": 1.0,
-          "t": 0.3500000238418579,
-          "x": 1.0,
-          "y": -0.3500000238418579
-        },
-        {
-          "s": 1.0,
-          "t": 0.2997010350227356,
-          "x": 1.0,
-          "y": -0.2997010350227356
-        },
-        {
-          "s": 0.7997010350227356,
-          "t": 0.0,
-          "x": 0.7997010350227356,
-          "y": -0.0
-        },
-        {
-          "s": 0.5,
-          "t": 0.0,
-          "x": 0.5,
-          "y": -0.0
-        }
-      ]
+      "uri": ""
     }
   ],
   "uis": [

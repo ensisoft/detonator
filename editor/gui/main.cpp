@@ -34,6 +34,7 @@
 #  include <nlohmann/json.hpp>
 #  include <hb.h> // harfbuzz
 #  include <sol/sol.hpp>
+#  include <assimp/version.h>
    #if defined(WINDOWS_OS)
    #  include <Windows.h>
    #  include <dwmapi.h>
@@ -64,6 +65,11 @@ void copyright()
     const auto boost_major    = BOOST_VERSION / 100000;
     const auto boost_minor    = BOOST_VERSION / 100 % 1000;
     const auto boost_revision = BOOST_VERSION % 100;
+
+    INFO("https://github.com/assimp");
+    INFO("https://assimp.org/");
+    INFO("Assimp the Asset Importer Library %1.%2.%3", aiGetVersionMajor(), aiGetVersionMinor(), aiGetVersionRevision());
+    INFO("Copyright (c) 2006-2023, assimp team");
 
     INFO("http://http://mpg123.de/");
     INFO("mpg123 - Fast console MPEG Audio Player and decoder library. 1.26.4");

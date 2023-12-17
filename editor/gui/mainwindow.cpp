@@ -64,6 +64,7 @@
 #include "editor/gui/dlgresdeps.h"
 #include "editor/gui/dlgimport.h"
 #include "editor/gui/dlgtileimport.h"
+#include "editor/gui/dlgmodelimport.h"
 #include "editor/gui/dlgsettings.h"
 #include "editor/gui/dlgimgpack.h"
 #include "editor/gui/dlgpackage.h"
@@ -1301,6 +1302,18 @@ void MainWindow::on_actionNewUI_triggered()
 void MainWindow::on_actionNewAudioGraph_triggered()
 {
     OpenNewWidget(new AudioWidget(mWorkspace.get()));
+}
+
+void MainWindow::on_actionImportModel_triggered()
+{
+    if (!mWorkspace)
+        return;
+
+    DlgModelImport dlg(this, mWorkspace.get());
+    dlg.LoadGeometry();
+    dlg.show();
+    dlg.LoadState();
+    dlg.exec();
 }
 
 void MainWindow::on_actionImportFiles_triggered()
@@ -3181,8 +3194,19 @@ void MainWindow::ShowHelpWidget()
         mUI.mainToolBar->addAction(mUI.actionNewTilemap);
         mUI.mainToolBar->addAction(mUI.actionNewAudioGraph);
         mUI.mainToolBar->addSeparator();
-        mUI.mainToolBar->addAction(mUI.actionImportFiles);
-        mUI.mainToolBar->addAction(mUI.actionImportTiles);
+
+        if (mImportMenu == nullptr)
+        {
+            mImportMenu = new QMenu(this);
+            mImportMenu->setIcon(QIcon("icons:import.png"));
+            mImportMenu->setTitle("Import Resource...");
+            mImportMenu->addAction(mUI.actionImportModel);
+            mImportMenu->addAction(mUI.actionImportTiles);
+            mImportMenu->addAction(mUI.actionImportFiles);
+            mImportMenu->addAction(mUI.actionImportJSON);
+            mImportMenu->addAction(mUI.actionImportZIP);
+        }
+        mUI.mainToolBar->addAction(mImportMenu->menuAction());
     }
     else
     {

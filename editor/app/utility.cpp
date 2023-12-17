@@ -273,6 +273,18 @@ std::uint64_t GetFileHash(const QString& file)
     return std::hash<std::string_view>()(view);
 }
 
+QString GetFilePath(const QString& file)
+{
+    const QFileInfo info(file);
+    if (!info.isFile())
+        return "";
+
+    if (!info.exists())
+        return "";
+
+    return ToNativeSeparators(QDir::cleanPath(info.canonicalPath()));
+}
+
 QString JoinPath(const QString& lhs, const QString& rhs)
 {
     QString s;

@@ -23,6 +23,7 @@ find_package(ZLIB REQUIRED)
 find_package(HARFBUZZ REQUIRED)
 find_package(MPG123 REQUIRED)
 find_package(Boost REQUIRED)
+find_package(assimp REQUIRED)
 
 # conan2 doesn't provide CONAN_LIBS anymore, so we'll setup our own array var
 # for the same purpose
@@ -31,6 +32,7 @@ list(APPEND CONAN_LIBS "harfbuzz::harfbuzz")
 list(APPEND CONAN_LIBS "Freetype::Freetype")
 list(APPEND CONAN_LIBS "mpg123::mpg123")
 list(APPEND CONAN_LIBS "ZLIB::ZLIB")
+list(APPEND CONAN_LIBS "assimp::assimp")
 
 # play  stupid games, win stupid prices.  shove this shit here to make the headers
 # found same like before conan -> conan2 upgrade
@@ -365,6 +367,8 @@ target_include_directories(tree-sitter PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_
 # Editor application.
 add_executable(Detonator
     graphics/tool/geometry.cpp
+    editor/app/import.h
+    editor/app/import.cpp
     editor/app/event.h
     editor/app/eventlog.h
     editor/app/eventlog.cpp
@@ -456,6 +460,9 @@ add_executable(Detonator
     editor/gui/dlgmaterialparams.h
     editor/gui/dlgmaterialparams.ui
     editor/gui/dlgmaterialparams.cpp
+    editor/gui/dlgmodelimport.h
+    editor/gui/dlgmodelimport.ui
+    editor/gui/dlgmodelimport.cpp
     editor/gui/dlgpackage.h
     editor/gui/dlgpackage.ui
     editor/gui/dlgpackage.cpp
