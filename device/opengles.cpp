@@ -1921,6 +1921,7 @@ private:
             {
                 mDevice->FreeBuffer(mIndexBufferIndex, mIndexBufferOffset, mIndexBufferSize, mIndexBufferUsage, BufferType::IndexBuffer);
             }
+            DEBUG("Deleted geometry object. [name='%1']", mName);
         }
         virtual void ClearDraws() override
         { mDrawCommands.clear(); }
@@ -1953,6 +1954,11 @@ private:
             mDevice->UploadBuffer(mVertexBufferIndex, mVertexBufferOffset, data, bytes, usage, BufferType::VertexBuffer);
             mVertexBufferSize  = bytes;
             mVertexBufferUsage = usage;
+
+            if (usage == Usage::Static)
+            {
+                DEBUG("Uploaded geometry vertices. [name='%1', bytes='%2', usage='%3']", mName, bytes, usage);
+            }
         }
         virtual void UploadIndices(const void* data, size_t bytes, IndexType type, Usage usage) override
         {
@@ -1977,6 +1983,11 @@ private:
             mIndexBufferSize  = bytes;
             mIndexBufferUsage = usage;
             mIndexBufferType  = type;
+
+            if (usage == Usage::Static)
+            {
+                DEBUG("Uploaded geometry indices. [name='%1', bytes='%2', usage='%3']", mName, bytes, usage);
+            }
         }
 
         virtual void SetDataHash(size_t hash) override
@@ -1987,6 +1998,10 @@ private:
         { return mDrawCommands.size(); }
         virtual DrawCommand GetDrawCmd(size_t index) const override
         { return mDrawCommands[index]; }
+        virtual void SetName(const std::string& name) override
+        { mName = name; }
+        virtual std::string GetName() const override
+        { return mName; }
 
         inline void SetFrameStamp(size_t frame_number) const noexcept
         { mFrameNumber = frame_number; }
@@ -2023,6 +2038,7 @@ private:
         std::size_t mIndexBufferOffset = 0;
         std::size_t mIndexBufferIndex  = 0;
         std::size_t mHash = 0;
+        std::string mName;
         Usage mVertexBufferUsage = Usage::Static;
         Usage mIndexBufferUsage  = Usage::Static;
         IndexType mIndexBufferType = IndexType::Index16;
@@ -2669,6 +2685,7 @@ private:
                     GL_CALL(glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_SRGB8_ALPHA8, width, height));
                     mMSAAWidth  = width;
                     mMSAAHeight = height;
+                    DEBUG("Allocated multi-sampled render buffer storage. [vbo='%1', size=%2x%3]", mName, width, height);
                 }
 
                 GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, mHandle));

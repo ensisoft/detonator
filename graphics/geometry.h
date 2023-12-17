@@ -289,6 +289,11 @@ namespace gfx
         // Get the draw command at the specified index.
         virtual DrawCommand GetDrawCmd(size_t index) const = 0;
 
+        // Set the (human-readable) name of the geometry.
+        // This has debug significance only.
+        virtual void SetName(const std::string& name) {}
+        virtual std::string GetName() const { return {}; }
+
         // Add a draw command that starts at offset 0 and covers the whole
         // current vertex buffer (i.e. count = num of vertices)
         inline void AddDrawCmd(DrawType type)
@@ -421,6 +426,10 @@ namespace gfx
         { return mDrawCmds.size(); }
         virtual DrawCommand GetDrawCmd(size_t index) const override
         { return mDrawCmds[index]; }
+        virtual void SetName(const std::string& name) override
+        { mName = name; }
+        virtual std::string GetName() const override
+        { return mName; }
 
         inline size_t GetVertexBytes() const noexcept
         { return mVertexData.size(); }
@@ -465,6 +474,7 @@ namespace gfx
         std::vector<DrawCommand> mDrawCmds;
         std::vector<uint8_t> mVertexData;
         std::vector<uint8_t> mIndexData;
+        std::string mName;
         Usage mVertexUsage = Usage::Static;
         Usage mIndexUsage  = Usage::Static;
         IndexType mIndexType = IndexType::Index16;
