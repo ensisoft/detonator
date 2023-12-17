@@ -175,6 +175,8 @@ namespace gfx
         virtual std::string GetName() const = 0;
         // Get the name of the texture group this texture belongs to (if any)
         virtual std::string GetGroup() const = 0;
+        // Get the texture GPU resource ID used to create the texture.
+        virtual std::string GetId() const = 0;
 
         // helpers.
         inline void SetTransient(bool on_off)
