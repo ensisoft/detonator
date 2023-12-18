@@ -2050,6 +2050,7 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "application_version"     , mSettings.application_version);
     JsonWrite(project, "application_library_win" , mSettings.application_library_win);
     JsonWrite(project, "application_library_lin" , mSettings.application_library_lin);
+    JsonWrite(project, "loading_screen_font"     , mSettings.loading_font);
     JsonWrite(project, "debug_font"              , mSettings.debug_font);
     JsonWrite(project, "debug_show_fps"          , mSettings.debug_show_fps);
     JsonWrite(project, "debug_show_msg"          , mSettings.debug_show_msg);
@@ -2174,6 +2175,7 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "application_version",      &mSettings.application_version);
     JsonReadSafe(project, "application_library_win",  &mSettings.application_library_win);
     JsonReadSafe(project, "application_library_lin",  &mSettings.application_library_lin);
+    JsonReadSafe(project, "loading_screen_font"     , &mSettings.loading_font);
     JsonReadSafe(project, "debug_font"              , &mSettings.debug_font);
     JsonReadSafe(project, "debug_show_fps"          , &mSettings.debug_show_fps);
     JsonReadSafe(project, "debug_show_msg"          , &mSettings.debug_show_msg);
@@ -3384,6 +3386,11 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         file_packer.CopyFile(app::ToUtf8(mSettings.debug_font), "fonts/");
     }
 
+    if (!mSettings.loading_font.isEmpty())
+    {
+        file_packer.CopyFile(app::ToUtf8(mSettings.loading_font), "fonts/");
+    }
+
     // write content file ?
     if (options.write_content_file)
     {
@@ -3484,6 +3491,7 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         base::JsonWrite(json["application"], "game_script", ToUtf8(mSettings.game_script));
         base::JsonWrite(json["application"], "save_window_geometry", mSettings.save_window_geometry);
         base::JsonWrite(json["desktop"], "audio_io_strategy", mSettings.desktop_audio_io_strategy);
+        base::JsonWrite(json["loading_screen"], "font", ToUtf8(mSettings.loading_font));
         base::JsonWrite(json["debug"], "font", ToUtf8(mSettings.debug_font));
         base::JsonWrite(json["debug"], "show_msg", mSettings.debug_show_msg);
         base::JsonWrite(json["debug"], "show_fps", mSettings.debug_show_fps);

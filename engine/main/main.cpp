@@ -464,10 +464,10 @@ int main(int argc, char* argv[])
         base::EnableLogEvent(base::LogEvent::Error,   global_log_error);
 
         DEBUG("It's alive!");
-        INFO("Ensisoft Gamestudio 2D");
-        INFO("Copyright (c) 2010-2022 Sami Vaisanen");
+        INFO("Ensisoft DETONATOR 2D");
+        INFO("Copyright (c) 2010-2023 Sami Vaisanen");
         INFO("http://www.ensisoft.com");
-        INFO("http://github.com/ensisoft/gamestudio");
+        INFO("http://github.com/ensisoft/detonator");
         INFO("Built on branch '%1' with commit %2", git_Branch(), git_CommitSHA1());
 
         std::unique_ptr<base::TraceWriter> trace_writer;
@@ -681,6 +681,33 @@ int main(int argc, char* argv[])
 
         engine->SetTracer(trace_logger.get());
         engine->SetEngineConfig(config);
+
+        // do pre-load / splash screen content load
+        {
+            engine::Engine::LoadingScreenSettings settings;
+
+            if (json.contains("loading_screen"))
+            {
+                const auto& splash = json["loading_screen"];
+                base::JsonReadSafe(splash, "font", &settings.font_uri);
+            }
+
+            auto screen = engine->CreateLoadingScreen(settings);
+
+            const auto& classes = loaders.ContentLoader->ListClasses();
+            for (size_t i=0; i<classes.size(); ++i)
+            {
+                DEBUG("Loading %1 class. [name='%2', id=%3]", classes[i].type, classes[i].name, classes[i].id);
+
+                engine::Engine::ContentClass klass;
+                klass.type = classes[i].type;
+                klass.name = classes[i].name;
+                klass.id   = classes[i].id;
+                engine->PreloadClass(klass, i, classes.size()-1, screen.get());
+            }
+            DEBUG("Class loading done!");
+        }
+
         engine->Load();
         engine->Start();
 

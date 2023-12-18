@@ -308,6 +308,25 @@ namespace engine
         // such as the graphics and audio.
         virtual void Init(const InitParams& init) {}
 
+        struct ContentClass {
+            ClassLibrary::ClassType type;
+            std::string name;
+            std::string id;
+        };
+
+        struct LoadingScreen {
+            virtual ~LoadingScreen() = default;
+        };
+
+        struct LoadingScreenSettings {
+            std::string font_uri;
+        };
+
+        virtual std::unique_ptr<LoadingScreen> CreateLoadingScreen(const LoadingScreenSettings& settings)
+        { return nullptr; }
+
+        virtual void PreloadClass(const ContentClass& klass, size_t index, size_t last, LoadingScreen* screen) {}
+
         // Load the game and its data and/or previous state.
         // Called once before entering the main game update/render loop.
         // Should return true if successful,otherwise false on error.

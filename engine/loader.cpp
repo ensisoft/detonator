@@ -688,6 +688,7 @@ public:
     virtual ClassHandle<const game::SceneClass> FindSceneClassById(const std::string& id) const override;
     virtual ClassHandle<const game::TilemapClass> FindTilemapClassById(const std::string& id) const override;
     // ContentLoader impl
+    virtual std::vector<JsonFileClassLoader::Class> ListClasses() const override;
     virtual bool LoadClasses(const data::Reader& data) override;
 private:
     // These are the material types that have been loaded
@@ -860,6 +861,76 @@ bool LoadMaterials(const data::Reader& data, const char* type,
         DEBUG("Loaded new game class. [type='%1', name='%2']", type, name);
     }
     return true;
+}
+
+std::vector<JsonFileClassLoader::Class> ContentLoaderImpl::ListClasses() const
+{
+    std::vector<Class> ret;
+
+    for (auto pair : mMaterials)
+    {
+        Class klass;
+        klass.type = ClassLibrary::ClassType::Material;
+        klass.id   = pair.second->GetId();
+        klass.name = pair.second->GetName();
+        ret.push_back(std::move(klass));
+    }
+
+    for (auto pair : mDrawables)
+    {
+        Class klass;
+        klass.type = ClassLibrary::ClassType::Drawable;
+        klass.id   = pair.second->GetId();
+        klass.name = pair.second->GetName();
+        ret.push_back(std::move(klass));
+    }
+
+    for (auto pair : mEntities)
+    {
+        Class klass;
+        klass.type = ClassLibrary::ClassType::Entity;
+        klass.id   = pair.second->GetId();
+        klass.name = pair.second->GetName();
+        ret.push_back(std::move(klass));
+    }
+
+    for (auto pair : mScenes)
+    {
+        Class klass;
+        klass.type = ClassLibrary::ClassType::Scene;
+        klass.id   = pair.second->GetId();
+        klass.name = pair.second->GetName();
+        ret.push_back(std::move(klass));
+    }
+
+    for (auto pair : mAudioGraphs)
+    {
+        Class klass;
+        klass.type = ClassLibrary::ClassType::AudioGraph;
+        klass.id   = pair.second->GetId();
+        klass.name = pair.second->GetName();
+        ret.push_back(std::move(klass));
+    }
+
+    for (auto pair : mMaps)
+    {
+        Class klass;
+        klass.type = ClassLibrary::ClassType::Tilemap;
+        klass.id   = pair.second->GetId();
+        klass.name = pair.second->GetName();
+        ret.push_back(std::move(klass));
+    }
+
+    for (auto pair : mWindows)
+    {
+        Class klass;
+        klass.type = ClassLibrary::ClassType::UI;
+        klass.id   = pair.second->GetId();
+        klass.name = pair.second->GetName();
+        ret.push_back(std::move(klass));
+    }
+
+    return ret;
 }
 
 bool ContentLoaderImpl::LoadClasses(const data::Reader& data)

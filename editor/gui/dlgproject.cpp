@@ -51,9 +51,11 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     PopulateFromEnum<app::Workspace::ProjectSettings::DefaultAudioIOStrategy>(mUI.cmbWasmAudioIO);
     PopulateFromEnum<audio::SampleType>(mUI.audioFormat);
     PopulateFromEnum<audio::Channels>(mUI.audioChannels);
+    PopulateFontNames(mUI.cmbLoadingFont);
     PopulateFontNames(mUI.cmbDebugFont);
     SetList(mUI.mouseDrawable, workspace.ListCursors());
     SetList(mUI.mouseMaterial, workspace.ListAllMaterials());
+    SetUIValue(mUI.cmbLoadingFont, mSettings.loading_font);
     SetUIValue(mUI.edtAppIdentifier, mSettings.application_identifier);
     SetUIValue(mUI.cmbMSAA, mSettings.multisample_sample_count);
     SetUIValue(mUI.cmbMinFilter, mSettings.default_min_filter);
@@ -124,6 +126,7 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
 
 void DlgProject::on_btnAccept_clicked()
 {
+    GetUIValue(mUI.cmbLoadingFont, &mSettings.loading_font);
     GetUIValue(mUI.cmbMSAA, &mSettings.multisample_sample_count);
     GetUIValue(mUI.cmbMinFilter, &mSettings.default_min_filter);
     GetUIValue(mUI.cmbMagFilter, &mSettings.default_mag_filter);

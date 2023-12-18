@@ -363,6 +363,7 @@ R"(
     settings.working_folder = "blah";
     settings.command_line_arguments = "args";
     settings.use_gamehost_process = false;
+    settings.loading_font.clear();
     workspace.SetProjectSettings(settings);
 
     // setup some content.
@@ -524,6 +525,7 @@ void unit_test_packing_texture_composition(unsigned padding)
 
         MakeDir("TestWorkspace");
         app::Workspace workspace("TestWorkspace");
+        workspace.GetProjectSettings().loading_font.clear();
         workspace.SaveResource(resource);
 
         app::Workspace::ContentPackingOptions options;
@@ -563,6 +565,7 @@ void unit_test_packing_texture_composition(unsigned padding)
 
         MakeDir("TestWorkspace");
         app::Workspace workspace("TestWorkspace");
+        workspace.GetProjectSettings().loading_font.clear();
         workspace.SaveResource(resource);
 
         app::Workspace::ContentPackingOptions options;
@@ -602,6 +605,7 @@ void unit_test_packing_texture_composition(unsigned padding)
 
         MakeDir("TestWorkspace");
         app::Workspace workspace("TestWorkspace");
+        workspace.GetProjectSettings().loading_font.clear();
         workspace.SaveResource(resource);
 
         app::Workspace::ContentPackingOptions options;
@@ -640,6 +644,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         app::MaterialResource resource(material, "material");
 
         app::Workspace workspace("TestWorkspace");
+        workspace.GetProjectSettings().loading_font.clear();
         workspace.SaveResource(resource);
 
         app::Workspace::ContentPackingOptions options;
@@ -673,6 +678,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         app::MaterialResource resource(material, "material");
 
         app::Workspace workspace("TestWorkspace");
+        workspace.GetProjectSettings().loading_font.clear();
         workspace.SaveResource(resource);
 
         app::Workspace::ContentPackingOptions options;
@@ -705,6 +711,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         MakeDir("TestWorkspace");
 
         app::Workspace workspace("TestWorkspace");
+        workspace.GetProjectSettings().loading_font.clear();
 
         // first material
         {
@@ -762,6 +769,7 @@ void unit_test_packing_texture_composition(unsigned padding)
         MakeDir("TestWorkspace");
 
         app::Workspace workspace("TestWorkspace");
+        workspace.GetProjectSettings().loading_font.clear();
 
         // first material
         {
@@ -862,6 +870,7 @@ void unit_test_packing_texture_composition_format()
 
         MakeDir("TestWorkspace");
         app::Workspace workspace("TestWorkspace");
+        workspace.GetProjectSettings().loading_font.clear();
         workspace.SaveResource(resource);
 
         app::Workspace::ContentPackingOptions options;
@@ -943,6 +952,7 @@ void unit_test_packing_texture_composition_rects(unsigned padding)
         MakeDir("TestWorkspace");
 
         app::Workspace workspace("TestWorkspace");
+        workspace.GetProjectSettings().loading_font.clear();
 
         gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
         material.SetTexture(gfx::LoadTextureFromFile("test_bitmap0.png"));
@@ -979,6 +989,7 @@ void unit_test_packing_texture_composition_rects(unsigned padding)
         MakeDir("TestWorkspace");
 
         app::Workspace workspace("TestWorkspace");
+        workspace.GetProjectSettings().loading_font.clear();
 
         gfx::TextureMap2DClass material(gfx::MaterialClass::Type::Texture);
         material.SetTexture(gfx::LoadTextureFromFile("test_bitmap0.png"));
@@ -1015,6 +1026,7 @@ void unit_test_packing_texture_composition_rects(unsigned padding)
         MakeDir("TestWorkspace");
 
         app::Workspace workspace("TestWorkspace");
+        workspace.GetProjectSettings().loading_font.clear();
 
         gfx::SpriteClass material(gfx::MaterialClass::Type::Sprite);
         material.AddTexture(gfx::LoadTextureFromFile("test_bitmap0.png"));
@@ -1072,6 +1084,7 @@ void unit_test_packing_texture_name_collision()
     MakeDir("TestWorkspace");
 
     app::Workspace workspace("TestWorkspace");
+    workspace.GetProjectSettings().loading_font.clear();
 
     // when there are multiple source textures with the same name
     // such as ws://textures/foo/1.png and ws://textures/bar/1.png
@@ -1195,6 +1208,7 @@ void unit_test_packing_ui_style_resources()
     TEST_REQUIRE(app::WriteTextFile("TestWorkspace/ui/textures/background.png", "background.png"));
     // set project settings.
     app::Workspace::ProjectSettings settings;
+    settings.loading_font.clear();
     workspace.SetProjectSettings(settings);
 
     // setup a UI window with widgets with inline styling that contains
@@ -1265,6 +1279,7 @@ void unit_test_packing_texture_name_collision_resample_bug()
     MakeDir("TestWorkspace");
 
     app::Workspace workspace("TestWorkspace");
+    workspace.GetProjectSettings().loading_font.clear();
 
     // when there are multiple source textures with the same name
     // such as ws://textures/foo/1.png and ws://textures/bar/1.png
@@ -1361,6 +1376,7 @@ void unit_test_packing_dependent_scripts()
                                     "end\n"));
 
     app::Workspace workspace("TestWorkspace");
+    workspace.GetProjectSettings().loading_font.clear();
 
     // setup the game content.
     app::Script  script;
@@ -1396,6 +1412,7 @@ void unit_test_json_export_import()
 
     {
         app::Workspace workspace("TestWorkspace");
+        workspace.GetProjectSettings().loading_font.clear();
         // add some user defined content.
         gfx::ColorClass material(gfx::MaterialClass::Type::Color, std::string("foo123"));
         app::MaterialResource resource(material, "TestMaterial");

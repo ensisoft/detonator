@@ -46,6 +46,10 @@ namespace engine
     class ClassLibrary
     {
     public:
+        enum class ClassType {
+            Entity, Scene, AudioGraph, Material, Drawable, Tilemap, UI
+        };
+
         template<typename T>
         using ClassHandle = std::shared_ptr<const T>;
 

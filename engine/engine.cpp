@@ -116,6 +116,92 @@ public:
         mFlags.set(Flags::EnableBloom,     true);
         mFlags.set(Flags::EnablePhysics,   true);
     }
+
+    struct LoadingScreen : public Engine::LoadingScreen {
+        std::unique_ptr<uik::Window> splash;
+        uik::TransientState state;
+        engine::UIStyle style;
+        engine::UIPainter painter;
+        std::vector<uik::Animation> animations;
+        std::string font;
+    };
+    virtual std::unique_ptr<Engine::LoadingScreen> CreateLoadingScreen(const LoadingScreenSettings& settings) override
+    {
+        auto state = std::make_unique<LoadingScreen>();
+        state->font = settings.font_uri;
+        return state;
+    }
+
+    virtual void PreloadClass(const Engine::ContentClass& klass, size_t index, size_t last, Engine::LoadingScreen* screen) override
+    {
+        // todo: explore the content class and load content on the GPU
+
+
+        auto* my_screen = static_cast<LoadingScreen*>(screen);
+        const float surf_width = mSurfaceWidth;
+        const float surf_height = mSurfaceHeight;
+
+        mDevice->BeginFrame();
+        mDevice->ClearColor(mClearColor);
+        mDevice->ClearDepth(1.0f);
+
+        if (my_screen->splash)
+        {
+            auto& ui_splash  = *my_screen->splash;
+            auto& ui_painter = my_screen->painter;
+            auto& ui_state   = my_screen->state;
+            auto& ui_style   = my_screen->style;
+
+            // the viewport retains the UI's aspect ratio and is centered in the middle
+            // of the rendering surface.
+            const auto& window_rect = ui_splash.GetBoundingRect();
+            const float width = window_rect.GetWidth();
+            const float height = window_rect.GetHeight();
+            const float scale = std::min(surf_width / width, surf_height / height);
+            const float device_viewport_width = width * scale;
+            const float device_viewport_height = height * scale;
+
+            gfx::IRect device_viewport;
+            device_viewport.Move((surf_width - device_viewport_width) * 0.5,
+                                 (surf_height - device_viewport_height) * 0.5);
+            device_viewport.Resize(device_viewport_width, device_viewport_height);
+
+            gfx::Painter painter(mDevice);
+            painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
+            painter.SetPixelRatio(glm::vec2(1.0f, 1.0f));
+            painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, width, height));
+            painter.ResetViewMatrix();
+            painter.SetViewport(device_viewport);
+            painter.SetEditingMode(mFlags.test(Flags::EditingMode));
+
+            ui_painter.SetPainter(&painter);
+            ui_painter.SetStyle(&ui_style);
+            ui_splash.Paint(ui_state, ui_painter, base::GetTime(), nullptr);
+            ui_painter.SetPainter(nullptr);
+        }
+        else if (!my_screen->font.empty())
+        {
+            gfx::Painter painter;
+            painter.SetDevice(mDevice);
+            painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
+            painter.SetPixelRatio(glm::vec2(1.0f, 1.0f));
+            painter.SetViewport(0, 0, surf_width, surf_height);
+            painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, surf_width, surf_height));
+            painter.SetEditingMode(mFlags.test(Flags::EditingMode));
+
+            gfx::FillRect(painter, gfx::FRect(0.0f, 0.0f, mSurfaceWidth, mSurfaceHeight), gfx::Color::Black);
+            gfx::DrawTextRect(painter,  base::FormatString("DETONATOR 2D\n\nLoading ... %1/%2 ", index, last),
+                              my_screen->font, 26, gfx::FRect(0.0f,  0.0f, mSurfaceWidth, mSurfaceHeight),
+                              gfx::Color::Silver,
+                              gfx::TextAlign::AlignVCenter | gfx::TextAlign::AlignVCenter);
+        }
+
+        // this is for debugging so we can see what happens...
+        //std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        mDevice->EndFrame(true);
+    }
+
     virtual bool Load() override
     {
         DEBUG("Loading game state.");

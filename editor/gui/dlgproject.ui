@@ -124,6 +124,42 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="groupBox_20">
+         <property name="title">
+          <string>Loading screen settings</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_22">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_40">
+            <property name="text">
+             <string>Font</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" colspan="2">
+           <layout class="QHBoxLayout" name="horizontalLayout_14">
+            <item>
+             <widget class="QComboBox" name="cmbLoadingFont">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="placeholderText">
+               <string>Select Font</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="groupBox_10">
          <property name="title">
           <string>Debug settings for the packaged game</string>
@@ -1790,6 +1826,7 @@
   <tabstop>edtAppName</tabstop>
   <tabstop>edtAppVersion</tabstop>
   <tabstop>edtGameScript</tabstop>
+  <tabstop>cmbLoadingFont</tabstop>
   <tabstop>cmbDebugFont</tabstop>
   <tabstop>btnResetDebugFont</tabstop>
   <tabstop>chkDebugShowFps</tabstop>
