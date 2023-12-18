@@ -511,6 +511,9 @@ namespace app
                 application_library_win = library;
             #endif
             }
+            // Loading screen font
+            QString loading_font = "app://fonts/orbitron-bold.otf";
+
             // Debug font (if any) used by the engine to print debug messages.
             QString debug_font;
             bool debug_show_fps = false;

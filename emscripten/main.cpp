@@ -374,8 +374,27 @@ public:
         mEngine->SetEngineConfig(config);
         // doesn't exist here.
         mEngine->SetTracer(nullptr);
-        mEngine->Load();
-        mEngine->Start();
+
+
+        // We're no longer doing this here because the loading screen must
+        // run first and it requires rendering which means it must be done
+        // in the animation frame callback.
+        //mEngine->Load();
+        //mEngine->Start();
+
+        {
+            engine::Engine::LoadingScreenSettings settings;
+            if (json.contains("loading_screen"))
+            {
+                const auto& splash = json["loading_screen"];
+                base::JsonReadSafe(splash, "font", &settings.font_uri);
+            }
+
+            mLoadingScreen = std::make_unique<LoadingScreen>();
+            mLoadingScreen->classes = mContentLoader->ListClasses();
+            mLoadingScreen->screen  = mEngine->CreateLoadingScreen(settings);
+        }
+
 
         mRenderTargetWidth   = canvas_render_width;
         mRenderTargetHeight  = canvas_render_height;
@@ -442,6 +461,43 @@ public:
 
     EM_BOOL OnAnimationFrame()
     {
+        if (mLoadingScreen)
+        {
+            // we're pumping the event queue here too, but only processing
+            // the resize events since it seems these are important for
+            // the correct rendering in the engine (correct surface size)
+            for (const auto& event : mEventQueue)
+            {
+                if (const auto* ptr = std::get_if<wdk::WindowEventResize>(&event))
+                {
+                    PostResize(ptr);
+                }
+            }
+            mEventQueue.clear();
+
+            const auto& classes = mLoadingScreen->classes;
+            auto& screen  = mLoadingScreen->screen;
+            auto& counter = mLoadingScreen->counter;
+
+            DEBUG("Loading %1 class. [name='%2', id=%3]", classes[counter].type,
+                  classes[counter].name, classes[counter].id);
+
+            engine::Engine::ContentClass klass;
+            klass.type = classes[counter].type;
+            klass.name = classes[counter].name;
+            klass.id   = classes[counter].id;
+            mEngine->PreloadClass(klass, counter, classes.size()-1, screen.get());
+
+            if (++counter < classes.size())
+                return EM_TRUE;
+
+            DEBUG("Class loading is done!");
+            mLoadingScreen.reset();
+
+            mEngine->Load();
+            mEngine->Start();
+        }
+
         // make sure the tracing state only changes before
         // any trace macros are called. otherwise, there'll
         // be an assert.
@@ -513,27 +569,7 @@ public:
             else if (const auto* ptr = std::get_if<wdk::WindowEventChar>(&event))
                 mListener->OnChar(*ptr);
             else if (const auto* ptr = std::get_if<wdk::WindowEventResize>(&event))
-            {
-                // filter out superfluous event notifications when the render target
-                // hasn't actually changed.
-                if ((mRenderTargetHeight != ptr->height) || (mRenderTargetWidth != ptr->width))
-                {
-                    // for consistency's sake call the window resize event handler.
-                    mListener->OnResize(*ptr);
-                    // this is the main engine rendering surface callback which is important.
-                    mEngine->OnRenderingSurfaceResized(ptr->width, ptr->height);
-
-                    mRenderTargetWidth  = ptr->width;
-                    mRenderTargetHeight = ptr->height;
-                    DEBUG("Canvas render target size changed. [width=%1, height=%2]", ptr->width, ptr->height);
-                }
-                // obtain the new (if changed) canvas display width and height.
-                // we need these for mapping the mouse coordinates from CSS display
-                // units to render target units.
-                emscripten_get_element_css_size("canvas", &mCanvasDisplayWidth, &mCanvasDisplayHeight);
-                DEBUG("Canvas display (CSS logical pixel) size changed. [width=%1, height=%2]",
-                      mCanvasDisplayWidth, mCanvasDisplayHeight);
-            }
+                PostResize(ptr);
             else BUG("Unhandled window event.");
         }
         mEventQueue.clear();
@@ -614,6 +650,30 @@ public:
         mContext.reset();
         return EM_FALSE;
     }
+    void PostResize(const wdk::WindowEventResize* ptr)
+    {
+        // filter out superfluous event notifications when the render target
+        // hasn't actually changed.
+        if ((mRenderTargetHeight != ptr->height) || (mRenderTargetWidth != ptr->width))
+        {
+            // for consistency's sake call the window resize event handler.
+            mListener->OnResize(*ptr);
+            // this is the main engine rendering surface callback which is important.
+            mEngine->OnRenderingSurfaceResized(ptr->width, ptr->height);
+
+            mRenderTargetWidth  = ptr->width;
+            mRenderTargetHeight = ptr->height;
+            DEBUG("Canvas render target size changed. [width=%1, height=%2]", ptr->width, ptr->height);
+        }
+        // obtain the new (if changed) canvas display width and height.
+        // we need these for mapping the mouse coordinates from CSS display
+        // units to render target units.
+        emscripten_get_element_css_size("canvas", &mCanvasDisplayWidth, &mCanvasDisplayHeight);
+        DEBUG("Canvas display (CSS logical pixel) size changed. [width=%1, height=%2]",
+              mCanvasDisplayWidth, mCanvasDisplayHeight);
+    }
+
+
     void ToggleTracing(bool enable)
     {
         if (enable && mTraceLogger)
@@ -993,6 +1053,13 @@ private:
     // Not necessarily the same as the render target size.
     double mCanvasDisplayWidth  = 0.0f;
     double mCanvasDisplayHeight = 0.0f;
+
+    struct LoadingScreen {
+        std::unique_ptr<engine::Engine::LoadingScreen> screen;
+        std::vector<engine::JsonFileClassLoader::Class> classes;
+        std::size_t counter = 0;
+    };
+    std::unique_ptr<LoadingScreen> mLoadingScreen;
 };
 
 EM_BOOL OnWindowSizeChanged(int emsc_type, const EmscriptenUiEvent* emsc_event, void* user_data)

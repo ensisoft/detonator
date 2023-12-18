@@ -94,6 +94,13 @@ namespace engine
     class JsonFileClassLoader : public ClassLibrary
     {
     public:
+        struct Class {
+            ClassLibrary::ClassType type;
+            std::string name;
+            std::string id;
+        };
+        virtual std::vector<Class> ListClasses() const = 0;
+
         // Load game content from a JSON file. Returns true on success or
         // false on failure if content failed to load.
         // In general no validation is done regarding the completeness of th
