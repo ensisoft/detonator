@@ -70,6 +70,7 @@ namespace engine
         virtual void BeginLoop() override;
         virtual void EndLoop() override;
         virtual bool GetNextAction(Action* out) override;
+        virtual void TransferDebugQueue(std::vector<DebugDraw>* out) override;
         virtual void OnContactEvent(const ContactEvent& contact) override;
         virtual void OnGameEvent(const GameEvent& event) override;
         virtual void OnAudioEvent(const AudioEvent& event) override;
@@ -113,6 +114,7 @@ namespace engine
         std::unique_ptr<sol::environment> mSceneEnv;
         std::unique_ptr<sol::environment> mGameEnv;
         std::queue<Action> mActionQueue;
+        std::vector<DebugDraw> mDebugDrawQueue;
         game::Scene* mScene = nullptr;
         game::Tilemap* mTilemap = nullptr;
         uik::Window* mWindow = nullptr;

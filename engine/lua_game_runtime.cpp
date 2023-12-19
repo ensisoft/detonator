@@ -444,7 +444,7 @@ void LuaRuntime::Init()
             draw.radius = radius;
             draw.color  = color;
             draw.width   = width;
-            self.mActionQueue.push(draw);
+            self.mDebugDrawQueue.push_back(draw);
         },
         [](LuaRuntime& self, const base::FPoint& center, float radius, const base::Color4f& color, float width) {
             DebugDrawCircle draw;
@@ -452,7 +452,7 @@ void LuaRuntime::Init()
             draw.radius = radius;
             draw.color  = color;
             draw.width  = width;
-            self.mActionQueue.push(draw);
+            self.mDebugDrawQueue.push_back(draw);
         });
     engine["DebugDrawLine"] = sol::overload(
         [](LuaRuntime& self, const glm::vec2&  a, const glm::vec2& b, const base::Color4f& color, float width) {
@@ -461,7 +461,7 @@ void LuaRuntime::Init()
             draw.b = FPoint(b.x, b.y);
             draw.color = color;
             draw.width = width;
-            self.mActionQueue.push(draw);
+            self.mDebugDrawQueue.push_back(draw);
         },
         [](LuaRuntime& self, const base::FPoint& a, const FPoint& b, const base::Color4f& color, float width) {
             DebugDrawLine draw;
@@ -469,7 +469,7 @@ void LuaRuntime::Init()
             draw.b = b;
             draw.color = color;
             draw.width = width;
-            self.mActionQueue.push(draw);
+            self.mDebugDrawQueue.push_back(draw);
         },
         [](LuaRuntime& self, float x0, float y0, float x1, float y1, const base::Color4f& color, float width) {
             DebugDrawLine draw;
@@ -477,7 +477,7 @@ void LuaRuntime::Init()
             draw.b = base::FPoint(x1, y1);
             draw.color = color;
             draw.width = width;
-            self.mActionQueue.push(draw);
+            self.mDebugDrawQueue.push_back(draw);
         });
     engine["DebugDrawRect"] = sol::overload(
         [](LuaRuntime& self, const glm::vec2& top_left, const glm::vec2& bottom_right, base::Color4f& color, float width) {
@@ -486,7 +486,7 @@ void LuaRuntime::Init()
             draw.bottom_right = FPoint(bottom_right.x, bottom_right.y);
             draw.color = color;
             draw.width = width;
-            self.mActionQueue.push(draw);
+            self.mDebugDrawQueue.push_back(draw);
         },
         [](LuaRuntime& self, const base::FPoint& top_left, const base::FPoint& bottom_right, base::Color4f& color, float width) {
             DebugDrawRect draw;
@@ -494,7 +494,7 @@ void LuaRuntime::Init()
             draw.bottom_right = bottom_right;
             draw.color = color;
             draw.width = width;
-            self.mActionQueue.push(draw);
+            self.mDebugDrawQueue.push_back(draw);
         });
 
     engine["DebugClear"] = [](LuaRuntime& self) {
@@ -1026,6 +1026,11 @@ bool LuaRuntime::GetNextAction(Action* out)
     *out = std::move(mActionQueue.front());
     mActionQueue.pop();
     return true;
+}
+
+void LuaRuntime::TransferDebugQueue(std::vector<DebugDraw>* out)
+{
+    std::swap(mDebugDrawQueue, *out);
 }
 
 void LuaRuntime::OnContactEvent(const ContactEvent& contact)
