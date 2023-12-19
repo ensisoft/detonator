@@ -134,8 +134,65 @@ public:
 
     virtual void PreloadClass(const Engine::ContentClass& klass, size_t index, size_t last, Engine::LoadingScreen* screen) override
     {
-        // todo: explore the content class and load content on the GPU
+        gfx::Painter dummy;
+        dummy.SetEditingMode(mFlags.test(Flags::EditingMode));
+        dummy.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
+        dummy.SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
+        dummy.SetPixelRatio(glm::vec2{1.0f, 1.0});
+        dummy.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, mSurfaceWidth, mSurfaceHeight));
+        dummy.SetScissor(0, 0, 1, 1);
+        dummy.SetDevice(mDevice);
 
+        // todo: We currently don't have a good mechanism to understand and track
+        // all the possible content (shaders, programs, textures and geometries)
+        // that the game needs. The packaging process should be enhanced so that
+        // the loading process can be improved.
+
+        // The implementation here is a kludge hack basically doing a dry-run
+        // rendering without anything visible getting rendered. This will hopefully
+        // precipitate data generation on the GPU. 
+
+        if (klass.type == engine::ClassLibrary::ClassType::Entity)
+        {
+            const auto& entity = mClasslib->FindEntityClassById(klass.id);
+            if (!entity)
+                return;
+
+            for (size_t i=0; i<entity->GetNumNodes(); ++i)
+            {
+                const auto& node = entity->GetNode(i);
+                if (!node.HasDrawable())
+                    continue;
+
+                const auto* item = node.GetDrawable();
+                const auto& materialId = item->GetMaterialId();
+                const auto& drawableId = item->GetDrawableId();
+
+                const auto& materialClass = mClasslib->FindMaterialClassById(materialId);
+                const auto& drawableClass = mClasslib->FindDrawableClassById(drawableId);
+                if (!materialClass || !drawableClass)
+                    continue;
+
+                const auto& material = gfx::CreateMaterialInstance(materialClass);
+                const auto& drawable = gfx::CreateDrawableInstance(drawableClass);
+
+                glm::mat4 model(1.0f);
+                gfx::Drawable::Environment  env;
+                env.editing_mode = mFlags.test(Flags::EditingMode);
+                env.model_matrix = &model;
+
+                float time = 0.0f;
+                float step = 1.0f/60.0f;
+                while (time < 5.0f)
+                {
+                    glm::mat4 model(1.0f);
+                    dummy.Draw(*drawable, model, *material);
+                    material->Update(step);
+                    drawable->Update(env, step);
+                    time += step;
+                }
+            }
+        }
 
         auto* my_screen = static_cast<LoadingScreen*>(screen);
         const float surf_width = mSurfaceWidth;
@@ -190,7 +247,7 @@ public:
             painter.SetEditingMode(mFlags.test(Flags::EditingMode));
 
             gfx::FillRect(painter, gfx::FRect(0.0f, 0.0f, mSurfaceWidth, mSurfaceHeight), gfx::Color::Black);
-            gfx::DrawTextRect(painter,  base::FormatString("DETONATOR 2D\n\nLoading ... %1/%2 ", index, last),
+            gfx::DrawTextRect(painter,  base::FormatString("DETONATOR 2D\n\n%1\n\nLoading ... %2/%3 ", klass.name, index, last),
                               my_screen->font, 26, gfx::FRect(0.0f,  0.0f, mSurfaceWidth, mSurfaceHeight),
                               gfx::Color::Silver,
                               gfx::TextAlign::AlignVCenter | gfx::TextAlign::AlignVCenter);
