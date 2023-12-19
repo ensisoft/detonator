@@ -118,6 +118,10 @@ namespace engine
         Color4f color;
         float width = 1.0f;
     };
+    using DebugDraw = std::variant<
+            DebugDrawLine,
+            DebugDrawCircle,
+            DebugDrawRect>;
 
     struct DebugPauseAction {
         bool pause = true;
@@ -139,9 +143,6 @@ namespace engine
             CloseUIAction,
             DebugPrintAction,
             DebugClearAction,
-            DebugDrawLine,
-            DebugDrawRect,
-            DebugDrawCircle,
             DebugPauseAction,
             DelayAction,
             ShowDebugAction,

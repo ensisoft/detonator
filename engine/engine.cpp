@@ -150,7 +150,7 @@ public:
 
         // The implementation here is a kludge hack basically doing a dry-run
         // rendering without anything visible getting rendered. This will hopefully
-        // precipitate data generation on the GPU. 
+        // precipitate data generation on the GPU.
 
         if (klass.type == engine::ClassLibrary::ClassType::Entity)
         {
@@ -1212,18 +1212,6 @@ private:
         mRequests.ShowDeveloperUI(action.show);
         DEBUG("Requesting developer UI. [show=%1]", action.show);
     }
-    void OnAction(const engine::DebugDrawCircle& draw)
-    {
-        mDebugDraws.emplace_back(draw);
-    }
-    void OnAction(const engine::DebugDrawLine& draw)
-    {
-        mDebugDraws.emplace_back(draw);
-    }
-    void OnAction(const engine::DebugDrawRect& draw)
-    {
-        mDebugDraws.emplace_back(draw);
-    }
     void OnAction(const engine::DebugPauseAction& pause)
     {
         mRequests.DebugPause(pause.pause);
@@ -1458,9 +1446,11 @@ private:
 
     void DrawDebugObjects()
     {
+        std::vector<engine::DebugDraw> debug_draws;
+        mRuntime->TransferDebugQueue(&debug_draws);
+
         if (!mDebug.debug_draw)
         {
-            mDebugDraws.clear();
             return;
         }
 
@@ -1483,7 +1473,7 @@ private:
          TRACE_BLOCK("DebugDrawLines",
             if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::GameDebugDraw))
             {
-                for (const auto& draw: mDebugDraws)
+                for (const auto& draw: debug_draws)
                 {
                     if (const auto* ptr = std::get_if<engine::DebugDrawLine>(&draw))
                         gfx::DebugDrawLine(painter, ptr->a, ptr->b, ptr->color, ptr->width);
@@ -1545,7 +1535,6 @@ private:
             }
         );
 
-        mDebugDraws.clear();
     }
 private:
     enum class Flags {
@@ -1660,12 +1649,6 @@ private:
     double mGameTimeTotal = 0.0f;
     // The bitbag for storing game state.
     engine::KeyValueStore mStateStore;
-    // Debug draw actions.
-    using DebugDraw = std::variant<engine::DebugDrawLine, engine::DebugDrawRect, engine::DebugDrawCircle>;
-    // Current debug draw actions that are queued for the
-    // next draw. next call to draw will draw them and clear
-    // the vector.
-    std::vector<DebugDraw> mDebugDraws;
     // debug stepping flag to control taking a single update step.
     bool mStepForward = false;
 };
