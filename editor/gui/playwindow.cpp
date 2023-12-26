@@ -796,10 +796,12 @@ bool PlayWindow::LoadGame(bool clean_game_home)
 
     // Another workaround for Qt bugs has been created and the timer
     // based workaround is now here only for posterity.
-    //QTimer::singleShot(10, this, &PlayWindow::InitGame);
+    QTimer::singleShot(100, this, [this, clean_game_home]() {
+        InitGame(clean_game_home);
+    });
 
     // call directly now.
-    InitGame(clean_game_home);
+    //InitGame(clean_game_home);
     return true;
 }
 
@@ -1105,6 +1107,42 @@ void PlayWindow::InitGame(bool clean_game_home)
         mEngine->Init(params);
 
         SetEngineConfig();
+
+        {
+            engine::Engine::LoadingScreenSettings loading_screen_settings;
+            loading_screen_settings.font_uri = app::ToUtf8(settings.loading_font);
+
+            auto screen = mEngine->CreateLoadingScreen(loading_screen_settings);
+
+            const auto count = mWorkspace.GetNumResources();
+            for (size_t i=0; i<count; ++i)
+            {
+                const auto& resource = mWorkspace.GetResource(i);
+                const auto type = resource.GetType();
+
+                engine::Engine::ContentClass klass;
+                if (type == app::Resource::Type::Entity)
+                    klass.type = engine::ClassLibrary::ClassType::Entity;
+                else if (type == app::Resource::Type::Material)
+                    klass.type = engine::ClassLibrary::ClassType::Material;
+                else if (type == app::Resource::Type::AudioGraph)
+                    klass.type = engine::ClassLibrary::ClassType::AudioGraph;
+                else if (type == app::Resource::Type::Drawable ||
+                         type == app::Resource::Type::ParticleSystem ||
+                         type == app::Resource::Type::Shape)
+                    klass.type = engine::ClassLibrary::ClassType::Drawable;
+                else if (type == app::Resource::Type::Scene)
+                    klass.type = engine::ClassLibrary::ClassType::Scene;
+                else if (type == app::Resource::Type::Tilemap)
+                    klass.type = engine::ClassLibrary::ClassType::Tilemap;
+                else if (type == app::Resource::Type::UI)
+                    klass.type = engine::ClassLibrary::ClassType::UI;
+                else continue;
+                klass.name = resource.GetName();
+                klass.id   = resource.GetId();
+                mEngine->PreloadClass(klass, i, count-1, screen.get());
+            }
+        }
 
         if (!mEngine->Load())
         {
