@@ -582,6 +582,7 @@
         "game_viewport_width": 1200,
         "grab_mouse": false,
         "html5_developer_ui": false,
+        "loading_screen_font": "app://fonts/nulshock_bd.otf",
         "logging_debug": false,
         "logging_error": false,
         "logging_info": false,

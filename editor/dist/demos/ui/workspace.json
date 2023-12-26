@@ -46,6 +46,7 @@
         "game_viewport_width": 1024,
         "grab_mouse": false,
         "html5_developer_ui": true,
+        "loading_screen_font": "app://fonts/orbitron-bold.otf",
         "logging_debug": true,
         "logging_error": true,
         "logging_info": true,
