@@ -46,7 +46,7 @@ as puzzle games, platformers, side scrollers and tile based real time strategy a
 
 ### DOWNLOAD LATEST WINDOWS BINARY
 
-https://github.com/ensisoft/detonator/releases/tag/rel-3
+https://github.com/ensisoft/detonator/releases/tag/rel-4
 
 ### ROADMAP
 
