@@ -52,8 +52,8 @@ namespace engine
         virtual void SetEditingMode(bool editing) override;
         virtual void SetPreviewMode(bool preview) override;
         virtual void SetClassLibrary(const ClassLibrary* classlib) override;
-        virtual void SetPhysicsEngine(const PhysicsEngine* engine) override;
-        virtual void SetAudioEngine(const AudioEngine* engine) override;
+        virtual void SetPhysicsEngine(PhysicsEngine* engine) override;
+        virtual void SetAudioEngine(AudioEngine* engine) override;
         virtual void SetDataLoader(const Loader* loader) override;
         virtual void SetStateStore(KeyValueStore* store) override;
         virtual void SetCurrentUI(uik::Window* window) override;
@@ -103,8 +103,8 @@ namespace engine
         const std::string mGameHome;
         const std::string mGameName;
         const ClassLibrary* mClassLib = nullptr;
-        const PhysicsEngine* mPhysicsEngine = nullptr;
-        const AudioEngine* mAudioEngine = nullptr;
+        PhysicsEngine* mPhysicsEngine = nullptr;
+        AudioEngine* mAudioEngine = nullptr;
         const Loader* mDataLoader = nullptr;
         KeyValueStore* mStateStore = nullptr;
         std::unique_ptr<sol::state> mLuaState;
