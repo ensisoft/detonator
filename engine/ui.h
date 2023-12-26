@@ -23,8 +23,10 @@
 
 #include <any>
 #include <string>
+#include <stack>
 #include <memory>
 #include <vector>
+#include <queue>
 #include <unordered_map>
 #include <unordered_set>
 #include <functional>
@@ -32,11 +34,15 @@
 #include "base/assert.h"
 #include "base/bitflag.h"
 #include "uikit/painter.h"
+#include "uikit/state.h"
+#include "uikit/window.h"
+#include "uikit/animation.h"
 #include "graphics/color4f.h"
 #include "graphics/material.h"
 #include "graphics/fwd.h"
 #include "wdk/keys.h"
 #include "wdk/bitflag.h"
+#include "wdk/events.h"
 
 namespace engine
 {
@@ -661,6 +667,124 @@ namespace engine
             uik::VirtualKey vk = uik::VirtualKey::None;
         };
         std::vector<KeyMapping> mKeyMap;
+    };
+
+    // UI Subsystem (engine) for UI state including the window
+    // stack, style and keymap information. Functionality for
+    // dispatching mouse/keyboard events and painting the UI.
+    class UIEngine
+    {
+    public:
+        UIEngine();
+
+        inline void SetEditingMode(bool on_off) noexcept
+        { mEditingMode = on_off; }
+        inline void SetClassLibrary(const ClassLibrary* classlib) noexcept
+        { mClassLib = classlib; }
+        inline void SetLoader(const Loader* loader) noexcept
+        { mLoader = loader; }
+        inline void SetSurfaceSize(float width, float height) noexcept
+        {
+            mSurfaceWidth = width;
+            mSurfaceHeight = height;
+        }
+        inline uik::Window* GetUI() noexcept
+        {
+            if (mStack.empty())
+                return nullptr;
+            return mStack.top().get();
+        }
+        inline const uik::Window* GetUI() const noexcept
+        {
+            if (mStack.empty())
+                return nullptr;
+            return mStack.top().get();
+        }
+        bool HaveOpenUI() const noexcept;
+
+        struct WindowOpen {
+            // This is the reference to the new window that has been opened.
+            // Todo: only provide this event when the window has
+            // finished running it's $OnOpen animations ?
+            uik::Window* window = nullptr;
+        };
+        struct WindowClose {
+            // this could be the last reference to the window.
+            // it's provided so that the game can perform actions
+            // on window close and still be able to access any data
+            // in the UI for any subsequent action.
+            std::shared_ptr<uik::Window> window;
+            // This is the result code that was passed in CloseUI call
+            // and will be passed back to the game runtime ui close handlers.
+            int result = 0;
+        };
+        struct WindowUpdate {
+            // Currently, active window in the window stack.
+            // could be nullptr if there is no active window.
+            uik::Window* window = nullptr;
+        };
+
+        using WidgetAction = uik::Window::WidgetAction;
+        using WindowAction = std::variant<WindowOpen, WindowClose, WindowUpdate>;
+
+        void UpdateWindow(double game_time, float dt,
+                          std::vector<WidgetAction>* widget_actions);
+        void UpdateState(double game_time, float dt,
+                         std::vector<WindowAction>* window_actions);
+
+        void Draw(gfx::Device& device);
+
+        void OpenUI(std::shared_ptr<uik::Window> window);
+        void CloseUI(const std::string& window_name,
+                     const std::string& window_id,
+                     int result);
+
+        void OnKeyDown(const wdk::WindowEventKeyDown& key, std::vector<WidgetAction>* actions);
+        void OnKeyUp(const wdk::WindowEventKeyUp& key, std::vector<WidgetAction>* actions);
+        void OnMouseMove(const wdk::WindowEventMouseMove& mouse, std::vector<WidgetAction>* actions);
+        void OnMousePress(const wdk::WindowEventMousePress& mouse, std::vector<WidgetAction>* actions);
+        void OnMouseRelease(const wdk::WindowEventMouseRelease& mouse, std::vector<WidgetAction>* actions);
+
+    private:
+        void PrepareUI(uik::Window* ui);
+        void LoadStyle(const std::string& uri);
+        void LoadKeymap(const std::string& uri);
+
+        using UIKeyFunc = std::vector<uik::Window::WidgetAction> (uik::Window::*)(const uik::Window::KeyEvent&, uik::TransientState&);
+        template<typename WdkEvent>
+        void OnKeyEvent(const WdkEvent& key, UIKeyFunc which, std::vector<WidgetAction>* actions);
+
+        using UIMouseFunc = std::vector<uik::Window::WidgetAction> (uik::Window::*)(const uik::Window::MouseEvent&, uik::TransientState&);
+        template<typename WdkEvent>
+        void OnMouseEvent(const WdkEvent& mouse, UIMouseFunc which, std::vector<WidgetAction>* actions);
+
+        uik::MouseButton MapMouseButton(const wdk::MouseButton btn) const;
+    private:
+        const ClassLibrary* mClassLib = nullptr;
+        const Loader* mLoader = nullptr;
+
+        struct OpenUIAction {
+            std::shared_ptr<uik::Window> window;
+        };
+        struct CloseUIAction {
+            int result = 0;
+            std::string window_id;
+            std::string window_name;
+        };
+        using UIAction = std::variant<OpenUIAction, CloseUIAction>;
+        using UIActionQueue = std::queue<UIAction>;
+
+        bool mEditingMode = false;
+        float mSurfaceWidth  = 0.0f;
+        float mSurfaceHeight = 0.0f;
+
+        UIActionQueue mUIActionQueue;
+        UIPainter mPainter;
+        UIStyle mStyle;
+        UIKeyMap mKeyMap;
+        std::stack<std::shared_ptr<uik::Window>> mStack;
+        uik::TransientState mState;
+        uik::AnimationStateArray mAnimationState;
     };
 
 } // namespace

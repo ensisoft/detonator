@@ -299,6 +299,12 @@ namespace uik
         // the last PollAction call.
         std::vector<WidgetAction> PollAction(TransientState& state, double time, float dt);
 
+        inline void PollAction(TransientState& state, double time, float dt,
+                               std::vector<WidgetAction>* actions)
+        {
+            *actions = PollAction(state, time, dt);
+        }
+
         // Dispatch mouse press event.
         std::vector<WidgetAction> MousePress(const MouseEvent& mouse, TransientState& state);
         // Dispatch mouse release event.
