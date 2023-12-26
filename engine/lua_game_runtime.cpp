@@ -281,9 +281,9 @@ void LuaRuntime::SetPreviewMode(bool preview)
 { mPreviewMode = preview; }
 void LuaRuntime::SetClassLibrary(const ClassLibrary* classlib)
 { mClassLib = classlib; }
-void LuaRuntime::SetPhysicsEngine(const PhysicsEngine* engine)
+void LuaRuntime::SetPhysicsEngine(PhysicsEngine* engine)
 { mPhysicsEngine = engine; }
-void LuaRuntime::SetAudioEngine(const AudioEngine* engine)
+void LuaRuntime::SetAudioEngine(AudioEngine* engine)
 { mAudioEngine = engine; }
 void LuaRuntime::SetDataLoader(const Loader* loader)
 { mDataLoader = loader; }

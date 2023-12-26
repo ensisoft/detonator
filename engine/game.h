@@ -70,9 +70,9 @@ namespace engine
         // duration of the game play.
         virtual void SetStateStore(KeyValueStore* store) = 0;
         // Set physics engine instance.
-        virtual void SetPhysicsEngine(const PhysicsEngine* engine) = 0;
+        virtual void SetPhysicsEngine(PhysicsEngine* engine) = 0;
         // Set audio engine instance.
-        virtual void SetAudioEngine(const AudioEngine* engine) = 0;
+        virtual void SetAudioEngine(AudioEngine* engine) = 0;
         // Set the game data loader.
         virtual void SetDataLoader(const Loader* loader) = 0;
         // Set the class loader.
