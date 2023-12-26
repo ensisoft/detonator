@@ -66,7 +66,9 @@ namespace uik
         RadioButtonSelect,
         SingleItemSelect,
         MouseEnter,
-        MouseLeave
+        MouseLeave,
+        MouseGrabBegin,
+        MouseGrabEnd
     };
     // check whether the widget action is a notification about some superficial
     // state change such as widget gaining keyboard focus or the mouse being
@@ -74,7 +76,9 @@ namespace uik
     inline bool IsNotification(WidgetActionType type) {
         if (type == WidgetActionType::FocusChange ||
             type == WidgetActionType::MouseEnter ||
-            type ==WidgetActionType::MouseLeave)
+            type == WidgetActionType::MouseLeave ||
+            type == WidgetActionType::MouseGrabBegin ||
+            type == WidgetActionType::MouseGrabEnd)
             return true;
         return false;
     }
