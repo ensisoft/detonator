@@ -111,7 +111,7 @@ namespace uik
         void Clear()
         { mState.clear(); }
     private:
-        using Variant = std::variant<int, float, bool, Widget*, base::FPoint>;
+        using Variant = std::variant<int, float, bool, Widget*, base::FPoint, base::FRect>;
 
         std::unordered_map<std::string, Variant> mState;
     };

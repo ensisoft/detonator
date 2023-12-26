@@ -1164,6 +1164,39 @@ std::vector<Window::WidgetAction> Window::send_mouse_event(const MouseEvent& mou
 {
     std::vector<Window::WidgetAction> ret;
 
+    Widget* mouse_grab_widget = nullptr;
+    state.GetValue(mId + "/mouse-grab-widget", &mouse_grab_widget);
+    if (mouse_grab_widget)
+    {
+        FRect widget_rect;
+        state.GetValue(mId + "/mouse-grab-rect", &widget_rect);
+
+        Widget::MouseEvent widget_mouse_event;
+        widget_mouse_event.window_mouse_pos   = mouse.window_mouse_pos;
+        widget_mouse_event.native_mouse_pos   = mouse.native_mouse_pos;
+        widget_mouse_event.widget_window_rect = widget_rect;
+        widget_mouse_event.widget_mouse_pos   = widget_rect.MapToLocal(mouse.window_mouse_pos);
+        widget_mouse_event.button = mouse.button;
+        widget_mouse_event.time   = mouse.time;
+
+        const auto& mouse_ret = (mouse_grab_widget->*which)(widget_mouse_event, state);
+        if (mouse_ret.type == WidgetActionType::None)
+            return ret;
+        else if (mouse_ret.type == WidgetActionType::MouseGrabEnd)
+        {
+            state.DeleteValue(mId + "/mouse-grab-widget");
+            state.DeleteValue(mId + "/mouse-grab-rect");
+        }
+
+        WidgetAction action;
+        action.id    = mouse_grab_widget->GetId();
+        action.name  = mouse_grab_widget->GetName();
+        action.type  = mouse_ret.type;
+        action.value = mouse_ret.value;
+        ret.push_back(action);
+        return ret;
+    }
+
     // only consider widgets with the appropriate flags
     // i.e. enabled and visible.
     const bool consider_flags = true;
@@ -1233,6 +1266,11 @@ std::vector<Window::WidgetAction> Window::send_mouse_event(const MouseEvent& mou
     const auto& mouse_ret = (new_widget_under_mouse->*which)(widget_mouse_event, state);
     if (mouse_ret.type == WidgetActionType::None)
         return ret;
+    else if (mouse_ret.type == WidgetActionType::MouseGrabBegin)
+    {
+        state.SetValue(mId + "/mouse-grab-widget", new_widget_under_mouse);
+        state.SetValue(mId + "/mouse-grab-rect", widget_rect);
+    }
 
     WidgetAction action;
     action.id    = new_widget_under_mouse->GetId();
