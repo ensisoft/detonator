@@ -7,6 +7,7 @@
         "mapping_count": 0
     },
     "26DgI88X5u": {
+        "__version": 1,
         "material": "w26YsP04pJ"
     },
     "2Q2vkLGDEg": {
@@ -27,6 +28,7 @@
         "checked_for_packing": 1
     },
     "4rBCnTGuXK": {
+        "__version": 1,
         "material": "90E8gRgYDP"
     },
     "5GPKkIzzUf": {
@@ -51,6 +53,7 @@
         "checked_for_packing": 1
     },
     "8636ofEjei": {
+        "__version": 1,
         "material": "RnL44evfW5"
     },
     "8Prh114uxP": {
@@ -89,6 +92,7 @@
         "checked_for_packing": 1
     },
     "EXQWh9Zz2B": {
+        "__version": 1,
         "material": "MYaj1na7M4"
     },
     "FNUUxWSBTe": {
@@ -240,6 +244,7 @@
         "checked_for_packing": 1
     },
     "FgJP6uJzoG": {
+        "__version": 1,
         "material": "bvJqe9fGu5"
     },
     "Fm5ByqI6xo": {
@@ -276,6 +281,7 @@
         "checked_for_packing": 1
     },
     "IfEi7dQdbW": {
+        "__version": 1,
         "material": "QR14nEb7T3"
     },
     "ImTnUuKMDu": {
@@ -283,6 +289,7 @@
         "checked_for_packing": 1
     },
     "JQAP7v0ZUJ": {
+        "__version": 1,
         "material": "gzjp7PwMQd"
     },
     "Jn0SpbgGSY": {
@@ -369,6 +376,7 @@
         "checked_for_packing": 1
     },
     "PBPIRCm9MB": {
+        "__version": 1,
         "material": "9aRwE7zov7"
     },
     "PiCFlSf9Gm": {
@@ -384,6 +392,7 @@
         "checked_for_packing": 1
     },
     "QwLaM5bEqx": {
+        "__version": 1,
         "material": "IM3dwFG7wS"
     },
     "RhslGRtQQR": {
@@ -416,6 +425,7 @@
         "checked_for_packing": 1
     },
     "W27ZFgJKAJ": {
+        "__version": 1,
         "material": "f2rOXhvzDy"
     },
     "WKsCpHkbNw": {
@@ -435,6 +445,7 @@
         "checked_for_packing": 1
     },
     "XJz8lK4sSZ": {
+        "__version": 1,
         "material": "nLUoQRjXrg"
     },
     "Y3nvZp6DaX": {
@@ -446,6 +457,7 @@
         "checked_for_packing": 1
     },
     "YkK6SEnX2R": {
+        "__version": 1,
         "material": "xrUzM3pdBZ"
     },
     "Yq50Y5iaj6": {
@@ -495,6 +507,7 @@
         "checked_for_packing": 1
     },
     "dWDAODzq3M": {
+        "__version": 1,
         "material": "Ca4GgRWjP2"
     },
     "dfb84OzuRo": {
@@ -518,6 +531,7 @@
         "checked_for_packing": 1
     },
     "fW1kOmDCo0": {
+        "__version": 1,
         "material": "wrSRezqUfj"
     },
     "fmxJ24RhUE": {
@@ -530,6 +544,7 @@
         "comment_nyU7LB2bT7": ""
     },
     "gUmNEBelRm": {
+        "__version": 1,
         "material": "bBSpmT5CN0"
     },
     "gwm3bTflRn": {
@@ -561,6 +576,7 @@
         "checked_for_packing": 1
     },
     "l9oab5XQTK": {
+        "__version": 1,
         "material": "IPqp1SooOX"
     },
     "loHDpIgprb": {
@@ -593,9 +609,11 @@
         "use_size_derivatives": 0
     },
     "oDE09YOPk9": {
+        "__version": 1,
         "material": "zgwqXHtABU"
     },
     "oNJA4jNZF9": {
+        "__version": 1,
         "material": "pQ2O7Ekypd"
     },
     "oTLKJxJ07d": {
@@ -638,6 +656,7 @@
         "game_viewport_width": 1200,
         "grab_mouse": false,
         "html5_developer_ui": false,
+        "loading_screen_font": "app://fonts/orbitron-bold.otf",
         "logging_debug": false,
         "logging_error": false,
         "logging_info": false,
@@ -754,6 +773,7 @@
         "checked_for_packing": 1
     },
     "zoqnFP5Gvz": {
+        "__version": 1,
         "material": "mgo2XI2toK"
     }
 }

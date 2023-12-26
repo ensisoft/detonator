@@ -24397,68 +24397,42 @@
   ],
   "shapes": [
     {
-      "draws": [
-        {
-          "count": 4,
-          "offset": 0,
-          "type": "TriangleFan"
-        },
-        {
-          "count": 3,
-          "offset": 4,
-          "type": "TriangleFan"
-        }
-      ],
+      "content_hash_hi": 0,
+      "content_hash_lo": 0,
       "id": "yZllA8JJYo",
+      "inline_data": {
+        "byte_order": "LE",
+        "command_buffer": "AgAAAAQAAAAAAAAAAgAAAAMAAAAEAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
+        "vertex_buffer": "AACAPjMzs74AAIA+MzOzPgAAgD5nZia/AACAPmdmJj8zMzM/Z2YmvzMzMz9nZiY/MzMzPzMzs74zMzM/MzOzPgAAgD8AAAC/AACAPwAAAD/sUTg/7FE4vuxROD/sUTg+7FE4P4brUb/sUTg/hutRPw==",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
+      "mesh": "Simple2D",
       "name": "Arrow",
       "resource_id": "yZllA8JJYo",
       "resource_name": "Arrow",
       "resource_ver": 1,
       "static": true,
-      "vertices": [
-        {
-          "s": 0.25,
-          "t": 0.3499999940395355,
-          "x": 0.25,
-          "y": -0.3499999940395355
-        },
-        {
-          "s": 0.25,
-          "t": 0.6500000357627869,
-          "x": 0.25,
-          "y": -0.6500000357627869
-        },
-        {
-          "s": 0.699999988079071,
-          "t": 0.6500000357627869,
-          "x": 0.699999988079071,
-          "y": -0.6500000357627869
-        },
-        {
-          "s": 0.699999988079071,
-          "t": 0.3499999940395355,
-          "x": 0.699999988079071,
-          "y": -0.3499999940395355
-        },
-        {
-          "s": 1.0,
-          "t": 0.5,
-          "x": 1.0,
-          "y": -0.5
-        },
-        {
-          "s": 0.7200000286102295,
-          "t": 0.18000000715255737,
-          "x": 0.7200000286102295,
-          "y": -0.18000000715255737
-        },
-        {
-          "s": 0.7200000286102295,
-          "t": 0.8200000524520874,
-          "x": 0.7200000286102295,
-          "y": -0.8200000524520874
-        }
-      ]
+      "uri": ""
     }
   ],
   "uis": [

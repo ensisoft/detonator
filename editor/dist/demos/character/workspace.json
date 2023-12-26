@@ -65,6 +65,7 @@
             "src_point_y:iSRBkUNaPz": -712,
             "src_point_y:uLqRIQOx46": -712
         },
+        "checked_for_packing": 1,
         "comment_0hLkkYFQPJ": "",
         "comment_EDSEr5TLWp": "",
         "comment_LWhWAOSjyx": "",
@@ -297,6 +298,7 @@
         "game_viewport_width": 1000,
         "grab_mouse": false,
         "html5_developer_ui": false,
+        "loading_screen_font": "app://fonts/orbitron-bold.otf",
         "logging_debug": false,
         "logging_error": false,
         "logging_info": false,
