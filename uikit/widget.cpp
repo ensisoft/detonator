@@ -320,7 +320,9 @@ WidgetAction SliderModel::MousePress(const MouseEvent& mouse, const MouseStruct&
     ComputeLayout(mouse.widget_window_rect, &slider, &knob);
     ms.state->SetValue(ms.widgetId + "/slider-knob-down", knob.TestPoint(mouse.window_mouse_pos));
     ms.state->SetValue(ms.widgetId + "/mouse-pos", mouse.widget_mouse_pos);
-    return WidgetAction {};
+    return WidgetAction {
+        WidgetActionType::MouseGrabBegin
+    };
 }
 WidgetAction SliderModel::MouseMove(const MouseEvent& mouse, const MouseStruct& ms)
 {
@@ -350,11 +352,12 @@ WidgetAction SliderModel::MouseRelease(const MouseEvent& mouse, const MouseStruc
 {
     ms.state->SetValue(ms.widgetId + "/slider-knob-down", false);
 
-    return WidgetAction {};
+    return WidgetAction {
+        WidgetActionType::MouseGrabEnd
+    };
 }
 WidgetAction SliderModel::MouseLeave(const MouseStruct& ms)
 {
-    ms.state->SetValue(ms.widgetId + "/slider-knob-down", false);
     ms.state->SetValue(ms.widgetId + "/slider-knob-under-mouse", false);
     return WidgetAction {};
 }
