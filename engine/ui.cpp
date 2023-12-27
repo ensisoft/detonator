@@ -53,6 +53,99 @@ bool ReadColor(const nlohmann::json& json, const std::string& name, gfx::Color4f
     *out = gfx::Color(value);
     return true;
 }
+
+struct PropertyPair {
+    std::string key;
+    engine::UIProperty::ValueType value;
+};
+struct MaterialPair {
+    std::string key;
+    std::unique_ptr<engine::UIMaterial> material;
+};
+
+bool ParseProperties(const nlohmann::json& json, std::vector<PropertyPair>& props)
+{
+    if (!json.contains("properties"))
+        return true;
+
+    auto success = true;
+
+    for (const auto& item : json["properties"].items())
+    {
+        const auto& json = item.value();
+
+        PropertyPair prop;
+        if (!base::JsonReadSafe(json, "key", &prop.key))
+        {
+            WARN("Ignored JSON UI Style property without property key.");
+            success = false;
+            continue;
+        }
+        if (!base::JsonReadSafe(json, "value", &prop.value))
+        {
+            // this is not necessarily a BUG because currently the style json files are
+            // hand written. thus we have to be prepared to handle unexpected cases.
+            success = false;
+            WARN("Ignoring unexpected UI style property. [key='%1']", prop.key);
+            continue;
+        }
+        props.push_back(std::move(prop));
+    }
+    return success;
+}
+bool ParseMaterials(const nlohmann::json& json, std::vector<MaterialPair>& materials)
+{
+    if (!json.contains("materials"))
+        return true;
+
+    using namespace engine;
+
+    auto success = true;
+    for (const auto& item : json["materials"].items())
+    {
+        const auto& json = item.value();
+        UIMaterial::Type type;
+        std::string key;
+        if (!base::JsonReadSafe(json, "type", &type))
+        {
+            WARN("Ignored JSON UI style material property with unrecognized type.");
+            success = false;
+            continue;
+        }
+        else if (!base::JsonReadSafe(json, "key", &key))
+        {
+            WARN("Ignored JSON UI style material property without material key.");
+            success = false;
+            continue;
+        }
+
+        std::unique_ptr<UIMaterial> material;
+        if (type == UIMaterial::Type::Null)
+            material.reset(new detail::UINullMaterial());
+        else if (type == UIMaterial::Type::Color)
+            material.reset(new detail::UIColor);
+        else if (type == UIMaterial::Type::Gradient)
+            material.reset(new detail::UIGradient);
+        else if (type == UIMaterial::Type::Reference)
+            material.reset(new detail::UIMaterialReference);
+        else if (type == UIMaterial::Type::Texture)
+            material.reset(new detail::UITexture);
+        else BUG("Unhandled material type.");
+        if (!material->FromJson(json))
+        {
+            success = false;
+            WARN("Failed to parse UI material. [key='%1']", key);
+            continue;
+        }
+
+        MaterialPair p;
+        p.key = std::move(key);
+        p.material = std::move(material);
+        materials.push_back(std::move(p));
+    }
+    return success;
+}
+
 } // namespace
 
 namespace engine
@@ -228,6 +321,58 @@ void UITexture::IntoJson(nlohmann::json& json) const
 
 } // detail
 
+bool UIStyleFile::LoadStyle(const nlohmann::json& json)
+{
+    std::vector<PropertyPair> props;
+    if (!ParseProperties(json, props))
+        return false;
+    std::vector<MaterialPair> materials;
+    if (!ParseMaterials(json, materials))
+        return false;
+
+    for (auto& p : props)
+    {
+        mProperties[p.key] = std::move(p.value);
+    }
+    for (auto& m : materials)
+    {
+        mMaterials[m.key] = std::move(m.material);
+    }
+    return true;
+}
+
+bool UIStyleFile::LoadStyle(const EngineData& data)
+{
+    const auto* beg = (const char*)data.GetData();
+    const auto* end = beg + data.GetByteSize();
+    auto [ok, json, error] = base::JsonParse(beg, end);
+    if (!ok)
+    {
+        ERROR("UI style load failed with JSON parse error. [error='%1', file='%2']", error, data.GetSourceName());
+        return false;
+    }
+    return LoadStyle(json);
+}
+
+void UIStyleFile::SaveStyle(nlohmann::json& json) const
+{
+    for (const auto& [key, val] : mProperties)
+    {
+        nlohmann::json prop;
+        base::JsonWrite(prop, "key", key);
+        base::JsonWrite(prop, "value", val);
+        json["properties"].push_back(std::move(prop));
+    }
+    for (const auto& [key, mat] : mMaterials)
+    {
+        nlohmann::json material;
+        base::JsonWrite(material, "key", key);
+        base::JsonWrite(material, "type", mat->GetType());
+        mat->IntoJson(material);
+        json["materials"].push_back(std::move(material));
+    }
+}
+
 UIStyle::MaterialClass UIStyle::MakeMaterial(const std::string& str) const
 {
     ASSERT(mClassLib);
@@ -267,17 +412,33 @@ UIStyle::MaterialClass UIStyle::MakeMaterial(const std::string& str) const
 std::optional<UIStyle::MaterialClass> UIStyle::GetMaterial(const std::string& key) const
 {
     auto it = mMaterials.find(key);
-    if (it == mMaterials.end())
+    if (it != mMaterials.end())
+        return it->second->GetClass(mClassLib, mLoader);
+
+    if (!mStyleFile)
         return std::nullopt;
-    return it->second->GetClass(mClassLib, mLoader);
+
+    it = mStyleFile->mMaterials.find(key);
+    if (it != mStyleFile->mMaterials.end())
+        return it->second->GetClass(mClassLib, mLoader);
+
+    return std::nullopt;
 }
 
 UIProperty UIStyle::GetProperty(const std::string& key) const
 {
     auto it = mProperties.find(key);
-    if (it == mProperties.end())
+    if (it != mProperties.end())
+        return UIProperty(it->second);
+
+    if (!mStyleFile)
         return UIProperty();
-    return UIProperty(it->second);
+
+    it = mStyleFile->mProperties.find(key);
+    if (it != mStyleFile->mProperties.end())
+        return UIProperty(it->second);
+
+    return UIProperty();
 }
 
 bool UIStyle::ParseStyleString(const std::string& tag, const std::string& style)
@@ -312,9 +473,25 @@ bool UIStyle::ParseStyleString(const std::string& tag, const std::string& style)
 }
 
 bool UIStyle::HasProperty(const std::string& key) const
-{ return mProperties.find(key) != mProperties.end(); }
+{
+    if (base::Contains(mProperties, key))
+        return true;
+
+    if (mStyleFile && base::Contains(mStyleFile->mProperties, key))
+        return true;
+
+    return false;
+}
 bool UIStyle::HasMaterial(const std::string& key) const
-{ return mMaterials.find(key) != mMaterials.end(); }
+{
+    if (base::Contains(mMaterials, key))
+        return true;
+
+    if (mStyleFile && base::Contains(mStyleFile->mMaterials, key))
+        return true;
+
+    return false;
+}
 
 void UIStyle::DeleteProperty(const std::string& key)
 {
@@ -337,6 +514,20 @@ void UIStyle::DeleteProperties(const std::string& filter)
 void UIStyle::GatherProperties(const std::string& filter, std::vector<PropertyKeyValue>* props) const
 {
     for (const auto& pair : mProperties)
+    {
+        const auto& key = pair.first;
+        if (!base::Contains(key, filter))
+            continue;
+        PropertyKeyValue kv;
+        kv.key  = key;
+        kv.prop = pair.second;
+        props->push_back(std::move(kv));
+    }
+
+    if (!mStyleFile)
+        return;
+
+    for (const auto& pair : mStyleFile->mProperties)
     {
         const auto& key = pair.first;
         if (!base::Contains(key, filter))
@@ -371,9 +562,17 @@ void UIStyle::DeleteMaterials(const std::string& filter)
 const UIMaterial* UIStyle::GetMaterialType(const std::string& key) const
 {
     auto it = mMaterials.find(key);
-    if (it == mMaterials.end())
+    if (it != mMaterials.end())
+        return (*it).second.get();
+
+    if (!mStyleFile)
         return nullptr;
-    return (*it).second.get();
+
+    it = mStyleFile->mMaterials.find(key);
+    if (it != mStyleFile->mMaterials.end())
+        return (*it).second.get();
+
+    return nullptr;
 }
 
 bool UIStyle::LoadStyle(const nlohmann::json& json)
@@ -425,6 +624,9 @@ void UIStyle::SaveStyle(nlohmann::json& json) const
         mat->IntoJson(material);
         json["materials"].push_back(std::move(material));
     }
+
+    if (mStyleFile)
+        mStyleFile->SaveStyle(json);
 }
 
 std::string UIStyle::MakeStyleString(const std::string& filter) const
@@ -454,6 +656,35 @@ std::string UIStyle::MakeStyleString(const std::string& filter) const
         mat->IntoJson(material);
         json["materials"].push_back(std::move(material));
     }
+
+    if (mStyleFile)
+    {
+        for (const auto& p : mStyleFile->mProperties)
+        {
+            const auto& key = p.first;
+            const auto& val = p.second;
+            if (!base::Contains(p.first, filter))
+                continue;
+            nlohmann::json prop;
+            base::JsonWrite(prop, "key", key);
+            base::JsonWrite(prop, "value", val);
+            json["properties"].push_back(std::move(prop));
+        }
+        for (const auto& p : mStyleFile->mMaterials)
+        {
+            const auto& key = p.first;
+            const auto& mat = p.second;
+            if (!base::Contains(p.first, filter))
+                continue;
+
+            nlohmann::json material;
+            base::JsonWrite(material, "key", key);
+            base::JsonWrite(material, "type", mat->GetType());
+            mat->IntoJson(material);
+            json["materials"].push_back(std::move(material));
+        }
+    }
+
     // if JSON object is "empty" then explicitly return an empty string
     // calling dump on an empty json object returns "null" string.
     if (json.empty())
@@ -470,11 +701,35 @@ void UIStyle::ListMaterials(std::vector<MaterialEntry>* materials) const
         me.material = material.get();
         materials->push_back(std::move(me));
     }
+
+    if (!mStyleFile)
+        return;
+
+    for (const auto& [key, material] : mStyleFile->mMaterials)
+    {
+        MaterialEntry me;
+        me.key = key;
+        me.material = material.get();
+        materials->push_back(std::move(me));
+    }
 }
 
 void UIStyle::GatherMaterials(const std::string& filter, std::vector<MaterialEntry>* materials) const
 {
     for (const auto& [key, material] : mMaterials)
+    {
+        if (!base::Contains(key, filter))
+            continue;
+        MaterialEntry entry;
+        entry.key      = key;
+        entry.material = material.get();
+        materials->push_back(entry);
+    }
+
+    if (!mStyleFile)
+        return;
+
+    for (const auto& [key, material] : mStyleFile->mMaterials)
     {
         if (!base::Contains(key, filter))
             continue;
@@ -500,90 +755,6 @@ bool UIStyle::PurgeUnavailableMaterialReferences()
         purged = true;
     }
     return purged;
-}
-
-// static
-bool UIStyle::ParseProperties(const nlohmann::json& json, std::vector<PropertyPair>& props)
-{
-    if (!json.contains("properties"))
-        return true;
-
-    auto success = true;
-
-    for (const auto& item : json["properties"].items())
-    {
-        const auto& json = item.value();
-
-        PropertyPair prop;
-        if (!base::JsonReadSafe(json, "key", &prop.key))
-        {
-            WARN("Ignored JSON UI Style property without property key.");
-            success = false;
-            continue;
-        }
-        if (!base::JsonReadSafe(json, "value", &prop.value))
-        {
-            // this is not necessarily a BUG because currently the style json files are
-            // hand written. thus we have to be prepared to handle unexpected cases.
-            success = false;
-            WARN("Ignoring unexpected UI style property. [key='%1']", prop.key);
-            continue;
-        }
-        props.push_back(std::move(prop));
-    }
-    return success;
-}
-
-// static
-bool UIStyle::ParseMaterials(const nlohmann::json& json, std::vector<MaterialPair>& materials)
-{
-    if (!json.contains("materials"))
-        return true;
-
-    auto success = true;
-    for (const auto& item : json["materials"].items())
-    {
-        const auto& json = item.value();
-        UIMaterial::Type type;
-        std::string key;
-        if (!base::JsonReadSafe(json, "type", &type))
-        {
-            WARN("Ignored JSON UI style material property with unrecognized type.");
-            success = false;
-            continue;
-        }
-        else if (!base::JsonReadSafe(json, "key", &key))
-        {
-            WARN("Ignored JSON UI style material property without material key.");
-            success = false;
-            continue;
-        }
-
-        std::unique_ptr<UIMaterial> material;
-        if (type == UIMaterial::Type::Null)
-            material.reset(new detail::UINullMaterial());
-        else if (type == UIMaterial::Type::Color)
-            material.reset(new detail::UIColor);
-        else if (type == UIMaterial::Type::Gradient)
-            material.reset(new detail::UIGradient);
-        else if (type == UIMaterial::Type::Reference)
-            material.reset(new detail::UIMaterialReference);
-        else if (type == UIMaterial::Type::Texture)
-            material.reset(new detail::UITexture);
-        else BUG("Unhandled material type.");
-        if (!material->FromJson(json))
-        {
-            success = false;
-            WARN("Failed to parse UI material. [key='%1']", key);
-            continue;
-        }
-
-        MaterialPair p;
-        p.key = std::move(key);
-        p.material = std::move(material);
-        materials.push_back(std::move(p));
-    }
-    return success;
 }
 
 void UIPainter::DrawWidgetBackground(const WidgetId& id, const PaintStruct& ps) const
