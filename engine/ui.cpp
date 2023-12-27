@@ -414,21 +414,7 @@ void UIStyle::SaveStyle(nlohmann::json& json) const
     {
         nlohmann::json prop;
         base::JsonWrite(prop, "key", key);
-        if (const auto* color = std::any_cast<gfx::Color4f>(&val))
-            base::JsonWrite(prop, "value", *color);
-        else if(const auto* string = std::any_cast<std::string>(&val))
-            base::JsonWrite(prop, "value", *string);
-        else if (const auto* integer= std::any_cast<int>(&val))
-            base::JsonWrite(prop, "value", *integer);
-        else if (const auto* integer = std::any_cast<unsigned>(&val))
-            base::JsonWrite(prop, "value", *integer);
-        else if (const auto* real = std::any_cast<float>(&val))
-            base::JsonWrite(prop, "value", *real);
-        else if (const auto* real = std::any_cast<double>(&val))
-            base::JsonWrite(prop, "value", *real);
-        else if (const auto* boolean = std::any_cast<bool>(&val))
-            base::JsonWrite(prop, "value", *boolean);
-        else BUG("Unsupported property type.");
+        base::JsonWrite(prop, "value", val);
         json["properties"].push_back(std::move(prop));
     }
     for (const auto& [key, mat] : mMaterials)
@@ -452,22 +438,7 @@ std::string UIStyle::MakeStyleString(const std::string& filter) const
              continue;
         nlohmann::json prop;
         base::JsonWrite(prop, "key", key);
-
-        if (const auto* color = std::any_cast<gfx::Color4f>(&val))
-            base::JsonWrite(prop, "value", *color);
-        else if(const auto* string = std::any_cast<std::string>(&val))
-            base::JsonWrite(prop, "value", *string);
-        else if (const auto* integer= std::any_cast<int>(&val))
-            base::JsonWrite(prop, "value", *integer);
-        else if (const auto* integer = std::any_cast<unsigned>(&val))
-            base::JsonWrite(prop, "value", *integer);
-        else if (const auto* real = std::any_cast<float>(&val))
-            base::JsonWrite(prop, "value", *real);
-        else if (const auto* real = std::any_cast<double>(&val))
-            base::JsonWrite(prop, "value", *real);
-        else if (const auto* boolean = std::any_cast<bool>(&val))
-            base::JsonWrite(prop, "value", *boolean);
-        else BUG("Unsupported property type.");
+        base::JsonWrite(prop, "value", val);
         json["properties"].push_back(std::move(prop));
     }
     for (const auto& p : mMaterials)
@@ -543,42 +514,21 @@ bool UIStyle::ParseProperties(const nlohmann::json& json, std::vector<PropertyPa
     {
         const auto& json = item.value();
 
-        gfx::Color4f color;
-        std::string str_value;
-        int int_value = 0;
-        unsigned uint_value = 0;
-        float float_value = 0.0f;
-        bool bool_value   = false;
-
-        std::string key;
-        if (!base::JsonReadSafe(json, "key", &key))
+        PropertyPair prop;
+        if (!base::JsonReadSafe(json, "key", &prop.key))
         {
             WARN("Ignored JSON UI Style property without property key.");
             success = false;
             continue;
         }
-
-        PropertyPair prop;
-        if (base::JsonReadSafe(json, "value", &int_value))
-            prop.value = int_value;
-        else if (base::JsonReadSafe(json, "value", &uint_value))
-            prop.value = uint_value;
-        else if (base::JsonReadSafe(json, "value", &float_value))
-            prop.value = float_value;
-        else if (base::JsonReadSafe(json, "value", &str_value))
-            prop.value = str_value;
-        else if (base::JsonReadSafe(json, "value", &color))
-            prop.value = color;
-        else if (base::JsonReadSafe(json, "value", &bool_value))
-            prop.value = bool_value;
-        else {
+        if (!base::JsonReadSafe(json, "value", &prop.value))
+        {
             // this is not necessarily a BUG because currently the style json files are
             // hand written. thus we have to be prepared to handle unexpected cases.
             success = false;
-            WARN("Ignoring unexpected UI style property. [key='%1']", key);
+            WARN("Ignoring unexpected UI style property. [key='%1']", prop.key);
             continue;
         }
-        prop.key = key;
         props.push_back(std::move(prop));
     }
     return success;
