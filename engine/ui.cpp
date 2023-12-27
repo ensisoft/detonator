@@ -1646,28 +1646,30 @@ uik::VirtualKey UIKeyMap::MapKey(wdk::Keysym sym, wdk::bitflag<wdk::Keymod> mods
 
 UIEngine::UIEngine()
 {
-    mPainter.SetStyle(&mStyle);
-    mPainter.SetFlag(UIPainter::Flags::ClipWidgets, true);
 }
 
 void UIEngine::UpdateWindow(double game_time, float dt,
                       std::vector<WidgetAction>* widget_actions)
 {
-    if (auto* ui = GetUI())
+
+    if (auto* state = GetState())
     {
         // Update the UI materials in order to do material animation.
-        TRACE_CALL("UIPainter::Update", mPainter.Update(game_time, dt));
+        TRACE_CALL("UIPainter::Update", state->painter.Update(game_time, dt));
 
         // Update the UI widgets in order to do widget animation.
-        TRACE_CALL("Window::Update", ui->Update(mState, game_time, dt, &mAnimationState));
+        TRACE_CALL("Window::Update", state->window->Update(state->window_state, game_time, dt,
+                                                           &state->animation_state));
 
         // Poll widget for pending actions for example
         // something based on previous keyboard/mouse input.
-        TRACE_CALL("Window::PollAction", ui->PollAction(mState, game_time, dt, widget_actions));
+        TRACE_CALL("Window::PollAction", state->window->PollAction(state->window_state, game_time, dt, widget_actions));
 
         // Trigger widget animations based on the actions
         // that we have received. For example $OnClick etc.
-        TRACE_CALL("Window::TriggerAnimations", ui->TriggerAnimations(*widget_actions, mState, mAnimationState));
+        TRACE_CALL("Window::TriggerAnimations", state->window->TriggerAnimations(*widget_actions,
+                                                                                 state->window_state,
+                                                                                 state->animation_state));
     }
 }
 
@@ -1690,35 +1692,27 @@ void UIEngine::UpdateState(double game_time, float dt,
         const auto& action = mUIActionQueue.front();
         if (const auto* closing_action = std::get_if<CloseUIAction>(&action))
         {
-            auto* ui = GetUI();
-            if (ui == nullptr)
+            auto* state = GetState();
+            if (state == nullptr)
             {
                 WARN("Request to close a UI but there's no such UI open. [ui='%1']]", closing_action->window_name);
                 mUIActionQueue.pop();
                 continue;
             }
 
-            if (ui->IsClosed(mState, &mAnimationState))
+            if (state->window->IsClosed(state->window_state, &state->animation_state))
             {
-                DEBUG("Closing UI '%1'", ui->GetName());
-
-                int close_result = 0;
-                mState.GetValue("close_result", &close_result);
-                mState.DeleteValue("close_result");
+                DEBUG("Closing UI '%1'", state->window->GetName());
 
                 // generate a close event
                 {
                     WindowClose close;
-                    close.result = close_result;
-                    close.window = mStack.top();
+                    close.result = state->close_result;
+                    close.window = state->window;
                     window_actions->push_back(std::move(close));
                 }
 
-                // pop this UI off of the UI stack
-                mStack.pop();
-
-                // GetUI could be nullptr at this point.
-                PrepareUI(GetUI());
+                CloseWindowStackState();
 
                 // generate an update event.
                 {
@@ -1729,75 +1723,69 @@ void UIEngine::UpdateState(double game_time, float dt,
 
                 mUIActionQueue.pop();
             }
-            else if (!ui->IsClosing(mState))
+            else if (!state->window->IsClosing(state->window_state))
             {
-                mState.SetValue("close_result", closing_action->result);
-                ui->Close(mState, &mAnimationState);
+                state->close_result = closing_action->result;
+                state->window->Close(state->window_state, &state->animation_state);
                 break;
 
             } else break;
         }
         else if (const auto* open_action = std::get_if<OpenUIAction>(&action))
         {
-            mStack.push(open_action->window);
-
-            auto* ui = GetUI();
-
-            PrepareUI(ui);
+            OpenWindowStackState(open_action->window);
 
             // generate open event
             {
                 WindowOpen open;
-                open.window = ui;
+                open.window = GetUI();
                 window_actions->push_back(open);
             }
             // generate update event
             {
                 WindowUpdate update;
-                update.window = ui;
+                update.window = GetUI();
                 window_actions->push_back(update);
             }
 
             mUIActionQueue.pop();
 
-            DEBUG("Opened new UI '%1'", ui->GetName());
+            DEBUG("Opened new UI '%1'", open_action->window->GetName());
         }
     }
 }
 
 void UIEngine::Draw(gfx::Device& device)
 {
-    auto* ui = GetUI();
-    if (!ui)
-        return;
+    if (auto* state = GetState())
+    {
 
-    // the viewport retains the UI's aspect ratio and is centered in the middle
-    // of the rendering surface.
-    const auto& window_rect = ui->GetBoundingRect();
-    const float width  = window_rect.GetWidth();
-    const float height = window_rect.GetHeight();
-    const float scale  = std::min(mSurfaceWidth / width, mSurfaceHeight / height);
-    const float device_viewport_width  = width * scale;
-    const float device_viewport_height = height * scale;
+        // the viewport retains the UI's aspect ratio and is centered in the middle
+        // of the rendering surface.
+        const auto& window_rect = state->window->GetBoundingRect();
+        const float width = window_rect.GetWidth();
+        const float height = window_rect.GetHeight();
+        const float scale = std::min(mSurfaceWidth / width, mSurfaceHeight / height);
+        const float device_viewport_width = width * scale;
+        const float device_viewport_height = height * scale;
 
-    gfx::IRect device_viewport;
-    device_viewport.Move((mSurfaceWidth - device_viewport_width)*0.5,
-                         (mSurfaceHeight - device_viewport_height)*0.5);
-    device_viewport.Resize(device_viewport_width, device_viewport_height);
+        gfx::IRect device_viewport;
+        device_viewport.Move((mSurfaceWidth - device_viewport_width) * 0.5,
+                             (mSurfaceHeight - device_viewport_height) * 0.5);
+        device_viewport.Resize(device_viewport_width, device_viewport_height);
 
-    gfx::Painter painter(&device);
-    painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
-    painter.SetPixelRatio(glm::vec2{1.0f, 1.0f});
-    painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, width, height));
-    painter.SetViewport(device_viewport);
-    painter.SetEditingMode(mEditingMode);
+        gfx::Painter painter(&device);
+        painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
+        painter.SetPixelRatio(glm::vec2{1.0f, 1.0f});
+        painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, width, height));
+        painter.SetViewport(device_viewport);
+        painter.SetEditingMode(mEditingMode);
 
-    mStyle.SetClassLibrary(mClassLib);
-    mStyle.SetDataLoader(mLoader);
-
-    mPainter.SetPainter(&painter);
-    TRACE_CALL("Window::Paint", ui->Paint(mState, mPainter, base::GetTime(), nullptr));
-    mPainter.SetPainter(nullptr);
+        state->painter.SetPainter(&painter);
+        TRACE_CALL("Window::Paint", state->window->Paint(state->window_state,
+                                                         state->painter, base::GetTime(), nullptr));
+        state->painter.SetPainter(nullptr);
+    }
 }
 
 void UIEngine::OpenUI(std::shared_ptr<uik::Window> window)
@@ -1871,22 +1859,32 @@ void UIEngine::CloseUI(const std::string& window_name,
     // in other words the close takes place only if there is a window
     // with that name open at the right time.
     // this is useful for closing UIs that are conditionally open.
-    //
-    auto window_stack = mStack;
+
+    // prepare fake "stack" for replaying the window open/close
+    // commands in order to validate the command
+    std::vector<uik::Window*> window_stack;
+    for (auto& state : mStack)
+    {
+        window_stack.push_back(state.window.get());
+    }
+
+    // replay actions on the stack to see whether we end up with
+    // the right window on top of the stack so that the command
+    // is matched correctly.
     auto pending_actions = mUIActionQueue;
     while (!pending_actions.empty())
     {
         const auto& action = pending_actions.front();
         if (const auto* closing_action = std::get_if<CloseUIAction>(&action))
-            window_stack.pop();
+            window_stack.pop_back();
         else if (const auto* opening_action = std::get_if<OpenUIAction>(&action))
-            window_stack.push(opening_action->window);
+            window_stack.push_back(opening_action->window.get());
         else BUG("Missing UI action handling.");
         pending_actions.pop();
     }
     if (window_stack.empty())
         return;
-    const auto& future_top_most_window = window_stack.top();
+    const auto* future_top_most_window = window_stack.back();
     if (future_top_most_window->GetName() != window_name)
         return;
 
@@ -1899,14 +1897,15 @@ void UIEngine::CloseUI(const std::string& window_name,
 
 bool UIEngine::HaveOpenUI() const noexcept
 {
-    auto* ui = GetUI();
-    if (ui == nullptr)
+    auto* state = GetState();
+    if (state == nullptr)
         return false;
 
     // disregard window if it's closing or already closed. this filters
     // out keyboard and mouse event input that would otherwise be dispatched
     // to the window's input handler callbacks
-    if (ui->IsClosing(mState) || ui->IsClosing(mState))
+    if (state->window->IsClosing(state->window_state) || 
+        state->window->IsClosing(state->window_state))
         return false;
 
     return true;
@@ -1935,66 +1934,57 @@ void UIEngine::OnMouseRelease(const wdk::WindowEventMouseRelease& mouse, std::ve
     OnMouseEvent(mouse, &uik::Window::MouseRelease, actions);
 }
 
-void UIEngine::PrepareUI(uik::Window *ui)
+bool UIEngine::LoadStyle(const std::string& uri)
 {
-    if (!ui)
-        return;
+    if (base::Contains(mStyles, uri))
+        return true;
 
-    LoadStyle(ui->GetStyleName());
-    LoadKeymap(ui->GetKeyMapFile());
+    auto style = std::make_shared<UIStyleFile>();
+    mStyles[uri] = style;
 
-    mPainter.DeleteMaterialInstances();
-    mState.Clear();
-    mAnimationState.clear();
-
-    ui->Style(mPainter);
-
-    // todo: open doesn't execute in consistent state since the open might
-    // have executed before (and some widgets were for example animated and their
-    // state was changed)
-    // but when open is called again the animation state is cleared thus resulting
-    // in half-ass animation state.
-    // we should keep the state available in the state stack then the problem
-    // is solved.
-    ui->Open(mState, &mAnimationState);
-}
-
-void UIEngine::LoadStyle(const std::string& uri)
-{
     // todo: if the style loading somehow fails, then what?
-    mStyle.ClearProperties();
-    mStyle.ClearMaterials();
 
     auto data = mLoader->LoadEngineDataUri(uri);
     if (!data)
     {
         ERROR("Failed to load UI style. [uri='%1']", uri);
-        return;
+        return false;
     }
 
-    if (!mStyle.LoadStyle(*data))
+    if (!style->LoadStyle(*data))
     {
         ERROR("Failed to parse UI style. [uri='%1']", uri);
-        return;
+        return false;
     }
+
     DEBUG("Loaded UI style file successfully. [uri='%1']", uri);
+    return true;
+
 }
-void UIEngine::LoadKeymap(const std::string &uri)
+
+bool UIEngine::LoadKeymap(const std::string& uri)
 {
-    mKeyMap.Clear();
+    if (base::Contains(mKeyMaps, uri))
+        return true;
+
+    auto keymap = std::make_shared<UIKeyMap>();
+    mKeyMaps[uri] = keymap;
 
     auto data = mLoader->LoadEngineDataUri(uri);
     if (!data)
     {
         ERROR("Failed to load UI keymap data. [uri='%1']", uri);
-        return;
+        return false;
     }
-    if (!mKeyMap.LoadKeys(*data))
+    if (!keymap->LoadKeys(*data))
     {
         ERROR("Failed to parse UI keymap. [uri='%1']", uri);
-        return;
+        return false;
     }
+
     DEBUG("Loaded UI keymap successfully. [uri='%1']", uri);
+    return true;
+
 }
 
 template<typename WdkEvent>
@@ -2003,11 +1993,11 @@ void UIEngine::OnKeyEvent(const WdkEvent& key, UIKeyFunc which, std::vector<Widg
     if (!HaveOpenUI())
         return;
 
-    auto* ui = GetUI();
-    if (!ui->TestFlag(uik::Window::Flags::EnableVirtualKeys))
+    auto* state = GetState();
+    if (!state->window->TestFlag(uik::Window::Flags::EnableVirtualKeys))
         return;
 
-    const auto vk = mKeyMap.MapKey(key.symbol, key.modifiers);
+    const auto vk = state->keymap->MapKey(key.symbol, key.modifiers);
     if (vk == uik::VirtualKey::None)
         return;
 
@@ -2023,12 +2013,14 @@ void UIEngine::OnKeyEvent(const WdkEvent& key, UIKeyFunc which, std::vector<Widg
         DEBUG("UI virtual key mapping %1%2 => %3", mod_string, base::ToString(key.symbol), vk);
     }
 
+    auto* ui = state->window.get();
+
     uik::Window::KeyEvent event;
     event.key  = vk;
     event.time = base::GetTime();
-    *actions = (ui->*which)(event, mState);
+    *actions = (ui->*which)(event, state->window_state);
 
-    ui->TriggerAnimations(*actions, mState, mAnimationState);
+    ui->TriggerAnimations(*actions, state->window_state, state->animation_state);
 }
 
 template<typename WdkEvent>
@@ -2037,9 +2029,9 @@ void UIEngine::OnMouseEvent(const WdkEvent& mickey, UIMouseFunc which, std::vect
     if (!HaveOpenUI())
         return;
 
-    auto* ui = GetUI();
+    auto* state = GetState();
 
-    const auto& rect   = ui->GetBoundingRect();
+    const auto& rect   = state->window->GetBoundingRect();
     const float width  = rect.GetWidth();
     const float height = rect.GetHeight();
     const float scale  = std::min(mSurfaceWidth/width, mSurfaceHeight/height);
@@ -2056,9 +2048,11 @@ void UIEngine::OnMouseEvent(const WdkEvent& mickey, UIMouseFunc which, std::vect
     event.native_mouse_pos = uik::FPoint(mickey_pos_win.x, mickey_pos_win.y);
     event.window_mouse_pos = uik::FPoint(mickey_pos_uik.x, mickey_pos_uik.y);
 
-    *actions = (ui->*which)(event, mState);
+    auto* ui = state->window.get();
 
-    ui->TriggerAnimations(*actions, mState, mAnimationState);
+    *actions = (ui->*which)(event, state->window_state);
+
+    ui->TriggerAnimations(*actions, state->window_state, state->animation_state);
 }
 
 uik::MouseButton UIEngine::MapMouseButton(const wdk::MouseButton btn) const
@@ -2077,6 +2071,52 @@ uik::MouseButton UIEngine::MapMouseButton(const wdk::MouseButton btn) const
         return uik::MouseButton::WheelDown;
     WARN("Unmapped wdk mouse button '%1'", base::ToString(btn));
     return uik::MouseButton::None;
+}
+
+UIEngine::WindowStackState* UIEngine::GetState()
+{
+    if (mStack.empty())
+        return nullptr;
+
+    return &mStack.back();
+}
+
+const UIEngine::WindowStackState* UIEngine::GetState() const
+{
+    if (mStack.empty())
+        return nullptr;
+
+    return &mStack.back();
+}
+
+void UIEngine::OpenWindowStackState(std::shared_ptr<uik::Window> window)
+{
+    LoadStyle(window->GetStyleName());
+    LoadKeymap(window->GetKeyMapFile());
+
+    WindowStackState state;
+    state.window = window;
+    state.style = std::make_unique<UIStyle>();
+    state.style->SetStyleFile(mStyles[window->GetStyleName()]);
+    state.style->SetClassLibrary(mClassLib);
+    state.style->SetDataLoader(mLoader);
+    state.keymap = mKeyMaps[window->GetKeyMapFile()];
+    state.painter.SetFlag(UIPainter::Flags::ClipWidgets, true);
+    state.painter.SetStyle(state.style.get());
+
+    // apply window and widget styling on the painter
+    state.window->Style(state.painter);
+    // open the window and start animations.
+    state.window->Open(state.window_state, &state.animation_state);
+    // push to the stack as the top most window now.
+    // all subsequent update/draw/event operations are then
+    // performed on top of the stack window.
+    mStack.push_back(std::move(state));
+}
+
+void UIEngine::CloseWindowStackState()
+{
+    mStack.pop_back();
 }
 
 } // namespace
