@@ -82,6 +82,10 @@ template<typename Key> inline
 bool Contains(const std::unordered_set<Key>& set, const Key& k)
 { return set.find(k) != set.end(); }
 
+template<typename Key, typename Val> inline
+bool Contains(const std::unordered_map<Key, Val>& map, const Key& k)
+{ return map.find(k) != map.end(); }
+
 template<typename Key> inline
 bool Contains(const std::set<Key>& set, const Key& k)
 { return set.find(k) != set.end(); }

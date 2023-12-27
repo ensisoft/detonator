@@ -395,6 +395,18 @@ namespace engine
         std::optional<ValueType> mValue;
     };
 
+    class UIStyleFile
+    {
+    public:
+        bool LoadStyle(const nlohmann::json& json);
+        bool LoadStyle(const EngineData& data);
+        void SaveStyle(nlohmann::json& json) const;
+    private:
+        std::unordered_map<std::string, UIProperty::ValueType> mProperties;
+        std::unordered_map<std::string, std::unique_ptr<UIMaterial>> mMaterials;
+        friend class UIStyle;
+    };
+
 
     // Style resolves generic and widget specific material references
     // as well as generic and widget specific properties to actual
@@ -496,27 +508,20 @@ namespace engine
         void ListMaterials(std::vector<MaterialEntry>* materials) const;
         void GatherMaterials(const std::string& filter, std::vector<MaterialEntry>* materials) const;
 
-        void ClearProperties()
+        inline void ClearProperties() noexcept
         { mProperties.clear(); }
-        void ClearMaterials()
+        inline void ClearMaterials() noexcept
         { mMaterials.clear(); }
 
+        inline void SetStyleFile(std::shared_ptr<const UIStyleFile> file) noexcept
+        { mStyleFile = file; }
+
         bool PurgeUnavailableMaterialReferences();
-    private:
-        struct PropertyPair {
-            std::string key;
-            UIProperty::ValueType value;
-        };
-        struct MaterialPair {
-            std::string key;
-            std::unique_ptr<UIMaterial> material;
-        };
-        static bool ParseProperties(const nlohmann::json& json, std::vector<PropertyPair>& props);
-        static bool ParseMaterials(const nlohmann::json& json, std::vector<MaterialPair>& materials);
 
     private:
         const ClassLibrary* mClassLib = nullptr;
         const Loader* mLoader = nullptr;
+        std::shared_ptr<const UIStyleFile> mStyleFile;
         std::unordered_map<std::string, UIProperty::ValueType> mProperties;
         std::unordered_map<std::string, std::unique_ptr<UIMaterial>> mMaterials;
     };
