@@ -1905,7 +1905,7 @@ bool UIEngine::HaveOpenUI() const noexcept
     // out keyboard and mouse event input that would otherwise be dispatched
     // to the window's input handler callbacks
     if (state->window->IsClosing(state->window_state) || 
-        state->window->IsClosing(state->window_state))
+        state->window->IsClosed(state->window_state))
         return false;
 
     return true;
