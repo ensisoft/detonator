@@ -318,7 +318,13 @@ namespace engine
 
         template<typename T>
         void SetValue(const T& value)
-        { mValue = value; }
+        {
+            if constexpr (std::is_enum<T>::value) {
+                mValue = std::string(magic_enum::enum_name(value));
+            } else {
+                mValue = value;
+            }
+        }
         void SetValue(const std::string& str)
         { mValue = str; }
         void SetValue(const char* str)
@@ -446,9 +452,9 @@ namespace engine
             // knowing the type of the enum.
             if constexpr (std::is_enum<T>::value) {
                 mProperties[key] = std::string(magic_enum::enum_name(value));
-                return;
+            } else {
+                mProperties[key] = value;
             }
-            mProperties[key] = value;
         }
         void SetProperty(const std::string& key, const char* value)
         { mProperties[key] = std::string(value); }

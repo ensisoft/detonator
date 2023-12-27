@@ -906,6 +906,7 @@ add_library(GameLibTesting
     game/scene.cpp
     game/tilemap.cpp)
 add_library(EngineLibTesting
+    engine/ui.cpp
     engine/audio.cpp
     engine/physics.cpp
     engine/renderer.cpp
@@ -940,6 +941,7 @@ add_executable(unit_test_tilemap   game/unit_test/unit_test_tilemap.cpp)
 add_executable(unit_test_settings engine/unit_test/unit_test_settings.cpp)
 add_executable(unit_test_lua      engine/unit_test/unit_test_lua.cpp)
 add_executable(unit_test_renderer engine/unit_test/unit_test_renderer.cpp)
+add_executable(unit_test_ui       engine/unit_test/unit_test_ui.cpp)
 if (MSVC)
     target_compile_options(unit_test_lua PRIVATE /bigobj)
 endif()
@@ -950,8 +952,9 @@ target_link_libraries(unit_test_scene     GameLibTesting DataLib BaseLib)
 target_link_libraries(unit_test_anim      GameLibTesting DataLib BaseLib ${CONAN_LIBS})
 target_link_libraries(unit_test_tree      GameLibTesting DataLib BaseLib)
 target_link_libraries(unit_test_lua       EngineLibTesting GameLibTesting GfxLib DataLib UiLib AudioLib BaseLib wdk_system Lua ${CONAN_LIBS})
-target_link_libraries(unit_test_settings  EngineLibTesting DataLib BaseLib)
-target_link_libraries(unit_test_renderer  EngineLibTesting GameLibTesting GfxLib DataLib BaseLib wdk_system wdk_desktop_gl ${CONAN_LIBS})
+target_link_libraries(unit_test_settings  EngineLibTesting DataLib BaseLib UiLib)
+target_link_libraries(unit_test_renderer  EngineLibTesting GameLibTesting GfxLib DataLib BaseLib UiLib wdk_system wdk_desktop_gl ${CONAN_LIBS})
+target_link_libraries(unit_test_ui        EngineLibTesting GameLibTesting GfxLib DataLib BaseLib UiLib wdk_system wdk_desktop_gl ${CONAN_LIBS})
 
 target_include_directories(unit_test_tilemap   PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game/unit_test")
 target_include_directories(unit_test_scriptvar PRIVATE "${CMAKE_CURRENT_LIST_DIR}/game/unit_test")
@@ -962,6 +965,7 @@ target_include_directories(unit_test_scene     PRIVATE "${CMAKE_CURRENT_LIST_DIR
 target_include_directories(unit_test_settings  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
 target_include_directories(unit_test_lua       PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
 target_include_directories(unit_test_renderer  PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
+target_include_directories(unit_test_ui        PRIVATE "${CMAKE_CURRENT_LIST_DIR}/engine/unit_test")
 add_test(NAME unit_test_tree      COMMAND unit_test_tree)
 add_test(NAME unit_test_anim      COMMAND unit_test_anim)
 add_test(NAME unit_test_settings  COMMAND unit_test_settings)
@@ -969,6 +973,7 @@ add_test(NAME unit_test_entity    COMMAND unit_test_entity)
 add_test(NAME unit_test_scene     COMMAND unit_test_scene)
 add_test(NAME unit_test_lua       COMMAND unit_test_lua)
 add_test(NAME unit_test_rend      COMMAND unit_test_renderer)
+add_test(NAME unit_test_ui        COMMAND unit_test_renderer)
 add_test(NAME unit_test_scriptvar COMMAND unit_test_scriptvar)
 add_test(NAME unit_test_tilemap   COMMAND unit_test_tilemap)
 
