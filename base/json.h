@@ -28,6 +28,7 @@
 #include <sstream>
 #include <string>
 #include <type_traits>
+#include <variant>
 #include <memory>
 
 #include "base/bitflag.h"
@@ -114,6 +115,16 @@ void JsonWrite(nlohmann::json& json, const char* name, const FSize& point);
 void JsonWrite(nlohmann::json& json, const char* name, const Color4f& color);
 void JsonWrite(nlohmann::json& json, const char* name, const Rotator& rotator);
 
+
+template<typename... Types>
+void JsonWrite(nlohmann::json& json, const char* name, const std::variant<Types...>& variant)
+{
+    std::visit([&json, name](auto&& the_value) {
+        JsonWrite(json, name, the_value);
+    }, variant);
+}
+
+
 void JsonWrite(nlohmann::json& json, const char* name, const nlohmann::json& js);
 void JsonWrite(nlohmann::json& json, const char* name, nlohmann::json&& js);
 void JsonWrite(nlohmann::json& json, const char* name, std::unique_ptr<nlohmann::json> js);
@@ -186,6 +197,30 @@ bool JsonReadSafe(const nlohmann::json& json, const char* name, base::bitflag<En
     JsonRef object = GetJsonObj(json, name);
     return JsonReadSafe(*object.json, bitflag);
 }
+
+template<size_t index, typename... T>
+bool JsonReadVariantAlternative(const nlohmann::json& json, const char* key, std::variant<T...>* variant)
+{
+    using Variant = std::variant<T...>;
+    using Alternative = std::variant_alternative_t<index, Variant>;
+
+    Alternative value;
+    if (JsonReadSafe(json, key, &value)) {
+        *variant = value;
+        return true;
+    }
+    constexpr auto variant_size = std::variant_size_v<Variant>;
+    if constexpr(index + 1 == variant_size)
+        return false;
+    else return JsonReadVariantAlternative<index+1>(json, key, variant);
+}
+
+template<typename... T>
+bool JsonReadSafe(const nlohmann::json& json, const char* name, std::variant<T...>* variant)
+{
+    return JsonReadVariantAlternative<0>(json, name, variant);
+}
+
 
 template<typename ValueT> inline
 void JsonWrite(nlohmann::json& json, const char* name, const ValueT& value)
