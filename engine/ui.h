@@ -21,7 +21,7 @@
 #  include <neargye/magic_enum.hpp>
 #include "warnpop.h"
 
-#include <any>
+#include <variant>
 #include <string>
 #include <stack>
 #include <memory>
@@ -240,9 +240,12 @@ namespace engine
     class UIProperty
     {
     public:
+        using ValueType = std::variant<gfx::Color4f, std::string,
+                int, unsigned, float, double, bool>;
+
         UIProperty() = default;
-        UIProperty(const std::any& value) : mValue(value) {}
-        UIProperty(std::any&& value) : mValue(std::move(value)) {}
+        UIProperty(const ValueType& value) : mValue(value) {}
+        UIProperty(ValueType&& value) : mValue(std::move(value)) {}
 
         // Construct a new property using the primitive value.
         template<typename T>
@@ -255,8 +258,8 @@ namespace engine
         // Returns true if property holds a value.
         operator bool() const
         { return HasValue(); }
-        std::any GetAny() const
-        { return mValue; }
+        ValueType GetValue() const
+        { return mValue.value(); }
 
         // Get a string property value. Returns the given default value
         // if no property was available.
@@ -334,12 +337,11 @@ namespace engine
         bool GetValueInternal(T* out) const
         {
             ASSERT(mValue.has_value());
-            // if the raw value has the matching type we're done
-            if (GetRawValue(out))
-                return true;
+
             // if the value we want to read is an enum then it's possible
             // that is encoded as a string.
-            if constexpr (std::is_enum<T>::value) {
+            if constexpr (std::is_enum<T>::value)
+            {
                 std::string str;
                 if (!GetRawValue(&str))
                     return false;
@@ -348,6 +350,12 @@ namespace engine
                     return false;
                 *out = enum_val.value();
                 return true;
+            }
+            else
+            {
+                // if the raw value has the matching type we're done
+                if (GetRawValue(out))
+                    return true;
             }
             return false;
         }
@@ -370,23 +378,21 @@ namespace engine
         bool GetRawValue(T* out) const
         {
             ASSERT(mValue.has_value());
-            if (mValue.type() != typeid(T))
+            if (!std::holds_alternative<T>(mValue.value()))
                 return false;
-            *out = std::any_cast<T>(mValue);
+            *out = std::get<T>(mValue.value());
             return true;
         }
         bool GetRawValue(std::string* out) const
         {
             ASSERT(mValue.has_value());
-            if (mValue.type() == typeid(std::string))
-                *out = std::any_cast<std::string>(mValue);
-            else if (mValue.type() == typeid(const char*))
-                *out = std::any_cast<const char*>(mValue);
+            if (std::holds_alternative<std::string>(mValue.value()))
+                *out = std::get<std::string>(mValue.value());
             else return false;
             return true;
         }
     private:
-        std::any mValue;
+        std::optional<ValueType> mValue;
     };
 
 
@@ -459,7 +465,7 @@ namespace engine
         void SetProperty(const std::string& key, const char* value)
         { mProperties[key] = std::string(value); }
         void SetProperty(const std::string& key, const UIProperty& prop)
-        { mProperties[key] = prop.GetAny(); }
+        { mProperties[key] = prop.GetValue(); }
         // Set a new material setting under the given material key.
         void SetMaterial(const std::string& key, std::unique_ptr<UIMaterial> material)
         { mMaterials[key] = std::move(material); }
@@ -499,7 +505,7 @@ namespace engine
     private:
         struct PropertyPair {
             std::string key;
-            std::any    value;
+            UIProperty::ValueType value;
         };
         struct MaterialPair {
             std::string key;
@@ -511,7 +517,7 @@ namespace engine
     private:
         const ClassLibrary* mClassLib = nullptr;
         const Loader* mLoader = nullptr;
-        std::unordered_map<std::string, std::any> mProperties;
+        std::unordered_map<std::string, UIProperty::ValueType> mProperties;
         std::unordered_map<std::string, std::unique_ptr<UIMaterial>> mMaterials;
     };
 
