@@ -23,7 +23,6 @@
 
 #include <variant>
 #include <string>
-#include <stack>
 #include <memory>
 #include <vector>
 #include <queue>
@@ -709,13 +708,13 @@ namespace engine
         {
             if (mStack.empty())
                 return nullptr;
-            return mStack.top().get();
+            return mStack.back().window.get();
         }
         inline const uik::Window* GetUI() const noexcept
         {
             if (mStack.empty())
                 return nullptr;
-            return mStack.top().get();
+            return mStack.back().window.get();
         }
         bool HaveOpenUI() const noexcept;
 
@@ -763,9 +762,8 @@ namespace engine
         void OnMouseRelease(const wdk::WindowEventMouseRelease& mouse, std::vector<WidgetAction>* actions);
 
     private:
-        void PrepareUI(uik::Window* ui);
-        void LoadStyle(const std::string& uri);
-        void LoadKeymap(const std::string& uri);
+        bool LoadStyle(const std::string& uri);
+        bool LoadKeymap(const std::string& uri);
 
         using UIKeyFunc = std::vector<uik::Window::WidgetAction> (uik::Window::*)(const uik::Window::KeyEvent&, uik::TransientState&);
         template<typename WdkEvent>
@@ -776,6 +774,21 @@ namespace engine
         void OnMouseEvent(const WdkEvent& mouse, UIMouseFunc which, std::vector<WidgetAction>* actions);
 
         uik::MouseButton MapMouseButton(const wdk::MouseButton btn) const;
+
+        struct WindowStackState {
+            std::shared_ptr<uik::Window> window;
+            std::shared_ptr<const UIKeyMap> keymap;
+            std::unique_ptr<UIStyle> style;
+            UIPainter painter;
+            uik::TransientState window_state;
+            uik::AnimationStateArray  animation_state;
+            int close_result = 0;
+        };
+        WindowStackState* GetState();
+        const WindowStackState* GetState() const;
+        void OpenWindowStackState(std::shared_ptr<uik::Window> window);
+        void CloseWindowStackState();
+
     private:
         const ClassLibrary* mClassLib = nullptr;
         const Loader* mLoader = nullptr;
@@ -796,12 +809,12 @@ namespace engine
         float mSurfaceHeight = 0.0f;
 
         UIActionQueue mUIActionQueue;
-        UIPainter mPainter;
-        UIStyle mStyle;
-        UIKeyMap mKeyMap;
-        std::stack<std::shared_ptr<uik::Window>> mStack;
-        uik::TransientState mState;
-        uik::AnimationStateArray mAnimationState;
+        std::vector<WindowStackState> mStack;
+
+        // a cache of UI styles keyd by the style URI
+        std::unordered_map<std::string, std::shared_ptr<const UIStyleFile>> mStyles;
+        // a cache of UI keymaps keyd by the keymap URI
+        std::unordered_map<std::string, std::shared_ptr<const UIKeyMap>> mKeyMaps;
     };
 
 } // namespace
