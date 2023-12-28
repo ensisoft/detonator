@@ -3478,6 +3478,7 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         base::JsonWrite(json["window"], "vsync",      mSettings.window_vsync);
         base::JsonWrite(json["window"], "cursor",     mSettings.window_cursor);
         base::JsonWrite(json["window"], "grab_mouse", mSettings.grab_mouse);
+        base::JsonWrite(json["window"], "save_geometry", mSettings.save_window_geometry);
         if (mSettings.window_mode == ProjectSettings::WindowMode::Windowed)
             base::JsonWrite(json["window"], "set_fullscreen", false);
         else if (mSettings.window_mode == ProjectSettings::WindowMode::Fullscreen)
@@ -3489,7 +3490,6 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         base::JsonWrite(json["application"], "version",  ToUtf8(mSettings.application_version));
         base::JsonWrite(json["application"], "content", ToUtf8(options.package_name));
         base::JsonWrite(json["application"], "game_script", ToUtf8(mSettings.game_script));
-        base::JsonWrite(json["application"], "save_window_geometry", mSettings.save_window_geometry);
         base::JsonWrite(json["desktop"], "audio_io_strategy", mSettings.desktop_audio_io_strategy);
         base::JsonWrite(json["loading_screen"], "font", ToUtf8(mSettings.loading_font));
         base::JsonWrite(json["debug"], "font", ToUtf8(mSettings.debug_font));
