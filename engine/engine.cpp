@@ -242,13 +242,17 @@ public:
             painter.SetDevice(mDevice);
             painter.SetSurfaceSize(mSurfaceWidth, mSurfaceHeight);
             painter.SetPixelRatio(glm::vec2(1.0f, 1.0f));
-            painter.SetViewport(0, 0, surf_width, surf_height);
-            painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, surf_width, surf_height));
+            painter.SetViewport(0, 0, mSurfaceWidth, mSurfaceHeight);
+            painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, mSurfaceWidth, mSurfaceHeight));
             painter.SetEditingMode(mFlags.test(Flags::EditingMode));
 
-            gfx::FillRect(painter, gfx::FRect(0.0f, 0.0f, mSurfaceWidth, mSurfaceHeight), gfx::Color::Black);
+            painter.ClearColor(gfx::Color::Black);
+            const auto& window = gfx::FRect(0.0f, 0.0f, mSurfaceWidth, mSurfaceHeight);
+            const auto& text   = gfx::FRect(0.0f, 0.0f, 500.0f, 300.0f);
+            const auto& rect   = CenterRectOnRect(window, text);
+
             gfx::DrawTextRect(painter,  base::FormatString("DETONATOR 2D\n\n%1\n\nLoading ... %2/%3 ", klass.name, index, last),
-                              my_screen->font, 26, gfx::FRect(0.0f,  0.0f, mSurfaceWidth, mSurfaceHeight),
+                              my_screen->font, 26, rect,
                               gfx::Color::Silver,
                               gfx::TextAlign::AlignVCenter | gfx::TextAlign::AlignVCenter);
         }
