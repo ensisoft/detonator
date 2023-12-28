@@ -497,6 +497,15 @@ namespace base
     }
 
     template<typename T>
+    Rect<T> CenterRectOnRect(const Rect<T>& bigger, const Rect<T>& smaller)
+    {
+        const auto x = (bigger.GetWidth() - smaller.GetWidth()) / T(2);
+        const auto y = (bigger.GetHeight() - smaller.GetHeight()) / T(2);
+        return Rect<T>(bigger.GetX() + x,
+                       bigger.GetY() + y, smaller.GetWidth(), smaller.GetHeight());
+    }
+
+    template<typename T>
     class Circle
     {
     public:
