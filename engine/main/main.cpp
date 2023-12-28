@@ -20,6 +20,8 @@
 #  include <nlohmann/json.hpp>
 #include "warnpop.h"
 
+#include <algorithm>
+#include <thread>
 #include <memory>
 #include <vector>
 #include <chrono>
@@ -59,6 +61,7 @@
 #include "wdk/window.h"
 #include "wdk/events.h"
 #include "wdk/system.h"
+#include "wdk/videomode.h"
 #include "interface.h"
 
 #include "git.h"
@@ -276,29 +279,25 @@ double CurrentRuntime()
         (1000.0 * 1000.0);
 }
 
-void SaveState(const std::string& file, const wdk::Window& window)
+void SaveWindowState(const std::string& file, const wdk::Window& window)
 {
     nlohmann::json json;
     base::JsonWrite(json["window"], "width",  window.GetSurfaceWidth());
     base::JsonWrite(json["window"], "height", window.GetSurfaceHeight());
     base::JsonWrite(json["window"], "xpos", window.GetPosX());
     base::JsonWrite(json["window"], "ypos", window.GetPosY());
-    base::JsonWrite(json["window"], "fullscreen", window.IsFullscreen());
     const auto [success, error] = base::JsonWriteFile(json, file);
     if (success) return;
 
-    ERROR("Failed to save main app state.", error);
+    ERROR("Failed to save window state. [file='%1', error='%2']", file, error);
 }
 
-void LoadState(const std::string& file, wdk::Window& window)
+void LoadWindowState(const std::string& file, wdk::Window& window)
 {
-    if (!base::FileExists(file))
-        return;
-
     const auto [json_ok, json, json_error] = base::JsonParseFile(file);
     if (!json_ok)
     {
-        ERROR("Failed to read _app_state.json ('%1')", json_error);
+        ERROR("Failed to read window state file. [file='%1', error='%2']", file, json_error);
         return;
     }
 
@@ -307,18 +306,47 @@ void LoadState(const std::string& file, wdk::Window& window)
     int window_xpos = 0;
     int window_ypos = 0;
     bool window_set_fullscreen = false;
-    base::JsonReadSafe(json["window"], "width", &window_width);
+    base::JsonReadSafe(json["window"], "width",  &window_width);
     base::JsonReadSafe(json["window"], "height", &window_height);
-    base::JsonReadSafe(json["window"], "xpos", &window_xpos);
-    base::JsonReadSafe(json["window"], "ypos", &window_ypos);
-    base::JsonReadSafe(json["window"], "fullscreen", &window_set_fullscreen);
+    base::JsonReadSafe(json["window"], "xpos",   &window_xpos);
+    base::JsonReadSafe(json["window"], "ypos",   &window_ypos);
     window.Move(window_xpos, window_ypos);
     window.SetSize(window_width, window_height);
-    window.SetFullscreen(window_set_fullscreen);
-    DEBUG("Previous window state %1x%2 @ %3%,%4 full screen = %5.",
-          window_width, window_height,
-          window_xpos, window_ypos,
-          window_set_fullscreen ? "True" : "False");
+    DEBUG("Previous window state %1x%2 @ %3%,%4.", window_width, window_height, window_xpos, window_ypos);
+}
+
+void CenterWindowOnScreen(wdk::Window& window)
+{
+    // todo: this probably won't work with multiple displays...
+
+    const auto& mode = wdk::GetCurrentVideoMode();
+
+    const auto width = std::min(mode.xres, window.GetSurfaceWidth());
+    const auto height = std::min(mode.yres, window.GetSurfaceHeight());
+
+    const auto xpos = (mode.xres - width) / 2;
+    const auto ypos = (mode.yres - height) / 2;
+    window.Move(xpos, ypos);
+    window.SetSize(width, height);
+}
+
+void WaitWindowResizeEvent(wdk::Window& window)
+{
+    DEBUG("Current window surface size %1x%2", window.GetSurfaceWidth(), window.GetSurfaceHeight());
+    for (unsigned i=0; i<10; ++i)
+    {
+        wdk::native_event_t event;
+        while (wdk::PeekEvent(event))
+        {
+            window.ProcessEvent(event);
+            if (event.identity() == wdk::native_event_t::type::window_resize)
+            {
+                DEBUG("Realized change in window surface size. Hooray!!");
+                //return;
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
 }
 
 int main(int argc, char* argv[])
@@ -586,6 +614,7 @@ int main(int argc, char* argv[])
         bool window_vsync = false;
         bool window_show_cursor = false;
         bool window_grab_mouse  = false;
+        bool window_save_geometry = false;
         base::JsonReadSafe(json["window"], "width", &window_width);
         base::JsonReadSafe(json["window"], "height", &window_height);
         base::JsonReadSafe(json["window"], "can_resize", &window_can_resize);
@@ -594,6 +623,9 @@ int main(int argc, char* argv[])
         base::JsonReadSafe(json["window"], "vsync", &window_vsync);
         base::JsonReadSafe(json["window"], "cursor", &window_show_cursor);
         base::JsonReadSafe(json["window"], "grab_mouse", &window_grab_mouse);
+        base::JsonReadSafe(json["window"], "save_geometry", &window_save_geometry);
+
+        const auto& window_state_file = base::JoinPath(env.game_home, "_app_state.json");
 
         if (vsync_override.has_value())
             window_vsync = vsync_override.value();
@@ -609,7 +641,6 @@ int main(int argc, char* argv[])
         // Create application window
         window.Create(title, window_width, window_height, context->GetVisualID(),
             window_can_resize, window_has_border, true);
-        window.SetFullscreen(window_set_fullscreen);
         window.ShowCursor(window_show_cursor);
         window.GrabMouse(window_grab_mouse);
 
@@ -671,16 +702,22 @@ int main(int argc, char* argv[])
             base::JsonReadSafe(audio, "pcm_caching", &config.audio.enable_pcm_caching);
         }
 
-        // check whether there's a state file with previous window geometry
-        const auto& state_file = base::JoinPath(env.game_home, "_app_state.json");
-
-        bool save_window_geometry = false;
-        base::JsonReadSafe(json["application"], "save_window_geometry", &save_window_geometry);
-        if (save_window_geometry)
-            LoadState(state_file, window);
-
         engine->SetTracer(trace_logger.get());
         engine->SetEngineConfig(config);
+
+        if (window_save_geometry)
+        {
+            if (base::FileExists(window_state_file))
+            {
+                LoadWindowState(window_state_file, window);
+
+                WaitWindowResizeEvent(window);
+
+                engine->OnRenderingSurfaceResized(window.GetSurfaceWidth(),
+                                                  window.GetSurfaceHeight());
+            }
+            else CenterWindowOnScreen(window);
+        } else CenterWindowOnScreen(window);
 
         // do pre-load / splash screen content load
         {
@@ -704,8 +741,24 @@ int main(int argc, char* argv[])
                 klass.name = classes[i].name;
                 klass.id   = classes[i].id;
                 engine->PreloadClass(klass, i, classes.size()-1, screen.get());
+
+                wdk::native_event_t event;
+                while (wdk::PeekEvent(event))
+                {
+                    window.ProcessEvent(event);
+                }
             }
             DEBUG("Class loading done!");
+        }
+
+        if (window_set_fullscreen)
+        {
+            window.SetFullscreen(window_set_fullscreen);
+
+            WaitWindowResizeEvent(window);
+
+            engine->OnRenderingSurfaceResized(window.GetSurfaceWidth(),
+                                              window.GetSurfaceHeight());
         }
 
         engine->Load();
@@ -821,8 +874,19 @@ int main(int argc, char* argv[])
 
         context->Dispose();
 
-        if (save_window_geometry)
-            SaveState(state_file, window);
+        wdk::Disconnect(window);
+
+        if (window.IsFullscreen())
+        {
+            window.SetFullscreen(false);
+
+            WaitWindowResizeEvent(window);
+        }
+
+        if (window_save_geometry)
+        {
+            SaveWindowState(window_state_file, window);
+        }
 
         window.Destroy();
 
