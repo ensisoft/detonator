@@ -2433,6 +2433,9 @@ std::size_t ParticleEngineClass::GetHash() const
 
 void ParticleEngineClass::InitParticles(const Environment& env, InstanceState& state, size_t num) const
 {
+    const auto count = state.particles.size();
+    state.particles.resize(count + num);
+
     if (mParams.coordinate_space == CoordinateSpace::Global)
     {
         Transform transform(*env.model_matrix);
@@ -2514,15 +2517,14 @@ void ParticleEngineClass::InitParticles(const Environment& env, InstanceState& s
             const auto world = particle_to_world * glm::vec4(position, 0.0f, 1.0f);
             // note that the velocity vector is baked into the
             // direction vector in order to save space.
-            Particle p;
-            p.time       = 0.0f;
-            p.time_scale = math::rand(mParams.min_lifetime, mParams.max_lifetime) / mParams.max_lifetime;
-            p.pointsize  = math::rand(mParams.min_point_size, mParams.max_point_size);
-            p.alpha      = math::rand(mParams.min_alpha, mParams.max_alpha);
-            p.position   = glm::vec2(world.x, world.y);
-            p.direction  = direction * velocity;
-            p.randomizer = math::rand(0.0f, 1.0f);
-            state.particles.push_back(p);
+            auto& particle = state.particles[count+i];
+            particle.time       = 0.0f;
+            particle.time_scale = math::rand(mParams.min_lifetime, mParams.max_lifetime) / mParams.max_lifetime;
+            particle.pointsize  = math::rand(mParams.min_point_size, mParams.max_point_size);
+            particle.alpha      = math::rand(mParams.min_alpha, mParams.max_alpha);
+            particle.position   = glm::vec2(world.x, world.y);
+            particle.direction  = direction * velocity;
+            particle.randomizer = math::rand(0.0f, 1.0f);
         }
     }
     else if (mParams.coordinate_space == CoordinateSpace::Local)
@@ -2630,15 +2632,14 @@ void ParticleEngineClass::InitParticles(const Environment& env, InstanceState& s
 
             // note that the velocity vector is baked into the
             // direction vector in order to save space.
-            Particle p;
-            p.time       = 0.0f;
-            p.time_scale = math::rand(mParams.min_lifetime, mParams.max_lifetime) / mParams.max_lifetime;
-            p.pointsize  = math::rand(mParams.min_point_size, mParams.max_point_size);
-            p.alpha      = math::rand(mParams.min_alpha, mParams.max_alpha);
-            p.position   = position;
-            p.direction  = direction *  velocity;
-            p.randomizer = math::rand(0.0f, 1.0f);
-            state.particles.push_back(p);
+            auto& particle = state.particles[count+i];
+            particle.time       = 0.0f;
+            particle.time_scale = math::rand(mParams.min_lifetime, mParams.max_lifetime) / mParams.max_lifetime;
+            particle.pointsize  = math::rand(mParams.min_point_size, mParams.max_point_size);
+            particle.alpha      = math::rand(mParams.min_alpha, mParams.max_alpha);
+            particle.position   = position;
+            particle.direction  = direction *  velocity;
+            particle.randomizer = math::rand(0.0f, 1.0f);
         }
     } else BUG("Unhandled particle system coordinate space.");
 }
