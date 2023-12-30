@@ -292,6 +292,19 @@ void SaveWindowState(const std::string& file, const wdk::Window& window)
     ERROR("Failed to save window state. [file='%1', error='%2']", file, error);
 }
 
+void ProcessEvents(wdk::Window& window)
+{
+    for (unsigned i=0; i<10; ++i)
+    {
+        wdk::native_event_t event;
+        while (wdk::PeekEvent(event))
+        {
+            window.ProcessEvent(event);
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+}
+
 void LoadWindowState(const std::string& file, wdk::Window& window)
 {
     const auto [json_ok, json, json_error] = base::JsonParseFile(file);
@@ -301,52 +314,62 @@ void LoadWindowState(const std::string& file, wdk::Window& window)
         return;
     }
 
-    int window_width = 0;
-    int window_height = 0;
+    unsigned surface_width = 0;
+    unsigned surface_height = 0;
     int window_xpos = 0;
     int window_ypos = 0;
-    bool window_set_fullscreen = false;
-    base::JsonReadSafe(json["window"], "width",  &window_width);
-    base::JsonReadSafe(json["window"], "height", &window_height);
+    base::JsonReadSafe(json["window"], "width",  &surface_width);
+    base::JsonReadSafe(json["window"], "height", &surface_height);
     base::JsonReadSafe(json["window"], "xpos",   &window_xpos);
     base::JsonReadSafe(json["window"], "ypos",   &window_ypos);
+    DEBUG("Previous window state %1x%2 @ %3%,%4.", surface_width, surface_height, window_xpos, window_ypos);
+
+    // try to relocate the window in case the current coordinates
+    // would place it offscreen.
+    const auto& mode = wdk::GetCurrentVideoMode();
+    if (window_xpos >= mode.xres)
+        window_xpos = 0;
+    if (window_ypos >= mode.yres)
+        window_ypos = 0;
+
     window.Move(window_xpos, window_ypos);
-    window.SetSize(window_width, window_height);
-    DEBUG("Previous window state %1x%2 @ %3%,%4.", window_width, window_height, window_xpos, window_ypos);
+
+    surface_width  = std::min(mode.xres, surface_width);
+    surface_height = std::min(mode.yres, surface_height);
+    ASSERT(surface_width && surface_height);
+    if (surface_width != window.GetSurfaceWidth() ||
+        surface_height != window.GetSurfaceHeight())
+        window.SetSize(surface_width, surface_height);
+
+    ProcessEvents(window);
 }
 
 void CenterWindowOnScreen(wdk::Window& window)
 {
     // todo: this probably won't work with multiple displays...
 
+    // this is actually a bit off when the window has a border around it...
+    // because then the actual window size is bigger than the surface size.
+    const auto width = window.GetSurfaceWidth();
+    const auto height = window.GetSurfaceHeight();
     const auto& mode = wdk::GetCurrentVideoMode();
+    DEBUG("Current window surface %1x%2. ", width, height);
+    DEBUG("Current video mode %1x%2", mode.xres, mode.yres);
 
-    const auto width = std::min(mode.xres, window.GetSurfaceWidth());
-    const auto height = std::min(mode.yres, window.GetSurfaceHeight());
+    const auto surface_width = std::min(mode.xres, width);
+    const auto surface_height = std::min(mode.yres, height);
 
-    const auto xpos = (mode.xres - width) / 2;
-    const auto ypos = (mode.yres - height) / 2;
+    const auto xpos = (mode.xres - surface_width) / 2;
+    const auto ypos = (mode.yres - surface_height) / 2;
     window.Move(xpos, ypos);
-    window.SetSize(width, height);
-}
 
-void WaitWindowResizeEvent(wdk::Window& window)
-{
-    DEBUG("Current window surface size %1x%2", window.GetSurfaceWidth(), window.GetSurfaceHeight());
-    for (unsigned i=0; i<10; ++i)
-    {
-        wdk::native_event_t event;
-        while (wdk::PeekEvent(event))
-        {
-            window.ProcessEvent(event);
-            if (event.identity() == wdk::native_event_t::type::window_resize)
-            {
-                DEBUG("Realized change in window surface size. Hooray!!");
-                //return;
-            }
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
+    ASSERT(surface_width && surface_height);
+    if (surface_width != window.GetSurfaceWidth() ||
+        surface_height != window.GetSurfaceHeight())
+        window.SetSize(surface_width, surface_height);
+
+    ProcessEvents(window);
+    DEBUG("Reformat the window. %1x%2 @ %3,%4", surface_width, surface_height, xpos, ypos);
 }
 
 int main(int argc, char* argv[])
@@ -637,40 +660,6 @@ int main(int argc, char* argv[])
         base::JsonReadSafe(json["window"], "grab_mouse", &window_grab_mouse);
         base::JsonReadSafe(json["window"], "save_geometry", &window_save_geometry);
 
-        const auto& window_state_file = base::JoinPath(env.game_home, "_app_state.json");
-
-        if (vsync_override.has_value())
-            window_vsync = vsync_override.value();
-
-        wdk::Window window;
-        // makes sure to connect the listener before creating the window
-        // so that the listener can get the initial events, (resize, etc)
-        if (auto* listener = engine->GetWindowListener())
-        {
-            wdk::Connect(window, *listener);
-        }
-
-        // Create application window
-        window.Create(title, window_width, window_height, context->GetVisualID(),
-            window_can_resize, window_has_border, true);
-        window.ShowCursor(window_show_cursor);
-        window.GrabMouse(window_grab_mouse);
-
-        // Setup context to render in the window.
-        context->SetWindowSurface(window);
-        context->SetSwapInterval(window_vsync ? 1 : 0);
-        DEBUG("Swap interval: %1", window_vsync ? 1 : 0);
-
-        // setup application
-        engine::Engine::InitParams params;
-        params.editing_mode     = false; // no editing, static means optimal static, no checking for changes.
-        params.application_name = title;
-        params.context          = context.get();
-        params.surface_width    = window.GetSurfaceWidth();
-        params.surface_height   = window.GetSurfaceHeight();
-        base::JsonReadSafe(json["application"], "game_script", &params.game_script);
-        engine->Init(params);
-
         engine::Engine::EngineConfig config;
         config.ticks_per_second   = 1.0f;
         config.updates_per_second = 60.0f;
@@ -713,23 +702,49 @@ int main(int argc, char* argv[])
             base::JsonReadSafe(audio, "buffer_size", &config.audio.buffer_size);
             base::JsonReadSafe(audio, "pcm_caching", &config.audio.enable_pcm_caching);
         }
+        const auto& window_state_file = base::JoinPath(env.game_home, "_app_state.json");
 
-        engine->SetTracer(trace_logger.get());
-        engine->SetEngineConfig(config);
+        if (vsync_override.has_value())
+            window_vsync = vsync_override.value();
 
+        wdk::Window window;
+
+        // Create application window
+        window.Create(title, window_width, window_height, context->GetVisualID(),
+            window_can_resize, window_has_border, true);
+        window.ShowCursor(window_show_cursor);
+        window.GrabMouse(window_grab_mouse);
+
+        // if we have previous saved geometry then restore the window
+        // based on that geometry. we're always starting in the windowed
+        // mode for the loading/splash screen and then transition
+        // to fullscreen mode later if fullscreen mode is enabled.
         if (window_save_geometry)
         {
             if (base::FileExists(window_state_file))
             {
                 LoadWindowState(window_state_file, window);
-
-                WaitWindowResizeEvent(window);
-
-                engine->OnRenderingSurfaceResized(window.GetSurfaceWidth(),
-                                                  window.GetSurfaceHeight());
             }
             else CenterWindowOnScreen(window);
-        } else CenterWindowOnScreen(window);
+        }
+        else CenterWindowOnScreen(window);
+
+        // Setup context to render in the window.
+        context->SetWindowSurface(window);
+        context->SetSwapInterval(window_vsync ? 1 : 0);
+        DEBUG("Swap interval: %1", window_vsync ? 1 : 0);
+
+        // setup application
+        engine::Engine::InitParams params;
+        params.editing_mode     = false; // no editing, static means optimal static, no checking for changes.
+        params.application_name = title;
+        params.context          = context.get();
+        params.surface_width    = window.GetSurfaceWidth();
+        params.surface_height   = window.GetSurfaceHeight();
+        base::JsonReadSafe(json["application"], "game_script", &params.game_script);
+        engine->Init(params);
+        engine->SetEngineConfig(config);
+        engine->SetTracer(trace_logger.get());
 
         // do pre-load / splash screen content load
         {
@@ -767,7 +782,7 @@ int main(int argc, char* argv[])
         {
             window.SetFullscreen(window_set_fullscreen);
 
-            WaitWindowResizeEvent(window);
+            ProcessEvents(window);
 
             engine->OnRenderingSurfaceResized(window.GetSurfaceWidth(),
                                               window.GetSurfaceHeight());
@@ -775,6 +790,10 @@ int main(int argc, char* argv[])
 
         engine->Load();
         engine->Start();
+
+        // Connect the engine's window event listener to the window.
+        if (auto* listener = engine->GetWindowListener())
+            wdk::Connect(window, *listener);
 
         bool quit = false;
         // initialize to false, so that if the window was requested to go into full screen
@@ -920,7 +939,7 @@ int main(int argc, char* argv[])
         {
             window.SetFullscreen(false);
 
-            WaitWindowResizeEvent(window);
+            ProcessEvents(window);
         }
 
         if (window_save_geometry)
