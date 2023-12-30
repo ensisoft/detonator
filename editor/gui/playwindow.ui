@@ -262,7 +262,7 @@ font: 16pt &quot;Sans Serif&quot;;</string>
      <x>0</x>
      <y>0</y>
      <width>1053</width>
-     <height>36</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -350,6 +350,8 @@ font: 16pt &quot;Sans Serif&quot;;</string>
    <addaction name="actionClose"/>
    <addaction name="actionPause"/>
    <addaction name="actionStep"/>
+   <addaction name="separator"/>
+   <addaction name="actionTrace"/>
    <addaction name="separator"/>
    <addaction name="actionToggleDebugDraw"/>
    <addaction name="actionToggleDebugLog"/>
@@ -715,6 +717,24 @@ font: 16pt &quot;Sans Serif&quot;;</string>
    </property>
    <property name="shortcut">
     <string>F8</string>
+   </property>
+  </action>
+  <action name="actionTrace">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/performance.png</normaloff>:/32x32_ico_png/performance.png</iconset>
+   </property>
+   <property name="text">
+    <string>Trace</string>
+   </property>
+   <property name="toolTip">
+    <string>Start stop performance tracing</string>
+   </property>
+   <property name="shortcut">
+    <string>F10</string>
    </property>
   </action>
  </widget>

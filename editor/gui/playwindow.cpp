@@ -636,17 +636,43 @@ void PlayWindow::RunGameLoopOnce()
     if (!mEngine || !mInitDone)
         return;
 
+    auto* listener = mEngine->GetWindowListener();
+    bool quit = false;
+
     TemporaryCurrentDirChange cwd(mGameWorkingDir);
 
     mContext.makeCurrent(mSurface);
     try
     {
-        auto* listener = mEngine->GetWindowListener();
-        bool quit = false;
+        // Remember that the tracing state cannot be changed while the
+        // tracing stack has entries. I.e. the state can only change before
+        // any tracing statements are ever entered on the trace stack!
+        if (!mEnableTrace.empty())
+        {
+            // We might have received multiple application requests to change the
+            // tracing state, i.e. nested calls. Therefore we must queue them and
+            // then process in batch while keeping count of what the final tracer
+            // state will be!
+            for (bool on_off : mEnableTrace)
+            {
+                if (on_off)
+                    ++mTraceEnabledCounter;
+                else if (mTraceEnabledCounter)
+                    --mTraceEnabledCounter;
+                else WARN("Incorrect number of tracing enable/disable requests detected.");
+            }
+            mEnableTrace.clear();
+            DEBUG("Performance tracing update. [value=%1", mTraceEnabledCounter ? "ON" : "OFF");
+            ToggleTracing(mTraceEnabledCounter > 0);
+        }
+
+        TRACE_START();
+        TRACE_ENTER(MainLoop);
 
         // indicate beginning of the main loop iteration.
-        mEngine->BeginMainLoop();
+        TRACE_CALL("Engine::BeginMainLoop", mEngine->BeginMainLoop());
 
+        TRACE_ENTER(EventDispatch);
         // if we have an event log that is being replayed then source
         // the window input events from the log.
         if (mWinEventLog && mWinEventLog->IsPlaying())
@@ -678,6 +704,9 @@ void PlayWindow::RunGameLoopOnce()
             }
             mEventQueue.clear();
         }
+        TRACE_LEAVE(EventDispatch);
+
+        TRACE_ENTER(EngineRequest);
 
         // Process pending application requests if any.
         engine::Engine::Request request;
@@ -691,6 +720,8 @@ void PlayWindow::RunGameLoopOnce()
                 AskToggleFullScreen();
             else if (const auto* ptr = std::get_if<engine::Engine::DebugPause>(&request))
                 DebugPause(ptr->pause);
+            else if (const auto* ptr = std::get_if<engine::Engine::EnableTracing>(&request))
+                mEnableTrace.push_back(ptr->enabled);
             else if (const auto* ptr = std::get_if<engine::Engine::ShowMouseCursor>(&request)) {
                 if (ptr->show) {
                     mContainer->setCursor(Qt::ArrowCursor);
@@ -704,6 +735,7 @@ void PlayWindow::RunGameLoopOnce()
                 quit = true;
             }
         }
+        TRACE_LEAVE(EngineRequest);
 
         // This is the real wall time elapsed rendering the previous frame.
         // For each iteration of the loop we measure the time
@@ -712,11 +744,12 @@ void PlayWindow::RunGameLoopOnce()
         // to catch up for the *next* frame.
         const auto time_step = mTimer.Delta();
         const auto wall_time = mTimer.SinceStart();
+
         // ask the application to take its simulation steps.
-        mEngine->Update(time_step);
+        TRACE_CALL("Engine::Update", mEngine->Update(time_step));
 
         // ask the application to draw the current frame.
-        mEngine->Draw();
+        TRACE_CALL("Engine::Draw", mEngine->Draw());
 
         if (mWinEventLog)
             mWinEventLog->SetTime(wall_time);
@@ -761,7 +794,13 @@ void PlayWindow::RunGameLoopOnce()
         }
 
         // indicate end of iteration.
-        mEngine->EndMainLoop();
+        TRACE_CALL("Engine::EndMainLoop", mEngine->EndMainLoop());
+        TRACE_LEAVE(MainLoop);
+
+        if (mTraceLogger)
+        {
+            mTraceLogger->Write(*mTraceWriter);
+        }
 
         if (!mEngine->IsRunning() || quit)
         {
@@ -1259,6 +1298,11 @@ void PlayWindow::SelectResolution()
     }
 }
 
+void PlayWindow::on_actionTrace_toggled(bool val)
+{
+    mEnableTrace.push_back(val);
+}
+
 void PlayWindow::on_actionPause_toggled(bool val)
 {
     SetDebugOptions();
@@ -1736,5 +1780,26 @@ bool PlayWindow::LoadLibrary()
     return true;
 }
 
+void PlayWindow::ToggleTracing(bool enable)
+{
+     if (enable && !mTraceWriter)
+    {
+        mTraceWriter.reset(new base::ChromiumTraceJsonWriter("trace.json"));
+        mTraceLogger.reset(new base::TraceLog(1000));
+        base::SetThreadTrace(mTraceLogger.get());
+        base::EnableTracing(true);
+        mEngine->SetTracer(mTraceLogger.get());
+        mEngine->SetTracingOn(true);
+    }
+    else if (!enable && mTraceWriter)
+    {
+        mTraceWriter.reset();
+        mTraceLogger.reset();
+        base::SetThreadTrace(nullptr);
+        base::EnableTracing(false);
+        mEngine->SetTracer(nullptr);
+        mEngine->SetTracingOn(false);
+    }
+}
 
 } // namespace
