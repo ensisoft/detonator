@@ -898,6 +898,11 @@ void InitLuaDoc()
                                        "When mouse block is enabled the mouse events coming from the OS are not processed "
                                        "and none of the entity/scene mouse event handlers are called.",
                  "bool", "block");
+    DOC_METHOD_1("void", "EnableTracing", "Request to enable/disable application tracing.<br>"
+                                          "Since tracing can be potentially enabled/disabled through this API call and also"
+                                          "by the user via the (developer/debug) UI this actually only controls a global counter"
+                                          "and only when every caller has turned the tracing off will the actual tracing stop.",
+                 "bool", "enabled");
     DOC_METHOD_1("void", "DebugPause", "Initiate a debug pause or leave previous debug pause.", "bool", "pause");
     DOC_METHOD_1("void", "DebugPrint", "Print a debug message in the game window.", "string", "message");
     DOC_METHOD_4("void", "DebugDrawCircle", "Draw a debug circle with the given radius around the center point in game space.",

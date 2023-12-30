@@ -506,6 +506,11 @@ void LuaRuntime::Init()
         action.pause = pause;
         self.mActionQueue.push(action);
     };
+    engine["EnableTracing"] = [](LuaRuntime& self, bool enabled) {
+        EnableTracing action;
+        action.enabled = enabled;
+        self.mActionQueue.push(action);
+    };
 
     engine["MoveCamera"] = sol::overload(
          [](LuaRuntime& self, float x, float y) {

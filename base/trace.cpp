@@ -20,7 +20,8 @@
 #include "base/trace.h"
 
 namespace {
-static thread_local base::Trace* thread_tracer;
+static thread_local base::Trace* thread_tracer = nullptr;
+static thread_local bool enable_tracing = false;
 } // namespace
 
 namespace base
@@ -32,40 +33,47 @@ void SetThreadTrace(Trace* trace)
 }
 void TraceStart()
 {
-    if (thread_tracer)
+    if (thread_tracer && enable_tracing)
         thread_tracer->Start();
 }
 
 void TraceWrite(TraceWriter& writer)
 {
-    if (thread_tracer)
+    if (thread_tracer && enable_tracing)
         thread_tracer->Write(writer);
 }
 
 unsigned TraceBeginScope(const char* name, std::string comment)
 {
-    if (thread_tracer)
+    if (thread_tracer && enable_tracing)
         return thread_tracer->BeginScope(name, comment);
     return 0;
 }
 void TraceEndScope(unsigned index)
 {
-    if (thread_tracer)
+    if (thread_tracer && enable_tracing)
         thread_tracer->EndScope(index);
 }
 void TraceMarker(const std::string& str)
 {
-    if (thread_tracer)
+    if (thread_tracer && enable_tracing)
         thread_tracer->Marker(str);
 }
 void TraceMarker(const std::string& str, unsigned index)
 {
-    if (thread_tracer)
+    if (thread_tracer && enable_tracing)
         thread_tracer->Marker(str, index);
 }
 
 bool IsTracingEnabled()
-{ return thread_tracer != nullptr; }
+{
+    return enable_tracing;
+}
+
+void EnableTracing(bool on_off)
+{
+    enable_tracing = on_off;
+}
 
 TextFileTraceWriter::TextFileTraceWriter(const std::string& file)
 {

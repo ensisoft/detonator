@@ -390,6 +390,7 @@ int main(int argc, char* argv[])
         opt.Add("--debug-show-msg", "Show debug messages. You'll need to use --debug-font.");
         opt.Add("--debug-print-fps", "Print FPS counter and stats to log.");
         opt.Add("--trace", "Record engine function call trace and timing info into a file.", std::string("trace.txt"));
+        opt.Add("--trace-start", "Start tracing immediately on application start. (requires --trace).");
         opt.Add("--vsync", "Force vsync on or off.", false);
         if (!opt.Parse(args, &cmdline_error, true))
         {
@@ -498,6 +499,12 @@ int main(int argc, char* argv[])
         INFO("http://github.com/ensisoft/detonator");
         INFO("Built on branch '%1' with commit %2", git_Branch(), git_CommitSHA1());
 
+        // in order to have nesting and multiple things controlling the tracing
+        // we have a tracing counter. Any time the counter has a value > 0 tracing
+        // is enabled. Every request to disable the tracing decrements the counter
+        // and when counter drops to 0 the tracing is disabled.
+        unsigned trace_enabled_counter = 0;
+
         std::unique_ptr<base::TraceWriter> trace_writer;
         std::unique_ptr<base::TraceLog> trace_logger;
         if (opt.WasGiven("--trace"))
@@ -506,7 +513,12 @@ int main(int argc, char* argv[])
                 trace_writer.reset(new base::ChromiumTraceJsonWriter(trace_file));
             else trace_writer.reset(new base::TextFileTraceWriter(trace_file));
             trace_logger.reset(new base::TraceLog(1000));
+
+            if (opt.WasGiven("--trace-start"))
+                trace_enabled_counter = 1;
+
             base::SetThreadTrace(trace_logger.get());
+            base::EnableTracing(trace_enabled_counter == 1);
         }
 
 
@@ -770,8 +782,34 @@ int main(int argc, char* argv[])
         // invoke the application handlers.
         bool fullscreen = false;
 
+        std::vector<bool> enable_tracing;
+
         while (engine->IsRunning() && !quit)
         {
+            // Remember that the tracing state cannot be changed while the
+            // tracing stack has entries. I.e. the state can only change before
+            // any tracing statements are ever entered on the trace stack!
+            if (!enable_tracing.empty())
+            {
+                // We might have received multiple application requests to change the
+                // tracing state, i.e. nested calls. Therefore we must queue them and
+                // then process in batch while keeping count of what the final tracer
+                // state will be!
+                for (bool on_off: enable_tracing)
+                {
+                    if (on_off)
+                        ++trace_enabled_counter;
+                    else if (trace_enabled_counter)
+                        --trace_enabled_counter;
+                    else WARN("Incorrect number of tracing enable/disable requests detected.");
+                }
+                enable_tracing.clear();
+                const auto enabled = trace_enabled_counter > 0;
+                DEBUG("Performance tracing update. [value=%1", enabled ? "ON" : "OFF");
+                base::EnableTracing(enabled);
+                engine->SetTracingOn(enabled);
+            }
+
             TRACE_START();
             TRACE_ENTER(MainLoop);
 
@@ -814,6 +852,8 @@ int main(int argc, char* argv[])
                     window.ShowCursor(ptr->show);
                 else if (auto* ptr = std::get_if<engine::Engine::GrabMouse>(&request))
                     window.GrabMouse(ptr->grab);
+                else if (auto* ptr = std::get_if<engine::Engine::EnableTracing>(&request))
+                    enable_tracing.push_back(ptr->enabled);
                 else if (auto* ptr = std::get_if<engine::Engine::QuitApp>(&request)) {
                     quit = true;
                     exit_code = ptr->exit_code;

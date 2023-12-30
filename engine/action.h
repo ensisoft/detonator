@@ -132,6 +132,10 @@ namespace engine
         bool value = false;
     };
 
+    struct EnableTracing {
+        bool enabled = false;
+    };
+
     // Actions express some want the game wants to take
     // such as opening a menu, playing a scene and so on.
     using Action = std::variant<PlayAction,
@@ -153,6 +157,7 @@ namespace engine
             RequestFullScreenAction,
             PostEventAction,
             ShowDeveloperUIAction,
-            EnableEffectAction>;
+            EnableEffectAction,
+            EnableTracing>;
 
 } // namespace

@@ -498,14 +498,28 @@ public:
             mEngine->Start();
         }
 
-        // make sure the tracing state only changes before
-        // any trace macros are called. otherwise, there'll
-        // be an assert.
-        if (mToggleTracing.has_value())
+        // Remember that the tracing state cannot be changed while the
+        // tracing stack has entries. I.e. the state can only change before
+        // any tracing statements are ever entered on the trace stack!
+        if (!mEnableTracing.empty())
         {
-            ToggleTracing(mToggleTracing.value());
-            mToggleTracing.reset();
+            // We might have received multiple application requests to change the
+            // tracing state, i.e. nested calls. Therefore we must queue them and
+            // then process in batch while keeping count of what the final tracer
+            // state will be!
+            for (bool on_off : mEnableTracing)
+            {
+                if (on_off)
+                    ++mTraceEnabledCounter;
+                else if (mTraceEnabledCounter)
+                    --mTraceEnabledCounter;
+                else WARN("Incorrect number of tracing enable/disable requests detected.");
+            }
+            mEnableTracing.clear();
+            DEBUG("Performance tracing update. [value=%1", mTraceEnabledCounter ? "ON" : "OFF");
+            ToggleTracing(mTraceEnabledCounter > 0);
         }
+
 
         TRACE_START();
         TRACE_ENTER(MainLoop);
@@ -536,9 +550,9 @@ public:
                         base::EnableLogEvent(base::LogEvent::Warning, ptr->enabled);
                     else if (ptr->name == "chk-log-error")
                         base::EnableLogEvent(base::LogEvent::Error, ptr->enabled);
-                    else if (ptr->name == "chk-toggle-trace")
-                        mToggleTracing = ptr->enabled;
-                    else WARN("Unknown debug flag. [flag='%1']", ptr->name);
+                    else if (ptr->name == "chk-toggle-trace") {
+                        mEnableTracing.push_back(ptr->enabled);
+                    } else WARN("Unknown debug flag. [flag='%1']", ptr->name);
                 }
                 gui_commands.pop();
             }
@@ -594,6 +608,8 @@ public:
                 HandleEngineRequest(*ptr);
             else if (auto* ptr = std::get_if<engine::Engine::ShowDeveloperUI>(&request))
                 HandleEngineRequest(*ptr);
+            else if (auto* ptr = std::get_if<engine::Engine::EnableTracing>(&request))
+                mEnableTracing.push_back(ptr->enabled);
             else if (auto* ptr = std::get_if<engine::Engine::QuitApp>(&request))
                 quit = true;
             else BUG("Unhandled engine request type.");
@@ -676,21 +692,23 @@ public:
 
     void ToggleTracing(bool enable)
     {
-        if (enable && mTraceLogger)
-            return;
-        else if (!enable && !mTraceLogger)
-            return;
-        mTraceWriter.reset();
-        mTraceLogger.reset();
-        base::SetThreadTrace(nullptr);
-        if (enable)
+        // note we don't need to call the Engine::SetTracer here because this is all
+        // built into a single WASM binary (vs. different link binaries in native)
+
+        if (mTraceEnabledCounter && !mTraceWriter)
         {
             mTraceWriter.reset(new base::ChromiumTraceJsonWriter("/trace.json"));
             mTraceLogger.reset(new base::TraceLog(1000));
             base::SetThreadTrace(mTraceLogger.get());
-
+            base::EnableTracing(true);
         }
-        DEBUG("Toggle tracing. [enable=%1]", enable);
+        else if (!mTraceEnabledCounter && mTraceWriter)
+        {
+            mTraceWriter.reset();
+            mTraceLogger.reset();
+            base::SetThreadTrace(nullptr);
+            base::EnableTracing(false);
+        }
     }
 
     void SetFullScreen(bool fullscreen)
@@ -1025,7 +1043,8 @@ private:
     std::unique_ptr<engine::FileResourceLoader>  mResourceLoader;
     std::unique_ptr<base::TraceLog> mTraceLogger;
     std::unique_ptr<base::TraceWriter> mTraceWriter;
-    std::optional<bool> mToggleTracing;
+    std::vector<bool> mEnableTracing;
+    unsigned mTraceEnabledCounter = 0;
 
     using WindowEvent = std::variant<
         wdk::WindowEventResize,
