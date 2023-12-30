@@ -33,6 +33,7 @@
 #include <variant>
 
 #include "base/utility.h"
+#include "base/trace.h"
 #include "engine/main/interface.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/dlgeventlog.h"
@@ -103,6 +104,7 @@ namespace gui
         void InitGame(bool clean_game_home);
         void InitPreview(const QString& script);
         void SelectResolution();
+        void on_actionTrace_toggled(bool val);
         void on_actionPause_toggled(bool val);
         void on_actionStep_triggered();
         void on_actionClose_triggered();
@@ -135,6 +137,7 @@ namespace gui
         void SetEngineConfig() const;
         void Barf(const std::string& msg);
         bool LoadLibrary();
+        void ToggleTracing(bool enable);
 
     private:
         class WindowContext;
@@ -208,6 +211,11 @@ namespace gui
                      wdk::WindowEventKeyUp,
                      wdk::WindowEventKeyDown>;
         boost::circular_buffer<WindowEvent> mEventQueue;
+
+        unsigned mTraceEnabledCounter = 0;
+        std::unique_ptr<base::TraceLog> mTraceLogger;
+        std::unique_ptr<base::TraceWriter> mTraceWriter;
+        std::vector<bool> mEnableTrace;
     };
 
 } // namespace
