@@ -3610,12 +3610,14 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
             // if the threaded WASM build is being used.
             {"GameEngine.worker.js", false},
             // this is just a helper file for convenience
-            {"http-server.py", false}
+            {"http-server.py", false},
+            // this is needed for the trace file save
+            {"FileSaver.js", false}
         };
-        for (int i=0; i<4; ++i)
+        for (const auto& file : files)
         {
-            const auto& src = app::GetAppInstFilePath(files[i].name);
-            const auto& dst = app::JoinPath(options.directory, files[i].name);
+            const auto& src = app::GetAppInstFilePath(file.name);
+            const auto& dst = app::JoinPath(options.directory, file.name);
             auto[success, error] = app::CopyFile(src, dst);
             if (!success)
             {
