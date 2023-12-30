@@ -325,6 +325,7 @@ void unit_test_trace()
     base::TraceLog trace(10);
 
     base::SetThreadTrace(&trace);
+    base::EnableTracing(true);
     base::TraceStart();
     {
         TRACE_SCOPE("unit_test");

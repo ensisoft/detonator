@@ -157,6 +157,7 @@ namespace base
     void TraceWrite(TraceWriter& writer);
     void TraceMarker(const std::string& str, unsigned index);
     void TraceMarker(const std::string& str);
+    void EnableTracing(bool on_off);
     bool IsTracingEnabled();
 
     unsigned TraceBeginScope(const char* name, std::string comment);

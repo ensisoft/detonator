@@ -289,7 +289,13 @@ public:
         mDebugPrints.push_back(std::move(print));
     }
     virtual void SetTracer(base::Trace* tracer) override
-    { base::SetThreadTrace(tracer); }
+    {
+        base::SetThreadTrace(tracer);
+    }
+    virtual void SetTracingOn(bool on_off) override
+    {
+        base::EnableTracing(on_off);
+    }
 
     virtual void SetEnvironment(const Environment& env) override
     {
@@ -984,6 +990,11 @@ private:
             mFlags.set(Flags::EnableBloom, action.value);
         else WARN("Unidentified effect name. [effect='%1']", action.name);
         ConfigureRendererForScene();
+    }
+    void OnAction(const engine::EnableTracing& action)
+    {
+        DEBUG("Enable function tracing. [value=%1]", action.enabled ? "enable" : "disable");
+        mRequests.EnableTracing(action.enabled);
     }
 
     void UpdateGame(double game_time,  double dt)

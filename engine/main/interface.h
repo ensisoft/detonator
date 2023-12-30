@@ -113,6 +113,9 @@ namespace engine
         struct DebugPause {
             bool pause = true;
         };
+        struct EnableTracing {
+            bool enabled = true;
+        };
 
         // Union of possible window requests.
         using Request = std::variant<
@@ -123,7 +126,8 @@ namespace engine
             GrabMouse,
             ShowMouseCursor,
             ShowDeveloperUI,
-            DebugPause>;
+            DebugPause,
+            EnableTracing>;
 
         // During the lifetime of the game process the engine may request
         // the host application to provide some services. The engine may queue
@@ -173,6 +177,8 @@ namespace engine
         {}
 
         virtual void SetTracer(base::Trace* tracer)
+        {}
+        virtual void SetTracingOn(bool on_off)
         {}
 
         // Parameters pertaining to the environment of the application.
@@ -468,6 +474,8 @@ namespace engine
         { mQueue.push(engine::Engine::ShowDeveloperUI {show}); }
         inline void DebugPause(bool pause)
         { mQueue.push(engine::Engine::DebugPause {pause}); }
+        inline void EnableTracing(bool enabled)
+        { mQueue.push(engine::Engine::EnableTracing { enabled } ); }
     private:
         std::queue<Request> mQueue;
     };
