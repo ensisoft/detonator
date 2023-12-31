@@ -148,7 +148,7 @@ void OStreamLogger::Write(LogEvent type, const char* msg)
     HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_SCREEN_BUFFER_INFO console = {0};
     GetConsoleScreenBufferInfo(out, &console);
-    if (type == LogEvent::Debug)
+    if (type == LogEvent::Info)
         SetConsoleTextAttribute(out, FOREGROUND_GREEN | FOREGROUND_BLUE);
     else if (type == LogEvent::Error)
         SetConsoleTextAttribute(out, FOREGROUND_RED);
