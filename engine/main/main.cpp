@@ -212,7 +212,7 @@ public:
     }
     virtual void Display() override
     {
-        mContext->SwapBuffers();
+        TRACE_CALL("Context::SwapBuffers", mContext->SwapBuffers());
     }
     virtual void* Resolve(const char* name) override
     {

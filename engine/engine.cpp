@@ -483,7 +483,7 @@ public:
             gfx::FillShape(painter, rect, *mMouseDrawable, *mMouseMaterial);
         }
 
-        TRACE_CALL("Device::Swap", mDevice->EndFrame(true));
+        TRACE_CALL("Device::EndFrame", mDevice->EndFrame(true));
         // Note that we *don't* call CleanGarbage here since currently there should
         // be nothing that is creating needless GPU resources.
     }
@@ -863,11 +863,11 @@ private:
     }
     void OnAction(const engine::OpenUIAction& action)
     {
-        mUIEngine.OpenUI(action.ui);
+        TRACE_CALL("UI::Open", mUIEngine.OpenUI(action.ui));
     }
     void OnAction(const engine::CloseUIAction& action)
     {
-        mUIEngine.CloseUI(action.window_name, action.action_id, action.result);
+        TRACE_CALL("Ui::Close", mUIEngine.CloseUI(action.window_name, action.action_id, action.result));
     }
     void OnAction(engine::PlayAction& action)
     {
@@ -877,7 +877,7 @@ private:
             mPhysics.DeleteAll();
             mPhysics.CreateWorld(*mScene);
         }
-        mRenderer.CreateRenderStateFromScene(*mScene);
+        TRACE_CALL("Renderer::CreateState", mRenderer.CreateRenderStateFromScene(*mScene));
         ConfigureRendererForScene();
 
         const auto& klass = mScene->GetClass();
@@ -891,13 +891,13 @@ private:
             }
             else
             {
-                mTilemap = game::CreateTilemap(map);              
-                mTilemap->Load(*mGameLoader, 1024); // todo:
+                TRACE_CALL("Tilemap::Create", mTilemap = game::CreateTilemap(map));
+                TRACE_CALL("Tilemap::Load", mTilemap->Load(*mGameLoader, 1024)); // todo:
                 DEBUG("Created tilemap instance");
             }
         }
         mScene->SetMap(mTilemap.get());
-        mRuntime->BeginPlay(mScene.get(), mTilemap.get());
+        TRACE_CALL("Runtime::BeginPlay", mRuntime->BeginPlay(mScene.get(), mTilemap.get()));
     }
     void OnAction(const engine::SuspendAction& action)
     {
@@ -1001,6 +1001,8 @@ private:
     {
         if (mScene)
         {
+            TRACE_SCOPE("UpdateScene");
+
             std::vector<game::Scene::Event> events;
             TRACE_CALL("Scene::Update", mScene->Update(dt, &events));
             TRACE_CALL("Runtime:OnSceneEvent", mRuntime->OnSceneEvent(events));
