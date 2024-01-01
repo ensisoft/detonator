@@ -66,6 +66,10 @@
 
 #include "git.h"
 
+#if defined(WINDOWS_OS)
+extern "C" _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+#endif
+
 // this application will read the given JSON file and
 // create window and open gl rendering context based on
 // the parameters in the config file.
