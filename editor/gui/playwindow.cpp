@@ -202,7 +202,7 @@ public:
         // Try to avoid Qt error about calling swap buffers on non-exposed window
         // resulting in undefined behavior
         if (mSurface->isExposed())
-            mContext->swapBuffers(mSurface);
+            TRACE_CALL("Context::SwapBuffers", mContext->swapBuffers(mSurface));
     }
     virtual void MakeCurrent() override
     {
