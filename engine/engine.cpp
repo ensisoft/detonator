@@ -1003,12 +1003,8 @@ private:
         {
             std::vector<game::Scene::Event> events;
             TRACE_CALL("Scene::Update", mScene->Update(dt, &events));
-            TRACE_BLOCK("Scene::Events",
-                for (const auto& event : events)
-                {
-                    mRuntime->OnSceneEvent(event);
-                }
-            );
+            TRACE_CALL("Runtime:OnSceneEvent", mRuntime->OnSceneEvent(events));
+
             if (mPhysics.HaveWorld())
             {
                 std::vector<engine::ContactEvent> contacts;
@@ -1022,12 +1018,7 @@ private:
                 // physics world to the scene and its entities.
                 TRACE_CALL("Physics::UpdateScene", mPhysics.UpdateScene(*mScene));
                 // dispatch the contact events (if any).
-                TRACE_BLOCK("Physics::ContactEvents",
-                    for (const auto& contact : contacts)
-                    {
-                        mRuntime->OnContactEvent(contact);
-                    }
-                );
+                TRACE_CALL("Runtime::OnContactEvents", mRuntime->OnContactEvent(contacts));
             }
 
             // Update renderers data structures from the scene.
