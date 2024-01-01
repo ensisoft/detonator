@@ -1038,33 +1038,36 @@ void LuaRuntime::TransferDebugQueue(std::vector<DebugDraw>* out)
     std::swap(mDebugDrawQueue, *out);
 }
 
-void LuaRuntime::OnContactEvent(const ContactEvent& contact)
+void LuaRuntime::OnContactEvent(const std::vector<ContactEvent>& contacts)
 {
-    const auto* function = contact.type == ContactEvent::Type::BeginContact
-            ? "OnBeginContact"
-            : "OnEndContact";
-
-    auto* nodeA = contact.nodeA;
-    auto* nodeB = contact.nodeB;
-    auto* entityA = nodeA->GetEntity();
-    auto* entityB = nodeB->GetEntity();
-
-    const auto& klassA = entityA->GetClass();
-    const auto& klassB = entityB->GetClass();
-
-    if (mGameEnv)
-        CallLua((*mGameEnv)[function], entityA, entityB, nodeA, nodeB);
-
-    if (mSceneEnv)
-        CallLua((*mSceneEnv)[function](mScene, entityA, nodeA, entityB, nodeB));
-
-    if (auto* env = GetTypeEnv(klassA))
+    for (const auto& contact : contacts)
     {
-        CallLua((*env)[function], entityA, nodeA, entityB, nodeB);
-    }
-    if (auto* env = GetTypeEnv(klassB))
-    {
-        CallLua((*env)[function], entityB, nodeB, entityA, nodeA);
+        const auto* function = contact.type == ContactEvent::Type::BeginContact
+                ? "OnBeginContact"
+                : "OnEndContact";
+
+        auto* nodeA = contact.nodeA;
+        auto* nodeB = contact.nodeB;
+        auto* entityA = nodeA->GetEntity();
+        auto* entityB = nodeB->GetEntity();
+
+        const auto& klassA = entityA->GetClass();
+        const auto& klassB = entityB->GetClass();
+
+        if (mGameEnv)
+            CallLua((*mGameEnv)[function], entityA, entityB, nodeA, nodeB);
+
+        if (mSceneEnv)
+            CallLua((*mSceneEnv)[function](mScene, entityA, nodeA, entityB, nodeB));
+
+        if (auto* env = GetTypeEnv(klassA))
+        {
+            CallLua((*env)[function], entityA, nodeA, entityB, nodeB);
+        }
+        if (auto* env = GetTypeEnv(klassB))
+        {
+            CallLua((*env)[function], entityB, nodeB, entityA, nodeA);
+        }
     }
 }
 void LuaRuntime::OnGameEvent(const GameEvent& event)
@@ -1094,28 +1097,31 @@ void LuaRuntime::OnAudioEvent(const AudioEvent& event)
         CallLua((*mGameEnv)["OnAudioEvent"], event);
 }
 
-void LuaRuntime::OnSceneEvent(const game::Scene::Event& event)
+void LuaRuntime::OnSceneEvent(const std::vector<game::Scene::Event>& events)
 {
-    if (const auto* ptr = std::get_if<game::Scene::EntityTimerEvent>(&event))
+    for (const auto& event : events)
     {
-        auto* entity = ptr->entity;
-        if (mSceneEnv)
-            CallLua((*mSceneEnv)["OnEntityTimer"], mScene, entity, ptr->event.name, ptr->event.jitter);
-
-        if (auto* env = GetTypeEnv(entity->GetClass()))
+        if (const auto* ptr = std::get_if<game::Scene::EntityTimerEvent>(&event))
         {
-            CallLua((*env)["OnTimer"], entity, ptr->event.name, ptr->event.jitter);
+            auto* entity = ptr->entity;
+            if (mSceneEnv)
+                CallLua((*mSceneEnv)["OnEntityTimer"], mScene, entity, ptr->event.name, ptr->event.jitter);
+
+            if (auto* env = GetTypeEnv(entity->GetClass()))
+            {
+                CallLua((*env)["OnTimer"], entity, ptr->event.name, ptr->event.jitter);
+            }
         }
-    }
-    else if (const auto* ptr = std::get_if<game::Scene::EntityEventPostedEvent>(&event))
-    {
-        auto* entity = ptr->entity;
-        if (mSceneEnv)
-            CallLua((*mSceneEnv)["OnEntityEvent"], mScene, entity, ptr->event);
-
-        if (auto* env = GetTypeEnv(entity->GetClass()))
+        else if (const auto* ptr = std::get_if<game::Scene::EntityEventPostedEvent>(&event))
         {
-            CallLua((*env)["OnEvent"], entity, ptr->event);
+            auto* entity = ptr->entity;
+            if (mSceneEnv)
+                CallLua((*mSceneEnv)["OnEntityEvent"], mScene, entity, ptr->event);
+
+            if (auto* env = GetTypeEnv(entity->GetClass()))
+            {
+                CallLua((*env)["OnEvent"], entity, ptr->event);
+            }
         }
     }
 }

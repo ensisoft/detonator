@@ -71,10 +71,10 @@ namespace engine
         virtual void EndLoop() override;
         virtual bool GetNextAction(Action* out) override;
         virtual void TransferDebugQueue(std::vector<DebugDraw>* out) override;
-        virtual void OnContactEvent(const ContactEvent& contact) override;
+        virtual void OnContactEvent(const std::vector<ContactEvent>& contacts) override;
         virtual void OnGameEvent(const GameEvent& event) override;
         virtual void OnAudioEvent(const AudioEvent& event) override;
-        virtual void OnSceneEvent(const game::Scene::Event& event) override;
+        virtual void OnSceneEvent(const std::vector<game::Scene::Event>& events) override;
         virtual void OnKeyDown(const wdk::WindowEventKeyDown& key) override;
         virtual void OnKeyUp(const wdk::WindowEventKeyUp& key) override;
         virtual void OnChar(const wdk::WindowEventChar& text) override;

@@ -183,7 +183,7 @@ namespace engine
         // Act on a contact event when 2 physics bodies have come into
         // contact or have come out of contact.
         // Called when the physics engine reports collision between bodies.
-        virtual void OnContactEvent(const ContactEvent& contact) {}
+        virtual void OnContactEvent(const std::vector<ContactEvent>& contacts) {}
         // Act on audio playback event.
         // Called when the audio engine reports and audio event such as the
         // audio track playback having finished.
@@ -191,7 +191,7 @@ namespace engine
         // Act on a game event posted through PostEvent
         virtual void OnGameEvent(const GameEvent& event) {}
         // todo:
-        virtual void OnSceneEvent(const game::Scene::Event& event){}
+        virtual void OnSceneEvent(const std::vector<game::Scene::Event>& events) {}
         // action/input handlers for some interesting windowing events.
         virtual void OnKeyDown(const wdk::WindowEventKeyDown& key) {}
         virtual void OnKeyUp(const wdk::WindowEventKeyUp& key) {}
