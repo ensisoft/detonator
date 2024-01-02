@@ -258,8 +258,14 @@ private:
     bool mDebug = false;
 };
 
+enum class TimeId {
+    GameTime,
+    LoopTime
+};
+
 // returns number of seconds elapsed since the last call
 // of this function.
+template<TimeId id>
 double ElapsedSeconds()
 {
     using clock = std::chrono::steady_clock;
@@ -341,8 +347,8 @@ void LoadWindowState(const std::string& file, wdk::Window& window)
     surface_width  = std::min(mode.xres, surface_width);
     surface_height = std::min(mode.yres, surface_height);
     ASSERT(surface_width && surface_height);
-    if (surface_width != window.GetSurfaceWidth() ||
-        surface_height != window.GetSurfaceHeight())
+    if ((surface_width != window.GetSurfaceWidth()) ||
+        (surface_height != window.GetSurfaceHeight()))
         window.SetSize(surface_width, surface_height);
 
     ProcessEvents(window);
@@ -368,8 +374,8 @@ void CenterWindowOnScreen(wdk::Window& window)
     window.Move(xpos, ypos);
 
     ASSERT(surface_width && surface_height);
-    if (surface_width != window.GetSurfaceWidth() ||
-        surface_height != window.GetSurfaceHeight())
+    if ((surface_width != window.GetSurfaceWidth()) ||
+        (surface_height != window.GetSurfaceHeight()))
         window.SetSize(surface_width, surface_height);
 
     ProcessEvents(window);
@@ -399,6 +405,9 @@ int main(int argc, char* argv[])
         std::optional<bool> debug_log_override;
         std::optional<bool> vsync_override;
         bool debug_context = false;
+        bool trace_jank = true;
+        bool report_jank = false;
+        float jank_factor = 1.25f;
 
         std::string trace_file;
         std::string config_file;
@@ -416,8 +425,11 @@ int main(int argc, char* argv[])
         opt.Add("--debug-show-fps", "Show FPS counter and stats. You'll need to use --debug-font.");
         opt.Add("--debug-show-msg", "Show debug messages. You'll need to use --debug-font.");
         opt.Add("--debug-print-fps", "Print FPS counter and stats to log.");
-        opt.Add("--trace", "Record engine function call trace and timing info into a file.", std::string("trace.txt"));
-        opt.Add("--trace-start", "Start tracing immediately on application start. (requires --trace).");
+        opt.Add("--trace-file", "Record engine function call trace and timing info into a file.", std::string("trace.txt"));
+        opt.Add("--trace-start", "Start tracing immediately on application start. (requires --trace-file).");
+        opt.Add("--trace-jank", "Try to detect and trace jank frames only.");
+        opt.Add("--jank-factor", "The 'jank frame' time scaling factor. (time > avg * factor => 'jank')", jank_factor);
+        opt.Add("--report-jank", "Report janky frames to log.");
         opt.Add("--vsync", "Force vsync on or off.", false);
         if (!opt.Parse(args, &cmdline_error, true))
         {
@@ -429,19 +441,23 @@ int main(int argc, char* argv[])
             opt.Print(std::cout);
             return 0;
         }
-        if (opt.WasGiven("--trace"))
+        if (opt.WasGiven("--trace-file"))
         {
-            trace_file = opt.GetValue<std::string>("--trace");
+            trace_file = opt.GetValue<std::string>("--trace-file");
         }
         if (opt.WasGiven("--vsync"))
         {
             vsync_override = opt.GetValue<bool>("--vsync");
         }
 
+        jank_factor = opt.GetValue<float>("--jank-factor");
+        trace_jank  = opt.WasGiven("--trace-jank");
+        report_jank = opt.WasGiven("--report-jank");
+
         if (opt.WasGiven("--debug"))
         {
-            debug_log_override = true;
-            debug_context      = true;
+            debug_log_override    = true;
+            debug_context         = true;
             debug.debug_draw      = true;
             debug.debug_show_fps  = true;
             debug.debug_show_msg  = true;
@@ -456,7 +472,7 @@ int main(int argc, char* argv[])
             debug.debug_show_fps  = opt.WasGiven("--debug-show-fps");
             debug.debug_draw      = opt.WasGiven("--debug-draw");
             debug.debug_show_msg  = opt.WasGiven("--debug-show-msg");
-            debug_context = opt.WasGiven("--debug-ctx");
+            debug_context         = opt.WasGiven("--debug-ctx");
         }
 
         debug.debug_font = opt.GetValue<std::string>("--debug-font");
@@ -534,7 +550,7 @@ int main(int argc, char* argv[])
 
         std::unique_ptr<base::TraceWriter> trace_writer;
         std::unique_ptr<base::TraceLog> trace_logger;
-        if (opt.WasGiven("--trace"))
+        if (opt.WasGiven("--trace-file"))
         {
             if (base::EndsWith(trace_file, ".json"))
                 trace_writer.reset(new base::ChromiumTraceJsonWriter(trace_file));
@@ -542,8 +558,15 @@ int main(int argc, char* argv[])
             trace_logger.reset(new base::TraceLog(1000));
 
             if (opt.WasGiven("--trace-start"))
+            {
                 trace_enabled_counter = 1;
-
+            }
+            else
+            {
+                WARN("Tracing is enabled but not started.");
+                WARN("Use --trace-start to start immediately.");
+                WARN("Or start tracing in the game with Game:EnableTracing(true).");
+            }
             base::SetThreadTrace(trace_logger.get());
             base::EnableTracing(trace_enabled_counter == 1);
         }
@@ -654,6 +677,7 @@ int main(int argc, char* argv[])
         bool window_show_cursor = false;
         bool window_grab_mouse  = false;
         bool window_save_geometry = false;
+
         base::JsonReadSafe(json["window"], "width", &window_width);
         base::JsonReadSafe(json["window"], "height", &window_height);
         base::JsonReadSafe(json["window"], "can_resize", &window_can_resize);
@@ -795,6 +819,8 @@ int main(int argc, char* argv[])
         engine->Load();
         engine->Start();
 
+        engine->SetTracingOn(trace_enabled_counter > 0);
+
         // Connect the engine's window event listener to the window.
         if (auto* listener = engine->GetWindowListener())
             wdk::Connect(window, *listener);
@@ -806,6 +832,24 @@ int main(int argc, char* argv[])
         bool fullscreen = false;
 
         std::vector<bool> enable_tracing;
+
+        auto frames_total  = 0u;
+        auto frame_count   = 0u;
+        auto frame_seconds = 0.0;
+
+        // keep a running average over the last N iterations of the
+        // game loop in order to try to detect some anomalies, i.e. janky
+        // i.e. "shit frames".
+        std::size_t iteration_index = 0;
+        std::size_t iteration_counter = 0;
+        std::vector<double> iteration_times;
+        iteration_times.resize(10);
+        // running / current iteration time average based on the values
+        // in the iteration_times vector.
+        double iteration_time_sum = 0.0;
+        double iteration_time_avg = 0.0;
+
+        ElapsedSeconds<TimeId::LoopTime>();
 
         while (engine->IsRunning() && !quit)
         {
@@ -828,13 +872,13 @@ int main(int argc, char* argv[])
                 }
                 enable_tracing.clear();
                 const auto enabled = trace_enabled_counter > 0;
-                DEBUG("Performance tracing update. [value=%1", enabled ? "ON" : "OFF");
+                DEBUG("Performance tracing update. [value=%1]", enabled ? "ON" : "OFF");
                 base::EnableTracing(enabled);
                 engine->SetTracingOn(enabled);
             }
 
             TRACE_START();
-            TRACE_ENTER(MainLoop);
+            TRACE_ENTER(Frame);
 
             // indicate beginning of the main loop iteration.
             TRACE_CALL("Engine::BeginMainLoop", engine->BeginMainLoop());
@@ -889,7 +933,7 @@ int main(int argc, char* argv[])
             // spent producing a frame. the time is then used to take
             // some number of simulation steps in order for the simulations
             // to catch up for the *next* frame.
-            const auto time_step = ElapsedSeconds();
+            const auto time_step = ElapsedSeconds<TimeId::GameTime>();
             const auto wall_time = CurrentRuntime();
 
             // ask the application to take its simulation steps.
@@ -898,34 +942,62 @@ int main(int argc, char* argv[])
             // ask the application to draw the current frame.
             TRACE_CALL("Engine::Draw", engine->Draw());
 
-            // do some simple statistics bookkeeping.
-            static auto frames_total = 0;
-            static auto frames       = 0;
-            static auto seconds      = 0.0;
+            // indicate end of iteration.
+            TRACE_CALL("Engine::EndMainLoop", engine->EndMainLoop());
+            TRACE_LEAVE(Frame);
 
-            frames_total += 1;
-            frames  += 1;
-            seconds += time_step;
-            if (seconds > 1.0)
+            const auto loop_time_now = ElapsedSeconds<TimeId::LoopTime>();
+            const auto loop_time_old = iteration_times[iteration_index];
+
+            iteration_time_sum += loop_time_now;
+            iteration_time_sum -= loop_time_old;
+            iteration_times[iteration_index] = loop_time_now;
+            iteration_index = (iteration_index + 1) % 10;
+            iteration_counter++;
+
+            // how should this work? take the median and standard deviation
+            // and consider jank when it's some STD away from the median?
+            // use an absolute value?
+            // relative value? percentage ?
+            const bool likely_jank_frame = (iteration_counter >= iteration_times.size()) &&
+                                           (loop_time_now > (iteration_time_avg * jank_factor));
+            if (likely_jank_frame && report_jank)
             {
-                const auto fps = frames / seconds;
+                WARN("Likely bad frame detected. Time %1ms vs %2ms avg.",
+                     unsigned(loop_time_now * 1000.0), unsigned(iteration_time_avg * 1000.0));
+                if (trace_logger) {
+                    trace_logger->RenameBlock("BadFrame", 0);
+                }
+            }
+            iteration_time_avg = iteration_time_sum / (double)iteration_times.size();
+
+            if (trace_logger)
+            {
+                if (trace_jank && likely_jank_frame)
+                    trace_logger->Write(*trace_writer.get());
+                else if (!trace_jank)
+                    trace_logger->Write(*trace_writer.get());
+            }
+
+            // do some simple statistics bookkeeping to measure the current
+            // FPS based on the number of frames over the past second
+            ++frames_total;
+            ++frame_count;
+            frame_seconds += time_step;
+            if (frame_seconds >= 1.0)
+            {
+                const auto fps = frame_count / frame_seconds;
                 engine::Engine::HostStats stats;
                 stats.current_fps         = fps;
                 stats.num_frames_rendered = frames_total;
                 stats.total_wall_time     = wall_time;
                 engine->SetHostStats(stats);
 
-                frames  = 0;
-                seconds = 0.0;
+                frame_count = 0;
+                frame_seconds = 0.0f;
+                //DEBUG("Game loop average %1ms", unsigned(iteration_time_avg * 1000.0));
             }
-            // indicate end of iteration.
-            TRACE_CALL("Engine::EndMainLoop", engine->EndMainLoop());
-            TRACE_LEAVE(MainLoop);
 
-            if (trace_logger)
-            {
-                trace_logger->Write(*trace_writer);
-            }
         } // main loop
 
         engine->SetTracer(nullptr);
