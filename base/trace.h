@@ -54,8 +54,10 @@ namespace base
         virtual void Write(TraceWriter& writer) const = 0;
         virtual unsigned BeginScope(const char* name, std::string comment) = 0;
         virtual void EndScope(unsigned index) = 0;
-        virtual void Marker(const std::string& marker) = 0;
-        virtual void Marker(const std::string& marker, unsigned index) = 0;
+        virtual void Marker(std::string marker, unsigned index) = 0;
+        virtual void Marker(std::string marker) = 0;
+        virtual void Comment(std::string comment, unsigned index) = 0;
+        virtual void Comment(std::string comment) = 0;
     private:
     };
 
@@ -96,19 +98,38 @@ namespace base
             mCallTrace[index].finish_time = GetTime();
             mStackDepth--;
         }
-        virtual void Marker(const std::string& str) override
+        virtual void Marker(std::string str) override
         {
             ASSERT(mTraceIndex > 0 && mTraceIndex < mCallTrace.size());
-            mCallTrace[mTraceIndex-1].markers.push_back(str);
+            mCallTrace[mTraceIndex-1].markers.push_back(std::move(str));
         }
-        virtual void Marker(const std::string& str, unsigned index) override
+        virtual void Marker(std::string str, unsigned index) override
         {
             ASSERT(index < mTraceIndex);
-            mCallTrace[index].markers.push_back(str);
+            mCallTrace[index].markers.push_back(std::move(str));
         }
-        std::size_t GetNumEntries() const
+
+        virtual void Comment(std::string str, unsigned index) override
+        {
+            ASSERT(index < mTraceIndex);
+            mCallTrace[index].comment = std::move(str);
+        }
+
+        virtual void Comment(std::string str) override
+        {
+            ASSERT(mTraceIndex > 0 && mTraceIndex < mCallTrace.size());
+            mCallTrace[mTraceIndex-1].comment = std::move(str);
+        }
+
+        inline void RenameBlock(const char* name, unsigned index) noexcept
+        {
+            ASSERT(index < mTraceIndex);
+            mCallTrace[index].name = name;
+        }
+
+        inline std::size_t GetNumEntries() const noexcept
         { return mTraceIndex; }
-        const TraceEntry& GetEntry(size_t index) const
+        inline const TraceEntry& GetEntry(size_t index) const noexcept
         { return mCallTrace[index]; }
     private:
         unsigned GetTime() const

@@ -46,8 +46,14 @@ using WebGuiCmd = std::variant<WebGuiToggleDbgSwitchCmd>;
 
 std::queue<WebGuiCmd> gui_commands;
 
+enum class TimeId {
+    GameTime,
+    LoopTime
+};
+
 // returns number of seconds elapsed since the last call
 // of this function.
+template<TimeId id>
 double ElapsedSeconds()
 {
     using clock = std::chrono::steady_clock;
@@ -496,6 +502,9 @@ public:
 
             mEngine->Load();
             mEngine->Start();
+
+            ElapsedSeconds<TimeId::LoopTime>();
+            mLoopCounter.times.resize(10);
         }
 
         // Remember that the tracing state cannot be changed while the
@@ -520,9 +529,8 @@ public:
             ToggleTracing(mTraceEnabledCounter > 0);
         }
 
-
         TRACE_START();
-        TRACE_ENTER(MainLoop);
+        TRACE_ENTER(Frame);
 
         TRACE_ENTER(GuiCmd);
         if (!gui_commands.empty())
@@ -621,7 +629,7 @@ public:
         // spent producing a frame. the time is then used to take
         // some number of simulation steps in order for the simulations
         // to catch up for the *next* frame.
-        const auto time_step = ElapsedSeconds();
+        const auto time_step = ElapsedSeconds<TimeId::GameTime>();
         const auto wall_time = CurrentRuntime();
 
         // ask the application to take its simulation steps.
@@ -629,6 +637,44 @@ public:
 
         // ask the application to draw the current frame.
         TRACE_CALL("Engine::Draw", mEngine->Draw());
+
+        TRACE_CALL("Engine::EndMainLoop", mEngine->EndMainLoop());
+        TRACE_LEAVE(Frame);
+
+        const auto loop_time_now = ElapsedSeconds<TimeId::LoopTime>();
+        const auto loop_time_old = mLoopCounter.times[mLoopCounter.index];
+        const auto times_count = mLoopCounter.times.size();
+
+        mLoopCounter.time_sum += loop_time_now;
+        mLoopCounter.time_sum -= loop_time_old;
+        mLoopCounter.times[mLoopCounter.index] = loop_time_now;
+        mLoopCounter.index = (mLoopCounter.index+1) % times_count;
+        mLoopCounter.counter++;
+
+        constexpr auto jank_factor = 1.2;
+        constexpr auto report_jank = true;
+
+        // how should this work? take the median and standard deviation
+        // and consider jank when it's some STD away from the median?
+        // use an absolute value?
+        // relative value? percentage ?
+        const bool likely_jank_frame = (mLoopCounter.counter >= times_count) &&
+                                       (loop_time_now > (mLoopCounter.time_avg * jank_factor));
+        if (likely_jank_frame && report_jank)
+        {
+            WARN("Likely bad frame detected. Time %1ms vs %2ms avg.",
+                 unsigned(loop_time_now * 1000.0), unsigned(mLoopCounter.time_avg * 1000.0));
+            if (mTraceLogger) {
+                mTraceLogger->RenameBlock("BadFrame", 0);
+            }
+        }
+        mLoopCounter.time_avg = mLoopCounter.time_sum / (double)times_count;
+
+        // dump trace if needed.
+        if (mTraceLogger)
+        {
+            mTraceLogger->Write(*mTraceWriter);
+        }
 
         ++mFrames;
         ++mCounter;
@@ -643,12 +689,6 @@ public:
             mCounter = 0;
             mSeconds = 0;
         }
-
-        TRACE_CALL("Engine::EndMainLoop", mEngine->EndMainLoop());
-        TRACE_LEAVE(MainLoop);
-        // dump trace if needed.
-        if (mTraceLogger)
-            mTraceLogger->Write(*mTraceWriter);
 
         if (!quit)
             return EM_TRUE;
@@ -1079,6 +1119,14 @@ private:
         std::size_t counter = 0;
     };
     std::unique_ptr<LoadingScreen> mLoadingScreen;
+
+    struct LoopStats {
+        std::size_t index = 0;
+        std::size_t counter = 0;
+        std::vector<double> times;
+        double time_sum = 0.0;
+        double time_avg = 0.0;
+    } mLoopCounter;
 };
 
 EM_BOOL OnWindowSizeChanged(int emsc_type, const EmscriptenUiEvent* emsc_event, void* user_data)

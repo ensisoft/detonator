@@ -667,7 +667,7 @@ void PlayWindow::RunGameLoopOnce()
         }
 
         TRACE_START();
-        TRACE_ENTER(MainLoop);
+        TRACE_ENTER(Frame);
 
         // indicate beginning of the main loop iteration.
         TRACE_CALL("Engine::BeginMainLoop", mEngine->BeginMainLoop());
@@ -751,23 +751,12 @@ void PlayWindow::RunGameLoopOnce()
         // ask the application to draw the current frame.
         TRACE_CALL("Engine::Draw", mEngine->Draw());
 
+        // indicate end of iteration.
+        TRACE_CALL("Engine::EndMainLoop", mEngine->EndMainLoop());
+        TRACE_LEAVE(Frame);
+
         if (mWinEventLog)
             mWinEventLog->SetTime(wall_time);
-
-        engine::Engine::Stats stats;
-        if (mEngine->GetStats(&stats))
-        {
-            SetValue(mUI.gameTime, stats.total_game_time);
-            const auto kb = 1024.0; // * 1024.0;
-            const auto vbo_use = stats.static_vbo_mem_use +
-                                 stats.streaming_vbo_mem_use +
-                                 stats.dynamic_vbo_mem_use;
-            const auto vbo_alloc = stats.static_vbo_mem_alloc +
-                                   stats.streaming_vbo_mem_alloc +
-                                   stats.dynamic_vbo_mem_alloc;
-            SetValue(mUI.statVBO, QString("%1/%2 kB")
-                    .arg(vbo_use / kb, 0, 'f', 1, ' ').arg(vbo_alloc / kb, 0, 'f', 1, ' '));
-        }
 
         mNumFrames++;
         mNumFramesTotal++;
@@ -779,11 +768,11 @@ void PlayWindow::RunGameLoopOnce()
         {
             const auto seconds = elapsed / 1000.0;
             const auto fps = mNumFrames / seconds;
-            engine::Engine::HostStats stats;
-            stats.num_frames_rendered = mNumFramesTotal;
-            stats.total_wall_time     = wall_time;
-            stats.current_fps         = fps;
-            mEngine->SetHostStats(stats);
+            engine::Engine::HostStats host_stats;
+            host_stats.num_frames_rendered = mNumFramesTotal;
+            host_stats.total_wall_time     = wall_time;
+            host_stats.current_fps         = fps;
+            mEngine->SetHostStats(host_stats);
 
             const auto cache = mResourceLoader->GetBufferCacheSize();
             const auto megs  = cache / (1024.0 * 1024.0);
@@ -791,11 +780,22 @@ void PlayWindow::RunGameLoopOnce()
             SetValue(mUI.fps, fps);
             mNumFrames = 0;
             mFrameTimer.restart();
-        }
 
-        // indicate end of iteration.
-        TRACE_CALL("Engine::EndMainLoop", mEngine->EndMainLoop());
-        TRACE_LEAVE(MainLoop);
+            engine::Engine::Stats engine_stats;
+            if (mEngine->GetStats(&engine_stats))
+            {
+                SetValue(mUI.gameTime, engine_stats.total_game_time);
+                const auto kb = 1024.0; // * 1024.0;
+                const auto vbo_use = engine_stats.static_vbo_mem_use +
+                        engine_stats.streaming_vbo_mem_use +
+                        engine_stats.dynamic_vbo_mem_use;
+                const auto vbo_alloc = engine_stats.static_vbo_mem_alloc +
+                        engine_stats.streaming_vbo_mem_alloc +
+                        engine_stats.dynamic_vbo_mem_alloc;
+                SetValue(mUI.statVBO, QString("%1/%2 kB")
+                .arg(vbo_use / kb, 0, 'f', 1, ' ').arg(vbo_alloc / kb, 0, 'f', 1, ' '));
+            }
+        }
 
         if (mTraceLogger)
         {
