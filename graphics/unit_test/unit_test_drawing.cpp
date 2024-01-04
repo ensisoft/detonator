@@ -284,6 +284,10 @@ public:
 
     using Geometry::AddDrawCmd;
 
+    virtual void SetUsage(Usage usage) override
+    {
+        mUsage = usage;
+    }
     virtual void ClearDraws() override
     {
         mDrawCmds.clear();
@@ -297,16 +301,14 @@ public:
     {
         mLayout = layout;
     }
-    virtual void UploadVertices(const void* data, size_t bytes, Usage usage) override
+    virtual void UploadVertices(const void* data, size_t bytes) override
     {
-
         mVertexUploaded = true;
-        mVertexUsage = usage;
         mVertexBytes = bytes;
         mVertexData.resize(bytes);
         std::memcpy(&mVertexData[0], data, bytes);
     }
-    virtual void UploadIndices(const void* data, size_t bytes, IndexType type, Usage usage) override
+    virtual void UploadIndices(const void* data, size_t bytes, IndexType type) override
     {
 
     }
@@ -320,6 +322,8 @@ public:
     { return 0; }
     virtual DrawCommand GetDrawCmd(size_t index) const override
     { return {}; }
+    virtual Usage GetUsage() const override
+    { return mUsage; }
 
     template<typename T>
     const T* AsVertexArray() const
@@ -348,6 +352,7 @@ public:
     std::vector<char> mVertexData;
     std::size_t mVertexBytes = 0;
     std::size_t mHash = 0;
+    Usage mUsage = Usage::Static;
 private:
 };
 

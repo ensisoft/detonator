@@ -270,6 +270,9 @@ namespace gfx
 #pragma pack(pop)
 
         virtual ~Geometry() = default;
+        // Set the expected usage of the geometry. Should be set before
+        // calling any methods to upload the data.
+        virtual void SetUsage(Usage usage) = 0;
         // Clear previous draw commands.
         virtual void ClearDraws() = 0;
         // Add a draw command to the geometry.
@@ -277,9 +280,9 @@ namespace gfx
         // Set the layout object that describes the contents of the vertex buffer vertices.
         virtual void SetVertexLayout(const VertexLayout& layout) = 0;
         // Upload the vertex data that defines the geometry.
-        virtual void UploadVertices(const void* data, size_t bytes, Usage usage = Usage::Static) = 0;
+        virtual void UploadVertices(const void* data, size_t bytes) = 0;
         // Upload 16bit index data for indexed drawing.
-        virtual void UploadIndices(const void* data, size_t bytes, IndexType type, Usage usage = Usage::Static) = 0;
+        virtual void UploadIndices(const void* data, size_t bytes, IndexType type) = 0;
         // Set the hash value that identifies the data.
         virtual void SetDataHash(size_t hash) = 0;
         // Get the hash value that was used in the latest data upload.
@@ -288,6 +291,8 @@ namespace gfx
         virtual size_t GetNumDrawCmds() const = 0;
         // Get the draw command at the specified index.
         virtual DrawCommand GetDrawCmd(size_t index) const = 0;
+        // Get the current usage set on the geometry.
+        virtual Usage GetUsage() const = 0;
 
         // Set the (human-readable) name of the geometry.
         // This has debug significance only.
@@ -323,26 +328,26 @@ namespace gfx
 
         // Update the geometry object's data buffer contents.
         template<typename Vertex>
-        void SetVertexBuffer(const Vertex* vertices, std::size_t count, Usage usage = Usage::Static)
+        void SetVertexBuffer(const Vertex* vertices, std::size_t count)
         {
-            UploadVertices(vertices, count * sizeof(Vertex), usage);
+            UploadVertices(vertices, count * sizeof(Vertex));
             // for compatibility sakes set the vertex layout here.
             if constexpr (std::is_same_v<Vertex, gfx::Vertex2D>)
                 SetVertexLayout(GetVertexLayout<Vertex>());
         }
 
         template<typename Vertex> inline
-        void SetVertexBuffer(const std::vector<Vertex>& vertices, Usage usage = Usage::Static)
-        { SetVertexBuffer(vertices.data(), vertices.size(), usage); }
+        void SetVertexBuffer(const std::vector<Vertex>& vertices)
+        { SetVertexBuffer(vertices.data(), vertices.size()); }
 
-        void SetIndexBuffer(const Index16* indices, size_t count, Usage usage = Usage::Static)
-        { UploadIndices(indices, count * sizeof(Index16), IndexType::Index16, usage); }
-        void SetIndexBuffer(const Index32* indices, size_t count, Usage usage = Usage::Static)
-        { UploadIndices(indices, count * sizeof(Index32), IndexType::Index32, usage); }
-        void SetIndexBuffer(const std::vector<Index16>& indices, Usage usage = Usage::Static)
-        { SetIndexBuffer(indices.data(), indices.size(), usage); }
-        void SetIndexBuffer(const std::vector<Index32>& indices, Usage usage = Usage::Static)
-        { SetIndexBuffer(indices.data(), indices.size(), usage); }
+        void SetIndexBuffer(const Index16* indices, size_t count)
+        { UploadIndices(indices, count * sizeof(Index16), IndexType::Index16); }
+        void SetIndexBuffer(const Index32* indices, size_t count)
+        { UploadIndices(indices, count * sizeof(Index32), IndexType::Index32); }
+        void SetIndexBuffer(const std::vector<Index16>& indices)
+        { SetIndexBuffer(indices.data(), indices.size()); }
+        void SetIndexBuffer(const std::vector<Index32>& indices)
+        { SetIndexBuffer(indices.data(), indices.size()); }
 
         // Map the type of the index to index size in bytes.
         static size_t GetIndexByteSize(IndexType type)
@@ -397,25 +402,25 @@ namespace gfx
     public:
         using Geometry::AddDrawCmd;
 
+        virtual void SetUsage(Usage usage) override
+        { mUsage = usage;}
         virtual void ClearDraws() override
         { mDrawCmds.clear(); }
         virtual void AddDrawCmd(const DrawCommand& cmd) override
         {  mDrawCmds.push_back(cmd); }
         virtual void SetVertexLayout(const VertexLayout& layout) override
         { mVertexLayout = layout; }
-        virtual void UploadVertices(const void* data, size_t bytes, Usage usage) override
+        virtual void UploadVertices(const void* data, size_t bytes) override
         {
             ASSERT(data && bytes);
             mVertexData.resize(bytes);
             std::memcpy(&mVertexData[0], data, bytes);
-            mVertexUsage = usage;
         }
-        virtual void UploadIndices(const void* data, size_t bytes, IndexType type, Usage usage) override
+        virtual void UploadIndices(const void* data, size_t bytes, IndexType type) override
         {
             ASSERT(data && bytes);
             mIndexData.resize(bytes);
             std::memcpy(&mIndexData[0], data, bytes);
-            mIndexUsage = usage;
             mIndexType  = type;
         }
         virtual void SetDataHash(size_t hash) override
@@ -426,6 +431,8 @@ namespace gfx
         { return mDrawCmds.size(); }
         virtual DrawCommand GetDrawCmd(size_t index) const override
         { return mDrawCmds[index]; }
+        virtual Usage GetUsage() const override
+        { return mUsage; }
         virtual void SetName(const std::string& name) override
         { mName = name; }
         virtual std::string GetName() const override
@@ -441,10 +448,6 @@ namespace gfx
         { return mIndexData.empty() ? nullptr : &mIndexData[0]; }
         inline const VertexLayout& GetLayout() const noexcept
         { return mVertexLayout; }
-        inline Usage GetVertexUsage() const noexcept
-        { return mVertexUsage; }
-        inline Usage GetIndexUsage() const noexcept
-        { return mIndexUsage; }
         inline IndexType GetIndexType() const noexcept
         { return mIndexType; }
         inline void SetVertexBuffer(std::vector<uint8_t>&& data) noexcept
@@ -455,10 +458,11 @@ namespace gfx
         void Transfer(Geometry& other) const
         {
             other.SetVertexLayout(mVertexLayout);
+            other.SetUsage(mUsage);
             if (!mVertexData.empty())
-                other.UploadVertices(mVertexData.data(), mVertexData.size(), mVertexUsage);
+                other.UploadVertices(mVertexData.data(), mVertexData.size());
             if (mIndexData.empty())
-                other.UploadIndices(mIndexData.data(), mIndexData.size(), mIndexType, mIndexUsage);
+                other.UploadIndices(mIndexData.data(), mIndexData.size(), mIndexType);
 
             other.SetDataHash(mDataHash);
 
@@ -475,8 +479,7 @@ namespace gfx
         std::vector<uint8_t> mVertexData;
         std::vector<uint8_t> mIndexData;
         std::string mName;
-        Usage mVertexUsage = Usage::Static;
-        Usage mIndexUsage  = Usage::Static;
+        Usage mUsage = Usage::Static;
         IndexType mIndexType = IndexType::Index16;
     };
 

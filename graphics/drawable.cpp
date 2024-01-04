@@ -823,8 +823,9 @@ void CubeGeometry::Generate(const Environment& env, Style style, Geometry& geome
     // back face
     MakeFace(20, &indices[30], &vertices[20], BackTopRight, BackBotRight, BackBotLeft, BackTopLeft, Vec3{0.0, 0.0, -1.0});
 
-    geometry.UploadVertices(vertices, sizeof(vertices), Geometry::Usage::Static);
-    geometry.UploadIndices(indices, sizeof(indices), Geometry::IndexType::Index16, Geometry::Usage::Static);
+    geometry.SetUsage(Geometry::Usage::Static);
+    geometry.UploadVertices(vertices, sizeof(vertices));
+    geometry.UploadIndices(indices, sizeof(indices), Geometry::IndexType::Index16);
     geometry.SetVertexLayout(GetVertexLayout<Vertex3D>());
     geometry.AddDrawCmd(Geometry::DrawType::Triangles);
 
@@ -1892,13 +1893,13 @@ bool PolygonMeshClass::UploadGeometry(const Environment& env, Geometry& geometry
     {
         const auto& data = mData.value();
 
+        geometry.SetUsage(usage);
         geometry.SetDataHash(GetContentHash());
-
         geometry.SetVertexLayout(data.layout);
-        geometry.UploadVertices(data.vertices.data(), data.vertices.size(), usage);
+        geometry.UploadVertices(data.vertices.data(), data.vertices.size());
 
         if (!data.indices.empty())
-            geometry.UploadIndices(data.indices.data(), data.indices.size(), data.index_type, usage);
+            geometry.UploadIndices(data.indices.data(), data.indices.size(), data.index_type);
 
         geometry.ClearDraws();
 
@@ -1960,10 +1961,11 @@ bool PolygonMeshClass::UploadGeometry(const Environment& env, Geometry& geometry
     }
 
     geometry.SetName(mName);
+    geometry.SetUsage(usage);
     geometry.SetVertexLayout(vertex_buffer.GetLayout());
-    geometry.UploadVertices(vertex_buffer.GetBufferPtr(), vertex_buffer.GetBufferSize(), usage);
+    geometry.UploadVertices(vertex_buffer.GetBufferPtr(), vertex_buffer.GetBufferSize());
     geometry.UploadIndices(index_buffer.GetBufferPtr(), index_buffer.GetBufferSize(),
-                           index_buffer.GetType(), usage);
+                           index_buffer.GetType());
     geometry.SetDataHash(GetContentHash());
     geometry.ClearDraws();
     geometry.SetDrawCommands(command_buffer.GetCommandBuffer());
@@ -2169,7 +2171,8 @@ bool ParticleEngineClass::Upload(const Drawable::Environment& env, const Instanc
     }
 
     geometry.SetName(mName);
-    geometry.SetVertexBuffer(std::move(verts), Geometry::Usage::Stream);
+    geometry.SetUsage(Geometry::Usage::Stream);
+    geometry.SetVertexBuffer(std::move(verts));
     geometry.SetVertexLayout(layout);
     geometry.ClearDraws();
     geometry.AddDrawCmd(Geometry::DrawType::Points);
@@ -2995,7 +2998,8 @@ bool TileBatch::Upload(const Environment& env, Geometry& geometry) const
         });
 
         geometry.SetName("TileBatch");
-        geometry.SetVertexBuffer(mTiles, Geometry::Usage::Stream);
+        geometry.SetUsage(Geometry::Usage::Stream);
+        geometry.SetVertexBuffer(mTiles);
         geometry.SetVertexLayout(layout);
         geometry.ClearDraws();
         geometry.AddDrawCmd(Geometry::DrawType::Points);
@@ -3027,8 +3031,9 @@ bool TileBatch::Upload(const Environment& env, Geometry& geometry) const
             vertices.push_back(top_right);
         }
         geometry.SetName("TileBatch");
+        geometry.SetUsage(Geometry::Usage::Stream);
         geometry.ClearDraws();
-        geometry.SetVertexBuffer(vertices, Geometry::Usage::Stream);
+        geometry.SetVertexBuffer(vertices);
         geometry.SetVertexLayout(layout);
         geometry.AddDrawCmd(Geometry::DrawType::Triangles);
     }
@@ -3088,7 +3093,8 @@ bool DynamicLine3D::Upload(const Environment& environment, Geometry& geometry) c
     vertices.push_back(a);
     vertices.push_back(b);
 
-    geometry.SetVertexBuffer(vertices, Geometry::Usage::Stream);
+    geometry.SetUsage(Geometry::Usage::Stream);
+    geometry.SetVertexBuffer(vertices);
     geometry.SetVertexLayout(GetVertexLayout<Vertex3D>());
     geometry.ClearDraws();
     geometry.AddDrawCmd(Geometry::DrawType::Lines);
