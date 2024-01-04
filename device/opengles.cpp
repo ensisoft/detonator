@@ -1915,14 +1915,25 @@ private:
         {
             if (mVertexBufferSize)
             {
-                mDevice->FreeBuffer(mVertexBufferIndex, mVertexBufferOffset, mVertexBufferSize, mVertexBufferUsage, BufferType::VertexBuffer);
+                mDevice->FreeBuffer(mVertexBufferIndex, mVertexBufferOffset, mVertexBufferSize, mUsage, BufferType::VertexBuffer);
             }
             if (mIndexBufferSize)
             {
-                mDevice->FreeBuffer(mIndexBufferIndex, mIndexBufferOffset, mIndexBufferSize, mIndexBufferUsage, BufferType::IndexBuffer);
+                mDevice->FreeBuffer(mIndexBufferIndex, mIndexBufferOffset, mIndexBufferSize, mUsage, BufferType::IndexBuffer);
             }
             DEBUG("Deleted geometry object. [name='%1']", mName);
         }
+        virtual void SetUsage(Usage usage) override
+        {
+            if (usage == mUsage)
+                return;
+
+            // can only change the usage if nothing is allocated.
+            ASSERT(mVertexBufferSize == 0);
+            ASSERT(mIndexBufferSize == 0);
+            mUsage = usage;
+        }
+
         virtual void ClearDraws() override
         { mDrawCommands.clear(); }
 
@@ -1932,61 +1943,57 @@ private:
         virtual void SetVertexLayout(const gfx::VertexLayout& layout) override
         { mLayout = layout; }
 
-        virtual void UploadVertices(const void* data, size_t bytes, Usage usage) override
+        virtual void UploadVertices(const void* data, size_t bytes) override
         {
             if (data == nullptr || bytes == 0)
             {
                 if (mVertexBufferSize)
-                    mDevice->FreeBuffer(mVertexBufferIndex, mVertexBufferOffset, mVertexBufferSize, mVertexBufferUsage, BufferType::VertexBuffer);
+                    mDevice->FreeBuffer(mVertexBufferIndex, mVertexBufferOffset, mVertexBufferSize, mUsage, BufferType::VertexBuffer);
 
-                mVertexBufferSize  = 0;
-                mVertexBufferUsage = usage;
+                mVertexBufferSize = 0;
                 return;
             }
 
-            if ((usage != mVertexBufferUsage) || (bytes > mVertexBufferSize))
+            if (bytes > mVertexBufferSize)
             {
                 if (mVertexBufferSize)
-                    mDevice->FreeBuffer(mVertexBufferIndex, mVertexBufferOffset, mVertexBufferSize, mVertexBufferUsage, BufferType::VertexBuffer);
+                    mDevice->FreeBuffer(mVertexBufferIndex, mVertexBufferOffset, mVertexBufferSize, mUsage, BufferType::VertexBuffer);
 
-                std::tie(mVertexBufferIndex, mVertexBufferOffset) = mDevice->AllocateBuffer(bytes, usage, BufferType::VertexBuffer);
+                std::tie(mVertexBufferIndex, mVertexBufferOffset) = mDevice->AllocateBuffer(bytes, mUsage, BufferType::VertexBuffer);
             }
-            mDevice->UploadBuffer(mVertexBufferIndex, mVertexBufferOffset, data, bytes, usage, BufferType::VertexBuffer);
-            mVertexBufferSize  = bytes;
-            mVertexBufferUsage = usage;
+            mDevice->UploadBuffer(mVertexBufferIndex, mVertexBufferOffset, data, bytes, mUsage, BufferType::VertexBuffer);
+            mVertexBufferSize = bytes;
 
-            if (usage == Usage::Static)
+            if (mUsage == Usage::Static)
             {
-                DEBUG("Uploaded geometry vertices. [name='%1', bytes='%2', usage='%3']", mName, bytes, usage);
+                DEBUG("Uploaded geometry vertices. [name='%1', bytes='%2', usage='%3']", mName, bytes, mUsage);
             }
         }
-        virtual void UploadIndices(const void* data, size_t bytes, IndexType type, Usage usage) override
+        virtual void UploadIndices(const void* data, size_t bytes, IndexType type) override
         {
             if (data == nullptr || bytes == 0)
             {
                 if (mIndexBufferSize)
-                    mDevice->FreeBuffer(mIndexBufferIndex, mIndexBufferOffset, mIndexBufferSize, mIndexBufferUsage, BufferType::IndexBuffer);
+                    mDevice->FreeBuffer(mIndexBufferIndex, mIndexBufferOffset, mIndexBufferSize, mUsage, BufferType::IndexBuffer);
 
-                mIndexBufferSize  = 0;
-                mIndexBufferUsage = usage;
+                mIndexBufferSize = 0;
                 return;
             }
 
-            if ((usage != mIndexBufferUsage) || (bytes > mIndexBufferSize))
+            if (bytes > mIndexBufferSize)
             {
                 if (mIndexBufferSize)
-                    mDevice->FreeBuffer(mIndexBufferIndex, mIndexBufferOffset, mIndexBufferSize, mIndexBufferUsage, BufferType::IndexBuffer);
+                    mDevice->FreeBuffer(mIndexBufferIndex, mIndexBufferOffset, mIndexBufferSize, mUsage, BufferType::IndexBuffer);
 
-                std::tie(mIndexBufferIndex, mIndexBufferOffset) = mDevice->AllocateBuffer(bytes, usage, BufferType::IndexBuffer);
+                std::tie(mIndexBufferIndex, mIndexBufferOffset) = mDevice->AllocateBuffer(bytes, mUsage, BufferType::IndexBuffer);
             }
-            mDevice->UploadBuffer(mIndexBufferIndex, mIndexBufferOffset, data, bytes, usage, BufferType::IndexBuffer);
-            mIndexBufferSize  = bytes;
-            mIndexBufferUsage = usage;
-            mIndexBufferType  = type;
+            mDevice->UploadBuffer(mIndexBufferIndex, mIndexBufferOffset, data, bytes, mUsage, BufferType::IndexBuffer);
+            mIndexBufferSize = bytes;
+            mIndexBufferType = type;
 
-            if (usage == Usage::Static)
+            if (mUsage == Usage::Static)
             {
-                DEBUG("Uploaded geometry indices. [name='%1', bytes='%2', usage='%3']", mName, bytes, usage);
+                DEBUG("Uploaded geometry indices. [name='%1', bytes='%2', usage='%3']", mName, bytes, mUsage);
             }
         }
 
@@ -1998,6 +2005,8 @@ private:
         { return mDrawCommands.size(); }
         virtual DrawCommand GetDrawCmd(size_t index) const override
         { return mDrawCommands[index]; }
+        virtual Usage GetUsage() const override
+        { return mUsage; }
         virtual void SetName(const std::string& name) override
         { mName = name; }
         virtual std::string GetName() const override
@@ -2039,8 +2048,7 @@ private:
         std::size_t mIndexBufferIndex  = 0;
         std::size_t mHash = 0;
         std::string mName;
-        Usage mVertexBufferUsage = Usage::Static;
-        Usage mIndexBufferUsage  = Usage::Static;
+        Usage mUsage = Usage::Static;
         IndexType mIndexBufferType = IndexType::Index16;
         gfx::VertexLayout mLayout;
     };

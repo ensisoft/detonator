@@ -926,7 +926,8 @@ void main() {
         base::AppendVector(verts, {v0, v2, v3});
     }
     geometry->ClearDraws();
-    geometry->SetVertexBuffer(verts, Geometry::Usage::Stream);
+    geometry->SetUsage(Geometry::Usage::Stream);
+    geometry->SetVertexBuffer(verts);
     geometry->AddDrawCmd(Geometry::DrawType::Triangles);
 
     program->SetTexture("kGlyphMap", 0, *font_texture);
