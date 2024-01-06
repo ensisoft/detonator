@@ -31,6 +31,7 @@
 #include <cstring>
 #include <vector>
 #include <variant>
+#include <memory>
 
 #include "graphics/color4f.h"
 
@@ -264,30 +265,23 @@ namespace gfx
     class Program
     {
     public:
+        struct CreateArgs {
+            // The program state that is applied initially on the program
+            // once when created. Note that this only applies to uniforms!
+            ProgramState state;
+            // The program human-readable debug name
+            std::string name;
+            // mandatory fragment shader. Must be valid
+            std::shared_ptr<const Shader> fragment_shader;
+            // mandatory vertex shader. Must be valid.
+            std::shared_ptr<const Shader> vertex_shader;
+        };
         virtual ~Program() = default;
-
-        // Build the program from the given list of shaders.
-        // Returns true if the build was successful.
-        // Failed build will leave the program object in the previous state.
-        // Trying to build from shaders that are not valid is considered a bug.
-        virtual bool Build(const std::vector<std::shared_ptr<const Shader>>& shaders) = 0;
 
         // Returns true if the program is valid or not I.e. it has been
         // successfully build and can be used for drawing.
         virtual bool IsValid() const = 0;
 
-        // Set a (human-readable) name for the program object.
-        // Used for improved debug/log messages.
-        virtual void SetName(const std::string& name) = 0;
-
-        inline bool Build(const std::shared_ptr<const Shader>& vertex,
-                          const std::shared_ptr<const Shader>& fragment) noexcept
-        {
-            std::vector<std::shared_ptr<const Shader>> shaders;
-            shaders.push_back(vertex);
-            shaders.push_back(fragment);
-            return Build(shaders);
-        }
 
         // this API exists here to facilitate migration towards design where
         // the program state (i.e. uniform and texture sampler state) is separate
@@ -378,5 +372,7 @@ namespace gfx
     private:
         mutable std::shared_ptr<ProgramState> mState;
     };
+
+    using ProgramPtr = std::shared_ptr<const Program>;
 
 } //

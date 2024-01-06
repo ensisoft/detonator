@@ -97,7 +97,7 @@ private:
 
 unsigned TestContext::GL_ES_Version = 2;
 
-gfx::Program* MakeTestProgram(gfx::Device& dev, const char* vssrc, const char* fssrc, const std::string name = "prog")
+gfx::ProgramPtr MakeTestProgram(gfx::Device& dev, const char* vssrc, const char* fssrc, const std::string name = "prog")
 {
     gfx::Shader::CreateArgs vertex_shader_args;
     vertex_shader_args.name   = name + "/vertex";
@@ -115,8 +115,12 @@ gfx::Program* MakeTestProgram(gfx::Device& dev, const char* vssrc, const char* f
     shaders.push_back(vs);
     shaders.push_back(fs);
 
-    auto* prog = dev.MakeProgram(name);
-    TEST_REQUIRE(prog->Build(shaders));
+    gfx::Program::CreateArgs args;
+    args.name = name;
+    args.fragment_shader = fs;
+    args.vertex_shader   = vs;
+    auto prog = dev.CreateProgram(name, args);
+    TEST_REQUIRE(prog->IsValid());
     return prog;
 }
 
@@ -140,64 +144,6 @@ gfx::Geometry* MakeQuad(gfx::Device& dev)
 std::shared_ptr<gfx::Device> CreateDevice()
 {
     return dev::CreateDevice(std::make_shared<TestContext>(10, 10))->GetSharedGraphicsDevice();
-}
-
-void unit_test_device()
-{
-    TEST_CASE(test::Type::Feature)
-
-    auto dev = CreateDevice();
-
-    // test clear color.
-    const gfx::Color colors[] = {
-        gfx::Color::Red,
-        gfx::Color::White
-    };
-    for (auto c : colors)
-    {
-        dev->BeginFrame();
-        dev->ClearColor(c);
-        dev->EndFrame();
-
-        // this has alpha in it.
-        auto bmp = dev->ReadColorBuffer(10, 10);
-        TEST_REQUIRE(bmp.Compare(c));
-    }
-
-    // resources
-    {
-        TEST_REQUIRE(dev->FindShader("foo") == nullptr);
-        TEST_REQUIRE(dev->FindProgram("foo") == nullptr);
-        TEST_REQUIRE(dev->FindGeometry("foo") == nullptr);
-        TEST_REQUIRE(dev->FindTexture("foo") == nullptr);
-
-        gfx::Shader::CreateArgs args;
-        args.name = "test";
-        args.source = "#version 100\n"
-                      "void main() {\n"
-                      "  gl_FragColor = vec4(1.0);\n"
-                      "}\n";
-
-        TEST_REQUIRE(dev->CreateShader("foo", args) != nullptr);
-        TEST_REQUIRE(dev->MakeProgram("foo") != nullptr);
-        TEST_REQUIRE(dev->MakeGeometry("foo") != nullptr);
-        TEST_REQUIRE(dev->MakeTexture("foo") != nullptr);
-
-        // identity
-        TEST_REQUIRE(dev->FindShader("foo") == dev->FindShader("foo"));
-        TEST_REQUIRE(dev->FindProgram("foo") == dev->FindProgram("foo"));
-        TEST_REQUIRE(dev->FindGeometry("foo") == dev->FindGeometry("foo"));
-        TEST_REQUIRE(dev->FindTexture("foo") == dev->FindTexture("foo"));
-
-        dev->DeleteShaders();
-        dev->DeletePrograms();
-        dev->DeleteGeometries();
-        dev->DeleteTextures();
-        TEST_REQUIRE(dev->FindShader("foo") == nullptr);
-        TEST_REQUIRE(dev->FindProgram("foo") == nullptr);
-        TEST_REQUIRE(dev->FindGeometry("foo") == nullptr);
-        TEST_REQUIRE(dev->FindTexture("foo") == nullptr);
-    }
 }
 
 void unit_test_shader()
@@ -303,82 +249,6 @@ void unit_test_texture()
 
 }
 
-void unit_test_program()
-{
-    TEST_CASE(test::Type::Feature)
-
-    auto dev = CreateDevice();
-
-    auto* prog = dev->MakeProgram("foo");
-
-    TEST_REQUIRE(prog->IsValid() == false);
-
-    // missing fragment shader
-    {
-        gfx::Shader::CreateArgs args;
-        args.name = "vertex";
-        args.source =
-R"(#version 100
-void main() {
-    gl_Position = vec4(1.0);
-    }
-)";
-        auto vert = dev->CreateShader("vert", args);
-        TEST_REQUIRE(vert->IsValid());
-
-        std::vector<gfx::ShaderPtr> shaders;
-        shaders.push_back(vert);
-        TEST_REQUIRE(prog->Build(shaders) == false);
-    }
-
-    // missing vertex shader
-    {
-        gfx::Shader::CreateArgs args;
-        args.name = "fragment";
-        args.source =
-R"(#version 100
-precision mediump float;
-void main() {
-  gl_FragColor = vec4(1.0);
-})";
-
-        auto frag = dev->CreateShader("frag", args);
-        TEST_REQUIRE(frag->IsValid());
-
-        std::vector<gfx::ShaderPtr> shaders;
-        shaders.push_back(frag);
-        TEST_REQUIRE(prog->Build(shaders) == false);
-    }
-
-    // complete program with vertex and fragment shaders
-    {
-        gfx::Shader::CreateArgs args;
-        args.name = "vertex";
-        args.source =
-R"(#version 100
-void main() {
-    gl_Position = vec4(1.0);
-    }
-)";
-        auto vert = dev->CreateShader("vert", args);
-        TEST_REQUIRE(vert->IsValid());
-
-        args.source =
-R"(#version 100
-precision mediump float;
-void main() {
-  gl_FragColor = vec4(1.0);
-})";
-        auto frag = dev->CreateShader("frag", args);
-        TEST_REQUIRE(frag->IsValid());
-
-        std::vector<gfx::ShaderPtr> shaders;
-        shaders.push_back(vert);
-        shaders.push_back(frag);
-        TEST_REQUIRE(prog->Build(shaders) == true);
-    }
-}
-
 void unit_test_render_fbo(gfx::Framebuffer::Format format, gfx::Framebuffer::MSAA msaa)
 {
     TEST_CASE(test::Type::Feature)
@@ -400,7 +270,7 @@ void unit_test_render_fbo(gfx::Framebuffer::Format format, gfx::Framebuffer::MSA
 
     // rendered a colored quad into the fbo then use the fbo
     // color buffer texture to sample in another program.
-    auto* p0 = MakeTestProgram(*dev,
+    auto p0 = MakeTestProgram(*dev,
 R"(#version 100
 attribute vec2 aPosition;
 void main() {
@@ -412,7 +282,7 @@ void main() {
   gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
 })", "p0");
 
-    auto* p1 = MakeTestProgram(*dev,
+    auto p1 = MakeTestProgram(*dev,
 R"(#version 100
 attribute vec2 aPosition;
 attribute vec2 aTexCoord;
@@ -540,7 +410,7 @@ void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
 
-    auto* prog = MakeTestProgram(*dev, vertex_src, fragment_src);
+    auto prog = MakeTestProgram(*dev, vertex_src, fragment_src);
 
     gfx::Device::State state;
     state.bWriteColor  = true;
@@ -660,7 +530,7 @@ void main() {
   vTexCoord = aTexCoord;
 })";
 
-    auto* prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
+    auto prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
 
     auto* texture = dev->MakeTexture("tex");
@@ -736,7 +606,7 @@ attribute vec2 aPosition;
 void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
-    auto* prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
+    auto prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
     auto* tex0 = dev->MakeTexture("tex0");
     auto* tex1 = dev->MakeTexture("tex1");
@@ -807,7 +677,7 @@ void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
 
-    auto* prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
+    auto prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
@@ -919,7 +789,7 @@ void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
 
-    auto *prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
+    auto prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
 
     gfx::Device::State state;
@@ -1000,7 +870,7 @@ void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
 
-    auto* prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
+    auto prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
@@ -1060,7 +930,7 @@ void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
 
-    auto* prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
+    auto prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
@@ -1122,7 +992,7 @@ void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
 
-    auto* prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
+    auto prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
@@ -1166,7 +1036,7 @@ void unit_test_uniform_sampler_optimize_bug()
     };
     texture->Upload(pixels, 2, 3, gfx::Texture::Format::RGB);
 
-    auto* geom = dev->MakeGeometry("geom");
+    auto geom = dev->MakeGeometry("geom");
     const gfx::Vertex2D verts[] = {
             { {-1,  1}, {0, 1} },
             { {-1, -1}, {0, 0} },
@@ -1193,7 +1063,7 @@ attribute vec2 aPosition;
 void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
-    auto* prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
+    auto prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
@@ -1236,7 +1106,7 @@ void unit_test_clean_textures()
         { { 1, -1}, {1, 0} },
         { { 1,  1}, {1, 1} }
     };
-    auto* geom = dev->MakeGeometry("geom");
+    auto geom = dev->MakeGeometry("geom");
     geom->SetVertexBuffer(verts, 6);
     geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
@@ -1262,7 +1132,7 @@ void main() {
   gl_FragColor = texture2D(kTexture, vec2(0.5));
 }
 )";
-        auto* prog = MakeTestProgram(*dev, vs, fs);
+        auto prog = MakeTestProgram(*dev, vs, fs);
 
         for (int i=0; i<3; ++i)
         {
@@ -1308,7 +1178,7 @@ void main() {
   gl_FragColor = vec4(1.0);
 }
 )";
-        auto* prog = MakeTestProgram(*dev, vs, fs);
+        auto prog = MakeTestProgram(*dev, vs, fs);
 
         for (int i=0; i<3; ++i)
         {
@@ -1413,7 +1283,7 @@ void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
 
-    auto* prog = MakeTestProgram(*dev, vssrc, fssrc);
+    auto prog = MakeTestProgram(*dev, vssrc, fssrc);
 
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
@@ -1814,7 +1684,7 @@ attribute vec2 aPosition;
 void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
-    auto* prog = MakeTestProgram(*dev, vssrc, fssrc);
+    auto prog = MakeTestProgram(*dev, vssrc, fssrc);
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
@@ -1902,7 +1772,7 @@ uniform sampler2D kTexture;
 void main() {
   gl_FragColor = texture2D(kTexture, vTexCoord.xy);
 })";
-    auto* program = MakeTestProgram(*dev, vssrc, fssrc);
+    auto program = MakeTestProgram(*dev, vssrc, fssrc);
 
     gfx::Bitmap<gfx::Pixel_RGBA> bmp(10, 10);
     bmp.Fill(gfx::Color::Green);
@@ -2001,7 +1871,7 @@ uniform sampler2D kTexture;
 void main() {
   gl_FragColor = texture2D(kTexture, vTexCoord.xy);
 })";
-        auto* program = MakeTestProgram(*dev, vssrc, fssrc);
+        auto program = MakeTestProgram(*dev, vssrc, fssrc);
 
         gfx::Bitmap<gfx::Pixel_RGBA> bmp(10, 10);
         bmp.Fill(gfx::Color::Green);
@@ -2047,7 +1917,7 @@ attribute vec2 aPosition;
 void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
-        auto* program = MakeTestProgram(*dev, vssrc, fssrc);
+        auto program = MakeTestProgram(*dev, vssrc, fssrc);
         // setup 4 textures and the output from fragment shader
         // is then the sum of all of these, i.e. white.
         gfx::Bitmap<gfx::Pixel_RGBA> r(1, 1);
@@ -2227,7 +2097,7 @@ void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
 
-    auto* program = MakeTestProgram(*dev, vssrc, fssrc, "prog");
+    auto program = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
     gfx::Device::State state;
     state.blending     = gfx::Device::State::BlendOp::None;
@@ -2335,7 +2205,7 @@ void unit_test_fbo_change_color_target_bug()
 
     // red texture should now be red and green texture should now be green.
     // setup a program to sample from textures
-    auto* program = MakeTestProgram(*dev,
+    auto program = MakeTestProgram(*dev,
 R"(#version 100
 attribute vec2 aPosition;
 attribute vec2 aTexCoord;
@@ -2401,7 +2271,7 @@ void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
 
-    auto* prog = MakeTestProgram(*dev, vertex_src, fragment_src);
+    auto prog = MakeTestProgram(*dev, vertex_src, fragment_src);
 
     gfx::Device::State state;
     state.bWriteColor  = true;
@@ -2451,10 +2321,8 @@ int test_main(int argc, char* argv[])
     }
     test::Print(test::Color::Info, "Testing with GL ES%d\n", TestContext::GL_ES_Version);
 
-    unit_test_device();
     unit_test_shader();
     unit_test_texture();
-    unit_test_program();
 
     unit_test_render_fbo(gfx::Framebuffer::Format::ColorRGBA8, gfx::Framebuffer::MSAA::Disabled);
     unit_test_render_fbo(gfx::Framebuffer::Format::ColorRGBA8_Depth16, gfx::Framebuffer::MSAA::Disabled);

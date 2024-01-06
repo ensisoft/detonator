@@ -25,19 +25,19 @@
 #include <string>
 
 #include "graphics/types.h"
+#include "graphics/program.h"
 
 // random helper and utility functions
 
 namespace gfx
 {
-class Program;
 class Device;
 class Geometry;
 
-Program* MakeProgram(const std::string& vertex_source,
-                     const std::string& fragment_source,
-                     const std::string& program_name,
-                     Device& device);
+gfx::ProgramPtr MakeProgram(const std::string& vertex_source,
+                            const std::string& fragment_source,
+                            const std::string& program_name,
+                            Device& device);
 
 Geometry* MakeFullscreenQuad(Device& device);
 

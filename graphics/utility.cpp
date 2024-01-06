@@ -30,10 +30,10 @@
 namespace gfx
 {
 
-Program* MakeProgram(const std::string& vertex_source,
-                     const std::string& fragment_source,
-                     const std::string& program_name,
-                     Device& device)
+ProgramPtr MakeProgram(const std::string& vertex_source,
+                       const std::string& fragment_source,
+                       const std::string& program_name,
+                       Device& device)
 {
     Shader::CreateArgs vertex_args;
     vertex_args.name   = program_name + "/VertexShader";
@@ -50,9 +50,13 @@ Program* MakeProgram(const std::string& vertex_source,
     if (!fs->IsValid())
         return nullptr;
 
-    auto* program = device.MakeProgram(program_name);
-    program->SetName(program_name);
-    if (!program->Build(vs, fs))
+    Program::CreateArgs args;
+    args.name = program_name;
+    args.vertex_shader = vs;
+    args.fragment_shader = fs;
+
+    auto program = device.CreateProgram(program_name, args);
+    if (!program->IsValid())
         return nullptr;
 
     return program;

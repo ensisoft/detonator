@@ -151,17 +151,8 @@ private:
 class TestProgram : public gfx::Program
 {
 public:
-    virtual bool Build(const std::vector<gfx::ShaderPtr>& shaders) override
-    {
-        return true;
-    }
     virtual bool IsValid() const override
     { return true; }
-
-    virtual void SetName(const std::string& name) override
-    {
-
-    }
 private:
 
 };
@@ -282,19 +273,19 @@ public:
         mShaderIndexMap[id] = index;
         return mShaders.back();
     }
-    virtual gfx::Program* FindProgram(const std::string& name) override
+    virtual gfx::ProgramPtr FindProgram(const std::string& id) override
     {
-       auto it = mProgramIndexMap.find(name);
+       auto it = mProgramIndexMap.find(id);
        if (it == mProgramIndexMap.end())
            return nullptr;
-       return mPrograms[it->second].get();
+       return mPrograms[it->second];
     }
-    virtual gfx::Program* MakeProgram(const std::string& name) override
+    virtual gfx::ProgramPtr CreateProgram(const std::string& id, const gfx::Program::CreateArgs&) override
     {
        const size_t index = mPrograms.size();
        mPrograms.emplace_back(new TestProgram);
-       mProgramIndexMap[name] = index;
-       return mPrograms.back().get();
+       mProgramIndexMap[id] = index;
+       return mPrograms.back();
     }
     virtual gfx::Geometry* FindGeometry(const std::string& name) override
     {
@@ -414,7 +405,7 @@ private:
     std::vector<std::shared_ptr<TestShader>> mShaders;
 
     std::unordered_map<std::string, std::size_t> mProgramIndexMap;
-    std::vector<std::unique_ptr<TestProgram>> mPrograms;
+    std::vector<std::shared_ptr<TestProgram>> mPrograms;
 };
 
 

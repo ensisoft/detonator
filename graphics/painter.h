@@ -259,11 +259,11 @@ namespace gfx
         IRect MapToDevice(const IRect& rect) const noexcept;
 
     private:
-        Program* GetProgram(const ShaderProgram& program,
-                            const Drawable& drawable,
-                            const Material& material,
-                            const Drawable::Environment& drawable_environment,
-                            const Material::Environment& material_environment) const;
+        ProgramPtr GetProgram(const ShaderProgram& program,
+                              const Drawable& drawable,
+                              const Material& material,
+                              const Drawable::Environment& drawable_environment,
+                              const Material::Environment& material_environment) const;
 
         Geometry* GetGeometry(const Drawable& drawable,
                               const Drawable::Environment& env) const;

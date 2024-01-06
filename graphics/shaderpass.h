@@ -65,7 +65,7 @@ namespace gfx
         virtual void ApplyDynamicState(const Device& device, ProgramState& program, Device::State& state) const {}
 
         // todo:
-        virtual void ApplyStaticState(const Device& device, Program& program) const {}
+        virtual void ApplyStaticState(const Device& device, ProgramState& program) const {}
     private:
     };
 

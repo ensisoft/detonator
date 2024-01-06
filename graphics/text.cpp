@@ -870,7 +870,7 @@ void main() {
     gl_Position = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
 }
     )";
-    auto* program = device.FindProgram("BitmapFontCompositeProgram");
+    auto program = device.FindProgram("BitmapFontCompositeProgram");
     if (program == nullptr)
     {
         program = gfx::MakeProgram(vertex_src, fragment_src, "BitmapFontComposite", device);

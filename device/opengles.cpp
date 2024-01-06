@@ -615,21 +615,33 @@ public:
         return shader;
     }
 
-    virtual gfx::Program* FindProgram(const std::string& name) override
+    virtual gfx::ProgramPtr FindProgram(const std::string& id) override
     {
-        auto it = mPrograms.find(name);
+        auto it = mPrograms.find(id);
         if (it == std::end(mPrograms))
             return nullptr;
-        return it->second.get();
+        return it->second;
     }
 
-    virtual gfx::Program* MakeProgram(const std::string& name) override
+    virtual gfx::ProgramPtr CreateProgram(const std::string& id, const gfx::Program::CreateArgs& args) override
     {
-        auto program = std::make_unique<ProgImpl>(mGL);
-        auto* ret    = program.get();
-        mPrograms[name] = std::move(program);
-        ret->SetFrameStamp(mFrameNumber);
-        return ret;
+        auto program = std::make_shared<ProgImpl>(mGL);
+
+        std::vector<gfx::ShaderPtr> shaders;
+        shaders.push_back(args.vertex_shader);
+        shaders.push_back(args.fragment_shader);
+
+        program->SetName(args.name);
+        program->Build(shaders);
+
+        if (program->IsValid()) {
+            // set the initial uniform state
+            program->ApplyUniformState(args.state);
+        }
+
+        mPrograms[id] = program;
+        program->SetFrameStamp(mFrameNumber);
+        return program;
     }
 
     virtual gfx::Geometry* FindGeometry(const std::string& name) override
@@ -724,64 +736,10 @@ public:
         mygeom->SetFrameStamp(mFrameNumber);
 
         // start using this program
-        GL_CALL(glUseProgram(myprog->GetHandle()));
+        //GL_CALL(glUseProgram(myprog->GetHandle()));
 
-        // IMPORTANT !
-        // the program doesn't set the uniforms directly but instead of compares the uniform
-        // value against a cached hash in order to elide redundant uniform sets.
-        // However, this means that if a uniform value is set but the draw that uses the
-        // program doesn't actually draw anything doing an early return here would mean
-        // that the uniform state setting would be skipped. This would later lead to
-        // incorrect assumption about the state of the program. I.e. using the program
-        // later would not set the uniform value since the cached hash would incorrectly
-        // indicate that the actual value has already been set in the program!
-        // Easiest fix for this right now is to simply do the uniform setting first (and always)
-        // even if the geometry is "empty", (i.e. no vertex data/draw commands).
-
-        TRACE_ENTER(SetUniforms);
-
-        // flush pending uniforms onto the GPU program object
-        for (size_t i=0; i<program_state.GetUniformCount(); ++i)
-        {
-            const auto& setting = program_state.GetUniformSetting(i);
-            const auto& uniform = myprog->GetUniform(setting.name);
-            if (uniform.location == -1)
-                continue;
-
-            const auto& value = setting.value;
-            const auto location = uniform.location;
-
-            if (const auto* ptr = std::get_if<int>(&value))
-                GL_CALL(glUniform1i(location, *ptr));
-            else if (const auto* ptr = std::get_if<float>(&value))
-                GL_CALL(glUniform1f(location, *ptr));
-            else if (const auto* ptr = std::get_if<glm::ivec2>(&value))
-                GL_CALL(glUniform2i(location, ptr->x, ptr->y));
-            else if (const auto* ptr = std::get_if<glm::vec2>(&value))
-                GL_CALL(glUniform2f(location, ptr->x, ptr->y));
-            else if (const auto* ptr = std::get_if<glm::vec3>(&value))
-                GL_CALL(glUniform3f(location, ptr->x, ptr->y, ptr->z));
-            else if (const auto* ptr = std::get_if<glm::vec4>(&value))
-                GL_CALL(glUniform4f(location, ptr->x, ptr->y, ptr->z, ptr->w));
-            else if (const auto* ptr = std::get_if<gfx::Color4f>(&value)) {
-                // Assume sRGB encoded color values now. so this is a simple
-                // place to convert to linear and will catch all uses without
-                // breaking the higher level APIs
-                // the cost of the sRGB conversion should be mitigated due to
-                // the hash check to compare to the previous value.
-                const auto& linear = sRGB_Decode(*ptr);
-                GL_CALL(glUniform4f(location, linear.Red(), linear.Green(), linear.Blue(), linear.Alpha()));
-            }
-            else if (const auto* ptr = std::get_if<glm::mat2>(&value))
-                GL_CALL(glUniformMatrix2fv(location, 1, GL_FALSE /* transpose */, glm::value_ptr(*ptr)));
-            else if (const auto* ptr = std::get_if<glm::mat3>(&value))
-                GL_CALL(glUniformMatrix3fv(location, 1, GL_FALSE /* transpose */, glm::value_ptr(*ptr)));
-            else if (const auto* ptr = std::get_if<glm::mat4>(&value))
-                GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE /*transpose*/, glm::value_ptr(*ptr)));
-            else BUG("Unhandled shader program uniform type.");
-        }
-
-        TRACE_LEAVE(SetUniforms);
+        // this will also call glUseProgram
+        TRACE_CALL("SetUniforms", myprog->ApplyUniformState(program_state));
 
         // this check is fine for any draw case because even when drawing with
         // indices there should be vertex data. if there isn't that means the
@@ -2080,14 +2038,14 @@ private:
                 DEBUG("Deleted program object. [name='%1', handle='%2']", mName, mProgram);
             }
         }
-        virtual bool Build(const std::vector<std::shared_ptr<const gfx::Shader>>& shaders) override
+        bool Build(const std::vector<gfx::ShaderPtr>& shaders)
         {
             GLuint prog = mGL.glCreateProgram();
             DEBUG("Created new GL program object. [name='%1', handle='%2']", mName, prog);
 
             for (const auto& shader : shaders)
             {
-                ASSERT(shader->IsValid());
+                ASSERT(shader && shader->IsValid());
                 GL_CALL(glAttachShader(prog,
                     static_cast<const ShaderImpl*>(shader.get())->GetHandle()));
             }
@@ -2114,19 +2072,60 @@ private:
             }
 
             DEBUG("Program was built successfully. [name='%1', info='%2']", mName, build_info);
-            if (mProgram)
-            {
-                GL_CALL(glDeleteProgram(mProgram));
-                GL_CALL(glUseProgram(0));
-            }
             mProgram = prog;
-            mVersion++;
             return true;
         }
+
+        void ApplyUniformState(const gfx::ProgramState& state) const
+        {
+            GL_CALL(glUseProgram(mProgram));
+            // flush pending uniforms onto the GPU program object
+            for (size_t i=0; i<state.GetUniformCount(); ++i)
+            {
+                const auto& setting = state.GetUniformSetting(i);
+                const auto& uniform = this->GetUniform(setting.name);
+                if (uniform.location == -1)
+                    continue;
+
+                const auto& value = setting.value;
+                const auto location = uniform.location;
+
+                if (const auto* ptr = std::get_if<int>(&value))
+                    GL_CALL(glUniform1i(location, *ptr));
+                else if (const auto* ptr = std::get_if<float>(&value))
+                    GL_CALL(glUniform1f(location, *ptr));
+                else if (const auto* ptr = std::get_if<glm::ivec2>(&value))
+                    GL_CALL(glUniform2i(location, ptr->x, ptr->y));
+                else if (const auto* ptr = std::get_if<glm::vec2>(&value))
+                    GL_CALL(glUniform2f(location, ptr->x, ptr->y));
+                else if (const auto* ptr = std::get_if<glm::vec3>(&value))
+                    GL_CALL(glUniform3f(location, ptr->x, ptr->y, ptr->z));
+                else if (const auto* ptr = std::get_if<glm::vec4>(&value))
+                    GL_CALL(glUniform4f(location, ptr->x, ptr->y, ptr->z, ptr->w));
+                else if (const auto* ptr = std::get_if<gfx::Color4f>(&value)) {
+                    // Assume sRGB encoded color values now. so this is a simple
+                    // place to convert to linear and will catch all uses without
+                    // breaking the higher level APIs
+                    // the cost of the sRGB conversion should be mitigated due to
+                    // the hash check to compare to the previous value.
+                    const auto& linear = sRGB_Decode(*ptr);
+                    GL_CALL(glUniform4f(location, linear.Red(), linear.Green(), linear.Blue(), linear.Alpha()));
+                }
+                else if (const auto* ptr = std::get_if<glm::mat2>(&value))
+                    GL_CALL(glUniformMatrix2fv(location, 1, GL_FALSE /* transpose */, glm::value_ptr(*ptr)));
+                else if (const auto* ptr = std::get_if<glm::mat3>(&value))
+                    GL_CALL(glUniformMatrix3fv(location, 1, GL_FALSE /* transpose */, glm::value_ptr(*ptr)));
+                else if (const auto* ptr = std::get_if<glm::mat4>(&value))
+                    GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE /*transpose*/, glm::value_ptr(*ptr)));
+                else BUG("Unhandled shader program uniform type.");
+            }
+        }
+
+
         virtual bool IsValid() const override
         { return mProgram != 0; }
 
-        virtual void SetName(const std::string& name) override
+        void SetName(const std::string& name)
         {
             mName = name;
         }
@@ -2640,7 +2639,7 @@ private:
 private:
     std::map<std::string, std::unique_ptr<gfx::Geometry>> mGeoms;
     std::map<std::string, std::shared_ptr<gfx::Shader>> mShaders;
-    std::map<std::string, std::unique_ptr<gfx::Program>> mPrograms;
+    std::map<std::string, std::shared_ptr<gfx::Program>> mPrograms;
     std::map<std::string, std::unique_ptr<gfx::Texture>> mTextures;
     std::map<std::string, std::unique_ptr<gfx::Framebuffer>> mFBOs;
     std::shared_ptr<dev::Context> mContextImpl;
