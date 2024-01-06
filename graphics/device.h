@@ -174,8 +174,8 @@ namespace gfx
         // resource creation APIs
         virtual ShaderPtr FindShader(const std::string& id) = 0;
         virtual ShaderPtr CreateShader(const std::string& id, const Shader::CreateArgs& args) = 0;
-        virtual Program* FindProgram(const std::string& name) = 0;
-        virtual Program* MakeProgram(const std::string& name) = 0;
+        virtual ProgramPtr FindProgram(const std::string& id) = 0;
+        virtual ProgramPtr CreateProgram(const std::string& id, const Program::CreateArgs& args) = 0;
         virtual Geometry* FindGeometry(const std::string& name) = 0;
         virtual Geometry* MakeGeometry(const std::string& name) = 0;
         virtual Texture* FindTexture(const std::string& name) = 0;

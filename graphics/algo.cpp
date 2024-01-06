@@ -111,7 +111,7 @@ void main() {
 }
 )";
 
-    auto* program = device->FindProgram("BloomColorProgram");
+    auto program = device->FindProgram("BloomColorProgram");
     if (!program)
         program = MakeProgram(vertex_src, fragment_src, "BloomColorProgram", *device);
 
@@ -327,7 +327,7 @@ void main() {
 }
 
 )";
-    auto* program = device->FindProgram("BlurProgram");
+    auto program = device->FindProgram("BlurProgram");
     if (!program)
         program = MakeProgram(vertex_src, fragment_src, "BlurProgram", *device);
 
@@ -455,7 +455,7 @@ void main() {
 }
 )";
 
-    auto* program = device->FindProgram("EdgeProgram");
+    auto program = device->FindProgram("EdgeProgram");
     if (!program)
         program = MakeProgram(vertex_src, fragment_src, "EdgeProgram", *device);
 
@@ -547,7 +547,7 @@ void main() {
 }
 )";
 
-    auto* program = device->FindProgram("CopyProgram");
+    auto program = device->FindProgram("CopyProgram");
     if (!program)
         program = MakeProgram(vertex_src, fragment_src, "CopyProgram", *device);
 

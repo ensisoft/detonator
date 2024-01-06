@@ -73,20 +73,20 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
         Material::Environment material_env;
         material_env.editing_mode  = mEditingMode;
         material_env.render_points = draw.drawable->GetPrimitive() == Drawable::Primitive::Points;
-        Program* gpu_program = GetProgram(program, *draw.drawable, *draw.material, drawable_env, material_env);
+        ProgramPtr gpu_program = GetProgram(program, *draw.drawable, *draw.material, drawable_env, material_env);
         if (gpu_program == nullptr)
             continue;
 
-        ProgramState program_state;
+        ProgramState gpu_program_state;
 
         Material::RasterState material_raster_state;
-        if (!draw.material->ApplyDynamicState(material_env, *mDevice, program_state, material_raster_state))
+        if (!draw.material->ApplyDynamicState(material_env, *mDevice, gpu_program_state, material_raster_state))
             continue;
 
         Drawable::RasterState drawable_raster_state;
         drawable_raster_state.culling    = draw.state.culling;
         drawable_raster_state.line_width = draw.state.line_width;
-        draw.drawable->ApplyDynamicState(drawable_env, program_state, drawable_raster_state);
+        draw.drawable->ApplyDynamicState(drawable_env, gpu_program_state, drawable_raster_state);
 
         device_state.blending      = material_raster_state.blending;
         device_state.premulalpha   = material_raster_state.premultiplied_alpha;
@@ -101,7 +101,7 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
         device_state.bWriteColor   = draw.state.write_color;
         device_state.depth_test    = draw.state.depth_test;
 
-        program.ApplyDynamicState(*mDevice, program_state, device_state);
+        program.ApplyDynamicState(*mDevice, gpu_program_state, device_state);
 
         // The drawable provides the draw command which identifies the
         // sequence of more primitive draw commands set on the geometry
@@ -109,7 +109,7 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
         const auto& cmd_params = draw.drawable->GetDrawCmd();
 
         mDevice->Draw(*gpu_program,
-                      program_state,
+                      gpu_program_state,
                       GeometryDrawCommand(*geometry,
                                           cmd_params.draw_cmd_start,
                                           cmd_params.draw_cmd_count),
@@ -160,17 +160,17 @@ std::unique_ptr<Painter> Painter::Create(Device* device)
     return std::make_unique<Painter>(device);
 }
 
-Program* Painter::GetProgram(const ShaderProgram& program,
-                             const Drawable& drawable,
-                             const Material& material,
-                             const Drawable::Environment& drawable_environment,
-                             const Material::Environment& material_environment) const
+ProgramPtr Painter::GetProgram(const ShaderProgram& program,
+                               const Drawable& drawable,
+                               const Material& material,
+                               const Drawable::Environment& drawable_environment,
+                               const Material::Environment& material_environment) const
 {
     const auto& material_gpu_id = program.GetShaderId(material, material_environment);
     const auto& drawable_gpu_id = program.GetShaderId(drawable, drawable_environment);
     const auto& program_gpu_id = drawable_gpu_id + "/" + material_gpu_id;
 
-    Program* gpu_program = mDevice->FindProgram(program_gpu_id);
+    ProgramPtr gpu_program = mDevice->FindProgram(program_gpu_id);
     if (!gpu_program)
     {
         ShaderPtr material_shader = mDevice->FindShader(material_gpu_id);
@@ -207,19 +207,19 @@ Program* Painter::GetProgram(const ShaderProgram& program,
                                               program.GetName(),
                                               drawable_shader->GetName(),
                                               material_shader->GetName());
-        std::vector<ShaderPtr> shaders;
-        shaders.push_back(drawable_shader);
-        shaders.push_back(material_shader);
 
-        gpu_program = mDevice->MakeProgram(program_gpu_id);
-        gpu_program->SetName(gpu_program_name);
-        gpu_program->Build(shaders);
+        Program::CreateArgs args;
+        args.name = gpu_program_name;
+        args.fragment_shader = material_shader;
+        args.vertex_shader   = drawable_shader;
+
+        material.ApplyStaticState(material_environment, *mDevice, args.state);
+
+        program.ApplyStaticState(*mDevice, args.state);
+
+        gpu_program = mDevice->CreateProgram(program_gpu_id, args);
         if (!gpu_program->IsValid())
             return nullptr;
-
-        material.ApplyStaticState(material_environment, *mDevice, gpu_program->GetState());
-
-        program.ApplyStaticState(*mDevice, *gpu_program);
     }
     if (!gpu_program->IsValid())
         return nullptr;

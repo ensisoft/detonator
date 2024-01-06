@@ -270,7 +270,7 @@ void main() {
     auto* bloom_texture = bloom->GetBloomTexture();
 
     auto* device = mPainter.GetDevice();
-    auto* program = device->FindProgram("MainCompositor");
+    auto program = device->FindProgram("MainCompositor");
     if (!program)
         program = gfx::MakeProgram(vertex_source, fragment_source, "MainCompositor", *device);
 
