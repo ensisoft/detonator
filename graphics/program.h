@@ -86,16 +86,12 @@ namespace gfx
         // In other words the first 3 floats are the X vector followed by the
         // Y vector followed by the Z vector.
 
-        using Matrix2x2 = float[2][2];
-        using Matrix3x3 = float[3][3];
-        using Matrix4x4 = float[4][4];
-
         // set 2x2 matrix uniform.
-        virtual void SetUniform(const char* name, const Matrix2x2& matrix) = 0;
+        virtual void SetUniform(const char* name, const glm::mat2& matrix) = 0;
         // Set 3x3 matrix uniform.
-        virtual void SetUniform(const char* name, const Matrix3x3& matrix) = 0;
+        virtual void SetUniform(const char* name, const glm::mat3& matrix) = 0;
         // Set 4x4 matrix uniform.
-        virtual void SetUniform(const char* name, const Matrix4x4& matrix) = 0;
+        virtual void SetUniform(const char* name, const glm::mat4& matrix) = 0;
 
         // Set a texture sampler.
         // Sampler is the name of the texture sampler in the shader.
@@ -128,12 +124,6 @@ namespace gfx
         inline void SetUniform(const char* name, const glm::vec4& vec) noexcept
         { SetUniform(name, vec.x, vec.y, vec.z, vec.w); }
 
-        inline void SetUniform(const char* name, const glm::mat4& mat) noexcept
-        { SetUniform(name, *(const Matrix4x4*)glm::value_ptr(mat)); }
-        inline void SetUniform(const char* name, const glm::mat3& mat) noexcept
-        { SetUniform(name, *(const Matrix3x3*)glm::value_ptr(mat)); }
-        inline void SetUniform(const char* name, const glm::mat2& mat) noexcept
-        { SetUniform(name, *(const Matrix2x2*)glm::value_ptr(mat)); }
 
         inline bool Build(const std::shared_ptr<const Shader>& vertex,
                           const std::shared_ptr<const Shader>& fragment) noexcept

@@ -1010,7 +1010,7 @@ void main() {
     state.viewport = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
 
-    const gfx::Program::Matrix2x2 matrix = {
+    const glm::mat2 matrix = {
         {0.25f, 0.25f},
         {0.25f, 0.25f}
     };
@@ -1070,10 +1070,10 @@ void main() {
     state.viewport = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
 
-    const gfx::Program::Matrix3x3 matrix = {
-            {0.25f, 0.25f, 0.50f},
-            {0.25f, 0.50f, 0.25f},
-            {0.50f, 0.25f, 0.25f}
+    const glm::mat3 matrix = {
+        {0.25f, 0.25f, 0.50f},
+        {0.25f, 0.50f, 0.25f},
+        {0.50f, 0.25f, 0.25f}
     };
     prog->SetUniform("kMatrix", matrix);
     dev->Draw(*prog, *geom, state);
@@ -1132,11 +1132,11 @@ void main() {
     state.viewport = gfx::IRect(0, 0, 10, 10);
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
 
-    const gfx::Program::Matrix4x4 matrix = {
-            {0.25f, 0.25, 0.25f, 0.25f},
-            {0.25f, 0.25, 0.25f, 0.25f},
-            {0.25f, 0.25, 0.25f, 0.25f},
-            {0.25f, 0.25, 0.25f, 0.25f}
+    const glm::mat4 matrix = {
+        {0.25f, 0.25, 0.25f, 0.25f},
+        {0.25f, 0.25, 0.25f, 0.25f},
+        {0.25f, 0.25, 0.25f, 0.25f},
+        {0.25f, 0.25, 0.25f, 0.25f}
     };
     prog->SetUniform("kMatrix", matrix);
     dev->Draw(*prog, *geom, state);

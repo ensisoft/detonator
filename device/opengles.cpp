@@ -759,12 +759,12 @@ public:
                 GL_CALL(glUniform4f(location, ptr->x, ptr->y, ptr->z, ptr->w));
             else if (const auto* ptr = std::get_if<gfx::Color4f>(&value))
                 GL_CALL(glUniform4f(location, ptr->Red(), ptr->Green(), ptr->Blue(), ptr->Alpha()));
-            else if (const auto* ptr = std::get_if<ProgImpl::Uniform::Matrix2>(&value))
-                GL_CALL(glUniformMatrix2fv(location, 1, GL_FALSE /* transpose */, (const float*)ptr->s));
-            else if (const auto* ptr = std::get_if<ProgImpl::Uniform::Matrix3>(&value))
-                GL_CALL(glUniformMatrix3fv(location, 1, GL_FALSE /* transpose */, (const float*)ptr->s));
-            else if (const auto* ptr = std::get_if<ProgImpl::Uniform::Matrix4>(&value))
-                GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE /*transpose*/, (const float*)&ptr->s));
+            else if (const auto* ptr = std::get_if<glm::mat2>(&value))
+                GL_CALL(glUniformMatrix2fv(location, 1, GL_FALSE /* transpose */, glm::value_ptr(*ptr)));
+            else if (const auto* ptr = std::get_if<glm::mat3>(&value))
+                GL_CALL(glUniformMatrix3fv(location, 1, GL_FALSE /* transpose */, glm::value_ptr(*ptr)));
+            else if (const auto* ptr = std::get_if<glm::mat4>(&value))
+                GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE /*transpose*/, glm::value_ptr(*ptr)));
             else BUG("Unhandled shader program uniform type.");
         }
 
@@ -2222,7 +2222,7 @@ private:
                 ret.hash = hash;
             }
         }
-        virtual void SetUniform(const char* name, const Matrix2x2& matrix) override
+        virtual void SetUniform(const char* name, const glm::mat2& matrix) override
         {
             auto& ret = GetUniform(name);
             if (ret.location == -1)
@@ -2235,11 +2235,11 @@ private:
                 hash = base::hash_combine(hash, ptr[i]);
             if (ret.hash != hash)
             {
-                mUniforms.push_back({ret.location, Uniform::Matrix2(matrix)});
+                mUniforms.push_back({ret.location, matrix});
                 ret.hash = hash;
             }
         }
-        virtual void SetUniform(const char* name, const Matrix3x3& matrix) override
+        virtual void SetUniform(const char* name, const glm::mat3& matrix) override
         {
             auto& ret = GetUniform(name);
             if (ret.location == -1)
@@ -2253,11 +2253,11 @@ private:
 
             if (ret.hash != hash)
             {
-                mUniforms.push_back({ret.location, Uniform::Matrix3(matrix) });
+                mUniforms.push_back({ret.location, matrix });
                 ret.hash = hash;
             }
         }
-        virtual void SetUniform(const char* name, const Matrix4x4& matrix) override
+        virtual void SetUniform(const char* name, const glm::mat4& matrix) override
         {
             auto& ret = GetUniform(name);
             if (ret.location == -1)
@@ -2271,7 +2271,7 @@ private:
 
             if (ret.hash != hash)
             {
-                mUniforms.push_back({ret.location, Uniform::Matrix4(matrix) });
+                mUniforms.push_back({ret.location, matrix });
                 ret.hash = hash;
             }
         }
@@ -2367,28 +2367,15 @@ private:
         };
         struct Uniform {
             GLuint location = 0;
-            struct Matrix2 {
-                float s[2*2];
-                Matrix2(const Program::Matrix2x2& matrix)
-                { std::memcpy(&s, matrix, sizeof(matrix)); }
-            };
-            struct Matrix3 {
-                float s[3*3];
-                Matrix3(const Program::Matrix3x3& matrix)
-                { std::memcpy(&s, matrix, sizeof(matrix)); }
-            };
-            struct Matrix4 {
-                float s[4*4];
-                Matrix4(const Program::Matrix4x4& matrix)
-                { std::memcpy(&s, matrix, sizeof(matrix)); }
-            };
             std::variant<int, float,
                 glm::ivec2,
                 glm::vec2,
                 glm::vec3,
                 glm::vec4,
                 gfx::Color4f,
-                Matrix2, Matrix3, Matrix4> value;
+                glm::mat2,
+                glm::mat3,
+                glm::mat4> value;
         };
         size_t GetNumSamplersSet() const
         { return mSamplers.size(); }

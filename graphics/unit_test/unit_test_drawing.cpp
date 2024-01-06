@@ -186,11 +186,11 @@ public:
     {
         mUniforms[name] = color;
     }
-    virtual void SetUniform(const char* name, const Matrix2x2& matrix) override
+    virtual void SetUniform(const char* name, const glm::mat2& matrix) override
     {}
-    virtual void SetUniform(const char* name, const Matrix3x3& matrix) override
+    virtual void SetUniform(const char* name, const glm::mat3& matrix) override
     {}
-    virtual void SetUniform(const char* name, const Matrix4x4& matrix) override
+    virtual void SetUniform(const char* name, const glm::mat4& matrix) override
     {}
 
     struct TextureBinding {
