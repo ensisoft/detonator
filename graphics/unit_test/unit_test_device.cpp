@@ -99,11 +99,19 @@ unsigned TestContext::GL_ES_Version = 2;
 
 gfx::Program* MakeTestProgram(gfx::Device& dev, const char* vssrc, const char* fssrc, const std::string name = "prog")
 {
-    auto* vs = dev.MakeShader(name + "/vert");
-    auto* fs = dev.MakeShader(name + "/frag");
-    TEST_REQUIRE(vs->CompileSource(vssrc));
-    TEST_REQUIRE(fs->CompileSource(fssrc));
-    std::vector<const gfx::Shader*> shaders;
+    gfx::Shader::CreateArgs vertex_shader_args;
+    vertex_shader_args.name   = name + "/vertex";
+    vertex_shader_args.source = vssrc;
+
+    gfx::Shader::CreateArgs fragment_shader_args;
+    fragment_shader_args.name = name + "/fragment";
+    fragment_shader_args.source = fssrc;
+
+    auto vs = dev.CreateShader(name + "/vert", vertex_shader_args);
+    auto fs = dev.CreateShader(name + "/frag", fragment_shader_args);
+    TEST_REQUIRE(vs->IsValid());
+    TEST_REQUIRE(fs->IsValid());
+    std::vector<gfx::ShaderPtr> shaders;
     shaders.push_back(vs);
     shaders.push_back(fs);
 
@@ -163,7 +171,14 @@ void unit_test_device()
         TEST_REQUIRE(dev->FindGeometry("foo") == nullptr);
         TEST_REQUIRE(dev->FindTexture("foo") == nullptr);
 
-        TEST_REQUIRE(dev->MakeShader("foo") != nullptr);
+        gfx::Shader::CreateArgs args;
+        args.name = "test";
+        args.source = "#version 100\n"
+                      "void main() {\n"
+                      "  gl_FragColor = vec4(1.0);\n"
+                      "}\n";
+
+        TEST_REQUIRE(dev->CreateShader("foo", args) != nullptr);
         TEST_REQUIRE(dev->MakeProgram("foo") != nullptr);
         TEST_REQUIRE(dev->MakeGeometry("foo") != nullptr);
         TEST_REQUIRE(dev->MakeTexture("foo") != nullptr);
@@ -193,52 +208,62 @@ void unit_test_shader()
 
     // junk
     {
-        auto* shader = dev->MakeShader("foo");
+        gfx::Shader::CreateArgs args;
+        args.name = "test";
+        args.source = "bla bla";
+
+        auto shader = dev->CreateShader("foo", args);
         TEST_REQUIRE(shader->IsValid() == false);
-        TEST_REQUIRE(shader->CompileSource("bla alsgas") == false);
     }
 
     // fragment shader
     {
-        auto* shader = dev->MakeShader("foo");
-
         // missing frag gl_FragColor
-        const std::string& wrong =
+        gfx::Shader::CreateArgs args;
+        args.name   = "test";
+        args.source =
 R"(#version 100
 precision mediump float;
 void main()
 {
 })";
-        TEST_REQUIRE(shader->CompileSource(wrong) == false);
 
-        const std::string& valid =
+        auto shader = dev->CreateShader("foo", args);
+        TEST_REQUIRE(shader->IsValid() == false);
+
+        args.source =
 R"(#version 100
 precision mediump float;
 void main() {
   gl_FragColor = vec4(1.0);
 })";
-        TEST_REQUIRE(shader->CompileSource(valid) == true);
+
+        shader = dev->CreateShader("foo", args);
+        TEST_REQUIRE(shader->IsValid() == true);
     }
 
     // vertex shader
     {
-        auto* shader = dev->MakeShader("foo");
 
         // missing gl_Position
-        const std::string& wrong =
+        gfx::Shader::CreateArgs args;
+        args.name = "test";
+        args.source =
 R"(#version 100
 attribute vec position;
 void main() {}
 )";
-        TEST_REQUIRE(shader->CompileSource(wrong) == false);
+        auto shader = dev->CreateShader("foo", args);
+        TEST_REQUIRE(shader->IsValid() == false);
 
-        const std::string& valid =
+        args.source =
 R"(#version 100
 void main() {
     gl_Position = vec4(1.0);
     }
 )";
-        TEST_REQUIRE(shader->CompileSource(valid) == true);
+        shader = dev->CreateShader("foo", args);
+        TEST_REQUIRE(shader->IsValid());
     }
 }
 
@@ -290,55 +315,64 @@ void unit_test_program()
 
     // missing fragment shader
     {
-        auto* vert = dev->MakeShader("vert");
-        const std::string& valid =
+        gfx::Shader::CreateArgs args;
+        args.name = "vertex";
+        args.source =
 R"(#version 100
 void main() {
     gl_Position = vec4(1.0);
     }
 )";
-        TEST_REQUIRE(vert->CompileSource(valid) == true);
-        std::vector<const gfx::Shader*> shaders;
+        auto vert = dev->CreateShader("vert", args);
+        TEST_REQUIRE(vert->IsValid());
+
+        std::vector<gfx::ShaderPtr> shaders;
         shaders.push_back(vert);
         TEST_REQUIRE(prog->Build(shaders) == false);
     }
 
     // missing vertex shader
     {
-        auto* frag = dev->MakeShader("frag");
-        const std::string& valid =
+        gfx::Shader::CreateArgs args;
+        args.name = "fragment";
+        args.source =
 R"(#version 100
 precision mediump float;
 void main() {
   gl_FragColor = vec4(1.0);
 })";
-        TEST_REQUIRE(frag->CompileSource(valid) == true);
-        std::vector<const gfx::Shader*> shaders;
+
+        auto frag = dev->CreateShader("frag", args);
+        TEST_REQUIRE(frag->IsValid());
+
+        std::vector<gfx::ShaderPtr> shaders;
         shaders.push_back(frag);
         TEST_REQUIRE(prog->Build(shaders) == false);
     }
 
     // complete program with vertex and fragment shaders
     {
-        auto* vert = dev->MakeShader("vert");
-        const std::string& validvs =
+        gfx::Shader::CreateArgs args;
+        args.name = "vertex";
+        args.source =
 R"(#version 100
 void main() {
     gl_Position = vec4(1.0);
     }
 )";
-        TEST_REQUIRE(vert->CompileSource(validvs) == true);
+        auto vert = dev->CreateShader("vert", args);
+        TEST_REQUIRE(vert->IsValid());
 
-        auto* frag = dev->MakeShader("frag");
-        const std::string& validfs =
+        args.source =
 R"(#version 100
 precision mediump float;
 void main() {
   gl_FragColor = vec4(1.0);
 })";
-        TEST_REQUIRE(frag->CompileSource(validfs) == true);
+        auto frag = dev->CreateShader("frag", args);
+        TEST_REQUIRE(frag->IsValid());
 
-        std::vector<const gfx::Shader*> shaders;
+        std::vector<gfx::ShaderPtr> shaders;
         shaders.push_back(vert);
         shaders.push_back(frag);
         TEST_REQUIRE(prog->Build(shaders) == true);
@@ -607,7 +641,7 @@ void unit_test_render_with_single_texture()
     geom->SetVertexBuffer(verts, 6);
     geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
-    const std::string& fssrc =
+    constexpr const char* fssrc =
 R"(#version 100
 precision mediump float;
 varying vec2 vTexCoord;
@@ -616,7 +650,7 @@ void main() {
   gl_FragColor = texture2D(kTexture, vTexCoord.xy);
 })";
 
-    const std::string& vssrc =
+    constexpr const char* vssrc =
 R"(#version 100
 attribute vec2 aPosition;
 attribute vec2 aTexCoord;
@@ -625,16 +659,9 @@ void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
   vTexCoord = aTexCoord;
 })";
-    auto* vs = dev->MakeShader("vert");
-    auto* fs = dev->MakeShader("frag");
-    TEST_REQUIRE(vs->CompileSource(vssrc));
-    TEST_REQUIRE(fs->CompileSource(fssrc));
-    std::vector<const gfx::Shader*> shaders;
-    shaders.push_back(vs);
-    shaders.push_back(fs);
 
-    auto* prog = dev->MakeProgram("prog");
-    TEST_REQUIRE(prog->Build(shaders));
+    auto* prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
+
 
     auto* texture = dev->MakeTexture("tex");
     texture->Upload(data.GetDataPtr(), 4, 4, gfx::Texture::Format::RGBA);
@@ -688,7 +715,7 @@ void unit_test_render_with_multiple_textures()
     geom->SetVertexBuffer(verts, 6);
     geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
-    const std::string& fssrc =
+    constexpr const char* fssrc =
 R"(#version 100
 precision mediump float;
 uniform sampler2D kTexture0;
@@ -703,22 +730,13 @@ void main() {
         texture2D(kTexture3, vec2(0.0));
 })";
 
-    const std::string& vssrc =
+    constexpr const char* vssrc =
 R"(#version 100
 attribute vec2 aPosition;
 void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
-    auto* vs = dev->MakeShader("vert");
-    auto* fs = dev->MakeShader("frag");
-    TEST_REQUIRE(vs->CompileSource(vssrc));
-    TEST_REQUIRE(fs->CompileSource(fssrc));
-    std::vector<const gfx::Shader*> shaders;
-    shaders.push_back(vs);
-    shaders.push_back(fs);
-
-    auto* prog = dev->MakeProgram("prog");
-    TEST_REQUIRE(prog->Build(shaders));
+    auto* prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
     auto* tex0 = dev->MakeTexture("tex0");
     auto* tex1 = dev->MakeTexture("tex1");
@@ -767,8 +785,8 @@ void unit_test_render_set_float_uniforms()
     geom->SetVertexBuffer(verts, 6);
     geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
-    const std::string& fssrc =
-            R"(#version 100
+    constexpr const char* fssrc =
+R"(#version 100
 precision mediump float;
 uniform float kFloat;
 uniform vec2  kVec2;
@@ -782,22 +800,14 @@ void main() {
   gl_FragColor = vec4(value, value, value, value);
 })";
 
-    const std::string& vssrc =
-            R"(#version 100
+    constexpr const char* vssrc =
+R"(#version 100
 attribute vec2 aPosition;
 void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
-    auto* vs = dev->MakeShader("vert");
-    auto* fs = dev->MakeShader("frag");
-    TEST_REQUIRE(vs->CompileSource(vssrc));
-    TEST_REQUIRE(fs->CompileSource(fssrc));
-    std::vector<const gfx::Shader*> shaders;
-    shaders.push_back(vs);
-    shaders.push_back(fs);
 
-    auto* prog = dev->MakeProgram("prog");
-    TEST_REQUIRE(prog->Build(shaders));
+    auto* prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
@@ -890,8 +900,8 @@ void unit_test_render_set_int_uniforms()
     geom->SetVertexBuffer(verts, 6);
     geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
-    const std::string& fssrc =
-            R"(#version 100
+    constexpr const char* fssrc =
+R"(#version 100
 precision mediump float;
 uniform int kValue;
 uniform ivec2 kVec2;
@@ -902,21 +912,15 @@ void main() {
     gl_FragColor = vec4(1.0);
 })";
 
-    const std::string& vssrc =
-            R"(#version 100
+    constexpr const char* vssrc =
+R"(#version 100
 attribute vec2 aPosition;
 void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
-    auto *vs = dev->MakeShader("vert");
-    auto *fs = dev->MakeShader("frag");
-    TEST_REQUIRE(vs->CompileSource(vssrc));
-    TEST_REQUIRE(fs->CompileSource(fssrc));
-    std::vector<const gfx::Shader *> shaders;
-    shaders.push_back(vs);
-    shaders.push_back(fs);
-    auto *prog = dev->MakeProgram("prog");
-    TEST_REQUIRE(prog->Build(shaders));
+
+    auto *prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
+
 
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
@@ -977,8 +981,8 @@ void unit_test_render_set_matrix2x2_uniform()
     geom->SetVertexBuffer(verts, 6);
     geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
-    const std::string& fssrc =
-            R"(#version 100
+    constexpr const char* fssrc =
+R"(#version 100
 precision mediump float;
 uniform mat2 kMatrix;
 void main() {
@@ -989,21 +993,14 @@ void main() {
     kMatrix[1][1]);
 })";
 
-    const std::string& vssrc =
-            R"(#version 100
+    constexpr const char* vssrc =
+R"(#version 100
 attribute vec2 aPosition;
 void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
-    auto* vs = dev->MakeShader("vert");
-    auto* fs = dev->MakeShader("frag");
-    TEST_REQUIRE(vs->CompileSource(vssrc));
-    TEST_REQUIRE(fs->CompileSource(fssrc));
-    std::vector<const gfx::Shader*> shaders;
-    shaders.push_back(vs);
-    shaders.push_back(fs);
-    auto* prog = dev->MakeProgram("prog");
-    TEST_REQUIRE(prog->Build(shaders));
+
+    auto* prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
@@ -1045,8 +1042,8 @@ void unit_test_render_set_matrix3x3_uniform()
     geom->SetVertexBuffer(verts, 6);
     geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
-    const std::string& fssrc =
-            R"(#version 100
+    constexpr const char* fssrc =
+R"(#version 100
 precision mediump float;
 uniform mat3 kMatrix;
 void main() {
@@ -1056,21 +1053,14 @@ void main() {
   gl_FragColor = vec4(r, g, b, 1.0);
 })";
 
-    const std::string& vssrc =
-            R"(#version 100
+    constexpr const char* vssrc =
+R"(#version 100
 attribute vec2 aPosition;
 void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
-    auto* vs = dev->MakeShader("vert");
-    auto* fs = dev->MakeShader("frag");
-    TEST_REQUIRE(vs->CompileSource(vssrc));
-    TEST_REQUIRE(fs->CompileSource(fssrc));
-    std::vector<const gfx::Shader*> shaders;
-    shaders.push_back(vs);
-    shaders.push_back(fs);
-    auto* prog = dev->MakeProgram("prog");
-    TEST_REQUIRE(prog->Build(shaders));
+
+    auto* prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
@@ -1113,8 +1103,8 @@ void unit_test_render_set_matrix4x4_uniform()
     geom->SetVertexBuffer(verts, 6);
     geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
-    const std::string& fssrc =
-            R"(#version 100
+    constexpr const char* fssrc =
+R"(#version 100
 precision mediump float;
 uniform mat4 kMatrix;
 void main() {
@@ -1125,21 +1115,14 @@ void main() {
   gl_FragColor = vec4(r, g, b, a);
 })";
 
-    const std::string& vssrc =
-            R"(#version 100
+    constexpr const char* vssrc =
+R"(#version 100
 attribute vec2 aPosition;
 void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
-    auto* vs = dev->MakeShader("vert");
-    auto* fs = dev->MakeShader("frag");
-    TEST_REQUIRE(vs->CompileSource(vssrc));
-    TEST_REQUIRE(fs->CompileSource(fssrc));
-    std::vector<const gfx::Shader*> shaders;
-    shaders.push_back(vs);
-    shaders.push_back(fs);
-    auto* prog = dev->MakeProgram("prog");
-    TEST_REQUIRE(prog->Build(shaders));
+
+    auto* prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
@@ -1197,28 +1180,20 @@ void unit_test_uniform_sampler_optimize_bug()
     geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
     // no mention of the texture sampler in the fragment shader!
-    const std::string& fssrc =
-            R"(#version 100
+    constexpr const char* fssrc =
+R"(#version 100
 precision mediump float;
 void main() {
   gl_FragColor = vec4(1.0);
 })";
 
-    const std::string& vssrc =
-            R"(#version 100
+    constexpr const char* vssrc =
+R"(#version 100
 attribute vec2 aPosition;
 void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
-    auto* vs = dev->MakeShader("vert");
-    auto* fs = dev->MakeShader("frag");
-    TEST_REQUIRE(vs->CompileSource(vssrc));
-    TEST_REQUIRE(fs->CompileSource(fssrc));
-    std::vector<const gfx::Shader*> shaders;
-    shaders.push_back(vs);
-    shaders.push_back(fs);
-    auto* prog = dev->MakeProgram("prog");
-    TEST_REQUIRE(prog->Build(shaders));
+    auto* prog = MakeTestProgram(*dev, vssrc, fssrc, "prog");
 
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;
@@ -1271,16 +1246,16 @@ void unit_test_clean_textures()
         texture->Upload(pixels, 2, 3, gfx::Texture::Format::RGB);
         TEST_REQUIRE(dev->FindTexture("foo"));
 
-        const char* vs = R"(
-#version 100
+        constexpr const char* vs =
+R"(#version 100
 attribute vec2 aPosition;
 void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 }
 )";
 
-        const char* fs = R"(
-#version 100
+        constexpr const char* fs =
+R"(#version 100
 precision mediump float;
 uniform sampler2D kTexture;
 void main() {
@@ -1317,16 +1292,16 @@ void main() {
         texture->Upload(pixels, 2, 3, gfx::Texture::Format::RGB);
         TEST_REQUIRE(dev->FindTexture("foo"));
 
-        const char* vs = R"(
-#version 100
+        constexpr const char* vs =
+R"(#version 100
 attribute vec2 aPosition;
 void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 }
 )";
 
-        const char* fs = R"(
-#version 100
+        constexpr const char* fs =
+R"(#version 100
 precision mediump float;
 uniform sampler2D kTexture;
 void main() {
@@ -1424,29 +1399,21 @@ void unit_test_render_dynamic()
     geom->SetVertexBuffer(verts1, 6);
     geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
 
-    const std::string& fssrc =
-            R"(#version 100
+    constexpr const char* fssrc =
+R"(#version 100
 precision mediump float;
 void main() {
   gl_FragColor = vec4(1.0);
 })";
 
-    const std::string& vssrc =
-            R"(#version 100
+    constexpr const char* vssrc =
+R"(#version 100
 attribute vec2 aPosition;
 void main() {
   gl_Position = vec4(aPosition.xy, 1.0, 1.0);
 })";
-    auto* vs = dev->MakeShader("vert");
-    auto* fs = dev->MakeShader("frag");
-    TEST_REQUIRE(vs->CompileSource(vssrc));
-    TEST_REQUIRE(fs->CompileSource(fssrc));
-    std::vector<const gfx::Shader*> shaders;
-    shaders.push_back(vs);
-    shaders.push_back(fs);
 
-    auto* prog = dev->MakeProgram("prog");
-    TEST_REQUIRE(prog->Build(shaders));
+    auto* prog = MakeTestProgram(*dev, vssrc, fssrc);
 
     gfx::Device::State state;
     state.blending = gfx::Device::State::BlendOp::None;

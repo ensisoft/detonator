@@ -170,30 +170,32 @@ Program* Painter::GetProgram(const ShaderProgram& program,
     Program* gpu_program = mDevice->FindProgram(program_gpu_id);
     if (!gpu_program)
     {
-        gfx::Shader* material_shader = mDevice->FindShader(material_gpu_id);
+        ShaderPtr material_shader = mDevice->FindShader(material_gpu_id);
         if (material_shader == nullptr)
         {
             std::string material_shader_source = program.GetShader(material, material_environment, *mDevice);
             if (material_shader_source.empty())
                 return nullptr;
 
-            material_shader = mDevice->MakeShader(material_gpu_id);
-            material_shader->SetName(material.GetShaderName(material_environment));
-            material_shader->CompileSource(std::move(material_shader_source));
+            Shader::CreateArgs args;
+            args.name   = material.GetShaderName(material_environment);
+            args.source = material_shader_source;
+            material_shader = mDevice->CreateShader(material_gpu_id, args);
         }
         if (!material_shader->IsValid())
             return nullptr;
 
-        gfx::Shader* drawable_shader = mDevice->FindShader(drawable_gpu_id);
+        ShaderPtr drawable_shader = mDevice->FindShader(drawable_gpu_id);
         if (drawable_shader == nullptr)
         {
             std::string drawable_shader_source = program.GetShader(drawable, drawable_environment, *mDevice);
             if (drawable_shader_source.empty())
                 return nullptr;
 
-            drawable_shader = mDevice->MakeShader(drawable_gpu_id);
-            drawable_shader->SetName(drawable.GetShaderName(drawable_environment));
-            drawable_shader->CompileSource(std::move(drawable_shader_source));
+            Shader::CreateArgs args;
+            args.name   = drawable.GetShaderName(drawable_environment);
+            args.source = drawable_shader_source;
+            drawable_shader = mDevice->CreateShader(drawable_gpu_id, args);
         }
         if (!drawable_shader->IsValid())
             return nullptr;
@@ -202,7 +204,7 @@ Program* Painter::GetProgram(const ShaderProgram& program,
                                               program.GetName(),
                                               drawable_shader->GetName(),
                                               material_shader->GetName());
-        std::vector<const Shader*> shaders;
+        std::vector<ShaderPtr> shaders;
         shaders.push_back(drawable_shader);
         shaders.push_back(material_shader);
 

@@ -50,6 +50,7 @@
 #include "graphics/geometry.h"
 #include "graphics/image.h"
 #include "graphics/transform.h"
+#include "graphics/utility.h"
 
 // some good information here about text rendering
 // https://gankra.github.io/blah/text-hates-you/
@@ -872,18 +873,7 @@ void main() {
     auto* program = device.FindProgram("BitmapFontCompositeProgram");
     if (program == nullptr)
     {
-        program  = device.MakeProgram("BitmapFontCompositeProgram");
-        program->SetName("BitmapFontCompositeProgram");
-        auto* fs = device.MakeShader("BitmapFontCompositeFragmentShader");
-        auto* vs = device.MakeShader("BitmapFontCompositeVertexShader");
-        fs->SetName("BitmapFontCompositeFragmentShader");
-        if (!fs->CompileSource(fragment_src))
-            return nullptr;
-        vs->SetName("BitmapFontCompositeVertexShader");
-        if (!vs->CompileSource(vertex_src))
-            return nullptr;
-        if (!program->Build(fs, vs))
-            return nullptr;
+        program = gfx::MakeProgram(vertex_src, fragment_src, "BitmapFontComposite", device);
     }
 
     auto* geometry = device.FindGeometry("BitmapFontTextGeometry");

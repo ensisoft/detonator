@@ -49,7 +49,7 @@ namespace gfx
         // Returns true if the build was successful.
         // Failed build will leave the program object in the previous state.
         // Trying to build from shaders that are not valid is considered a bug.
-        virtual bool Build(const std::vector<const Shader*>& shaders) = 0;
+        virtual bool Build(const std::vector<std::shared_ptr<const Shader>>& shaders) = 0;
 
         // Returns true if the program is valid or not I.e. it has been
         // successfully build and can be used for drawing.
@@ -135,8 +135,14 @@ namespace gfx
         inline void SetUniform(const char* name, const glm::mat2& mat) noexcept
         { SetUniform(name, *(const Matrix2x2*)glm::value_ptr(mat)); }
 
-        inline bool Build(const Shader* vertex, const Shader* fragment) noexcept
-        {  return Build( std::vector<const Shader*> {vertex, fragment }); }
+        inline bool Build(const std::shared_ptr<const Shader>& vertex,
+                          const std::shared_ptr<const Shader>& fragment) noexcept
+        {
+            std::vector<std::shared_ptr<const Shader>> shaders;
+            shaders.push_back(vertex);
+            shaders.push_back(fragment);
+            return Build(shaders);
+        }
     private:
     };
 

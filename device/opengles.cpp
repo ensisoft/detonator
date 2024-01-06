@@ -598,20 +598,21 @@ public:
         mDefaultMagTextureFilter = filter;
     }
 
-    virtual gfx::Shader* FindShader(const std::string& name) override
+    virtual gfx::ShaderPtr FindShader(const std::string& name) override
     {
         auto it = mShaders.find(name);
         if (it == std::end(mShaders))
             return nullptr;
-        return it->second.get();
+        return it->second;
     }
 
-    virtual gfx::Shader* MakeShader(const std::string& name) override
+    virtual gfx::ShaderPtr CreateShader(const std::string& id, const gfx::Shader::CreateArgs& args) override
     {
-        auto shader = std::make_unique<ShaderImpl>(mGL);
-        auto* ret   = shader.get();
-        mShaders[name] = std::move(shader);
-        return ret;
+        auto shader = std::make_shared<ShaderImpl>(mGL);
+        shader->SetName(args.name);
+        shader->CompileSource(args.source);
+        mShaders[id] = shader;
+        return shader;
     }
 
     virtual gfx::Program* FindProgram(const std::string& name) override
@@ -2067,16 +2068,16 @@ private:
                 DEBUG("Deleted program object. [name='%1', handle='%2']", mName, mProgram);
             }
         }
-        virtual bool Build(const std::vector<const gfx::Shader*>& shaders) override
+        virtual bool Build(const std::vector<std::shared_ptr<const gfx::Shader>>& shaders) override
         {
             GLuint prog = mGL.glCreateProgram();
             DEBUG("Created new GL program object. [name='%1', handle='%2']", mName, prog);
 
-            for (const auto* shader : shaders)
+            for (const auto& shader : shaders)
             {
                 ASSERT(shader->IsValid());
                 GL_CALL(glAttachShader(prog,
-                    static_cast<const ShaderImpl*>(shader)->GetHandle()));
+                    static_cast<const ShaderImpl*>(shader.get())->GetHandle()));
             }
             GL_CALL(glLinkProgram(prog));
             GL_CALL(glValidateProgram(prog));
@@ -2446,7 +2447,7 @@ private:
                 DEBUG("Deleted shader object. [name='%1', handle=[%2]", mName, mShader);
             }
         }
-        virtual bool CompileSource(const std::string& source) override
+        void CompileSource(const std::string& source)
         {
             GLenum type = GL_NONE;
             std::stringstream ss(source);
@@ -2461,7 +2462,7 @@ private:
             if (type == GL_NONE)
             {
                 ERROR("Failed to identify shader type. [name='%1']", mName);
-                return false;
+                return;
             }
 
             GLint status = 0;
@@ -2484,29 +2485,25 @@ private:
             {
                 GL_CALL(glDeleteShader(shader));
                 ERROR("Shader compile error. [name='%1', info='%2']", mName, compile_info);
-                return false;
+                return;
             }
             else
             {
                 DEBUG("Shader was built successfully. [name='%1', info='%2']", mName, compile_info);
             }
-
-            if (mShader)
-            {
-                GL_CALL(glDeleteShader(mShader));
-            }
             mShader = shader;
-            mVersion++;
-            return true;
         }
+
+
         virtual bool IsValid() const override
         { return mShader != 0; }
-        virtual void SetName(const std::string& name) override
-        { mName = name; }
         virtual std::string GetName() const override
         { return mName; }
 
-        GLuint GetHandle() const
+        inline void SetName(std::string name) noexcept
+        { mName = std::move(name); }
+
+        inline GLuint GetHandle() const noexcept
         { return mShader; }
 
     private:
@@ -2903,7 +2900,7 @@ private:
     };
 private:
     std::map<std::string, std::unique_ptr<gfx::Geometry>> mGeoms;
-    std::map<std::string, std::unique_ptr<gfx::Shader>> mShaders;
+    std::map<std::string, std::shared_ptr<gfx::Shader>> mShaders;
     std::map<std::string, std::unique_ptr<gfx::Program>> mPrograms;
     std::map<std::string, std::unique_ptr<gfx::Texture>> mTextures;
     std::map<std::string, std::unique_ptr<gfx::Framebuffer>> mFBOs;

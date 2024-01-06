@@ -35,13 +35,19 @@ Program* MakeProgram(const std::string& vertex_source,
                      const std::string& program_name,
                      Device& device)
 {
-    auto* vs = device.MakeShader(program_name + "/vertex-shader");
-    auto* fs = device.MakeShader(program_name + "/fragment-shader");
-    vs->SetName(program_name + "/vertex-shader");
-    fs->SetName(program_name + "/fragment-shader");
-    if (!vs->CompileSource(vertex_source))
+    Shader::CreateArgs vertex_args;
+    vertex_args.name   = program_name + "/VertexShader";
+    vertex_args.source = vertex_source;
+
+    Shader::CreateArgs fragment_args;
+    fragment_args.name   = program_name + "/FragmentShader";
+    fragment_args.source = fragment_source;
+
+    auto vs = device.CreateShader(program_name + "/vs", vertex_args);
+    auto fs = device.CreateShader(program_name + "/fs", fragment_args);
+    if (!vs->IsValid())
         return nullptr;
-    if (!fs->CompileSource(fragment_source))
+    if (!fs->IsValid())
         return nullptr;
 
     auto* program = device.MakeProgram(program_name);
