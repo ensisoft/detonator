@@ -62,11 +62,10 @@ bool operator==(const gfx::Geometry::DrawCommand& lhs, const gfx::Geometry::Draw
 class TestShader : public gfx::Shader
 {
 public:
-    virtual bool CompileSource(const std::string& source) override
-    {
-        mSource = source;
-        return true;
-    }
+    TestShader(const std::string& source)
+      : mSource(source)
+    {}
+
     virtual bool IsValid() const override
     { return true; }
 
@@ -152,7 +151,7 @@ private:
 class TestProgram : public gfx::Program
 {
 public:
-    virtual bool Build(const std::vector<const gfx::Shader*>& shaders) override
+    virtual bool Build(const std::vector<gfx::ShaderPtr>& shaders) override
     {
         return true;
     }
@@ -376,19 +375,19 @@ public:
     {}
 
     // resource creation APIs
-    virtual gfx::Shader* FindShader(const std::string& name) override
+    virtual gfx::ShaderPtr FindShader(const std::string& id) override
     {
-        auto it = mShaderIndexMap.find(name);
+        auto it = mShaderIndexMap.find(id);
         if (it == mShaderIndexMap.end())
             return nullptr;
-        return mShaders[it->second].get();
+        return mShaders[it->second];
     }
-    virtual gfx::Shader* MakeShader(const std::string& name) override
+    virtual gfx::ShaderPtr CreateShader(const std::string& id, const gfx::Shader::CreateArgs& args) override
     {
         const size_t index = mShaders.size();
-        mShaders.emplace_back(new TestShader);
-        mShaderIndexMap[name] = index;
-        return mShaders.back().get();
+        mShaders.emplace_back(new TestShader(args.source));
+        mShaderIndexMap[id] = index;
+        return mShaders.back();
     }
     virtual gfx::Program* FindProgram(const std::string& name) override
     {
@@ -518,7 +517,7 @@ private:
     std::vector<std::unique_ptr<TestGeometry>> mGeoms;
 
     std::unordered_map<std::string, std::size_t> mShaderIndexMap;
-    std::vector<std::unique_ptr<TestShader>> mShaders;
+    std::vector<std::shared_ptr<TestShader>> mShaders;
 
     std::unordered_map<std::string, std::size_t> mProgramIndexMap;
     std::vector<std::unique_ptr<TestProgram>> mPrograms;

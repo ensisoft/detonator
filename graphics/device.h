@@ -25,6 +25,7 @@
 #include "graphics/types.h"
 #include "graphics/color4f.h"
 #include "graphics/bitmap.h"
+#include "graphics/shader.h"
 
 namespace gfx
 {
@@ -170,8 +171,8 @@ namespace gfx
         virtual void SetDefaultTextureFilter(MagFilter filter) = 0;
 
         // resource creation APIs
-        virtual Shader* FindShader(const std::string& name) = 0;
-        virtual Shader* MakeShader(const std::string& name) = 0;
+        virtual ShaderPtr FindShader(const std::string& id) = 0;
+        virtual ShaderPtr CreateShader(const std::string& id, const Shader::CreateArgs& args) = 0;
         virtual Program* FindProgram(const std::string& name) = 0;
         virtual Program* MakeProgram(const std::string& name) = 0;
         virtual Geometry* FindGeometry(const std::string& name) = 0;
