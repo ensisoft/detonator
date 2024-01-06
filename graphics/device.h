@@ -26,6 +26,7 @@
 #include "graphics/color4f.h"
 #include "graphics/bitmap.h"
 #include "graphics/shader.h"
+#include "graphics/program.h"
 
 namespace gfx
 {
@@ -189,7 +190,17 @@ namespace gfx
         virtual void DeleteFramebuffers() = 0;
 
         // Draw the given geometry using the given program with the specified state applied.
-        virtual void Draw(const Program& program, const GeometryDrawCommand& geometry, const State& state, Framebuffer* fbo = nullptr) const = 0;
+        virtual void Draw(const Program& program, const ProgramState& program_state,
+                          const GeometryDrawCommand& geometry, const State& state, Framebuffer* fbo = nullptr) const = 0;
+
+
+        void Draw(const Program& program, const GeometryDrawCommand& geometry, const State& state, Framebuffer* fbo  = nullptr) const
+        {
+            const auto& program_state = program.TransferState();
+            if (program_state)
+                Draw(program, *program_state, geometry, state, fbo);
+            else Draw(program, ProgramState(), geometry, state, fbo);
+        }
 
         enum GCFlags {
             Textures   = 0x1,

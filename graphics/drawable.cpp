@@ -1313,7 +1313,7 @@ bool SimpleShapeClass::FromJson(const data::Reader& data)
     return ok;
 }
 
-void SimpleShapeInstance::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
+void SimpleShapeInstance::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
 {
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
@@ -1369,7 +1369,7 @@ Drawable::Primitive SimpleShapeInstance::GetPrimitive() const
     return Primitive::Triangles;
 }
 
-void SimpleShape::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
+void SimpleShape::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
 {
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
@@ -1426,7 +1426,7 @@ Drawable::Primitive SimpleShape::GetPrimitive() const
     return Primitive::Triangles;
 }
 
-void Grid::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
+void Grid::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
 {
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
@@ -1972,7 +1972,7 @@ bool PolygonMeshClass::UploadGeometry(const Environment& env, Geometry& geometry
     return true;
 }
 
-void PolygonMeshInstance::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
+void PolygonMeshInstance::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
 {
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
     const auto& kProjectionMatrix = *env.proj_matrix;
@@ -2179,7 +2179,7 @@ bool ParticleEngineClass::Upload(const Drawable::Environment& env, const Instanc
     return true;
 }
 
-void ParticleEngineClass::ApplyDynamicState(const Environment& env, Program& program) const
+void ParticleEngineClass::ApplyDynamicState(const Environment& env, ProgramState& program) const
 {
     if (mParams.coordinate_space == CoordinateSpace::Global)
     {
@@ -2761,7 +2761,7 @@ bool ParticleEngineClass::UpdateParticle(const Environment& env, InstanceState& 
     return true;
 }
 
-void ParticleEngineInstance::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
+void ParticleEngineInstance::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
 {
     state.line_width = 1.0;
     state.culling    = Culling::None;
@@ -2828,7 +2828,7 @@ void ParticleEngineInstance::Execute(const Environment& env, const Command& cmd)
     else WARN("No such particle engine command. [cmd='%1']", cmd.name);
 }
 
-void TileBatch::ApplyDynamicState(const Environment& env, Program& program, RasterState& raster) const
+void TileBatch::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& raster) const
 {
     const auto pixel_scale = std::min(env.pixel_ratio.x, env.pixel_ratio.y);
 
@@ -3052,7 +3052,7 @@ Drawable::Primitive TileBatch::GetPrimitive() const
     return Primitive::Points;
 }
 
-void DynamicLine3D::ApplyDynamicState(const Environment& environment, Program& program, RasterState& state) const
+void DynamicLine3D::ApplyDynamicState(const Environment& environment, ProgramState& program, RasterState& state) const
 {
     program.SetUniform("kProjectionMatrix",  *environment.proj_matrix);
     program.SetUniform("kModelViewMatrix", *environment.view_matrix * *environment.model_matrix);
@@ -3101,7 +3101,7 @@ bool DynamicLine3D::Upload(const Environment& environment, Geometry& geometry) c
     return true;
 }
 
-void DebugDrawableBase::ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const
+void DebugDrawableBase::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
 {
     mDrawable->ApplyDynamicState(env, program, state);
 }

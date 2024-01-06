@@ -62,7 +62,7 @@ namespace gfx
         // When any object is being rendered this is the final place to change any of the state
         // required to draw. I.e. the state coming in is the combination of the state from the
         // drawable, material and painter. This applies both to the program and the state object.
-        virtual void ApplyDynamicState(const Device& device, Program& program, Device::State& state) const {}
+        virtual void ApplyDynamicState(const Device& device, ProgramState& program, Device::State& state) const {}
 
         // todo:
         virtual void ApplyStaticState(const Device& device, Program& program) const {}

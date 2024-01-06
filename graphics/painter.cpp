@@ -77,14 +77,16 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
         if (gpu_program == nullptr)
             continue;
 
+        ProgramState program_state;
+
         Material::RasterState material_raster_state;
-        if (!draw.material->ApplyDynamicState(material_env, *mDevice, *gpu_program, material_raster_state))
+        if (!draw.material->ApplyDynamicState(material_env, *mDevice, program_state, material_raster_state))
             continue;
 
         Drawable::RasterState drawable_raster_state;
         drawable_raster_state.culling    = draw.state.culling;
         drawable_raster_state.line_width = draw.state.line_width;
-        draw.drawable->ApplyDynamicState(drawable_env, *gpu_program, drawable_raster_state);
+        draw.drawable->ApplyDynamicState(drawable_env, program_state, drawable_raster_state);
 
         device_state.blending      = material_raster_state.blending;
         device_state.premulalpha   = material_raster_state.premultiplied_alpha;
@@ -99,7 +101,7 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
         device_state.bWriteColor   = draw.state.write_color;
         device_state.depth_test    = draw.state.depth_test;
 
-        program.ApplyDynamicState(*mDevice, *gpu_program, device_state);
+        program.ApplyDynamicState(*mDevice, program_state, device_state);
 
         // The drawable provides the draw command which identifies the
         // sequence of more primitive draw commands set on the geometry
@@ -107,6 +109,7 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
         const auto& cmd_params = draw.drawable->GetDrawCmd();
 
         mDevice->Draw(*gpu_program,
+                      program_state,
                       GeometryDrawCommand(*geometry,
                                           cmd_params.draw_cmd_start,
                                           cmd_params.draw_cmd_count),
@@ -214,7 +217,7 @@ Program* Painter::GetProgram(const ShaderProgram& program,
         if (!gpu_program->IsValid())
             return nullptr;
 
-        material.ApplyStaticState(material_environment, *mDevice, *gpu_program);
+        material.ApplyStaticState(material_environment, *mDevice, gpu_program->GetState());
 
         program.ApplyStaticState(*mDevice, *gpu_program);
     }

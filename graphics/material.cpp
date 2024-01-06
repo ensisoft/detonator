@@ -1122,7 +1122,7 @@ std::string MaterialClass::GetShader(const State& state, const Device& device) c
     return source;
 }
 
-bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Program& program) const noexcept
+bool MaterialClass::ApplyDynamicState(const State& state, Device& device, ProgramState& program) const noexcept
 {
     program.SetUniform("kRenderPoints", state.render_points ? 1.0f : 0.0f);
     program.SetUniform("kTime", (float)state.material_time);
@@ -1156,7 +1156,7 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
     return true;
 }
 
-void MaterialClass::ApplyStaticState(const State& state, Device& device, Program& program) const noexcept
+void MaterialClass::ApplyStaticState(const State& state, Device& device, ProgramState& program) const noexcept
 {
     if (mType == Type::Color)
     {
@@ -1243,7 +1243,7 @@ void MaterialClass::IntoJson(data::Writer& data) const
 }
 
 template<typename T> // static
-bool MaterialClass::SetUniform(const char* name, const UniformMap* uniforms, const T& backup, Program& program)
+bool MaterialClass::SetUniform(const char* name, const UniformMap* uniforms, const T& backup, ProgramState& program)
 {
     if (uniforms)
     {
@@ -1962,7 +1962,7 @@ void FragmentShaderMain()
     return source;
 }
 
-bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, Program& program) const noexcept
+bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, ProgramState& program) const noexcept
 {
     auto* map = SelectTextureMap(state);
     if (map == nullptr)
@@ -2150,7 +2150,7 @@ void FragmentShaderMain()
     return source;
 }
 
-bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device, Program& program) const noexcept
+bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device, ProgramState& program) const noexcept
 {
     auto* map = SelectTextureMap(state);
     if (map == nullptr)
@@ -2224,7 +2224,7 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
     return true;
 }
 
-bool MaterialClass::ApplyCustomDynamicState(const State& state, Device& device, Program& program) const noexcept
+bool MaterialClass::ApplyCustomDynamicState(const State& state, Device& device, ProgramState& program) const noexcept
 {
     for (const auto& uniform : mUniforms)
     {
@@ -2284,7 +2284,7 @@ bool MaterialClass::ApplyCustomDynamicState(const State& state, Device& device, 
     return true;
 }
 
-bool MaterialInstance::ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const
+bool MaterialInstance::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& raster) const
 {
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
@@ -2314,7 +2314,7 @@ bool MaterialInstance::ApplyDynamicState(const Environment& env, Device& device,
     return true;
 }
 
-void MaterialInstance::ApplyStaticState(const Environment& env, Device& device, Program& program) const
+void MaterialInstance::ApplyStaticState(const Environment& env, Device& device, ProgramState& program) const
 {
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
@@ -2353,7 +2353,7 @@ TextMaterial::TextMaterial(const TextBuffer& text)  : mText(text)
 TextMaterial::TextMaterial(TextBuffer&& text)
   : mText(std::move(text))
 {}
-bool TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const
+bool TextMaterial::ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& raster) const
 {
     raster.blending = RasterState::Blending::Transparent;
 
@@ -2419,7 +2419,7 @@ bool TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
     program.SetUniform("kColor", mColor);
     return true;
 }
-void TextMaterial::ApplyStaticState(const Environment& env, Device& device, gfx::Program& program) const
+void TextMaterial::ApplyStaticState(const Environment& env, Device& device, gfx::ProgramState& program) const
 {}
 std::string TextMaterial::GetShader(const Environment& env, const Device& device) const
 {
