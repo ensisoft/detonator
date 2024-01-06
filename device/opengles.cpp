@@ -712,7 +712,8 @@ public:
         mFBOs.clear();
     }
 
-    virtual void Draw(const gfx::Program& program, const gfx::GeometryDrawCommand& geometry, const State& state, gfx::Framebuffer* fbo) const override
+    virtual void Draw(const gfx::Program& program, const gfx::ProgramState& program_state,
+                      const gfx::GeometryDrawCommand& geometry, const State& state, gfx::Framebuffer* fbo) const override
     {
         if (!SetupFBO(fbo))
             return;
@@ -723,7 +724,7 @@ public:
         mygeom->SetFrameStamp(mFrameNumber);
 
         // start using this program
-        GL_CALL(glUseProgram(myprog->GetName()));
+        GL_CALL(glUseProgram(myprog->GetHandle()));
 
         // IMPORTANT !
         // the program doesn't set the uniforms directly but instead of compares the uniform
@@ -740,11 +741,16 @@ public:
         TRACE_ENTER(SetUniforms);
 
         // flush pending uniforms onto the GPU program object
-        for (size_t i=0; i<myprog->GetNumUniformsSet(); ++i)
+        for (size_t i=0; i<program_state.GetUniformCount(); ++i)
         {
-            const auto& uniform = myprog->GetUniformSetting(i);
-            const auto& value   = uniform.value;
+            const auto& setting = program_state.GetUniformSetting(i);
+            const auto& uniform = myprog->GetUniform(setting.name);
+            if (uniform.location == -1)
+                continue;
+
+            const auto& value = setting.value;
             const auto location = uniform.location;
+
             if (const auto* ptr = std::get_if<int>(&value))
                 GL_CALL(glUniform1i(location, *ptr));
             else if (const auto* ptr = std::get_if<float>(&value))
@@ -757,8 +763,15 @@ public:
                 GL_CALL(glUniform3f(location, ptr->x, ptr->y, ptr->z));
             else if (const auto* ptr = std::get_if<glm::vec4>(&value))
                 GL_CALL(glUniform4f(location, ptr->x, ptr->y, ptr->z, ptr->w));
-            else if (const auto* ptr = std::get_if<gfx::Color4f>(&value))
-                GL_CALL(glUniform4f(location, ptr->Red(), ptr->Green(), ptr->Blue(), ptr->Alpha()));
+            else if (const auto* ptr = std::get_if<gfx::Color4f>(&value)) {
+                // Assume sRGB encoded color values now. so this is a simple
+                // place to convert to linear and will catch all uses without
+                // breaking the higher level APIs
+                // the cost of the sRGB conversion should be mitigated due to
+                // the hash check to compare to the previous value.
+                const auto& linear = sRGB_Decode(*ptr);
+                GL_CALL(glUniform4f(location, linear.Red(), linear.Green(), linear.Blue(), linear.Alpha()));
+            }
             else if (const auto* ptr = std::get_if<glm::mat2>(&value))
                 GL_CALL(glUniformMatrix2fv(location, 1, GL_FALSE /* transpose */, glm::value_ptr(*ptr)));
             else if (const auto* ptr = std::get_if<glm::mat3>(&value))
@@ -769,8 +782,6 @@ public:
         }
 
         TRACE_LEAVE(SetUniforms);
-        // clear pending uniform state after everything has been set.
-        myprog->ClearPendingUniforms();
 
         // this check is fine for any draw case because even when drawing with
         // indices there should be vertex data. if there isn't that means the
@@ -876,7 +887,7 @@ public:
         }
 
         // set program texture bindings
-        size_t num_textures = myprog->GetNumSamplersSet();
+        size_t num_textures = program_state.GetSamplerCount();
         if (num_textures > mTextureUnits.size())
         {
             WARN("Program uses more textures than there are units available.");
@@ -898,11 +909,12 @@ public:
         TRACE_ENTER(BindTextures);
         for (size_t i=0; i<num_textures; ++i)
         {
-            const auto& sampler = myprog->GetSamplerSetting(i);
-            auto* texture = sampler.texture;
+            const auto& setting = program_state.GetSamplerSetting(i);
+            const auto& sampler = myprog->GetUniform(setting.name);
+
+            auto* texture = (TextureImpl*)setting.texture;
             texture->SetFrameStamp(mFrameNumber);
-            // if the shader compiler has removed the uniform the location is -1
-            // in which case we can skip rest of the work.
+
             if (sampler.location == -1)
                 continue;
 
@@ -1101,7 +1113,7 @@ public:
         // first enable the vertex attributes.
         for (const auto& attr : vertex_layout.attributes)
         {
-            const GLint location = mGL.glGetAttribLocation(myprog->GetName(), attr.name.c_str());
+            const GLint location = mGL.glGetAttribLocation(myprog->GetHandle(), attr.name.c_str());
             if (location == -1)
                 continue;
             const auto size   = attr.num_vector_components;
@@ -2114,309 +2126,49 @@ private:
         virtual bool IsValid() const override
         { return mProgram != 0; }
 
-        virtual void SetUniform(const char* name, int x) override
-        {
-            auto& ret = GetUniform(name);
-            if (ret.location == -1)
-                return;
-            uint32_t hash = 0;
-            hash = base::hash_combine(hash, x);
-            if (hash != ret.hash)
-            {
-                mUniforms.push_back({ret.location, x});
-                ret.hash = hash;
-            }
-        }
-        virtual void SetUniform(const char* name, int x, int y) override
-        {
-            auto& ret = GetUniform(name);
-            if (ret.location == -1)
-                return;
-
-            uint32_t hash = 0;
-            hash = base::hash_combine(hash, x);
-            hash = base::hash_combine(hash, y);
-            if (hash != ret.hash)
-            {
-                mUniforms.push_back({ret.location, glm::ivec2(x, y)});
-                ret.hash = hash;
-            }
-        }
-
-        virtual void SetUniform(const char* name, float x) override
-        {
-            auto& ret = GetUniform(name);
-            if (ret.location == -1)
-                return;
-            uint32_t hash = 0;
-            hash = base::hash_combine(hash, x);
-            if (ret.hash != hash)
-            {
-                mUniforms.push_back({ret.location, x});
-                ret.hash = hash;
-            }
-        }
-        virtual void SetUniform(const char* name, float x, float y) override
-        {
-            auto& ret = GetUniform(name);
-            if (ret.location == -1)
-                return;
-
-            uint32_t hash = 0;
-            hash = base::hash_combine(hash, x);
-            hash = base::hash_combine(hash, y);
-            if (hash != ret.hash)
-            {
-                mUniforms.push_back({ret.location, glm::vec2(x, y)});
-                ret.hash = hash;
-            }
-        }
-        virtual void SetUniform(const char* name, float x, float y, float z) override
-        {
-            auto& ret = GetUniform(name);
-            if (ret.location == -1)
-                return;
-
-            uint32_t hash = 0;
-            hash = base::hash_combine(hash, x);
-            hash = base::hash_combine(hash, y);
-            hash = base::hash_combine(hash, z);
-            if (hash != ret.hash)
-            {
-                mUniforms.push_back({ret.location, glm::vec3(x, y, z)});
-                ret.hash = hash;
-            }
-        }
-        virtual void SetUniform(const char* name, float x, float y, float z, float w) override
-        {
-            auto& ret = GetUniform(name);
-            if (ret.location == -1)
-                return;
-
-            uint32_t hash = 0;
-            hash = base::hash_combine(hash, x);
-            hash = base::hash_combine(hash, y);
-            hash = base::hash_combine(hash, z);
-            hash = base::hash_combine(hash, w);
-            if (hash != ret.hash)
-            {
-                mUniforms.push_back({ret.location, glm::vec4(x, y, z, w)});
-                ret.hash = hash;
-            }
-        }
-        virtual void SetUniform(const char* name, const gfx::Color4f& color) override
-        {
-            auto& ret = GetUniform(name);
-            if (ret.location == -1)
-                return;
-            const auto hash = base::hash_combine(0u, color);
-            if (ret.hash != hash)
-            {
-                // Assume sRGB encoded color values now. so this is a simple
-                // place to convert to linear and will catch all uses without
-                // breaking the higher level APIs
-                // the cost of the sRGB conversion should be mitigated due to
-                // the hash check to compare to the previous value.
-                mUniforms.push_back({ret.location, sRGB_Decode(color)});
-
-                ret.hash = hash;
-            }
-        }
-        virtual void SetUniform(const char* name, const glm::mat2& matrix) override
-        {
-            auto& ret = GetUniform(name);
-            if (ret.location == -1)
-                return;
-
-            uint32_t hash = 0;
-            const auto ptr = (const float*)&matrix;
-            const auto len  = sizeof(matrix) / sizeof(float);
-            for (size_t i=0; i<len; ++i)
-                hash = base::hash_combine(hash, ptr[i]);
-            if (ret.hash != hash)
-            {
-                mUniforms.push_back({ret.location, matrix});
-                ret.hash = hash;
-            }
-        }
-        virtual void SetUniform(const char* name, const glm::mat3& matrix) override
-        {
-            auto& ret = GetUniform(name);
-            if (ret.location == -1)
-                return;
-
-            uint32_t hash = 0;
-            const auto ptr = (const float*)&matrix;
-            const auto len  = sizeof(matrix) / sizeof(float);
-            for (size_t i=0; i<len; ++i)
-                hash = base::hash_combine(hash, ptr[i]);
-
-            if (ret.hash != hash)
-            {
-                mUniforms.push_back({ret.location, matrix });
-                ret.hash = hash;
-            }
-        }
-        virtual void SetUniform(const char* name, const glm::mat4& matrix) override
-        {
-            auto& ret = GetUniform(name);
-            if (ret.location == -1)
-                return;
-
-            uint32_t hash = 0;
-            const auto ptr = (const float*)&matrix;
-            const auto len  = sizeof(matrix) / sizeof(float);
-            for (size_t i=0; i<len; ++i)
-                hash = base::hash_combine(hash, ptr[i]);
-
-            if (ret.hash != hash)
-            {
-                mUniforms.push_back({ret.location, matrix });
-                ret.hash = hash;
-            }
-        }
-
-        virtual void SetTexture(const char* sampler, unsigned unit, const gfx::Texture& texture) override
-        {
-            auto ret = GetUniform(sampler);
-
-            const auto* impl = static_cast<const TextureImpl*>(&texture);
-
-            // in OpenGL the expected memory layout of texture data that
-            // is given to glTexImage2D doesn't match the "typical" layout
-            // that is used by many toolkits/libraries. The order of scan lines
-            // is reversed and glTexImage expects the first scanline (in memory)
-            // to be the bottom scanline of the image.
-            // There are several ways to deal with this dilemma:
-            // - flip all images on the horizontal axis before calling glTexImage2D.
-            // - use a matrix to transform the texture coordinates to counter this.
-            // - flip texture coordinates and assume that Y=0.0f means the top of
-            //   the texture (first scan row) and Y=1.0f means the bottom of the
-            //   texture (last scan row).
-            //
-            //
-            // this comment and the below kDeviceTextureMatrix is here only for posterity.
-            // Currently, we have flipped the texture coordinates like explained above.
-            //
-            // If the program being used to render stuff is using a texture
-            // we helpfully set up here a "device texture matrix" that will be provided
-            // for the program and should be used to transform the texture coordinates
-            // before sampling textures.
-            // This will avoid having to do any image flips which is especially
-            // handy when dealing with data that gets often (re)uploaded, e.g.
-            // dynamically changing/procedural texture data.
-            //
-            // It should also be possible to use the device texture matrix for example
-            // in cases where the device would bake some often used textures into an atlas
-            // and implicitly alter the texture coordinates.
-            //
-            /* no longer used.
-            static const float kDeviceTextureMatrix[3][3] = {
-                {1.0f, 0.0f, 0.0f},
-                {0.0f, -1.0f, 0.0f},
-                {0.0f, 1.0f, 0.0f}
-            };
-            SetUniform("kDeviceTextureMatrix", kDeviceTextureMatrix);
-            */
-
-            if (unit >= mSamplers.size())
-                mSamplers.resize(unit + 1);
-
-            // keep track of textures being used so that if/when this
-            // program is actually used to draw stuff we can realize
-            // which textures will actually be used to draw and do the
-            // texture binds.
-            mSamplers[unit].texture  = const_cast<TextureImpl*>(impl);
-            mSamplers[unit].location = ret.location;
-        }
-        virtual void SetTextureCount(unsigned count) override
-        {
-            mSamplers.resize(count);
-        }
         virtual void SetName(const std::string& name) override
         {
             mName = name;
         }
-        virtual size_t GetPendingUniformCount() const override
-        {
-            return mUniforms.size();
-        }
+
 
         void BeginFrame()
         {
-            // this clear has some unfortunate consequences.
-            // If we don't clear then we're holding onto some texture objects
-            // which means that:
-            //   a) the texture(s) cannot be garbage collected
-            //   b) the texture(s) are garbage collected and the pointers are garbage
-            // Right now the solution is to clear the texture sampler settings
-            // on every frame and require that the material system sets the
-            // textures again before every draw.
-            mSamplers.clear();
-            mUniforms.clear();
         }
 
-        void ClearPendingUniforms() const
-        {
-            mUniforms.clear();
-        }
-
-        struct Sampler {
-            GLuint location = 0;
-            TextureImpl* texture = nullptr;
-        };
-        struct Uniform {
-            GLuint location = 0;
-            std::variant<int, float,
-                glm::ivec2,
-                glm::vec2,
-                glm::vec3,
-                glm::vec4,
-                gfx::Color4f,
-                glm::mat2,
-                glm::mat3,
-                glm::mat4> value;
-        };
-        size_t GetNumSamplersSet() const
-        { return mSamplers.size(); }
-        size_t GetNumUniformsSet() const
-        { return mUniforms.size(); }
-        const Sampler& GetSamplerSetting(size_t index) const
-        { return mSamplers[index]; }
-        const Uniform& GetUniformSetting(size_t index) const
-        { return mUniforms[index]; }
-        GLuint GetName() const
+        GLuint GetHandle() const
         { return mProgram; }
         void SetFrameStamp(size_t frame_number) const
         { mFrameNumber = frame_number; }
         size_t GetFrameStamp() const
         { return mFrameNumber; }
-    private:
+
+
         struct CachedUniform {
             GLuint location = 0;
             uint32_t hash   = 0;
         };
-        CachedUniform& GetUniform(const char* name)
+
+        CachedUniform& GetUniform(const std::string& name) const
         {
             auto it = mUniformCache.find(name);
             if (it != std::end(mUniformCache))
                 return it->second;
 
-            auto ret = mGL.glGetUniformLocation(mProgram, name);
+            auto ret = mGL.glGetUniformLocation(mProgram, name.c_str());
             CachedUniform uniform;
             uniform.location = ret;
             uniform.hash     = 0;
             mUniformCache[name] = uniform;
             return mUniformCache[name];
         }
-        std::unordered_map<std::string, CachedUniform> mUniformCache;
+
     private:
         const OpenGLFunctions& mGL;
         GLuint mProgram = 0;
         GLuint mVersion = 0;
         std::string mName;
-        std::vector<Sampler> mSamplers;
-        mutable std::vector<Uniform> mUniforms;
+        mutable std::unordered_map<std::string, CachedUniform> mUniformCache;
         mutable std::size_t mFrameNumber = 0;
     };
 

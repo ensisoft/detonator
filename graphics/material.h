@@ -1063,10 +1063,10 @@ namespace gfx
         std::string GetShader(const State& state, const Device& device) const noexcept;
         // Apply the material properties onto the given program object based
         // on the material class and the material instance state.
-        bool ApplyDynamicState(const State& state, Device& device, Program& program) const noexcept;
+        bool ApplyDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
         // Apply the static state, i.e. the material state that doesn't change
         // during the material's lifetime and need to be only set once.
-        void ApplyStaticState(const State& state, Device& device, Program& program) const noexcept;
+        void ApplyStaticState(const State& state, Device& device, ProgramState& program) const noexcept;
         // Serialize the class into JSON.
         void IntoJson(data::Writer& data) const;
         // Load the class from JSON. Returns true on success.
@@ -1120,7 +1120,7 @@ namespace gfx
         MaterialClass& operator=(const MaterialClass& other);
     private:
         template<typename T>
-        static bool SetUniform(const char* name, const UniformMap* uniforms, const T& backup, Program& program);
+        static bool SetUniform(const char* name, const UniformMap* uniforms, const T& backup, ProgramState& program);
 
         template<typename T>
         bool ReadLegacyValue(const char* name, const char* uniform, const data::Reader& reader);
@@ -1132,9 +1132,9 @@ namespace gfx
         std::string GetGradientShaderSource(const State& state, const Device& device) const;
         std::string GetSpriteShaderSource(const State& state, const Device& device) const;
         std::string GetTextureShaderSource(const State& state, const Device& device) const;
-        bool ApplySpriteDynamicState(const State& state, Device& device, Program& program) const noexcept;
-        bool ApplyCustomDynamicState(const State& state, Device& device, Program& program) const noexcept;
-        bool ApplyTextureDynamicState(const State& state, Device& device, Program& program) const noexcept;
+        bool ApplySpriteDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
+        bool ApplyCustomDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
+        bool ApplyTextureDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
 
     private:
         std::string mClassId;
@@ -1189,10 +1189,10 @@ namespace gfx
         // of material "marble" have the same underlying static type "marble"
         // but both instances have their own instance state as well.
         // Returns true if the state is applied correctly and drawing can proceed.
-        virtual bool ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const = 0;
+        virtual bool ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& raster) const = 0;
         // Apply the static state, i.e. the material state that doesn't change
         // during the material's lifetime and need to be only set once.
-        virtual void ApplyStaticState(const Environment& env, Device& device, Program& program) const = 0;
+        virtual void ApplyStaticState(const Environment& env, Device& device, ProgramState& program) const = 0;
         // Get the device specific shader source applicable for this material, its state
         // and the given environment in which it should execute.
         // Should return an empty string on any error.
@@ -1240,8 +1240,8 @@ namespace gfx
         {}
 
         // Apply the material properties to the given program object and set the rasterizer state.
-        virtual bool ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const override;
-        virtual void ApplyStaticState(const Environment& env, Device& device, Program& program) const override;
+        virtual bool ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& raster) const override;
+        virtual void ApplyStaticState(const Environment& env, Device& device, ProgramState& program) const override;
         virtual std::string GetShader(const Environment& env, const Device& device) const override;
         virtual std::string GetShaderId(const Environment& env) const override;
         virtual std::string GetShaderName(const Environment& env) const override;
@@ -1294,8 +1294,8 @@ namespace gfx
     public:
         TextMaterial(const TextBuffer& text);
         TextMaterial(TextBuffer&& text);
-        virtual bool ApplyDynamicState(const Environment& env, Device& device, Program& program, RasterState& raster) const override;
-        virtual void ApplyStaticState(const Environment& env, Device& device, Program& program) const override;
+        virtual bool ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& raster) const override;
+        virtual void ApplyStaticState(const Environment& env, Device& device, ProgramState& program) const override;
         virtual std::string GetShader(const Environment& env, const Device& device) const override;
         virtual std::string GetShaderId(const Environment&) const override;
         virtual std::string GetShaderName(const Environment&) const override;

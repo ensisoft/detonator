@@ -82,7 +82,7 @@ void main() {
     }
     virtual std::string GetName() const override
     { return "BloomShader"; }
-    virtual void ApplyDynamicState(const gfx::Device& device, gfx::Program& program, gfx::Device::State& state) const override
+    virtual void ApplyDynamicState(const gfx::Device& device, gfx::ProgramState& program, gfx::Device::State& state) const override
     {
         program.SetUniform("kBloomThreshold", mThreshold);
         program.SetUniform("kBloomColor",     mColor);

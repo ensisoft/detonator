@@ -154,7 +154,7 @@ namespace gfx
 
         virtual ~Drawable() = default;
         // Apply the drawable's state (if any) on the program and set the rasterizer state.
-        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const = 0;
+        virtual void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const = 0;
         // Get the device specific shader source applicable for this drawable, its state
         // and the given environment in which it should execute.
         // Should return an empty string on any error.
@@ -477,7 +477,7 @@ namespace gfx
           : mClass(std::make_shared<Class>(std::move(klass)))
           , mStyle(style)
         {}
-        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
+        virtual void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
         virtual std::string GetShader(const Environment& env, const Device& device) const override;
         virtual std::string GetShaderId(const Environment& env) const override;
         virtual std::string GetShaderName(const Environment& env) const override;
@@ -514,7 +514,7 @@ namespace gfx
           , mArgs(args)
           , mStyle(style)
         {}
-        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
+        virtual void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
         virtual std::string GetShader(const Environment& env, const Device& device) const override;
         virtual std::string GetShaderId(const Environment& env) const override;
         virtual std::string GetShaderName(const Environment& env) const override;
@@ -677,7 +677,7 @@ namespace gfx
           , mNumHorizontalLines(num_horizontal_lines)
           , mBorderLines(border_lines)
         {}
-        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
+        virtual void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
         virtual std::string GetShader(const Environment& env, const Device& device) const override;
         virtual std::string GetShaderId(const Environment& env) const override;
         virtual std::string GetShaderName(const Environment& env) const override;
@@ -836,7 +836,7 @@ namespace gfx
         inline void SetSubMeshKey(std::string key) noexcept
         { mSubMeshKey = std::move(key); }
 
-        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
+        virtual void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
         virtual std::string GetShader(const Environment& env, const Device& device) const override;
         virtual std::string GetShaderId(const Environment& env) const override;
         virtual std::string GetShaderName(const Environment& env) const override;
@@ -1097,7 +1097,7 @@ namespace gfx
         std::string GetShaderName(const Environment& env) const;
         std::string GetGeometryName(const Environment& env) const;
 
-        void ApplyDynamicState(const Environment& env, Program& program) const;
+        void ApplyDynamicState(const Environment& env, ProgramState& program) const;
         void Update(const Environment& env, InstanceState& state, float dt) const;
         void Restart(const Environment& env, InstanceState& state) const;
         bool IsAlive(const InstanceState& state) const;
@@ -1156,7 +1156,7 @@ namespace gfx
         explicit ParticleEngineInstance(const ParticleEngineClass::Params& params)
           : mClass(std::make_shared<ParticleEngineClass>(params))
         {}
-        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& state) const override;
+        virtual void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
         virtual std::string GetShader(const Environment& env, const Device& device) const override;
         virtual std::string GetShaderId(const Environment&  env) const override;
         virtual std::string GetShaderName(const Environment& env) const override;
@@ -1208,7 +1208,7 @@ namespace gfx
           : mTiles(std::move(tiles))
         {}
 
-        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState& raster) const override;
+        virtual void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& raster) const override;
         virtual std::string GetShader(const Environment& env, const Device& device) const override;
         virtual std::string GetShaderId(const Environment& env) const override;
         virtual std::string GetShaderName(const Environment& env) const override;
@@ -1281,7 +1281,7 @@ namespace gfx
           : mPointA(a)
           , mPointB(b)
         {}
-        virtual void ApplyDynamicState(const Environment& environment, Program& program, RasterState& state) const override;
+        virtual void ApplyDynamicState(const Environment& environment, ProgramState& program, RasterState& state) const override;
         virtual std::string GetShader(const Environment& environment, const Device& device) const override;
         virtual std::string GetShaderId(const Environment& environment) const override;
         virtual std::string GetShaderName(const Environment& environment) const override;
@@ -1303,7 +1303,7 @@ namespace gfx
             Wireframe
         };
 
-        virtual void ApplyDynamicState(const Environment& env, Program& program, RasterState&  state) const override;
+        virtual void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState&  state) const override;
         virtual std::string GetShader(const Environment& env, const Device& device) const override;
         virtual std::string GetShaderId(const Environment& env) const override;
         virtual std::string GetShaderName(const Environment& env) const override;

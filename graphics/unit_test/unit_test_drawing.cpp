@@ -158,119 +158,12 @@ public:
     virtual bool IsValid() const override
     { return true; }
 
-    virtual void SetUniform(const char* name, int x) override
-    {
-        mUniforms[name] = glm::ivec1(x);
-    }
-    virtual void SetUniform(const char* name, int x, int y) override
-    {
-        mUniforms[name] = glm::ivec2(x, y);
-    }
-    virtual void SetUniform(const char* name, float x) override
-    {
-        mUniforms[name] = glm::vec1(x);
-    }
-    virtual void SetUniform(const char* name, float x, float y) override
-    {
-        mUniforms[name] = glm::vec2(x, y);
-    }
-    virtual void SetUniform(const char* name, float x, float y, float z) override
-    {
-        mUniforms[name] = glm::vec3(x, y, z);
-    }
-    virtual void SetUniform(const char* name, float x, float y, float z, float w) override
-    {
-        mUniforms[name] = glm::vec4(x, y, z, w);
-    }
-    virtual void SetUniform(const char* name, const gfx::Color4f& color) override
-    {
-        mUniforms[name] = color;
-    }
-    virtual void SetUniform(const char* name, const glm::mat2& matrix) override
-    {}
-    virtual void SetUniform(const char* name, const glm::mat3& matrix) override
-    {}
-    virtual void SetUniform(const char* name, const glm::mat4& matrix) override
-    {}
-
-    struct TextureBinding {
-        const TestTexture* texture = nullptr;
-        unsigned unit = 0;
-        std::string sampler;
-    };
-
-    virtual void SetTexture(const char* sampler, unsigned unit, const gfx::Texture& texture) override
-    {
-        TextureBinding binding;
-        binding.sampler = sampler;
-        binding.unit    = unit;
-        binding.texture = static_cast<const TestTexture*>(&texture);
-        mTextures.push_back(binding);
-    }
-    virtual void SetTextureCount(unsigned count) override
-    {
-        mTextures.resize(count);
-    }
     virtual void SetName(const std::string& name) override
     {
 
     }
-
-    virtual size_t GetPendingUniformCount() const override
-    {
-        return 0;
-    }
-
-    template<typename T>
-    bool GetUniform(const char* name, T* out) const
-    {
-        auto it = mUniforms.find(name);
-        if (it == mUniforms.end())
-            return false;
-        *out = std::any_cast<T>(it->second);
-        return true;
-    }
-    bool HasUniform(const char* name) const
-    {
-        auto it = mUniforms.find(name);
-        if (it != mUniforms.end())
-            return true;
-        return false;
-    }
-    bool HasUniforms() const
-    { return !mUniforms.empty(); }
-
-    void Clear()
-    {
-        mUniforms.clear();
-        mTextures.clear();
-    }
-
-    const TextureBinding& GetTextureBinding(size_t index) const
-    {
-        TEST_REQUIRE(index <mTextures.size());
-        return mTextures[index];
-    }
-    const TestTexture& GetTexture(size_t index) const
-    {
-        TEST_REQUIRE(index < mTextures.size());
-        return *mTextures[index].texture;
-    }
-    size_t GetNumTextures() const
-    { return mTextures.size(); }
-    TextureBinding* FindTextureBinding(const std::string& sampler)
-    {
-        for (auto& binding : mTextures)
-        {
-            if (binding.sampler == sampler)
-                return &binding;
-        }
-        return nullptr;
-    }
-
 private:
-    std::unordered_map<std::string, std::any> mUniforms;
-    std::vector<TextureBinding> mTextures;
+
 };
 
 
@@ -450,7 +343,8 @@ public:
     {}
     virtual void DeleteFramebuffers() override
     {}
-    virtual void Draw(const gfx::Program& program, const gfx::GeometryDrawCommand& geometry, const State& state, gfx::Framebuffer* fbo) const override
+    virtual void Draw(const gfx::Program& program, const gfx::ProgramState& program_state,
+                      const gfx::GeometryDrawCommand& geometry, const State& state, gfx::Framebuffer* fbo) const override
     {}
 
     virtual void CleanGarbage(size_t, unsigned) override
@@ -531,7 +425,7 @@ void unit_test_material_uniforms()
     // test dynamic program uniforms.
     {
         TestDevice device;
-        TestProgram program;
+        gfx::ProgramState program;
         gfx::ColorClass test(gfx::MaterialClass::Type::Color);
         test.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
         test.SetBaseColor(gfx::Color::Green);
@@ -553,7 +447,7 @@ void unit_test_material_uniforms()
 
     {
         TestDevice device;
-        TestProgram program;
+        gfx::ProgramState program;
 
         gfx::GradientClass test(gfx::MaterialClass::Type::Gradient);
         test.SetColor(gfx::Color::DarkBlue,    gfx::GradientClass::ColorIndex::BottomLeft);
@@ -587,7 +481,7 @@ void unit_test_material_uniforms()
         bitmap.Resize(2, 2);
 
         TestDevice device;
-        TestProgram program;
+        gfx::ProgramState program;
 
         gfx::TextureMap2DClass test(gfx::MaterialClass::Type::Texture);
         test.SetTextureScaleX(2.0f);
@@ -606,9 +500,9 @@ void unit_test_material_uniforms()
 
         glm::vec2 texture_scale;
         glm::vec3 texture_velocity;
-        glm::vec1 particle_rotation_flag;
-        glm::vec1 render_points_flag;
-        glm::vec1 runtime;
+        float particle_rotation_flag;
+        float render_points_flag;
+        float runtime;
         TEST_REQUIRE(program.GetUniform("kTextureScale", &texture_scale));
         TEST_REQUIRE(program.GetUniform("kTextureVelocity", &texture_velocity));
         TEST_REQUIRE(program.GetUniform("kApplyRandomParticleRotation", &particle_rotation_flag));
@@ -616,9 +510,9 @@ void unit_test_material_uniforms()
         TEST_REQUIRE(program.GetUniform("kTime", &runtime));
         TEST_REQUIRE(texture_scale == glm::vec2(2.0f, 3.0f));
         TEST_REQUIRE(texture_velocity == glm::vec3(4.0f, 5.0f, -1.0f));
-        TEST_REQUIRE(particle_rotation_flag == glm::vec1(0.0f));
-        TEST_REQUIRE(render_points_flag == glm::vec1(0.0f));
-        TEST_REQUIRE(runtime == glm::vec1(2.0f));
+        TEST_REQUIRE(particle_rotation_flag == 0.0f);
+        TEST_REQUIRE(render_points_flag == 0.0f);
+        TEST_REQUIRE(runtime == 2.0f);
 
     }
 
@@ -627,7 +521,7 @@ void unit_test_material_uniforms()
         bitmap.Resize(2, 2);
 
         TestDevice device;
-        TestProgram program;
+        gfx::ProgramState program;
 
         gfx::SpriteClass test(gfx::MaterialClass::Type::Sprite);
         test.SetTextureScaleX(2.0f);
@@ -648,9 +542,9 @@ void unit_test_material_uniforms()
 
         glm::vec2 texture_scale;
         glm::vec3 texture_velocity;
-        glm::vec1 particle_rotation_flag;
-        glm::vec1 render_points_flag;
-        glm::vec1 runtime;
+        float particle_rotation_flag;
+        float render_points_flag;
+        float runtime;
         gfx::Color4f base_color;
         TEST_REQUIRE(program.GetUniform("kTextureScale", &texture_scale));
         TEST_REQUIRE(program.GetUniform("kTextureVelocity", &texture_velocity));
@@ -660,9 +554,9 @@ void unit_test_material_uniforms()
         TEST_REQUIRE(program.GetUniform("kBaseColor", &base_color));
         TEST_REQUIRE(texture_scale == glm::vec2(2.0f, 3.0f));
         TEST_REQUIRE(texture_velocity == glm::vec3(4.0f, 5.0f, -1.0f));
-        TEST_REQUIRE(particle_rotation_flag == glm::vec1(0.0f));
-        TEST_REQUIRE(render_points_flag == glm::vec1(0.0f));
-        TEST_REQUIRE(runtime == glm::vec1(2.0f));
+        TEST_REQUIRE(particle_rotation_flag == 0.0f);
+        TEST_REQUIRE(render_points_flag == 0.0f);
+        TEST_REQUIRE(runtime == 2.0f);
         TEST_REQUIRE(base_color == gfx::Color::Green);
 
     }
@@ -670,7 +564,7 @@ void unit_test_material_uniforms()
     // test static program uniforms.
     {
         TestDevice device;
-        TestProgram program;
+        gfx::ProgramState program;
 
         gfx::ColorClass test(gfx::MaterialClass::Type::Color);
         test.SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
@@ -694,7 +588,7 @@ void unit_test_material_uniforms()
 
     {
         TestDevice device;
-        TestProgram program;
+        gfx::ProgramState program;
 
         gfx::GradientClass test(gfx::MaterialClass::Type::Gradient);
         test.SetColor(gfx::Color::DarkBlue,    gfx::GradientClass::ColorIndex::BottomLeft);
@@ -736,7 +630,7 @@ void unit_test_material_uniforms()
         bitmap.Resize(2, 2);
 
         TestDevice device;
-        TestProgram program;
+        gfx::ProgramState program;
 
         gfx::TextureMap2DClass test(gfx::MaterialClass::Type::Texture);
         test.SetTextureScaleX(2.0f);
@@ -776,7 +670,7 @@ void unit_test_material_uniforms()
         bitmap.Resize(2, 2);
 
         TestDevice device;
-        TestProgram program;
+        gfx::ProgramState program;
 
         gfx::SpriteClass test(gfx::MaterialClass::Type::Sprite);
         test.SetTextureScaleX(2.0f);
@@ -934,7 +828,7 @@ void unit_test_material_textures()
     // test setting basic texture properties.
     {
         TestDevice device;
-        TestProgram program;
+        gfx::ProgramState program;
 
         gfx::TextureMap2DClass test(gfx::MaterialClass::Type::Texture);
         test.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
@@ -959,8 +853,8 @@ void unit_test_material_textures()
         TEST_REQUIRE(texture.GetMagFilter() == gfx::Texture::MagFilter::Nearest);
         TEST_REQUIRE(texture.GetWrapX() == gfx::Texture::Wrapping::Clamp);
         TEST_REQUIRE(texture.GetWrapY() == gfx::Texture::Wrapping::Clamp);
-        TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
-        TEST_REQUIRE(program.GetTextureBinding(0).texture == &texture);
+        TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+        TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture);
     }
 
     // test cycling through sprite textures.
@@ -975,20 +869,20 @@ void unit_test_material_textures()
         test.GetTextureMap(0)->SetFps(1.0f);
 
         TestDevice device;
-        TestProgram program;
+        gfx::ProgramState program;
         {
             gfx::detail::GenericShaderProgram pass;
             gfx::MaterialClass::State env;
             env.material_time = 0.0f;
             test.ApplyDynamicState(env, device, program);
             const auto &texture = device.GetTexture(0);
-            TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
-            TEST_REQUIRE(program.GetTextureBinding(0).texture == &texture);
-            TEST_REQUIRE(program.GetTextureBinding(1).unit == 1);
-            TEST_REQUIRE(program.GetTextureBinding(1).texture == &texture);
-            glm::vec1 blend_factor;
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture);
+            float blend_factor = 0.0f;
             TEST_REQUIRE(program.GetUniform("kBlendCoeff", &blend_factor));
-            TEST_REQUIRE(blend_factor == glm::vec1(0.0f));
+            TEST_REQUIRE(blend_factor == 0.0f);
         }
         program.Clear();
         {
@@ -997,13 +891,13 @@ void unit_test_material_textures()
             env.material_time = 1.5f;
             test.ApplyDynamicState(env, device, program);
             const auto &texture = device.GetTexture(0);
-            TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
-            TEST_REQUIRE(program.GetTextureBinding(0).texture == &texture);
-            TEST_REQUIRE(program.GetTextureBinding(1).unit == 1);
-            TEST_REQUIRE(program.GetTextureBinding(1).texture == &texture);
-            glm::vec1 blend_factor;
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &texture);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &texture);
+            float blend_factor = 0.0f;
             TEST_REQUIRE(program.GetUniform("kBlendCoeff", &blend_factor));
-            TEST_REQUIRE(blend_factor == glm::vec1(0.5f));
+            TEST_REQUIRE(blend_factor == 0.5f);
         }
     }
 
@@ -1023,7 +917,7 @@ void unit_test_material_textures()
         test.GetTextureMap(0)->SetFps(1.0f); // 1 frame per second.
 
         TestDevice device;
-        TestProgram program;
+        gfx::ProgramState program;
         {
             gfx::detail::GenericShaderProgram pass;
             gfx::MaterialClass::State env;
@@ -1031,10 +925,10 @@ void unit_test_material_textures()
             test.ApplyDynamicState(env, device, program);
             const auto& tex0 = device.GetTexture(0);
             const auto& tex1 = device.GetTexture(1);
-            TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
-            TEST_REQUIRE(program.GetTextureBinding(0).texture == &tex0);
-            TEST_REQUIRE(program.GetTextureBinding(1).unit == 1);
-            TEST_REQUIRE(program.GetTextureBinding(1).texture == &tex1);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &tex0);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &tex1);
         }
         program.Clear();
         {
@@ -1044,10 +938,10 @@ void unit_test_material_textures()
             test.ApplyDynamicState(env, device, program);
             const auto& tex0 = device.GetTexture(0);
             const auto& tex1 = device.GetTexture(1);
-            TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
-            TEST_REQUIRE(program.GetTextureBinding(0).texture == &tex1);
-            TEST_REQUIRE(program.GetTextureBinding(1).unit == 1);
-            TEST_REQUIRE(program.GetTextureBinding(1).texture == &tex0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &tex1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &tex0);
         }
     }
 
@@ -1071,7 +965,7 @@ void unit_test_material_textures()
         test.GetTextureMap(0)->SetFps(1.0f); // 1 frame per second.
 
         TestDevice device;
-        TestProgram program;
+        gfx::ProgramState program;
         {
             gfx::detail::GenericShaderProgram pass;
             gfx::MaterialClass::State env;
@@ -1079,10 +973,10 @@ void unit_test_material_textures()
             test.ApplyDynamicState(env, device, program);
             const auto& tex0 = device.GetTexture(0);
             const auto& tex1 = device.GetTexture(1);
-            TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
-            TEST_REQUIRE(program.GetTextureBinding(0).texture == &tex0);
-            TEST_REQUIRE(program.GetTextureBinding(1).unit == 1);
-            TEST_REQUIRE(program.GetTextureBinding(1).texture == &tex1);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &tex0);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &tex1);
         }
         program.Clear();
         {
@@ -1093,10 +987,10 @@ void unit_test_material_textures()
             const auto& tex0 = device.GetTexture(0);
             const auto& tex1 = device.GetTexture(1);
             const auto& tex2 = device.GetTexture(2);
-            TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
-            TEST_REQUIRE(program.GetTextureBinding(0).texture == &tex1);
-            TEST_REQUIRE(program.GetTextureBinding(1).unit == 1);
-            TEST_REQUIRE(program.GetTextureBinding(1).texture == &tex2);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &tex1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &tex2);
         }
         program.Clear();
         {
@@ -1107,10 +1001,10 @@ void unit_test_material_textures()
             const auto& tex0 = device.GetTexture(0);
             const auto& tex1 = device.GetTexture(1);
             const auto& tex2 = device.GetTexture(2);
-            TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
-            TEST_REQUIRE(program.GetTextureBinding(0).texture == &tex2);
-            TEST_REQUIRE(program.GetTextureBinding(1).unit == 1);
-            TEST_REQUIRE(program.GetTextureBinding(1).texture == &tex0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &tex2);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &tex0);
         }
     }
 
@@ -1135,7 +1029,7 @@ void unit_test_material_textures()
         test.GetTextureMap(0)->SetLooping(false);
 
         TestDevice device;
-        TestProgram program;
+        gfx::ProgramState program;
         {
             gfx::detail::GenericShaderProgram pass;
             gfx::MaterialClass::State env;
@@ -1143,10 +1037,10 @@ void unit_test_material_textures()
             test.ApplyDynamicState(env, device, program);
             const auto& tex0 = device.GetTexture(0);
             const auto& tex1 = device.GetTexture(1);
-            TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
-            TEST_REQUIRE(program.GetTextureBinding(0).texture == &tex0);
-            TEST_REQUIRE(program.GetTextureBinding(1).unit == 1);
-            TEST_REQUIRE(program.GetTextureBinding(1).texture == &tex1);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &tex0);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &tex1);
         }
 
         program.Clear();
@@ -1158,10 +1052,10 @@ void unit_test_material_textures()
             const auto& tex0 = device.GetTexture(0);
             const auto& tex1 = device.GetTexture(1);
             const auto& tex2 = device.GetTexture(2);
-            TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
-            TEST_REQUIRE(program.GetTextureBinding(0).texture == &tex1);
-            TEST_REQUIRE(program.GetTextureBinding(1).unit == 1);
-            TEST_REQUIRE(program.GetTextureBinding(1).texture == &tex2);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &tex1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &tex2);
         }
         program.Clear();
         {
@@ -1172,10 +1066,10 @@ void unit_test_material_textures()
             const auto& tex0 = device.GetTexture(0);
             const auto& tex1 = device.GetTexture(1);
             const auto& tex2 = device.GetTexture(2);
-            TEST_REQUIRE(program.GetTextureBinding(0).unit == 0);
-            TEST_REQUIRE(program.GetTextureBinding(0).texture == &tex2);
-            TEST_REQUIRE(program.GetTextureBinding(1).unit == 1);
-            TEST_REQUIRE(program.GetTextureBinding(1).texture == &tex2);
+            TEST_REQUIRE(program.GetSamplerSetting(0).unit == 0);
+            TEST_REQUIRE(program.GetSamplerSetting(0).texture == &tex2);
+            TEST_REQUIRE(program.GetSamplerSetting(1).unit == 1);
+            TEST_REQUIRE(program.GetSamplerSetting(1).texture == &tex2);
         }
     }
 }
@@ -1186,7 +1080,7 @@ void unit_test_material_textures_bind_fail()
     TEST_CASE(test::Type::Feature)
 
     TestDevice device;
-    TestProgram program;
+    gfx::ProgramState program;
 
     // test setting basic texture properties.
     {
@@ -1322,14 +1216,14 @@ void unit_test_custom_uniforms()
     klass.SetUniform("color", gfx::Color::DarkCyan);
 
     TestDevice device;
-    TestProgram program;
+    gfx::ProgramState program;
     gfx::detail::GenericShaderProgram pass;
     gfx::MaterialClass::State env;
     env.material_time = 0.0f;
     klass.ApplyDynamicState(env, device, program);
 
-    glm::ivec1 ivec1_;
-    glm::vec1 vec1_;
+    int ivec1_;
+    float vec1_;
     glm::vec2 vec2_;
     glm::vec3 vec3_;
     glm::vec4 vec4_;
@@ -1340,8 +1234,8 @@ void unit_test_custom_uniforms()
     TEST_REQUIRE(program.GetUniform("vec3", &vec3_));
     TEST_REQUIRE(program.GetUniform("vec4", &vec4_));
     TEST_REQUIRE(program.GetUniform("color", &color_));
-    TEST_REQUIRE(ivec1_.x   == 123);
-    TEST_REQUIRE(vec1_.x == real::float32(56.0f));
+    TEST_REQUIRE(ivec1_   == 123);
+    TEST_REQUIRE(vec1_ == real::float32(56.0f));
     TEST_REQUIRE(vec2_  == glm::vec2(1.0f, 2.0f));
     TEST_REQUIRE(vec3_  == glm::vec3(1.0f, 2.0f, 3.0f));
     TEST_REQUIRE(vec4_  == glm::vec4(1.0f, 2.0f, 3.0f, 4.0f));
@@ -1393,7 +1287,7 @@ void unit_test_custom_textures()
     }
 
     TestDevice device;
-    TestProgram program;
+    gfx::ProgramState program;
 
     gfx::detail::GenericShaderProgram pass;
     gfx::MaterialClass::State env;
@@ -2005,7 +1899,7 @@ void unit_test_packed_texture_bug()
         material1.SetTexture(gfx::LoadTextureFromFile("test-texture.png"));
 
         TestDevice device;
-        TestProgram program;
+        gfx::ProgramState program;
         gfx::detail::GenericShaderProgram pass;
         gfx::MaterialClass::State env;
         env.material_time = 0.0f;
