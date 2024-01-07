@@ -595,18 +595,6 @@ public:
     virtual void EndMainLoop() override
     {
         mFrameCounter++;
-
-        if (!mDebug.debug_pause)
-        {
-            for (auto it = mDebugPrints.begin(); it != mDebugPrints.end();)
-            {
-                auto& print = *it;
-                if (--print.lifetime < 0)
-                {
-                    it = mDebugPrints.erase(it);
-                } else ++it;
-            }
-        }
     }
 
     virtual void Stop() override
@@ -644,6 +632,18 @@ public:
         {
             DEBUG("FPS: %1, wall_time: %2, frames: %3",
                   stats.current_fps, stats.total_wall_time, stats.num_frames_rendered);
+        }
+
+        if (!mDebug.debug_pause)
+        {
+            for (auto it = mDebugPrints.begin(); it != mDebugPrints.end();)
+            {
+                auto& print = *it;
+                if (--print.lifetime < 0)
+                {
+                    it = mDebugPrints.erase(it);
+                } else ++it;
+            }
         }
     }
     virtual bool GetStats(Stats* stats) const override
