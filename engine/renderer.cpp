@@ -1358,6 +1358,7 @@ void Renderer::DrawScenePackets(gfx::Device& device, std::vector<DrawPacket>& pa
         draw.state.stencil_func = gfx::Painter::StencilFunc ::Disabled;
         draw.view               = &model_view;
         draw.projection         = projection;
+        painter.Prime(draw);
 
         const auto render_layer_index = packet.render_layer;
         if (render_layer_index >= layers.size())

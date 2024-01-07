@@ -47,6 +47,17 @@ void Painter::ClearDepth(float depth) const
     mDevice->ClearDepth(depth, mFrameBuffer);
 }
 
+void Painter::Prime(DrawCommand& draw) const
+{
+    Drawable::Environment drawable_env;
+    drawable_env.editing_mode = mEditingMode;
+    drawable_env.pixel_ratio  = mPixelRatio;
+    drawable_env.view_matrix  = draw.view ? draw.view : &mViewMatrix;
+    drawable_env.proj_matrix  = draw.projection ? draw.projection : &mProjMatrix;
+    drawable_env.model_matrix = draw.model;
+    draw.geometry = GetGeometry(*draw.drawable, drawable_env);
+}
+
 void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
 {
 
@@ -66,7 +77,11 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
         drawable_env.view_matrix  = draw.view ? draw.view : &mViewMatrix;
         drawable_env.proj_matrix  = draw.projection ? draw.projection : &mProjMatrix;
         drawable_env.model_matrix = draw.model;
-        GeometryPtr geometry = GetGeometry(*draw.drawable, drawable_env);
+
+        auto geometry = draw.geometry;
+        if (geometry == nullptr)
+            geometry = GetGeometry(*draw.drawable, drawable_env);
+
         if (!geometry)
             continue;
 
