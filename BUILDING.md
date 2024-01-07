@@ -197,15 +197,15 @@ Install these packages:
 
 <details><summary>How to build the project in PROFILE</summary>
 
-- Build the project for profiling using valgrind / kcachegrind
+- Build the project for profiling using Valgrind / KCachegrind
 ```
   $ git clone https://github.com/ensisoft/detonator
   $ cd detonator
   $ git submodule update --init --recursive
   $ mkdir build_profile
   $ cd build_profile
-  $ conan install .. --build missing 
-  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=RelWithDebInfo
+  $ conan install .. --output-folder=conan --build missing -s build_type=RelWithDebInfo 
+  $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
   $ make -j16 install
 ```
 - Then in order to profile and analyze the output use the combination of valgrind and kcachegrind.
