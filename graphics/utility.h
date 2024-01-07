@@ -26,6 +26,7 @@
 
 #include "graphics/types.h"
 #include "graphics/program.h"
+#include "graphics/geometry.h"
 
 // random helper and utility functions
 
@@ -39,7 +40,7 @@ gfx::ProgramPtr MakeProgram(const std::string& vertex_source,
                             const std::string& program_name,
                             Device& device);
 
-Geometry* MakeFullscreenQuad(Device& device);
+GeometryPtr MakeFullscreenQuad(Device& device);
 
 // Create an orthographic (parallel axis-aligned) projection matrix.
 // Essentially this creates a logical viewport (and coordinate

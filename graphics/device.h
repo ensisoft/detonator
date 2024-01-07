@@ -27,6 +27,7 @@
 #include "graphics/bitmap.h"
 #include "graphics/shader.h"
 #include "graphics/program.h"
+#include "graphics/geometry.h"
 
 namespace gfx
 {
@@ -176,8 +177,8 @@ namespace gfx
         virtual ShaderPtr CreateShader(const std::string& id, const Shader::CreateArgs& args) = 0;
         virtual ProgramPtr FindProgram(const std::string& id) = 0;
         virtual ProgramPtr CreateProgram(const std::string& id, const Program::CreateArgs& args) = 0;
-        virtual Geometry* FindGeometry(const std::string& name) = 0;
-        virtual Geometry* MakeGeometry(const std::string& name) = 0;
+        virtual GeometryPtr FindGeometry(const std::string& id) = 0;
+        virtual GeometryPtr CreateGeometry(const std::string& id, Geometry::CreateArgs args) = 0;
         virtual Texture* FindTexture(const std::string& name) = 0;
         virtual Texture* MakeTexture(const std::string& name) = 0;
         virtual Framebuffer* FindFramebuffer(const std::string& name) = 0;

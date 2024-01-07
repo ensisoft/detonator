@@ -218,11 +218,7 @@ namespace gfx
         return layout;
     }
 
-    // Encapsulate information about a particular geometry and how
-    // that geometry is to be rendered and rasterized. A geometry
-    // object contains a set of vertex data and then multiple draw
-    // commands each command addressing some subset of the vertices.
-    class Geometry
+    class GeometryBuffer
     {
     public:
         // Define how the geometry is to be rasterized.
@@ -245,6 +241,10 @@ namespace gfx
             LineLoop
         };
 
+        enum class IndexType {
+            Index16, Index32
+        };
+
         // Define how the contents of the geometry object are expected
         // to be used.
         enum class Usage {
@@ -254,9 +254,6 @@ namespace gfx
             Stream,
             // The buffer is updated multiple times and drawn multiple times.
             Dynamic
-        };
-        enum class IndexType {
-            Index16, Index32
         };
 
         // the structure is packed for more compact and simpler
@@ -269,35 +266,72 @@ namespace gfx
         };
 #pragma pack(pop)
 
-        virtual ~Geometry() = default;
-        // Set the expected usage of the geometry. Should be set before
-        // calling any methods to upload the data.
-        virtual void SetUsage(Usage usage) = 0;
-        // Clear previous draw commands.
-        virtual void ClearDraws() = 0;
-        // Add a draw command to the geometry.
-        virtual void AddDrawCmd(const DrawCommand& cmd) = 0;
-        // Set the layout object that describes the contents of the vertex buffer vertices.
-        virtual void SetVertexLayout(const VertexLayout& layout) = 0;
-        // Upload the vertex data that defines the geometry.
-        virtual void UploadVertices(const void* data, size_t bytes) = 0;
-        // Upload 16bit index data for indexed drawing.
-        virtual void UploadIndices(const void* data, size_t bytes, IndexType type) = 0;
-        // Set the hash value that identifies the data.
-        virtual void SetDataHash(size_t hash) = 0;
-        // Get the hash value that was used in the latest data upload.
-        virtual size_t GetDataHash() const  = 0;
-        // Get the number of draw commands set on the geometry.
-        virtual size_t GetNumDrawCmds() const = 0;
-        // Get the draw command at the specified index.
-        virtual DrawCommand GetDrawCmd(size_t index) const = 0;
-        // Get the current usage set on the geometry.
-        virtual Usage GetUsage() const = 0;
+        void UploadVertices(const void* data, size_t bytes)
+        {
+            ASSERT((data && bytes) || (!data && !bytes));
+            mVertexData.resize(bytes);
+            if (data)
+                std::memcpy(&mVertexData[0], data, bytes);
+        }
+        void UploadIndices(const void* data, size_t bytes, IndexType type)
+        {
+            ASSERT((data && bytes) || (!data && !bytes));
+            mIndexData.resize(bytes);
+            if (data)
+                std::memcpy(&mIndexData[0], data, bytes);
+            mIndexType  = type;
+        }
 
-        // Set the (human-readable) name of the geometry.
-        // This has debug significance only.
-        virtual void SetName(const std::string& name) {}
-        virtual std::string GetName() const { return {}; }
+        inline void ClearDraws() noexcept
+        { mDrawCmds.clear(); }
+        inline void AddDrawCmd(const DrawCommand& cmd)
+        {  mDrawCmds.push_back(cmd); }
+        inline void SetVertexLayout(const VertexLayout& layout)
+        { mVertexLayout = layout; }
+        inline size_t GetNumDrawCmds() const noexcept
+        { return mDrawCmds.size(); }
+        inline size_t GetVertexBytes() const noexcept
+        { return mVertexData.size(); }
+        inline size_t GetIndexBytes() const noexcept
+        { return mIndexData.size(); }
+        inline const void* GetVertexDataPtr() const noexcept
+        { return mVertexData.empty() ? nullptr : &mVertexData[0]; }
+        inline const void* GetIndexDataPtr() const noexcept
+        { return mIndexData.empty() ? nullptr : &mIndexData[0]; }
+        inline auto& GetLayout() const & noexcept
+        { return mVertexLayout; }
+        inline auto&& GetLayout() && noexcept
+        { return std::move(mVertexLayout); }
+        inline IndexType GetIndexType() const noexcept
+        { return mIndexType; }
+        inline const DrawCommand GetDrawCmd(size_t index) const
+        { return mDrawCmds[index]; }
+
+        // Update the geometry object's data buffer contents.
+        template<typename Vertex>
+        void SetVertexBuffer(const Vertex* vertices, std::size_t count)
+        { UploadVertices(vertices, count * sizeof(Vertex)); }
+
+        template<typename Vertex> inline
+        void SetVertexBuffer(const std::vector<Vertex>& vertices)
+        { UploadVertices(vertices.data(), vertices.size() * sizeof(Vertex)); }
+
+        inline void SetVertexBuffer(std::vector<uint8_t>&& data) noexcept
+        { mVertexData = std::move(data); }
+
+        inline void SetIndexData(std::vector<uint8_t>&& data) noexcept
+        { mIndexData = std::move(data); }
+        void SetIndexBuffer(const Index16* indices, size_t count)
+        { UploadIndices(indices, count * sizeof(Index16), IndexType::Index16); }
+
+        void SetIndexBuffer(const Index32* indices, size_t count)
+        { UploadIndices(indices, count * sizeof(Index32), IndexType::Index32); }
+
+        void SetIndexBuffer(const std::vector<Index16>& indices)
+        { SetIndexBuffer(indices.data(), indices.size()); }
+
+        void SetIndexBuffer(const std::vector<Index32>& indices)
+        { SetIndexBuffer(indices.data(), indices.size()); }
 
         // Add a draw command that starts at offset 0 and covers the whole
         // current vertex buffer (i.e. count = num of vertices)
@@ -309,6 +343,7 @@ namespace gfx
             cmd.count  = std::numeric_limits<uint32_t>::max();
             AddDrawCmd(cmd);
         }
+
         // Add a draw command for some particular set of vertices within
         // the current vertex buffer.
         inline void AddDrawCmd(DrawType type, uint32_t offset, size_t count)
@@ -320,34 +355,84 @@ namespace gfx
             AddDrawCmd(cmd);
         }
 
-        void SetDrawCommands(const std::vector<DrawCommand>& commands)
+        inline void SetDrawCommands(const std::vector<DrawCommand>& commands)
+        { mDrawCmds = commands; }
+        inline void SetDrawCmds(std::vector<DrawCommand>&& commands)
+        { mDrawCmds = std::move(commands); }
+
+        inline const auto& GetDrawCommands() const & noexcept
+        { return mDrawCmds; }
+
+        inline auto GetDrawCommands() && noexcept
+        { return std::move(mDrawCmds); }
+
+        inline bool HasData() const noexcept
+        { return !mVertexData.empty(); }
+
+        inline size_t GetVertexCount() const noexcept
         {
-            for (const auto& cmd : commands)
-                AddDrawCmd(cmd);
+            ASSERT(mVertexLayout.vertex_struct_size);
+            return mVertexData.size() / mVertexLayout.vertex_struct_size;
         }
 
-        // Update the geometry object's data buffer contents.
         template<typename Vertex>
-        void SetVertexBuffer(const Vertex* vertices, std::size_t count)
+        Vertex GetVertexAt(size_t index) const noexcept
         {
-            UploadVertices(vertices, count * sizeof(Vertex));
-            // for compatibility sakes set the vertex layout here.
-            if constexpr (std::is_same_v<Vertex, gfx::Vertex2D>)
-                SetVertexLayout(GetVertexLayout<Vertex>());
+            ASSERT(sizeof(Vertex) == mVertexLayout.vertex_struct_size);
+            const auto count = GetVertexCount();
+            ASSERT(index < count);
+            const auto offset = index * mVertexLayout.vertex_struct_size;
+            Vertex vertex;
+            const auto* src = (const char*)mVertexData.data();
+            std::memcpy(&vertex, src + offset, sizeof(vertex));
+            return vertex;
+
         }
+    private:
+        VertexLayout mVertexLayout;
+        std::vector<DrawCommand> mDrawCmds;
+        std::vector<uint8_t> mVertexData;
+        std::vector<uint8_t> mIndexData;
+        IndexType mIndexType = IndexType::Index16;
+    };
 
-        template<typename Vertex> inline
-        void SetVertexBuffer(const std::vector<Vertex>& vertices)
-        { SetVertexBuffer(vertices.data(), vertices.size()); }
 
-        void SetIndexBuffer(const Index16* indices, size_t count)
-        { UploadIndices(indices, count * sizeof(Index16), IndexType::Index16); }
-        void SetIndexBuffer(const Index32* indices, size_t count)
-        { UploadIndices(indices, count * sizeof(Index32), IndexType::Index32); }
-        void SetIndexBuffer(const std::vector<Index16>& indices)
-        { SetIndexBuffer(indices.data(), indices.size()); }
-        void SetIndexBuffer(const std::vector<Index32>& indices)
-        { SetIndexBuffer(indices.data(), indices.size()); }
+    // Encapsulate information about a particular geometry and how
+    // that geometry is to be rendered and rasterized. A geometry
+    // object contains a set of vertex data and then multiple draw
+    // commands each command addressing some subset of the vertices.
+    class Geometry
+    {
+    public:
+        using Usage       = GeometryBuffer::Usage;
+        using DrawType    = GeometryBuffer::DrawType;
+        using DrawCommand = GeometryBuffer::DrawCommand;
+        using IndexType   = GeometryBuffer::IndexType;
+
+        struct CreateArgs {
+            GeometryBuffer buffer;
+            // Set the expected usage of the geometry. Should be set before
+            // calling any methods to upload the data.
+            Usage usage = Usage::Static;
+            // Set the (human-readable) name of the geometry.
+            // This has debug significance only.
+            std::string content_name;
+            // Get the hash value based on the buffer contents.
+            std::size_t content_hash = 0;
+        };
+
+        virtual ~Geometry() = default;
+
+        // Get the human-readable geometry name.
+        virtual std::string GetName() const = 0;
+        // Get the current usage set on the geometry.
+        virtual Usage GetUsage() const = 0;
+        // Get the hash value computed from the geometry buffer.
+        virtual std::size_t GetContentHash() const  = 0;
+        // Get the number of draw commands set on the geometry.
+        virtual size_t GetNumDrawCmds() const = 0;
+        // Get the draw command at the specified index.
+        virtual DrawCommand GetDrawCmd(size_t index) const = 0;
 
         // Map the type of the index to index size in bytes.
         static size_t GetIndexByteSize(IndexType type)
@@ -361,6 +446,8 @@ namespace gfx
         }
     private:
     };
+
+    using GeometryPtr = std::shared_ptr<const Geometry>;
 
     class GeometryDrawCommand
     {
@@ -395,92 +482,6 @@ namespace gfx
         const Geometry* mGeometry = nullptr;
         const size_t mCmdStart = 0;
         const size_t mCmdCount = 0;
-    };
-
-    class GeometryBuffer : public Geometry
-    {
-    public:
-        using Geometry::AddDrawCmd;
-
-        virtual void SetUsage(Usage usage) override
-        { mUsage = usage;}
-        virtual void ClearDraws() override
-        { mDrawCmds.clear(); }
-        virtual void AddDrawCmd(const DrawCommand& cmd) override
-        {  mDrawCmds.push_back(cmd); }
-        virtual void SetVertexLayout(const VertexLayout& layout) override
-        { mVertexLayout = layout; }
-        virtual void UploadVertices(const void* data, size_t bytes) override
-        {
-            ASSERT(data && bytes);
-            mVertexData.resize(bytes);
-            std::memcpy(&mVertexData[0], data, bytes);
-        }
-        virtual void UploadIndices(const void* data, size_t bytes, IndexType type) override
-        {
-            ASSERT(data && bytes);
-            mIndexData.resize(bytes);
-            std::memcpy(&mIndexData[0], data, bytes);
-            mIndexType  = type;
-        }
-        virtual void SetDataHash(size_t hash) override
-        { mDataHash = hash; }
-        virtual size_t GetDataHash() const override
-        { return mDataHash; }
-        virtual size_t GetNumDrawCmds() const override
-        { return mDrawCmds.size(); }
-        virtual DrawCommand GetDrawCmd(size_t index) const override
-        { return mDrawCmds[index]; }
-        virtual Usage GetUsage() const override
-        { return mUsage; }
-        virtual void SetName(const std::string& name) override
-        { mName = name; }
-        virtual std::string GetName() const override
-        { return mName; }
-
-        inline size_t GetVertexBytes() const noexcept
-        { return mVertexData.size(); }
-        inline size_t GetIndexBytes() const noexcept
-        { return mIndexData.size(); }
-        inline const void* GetVertexDataPtr() const noexcept
-        { return mVertexData.empty() ? nullptr : &mVertexData[0]; }
-        inline const void* GetIndexDataPtr() const noexcept
-        { return mIndexData.empty() ? nullptr : &mIndexData[0]; }
-        inline const VertexLayout& GetLayout() const noexcept
-        { return mVertexLayout; }
-        inline IndexType GetIndexType() const noexcept
-        { return mIndexType; }
-        inline void SetVertexBuffer(std::vector<uint8_t>&& data) noexcept
-        { mVertexData = std::move(data); }
-        inline void SetIndexData(std::vector<uint8_t>&& data) noexcept
-        { mIndexData = std::move(data); }
-
-        void Transfer(Geometry& other) const
-        {
-            other.SetVertexLayout(mVertexLayout);
-            other.SetUsage(mUsage);
-            if (!mVertexData.empty())
-                other.UploadVertices(mVertexData.data(), mVertexData.size());
-            if (mIndexData.empty())
-                other.UploadIndices(mIndexData.data(), mIndexData.size(), mIndexType);
-
-            other.SetDataHash(mDataHash);
-
-            other.ClearDraws();
-            for (const auto& cmd : mDrawCmds)
-                other.AddDrawCmd(cmd.type, cmd.offset, cmd.count);
-        }
-        inline bool HasData() const noexcept
-        { return !mVertexData.empty(); }
-    private:
-        VertexLayout mVertexLayout;
-        size_t mDataHash = 0;
-        std::vector<DrawCommand> mDrawCmds;
-        std::vector<uint8_t> mVertexData;
-        std::vector<uint8_t> mIndexData;
-        std::string mName;
-        Usage mUsage = Usage::Static;
-        IndexType mIndexType = IndexType::Index16;
     };
 
 

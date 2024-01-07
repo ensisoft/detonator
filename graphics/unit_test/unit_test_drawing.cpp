@@ -161,81 +161,16 @@ private:
 class TestGeometry : public gfx::Geometry
 {
 public:
-    std::vector<DrawCommand> mDrawCmds;
-
-    gfx::VertexLayout mLayout;
-
-    using Geometry::AddDrawCmd;
-
-    virtual void SetUsage(Usage usage) override
-    {
-        mUsage = usage;
-    }
-    virtual void ClearDraws() override
-    {
-        mDrawCmds.clear();
-    }
-    virtual void AddDrawCmd(const DrawCommand& cmd) override
-    {
-        mDrawCmds.push_back(cmd);
-    }
-
-    virtual void SetVertexLayout(const gfx::VertexLayout& layout) override
-    {
-        mLayout = layout;
-    }
-    virtual void UploadVertices(const void* data, size_t bytes) override
-    {
-        mVertexUploaded = true;
-        mVertexBytes = bytes;
-        mVertexData.resize(bytes);
-        std::memcpy(&mVertexData[0], data, bytes);
-    }
-    virtual void UploadIndices(const void* data, size_t bytes, IndexType type) override
-    {
-
-    }
-    // Set the hash value that identifies the data.
-    virtual void SetDataHash(size_t hash) override
-    { mHash = hash; }
-    // Get the hash value that was used in the latest data upload.
-    virtual size_t GetDataHash() const  override
-    { return mHash; }
+    virtual std::string GetName() const override
+    { return ""; }
+    virtual Usage GetUsage() const override
+    { return Usage::Static; }
     virtual size_t GetNumDrawCmds() const override
+    { return 0; }
+    virtual size_t GetContentHash() const override
     { return 0; }
     virtual DrawCommand GetDrawCmd(size_t index) const override
     { return {}; }
-    virtual Usage GetUsage() const override
-    { return mUsage; }
-
-    template<typename T>
-    const T* AsVertexArray() const
-    {
-        TEST_REQUIRE(!mVertexData.empty());
-        return reinterpret_cast<const T*>(mVertexData.data());
-    }
-    template<typename T>
-    size_t VertexCount() const
-    {
-        const auto bytes = mVertexData.size();
-        return bytes / sizeof(T);
-    }
-    template<typename T>
-    const T& GetVertexAt(size_t index) const
-    {
-        const auto offset = sizeof(T) * index;
-        TEST_REQUIRE(offset < mVertexData.size());
-        const void* ptr = &mVertexData[offset];
-        return *static_cast<const T*>(ptr);
-    }
-
-
-    bool mVertexUploaded = false;
-    gfx::Geometry::Usage mVertexUsage;
-    std::vector<char> mVertexData;
-    std::size_t mVertexBytes = 0;
-    std::size_t mHash = 0;
-    Usage mUsage = Usage::Static;
 private:
 };
 
@@ -287,19 +222,19 @@ public:
        mProgramIndexMap[id] = index;
        return mPrograms.back();
     }
-    virtual gfx::Geometry* FindGeometry(const std::string& name) override
+    virtual gfx::GeometryPtr FindGeometry(const std::string& id) override
     {
-        auto it = mGeomIndexMap.find(name);
+        auto it = mGeomIndexMap.find(id);
         if (it == mGeomIndexMap.end())
             return nullptr;
-        return mGeoms[it->second].get();
+        return mGeoms[it->second];
     }
-    virtual gfx::Geometry* MakeGeometry(const std::string& name) override
+    virtual gfx::GeometryPtr CreateGeometry(const std::string& id, gfx::Geometry::CreateArgs args) override
     {
         const size_t index = mGeoms.size();
         mGeoms.emplace_back(new TestGeometry);
-        mGeomIndexMap[name] = index;
-        return mGeoms.back().get();
+        mGeomIndexMap[id] = index;
+        return mGeoms.back();
     }
     virtual gfx::Texture* FindTexture(const std::string& name) override
     {
@@ -399,7 +334,7 @@ private:
     std::vector<std::unique_ptr<TestTexture>> mTextures;
 
     std::unordered_map<std::string, std::size_t> mGeomIndexMap;
-    std::vector<std::unique_ptr<TestGeometry>> mGeoms;
+    std::vector<std::shared_ptr<TestGeometry>> mGeoms;
 
     std::unordered_map<std::string, std::size_t> mShaderIndexMap;
     std::vector<std::shared_ptr<TestShader>> mShaders;
@@ -1310,15 +1245,12 @@ void unit_test_polygon_inline_data()
 
     gfx::tool::PolygonBuilder builder;
     gfx::PolygonMeshClass poly;
-
-    // polygon is marked static, but we're in edit mode so the
-    // contents should get re-uploaded as needed.
-    poly.SetStatic(true);
+    TEST_REQUIRE(poly.GetContentHash() == 0);
 
     const gfx::Vertex2D verts[3] = {
-       {{10.0f, 10.0f}, {0.5f, 1.0f}},
-       {{-10.0f, -10.0f}, {0.0f, 0.0f}},
-       {{10.0f, 10.0f}, {1.0f, 0.0f}}
+       { { 10.0f,  10.0f}, {0.5f, 1.0f} },
+       { {-10.0f, -10.0f}, {0.0f, 0.0f} },
+       { { 10.0f,  10.0f}, {1.0f, 0.0f} }
     };
     gfx::Geometry::DrawCommand cmd;
     cmd.offset = 0;
@@ -1328,48 +1260,54 @@ void unit_test_polygon_inline_data()
     builder.AddDrawCommand(cmd);
     builder.BuildPoly(poly);
 
-    gfx::DrawableClass::Environment env;
-    env.editing_mode = true;
+    const auto hash1 = poly.GetContentHash();
+    TEST_REQUIRE(hash1);
 
-    TestDevice device;
-    TestGeometry geom;
-    TEST_REQUIRE(poly.Upload(env, geom));
-    TEST_REQUIRE(geom.mVertexUploaded == true);
-    TEST_REQUIRE(geom.mVertexBytes == sizeof(verts));
-    TEST_REQUIRE(geom.mDrawCmds.size() == 1);
-    TEST_REQUIRE(geom.mDrawCmds[0].offset == 0);
-    TEST_REQUIRE(geom.mDrawCmds[0].count == 3);
-    TEST_REQUIRE(geom.mDrawCmds[0].type == gfx::Geometry::DrawType::TriangleFan);
+    {
+        gfx::Geometry::CreateArgs args;
+        gfx::DrawableClass::Environment env;
+        env.editing_mode = true;
 
-    geom.mVertexUploaded = false;
-    builder.BuildPoly(poly);
-
-    TEST_REQUIRE(poly.Upload(env, geom));
-    TEST_REQUIRE(geom.mVertexUploaded == false);
-    TEST_REQUIRE(geom.mVertexBytes == sizeof(verts));
-
-    // change the content (simulate editing)
-    builder.AddVertices(verts, 3);
-    builder.AddDrawCommand(cmd);
-    builder.BuildPoly(poly);
-
-    TEST_REQUIRE(poly.Upload(env, geom));
-    TEST_REQUIRE(geom.mVertexUploaded == true);
-    TEST_REQUIRE(geom.mVertexBytes == sizeof(verts) + sizeof(verts));
-
-    geom.mVertexUploaded = false;
+        auto& geom = args.buffer;
+        TEST_REQUIRE(poly.Construct(env, args));
+        TEST_REQUIRE(geom.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(geom.GetDrawCmd(0) == cmd);
+        TEST_REQUIRE(geom.GetVertexCount() == 3);
+        TEST_REQUIRE(geom.GetVertexBytes() == sizeof(verts));
+        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(0) == verts[0]);
+        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(1) == verts[1]);
+        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(2) == verts[2]);
+    }
 
     // change the content (simulate editing)
     builder.AddVertices(verts, 3);
     builder.AddDrawCommand(cmd);
     builder.BuildPoly(poly);
 
-    // upload when edit mode is false should not re-upload anything.
-    env.editing_mode = false;
+    const auto hash2 = poly.GetContentHash();
+    TEST_REQUIRE(hash2);
+    TEST_REQUIRE(hash1 != hash2);
 
-    TEST_REQUIRE(poly.Upload(env, geom));
-    TEST_REQUIRE(geom.mVertexUploaded == false);
-    TEST_REQUIRE(geom.mVertexBytes == sizeof(verts) + sizeof(verts));
+    {
+        gfx::Geometry::CreateArgs args;
+        gfx::DrawableClass::Environment env;
+        env.editing_mode = true;
+
+        auto& geom = args.buffer;
+        TEST_REQUIRE(poly.Construct(env, args));
+        TEST_REQUIRE(geom.GetNumDrawCmds() == 2);
+        TEST_REQUIRE(geom.GetDrawCmd(0) == cmd);
+        TEST_REQUIRE(geom.GetDrawCmd(1) == cmd);
+        TEST_REQUIRE(geom.GetVertexBytes() == sizeof(verts) * 2);
+        TEST_REQUIRE(geom.GetVertexCount() == 6);
+        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(0) == verts[0]);
+        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(1) == verts[1]);
+        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(2) == verts[2]);
+        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(3) == verts[0]);
+        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(4) == verts[1]);
+        TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(5) == verts[2]);
+    }
+
 }
 
 void unit_test_polygon_mesh()
@@ -1416,18 +1354,20 @@ void unit_test_polygon_mesh()
         gfx::PolygonMeshClass poly;
         poly.SetContentUri("mesh-test.json");
 
+        gfx::Geometry::CreateArgs args;
         gfx::DrawableClass::Environment env;
         env.editing_mode = false;
 
-        TestGeometry geom;
-        TEST_REQUIRE(poly.Upload(env, geom));
-        TEST_REQUIRE(geom.mVertexUploaded == true);
-        TEST_REQUIRE(geom.mVertexBytes == sizeof(verts));
-        TEST_REQUIRE(geom.mDrawCmds.size() == 1);
+        auto& geom = args.buffer;
+
+        TEST_REQUIRE(poly.Construct(env, args));
+        TEST_REQUIRE(geom.GetNumDrawCmds() == 1);
+        TEST_REQUIRE(geom.GetDrawCmd(0) == cmds[0]);
+        TEST_REQUIRE(geom.GetVertexBytes() == sizeof(verts));
+        TEST_REQUIRE(geom.GetVertexCount() == 3);
         TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(0) == verts[0]);
         TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(1) == verts[1]);
         TEST_REQUIRE(geom.GetVertexAt<gfx::Vertex2D>(2) == verts[2]);
-        TEST_REQUIRE(geom.mDrawCmds[0] == cmds[0]);
     }
 
 }
@@ -1460,17 +1400,17 @@ void unit_test_local_particles()
         gfx::ParticleEngineClass klass(p);
         gfx::ParticleEngineInstance eng(klass);
 
-        TestDevice dev;
-        TestGeometry geom;
+        gfx::Geometry::CreateArgs args;
         gfx::detail::GenericShaderProgram pass;
         gfx::DrawableClass::Environment env;
-        eng.Restart(env);
-        TEST_REQUIRE(eng.Upload(env, geom));
-        TEST_REQUIRE(geom.VertexCount<ParticleVertex>() == p.num_particles);
 
+        eng.Restart(env);
+
+        TEST_REQUIRE(eng.Construct(env, args));
+        TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = geom.GetVertexAt<ParticleVertex>(i);
+            const auto& v = args.buffer.GetVertexAt<ParticleVertex>(i);
             TEST_REQUIRE(v.aPosition.x >= 0.25f);
             TEST_REQUIRE(v.aPosition.y >= 0.25f);
             TEST_REQUIRE(v.aPosition.x <= 0.25f + 0.5f);
@@ -1493,17 +1433,18 @@ void unit_test_local_particles()
         gfx::ParticleEngineClass klass(p);
         gfx::ParticleEngineInstance eng(klass);
 
-        TestDevice dev;
-        TestGeometry geom;
+
+        gfx::Geometry::CreateArgs args;
         gfx::detail::GenericShaderProgram pass;
         gfx::DrawableClass::Environment env;
-        eng.Restart(env);
-        TEST_REQUIRE(eng.Upload(env, geom));
-        TEST_REQUIRE(geom.VertexCount<ParticleVertex>() == p.num_particles);
 
+        eng.Restart(env);
+
+        TEST_REQUIRE(eng.Construct(env, args));
+        TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = geom.GetVertexAt<ParticleVertex>(i);
+            const auto& v = args.buffer.GetVertexAt<ParticleVertex>(i);
             const bool inside_box = (v.aPosition.x > 0.25f && v.aPosition.x < 0.75f) &&
                                     (v.aPosition.y > 0.25f && v.aPosition.y < 0.75f);
             TEST_REQUIRE(!inside_box);
@@ -1526,17 +1467,17 @@ void unit_test_local_particles()
         gfx::ParticleEngineClass klass(p);
         gfx::ParticleEngineInstance eng(klass);
 
-        TestDevice dev;
-        TestGeometry geom;
+        gfx::Geometry::CreateArgs args;
         gfx::detail::GenericShaderProgram pass;
         gfx::DrawableClass::Environment env;
-        eng.Restart(env);
-        TEST_REQUIRE(eng.Upload(env, geom));
-        TEST_REQUIRE(geom.VertexCount<ParticleVertex>() == p.num_particles);
 
+        eng.Restart(env);
+
+        TEST_REQUIRE(eng.Construct(env, args));
+        TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = geom.GetVertexAt<ParticleVertex>(i);
+            const auto& v = args.buffer.GetVertexAt<ParticleVertex>(i);
             const auto on_left_edge   = math::equals(v.aPosition.x, 0.25f)   && v.aPosition.y >= 0.25f && v.aPosition.y <= 0.75f;
             const auto on_right_edge  = math::equals(v.aPosition.x, 0.75f)  && v.aPosition.y >= 0.25f && v.aPosition.y <= 0.75f;
             const auto on_top_edge    = math::equals(v.aPosition.y, 0.25f)    && v.aPosition.x >= 0.25f && v.aPosition.x <= 0.75f;
@@ -1561,17 +1502,17 @@ void unit_test_local_particles()
         gfx::ParticleEngineClass klass(p);
         gfx::ParticleEngineInstance eng(klass);
 
-        TestDevice dev;
-        TestGeometry geom;
+        gfx::Geometry::CreateArgs args;
         gfx::detail::GenericShaderProgram pass;
         gfx::DrawableClass::Environment env;
-        eng.Restart(env);
-        TEST_REQUIRE(eng.Upload(env, geom));
-        TEST_REQUIRE(geom.VertexCount<ParticleVertex>() == p.num_particles);
 
+        eng.Restart(env);
+
+        TEST_REQUIRE(eng.Construct(env, args));
+        TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = geom.GetVertexAt<ParticleVertex>(i);
+            const auto& v = args.buffer.GetVertexAt<ParticleVertex>(i);
             TEST_REQUIRE(math::equals(v.aPosition.x, 0.5f));
             TEST_REQUIRE(math::equals(v.aPosition.y, 0.5f));
         }
@@ -1601,17 +1542,17 @@ void unit_test_local_particles()
             gfx::ParticleEngineClass klass(p);
             gfx::ParticleEngineInstance eng(klass);
 
-            TestDevice dev;
-            TestGeometry geom;
+            gfx::Geometry::CreateArgs args;
             gfx::detail::GenericShaderProgram pass;
             gfx::DrawableClass::Environment env;
-            eng.Restart(env);
-            TEST_REQUIRE(eng.Upload(env, geom));
-            TEST_REQUIRE(geom.VertexCount<ParticleVertex>() == p.num_particles);
 
+            eng.Restart(env);
+
+            TEST_REQUIRE(eng.Construct(env, args));
+            TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
             for (size_t i=0; i<p.num_particles; ++i)
             {
-                const auto& v = geom.GetVertexAt<ParticleVertex>(i);
+                const auto& v = args.buffer.GetVertexAt<ParticleVertex>(i);
                 const auto r = glm::length(glm::vec2(0.5f, 0.5f) - glm::vec2(v.aPosition.x, v.aPosition.y));
                 if (placement == K::Placement::Inside)
                     TEST_REQUIRE(math::equals(r, 0.25f) || r < 0.25f);
@@ -1644,18 +1585,18 @@ void unit_test_local_particles()
         gfx::ParticleEngineClass klass(p);
         gfx::ParticleEngineInstance eng(klass);
 
-        TestDevice dev;
-        TestGeometry geom;
+        gfx::Geometry::CreateArgs args;
         gfx::detail::GenericShaderProgram pass;
         gfx::DrawableClass::Environment env;
+
         eng.Restart(env);
         eng.Update(env, 1.0/60.0f);
-        TEST_REQUIRE(eng.Upload(env, geom));
-        TEST_REQUIRE(geom.VertexCount<ParticleVertex>() == p.num_particles);
 
+        TEST_REQUIRE(eng.Construct(env, args));
+        TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = geom.GetVertexAt<ParticleVertex>(i);
+            const auto& v = args.buffer.GetVertexAt<ParticleVertex>(i);
             const auto r = glm::length(glm::vec2(0.5f, 0.5f) - glm::vec2(v.aPosition.x, v.aPosition.y));
             TEST_REQUIRE( r > 0.25f);
         }
@@ -1680,18 +1621,18 @@ void unit_test_local_particles()
         gfx::ParticleEngineClass klass(p);
         gfx::ParticleEngineInstance eng(klass);
 
-        TestDevice dev;
-        TestGeometry geom;
+        gfx::Geometry::CreateArgs args;
         gfx::detail::GenericShaderProgram pass;
         gfx::DrawableClass::Environment env;
+
         eng.Restart(env);
         eng.Update(env, 1.0/60.0f);
-        TEST_REQUIRE(eng.Upload(env, geom));
-        TEST_REQUIRE(geom.VertexCount<ParticleVertex>() == p.num_particles);
 
+        TEST_REQUIRE(eng.Construct(env, args));
+        TEST_REQUIRE(args.buffer.GetVertexCount() == p.num_particles);
         for (size_t i=0; i<p.num_particles; ++i)
         {
-            const auto& v = geom.GetVertexAt<ParticleVertex>(i);
+            const auto& v = args.buffer.GetVertexAt<ParticleVertex>(i);
             const auto r = glm::length(glm::vec2(0.5f, 0.5f) - glm::vec2(v.aPosition.x, v.aPosition.y));
             TEST_REQUIRE( r < 0.25f);
         }
@@ -1913,6 +1854,8 @@ void unit_test_packed_texture_bug()
 // however not having static should not generate new IDs
 void unit_test_gpu_id_bug()
 {
+    TEST_CASE(test::Type::Feature)
+
     gfx::detail::GenericShaderProgram pass;
     gfx::MaterialClass::State env;
     env.material_time = 0.0f;

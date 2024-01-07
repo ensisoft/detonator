@@ -124,9 +124,8 @@ gfx::ProgramPtr MakeTestProgram(gfx::Device& dev, const char* vssrc, const char*
     return prog;
 }
 
-gfx::Geometry* MakeQuad(gfx::Device& dev)
+gfx::GeometryPtr MakeQuad(gfx::Device& dev)
 {
-    auto* geom = dev.MakeGeometry("quad");
     const gfx::Vertex2D verts[] = {
         { {-1,  1}, {0, 1} },
         { {-1, -1}, {0, 0} },
@@ -136,8 +135,13 @@ gfx::Geometry* MakeQuad(gfx::Device& dev)
         { { 1, -1}, {1, 0} },
         { { 1,  1}, {1, 1} }
     };
-    geom->SetVertexBuffer(verts, 6);
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    gfx::Geometry::CreateArgs args;
+    args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    args.buffer.SetVertexBuffer(verts, 6);
+    args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    args.content_name = "quad";
+
+    auto geom = dev.CreateGeometry("quad", std::move(args));
     return geom;
 }
 
@@ -255,18 +259,7 @@ void unit_test_render_fbo(gfx::Framebuffer::Format format, gfx::Framebuffer::MSA
 
     auto dev = CreateDevice();
 
-    auto* geom = dev->MakeGeometry("geom");
-    const gfx::Vertex2D verts[] = {
-        { {-1,  1}, {0, 1} },
-        { {-1, -1}, {0, 0} },
-        { { 1, -1}, {1, 0} },
-
-        { {-1,  1}, {0, 1} },
-        { { 1, -1}, {1, 0} },
-        { { 1,  1}, {1, 1} }
-    };
-    geom->SetVertexBuffer(verts, 6);
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    auto geom = MakeQuad(*dev);
 
     // rendered a colored quad into the fbo then use the fbo
     // color buffer texture to sample in another program.
@@ -420,7 +413,7 @@ void main() {
 
     // draw using vertex buffer only
     {
-        auto* geom = dev->MakeGeometry("geom");
+
         constexpr const gfx::Vertex2D vertices[] = {
             { {-1,  1}, {0, 1} },
             { {-1, -1}, {0, 0} },
@@ -430,8 +423,12 @@ void main() {
             { { 1, -1}, {1, 0} },
             { { 1,  1}, {1, 1} }
         };
-        geom->SetVertexBuffer(vertices, 6);
-        geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+
+        gfx::Geometry::CreateArgs args;
+        args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+        args.buffer.SetVertexBuffer(vertices, 6);
+        args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+        auto geom = dev->CreateGeometry("geom", std::move(args));
 
         dev->BeginFrame();
           dev->ClearColor(gfx::Color::Red);
@@ -445,7 +442,7 @@ void main() {
 
     // draw using vertex and index buffer
     {
-        auto* geom =  dev->MakeGeometry("geom");
+
         constexpr const gfx::Vertex2D vertices[] = {
             { {-1,  1}, {0, 1} },
             { {-1, -1}, {0, 0} },
@@ -456,9 +453,12 @@ void main() {
             0, 1, 2, // bottom triangle
             0, 2, 3  // top triangle
         };
-        geom->SetVertexBuffer(vertices, 4);
-        geom->SetIndexBuffer(indices, 6);
-        geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+        gfx::Geometry::CreateArgs args;
+        args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+        args.buffer.SetVertexBuffer(vertices, 4);
+        args.buffer.SetIndexBuffer(indices, 6);
+        args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+        auto geom =  dev->CreateGeometry("geom", std::move(args));
 
         dev->BeginFrame();
             dev->ClearColor(gfx::Color::Red);
@@ -498,7 +498,6 @@ void unit_test_render_with_single_texture()
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::White);
 
-    auto* geom = dev->MakeGeometry("geom");
     const gfx::Vertex2D verts[] = {
         { {-1,  1}, {0, 0} },
         { {-1, -1}, {0, 1} },
@@ -508,8 +507,11 @@ void unit_test_render_with_single_texture()
         { { 1, -1}, {1, 1} },
         { { 1,  1}, {1, 0} }
     };
-    geom->SetVertexBuffer(verts, 6);
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    gfx::Geometry::CreateArgs args;
+    args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    args.buffer.SetVertexBuffer(verts, 6);
+    args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    auto geom = dev->CreateGeometry("geom", std::move(args));
 
     constexpr const char* fssrc =
 R"(#version 100
@@ -572,7 +574,6 @@ void unit_test_render_with_multiple_textures()
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::White);
 
-    auto* geom = dev->MakeGeometry("geom");
     const gfx::Vertex2D verts[] = {
         { {-1,  1}, {0, 0} },
         { {-1, -1}, {0, 1} },
@@ -582,8 +583,11 @@ void unit_test_render_with_multiple_textures()
         { { 1, -1}, {1, 1} },
         { { 1,  1}, {1, 0} }
     };
-    geom->SetVertexBuffer(verts, 6);
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    gfx::Geometry::CreateArgs args;
+    args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    args.buffer.SetVertexBuffer(verts, 6);
+    args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    auto geom = dev->CreateGeometry("geom", std::move(args));
 
     constexpr const char* fssrc =
 R"(#version 100
@@ -642,7 +646,6 @@ void unit_test_render_set_float_uniforms()
 
     auto dev = CreateDevice();
 
-    auto* geom = dev->MakeGeometry("geom");
     const gfx::Vertex2D verts[] = {
             { {-1,  1}, {0, 1} },
             { {-1, -1}, {0, 0} },
@@ -652,8 +655,11 @@ void unit_test_render_set_float_uniforms()
             { { 1, -1}, {1, 0} },
             { { 1,  1}, {1, 1} }
     };
-    geom->SetVertexBuffer(verts, 6);
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    gfx::Geometry::CreateArgs args;
+    args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    args.buffer.SetVertexBuffer(verts, 6);
+    args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    auto geom = dev->CreateGeometry("geom", std::move(args));
 
     constexpr const char* fssrc =
 R"(#version 100
@@ -757,7 +763,6 @@ void unit_test_render_set_int_uniforms()
 
     auto dev = CreateDevice();
 
-    auto *geom = dev->MakeGeometry("geom");
     const gfx::Vertex2D verts[] = {
             {{-1, 1},  {0, 1}},
             {{-1, -1}, {0, 0}},
@@ -767,8 +772,11 @@ void unit_test_render_set_int_uniforms()
             {{1,  -1}, {1, 0}},
             {{1,  1},  {1, 1}}
     };
-    geom->SetVertexBuffer(verts, 6);
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    gfx::Geometry::CreateArgs args;
+    args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    args.buffer.SetVertexBuffer(verts, 6);
+    args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    auto geom = dev->CreateGeometry("geom", std::move(args));
 
     constexpr const char* fssrc =
 R"(#version 100
@@ -838,7 +846,6 @@ void unit_test_render_set_matrix2x2_uniform()
 
     auto dev = CreateDevice();
 
-    auto* geom = dev->MakeGeometry("geom");
     const gfx::Vertex2D verts[] = {
             { {-1,  1}, {0, 1} },
             { {-1, -1}, {0, 0} },
@@ -848,8 +855,11 @@ void unit_test_render_set_matrix2x2_uniform()
             { { 1, -1}, {1, 0} },
             { { 1,  1}, {1, 1} }
     };
-    geom->SetVertexBuffer(verts, 6);
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    gfx::Geometry::CreateArgs args;
+    args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    args.buffer.SetVertexBuffer(verts, 6);
+    args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    auto geom = dev->CreateGeometry("geom", std::move(args));
 
     constexpr const char* fssrc =
 R"(#version 100
@@ -899,7 +909,6 @@ void unit_test_render_set_matrix3x3_uniform()
 
     auto dev = CreateDevice();
 
-    auto* geom = dev->MakeGeometry("geom");
     const gfx::Vertex2D verts[] = {
             { {-1,  1}, {0, 1} },
             { {-1, -1}, {0, 0} },
@@ -909,8 +918,11 @@ void unit_test_render_set_matrix3x3_uniform()
             { { 1, -1}, {1, 0} },
             { { 1,  1}, {1, 1} }
     };
-    geom->SetVertexBuffer(verts, 6);
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    gfx::Geometry::CreateArgs args;
+    args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    args.buffer.SetVertexBuffer(verts, 6);
+    args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    auto geom = dev->CreateGeometry("geom", std::move(args));
 
     constexpr const char* fssrc =
 R"(#version 100
@@ -960,7 +972,6 @@ void unit_test_render_set_matrix4x4_uniform()
 
     auto dev = CreateDevice();
 
-    auto* geom = dev->MakeGeometry("geom");
     const gfx::Vertex2D verts[] = {
             { {-1,  1}, {0, 1} },
             { {-1, -1}, {0, 0} },
@@ -970,8 +981,11 @@ void unit_test_render_set_matrix4x4_uniform()
             { { 1, -1}, {1, 0} },
             { { 1,  1}, {1, 1} }
     };
-    geom->SetVertexBuffer(verts, 6);
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    gfx::Geometry::CreateArgs args;
+    args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    args.buffer.SetVertexBuffer(verts, 6);
+    args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    auto geom = dev->CreateGeometry("geom", std::move(args));
 
     constexpr const char* fssrc =
 R"(#version 100
@@ -1036,7 +1050,6 @@ void unit_test_uniform_sampler_optimize_bug()
     };
     texture->Upload(pixels, 2, 3, gfx::Texture::Format::RGB);
 
-    auto geom = dev->MakeGeometry("geom");
     const gfx::Vertex2D verts[] = {
             { {-1,  1}, {0, 1} },
             { {-1, -1}, {0, 0} },
@@ -1046,8 +1059,11 @@ void unit_test_uniform_sampler_optimize_bug()
             { { 1, -1}, {1, 0} },
             { { 1,  1}, {1, 1} }
     };
-    geom->SetVertexBuffer(verts, 6);
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    gfx::Geometry::CreateArgs args;
+    args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    args.buffer.SetVertexBuffer(verts, 6);
+    args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    auto geom = dev->CreateGeometry("geom", std::move(args));
 
     // no mention of the texture sampler in the fragment shader!
     constexpr const char* fssrc =
@@ -1106,9 +1122,11 @@ void unit_test_clean_textures()
         { { 1, -1}, {1, 0} },
         { { 1,  1}, {1, 1} }
     };
-    auto geom = dev->MakeGeometry("geom");
-    geom->SetVertexBuffer(verts, 6);
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    gfx::Geometry::CreateArgs args;
+    args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    args.buffer.SetVertexBuffer(verts, 6);
+    args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    auto geom = dev->CreateGeometry("geom", std::move(args));
 
     // texture that is used is not cleaned
     {
@@ -1236,100 +1254,6 @@ void main() {
     dev->DeleteTextures();
 }
 
-void unit_test_render_dynamic()
-{
-    TEST_CASE(test::Type::Feature)
-
-    auto dev = CreateDevice();
-
-    dev->BeginFrame();
-    dev->ClearColor(gfx::Color::Red);
-
-    auto* geom = dev->MakeGeometry("geom");
-    const gfx::Vertex2D verts1[] = {
-        { {-1,  1}, {0, 1} },
-        { {-1,  0}, {0, 0} },
-        { { 0,  0}, {1, 0} },
-
-        { {-1,  1}, {0, 1} },
-        { { 0,  0}, {1, 0} },
-        { { 0,  1}, {1, 1} }
-    };
-    const gfx::Vertex2D verts2[] = {
-        { {0,  1}, {0, 1} },
-        { {0,  0}, {0, 0} },
-        { {1,  0}, {1, 0} },
-
-        { {0,  1}, {0, 1} },
-        { {1,  0}, {1, 0} },
-        { {1,  1}, {1, 1} }
-    };
-
-    geom->SetUsage(gfx::Geometry::Usage::Dynamic);
-    geom->SetVertexBuffer(verts1, 6);
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
-
-    constexpr const char* fssrc =
-R"(#version 100
-precision mediump float;
-void main() {
-  gl_FragColor = vec4(1.0);
-})";
-
-    constexpr const char* vssrc =
-R"(#version 100
-attribute vec2 aPosition;
-void main() {
-  gl_Position = vec4(aPosition.xy, 1.0, 1.0);
-})";
-
-    auto prog = MakeTestProgram(*dev, vssrc, fssrc);
-
-    gfx::Device::State state;
-    state.blending = gfx::Device::State::BlendOp::None;
-    state.bWriteColor = true;
-    state.viewport = gfx::IRect(0, 0, 10, 10);
-    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
-
-    dev->Draw(*prog, *geom, state);
-    dev->EndFrame();
-
-    {
-        gfx::RgbaBitmap expected;
-        expected.Resize(10, 10);
-        expected.Fill(gfx::Color::Red);
-        expected.Fill(gfx::URect(0, 0, 5, 5), gfx::Color::White);
-
-        // this has alpha in it.
-        const auto& bmp = dev->ReadColorBuffer(10, 10);
-        //gfx::WritePNG(bmp, "render-test-dynamic.png");
-        TEST_REQUIRE(bmp == expected);
-    }
-
-    // change the geometry buffer.
-    geom->ClearDraws();
-    geom->SetUsage(gfx::Geometry::Usage::Dynamic);
-    geom->SetVertexBuffer(verts2, 6);
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
-
-    // draw frame
-    dev->BeginFrame();
-    dev->ClearColor(gfx::Color::Red);
-    dev->Draw(*prog, *geom, state);
-    dev->EndFrame();
-
-    {
-        gfx::RgbaBitmap expected;
-        expected.Resize(10, 10);
-        expected.Fill(gfx::Color::Red);
-        expected.Fill(gfx::URect(5, 0, 5, 5), gfx::Color::White);
-
-        // this has alpha in it.
-        const auto& bmp = dev->ReadColorBuffer(10, 10);
-        //gfx::WritePNG(bmp, "render-test-dynamic.png");
-        TEST_REQUIRE(bmp == expected);
-    }
-}
 
 void unit_test_vbo_allocation()
 {
@@ -1341,9 +1265,12 @@ void unit_test_vbo_allocation()
 
     // static
     {
-        auto* foo = dev->MakeGeometry("foo");
-        foo->SetUsage(gfx::Geometry::Usage::Static);
-        foo->UploadVertices(junk_data, sizeof(junk_data));
+        {
+            gfx::Geometry::CreateArgs args;
+            args.buffer.SetVertexBuffer(junk_data, sizeof(junk_data));
+            args.usage = gfx::GeometryBuffer::Usage::Static;
+            auto foo = dev->CreateGeometry("foo", std::move(args));
+        }
 
         gfx::Device::ResourceStats stats;
 
@@ -1353,6 +1280,7 @@ void unit_test_vbo_allocation()
         TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == 0);
         TEST_REQUIRE(stats.dynamic_vbo_mem_use == 0);
         TEST_REQUIRE(stats.static_vbo_mem_use == sizeof(junk_data));
+        TEST_REQUIRE(stats.static_vbo_mem_alloc >= sizeof(junk_data));
 
         dev->BeginFrame();
         dev->EndFrame();
@@ -1364,29 +1292,13 @@ void unit_test_vbo_allocation()
         TEST_REQUIRE(stats.dynamic_vbo_mem_use == 0);
         TEST_REQUIRE(stats.static_vbo_mem_use == sizeof(junk_data));
 
-        // should reuse the same buffer since the data is the same.
-        foo->UploadVertices(junk_data, sizeof(junk_data));
+        {
+            gfx::Geometry::CreateArgs args;
+            args.buffer.SetVertexBuffer(junk_data, sizeof(junk_data) / 2);
+            args.usage = gfx::GeometryBuffer::Usage::Static;
+            auto bar = dev->CreateGeometry("bar", std::move(args));
+        }
 
-        dev->GetResourceStats(&stats);
-        TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
-        TEST_REQUIRE(stats.streaming_vbo_mem_alloc == 0);
-        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == 0);
-        TEST_REQUIRE(stats.dynamic_vbo_mem_use == 0);
-        TEST_REQUIRE(stats.static_vbo_mem_use == sizeof(junk_data));
-
-        // should reuse the same buffer since the data is less
-        foo->UploadVertices(junk_data, sizeof(junk_data) / 2);
-
-        dev->GetResourceStats(&stats);
-        TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
-        TEST_REQUIRE(stats.streaming_vbo_mem_alloc == 0);
-        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == 0);
-        TEST_REQUIRE(stats.dynamic_vbo_mem_use == 0);
-        TEST_REQUIRE(stats.static_vbo_mem_use == sizeof(junk_data)); // no decrease here.
-
-        auto* bar = dev->MakeGeometry("bar");
-        bar->SetUsage(gfx::Geometry::Usage::Static);
-        bar->UploadVertices(junk_data, sizeof(junk_data) / 2);
         dev->GetResourceStats(&stats);
         TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
         TEST_REQUIRE(stats.streaming_vbo_mem_alloc == 0);
@@ -1394,14 +1306,25 @@ void unit_test_vbo_allocation()
         TEST_REQUIRE(stats.dynamic_vbo_mem_use == 0);
         TEST_REQUIRE(stats.static_vbo_mem_use == sizeof(junk_data) + sizeof(junk_data)/2);
 
+        dev->DeleteGeometries();
+        dev->GetResourceStats(&stats);
+        TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.streaming_vbo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_use == 0);
+        TEST_REQUIRE(stats.static_vbo_mem_use == 0);
     }
+
     dev->DeleteGeometries();
 
     // streaming. cleared after every frame, allocations remain.
     {
-        auto* foo = dev->MakeGeometry("foo");
-        foo->SetUsage(gfx::Geometry::Usage::Stream);
-        foo->UploadVertices(junk_data, sizeof(junk_data));
+        {
+            gfx::Geometry::CreateArgs args;
+            args.buffer.SetVertexBuffer(junk_data, sizeof(junk_data));
+            args.usage = gfx::GeometryBuffer::Usage::Stream;
+            auto foo = dev->CreateGeometry("foo", std::move(args));
+        }
 
         gfx::Device::ResourceStats stats;
 
@@ -1428,65 +1351,35 @@ void unit_test_vbo_allocation()
 
     // dynamic
     {
-        auto* foo = dev->MakeGeometry("foo");
-        foo->SetUsage(gfx::Geometry::Usage::Dynamic);
-        foo->UploadVertices(junk_data, sizeof(junk_data));
+        {
+            gfx::Geometry::CreateArgs args;
+            args.buffer.SetVertexBuffer(junk_data, sizeof(junk_data));
+            args.usage = gfx::GeometryBuffer::Usage::Dynamic;
+            auto foo = dev->CreateGeometry("foo", std::move(args));
+        }
 
         gfx::Device::ResourceStats stats;
 
         dev->GetResourceStats(&stats);
         TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
         TEST_REQUIRE(stats.streaming_vbo_mem_alloc > 0);
-        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc > 0);
+        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc >= sizeof(junk_data));
         TEST_REQUIRE(stats.dynamic_vbo_mem_use == sizeof(junk_data));
         TEST_REQUIRE(stats.static_vbo_mem_use == 0);
         TEST_REQUIRE(stats.static_vbo_mem_alloc > 0 );
 
-        // should reuse the same buffer since the amount of data is the same.
-        foo->UploadVertices(junk_data, sizeof(junk_data));
+        {
+            gfx::Geometry::CreateArgs args;
+            args.buffer.SetVertexBuffer(junk_data, sizeof(junk_data));
+            args.usage = gfx::GeometryBuffer::Usage::Dynamic;
+            auto bar = dev->CreateGeometry("bar", std::move(args));
+        }
 
         dev->GetResourceStats(&stats);
         TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
         TEST_REQUIRE(stats.streaming_vbo_mem_alloc > 0);
-        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == sizeof(junk_data));
-        TEST_REQUIRE(stats.dynamic_vbo_mem_use == sizeof(junk_data));
-        TEST_REQUIRE(stats.static_vbo_mem_use == 0);
-        TEST_REQUIRE(stats.static_vbo_mem_alloc > 0);
-
-        // should reuse the same buffer since the amount of data is less.
-        foo->UploadVertices(junk_data, sizeof(junk_data) - 1);
-
-        dev->GetResourceStats(&stats);
-        TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
-        TEST_REQUIRE(stats.streaming_vbo_mem_alloc > 0);
-        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == sizeof(junk_data));
-        TEST_REQUIRE(stats.dynamic_vbo_mem_use == sizeof(junk_data));
-        TEST_REQUIRE(stats.static_vbo_mem_use == 0);
-        TEST_REQUIRE(stats.static_vbo_mem_alloc > 0);
-
-        // grow dynamic buffer.
-        char more_junk[1024] = {0};
-        foo->UploadVertices(more_junk, sizeof(more_junk));
-
-        dev->GetResourceStats(&stats);
-        TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
-        TEST_REQUIRE(stats.streaming_vbo_mem_alloc > 0);
-        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == sizeof(more_junk) + sizeof(junk_data));
-        TEST_REQUIRE(stats.dynamic_vbo_mem_use == sizeof(more_junk));
-        TEST_REQUIRE(stats.static_vbo_mem_use == 0);
-        TEST_REQUIRE(stats.static_vbo_mem_alloc > 0);
-
-        // second geometry should be able to re-use the dynamic buffer that should
-        // be unused.
-        auto* bar = dev->MakeGeometry("bar");
-        bar->SetUsage(gfx::Geometry::Usage::Dynamic);
-        bar->UploadVertices(junk_data, sizeof(junk_data));
-
-        dev->GetResourceStats(&stats);
-        TEST_REQUIRE(stats.streaming_vbo_mem_use == 0);
-        TEST_REQUIRE(stats.streaming_vbo_mem_alloc > 0);
-        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == sizeof(more_junk) + sizeof(junk_data));
-        TEST_REQUIRE(stats.dynamic_vbo_mem_use == sizeof(more_junk) + sizeof(junk_data));
+        TEST_REQUIRE(stats.dynamic_vbo_mem_alloc == sizeof(junk_data) + sizeof(junk_data));
+        TEST_REQUIRE(stats.dynamic_vbo_mem_use == sizeof(junk_data) + sizeof(junk_data));
         TEST_REQUIRE(stats.static_vbo_mem_use == 0);
         TEST_REQUIRE(stats.static_vbo_mem_alloc > 0);
 
@@ -1503,9 +1396,14 @@ void unit_test_ibo_allocation()
 
     // static
     {
-        auto* foo = dev->MakeGeometry("foo");
-        foo->SetUsage(gfx::Geometry::Usage::Static);
-        foo->UploadIndices(junk_data, sizeof(junk_data), gfx::Geometry::IndexType::Index16);
+        {
+            gfx::Geometry::CreateArgs args;
+            args.buffer.UploadVertices(junk_data, sizeof(junk_data));
+            args.buffer.UploadIndices(junk_data, sizeof(junk_data), gfx::Geometry::IndexType ::Index16);
+            args.usage = gfx::GeometryBuffer::Usage::Static;
+            auto foo = dev->CreateGeometry("foo", std::move(args));
+        }
+
 
         gfx::Device::ResourceStats stats;
 
@@ -1526,43 +1424,32 @@ void unit_test_ibo_allocation()
         TEST_REQUIRE(stats.dynamic_ibo_mem_use == 0);
         TEST_REQUIRE(stats.static_ibo_mem_use == sizeof(junk_data));
 
-        // should reuse the same buffer since the data is the same.
-        foo->UploadIndices(junk_data, sizeof(junk_data), gfx::Geometry::IndexType::Index16);
+        {
+            gfx::Geometry::CreateArgs args;
+            args.buffer.UploadVertices(junk_data, sizeof(junk_data));
+            args.buffer.UploadIndices(junk_data, sizeof(junk_data), gfx::Geometry::IndexType ::Index16);
+            args.usage = gfx::GeometryBuffer::Usage::Static;
+            auto foo = dev->CreateGeometry("bar", std::move(args));
+        }
 
         dev->GetResourceStats(&stats);
         TEST_REQUIRE(stats.streaming_ibo_mem_use == 0);
         TEST_REQUIRE(stats.streaming_ibo_mem_alloc == 0);
         TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == 0);
         TEST_REQUIRE(stats.dynamic_ibo_mem_use == 0);
-        TEST_REQUIRE(stats.static_ibo_mem_use == sizeof(junk_data));
-
-        // should reuse the same buffer since the data is less
-        foo->UploadIndices(junk_data, sizeof(junk_data)/2, gfx::Geometry::IndexType::Index16);
-
-        dev->GetResourceStats(&stats);
-        TEST_REQUIRE(stats.streaming_ibo_mem_use == 0);
-        TEST_REQUIRE(stats.streaming_ibo_mem_alloc == 0);
-        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == 0);
-        TEST_REQUIRE(stats.dynamic_ibo_mem_use == 0);
-        TEST_REQUIRE(stats.static_ibo_mem_use == sizeof(junk_data)); // no decrease here.
-
-        auto* bar = dev->MakeGeometry("bar");
-        bar->SetUsage(gfx::Geometry::Usage::Static);
-        bar->UploadIndices(junk_data, sizeof(junk_data) / 2, gfx::Geometry::IndexType::Index16);
-        dev->GetResourceStats(&stats);
-        TEST_REQUIRE(stats.streaming_ibo_mem_use == 0);
-        TEST_REQUIRE(stats.streaming_ibo_mem_alloc == 0);
-        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == 0);
-        TEST_REQUIRE(stats.dynamic_ibo_mem_use == 0);
-        TEST_REQUIRE(stats.static_ibo_mem_use == sizeof(junk_data) + sizeof(junk_data)/2);
+        TEST_REQUIRE(stats.static_ibo_mem_use == sizeof(junk_data) + sizeof(junk_data));
     }
     dev->DeleteGeometries();
 
     // streaming. cleared after every frame, allocations remain.
     {
-        auto* foo = dev->MakeGeometry("foo");
-        foo->SetUsage(gfx::Geometry::Usage::Stream);
-        foo->UploadIndices(junk_data, sizeof(junk_data), gfx::Geometry::IndexType::Index16);
+        {
+            gfx::Geometry::CreateArgs args;
+            args.buffer.UploadVertices(junk_data, sizeof(junk_data));
+            args.buffer.UploadIndices(junk_data, sizeof(junk_data), gfx::Geometry::IndexType ::Index16);
+            args.usage = gfx::GeometryBuffer::Usage::Stream;
+            auto foo = dev->CreateGeometry("foo", std::move(args));
+        }
 
         gfx::Device::ResourceStats stats;
 
@@ -1589,9 +1476,14 @@ void unit_test_ibo_allocation()
 
     // dynamic
     {
-        auto* foo = dev->MakeGeometry("foo");
-        foo->SetUsage(gfx::Geometry::Usage::Dynamic);
-        foo->UploadIndices(junk_data, sizeof(junk_data), gfx::Geometry::IndexType::Index16);
+
+        {
+            gfx::Geometry::CreateArgs args;
+            args.buffer.UploadVertices(junk_data, sizeof(junk_data));
+            args.buffer.UploadIndices(junk_data, sizeof(junk_data), gfx::Geometry::IndexType ::Index16);
+            args.usage = gfx::GeometryBuffer::Usage::Dynamic;
+            auto foo = dev->CreateGeometry("foo", std::move(args));
+        }
 
         gfx::Device::ResourceStats stats;
 
@@ -1603,51 +1495,20 @@ void unit_test_ibo_allocation()
         TEST_REQUIRE(stats.static_ibo_mem_use == 0);
         TEST_REQUIRE(stats.static_ibo_mem_alloc > 0 );
 
-        // should reuse the same buffer since the amount of data is the same.
-        foo->UploadIndices(junk_data, sizeof(junk_data), gfx::Geometry::IndexType::Index16);
+
+        {
+            gfx::Geometry::CreateArgs args;
+            args.buffer.UploadVertices(junk_data, sizeof(junk_data));
+            args.buffer.UploadIndices(junk_data, sizeof(junk_data), gfx::Geometry::IndexType ::Index16);
+            args.usage = gfx::GeometryBuffer::Usage::Dynamic;
+            auto foo = dev->CreateGeometry("bar", std::move(args));
+        }
 
         dev->GetResourceStats(&stats);
         TEST_REQUIRE(stats.streaming_ibo_mem_use == 0);
         TEST_REQUIRE(stats.streaming_ibo_mem_alloc > 0);
-        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == sizeof(junk_data));
-        TEST_REQUIRE(stats.dynamic_ibo_mem_use == sizeof(junk_data));
-        TEST_REQUIRE(stats.static_ibo_mem_use == 0);
-        TEST_REQUIRE(stats.static_ibo_mem_alloc > 0);
-
-        // should reuse the same buffer since the amount of data is less.
-        foo->UploadIndices(junk_data, sizeof(junk_data) - 1, gfx::Geometry::IndexType::Index16);
-
-        dev->GetResourceStats(&stats);
-        TEST_REQUIRE(stats.streaming_ibo_mem_use == 0);
-        TEST_REQUIRE(stats.streaming_ibo_mem_alloc > 0);
-        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == sizeof(junk_data));
-        TEST_REQUIRE(stats.dynamic_ibo_mem_use == sizeof(junk_data));
-        TEST_REQUIRE(stats.static_ibo_mem_use == 0);
-        TEST_REQUIRE(stats.static_ibo_mem_alloc > 0);
-
-        // grow dynamic buffer.
-        char more_junk[1024] = {0};
-        foo->UploadIndices(more_junk, sizeof(more_junk), gfx::Geometry::IndexType::Index16);
-
-        dev->GetResourceStats(&stats);
-        TEST_REQUIRE(stats.streaming_ibo_mem_use == 0);
-        TEST_REQUIRE(stats.streaming_ibo_mem_alloc > 0);
-        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == sizeof(more_junk) + sizeof(junk_data));
-        TEST_REQUIRE(stats.dynamic_ibo_mem_use == sizeof(more_junk));
-        TEST_REQUIRE(stats.static_ibo_mem_use == 0);
-        TEST_REQUIRE(stats.static_ibo_mem_alloc > 0);
-
-        // second geometry should be able to re-use the dynamic buffer that should
-        // be unused.
-        auto* bar = dev->MakeGeometry("bar");
-        bar->SetUsage(gfx::Geometry::Usage::Dynamic);
-        bar->UploadIndices(junk_data, sizeof(junk_data), gfx::Geometry::IndexType::Index16);
-
-        dev->GetResourceStats(&stats);
-        TEST_REQUIRE(stats.streaming_ibo_mem_use == 0);
-        TEST_REQUIRE(stats.streaming_ibo_mem_alloc > 0);
-        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == sizeof(more_junk) + sizeof(junk_data));
-        TEST_REQUIRE(stats.dynamic_ibo_mem_use == sizeof(more_junk) + sizeof(junk_data));
+        TEST_REQUIRE(stats.dynamic_ibo_mem_alloc == sizeof(junk_data) + sizeof(junk_data));
+        TEST_REQUIRE(stats.dynamic_ibo_mem_use == sizeof(junk_data) + sizeof(junk_data));
         TEST_REQUIRE(stats.static_ibo_mem_use == 0);
         TEST_REQUIRE(stats.static_ibo_mem_alloc > 0);
     }
@@ -1667,7 +1528,8 @@ void unit_test_empty_draw_lost_uniform_bug()
 
     auto dev = CreateDevice();
 
-    auto* geom = dev->MakeGeometry("geom");
+    gfx::Geometry::CreateArgs args;
+    auto empty = dev->CreateGeometry("geom", args);
     // geometry doesn't have any actual vertex data!
 
     const char* fssrc =
@@ -1699,7 +1561,7 @@ void main() {
 
     // this doesn't actually draw anything (and it cannot draw) because
     // there's no vertex data that has been put in the geometry.
-    dev->Draw(*prog, *geom, state);
+    dev->Draw(*prog, *empty, state);
     dev->EndFrame();
 
     // now set the actual vertex geometry
@@ -1712,8 +1574,10 @@ void main() {
             { { 1, -1}, {1, 0} },
             { { 1,  1}, {1, 1} }
     };
-    geom->SetVertexBuffer(verts, 6);
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    args.buffer.SetVertexBuffer(verts, 6);
+    args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    auto geom = dev->CreateGeometry("geom", std::move(args));
 
     // draw
     dev->BeginFrame();
@@ -1743,7 +1607,7 @@ void unit_test_max_texture_units_single_texture()
     gfx::Device::DeviceCaps caps = {};
     dev->GetDeviceCaps(&caps);
 
-    auto* geom = dev->MakeGeometry("geom");
+
     const gfx::Vertex2D verts[] = {
         { {-1,  1}, {0, 0} },
         { {-1, -1}, {0, 1} },
@@ -1752,8 +1616,11 @@ void unit_test_max_texture_units_single_texture()
         { { 1, -1}, {1, 1} },
         { { 1,  1}, {1, 0} }
     };
-    geom->SetVertexBuffer(verts, 6);
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    gfx::Geometry::CreateArgs args;
+    args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    args.buffer.SetVertexBuffer(verts, 6);
+    args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    auto geom = dev->CreateGeometry("geom", std::move(args));
 
     const char* vssrc =
             R"(#version 100
@@ -1840,7 +1707,7 @@ void unit_test_max_texture_units_many_textures()
     gfx::Device::DeviceCaps caps = {};
     dev->GetDeviceCaps(&caps);
 
-    auto* geom = dev->MakeGeometry("geom");
+
     const gfx::Vertex2D verts[] = {
         { {-1,  1}, {0, 0} },
         { {-1, -1}, {0, 1} },
@@ -1849,8 +1716,11 @@ void unit_test_max_texture_units_many_textures()
         { { 1, -1}, {1, 1} },
         { { 1,  1}, {1, 0} }
     };
-    geom->SetVertexBuffer(verts, 6);
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    gfx::Geometry::CreateArgs args;
+    args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    args.buffer.SetVertexBuffer(verts, 6);
+    args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    auto geom = dev->CreateGeometry("geom", std::move(args));
 
     // saturate texture units.
     {
@@ -2070,7 +1940,6 @@ void unit_test_repeated_uniform_bug()
     dev->BeginFrame();
     dev->ClearColor(gfx::Color::Red);
 
-    auto* geom = dev->MakeGeometry("geom");
     const gfx::Vertex2D verts[] = {
       { {-1,  1}, {0, 1} },
       { {-1, -1}, {0, 0} },
@@ -2080,8 +1949,11 @@ void unit_test_repeated_uniform_bug()
       { { 1, -1}, {1, 0} },
       { { 1,  1}, {1, 1} }
     };
-    geom->SetVertexBuffer(verts, 6);
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    gfx::Geometry::CreateArgs args;
+    args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    args.buffer.SetVertexBuffer(verts, 6);
+    args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+    auto geom = dev->CreateGeometry("geom", std::move(args));
 
     const char* fssrc =
             R"(#version 100
@@ -2222,7 +2094,7 @@ void main() {
   gl_FragColor = texture2D(kTexture, vTexCoord.xy);
 })", "p1");
 
-    auto* quad = MakeQuad(*dev);
+    auto quad = MakeQuad(*dev);
 
     gfx::Device::State state;
     state.bWriteColor  = true;
@@ -2279,7 +2151,6 @@ void main() {
     state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
     state.viewport     = gfx::IRect(0, 0, 10, 10);
 
-    auto* geom = dev->MakeGeometry("geom");
     constexpr const gfx::Vertex2D vertices[] = {
         { {-1,  1}, {0, 1} },
         { {-1, -1}, {0, 0} },
@@ -2290,11 +2161,12 @@ void main() {
         0, 1, 2, // bottom triangle
         0, 2, 3  // top triangle
     };
-
-    geom->SetVertexBuffer(vertices, 4);
-    geom->SetIndexBuffer(indices, 6);
-
-    geom->AddDrawCmd(gfx::Geometry::DrawType::Triangles, 3, 3);
+    gfx::Geometry::CreateArgs args;
+    args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+    args.buffer.SetVertexBuffer(vertices, 4);
+    args.buffer.SetIndexBuffer(indices, 6);
+    args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles, 3, 3);
+    auto geom = dev->CreateGeometry("geom", std::move(args));
 
     dev->BeginFrame();
        dev->ClearColor(gfx::Color::Red);
@@ -2340,7 +2212,6 @@ int test_main(int argc, char* argv[])
     unit_test_render_set_matrix3x3_uniform();
     unit_test_render_set_matrix4x4_uniform();
     unit_test_uniform_sampler_optimize_bug();
-    unit_test_render_dynamic();
     unit_test_clean_textures();
     unit_test_vbo_allocation();
     unit_test_ibo_allocation();

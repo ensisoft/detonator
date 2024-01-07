@@ -174,7 +174,7 @@ void VertexShaderMain()
 namespace gfx {
 namespace detail {
 
-void ArrowGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+void ArrowGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry)
 {
     if (style == Style::Outline)
     {
@@ -187,6 +187,7 @@ void ArrowGeometry::Generate(const Environment& env, Style style, Geometry& geom
             {{0.7f, -0.0f},  {0.7f, 0.0f}},
             {{0.7f, -0.25f}, {0.7f, 0.25f}},
         };
+        geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
         geometry.SetVertexBuffer(verts, 7);
         geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
     }
@@ -207,25 +208,27 @@ void ArrowGeometry::Generate(const Environment& env, Style style, Geometry& geom
             {{0.7f, -1.0f}, {0.7f, 1.0f}},
             {{1.0f, -0.5f}, {1.0f, 0.5f}},
         };
+        geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
         geometry.SetVertexBuffer(verts, 9);
         geometry.AddDrawCmd(Geometry::DrawType::Triangles);
     }
 }
 
 // static
-void StaticLineGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+void StaticLineGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry)
 {
     // horizontal line.
     constexpr const gfx::Vertex2D verts[2] = {
         {{0.0f,  -0.5f}, {0.0f, 0.5f}},
         {{1.0f,  -0.5f}, {1.0f, 0.5f}}
     };
+    geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
     geometry.SetVertexBuffer(verts, 2);
     geometry.AddDrawCmd(Geometry::DrawType::Lines);
 }
 
 // static
-void CapsuleGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+void CapsuleGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry)
 {
     // todo LOD information
     const auto slices = 50;
@@ -336,11 +339,12 @@ void CapsuleGeometry::Generate(const Environment& env, Style style, Geometry& ge
     else if (style == Style::Outline)
         geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
 
+    geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
     geometry.SetVertexBuffer(std::move(vs));
 }
 
 // static
-void SemiCircleGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+void SemiCircleGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry)
 {
     // todo: we could use some information here about the
     // eventual transform on the screen and use that to compute
@@ -378,7 +382,7 @@ void SemiCircleGeometry::Generate(const Environment& env, Style style, Geometry&
         angle += angle_increment;
     }
     geometry.SetVertexBuffer(&vs[0], vs.size());
-    geometry.ClearDraws();
+    geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
 
     if (style == Style::Solid)
         geometry.AddDrawCmd(Geometry::DrawType::TriangleFan);
@@ -387,7 +391,7 @@ void SemiCircleGeometry::Generate(const Environment& env, Style style, Geometry&
 }
 
 // static
-void CircleGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+void CircleGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry)
 {
     // todo: we could use some information here about the
     // eventual transform on the screen and use that to compute
@@ -424,7 +428,7 @@ void CircleGeometry::Generate(const Environment& env, Style style, Geometry& geo
         angle += angle_increment;
     }
     geometry.SetVertexBuffer(&vs[0], vs.size());
-    geometry.ClearDraws();
+    geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
 
     if (style == Style::Solid)
         geometry.AddDrawCmd(Geometry::DrawType::TriangleFan);
@@ -433,7 +437,7 @@ void CircleGeometry::Generate(const Environment& env, Style style, Geometry& geo
 }
 
 // static
-void RectangleGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+void RectangleGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry)
 {
     if (style == Style::Outline)
     {
@@ -443,6 +447,7 @@ void RectangleGeometry::Generate(const Environment& env, Style style, Geometry& 
             { {1.0f, -1.0f}, {1.0f, 1.0f} },
             { {1.0f,  0.0f}, {1.0f, 0.0f} }
         };
+        geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
         geometry.SetVertexBuffer(verts, 4);
         geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
     }
@@ -457,14 +462,14 @@ void RectangleGeometry::Generate(const Environment& env, Style style, Geometry& 
             { {1.0f, -1.0f}, {1.0f, 1.0f} },
             { {1.0f,  0.0f}, {1.0f, 0.0f} }
         };
+        geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
         geometry.SetVertexBuffer(verts, 6);
-        geometry.ClearDraws();
         geometry.AddDrawCmd(Geometry::DrawType::Triangles);
     }
 }
 
 // static
-void IsoscelesTriangleGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+void IsoscelesTriangleGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry)
 {
     const Vertex2D verts[3] = {
         { {0.5f,  0.0f}, {0.5f, 0.0f} },
@@ -473,7 +478,8 @@ void IsoscelesTriangleGeometry::Generate(const Environment& env, Style style, Ge
     };
 
     geometry.SetVertexBuffer(verts, 3);
-    geometry.ClearDraws();
+    geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
+
     if (style == Style::Solid)
         geometry.AddDrawCmd(Geometry::DrawType::Triangles);
     else if (style == Style::Outline)
@@ -481,7 +487,7 @@ void IsoscelesTriangleGeometry::Generate(const Environment& env, Style style, Ge
 }
 
 // static
-void RightTriangleGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+void RightTriangleGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry)
 {
     const Vertex2D verts[3] = {
         { {0.0f,  0.0f}, {0.0f, 0.0f} },
@@ -489,7 +495,8 @@ void RightTriangleGeometry::Generate(const Environment& env, Style style, Geomet
         { {1.0f, -1.0f}, {1.0f, 1.0f} }
     };
     geometry.SetVertexBuffer(verts, 3);
-    geometry.ClearDraws();
+    geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
+
     if (style == Style::Solid)
         geometry.AddDrawCmd(Geometry::DrawType::Triangles);
     else if (style == Style::Outline)
@@ -497,7 +504,7 @@ void RightTriangleGeometry::Generate(const Environment& env, Style style, Geomet
 }
 
 // static
-void TrapezoidGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+void TrapezoidGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry)
 {
     if (style == Style::Outline)
     {
@@ -508,8 +515,8 @@ void TrapezoidGeometry::Generate(const Environment& env, Style style, Geometry& 
             { {0.8f,  0.0f}, {0.8f, 0.0f} }
         };
         geometry.SetVertexBuffer(verts, 4);
+        geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
         geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
-
     }
     else if (style == Style::Solid)
     {
@@ -531,13 +538,13 @@ void TrapezoidGeometry::Generate(const Environment& env, Style style, Geometry& 
             {{1.0f, -1.0f}, {1.0f, 1.0f}}
         };
         geometry.SetVertexBuffer(verts, 12);
-        geometry.ClearDraws();
+        geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
         geometry.AddDrawCmd(Geometry::DrawType::Triangles);
     }
 }
 
 // static
-void ParallelogramGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+void ParallelogramGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry)
 {
     if (style == Style::Outline)
     {
@@ -548,6 +555,7 @@ void ParallelogramGeometry::Generate(const Environment& env, Style style, Geomet
             { {1.0f,  0.0f}, {1.0f, 0.0f} }
         };
         geometry.SetVertexBuffer(verts, 4);
+        geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
         geometry.AddDrawCmd(Geometry::DrawType::LineLoop);
     }
     else if (style == Style::Solid)
@@ -562,13 +570,13 @@ void ParallelogramGeometry::Generate(const Environment& env, Style style, Geomet
             {{0.2f,  0.0f}, {0.2f, 0.0f}}
         };
         geometry.SetVertexBuffer(verts, 6);
-        geometry.ClearDraws();
+        geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
         geometry.AddDrawCmd(Geometry::DrawType::Triangles);
     }
 }
 
 // static
-void SectorGeometry::Generate(const Environment& env, Style style, Geometry& geometry, float fill_percentage)
+void SectorGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry, float fill_percentage)
 {
     std::vector<Vertex2D> vs;
 
@@ -602,7 +610,7 @@ void SectorGeometry::Generate(const Environment& env, Style style, Geometry& geo
         angle += angle_inc;
     }
     geometry.SetVertexBuffer(&vs[0], vs.size());
-    geometry.ClearDraws();
+    geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
 
     if (style == Style::Solid)
         geometry.AddDrawCmd(Geometry::DrawType::TriangleFan);
@@ -611,7 +619,7 @@ void SectorGeometry::Generate(const Environment& env, Style style, Geometry& geo
 }
 
 // static
-void RoundRectGeometry::Generate(const Environment& env, Style style, Geometry& geometry, float corner_radius)
+void RoundRectGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry, float corner_radius)
 {
 
     // try to figure out if the model matrix will distort the
@@ -687,6 +695,7 @@ void RoundRectGeometry::Generate(const Environment& env, Style style, Geometry& 
             }
         }
         geometry.SetVertexBuffer(std::move(vs));
+        geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
         geometry.AddDrawCmd(Geometry::DrawType::Lines);
     }
     else if (style == Style::Solid)
@@ -754,11 +763,12 @@ void RoundRectGeometry::Generate(const Environment& env, Style style, Geometry& 
             geometry.AddDrawCmd(Geometry::DrawType::TriangleFan, offset, vs.size() - offset); // corners
         }
         geometry.SetVertexBuffer(std::move(vs));
+        geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
     }
 }
 
 // static
-void ArrowCursorGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+void ArrowCursorGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry)
 {
     const Vertex2D verts[] = {
         {{0.0f,  0.0f}, {0.0f, 0.0f}},
@@ -774,11 +784,12 @@ void ArrowCursorGeometry::Generate(const Environment& env, Style style, Geometry
         {{1.0f, -0.7f}, {1.0f, 0.7f}}
     };
     geometry.SetVertexBuffer(verts, 9);
+    geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
     geometry.AddDrawCmd(Geometry::DrawType::Triangles);
 }
 
 // static
-void BlockCursorGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+void BlockCursorGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry)
 {
     const Vertex2D verts[] = {
         { {0.0f,  0.0f}, {0.0f, 0.0f} },
@@ -790,11 +801,12 @@ void BlockCursorGeometry::Generate(const Environment& env, Style style, Geometry
         { {1.0f,  0.0f}, {1.0f, 0.0f} }
     };
     geometry.SetVertexBuffer(verts, 6);
+    geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
     geometry.AddDrawCmd(Geometry::DrawType::Triangles);
 }
 
 // static
-void CubeGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+void CubeGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry)
 {
     // all corners of the cube.
     constexpr const Vec3 FrontTopLeft =  {-0.5f,  0.5f,  0.5f};
@@ -823,7 +835,6 @@ void CubeGeometry::Generate(const Environment& env, Style style, Geometry& geome
     // back face
     MakeFace(20, &indices[30], &vertices[20], BackTopRight, BackBotRight, BackBotLeft, BackTopLeft, Vec3{0.0, 0.0, -1.0});
 
-    geometry.SetUsage(Geometry::Usage::Static);
     geometry.UploadVertices(vertices, sizeof(vertices));
     geometry.UploadIndices(indices, sizeof(indices), Geometry::IndexType::Index16);
     geometry.SetVertexLayout(GetVertexLayout<Vertex3D>());
@@ -874,7 +885,7 @@ void CubeGeometry::AddLine(const Vec3& v0, const Vec3& v1, std::vector<Vertex3D>
 }
 
 // static
-void CylinderGeometry::Generate(const Environment& env, Style style, Geometry& geometry, unsigned slices)
+void CylinderGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry, unsigned slices)
 {
     const auto vertex_count = slices + 1;
 
@@ -1016,7 +1027,7 @@ void CylinderGeometry::Generate(const Environment& env, Style style, Geometry& g
 }
 
 // static
-void ConeGeometry::Generate(const Environment& env, Style style, Geometry& geometry, unsigned int slices)
+void ConeGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry, unsigned int slices)
 {
     const auto vertex_count = slices + 1;
 
@@ -1100,7 +1111,7 @@ void ConeGeometry::Generate(const Environment& env, Style style, Geometry& geome
 }
 
 // static
-void SphereGeometry::Generate(const Environment& env, Style style, Geometry& geometry, unsigned int slices)
+void SphereGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry, unsigned int slices)
 {
     const float radius     = 0.5f;
     const int numSlices    = slices;
@@ -1160,7 +1171,7 @@ void SphereGeometry::Generate(const Environment& env, Style style, Geometry& geo
 }
 
 // static
-void PyramidGeometry::Generate(const Environment& env, Style style, Geometry& geometry)
+void PyramidGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry)
 {
     Vertex3D apex;
     apex.aPosition = Vec3 {0.0f, 0.5f, 0.0f};
@@ -1210,17 +1221,17 @@ void PyramidGeometry::MakeFace(std::vector<Vertex3D>& vertices, const Vertex3D& 
     vertices.back().aNormal = ToVec(normal);
 }
 
-std::string GetSimpleShapeGeometryName(const SimpleShapeArgs& args,
-                                       const SimpleShapeEnvironment& env,
-                                       SimpleShapeStyle style,
-                                       SimpleShapeType type)
+std::string GetSimpleShapeGeometryId(const SimpleShapeArgs& args,
+                                     const SimpleShapeEnvironment& env,
+                                     SimpleShapeStyle style,
+                                     SimpleShapeType type)
 {
     if (Is3DShape(type))
         style = Style::Solid;
 
-    std::string name;
-    name += base::ToString(type);
-    name += base::ToString(style);
+    std::string id;
+    id += base::ToString(type);
+    id += base::ToString(style);
     if (type == SimpleShapeType::Capsule || type == SimpleShapeType::RoundRect)
     {
         // try to figure out if the model matrix will distort the
@@ -1231,20 +1242,23 @@ std::string GetSimpleShapeGeometryName(const SimpleShapeArgs& args,
         const auto rect_height   = glm::length(model_matrix * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
         const auto aspect_ratio  = rect_width / rect_height;
         if (type == SimpleShapeType::Capsule)
-            name += NameAspectRatio(rect_width, rect_height, HalfRound, "%1.1f:%1.1f");
+            id += NameAspectRatio(rect_width, rect_height, HalfRound, "%1.1f:%1.1f");
         else if (type == SimpleShapeType::RoundRect)
-            name += NameAspectRatio(rect_width, rect_height, Truncate, "%d:%d");
+            id += NameAspectRatio(rect_width, rect_height, Truncate, "%d:%d");
     }
-    return name;
+    return id;
 }
 
 void ConstructSimpleShape(const SimpleShapeArgs& args,
                           const SimpleShapeEnvironment& environment,
                           SimpleShapeStyle style,
                           SimpleShapeType type,
-                          Geometry& geometry)
+                          Geometry::CreateArgs& create)
 {
-    geometry.SetName(base::ToString(type));
+
+    create.usage = Geometry::Usage::Static;
+    create.content_name = base::ToString(type);
+    auto& geometry = create.buffer;
 
     if (type == SimpleShapeType::Arrow)
         detail::ArrowGeometry::Generate(environment, style, geometry);
@@ -1327,12 +1341,12 @@ std::string SimpleShapeInstance::GetShader(const Environment& env, const Device&
 
     return MakeSimple2DVertexShader(device);
 }
-std::string SimpleShapeInstance::GetGeometryName(const Environment& env) const
+std::string SimpleShapeInstance::GetGeometryId(const Environment& env) const
 {
-    return detail::GetSimpleShapeGeometryName(mClass->GetShapeArgs(), env, mStyle, mClass->GetShapeType());
+    return detail::GetSimpleShapeGeometryId(mClass->GetShapeArgs(), env, mStyle, mClass->GetShapeType());
 }
 
-bool SimpleShapeInstance::Upload(const Environment& env, Geometry& geometry) const
+bool SimpleShapeInstance::Construct(const Environment& env, Geometry::CreateArgs& geometry) const
 {
     detail::ConstructSimpleShape(mClass->GetShapeArgs(), env, mStyle, mClass->GetShapeType(), geometry);
     return true;
@@ -1369,6 +1383,11 @@ Drawable::Primitive SimpleShapeInstance::GetPrimitive() const
     return Primitive::Triangles;
 }
 
+Drawable::Usage SimpleShapeInstance::GetUsage() const
+{
+    return Usage::Static;
+}
+
 void SimpleShape::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
 {
     const auto& kModelViewMatrix  = (*env.view_matrix) * (*env.model_matrix);
@@ -1399,12 +1418,12 @@ std::string SimpleShape::GetShaderName(const Environment& env) const
     return "Simple2DVertexShader";
 }
 
-std::string SimpleShape::GetGeometryName(const Environment& env) const
+std::string SimpleShape::GetGeometryId(const Environment& env) const
 {
-    return detail::GetSimpleShapeGeometryName(mArgs, env, mStyle, mShape);
+    return detail::GetSimpleShapeGeometryId(mArgs, env, mStyle, mShape);
 }
 
-bool SimpleShape::Upload(const Environment& env, Geometry& geometry) const
+bool SimpleShape::Construct(const Environment& env, Geometry::CreateArgs& geometry) const
 {
     detail::ConstructSimpleShape(mArgs, env, mStyle, mShape, geometry);
     return true;
@@ -1424,6 +1443,11 @@ Drawable::Primitive SimpleShape::GetPrimitive() const
         return Primitive::Lines;
 
     return Primitive::Triangles;
+}
+
+Drawable::Usage SimpleShape::GetUsage() const
+{
+    return Usage::Static;
 }
 
 void Grid::ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const
@@ -1449,7 +1473,7 @@ std::string Grid::GetShaderName(const Environment& env) const
     return "Simple2DVertexShader";
 }
 
-std::string Grid::GetGeometryName(const Environment& env) const
+std::string Grid::GetGeometryId(const Environment& env) const
 {
     // use the content properties to generate a name for the
     // gpu side geometry.
@@ -1460,7 +1484,7 @@ std::string Grid::GetGeometryName(const Environment& env) const
     return std::to_string(hash);
 }
 
-bool Grid::Upload(const Environment&, Geometry& geometry) const
+bool Grid::Construct(const Environment&, Geometry::CreateArgs& create) const
 {
     std::vector<Vertex2D> verts;
 
@@ -1508,9 +1532,12 @@ bool Grid::Upload(const Environment&, Geometry& geometry) const
         verts.push_back(corners[1]);
         verts.push_back(corners[3]);
     }
-    geometry.SetName(base::FormatString("Grid %1x%2", mNumVerticalLines+1, mNumHorizontalLines+1));
+    auto& geometry = create.buffer;
+    create.content_name = base::FormatString("Grid %1x%2", mNumVerticalLines+1, mNumHorizontalLines+1);
+    create.usage = GeometryBuffer::Usage::Static;
     geometry.SetVertexBuffer(std::move(verts));
     geometry.AddDrawCmd(Geometry::DrawType::Lines);
+    geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
     return true;
 }
 
@@ -1645,36 +1672,9 @@ const Geometry::DrawCommand* PolygonMeshClass::GetDrawCmd(size_t index) const no
     return nullptr;
 }
 
-std::string PolygonMeshClass::GetGeometryName(const Environment& env) const
+std::string PolygonMeshClass::GetGeometryId(const Environment& env) const
 {
     return mId;
-}
-
-bool PolygonMeshClass::IsDynamic(const Environment& env) const
-{
-    // editing mode overrides static
-    if (env.editing_mode)
-        return true;
-
-    return !mStatic;
-}
-
-bool PolygonMeshClass::Upload(const Environment& env, Geometry& geometry) const
-{
-    if (!geometry.GetDataHash())
-    {
-        return UploadGeometry(env, geometry);
-    }
-    else if (IsDynamic(env))
-    {
-        const auto content_hash  = GetContentHash();
-        const auto geometry_hash = geometry.GetDataHash();
-        if (content_hash != geometry_hash)
-        {
-            return UploadGeometry(env, geometry);
-        }
-    }
-    return true;
 }
 
 void PolygonMeshClass::SetSubMeshDrawCmd(const std::string& key, const DrawCmd& cmd)
@@ -1884,24 +1884,26 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
     return ok;
 }
 
-bool PolygonMeshClass::UploadGeometry(const Environment& env, Geometry& geometry) const
+bool PolygonMeshClass::Construct(const Environment& env, Geometry::CreateArgs& create) const
 {
-    const auto dynamic = IsDynamic(env);
-    const auto usage   = dynamic ? Geometry::Usage::Dynamic
-                                 : Geometry::Usage::Static;
+    const auto usage = mStatic ? Geometry::Usage::Static
+                               : Geometry::Usage::Dynamic;
+
+    auto& geometry = create.buffer;
+    ASSERT(geometry.GetNumDrawCmds() == 0);
+
     if (mData.has_value())
     {
         const auto& data = mData.value();
+        create.usage  = usage;
+        create.content_hash = GetContentHash();
+        create.content_name = mName;
 
-        geometry.SetUsage(usage);
-        geometry.SetDataHash(GetContentHash());
         geometry.SetVertexLayout(data.layout);
         geometry.UploadVertices(data.vertices.data(), data.vertices.size());
 
         if (!data.indices.empty())
             geometry.UploadIndices(data.indices.data(), data.indices.size(), data.index_type);
-
-        geometry.ClearDraws();
 
         for (const auto& cmd : data.cmds)
         {
@@ -1960,14 +1962,14 @@ bool PolygonMeshClass::UploadGeometry(const Environment& env, Geometry& geometry
         return false;
     }
 
-    geometry.SetName(mName);
-    geometry.SetUsage(usage);
+    create.usage = usage;
+    create.content_name = mName;
+    create.content_hash = GetContentHash();
+
     geometry.SetVertexLayout(vertex_buffer.GetLayout());
     geometry.UploadVertices(vertex_buffer.GetBufferPtr(), vertex_buffer.GetBufferSize());
     geometry.UploadIndices(index_buffer.GetBufferPtr(), index_buffer.GetBufferSize(),
                            index_buffer.GetType());
-    geometry.SetDataHash(GetContentHash());
-    geometry.ClearDraws();
     geometry.SetDrawCommands(command_buffer.GetCommandBuffer());
     return true;
 }
@@ -1992,14 +1994,14 @@ std::string PolygonMeshInstance::GetShader(const Environment& env, const Device&
     return "";
 }
 
-std::string PolygonMeshInstance::GetGeometryName(const Environment& env) const
+std::string PolygonMeshInstance::GetGeometryId(const Environment& env) const
 {
-    return mClass->GetGeometryName(env);
+    return mClass->GetGeometryId(env);
 }
 
-bool PolygonMeshInstance::Upload(const Environment& env, Geometry& geometry) const
+bool PolygonMeshInstance::Construct(const Environment& env, Geometry::CreateArgs& create) const
 {
-    return mClass->Upload(env, geometry);
+    return mClass->Construct(env, create);
 }
 
 Drawable::DrawCmd PolygonMeshInstance::GetDrawCmd() const
@@ -2017,6 +2019,19 @@ Drawable::DrawCmd PolygonMeshInstance::GetDrawCmd() const
 
     mError = true;
     return {0, 0};
+}
+
+Drawable::Usage PolygonMeshInstance::GetUsage() const
+{
+    if (mClass->IsStatic())
+        return Usage::Static;
+
+    return Usage::Dynamic;
+}
+
+size_t PolygonMeshInstance::GetContentHash() const
+{
+    return mClass->GetContentHash();
 }
 
 std::string PolygonMeshInstance::GetShaderId(const Environment& env) const
@@ -2055,7 +2070,7 @@ std::string ParticleEngineClass::GetProgramId(const Environment& env) const
     return "";
 }
 
-std::string ParticleEngineClass::GetGeometryName(const Environment& env) const
+std::string ParticleEngineClass::GetGeometryId(const Environment& env) const
 {
     return "particle-buffer";
 }
@@ -2128,7 +2143,7 @@ std::string ParticleEngineClass::GetShaderName(const Environment& env) const
     return "";
 }
 
-bool ParticleEngineClass::Upload(const Drawable::Environment& env, const InstanceState& state, Geometry& geometry) const
+bool ParticleEngineClass::Construct(const Drawable::Environment& env, const InstanceState& state, Geometry::CreateArgs& create) const
 {
     // the point rasterization doesn't support non-uniform
     // sizes for the points, i.e. they're always square
@@ -2170,11 +2185,14 @@ bool ParticleEngineClass::Upload(const Drawable::Environment& env, const Instanc
         verts.push_back(v);
     }
 
-    geometry.SetName(mName);
-    geometry.SetUsage(Geometry::Usage::Stream);
+    auto& geometry = create.buffer;
+    ASSERT(geometry.GetNumDrawCmds() == 0);
+
+    create.usage = Geometry::Usage::Stream;
+    create.content_name = mName;
+
     geometry.SetVertexBuffer(std::move(verts));
     geometry.SetVertexLayout(layout);
-    geometry.ClearDraws();
     geometry.AddDrawCmd(Geometry::DrawType::Points);
     return true;
 }
@@ -2780,14 +2798,14 @@ std::string ParticleEngineInstance::GetShaderName(const Environment& env) const
 {
     return mClass->GetShaderName(env);
 }
-std::string ParticleEngineInstance::GetGeometryName(const Environment& env) const
+std::string ParticleEngineInstance::GetGeometryId(const Environment& env) const
 {
-    return mClass->GetGeometryName(env);
+    return mClass->GetGeometryId(env);
 }
 
-bool ParticleEngineInstance::Upload(const Environment& env, Geometry& geometry) const
+bool ParticleEngineInstance::Construct(const Environment& env, Geometry::CreateArgs& create) const
 {
-    return mClass->Upload(env, mState, geometry);
+    return mClass->Construct(env, mState, create);
 }
 
 void ParticleEngineInstance::Update(const Environment& env, float dt)
@@ -2798,11 +2816,6 @@ void ParticleEngineInstance::Update(const Environment& env, float dt)
 bool ParticleEngineInstance::IsAlive() const
 {
     return mClass->IsAlive(mState);
-}
-
-bool ParticleEngineInstance::IsDynamic(const Environment& env) const
-{
-    return true;
 }
 
 void ParticleEngineInstance::Restart(const Environment& env)
@@ -2982,12 +2995,12 @@ std::string TileBatch::GetShaderName(const Environment& env) const
     return "";
 }
 
-std::string TileBatch::GetGeometryName(const Environment& env) const
+std::string TileBatch::GetGeometryId(const Environment& env) const
 {
     return "tile-buffer";
 }
 
-bool TileBatch::Upload(const Environment& env, Geometry& geometry) const
+bool TileBatch::Construct(const Environment& env, Geometry::CreateArgs& create) const
 {
     const auto shape = ResolveTileShape();
     if (shape == TileShape::Square)
@@ -2997,11 +3010,12 @@ bool TileBatch::Upload(const Environment& env, Geometry& geometry) const
             {"aTilePosition", 0, 3, 0, offsetof(TileVertex, pos)},
         });
 
-        geometry.SetName("TileBatch");
-        geometry.SetUsage(Geometry::Usage::Stream);
+        create.content_name = "TileBatch";
+        create.usage = Geometry::Usage ::Stream;
+        auto& geometry = create.buffer;
+
         geometry.SetVertexBuffer(mTiles);
         geometry.SetVertexLayout(layout);
-        geometry.ClearDraws();
         geometry.AddDrawCmd(Geometry::DrawType::Points);
     }
     else if (shape == TileShape::Rectangle)
@@ -3030,9 +3044,10 @@ bool TileBatch::Upload(const Environment& env, Geometry& geometry) const
             vertices.push_back(bot_right);
             vertices.push_back(top_right);
         }
-        geometry.SetName("TileBatch");
-        geometry.SetUsage(Geometry::Usage::Stream);
-        geometry.ClearDraws();
+        create.content_name = "TileBatch";
+        create.usage = Geometry::Usage::Stream;
+        auto& geometry = create.buffer;
+
         geometry.SetVertexBuffer(vertices);
         geometry.SetVertexLayout(layout);
         geometry.AddDrawCmd(Geometry::DrawType::Triangles);
@@ -3073,12 +3088,12 @@ std::string DynamicLine3D::GetShaderName(const Environment& environment) const
     return "Simple3DVertexShader";
 }
 
-std::string DynamicLine3D::GetGeometryName(const Environment& environment) const
+std::string DynamicLine3D::GetGeometryId(const Environment& environment) const
 {
     return "line-buffer";
 }
 
-bool DynamicLine3D::Upload(const Environment& environment, Geometry& geometry) const
+bool DynamicLine3D::Construct(const Environment& environment, Geometry::CreateArgs& create) const
 {
     // it's also possible to draw without generating geometry by simply having
     // the two line end points as uniforms in the vertex shader and then using
@@ -3093,10 +3108,12 @@ bool DynamicLine3D::Upload(const Environment& environment, Geometry& geometry) c
     vertices.push_back(a);
     vertices.push_back(b);
 
-    geometry.SetUsage(Geometry::Usage::Stream);
+    create.content_name = "3D Line";
+    create.usage = Geometry::Usage::Stream;
+    auto& geometry = create.buffer;
+
     geometry.SetVertexBuffer(vertices);
     geometry.SetVertexLayout(GetVertexLayout<Vertex3D>());
-    geometry.ClearDraws();
     geometry.AddDrawCmd(Geometry::DrawType::Lines);
     return true;
 }
@@ -3118,45 +3135,48 @@ std::string DebugDrawableBase::GetShaderName(const Environment& env) const
 {
     return mDrawable->GetShaderName(env);
 }
-std::string DebugDrawableBase::GetGeometryName(const Environment& env) const
+std::string DebugDrawableBase::GetGeometryId(const Environment& env) const
 {
-    std::string name;
-    name += mDrawable->GetGeometryName(env);
-    name += base::ToString(mFeature);
-    return name;
+    std::string id;
+    id += mDrawable->GetGeometryId(env);
+    id += base::ToString(mFeature);
+    return id;
 }
 
-bool DebugDrawableBase::Upload(const Environment& env, Geometry& geom) const
+bool DebugDrawableBase::Construct(const Environment& env, Geometry::CreateArgs& create) const
 {
     if (mDrawable->GetPrimitive() != Primitive::Triangles)
     {
-        return mDrawable->Upload(env, geom);
+        return mDrawable->Construct(env, create);
     }
 
     if (mFeature == Feature::Wireframe)
     {
-        GeometryBuffer buffer;
-        buffer.SetDataHash(geom.GetDataHash());
-
-        if (!mDrawable->Upload(env, buffer))
+        Geometry::CreateArgs temp;
+        if (!mDrawable->Construct(env, temp))
             return false;
 
-        if (buffer.HasData())
+        if (temp.buffer.HasData())
         {
             GeometryBuffer wireframe;
-            CreateWireframe(buffer, wireframe);
+            CreateWireframe(temp.buffer, wireframe);
 
-            geom.SetName("Wireframe/" + buffer.GetName());
-            wireframe.Transfer(geom);
-            geom.SetDataHash(buffer.GetDataHash());
+            create.buffer = std::move(wireframe);
+            create.content_name = "Wireframe/" + temp.content_name;
+            create.content_hash = temp.content_hash;
         }
     }
     return true;
 }
 
-bool DebugDrawableBase::IsDynamic(const Environment& env) const
+Drawable::Usage DebugDrawableBase::GetUsage() const
 {
-    return mDrawable->IsDynamic(env);
+    return mDrawable->GetUsage();
+}
+
+size_t DebugDrawableBase::GetContentHash() const
+{
+    return mDrawable->GetContentHash();
 }
 
 std::unique_ptr<Drawable> CreateDrawableInstance(const std::shared_ptr<const DrawableClass>& klass)

@@ -644,21 +644,26 @@ public:
         return program;
     }
 
-    virtual gfx::Geometry* FindGeometry(const std::string& name) override
+    virtual gfx::GeometryPtr FindGeometry(const std::string& id) override
     {
-        auto it = mGeoms.find(name);
+        auto it = mGeoms.find(id);
         if (it == std::end(mGeoms))
             return nullptr;
-        return it->second.get();
+        return it->second;
     }
 
-    virtual gfx::Geometry* MakeGeometry(const std::string& name) override
+    virtual gfx::GeometryPtr CreateGeometry(const std::string& id, gfx::Geometry::CreateArgs args) override
     {
-        auto geometry = std::make_unique<GeomImpl>(this);
-        auto* ret = geometry.get();
-        mGeoms[name] = std::move(geometry);
-        ret->SetFrameStamp(mFrameNumber);
-        return ret;
+        auto geometry = std::make_shared<GeomImpl>(this);
+        geometry->SetFrameStamp(mFrameNumber);
+        geometry->SetName(args.content_name);
+        geometry->SetDataHash(args.content_hash);
+        geometry->SetUsage(args.usage);
+        geometry->SetBuffer(std::move(args.buffer));
+        geometry->Upload();
+
+        mGeoms[id] = geometry;
+        return geometry;
     }
 
     virtual gfx::Texture* FindTexture(const std::string& name) override
@@ -1892,85 +1897,11 @@ private:
             {
                 mDevice->FreeBuffer(mIndexBufferIndex, mIndexBufferOffset, mIndexBufferSize, mUsage, BufferType::IndexBuffer);
             }
-            DEBUG("Deleted geometry object. [name='%1']", mName);
-        }
-        virtual void SetUsage(Usage usage) override
-        {
-            if (usage == mUsage)
-                return;
-
-            // can only change the usage if nothing is allocated.
-            ASSERT(mVertexBufferSize == 0);
-            ASSERT(mIndexBufferSize == 0);
-            mUsage = usage;
-        }
-
-        virtual void ClearDraws() override
-        { mDrawCommands.clear(); }
-
-        virtual void AddDrawCmd(const DrawCommand& cmd) override
-        { mDrawCommands.push_back(cmd); }
-
-        virtual void SetVertexLayout(const gfx::VertexLayout& layout) override
-        { mLayout = layout; }
-
-        virtual void UploadVertices(const void* data, size_t bytes) override
-        {
-            if (data == nullptr || bytes == 0)
-            {
-                if (mVertexBufferSize)
-                    mDevice->FreeBuffer(mVertexBufferIndex, mVertexBufferOffset, mVertexBufferSize, mUsage, BufferType::VertexBuffer);
-
-                mVertexBufferSize = 0;
-                return;
-            }
-
-            if (bytes > mVertexBufferSize)
-            {
-                if (mVertexBufferSize)
-                    mDevice->FreeBuffer(mVertexBufferIndex, mVertexBufferOffset, mVertexBufferSize, mUsage, BufferType::VertexBuffer);
-
-                std::tie(mVertexBufferIndex, mVertexBufferOffset) = mDevice->AllocateBuffer(bytes, mUsage, BufferType::VertexBuffer);
-            }
-            mDevice->UploadBuffer(mVertexBufferIndex, mVertexBufferOffset, data, bytes, mUsage, BufferType::VertexBuffer);
-            mVertexBufferSize = bytes;
-
             if (mUsage == Usage::Static)
-            {
-                DEBUG("Uploaded geometry vertices. [name='%1', bytes='%2', usage='%3']", mName, bytes, mUsage);
-            }
-        }
-        virtual void UploadIndices(const void* data, size_t bytes, IndexType type) override
-        {
-            if (data == nullptr || bytes == 0)
-            {
-                if (mIndexBufferSize)
-                    mDevice->FreeBuffer(mIndexBufferIndex, mIndexBufferOffset, mIndexBufferSize, mUsage, BufferType::IndexBuffer);
-
-                mIndexBufferSize = 0;
-                return;
-            }
-
-            if (bytes > mIndexBufferSize)
-            {
-                if (mIndexBufferSize)
-                    mDevice->FreeBuffer(mIndexBufferIndex, mIndexBufferOffset, mIndexBufferSize, mUsage, BufferType::IndexBuffer);
-
-                std::tie(mIndexBufferIndex, mIndexBufferOffset) = mDevice->AllocateBuffer(bytes, mUsage, BufferType::IndexBuffer);
-            }
-            mDevice->UploadBuffer(mIndexBufferIndex, mIndexBufferOffset, data, bytes, mUsage, BufferType::IndexBuffer);
-            mIndexBufferSize = bytes;
-            mIndexBufferType = type;
-
-            if (mUsage == Usage::Static)
-            {
-                DEBUG("Uploaded geometry indices. [name='%1', bytes='%2', usage='%3']", mName, bytes, mUsage);
-            }
+                DEBUG("Deleted geometry object. [name='%1']", mName);
         }
 
-        virtual void SetDataHash(size_t hash) override
-        { mHash = hash; }
-        virtual size_t GetDataHash() const  override
+        virtual size_t GetContentHash() const  override
         { return mHash; }
         virtual size_t GetNumDrawCmds() const override
         { return mDrawCommands.size(); }
@@ -1978,11 +1909,62 @@ private:
         { return mDrawCommands[index]; }
         virtual Usage GetUsage() const override
         { return mUsage; }
-        virtual void SetName(const std::string& name) override
-        { mName = name; }
         virtual std::string GetName() const override
         { return mName; }
 
+        void Upload() const
+        {
+            if (!mPendingUpload.has_value())
+                return;
+
+            auto upload = std::move(mPendingUpload.value());
+
+            mPendingUpload.reset();
+
+            const auto vertex_bytes = upload.GetVertexBytes();
+            const auto index_bytes  = upload.GetIndexBytes();
+            const auto vertex_ptr   = upload.GetVertexDataPtr();
+            const auto index_ptr    = upload.GetIndexDataPtr();
+            if (vertex_bytes == 0)
+                return;
+
+            std::tie(mVertexBufferIndex, mVertexBufferOffset) = mDevice->AllocateBuffer(vertex_bytes, mUsage, BufferType::VertexBuffer);
+            mDevice->UploadBuffer(mVertexBufferIndex,
+                                  mVertexBufferOffset,
+                                  vertex_ptr, vertex_bytes,
+                                  mUsage, BufferType::VertexBuffer);
+            mVertexBufferSize = upload.GetVertexBytes();
+            mVertexLayout     = std::move(upload.GetLayout());
+            mDrawCommands     = std::move(upload.GetDrawCommands());
+
+            if (mUsage == Usage::Static)
+            {
+                DEBUG("Uploaded geometry vertices. [name='%1', bytes='%2', usage='%3']", mName, vertex_bytes, mUsage);
+            }
+            if (index_bytes == 0)
+                return;
+
+            std::tie(mIndexBufferIndex, mIndexBufferOffset) = mDevice->AllocateBuffer(index_bytes, mUsage, BufferType::IndexBuffer);
+            mDevice->UploadBuffer(mIndexBufferIndex,
+                                  mIndexBufferOffset,
+                                  index_ptr, index_bytes,
+                                  mUsage, BufferType::IndexBuffer);
+            mIndexBufferSize = index_bytes;
+            mIndexBufferType = upload.GetIndexType();
+            if (mUsage == Usage::Static)
+            {
+                DEBUG("Uploaded geometry indices. [name='%1', bytes='%2', usage='%3']", mName, index_bytes, mUsage);
+            }
+        }
+
+        inline void SetBuffer(gfx::GeometryBuffer&& buffer) noexcept
+        { mPendingUpload = std::move(buffer); }
+        inline void SetUsage(Usage usage) noexcept
+        { mUsage = usage; }
+        inline void SetDataHash(size_t hash) noexcept
+        { mHash = hash; }
+        inline void SetName(const std::string& name) noexcept
+        { mName = name; }
         inline void SetFrameStamp(size_t frame_number) const noexcept
         { mFrameNumber = frame_number; }
         inline size_t GetFrameStamp() const noexcept
@@ -2003,25 +1985,26 @@ private:
         { return mIndexBufferType; }
         inline bool UsesIndexBuffer() const noexcept
         { return mIndexBufferSize != 0; }
-
         inline const gfx::VertexLayout& GetVertexLayout() const noexcept
-        { return mLayout; }
+        { return mVertexLayout; }
     private:
         OpenGLES2GraphicsDevice* mDevice = nullptr;
 
-        mutable std::size_t mFrameNumber = 0;
-        std::vector<DrawCommand> mDrawCommands;
-        std::size_t mVertexBufferSize   = 0;
-        std::size_t mVertexBufferOffset = 0;
-        std::size_t mVertexBufferIndex  = 0;
-        std::size_t mIndexBufferSize   = 0;
-        std::size_t mIndexBufferOffset = 0;
-        std::size_t mIndexBufferIndex  = 0;
         std::size_t mHash = 0;
         std::string mName;
         Usage mUsage = Usage::Static;
-        IndexType mIndexBufferType = IndexType::Index16;
-        gfx::VertexLayout mLayout;
+
+        mutable std::size_t mFrameNumber = 0;
+        mutable std::optional<gfx::GeometryBuffer> mPendingUpload;
+        mutable std::vector<DrawCommand> mDrawCommands;
+        mutable std::size_t mVertexBufferSize   = 0;
+        mutable std::size_t mVertexBufferOffset = 0;
+        mutable std::size_t mVertexBufferIndex  = 0;
+        mutable std::size_t mIndexBufferSize   = 0;
+        mutable std::size_t mIndexBufferOffset = 0;
+        mutable std::size_t mIndexBufferIndex  = 0;
+        mutable IndexType mIndexBufferType = IndexType::Index16;
+        mutable gfx::VertexLayout mVertexLayout;
     };
 
     class ProgImpl : public gfx::Program
@@ -2637,7 +2620,7 @@ private:
         std::size_t mFrameNumber;
     };
 private:
-    std::map<std::string, std::unique_ptr<gfx::Geometry>> mGeoms;
+    std::map<std::string, std::shared_ptr<gfx::Geometry>> mGeoms;
     std::map<std::string, std::shared_ptr<gfx::Shader>> mShaders;
     std::map<std::string, std::shared_ptr<gfx::Program>> mPrograms;
     std::map<std::string, std::unique_ptr<gfx::Texture>> mTextures;
