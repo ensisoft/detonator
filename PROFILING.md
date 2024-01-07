@@ -92,6 +92,8 @@ parameter and use the Lua API in the game to start the tracing programmatically.
 
 ### Valgrind + Callgrind + KCachegrind
 
+*BUILD THE PROJECT FOR PROFILING! See [BUILDING.MD](BUILDING.md) on how to do that.*
+
 The biggest problem with valgrind is that it cannot be used for the entire application. It'll be far too slow and the
 game will not be able to run properly. Instead, the profiling needs to be turned on and off only for parts of the code.
 
