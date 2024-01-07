@@ -115,7 +115,7 @@ void main() {
     if (!program)
         program = MakeProgram(vertex_src, fragment_src, "BloomColorProgram", *device);
 
-    auto* quad = MakeFullscreenQuad(*device);
+    auto quad = MakeFullscreenQuad(*device);
 
     program->SetUniform("kColor", color);
     program->SetUniform("kThreshold", threshold);
@@ -331,7 +331,7 @@ void main() {
     if (!program)
         program = MakeProgram(vertex_src, fragment_src, "BlurProgram", *device);
 
-    auto* quad = gfx::MakeFullscreenQuad(*device);
+    auto quad = gfx::MakeFullscreenQuad(*device);
 
     gfx::Device::State state;
     state.bWriteColor  = true;
@@ -466,7 +466,7 @@ void main() {
     program->SetUniform("kTextureSize", src_width, src_height);
     program->SetUniform("kEdgeColor", edge_color);
 
-    auto* quad = MakeFullscreenQuad(*device);
+    auto quad = MakeFullscreenQuad(*device);
     const auto dst_width  = dst->GetWidth();
     const auto dst_height = dst->GetHeight();
 
@@ -555,7 +555,7 @@ void main() {
     program->SetTexture("kTexture", 0, *src);
     program->SetTextureCount(1);
 
-    auto* quad = MakeFullscreenQuad(*device);
+    auto quad = MakeFullscreenQuad(*device);
     const auto dst_width  = dst->GetWidth();
     const auto dst_height = dst->GetHeight();
 

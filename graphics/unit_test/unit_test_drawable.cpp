@@ -230,7 +230,6 @@ void unit_test_wireframe()
         verts[5].aPosition = gfx::Vec2 {  1.0f,  1.0f };
 
         gfx::GeometryBuffer buffer;
-        buffer.SetUsage(gfx::Geometry::Usage::Static);
         buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
         buffer.UploadVertices(verts.data(), verts.size() * sizeof(gfx::Vertex2D));
         buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles, 0, 3);
@@ -274,7 +273,6 @@ void unit_test_wireframe()
         verts[5].aPosition = gfx::Vec2 { -1.0f,  1.0f };
 
         gfx::GeometryBuffer buffer;
-        buffer.SetUsage(gfx::Geometry::Usage::Static);
         buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
         buffer.UploadVertices(verts.data(), verts.size() * sizeof(gfx::Vertex2D));
         buffer.AddDrawCmd(gfx::Geometry::DrawType::TriangleFan);

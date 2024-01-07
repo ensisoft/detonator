@@ -277,7 +277,7 @@ void main() {
     program->SetTextureCount(1);
     program->SetTexture("kBloomTexture", 0, *bloom_texture);
 
-    auto* quad = gfx::MakeFullscreenQuad(*device);
+    auto quad = gfx::MakeFullscreenQuad(*device);
 
     gfx::Device::State state;
     state.depth_test   = gfx::Device::State::DepthTest::Disabled;

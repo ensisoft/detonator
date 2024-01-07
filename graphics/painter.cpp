@@ -66,7 +66,7 @@ void Painter::Draw(const DrawList& list, const ShaderProgram& program) const
         drawable_env.view_matrix  = draw.view ? draw.view : &mViewMatrix;
         drawable_env.proj_matrix  = draw.projection ? draw.projection : &mProjMatrix;
         drawable_env.model_matrix = draw.model;
-        Geometry* geometry = GetGeometry(*draw.drawable, drawable_env);
+        GeometryPtr geometry = GetGeometry(*draw.drawable, drawable_env);
         if (!geometry)
             continue;
 
@@ -227,25 +227,62 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
     return gpu_program;
 }
 
-Geometry* Painter::GetGeometry(const Drawable& drawable,
-                               const Drawable::Environment& env) const
+GeometryPtr Painter::GetGeometry(const Drawable& drawable,
+                                 const Drawable::Environment& env) const
 {
-    const auto& name = drawable.GetGeometryName(env);
-    if (auto* geom = mDevice->FindGeometry(name))
+    const auto& id = drawable.GetGeometryId(env);
+
+    const auto usage = drawable.GetUsage();
+    if (usage == Drawable::Usage::Stream)
     {
-        if (drawable.IsDynamic(env))
-        {
-            if (!drawable.Upload(env, *geom))
-                return nullptr;
-        }
-        return geom;
+        Geometry::CreateArgs args;
+        if (!drawable.Construct(env, args))
+            return nullptr;
+
+        return mDevice->CreateGeometry(id, std::move(args));
     }
+    else if (usage == Drawable::Usage::Dynamic)
+    {
+        auto geom = mDevice->FindGeometry(id);
+        if (geom == nullptr) {
+            Geometry::CreateArgs args;
+            if (!drawable.Construct(env, args))
+                return nullptr;
 
-    auto* geom = mDevice->MakeGeometry(name);
-    if (!drawable.Upload(env, *geom))
-        return nullptr;
+            return mDevice->CreateGeometry(id, std::move(args));
+        }
+        if (geom->GetContentHash() == drawable.GetContentHash())
+            return geom;
 
-    return geom;
+        Geometry::CreateArgs args;
+        if (!drawable.Construct(env, args))
+            return nullptr;
+
+        return mDevice->CreateGeometry(id, std::move(args));
+    }
+    else if (usage == Drawable::Usage::Static)
+    {
+        auto geom = mDevice->FindGeometry(id);
+        if (geom == nullptr) {
+            Geometry::CreateArgs args;
+            if (!drawable.Construct(env, args))
+                return nullptr;
+
+            return mDevice->CreateGeometry(id, std::move(args));
+        }
+        if (!mEditingMode)
+            return geom;
+
+        if (geom->GetContentHash() == drawable.GetContentHash())
+            return geom;
+
+        Geometry::CreateArgs args;
+        if (!drawable.Construct(env, args))
+            return nullptr;
+
+        return mDevice->CreateGeometry(id, std::move(args));
+
+    } else BUG("Missing geometry usage handling.");
 }
 
 IRect Painter::MapToDevice(const IRect& rect) const noexcept

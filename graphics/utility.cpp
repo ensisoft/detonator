@@ -62,12 +62,11 @@ ProgramPtr MakeProgram(const std::string& vertex_source,
     return program;
 }
 
-Geometry* MakeFullscreenQuad(Device& device)
+GeometryPtr MakeFullscreenQuad(Device& device)
 {
-    if (auto* geometry = device.FindGeometry("FullscreenQuad"))
+    if (auto geometry = device.FindGeometry("FullscreenQuad"))
         return geometry;
 
-    auto* geometry = device.MakeGeometry("FullscreenQuad");
     const gfx::Vertex2D verts[] = {
         { {-1,  1}, {0, 1} },
         { {-1, -1}, {0, 0} },
@@ -77,11 +76,13 @@ Geometry* MakeFullscreenQuad(Device& device)
         { { 1, -1}, {1, 0} },
         { { 1,  1}, {1, 1} }
     };
-    geometry->SetUsage(Geometry::Usage::Static);
-    geometry->SetName("FullscreenQuad");
-    geometry->SetVertexBuffer(verts, 6);
-    geometry->AddDrawCmd(gfx::Geometry::DrawType::Triangles);
-    return geometry;
+    gfx::Geometry::CreateArgs args;
+    args.usage = Geometry::Usage::Static;
+    args.content_name = "FullscreenQuad";
+    args.buffer.SetVertexBuffer(verts, 6);
+    args.buffer.SetVertexLayout(GetVertexLayout<Vertex2D>());
+    args.buffer.AddDrawCmd(Geometry::DrawType::Triangles);
+    return device.CreateGeometry("FullscreenQuad", std::move(args));
 }
 
 glm::mat4 MakeOrthographicProjection(const FRect& rect)

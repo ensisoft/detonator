@@ -876,13 +876,6 @@ void main() {
         program = gfx::MakeProgram(vertex_src, fragment_src, "BitmapFontComposite", device);
     }
 
-    auto* geometry = device.FindGeometry("BitmapFontTextGeometry");
-    if (geometry == nullptr)
-    {
-        geometry = device.MakeGeometry("BitmapFontTextGeometry");
-    }
-
-
     auto ortho = glm::ortho(0.0f, (float)buffer_width, (float)buffer_height, 0.0f);
     Quad quad;
     quad.top_left     = {0.0f,  0.0f, 0.0f, 1.0f};
@@ -915,10 +908,13 @@ void main() {
         base::AppendVector(verts, {v0, v1, v2});
         base::AppendVector(verts, {v0, v2, v3});
     }
-    geometry->ClearDraws();
-    geometry->SetUsage(Geometry::Usage::Stream);
-    geometry->SetVertexBuffer(verts);
-    geometry->AddDrawCmd(Geometry::DrawType::Triangles);
+    Geometry::CreateArgs args;
+    args.content_name = "TextGeometry";
+    args.usage = Geometry::Usage::Stream;
+    args.buffer.SetVertexBuffer(std::move(verts));
+    args.buffer.SetVertexLayout(GetVertexLayout<Vertex2D>());
+    args.buffer.AddDrawCmd(Geometry::DrawType::Triangles);
+    auto geometry = device.CreateGeometry("BitmapFontTextGeometry", std::move(args));
 
     program->SetTexture("kGlyphMap", 0, *font_texture);
     program->SetTextureCount(1);

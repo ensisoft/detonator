@@ -265,8 +265,8 @@ namespace gfx
                               const Drawable::Environment& drawable_environment,
                               const Material::Environment& material_environment) const;
 
-        Geometry* GetGeometry(const Drawable& drawable,
-                              const Drawable::Environment& env) const;
+        GeometryPtr GetGeometry(const Drawable& drawable,
+                                const Drawable::Environment& env) const;
 
     private:
         std::shared_ptr<Device> mDeviceInst;
