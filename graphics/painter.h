@@ -194,8 +194,12 @@ namespace gfx
             // State aggregate for the device state for depth testing
             // stencil testing etc.
             DrawState state;
+
+            GeometryPtr geometry;
         };
         using DrawList = std::vector<DrawCommand>;
+
+        void Prime(DrawCommand& cmd) const;
 
         // Draw multiple objects inside a render pass. Each object has a drawable shape,
         // which provides the geometrical information of the object to be drawn, a material,
