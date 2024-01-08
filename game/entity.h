@@ -438,8 +438,8 @@ namespace game
         { return mBitFlags; }
         MaterialParamMap GetMaterialParams() noexcept
         { return mMaterialParams; }
-        const MaterialParamMap& GetMaterialParams() const noexcept
-        { return mMaterialParams; }
+        const MaterialParamMap* GetMaterialParams() const noexcept
+        { return &mMaterialParams; }
         bool HasMaterialParam(const std::string& name) const noexcept
         { return base::SafeFind(mMaterialParams, name) != nullptr; }
         MaterialParam* FindMaterialParam(const std::string& name) noexcept
@@ -660,14 +660,17 @@ namespace game
         };
 
         DrawableItem(std::shared_ptr<const DrawableItemClass> klass)
-          : mClass(klass)
+          : mClass(std::move(klass))
           , mMaterialId(mClass->GetMaterialId())
           , mInstanceFlags(mClass->GetFlags())
           , mInstanceTimeScale(mClass->GetTimeScale())
           , mInstanceDepth(mClass->GetDepth())
           , mInstanceRotator(mClass->GetRotator())
-          , mMaterialParams(mClass->GetMaterialParams())
-        {}
+        {
+            const auto* params = mClass->GetMaterialParams();
+            if (!params->empty())
+                mMaterialParams = *params;
+        }
         bool HasMaterialTimeAdjustment() const noexcept
         { return mTimeAdjustment.has_value(); }
         double GetMaterialTimeAdjustment() const noexcept
@@ -727,39 +730,82 @@ namespace game
         void SetMaterialId(std::string id) noexcept
         { mMaterialId = std::move(id); }
         void SetMaterialParam(const std::string& name, const MaterialParam& value)
-        { mMaterialParams[name] = value; }
+        {
+            if (!mMaterialParams.has_value())
+                mMaterialParams = MaterialParamMap {};
+            mMaterialParams.value()[name] = value;
+        }
+
         MaterialParamMap GetMaterialParams()
-        { return mMaterialParams; }
-        const MaterialParamMap& GetMaterialParams() const noexcept
-        { return mMaterialParams; }
+        { return mMaterialParams.value_or(MaterialParamMap{}); }
+
+        const MaterialParamMap* GetMaterialParams() const noexcept
+        {
+            if (mMaterialParams.has_value())
+                return &mMaterialParams.value();
+            return nullptr;
+        }
         bool HasMaterialParam(const std::string& name) const noexcept
-        { return base::SafeFind(mMaterialParams, name) != nullptr; }
+        {
+            if (auto* map = GetMaterialParams())
+                return base::SafeFind(*map, name) != nullptr;
+            return false;
+        }
         MaterialParam* FindMaterialParam(const std::string& name) noexcept
-        { return base::SafeFind(mMaterialParams, name); }
+        {
+            if (mMaterialParams.has_value())
+                return base::SafeFind(mMaterialParams.value(), name);
+            return nullptr;
+        }
         const MaterialParam* FindMaterialParam(const std::string& name) const noexcept
-        { return base::SafeFind(mMaterialParams, name); }
+        {
+            if (mMaterialParams.has_value())
+                return base::SafeFind(mMaterialParams.value(), name);
+            return nullptr;
+        }
+
         template<typename T>
         T* GetMaterialParamValue(const std::string& name) noexcept
         {
-            if (auto* ptr = base::SafeFind(mMaterialParams, name))
+            if (!mMaterialParams.has_value())
+                return nullptr;
+            if (auto* ptr = base::SafeFind(mMaterialParams.value(), name))
                 return std::get_if<T>(ptr);
             return nullptr;
         }
         template<typename T>
         const T* GetMaterialParamValue(const std::string& name) const noexcept
         {
-            if (auto* ptr = base::SafeFind(mMaterialParams, name))
+            if (!mMaterialParams.has_value())
+                return nullptr;
+            if (auto* ptr = base::SafeFind(mMaterialParams.value(), name))
                 return std::get_if<T>(ptr);
             return nullptr;
         }
         void ClearMaterialParams() noexcept
-        { mMaterialParams.clear(); }
+        {
+            mMaterialParams.reset();
+        }
+
         void DeleteMaterialParam(const std::string& name) noexcept
-        { mMaterialParams.erase(name); }
+        {
+            if (mMaterialParams.has_value())
+                mMaterialParams.value().erase(name);
+        }
+
         void SetActiveTextureMap(std::string id) noexcept
-        { mMaterialParams["active_texture_map"] = std::move(id); }
+        {
+            if (!mMaterialParams.has_value())
+                mMaterialParams = MaterialParamMap {};
+
+            mMaterialParams.value()["active_texture_map"] = std::move(id);
+        }
+
         void ResetActiveTextureMap() noexcept
-        { mMaterialParams.erase("active_texture_map"); }
+        {
+            if (mMaterialParams.has_value())
+                mMaterialParams.value().erase("active_texture_map");
+        }
 
         void SetCurrentMaterialTime(double time) const noexcept
         { mMaterialTime = time; }
@@ -788,14 +834,14 @@ namespace game
     private:
         std::shared_ptr<const DrawableItemClass> mClass;
         std::string mMaterialId;
-        mutable std::optional<double> mTimeAdjustment;
-        mutable std::vector<Command> mCommands;
         base::bitflag<Flags> mInstanceFlags;
         float mInstanceTimeScale = 1.0f;
         float mInstanceDepth = 1.0f;
         Rotator mInstanceRotator;
         mutable double mMaterialTime = 0.0f;
-        MaterialParamMap mMaterialParams;
+        mutable std::optional<double> mTimeAdjustment;
+        mutable std::vector<Command> mCommands;
+        std::optional<MaterialParamMap> mMaterialParams;
     };
 
     class Fixture
