@@ -980,7 +980,8 @@ void Renderer::CreateDrawResources(PaintNode& paint_node)
         if (paint_node.item_material)
         {
             paint_node.item_material->ResetUniforms();
-            paint_node.item_material->SetUniforms(item->GetMaterialParams());
+            if (const auto* params = item->GetMaterialParams())
+                paint_node.item_material->SetUniforms(*params);
         }
         if (paint_node.item_drawable)
         {
