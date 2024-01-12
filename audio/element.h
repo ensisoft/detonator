@@ -42,19 +42,21 @@ namespace audio
         std::string name;
     };
 
-    // Port provides an input/output /queueing abstraction.
-    // I.e. a port is used to push and pull data in and out
-    // in buffers. Each port additionally specifies the format
-    // that it supports and understand. Each port then going
-    // in and coming out of such port should have a matching
-    // format setting.
+    // Port provides an input/output abstraction for connecting
+    // elements and their output ports to input ports.
+    // A port is used to push and pull data buffers in and out.
+    // Each port additionally specifies the format that it supports
+    // and understand.
     class Port
     {
     public:
         using BufferHandle = audio::BufferHandle;
         using Format = audio::Format;
-        // dtor.
-        virtual ~Port() = default;
+
+        explicit Port(const std::string& name)
+          : mName(name)
+        {}
+
         // Push a new buffer for into the port.
         // The audio graph will *pull* from the source output ports
         // and *push* into the destination input ports.
@@ -62,89 +64,68 @@ namespace audio
         // into its output ports.
         // Returns false if the queue overflowed and buffer could
         // not be pushed.
-        virtual bool PushBuffer(BufferHandle buffer) = 0;
+        bool PushBuffer(BufferHandle buffer) noexcept
+        {
+            if (mBuffer)
+                return false;
+            mBuffer = std::move(buffer);
+            return true;
+        }
+
         // Pull a buffer out of the port.
         // The audio graph will *pull* from the source output ports
         // and *push* into the destination input ports.
         // An element will *pull* from its input ports and *push*
         // into its output ports.
         // Returns false if the port was empty and no buffer was available.
-        virtual bool PullBuffer(BufferHandle& buffer) = 0;
+        bool PullBuffer(BufferHandle& buffer) noexcept
+        {
+            if (!mBuffer)
+                return false;
+            buffer = std::move(mBuffer);
+            mBuffer = BufferHandle {};
+            return true;
+        }
+
         // Get the human -readable name of the port.
-        virtual std::string GetName() const = 0;
+        inline std::string GetName() const
+        { return mName; }
+
         // Get the port's data format. The format is undefined until
         // the whole audio graph has been prepared.
-        virtual Format GetFormat() const = 0;
+        inline  Format GetFormat() const noexcept
+        { return mFormat; }
+
         // Set the result of the port format negotiation.
-        virtual void SetFormat(const Format& format) = 0;
+        inline void SetFormat(const Format& format) noexcept
+        { mFormat = format; }
+
         // Perform format compatibility check by checking against the given
         // suggested audio stream format. Should return true if the format
         // is accepted or false to indicate that the format is not supported.
-        virtual bool CanAccept(const Format& format) const = 0;
+        inline bool CanAccept(const Format& format) const noexcept
+        {
+            return true;
+        }
+
         // Return true if there are pending buffers in the port's buffer queue.
-        virtual bool HasBuffers() const = 0;
+        inline  bool HasBuffers() const noexcept
+        {
+            return !!mBuffer;
+        }
+
         // Return true if the port is full and cannot queue more.
-        virtual bool IsFull() const = 0;
+        inline bool IsFull() const noexcept
+        {
+            return !!mBuffer;
+        }
     private:
+        const std::string mName;
+        Format mFormat;
+        BufferHandle mBuffer;
     };
 
-    namespace detail {
-        class SingleSlotQueue {
-        public:
-        protected:
-            ~SingleSlotQueue() = default;
-             bool Push(BufferHandle buffer)
-             {
-                 if (mBuffer) return false;
-                 mBuffer = buffer;
-                 return true;
-             }
-             bool Pull(BufferHandle& buffer)
-             {
-                 if (!mBuffer) return false;
-                 buffer = mBuffer;
-                 mBuffer.reset();
-                 return true;
-             }
-             bool HasBuffers() const
-             { return !!mBuffer; }
-             bool IsFull() const
-             { return !!mBuffer; }
-        private:
-            BufferHandle mBuffer;
-        };
-
-        template<typename Queue>
-        class BasicPort : public Port, public Queue {
-        public:
-            BasicPort(const std::string& name)
-              : mName(name)
-            {}
-            virtual bool PushBuffer(BufferHandle buffer) override
-            { return Queue::Push(buffer); }
-            virtual bool PullBuffer(BufferHandle& buffer) override
-            { return Queue::Pull(buffer); }
-            virtual std::string GetName() const override
-            { return mName; }
-            virtual Format GetFormat() const override
-            { return mFormat; }
-            virtual void SetFormat(const Format& format) override
-            { mFormat = format; }
-            virtual bool CanAccept(const Format& format) const override
-            {
-                return true;
-            }
-            virtual bool HasBuffers() const override
-            { return Queue::HasBuffers(); }
-            virtual bool IsFull() const override
-            { return Queue::IsFull(); }
-        private:
-            const std::string mName;
-            Format mFormat;
-        };
-    } // namespace
-
-    using SingleSlotPort = detail::BasicPort<detail::SingleSlotQueue>;
+    using SingleSlotPort = Port;
 
     // Audio processing element. Each element can have multiple input
     // and output ports with various port format settings. During
