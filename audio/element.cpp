@@ -567,6 +567,29 @@ void Splitter::Process(Allocator& allocator, EventQueue& events, unsigned millis
 }
 
 
+bool Queue::Prepare(const Loader& loader, const PrepareParams& params)
+{
+    const auto format = mIn.GetFormat();
+    mOut.SetFormat(format);
+    DEBUG("Audio queue element prepared successfully. [elem=%1, output=%2]", mName, format);
+    return true;
+}
+
+void Queue::Process(Allocator& allocator, EventQueue& events, unsigned int milliseconds)
+{
+    BufferHandle buffer;
+    if (mIn.PullBuffer(buffer))
+        mQueue.push(std::move(buffer));
+
+    if (mQueue.empty())
+        return;
+    if (mOut.IsFull())
+        return;
+
+    if (mOut.PushBuffer(mQueue.front()))
+        mQueue.pop();
+}
+
 Mixer::Mixer(const std::string& name, const std::string& id, unsigned int num_srcs)
   : mName(name)
   , mId(id)
@@ -1846,6 +1869,7 @@ std::vector<std::string> ListAudioElements()
         list.push_back("Mixer");
         list.push_back("Delay");
         list.push_back("Playlist");
+        list.push_back("Queue");
     }
     return list;
 }
@@ -1959,6 +1983,13 @@ const ElementDesc* FindElementDesc(const std::string& type)
             splitter.output_ports.push_back({"out1"});
             map["Splitter"] = splitter;
         }
+
+        {
+            ElementDesc queue;
+            queue.input_ports.push_back({"in"});
+            queue.output_ports.push_back({"out"});
+            map["Queue"] = std::move(queue);
+        }
     }
     return base::SafeFind(map, type);
 }
@@ -1967,7 +1998,9 @@ std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc)
 {
     const auto& args = desc.args;
     const auto& name = desc.type + "/" + desc.name;
-    if (desc.type == "Playlist")
+    if (desc.type == "Queue")
+        return std::make_unique<Queue>(desc.name, desc.id);
+    else if (desc.type == "Playlist")
         return Construct<Playlist>(desc.name, desc.id, &desc.input_ports);
     else if (desc.type == "StereoMaker")
         return Construct<StereoMaker>(desc.name, desc.id,

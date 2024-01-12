@@ -630,7 +630,10 @@ void Graph::Process(Allocator& allocator, EventQueue& events, unsigned milliseco
             }
         }
         if (backpressure)
-            continue;
+        {
+            if (source->GetType() != "Queue")
+                continue;
+        }
 
         // process the audio buffers.
         source->Process(allocator, events, milliseconds);
@@ -652,7 +655,10 @@ void Graph::Process(Allocator& allocator, EventQueue& events, unsigned milliseco
             buffer->AddInfoTag(tag);
 
             if (auto* dst = FindDstPort(&output))
-                dst->PushBuffer(buffer);
+            {
+                if (!dst->PushBuffer(buffer))
+                    output.PushBuffer(buffer);
+            }
         }
     }
 
@@ -662,6 +668,14 @@ void Graph::Process(Allocator& allocator, EventQueue& events, unsigned milliseco
     {
         if (element->IsSource() && !element->IsSourceDone())
             graph_done = false;
+
+        if (element->GetType() == "Queue")
+        {
+            const auto* queue = static_cast<const Queue*>(element);
+
+            if (!queue->IsEmpty())
+                graph_done = false;
+        }
 
         if (!graph_done)
             break;
