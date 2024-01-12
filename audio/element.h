@@ -109,15 +109,15 @@ namespace audio
         }
 
         // Return true if there are pending buffers in the port's buffer queue.
-        inline  bool HasBuffers() const noexcept
+        inline bool HasBuffers() const noexcept
         {
-            return !!mBuffer;
+            return mBuffer ? true : false;
         }
 
         // Return true if the port is full and cannot queue more.
         inline bool IsFull() const noexcept
         {
-            return !!mBuffer;
+            return mBuffer ? true : false;
         }
     private:
         const std::string mName;
@@ -401,6 +401,51 @@ namespace audio
         SingleSlotPort mOutLeft;
         SingleSlotPort mOutRight;
     };
+
+    class Queue : public Element
+    {
+    public:
+        Queue(const std::string& name, const std::string& id)
+          : mName(name)
+          , mId(id)
+          , mIn("in")
+          , mOut("out")
+        {}
+        virtual std::string GetId() const override
+        { return mId; }
+        virtual std::string GetName() const override
+        { return mName; }
+        virtual std::string GetType() const override
+        { return "Queue"; }
+        virtual unsigned GetNumOutputPorts() const override
+        { return 1; }
+        virtual unsigned GetNumInputPorts() const override
+        { return 1; }
+        virtual Port& GetOutputPort(unsigned index) override
+        {
+            if (index == 0) return mOut;
+            BUG("No such output port.");
+        }
+        virtual Port& GetInputPort(unsigned index) override
+        {
+            if (index == 0) return mIn;
+            BUG("No such input port.");
+        }
+        virtual bool Prepare(const Loader& loader, const PrepareParams& params) override;
+        virtual void Process(Allocator& allocator, EventQueue& events, unsigned milliseconds) override;
+
+        inline size_t GetQueueSize() const noexcept
+        { return mQueue.size(); }
+        inline bool IsEmpty() const noexcept
+        { return mQueue.empty(); }
+    private:
+        const std::string mName;
+        const std::string mId;
+        SingleSlotPort mIn;
+        SingleSlotPort mOut;
+        std::queue<BufferHandle> mQueue;
+    };
+
 
     // Null element discards any input stream buffers pushed
     // into its input port.
