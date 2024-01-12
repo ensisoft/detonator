@@ -76,51 +76,7 @@ private:
     std::vector<InfoTag> mTags;
 };
 
-class TestPort : public audio::Port
-{
-public:
-    TestPort(const std::string& name)
-        : mName(name)
-    {}
-
-    virtual bool PushBuffer(BufferHandle buffer) override
-    {
-        if (mBuffer) return false;
-        mBuffer = buffer;
-        return true;
-    }
-    virtual bool PullBuffer(BufferHandle& buffer) override
-    {
-        if (!mBuffer) return false;
-
-        buffer = mBuffer;
-        mBuffer.reset();
-        return true;
-    }
-    virtual std::string GetName() const override
-    { return mName; }
-    virtual Format GetFormat() const override
-    { return mFormat; }
-    virtual void SetFormat(const Format& format) override
-    { mFormat = format; }
-
-    virtual bool CanAccept(const Format& format) const override
-    {
-        return true;
-    }
-    virtual bool HasBuffers() const override
-    {
-        return !!mBuffer;
-    }
-    virtual bool IsFull() const override
-    {
-        return !!mBuffer;
-    }
-private:
-    const std::string mName;
-    BufferHandle mBuffer;
-    Format mFormat;
-};
+using TestPort = audio::SingleSlotPort;
 
 struct TestState  {
     std::vector<audio::Element*> prepare_list;
