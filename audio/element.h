@@ -778,6 +778,9 @@ namespace audio
             if (index == 0) return mPort;
             BUG("No such output port.");
         }
+        std::string GetFileName() const
+        { return mFile; }
+
         void SetFileName(const std::string& file)
         { mFile = file; }
         void SetLoopCount(unsigned count)
@@ -1133,6 +1136,21 @@ namespace audio
             StereoMaker::Channel,
             Effect::Kind>;
 
+    struct ElementDesc {
+        std::vector<PortDesc> input_ports;
+        std::vector<PortDesc> output_ports;
+        std::unordered_map<std::string, ElementArg> args;
+    };
+
+    struct ElementCreateArgs {
+        std::string id;
+        std::string name;
+        std::string type;
+        std::unordered_map<std::string, ElementArg> args;
+        std::vector<PortDesc> input_ports;
+        std::vector<PortDesc> output_ports;
+    };
+
     template<typename T> inline
     const T* FindElementArg(const std::unordered_map<std::string, ElementArg>& args,
                             const std::string& arg_name)
@@ -1145,23 +1163,10 @@ namespace audio
         return nullptr;
     }
 
-    struct ElementDesc {
-        std::vector<PortDesc> input_ports;
-        std::vector<PortDesc> output_ports;
-        std::unordered_map<std::string, ElementArg> args;
-    };
     const ElementDesc* FindElementDesc(const std::string& type);
 
     std::vector<std::string> ListAudioElements();
 
-    struct ElementCreateArgs {
-        std::string id;
-        std::string name;
-        std::string type;
-        std::unordered_map<std::string, ElementArg> args;
-        std::vector<PortDesc> input_ports;
-        std::vector<PortDesc> output_ports;
-    };
     std::unique_ptr<Element> CreateElement(const ElementCreateArgs& desc);
 
     void ClearCaches();

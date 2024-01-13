@@ -32,6 +32,7 @@
 #include "base/bitflag.h"
 #include "base/logging.h"
 #include "base/trace.h"
+#include "audio/graph.h"
 #include "game/entity.h"
 #include "game/treeop.h"
 #include "game/tilemap.h"
@@ -193,6 +194,18 @@ public:
                 }
             }
         }
+
+        if (klass.type == engine::ClassLibrary::ClassType::AudioGraph)
+        {
+            const auto& graph = mClasslib->FindAudioGraphClassById(klass.id);
+            if (!graph)
+                return;
+            audio::GraphClass::PreloadParams params;
+            params.enable_pcm_caching = mAudio->IsCachingEnabled();
+
+            graph->Preload(*mAudioLoader, params);
+        }
+
 
         auto* my_screen = static_cast<LoadingScreen*>(screen);
         const float surf_width = mSurfaceWidth;
