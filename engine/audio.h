@@ -61,20 +61,24 @@ namespace engine
 
         AudioEngine(const std::string& name);
        ~AudioEngine();
-        void EnableCaching(bool on_off)
+
+        inline void EnableCaching(bool on_off) noexcept
         { mEnableCaching = on_off; }
-        void SetLoader(const audio::Loader* loader)
+        inline void SetLoader(const audio::Loader* loader) noexcept
         { mLoader = loader; }
-        void SetFormat(const audio::Format& format)
+        inline void SetFormat(const audio::Format& format) noexcept
         { mFormat = format; }
-        void SetClassLibrary(const ClassLibrary* library)
+        inline void SetClassLibrary(const ClassLibrary* library) noexcept
         { mClassLib = library; }
-        void SetBufferSize(unsigned milliseconds)
+        inline void SetBufferSize(unsigned milliseconds) noexcept
         { mBufferSize = milliseconds; }
-        const ClassLibrary* GetClassLibrary() const
+        inline const ClassLibrary* GetClassLibrary() const noexcept
         { return mClassLib; }
-        const audio::Loader* GetLoader() const
+        inline const audio::Loader* GetLoader() const noexcept
         { return mLoader; }
+        inline void EnableEffects(bool on_off) noexcept
+        { mEnableEffects = on_off; }
+
         // Start the audio engine. You must call this before calling any
         // actual playback functions.
         void Start();
@@ -118,9 +122,6 @@ namespace engine
         // Kill all currently playing sound effects.
         void KillAllSoundEffects();
 
-        void EnableEffects(bool on_off)
-        { mEnableEffects = on_off; }  
-   
         using AudioEventQueue = std::vector<AudioEvent>;
         // Tick the audio engine/player and optionally receive a list of
         // audio events that have happened.
