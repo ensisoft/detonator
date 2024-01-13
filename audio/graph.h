@@ -126,6 +126,12 @@ namespace audio
             return ret;
         }
 
+        struct PreloadParams {
+            bool enable_pcm_caching = false;
+        };
+
+        void Preload(const Loader& loader, const PreloadParams& params) const;
+
         void IntoJson(data::Writer& writer) const;
         bool FromJson(const data::Reader& reader);
     private:

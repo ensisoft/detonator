@@ -28,6 +28,22 @@
 #include "audio/graph.h"
 #include "audio/element.h"
 
+namespace {
+    template<typename T>
+    const T* GetOptionalArg(const std::unordered_map<std::string, audio::ElementArg>& args,
+                            const std::string& arg_name,
+                            const std::string& elem)
+    {
+        if (const auto* variant = base::SafeFind(args, arg_name))
+        {
+            if (const auto* value = std::get_if<T>(variant))
+                return value;
+            else WARN("Mismatch in audio element argument type. [elem=%1, arg=%2]", elem, arg_name);
+        }
+        return nullptr;
+    }
+}
+
 namespace audio
 {
 
@@ -81,6 +97,43 @@ std::size_t GraphClass::GetHash() const
     }
     return hash;
 }
+
+void GraphClass::Preload(const Loader& loader, const PreloadParams& params) const
+{
+    for (const auto& element : mElements)
+    {
+        if (element.type != "FileSource")
+            continue;
+
+        const auto* file_caching = GetOptionalArg<bool>(element.args, "file_caching", element.name);
+        const auto* pcm_caching = GetOptionalArg<bool>(element.args, "pcm_caching", element.name);
+
+        if (pcm_caching && *pcm_caching)
+        {
+            auto source = CreateElement(element);
+            auto* file = static_cast<FileSource*>(source.get());
+            DEBUG("Preloading audio file '%1'", file->GetFileName());
+
+            audio::Element::PrepareParams prep;
+            prep.enable_pcm_caching = params.enable_pcm_caching;
+
+            if (!source->Prepare(loader, prep))
+                continue;
+
+            BufferAllocator allocator;
+            BufferHandle buffer;
+            std::queue<std::unique_ptr<Event>> events;
+            do
+            {
+                source->Process(allocator, events, 20);
+                auto& out = source->GetOutputPort(0);
+                out.PullBuffer(buffer);
+            }
+            while (!source->IsSourceDone());
+        }
+    }
+}
+
 
 void GraphClass::IntoJson(data::Writer& writer) const
 {

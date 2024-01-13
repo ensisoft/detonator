@@ -78,6 +78,8 @@ namespace engine
         { return mLoader; }
         inline void EnableEffects(bool on_off) noexcept
         { mEnableEffects = on_off; }
+        inline bool IsCachingEnabled() const noexcept
+        { return mEnableCaching; }
 
         // Start the audio engine. You must call this before calling any
         // actual playback functions.
