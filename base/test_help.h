@@ -33,6 +33,9 @@
 #include <limits>
 #include <functional>
 #include <variant>
+#include <fstream>
+#include <sstream>
+#include <unordered_map>
 
 #include "base/platform.h"
 #include "base/test_float.h"
@@ -189,17 +192,104 @@ static TestTimes TimedTest(unsigned iterations, TestCallable function)
     return ret;
 }
 
-static void PrintTestTimes(const char* name, const TestTimes& times)
+struct PerformanceRecord {
+    std::string name;
+    unsigned total   = 0;
+    unsigned minimum = 0;
+    unsigned maximum = 0;
+    unsigned average = 0;
+    unsigned median  = 0;
+};
+
+static void ReadPerformanceRecord(const std::string& file,
+                           std::vector<PerformanceRecord>* results)
 {
+    std::ifstream in(file);
+    if (!in.is_open())
+        return;
+
+    std::string line;
+    while (std::getline(in, line))
+    {
+        std::stringstream ss(line);
+        PerformanceRecord record;
+        ss >> record.name;
+        ss >> record.total;
+        ss >> record.minimum;
+        ss >> record.maximum;
+        ss >> record.average;
+        ss >> record.median;
+        results->push_back(std::move(record));
+    }
+}
+
+static void WritePerformanceRecord(const std::string& file,
+                            const std::vector<PerformanceRecord>& records)
+{
+    std::ofstream out(file);
+    if (!out.is_open())
+        return;
+
+    for (const auto& record : records)
+    {
+        out << record.name << " ";
+        out << record.total << " ";
+        out << record.minimum << " ";
+        out << record.maximum << " ";
+        out << record.average << " ";
+        out << record.median << " ";
+        out << "\n";
+    }
+}
+
+static test::Color ChooseColor(unsigned current, unsigned  benchmark)
+{
+    if (current > benchmark)
+        return test::Color::Warning;
+    else if (current < benchmark)
+        return test::Color::Success;
+
+    return test::Color::Info;
+}
+
+static unsigned ToMicroSec(double secs) noexcept
+{
+    return secs * 1000u*1000u;
+}
+static unsigned ToMilliSec(double secs) noexcept
+{
+    return secs * 1000u;
+}
+
+static void PrintTestTimes(const char* name, const TestTimes& times,
+                           const PerformanceRecord* benchmark = nullptr)
+{
+    std::unordered_map<std::string, test::Color> colors;
+    if (benchmark)
+    {
+        colors["total"]  = ChooseColor(ToMilliSec(times.total),   benchmark->total);
+        colors["min"]    = ChooseColor(ToMilliSec(times.minimum), benchmark->minimum);
+        colors["max"]    = ChooseColor(ToMilliSec(times.maximum), benchmark->maximum);
+        colors["avg"]    = ChooseColor(ToMilliSec(times.average), benchmark->average);
+        colors["median"] = ChooseColor(ToMilliSec(times.median),  benchmark->median);
+    }
+    else
+    {
+        colors["total"]  = test::Color::Info;
+        colors["min"]    = test::Color::Info;
+        colors["max"]    = test::Color::Info;
+        colors["avg"]    = test::Color::Info;
+        colors["median"] = test::Color::Info;
+    }
     test::Print(test::Color::Info, "\n");
     test::Print(test::Color::Info, " %s\n", name);
     test::Print(test::Color::Info, " -------------------------------------------\n");
     test::Print(test::Color::Info, "  loops=%u\n\n", times.iterations);
-    test::Print(test::Color::Info, "  total  = %.6f s %6u ms  %6u us\n", times.total,   unsigned(times.total   * 1000u), unsigned(times.total   * 1000u*1000u));
-    test::Print(test::Color::Info, "  min    = %.6f s %6u ms  %6u us\n", times.minimum, unsigned(times.minimum * 1000u), unsigned(times.minimum * 1000u*1000u));
-    test::Print(test::Color::Info, "  max    = %.6f s %6u ms  %6u us\n", times.maximum, unsigned(times.maximum * 1000u), unsigned(times.maximum * 1000u*1000u));
-    test::Print(test::Color::Info, "  avg    = %.6f s %6u ms  %6u us\n", times.average, unsigned(times.average * 1000u), unsigned(times.average * 1000u*1000u));
-    test::Print(test::Color::Info, "  median = %.6f s %6u ms  %6u us\n", times.median,  unsigned(times.median  * 1000u), unsigned(times.median  * 1000u*1000u));
+    test::Print(colors["total"],   "  total  = %.6f s %6u ms  %6u us\n", times.total,   ToMilliSec(times.total  ), ToMicroSec(times.total  ));
+    test::Print(colors["min"],     "  min    = %.6f s %6u ms  %6u us\n", times.minimum, ToMilliSec(times.minimum), ToMicroSec(times.minimum));
+    test::Print(colors["max"],     "  max    = %.6f s %6u ms  %6u us\n", times.maximum, ToMilliSec(times.maximum), ToMicroSec(times.maximum));
+    test::Print(colors["avg"],     "  avg    = %.6f s %6u ms  %6u us\n", times.average, ToMilliSec(times.average), ToMicroSec(times.average));
+    test::Print(colors["median"],  "  median = %.6f s %6u ms  %6u us\n", times.median,  ToMilliSec(times.median ), ToMicroSec(times.median ));
     test::Print(test::Color::Info, "\n");
 }
 
@@ -221,7 +311,46 @@ static void DevNull(const char* fmt, ...)
     va_end(args);
 }
 
+template<typename Callable>
+static void PerfTest(std::string name, unsigned iterations, Callable callable)
+{
+    const auto& result = TimedTest(iterations, callable);
+
+    std::vector<PerformanceRecord> records;
+    ReadPerformanceRecord(test::GetPerformanceRecordFileName(), &records);
+
+    const PerformanceRecord* previous = nullptr;
+    for (const auto& record :records)
+    {
+        if (record.name == name) {
+            previous = &record;
+            break;
+        }
+    }
+    if (!previous)
+    {
+        PerformanceRecord record;
+        record.name    = name;
+        record.total   = ToMilliSec(result.total);
+        record.minimum = ToMilliSec(result.minimum);
+        record.maximum = ToMilliSec(result.maximum);
+        record.average = ToMilliSec(result.average);
+        record.median  = ToMilliSec(result.median);
+        records.push_back(record);
+        previous = &records.back();
+    }
+    PrintTestTimes(name.c_str(), result, previous);
+
+    if (!ReadYesNo(test::Color::Info, "Save record? y)es n)o : "))
+        return;
+
+    WritePerformanceRecord(test::GetPerformanceRecordFileName(), records);
+
+}
+
 } // namespace
+
+
 
 
 
