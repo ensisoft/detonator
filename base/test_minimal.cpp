@@ -36,6 +36,9 @@ namespace test {
 base::bitflag<Type>      EnabledTestTypes;
 std::vector<std::string> EnabledTestNames;
 std::vector<TestBundle*> TestBundles;
+
+std::string PerformanceRecordFile = "performance-record.txt";
+
 unsigned ErrorCount = 0;
 
 static bool EnableFatality = true;
@@ -78,6 +81,24 @@ void Print(Color color, const char* fmt, ...)
 
     va_end(args);
     std::fflush(stdout);
+}
+
+bool ReadYesNo(Color color, const char* prompt)
+{
+#if defined(__EMSCRIPTEN__)
+    return false;
+#else
+    for (;;)
+    {
+        Print(color, prompt);
+        int ch = getchar();
+        if (ch == 'y' || ch == 'Y')
+            return true;
+        else if (ch == 'n' || ch == 'N')
+            return false;
+        Print(Color::Error, "\nSorry what?\n");
+    }
+#endif
 }
 
 std::string GetBundleName(const char* file)
@@ -173,6 +194,12 @@ void AddBundle(test::TestBundle* bundle)
 {
     TestBundles.push_back(bundle);
 }
+
+std::string GetPerformanceRecordFileName()
+{
+    return PerformanceRecordFile;
+}
+
 } // namespace
 
 int main(int argc, char* argv[])
@@ -197,6 +224,8 @@ int main(int argc, char* argv[])
         else if (!std::strcmp(argv[i], "--case") ||
                  !std::strcmp(argv[i], "-c"))
             test::EnabledTestNames.emplace_back(argv[i+1]);
+        else if (!std::strcmp(argv[i], "--perf-record"))
+            test::PerformanceRecordFile = argv[i+1];
     }
     try
     {

@@ -89,6 +89,10 @@ bool IsEnabledByName(const std::string& name);
 bool IsEnabledByType(Type type);
 void AddBundle(TestBundle* bundle);
 
+std::string GetPerformanceRecordFileName();
+
+bool ReadYesNo(Color color, const char* prompt);
+
 class TestCaseReporter {
 public:
     TestCaseReporter(const char* file, const char* func, Type type)
