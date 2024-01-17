@@ -27,6 +27,7 @@
 
 #include "base/utility.h"
 #include "base/assert.h"
+#include "base/threadpool.h"
 #include "audio/buffer.h"
 #include "audio/format.h"
 #include "audio/command.h"
@@ -806,7 +807,10 @@ namespace audio
         struct PCMBuffer;
         using PCMCache = std::unordered_map<std::string,
             std::shared_ptr<PCMBuffer>>;
+        using FileInfoCache = std::unordered_map<std::string, FileInfo>;
+
         static PCMCache pcm_cache;
+        static FileInfoCache file_info_cache;
     private:
         const std::string mName;
         const std::string mId;
@@ -821,6 +825,7 @@ namespace audio
         bool mEnablePcmCaching  = false;
         bool mEnableFileCaching = false;
         IOStrategy mIOStrategy = IOStrategy::Default;
+        base::TaskHandle mOpenDecoderTask;
     };
 
     class StreamSource : public Element

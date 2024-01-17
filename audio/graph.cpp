@@ -105,21 +105,21 @@ void GraphClass::Preload(const Loader& loader, const PreloadParams& params) cons
         if (element.type != "FileSource")
             continue;
 
+        auto source = CreateElement(element);
+        auto* file = static_cast<FileSource*>(source.get());
+
         const auto* file_caching = GetOptionalArg<bool>(element.args, "file_caching", element.name);
         const auto* pcm_caching = GetOptionalArg<bool>(element.args, "pcm_caching", element.name);
 
+        DEBUG("Preloading audio file '%1'", file->GetFileName());
+
+        audio::Element::PrepareParams prep;
+        prep.enable_pcm_caching = params.enable_pcm_caching;
+        if (!source->Prepare(loader, prep))
+            continue;
+
         if (pcm_caching && *pcm_caching)
         {
-            auto source = CreateElement(element);
-            auto* file = static_cast<FileSource*>(source.get());
-            DEBUG("Preloading audio file '%1'", file->GetFileName());
-
-            audio::Element::PrepareParams prep;
-            prep.enable_pcm_caching = params.enable_pcm_caching;
-
-            if (!source->Prepare(loader, prep))
-                continue;
-
             BufferAllocator allocator;
             BufferHandle buffer;
             std::queue<std::unique_ptr<Event>> events;
