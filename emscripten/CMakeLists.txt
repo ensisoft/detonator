@@ -72,6 +72,7 @@ add_executable(GameEngine
     ../base/utility.cpp
     ../base/format.cpp
     ../base/trace.cpp
+    ../base/threadpool.cpp
     ../base/json.cpp
     ../data/json.cpp
     ../data/io.cpp

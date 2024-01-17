@@ -1037,6 +1037,8 @@ private:
 
 // static
 FileSource::PCMCache FileSource::pcm_cache;
+// static
+FileSource::FileInfoCache FileSource::file_info_cache;
 
 FileSource::FileSource(const std::string& name, const std::string& file, SampleType type, unsigned loops)
   : mName(name)
@@ -1083,6 +1085,14 @@ bool FileSource::Prepare(const Loader& loader, const PrepareParams& params)
             cached_pcm_buffer = it->second;
     }
 
+    // if we have a file info available (discovered through preload)
+    // then we don't need the actual codec in order to prepare
+    // the FileSource. Rather we can use the cached information
+    // (assuming it's correct) and then defer the decoder open to
+    // background task in the thread pool that is waited on when
+    // the first call to process audio data is done.
+    const auto* info = base::SafeFind(file_info_cache, mFile);
+
     // if there already exists a complete PCM blob for the
     // contents of this (as identified by ID) FileSource
     // element's audio file then we can use that data directly
@@ -1101,42 +1111,130 @@ bool FileSource::Prepare(const Loader& loader, const PrepareParams& params)
         const auto& upper = base::ToUpperUtf8(mFile);
         if (base::EndsWith(upper, ".MP3"))
         {
-            auto dec = std::make_unique<Mpg123Decoder>();
-            if (!dec->Open(source, mFormat.sample_type))
-                return false;
-            decoder = std::move(dec);
+            class OpenDecoderTask : public base::ThreadTask {
+            public:
+                OpenDecoderTask(std::unique_ptr<Mpg123Decoder> decoder,
+                                std::shared_ptr<const SourceStream> stream,
+                                SampleType type)
+                  : mDecoder(std::move(decoder))
+                  , mStream(std::move(stream))
+                  , mSampleType(type)
+                {}
+                virtual void DoTask() override
+                {
+                    if (!mDecoder->Open(mStream, mSampleType))
+                    {
+                        mFlags.set(Flags::Error, true);
+                    }
+                }
+                virtual void GetValue(const char* key, void* ptr) override
+                {
+                    ASSERT(!std::strcmp(key, "decoder"));
+                    using DecoderPtr = std::unique_ptr<Decoder>;
+                    auto* foo = static_cast<DecoderPtr*>(ptr);
+                    *foo = std::move(mDecoder);
+                }
+            private:
+                std::unique_ptr<Mpg123Decoder> mDecoder;
+                std::shared_ptr<const SourceStream> mStream;
+                SampleType mSampleType;
+            };
+
+            auto mpg123_decoder = std::make_unique<Mpg123Decoder>();
+            if (info && base::HaveGlobalThreadPool())
+            {
+                auto* pool = base::GetGlobalThreadPool();
+                auto task = std::make_unique<OpenDecoderTask>(std::move(mpg123_decoder), std::move(source), mFormat.sample_type);
+                mOpenDecoderTask = pool->SubmitTask(std::move(task));
+                DEBUG("Submitted new audio decoder open task. [file='%1']", mFile);
+            }
+            else
+            {
+                if (!mpg123_decoder->Open(source, mFormat.sample_type))
+                    return false;
+                decoder = std::move(mpg123_decoder);
+            }
         }
         else if (base::EndsWith(upper, ".OGG") ||
                  base::EndsWith(upper, ".WAV") ||
                  base::EndsWith(upper, ".FLAC"))
         {
-            auto dec = std::make_unique<SndFileDecoder>();
-            if (!dec->Open(source))
-                return false;
-            decoder = std::move(dec);
+            class OpenDecoderTask : public base::ThreadTask {
+            public:
+                OpenDecoderTask(std::unique_ptr<SndFileDecoder> decoder,
+                                std::shared_ptr<const SourceStream> stream)
+                  : mDecoder(std::move(decoder))
+                  , mStream(std::move(stream))
+                {}
+                virtual void DoTask() override
+                {
+                    if (!mDecoder->Open(mStream))
+                    {
+                        mFlags.set(Flags::Error, true);
+                    }
+                }
+                virtual void GetValue(const char* key, void* ptr) override
+                {
+                    ASSERT(!std::strcmp(key, "decoder"));
+                    using DecoderPtr = std::unique_ptr<Decoder>;
+                    auto* foo = static_cast<DecoderPtr*>(ptr);
+                    *foo = std::move(mDecoder);
+                }
+            private:
+                std::unique_ptr<SndFileDecoder> mDecoder;
+                std::shared_ptr<const SourceStream> mStream;
+            };
+
+            auto snd_file_decoder = std::make_unique<SndFileDecoder>();
+            if (info && base::HaveGlobalThreadPool())
+            {
+                auto* pool = base::GetGlobalThreadPool();
+                auto task = std::make_unique<OpenDecoderTask>(std::move(snd_file_decoder), std::move(source));
+                mOpenDecoderTask = pool->SubmitTask(std::move(task));
+                DEBUG("Submitted new audio decoder open task. [file='%1']", mFile);
+            }
+            else
+            {
+                if (!snd_file_decoder->Open(source))
+                    return false;
+                decoder = std::move(snd_file_decoder);
+            }
         }
         else
         {
             ERROR("Audio file source file format is unsupported. [elem=%1, file='%2']", mName, mFile);
             return false;
         }
+        ASSERT(mOpenDecoderTask.IsValid() || decoder);
+
         if (!cached_pcm_buffer && enable_pcm_caching)
         {
             cached_pcm_buffer = std::make_shared<PCMBuffer>();
             cached_pcm_buffer->complete    = false;
-            cached_pcm_buffer->channels    = decoder->GetNumChannels();
-            cached_pcm_buffer->rate        = decoder->GetSampleRate();
-            cached_pcm_buffer->frame_count = decoder->GetNumFrames();
+            cached_pcm_buffer->channels    = info ? info->channels : decoder->GetNumChannels();
+            cached_pcm_buffer->rate        = info ? info->sample_rate : decoder->GetSampleRate();
+            cached_pcm_buffer->frame_count = info ? info->frames : decoder->GetNumFrames();
             cached_pcm_buffer->type        = mFormat.sample_type;
             pcm_cache[mId] = cached_pcm_buffer;
             mPCMBuffer = cached_pcm_buffer;
         }
     }
     Format format;
-    format.channel_count = decoder->GetNumChannels();
-    format.sample_rate   = decoder->GetSampleRate();
+    format.channel_count = info ? info->channels : decoder->GetNumChannels();
+    format.sample_rate   = info ? info->sample_rate : decoder->GetSampleRate();
     format.sample_type   = mFormat.sample_type;
+
     DEBUG("Audio file source prepared successfully. [elem=%1, file='%2', format=%3]", mName, mFile,format);
+    if (info == nullptr)
+    {
+        FileInfo fileinfo;
+        fileinfo.sample_rate = decoder->GetSampleRate();
+        fileinfo.channels    = decoder->GetNumChannels();
+        fileinfo.frames      = decoder->GetNumFrames();
+        file_info_cache[mFile] = fileinfo;
+        DEBUG("Saved audio file source file info. [file='%1']", mFile);
+    }
+
     mDecoder = std::move(decoder);
     mPort.SetFormat(format);
     mFormat = format;
@@ -1145,6 +1243,25 @@ bool FileSource::Prepare(const Loader& loader, const PrepareParams& params)
 
 void FileSource::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
+    if (mOpenDecoderTask.IsValid())
+    {
+        // wait here? maybe not... generate silence ?
+        if (!mOpenDecoderTask.IsComplete())
+            return;
+
+        auto task = mOpenDecoderTask.GetTask();
+        if (task->Failed())
+        {
+            ERROR("Failed to open decoder on audio stream. [elem=%1, file='%2']", mName, mFile);
+            return;
+        }
+        task->GetValue("decoder", &mDecoder);
+        ASSERT(mDecoder);
+
+        mOpenDecoderTask.Clear();
+        DEBUG("Audio decoder open task is complete.");
+    }
+
     const auto frame_size = GetFrameSizeInBytes(mFormat);
     const auto frames_per_ms = mFormat.sample_rate / 1000;
     const auto frames_wanted = (unsigned)(frames_per_ms * milliseconds);
@@ -1214,6 +1331,11 @@ void FileSource::Shutdown()
 
 bool FileSource::IsSourceDone() const
 {
+    if (mOpenDecoderTask.IsValid())
+        return false;
+    if (!mDecoder)
+        return true;
+
     return mFramesRead == mDecoder->GetNumFrames();
 }
 
@@ -1254,6 +1376,7 @@ bool FileSource::ProbeFile(const std::string& file, FileInfo* info)
 void FileSource::ClearCache()
 {
     pcm_cache.clear();
+    file_info_cache.clear();
 }
 
 StreamSource::StreamSource(const std::string& name, std::shared_ptr<const SourceStream> buffer,
