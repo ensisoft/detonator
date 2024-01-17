@@ -25,6 +25,7 @@
 #include "base/json.h"
 #include "base/trace.h"
 #include "base/utility.h"
+#include "base/threadpool.h"
 #include "data/json.h"
 #include "wdk/events.h"
 #include "device/device.h"
@@ -287,6 +288,12 @@ public:
         mResourceLoader->SetContentPath("/" + content);
         mResourceLoader->LoadResourceLoadingInfo(content_json);
 
+        mThreadPool = std::make_unique<base::ThreadPool>();
+        mThreadPool->AddRealThread();
+        mThreadPool->AddRealThread();
+        mThreadPool->AddMainThread();
+        base::SetGlobalThreadPool(mThreadPool.get());
+
         // todo: context attributes.
         mContext.reset(new WebGLContext(power_pref, antialias));
 
@@ -532,6 +539,8 @@ public:
         TRACE_START();
         TRACE_ENTER(Frame);
 
+        TRACE_CALL("ThreadPool::ExecuteMainThread", mThreadPool->ExecuteMainThread());
+
         TRACE_ENTER(GuiCmd);
         if (!gui_commands.empty())
         {
@@ -701,8 +710,11 @@ public:
         mEngine->Stop();
         mEngine->Save();
         mEngine->Shutdown();
-
         mEngine.reset();
+
+        mThreadPool->Shutdown();
+        mThreadPool.reset();
+                
         mContext.reset();
         return EM_FALSE;
     }
@@ -1081,6 +1093,7 @@ private:
     wdk::WindowListener* mListener = nullptr;
     std::unique_ptr<engine::JsonFileClassLoader> mContentLoader;
     std::unique_ptr<engine::FileResourceLoader>  mResourceLoader;
+    std::unique_ptr<base::ThreadPool> mThreadPool;
     std::unique_ptr<base::TraceLog> mTraceLogger;
     std::unique_ptr<base::TraceWriter> mTraceWriter;
     std::vector<bool> mEnableTracing;
