@@ -16,6 +16,7 @@
 
 #define GAMESTUDIO_GAMELIB_IMPLEMENTATION
 #include "base/logging.h"
+#include "base/threadpool.h"
 #include "engine/main/interface.h"
 #include "engine/loader.h"
 
@@ -37,6 +38,11 @@ GAMESTUDIO_EXPORT void Gamestudio_SetGlobalLogger(base::Logger* logger,
     base::EnableLogEvent(base::LogEvent::Warning, warn_log);
     base::EnableLogEvent(base::LogEvent::Info, info_log);
     base::EnableLogEvent(base::LogEvent::Error, error_log);
+}
+
+GAMESTUDIO_EXPORT void Gamestudio_SetGlobalThreadPool(base::ThreadPool* pool)
+{
+    base::SetGlobalThreadPool(pool);
 }
 
 } // extern "C"
