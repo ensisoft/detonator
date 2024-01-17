@@ -6,6 +6,7 @@ FOO {
   global: Gamestudio_CreateEngine;
           Gamestudio_CreateFileLoaders;
           Gamestudio_SetGlobalLogger;
+          Gamestudio_SetGlobalThreadPool;
 
   # hide everything else
   local: *;
