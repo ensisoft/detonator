@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(GameStudio-Emscripten)
+project(Detonator-Emscripten)
 message(STATUS "
-     ~~ Ensisoft GameStudio Emscripten ~~
+           ~~ DETONATOR 2D ~~
 
     \\\\o Brought to you by Ensisoft o//
         http://www.ensisoft.com
-    Copyright (c) 2021 Sami Väisänen
+    Copyright (c) 2020-2024 Sami Väisänen
                 Ensisoft
 
-https://github.com/ensisoft/gamestudio
+    https://github.com/ensisoft/detonator
 ")
 
 set(CMAKE_CXX_STANDARD 17)
@@ -139,7 +139,7 @@ target_compile_options(GameEngine PRIVATE -sUSE_FREETYPE)
 target_compile_options(GameEngine PRIVATE -sUSE_BOOST_HEADERS)
 
 # uncomment this in order to enable threading
-#target_compile_options(GameEngine PRIVATE -pthread)
+target_compile_options(GameEngine PRIVATE -pthread)
 
 target_link_options(GameEngine PRIVATE -sNO_DISABLE_EXCEPTION_CATCHING)
 target_link_options(GameEngine PRIVATE -sUSE_MPG123)
@@ -156,7 +156,7 @@ target_link_options(GameEngine PRIVATE -sUSE_WEBGL2)
 target_link_options(GameEngine PRIVATE -sFULL_ES3)
 
 # uncomment this in order to enable threading
-#target_link_options(GameEngine PRIVATE -pthread)
+target_link_options(GameEngine PRIVATE -pthread)
 
 # emscripten cache (when emscripten is installed from github)
 # seems to be under /home/user/emsdk/upstream/emscripten/cache
@@ -165,5 +165,5 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.js"   DESTINATION "${CMAKE
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.wasm" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../editor/dist")
 
 # uncomment this in order to enable threading
-#install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.worker.js" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../editor/dist")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.worker.js" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../editor/dist")
 
