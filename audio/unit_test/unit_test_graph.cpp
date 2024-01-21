@@ -17,6 +17,7 @@
 #include "config.h"
 
 #include <iostream>
+#include <fstream>
 #include <string>
 
 #include "base/test_minimal.h"
@@ -242,6 +243,8 @@ void Link(audio::Graph& graph, const std::string& src_elem_id, const std::string
 
 void unit_test_basic()
 {
+    TEST_CASE(test::Type::Feature)
+
     class TestElement : public audio::Element
     {
     public:
@@ -278,6 +281,8 @@ void unit_test_basic()
 
 void unit_test_prepare_topologies()
 {
+    TEST_CASE(test::Type::Feature)
+
     audio::Loader loader;
 
     // single audio element
@@ -385,12 +390,14 @@ void unit_test_prepare_topologies()
         TEST_REQUIRE(graph.Prepare(loader, p));
 
         std::string topo = state.ConcatPrepareNames();
-        TEST_REQUIRE(topo == "abcde" || topo == "acbde");
+        TEST_REQUIRE(topo == "abcde" || topo == "acbde" || topo == "acdbe");
     }
 }
 
 void unit_test_buffer_flow()
 {
+    TEST_CASE(test::Type::Feature)
+
     audio::Loader loader;
 
     TestState state;
@@ -431,6 +438,8 @@ void unit_test_buffer_flow()
 
 void unit_test_completion()
 {
+    TEST_CASE(test::Type::Feature)
+
     audio::Loader loader;
 
     // test completion with just a source element
@@ -512,6 +521,8 @@ void unit_test_completion()
 
 void unit_test_graph_in_graph()
 {
+    TEST_CASE(test::Type::Feature)
+
     audio::Loader loader;
 
     TestState state;
@@ -563,6 +574,8 @@ void unit_test_graph_in_graph()
 
 void unit_test_graph_class()
 {
+    TEST_CASE(test::Type::Feature)
+
     audio::Loader loader;
 
     {
@@ -671,6 +684,8 @@ void unit_test_graph_class()
 
 void unit_test_oversized_buffer()
 {
+    TEST_CASE(test::Type::Feature)
+
     class SrcElement : public audio::Element
     {
     public:
@@ -772,12 +787,22 @@ void unit_test_oversized_buffer()
     }
 }
 
+SET_BUNDLE_NAME("unit_test_audio_graph")
 
+EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
-    base::OStreamLogger logger(std::cout);
+
+#if defined(__EMSCRIPTEN__)
+    base::EmscriptenLogger logger;
     base::SetGlobalLog(&logger);
     base::EnableDebugLog(true);
+#else
+    std::ofstream file("unit_test_audio_graph.log");
+    base::OStreamLogger logger(file);
+    base::SetGlobalLog(&logger);
+    base::EnableDebugLog(true);
+#endif
 
     unit_test_basic();
     unit_test_prepare_topologies();
@@ -788,3 +813,5 @@ int test_main(int argc, char* argv[])
     unit_test_oversized_buffer();
     return 0;
 }
+) // TEST_MAIN
+

@@ -43,6 +43,9 @@ unsigned ErrorCount = 0;
 
 static bool EnableFatality = true;
 
+// maps filenames to bundle names.
+std::unordered_map<std::string, std::string> BundleNames;
+
 void Print(Color color, const char* fmt, ...)
 {
     va_list args;
@@ -101,9 +104,18 @@ bool ReadYesNo(Color color, const char* prompt)
 #endif
 }
 
-std::string GetBundleName(const char* file)
+void SetBundleName(const char* source_file_name, std::string name)
 {
-    std::string name(GetFileName(file));
+    BundleNames[source_file_name] = name;
+}
+
+std::string GetBundleName(const char* source_file_name)
+{
+    auto it = BundleNames.find(source_file_name);
+    if (it != BundleNames.end())
+        return it->second;
+
+    std::string name(GetFileName(source_file_name));
     if (base::EndsWith(name, ".cpp"))
         name.resize(name.size()-4);
     return name;

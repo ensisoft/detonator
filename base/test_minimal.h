@@ -76,6 +76,8 @@ extern unsigned ErrorCount;
 
 // Produce printed message into some output device such as stdout.
 void Print(Color color, const char* fmt, ...);
+
+void SetBundleName(const char* source_file_name, std::string name);
 // Extract simple bundle name from the filename provided by the __FILE__ macro.
 std::string GetBundleName(const char* source_file_name);
 // Extract simple filename from the filename provided by the __FILE__ macro.
@@ -174,6 +176,15 @@ private:
 // TestBundle::test_main method. A single object is then automatically
 // created and appended to the global list of test bundles to be run.
 #if defined(UNIT_TEST_BUNDLE)
+  #define SET_BUNDLE_NAME(name)                                                     \
+      namespace {                                                                   \
+          struct TestBundleName {                                                   \
+              TestBundleName(std::string bundle_name) {                             \
+                  test::SetBundleName(__FILE__, std::move(bundle_name));            \
+              }                                                                     \
+          } test_bundle_name(name);                                                 \
+      }
+
   #define EXPORT_TEST_MAIN(main)                                                    \
       namespace {                                                                   \
         struct PrivateTestBundle : public test::TestBundle {                        \
@@ -185,6 +196,8 @@ private:
         } test_bundle;                                                              \
       } // namespace
 #else
+  #define SET_BUNDLE_NAME(name)
+
   #define EXPORT_TEST_MAIN(main) main
   // automatically include the definitions for keeping the compilation
   // of existing unit tests simple and without having to explicitly
