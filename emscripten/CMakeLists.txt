@@ -31,6 +31,7 @@ add_executable(UnitTest
     ../base/unit_test/unit_test.cpp
     ../base/unit_test/unit_test_grid.cpp
     ../base/unit_test/unit_test_memory.cpp
+    ../audio/unit_test/unit_test_graph.cpp
     ../game/unit_test/unit_test_entity.cpp
     ../game/unit_test/unit_test_scene.cpp
     ../game/unit_test/unit_test_animation.cpp
@@ -39,7 +40,18 @@ add_executable(UnitTest
     ../base/assert.cpp
     ../base/json.cpp
     ../base/utility.cpp
+    ../base/threadpool.cpp
     ../data/json.cpp
+    ../audio/graph.cpp
+    ../audio/loader.cpp
+    ../audio/player.cpp
+    ../audio/element.cpp
+    ../audio/format.cpp
+    ../audio/mpg123.cpp
+    ../audio/sndfile.cpp
+    ../audio/source.cpp
+    ../audio/proxy.cpp
+    ../audio/openal.cpp
     ../game/scriptvar.cpp
     ../game/animation.cpp
     ../game/actuator.cpp
@@ -51,7 +63,9 @@ target_compile_options(UnitTest PRIVATE -fexceptions)
 target_compile_options(UnitTest PRIVATE -fbracket-depth=1024)
 target_link_options(UnitTest PRIVATE -sWASM)
 target_link_options(UnitTest PRIVATE -sALLOW_MEMORY_GROWTH)
-
+target_link_options(UnitTest PRIVATE -sUSE_MPG123)
+target_link_libraries(UnitTest sndfile)
+target_link_libraries(UnitTest samplerate)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/UnitTest.js"   DESTINATION "${CMAKE_CURRENT_LIST_DIR}/bin")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/UnitTest.wasm" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/bin")
 
