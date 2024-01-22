@@ -195,7 +195,8 @@ add_library(AudioLib
     audio/source.cpp
     audio/player.cpp
     audio/element.cpp
-    audio/graph.cpp)
+    audio/graph.cpp
+    audio/proxy.cpp)
 add_library(DataLib
     data/json.cpp
     data/io.cpp)
