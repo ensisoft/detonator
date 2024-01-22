@@ -22,7 +22,7 @@
 // the type of locking around the audio queue inside the audio/player
 // When the flag is defined the audio queue is a lock free queue
 // otherwise a standard queue with std mutex is used.
-#define AUDIO_USE_LOCK_FREE_QUEUE
+#define AUDIO_LOCK_FREE_QUEUE
 
 #define BASE_LOGGING_ENABLE_LOG
 #define BASE_FORMAT_SUPPORT_GLM
