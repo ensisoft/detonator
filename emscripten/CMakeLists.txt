@@ -70,6 +70,59 @@ target_link_libraries(UnitTest samplerate)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/UnitTest.js"   DESTINATION "${CMAKE_CURRENT_LIST_DIR}/bin")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/UnitTest.wasm" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/bin")
 
+
+add_executable(UnitTestThread
+        ../base/test_minimal.cpp
+        ../base/unit_test/unit_test_thread.cpp
+        ../audio/unit_test/unit_test.cpp
+        ../base/trace.cpp
+        ../base/logging.cpp
+        ../base/assert.cpp
+        ../base/json.cpp
+        ../base/utility.cpp
+        ../base/threadpool.cpp
+        ../audio/loader.cpp
+        ../audio/player.cpp
+        ../audio/element.cpp
+        ../audio/format.cpp
+        ../audio/mpg123.cpp
+        ../audio/sndfile.cpp
+        ../audio/source.cpp
+        ../audio/proxy.cpp
+        ../audio/openal.cpp)
+
+target_compile_definitions(UnitTestThread PRIVATE DETONATOR_UNIT_TEST_THREAD_BUILD)
+
+target_compile_definitions(UnitTestThread PRIVATE UNIT_TEST_BUNDLE)
+target_compile_definitions(UnitTestThread PRIVATE AUDIO_ENABLE_TEST_SOUND)
+target_compile_options(UnitTestThread PRIVATE -pthread)
+target_compile_options(UnitTestThread PRIVATE -O3)
+target_compile_options(UnitTestThread PRIVATE -fexceptions)
+target_compile_options(UnitTestThread PRIVATE -fbracket-depth=1024)
+target_link_options(UnitTestThread PRIVATE -sNO_DISABLE_EXCEPTION_CATCHING)
+target_link_options(UnitTestThread PRIVATE -sWASM)
+target_link_options(UnitTestThread PRIVATE -sALLOW_MEMORY_GROWTH)
+target_link_options(UnitTestThread PRIVATE -pthread)
+
+# You can't just spawn a thread in WASM but the thread (web worker)
+# creation must happen from the main thread's event loop (or something)
+# So if the main thread creates a thread and waits/joins it without ever
+# returning to the browser the application will hang.
+#
+# Using the PTHREAD_POOL_SIZE=x can create some web workers at application
+# start so that the pthread_create (std::thread create) can pick a
+# thread from the pool without having to return to browser's event loop first.
+#
+target_link_options(UnitTestThread PRIVATE -sPTHREAD_POOL_SIZE=10)
+target_link_options(UnitTestThread PRIVATE -sUSE_MPG123)
+target_link_libraries(UnitTestThread sndfile)
+target_link_libraries(UnitTestThread samplerate)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/UnitTestThread.js"        DESTINATION "${CMAKE_CURRENT_LIST_DIR}/bin")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/UnitTestThread.worker.js" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/bin")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/UnitTestThread.wasm"      DESTINATION "${CMAKE_CURRENT_LIST_DIR}/bin")
+
+
 add_executable(GameEngine
     main.cpp
     ../audio/loader.cpp
@@ -136,6 +189,9 @@ add_executable(GameEngine
     ../third_party/stb/stb_image_write.c
     ../third_party/stb/stb_image.c
     )
+
+target_compile_definitions(GameEngine PRIVATE DETONATOR_GAME_ENGINE_BUILD)
+
 target_link_libraries(GameEngine box2d)
 target_link_libraries(GameEngine sndfile)
 target_link_libraries(GameEngine samplerate)

@@ -17,6 +17,7 @@
 #include "config.h"
 
 #include <iostream>
+#include <fstream>
 
 #ifndef ENABLE_AUDIO_TEST_SOURCE
 #  define ENABLE_AUDIO_TEST_SOURCE
@@ -93,6 +94,8 @@ bool LoopUntilEvent(audio::Player& player, Condition cond)
 
 void unit_test_success()
 {
+    TEST_CASE(test::Type::Feature)
+
     audio::Player player(audio::Device::Create("audio_unit_test"));
 
     // single stream
@@ -122,6 +125,8 @@ void unit_test_success()
 
 void unit_test_format_fail()
 {
+    TEST_CASE(test::Type::Feature)
+
     audio::Player player(audio::Device::Create("audio_unit_test"));
 
     // bogus sample rate
@@ -149,6 +154,8 @@ void unit_test_format_fail()
 
 void unit_test_fill_buffer_exception()
 {
+    TEST_CASE(test::Type::Feature)
+
     audio::Player player(audio::Device::Create("audio_unit_test"));
 
     const auto id = player.Play(std::make_unique<TestSource>(44100, 2, 100, 45));
@@ -162,6 +169,8 @@ void unit_test_fill_buffer_exception()
 
 void unit_test_pause_resume()
 {
+    TEST_CASE(test::Type::Feature)
+
     audio::Player player(audio::Device::Create("audio_unit_test"));
 
     {
@@ -179,6 +188,8 @@ void unit_test_pause_resume()
 
 void unit_test_cancel()
 {
+    TEST_CASE(test::Type::Feature)
+
     // cancel stream while in playback
     audio::Player player(audio::Device::Create("audio_unit_test"));
 
@@ -192,6 +203,8 @@ void unit_test_cancel()
 
 void unit_test_shutdown_with_active_streams()
 {
+    TEST_CASE(test::Type::Feature)
+
     for (unsigned i=0; i<100; ++i)
     {
         audio::Player player(audio::Device::Create("audio_unit_test"));
@@ -203,6 +216,8 @@ void unit_test_shutdown_with_active_streams()
 
 void unit_test_thread_proxy()
 {
+    TEST_CASE(test::Type::Feature)
+
     // success.
     {
         auto test = std::make_unique<TestSource>(44100, 2, 10, 11);
@@ -263,6 +278,7 @@ void unit_test_thread_proxy()
         proxy->Shutdown();
     }
 
+
     // exception
     {
         auto test = std::make_unique<TestSource>(44100, 2, 10, 9);
@@ -294,12 +310,25 @@ void unit_test_thread_proxy()
     }
 }
 
+SET_BUNDLE_NAME("unit_test_audio")
+
+EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
-    base::LockedLogger<base::OStreamLogger> logger((base::OStreamLogger(std::cout)));
+#if defined(__EMSCRIPTEN__)
+    base::LockedLogger<base::EmscriptenLogger> logger((base::EmscriptenLogger()));
     base::SetGlobalLog(&logger);
     base::EnableDebugLog(true);
+#else
+    std::ofstream file("unit_test_audio.log");
+    base::LockedLogger<base::OStreamLogger> logger((base::OStreamLogger(file)));
+    base::SetGlobalLog(&logger);
+    base::EnableDebugLog(true);
+#endif
 
+#if defined(__EMSCRIPTEN__)
+    unit_test_thread_proxy();
+#else
     unit_test_success();
     unit_test_format_fail();
     unit_test_fill_buffer_exception();
@@ -307,5 +336,7 @@ int test_main(int argc, char* argv[])
     unit_test_cancel();
     unit_test_shutdown_with_active_streams();
     unit_test_thread_proxy();
+#endif
     return 0;
 }
+) // TEST_MAIN
