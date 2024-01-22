@@ -39,8 +39,10 @@ namespace audio
 {
 
 Player::Player(std::unique_ptr<Device> device)
+#if defined(AUDIO_USE_PLAYER_THREAD)
 #if defined(AUDIO_LOCK_FREE_QUEUE)
   : track_actions_(128)
+#endif
 #endif
 {
 #if defined(AUDIO_USE_PLAYER_THREAD)
