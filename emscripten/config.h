@@ -15,7 +15,7 @@
 // separate std::thread to run the platform specific audio device and
 // to manage the audio playback.
 //
-#define AUDIO_USE_PLAYER_THREAD
+//#define AUDIO_USE_PLAYER_THREAD
 
 
 // When AUDIO_USE_PLAYER_THREAD is defined  use this flag to control
