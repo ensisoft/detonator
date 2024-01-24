@@ -259,6 +259,8 @@ private:
             const auto buffer_size    = bytes_per_ms * buffer_size_ms;
             const auto block_size     = sample_size * source_->GetNumChannels();
 
+            source_->Prepare(buffer_size);
+
             // todo: cache and recycle audio buffers, or maybe
             // we need to cache audio streams since the buffers are per HWAVEOUT ?
             buffers_.resize(5);

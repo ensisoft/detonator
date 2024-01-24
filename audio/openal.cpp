@@ -183,6 +183,12 @@ private:
             if (!valid_channels || !valid_format || !valid_rate)
                 throw std::runtime_error("invalid OpenAL audio format");
 
+            const auto buffer_size = audio::Source::BuffSize(mSource->GetFormat(),
+                                                             mSource->GetNumChannels(),
+                                                             mSource->GetRateHz(),
+                                                             buffer_duration);
+            mSource->Prepare(buffer_size);
+
             CallOpenAL(alGenSources, 1, &mHandle);
             CallOpenAL(alGenBuffers, NumBuffers, &mBuffers[0]);
             DEBUG("OpenAL stream source handle. [handle=%1]", mHandle);
