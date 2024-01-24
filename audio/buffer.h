@@ -166,7 +166,7 @@ namespace audio
         virtual size_t GetByteSize() const override
         { return mSize; }
         virtual size_t GetCapacity() const override
-        { return mSize - sizeof(canary); }
+        { return mBuffer.size() - sizeof(canary); }
         virtual void SetByteSize(size_t bytes) override
         {
             const auto limit = mBuffer.size() - sizeof(canary);
