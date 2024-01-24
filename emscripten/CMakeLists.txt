@@ -228,6 +228,11 @@ target_link_options(GameEngine PRIVATE -sFULL_ES3)
 
 # uncomment this in order to enable threading
 target_link_options(GameEngine PRIVATE -pthread)
+# See the unit test comments about thread pool creation
+# and the limitations.
+# the number of threads here needs to match the code's
+# expectation of threads!
+target_link_options(GameEngine PRIVATE -sPTHREAD_POOL_SIZE=3)
 
 # emscripten cache (when emscripten is installed from github)
 # seems to be under /home/user/emsdk/upstream/emscripten/cache
