@@ -151,12 +151,14 @@ private:
             pa_stream_set_write_callback(stream_, write_callback, this);
             pa_stream_set_underflow_callback(stream_, underflow_callback, this);
 
-            const auto sample_size    = Source::ByteSize(source_->GetFormat());
-            const auto samples_per_ms = source_->GetRateHz() / 1000u;
-            const auto bytes_per_ms   = source_->GetNumChannels() * sample_size * samples_per_ms;
+            const auto buffer_size = Source::BuffSize(source_->GetFormat(),
+                                                      source_->GetNumChannels(),
+                                                      source_->GetRateHz(),
+                                                      buffer_size_ms);
+            source_->Prepare(buffer_size);
 
             pa_buffer_attr buffering;
-            buffering.maxlength = bytes_per_ms * buffer_size_ms;
+            buffering.maxlength = buffer_size;
             buffering.prebuf = -1;
             buffering.minreq = -1;
             buffering.tlength = -1;
