@@ -25,65 +25,106 @@
 namespace audio
 {
 SourceThreadProxy::SourceThreadProxy(std::unique_ptr<Source> source)
-    : mSampleRate(source->GetRateHz())
-    , mChannels(source->GetNumChannels())
-    , mFormat(source->GetFormat())
-    , mName(source->GetName())
-    , mSource(std::move(source))
+  : mSource(std::move(source))
 {}
 SourceThreadProxy::~SourceThreadProxy()
 {
     ASSERT(!mThread);
+    ASSERT(!mSource);
 }
 unsigned SourceThreadProxy::GetRateHz() const noexcept
-{ return mSampleRate; }
+{ return mSource->GetRateHz(); }
 unsigned SourceThreadProxy::GetNumChannels() const noexcept
-{ return mChannels; }
+{ return mSource->GetNumChannels(); }
 Source::Format SourceThreadProxy::GetFormat() const noexcept
-{ return mFormat; }
+{ return mSource->GetFormat(); }
 std::string SourceThreadProxy::GetName() const noexcept
-{ return mName; }
+{ return mSource->GetName(); }
 void SourceThreadProxy::Prepare(unsigned int buffer_size)
 {
-    std::vector<char> buffer(buffer_size);
-    mBufferSize = buffer_size;
-    mEmptyQueue.push(std::move(buffer));
+    ASSERT(!mThread);
+    ASSERT(!mBuffers.size());
+
+    // todo: maybe use multiple buffers ?
+    // But how about latency ?
+    // And have to deal with the partial buffers so that the
+    // data is stored somewhere temporarily
+
+    // alternative idea, use a single ring buffer
+
+    mBuffers.resize(1);
+    for (auto& buff : mBuffers)
+    {
+        buff.Resize(buffer_size);
+        mEmptyQueue.push(&buff);
+    }
+
     mThread.reset(new std::thread(&SourceThreadProxy::ThreadLoop, this));
 }
-unsigned SourceThreadProxy::FillBuffer(void* buff, unsigned max_bytes)
+unsigned SourceThreadProxy::FillBuffer(void* device_buff, unsigned max_bytes)
 {
-    std::unique_lock<decltype(mMutex)> lock(mMutex);
-    // if data isn't yet available we're in trouble
-    if (mFillQueue.empty())
+    VectorBuffer* buffer = nullptr;
+    while (!buffer)
     {
-        for (;;)
+        std::unique_lock<decltype(mMutex)> lock(mMutex);
+        if (mException)
+            std::rethrow_exception(mException);
+
+        // if data isn't yet available we're in trouble
+        // should we just return here ?
+        if (!mFillQueue.empty())
         {
+            buffer = mFillQueue.front();
+            mFillQueue.pop();
+        }
+
+        if (!buffer)
+        {
+            //DEBUG("Argh, no PCM buffer from source thread!");
             mCondition.wait(lock);
-            if (!mFillQueue.empty() || mException)
-                break;
         }
     }
-    if (mException)
-        std::rethrow_exception(mException);
 
-    auto& buffer = mFillQueue.front();
-
-    const auto bytes_in_buff = (unsigned)buffer.size();
+    const auto bytes_in_buff = (unsigned)buffer->GetByteSize();
     const auto bytes_to_copy = std::min(max_bytes, bytes_in_buff);
-    std::memcpy(buff, &buffer[0], bytes_to_copy);
+    std::memcpy(device_buff, buffer->GetPtr(), bytes_to_copy);
 
-    if (bytes_to_copy == bytes_in_buff)
+    if (max_bytes < bytes_in_buff)
     {
-        mEmptyQueue.push(std::move(buffer));
-        mFillQueue.pop();
+        // if the thread produced more data than was consumed we shift
+        // the remaining data in the buffer to the start and let the
+        // thread fill more to the buffer end.
+
+        const auto bytes_left_over = bytes_in_buff - bytes_to_copy;
+        char* ptr = (char*)buffer->GetPtr();
+        std::memmove(ptr, ptr+bytes_to_copy, bytes_left_over);
+        buffer->SetByteSize(bytes_left_over);
+    }
+    else if (max_bytes > bytes_in_buff)
+    {
+        // if the device wanted more PCM than the thread has produced
+        // log a warning for now.
+        WARN("Device requested more PCM data than audio source thread has produced. [out=%1 b, avail=%2 b]",
+             max_bytes, bytes_in_buff);
+        // should have copied everything we have produced.
+        ASSERT(bytes_to_copy == bytes_in_buff);
+
+        buffer->Clear();
+    }
+    else if (max_bytes == bytes_in_buff)
+    {
+        buffer->Clear();
+    }
+
+    // enqueue the buffer back for filling
+    {
+        std::unique_lock<decltype(mMutex)> lock(mMutex);
+        mEmptyQueue.push(buffer);
         mCondition.notify_one();
     }
-    else
-    {
-        const auto bytes_left = bytes_in_buff - bytes_to_copy;
-        std::memmove(&buffer[0], &buffer[bytes_to_copy], bytes_left);
-        buffer.resize(bytes_left);
-    }
+
+    //DEBUG("Got audio buffer from source thread. [bytes=%1 b]", bytes_to_copy);
+
     return bytes_to_copy;
 }
 
@@ -95,13 +136,23 @@ bool SourceThreadProxy::HasMore(std::uint64_t num_bytes_read) const noexcept
 
 void SourceThreadProxy::Shutdown() noexcept
 {
+    if (mThread)
     {
-        std::unique_lock<decltype(mMutex)> lock(mMutex);
-        mShutdown = true;
-        mCondition.notify_one();
+        {
+            std::unique_lock<decltype(mMutex)> lock(mMutex);
+            mShutdown = true;
+            mCondition.notify_one();
+        }
+        mThread->join();
+        mThread.reset();
+        DEBUG("Joined audio source thread. [name='%1']", mSource->GetName());
     }
-    mThread->join();
-    mThread.reset();
+
+    if (mSource)
+    {
+        mSource->Shutdown();
+        mSource.reset();
+    }
 }
 void SourceThreadProxy::RecvCommand(std::unique_ptr<Command> cmd) noexcept
 {
@@ -123,15 +174,17 @@ std::unique_ptr<Event> SourceThreadProxy::GetEvent() noexcept
 }
 void SourceThreadProxy::ThreadLoop()
 {
-    DEBUG("Hello from audio source proxy thread.");
+    DEBUG("Hello from audio source thread. [name='%1']", mSource->GetName());
     std::uint64_t bytes_read = 0;
     try
     {
         for (;;)
         {
-            std::vector<char> buffer;
+            VectorBuffer* buffer = nullptr;
+            while (!buffer)
             {
                 std::unique_lock<decltype(mMutex)> lock(mMutex);
+
                 if (mShutdown)
                     return;
 
@@ -142,40 +195,49 @@ void SourceThreadProxy::ThreadLoop()
                     mCommands.pop();
                     mSource->RecvCommand(std::move(cmd));
                 }
-                while (auto event = mSource->GetEvent())
+
+                if (!mEmptyQueue.empty())
                 {
-                    mEvents.push(std::move(event));
-                }
-                if (mEmptyQueue.empty())
-                {
-                    for (;;)
-                    {
-                        mCondition.wait(lock);
-                        if (mShutdown)
-                            return;
-                        if (!mEmptyQueue.empty())
-                            break;
-                    }
-                    buffer = std::move(mEmptyQueue.front());
+                    buffer = mEmptyQueue.front();
                     mEmptyQueue.pop();
                 }
+
+                if (!buffer)
+                {
+                    mCondition.wait(lock);
+                }
             }
-            buffer.resize(mBufferSize);
-            const auto ret = mSource->FillBuffer(&buffer[0], buffer.size());
+
+            const auto buffer_size  = buffer->GetCapacity();
+            const auto buffer_used  = buffer->GetByteSize();
+            const auto buffer_avail = buffer_size - buffer_used;
+            auto* ptr = (char*)buffer->GetPtr() + buffer_used;
+
+            const auto ret = mSource->FillBuffer(ptr, buffer_avail);
+            ASSERT(ret <= buffer_avail);
+            ASSERT(ret + buffer_used <= buffer_size);
+
+            buffer->SetByteSize(buffer_used + ret);
+
             bytes_read += ret;
             {
                 std::unique_lock<decltype(mMutex)> lock(mMutex);
 
-                mFillQueue.push(std::move(buffer));
+                mFillQueue.push(buffer);
                 mCondition.notify_one();
                 if (!mSource->HasMore(bytes_read))
                 {
                     mDone = true;
                     break;
                 }
+
+                while (auto event = mSource->GetEvent())
+                {
+                    mEvents.push(std::move(event));
+                }
             }
         }
-        DEBUG("Audio source thread exiting...");
+        DEBUG("Audio source thread exit. [name='%1']", mSource->GetName());
     }
     catch (const std::exception& e)
     {

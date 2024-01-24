@@ -34,6 +34,7 @@
 
 #include "base/assert.h"
 #include "audio/command.h"
+#include "audio/buffer.h"
 
 namespace audio
 {
@@ -132,19 +133,15 @@ namespace audio
     private:
         void ThreadLoop();
     private:
-        const unsigned mSampleRate = 0;
-        const unsigned mChannels = 0;
-        const Format mFormat = Format::Float32;
-        const std::string mName;
         mutable std::mutex mMutex;
-        unsigned mBufferSize = 0;
         std::unique_ptr<Source> mSource;
         std::unique_ptr<std::thread> mThread;
         std::queue<std::unique_ptr<Event>> mEvents;
         std::queue<std::unique_ptr<Command>> mCommands;
         std::condition_variable mCondition;
-        std::queue<std::vector<char>> mEmptyQueue;
-        std::queue<std::vector<char>> mFillQueue;
+        std::queue<VectorBuffer*> mEmptyQueue;
+        std::queue<VectorBuffer*> mFillQueue;
+        std::vector<VectorBuffer> mBuffers;
         std::exception_ptr mException;
         bool mShutdown = false;
         bool mDone = false;

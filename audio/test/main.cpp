@@ -47,6 +47,7 @@ int main(int argc, char* argv[])
     bool pcm_24bit_files = false;
     bool test_sine = false;
     bool test_graph = false;
+    bool source_thread = false;
     for (int i=1; i<argc; ++i)
     {
         if (!std::strcmp(argv[i], "--ogg"))
@@ -73,6 +74,8 @@ int main(int argc, char* argv[])
             format = audio::Source::Format::Int32;
         else if (!std::strcmp(argv[i], "--file"))
             file = argv[++i];
+        else if (!std::strcmp(argv[i], "--thread"))
+            source_thread = true;
     }
 
     if (!(flac_files || ogg_files || mp3_files || pcm_8bit_files || pcm_16bit_files || pcm_24bit_files || test_sine || test_graph) && file.empty())
@@ -87,6 +90,7 @@ int main(int argc, char* argv[])
             "\t--24bit\t\tTest 24bit PCM encoded files.\n"
             "\t--sine\t\tTest procedural audio (sine wave).\n"
             "\t--graph\t\tTest audio graph.\n"
+            "\t--thread\t\tTest threaded audio source.\n"
             "\t--loops\t\tNumber of loops to use to play each file.\n"
             "\t--file\t\tA specific test file to add\n");
         std::printf("Have a good day.\n");
@@ -97,7 +101,10 @@ int main(int argc, char* argv[])
     base::SetGlobalLog(&logger);
     base::EnableDebugLog(true);
 
-    audio::Player player(audio::Device::Create("audio_test"));
+    auto device = audio::Device::Create("audio_test");
+    device->SetBufferSize(10); // milliseconds
+    audio::Player player(std::move(device));
+
     if (test_sine)
     {
         INFO("Playing procedural sine audio for 10 seconds.");
@@ -147,9 +154,34 @@ int main(int argc, char* argv[])
         for (const auto& str : desc)
             DEBUG(str);
 
-        const auto id = player.Play(std::move(graph));
+        std::unique_ptr<audio::Source> source;
+        if (source_thread)
+        {
+            // put the audio graph into a threaded proxy source.
+            // this test is better when using the main thread to run
+            // the audio device. then it makes more sense to put the
+            // audio source in it's own thread
+            // see the audio/test/config.h for the build flag to
+            // enable/disable audio player thread
+            source = std::make_unique<audio::SourceThreadProxy>(std::move(graph));
+        }
+        else
+        {
+            source = std::move(graph);
+        }
+
+        const auto id = player.Play(std::move(source));
+
+#if defined(AUDIO_USE_PLAYER_THREAD)
         std::this_thread::sleep_for(std::chrono::seconds(10));
         player.Cancel(id);
+#else
+        for (unsigned i=0; i<1000*10; ++i)
+        {
+            player.ProcessOnce();
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+#endif
     }
 
     std::vector<std::string> test_files;
@@ -258,14 +290,32 @@ int main(int argc, char* argv[])
         INFO("Testing audio file. [file='%1']", file);
         base::FlushGlobalLog();
 
-        auto source = std::make_unique<audio::AudioFile>(file, "test", format);
-        if (!source->Open())
+        std::unique_ptr<audio::Source> source;
+
+        auto file_source = std::make_unique<audio::AudioFile>(file, "test", format);
+        if (!file_source->Open())
         {
             ERROR("Failed to open audio file. [file='%1']", file);
             continue;
         }
-        source->SetLoopCount(loops);
+        file_source->SetLoopCount(loops);
+
+        if (source_thread)
+        {
+            // this test is better when using the main thread to run
+            // the audio device. then it makes more sense to put the
+            // audio source in it's own thread
+            // see the audio/test/config.h for the build flag to
+            // enable/disable audio player thread
+            source = std::make_unique<audio::SourceThreadProxy>(std::move(file_source));
+        }
+        else
+        {
+            source = std::move(file_source);
+        }
+
         const auto id = player.Play(std::move(source));
+
         DEBUG("New audio track. [id=%1].", id);
 
         bool track_done = false;
@@ -275,7 +325,7 @@ int main(int argc, char* argv[])
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
 #else
             player.ProcessOnce();
-            std::this_thread::sleep_for(std::chrono::milliseconds(16));
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
 #endif
             audio::Player::Event e;
             if (!player.GetEvent(&e))

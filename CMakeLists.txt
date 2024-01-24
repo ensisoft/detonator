@@ -667,6 +667,7 @@ add_executable(audio_test
     audio/player.cpp
     audio/element.cpp
     audio/graph.cpp
+    audio/proxy.cpp
     audio/test/main.cpp
 )
 target_include_directories(audio_test PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/test")
