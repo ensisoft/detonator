@@ -134,6 +134,7 @@ add_executable(GameEngine
     ../audio/sndfile.cpp
     ../audio/openal.cpp
     ../audio/source.cpp
+    ../audio/proxy.cpp
     ../base/assert.cpp
     ../base/logging.h
     ../base/logging.cpp
@@ -232,7 +233,7 @@ target_link_options(GameEngine PRIVATE -pthread)
 # and the limitations.
 # the number of threads here needs to match the code's
 # expectation of threads!
-target_link_options(GameEngine PRIVATE -sPTHREAD_POOL_SIZE=3)
+target_link_options(GameEngine PRIVATE -sPTHREAD_POOL_SIZE=4)
 
 # emscripten cache (when emscripten is installed from github)
 # seems to be under /home/user/emsdk/upstream/emscripten/cache

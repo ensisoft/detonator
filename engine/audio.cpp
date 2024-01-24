@@ -59,29 +59,40 @@ void AudioEngine::Start()
     audio::AudioGraph::PrepareParams p;
     p.enable_pcm_caching = false;
 
-    auto effect_graph  = std::make_unique<audio::AudioGraph>("FX");
-    auto* effect_gain  = (*effect_graph)->AddElement(audio::Gain("gain", 1.0f));
-    auto* effect_mixer = (*effect_graph)->AddElement(audio::MixerSource("mixer", mFormat));
-    effect_mixer->SetNeverDone(true);
-    ASSERT((*effect_graph)->LinkElements("mixer", "out", "gain", "in"));
-    ASSERT((*effect_graph)->LinkGraph("gain", "out"));
-    ASSERT(effect_graph->Prepare(*mLoader, p));
-
-    auto music_graph = std::make_unique<audio::AudioGraph>("Music");
-    auto* music_gain  = (*music_graph)->AddElement(audio::Gain("gain", 1.0f));
-    auto* music_mixer = (*music_graph)->AddElement(audio::MixerSource("mixer", mFormat));
-    music_mixer->SetNeverDone(true);
-    ASSERT((*music_graph)->LinkElements("mixer", "out", "gain", "in"));
-    ASSERT((*music_graph)->LinkGraph("gain", "out"));
-    ASSERT(music_graph->Prepare(*mLoader, p));
-
     auto device = audio::Device::Create(mName.c_str());
     device->SetBufferSize(mBufferSize);
     mPlayer = std::make_unique<audio::Player>(std::move(device));
-    mEffectGraphId = mPlayer->Play(std::move(effect_graph));
-    mMusicGraphId  = mPlayer->Play(std::move(music_graph));
-    DEBUG("Audio effect graph is ready. [id=%1]", mEffectGraphId);
-    DEBUG("Audio music graph is ready. [id=%1]", mMusicGraphId);
+
+    {
+        auto effect_graph = std::make_unique<audio::AudioGraph>("FX");
+        auto* effect_gain = (*effect_graph)->AddElement(audio::Gain("gain", 1.0f));
+        auto* effect_mixer = (*effect_graph)->AddElement(audio::MixerSource("mixer", mFormat));
+        effect_mixer->SetNeverDone(true);
+        ASSERT((*effect_graph)->LinkElements("mixer", "out", "gain", "in"));
+        ASSERT((*effect_graph)->LinkGraph("gain", "out"));
+        ASSERT(effect_graph->Prepare(*mLoader, p));
+
+        auto proxy = std::make_unique<audio::SourceThreadProxy>(std::move(effect_graph));
+
+        mEffectGraphId = mPlayer->Play(std::move(proxy));
+        DEBUG("Audio effect graph is ready. [id=%1]", mEffectGraphId);
+    }
+
+    {
+
+        auto music_graph = std::make_unique<audio::AudioGraph>("Music");
+        auto* music_gain = (*music_graph)->AddElement(audio::Gain("gain", 1.0f));
+        auto* music_mixer = (*music_graph)->AddElement(audio::MixerSource("mixer", mFormat));
+        music_mixer->SetNeverDone(true);
+        ASSERT((*music_graph)->LinkElements("mixer", "out", "gain", "in"));
+        ASSERT((*music_graph)->LinkGraph("gain", "out"));
+        ASSERT(music_graph->Prepare(*mLoader, p));
+
+        auto proxy = std::make_unique<audio::SourceThreadProxy>(std::move(music_graph));
+
+        mMusicGraphId = mPlayer->Play(std::move(proxy));
+        DEBUG("Audio music graph is ready. [id=%1]", mMusicGraphId);
+    }
 #endif
 }
 
