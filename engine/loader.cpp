@@ -331,6 +331,27 @@ private:
 };
 #endif
 
+class AudioBuffer : public audio::SourceStream
+{
+public:
+    AudioBuffer(const std::string& filename, std::vector<char>&& data)
+      : mFileName(filename)
+      , mFileData(std::move(data))
+    {}
+    virtual void Read(void* ptr, uint64_t offset, uint64_t bytes) const override
+    {
+        ASSERT(offset + bytes <= mFileData.size());
+        std::memcpy(ptr, &mFileData[offset], bytes);
+    }
+    virtual std::uint64_t GetSize() const override
+    { return mFileData.size(); }
+    virtual std::string GetName() const override
+    { return mFileName; }
+private:
+    const std::string mFileName;
+    const std::vector<char> mFileData;
+};
+
 class AudioStream : public audio::SourceStream
 {
 public:
@@ -448,6 +469,12 @@ public:
     virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri,
         AudioIOStrategy strategy, bool enable_file_caching) const override
     {
+        // always cache on this GARBAGE PLATFORM since the filesystem
+        // is an absolute JOKE.
+#if __EMSCRIPTEN__
+            enable_file_caching = true;
+#endif
+
         const auto& filename = ResolveURI(uri);
         if (enable_file_caching)
         {
@@ -455,6 +482,20 @@ public:
             if (it != mAudioStreamCache.end())
                 return it->second;
         }
+
+#if __EMSCRIPTEN__
+        {
+            std::vector<char> buffer;
+            if (!LoadFileBuffer(filename, &buffer))
+                return nullptr;
+
+            auto buff = std::make_shared<AudioBuffer>(filename, std::move(buffer));
+            if (enable_file_caching)
+                mAudioStreamCache[filename] = buff;
+            return buff;
+        }
+#endif
+
         // if the requested IO strategy is default then see what
         // default actually means based on the configured setting.
         if (strategy == AudioIOStrategy::Default)
@@ -469,35 +510,33 @@ public:
                 strategy = AudioIOStrategy ::Stream;
             else BUG("Unhandled default audio IO strategy.");
         }
-#if defined(WEBASSEMBLY)
+
         if (strategy == AudioIOStrategy::Automatic)
         {
+#if defined(WEBASSEMBLY)
             auto map = std::make_shared<AudioFileMap>(filename);
             if (!map->Map())
                 return nullptr;
             if (enable_file_caching)
                 mAudioStreamCache[filename] = map;
             return map;
-        }
 #elif defined(POSIX_OS)
-      if (strategy == AudioIOStrategy::Automatic)
-      {
-          auto stream = std::make_shared<AudioStream>(filename);
-          if (!stream->Open())
-              return nullptr;
-          return stream;
-      }
+            // open using ifstream. since the stream is stateful (read position)
+            // sharing cannot be done right now.
+            auto stream = std::make_shared<AudioStream>(filename);
+            if (!stream->Open())
+                return nullptr;
+            return stream;
 #elif defined(WINDOWS_OS)
-      if (strategy == AudioIOStrategy::Automatic)
-      {
-          auto stream = std::make_shared<AudioStream>(filename);
-          if (!stream->Open())
-              return nullptr;
-          return stream;
-      }
+            // open using ifstream. since the stream is stateful (read position)
+            // sharing cannot be done right now.
+            auto stream = std::make_shared<AudioStream>(filename);
+            if (!stream->Open())
+                return nullptr;
+            return stream;
 #endif
-
-        if (strategy == AudioIOStrategy::Memmap)
+        }
+        else if (strategy == AudioIOStrategy::Memmap)
         {
             auto map = std::make_shared<AudioFileMap>(filename);
             if (!map->Map())
@@ -506,11 +545,10 @@ public:
                 mAudioStreamCache[filename] = map;
             return map;
         }
-
-        // open using ifstream. since the stream is stateful (read position)
-        // sharing cannot be done right now.
-        if (strategy == AudioIOStrategy::Stream)
+        else if (strategy == AudioIOStrategy::Stream)
         {
+            // open using ifstream. since the stream is stateful (read position)
+            // sharing cannot be done right now.
             auto stream = std::make_shared<AudioStream>(filename);
             if (!stream->Open())
                 return nullptr;
@@ -570,7 +608,7 @@ public:
     {
         DEBUG("Preloading file buffers.");
         const char* dirs[] = {
-          "fonts", "lua", "textures", "ui/style", "shaders/es2"
+          "audio", "fonts", "lua", "textures", "ui/style", "shaders/es2"
         };
         size_t bytes_loaded = 0;
         for (size_t i=0; i<base::ArraySize(dirs); ++i)
