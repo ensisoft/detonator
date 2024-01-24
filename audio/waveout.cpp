@@ -281,6 +281,8 @@ private:
 
             ret = waveOutClose(handle_);
             ASSERT(ret == MMSYSERR_NOERROR);
+
+            source_->Shutdown();
         }
 
         virtual Stream::State GetState() const override

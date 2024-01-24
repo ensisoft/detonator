@@ -197,6 +197,7 @@ private:
         {
             AL_CALL(alDeleteSources(1, &mHandle));
             AL_CALL(alDeleteBuffers(NumBuffers, mBuffers));
+            mSource->Shutdown();
             DEBUG("OpenAL stream delete. [handle=%1]", mHandle);
         }
         virtual State GetState() const override

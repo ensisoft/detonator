@@ -146,7 +146,7 @@ namespace audio
     class VectorBuffer : public Buffer
     {
     public:
-        VectorBuffer(size_t capacity)
+        explicit VectorBuffer(size_t capacity = 0)
         { Resize(capacity); }
        ~VectorBuffer()
         {
@@ -179,12 +179,19 @@ namespace audio
         { mInfos.push_back(tag); }
         virtual const InfoTag& GetInfoTag(size_t index) const override
         { return base::SafeIndex(mInfos, index); }
-    private:
+
         void Resize(size_t bytes)
         {
             const auto actual = bytes + sizeof(canary);
             mBuffer.resize(actual);
             std::memcpy(&mBuffer[bytes], &canary, sizeof(canary));
+        }
+
+        inline void Clear() noexcept
+        {
+            mSize = 0;
+            mFormat = {};
+            mInfos.clear();
         }
     private:
         static constexpr auto canary = 0xF4F5ABCD;
