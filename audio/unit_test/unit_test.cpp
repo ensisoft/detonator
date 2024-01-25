@@ -24,6 +24,7 @@
 #endif
 
 #include "base/test_minimal.h"
+#include "base/test_help.h"
 #include "base/logging.h"
 #include "base/math.h"
 #include "audio/source.h"
@@ -310,22 +311,8 @@ void unit_test_thread_proxy()
     }
 }
 
-SET_BUNDLE_NAME("unit_test_audio")
-
-EXPORT_TEST_MAIN(
-int test_main(int argc, char* argv[])
+void run_tests()
 {
-#if defined(__EMSCRIPTEN__)
-    base::LockedLogger<base::EmscriptenLogger> logger((base::EmscriptenLogger()));
-    base::SetGlobalLog(&logger);
-    base::EnableDebugLog(true);
-#else
-    std::ofstream file("unit_test_audio.log");
-    base::LockedLogger<base::OStreamLogger> logger((base::OStreamLogger(file)));
-    base::SetGlobalLog(&logger);
-    base::EnableDebugLog(true);
-#endif
-
 #if defined(__EMSCRIPTEN__)
     unit_test_thread_proxy();
 #else
@@ -337,6 +324,18 @@ int test_main(int argc, char* argv[])
     unit_test_shutdown_with_active_streams();
     unit_test_thread_proxy();
 #endif
+}
+
+SET_BUNDLE_NAME("unit_test_audio")
+
+EXPORT_TEST_MAIN(
+int test_main(int argc, char* argv[])
+{
+    test::TestLogger logger("unit_test_audio.log");
+
+    // helper to avoid having to have #if ... inside this
+    // macro since msvs drowns in its own shit with this construct
+    run_tests();
     return 0;
 }
 ) // TEST_MAIN

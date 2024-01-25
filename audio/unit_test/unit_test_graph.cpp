@@ -22,6 +22,7 @@
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
+#include "base/test_help.h"
 #include "base/logging.h"
 #include "data/json.h"
 #include "audio/element.h"
@@ -792,17 +793,7 @@ SET_BUNDLE_NAME("unit_test_audio_graph")
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
-
-#if defined(__EMSCRIPTEN__)
-    base::EmscriptenLogger logger;
-    base::SetGlobalLog(&logger);
-    base::EnableDebugLog(true);
-#else
-    std::ofstream file("unit_test_audio_graph.log");
-    base::OStreamLogger logger(file);
-    base::SetGlobalLog(&logger);
-    base::EnableDebugLog(true);
-#endif
+    test::TestLogger logger("unit_test_audio_graph.log");
 
     unit_test_basic();
     unit_test_prepare_topologies();
