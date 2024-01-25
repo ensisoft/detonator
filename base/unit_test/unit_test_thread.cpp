@@ -72,6 +72,7 @@ void unit_test_pool()
         base::ThreadTask::Affinity::AnyThread
     };
 
+    std::printf("\n");
     for (int i=0; i<1000; ++i)
     {
         const auto aff = affinity[i % 1];
@@ -87,7 +88,13 @@ void unit_test_pool()
 
         threads.ExecuteMainThread();
 
+#if !defined(__EMSCRIPTEN__)
+        const auto done = (float)i / (float)1000;
+        const auto done_percent = unsigned(done * 100.0);
+        std::printf("\rTesting ...%d%%", done_percent);
+#endif
     }
+    std::printf("\n");
     threads.WaitAll();
     threads.Shutdown();
 
