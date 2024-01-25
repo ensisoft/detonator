@@ -282,7 +282,11 @@ private:
             ret = waveOutClose(handle_);
             ASSERT(ret == MMSYSERR_NOERROR);
 
-            source_->Shutdown();
+            // we should no longer have source here because
+            // either the stream finished and the source was removed
+            // from the stream (GetFinishedSource) OR
+            // the stream was cancelled
+            ASSERT(source_ == nullptr);
         }
 
         virtual Stream::State GetState() const override
@@ -336,21 +340,22 @@ private:
 
         virtual void Pause() override
         {
-            waveOutPause(handle_);
             DEBUG("Waveout stream pause. [name='%1']", source_->GetName());
+            waveOutPause(handle_);
         }
 
         virtual void Resume() override
         {
-            waveOutRestart(handle_);
             DEBUG("Waveout stream resume. [name='%1']", source_->GetName());
+            waveOutRestart(handle_);
         }
 
         virtual void Cancel() override
         {
+            DEBUG("Waveout stream cancel. [name='%1']", source_->GetName());
             // anything that needs to be done?
             source_->Shutdown();
-            DEBUG("Waveout stream cancel. [name='%1']", source_->GetName());
+            source_.reset();
         }
 
         virtual void SendCommand(std::unique_ptr<Command> cmd) override
