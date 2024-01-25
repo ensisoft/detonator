@@ -98,21 +98,9 @@ void unit_test_pool()
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
-#if defined(__EMSCRIPTEN__)
-    base::LockedLogger<base::EmscriptenLogger> logger((base::EmscriptenLogger()));
-    base::SetGlobalLog(&logger);
-    base::EnableDebugLog(true);
-#else
-    std::ofstream file("unit_test_threadpool.log");
-    base::LockedLogger<base::OStreamLogger> logger((base::OStreamLogger(file)));
-    base::SetGlobalLog(&logger);
-    base::EnableDebugLog(true);
-#endif
+    test::TestLogger logger("unit_test_thread_pool.log");
 
     unit_test_pool();
-
-    base::SetGlobalLog(nullptr);
-
     return 0;
 }
 ) // TEST_MAIN

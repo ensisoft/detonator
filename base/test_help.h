@@ -44,6 +44,7 @@
 #include "base/types.h"
 #include "base/rotator.h"
 #include "base/utility.h"
+#include "base/logging.h"
 
 #include "base/snafu.h"
 
@@ -347,6 +348,30 @@ static void PerfTest(std::string name, unsigned iterations, Callable callable)
     WritePerformanceRecord(test::GetPerformanceRecordFileName(), records);
 
 }
+
+class TestLogger
+{
+public:
+    explicit TestLogger(const char* file)
+    {
+#if defined(__EMSCRIPTEN__)
+        using LoggerType = base::LockedLogger<base::EmscriptenLogger>;
+        mLogger = std::make_unique<LoggerType>((base::EmscriptenLogger()));
+        base::SetGlobalLog(mLogger.get());
+#else
+        using LoggerType = base::LockedLogger<base::OStreamLogger>;
+        std::ofstream stream(file);
+        mLogger = std::make_unique<LoggerType>((base::OStreamLogger(stream)));
+#endif
+        base::EnableDebugLog(true);
+    }
+   ~TestLogger()
+   {
+       base::SetGlobalLog(nullptr);
+   }
+private:
+    std::unique_ptr<base::Logger> mLogger;
+};
 
 } // namespace
 
