@@ -197,7 +197,11 @@ private:
         {
             AL_CALL(alDeleteSources(1, &mHandle));
             AL_CALL(alDeleteBuffers(NumBuffers, mBuffers));
-            mSource->Shutdown();
+            // we should no longer have source here because
+            // either the stream finished and the source was removed
+            // from the stream (GetFinishedSource) OR
+            // the stream was cancelled
+            ASSERT(mSource == nullptr);
             DEBUG("OpenAL stream delete. [handle=%1]", mHandle);
         }
         virtual State GetState() const override
@@ -266,8 +270,13 @@ private:
         }
         virtual void Cancel() override
         {
+            if (mPlaying)
+            {
+                AL_CALL(alSourceStop(mHandle));
+            }
+            mSource->Shutdown();
+            mSource.reset();
             mPlaying = false;
-            AL_CALL(alSourceStop(mHandle));
         }
         virtual void SendCommand(std::unique_ptr<audio::Command> cmd) override
         {
