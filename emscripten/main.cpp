@@ -217,6 +217,18 @@ public:
         INFO("http://www.ensisoft.com");
         INFO("https://github.com/ensisoft/detonator");
 
+#if defined(AUDIO_LOCK_FREE_QUEUE)
+        INFO("AUDIO_LOCK_FREE_QUEUE=1");
+#endif
+
+#if defined(AUDIO_USE_PLAYER_THREAD)
+        INFO("AUDIO_USE_PLAYER_THREAD=1");
+#endif
+
+#if defined(AUDIO_CHECK_OPENAL)
+        INFO("AUDIO_CHECK_OPENAL=1");
+#endif
+
         std::string content;
         std::string title;
         std::string identifier;
