@@ -1100,7 +1100,7 @@ AudioWidget::AudioWidget(app::Workspace* workspace)
     // to update the widget UI if needed, such as change the icon/window title
     // and tick the workspace for periodic cleanup and stuff.
     QObject::connect(&mRefreshTimer, &QTimer::timeout, this, &AudioWidget::RefreshTimer);
-    mRefreshTimer.setInterval(10);
+    mRefreshTimer.setInterval(5);
 
     PopulateFromEnum<audio::SampleType>(mUI.sampleType);
     PopulateFromEnum<audio::Channels>(mUI.channels);
@@ -1498,7 +1498,13 @@ void AudioWidget::on_actionPlay_triggered()
 
         const auto& port = (*source)->GetOutputPort(0);
         NOTE("Graph output %1", port.GetFormat());
+
+#if !defined(AUDIO_USE_PLAYER_THREAD)
+        auto proxy = std::make_unique<audio::SourceThreadProxy>(std::move(source));
+        mCurrentId = mPlayer->Play(std::move(proxy));
+#else
         mCurrentId = mPlayer->Play(std::move(source));
+#endif
     }
     else
     {
@@ -1905,7 +1911,12 @@ void AudioWidget::AddElementAction()
 void AudioWidget::RefreshTimer()
 {
     if (mCurrentId && mPlayer)
+    {
+#if !defined(AUDIO_USE_PLAYER_THREAD)
+        mPlayer->ProcessOnce();
+#endif
         mPlayer->AskProgress(mCurrentId);
+    }
 
     emit RefreshRequest();
 }
