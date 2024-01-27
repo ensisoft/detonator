@@ -41,6 +41,10 @@
 #  include <signal.h>
 #endif
 
+#if defined(__GCC__)
+#  include <cxxabi.h>
+#endif
+
 #include <iostream>
 
 #include "base/platform.h"
@@ -188,18 +192,42 @@ void do_assert(const char* expression, const char* file, const char* func, int l
         std::abort();
 
     // for backtrace symbols to work you need -rdynamic ld (linker) flag
-    char** strings = backtrace_symbols(callstack, frames);
-    if (strings == nullptr)
+    char** backtrace_symbol_names = backtrace_symbols(callstack, frames);
+    if (backtrace_symbol_names == nullptr)
         std::abort();
 
-    // todo: demangle
     for (int i=0; i<frames; ++i)
     {
-        std::fprintf(stderr, "Frame (%d): @ %p, '%s'\n",
-            i, callstack[i], strings[i]);
+        std::string name = backtrace_symbol_names[i];
+
+#if defined(__GCC__)
+        // we expect something like this from the call to backtrace_symbols
+        // ./unit_test_audio(_ZN5debug9do_assertEPKcS1_S1_i+0xc7) [0x558a93b90e47]
+        //
+        // try to extract the function name from ( until + and use that
+        // as the mangled function name in a call to demangle.
+
+        const auto beg = name.find('(');
+        const auto end = name.find('+');
+        if ((beg != std::string::npos) &&
+            (end != std::string::npos) && beg < end)
+        {
+            std::string str;
+            for (auto i=beg+1; i<end; ++i)
+                str.push_back(name[i]);
+
+            int status = 0;
+            if (char* ret = abi::__cxa_demangle(str.c_str(), NULL, NULL, &status))
+            {
+                name = ret;
+                free(ret);
+            }
+        }
+#endif
+        std::fprintf(stderr, "Frame (%3d): '%s'\n", i, name.c_str());
     }
 
-    free(strings);
+    free(backtrace_symbol_names);
 
 #endif
     std::abort();
