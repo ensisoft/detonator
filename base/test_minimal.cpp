@@ -23,12 +23,14 @@
 #include "base/bitflag.h"
 #include "base/assert.h"
 #include "base/utility.h"
+#include "base/logging.h"
 #include "base/test_minimal.h"
 
 #if defined(WINDOWS_OS)
 #  include <Windows.h> // for DebugBreak
 #elif defined(POSIX_OS)
 #  include <signal.h> // for raise/signal
+#  include <dlfcn.h> // for dlopen, dlsym
 #endif
 
 namespace test {
@@ -158,8 +160,25 @@ const char* GetTestName(const char* function_name)
     //return function_name;
 }
 
-void BlurpFailure(const char* expression, const char* file, const char* function, int line, bool fatality)
+void
+BlurpFailure(const char* expression, const char* file, const char* function, int line, bool fatality)
 {
+    // dynamically check to see if we actually have logging inside
+    // this executable. this avoids having to create compile/link time
+    // dependency to base/logging just for this flush here.
+#if defined(POSIX_OS)
+    static void* myself = dlopen(NULL, RTLD_NOW);
+    static auto* get_thread_log = (base_GetThreadLog_FuncPtr)dlsym(myself, "base_GetThreadLog");
+    static auto* get_global_log = (base_GetGlobalLog_FuncPtr)dlsym(myself, "base_GetGlobalLog");
+
+    if (auto* logger = get_thread_log())
+        logger->Flush();
+
+    if (auto* logger = get_global_log())
+        logger->Flush();
+
+#endif
+
     ++ErrorCount;
 
     file = GetFileName(file);

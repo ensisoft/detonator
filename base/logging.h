@@ -383,3 +383,13 @@ namespace base
     }
 
 } // base
+
+// C style interface for doing dymamic address / function resolution.
+// currently only for suppressing name mangling
+extern "C" {
+    base::Logger* base_GetGlobalLog();
+    base::Logger* base_GetThreadLog();
+
+    typedef base::Logger* (*base_GetGlobalLog_FuncPtr)();
+    typedef base::Logger* (*base_GetThreadLog_FuncPtr)();
+} //
