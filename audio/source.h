@@ -130,7 +130,12 @@ namespace audio
         virtual void Shutdown() noexcept override;
         virtual void RecvCommand(std::unique_ptr<Command> cmd) noexcept override;
         virtual std::unique_ptr<Event> GetEvent() noexcept override;
+
+        unsigned WaitBuffer(void* device_buff, unsigned device_buff_size);
+
     private:
+        unsigned FillBuffer(void* device_buff, unsigned device_buff_size, bool wait_buffer);
+        unsigned CopyBuffer(VectorBuffer* source, void* device_buff, unsigned device_buff_size);
         void ThreadLoop();
     private:
         mutable std::mutex mMutex;
@@ -144,7 +149,7 @@ namespace audio
         std::vector<VectorBuffer> mBuffers;
         std::exception_ptr mException;
         bool mShutdown = false;
-        bool mDone = false;
+        bool mSourceDone = false;
     };
 
     // AudioFile implements reading audio samples from an
