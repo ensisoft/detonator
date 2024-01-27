@@ -153,16 +153,20 @@ private:
 #define TEST_MESSAGE(msg, ...) \
     test::Print(test::Color::Message, "%s (%d): '" msg "'\n", __FUNCTION__, __LINE__, ## __VA_ARGS__); \
 
-#define TEST_EXCEPTION(expr) \
-    try { \
-        expr; \
-        TEST_REQUIRE(!"Exception was expected"); \
-    } \
-    catch (const std::exception& e) \
-    {}
+#define TEST_EXCEPTION(expr)                                                        \
+    do {                                                                            \
+        bool have_exception = false;                                                \
+        try {                                                                       \
+            expr;                                                                   \
+        } catch (const std::exception& e) {                                         \
+            have_exception = true;                                                  \
+        }                                                                           \
+        TEST_REQUIRE(have_exception && "Exception was expected");                   \
+   } while(0)
+
 
 #define TEST_CASE(type) \
-    test::TestCaseReporter test_case_reporter(__FILE__, __FUNCTION__, type); \
+    test::TestCaseReporter test_case_reporter(__FILE__, __FUNCTION__, type);        \
     if (!test::IsEnabledByType(type))                                               \
         return;                                                                     \
     if (!test::IsEnabledByName(test::GetTestName(__PRETTY_FUNCTION__)))             \
