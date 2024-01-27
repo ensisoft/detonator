@@ -29,8 +29,7 @@ SourceThreadProxy::SourceThreadProxy(std::unique_ptr<Source> source)
 {}
 SourceThreadProxy::~SourceThreadProxy()
 {
-    ASSERT(!mThread);
-    ASSERT(!mSource);
+    Shutdown();
 }
 unsigned SourceThreadProxy::GetRateHz() const noexcept
 { return mSource->GetRateHz(); }
@@ -52,86 +51,26 @@ void SourceThreadProxy::Prepare(unsigned int buffer_size)
 
     // alternative idea, use a single ring buffer
 
-    mBuffers.resize(1);
+    mBuffers.resize(2);
     for (auto& buff : mBuffers)
     {
         buff.Resize(buffer_size);
         mEmptyQueue.push(&buff);
     }
 
+    DEBUG("Preparing audio source thread buffers. [num=%1, size=%2 b]",
+          mEmptyQueue.size(),buffer_size);
+
     mThread.reset(new std::thread(&SourceThreadProxy::ThreadLoop, this));
 }
-unsigned SourceThreadProxy::FillBuffer(void* device_buff, unsigned max_bytes)
+unsigned SourceThreadProxy::FillBuffer(void* device_buff, unsigned device_buff_size)
 {
-    VectorBuffer* buffer = nullptr;
-    while (!buffer)
-    {
-        std::unique_lock<decltype(mMutex)> lock(mMutex);
-        if (mException)
-            std::rethrow_exception(mException);
-
-        // if data isn't yet available we're in trouble
-        // should we just return here ?
-        if (!mFillQueue.empty())
-        {
-            buffer = mFillQueue.front();
-            mFillQueue.pop();
-        }
-
-        if (!buffer)
-        {
-            //DEBUG("Argh, no PCM buffer from source thread!");
-            mCondition.wait(lock);
-        }
-    }
-
-    const auto bytes_in_buff = (unsigned)buffer->GetByteSize();
-    const auto bytes_to_copy = std::min(max_bytes, bytes_in_buff);
-    std::memcpy(device_buff, buffer->GetPtr(), bytes_to_copy);
-
-    if (max_bytes < bytes_in_buff)
-    {
-        // if the thread produced more data than was consumed we shift
-        // the remaining data in the buffer to the start and let the
-        // thread fill more to the buffer end.
-
-        const auto bytes_left_over = bytes_in_buff - bytes_to_copy;
-        char* ptr = (char*)buffer->GetPtr();
-        std::memmove(ptr, ptr+bytes_to_copy, bytes_left_over);
-        buffer->SetByteSize(bytes_left_over);
-    }
-    else if (max_bytes > bytes_in_buff)
-    {
-        // if the device wanted more PCM than the thread has produced
-        // log a warning for now.
-        WARN("Device requested more PCM data than audio source thread has produced. [out=%1 b, avail=%2 b]",
-             max_bytes, bytes_in_buff);
-        // should have copied everything we have produced.
-        ASSERT(bytes_to_copy == bytes_in_buff);
-
-        buffer->Clear();
-    }
-    else if (max_bytes == bytes_in_buff)
-    {
-        buffer->Clear();
-    }
-
-    // enqueue the buffer back for filling
-    {
-        std::unique_lock<decltype(mMutex)> lock(mMutex);
-        mEmptyQueue.push(buffer);
-        mCondition.notify_one();
-    }
-
-    //DEBUG("Got audio buffer from source thread. [bytes=%1 b]", bytes_to_copy);
-
-    return bytes_to_copy;
+    return FillBuffer(device_buff, device_buff_size, false);
 }
 
 bool SourceThreadProxy::HasMore(std::uint64_t num_bytes_read) const noexcept
 {
-    std::unique_lock<decltype(mMutex)> lock(mMutex);
-    return !mFillQueue.empty() || !mDone;
+    return !mSourceDone;
 }
 
 void SourceThreadProxy::Shutdown() noexcept
@@ -172,6 +111,88 @@ std::unique_ptr<Event> SourceThreadProxy::GetEvent() noexcept
     mMutex.unlock();
     return ret;
 }
+
+unsigned SourceThreadProxy::WaitBuffer(void* device_buff, unsigned int device_buff_size)
+{
+    return FillBuffer(device_buff, device_buff_size, true);
+}
+
+
+unsigned SourceThreadProxy::FillBuffer(void* device_buff, unsigned device_buff_size, bool wait_buffer)
+{
+    unsigned bytes_copied = 0;
+
+    while ((device_buff_size - bytes_copied) > 0)
+    {
+        VectorBuffer* buffer = nullptr;
+        {
+            std::unique_lock<decltype(mMutex)> lock(mMutex);
+
+            if (wait_buffer)
+            {
+                while (mFillQueue.empty() && !mSourceDone && !mException)
+                {
+                    mCondition.wait(lock);
+                }
+            }
+
+            if (mException)
+                std::rethrow_exception(mException);
+
+            // if data isn't yet available we're in trouble
+            // should we just return here ?
+            if (mFillQueue.empty())
+            {
+                return bytes_copied;
+            }
+            buffer = mFillQueue.front();
+        }
+
+        auto* device_buff_ptr = (char*)device_buff;
+
+        bytes_copied += CopyBuffer(buffer,
+                                   device_buff_ptr + bytes_copied,
+                                   device_buff_size - bytes_copied);
+
+        ASSERT(device_buff_size >= bytes_copied);
+    }
+    return bytes_copied;
+}
+
+unsigned SourceThreadProxy::CopyBuffer(VectorBuffer* source, void* device_buff, unsigned int device_buff_size)
+{
+    auto* buffer_ptr = (char*)source->GetPtr();
+
+    const unsigned bytes_in_buff = source->GetByteSize();
+    const unsigned bytes_to_copy = std::min(device_buff_size, bytes_in_buff);
+    const unsigned bytes_to_remain = bytes_in_buff - bytes_to_copy;
+
+    std::memcpy(device_buff, buffer_ptr, bytes_to_copy);
+
+    if (bytes_to_remain)
+    {
+        // shift the contents in the buffer.
+        // todo: get rid of the memmove and use a buffer offset.
+        std::memmove(buffer_ptr, buffer_ptr + bytes_to_copy, bytes_to_remain);
+        source->SetByteSize(bytes_to_remain);
+    }
+    else
+    {
+        if (source->TestFlag(Buffer::Flags::LastBuffer))
+        {
+            mSourceDone = true;
+        }
+
+        source->Clear();
+
+        std::unique_lock<decltype(mMutex)> lock(mMutex);
+        mFillQueue.pop();
+        mEmptyQueue.push(source);
+        mCondition.notify_one();
+    }
+    return bytes_to_copy;
+}
+
 void SourceThreadProxy::ThreadLoop()
 {
     DEBUG("Hello from audio source thread. [name='%1']", mSource->GetName());
@@ -220,20 +241,27 @@ void SourceThreadProxy::ThreadLoop()
             buffer->SetByteSize(buffer_used + ret);
 
             bytes_read += ret;
+
+            const bool has_more = mSource->HasMore(bytes_read);
+            if (!has_more)
+            {
+                buffer->SetFlag(Buffer::Flags::LastBuffer, true);
+            }
+
+            std::queue<std::unique_ptr<Event>> events;
+            while (auto event = mSource->GetEvent())
+            {
+                events.push(std::move(event));
+            }
+
             {
                 std::unique_lock<decltype(mMutex)> lock(mMutex);
-
                 mFillQueue.push(buffer);
                 mCondition.notify_one();
-                if (!mSource->HasMore(bytes_read))
+                mEvents = std::move(events);
+                if (!has_more)
                 {
-                    mDone = true;
                     break;
-                }
-
-                while (auto event = mSource->GetEvent())
-                {
-                    mEvents.push(std::move(event));
                 }
             }
         }

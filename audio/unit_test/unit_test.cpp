@@ -240,7 +240,7 @@ void unit_test_thread_proxy()
 
         for (unsigned i=0; i<10; ++i)
         {
-            const auto ret = proxy->FillBuffer(&buffer[0], buffer.size());
+            const auto ret = proxy->WaitBuffer(&buffer[0], buffer.size());
             TEST_REQUIRE(ret);
             bytes += ret;
         }
@@ -270,7 +270,7 @@ void unit_test_thread_proxy()
 
         for (unsigned i=0; i<5; ++i)
         {
-            const auto ret = proxy->FillBuffer(&buffer[0], buffer.size());
+            const auto ret = proxy->WaitBuffer(&buffer[0], buffer.size());
             TEST_REQUIRE(ret);
             bytes += ret;
         }
@@ -301,11 +301,11 @@ void unit_test_thread_proxy()
 
         for (unsigned i=0; i<8; ++i)
         {
-            const auto ret = proxy->FillBuffer(&buffer[0], buffer.size());
+            const auto ret = proxy->WaitBuffer(&buffer[0], buffer.size());
             TEST_REQUIRE(ret);
             bytes += ret;
         }
-        TEST_EXCEPTION(proxy->FillBuffer(&buffer[0], buffer.size()));
+        TEST_EXCEPTION(proxy->WaitBuffer(&buffer[0], buffer.size()));
 
         proxy->Shutdown();
     }
