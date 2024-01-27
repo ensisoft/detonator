@@ -374,3 +374,14 @@ void WriteLogMessage(LogEvent type, const char* file, int line, const std::strin
 }
 
 } // base
+
+extern "C" {
+base::Logger* base_GetGlobalLog()
+{
+    return base::GetGlobalLog();
+}
+base::Logger* base_GetThreadLog()
+{
+    return base::GetThreadLog();
+}
+} // extern C
