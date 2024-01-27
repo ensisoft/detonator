@@ -368,6 +368,18 @@ target_include_directories(tree-sitter PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_
 
 # Editor application.
 add_executable(Detonator
+    audio/format.cpp
+    audio/loader.cpp
+    audio/sndfile.cpp
+    audio/mpg123.cpp
+    audio/pulseaudio.cpp
+    audio/waveout.cpp
+    audio/openal.cpp
+    audio/source.cpp
+    audio/player.cpp
+    audio/element.cpp
+    audio/graph.cpp
+    audio/proxy.cpp
     graphics/tool/geometry.cpp
     editor/app/import.h
     editor/app/import.cpp
@@ -590,6 +602,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(Detonator PRIVATE -Wno-deprecated-declarations)
 endif()
 
+target_compile_definitions(Detonator PRIVATE DETONATOR_EDITOR_BUILD)
 target_compile_definitions(Detonator PRIVATE "QTCOLORWIDGETS_LIBRARY")
 target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/editor")
 # add this include for the promoted widgets
@@ -600,13 +613,21 @@ target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_LIST_DIR}/third_pa
 # support Clion finding the generated headers (see AUTOGEN_BUILD_DIR)
 target_include_directories(Detonator PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Editor_autogen/include")
 target_link_libraries(Detonator Qt5::Widgets Qt5::OpenGL Qt5::Core Qt5::CorePrivate Qt5::Network Qt5::Svg Qt5::Xml)
-target_link_libraries(Detonator EngineLib UiLib GfxLib AudioLib DataLib BaseLib)
+target_link_libraries(Detonator EngineLib UiLib GfxLib DataLib BaseLib)
 target_link_libraries(Detonator Lua)
 target_link_libraries(Detonator QtColorWidgets)
 target_link_libraries(Detonator QuaZip)
 target_link_libraries(Detonator ${CONAN_LIBS})
 target_link_libraries(Detonator cmake_git_version_tracking)
 target_link_libraries(Detonator tree-sitter)
+target_link_libraries(Detonator samplerate)
+target_link_libraries(Detonator sndfile)
+if (UNIX)
+    target_link_libraries(Detonator pulse)
+    target_link_libraries(Detonator pthread)
+endif()
+
+
 install(TARGETS Detonator DESTINATION  "${CMAKE_CURRENT_LIST_DIR}/editor/dist")
 
 # Copy the Python based http-server for serving the HTML5/WASM game locally
