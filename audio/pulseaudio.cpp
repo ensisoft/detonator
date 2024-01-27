@@ -174,10 +174,14 @@ private:
 
        ~PlaybackStream()
         {
-            if (stream_)
-            {
-                Cancel();
-            }
+            pa_stream_set_state_callback(stream_, nullptr, nullptr);
+            pa_stream_set_write_callback(stream_, nullptr, nullptr);
+            pa_stream_set_underflow_callback(stream_, nullptr, nullptr);
+            pa_stream_disconnect(stream_);
+            pa_stream_unref(stream_);
+            stream_ = nullptr;
+
+            ASSERT(source_ == nullptr);
         }
 
         virtual Stream::State GetState() const override
@@ -200,35 +204,27 @@ private:
 
         virtual void Play() override
         {
-            pa_stream_cork(stream_, 0, nullptr, nullptr);
             DEBUG("PulseAudio stream play. [name='%1']", source_->GetName());
+            pa_stream_cork(stream_, 0, nullptr, nullptr);
         }
 
         virtual void Pause() override
         {
-            pa_stream_cork(stream_, 1, nullptr, nullptr);
             DEBUG("PulseAudio stream pause. [name='%1']", source_->GetName());
+            pa_stream_cork(stream_, 1, nullptr, nullptr);
         }
 
         virtual void Resume() override
         {
-            pa_stream_cork(stream_, 0, nullptr, nullptr);
             DEBUG("PulseAudio stream resume. [name='%1']", source_->GetName());
+            pa_stream_cork(stream_, 0, nullptr, nullptr);
         }
 
         virtual void Cancel() override
         {
-            pa_stream_set_state_callback(stream_, nullptr, nullptr);
-            pa_stream_set_write_callback(stream_, nullptr, nullptr);
-            pa_stream_set_underflow_callback(stream_, nullptr, nullptr);
-            pa_stream_disconnect(stream_);
-            pa_stream_unref(stream_);
-            stream_ = nullptr;
-            if (source_)
-            {
-                source_->Shutdown();
-                DEBUG("PulseAudio stream cancel. [name='%1']", source_->GetName());
-            }
+            DEBUG("PulseAudio stream cancel. [name='%1']", source_->GetName());
+            source_->Shutdown();
+            source_.reset();
         }
 
         virtual void SendCommand(std::unique_ptr<Command> cmd) override
