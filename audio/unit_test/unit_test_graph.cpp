@@ -32,27 +32,37 @@
 class TestBuffer : public audio::Buffer
 {
 public:
-    virtual void SetFormat(const audio::Format& format) override
+    virtual bool TestFlag(Flags flag) const noexcept override
+    {
+        return false;
+    }
+
+    virtual void SetFlag(Flags flag, bool on_off) noexcept override
+    {
+
+    }
+
+    virtual void SetFormat(const audio::Format& format) noexcept override
     {
         TEST_REQUIRE(!"not implemented.");
     }
-    virtual Format GetFormat() const override
+    virtual Format GetFormat() const noexcept override
     {
         Format format;
         return format;
     }
-    virtual const void* GetPtr() const override
+    virtual const void* GetPtr() const noexcept override
     { return mData.data(); }
-    virtual void* GetPtr() override
+    virtual void* GetPtr() noexcept override
     { return mData.data(); }
-    virtual size_t GetByteSize() const override
+    virtual size_t GetByteSize() const noexcept override
     { return mData.size(); }
-    virtual size_t GetCapacity() const override
+    virtual size_t GetCapacity() const noexcept override
     {
         TEST_REQUIRE(!"not implemented.");
         return 0;
     }
-    virtual void SetByteSize(size_t bytes) override
+    virtual void SetByteSize(size_t bytes) noexcept override
     {
         TEST_REQUIRE(!"not implemented.");
     }
@@ -61,7 +71,7 @@ public:
     {
         mData += tag;
     }
-    virtual size_t GetNumInfoTags() const override
+    virtual size_t GetNumInfoTags() const noexcept override
     {
         return mTags.size();
     }
@@ -69,7 +79,7 @@ public:
     {
         mTags.push_back(tag);
     }
-    virtual const InfoTag& GetInfoTag(size_t index) const override
+    virtual const InfoTag& GetInfoTag(size_t index) const noexcept override
     {
         return mTags[index];
     }

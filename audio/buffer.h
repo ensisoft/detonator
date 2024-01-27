@@ -24,6 +24,7 @@
 #include <cstring>
 
 #include "base/assert.h"
+#include "base/bitflag.h"
 #include "base/utility.h"
 #include "audio/format.h"
 
@@ -37,6 +38,10 @@ namespace audio
     class Buffer
     {
     public:
+        enum class Flags {
+            LastBuffer
+        };
+
         using Format = audio::Format;
         // Collection of information regarding the element
         // that has touched/produced the buffer and its contents.
@@ -50,32 +55,38 @@ namespace audio
             } element;
         };
         virtual ~Buffer() = default;
+        // Set a flag on the buffer to indicate for example
+        // the end of the source stream.
+        virtual bool TestFlag(Flags flag) const noexcept = 0;
+        // Test a buffer flag. Returns true if the flag is set,
+        // otherwise false.
+        virtual void SetFlag(Flags flag, bool on_off) noexcept = 0;
         // Set the current format for the contents of the buffer.
-        virtual void SetFormat(const Format& format) = 0;
+        virtual void SetFormat(const Format& format) noexcept = 0;
         // Get the PCM audio format of the buffer.
         // The format is only valid when the buffer contains PCM data.
         // Other times the format will be NotSet.
-        virtual Format GetFormat() const = 0;
+        virtual Format GetFormat() const noexcept = 0;
         // Get the read pointer for the contents of the buffer.
-        virtual const void* GetPtr() const = 0;
+        virtual const void* GetPtr() const noexcept = 0;
         // Get the pointer for writing the buffer contents. It's possible
         // that this would be a nullptr when the buffer doesn't support
         // writing into.
-        virtual void* GetPtr() = 0;
+        virtual void* GetPtr() noexcept = 0;
         // Set the size of the buffer's content in bytes.
-        virtual void SetByteSize(size_t bytes) = 0;
+        virtual void SetByteSize(size_t bytes) noexcept = 0;
         // Get the size of the buffer's contents in bytes.
-        virtual size_t GetByteSize() const = 0;
+        virtual size_t GetByteSize() const noexcept  = 0;
         // Get the capacity of the buffer in bytes.
-        virtual size_t GetCapacity() const = 0;
+        virtual size_t GetCapacity() const noexcept = 0;
         // Get the number of info tags associated with this buffer.
         // the info tags are accumulated in the buffer as it passes
         // from one element to another for processing.
-        virtual size_t GetNumInfoTags() const = 0;
+        virtual size_t GetNumInfoTags() const noexcept = 0;
         // Add (append) a new info tag to this buffer.
         virtual void AddInfoTag(const InfoTag& tag) = 0;
         // Get an info tag at the specified index.
-        virtual const InfoTag& GetInfoTag(size_t index) const = 0;
+        virtual const InfoTag& GetInfoTag(size_t index) const noexcept = 0;
 
         // copy the buffer info tags from source buffer into the
         // destination buffer.
@@ -84,13 +95,13 @@ namespace audio
             for (size_t i=0; i<src.GetNumInfoTags(); ++i)
                 dst.AddInfoTag(src.GetInfoTag(i));
         }
-        inline void CopyData(const void* src, size_t bytes)
+        inline void CopyData(const void* src, size_t bytes) noexcept
         {
             ASSERT(GetCapacity() >= bytes);
             std::memcpy(GetPtr(), src, bytes);
             SetByteSize(bytes);
         }
-        inline void CopyData(const Buffer& src)
+        inline void CopyData(const Buffer& src) noexcept
         {
             ASSERT(GetCapacity() >= src.GetByteSize());
             std::memcpy(GetPtr(), src.GetPtr(), src.GetByteSize());
@@ -100,6 +111,11 @@ namespace audio
         {
             Buffer::CopyInfoTags(src, *this);
         }
+        inline bool IsLastBuffer() const noexcept
+        {
+            return TestFlag(Flags::LastBuffer);
+        }
+
     private:
     };
     using BufferHandle = std::shared_ptr<Buffer>;
@@ -111,28 +127,33 @@ namespace audio
           : mCapacity(capacity)
           , mData(data)
         {}
-        virtual void SetFormat(const Format& format) override
+        virtual void SetFlag(Flags flag, bool on_off) noexcept override
+        { mFlags.set(flag, on_off); }
+        virtual bool TestFlag(Flags flag) const noexcept override
+        { return mFlags.test(flag); }
+
+        virtual void SetFormat(const Format& format) noexcept override
         { mFormat = format; }
-        virtual Format GetFormat() const override
+        virtual Format GetFormat() const noexcept override
         { return mFormat; }
-        virtual const void* GetPtr() const override
+        virtual const void* GetPtr() const noexcept override
         { return mData; }
-        virtual void* GetPtr() override
+        virtual void* GetPtr() noexcept override
         { return mData; }
-        virtual size_t GetByteSize() const override
+        virtual size_t GetByteSize() const noexcept override
         { return mSize; }
-        virtual size_t GetCapacity() const override
+        virtual size_t GetCapacity() const noexcept override
         { return mCapacity; }
-        virtual void SetByteSize(size_t bytes) override
+        virtual void SetByteSize(size_t bytes) noexcept override
         {
             ASSERT(bytes <= mCapacity);
             mSize = bytes;
         }
-        virtual size_t GetNumInfoTags() const override
+        virtual size_t GetNumInfoTags() const noexcept override
         { return mInfos.size(); }
         virtual void AddInfoTag(const InfoTag& tag) override
         { mInfos.push_back(tag); }
-        virtual const InfoTag& GetInfoTag(size_t index) const override
+        virtual const InfoTag& GetInfoTag(size_t index) const noexcept override
         { return base::SafeIndex(mInfos, index); }
     private:
         const std::size_t mCapacity = 0;
@@ -140,6 +161,7 @@ namespace audio
         std::size_t mSize = 0;
         std::vector<InfoTag> mInfos;
         Format mFormat;
+        base::bitflag<Flags> mFlags;
     };
 
     // backing data storage.
@@ -155,29 +177,34 @@ namespace audio
             ASSERT(!std::memcmp(&mBuffer[canary_offset], &canary, sizeof(canary)) &&
                    "Audio buffer out of bounds write detected.");
         }
-        virtual void SetFormat(const Format& format) override
+        virtual bool TestFlag(Flags flag) const noexcept override
+        { return mFlags.test(flag); }
+        virtual void SetFlag(Flags flag, bool on_off) noexcept override
+        { mFlags.set(flag, on_off); }
+
+        virtual void SetFormat(const Format& format) noexcept override
         { mFormat = format; }
-        virtual Format GetFormat() const override
+        virtual Format GetFormat() const noexcept override
         { return mFormat; }
-        virtual const void* GetPtr() const override
+        virtual const void* GetPtr() const noexcept override
         { return mBuffer.empty() ? nullptr : &mBuffer[0]; }
-        virtual void* GetPtr() override
+        virtual void* GetPtr() noexcept override
         { return mBuffer.empty() ? nullptr : &mBuffer[0]; }
-        virtual size_t GetByteSize() const override
+        virtual size_t GetByteSize() const noexcept override
         { return mSize; }
-        virtual size_t GetCapacity() const override
+        virtual size_t GetCapacity() const noexcept override
         { return mBuffer.size() - sizeof(canary); }
-        virtual void SetByteSize(size_t bytes) override
+        virtual void SetByteSize(size_t bytes) noexcept override
         {
             const auto limit = mBuffer.size() - sizeof(canary);
             ASSERT(bytes <= limit);
             mSize = bytes;
         }
-        virtual size_t GetNumInfoTags() const override
+        virtual size_t GetNumInfoTags() const noexcept override
         { return mInfos.size(); }
         virtual void AddInfoTag(const InfoTag& tag) override
         { mInfos.push_back(tag); }
-        virtual const InfoTag& GetInfoTag(size_t index) const override
+        virtual const InfoTag& GetInfoTag(size_t index) const noexcept override
         { return base::SafeIndex(mInfos, index); }
 
         void Resize(size_t bytes)
@@ -192,6 +219,7 @@ namespace audio
             mSize = 0;
             mFormat = {};
             mInfos.clear();
+            mFlags.clear();
         }
     private:
         static constexpr auto canary = 0xF4F5ABCD;
@@ -206,6 +234,8 @@ namespace audio
         // Size of PCM data content in bytes. can be less than
         // the buffer's actual capacity.
         std::size_t mSize = 0;
+
+        base::bitflag<Flags> mFlags;
     };
 
     class BufferAllocator
