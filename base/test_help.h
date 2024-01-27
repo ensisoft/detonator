@@ -360,8 +360,9 @@ public:
         base::SetGlobalLog(mLogger.get());
 #else
         using LoggerType = base::LockedLogger<base::OStreamLogger>;
-        std::ofstream stream(file);
-        mLogger = std::make_unique<LoggerType>((base::OStreamLogger(stream)));
+        mFileStream.open(file, std::ios::trunc);
+        mLogger = std::make_unique<LoggerType>((base::OStreamLogger(mFileStream)));
+        base::SetGlobalLog(mLogger.get());
 #endif
         base::EnableDebugLog(true);
     }
@@ -371,6 +372,9 @@ public:
    }
 private:
     std::unique_ptr<base::Logger> mLogger;
+#if !defined(__EMSCRIPTEN__)
+    std::ofstream  mFileStream;
+#endif
 };
 
 } // namespace
