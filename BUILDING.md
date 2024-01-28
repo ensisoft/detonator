@@ -46,6 +46,20 @@ Header set Cross-Origin-Opener-Policy   "same-origin"
 Header set Access-Control-Allow-Headers "range"
 ```
 
+3. The threads must be launched by the main thread from the browser's main event loop. 
+In other words if your code does:
+
+```
+    auto thread = std.:thread(...);
+    thread.join(); 
+```
+
+You're deadlocking forever since the main thread (the currently) calling thread must return to the
+browsers event loop in order to launch the thread, but joining the thread will block the calling thread!
+
+The way to work around this is to use the Emscripten '-sPTHREAD_POOL_SIZE=n' build parameter which adds
+code to initialize N number of threads on the application launch so that they're ready to go.  
+
 #### Audio Thread
 
 The audio engine inside DETONATOR 2D engine can use a separate audio thread for audio playback.<br>
@@ -57,6 +71,16 @@ There are several build variables that control this feature.
   #define AUDIO_USE_LOCK_FREE_QUEUE
   #define AUDIO_USE_PLAYER_THREAD
 ```
+
+One of the problems is that Web Audio can only be used from the browsers main thread. If any 
+other thread is trying to use the Web Audio interface the requests are silently proxied to the
+main thread! This means that the original design that would run the audio device in it's own thread does 
+not work well since it'll implicitly synchronize with the main thread and kill all parallelism.
+
+The current solution is to wrap the audio *source* objects inside threads so that the audio
+graph evaluation runs in parallel and then use the main thread to take the produced audio
+buffers and push them to WebAudio in the OpenAL device stream callbacks.
+
 
 ### Building for WASM
 
