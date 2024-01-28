@@ -620,11 +620,18 @@ PlayWindow::PlayWindow(app::Workspace& workspace, bool is_separate_process) : mW
     // create new resource loader based on the current workspace
     // and its content.
     mResourceLoader = std::make_unique<ResourceLoader>(mWorkspace, mGameWorkingDir, mHostWorkingDir);
+
+    mThreadPool = std::make_unique<base::ThreadPool>();
+    mThreadPool->AddRealThread();
+    mThreadPool->AddRealThread();
+    mThreadPool->AddMainThread();
 }
 
 PlayWindow::~PlayWindow()
 {
     Shutdown();
+
+    mThreadPool->Shutdown();
 
     QDir::setCurrent(mHostWorkingDir);
 
@@ -668,6 +675,8 @@ void PlayWindow::RunGameLoopOnce()
 
         TRACE_START();
         TRACE_ENTER(Frame);
+
+        TRACE_CALL("ThreadPool::ExecuteMainThread", mThreadPool->ExecuteMainThread());
 
         // indicate beginning of the main loop iteration.
         TRACE_CALL("Engine::BeginMainLoop", mEngine->BeginMainLoop());
@@ -918,9 +927,13 @@ void PlayWindow::Shutdown()
     if (mGameLibSetGlobalLogger)
         mGameLibSetGlobalLogger(nullptr, false, false, false, false);
 
+    if (mGameLibSteGlobalThreadPool)
+        mGameLibSteGlobalThreadPool(nullptr);
+
     mLibrary.unload();
     mGameLibCreateEngine = nullptr;
     mGameLibSetGlobalLogger = nullptr;
+    mGameLibSteGlobalThreadPool = nullptr;
 }
 
 void PlayWindow::LoadState(const QString& key_prefix, const QWidget* parent)
@@ -1751,11 +1764,14 @@ bool PlayWindow::LoadLibrary()
 
     mGameLibCreateEngine    = (Gamestudio_CreateEngineFunc)mLibrary.resolve("Gamestudio_CreateEngine");
     mGameLibSetGlobalLogger = (Gamestudio_SetGlobalLoggerFunc)mLibrary.resolve("Gamestudio_SetGlobalLogger");
+    mGameLibSteGlobalThreadPool = (Gamestudio_SetGlobalThreadPoolFunc)mLibrary.resolve("Gamestudio_SetGlobalThreadPool");
     if (!mGameLibCreateEngine)
         ERROR("Failed to resolve 'Gamestudio_CreateEngine'.");
     else if (!mGameLibSetGlobalLogger)
         ERROR("Failed to resolve 'Gamestudio_SetGlobalLogger'.");
-    if (!mGameLibCreateEngine || !mGameLibSetGlobalLogger)
+    else if (!mGameLibSteGlobalThreadPool)
+        ERROR("Failed to resolve 'Gamestudio_SetGlobalThreadPool'.");
+    if (!mGameLibCreateEngine || !mGameLibSetGlobalLogger || !mGameLibSteGlobalThreadPool)
     {
         Barf("Failed to resolve engine library entry points.");
         return false;
@@ -1768,6 +1784,9 @@ bool PlayWindow::LoadLibrary()
     const auto log_info  = true;
     const auto log_error = true;
     mGameLibSetGlobalLogger(mLogger.get(), log_debug, log_warn, log_info, log_error);
+
+    mGameLibSteGlobalThreadPool(mThreadPool.get());
+
 
     std::unique_ptr<engine::Engine> engine(mGameLibCreateEngine());
     if (!engine)

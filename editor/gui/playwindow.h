@@ -34,6 +34,7 @@
 
 #include "base/utility.h"
 #include "base/trace.h"
+#include "base/threadpool.h"
 #include "engine/main/interface.h"
 #include "editor/app/eventlog.h"
 #include "editor/gui/dlgeventlog.h"
@@ -160,6 +161,7 @@ namespace gui
         // entry point functions into the game/app library.
         Gamestudio_CreateEngineFunc mGameLibCreateEngine = nullptr;
         Gamestudio_SetGlobalLoggerFunc mGameLibSetGlobalLogger = nullptr;
+        Gamestudio_SetGlobalThreadPoolFunc  mGameLibSteGlobalThreadPool = nullptr;
         // Qt's Open GL context for the QWindow.
         QOpenGLContext mContext;
         // This is the actual OpenGL renderable surface.
@@ -216,6 +218,8 @@ namespace gui
         std::unique_ptr<base::TraceLog> mTraceLogger;
         std::unique_ptr<base::TraceWriter> mTraceWriter;
         std::vector<bool> mEnableTrace;
+
+        std::unique_ptr<base::ThreadPool> mThreadPool;
     };
 
 } // namespace
