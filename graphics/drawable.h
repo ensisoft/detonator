@@ -31,6 +31,7 @@
 #include <optional>
 #include <variant>
 #include <unordered_map>
+#include <mutex>
 
 #include "base/assert.h"
 #include "base/utility.h"
@@ -65,32 +66,32 @@ namespace gfx
             SimpleShape,
             Undefined
         };
-         // Style of the drawable's geometry determines how the geometry
-         // is to be rasterized.
-         enum class Primitive {
-             Points, Lines, Triangles
-         };
-         struct Environment {
-             // true if running in an "editor mode", which means that even
-             // content marked static might have changed and should be checked
-             // in case it has been modified and should be re-uploaded.
-             bool editing_mode = false;
-             // how many render surface units (pixels, texels if rendering to a texture)
-             // to a game unit.
-             glm::vec2 pixel_ratio = {1.0f, 1.0f};
-             // the current projection matrix that will be used to project the
-             // vertices from the view space into Normalized Device Coordinates.
-             const glm::mat4* proj_matrix = nullptr;
-             // The current view matrix that will be used to transform the
-             // vertices from the world space to the camera/view space.
-             const glm::mat4* view_matrix = nullptr;
-             // the current model matrix that will be used to transform the
-             // vertices from the local space to the world space.
-             const glm::mat4* model_matrix = nullptr;
-             // the current world matrix that will be used to transform
-             // vectors, such as gravity vector, to world space.
-             const glm::mat4* world_matrix = nullptr;
-         };
+        // Style of the drawable's geometry determines how the geometry
+        // is to be rasterized.
+        enum class Primitive {
+            Points, Lines, Triangles
+        };
+        struct Environment {
+            // true if running in an "editor mode", which means that even
+            // content marked static might have changed and should be checked
+            // in case it has been modified and should be re-uploaded.
+            bool editing_mode = false;
+            // how many render surface units (pixels, texels if rendering to a texture)
+            // to a game unit.
+            glm::vec2 pixel_ratio = {1.0f, 1.0f};
+            // the current projection matrix that will be used to project the
+            // vertices from the view space into Normalized Device Coordinates.
+            const glm::mat4* proj_matrix = nullptr;
+            // The current view matrix that will be used to transform the
+            // vertices from the world space to the camera/view space.
+            const glm::mat4* view_matrix = nullptr;
+            // the current model matrix that will be used to transform the
+            // vertices from the local space to the world space.
+            const glm::mat4* model_matrix = nullptr;
+            // the current world matrix that will be used to transform
+            // vectors, such as gravity vector, to world space.
+            const glm::mat4* world_matrix = nullptr;
+        };
 
         struct DrawCmd {
             size_t draw_cmd_start = 0;
@@ -119,6 +120,46 @@ namespace gfx
         virtual bool FromJson(const data::Reader& data) = 0;
     private:
     };
+
+    namespace detail {
+        struct EnvironmentCopy {
+            explicit EnvironmentCopy(const DrawableClass::Environment& env) noexcept
+                    : editing_mode(env.editing_mode)
+                    , pixel_ratio(env.pixel_ratio)
+            {
+                if (env.proj_matrix)
+                    proj_matrix = *env.proj_matrix;
+                if (env.view_matrix)
+                    view_matrix = *env.view_matrix;
+                if (env.model_matrix)
+                    model_matrix = *env.model_matrix;
+                if (env.world_matrix)
+                    world_matrix = *env.world_matrix;
+            }
+            DrawableClass::Environment ToEnv() const
+            {
+                DrawableClass::Environment env;
+                env.editing_mode = editing_mode;
+                env.pixel_ratio  = pixel_ratio;
+                if (proj_matrix.has_value())
+                    env.proj_matrix = &proj_matrix.value();
+                if (view_matrix.has_value())
+                    env.view_matrix = &view_matrix.value();
+                if (model_matrix.has_value())
+                    env.model_matrix = &model_matrix.value();
+                if (world_matrix.has_value())
+                    env.world_matrix = &world_matrix.value();
+                return env;
+            }
+
+            bool editing_mode;
+            glm::vec2 pixel_ratio;
+            std::optional<glm::mat4> proj_matrix;
+            std::optional<glm::mat4> view_matrix;
+            std::optional<glm::mat4> model_matrix;
+            std::optional<glm::mat4> world_matrix;
+        };
+    } // detail
 
 
     // Drawable interface represents some kind of drawable
@@ -919,6 +960,7 @@ namespace gfx
             // 1.0f = particle is fully opaque.
             float alpha = 1.0f;
         };
+        using ParticleBuffer = std::vector<Particle>;
 
         // Define the motion of the particle.
         enum class Motion {
@@ -1076,14 +1118,14 @@ namespace gfx
             // the gravity that applies when using projectile particles.
             glm::vec2 gravity = {0.0f, 0.3f};
         };
+        using EngineParamsPtr = std::shared_ptr<Params>;
 
         // State of any instance of ParticleEngineInstance.
         struct InstanceState {
-            // cached world gravity vector for this particle system instance.
-            // exists only to avoid recomputing the gravity on every update.
-            std::optional<glm::vec2> cached_world_gravity;
+            // exclusion device on the particles buffer below.
+            std::mutex mutex;
             // the simulation particles.
-            std::vector<Particle> particles;
+            ParticleBuffer particles;
             // delay until the particles are first initially emitted.
             float delay = 0.0f;
             // simulation time.
@@ -1091,15 +1133,17 @@ namespace gfx
             // fractional count of new particles being hatched.
             float hatching = 0.0f;
         };
+        using InstanceStatePtr = std::shared_ptr<InstanceState>;
 
         explicit ParticleEngineClass(const Params& init, std::string id = base::RandomString(10), std::string name = "") noexcept
           : mId(std::move(id))
           , mName(std::move(name))
-          , mParams(init)
+          , mParams(std::make_shared<Params>(init))
         {}
         explicit ParticleEngineClass(std::string id = base::RandomString(10), std::string name = "") noexcept
           : mId(std::move(id))
           , mName(std::move(name))
+          , mParams(std::make_shared<Params>())
         {}
 
         bool Construct(const Environment& env, const InstanceState& state, Geometry::CreateArgs& create) const;
@@ -1109,18 +1153,24 @@ namespace gfx
         std::string GetGeometryId(const Environment& env) const;
 
         void ApplyDynamicState(const Environment& env, ProgramState& program) const;
-        void Update(const Environment& env, InstanceState& state, float dt) const;
-        void Restart(const Environment& env, InstanceState& state) const;
-        bool IsAlive(const InstanceState& state) const;
+        void Update(const Environment& env, InstanceStatePtr state, float dt) const;
+        void Restart(const Environment& env, InstanceStatePtr state) const;
+        bool IsAlive(const InstanceStatePtr& state) const;
 
-        void Emit(const Environment& env, InstanceState& state, int count) const;
+        void Emit(const Environment& env, InstanceStatePtr state, int count) const;
 
         // Get the params.
         inline const Params& GetParams() const noexcept
-        { return mParams; }
+        { return *mParams; }
         // Set the params.
         inline void SetParams(const Params& params) noexcept
-        { mParams = params;}
+        {
+            // create a fresh copy so that should this ever be called
+            // outside design time, if we have pending tasks to update
+            // the particle engine instance states we avoid having a race
+            // condition on the parameters
+            mParams = std::make_shared<Params>(params);
+        }
 
         virtual Type GetType() const override
         { return DrawableClass::Type::ParticleEngine; }
@@ -1136,13 +1186,24 @@ namespace gfx
         virtual std::unique_ptr<DrawableClass> Clone() const override;
         virtual std::unique_ptr<DrawableClass> Copy() const override;
     private:
-        void InitParticles(const Environment& env, InstanceState& state, size_t num) const;
-        void KillParticle(InstanceState& state, size_t i) const;
-        bool UpdateParticle(const Environment& env, InstanceState& state, size_t i, float dt) const;
+        void InitParticles(const Environment& env, InstanceStatePtr state, size_t num) const;
+        void UpdateParticles(const Environment& env, InstanceStatePtr state, float dt) const;
+
+        static void InitParticles(const Environment& env, const Params& params, ParticleBuffer& particles, size_t num);
+        static void UpdateParticles(const Environment& env, const Params& params, ParticleBuffer& particles, float dt);
+
+        static void KillParticle(ParticleBuffer& particles, size_t i);
+
+        struct ParticleWorld {
+            std::optional<glm::vec2> world_gravity;
+        };
+
+        static bool UpdateParticle(const Environment& env, const Params& params, const ParticleWorld& world,
+                                   ParticleBuffer& particles, size_t i, float dt);
     private:
         std::string mId;
         std::string mName;
-        Params mParams;
+        std::shared_ptr<Params> mParams;
     };
 
     // ParticleEngineInstance implements particle simulation
@@ -1158,14 +1219,17 @@ namespace gfx
 
         // Create a new particle engine based on an existing particle engine
         // class definition.
-        explicit ParticleEngineInstance(const std::shared_ptr<const ParticleEngineClass>& klass) noexcept
-          : mClass(klass)
+        explicit ParticleEngineInstance(std::shared_ptr<const ParticleEngineClass> klass) noexcept
+          : mClass(std::move(klass))
+          , mState(std::make_shared<ParticleEngineClass::InstanceState>())
         {}
         explicit ParticleEngineInstance(const ParticleEngineClass& klass)
           : mClass(std::make_shared<ParticleEngineClass>(klass))
+          , mState(std::make_shared<ParticleEngineClass::InstanceState>())
         {}
         explicit ParticleEngineInstance(const ParticleEngineClass::Params& params)
           : mClass(std::make_shared<ParticleEngineClass>(params))
+          , mState(std::make_shared<ParticleEngineClass::InstanceState>())
         {}
         virtual void ApplyDynamicState(const Environment& env, ProgramState& program, RasterState& state) const override;
         virtual std::string GetShader(const Environment& env, const Device& device) const override;
@@ -1186,7 +1250,7 @@ namespace gfx
 
         // Get the current number of alive particles.
         inline size_t GetNumParticlesAlive() const noexcept
-        { return mState.particles.size(); }
+        { return mState->particles.size(); }
 
         inline const Params& GetParams() const noexcept
         { return mClass->GetParams(); }
@@ -1195,7 +1259,10 @@ namespace gfx
         // this is the "class" object for this particle engine type.
         std::shared_ptr<const ParticleEngineClass> mClass;
         // this is this particle engine's state.
-        ParticleEngineClass::InstanceState mState;
+        // using a shared_ptr here so that we can share the state
+        // with some background thread tasks to update the
+        // particle engine state
+        std::shared_ptr<ParticleEngineClass::InstanceState> mState;
     };
 
 

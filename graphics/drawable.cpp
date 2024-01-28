@@ -27,6 +27,7 @@
 
 #include "base/logging.h"
 #include "base/utility.h"
+#include "base/threadpool.h"
 #include "base/math.h"
 #include "base/json.h"
 #include "data/reader.h"
@@ -2062,9 +2063,9 @@ std::string PolygonMeshInstance::GetShaderName(const Environment& env) const
 
 std::string ParticleEngineClass::GetProgramId(const Environment& env) const
 {
-    if (mParams.coordinate_space == CoordinateSpace::Local)
+    if (mParams->coordinate_space == CoordinateSpace::Local)
         return "local-particle-program";
-    else if (mParams.coordinate_space == CoordinateSpace::Global)
+    else if (mParams->coordinate_space == CoordinateSpace::Global)
         return "global-particle-program";
     else BUG("Unknown particle program coordinate space.");
     return "";
@@ -2125,9 +2126,9 @@ void VertexShaderMain()
   gl_Position  = kProjectionMatrix * kViewMatrix * vertex;
 }
     )";
-    if (mParams.coordinate_space == CoordinateSpace::Local)
+    if (mParams->coordinate_space == CoordinateSpace::Local)
         return local_src;
-    else if (mParams.coordinate_space == CoordinateSpace::Global)
+    else if (mParams->coordinate_space == CoordinateSpace::Global)
         return global_src;
     else BUG("Missing particle shader simulation space source.");
     return "";
@@ -2135,15 +2136,15 @@ void VertexShaderMain()
 
 std::string ParticleEngineClass::GetShaderName(const Environment& env) const
 {
-    if (mParams.coordinate_space == CoordinateSpace::Local)
+    if (mParams->coordinate_space == CoordinateSpace::Local)
         return "LocalParticleShader";
-    else if (mParams.coordinate_space == CoordinateSpace::Global)
+    else if (mParams->coordinate_space == CoordinateSpace::Global)
         return "GlobalParticleShader";
     else BUG("Missing particle shader name.");
     return "";
 }
 
-bool ParticleEngineClass::Construct(const Drawable::Environment& env, const InstanceState& state, Geometry::CreateArgs& create) const
+bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const InstanceState& state, Geometry::CreateArgs& create) const
 {
     // the point rasterization doesn't support non-uniform
     // sizes for the points, i.e. they're always square
@@ -2170,8 +2171,8 @@ bool ParticleEngineClass::Construct(const Drawable::Environment& env, const Inst
         // when using global coordinate space max x/y should be 1.0f
         // and particle coordinates are left in the global space
         ParticleVertex v;
-        v.aPosition.x = p.position.x / mParams.max_xpos;
-        v.aPosition.y = p.position.y / mParams.max_ypos;
+        v.aPosition.x = p.position.x / mParams->max_xpos;
+        v.aPosition.y = p.position.y / mParams->max_ypos;
         // copy the per particle data into the data vector for the fragment shader.
         v.aData.x = p.pointsize >= 0.0f ? p.pointsize * pixel_scaler : 0.0f;
         // abusing texcoord here to provide per particle random value.
@@ -2181,7 +2182,7 @@ bool ParticleEngineClass::Construct(const Drawable::Environment& env, const Inst
         // Use the particle data to pass the per particle alpha.
         v.aData.z = p.alpha;
         // use the particle data to pass the per particle time.
-        v.aData.w = p.time / (p.time_scale * mParams.max_lifetime);
+        v.aData.w = p.time / (p.time_scale * mParams->max_lifetime);
         verts.push_back(v);
     }
 
@@ -2199,7 +2200,7 @@ bool ParticleEngineClass::Construct(const Drawable::Environment& env, const Inst
 
 void ParticleEngineClass::ApplyDynamicState(const Environment& env, ProgramState& program) const
 {
-    if (mParams.coordinate_space == CoordinateSpace::Global)
+    if (mParams->coordinate_space == CoordinateSpace::Global)
     {
         // when the coordinate space is global the particles are spawn directly
         // in the global coordinate space. therefore, no model transformation
@@ -2209,7 +2210,7 @@ void ParticleEngineClass::ApplyDynamicState(const Environment& env, ProgramState
         program.SetUniform("kProjectionMatrix", kProjectionMatrix);
         program.SetUniform("kViewMatrix", kViewMatrix);
     }
-    else if (mParams.coordinate_space == CoordinateSpace::Local)
+    else if (mParams->coordinate_space == CoordinateSpace::Local)
     {
         const auto& kModelViewMatrix = (*env.view_matrix) * (*env.model_matrix);
         const auto& kProjectionMatrix = *env.proj_matrix;
@@ -2219,7 +2220,7 @@ void ParticleEngineClass::ApplyDynamicState(const Environment& env, ProgramState
 }
 
 // Update the particle simulation.
-void ParticleEngineClass::Update(const Environment& env, InstanceState& state, float dt) const
+void ParticleEngineClass::Update(const Environment& env, InstanceStatePtr ptr, float dt) const
 {
     // In case particles become heavy on the CPU here are some ways to try
     // to mitigate the issue:
@@ -2243,10 +2244,12 @@ void ParticleEngineClass::Update(const Environment& env, InstanceState& state, f
     //   It could also be possible to simulate transform feedback through
     //   texture writes. For example here: https://nullprogram.com/webgl-particles/
 
-    const bool has_max_time = mParams.max_time < std::numeric_limits<float>::max();
+    auto& state = *ptr;
+
+    const bool has_max_time = mParams->max_time < std::numeric_limits<float>::max();
 
     // check if we've exceeded maximum lifetime.
-    if (has_max_time && state.time >= mParams.max_time)
+    if (has_max_time && state.time >= mParams->max_time)
     {
         state.particles.clear();
         state.time += dt;
@@ -2255,13 +2258,13 @@ void ParticleEngineClass::Update(const Environment& env, InstanceState& state, f
 
     // with automatic spawn modes (once, maintain, continuous) do first
     // particle emission after initial delay has expired.
-    if (mParams.mode != SpawnPolicy::Command)
+    if (mParams->mode != SpawnPolicy::Command)
     {
         if (state.time < state.delay)
         {
             if (state.time + dt > state.delay)
             {
-                InitParticles(env, state, state.hatching);
+                InitParticles(env, ptr, state.hatching);
                 state.hatching = 0;
             }
             state.time += dt;
@@ -2269,166 +2272,165 @@ void ParticleEngineClass::Update(const Environment& env, InstanceState& state, f
         }
     }
 
-    // update each current particle
-    for (size_t i=0; i<state.particles.size();)
-    {
-        if (UpdateParticle(env, state, i, dt))
-        {
-            ++i;
-            continue;
-        }
-        KillParticle(state, i);
-    }
+    UpdateParticles(env, ptr, dt);
+
 
     // Spawn new particles if needed.
-    if (mParams.mode == SpawnPolicy::Maintain)
+    if (mParams->mode == SpawnPolicy::Maintain)
     {
-        const auto num_particles_always = size_t(mParams.num_particles);
+        const auto num_particles_always = size_t(mParams->num_particles);
         const auto num_particles_now = state.particles.size();
         if (num_particles_now < num_particles_always)
         {
             const auto num_particles_needed = num_particles_always - num_particles_now;
-            InitParticles(env, state, num_particles_needed);
+            InitParticles(env, ptr, num_particles_needed);
         }
     }
-    else if (mParams.mode == SpawnPolicy::Continuous)
+    else if (mParams->mode == SpawnPolicy::Continuous)
     {
         // the number of particles is taken as the rate of particles per
         // second. fractionally cumulate particles and then
         // spawn when we have some number non-fractional particles.
-        state.hatching += mParams.num_particles * dt;
+        state.hatching += mParams->num_particles * dt;
         const auto num = size_t(state.hatching);
-        InitParticles(env, state, num);
+        InitParticles(env, ptr, num);
         state.hatching -= num;
     }
     state.time += dt;
 }
 
 // ParticleEngine implementation.
-bool ParticleEngineClass::IsAlive(const InstanceState& state) const
+bool ParticleEngineClass::IsAlive(const InstanceStatePtr& ptr) const
 {
-    if (state.time < mParams.delay)
+    auto& state = *ptr;
+
+    if (state.time < mParams->delay)
         return true;
-    else if (state.time < mParams.min_time)
+    else if (state.time < mParams->min_time)
         return true;
-    else if (state.time > mParams.max_time)
+    else if (state.time > mParams->max_time)
         return false;
 
-    if (mParams.mode == SpawnPolicy::Continuous ||
-        mParams.mode == SpawnPolicy::Maintain ||
-        mParams.mode == SpawnPolicy::Command)
+    if (mParams->mode == SpawnPolicy::Continuous ||
+        mParams->mode == SpawnPolicy::Maintain ||
+        mParams->mode == SpawnPolicy::Command)
         return true;
 
     return !state.particles.empty();
 }
 
-void ParticleEngineClass::Emit(const Environment& env, InstanceState& state, int count) const
+void ParticleEngineClass::Emit(const Environment& env, InstanceStatePtr ptr, int count) const
 {
     if (count < 0)
         return;
 
-    InitParticles(env, state, size_t(count));
+    InitParticles(env, ptr, size_t(count));
 }
 
 // ParticleEngine implementation. Restart the simulation
 // with the previous parameters.
-void ParticleEngineClass::Restart(const Environment& env, InstanceState& state) const
+void ParticleEngineClass::Restart(const Environment& env, InstanceStatePtr ptr) const
 {
+    auto& state = *ptr;
+
     state.particles.clear();
-    state.delay    = mParams.delay;
+    state.delay    = mParams->delay;
     state.time     = 0.0f;
     state.hatching = 0.0f;
     // if the spawn policy is continuous the num particles
     // is a rate of particles per second. in order to avoid
     // a massive initial burst of particles skip the init here
-    if (mParams.mode == SpawnPolicy::Continuous)
+    if (mParams->mode == SpawnPolicy::Continuous)
         return;
 
     // if the spawn mode is on command only we don't spawn anything
     // unless by command.
-    if (mParams.mode == SpawnPolicy::Command)
+    if (mParams->mode == SpawnPolicy::Command)
         return;
 
     if (state.delay != 0.0f)
-        state.hatching = mParams.num_particles;
-    else InitParticles(env, state, size_t(mParams.num_particles));
+        state.hatching = mParams->num_particles;
+    else InitParticles(env, ptr, size_t(mParams->num_particles));
 }
 
 void ParticleEngineClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",                           mId);
     data.Write("name",                         mName);
-    data.Write("direction",                    mParams.direction);
-    data.Write("placement",                    mParams.placement);
-    data.Write("shape",                        mParams.shape);
-    data.Write("coordinate_space",             mParams.coordinate_space);
-    data.Write("motion",                       mParams.motion);
-    data.Write("mode",                         mParams.mode);
-    data.Write("boundary",                     mParams.boundary);
-    data.Write("delay",                        mParams.delay);
-    data.Write("min_time",                     mParams.min_time);
-    data.Write("max_time",                     mParams.max_time);
-    data.Write("num_particles",                mParams.num_particles);
-    data.Write("min_lifetime",                 mParams.min_lifetime);
-    data.Write("max_lifetime",                 mParams.max_lifetime);
-    data.Write("max_xpos",                     mParams.max_xpos);
-    data.Write("max_ypos",                     mParams.max_ypos);
-    data.Write("init_rect_xpos",               mParams.init_rect_xpos);
-    data.Write("init_rect_ypos",               mParams.init_rect_ypos);
-    data.Write("init_rect_width",              mParams.init_rect_width);
-    data.Write("init_rect_height",             mParams.init_rect_height);
-    data.Write("min_velocity",                 mParams.min_velocity);
-    data.Write("max_velocity",                 mParams.max_velocity);
-    data.Write("direction_sector_start_angle", mParams.direction_sector_start_angle);
-    data.Write("direction_sector_size",        mParams.direction_sector_size);
-    data.Write("min_point_size",               mParams.min_point_size);
-    data.Write("max_point_size",               mParams.max_point_size);
-    data.Write("min_alpha",                    mParams.min_alpha);
-    data.Write("max_alpha",                    mParams.max_alpha);
-    data.Write("growth_over_time",             mParams.rate_of_change_in_size_wrt_time);
-    data.Write("growth_over_dist",             mParams.rate_of_change_in_size_wrt_dist);
-    data.Write("alpha_over_time",              mParams.rate_of_change_in_alpha_wrt_time);
-    data.Write("alpha_over_dist",              mParams.rate_of_change_in_alpha_wrt_dist);
-    data.Write("gravity",                      mParams.gravity);
+    data.Write("direction",                    mParams->direction);
+    data.Write("placement",                    mParams->placement);
+    data.Write("shape",                        mParams->shape);
+    data.Write("coordinate_space",             mParams->coordinate_space);
+    data.Write("motion",                       mParams->motion);
+    data.Write("mode",                         mParams->mode);
+    data.Write("boundary",                     mParams->boundary);
+    data.Write("delay",                        mParams->delay);
+    data.Write("min_time",                     mParams->min_time);
+    data.Write("max_time",                     mParams->max_time);
+    data.Write("num_particles",                mParams->num_particles);
+    data.Write("min_lifetime",                 mParams->min_lifetime);
+    data.Write("max_lifetime",                 mParams->max_lifetime);
+    data.Write("max_xpos",                     mParams->max_xpos);
+    data.Write("max_ypos",                     mParams->max_ypos);
+    data.Write("init_rect_xpos",               mParams->init_rect_xpos);
+    data.Write("init_rect_ypos",               mParams->init_rect_ypos);
+    data.Write("init_rect_width",              mParams->init_rect_width);
+    data.Write("init_rect_height",             mParams->init_rect_height);
+    data.Write("min_velocity",                 mParams->min_velocity);
+    data.Write("max_velocity",                 mParams->max_velocity);
+    data.Write("direction_sector_start_angle", mParams->direction_sector_start_angle);
+    data.Write("direction_sector_size",        mParams->direction_sector_size);
+    data.Write("min_point_size",               mParams->min_point_size);
+    data.Write("max_point_size",               mParams->max_point_size);
+    data.Write("min_alpha",                    mParams->min_alpha);
+    data.Write("max_alpha",                    mParams->max_alpha);
+    data.Write("growth_over_time",             mParams->rate_of_change_in_size_wrt_time);
+    data.Write("growth_over_dist",             mParams->rate_of_change_in_size_wrt_dist);
+    data.Write("alpha_over_time",              mParams->rate_of_change_in_alpha_wrt_time);
+    data.Write("alpha_over_dist",              mParams->rate_of_change_in_alpha_wrt_dist);
+    data.Write("gravity",                      mParams->gravity);
 }
 
 bool ParticleEngineClass::FromJson(const data::Reader& data)
 {
+    Params params;
+
     bool ok = true;
     ok &= data.Read("id",                           &mId);
     ok &= data.Read("name",                         &mName);
-    ok &= data.Read("direction",                    &mParams.direction);
-    ok &= data.Read("placement",                    &mParams.placement);
-    ok &= data.Read("shape",                        &mParams.shape);
-    ok &= data.Read("coordinate_space",             &mParams.coordinate_space);
-    ok &= data.Read("motion",                       &mParams.motion);
-    ok &= data.Read("mode",                         &mParams.mode);
-    ok &= data.Read("boundary",                     &mParams.boundary);
-    ok &= data.Read("delay",                        &mParams.delay);
-    ok &= data.Read("min_time",                     &mParams.min_time);
-    ok &= data.Read("max_time",                     &mParams.max_time);
-    ok &= data.Read("num_particles",                &mParams.num_particles);
-    ok &= data.Read("min_lifetime",                 &mParams.min_lifetime) ;
-    ok &= data.Read("max_lifetime",                 &mParams.max_lifetime);
-    ok &= data.Read("max_xpos",                     &mParams.max_xpos);
-    ok &= data.Read("max_ypos",                     &mParams.max_ypos);
-    ok &= data.Read("init_rect_xpos",               &mParams.init_rect_xpos);
-    ok &= data.Read("init_rect_ypos",               &mParams.init_rect_ypos);
-    ok &= data.Read("init_rect_width",              &mParams.init_rect_width);
-    ok &= data.Read("init_rect_height",             &mParams.init_rect_height);
-    ok &= data.Read("min_velocity",                 &mParams.min_velocity);
-    ok &= data.Read("max_velocity",                 &mParams.max_velocity);
-    ok &= data.Read("direction_sector_start_angle", &mParams.direction_sector_start_angle);
-    ok &= data.Read("direction_sector_size",        &mParams.direction_sector_size);
-    ok &= data.Read("min_point_size",               &mParams.min_point_size);
-    ok &= data.Read("max_point_size",               &mParams.max_point_size);
-    ok &= data.Read("min_alpha",                    &mParams.min_alpha);
-    ok &= data.Read("max_alpha",                    &mParams.max_alpha);
-    ok &= data.Read("growth_over_time",             &mParams.rate_of_change_in_size_wrt_time);
-    ok &= data.Read("growth_over_dist",             &mParams.rate_of_change_in_size_wrt_dist);
-    ok &= data.Read("alpha_over_time",              &mParams.rate_of_change_in_alpha_wrt_time);
-    ok &= data.Read("alpha_over_dist",              &mParams.rate_of_change_in_alpha_wrt_dist);
-    ok &= data.Read("gravity",                      &mParams.gravity);
+    ok &= data.Read("direction",                    &params.direction);
+    ok &= data.Read("placement",                    &params.placement);
+    ok &= data.Read("shape",                        &params.shape);
+    ok &= data.Read("coordinate_space",             &params.coordinate_space);
+    ok &= data.Read("motion",                       &params.motion);
+    ok &= data.Read("mode",                         &params.mode);
+    ok &= data.Read("boundary",                     &params.boundary);
+    ok &= data.Read("delay",                        &params.delay);
+    ok &= data.Read("min_time",                     &params.min_time);
+    ok &= data.Read("max_time",                     &params.max_time);
+    ok &= data.Read("num_particles",                &params.num_particles);
+    ok &= data.Read("min_lifetime",                 &params.min_lifetime) ;
+    ok &= data.Read("max_lifetime",                 &params.max_lifetime);
+    ok &= data.Read("max_xpos",                     &params.max_xpos);
+    ok &= data.Read("max_ypos",                     &params.max_ypos);
+    ok &= data.Read("init_rect_xpos",               &params.init_rect_xpos);
+    ok &= data.Read("init_rect_ypos",               &params.init_rect_ypos);
+    ok &= data.Read("init_rect_width",              &params.init_rect_width);
+    ok &= data.Read("init_rect_height",             &params.init_rect_height);
+    ok &= data.Read("min_velocity",                 &params.min_velocity);
+    ok &= data.Read("max_velocity",                 &params.max_velocity);
+    ok &= data.Read("direction_sector_start_angle", &params.direction_sector_start_angle);
+    ok &= data.Read("direction_sector_size",        &params.direction_sector_size);
+    ok &= data.Read("min_point_size",               &params.min_point_size);
+    ok &= data.Read("max_point_size",               &params.max_point_size);
+    ok &= data.Read("min_alpha",                    &params.min_alpha);
+    ok &= data.Read("max_alpha",                    &params.max_alpha);
+    ok &= data.Read("growth_over_time",             &params.rate_of_change_in_size_wrt_time);
+    ok &= data.Read("growth_over_dist",             &params.rate_of_change_in_size_wrt_dist);
+    ok &= data.Read("alpha_over_time",              &params.rate_of_change_in_alpha_wrt_time);
+    ok &= data.Read("alpha_over_dist",              &params.rate_of_change_in_alpha_wrt_dist);
+    ok &= data.Read("gravity",                      &params.gravity);
+    SetParams(params);
     return ok;
 }
 
@@ -2448,38 +2450,50 @@ std::size_t ParticleEngineClass::GetHash() const
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
-    hash = base::hash_combine(hash, mParams);
+    hash = base::hash_combine(hash, *mParams);
     return hash;
 }
 
-void ParticleEngineClass::InitParticles(const Environment& env, InstanceState& state, size_t num) const
+void ParticleEngineClass::InitParticles(const Environment& env, InstanceStatePtr state, size_t num) const
 {
-    const auto count = state.particles.size();
-    state.particles.resize(count + num);
+    ParticleEngineClass::InitParticles(env, *mParams, state->particles, num);
+}
 
-    if (mParams.coordinate_space == CoordinateSpace::Global)
+void ParticleEngineClass::UpdateParticles(const Environment& env, InstanceStatePtr state, float dt) const
+{
+
+    ParticleEngineClass::UpdateParticles(env, *mParams, state->particles, dt);
+}
+
+// static
+void ParticleEngineClass::InitParticles(const Environment& env, const Params& params, ParticleBuffer& particles, size_t num)
+{
+    const auto count = particles.size();
+    particles.resize(count + num);
+
+    if (params.coordinate_space == CoordinateSpace::Global)
     {
         Transform transform(*env.model_matrix);
         transform.Push();
-        transform.Scale(mParams.init_rect_width, mParams.init_rect_height);
-        transform.Translate(mParams.init_rect_xpos, mParams.init_rect_ypos);
+        transform.Scale(params.init_rect_width, params.init_rect_height);
+        transform.Translate(params.init_rect_xpos, params.init_rect_ypos);
         const auto& particle_to_world = transform.GetAsMatrix();
         const auto emitter_radius = 0.5f;
         const auto emitter_center = glm::vec2(0.5f, 0.5f);
 
         for (size_t i=0; i<num; ++i)
         {
-            const auto velocity = math::rand(mParams.min_velocity, mParams.max_velocity);
+            const auto velocity = math::rand(params.min_velocity, params.max_velocity);
 
             glm::vec2 position;
             glm::vec2 direction;
-            if (mParams.shape == EmitterShape::Rectangle)
+            if (params.shape == EmitterShape::Rectangle)
             {
-                if (mParams.placement == Placement::Inside)
+                if (params.placement == Placement::Inside)
                     position = glm::vec2(math::rand(0.0f, 1.0f), math::rand(0.0f, 1.0f));
-                else if (mParams.placement == Placement::Center)
+                else if (params.placement == Placement::Center)
                     position = glm::vec2(0.5f, 0.5f);
-                else if (mParams.placement == Placement::Edge)
+                else if (params.placement == Placement::Edge)
                 {
                     const auto edge = math::rand(0, 3);
                     if (edge == 0 || edge == 1)
@@ -2494,18 +2508,18 @@ void ParticleEngineClass::InitParticles(const Environment& env, InstanceState& s
                     }
                 }
             }
-            else if (mParams.shape == EmitterShape::Circle)
+            else if (params.shape == EmitterShape::Circle)
             {
-                if (mParams.placement == Placement::Center)
+                if (params.placement == Placement::Center)
                     position = glm::vec2(0.5f, 0.5f);
-                else if (mParams.placement == Placement::Inside)
+                else if (params.placement == Placement::Inside)
                 {
                     const auto x = math::rand(-emitter_radius, emitter_radius);
                     const auto y = math::rand(-emitter_radius, emitter_radius);
                     const auto r = math::rand(0.0f, 1.0f);
                     position = glm::normalize(glm::vec2(x, y)) * emitter_radius * r + emitter_center;
                 }
-                else if (mParams.placement == Placement::Edge)
+                else if (params.placement == Placement::Edge)
                 {
                     const auto x = math::rand(-emitter_radius, emitter_radius);
                     const auto y = math::rand(-emitter_radius, emitter_radius);
@@ -2513,11 +2527,11 @@ void ParticleEngineClass::InitParticles(const Environment& env, InstanceState& s
                 }
             }
 
-            if (mParams.direction == Direction::Sector)
+            if (params.direction == Direction::Sector)
             {
                 Transform local_transform;
-                local_transform.RotateAroundZ(mParams.direction_sector_start_angle +
-                                              math::rand(0.0f, mParams.direction_sector_size));
+                local_transform.RotateAroundZ(params.direction_sector_start_angle +
+                                              math::rand(0.0f, params.direction_sector_size));
 
                 const auto local_direction = local_transform * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
                 const auto world_direction = glm::normalize(particle_to_world * local_direction);
@@ -2525,38 +2539,38 @@ void ParticleEngineClass::InitParticles(const Environment& env, InstanceState& s
                 const auto world_angle = std::atan2(world_direction.y, world_direction.x);
                 direction = glm::vec2(std::cos(world_angle), std::sin(world_angle));
             }
-            else if (mParams.placement == Placement::Center)
+            else if (params.placement == Placement::Center)
             {
                 direction = glm::normalize(glm::vec2(math::rand(-1.0f, 1.0f),
                                                      math::rand(-1.0f, 1.0f)));
             }
-            else if (mParams.direction == Direction::Inwards)
+            else if (params.direction == Direction::Inwards)
                 direction = glm::normalize(emitter_center - position);
-            else if (mParams.direction == Direction::Outwards)
+            else if (params.direction == Direction::Outwards)
                 direction = glm::normalize(position - emitter_center);
 
             const auto world = particle_to_world * glm::vec4(position, 0.0f, 1.0f);
             // note that the velocity vector is baked into the
             // direction vector in order to save space.
-            auto& particle = state.particles[count+i];
+            auto& particle = particles[count+i];
             particle.time       = 0.0f;
-            particle.time_scale = math::rand(mParams.min_lifetime, mParams.max_lifetime) / mParams.max_lifetime;
-            particle.pointsize  = math::rand(mParams.min_point_size, mParams.max_point_size);
-            particle.alpha      = math::rand(mParams.min_alpha, mParams.max_alpha);
+            particle.time_scale = math::rand(params.min_lifetime, params.max_lifetime) / params.max_lifetime;
+            particle.pointsize  = math::rand(params.min_point_size, params.max_point_size);
+            particle.alpha      = math::rand(params.min_alpha, params.max_alpha);
             particle.position   = glm::vec2(world.x, world.y);
             particle.direction  = direction * velocity;
             particle.randomizer = math::rand(0.0f, 1.0f);
         }
     }
-    else if (mParams.coordinate_space == CoordinateSpace::Local)
+    else if (params.coordinate_space == CoordinateSpace::Local)
     {
         // the emitter box uses normalized coordinates
-        const auto sim_width  = mParams.max_xpos;
-        const auto sim_height = mParams.max_ypos;
-        const auto emitter_width  = mParams.init_rect_width * sim_width;
-        const auto emitter_height = mParams.init_rect_height * sim_height;
-        const auto emitter_xpos   = mParams.init_rect_xpos * sim_width;
-        const auto emitter_ypos   = mParams.init_rect_ypos * sim_height;
+        const auto sim_width  = params.max_xpos;
+        const auto sim_height = params.max_ypos;
+        const auto emitter_width  = params.init_rect_width * sim_width;
+        const auto emitter_height = params.init_rect_height * sim_height;
+        const auto emitter_xpos   = params.init_rect_xpos * sim_width;
+        const auto emitter_ypos   = params.init_rect_ypos * sim_height;
         const auto emitter_radius = std::min(emitter_width, emitter_height) * 0.5f;
         const auto emitter_center = glm::vec2(emitter_xpos + emitter_width * 0.5f,
                                               emitter_ypos + emitter_height * 0.5f);
@@ -2569,17 +2583,17 @@ void ParticleEngineClass::InitParticles(const Environment& env, InstanceState& s
 
         for (size_t i = 0; i < num; ++i)
         {
-            const auto velocity = math::rand(mParams.min_velocity, mParams.max_velocity);
+            const auto velocity = math::rand(params.min_velocity, params.max_velocity);
             glm::vec2 position;
             glm::vec2 direction;
-            if (mParams.shape == EmitterShape::Rectangle)
+            if (params.shape == EmitterShape::Rectangle)
             {
-                if (mParams.placement == Placement::Inside)
+                if (params.placement == Placement::Inside)
                     position = emitter_pos + glm::vec2(math::rand(0.0f, emitter_width),
                                                        math::rand(0.0f, emitter_height));
-                else if (mParams.placement == Placement::Center)
+                else if (params.placement == Placement::Center)
                     position = emitter_center;
-                else if (mParams.placement == Placement::Edge)
+                else if (params.placement == Placement::Edge)
                 {
                     const auto edge = math::rand(0, 3);
                     if (edge == 0 || edge == 1)
@@ -2593,7 +2607,7 @@ void ParticleEngineClass::InitParticles(const Environment& env, InstanceState& s
                         position.y = edge == 2 ? emitter_top : emitter_bot;
                     }
                 }
-                else if (mParams.placement == Placement::Outside)
+                else if (params.placement == Placement::Outside)
                 {
                     position.x = math::rand(0.0f, sim_width);
                     position.y = math::rand(0.0f, sim_height);
@@ -2605,11 +2619,11 @@ void ParticleEngineClass::InitParticles(const Environment& env, InstanceState& s
                     }
                 }
             }
-            else if (mParams.shape == EmitterShape::Circle)
+            else if (params.shape == EmitterShape::Circle)
             {
-                if (mParams.placement == Placement::Center)
+                if (params.placement == Placement::Center)
                     position  = emitter_center;
-                else if (mParams.placement == Placement::Inside)
+                else if (params.placement == Placement::Inside)
                 {
                     const auto x = math::rand(-1.0f, 1.0f);
                     const auto y = math::rand(-1.0f, 1.0f);
@@ -2617,14 +2631,14 @@ void ParticleEngineClass::InitParticles(const Environment& env, InstanceState& s
                     const auto p = glm::normalize(glm::vec2(x, y)) * emitter_radius * r;
                     position = p + emitter_pos + emitter_size * 0.5f;
                 }
-                else if (mParams.placement == Placement::Edge)
+                else if (params.placement == Placement::Edge)
                 {
                     const auto x = math::rand(-1.0f, 1.0f);
                     const auto y = math::rand(-1.0f, 1.0f);
                     const auto p = glm::normalize(glm::vec2(x, y)) * emitter_radius;
                     position = p + emitter_pos + emitter_size * 0.5f;
                 }
-                else if (mParams.placement == Placement::Outside)
+                else if (params.placement == Placement::Outside)
                 {
                     auto p = glm::vec2(math::rand(0.0f, sim_width),
                                        math::rand(0.0f, sim_height));
@@ -2636,75 +2650,93 @@ void ParticleEngineClass::InitParticles(const Environment& env, InstanceState& s
                 }
             }
 
-            if (mParams.direction == Direction::Sector)
+            if (params.direction == Direction::Sector)
             {
-                const auto angle = math::rand(0.0f, mParams.direction_sector_size) + mParams.direction_sector_start_angle;
+                const auto angle = math::rand(0.0f, params.direction_sector_size) + params.direction_sector_start_angle;
                 direction = glm::vec2(std::cos(angle), std::sin(angle));
             }
-            else if (mParams.placement == Placement::Center)
+            else if (params.placement == Placement::Center)
             {
                 direction = glm::normalize(glm::vec2(math::rand(-1.0f, 1.0f),
                                                      math::rand(-1.0f, 1.0f)));
             }
-            else if (mParams.direction == Direction::Inwards)
+            else if (params.direction == Direction::Inwards)
                 direction = glm::normalize(emitter_center - position);
-            else if (mParams.direction == Direction::Outwards)
+            else if (params.direction == Direction::Outwards)
                 direction = glm::normalize(position - emitter_center);
 
             // note that the velocity vector is baked into the
             // direction vector in order to save space.
-            auto& particle = state.particles[count+i];
+            auto& particle      = particles[count+i];
             particle.time       = 0.0f;
-            particle.time_scale = math::rand(mParams.min_lifetime, mParams.max_lifetime) / mParams.max_lifetime;
-            particle.pointsize  = math::rand(mParams.min_point_size, mParams.max_point_size);
-            particle.alpha      = math::rand(mParams.min_alpha, mParams.max_alpha);
+            particle.time_scale = math::rand(params.min_lifetime, params.max_lifetime) / params.max_lifetime;
+            particle.pointsize  = math::rand(params.min_point_size, params.max_point_size);
+            particle.alpha      = math::rand(params.min_alpha, params.max_alpha);
             particle.position   = position;
             particle.direction  = direction *  velocity;
             particle.randomizer = math::rand(0.0f, 1.0f);
         }
     } else BUG("Unhandled particle system coordinate space.");
 }
-void ParticleEngineClass::KillParticle(InstanceState& state, size_t i) const
+
+// static
+void ParticleEngineClass::UpdateParticles(const Environment& env, const Params& params, ParticleBuffer& particles, float dt)
 {
-    const auto last = state.particles.size() - 1;
-    std::swap(state.particles[i], state.particles[last]);
-    state.particles.pop_back();
+    ParticleWorld world;
+    // transform the gravity vector associated with the particle engine
+    // to world space. For example when the rendering system uses dimetric
+    // rendering for some shape (we're looking at it at on a xy plane at
+    // a certain angle) the gravity vector needs to be transformed so that
+    // the local gravity vector makes sense in this dimetric world.
+    if (env.world_matrix && params.coordinate_space == CoordinateSpace::Global)
+    {
+        const auto local_gravity_dir = glm::normalize(params.gravity);
+        const auto world_gravity_dir = glm::normalize(*env.world_matrix * glm::vec4 { local_gravity_dir, 0.0f, 0.0f });
+        const auto world_gravity = glm::vec2 { world_gravity_dir.x * std::abs(params.gravity.x),
+                                               world_gravity_dir.y * std::abs(params.gravity.y) };
+        world.world_gravity = world_gravity;
+    }
+
+    // update each current particle
+    for (size_t i=0; i<particles.size();)
+    {
+        if (UpdateParticle(env, params, world, particles, i, dt))
+        {
+            ++i;
+            continue;
+        }
+        KillParticle(particles, i);
+    }
 }
 
-bool ParticleEngineClass::UpdateParticle(const Environment& env, InstanceState& state, size_t i, float dt) const
+// static
+void ParticleEngineClass::KillParticle(ParticleBuffer& particles, size_t i)
 {
-    auto& p = state.particles[i];
+    const auto last = particles.size() - 1;
+    std::swap(particles[i], particles[last]);
+    particles.pop_back();
+}
+
+// static
+bool ParticleEngineClass::UpdateParticle(const Environment& env, const Params& params, const ParticleWorld& world,
+                                         ParticleBuffer& particles, size_t i, float dt)
+{
+    auto& p = particles[i];
 
     p.time += dt;
-    if (p.time > p.time_scale * mParams.max_lifetime)
+    if (p.time > p.time_scale * params.max_lifetime)
         return false;
 
     const auto p0 = p.position;
 
     // update change in position
-    if (mParams.motion == Motion::Linear)
+    if (params.motion == Motion::Linear)
         p.position += (p.direction * dt);
-    else if (mParams.motion == Motion::Projectile)
+    else if (params.motion == Motion::Projectile)
     {
-        glm::vec2 gravity = mParams.gravity;
-
-        // transform the gravity vector associated with the particle engine
-        // to world space. For example when the rendering system uses dimetric
-        // rendering for some shape (we're looking at it at on a xy plane at
-        // a certain angle) the gravity vector needs to be transformed so that
-        // the local gravity vector makes sense in this dimetric world.
-        if (env.world_matrix && mParams.coordinate_space == CoordinateSpace::Global)
-        {
-            if (env.editing_mode || !state.cached_world_gravity.has_value())
-            {
-                const auto local_gravity_dir = glm::normalize(mParams.gravity);
-                const auto world_gravity_dir = glm::normalize(*env.world_matrix * glm::vec4 { local_gravity_dir, 0.0f, 0.0f });
-                const auto world_gravity = glm::vec2 { world_gravity_dir.x * std::abs(mParams.gravity.x),
-                                                       world_gravity_dir.y * std::abs(mParams.gravity.y) };
-                state.cached_world_gravity = world_gravity;
-            }
-            gravity = state.cached_world_gravity.value();
-        }
+        glm::vec2 gravity = params.gravity;
+        if (world.world_gravity.has_value())
+            gravity = world.world_gravity.value();
 
         p.position += (p.direction * dt);
         p.direction += (dt * gravity);
@@ -2715,14 +2747,14 @@ bool ParticleEngineClass::UpdateParticle(const Environment& env, InstanceState& 
     const auto  dd = glm::length(dp);
 
     // Update particle size with respect to time and distance
-    p.pointsize += (dt * mParams.rate_of_change_in_size_wrt_time * p.time_scale);
-    p.pointsize += (dd * mParams.rate_of_change_in_size_wrt_dist);
+    p.pointsize += (dt * params.rate_of_change_in_size_wrt_time * p.time_scale);
+    p.pointsize += (dd * params.rate_of_change_in_size_wrt_dist);
     if (p.pointsize <= 0.0f)
         return false;
 
     // update particle alpha value with respect to time and distance.
-    p.alpha += (dt * mParams.rate_of_change_in_alpha_wrt_time * p.time_scale);
-    p.alpha += (dt * mParams.rate_of_change_in_alpha_wrt_dist);
+    p.alpha += (dt * params.rate_of_change_in_alpha_wrt_time * p.time_scale);
+    p.alpha += (dt * params.rate_of_change_in_alpha_wrt_dist);
     if (p.alpha <= 0.0f)
         return false;
     p.alpha = math::clamp(0.0f, 1.0f, p.alpha);
@@ -2731,37 +2763,37 @@ bool ParticleEngineClass::UpdateParticle(const Environment& env, InstanceState& 
     p.distance += dd;
 
     // todo:
-    if (mParams.coordinate_space == CoordinateSpace::Global)
+    if (params.coordinate_space == CoordinateSpace::Global)
         return true;
 
     // boundary conditions.
-    if (mParams.boundary == BoundaryPolicy::Wrap)
+    if (params.boundary == BoundaryPolicy::Wrap)
     {
-        p.position.x = math::wrap(0.0f, mParams.max_xpos, p.position.x);
-        p.position.y = math::wrap(0.0f, mParams.max_ypos, p.position.y);
+        p.position.x = math::wrap(0.0f, params.max_xpos, p.position.x);
+        p.position.y = math::wrap(0.0f, params.max_ypos, p.position.y);
     }
-    else if (mParams.boundary == BoundaryPolicy::Clamp)
+    else if (params.boundary == BoundaryPolicy::Clamp)
     {
-        p.position.x = math::clamp(0.0f, mParams.max_xpos, p.position.x);
-        p.position.y = math::clamp(0.0f, mParams.max_ypos, p.position.y);
+        p.position.x = math::clamp(0.0f, params.max_xpos, p.position.x);
+        p.position.y = math::clamp(0.0f, params.max_ypos, p.position.y);
     }
-    else if (mParams.boundary == BoundaryPolicy::Kill)
+    else if (params.boundary == BoundaryPolicy::Kill)
     {
-        if (p.position.x < 0.0f || p.position.x > mParams.max_xpos)
+        if (p.position.x < 0.0f || p.position.x > params.max_xpos)
             return false;
-        else if (p.position.y < 0.0f || p.position.y > mParams.max_ypos)
+        else if (p.position.y < 0.0f || p.position.y > params.max_ypos)
             return false;
     }
-    else if (mParams.boundary == BoundaryPolicy::Reflect)
+    else if (params.boundary == BoundaryPolicy::Reflect)
     {
         glm::vec2 n;
         if (p.position.x <= 0.0f)
             n = glm::vec2(1.0f, 0.0f);
-        else if (p.position.x >= mParams.max_xpos)
+        else if (p.position.x >= params.max_xpos)
             n = glm::vec2(-1.0f, 0.0f);
         else if (p.position.y <= 0.0f)
             n = glm::vec2(0, 1.0f);
-        else if (p.position.y >= mParams.max_ypos)
+        else if (p.position.y >= params.max_ypos)
             n = glm::vec2(0, -1.0f);
         else return true;
         // compute new direction vector given the normal vector of the boundary
@@ -2773,8 +2805,8 @@ bool ParticleEngineClass::UpdateParticle(const Environment& env, InstanceState& 
         // clamp the position in order to eliminate the situation
         // where the object has moved beyond the boundaries of the simulation
         // and is stuck there alternating it's direction vector
-        p.position.x = math::clamp(0.0f, mParams.max_xpos, p.position.x);
-        p.position.y = math::clamp(0.0f, mParams.max_ypos, p.position.y);
+        p.position.x = math::clamp(0.0f, params.max_xpos, p.position.x);
+        p.position.y = math::clamp(0.0f, params.max_ypos, p.position.y);
     }
     return true;
 }
@@ -2805,7 +2837,7 @@ std::string ParticleEngineInstance::GetGeometryId(const Environment& env) const
 
 bool ParticleEngineInstance::Construct(const Environment& env, Geometry::CreateArgs& create) const
 {
-    return mClass->Construct(env, mState, create);
+    return mClass->Construct(env, *mState, create);
 }
 
 void ParticleEngineInstance::Update(const Environment& env, float dt)
