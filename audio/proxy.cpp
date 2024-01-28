@@ -65,7 +65,37 @@ void SourceThreadProxy::Prepare(unsigned int buffer_size)
 }
 unsigned SourceThreadProxy::FillBuffer(void* device_buff, unsigned device_buff_size)
 {
-    return FillBuffer(device_buff, device_buff_size, false);
+    // After the call to prepare the audio source was moved to the audio
+    // device it's now possible that the the first call to FillBuffer
+    // on the source object arrives "too" soon after the call to Prepare.
+    //
+    // In the thread proxy the Prepare is now the place where the thread
+    // is created after the buffers are created.
+    //
+    // But the problem is that the if the first call to FillBuffer
+    // arrives too soon it's possible that the thread has not yet produced
+    // any filled audio buffers. If the calling thread then leaves FillBuffer
+    // without having produced any data in the device audio buffer OpenAL
+    // audio sources (Emscripten implementation on Web Audio) stop playing.
+    //
+    // So the fix right now is to wait on the first buffer. An alternative
+    // could be to output zeroes either from the source or in the OpenAL
+    // device/stream itself if the source produces 0 bytes of audio data.
+
+
+    const auto wait_first_buffer = mFirstBuffer;
+    if (wait_first_buffer)
+    {
+        DEBUG("Waiting on first audio buffer from thread....");
+    }
+
+    if (const auto ret = FillBuffer(device_buff, device_buff_size, wait_first_buffer))
+        return ret;
+
+    mFirstBuffer = false;
+
+    WARN("No audio buffer available from source thread!");
+    return 0;
 }
 
 bool SourceThreadProxy::HasMore(std::uint64_t num_bytes_read) const noexcept

@@ -150,6 +150,7 @@ namespace audio
         std::exception_ptr mException;
         bool mShutdown = false;
         bool mSourceDone = false;
+        bool mFirstBuffer = true;
     };
 
     // AudioFile implements reading audio samples from an
