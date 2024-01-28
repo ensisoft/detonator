@@ -171,11 +171,17 @@ BlurpFailure(const char* expression, const char* file, const char* function, int
     static auto* get_thread_log = (base_GetThreadLog_FuncPtr)dlsym(myself, "base_GetThreadLog");
     static auto* get_global_log = (base_GetGlobalLog_FuncPtr)dlsym(myself, "base_GetGlobalLog");
 
-    if (auto* logger = get_thread_log())
-        logger->Flush();
+    if (get_thread_log)
+    {
+        if (auto* logger = get_thread_log())
+            logger->Flush();
+    }
 
-    if (auto* logger = get_global_log())
-        logger->Flush();
+    if (get_global_log)
+    {
+        if (auto* logger = get_global_log())
+            logger->Flush();
+    }
 
 #endif
 
