@@ -279,9 +279,13 @@ font: 16pt &quot;Sans Serif&quot;;</string>
      <string>Application</string>
     </property>
     <addaction name="actionPause"/>
+    <addaction name="actionStep"/>
+    <addaction name="separator"/>
+    <addaction name="actionTrace"/>
     <addaction name="separator"/>
     <addaction name="actionToggleDebugDraw"/>
     <addaction name="actionToggleDebugLog"/>
+    <addaction name="actionToggleDebugMsg"/>
     <addaction name="separator"/>
     <addaction name="actionScreenshot"/>
     <addaction name="separator"/>
