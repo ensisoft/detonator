@@ -47,12 +47,17 @@ namespace base
             // the same parent id will be submitted to the same thread.
             SingleThread
         };
-        explicit ThreadTask(Affinity affinity = Affinity::AnyThread, size_t parent = 0) noexcept
+        explicit ThreadTask(Affinity affinity = Affinity::AnyThread, size_t thread = 0) noexcept
           : mAffinity(affinity)
           , mTaskId(GetNextTaskId())
-          , mParentId(parent)
+          , mThreadId(thread)
         {}
         virtual ~ThreadTask() = default;
+
+        inline void SetAffinity(Affinity affinity) noexcept
+        { mAffinity = affinity; }
+        inline void SetThreadId(size_t thread) noexcept
+        { mThreadId = thread; }
 
         inline Affinity GetAffinity() const noexcept
         { return mAffinity; }
@@ -61,8 +66,8 @@ namespace base
         inline size_t GetTaskId() const noexcept
         { return mTaskId; }
 
-        inline size_t GetParentId() const noexcept
-        { return mParentId; }
+        inline size_t GetThreadId() const noexcept
+        { return mThreadId; }
 
         inline bool IsComplete() const noexcept
         { return mDone.load(std::memory_order_acquire); }
@@ -102,9 +107,9 @@ namespace base
         }
 
     private:
-        const Affinity mAffinity;
-        const std::size_t mTaskId = 0;
-        const std::size_t mParentId = 0;
+        Affinity mAffinity;
+        std::size_t mTaskId = 0;
+        std::size_t mThreadId = 0;
         std::exception_ptr mException;
         std::atomic<bool> mDone = {false};
 

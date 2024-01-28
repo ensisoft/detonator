@@ -228,7 +228,7 @@ TaskHandle ThreadPool::SubmitTask(std::unique_ptr<ThreadTask> task)
         }
         else
         {
-            const auto id = task->GetParentId();
+            const auto id = task->GetThreadId();
             thread = mRealThreads[id % num_threads].get();
         }
     }
