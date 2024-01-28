@@ -89,10 +89,10 @@ unsigned SourceThreadProxy::FillBuffer(void* device_buff, unsigned device_buff_s
         DEBUG("Waiting on first audio buffer from thread....");
     }
 
+    mFirstBuffer = false;
+
     if (const auto ret = FillBuffer(device_buff, device_buff_size, wait_first_buffer))
         return ret;
-
-    mFirstBuffer = false;
 
     WARN("No audio buffer available from source thread!");
     return 0;
