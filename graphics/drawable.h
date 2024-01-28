@@ -24,6 +24,7 @@
 #  include <glm/gtc/type_ptr.hpp>
 #include "warnpop.h"
 
+#include <atomic>
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -1123,7 +1124,7 @@ namespace gfx
         // State of any instance of ParticleEngineInstance.
         struct InstanceState {
             // exclusion device on the particles buffer below.
-            std::mutex mutex;
+            mutable std::mutex mutex;
             // the simulation particles.
             ParticleBuffer particles;
             // delay until the particles are first initially emitted.
@@ -1132,6 +1133,12 @@ namespace gfx
             float time = 0.0f;
             // fractional count of new particles being hatched.
             float hatching = 0.0f;
+            // these back / task buffers let us run the particle
+            // engine tasks (init/update) on the background on their
+            // own buffers while the rendering state is in the
+            // original 'particles' buffers.
+            ParticleBuffer task_buffer[2];
+            std::atomic<size_t> task_count = 0;
         };
         using InstanceStatePtr = std::shared_ptr<InstanceState>;
 

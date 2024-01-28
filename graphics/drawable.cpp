@@ -2146,6 +2146,10 @@ std::string ParticleEngineClass::GetShaderName(const Environment& env) const
 
 bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const InstanceState& state, Geometry::CreateArgs& create) const
 {
+    // take a lock on the mutex to make sure that we don't have
+    // a race condition with the background tasks.
+    std::lock_guard<std::mutex> lock(state.mutex);
+
     // the point rasterization doesn't support non-uniform
     // sizes for the points, i.e. they're always square
     // so therefore we must choose one of the pixel ratio values
@@ -2274,16 +2278,71 @@ void ParticleEngineClass::Update(const Environment& env, InstanceStatePtr ptr, f
 
     UpdateParticles(env, ptr, dt);
 
-
     // Spawn new particles if needed.
     if (mParams->mode == SpawnPolicy::Maintain)
     {
-        const auto num_particles_always = size_t(mParams->num_particles);
-        const auto num_particles_now = state.particles.size();
-        if (num_particles_now < num_particles_always)
+        class MaintainParticlesTask : public base::ThreadTask {
+        public:
+            MaintainParticlesTask(const Environment& env, InstanceStatePtr state, EngineParamsPtr params)
+              : mEnvironment(env)
+              , mInstanceState(std::move(state))
+              , mEngineParams(std::move(params))
+            {}
+        protected:
+            virtual void DoTask() override
+            {
+                const auto& env = mEnvironment.ToEnv();
+                const auto& params = *mEngineParams;
+
+                const auto num_particles_always = size_t(mEngineParams->num_particles);
+                const auto num_particles_now = mInstanceState->task_buffer[0].size();
+                if (num_particles_now < num_particles_always)
+                {
+                    const auto num_particles_needed = num_particles_always - num_particles_now;
+
+                    ParticleEngineClass::InitParticles(mEnvironment.ToEnv(), *mEngineParams,
+                                                       mInstanceState->task_buffer[0],
+                                                       num_particles_needed);
+
+                    // copy the updated contents over to the dst buffer.
+                    // we're copying the data to a secondary buffer so that
+                    // the part where we have to lock on the particle buffer
+                    // that the renderer is using is as short as possible.
+                    mInstanceState->task_buffer[1] = mInstanceState->task_buffer[0];
+
+                    // make this change atomically available for rendering
+                    {
+                        std::lock_guard<std::mutex> lock(mInstanceState->mutex);
+                        std::swap(mInstanceState->particles, mInstanceState->task_buffer[1]);
+                    }
+                }
+                mInstanceState->task_count--;
+            }
+        private:
+            const detail::EnvironmentCopy mEnvironment;
+            const InstanceStatePtr mInstanceState;
+            const EngineParamsPtr  mEngineParams;
+        };
+
+        if (auto* pool = base::GetGlobalThreadPool())
         {
-            const auto num_particles_needed = num_particles_always - num_particles_now;
-            InitParticles(env, ptr, num_particles_needed);
+            ptr->task_count++;
+
+            auto task = std::make_unique<MaintainParticlesTask>(env, ptr, mParams);
+            task->SetAffinity(base::ThreadTask::Affinity::SingleThread);
+            task->SetThreadId((size_t)ptr.get());
+            pool->SubmitTask(std::move(task));
+
+        }
+        else
+        {
+            const auto num_particles_always = size_t(mParams->num_particles);
+            const auto num_particles_now = state.particles.size();
+            if (num_particles_now < num_particles_always)
+            {
+                const auto num_particles_needed = num_particles_always - num_particles_now;
+                InitParticles(env, ptr, num_particles_needed);
+            }
         }
     }
     else if (mParams->mode == SpawnPolicy::Continuous)
@@ -2316,6 +2375,10 @@ bool ParticleEngineClass::IsAlive(const InstanceStatePtr& ptr) const
         mParams->mode == SpawnPolicy::Command)
         return true;
 
+    // if we have pending tasks we must be alive still
+    if (state.task_count)
+        return true;
+
     return !state.particles.empty();
 }
 
@@ -2333,7 +2396,39 @@ void ParticleEngineClass::Restart(const Environment& env, InstanceStatePtr ptr) 
 {
     auto& state = *ptr;
 
-    state.particles.clear();
+    class ClearParticlesTask : public base::ThreadTask {
+    public:
+        explicit ClearParticlesTask(InstanceStatePtr state) noexcept
+          : mInstanceState(std::move(state))
+        {}
+    protected:
+        virtual void DoTask() override
+        {
+            mInstanceState->task_buffer[0].clear();
+            mInstanceState->task_buffer[1].clear();
+
+            std::lock_guard<std::mutex> lock(mInstanceState->mutex);
+            mInstanceState->particles.clear();
+            mInstanceState->task_count--;
+        }
+    private:
+        const InstanceStatePtr mInstanceState;
+    };
+
+    if (auto* pool = base::GetGlobalThreadPool())
+    {
+        ptr->task_count++;
+
+        auto task = std::make_unique<ClearParticlesTask>(ptr);
+        task->SetAffinity(base::ThreadTask::Affinity::SingleThread);
+        task->SetThreadId((size_t)ptr.get());
+        pool->SubmitTask(std::move(task));
+    }
+    else
+    {
+        state.particles.clear();
+    }
+
     state.delay    = mParams->delay;
     state.time     = 0.0f;
     state.hatching = 0.0f;
@@ -2456,13 +2551,112 @@ std::size_t ParticleEngineClass::GetHash() const
 
 void ParticleEngineClass::InitParticles(const Environment& env, InstanceStatePtr state, size_t num) const
 {
-    ParticleEngineClass::InitParticles(env, *mParams, state->particles, num);
+    class InitParticlesTask : public base::ThreadTask {
+    public:
+        InitParticlesTask(const Environment& env, InstanceStatePtr state, EngineParamsPtr params, size_t count)
+          : mEnvironment(env)
+          , mInstanceState(std::move(state))
+          , mEngineParams(std::move(params))
+          , mInitCount(count)
+        {}
+    protected:
+        virtual void DoTask() override
+        {
+            const auto& env = mEnvironment.ToEnv();
+            const auto& params = *mEngineParams;
+
+            ParticleEngineClass::InitParticles(mEnvironment.ToEnv(), *mEngineParams,
+                                               mInstanceState->task_buffer[0],
+                                               mInitCount);
+
+            // copy the updated contents over to the dst buffer.
+            // we're copying the data to a secondary buffer so that
+            // the part where we have to lock on the particle buffer
+            // that the renderer is using is as short as possible.
+            mInstanceState->task_buffer[1] = mInstanceState->task_buffer[0];
+
+            // make this change atomically available for rendering
+            {
+                std::lock_guard<std::mutex> lock(mInstanceState->mutex);
+                std::swap(mInstanceState->particles, mInstanceState->task_buffer[1]);
+            }
+            mInstanceState->task_count--;
+        }
+    private:
+        const detail::EnvironmentCopy mEnvironment;
+        const InstanceStatePtr mInstanceState;
+        const EngineParamsPtr  mEngineParams;
+        const size_t mInitCount = 0;
+    };
+
+    if (auto* pool = base::GetGlobalThreadPool())
+    {
+        state->task_count++;
+
+        auto task = std::make_unique<InitParticlesTask>(env, std::move(state), mParams, num);
+        task->SetAffinity(base::ThreadTask::Affinity::SingleThread);
+        task->SetThreadId((size_t)state.get());
+        pool->SubmitTask(std::move(task));
+    }
+    else
+    {
+        ParticleEngineClass::InitParticles(env, *mParams, state->particles, num);
+    }
 }
 
 void ParticleEngineClass::UpdateParticles(const Environment& env, InstanceStatePtr state, float dt) const
 {
+    class UpdateParticlesTask : public base::ThreadTask {
+    public:
+        UpdateParticlesTask(const Environment& env, InstanceStatePtr state, EngineParamsPtr params, float dt)
+          : mEnvironment(env)
+          , mInstanceState(std::move(state))
+          , mEngineParams(std::move(params))
+          , mTimeStep(dt)
+        {}
+    protected:
+        virtual void DoTask() override
+        {
+            const auto& env = mEnvironment.ToEnv();
+            const auto& params = *mEngineParams;
 
-    ParticleEngineClass::UpdateParticles(env, *mParams, state->particles, dt);
+            ParticleEngineClass::UpdateParticles(mEnvironment.ToEnv(), *mEngineParams,
+                                                 mInstanceState->task_buffer[0],
+                                                 mTimeStep);
+
+            // copy the updated contents over to the dst buffer.
+            // we're copying the data to a secondary buffer so that
+            // the part where we have to lock on the particle buffer
+            // that the renderer is using is as short as possible.
+            mInstanceState->task_buffer[1] = mInstanceState->task_buffer[0];
+
+            // make this change atomically available for rendering
+            {
+                std::lock_guard<std::mutex> lock(mInstanceState->mutex);
+                std::swap(mInstanceState->particles, mInstanceState->task_buffer[1]);
+            }
+            mInstanceState->task_count--;
+        }
+    private:
+        const detail::EnvironmentCopy mEnvironment;
+        const InstanceStatePtr mInstanceState;
+        const EngineParamsPtr  mEngineParams;
+        const float mTimeStep;
+    };
+
+    if (auto* pool = base::GetGlobalThreadPool())
+    {
+        state->task_count++;
+
+        auto task = std::make_unique<UpdateParticlesTask>(env, std::move(state), mParams, dt);
+        task->SetAffinity(base::ThreadTask::Affinity::SingleThread);
+        task->SetThreadId((size_t)state.get());
+        pool->SubmitTask(std::move(task));
+    }
+    else
+    {
+        ParticleEngineClass::UpdateParticles(env, *mParams, state->particles, dt);
+    }
 }
 
 // static
