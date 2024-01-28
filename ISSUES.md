@@ -4,7 +4,7 @@
 
 List of known issues that are not clearly identified as DETONATOR 2D bugs (yet).
 
-### Linux
+### LINUX (Native)
 
 Pulseaudio  audio issue that happens occasionally. Pulseaudio sound is crackling a lot and several buffer 
 underruns are reported during the stream playback. Increasing audio buffer size or the audio device poll frequency makes no difference.<br>
@@ -67,10 +67,34 @@ The "fix" is to try to shuffle some target_link_libraries in the CMakeList.txt a
 The real fix would be to remove amateurs from ever contributing any fucking code anywhere in the world. If you can't
 do better than this just do everyone a fucking favour and don't ever write any publicly released code. Thank you!
 
-### Windows
+### WINDOWS (Native)
 
 ### HTML5/WASM
 
+#### Messed up 'Content-Type' HTTP header
+
+Issues with HTTP 'Content-Type' header being set incorrectly.
+* Python's http module fails to identify and set the Content-Type properly on .js GET
+  * Manually adding 'Content-Type' header in the 'end_headers' method adds a *second* 
+    'Content-Type' header.
+* Chrome gets confused about what is the actual ContentType and conflicting errors appear. 
+* Using threads (inclusion of .worker.js ?) causes the Content-Type issue to appear
+* Failures to load the JS code in the browser. Errors (from Chromium) include:
+
+```
+Refused to execute script from 'http://localhost:8000/GameEngine.js' because its MIME type ('text/plain') is not executable.
+self.onmessage @ GameEngine.worker.js:1
+
+worker.js onmessage() captured an uncaught exception: NetworkError: Failed to execute 'importScripts' on 'WorkerGlobalScope': The script at 'http://localhost:8000/GameEngine.js' failed to load.
+threadPrintErr @ GameEngine.worker.js:1
+self.onmessage @ GameEngine.worker.js:1
+
+GameEngine.worker.js:1 Error: Failed to execute 'importScripts' on 'WorkerGlobalScope': The script at 'http://localhost:8000/GameEngine.js' failed to load.
+    at self.onmessage (GameEngine.worker.js:1:1386)
+
+Refused to execute script from 'http://localhost:8000/GameEngine.js' because its MIME type ('text/plain') is not executable.
+self.onmessage @ GameEngine.worker.js:1
+```
 
 ## Qt5 Quirks and bugggggsss 🤬
 
