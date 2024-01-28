@@ -47,30 +47,30 @@ class ThreadPool::RealThread : public ThreadPool::Thread
 {
 public:
     explicit RealThread(std::shared_ptr<State> state) noexcept
-       : state_(std::move(state))
+       : mState(std::move(state))
     {}
 
     virtual void Submit(std::shared_ptr<ThreadTask> task) override
     {
-        std::lock_guard<std::mutex> lock(mutex);
-        queue.push(std::move(task));
-        cond.notify_one();
+        std::lock_guard<std::mutex> lock(mMutex);
+        mTaskQueue.push(std::move(task));
+        mCondition.notify_one();
     }
     void Shutdown()
     {
         {
-            std::lock_guard<std::mutex> lock(mutex);
-            run_loop = false;
-            cond.notify_one();
+            std::lock_guard<std::mutex> lock(mMutex);
+            mRunThread = false;
+            mCondition.notify_one();
         }
-        thread->join();
+        mThread->join();
 
-        ASSERT(queue.empty());
+        ASSERT(mTaskQueue.empty());
     }
     void Start()
     {
-        std::lock_guard<std::mutex> lock(mutex);
-        thread.reset(new std::thread([this]() {
+        std::lock_guard<std::mutex> lock(mMutex);
+        mThread.reset(new std::thread([this]() {
             ThreadMain();
         }));
     }
@@ -78,46 +78,52 @@ public:
 private:
     void ThreadMain()
     {
+        DEBUG("Hello from thread pool thread.");
         while (true)
         {
             std::shared_ptr<ThreadTask> task;
+            bool running = true;
 
             // use an explicit scope here to make sure the lock is
             // released as soon as we have something
             {
-                std::unique_lock<std::mutex> lock(mutex);
+                std::unique_lock<std::mutex> lock(mMutex);
+
                 // use a loop in order to protect against spurious
                 // signals on the condition
-                while (true)
+                while (mRunThread && mTaskQueue.empty())
                 {
-                    if (!run_loop)
-                        return;
-                    if (queue.empty())
-                        cond.wait(lock);
-
-                    if (!queue.empty())
-                    {
-                        task = std::move(queue.front());
-                        queue.pop();
-                        break;
-                    }
+                    mCondition.wait(lock);
                 }
+
+                if (!mTaskQueue.empty())
+                {
+                    task = std::move(mTaskQueue.front());
+                    mTaskQueue.pop();
+                }
+                running = mRunThread;
             }
-            ASSERT(task);
+
+            if (!running)
+                break;
+
+            if (!task)
+                continue;
 
             task->Execute();
 
-            state_->num_tasks--;
+            mState->num_tasks--;
         }
+        DEBUG("Thread pool thread exiting...");
     }
 
 private:
-    std::shared_ptr<State> state_;
-    std::mutex mutex;
-    std::condition_variable cond;
-    std::unique_ptr<std::thread> thread;
-    std::queue<std::shared_ptr<ThreadTask>> queue;
-    bool run_loop = true;
+    std::shared_ptr<State> mState;
+    std::mutex mMutex;
+    std::condition_variable mCondition;
+    std::unique_ptr<std::thread> mThread;
+    std::queue<std::shared_ptr<ThreadTask>> mTaskQueue;
+    bool mRunThread = true;
 };
 
 class ThreadPool::MainThread : public ThreadPool::Thread
