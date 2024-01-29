@@ -78,9 +78,7 @@ end
 
 -- Optionally called on keyboard events when the flag is set.
 function OnKeyDown(ui, symbol, modifier_bits)
-    if symbol == wdk.Keys.Escape then
-        Game:CloseUI(ui, 0)
-    end
+    Game:CloseUI(ui, 0)
 end
 
 -- Optionally called on keyboard events when the flag is set.

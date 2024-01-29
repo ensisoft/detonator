@@ -1433,6 +1433,67 @@
       "resource_ver": 1,
       "script_file": "",
       "tilemap": ""
+    },
+    {
+      "dynamic_spatial_index": "Disabled",
+      "id": "qjAAk1z2DN",
+      "name": "My Scene",
+      "nodes": [
+        {
+          "entity": "tqHo3nK0b9",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "opuDInSJY5",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "FlappyBird_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "opuDInSJY5"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "qjAAk1z2DN",
+      "resource_name": "My Scene",
+      "resource_ver": 1,
+      "script_file": "",
+      "tilemap": ""
     }
   ],
   "scripts": [

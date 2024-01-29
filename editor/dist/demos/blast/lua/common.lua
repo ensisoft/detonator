@@ -1,3 +1,15 @@
+function SpawnHealthPack()
+    local maybe = util.Random(0, 2)
+    if maybe == 1 then
+        local p = glm.vec2:new()
+        p.y = -500.0
+        p.x = util.Random(-450.0, 450.0)
+        Scene:SpawnEntity('Health Pack', {
+            pos = p
+        })
+    end
+end
+
 function SpawnExplosion(pos, kind)
     local class = ClassLib:FindEntityClassByName(kind)
     local args = game.EntityArgs:new()

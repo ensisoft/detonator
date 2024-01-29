@@ -14,9 +14,10 @@ local health = 5
 local _keydown_bits = 0
 
 local player_ready = false
-
+local show_message = true
 local hori_velocity = 0
 local vert_velocity = 0
+
 
 _Keys = {
     Left  = 0x1,
@@ -47,6 +48,72 @@ function _TestKeyDown(key)
     return wdk.TestKeyDown(val)
 end
 
+function IndicateDamage(player)
+    local smoke_emitter = player:FindNodeByClassName('Hit Smoke')
+    local flash_emitter = player:FindNodeByClassName('Hit Flash')
+
+    local drawable = nil
+    if smoke_emitter ~= nil then
+        drawable = smoke_emitter:GetDrawable()
+        drawable:Command('EmitParticles', {
+            count = 100
+        })
+    end
+
+    if flash_emitter ~= nil then
+        drawable = flash_emitter:GetDrawable()
+        drawable:Command('EmitParticles', {
+            count = 100
+        })
+    end
+
+    local event = game.GameEvent:new()
+    event.from = 'player'
+    event.to = 'game'
+    event.message = 'hit'
+    Game:PostEvent(event)
+
+    Audio:PlaySoundEffect('anchor_action')
+
+    -- start engine smoke on poor health
+    if health == 2 then
+        local engine_smoke_node = player:FindNodeByClassName('Engine Smoke')
+        local engine_smoke_draw = engine_smoke_node:GetDrawable()
+        engine_smoke_draw:SetFlag('VisibleInGame', true)
+        engine_smoke_draw:SetFlag('UpdateDrawable', true)
+        engine_smoke_draw:SetFlag('UpdateMaterial', true)
+    end
+end
+
+-- called by the health pack 
+function HealthPickup(player, health_pack)
+    Game:DebugPrint('Health pickup')
+
+    if player:IsDying() then
+        return
+    end
+
+    Audio:PlaySoundEffect('Health Pickup')
+
+    if health == 5 then
+        return
+    end
+
+    health = health + 1
+
+    local health_entity = Scene:FindEntityByInstanceName('health')
+    CallMethod(health_entity, 'UpdateHealth', health, true)
+
+    if health > 2 then
+        local engine_smoke_node = player:FindNodeByClassName('Engine Smoke')
+        local engine_smoke_draw = engine_smoke_node:GetDrawable()
+        engine_smoke_draw:SetFlag('VisibleInGame', false)
+        engine_smoke_draw:SetFlag('UpdateDrawable', false)
+        engine_smoke_draw:SetFlag('UpdateMaterial', false)
+    end
+
+end
+
 function BulletHit(player, bullet)
     if bullet.player then
         return
@@ -60,10 +127,11 @@ function BulletHit(player, bullet)
 
     local scene = player:GetScene()
     local health_entity = scene:FindEntityByInstanceName('health')
-    CallMethod(health_entity, 'UpdateHealth', health)
+    CallMethod(health_entity, 'UpdateHealth', health, false)
 
     health = health - 1
     if health > 0 then
+        IndicateDamage(player)
         return
     end
 
@@ -116,6 +184,7 @@ function FireGun(player, gun_name, ammo_name)
     args.position = util.GetTranslationFromMatrix(matrix)
     args.name = ammo_name
     args.logging = false
+    args.async = true
     Scene:SpawnEntity(args, true)
 
     local emitter_node = player:FindNodeByClassName(gun_name ..
@@ -161,7 +230,8 @@ end
 -- Called on every iteration of game loop.
 function Update(player, game_time, dt)
 
-    if game_time > 1.0 then
+    local player_time = player:GetTime()
+    if player_time > 1.0 then
         player_ready = true
     end
 
@@ -179,7 +249,7 @@ function Update(player, game_time, dt)
         mine_load_time = mine_load_time - dt
         if mine_load_time <= 0.0 then
             mine_ready = true
-            text:SetText('Ready!')
+            text:SetText('Press 1')
             text:SetFlag('BlinkText', true)
         end
     end
@@ -266,6 +336,13 @@ function OnKeyDown(player, symbol, modifier_bits)
         return
     end
 
+    if show_message then
+        local node = player:FindNodeByClassName('Message')
+        local text = node:GetTextItem()
+        text:SetFlag('VisibleInGame', false)
+        show_message = false
+    end
+
     if symbol == wdk.Keys.Key1 then
         if mine_ready then
             FireRocket(player, 'Rocket')
@@ -303,6 +380,12 @@ function OnKeyUp(player, symbol, modifier_bits)
     elseif symbol == wdk.Keys.Space then
         _keydown_bits = _keydown_bits & ~_Keys.Fire
     end
+
+    if PreviewMode then
+        if symbol == wdk.Keys.F1 then
+            IndicateDamage(player)
+        end
+    end
 end
 
 function OnAnimationFinished(player, animation)
@@ -311,10 +394,6 @@ function OnAnimationFinished(player, animation)
     -- enable player ready after the initial animation to fly into the scene finishes
     if name == 'Fly In' then
         player_ready = true
-
-        local node = player:FindNodeByClassName('Message')
-        local text = node:GetTextItem()
-        text:SetFlag('VisibleInGame', false)
     end
 end
 

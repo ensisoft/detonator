@@ -3,14 +3,40 @@
 -- This script will be called for every instance of 'health' in the scene during gameplay.
 -- You're free to delete functions you don't need.
 --
-function UpdateHealth(health, value)
-    local node = health:FindNodeByClassName('health_' .. tostring(value))
-    local draw = node:GetDrawable()
-    draw:SetFlag('VisibleInGame', false)
+local test_health = 5
+
+function UpdateHealthWithDelay(health, value, visible, delay)
+    local name = 'health_' .. tostring(value)
+    local node = health:FindNodeByClassName(name)
+
+    local node_pos = node:GetTranslation()
+    if visible then
+        Scene:SpawnEntity('Gain Health', {
+            pos = node_pos,
+            name = name,
+            delay = delay
+        })
+    else
+        Scene:SpawnEntity('Drop Health', {
+            pos = node_pos,
+            delay = delay
+        })
+        local health_bar = Scene:FindEntityByInstanceName(name)
+        health_bar:Die()
+    end
+end
+
+function UpdateHealth(health, value, visible)
+    UpdateHealthWithDelay(health, value, visible, 0.0)
 end
 
 -- Called once when the game play begins for the entity in the scene.
 function BeginPlay(health, scene, map)
+    UpdateHealthWithDelay(health, 1, true, 0.0)
+    UpdateHealthWithDelay(health, 2, true, 0.1)
+    UpdateHealthWithDelay(health, 3, true, 0.2)
+    UpdateHealthWithDelay(health, 4, true, 0.3)
+    UpdateHealthWithDelay(health, 5, true, 0.4)
 end
 
 -- Called once when the game play ends for the entity in the scene.
@@ -61,6 +87,15 @@ end
 -- continuously held you can get this event multiple times without getting
 -- the corresponding key up!
 function OnKeyDown(health, symbol, modifier_bits)
+    if EditingMode == true then
+        if symbol == wdk.Keys.F1 then
+            UpdateHealth(health, test_health, false)
+            test_health = test_health - 1
+        elseif symbol == wdk.Keys.F2 then
+            test_health = test_health + 1
+            UpdateHealth(health, test_health, true)
+        end
+    end
 end
 
 -- Called on key up events. See OnKeyDown for more details.
