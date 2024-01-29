@@ -31,10 +31,36 @@ local game_over = false
 
 local game_score = 0
 
+local kill_time = 0
+local kill_counter = 0
+
 -- LuaFormatter on
 
+function UpdateScore()
+    local entity = Scene:FindEntityByInstanceName('GameScore')
+    local node = entity:FindNodeByClassName('text')
+    local text = node:GetTextItem()
+    text:SetText(tostring(game_score))
+end
+
+function ComboKill()
+    Game:DebugPrint('Combo kill!!')
+
+    Scene:SpawnEntity('Combo', {})
+
+    Audio:PlaySoundEffect('Combo Kill')
+
+    local combo_kill_score = 1000
+
+    game_score = game_score + combo_kill_score
+
+    SpawnScore(glm.vec2:new(0.0, 0.0), combo_kill_score)
+
+    UpdateScore()
+end
+
 function SpawnEnemy(x, y, velocity)
-    local ship = ClassLib:FindEntityClassByName('Enemy')
+    local ship = ClassLib:FindEntityClassByName('Enemy/Basic')
     local args = game.EntityArgs:new()
     args.class = ship
     args.name = "enemy"
@@ -43,6 +69,13 @@ function SpawnEnemy(x, y, velocity)
     local ship = Scene:SpawnEntity(args, true)
     ship.velocity = velocity * ship_velo_increment
     ship.score = math.floor(ship.score * ship_velo_increment)
+end
+
+function SpawnBigBastard()
+    Scene:SpawnEntity('Enemy/Advanced', {
+        pos = glm.vec2:new(0.0, -500.0)
+    })
+
 end
 
 function SpawnWaveLeft()
@@ -91,6 +124,8 @@ function SpawnRow()
 end
 
 function BeginPlay(game, map)
+
+    trace.event('begin play')
 
     Camera.SetViewport(base.FRect:new(-600.0, -400.0, 1200, 800))
 
@@ -159,6 +194,15 @@ function Tick(game, game_time, dt)
             info_text:SetText(util.FormatString('Wave %1', wave_count))
         end
     end
+
+    if math.fmod(game_tick_count, 20) == 0 then
+        SpawnHealthPack()
+    end
+
+    if math.fmod(game_tick_count, 18) == 0 then
+        SpawnBigBastard()
+    end
+
     game_tick_count = game_tick_count + 1
 end
 
@@ -185,6 +229,7 @@ end
 
 -- Called on key down events.
 function OnKeyDown(game, symbol, modifier_bits)
+
     if symbol == wdk.Keys.Escape then
         Game:EndPlay()
         Game:Play('Menu')
@@ -227,12 +272,24 @@ function OnGameEvent(game, event)
 
         game_score = game_score + event.value
 
-        local entity = Scene:FindEntityByInstanceName('GameScore')
-        local node = entity:FindNodeByClassName('text')
-        local text = node:GetTextItem()
-        text:SetText(tostring(game_score))
+        UpdateScore()
 
-        Camera.Shake(util.RandomVec2(-10, 10.0), 0.03)
+        local game_time = Scene:GetTime()
+        if game_time - kill_time < 0.5 then
+            kill_counter = kill_counter + 1
+            if kill_counter == 18 then
+                ComboKill()
+                kill_counter = 0
+            end
+        end
+        kill_time = game_time
+
+        if event.value >= 500.0 then
+            local y = util.Random(25.0, 75.0)
+            local x = util.Random(-25.0, 25.0)
+            Camera.Shake(glm.vec2:new(x, y), 0.5, 10)
+        end
+
     end
 
     -- when the player gets killed end the game
@@ -256,8 +313,23 @@ function OnGameEvent(game, event)
 
         game_over = true
 
-        Camera.Shake(util.RandomVec2(-50.0, 50.0), 0.05)
+        local y = util.Random(50.0, 100.0)
+        local x = util.Random(-10.0, 20.0)
 
+        Camera.Shake(glm.vec2:new(x, y), 1.0, 10.0)
     end
+
+    if event.from == 'player' and event.message == 'hit' then
+        local y = util.Random(20.0, 30.0)
+        local x = util.Random(40.0, 50.0)
+        Camera.Shake(glm.vec2:new(x, y), 0.8, 10.0)
+    end
+
+    if event.from == 'rocket' and event.message == 'explosion' then
+        local y = util.Random(50.0, 100.0)
+        local x = util.Random(-10.0, 10.0)
+        Camera.Shake(glm.vec2:new(x, y), 0.5, 20)
+    end
+
 end
 

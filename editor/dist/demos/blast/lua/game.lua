@@ -11,6 +11,8 @@ local developer_ui = false
 -- LuaFormatter on
 
 function LoadGame()
+    collectgarbage('setpause', 100)
+
     Game:DebugPrint('LoadGame')
 
     local file = util.JoinPath(game.home, 'state.json')
@@ -72,7 +74,7 @@ end
 
 -- input event handlers
 function OnKeyDown(symbol, modifier_bits)
-    if symbol == wdk.Keys.F12 then
+    if symbol == wdk.Keys.F12 or symbol == wdk.Keys.Key0 then
         developer_ui = not developer_ui
         Game:ShowDeveloperUI(developer_ui)
     end

@@ -1813,11 +1813,12 @@ void InitLuaDoc()
                          "in order to create effects such as a camera shake.<br>"
                          "require('app://scripts/utility/camera.lua')");
     DOC_FUNCTION_1("void", "SetViewport", "Set the viewport rectangle to be manipulated.", "base.FRect", "viewport");
-    DOC_FUNCTION_2("void", "Shake", "Start shaking the camera.<br>"
-                                    "The shake effect is defined by its strength in game units and its duration in seconds.<br>"
+    DOC_FUNCTION_3("void", "Shake", "Start shaking the camera.<br>"
+                                    "The shake effect is defined by its strength in game units,its duration in seconds and"
+                                    "number of 'shake' iterations..<br>"
                                     "In order to perform the shake you should then call the Update method and take the resulting viewport with the shake effect applied "
                                     "and use that as your game's viewport setting.",
-                   "float", "strength", "float", "duration");
+                   "float", "strength", "float", "duration", "unsigned", "iterations");
     DOC_FUNCTION_1("base.FRect", "Update", "Update the camera with the given time step.<br>"
                                            "Returns the updated viewport with any effects/movement applied.",
                    "float", "dt");

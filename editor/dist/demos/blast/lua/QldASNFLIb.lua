@@ -7,6 +7,8 @@ require('common')
 local velocity = -100
 
 function Explode(redmine, mine_pos)
+    trace.event('rocket explode')
+
     Game:DebugPrint('KAPOW')
 
     local args = game.EntityArgs:new()
@@ -34,6 +36,12 @@ function Explode(redmine, mine_pos)
     Audio:PlaySoundEffect('Rocket Explosion')
 
     redmine:Die()
+
+    local event = game.GameEvent:new()
+    event.from = 'rocket'
+    event.message = 'explosion'
+    event.to = 'game'
+    Game:PostEvent(event)
 
 end
 
