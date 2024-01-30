@@ -427,6 +427,7 @@ int Main(int argc, char* argv[])
     options.Add("--no-workspace", "Don't load any previous workspace");
     options.Add("--no-session", "Don't load any previous window session within a workspace.");
     options.Add("--help", "Print this help.");
+    options.Add("--verbose", "Enable verbose debug logs.");
 
     bool viewer_mode = false;
     std::string arg_parse_error;
@@ -449,6 +450,11 @@ int Main(int argc, char* argv[])
         if (!options.GetValue("--socket-name", &ipc_socket_name))
             ipc_socket_name = "gamestudio-local-socket";
         options.GetValue("--app-style", &style);
+    }
+
+    if (options.WasGiven("--verbose"))
+    {
+        base::EnableLogEvent(base::LogEvent::Verbose, true);
     }
 
     // turn on Qt logging: QT_LOGGING_RULES = qt.qpa.gl
