@@ -38,16 +38,18 @@
 #endif
 
 #ifdef BASE_LOGGING_ENABLE_LOG
-  #define DEBUG(fmt, ...) WriteLog(base::LogEvent::Debug,   __FILE__, __LINE__, fmt, ## __VA_ARGS__)
-  #define WARN(fmt, ...)  WriteLog(base::LogEvent::Warning, __FILE__, __LINE__, fmt, ## __VA_ARGS__)
-  #define INFO(fmt, ...)  WriteLog(base::LogEvent::Info,    __FILE__, __LINE__, fmt, ## __VA_ARGS__)
-  #define ERROR(fmt, ...) WriteLog(base::LogEvent::Error,   __FILE__, __LINE__, fmt, ## __VA_ARGS__)
+  #define VERBOSE(fmt, ...) WriteLog(base::LogEvent::Verbose,  __FILE__, __LINE__, fmt, ## __VA_ARGS__)
+  #define DEBUG(fmt, ...) WriteLog(base::LogEvent::Debug,      __FILE__, __LINE__, fmt, ## __VA_ARGS__)
+  #define WARN(fmt, ...)  WriteLog(base::LogEvent::Warning,    __FILE__, __LINE__, fmt, ## __VA_ARGS__)
+  #define INFO(fmt, ...)  WriteLog(base::LogEvent::Info,       __FILE__, __LINE__, fmt, ## __VA_ARGS__)
+  #define ERROR(fmt, ...) WriteLog(base::LogEvent::Error,      __FILE__, __LINE__, fmt, ## __VA_ARGS__)
   #define ERROR_RETURN(ret, fmt, ...) \
       do { \
           WriteLog(base::LogEvent::Error, __FILE__, __LINE__, fmt, ## __VA_ARGS__); \
           return ret; \
      } while (0)
 #else
+  #define VERBOSE(...) while(false)
   #define DEBUG(...) while(false)
   #define WARN(...)  while(false)
   #define INFO(...)  while(false)
@@ -67,6 +69,8 @@ namespace base
     {
         // Debug relevance only
         Debug,
+        // Verbose debug relevance only.
+        Verbose,
         // Generic information about some event
         Info,
         // Warning about not being able to do something,

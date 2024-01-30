@@ -45,6 +45,7 @@ static base::Logger* globalLogger;
 
 // atomic flag to globally specify which log events
 // are enabled or not.
+static std::atomic<bool> isGlobalVerboseLogEnabled(false);
 static std::atomic<bool> isGlobalDebugLogEnabled(false);
 static std::atomic<bool> isGlobalWarnLogEnabled(true);
 static std::atomic<bool> isGlobalInfoLogEnabled(true);
@@ -59,6 +60,8 @@ const char* ToString(base::LogEvent e)
 {
     switch (e)
     {
+        case LogEvent::Verbose:
+            return "Verbose";
         case LogEvent::Debug:
            return "Debug";
         case LogEvent::Info:
@@ -283,7 +286,9 @@ bool IsDebugLogEnabled()
 
 bool IsLogEventEnabled(LogEvent type)
 {
-    if (type == LogEvent::Debug)
+    if (type == LogEvent::Verbose)
+        return isGlobalVerboseLogEnabled;
+    else if (type == LogEvent::Debug)
         return isGlobalDebugLogEnabled;
     else if (type == LogEvent::Warning)
         return isGlobalWarnLogEnabled;
@@ -297,7 +302,9 @@ bool IsLogEventEnabled(LogEvent type)
 
 void EnableLogEvent(LogEvent type, bool on_off)
 {
-    if (type == LogEvent::Debug)
+    if (type == LogEvent::Verbose)
+        isGlobalVerboseLogEnabled = on_off;
+    else if (type == LogEvent::Debug)
         isGlobalDebugLogEnabled = on_off;
     else if (type == LogEvent::Warning)
         isGlobalWarnLogEnabled = on_off;
