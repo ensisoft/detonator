@@ -440,7 +440,7 @@ void Window::Open(TransientState& state, AnimationStateArray* animations)
 
             for (auto& widget_animation : widget_animations)
             {
-                widget_animation.widget = widget.get();
+                widget_animation.SetWidget(widget.get());
                 animations->push_back(std::move(widget_animation));
             }
         }
@@ -448,11 +448,7 @@ void Window::Open(TransientState& state, AnimationStateArray* animations)
         // start animations that trigger on $OnOpen
         for (auto& anim : *animations)
         {
-            if (anim.trigger != Animation::Trigger::Open)
-                continue;
-
-            anim.state = Animation::State::Active;
-            anim.time  = -anim.delay;
+            anim.TriggerOnOpen();
         }
     }
 
@@ -486,11 +482,7 @@ void Window::Close(TransientState& state, AnimationStateArray* animations)
         // start animations that trigger on $OnClose
         for (auto& anim : *animations)
         {
-            if (anim.trigger != Animation::Trigger::Close)
-                continue;
-
-            anim.state = Animation::State::Active;
-            anim.time  = -anim.delay;
+            anim.TriggerOnClose();
         }
     }
     state.SetValue(mId + "/closing", true);
@@ -508,11 +500,9 @@ bool Window::IsClosed(const TransientState& state, const AnimationStateArray* an
 
     for (const auto& anim : *animations)
     {
-        if (anim.trigger == Animation::Trigger::Close)
-        {
-            if (anim.state == Animation::State::Active)
-                return false;
-        }
+        if (anim.IsActiveOnTrigger(Animation::Trigger::Close))
+            return false;
+
     }
     return true;
 }
@@ -534,128 +524,7 @@ void Window::Update(TransientState& state, double time, float dt, AnimationState
 
     for (auto& anim : *animations)
     {
-        if (anim.state == Animation::State::Inactive)
-            continue;
-
-        const auto prev_time = anim.time;
-
-        anim.time += dt;
-
-        auto* widget = anim.widget;
-
-        // read the starting state once when the animation time goes above zero.
-        if (prev_time <= 0.0f && anim.time > 0.0f)
-        {
-            // for each animation action read the current starting state that
-            // is required for the widget state interpolation. note that
-            // currently we can't interpolate style properties such as Color
-            // because the starting color is not known here unless it's
-            // specified explicitly in the animation string (or in the widget's
-            // style string..)
-            for (auto& action : anim.actions)
-            {
-                // in case the animation is looping we skip reading the initial
-                // state on subsequent animation loop iterations.
-                if (std::holds_alternative<std::monostate>(action.start_value))
-                {
-                    if (action.type == Animation::Action::Type::Move)
-                        action.start_value = widget->GetPosition();
-                    else if (action.type == Animation::Action::Type::Resize)
-                        action.start_value = widget->GetSize();
-                    else if (action.type == Animation::Action::Type::Translate)
-                    {
-                        action.start_value = widget->GetPosition();
-                        action.end_value   = widget->GetPosition() + std::get<uik::FPoint>(action.end_value);
-                    }
-                    else if (action.type == Animation::Action::Type::Grow)
-                    {
-                        action.start_value = widget->GetSize();
-                        action.end_value   = widget->GetSize() + std::get<uik::FSize>(action.end_value);
-                    }
-                }
-            }
-        }
-        if (anim.time <= 0.0f)
-            continue;
-
-        const float t = math::clamp(0.0f, anim.duration, anim.time) / anim.duration;
-        for (auto& action : anim.actions)
-        {
-            if (action.type == Animation::Action::Type::Resize || action.type ==Animation::Action::Type::Grow)
-            {
-                ASSERT(std::holds_alternative<uik::FSize>(action.start_value));
-                ASSERT(std::holds_alternative<uik::FSize>(action.end_value));
-
-                const auto start_value = std::get<uik::FSize>(action.start_value);
-                const auto end_value   = std::get<uik::FSize>(action.end_value);
-                const auto value       = math::interpolate(start_value, end_value, t, anim.interpolation);
-                widget->SetSize(value);
-            }
-            else if (action.type == Animation::Action::Type::Move || action.type == Animation::Action::Type::Translate)
-            {
-                ASSERT(std::holds_alternative<uik::FPoint>(action.start_value));
-                ASSERT(std::holds_alternative<uik::FPoint>(action.end_value));
-
-                const auto start_value = std::get<uik::FPoint>(action.start_value);
-                const auto end_value   = std::get<uik::FPoint>(action.end_value);
-                const auto value       = math::interpolate(start_value, end_value, t, anim.interpolation);
-                widget->SetPosition(value);
-            }
-            else if (action.type == Animation::Action::Type::SetProp)
-            {
-                if (t >= 0.5f)
-                {
-                    ASSERT(std::holds_alternative<StyleProperty>(action.end_value));
-
-                    const auto& style_property = std::get<StyleProperty>(action.end_value);
-                    widget->SetStyleProperty(action.name, style_property);
-                }
-            }
-            else if (action.type == Animation::Action::Type::DelProp)
-            {
-                if (t >= 0.5f)
-                {
-                    widget->DeleteStyleProperty(action.name);
-                }
-            }
-            else if (action.type == Animation::Action::Type::DelMaterial)
-            {
-                if (t >= 0.5f)
-                {
-                    widget->DeleteStyleMaterial(action.name);
-                }
-            }
-            else if (action.type == Animation::Action::Type::SetFlag)
-            {
-                if (t >= 0.5f)
-                {
-                    const auto on_off = std::get<bool>(action.end_value);
-                    if (action.name == "Enabled")
-                        widget->SetFlag(Widget::Flags::Enabled, on_off);
-                    else if (action.name == "Visible")
-                        widget->SetFlag(Widget::Flags::VisibleInGame, on_off);
-                    else WARN("Unknown widget flag in widget animation. [widget='%1', flag='%2']", widget->GetName(), action.name);
-                }
-            }
-            else BUG("Unhandled widget animation action.");
-        }
-        if (anim.time >= anim.duration)
-        {
-            anim.state = Animation::State::Inactive;
-            if (anim.loops == std::numeric_limits<unsigned>::max())
-            {
-                anim.time  = -anim.delay;
-                anim.state = Animation::State::Active;
-            }
-            else if (anim.loops > 0)
-            {
-                if (--anim.loops > 0)
-                {
-                    anim.time = -anim.delay;
-                    anim.state = Animation::State::Active;
-                }
-            }
-        }
+        anim.Update(time, dt);
     }
 }
 
@@ -1033,50 +902,7 @@ void Window::TriggerAnimations(const std::vector<WidgetAction>& actions, Transie
     {
         for (auto& anim : animations)
         {
-            auto* widget = anim.widget;
-
-            if (widget->GetId() != action.id)
-                continue;
-            else if (anim.state == Animation::State::Active)
-                continue;
-
-            bool should_trigger = false;
-
-            if (action.type == WidgetActionType::FocusChange &&
-                (anim.trigger == Animation::Trigger::LostFocus ||
-                 anim.trigger == Animation::Trigger::GainFocus))
-            {
-                const auto has_focus = std::get<bool>(action.value);
-                const auto trigger_gain_focus = anim.trigger == Animation::Trigger::GainFocus && has_focus;
-                const auto trigger_lost_focus = anim.trigger == Animation::Trigger::LostFocus && !has_focus;
-                if (trigger_gain_focus || trigger_gain_focus)
-                {
-                    should_trigger = true;
-                }
-            }
-            else if (action.type == WidgetActionType::ButtonPress &&
-                     anim.trigger == Animation::Trigger::Click)
-            {
-                if (widget->GetType() == Widget::Type::PushButton)
-                {
-                    should_trigger = true;
-                }
-            }
-            else if (action.type == WidgetActionType::ValueChange &&
-                     anim.trigger == Animation::Trigger::ValueChange)
-                should_trigger = true;
-            else if (action.type == WidgetActionType::MouseEnter &&
-                     anim.trigger == Animation::Trigger::MouseEnter)
-                should_trigger = true;
-            else if(action.type == WidgetActionType::MouseLeave &&
-                    anim.trigger == Animation::Trigger::MouseLeave)
-                should_trigger = true;
-
-            if (!should_trigger)
-                continue;
-
-            anim.time  = -anim.delay;
-            anim.state = Animation::State::Active;
+            anim.TriggerOnAction(action);
         }
     }
 }

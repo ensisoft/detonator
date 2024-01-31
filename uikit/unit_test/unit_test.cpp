@@ -1171,25 +1171,25 @@ move 200.0 250.0
         TEST_REQUIRE(uik::ParseAnimations(str, &animations));
         TEST_REQUIRE(animations.size() == 2);
 
-        TEST_REQUIRE(animations[0].delay == 1.0f);
-        TEST_REQUIRE(animations[0].duration == 2.0f);
-        TEST_REQUIRE(animations[0].interpolation == math::Interpolation::Cosine);
-        TEST_REQUIRE(animations[0].trigger == uik::Animation::Trigger::Click);
-        TEST_REQUIRE(animations[0].loops == 5);
-        TEST_REQUIRE(animations[0].actions.size() == 2);
-        TEST_REQUIRE(animations[0].actions[0].type == uik::Animation::Action::Type::Resize);
-        TEST_REQUIRE(std::get_if<uik::FSize>(&animations[0].actions[0].end_value)->GetWidth() == 100.0f);
-        TEST_REQUIRE(std::get_if<uik::FSize>(&animations[0].actions[0].end_value)->GetHeight() == 200.0f);
-        TEST_REQUIRE(animations[0].actions[1].type == uik::Animation::Action::Type::Move);
-        TEST_REQUIRE(std::get_if<uik::FPoint>(&animations[0].actions[1].end_value)->GetX() == 45.0f);
-        TEST_REQUIRE(std::get_if<uik::FPoint>(&animations[0].actions[1].end_value)->GetY() == 50.0f);
+        TEST_REQUIRE(animations[0].GetDelay() == 1.0f);
+        TEST_REQUIRE(animations[0].GetDuration() == 2.0f);
+        TEST_REQUIRE(animations[0].GetInterpolation() == math::Interpolation::Cosine);
+        TEST_REQUIRE(animations[0].GetTrigger() == uik::Animation::Trigger::Click);
+        TEST_REQUIRE(animations[0].GetLoops() == 5);
+        TEST_REQUIRE(animations[0].GetActionCount() == 2);
+        TEST_REQUIRE(animations[0].GetAction(0).type == uik::Animation::Action::Type::Resize);
+        TEST_REQUIRE(std::get_if<uik::FSize>(&animations[0].GetAction(0).end_value)->GetWidth() == 100.0f);
+        TEST_REQUIRE(std::get_if<uik::FSize>(&animations[0].GetAction(0).end_value)->GetHeight() == 200.0f);
+        TEST_REQUIRE(animations[0].GetAction(1).type == uik::Animation::Action::Type::Move);
+        TEST_REQUIRE(std::get_if<uik::FPoint>(&animations[0].GetAction(1).end_value)->GetX() == 45.0f);
+        TEST_REQUIRE(std::get_if<uik::FPoint>(&animations[0].GetAction(1).end_value)->GetY() == 50.0f);
 
-        TEST_REQUIRE(animations[1].loops == 1);
-        TEST_REQUIRE(animations[1].delay == 0.0f);
-        TEST_REQUIRE(animations[1].duration == 1.0f);
-        TEST_REQUIRE(animations[1].interpolation == math::Interpolation::Linear);
-        TEST_REQUIRE(animations[1].actions.size() == 1);
-        TEST_REQUIRE(animations[1].actions[0].type == uik::Animation::Action::Type::Move);
+        TEST_REQUIRE(animations[1].GetLoops() == 1);
+        TEST_REQUIRE(animations[1].GetDelay() == 0.0f);
+        TEST_REQUIRE(animations[1].GetDuration() == 1.0f);
+        TEST_REQUIRE(animations[1].GetInterpolation() == math::Interpolation::Linear);
+        TEST_REQUIRE(animations[1].GetActionCount() == 1);
+        TEST_REQUIRE(animations[1].GetAction(0).type == uik::Animation::Action::Type::Move);
     }
 
     {
@@ -1261,16 +1261,16 @@ loops 1
         window.Update(state, 0.0, 0.5f, &animations);
 
         TEST_REQUIRE(animations.size() == 1);
-        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
-        TEST_REQUIRE(animations[0].time == 0.5f);
-        TEST_REQUIRE(animations[0].duration == 1.0f);
-        TEST_REQUIRE(animations[0].actions.size() == 2);
-        TEST_REQUIRE(animations[0].actions[0].type == uik::Animation::Action::Type::Move);
-        TEST_REQUIRE(*std::get_if<uik::FPoint>(&animations[0].actions[0].start_value) == uik::FPoint(10.0f, 10.0f));
-        TEST_REQUIRE(*std::get_if<uik::FPoint>(&animations[0].actions[0].end_value) == uik::FPoint(100.0f, 100.0f));
-        TEST_REQUIRE(animations[0].actions[1].type == uik::Animation::Action::Type::Resize);
-        TEST_REQUIRE(*std::get_if<uik::FSize>(&animations[0].actions[1].start_value) == uik::FSize(10.0f, 10.0f));
-        TEST_REQUIRE(*std::get_if<uik::FSize>(&animations[0].actions[1].end_value) == uik::FSize(100.0f, 100.0f));
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].GetTime() == 0.5f);
+        TEST_REQUIRE(animations[0].GetDuration() == 1.0f);
+        TEST_REQUIRE(animations[0].GetActionCount() == 2);
+        TEST_REQUIRE(animations[0].GetAction(0).type == uik::Animation::Action::Type::Move);
+        TEST_REQUIRE(*std::get_if<uik::FPoint>(&animations[0].GetAction(0).start_value) == uik::FPoint(10.0f, 10.0f));
+        TEST_REQUIRE(*std::get_if<uik::FPoint>(&animations[0].GetAction(0).end_value) == uik::FPoint(100.0f, 100.0f));
+        TEST_REQUIRE(animations[0].GetAction(1).type == uik::Animation::Action::Type::Resize);
+        TEST_REQUIRE(*std::get_if<uik::FSize>(&animations[0].GetAction(1).start_value) == uik::FSize(10.0f, 10.0f));
+        TEST_REQUIRE(*std::get_if<uik::FSize>(&animations[0].GetAction(1).end_value) == uik::FSize(100.0f, 100.0f));
     }
 
 
@@ -1295,21 +1295,21 @@ loops 1
         uik::AnimationStateArray animations;
 
         window.Open(state, &animations);
-        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
-        TEST_REQUIRE(animations[0].time == 0.0f);
-        TEST_REQUIRE(animations[0].loops == 1);
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].GetTime() == 0.0f);
+        TEST_REQUIRE(animations[0].GetLoops() == 1);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(0.0f, 0.0f));
 
         window.Update(state, 0.0, 0.5f, &animations);
-        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
-        TEST_REQUIRE(animations[0].time == 0.5f);
-        TEST_REQUIRE(animations[0].loops == 1);
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].GetTime() == 0.5f);
+        TEST_REQUIRE(animations[0].GetLoops() == 1);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(50.0f, 50.0f));
 
         window.Update(state, 0.5f, 0.5f, &animations);
-        TEST_REQUIRE(animations[0].state == uik::Animation::State::Inactive);
-        TEST_REQUIRE(animations[0].time == 1.0f);
-        TEST_REQUIRE(animations[0].loops == 0);
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Inactive);
+        TEST_REQUIRE(animations[0].GetTime() == 1.0f);
+        TEST_REQUIRE(animations[0].GetLoops() == 0);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(100.0f, 100.0f));
     }
 
@@ -1334,33 +1334,33 @@ loops 2
         uik::AnimationStateArray animations;
 
         window.Open(state, &animations);
-        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
-        TEST_REQUIRE(animations[0].time == 0.0f);
-        TEST_REQUIRE(animations[0].loops == 2);
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].GetTime() == 0.0f);
+        TEST_REQUIRE(animations[0].GetLoops() == 2);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(0.0f, 0.0f));
 
         window.Update(state, 0.0, 0.5f, &animations);
-        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
-        TEST_REQUIRE(animations[0].time == 0.5f);
-        TEST_REQUIRE(animations[0].loops == 2);
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].GetTime() == 0.5f);
+        TEST_REQUIRE(animations[0].GetLoops() == 2);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(50.0f, 50.0f));
 
         window.Update(state, 0.5f, 0.5f, &animations);
-        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
-        TEST_REQUIRE(animations[0].time == 0.0f);
-        TEST_REQUIRE(animations[0].loops == 1);
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].GetTime() == 0.0f);
+        TEST_REQUIRE(animations[0].GetLoops() == 1);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(100.0f, 100.0f));
 
         window.Update(state, 1.0f, 0.5f, &animations);
-        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
-        TEST_REQUIRE(animations[0].time == 0.5f);
-        TEST_REQUIRE(animations[0].loops == 1);
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].GetTime() == 0.5f);
+        TEST_REQUIRE(animations[0].GetLoops() == 1);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(50.0f, 50.0f));
 
         window.Update(state, 1.5f, 0.5f, &animations);
-        TEST_REQUIRE(animations[0].state == uik::Animation::State::Inactive);
-        TEST_REQUIRE(animations[0].time == 1.0f);
-        TEST_REQUIRE(animations[0].loops == 0);
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Inactive);
+        TEST_REQUIRE(animations[0].GetTime() == 1.0f);
+        TEST_REQUIRE(animations[0].GetLoops() == 0);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(100.0f, 100.0f));
     }
 
@@ -1385,28 +1385,28 @@ loops 1
         uik::AnimationStateArray animations;
 
         window.Open(state, &animations);
-        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
-        TEST_REQUIRE(animations[0].time == -1.0f);
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].GetTime() == -1.0f);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(10.0f, 10.0f));
 
         window.Update(state, 0.0f, 0.5f, &animations);
-        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
-        TEST_REQUIRE(animations[0].time == -0.5f);
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].GetTime() == -0.5f);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(10.0f, 10.0f));
 
         window.Update(state, 0.5f, 0.5f, &animations);
-        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
-        TEST_REQUIRE(animations[0].time == 0.0f);
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].GetTime() == 0.0f);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(10.0f, 10.0f));
 
         window.Update(state, 1.0f, 0.5f, &animations);
-        TEST_REQUIRE(animations[0].state == uik::Animation::State::Active);
-        TEST_REQUIRE(animations[0].time == 0.5f);
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].GetTime() == 0.5f);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(55.0f, 55.0f));
 
         window.Update(state, 1.5f, 0.5f, &animations);
-        TEST_REQUIRE(animations[0].state == uik::Animation::State::Inactive);
-        TEST_REQUIRE(animations[0].time == 1.0f);
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Inactive);
+        TEST_REQUIRE(animations[0].GetTime() == 1.0f);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(100.0f, 100.0f));
     }
 }
