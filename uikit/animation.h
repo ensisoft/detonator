@@ -43,7 +43,8 @@ namespace uik
     // set prop font-size 12
     // set prop button-shape Rect
 
-    struct Animation {
+    class Animation {
+    public:
         enum class Trigger {
             Open,
             Close,
@@ -57,6 +58,7 @@ namespace uik
         enum class State {
             Active, Inactive
         };
+        using Interp = math::Interpolation;
 
         struct Action {
             enum class Type {
@@ -72,19 +74,66 @@ namespace uik
             };
             Type type = Type::Resize;
             std::variant<std::monostate, StyleProperty, FSize, FPoint, bool> end_value;
-            std::variant<std::monostate, StyleProperty,  FSize, FPoint, bool> start_value;
+            std::variant<std::monostate, StyleProperty, FSize, FPoint, bool> start_value;
             std::string name;
         };
-        Trigger trigger = Trigger::Open;
-        State state = State::Inactive;
-        math::Interpolation interpolation = math::Interpolation::Linear;
-        float duration = 1.0f;
-        float delay    = 0.0f;
-        float time     = 0.0f;
-        unsigned loops = 1;
 
-        std::vector<Action> actions;
-        Widget* widget = nullptr;
+        explicit Animation(Trigger trigger) noexcept
+          : mTrigger(trigger)
+        {}
+
+        bool TriggerOnOpen();
+        bool TriggerOnClose();
+        bool TriggerOnAction(const WidgetAction& action);
+
+        void Update(double time, float dt);
+
+        bool IsActiveOnTrigger(Trigger trigger) const noexcept;
+
+        inline auto GetTrigger() const noexcept
+        { return mTrigger; }
+        inline auto GetState() const noexcept
+        { return mState; }
+        inline auto GetInterpolation() const noexcept
+        { return mInterpolation; }
+        inline auto GetDuration() const noexcept
+        { return mDuration; }
+        inline auto GetDelay() const noexcept
+        { return mDelay; }
+        inline auto GetTime() const noexcept
+        { return mTime;}
+        inline auto GetLoops() const noexcept
+        { return mLoops; }
+
+        inline auto GetActionCount() const noexcept
+        { return mActions.size(); }
+        inline auto& GetAction(size_t index) noexcept
+        { return mActions[index]; }
+        inline const auto& GetAction(size_t index) const noexcept
+        { return mActions[index]; }
+
+        inline auto* GetWidget() noexcept
+        { return mWidget; }
+        inline const auto* GetWidget() const noexcept
+        { return mWidget; }
+        inline void SetWidget(Widget* widget) noexcept
+        { mWidget = widget; }
+
+        bool Parse(std::deque<std::string>& lines);
+
+    private:
+        Trigger mTrigger = Trigger::Open;
+        State mState     = State::Inactive;
+        Interp mInterpolation = math::Interpolation::Linear;
+
+        double   mDuration = 1.0f;
+        double   mDelay    = 0.0f;
+        double   mTime     = 0.0f;
+        unsigned mLoops    = 1;
+
+        std::vector<Action> mActions;
+
+        Widget* mWidget = nullptr;
     };
 
     bool ParseAnimations(const std::string& str, std::vector<Animation>* animations);
