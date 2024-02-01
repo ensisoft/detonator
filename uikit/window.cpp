@@ -894,10 +894,23 @@ std::vector<Window::WidgetAction> Window::KeyUp(const KeyEvent& key, TransientSt
 void Window::TriggerAnimations(const std::vector<WidgetAction>& actions, TransientState& state,
                                AnimationStateArray& animations)
 {
+
+    // don't trigger anything if there's any animation under the same
+    // trigger that is still executing. This allows all animations
+    // under the same trigger to complete before any is started again
+    // possibly leading to incorrect state.
+    for (const auto& action : actions)
+    {
+        for (auto& anim : animations)
+        {
+            if (anim.IsActiveOnAction(action))
+                return;
+        }
+    }
+
     // for each action see if there's an animation (identified by the widget ID)
     // that is wired to trigger on the action from the widget.
     // only consider currently inactive animations.
-
     for (const auto& action : actions)
     {
         for (auto& anim : animations)
