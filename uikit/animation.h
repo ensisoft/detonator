@@ -21,6 +21,7 @@
 #include <variant>
 #include <string>
 #include <vector>
+#include <deque>
 
 #include "base/math.h"
 #include "uikit/types.h"
@@ -60,6 +61,9 @@ namespace uik
         };
         using Interp = math::Interpolation;
 
+        // note that float values are handled in style property.
+        using ActionValue = std::variant<std::monostate, StyleProperty, FSize, FPoint, bool>;
+
         struct Action {
             enum class Type {
                 Resize,
@@ -73,9 +77,10 @@ namespace uik
                 SetFlag
             };
             Type type = Type::Resize;
-            std::variant<std::monostate, StyleProperty, FSize, FPoint, bool> end_value;
-            std::variant<std::monostate, StyleProperty, FSize, FPoint, bool> start_value;
-            std::string name;
+            // key applies to DelProp, SetProp, DelMaterial, SetMaterial and SetFlag
+            std::string key;
+            ActionValue value;
+            float step = 0.5f;
         };
 
         explicit Animation(Trigger trigger) noexcept
@@ -89,6 +94,7 @@ namespace uik
         void Update(double time, float dt);
 
         bool IsActiveOnTrigger(Trigger trigger) const noexcept;
+        bool IsActiveOnAction(const WidgetAction& action) const noexcept;
 
         inline auto GetTrigger() const noexcept
         { return mTrigger; }
@@ -104,6 +110,8 @@ namespace uik
         { return mTime;}
         inline auto GetLoops() const noexcept
         { return mLoops; }
+        inline auto GetLoop() const noexcept
+        { return mLoop; }
 
         inline auto GetActionCount() const noexcept
         { return mActions.size(); }
@@ -120,20 +128,37 @@ namespace uik
         { mWidget = widget; }
 
         bool Parse(std::deque<std::string>& lines);
+    private:
+        void EnterTriggerState();
+        void EnterRunState();
 
     private:
         Trigger mTrigger = Trigger::Open;
-        State mState     = State::Inactive;
         Interp mInterpolation = math::Interpolation::Linear;
-
         double   mDuration = 1.0f;
         double   mDelay    = 0.0f;
-        double   mTime     = 0.0f;
         unsigned mLoops    = 1;
-
         std::vector<Action> mActions;
+        std::string mName = {"unnamed"};
 
+        struct InterpolationActionState {
+            Action::Type type;
+            ActionValue start;
+            ActionValue end;
+        };
+        struct StepActionState {
+            Action::Type type;
+            std::string  key;
+            ActionValue  value;
+            float        step = 0.5f;
+        };
+
+        State mState    = State::Inactive;
         Widget* mWidget = nullptr;
+        std::vector<InterpolationActionState> mInterpolationState;
+        std::vector<StepActionState> mStepState;
+        unsigned mLoop = 0;
+        double   mTime = 0.0f;
     };
 
     bool ParseAnimations(const std::string& str, std::vector<Animation>* animations);

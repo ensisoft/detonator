@@ -120,7 +120,7 @@ std::optional<uik::Animation::Action> ParseAction(const std::vector<std::string>
             return std::nullopt;
 
             uik::Animation::Action action;
-            action.end_value = uik::FSize(width, height);
+            action.value = uik::FSize(width, height);
             if (directive == "resize")
                 action.type  = uik::Animation::Action::Type::Resize;
             else if (directive == "grow")
@@ -136,7 +136,7 @@ std::optional<uik::Animation::Action> ParseAction(const std::vector<std::string>
             return std::nullopt;
 
         uik::Animation::Action action;
-        action.end_value = uik::FPoint(x, y);
+        action.value = uik::FPoint(x, y);
         if (directive == "move")
             action.type  = uik::Animation::Action::Type::Move;
         else if (directive == "translate")
@@ -154,7 +154,7 @@ std::optional<uik::Animation::Action> ParseAction(const std::vector<std::string>
 
             uik::Animation::Action action;
             action.type = uik::Animation::Action::Type::DelProp;
-            action.name = prop_name;
+            action.key  = prop_name;
             return action;
         }
         else if (target == "material")
@@ -165,7 +165,7 @@ std::optional<uik::Animation::Action> ParseAction(const std::vector<std::string>
 
             uik::Animation::Action action;
             action.type = uik::Animation::Action::Type::DelMaterial;
-            action.name = mat_name;
+            action.key  = mat_name;
             return action;
         }
     }
@@ -177,33 +177,56 @@ std::optional<uik::Animation::Action> ParseAction(const std::vector<std::string>
         {
             const auto& flag_name  = GetToken(tokens, 2);
             const auto& flag_value = GetToken(tokens, 3);
-            if (flag_name.empty() || flag_value.empty())
+            const auto& step_value = GetToken(tokens, 4);
+            if (flag_name.empty())
                 return std::nullopt;
-            if (flag_value != "true" || flag_value != "false")
-                return std::nullopt;
+
+            bool value;
+            if (flag_value == "true")
+                value = true;
+            else if (flag_value == "false")
+                value = false;
+            else return std::nullopt;
+
+            float step = 0.5f;
 
             uik::Animation::Action action;
             action.type  = uik::Animation::Action::Type::SetFlag;
-            action.name  = flag_name;
-            action.end_value = flag_value == "true";
+            action.key   = flag_name;
+            action.value = value;
+            if (!step_value.empty())
+            {
+                if (const auto* ptr = ToNumber(step_value, &step))
+                    action.step = *ptr;
+            }
+
             return action;
         }
         else if (target == "prop")
         {
             const auto& prop_name = GetToken(tokens, 2);
             const auto& prop_val  = GetToken(tokens, 3);
+            const auto& step_val  = GetToken(tokens, 4);
             if (prop_name.empty() || prop_val.empty())
                 return std::nullopt;
 
             uik::Animation::Action action;
             action.type = uik::Animation::Action::Type::SetProp;
-            action.name = prop_name;
+            action.key  = prop_name;
+
+            float step = 0.5f;
+            if (!step_val.empty())
+            {
+                if (const auto* ptr = ToNumber(step_val, &step))
+                    action.step = *ptr;
+            }
+
 
             {
                 std::string val;
                 if (base::Scanf(prop_val, &val))
                 {
-                    action.end_value = uik::StyleProperty { std::move(val) };
+                    action.value = uik::StyleProperty { std::move(val) };
                     return action;
                 }
             }
@@ -211,7 +234,13 @@ std::optional<uik::Animation::Action> ParseAction(const std::vector<std::string>
                 uik::Color4f val;
                 if (base::Scanf(prop_val, &val))
                 {
-                    action.end_value = uik::StyleProperty { val };
+                    action.value = uik::StyleProperty { val };
+                    return action;
+                }
+                uik::Color color = uik::Color::Black;
+                if (ToEnum(prop_val, &color))
+                {
+                    action.value = uik::StyleProperty  { color };
                     return action;
                 }
             }
@@ -219,7 +248,7 @@ std::optional<uik::Animation::Action> ParseAction(const std::vector<std::string>
                 float val = 0.0f;
                 if (base::Scanf(prop_val, &val))
                 {
-                    action.end_value = uik::StyleProperty { val };
+                    action.value = uik::StyleProperty { val };
                     return action;
                 }
             }
@@ -227,10 +256,11 @@ std::optional<uik::Animation::Action> ParseAction(const std::vector<std::string>
                 int val = 0;
                 if (base::Scanf(prop_val, &val))
                 {
-                    action.end_value = uik::StyleProperty { val };
+                    action.value = uik::StyleProperty { val };
                     return action;
                 }
             }
+            WARN("Failed to parse widget animation value. '%1']", prop_val);
         }
         else if (target == "material")
         {
@@ -265,7 +295,11 @@ bool Animation::Parse(std::deque<std::string>& lines)
         const auto& tokens = SplitTokens(line);
         const auto& directive = GetToken(tokens, 0);
         const auto& argument  = GetToken(tokens, 1);
-        if (directive == "delay")
+        if (directive == "name")
+        {
+            mName = argument;
+        }
+        else if (directive == "delay")
         {
             float delay = 0.0f;
             if (const auto* ptr = ToNumber<float>(argument, &delay))
@@ -314,8 +348,7 @@ bool Animation::TriggerOnOpen()
     if (mTrigger != Trigger::Open)
         return false;
 
-    mState = State::Active;
-    mTime  = -mDelay;
+    EnterTriggerState();
     return true;
 }
 
@@ -324,8 +357,7 @@ bool Animation::TriggerOnClose()
     if (mTrigger != Trigger::Close)
         return false;
 
-    mState = State::Active;
-    mTime = -mDelay;
+    EnterTriggerState();
     return true;
 }
 
@@ -354,17 +386,16 @@ bool Animation::TriggerOnAction(const WidgetAction& action)
             return false;
     }
     else if (action.type == WidgetActionType::ValueChange &&
-             mTrigger == Animation::Trigger::ValueChange)
+             mTrigger != Animation::Trigger::ValueChange)
         return false;
     else if (action.type == WidgetActionType::MouseEnter &&
-             mTrigger == Animation::Trigger::MouseEnter)
+             mTrigger != Animation::Trigger::MouseEnter)
         return false;
     else if(action.type == WidgetActionType::MouseLeave &&
-            mTrigger == Animation::Trigger::MouseLeave)
+            mTrigger != Animation::Trigger::MouseLeave)
         return false;
 
-    mTime  = -mDelay;
-    mState = Animation::State::Active;
+    EnterTriggerState();
     return true;
 }
 
@@ -380,114 +411,100 @@ void Animation::Update(double game_time, float dt)
     // read the starting state once when the animation time goes above zero.
     if (prev_time <= 0.0f && mTime > 0.0f)
     {
-        // for each animation action read the current starting state that
-        // is required for the widget state interpolation. note that
-        // currently we can't interpolate style properties such as Color
-        // because the starting color is not known here unless it's
-        // specified explicitly in the animation string (or in the widget's
-        // style string..)
-        for (auto& action : mActions)
-        {
-            // in case the animation is looping we skip reading the initial
-            // state on subsequent animation loop iterations.
-            if (std::holds_alternative<std::monostate>(action.start_value))
-            {
-                if (action.type == Animation::Action::Type::Move)
-                    action.start_value = mWidget->GetPosition();
-                else if (action.type == Animation::Action::Type::Resize)
-                    action.start_value = mWidget->GetSize();
-                else if (action.type == Animation::Action::Type::Translate)
-                {
-                    action.start_value = mWidget->GetPosition();
-                    action.end_value   = mWidget->GetPosition() + std::get<uik::FPoint>(action.end_value);
-                }
-                else if (action.type == Animation::Action::Type::Grow)
-                {
-                    action.start_value = mWidget->GetSize();
-                    action.end_value   = mWidget->GetSize() + std::get<uik::FSize>(action.end_value);
-                }
-            }
-        }
+        EnterRunState();
     }
     if (mTime <= 0.0f)
         return;
 
+    // apply interpolation state update
     const float t = math::clamp(0.0, mDuration, mTime) / mDuration;
-    for (auto& action : mActions)
+    for (const auto& action : mInterpolationState)
     {
-        if (action.type == Animation::Action::Type::Resize || action.type ==Animation::Action::Type::Grow)
+        if (action.type == Animation::Action::Type::Resize || action.type == Animation::Action::Type::Grow)
         {
-            ASSERT(std::holds_alternative<uik::FSize>(action.start_value));
-            ASSERT(std::holds_alternative<uik::FSize>(action.end_value));
+            ASSERT(std::holds_alternative<uik::FSize>(action.start));
+            ASSERT(std::holds_alternative<uik::FSize>(action.end));
 
-            const auto start_value = std::get<uik::FSize>(action.start_value);
-            const auto end_value   = std::get<uik::FSize>(action.end_value);
-            const auto value       = math::interpolate(start_value, end_value, t, mInterpolation);
+            const auto start_value = std::get<uik::FSize>(action.start);
+            const auto end_value = std::get<uik::FSize>(action.end);
+            const auto value = math::interpolate(start_value, end_value, t, mInterpolation);
             mWidget->SetSize(value);
         }
         else if (action.type == Animation::Action::Type::Move || action.type == Animation::Action::Type::Translate)
         {
-            ASSERT(std::holds_alternative<uik::FPoint>(action.start_value));
-            ASSERT(std::holds_alternative<uik::FPoint>(action.end_value));
+            ASSERT(std::holds_alternative<uik::FPoint>(action.start));
+            ASSERT(std::holds_alternative<uik::FPoint>(action.end));
 
-            const auto start_value = std::get<uik::FPoint>(action.start_value);
-            const auto end_value   = std::get<uik::FPoint>(action.end_value);
-            const auto value       = math::interpolate(start_value, end_value, t, mInterpolation);
+            const auto start_value = std::get<uik::FPoint>(action.start);
+            const auto end_value = std::get<uik::FPoint>(action.end);
+            const auto value = math::interpolate(start_value, end_value, t, mInterpolation);
             mWidget->SetPosition(value);
-        }
-        else if (action.type == Animation::Action::Type::SetProp)
-        {
-            if (t >= 0.5f)
-            {
-                ASSERT(std::holds_alternative<StyleProperty>(action.end_value));
+        } else BUG("Unhandled widget animation action.");
+    }
 
-                const auto& style_property = std::get<StyleProperty>(action.end_value);
-                mWidget->SetStyleProperty(action.name, style_property);
-            }
+    // apply step state update
+    for (auto& action : mStepState)
+    {
+        // check if it's time to apply the state change
+        if (t < action.step)
+            continue;
+
+        // check if the state change has already been applied.
+        if (std::holds_alternative<std::monostate>(action.value))
+            continue;
+
+        if (action.type == Animation::Action::Type::SetProp)
+        {
+            ASSERT(std::holds_alternative<StyleProperty>(action.value));
+
+            const auto& style_property = std::get<StyleProperty>(action.value);
+            mWidget->SetStyleProperty(action.key, style_property);
+
         }
         else if (action.type == Animation::Action::Type::DelProp)
         {
-            if (t >= 0.5f)
-            {
-                mWidget->DeleteStyleProperty(action.name);
-            }
+            mWidget->DeleteStyleProperty(action.key);
         }
         else if (action.type == Animation::Action::Type::DelMaterial)
         {
-            if (t >= 0.5f)
-            {
-                mWidget->DeleteStyleMaterial(action.name);
-            }
+            mWidget->DeleteStyleMaterial(action.key);
         }
         else if (action.type == Animation::Action::Type::SetFlag)
         {
-            if (t >= 0.5f)
-            {
-                const auto on_off = std::get<bool>(action.end_value);
-                if (action.name == "Enabled")
-                    mWidget->SetFlag(Widget::Flags::Enabled, on_off);
-                else if (action.name == "Visible")
-                    mWidget->SetFlag(Widget::Flags::VisibleInGame, on_off);
-                else WARN("Unknown widget flag in widget animation. [widget='%1', flag='%2']", widget->GetName(), action.name);
-            }
-        }
-        else BUG("Unhandled widget animation action.");
+            ASSERT(std::holds_alternative<bool>(action.value));
+
+            const auto on_off = std::get<bool>(action.value);
+            if (action.key == "Enabled")
+                mWidget->SetFlag(Widget::Flags::Enabled, on_off);
+            else if (action.key == "Visible")
+                mWidget->SetFlag(Widget::Flags::VisibleInGame, on_off);
+            else WARN("Unknown widget flag in widget animation. [widget='%1', flag='%2']",
+                      mWidget->GetName(), action.key);
+        } else BUG("Unhandled widget animation action.");
+
+        // clear the value by setting to monostate (no value)
+        action.value = std::monostate {};
     }
+
     if (mTime >= mDuration)
     {
+        VERBOSE("Widget animation is inactive. [name='%1', trigger=%1, widget='%3']",
+                mName, mTrigger, mWidget->GetName());
+
+        // todo: should we transfer the reminder of the  time to current time?
+        const auto t = mTime - mDuration;
+
+        // when resetting for loop don't clear the previous state.
+        mLoop++;
         mState = Animation::State::Inactive;
-        if (mLoops == std::numeric_limits<unsigned>::max())
+
+        if (mLoops == std::numeric_limits<unsigned>::max() || mLoop < mLoops)
         {
-            mTime  = -mDelay;
+            mTime  = -mDelay + t;
             mState = Animation::State::Active;
-        }
-        else if (mLoops > 0)
-        {
-            if (--mLoops > 0)
-            {
-                mTime = -mDelay;
-                mState = Animation::State::Active;
-            }
+            VERBOSE("Widget animation loop restart. [name='%1', loop=%1/%2, widget=%3]",
+                    mName, mLoop, mLoops == std::numeric_limits<unsigned>::max() ? "inf" : std::to_string(mLoops),
+                    mWidget->GetName());
         }
     }
 }
@@ -500,6 +517,113 @@ bool Animation::IsActiveOnTrigger(Trigger trigger) const noexcept
         return false;
 
     return true;
+}
+
+bool Animation::IsActiveOnAction(const WidgetAction& action) const noexcept
+{
+    if (mState == State::Inactive)
+        return false;
+
+    if (action.type == WidgetActionType::FocusChange)
+    {
+        const auto has_focus = std::get<bool>(action.value);
+        if (has_focus && mTrigger == Trigger::GainFocus)
+            return true;
+        if (!has_focus && mTrigger == Trigger::LostFocus)
+            return true;
+    }
+    else if (action.type == WidgetActionType::ButtonPress)
+    {
+        if (mTrigger == Animation::Trigger::Click)
+            return true;
+    }
+    else if (action.type == WidgetActionType::ValueChange)
+    {
+        if (mTrigger == Animation::Trigger::ValueChange)
+            return true;
+    }
+    else if (action.type == WidgetActionType::MouseEnter)
+    {
+        if (mTrigger == Animation::Trigger::MouseEnter)
+            return true;
+    }
+    else if (action.type == WidgetActionType::MouseLeave)
+    {
+        if (mTrigger == Animation::Trigger::MouseLeave)
+            return true;
+    }
+    return false;
+}
+
+void Animation::EnterTriggerState()
+{
+    mState = State::Active;
+    mTime  = -mDelay;
+    mLoop  = 0;
+    mInterpolationState.clear();
+    mStepState.clear();
+    VERBOSE("Widget animation is active. [name='%1', trigger=%2, widget='%3']",
+            mName, mTrigger, mWidget->GetName());
+}
+
+void Animation::EnterRunState()
+{
+    // if the state is already initialized then don't do it
+    // again. We retain the initial state for looped animation.
+    if (!mInterpolationState.empty() || !mStepState.empty())
+        return;
+
+    // for each animation action read the current starting state that
+    // is required for the widget state interpolation. note that
+    // currently we can't interpolate style properties such as Color
+    // because the starting color is not known here unless it's
+    // specified explicitly in the animation string (or in the widget's
+    // style string..)
+    for (auto& action: mActions)
+    {
+        if (action.type == Animation::Action::Type::Move)
+        {
+            InterpolationActionState state;
+            state.type = action.type;
+            state.start = mWidget->GetPosition();
+            state.end   = action.value;
+            mInterpolationState.push_back(std::move(state));
+        }
+        else if (action.type == Animation::Action::Type::Resize)
+        {
+            InterpolationActionState state;
+            state.type = action.type;
+            state.start = mWidget->GetSize();
+            state.end   = action.value;
+            mInterpolationState.push_back(std::move(state));
+        }
+        else if (action.type == Animation::Action::Type::Translate)
+        {
+            InterpolationActionState state;
+            state.type = action.type;
+            state.start = mWidget->GetPosition();
+            state.end   = mWidget->GetPosition() + std::get<uik::FPoint>(action.value);
+            mInterpolationState.push_back(std::move(state));
+        }
+        else if (action.type == Animation::Action::Type::Grow)
+        {
+            InterpolationActionState state;
+            state.type = action.type;
+            state.start = mWidget->GetSize();
+            state.end   = mWidget->GetSize() + std::get<uik::FSize>(action.value);
+            mInterpolationState.push_back(std::move(state));
+        }
+        else
+        {
+            StepActionState state;
+            state.type  = action.type;
+            state.key   = action.key;
+            state.value = action.value;
+            state.step  = action.step;
+            mStepState.push_back(std::move(state));
+        }
+
+    }
 }
 
 

@@ -1164,6 +1164,11 @@ interpolation Cosine
 ; this is a comment
 $OnOpen
 move 200.0 250.0
+set prop float-prop 1.0
+set prop color-prop0 1.0,0.0,0.0,1.0
+set prop color-prop1 Red 1.0
+set flag foo true
+del prop foo
 
         )";
 
@@ -1171,25 +1176,45 @@ move 200.0 250.0
         TEST_REQUIRE(uik::ParseAnimations(str, &animations));
         TEST_REQUIRE(animations.size() == 2);
 
-        TEST_REQUIRE(animations[0].GetDelay() == 1.0f);
-        TEST_REQUIRE(animations[0].GetDuration() == 2.0f);
-        TEST_REQUIRE(animations[0].GetInterpolation() == math::Interpolation::Cosine);
-        TEST_REQUIRE(animations[0].GetTrigger() == uik::Animation::Trigger::Click);
-        TEST_REQUIRE(animations[0].GetLoops() == 5);
-        TEST_REQUIRE(animations[0].GetActionCount() == 2);
-        TEST_REQUIRE(animations[0].GetAction(0).type == uik::Animation::Action::Type::Resize);
-        TEST_REQUIRE(std::get_if<uik::FSize>(&animations[0].GetAction(0).end_value)->GetWidth() == 100.0f);
-        TEST_REQUIRE(std::get_if<uik::FSize>(&animations[0].GetAction(0).end_value)->GetHeight() == 200.0f);
-        TEST_REQUIRE(animations[0].GetAction(1).type == uik::Animation::Action::Type::Move);
-        TEST_REQUIRE(std::get_if<uik::FPoint>(&animations[0].GetAction(1).end_value)->GetX() == 45.0f);
-        TEST_REQUIRE(std::get_if<uik::FPoint>(&animations[0].GetAction(1).end_value)->GetY() == 50.0f);
+        {
+            const auto& animation = animations[0];
+            TEST_REQUIRE(animation.GetDelay()         == 1.0f);
+            TEST_REQUIRE(animation.GetDuration()      == 2.0f);
+            TEST_REQUIRE(animation.GetInterpolation() == math::Interpolation::Cosine);
+            TEST_REQUIRE(animation.GetTrigger()       == uik::Animation::Trigger::Click);
+            TEST_REQUIRE(animation.GetLoops()         == 5);
+            TEST_REQUIRE(animation.GetActionCount()   == 2);
+            TEST_REQUIRE(animation.GetAction(0).type  == uik::Animation::Action::Type::Resize);
+            TEST_REQUIRE(animation.GetAction(0).value == uik::FSize(100.0f, 200.0f));
+            TEST_REQUIRE(animation.GetAction(1).type  == uik::Animation::Action::Type::Move);
+            TEST_REQUIRE(animation.GetAction(1).value == uik::FPoint(45.0f, 50.0f));
+        }
 
-        TEST_REQUIRE(animations[1].GetLoops() == 1);
-        TEST_REQUIRE(animations[1].GetDelay() == 0.0f);
-        TEST_REQUIRE(animations[1].GetDuration() == 1.0f);
-        TEST_REQUIRE(animations[1].GetInterpolation() == math::Interpolation::Linear);
-        TEST_REQUIRE(animations[1].GetActionCount() == 1);
-        TEST_REQUIRE(animations[1].GetAction(0).type == uik::Animation::Action::Type::Move);
+        {
+            const auto& animation = animations[1];
+            TEST_REQUIRE(animation.GetLoops()         == 1);
+            TEST_REQUIRE(animation.GetDelay()         == 0.0f);
+            TEST_REQUIRE(animation.GetDuration()      == 1.0f);
+            TEST_REQUIRE(animation.GetInterpolation() == math::Interpolation::Linear);
+            TEST_REQUIRE(animation.GetActionCount()   == 6);
+            TEST_REQUIRE(animation.GetAction(0).type  == uik::Animation::Action::Type::Move);
+            TEST_REQUIRE(animation.GetAction(1).type  == uik::Animation::Action::Type::SetProp);
+            TEST_REQUIRE(animation.GetAction(1).key   == "float-prop");
+            TEST_REQUIRE(animation.GetAction(1).value == uik::StyleProperty { 1.0f });
+            TEST_REQUIRE(animation.GetAction(2).type  == uik::Animation::Action::Type::SetProp);
+            TEST_REQUIRE(animation.GetAction(2).key   == "color-prop0");
+            TEST_REQUIRE(animation.GetAction(2).value == uik::StyleProperty { uik::Color4f(1.0f, 0.0f, 0.0f, 1.0f) });
+            TEST_REQUIRE(animation.GetAction(2).step  == 0.5f);
+            TEST_REQUIRE(animation.GetAction(3).type  == uik::Animation::Action::Type::SetProp);
+            TEST_REQUIRE(animation.GetAction(3).key   == "color-prop1");
+            TEST_REQUIRE(animation.GetAction(3).value == uik::StyleProperty { uik::Color4f(uik::Color::Red) });
+            TEST_REQUIRE(animation.GetAction(3).step  == 1.0f);
+            TEST_REQUIRE(animation.GetAction(4).type  == uik::Animation::Action::Type::SetFlag);
+            TEST_REQUIRE(animation.GetAction(4).key   == "foo");
+            TEST_REQUIRE(animation.GetAction(4).value == true);
+            TEST_REQUIRE(animation.GetAction(5).type  == uik::Animation::Action::Type::DelProp);
+            TEST_REQUIRE(animation.GetAction(5).key   == "foo");
+        }
     }
 
     {
@@ -1229,7 +1254,7 @@ move 100.0 xwg12
     }
 }
 
-void unit_test_widget_animation()
+void unit_test_widget_animation_on_open()
 {
     TEST_CASE(test::Type::Feature)
 
@@ -1266,13 +1291,10 @@ loops 1
         TEST_REQUIRE(animations[0].GetDuration() == 1.0f);
         TEST_REQUIRE(animations[0].GetActionCount() == 2);
         TEST_REQUIRE(animations[0].GetAction(0).type == uik::Animation::Action::Type::Move);
-        TEST_REQUIRE(*std::get_if<uik::FPoint>(&animations[0].GetAction(0).start_value) == uik::FPoint(10.0f, 10.0f));
-        TEST_REQUIRE(*std::get_if<uik::FPoint>(&animations[0].GetAction(0).end_value) == uik::FPoint(100.0f, 100.0f));
-        TEST_REQUIRE(animations[0].GetAction(1).type == uik::Animation::Action::Type::Resize);
-        TEST_REQUIRE(*std::get_if<uik::FSize>(&animations[0].GetAction(1).start_value) == uik::FSize(10.0f, 10.0f));
-        TEST_REQUIRE(*std::get_if<uik::FSize>(&animations[0].GetAction(1).end_value) == uik::FSize(100.0f, 100.0f));
-    }
 
+        TEST_REQUIRE(widget->GetPosition() == uik::FPoint(55.0f, 55.0f));
+        TEST_REQUIRE(widget->GetSize() == uik::FSize(55.0f, 55.0f));
+    }
 
     // looping once without delay
     {
@@ -1297,19 +1319,19 @@ loops 1
         window.Open(state, &animations);
         TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
         TEST_REQUIRE(animations[0].GetTime() == 0.0f);
-        TEST_REQUIRE(animations[0].GetLoops() == 1);
+        TEST_REQUIRE(animations[0].GetLoop() == 0);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(0.0f, 0.0f));
 
         window.Update(state, 0.0, 0.5f, &animations);
         TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
         TEST_REQUIRE(animations[0].GetTime() == 0.5f);
-        TEST_REQUIRE(animations[0].GetLoops() == 1);
+        TEST_REQUIRE(animations[0].GetLoop() == 0);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(50.0f, 50.0f));
 
         window.Update(state, 0.5f, 0.5f, &animations);
         TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Inactive);
         TEST_REQUIRE(animations[0].GetTime() == 1.0f);
-        TEST_REQUIRE(animations[0].GetLoops() == 0);
+        TEST_REQUIRE(animations[0].GetLoop() == 1);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(100.0f, 100.0f));
     }
 
@@ -1336,31 +1358,31 @@ loops 2
         window.Open(state, &animations);
         TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
         TEST_REQUIRE(animations[0].GetTime() == 0.0f);
-        TEST_REQUIRE(animations[0].GetLoops() == 2);
+        TEST_REQUIRE(animations[0].GetLoop() == 0);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(0.0f, 0.0f));
 
         window.Update(state, 0.0, 0.5f, &animations);
         TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
         TEST_REQUIRE(animations[0].GetTime() == 0.5f);
-        TEST_REQUIRE(animations[0].GetLoops() == 2);
+        TEST_REQUIRE(animations[0].GetLoop() == 0);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(50.0f, 50.0f));
 
         window.Update(state, 0.5f, 0.5f, &animations);
         TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
         TEST_REQUIRE(animations[0].GetTime() == 0.0f);
-        TEST_REQUIRE(animations[0].GetLoops() == 1);
+        TEST_REQUIRE(animations[0].GetLoop() == 1);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(100.0f, 100.0f));
 
         window.Update(state, 1.0f, 0.5f, &animations);
         TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
         TEST_REQUIRE(animations[0].GetTime() == 0.5f);
-        TEST_REQUIRE(animations[0].GetLoops() == 1);
+        TEST_REQUIRE(animations[0].GetLoop() == 1);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(50.0f, 50.0f));
 
         window.Update(state, 1.5f, 0.5f, &animations);
         TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Inactive);
         TEST_REQUIRE(animations[0].GetTime() == 1.0f);
-        TEST_REQUIRE(animations[0].GetLoops() == 0);
+        TEST_REQUIRE(animations[0].GetLoop() == 2);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(100.0f, 100.0f));
     }
 
@@ -1409,6 +1431,202 @@ loops 1
         TEST_REQUIRE(animations[0].GetTime() == 1.0f);
         TEST_REQUIRE(widget->GetPosition() == uik::FPoint(100.0f, 100.0f));
     }
+}
+
+// Re-triggering animations under the same trigger while
+// some animation is still running.
+// For example if we have two animation sequences such as
+//
+// $OnMouseEnter
+// do stuff
+// duration 2
+//
+// $OnMouseEnter
+// undo stuff
+// delay 2
+// duration 2
+//
+// And the idea is that the second sequence starts after the
+// first one has finished and "undoes" the changes done by
+// the first sequence the first sequence can't be started
+// until the second one also has finished.
+//
+// Easiest fix is to simply not run any animation under any
+// trigger if any other animation under the same trigger is
+// still running.
+void bug_restart_animation_too_soon()
+{
+    TEST_CASE(test::Type::Feature)
+
+    uik::Window window;
+    uik::PushButton btn;
+    btn.SetName("test");
+    btn.SetPosition(uik::FPoint(0.0f, 0.0f));
+    btn.SetSize(uik::FSize(10.0f, 10.0f));
+    btn.SetAnimationString(R"(
+$OnMouseEnter
+move 100.0 100.0
+delay 0.0
+duration 1.0
+
+$OnMouseEnter
+move 0.0 0.0
+delay 2.0
+duration 1.0
+        )");
+
+    auto* widget = window.AddWidget(btn);
+    window.LinkChild(nullptr, widget);
+
+    uik::TransientState state;
+    uik::AnimationStateArray animations;
+    window.Open(state, &animations);
+
+    {
+        uik::Window::MouseEvent mickey;
+        mickey.window_mouse_pos = uik::FPoint(5.0f, 5.0f);
+        auto actions = window.MouseMove(mickey, state);
+        window.TriggerAnimations(actions, state, animations);
+
+        // both are started
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[1].GetState() == uik::Animation::State::Active);
+
+        mickey.window_mouse_pos = uik::FPoint(100.0f, 100.0f);
+        window.MouseMove(mickey, state);
+    }
+
+    double time = 0.0f;
+
+    window.Update(state, time, 0.5f, &animations);
+    time += 0.5f;
+    window.Update(state, time, 0.5f, &animations);
+    time += 0.5f;
+    window.Update(state, time, 0.5f, &animations);
+    time += 0.5f;
+
+    TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Inactive);
+    TEST_REQUIRE(animations[1].GetState() == uik::Animation::State::Active);
+
+    TEST_REQUIRE(widget->GetPosition() == uik::FPoint(100.0f, 100.0f));
+
+    {
+        uik::Window::MouseEvent mickey;
+        mickey.window_mouse_pos = uik::FPoint(105.0f, 105.0f);
+        auto actions = window.MouseMove(mickey, state);
+        window.TriggerAnimations(actions, state, animations);
+
+        // first sequence remains inactive
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Inactive);
+        TEST_REQUIRE(animations[1].GetState() == uik::Animation::State::Active);
+
+        mickey.window_mouse_pos = uik::FPoint(0.0f, 0.0f);
+        window.MouseMove(mickey, state);
+    }
+
+    while (animations[1].GetState() == uik::Animation::State::Active)
+    {
+        window.Update(state, time, 0.5f, &animations);
+        time += 0.5f;
+    }
+    TEST_REQUIRE(widget->GetPosition() == uik::FPoint(0.0f, 0.0f));
+    TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Inactive);
+    TEST_REQUIRE(animations[1].GetState() == uik::Animation::State::Inactive);
+
+    // now should be ok to trigger again.
+    {
+        uik::Window::MouseEvent mickey;
+        mickey.window_mouse_pos = uik::FPoint(5.0f, 5.0f);
+        auto actions = window.MouseMove(mickey, state);
+        window.TriggerAnimations(actions, state, animations);
+
+        // both are started
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[1].GetState() == uik::Animation::State::Active);
+    }
+
+}
+
+// looping state and start state are stale on restart (re-trigger)
+void bug_incorrect_state_on_restart()
+{
+    TEST_CASE(test::Type::Feature)
+
+    uik::Window window;
+    uik::PushButton btn;
+    btn.SetName("test");
+    btn.SetPosition(uik::FPoint(0.0f, 0.0f));
+    btn.SetSize(uik::FSize(10.0f, 10.0f));
+    btn.SetAnimationString(R"(
+$OnClick
+move 100.0 100.0
+delay 0.0
+duration 1.0
+loops 2
+        )");
+
+    auto* widget = window.AddWidget(btn);
+    window.LinkChild(nullptr, widget);
+
+    uik::TransientState state;
+    uik::AnimationStateArray animations;
+    window.Open(state, &animations);
+
+    {
+        uik::Window::MouseEvent press;
+        press.window_mouse_pos = uik::FPoint(5.0f, 5.0f);
+        press.button = uik::MouseButton::Left;
+        press.time   = base::GetTime();
+        window.TriggerAnimations(window.MousePress(press, state),
+                                 state, animations);
+        window.TriggerAnimations(window.MouseRelease(press, state),
+                state, animations);
+
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
+    }
+
+    {
+        window.Update(state, 0.0f, 1.0f, &animations);
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].GetLoop() == 1);
+
+        window.Update(state, 1.0f, 0.5f, &animations);
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].GetLoop()  == 1);
+        TEST_REQUIRE(widget->GetPosition()    == uik::FPoint(50.0f, 50.0f));
+
+        window.Update(state, 1.5f, 0.5f, &animations);
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Inactive);
+        TEST_REQUIRE(animations[0].GetLoop()  == 2);
+        TEST_REQUIRE(widget->GetPosition()    == uik::FPoint(100.0f, 100.0f));
+    }
+
+    // trigger again.
+    {
+        uik::Window::MouseEvent press;
+        press.window_mouse_pos = uik::FPoint(105.0f, 105.0f);
+        press.button = uik::MouseButton::Left;
+        press.time   = base::GetTime();
+        window.TriggerAnimations(window.MousePress(press, state),
+                                 state, animations);
+        window.TriggerAnimations(window.MouseRelease(press, state),
+                                 state, animations);
+
+        TEST_REQUIRE(animations[0].GetState() == uik::Animation::State::Active);
+        TEST_REQUIRE(animations[0].GetLoop() == 0);
+    }
+
+    double time = 1.5f;
+    // note that since we're now starting from the position
+    // that was the ending position of the animation on previous
+    // trigger there will actually not be any movement.
+    // so we're checking on *not* moving here.
+    while (animations[0].GetState() == uik::Animation::State::Active)
+    {
+        window.Update(state, time, 0.5f, &animations);
+        time += 0.5f;
+    }
+    TEST_REQUIRE(widget->GetPosition() == uik::FPoint(100.0f, 100.0f));
 }
 
 void bug_clipmask_when_parent_invisible()
@@ -1461,7 +1679,10 @@ int test_main(int argc, char* argv[])
     unit_test_keyboard_focus();
     unit_test_keyboard_radiobutton_select();
     unit_test_animation_parse();
-    unit_test_widget_animation();
+    unit_test_widget_animation_on_open();
+
+    bug_restart_animation_too_soon();
+    bug_incorrect_state_on_restart();
 
     bug_clipmask_when_parent_invisible();
     return 0;
