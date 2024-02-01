@@ -1362,20 +1362,20 @@ gfx::Material* UIPainter::GetWidgetMaterial(const std::string& id, const PaintSt
 {
     gfx::Material* ret = nullptr;
 
+    std::string prefix;
+    if (ps.enabled == false)
+        prefix = "disabled/";
+    else if (ps.pressed)
+        prefix = "pressed/";
+    else if (ps.focused)
+        prefix = "focused/";
+    else if (ps.moused)
+        prefix = "mouse-over/";
+
     // if the paint operation has associated material definitions these take
     // precedence over any other styling information
     if (ps.style_materials)
     {
-        std::string prefix;
-        if (ps.enabled == false)
-            prefix = "disabled/";
-        else if (ps.pressed)
-            prefix = "pressed/";
-        else if (ps.focused)
-            prefix = "focused/";
-        else if (ps.moused)
-            prefix = "mouse-over/";
-
         // check if we have this particular material key in the set of paint materials
         if (const auto* val = base::SafeFind(*ps.style_materials, prefix + key))
         {
@@ -1407,6 +1407,39 @@ gfx::Material* UIPainter::GetWidgetMaterial(const std::string& id, const PaintSt
             }
             mWidgetMaterials.push_back(std::move(material));
             return ret;
+        }
+    }
+    if (ps.style_properties)
+    {
+        if (const auto* val = base::SafeFind(*ps.style_properties, prefix + key + "-color"))
+        {
+            if (std::holds_alternative<gfx::Color4f>(*val))
+            {
+                gfx::Color4f color = std::get<gfx::Color4f>(*val);
+
+                size_t hash = 0;
+                hash = base::hash_combine(hash, color);
+                for (auto& material: mWidgetMaterials)
+                {
+                    if (material.hash != hash)
+                        continue;
+                    else if (material.key != prefix + key + "-color")
+                        continue;
+                    else if (material.widget != id)
+                        continue;
+                    material.used = true;
+                    return material.material.get();
+                }
+                auto klass = gfx::CreateMaterialClassFromColor(color);
+                WidgetMaterial material;
+                material.used = true;
+                material.hash = hash;
+                material.widget = id;
+                material.key = prefix + key + "-color";
+                material.material = gfx::CreateMaterialInstance(klass);
+                mWidgetMaterials.push_back(std::move(material));
+                return mWidgetMaterials.back().material.get();
+            }
         }
     }
 
