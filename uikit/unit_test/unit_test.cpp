@@ -1153,6 +1153,21 @@ void unit_test_animation_parse()
 {
     {
         constexpr const char* str = R"(
+@foobar
+0%
+size 100.0 100.0
+50%
+size 200.0 50.0
+100%
+size 250.0 25.0
+
+@something
+0%
+position 0.0 100.0
+100%
+position 20 50
+
+
 $OnClick
 resize 100.0 200.0
 move 45.0 50.0

@@ -23,6 +23,7 @@
 #  include <neargye/magic_enum.hpp>
 #include "warnpop.h"
 
+#include <algorithm>
 #include <string>
 #include <sstream>
 #include <deque>
@@ -107,11 +108,95 @@ bool GetLine(std::deque<std::string>& lines, std::string* line)
     return false;
 }
 
+std::optional<uik::Animation::KeyFrameAnimation> ParseKeyFrameAnimation(std::deque<std::string>& lines)
+{
+    uik::Animation::KeyFrameAnimation ret;
+    std::optional<uik::Animation::KeyFrame> keyframe;
+
+    std::string line;
+    while (GetLine(lines, &line))
+    {
+        if (base::StartsWith(line, "$") ||
+            base::StartsWith(line, "@")) {
+            lines.push_front(std::move(line));
+            break;
+        }
+        if (base::EndsWith(line, "%")) {
+            float time = 0.0f;
+            if (!base::Scanf(line, &time, "%")) {
+                return std::nullopt;
+            }
+            if (keyframe.has_value())
+            {
+                ret.keyframes.push_back(keyframe.value());
+                keyframe.reset();
+            }
+            uik::Animation::KeyFrame kf;
+            kf.time  = math::clamp(0.0f, 100.0f, time) / 100.0f;
+            keyframe = kf;
+            continue;
+        }
+        if (!keyframe.has_value()) {
+            WARN("Unexpected key frame property set without key frame start.");
+            return std::nullopt;
+        }
+
+        const auto& tokens   = SplitTokens(line);
+        const auto& prop_key = GetToken(tokens, 0);
+        if (prop_key.empty())
+            return std::nullopt;
+
+        uik::Animation::KeyFrameProperty key_frame_property;
+        key_frame_property.property_key = prop_key;
+        if (prop_key == "position") {
+            float x = 0.0f;
+            float y = 0.0f;
+            if (!base::FromChars(GetToken(tokens, 1), &x) ||
+                !base::FromChars(GetToken(tokens, 2), &y))
+                return std::nullopt;
+            key_frame_property.property_value = uik::FPoint(x, y);
+        }
+        else if (prop_key == "size") {
+            float w = 0.0f;
+            float h = 0.0f;
+            if (!base::FromChars(GetToken(tokens, 1), &w) ||
+                !base::FromChars(GetToken(tokens, 2), &h))
+                return std::nullopt;
+            key_frame_property.property_value = uik::FSize(w, h);
+        } else if (base::EndsWith(prop_key, "-color")) {
+            const auto& prop_val = GetToken(tokens, 1);
+            uik::Color4f color;
+            uik::Color  color_enum = uik::Color::Black;
+            if (base::Scanf(prop_val, &color))
+                key_frame_property.property_value = color;
+            else if (ToEnum(prop_val, &color_enum))
+                key_frame_property.property_value = color_enum;
+            else return std::nullopt;
+        }
+        auto& kf = keyframe.value();
+        kf.properties.push_back(std::move(key_frame_property));
+    }
+    if (keyframe.has_value())
+        ret.keyframes.push_back(keyframe.value());
+    return ret;
+}
+
 std::optional<uik::Animation::Action> ParseAction(const std::vector<std::string>& tokens)
 {
     const auto& directive = GetToken(tokens, 0);
 
-    if (directive == "resize" || directive == "grow")
+    if (directive == "animate")
+    {
+        std::string key_frame_animation_name = GetToken(tokens, 1);
+        if (key_frame_animation_name.empty())
+            return std::nullopt;
+
+        uik::Animation::Action action;
+        action.type = uik::Animation::Action::Type::Animate;
+        action.key  = key_frame_animation_name;
+        return action;
+    }
+    else if (directive == "resize" || directive == "grow")
     {
         float width  = 0.0f;
         float height = 0.0f;
@@ -286,7 +371,8 @@ bool Animation::Parse(std::deque<std::string>& lines)
     {
         // if the line begins a new animation block then stop reading
         // current block actions and return
-        if (line[0] == '$')
+        if (base::StartsWith(line, "$") ||
+            base::StartsWith(line, "@"))
         {
             lines.push_front(std::move(line));
             return ok;
@@ -418,6 +504,88 @@ void Animation::Update(double game_time, float dt)
 
     // apply interpolation state update
     const float t = math::clamp(0.0, mDuration, mTime) / mDuration;
+
+    const float key_frame_t = math::interpolate(t, mInterpolation);
+
+    for (auto& key_frame_state : mKeyFrameState)
+    {
+        if (key_frame_state.empty())
+            continue;
+
+        // looks for the interpolation value bounds
+        std::optional<KeyFrameAnimationState> lo_bound;
+        std::optional<KeyFrameAnimationState> hi_bound;
+        for (size_t i = 0; i < key_frame_state.size() - 1; ++i)
+        {
+            if (key_frame_t >= key_frame_state[i + 0].time &&
+                key_frame_t <= key_frame_state[i + 1].time)
+            {
+                lo_bound = key_frame_state[i + 0];
+                hi_bound = key_frame_state[i + 1];
+                break;
+            }
+        }
+
+        if (!lo_bound.has_value() || !hi_bound.has_value())
+            continue;
+
+        ASSERT(key_frame_t >= lo_bound->time && key_frame_t <= hi_bound->time);
+        const auto segment_duration = hi_bound->time - lo_bound->time;
+        const auto segment_t = (key_frame_t - lo_bound->time) / segment_duration;
+
+        // all the keys we need to interpolate on is the intersection
+        // keys in both. and when the animation key frame doesn't
+        // mention a key (+value) the value is taken from the widget.
+        std::unordered_set<std::string> property_keys;
+        for (const auto& props: lo_bound->values)
+            property_keys.insert(props.first);
+        for (const auto& props: hi_bound->values)
+            property_keys.insert(props.first);
+
+        // interpolate over all property keys (values)
+        for (const auto& key: property_keys)
+        {
+            bool have_beg_value = true;
+            bool have_end_value = true;
+            KeyFramePropertyValue beg;
+            KeyFramePropertyValue end;
+            if (const auto* ptr = base::SafeFind(lo_bound->values, key))
+                beg = *ptr;
+            else beg = GetWidgetPropertyValue(key, &have_beg_value);
+
+            if (const auto* ptr = base::SafeFind(hi_bound->values, key))
+                end = *ptr;
+            else end = GetWidgetPropertyValue(key, &have_end_value);
+            if (!have_beg_value || !have_end_value)
+                continue;
+
+            if (std::holds_alternative<FSize>(beg) && std::holds_alternative<FSize>(end))
+            {
+                auto size = math::interpolate(std::get<FSize>(beg), std::get<FSize>(end), segment_t,
+                                              math::Interpolation::Linear);
+                if (key == "size")
+                    mWidget->SetSize(size);
+            }
+            else if (std::holds_alternative<FPoint>(beg) && std::holds_alternative<FPoint>(end))
+            {
+                auto pos = math::interpolate(std::get<FPoint>(beg), std::get<FPoint>(end), segment_t,
+                                             math::Interpolation::Linear);
+                if (key == "position")
+                    mWidget->SetPosition(pos);
+            }
+            else if (std::holds_alternative<uik::Color4f>(beg) && std::holds_alternative<uik::Color4f>(end))
+            {
+                auto color = math::interpolate(std::get<uik::Color4f>(beg), std::get<uik::Color4f>(end), segment_t,
+                                               math::Interpolation::Linear);
+
+                // a hack exists in the engine's UI styling system to support defining color
+                // values through properties (instead of materials) for the simple cases.
+                if (base::EndsWith(key, "-color"))
+                    mWidget->SetStyleProperty(key, color);
+            }
+        }
+    }
+
     for (const auto& action : mInterpolationState)
     {
         if (action.type == Animation::Action::Type::Resize || action.type == Animation::Action::Type::Grow)
@@ -562,6 +730,7 @@ void Animation::EnterTriggerState()
     mLoop  = 0;
     mInterpolationState.clear();
     mStepState.clear();
+    mKeyFrameState.clear();
     VERBOSE("Widget animation is active. [name='%1', trigger=%2, widget='%3']",
             mName, mTrigger, mWidget->GetName());
 }
@@ -570,8 +739,65 @@ void Animation::EnterRunState()
 {
     // if the state is already initialized then don't do it
     // again. We retain the initial state for looped animation.
-    if (!mInterpolationState.empty() || !mStepState.empty())
+    if (!mInterpolationState.empty() || !mStepState.empty() || !mKeyFrameState.empty())
         return;
+
+    // Create state for each key frame animations key frames' property
+    // In other words we can multiple keyword animations and each has
+    // multiple key frames and each key frame has multiple properties
+    for (const auto& action : mActions)
+    {
+        if (action.type != Action::Type::Animate)
+            continue;
+        if (const auto* key_frame_animation = base::SafeFind(mKeyFrameAnimations, action.key))
+        {
+            std::vector<KeyFrameAnimationState> key_frame_state;
+
+            for (const auto& key_frame : (*key_frame_animation)->keyframes)
+            {
+                KeyFrameAnimationState state;
+                state.time = key_frame.time;
+                for (const auto& prop : key_frame.properties)
+                {
+                    state.values[prop.property_key] = prop.property_value;
+                }
+                key_frame_state.push_back(state);
+            }
+            mKeyFrameState.push_back(std::move(key_frame_state));
+        } else WARN("No such key frame animation was found. [name='%1']", action.key);
+    }
+
+    for (auto& key_frame_state : mKeyFrameState)
+    {
+        if (key_frame_state.empty())
+            continue;
+
+        // make sure our key frames are in ascending order, i.e. from 0% to 100%
+        std::sort(key_frame_state.begin(),
+                  key_frame_state.end(), [](const auto& a, const auto& b) {
+                    return a.time < b.time;
+                });
+
+        // fabricate a 0% and 100% animation states if nothing exists
+        // so that when interpolating we always have the start bound
+        // and the high bound.
+        // todo: maybe it should just clamp the values ?
+        if (!math::equals(key_frame_state[0].time, 0.0f))
+        {
+            KeyFrameAnimationState foo;
+            foo.time = 0.0f;
+            key_frame_state.insert(key_frame_state.begin(), foo);
+        }
+        const auto last = key_frame_state.size() - 1;
+        if (!math::equals(key_frame_state[last].time, 1.0f))
+        {
+            KeyFrameAnimationState foo;
+            foo.time = 1.0f;
+            key_frame_state.insert(key_frame_state.end(), foo);
+        }
+        VERBOSE("Starting key frame animation on widget animation [name='%1', widget='%2']",
+                mName, mWidget->GetName());
+    }
 
     // for each animation action read the current starting state that
     // is required for the widget state interpolation. note that
@@ -626,6 +852,19 @@ void Animation::EnterRunState()
     }
 }
 
+Animation::KeyFramePropertyValue Animation::GetWidgetPropertyValue(const std::string& key, bool* success) const
+{
+    // text-color and other style properties are difficult right
+    // now because the values are actually not available in the widget
+    // but are defined by the style.
+    if (key == "position")
+        return mWidget->GetPosition();
+    else if (key == "size")
+        return mWidget->GetSize();
+
+    *success = false;
+    return 0.0f;
+}
 
 bool ParseAnimations(const std::string& str, std::vector<Animation>* animations)
 {
@@ -633,9 +872,25 @@ bool ParseAnimations(const std::string& str, std::vector<Animation>* animations)
 
     bool ok = true;
 
+    uik::Animation::KeyFrameAnimationMap  key_frame_animations;
+
     std::string line;
     while (GetLine(lines, &line))
     {
+        if (line[0] == '@')
+        {
+            auto anim = ParseKeyFrameAnimation(lines);
+            if (anim == std::nullopt)
+            {
+                WARN("Failed to parse key frame animation.");
+                continue;
+            }
+            auto key_frame_animation = std::make_shared<uik::Animation::KeyFrameAnimation>(anim.value());
+            key_frame_animation->name = line;
+            key_frame_animations[key_frame_animation->name] = std::move(key_frame_animation);
+            continue;
+        }
+
         std::optional<uik::Animation::Trigger> trigger;
         if (line == "$OnOpen")
             trigger = uik::Animation::Trigger::Open;
@@ -664,6 +919,10 @@ bool ParseAnimations(const std::string& str, std::vector<Animation>* animations)
         ok &= animation.Parse(lines);
         animations->push_back(std::move(animation));
     }
+
+    for (auto& anim : *animations)
+        anim.SetKeyFrameAnimations(key_frame_animations);
+
     return ok;
 }
 

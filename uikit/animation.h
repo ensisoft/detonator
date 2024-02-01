@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <deque>
+#include <unordered_map>
 
 #include "base/math.h"
 #include "uikit/types.h"
@@ -66,6 +67,7 @@ namespace uik
 
         struct Action {
             enum class Type {
+                Animate,
                 Resize,
                 Grow,
                 Move,
@@ -81,6 +83,22 @@ namespace uik
             std::string key;
             ActionValue value;
             float step = 0.5f;
+        };
+        using KeyFramePropertyValue = std::variant<float, uik::Color4f, FSize, FPoint>;
+
+        struct KeyFrameProperty {
+            std::string property_key;
+            KeyFramePropertyValue property_value;
+        };
+
+        struct KeyFrame {
+            float time = 0.0f;
+            std::vector<KeyFrameProperty> properties;
+        };
+
+        struct KeyFrameAnimation {
+            std::string name;
+            std::vector<KeyFrame> keyframes;
         };
 
         explicit Animation(Trigger trigger) noexcept
@@ -128,9 +146,18 @@ namespace uik
         { mWidget = widget; }
 
         bool Parse(std::deque<std::string>& lines);
+
+        using KeyFrameAnimationMap = std::unordered_map<std::string,
+            std::shared_ptr<const KeyFrameAnimation>>;
+
+        inline void SetKeyFrameAnimations(KeyFrameAnimationMap animations) noexcept
+        { mKeyFrameAnimations = std::move(animations); }
+
+
     private:
         void EnterTriggerState();
         void EnterRunState();
+        KeyFramePropertyValue GetWidgetPropertyValue(const std::string& key, bool* success) const;
 
     private:
         Trigger mTrigger = Trigger::Open;
@@ -140,6 +167,7 @@ namespace uik
         unsigned mLoops    = 1;
         std::vector<Action> mActions;
         std::string mName = {"unnamed"};
+        KeyFrameAnimationMap mKeyFrameAnimations;
 
         struct InterpolationActionState {
             Action::Type type;
@@ -152,9 +180,16 @@ namespace uik
             ActionValue  value;
             float        step = 0.5f;
         };
+        struct KeyFrameAnimationState {
+            float time = 0.0f;
+            std::unordered_map<std::string,
+                KeyFramePropertyValue> values;
+        };
 
         State mState    = State::Inactive;
         Widget* mWidget = nullptr;
+        // a vector of key frames for each key frame animation
+        std::vector<std::vector<KeyFrameAnimationState>> mKeyFrameState;
         std::vector<InterpolationActionState> mInterpolationState;
         std::vector<StepActionState> mStepState;
         unsigned mLoop = 0;
