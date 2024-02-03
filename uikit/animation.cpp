@@ -385,26 +385,33 @@ bool Animation::Parse(std::deque<std::string>& lines)
         {
             mName = argument;
         }
+        else if (directive == "idle-for")
+        {
+            float idle_for = 0.0f;
+            if (const auto* ptr = ToNumber<float>(argument, &idle_for))
+                mIdleFor = *ptr;
+            else WARN("Failed to parse UI widget animation value 'idle-for'.");
+        }
         else if (directive == "delay")
         {
             float delay = 0.0f;
             if (const auto* ptr = ToNumber<float>(argument, &delay))
                 mDelay = *ptr;
-            else WARN("Failed to parse UI widget animation delay. [value='%1']", argument);
+            else WARN("Failed to parse UI widget animation value 'delay'.");
         }
         else if (directive == "duration")
         {
             float duration = 0.0f;
             if (const auto* ptr = ToNumber<float>(argument, &duration))
                 mDuration = *ptr;
-            else WARN("Failed to parse UI widget animation duration. [value='%1']", argument);
+            else WARN("Failed to parse UI widget animation value 'duration'.");
         }
         else if (directive == "interpolation")
         {
             math::Interpolation interpolation = math::Interpolation::Linear;
             if (const auto* ptr = ToEnum(argument, &interpolation))
                 mInterpolation = *ptr;
-            else WARN("Failed to parse UI widget animation interpolation. [value='%1']", argument);
+            else WARN("Failed to parse UI widget animation value 'interpolation'.");
         }
         else if (directive == "loops")
         {
@@ -413,7 +420,7 @@ bool Animation::Parse(std::deque<std::string>& lines)
                 mLoops = std::numeric_limits<unsigned>::max();
             else if (const auto* ptr = ToNumber<unsigned>(argument, &loops))
                 mLoops = *ptr;
-            else WARN("Failed to parse UI widget animation loops. [value='%1']", argument);
+            else WARN("Failed to parse UI widget animation value 'loops'.");
         }
         else if (const auto& action = ParseAction(tokens))
         {
@@ -428,6 +435,14 @@ bool Animation::Parse(std::deque<std::string>& lines)
     return ok;
 }
 
+bool Animation::TriggerOnIdle()
+{
+    if (mTrigger != Trigger::Idle)
+        return false;
+
+    EnterTriggerState();
+    return true;
+}
 
 bool Animation::TriggerOnOpen()
 {
@@ -483,6 +498,24 @@ bool Animation::TriggerOnAction(const WidgetAction& action)
 
     EnterTriggerState();
     return true;
+}
+
+void Animation::ClearIdle()
+{
+    if (mTrigger != Trigger::Idle)
+        return;
+
+    // could be interrupted before the animation actually transitioned
+    // to running state and the state was copied.
+    if (mWidgetState)
+    {
+        mWidget->CopyStateFrom(mWidgetState.get());
+        mWidgetState.reset();
+        VERBOSE("Cleared widget idle animation state. [name='%1', widget='%2']",
+                mName, mWidget->GetName());
+    }
+
+    mState = State::Inactive;
 }
 
 void Animation::Update(double game_time, float dt)
@@ -656,21 +689,20 @@ void Animation::Update(double game_time, float dt)
 
     if (mTime >= mDuration)
     {
-        VERBOSE("Widget animation is inactive. [name='%1', trigger=%1, widget='%3']",
-                mName, mTrigger, mWidget->GetName());
-
-        // todo: should we transfer the reminder of the  time to current time?
-        const auto t = mTime - mDuration;
+        const auto time  = mTime - mDuration;
+        const auto state = mState;
 
         // when resetting for loop don't clear the previous state.
         mLoop++;
         mState = Animation::State::Inactive;
+        VERBOSE("Widget animation is inactive. [name='%1', trigger=%2, widget='%3']",
+                mName, mTrigger, mWidget->GetName());
 
         if (mLoops == std::numeric_limits<unsigned>::max() || mLoop < mLoops)
         {
-            mTime  = -mDelay + t;
+            mTime  = -mDelay + time;
             mState = Animation::State::Active;
-            VERBOSE("Widget animation loop restart. [name='%1', loop=%1/%2, widget=%3]",
+            VERBOSE("Widget animation loop restart. [name='%1', loop=%2/%3, widget=%4]",
                     mName, mLoop, mLoops == std::numeric_limits<unsigned>::max() ? "inf" : std::to_string(mLoops),
                     mWidget->GetName());
         }
@@ -731,6 +763,12 @@ void Animation::EnterTriggerState()
     mInterpolationState.clear();
     mStepState.clear();
     mKeyFrameState.clear();
+
+    if (mTrigger == Trigger::Idle)
+    {
+        mTime -= mIdleFor;
+    }
+
     VERBOSE("Widget animation is active. [name='%1', trigger=%2, widget='%3']",
             mName, mTrigger, mWidget->GetName());
 }
@@ -741,6 +779,17 @@ void Animation::EnterRunState()
     // again. We retain the initial state for looped animation.
     if (!mInterpolationState.empty() || !mStepState.empty() || !mKeyFrameState.empty())
         return;
+
+    if (mTrigger == Trigger::Idle)
+    {
+        // create a copy of the widget in order to retain the state prior to
+        // going idle, but only do this on the first idle start.
+        // i.e. if the idle repeats without interruption (idle clear)
+        // avoid capturing the state that is the result of the previous
+        // idle animation. That is likely not what we want.
+        if (!mWidgetState)
+            mWidgetState = mWidget->Copy();
+    }
 
     // Create state for each key frame animations key frames' property
     // In other words we can multiple keyword animations and each has
@@ -892,7 +941,9 @@ bool ParseAnimations(const std::string& str, std::vector<Animation>* animations)
         }
 
         std::optional<uik::Animation::Trigger> trigger;
-        if (line == "$OnOpen")
+        if (line == "$OnIdle")
+            trigger = uik::Animation::Trigger::Idle;
+        else if (line == "$OnOpen")
             trigger = uik::Animation::Trigger::Open;
         else if (line == "$OnClose")
             trigger = uik::Animation::Trigger::Close;

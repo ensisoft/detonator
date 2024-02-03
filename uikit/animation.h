@@ -48,6 +48,7 @@ namespace uik
     class Animation {
     public:
         enum class Trigger {
+            Idle,
             Open,
             Close,
             Click,
@@ -105,9 +106,12 @@ namespace uik
           : mTrigger(trigger)
         {}
 
+        bool TriggerOnIdle();
         bool TriggerOnOpen();
         bool TriggerOnClose();
         bool TriggerOnAction(const WidgetAction& action);
+
+        void ClearIdle();
 
         void Update(double time, float dt);
 
@@ -144,6 +148,8 @@ namespace uik
         { return mWidget; }
         inline void SetWidget(Widget* widget) noexcept
         { mWidget = widget; }
+        inline bool IsActive() const noexcept
+        { return mState == State::Active; }
 
         bool Parse(std::deque<std::string>& lines);
 
@@ -164,6 +170,7 @@ namespace uik
         Interp mInterpolation = math::Interpolation::Linear;
         double   mDuration = 1.0f;
         double   mDelay    = 0.0f;
+        double   mIdleFor  = 0.0f;
         unsigned mLoops    = 1;
         std::vector<Action> mActions;
         std::string mName = {"unnamed"};
@@ -194,11 +201,22 @@ namespace uik
         std::vector<StepActionState> mStepState;
         unsigned mLoop = 0;
         double   mTime = 0.0f;
+
+        std::unique_ptr<Widget> mWidgetState;
     };
 
     bool ParseAnimations(const std::string& str, std::vector<Animation>* animations);
 
     using AnimationStateArray = std::vector<Animation>;
+
+    inline bool IsAnimating(const AnimationStateArray& animations) noexcept
+    {
+        for (const auto& anim : animations) {
+            if (anim.IsActive())
+                return true;
+        }
+        return false;
+    }
 
 } // namespace
 

@@ -248,6 +248,10 @@ public:
     {
 
     }
+    virtual void CopyStateFrom(const Widget* other) override
+    {
+
+    }
 private:
 };
 

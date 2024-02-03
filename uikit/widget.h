@@ -249,6 +249,8 @@ namespace uik
         virtual const std::string* GetStyleMaterial(const std::string& key) const = 0;
         virtual void DeleteStyleMaterial(const std::string& key) = 0;
 
+        virtual void CopyStateFrom(const Widget* other) = 0;
+
         // helpers
 
         // Get the rectangle of this widget wrt its parent.
@@ -822,6 +824,7 @@ namespace uik
             // Without this they're hidden when the static type is BasicWidget<T>
             using Widget::SetSize;
             using Widget::SetPosition;
+            using BasicWidgetType = BasicWidget;
 
             static constexpr auto RuntimeWidgetType = Traits::Type;
 
@@ -993,6 +996,12 @@ namespace uik
                 auto ret = std::make_unique<BasicWidget>(*this);
                 ret->mId = base::RandomString(10);
                 return ret;
+            }
+            virtual void CopyStateFrom(const Widget* other) override
+            {
+                ASSERT(other->GetType() == this->GetType());
+
+                *this = *static_cast<const BasicWidgetType *>(other);
             }
         protected:
         };
