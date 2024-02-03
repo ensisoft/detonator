@@ -522,6 +522,22 @@ void Window::Update(TransientState& state, double time, float dt, AnimationState
     if (!animations)
         return;
 
+    if (state.HasValue("activity-flag"))
+    {
+        state.DeleteValue("activity-flag");
+        for (auto& anim : *animations)
+        {
+            anim.ClearIdle();
+        }
+    }
+    else if (!IsAnimating(*animations))
+    {
+        for (auto& anim : *animations)
+        {
+            anim.TriggerOnIdle();
+        }
+    }
+
     for (auto& anim : *animations)
     {
         anim.Update(time, dt);
@@ -714,6 +730,8 @@ std::vector<Window::WidgetAction> Window::MouseMove(const MouseEvent& mouse, Tra
 
 std::vector<Window::WidgetAction> Window::KeyDown(const KeyEvent& key, TransientState& state)
 {
+    state.SetValue("activity-flag", true);
+
     Widget* focused_widget = nullptr;
     state.GetValue(mId + "/focused-widget", &focused_widget);
 
@@ -874,6 +892,8 @@ std::vector<Window::WidgetAction> Window::KeyDown(const KeyEvent& key, Transient
 
 std::vector<Window::WidgetAction> Window::KeyUp(const KeyEvent& key, TransientState& state)
 {
+    state.SetValue("activity-flag", true);
+
     Widget* focused_widget = nullptr;
     if (state.GetValue(mId + "/focused-widget", &focused_widget))
     {
@@ -1001,6 +1021,8 @@ bool Window::FromJson(const data::Reader& data)
 
 std::vector<Window::WidgetAction> Window::send_mouse_event(const MouseEvent& mouse, MouseHandler which, TransientState& state, bool is_mouse_press)
 {
+    state.SetValue("activity-flag", true);
+
     std::vector<Window::WidgetAction> ret;
 
     Widget* mouse_grab_widget = nullptr;
