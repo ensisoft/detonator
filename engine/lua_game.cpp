@@ -914,6 +914,7 @@ void BindGameLib(sol::state& L)
     entity_args["rotation"] = sol::property(&EntityArgs::rotation);
     entity_args["logging"]  = sol::property(&EntityArgs::enable_logging);
     entity_args["layer"]    = sol::property(&EntityArgs::layer);
+    entity_args["async"]    = sol::property(&EntityArgs::async_spawn);
 
     using DynamicSpatialQueryResultSet = ResultSet<EntityNode*>;
     auto query_result_set = table.new_usertype<DynamicSpatialQueryResultSet>("SpatialQueryResultSet");
@@ -1177,6 +1178,10 @@ void BindGameLib(sol::state& L)
                 args.position = *ptr;
             if (const auto* ptr = args_table.get_or("scale", scale))
                 args.scale = *ptr;
+
+            bool* async = nullptr;
+            if (const auto* ptr = args_table.get_or("async", async))
+                args.async_spawn = *ptr;
 
             return scene.SpawnEntity(args, link_to_root);
         });

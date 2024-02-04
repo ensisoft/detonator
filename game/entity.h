@@ -1962,6 +1962,8 @@ namespace game
         // flag to indicate whether to log events
         // pertaining to this entity or not.
         bool enable_logging = true;
+        // flag to control spawning on the background.
+        bool async_spawn = false;
         // The scene layer for the entity.
         int layer = 0;
     };

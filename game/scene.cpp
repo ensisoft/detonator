@@ -25,6 +25,7 @@
 
 #include "base/format.h"
 #include "base/logging.h"
+#include "base/threadpool.h"
 #include "base/hash.h"
 #include "data/reader.h"
 #include "data/writer.h"
@@ -1210,6 +1211,43 @@ void Scene::KillEntity(Entity* entity)
 Entity* Scene::SpawnEntity(const EntityArgs& args, bool link_to_root)
 {
     ASSERT(args.klass);
+
+    auto* task_pool = args.async_spawn ? base::GetGlobalThreadPool() : nullptr;
+
+    if (task_pool)
+    {
+        if (!mAsyncSpawnState)
+            mAsyncSpawnState = std::make_shared<AsyncSpawnState>();
+
+        class SpawnEntityTask : public base::ThreadTask {
+        public:
+            SpawnEntityTask(EntityArgs args, std::shared_ptr<AsyncSpawnState> state) noexcept
+              : mArgs(std::move(args))
+              , mState(std::move(state))
+            {}
+        protected:
+            virtual void DoTask() override
+            {
+                auto instance = CreateEntityInstance(mArgs);
+                if (instance->HasIdleTrack())
+                    instance->PlayIdle();
+
+                if (mArgs.enable_logging)
+                    DEBUG("New entity '%1/%2'", mArgs.klass->GetName(), mArgs.name);
+
+                std::lock_guard<std::mutex> lock(mState->mutex);
+                mState->entities.push_back(std::move(instance));
+            }
+        private:
+            const EntityArgs mArgs;
+            std::shared_ptr<AsyncSpawnState> mState;
+        };
+
+        auto task = std::make_unique<SpawnEntityTask>(args, mAsyncSpawnState);
+        task_pool->SubmitTask(std::move(task));
+        return nullptr;
+    }
+
     // we must have the klass of the entity and an id.
     // the invariant that must hold is that entity IDs are
     // always going to be unique.
@@ -1257,6 +1295,26 @@ void Scene::BeginLoop()
         mRenderTree.LinkChild(nullptr, entity.get());
         mEntities.push_back(std::move(entity));
     }
+
+    if (mAsyncSpawnState)
+    {
+        std::lock_guard<std::mutex> lock(mAsyncSpawnState->mutex);
+        for (auto& entity : mAsyncSpawnState->entities)
+        {
+            ASSERT(!base::Contains(mIdMap, entity->GetId()));
+
+            if (entity->TestFlag(Entity::ControlFlags::EnableLogging))
+                DEBUG("Entity '%1/%2' was spawned.", entity->GetClassName(), entity->GetName());
+
+            entity->SetFlag(Entity::ControlFlags::Spawned, true);
+            mIdMap[entity->GetId()]     = entity.get();
+            mNameMap[entity->GetName()] = entity.get();
+            mRenderTree.LinkChild(nullptr, entity.get());
+            mEntities.push_back(std::move(entity));
+        }
+        mAsyncSpawnState->entities.clear();
+    }
+
     mKillSet.clear();
     mSpawnList.clear();
 }

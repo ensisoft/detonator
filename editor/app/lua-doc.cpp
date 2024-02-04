@@ -1475,6 +1475,8 @@ void InitLuaDoc()
                                                "then each entity that was just spawned will have their HasBeenSpawned flag on.<br><br>"
                                                "If link is true the entity is linked to the current scene's entity hierarchy.<br>"
                                                "If link is false the entity is not linked to the current scene's entity hierarchy and you should manually call LinkChild later.<br>"
+                                               "If async is true the entity is spawned in the background and there's no guarantee when it will be placed in to the scene."
+                                               "On async spawn no entity object will be returned to the caller from this call."
                                                "The args table is a Lua table for packing all the spawn arguments with the following keys.<br><br>"
                                                " &nbsp;&nbsp; id,   string, the ID for the entity. Default = '' <br>"
                                                " &nbsp;&nbsp; name, string, the name for the entity. Default = ''<br>"
@@ -1487,7 +1489,8 @@ void InitLuaDoc()
                                                " &nbsp;&nbsp; scale, glm.vec2 scaling vector (Alternative for sx, sy). Default = glm.vec2(1.0, 1.0)<br>"
                                                " &nbsp;&nbsp; logging, bool, Flag to enable/disable entity logging. Default = false<br>"
                                                " &nbsp;&nbsp; layer, int, Scene layer index. Default = 0<br>"
-                                               " &nbsp;&nbsp; link, bool, Flag to control linking to scene root in scene graph. Default = true",
+                                               " &nbsp;&nbsp; link, bool, Flag to control linking to scene root in scene graph. Default = true"
+                                               " &nbsp;&nbsp; async, bool, Flag to control async spawning. Default = false",
                  "string", "klass_name", "table", "args");
 
     DOC_METHOD_1("glm.mat4", "FindEntityTransform", "Find the transform for transforming the entity into the world/scene coordinate space.",
