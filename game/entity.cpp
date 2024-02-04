@@ -20,6 +20,7 @@
 #  include <glm/glm.hpp> // for glm::inverse
 #include "warnpop.h"
 
+#include <atomic>
 #include <algorithm>
 #include <set>
 
@@ -36,7 +37,7 @@
 namespace {
     std::string FastId(std::size_t len)
     {
-        static std::uint64_t counter = 1;
+        static std::atomic<std::uint64_t> counter = 1;
         return std::to_string(counter++);
     }
 } // namespace

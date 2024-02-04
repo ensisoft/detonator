@@ -25,6 +25,7 @@
 #include "base/test_help.h"
 #include "base/assert.h"
 #include "base/math.h"
+#include "base/threadpool.h"
 #include "data/json.h"
 #include "game/scene.h"
 #include "game/entity.h"
@@ -1219,6 +1220,46 @@ void unit_test_scene_spatial_update(game::SceneClass::SpatialIndex index)
 
 }
 
+void unit_test_async_spawn()
+{
+    TEST_CASE(test::Type::Feature)
+
+    base::ThreadPool threadpool;
+    threadpool.AddRealThread();
+    threadpool.AddRealThread();
+    base::SetGlobalThreadPool(&threadpool);
+
+    auto entity = std::make_shared<game::EntityClass>();
+
+    game::SceneClass klass;
+    game::Scene scene(klass);
+
+    for (int i=0; i<1000; ++i)
+    {
+        game::EntityArgs args;
+        args.klass = entity;
+        args.name  = "foo";
+        args.async_spawn = true;
+        scene.SpawnEntity(args);
+
+        scene.BeginLoop();
+
+        scene.Update(1.0/60.0f, nullptr);
+
+        for (size_t i=0; i<scene.GetNumEntities(); ++i)
+        {
+            auto& entity = scene.GetEntity(i);
+            entity.Die();
+        }
+
+        scene.EndLoop();
+    }
+
+    base::SetGlobalThreadPool(nullptr);
+    threadpool.WaitAll();
+    threadpool.Shutdown();
+}
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
@@ -1233,6 +1274,8 @@ int test_main(int argc, char* argv[])
     unit_test_scene_spatial_update(game::SceneClass::SpatialIndex::QuadTree);
     unit_test_scene_spatial_query(game::SceneClass::SpatialIndex::DenseGrid);
     unit_test_scene_spatial_update(game::SceneClass::SpatialIndex::DenseGrid);
+
+    unit_test_async_spawn();
     return 0;
 }
 ) // TEST-MAIN

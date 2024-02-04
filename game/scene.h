@@ -33,6 +33,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <set>
+#include <mutex>
 
 #include "base/bitflag.h"
 #include "data/fwd.h"
@@ -602,6 +603,7 @@ namespace game
         // to any other entity or later RelinkEntity to relink to some other
         // entity in the scene graph.
         Entity* SpawnEntity(const EntityArgs& args, bool link_to_root = true);
+
         // Prepare the scene for the next iteration of the game loop.
         void BeginLoop();
         // Perform end of game loop iteration cleanup etc.
@@ -835,6 +837,12 @@ namespace game
         std::unique_ptr<SpatialIndex> mSpatialIndex;
         // for convenience..
         Tilemap* mMap = nullptr;
+
+        struct AsyncSpawnState {
+            std::mutex mutex;
+            std::vector<std::unique_ptr<Entity>> entities;
+        };
+        std::shared_ptr<AsyncSpawnState> mAsyncSpawnState;
     };
 
     std::unique_ptr<Scene> CreateSceneInstance(std::shared_ptr<const SceneClass> klass);
