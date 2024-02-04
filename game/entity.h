@@ -2132,8 +2132,6 @@ namespace game
         bool HasSpatialNodes() const;
         // Returns true if the entity should be killed at the scene boundary.
         bool KillAtBoundary() const;
-        // Returns true if the entity did just finish an animation.
-        bool DidFinishAnimation() const;
         // Returns true if the entity contains nodes that have rendering
         // attachments, i.d. drawables or text items.
         bool HasRenderableItems() const;
@@ -2223,16 +2221,25 @@ namespace game
 
 
         // Get the current track if any. (when IsAnimating is true)
-        Animation* GetCurrentAnimation() noexcept
-        { return mCurrentAnimation.get(); }
+        Animation* GetCurrentAnimation(size_t index) noexcept
+        { return mCurrentAnimations[index].get(); }
         // Get the current track if any. (when IsAnimating is true)
-        const Animation* GetCurrentAnimation() const noexcept
-        { return mCurrentAnimation.get(); }
+        const Animation* GetCurrentAnimation(size_t index) const noexcept
+        { return mCurrentAnimations[index].get(); }
+
+        inline size_t GetNumCurrentAnimations()  const noexcept
+        { return mCurrentAnimations.size(); }
+
         // Get the previously completed animation track (if any).
         // This is a transient state that only exists for one
         // iteration of the game loop after the animation is done.
-        const Animation* GetFinishedAnimation() const noexcept
-        { return mFinishedAnimation.get(); }
+        const std::vector<Animation*> GetFinishedAnimations() const
+        {
+            std::vector<Animation*> ret;
+            for (auto& anim : mFinishedAnimations)
+                ret.push_back(anim.get());
+            return ret;
+        }
         // Get the current scene.
         const Scene* GetScene() const noexcept
         { return mScene; }
@@ -2303,7 +2310,7 @@ namespace game
         std::string mParentNodeId;
         std::optional<game::Animator> mAnimator;
         // The current animation if any.
-        std::unique_ptr<Animation> mCurrentAnimation;
+        std::vector<std::unique_ptr<Animation>> mCurrentAnimations;
         // the list of nodes that are in the entity.
         std::vector<std::unique_ptr<EntityNode>> mNodes;
         // the list of read-write script variables. read-only ones are
@@ -2331,7 +2338,7 @@ namespace game
         // control flags for the engine itself
         base::bitflag<ControlFlags> mControlFlags;
         // the previously finished animation track (if any)
-        std::unique_ptr<Animation> mFinishedAnimation;
+        std::vector<std::unique_ptr<Animation>> mFinishedAnimations;
 
         struct Timer {
             std::string name;

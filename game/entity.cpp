@@ -1835,7 +1835,7 @@ void Entity::Update(float dt, std::vector<Event>* events)
             SetFlag(ControlFlags::WantsToDie, true);
     }
 
-    mFinishedAnimation.reset();
+    mFinishedAnimations.clear();
 
     for (auto it = mTimers.begin(); it != mTimers.end();)
     {
@@ -1863,47 +1863,58 @@ void Entity::Update(float dt, std::vector<Event>* events)
     }
     mEvents.clear();
 
-    if (!mCurrentAnimation)
+    if (mCurrentAnimations.empty())
         return;
 
     // Update the animation state.
-    mCurrentAnimation->Update(dt);
+    for (auto& animation : mCurrentAnimations)
+    {
+        animation->Update(dt);
+    }
 
     // Apply animation state transforms/actions on the entity nodes.
     for (auto& node : mNodes)
     {
-        mCurrentAnimation->Apply(*node);
-    }
-
-    if (!mCurrentAnimation->IsComplete())
-        return;
-
-    if (mCurrentAnimation->IsLooping())
-    {
-        mCurrentAnimation->Restart();
-        for (auto& node : mNodes)
+        for (auto& animation : mCurrentAnimations)
         {
-            if (!mRenderTree.GetParent(node.get()))
-                continue;
-
-            const auto& klass = node->GetClass();
-            const auto& rotation = klass.GetRotation();
-            const auto& translation = klass.GetTranslation();
-            const auto& scale = klass.GetScale();
-            // if the node is a child node (i.e. has a parent) then reset the
-            // node's transformation based on the node's transformation relative
-            // to its parent in the entity class.
-            node->SetTranslation(translation);
-            node->SetRotation(rotation);
-            node->SetScale(scale);
+            animation->Apply(*node);
         }
-        return;
     }
-    // spams the log
-    //DEBUG("Entity animation is complete. [entity='%1/%2', animation='%3']",
-    //      mClass->GetName(), mInstanceName, mCurrentAnimation->GetName());
-    std::swap(mCurrentAnimation, mFinishedAnimation);
-    mCurrentAnimation.reset();
+
+    for (auto& animation : mCurrentAnimations)
+    {
+        if (!animation->IsComplete())
+            continue;
+
+        if (animation->IsLooping())
+        {
+            animation->Restart();
+            for (auto& node: mNodes)
+            {
+                if (!mRenderTree.GetParent(node.get()))
+                    continue;
+
+                const auto& klass = node->GetClass();
+                const auto& rotation = klass.GetRotation();
+                const auto& translation = klass.GetTranslation();
+                const auto& scale = klass.GetScale();
+                // if the node is a child node (i.e. has a parent) then reset the
+                // node's transformation based on the node's transformation relative
+                // to its parent in the entity class.
+                node->SetTranslation(translation);
+                node->SetRotation(rotation);
+                node->SetScale(scale);
+            }
+        }
+
+        VERBOSE("Entity animation is complete. [entity='%1/%2', animation='%3']",
+              mClass->GetName(), mInstanceName, animation->GetClassName());
+        mFinishedAnimations.push_back(std::move(animation));
+        animation.reset();
+    }
+    base::EraseRemove(mCurrentAnimations, [](const auto& animation) {
+        return !animation;
+    });
 }
 
 void Entity::UpdateAnimator(float dt, std::vector<AnimatorAction>* actions)
@@ -1944,8 +1955,8 @@ Animation* Entity::PlayAnimation(std::unique_ptr<Animation> animation)
 {
     // todo: what to do if there's a previous track ?
     // possibilities: reset or queue?
-    mCurrentAnimation = std::move(animation);
-    return mCurrentAnimation.get();
+    mCurrentAnimations.push_back(std::move(animation));
+    return mCurrentAnimations.back().get();
 }
 Animation* Entity::PlayAnimation(const Animation& animation)
 {
@@ -1967,6 +1978,8 @@ Animation* Entity::PlayAnimationByName(const std::string& name)
         auto track = std::make_unique<Animation>(klass);
         return PlayAnimation(std::move(track));
     }
+    WARN("No such entity animation found. [entity=%1/%2', animation='%3']",
+         mClass->GetClassName(), mInstanceName, name);
     return nullptr;
 }
 Animation* Entity::PlayAnimationById(const std::string& id)
@@ -1979,12 +1992,14 @@ Animation* Entity::PlayAnimationById(const std::string& id)
         auto track = std::make_unique<Animation>(klass);
         return PlayAnimation(std::move(track));
     }
+    WARN("No such entity animation found. [entity=%1/%2', animation='%3']",
+         mClass->GetClassName(), mInstanceName, id);
     return nullptr;
 }
 
 Animation* Entity::PlayIdle()
 {
-    if (mCurrentAnimation)
+    if (!mCurrentAnimations.empty())
         return nullptr;
 
     if (!mIdleTrackId.empty())
@@ -2002,7 +2017,7 @@ bool Entity::IsDying() const
 
 bool Entity::IsAnimating() const
 {
-    return !!mCurrentAnimation;
+    return !mCurrentAnimations.empty();
 }
 
 bool Entity::HasExpired() const
@@ -2039,8 +2054,6 @@ bool Entity::HasSpatialNodes() const
 bool Entity::KillAtBoundary() const
 { return TestFlag(Flags::KillAtBoundary); }
 
-bool Entity::DidFinishAnimation() const
-{ return !!mFinishedAnimation; }
 
 bool Entity::HasRenderableItems() const
 {

@@ -476,7 +476,7 @@ void AnimationTrackWidget::Update(double secs)
 
     if (mPlaybackAnimation->IsAnimating())
     {
-        const auto* track = mPlaybackAnimation->GetCurrentAnimation();
+        const auto* track = mPlaybackAnimation->GetCurrentAnimation(0);
         mAnimationTime = track->GetCurrentTime();
         mUI.timeline->SetCurrentTime(mAnimationTime);
         mUI.timeline->Repaint();

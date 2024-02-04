@@ -1507,16 +1507,23 @@ void Scene::Update(float dt, std::vector<Event>* events)
         if (entity->IsAnimating())
             continue;
 
-        if (const auto* anim = entity->GetFinishedAnimation())
+        if (!entity->HasIdleTrack())
+            continue;
+
+        const auto& finished_animations = entity->GetFinishedAnimations();
+        bool play_idle = true;
+        for (const auto* anim : finished_animations)
         {
-            if (entity->HasIdleTrack())
+            const auto& idle_track_id = entity->GetIdleTrackId();
+            const auto& prev_track_id = anim->GetClassId();
+            if (idle_track_id == prev_track_id)
             {
-                const auto& idle_track_id = entity->GetIdleTrackId();
-                const auto& prev_track_id = anim->GetClassId();
-                if (idle_track_id != prev_track_id)
-                    entity->PlayIdle();
+                play_idle = false;
+                break;
             }
         }
+        if (play_idle)
+            entity->PlayIdle();
     }
 }
 

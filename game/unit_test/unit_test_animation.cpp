@@ -753,23 +753,22 @@ void unit_test_animation_complete()
     auto entity = game::CreateEntityInstance(klass);
     TEST_REQUIRE(entity->PlayAnimationByName("test"));
     TEST_REQUIRE(entity->IsAnimating());
-    TEST_REQUIRE(entity->GetCurrentAnimation());
-    TEST_REQUIRE(entity->GetCurrentAnimation()->GetClassName() == "test");
+    TEST_REQUIRE(entity->GetCurrentAnimation(0));
+    TEST_REQUIRE(entity->GetCurrentAnimation(0)->GetClassName() == "test");
 
     entity->Update(0.5f);
     TEST_REQUIRE(entity->IsAnimating());
-    TEST_REQUIRE(entity->GetCurrentAnimation());
-    TEST_REQUIRE(entity->GetCurrentAnimation()->GetClassName() == "test");
+    TEST_REQUIRE(entity->GetCurrentAnimation(0));
+    TEST_REQUIRE(entity->GetCurrentAnimation(0)->GetClassName() == "test");
     entity->Update(0.6f);
     TEST_REQUIRE(!entity->IsAnimating());
-    TEST_REQUIRE(!entity->GetCurrentAnimation());
-    TEST_REQUIRE(entity->GetFinishedAnimation());
-    TEST_REQUIRE(entity->GetFinishedAnimation()->GetClassName() == "test");
+    TEST_REQUIRE(entity->GetNumCurrentAnimations() == 0);
+    TEST_REQUIRE(entity->GetFinishedAnimations()[0]->GetClassName() == "test");
 
     entity->Update(0.1f);
     TEST_REQUIRE(!entity->IsAnimating());
-    TEST_REQUIRE(!entity->GetCurrentAnimation());
-    TEST_REQUIRE(!entity->GetFinishedAnimation());
+    TEST_REQUIRE(entity->GetNumCurrentAnimations() == 0);
+    TEST_REQUIRE(entity->GetFinishedAnimations().empty());
 }
 
 void unit_test_animation_state()
