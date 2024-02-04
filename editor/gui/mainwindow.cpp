@@ -2890,6 +2890,9 @@ void MainWindow::LaunchGame(bool clean)
         if (clean)
             game_host_args << "--clean-home";
 
+        if (base::IsLogEventEnabled(base::LogEvent::Verbose))
+            game_host_args << "--verbose";
+
         QString game_host_name = "EditorGameHost";
 #if defined(WINDOWS_OS)
         game_host_name.append(".exe");
@@ -2919,7 +2922,10 @@ void MainWindow::LaunchGame(bool clean)
                 app::EventLog::get().write(app::Event::Type::Warning, msg, "game-host");
             else if (msg[0] == "I")
                 app::EventLog::get().write(app::Event::Type::Info, msg, "game-host");
-            else base::WriteLog(base::LogEvent::Debug, "game-host", 0, app::ToUtf8(msg));
+            else if (msg[0] == "D")
+                base::WriteLog(base::LogEvent::Debug, "game-host", 0, app::ToUtf8(msg));
+            else if (msg[0] == "V")
+                base::WriteLog(base::LogEvent::Verbose, "game-host", 0, app::ToUtf8(msg));
         };
         mGameProcess.onStdErr = [](const QString& msg) {
             app::EventLog::get().write(app::Event::Type::Error, msg, "game-host");

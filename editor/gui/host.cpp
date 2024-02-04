@@ -64,6 +64,9 @@ public:
             prefix = "I: ";
         else if (type == base::LogEvent::Debug)
             prefix = "D: ";
+        else if (type == base::LogEvent::Verbose)
+            prefix = "V: ";
+        else BUG("Missing log event type encoding.");
 
         std::string message;
         message.append(prefix);
@@ -110,6 +113,7 @@ void Main(int argc, char* argv[])
     options.Add("--socket-name", "Name of the local socket to connect to.", std::string(""));
     options.Add("--clean-home", "Clean the game home before game start.");
     options.Add("--help", "Print this help.");
+    options.Add("--verbose", "Enable verbose debug log.");
 
     std::string arg_error;
     if (!options.Parse(base::CreateStandardArgs(argc, argv), &arg_error))
@@ -146,6 +150,7 @@ void Main(int argc, char* argv[])
     logger.WriteFormatted(standalone);
     base::SetGlobalLog(&logger);
     base::EnableDebugLog(true);
+    base::EnableLogEvent(base::LogEvent::Verbose, options.WasGiven("--verbose"));
     DEBUG("It's alive!");
 
     // capture log events written into app::EventLog.
