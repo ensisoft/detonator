@@ -86,7 +86,7 @@
         <item>
          <widget class="QDoubleSpinBox" name="lineHeight">
           <property name="minimum">
-           <double>1.000000000000000</double>
+           <double>0.000000000000000</double>
           </property>
           <property name="singleStep">
            <double>0.100000000000000</double>
