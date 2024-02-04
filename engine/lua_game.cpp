@@ -855,6 +855,8 @@ void BindGameLib(sol::state& L)
     entity["HasBeenKilled"]        = &Entity::HasBeenKilled;
     entity["HasBeenSpawned"]       = &Entity::HasBeenSpawned;
     entity["HasAnimator"]          = &Entity::HasAnimator;
+    entity["GetNumAnimations"]     = &Entity::GetNumCurrentAnimations;
+    entity["GetAnimation"]         = (Animation*(Entity::*)(size_t))&Entity::GetCurrentAnimation;
     entity["GetAnimator"]          = (Animator*(Entity::*)(void))&Entity::GetAnimator;
     entity["GetScene"]             = (Scene*(Entity::*)(void))&Entity::GetScene;
     entity["GetNode"]              = (EntityNode&(Entity::*)(size_t))&Entity::GetNode;

@@ -1261,6 +1261,10 @@ void InitLuaDoc()
     DOC_METHOD_0("bool", "HasBeenSpawned", "Checks whether the entity has just been spawned and exists for the first iteration of the game loop.<br>"
                                            "This flag is only ever true on the first iteration of the game loop during the entity's lifetime.");
     DOC_METHOD_0("bool", "HasAnimator", "Checks whether the entity has an animator component or not.");
+    DOC_METHOD_1("game.Animation", "GetAnimation", "Get a current entity animation."
+                                                   "The indexing is 0 based and the index must be a valid index.",
+                 "unsigned", "index");
+    DOC_METHOD_0("unsigned", "GetNumAnimations", "Get the number of current animations.");
     DOC_METHOD_0("game.Animator", "GetAnimator", "Get the entity animator instance if any.");
     DOC_METHOD_0("game.Scene", "GetScene", "Get the current scene.");
     DOC_METHOD_1("game.EntityNode", "GetNode", "Get an entity node at the the given index. The indexing is 0 based and the index must be a valid index.",
