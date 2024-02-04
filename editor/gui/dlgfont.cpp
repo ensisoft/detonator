@@ -53,6 +53,7 @@ DlgFont::DlgFont(QWidget* parent, const app::Workspace* workspace, const app::An
             mFonts.push_back(mSelectedFontURI);
     }
     base::AppendVector(mFonts, ListAppFonts());
+    mAllFonts = mFonts;
 
     // total fudge. the current size of the box for visualizing the
     // text is just a "random guess value" that just looked okay now at 18px.
@@ -99,6 +100,26 @@ void DlgFont::on_btnCancel_clicked()
 void DlgFont::on_vScroll_valueChanged()
 {
     mScrollOffsetRow = mUI.vScroll->value();
+}
+
+void DlgFont::on_filter_textChanged(const QString& text)
+{
+    mScrollOffsetRow = 0;
+    mNumVisibleRows  = 0;
+
+    if (text.isEmpty())
+    {
+        mFonts = mAllFonts;
+    }
+    else
+    {
+        mFonts.clear();
+        for (const auto& fontUri : mAllFonts)
+        {
+            if (fontUri.contains(text, Qt::CaseInsensitive))
+                mFonts.push_back(fontUri);
+        }
+    }
 }
 
 void DlgFont::PaintScene(gfx::Painter& painter, double secs)
@@ -227,12 +248,74 @@ void DlgFont::MouseWheel(QWheelEvent* wheel)
 
 bool DlgFont::KeyPress(QKeyEvent* key)
 {
-    if (key->key() == Qt::Key_Escape)
+    const auto sym = key->key();
+
+    if (sym == Qt::Key_Escape)
     {
         reject();
         return true;
     }
-    return false;
+    else if (sym == Qt::Key_Return)
+    {
+        if (mSelectedFontURI.isEmpty())
+            return false;
+        accept();
+        return true;
+    }
+
+    if (mFonts.empty())
+        return false;
+
+    size_t index = 0;
+    for (; index < mFonts.size(); ++index)
+    {
+        if (mFonts[index] == mSelectedFontURI)
+            break;
+    }
+    if (index == mFonts.size())
+    {
+        mScrollOffsetRow = 0;
+        mSelectedFontURI = mFonts[0];
+        return true;
+    }
+
+    const auto width    = mUI.widget->width();
+    const auto height   = mUI.widget->height();
+    const auto num_cols = width / (mBoxWidth + BoxMargin);
+    const auto num_rows = mFonts.size() / num_cols;
+
+    if (sym == Qt::Key_Left)
+    {
+        if (index > 0)
+            index--;
+        else index = mFonts.size()-1;
+    }
+    else if(sym == Qt::Key_Right)
+    {
+        if (index < mFonts.size() - 1)
+            index++;
+        else index = 0;
+    }
+    else if (sym == Qt::Key_Down)
+    {
+        index += num_cols;
+        if (index >= mFonts.size())
+            index = mFonts.size() - 1;
+    }
+    else if (sym == Qt::Key_Up)
+    {
+        index -= num_cols;
+        if (index >= mFonts.size())
+            index = 0;
+    }
+
+    const auto row = index / num_cols;
+    if (row < mScrollOffsetRow || row > mScrollOffsetRow + mNumVisibleRows)
+        mScrollOffsetRow = row;
+
+    ASSERT(index < mFonts.size());
+    mSelectedFontURI = mFonts[index];
+    return true;
 }
 
 } // namespace

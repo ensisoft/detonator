@@ -25,6 +25,16 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
+       <widget class="QLineEdit" name="filter">
+        <property name="placeholderText">
+         <string>Filter fonts</string>
+        </property>
+        <property name="clearButtonEnabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
          <widget class="gui::GfxWidget" name="widget" native="true">
@@ -39,6 +49,9 @@
             <width>400</width>
             <height>400</height>
            </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
           </property>
          </widget>
         </item>
