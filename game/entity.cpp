@@ -1916,6 +1916,18 @@ void Entity::Update(float dt, std::vector<Event>* events)
     base::EraseRemove(mCurrentAnimations, [](const auto& animation) {
         return !animation;
     });
+
+    if (mCurrentAnimations.empty())
+        return;
+
+    if (mAnimationQueue.empty())
+        return;
+
+    auto animation = std::move(mAnimationQueue.front());
+    VERBOSE("Starting next queued entity animation. [entity='%1/%2', animation='%3']",
+            mClass->GetName(), mInstanceName, animation->GetClassName());
+    mCurrentAnimations.push_back(std::move(animation));
+    mAnimationQueue.pop();
 }
 
 void Entity::UpdateAnimator(float dt, std::vector<AnimatorAction>* actions)
@@ -1979,7 +1991,7 @@ Animation* Entity::PlayAnimationByName(const std::string& name)
         auto track = std::make_unique<Animation>(klass);
         return PlayAnimation(std::move(track));
     }
-    WARN("No such entity animation found. [entity=%1/%2', animation='%3']",
+    WARN("No such entity animation found. [entity='%1/%2', animation='%3']",
          mClass->GetClassName(), mInstanceName, name);
     return nullptr;
 }
@@ -1993,8 +2005,31 @@ Animation* Entity::PlayAnimationById(const std::string& id)
         auto track = std::make_unique<Animation>(klass);
         return PlayAnimation(std::move(track));
     }
-    WARN("No such entity animation found. [entity=%1/%2', animation='%3']",
+    WARN("No such entity animation found. [entity='%1/%2', animation='%3']",
          mClass->GetClassName(), mInstanceName, id);
+    return nullptr;
+}
+
+Animation* Entity::QueueAnimation(std::unique_ptr<Animation> animation)
+{
+    mAnimationQueue.push(std::move(animation));
+    VERBOSE("Queued new entity animation. [entity='%1/%2', animation='%3']",
+            mClass->GetClassName(), mInstanceName, animation->GetClassName());
+    return mAnimationQueue.back().get();
+}
+
+Animation* Entity::QueueAnimationByName(const std::string& name)
+{
+    for (size_t i=0; i< mClass->GetNumAnimations(); ++i)
+    {
+        const auto& klass = mClass->GetSharedAnimationClass(i);
+        if (klass->GetName() != name)
+            continue;
+        auto track = std::make_unique<Animation>(klass);
+        return QueueAnimation(std::move(track));
+    }
+    WARN("No such entity animation found. [entity='%1/%2', animation='%3']",
+         mClass->GetClassName(), mInstanceName, name);
     return nullptr;
 }
 

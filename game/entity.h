@@ -31,6 +31,7 @@
 #include <unordered_map>
 #include <optional>
 #include <variant>
+#include <queue>
 
 #include "base/bitflag.h"
 #include "base/utility.h"
@@ -1966,6 +1967,8 @@ namespace game
         bool async_spawn = false;
         // The scene layer for the entity.
         int layer = 0;
+        // delay before spawning/placing the entity into the scene.
+        float delay = 0.0f;
     };
 
     class Entity
@@ -2113,6 +2116,11 @@ namespace game
         // Returns a pointer to the animation instance or nullptr if
         // no such animation could be found.
         Animation* PlayAnimationById(const std::string& id);
+
+        Animation* QueueAnimation(std::unique_ptr<Animation> animation);
+
+        Animation* QueueAnimationByName(const std::string& name);
+
         // Play the designated idle animation if there is a designated
         // idle animation and if no other animation is currently playing.
         // Returns a pointer to the animation instance or nullptr if
@@ -2341,6 +2349,8 @@ namespace game
         base::bitflag<ControlFlags> mControlFlags;
         // the previously finished animation track (if any)
         std::vector<std::unique_ptr<Animation>> mFinishedAnimations;
+        // Currently queued animations
+        std::queue<std::unique_ptr<Animation>> mAnimationQueue;
 
         struct Timer {
             std::string name;
