@@ -827,9 +827,6 @@ namespace game
         RenderTree mRenderTree;
         // the current scene time.
         double mCurrentTime = 0.0;
-        // spawn list of new entities that have been spawned
-        // but not yet placed in the scene's entity list.
-        std::vector<std::unique_ptr<Entity>> mSpawnList;
         // kill set of entities that were killed but have
         // not yet been removed from the scene.
         std::unordered_set<Entity*> mKillSet;
@@ -838,9 +835,17 @@ namespace game
         // for convenience..
         Tilemap* mMap = nullptr;
 
+        struct SpawnRecord {
+            double spawn_time = 0.0f;
+            std::unique_ptr<Entity> instance;
+        };
+        // spawn list of new entities that have been spawned
+        // but not yet placed in the scene's entity list.
+        std::vector<SpawnRecord> mSpawnList;
+
         struct AsyncSpawnState {
             std::mutex mutex;
-            std::vector<std::unique_ptr<Entity>> entities;
+            std::vector<SpawnRecord> spawn_list;
         };
         std::shared_ptr<AsyncSpawnState> mAsyncSpawnState;
     };

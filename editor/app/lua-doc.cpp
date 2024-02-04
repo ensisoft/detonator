@@ -1489,8 +1489,9 @@ void InitLuaDoc()
                                                " &nbsp;&nbsp; scale, glm.vec2 scaling vector (Alternative for sx, sy). Default = glm.vec2(1.0, 1.0)<br>"
                                                " &nbsp;&nbsp; logging, bool, Flag to enable/disable entity logging. Default = false<br>"
                                                " &nbsp;&nbsp; layer, int, Scene layer index. Default = 0<br>"
-                                               " &nbsp;&nbsp; link, bool, Flag to control linking to scene root in scene graph. Default = true"
-                                               " &nbsp;&nbsp; async, bool, Flag to control async spawning. Default = false",
+                                               " &nbsp;&nbsp; link, bool, Flag to control linking to scene root in scene graph. Default = true<br>"
+                                               " &nbsp;&nbsp; async, bool, Flag to control async spawning. Default = false<br>"
+                                               " &nbsp;&nbsp; delay, float, time delay before the entity is placed into the scene. Default = 0.0<br>",
                  "string", "klass_name", "table", "args");
 
     DOC_METHOD_1("glm.mat4", "FindEntityTransform", "Find the transform for transforming the entity into the world/scene coordinate space.",

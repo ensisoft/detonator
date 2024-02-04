@@ -1221,8 +1221,9 @@ Entity* Scene::SpawnEntity(const EntityArgs& args, bool link_to_root)
 
         class SpawnEntityTask : public base::ThreadTask {
         public:
-            SpawnEntityTask(EntityArgs args, std::shared_ptr<AsyncSpawnState> state) noexcept
-              : mArgs(std::move(args))
+            SpawnEntityTask(EntityArgs args, std::shared_ptr<AsyncSpawnState> state, double scene_time) noexcept
+              : mSceneTime(scene_time)
+              , mArgs(std::move(args))
               , mState(std::move(state))
             {}
         protected:
@@ -1233,17 +1234,21 @@ Entity* Scene::SpawnEntity(const EntityArgs& args, bool link_to_root)
                     instance->PlayIdle();
 
                 if (mArgs.enable_logging)
-                    DEBUG("New entity '%1/%2'", mArgs.klass->GetName(), mArgs.name);
+                    DEBUG("New entity instance. [name='%1/%2']", mArgs.klass->GetName(), mArgs.name);
 
                 std::lock_guard<std::mutex> lock(mState->mutex);
-                mState->entities.push_back(std::move(instance));
+                SpawnRecord spawn;
+                spawn.spawn_time = mSceneTime + mArgs.delay;
+                spawn.instance   = std::move(instance);
+                mState->spawn_list.push_back(std::move(spawn));
             }
         private:
+            const double mSceneTime = 0.0f;
             const EntityArgs mArgs;
             std::shared_ptr<AsyncSpawnState> mState;
         };
 
-        auto task = std::make_unique<SpawnEntityTask>(args, mAsyncSpawnState);
+        auto task = std::make_unique<SpawnEntityTask>(args, mAsyncSpawnState, mCurrentTime);
         task_pool->SubmitTask(std::move(task));
         return nullptr;
     }
@@ -1260,11 +1265,14 @@ Entity* Scene::SpawnEntity(const EntityArgs& args, bool link_to_root)
 
     ASSERT(mIdMap.find(instance->GetId()) == mIdMap.end());
 
-    mSpawnList.push_back(std::move(instance));
+    SpawnRecord spawn;
+    spawn.spawn_time = mCurrentTime + args.delay;
+    spawn.instance   = std::move(instance);
+    mSpawnList.push_back(std::move(spawn));
     if (args.enable_logging)
-        DEBUG("New entity '%1/%2'", args.klass->GetName(), args.name);
+        DEBUG("New entity instance. [entity='%1/%2']", args.klass->GetName(), args.name);
 
-    return mSpawnList.back().get();
+    return mSpawnList.back().instance.get();
 }
 
 void Scene::BeginLoop()
@@ -1282,41 +1290,43 @@ void Scene::BeginLoop()
         mRenderTree.PreOrderTraverseForEach([](Entity* entity) {
             entity->SetFlag(Entity::ControlFlags::Killed, true);
             if (entity->TestFlag(Entity::ControlFlags::EnableLogging))
-                DEBUG("Entity '%1/%2' was killed", entity->GetClassName(), entity->GetName());
+                DEBUG("Entity was killed. [entity='%1/%2']", entity->GetClassName(), entity->GetName());
         }, entity);
     }
-    for (auto& entity : mSpawnList)
+
+    if (mAsyncSpawnState)
     {
+        std::lock_guard<std::mutex> lock(mAsyncSpawnState->mutex);
+        base::AppendVector(mSpawnList, std::move(mAsyncSpawnState->spawn_list));
+        mAsyncSpawnState->spawn_list.clear();
+    }
+
+    for (auto& spawn : mSpawnList)
+    {
+        if (mCurrentTime < spawn.spawn_time)
+            continue;
+
+        auto& entity = spawn.instance;
+
         if (entity->TestFlag(Entity::ControlFlags::EnableLogging))
-            DEBUG("Entity '%1/%2' was spawned.", entity->GetClassName(), entity->GetName());
+            DEBUG("Entity was spawned [entity=''%1/%2'].", entity->GetClassName(), entity->GetName());
+
         entity->SetFlag(Entity::ControlFlags::Spawned, true);
+        entity->SetScene(this);
+
+        ASSERT(!base::Contains(mIdMap, entity->GetId()));
+
         mIdMap[entity->GetId()]     = entity.get();
         mNameMap[entity->GetName()] = entity.get();
         mRenderTree.LinkChild(nullptr, entity.get());
         mEntities.push_back(std::move(entity));
     }
 
-    if (mAsyncSpawnState)
-    {
-        std::lock_guard<std::mutex> lock(mAsyncSpawnState->mutex);
-        for (auto& entity : mAsyncSpawnState->entities)
-        {
-            ASSERT(!base::Contains(mIdMap, entity->GetId()));
-
-            if (entity->TestFlag(Entity::ControlFlags::EnableLogging))
-                DEBUG("Entity '%1/%2' was spawned.", entity->GetClassName(), entity->GetName());
-
-            entity->SetFlag(Entity::ControlFlags::Spawned, true);
-            mIdMap[entity->GetId()]     = entity.get();
-            mNameMap[entity->GetName()] = entity.get();
-            mRenderTree.LinkChild(nullptr, entity.get());
-            mEntities.push_back(std::move(entity));
-        }
-        mAsyncSpawnState->entities.clear();
-    }
+    base::EraseRemove(mSpawnList, [](auto& record) {
+        return !record.instance;
+    });
 
     mKillSet.clear();
-    mSpawnList.clear();
 }
 
 void Scene::EndLoop()
