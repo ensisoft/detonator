@@ -1278,6 +1278,15 @@ void InitLuaDoc()
                  "string", "id");
     DOC_METHOD_0("game.Animation", "PlayIdle", "Play the entity's idle animation (if any).<br>"
                                                "Returns nil if the entity doesn't have any idle animation or is already playing an animation.");
+    DOC_METHOD_1("game.Animation", "QueueAnimation", "Queue an entity animation for playback as soon as the previous animations finish playing.<br>"
+                                                     "This is a shorthand for 'QueueAnimationByName'.",
+                                                     "string", "name");
+    DOC_METHOD_1("game.Animation", "QueueAnimationByName", "Queue an entity animation for playback as soon as the previous animations finish playing.<br>"
+                                                           "Returns the animation instance or nil if no animation could be found.",
+                 "string", "name");
+
+    DOC_METHOD_1("game.Animation", "PlayAnimation", "Play an entity animation by the given name if found. This is a shorthand for 'PlayAnimationByName'.<br>",
+                 "string", "name");
     DOC_METHOD_1("game.Animation", "PlayAnimationByName", "Play an animation by the given name if found.<br>"
                                                           "Any current animation is replaced by this new animation.<br>"
                                                           "Returns the animation instance or nil if no such animation could be found.",
