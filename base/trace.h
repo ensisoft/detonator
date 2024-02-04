@@ -22,6 +22,7 @@
 #include <string>
 #include <chrono>
 #include <cstdio>
+#include <exception>
 
 #include "base/platform.h"
 #include "base/assert.h"
@@ -198,6 +199,11 @@ namespace base
         { index = TraceBeginScope(name, std::move(comment)); }
        ~ManualTracingScope()
         {
+            if (std::uncaught_exceptions())
+            {
+                TraceEndScope(index);
+                index = -1;
+            }
             ASSERT(index == -1 && "No matching call to TraceEndScope found.");
         }
         void EndScope()
