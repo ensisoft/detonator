@@ -1228,7 +1228,7 @@ void LuaRuntime::DispatchKeyboardEvent(const std::string& method, const KeyEvent
         for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
         {
             auto* entity = &mScene->GetEntity(i);
-            if (!entity->TestFlag(Entity::Flags::WantsKeyEvents))
+            if (!entity->TestFlag(Entity::Flags::WantsKeyEvents) && !mPreviewMode)
                 continue;
             if (auto* env = GetTypeEnv(entity->GetClass()))
             {
