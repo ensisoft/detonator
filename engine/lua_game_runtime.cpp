@@ -907,7 +907,8 @@ void LuaRuntime::Update(double game_time, double dt)
         auto* entity = &mScene->GetEntity(i);
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
-            if (const auto* anim = entity->GetFinishedAnimation())
+            const auto& finished_animations = entity->GetFinishedAnimations();
+            for (const auto* anim : finished_animations)
             {
                 CallLua((*env)["OnAnimationFinished"], entity, anim);
             }
