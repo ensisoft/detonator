@@ -20,6 +20,8 @@
 
 #include <memory>
 
+#include "audio/format.h"
+
 namespace audio
 {
     class Source;
@@ -68,7 +70,7 @@ namespace audio
 
         // Create the appropriate audio device for this platform.
         static
-        std::unique_ptr<Device> Create(const char* appname);
+        std::unique_ptr<Device> Create(const char* appname, const Format* hint = nullptr);
 
     protected:
     private:

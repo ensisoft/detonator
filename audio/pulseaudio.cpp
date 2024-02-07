@@ -416,7 +416,7 @@ private:
 };
 
 // static
-std::unique_ptr<Device> Device::Create(const char* appname)
+std::unique_ptr<Device> Device::Create(const char* appname, const Format* format)
 {
     return std::make_unique<PulseAudio>(appname);
 }
