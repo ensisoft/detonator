@@ -59,7 +59,7 @@ void AudioEngine::Start()
     audio::AudioGraph::PrepareParams p;
     p.enable_pcm_caching = false;
 
-    auto device = audio::Device::Create(mName.c_str());
+    auto device = audio::Device::Create(mName.c_str(), &mFormat);
     device->SetBufferSize(mBufferSize);
     mPlayer = std::make_unique<audio::Player>(std::move(device));
 

@@ -80,7 +80,8 @@ do {                              \
 class OpenALDevice : public audio::Device
 {
 public:
-    OpenALDevice(const char* name)
+    OpenALDevice(const char* name, const audio::Format* format)
+      : mFormat(*format)
     {}
 
     ~OpenALDevice()
@@ -96,6 +97,13 @@ public:
     }
     virtual std::shared_ptr<audio::Stream> Prepare(std::unique_ptr<audio::Source> source) override
     {
+        if (source->GetRateHz() != mFormat.sample_rate)
+        {
+            ERROR("Audio source has incorrect sample rate for the audio device. [device=%1 Hz, source=%2 Hz",
+                  mFormat.sample_rate, source->GetRateHz());
+            return nullptr;
+        }
+
         const auto& name = source->GetName();
         try
         {
@@ -133,12 +141,28 @@ public:
         mDevice = alcOpenDevice(default_device);
         if (!mDevice)
             throw std::runtime_error("failed to open OpenAL audio device.");
-        mContext = alcCreateContext(mDevice, NULL);
+
+        // Emscripten WAR!
+        // library_openal.js opens the Web AudioContext with or without options
+        // and we need to have the ALC_FREQUENCY parameter set or the audio
+        // context will be created with browser's *default* sample rate!!
+
+        const ALCint ARNOLD = 0;
+        const ALCint context_attrs[] = {
+            ALC_FREQUENCY, (ALCint)mFormat.sample_rate,
+            ARNOLD
+        };
+
+        mContext = alcCreateContext(mDevice, context_attrs);
         if (!mContext)
             throw std::runtime_error("failed to create OpenAL audio context.");
 
         // todo: refactor this, this cannot work if there ever are more than one device.
         AL_CALL(alcMakeContextCurrent(mContext));
+
+        ALCint values[1] = {0};
+        AL_CALL(alcGetIntegerv(mDevice, ALC_FREQUENCY, sizeof(values), values));
+        DEBUG("OpenAL device context sample rate = %1", values[0]);
 
         mState = State::Ready;
     }
@@ -415,6 +439,7 @@ private:
     ALCcontext* mContext = nullptr;
     unsigned mBufferSize = 20; // milliseconds
     std::list<std::weak_ptr<PlaybackStream>> mStreams;
+    audio::Format mFormat;
 };
 
 } // namespace
@@ -423,9 +448,9 @@ namespace audio
 {
 
 // static
-std::unique_ptr<Device> Device::Create(const char* name)
+std::unique_ptr<Device> Device::Create(const char* name, const Format* format)
 {
-    return std::make_unique<OpenALDevice>(name);
+    return std::make_unique<OpenALDevice>(name, format);
 }
 
 } // namespace
