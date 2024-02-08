@@ -3,7 +3,9 @@
 
 #include "base/platform.h"
 
-#define AUDIO_USE_OPENAL
+//#define AUDIO_USE_OPENAL
+//#define AUDIO_USE_SDL2
+#define AUDIO_USE_SOKOL
 
 // When this flag is defined the OpenAL API calls are checked for errors.
 // Currently turned off for performance reasons. Might cause unexpected
