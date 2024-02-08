@@ -8,6 +8,11 @@
 #define AUDIO_USE_PLAYER_THREAD
 #if defined(LINUX_OS)
 #  define AUDIO_USE_PULSEAUDIO
+// remember to enable the right linker flags too in the master CMakeLists.txt
+// in order to get backends working
+// #define AUDIO_USE_OPENAL
+// #define AUDIO_USE_SDL2
+// #define AUDIO_USE_SOKOL
 #else
 #  define AUDIO_USE_WAVEOUT
 #endif
