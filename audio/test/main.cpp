@@ -90,9 +90,11 @@ int main(int argc, char* argv[])
             "\t--24bit\t\tTest 24bit PCM encoded files.\n"
             "\t--sine\t\tTest procedural audio (sine wave).\n"
             "\t--graph\t\tTest audio graph.\n"
-            "\t--thread\t\tTest threaded audio source.\n"
+            "\t--thread\tTest threaded audio source.\n"
             "\t--loops\t\tNumber of loops to use to play each file.\n"
-            "\t--file\t\tA specific test file to add\n");
+            "\t--int16\t\tUse 16bit integers for audio format.\n"
+            "\t--int32\t\tUse 32bit integers for audio format.\n"
+            "\t--file\t\tA specific test file to add.\n");
         std::printf("Have a good day.\n");
         return 0;
     }
