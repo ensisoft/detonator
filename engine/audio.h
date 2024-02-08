@@ -145,6 +145,8 @@ namespace engine
         std::size_t mEffectGraphId = 0;
         // Id of the music audio graph in the audio player.
         std::size_t mMusicGraphId  = 0;
+        // Id of the single (combined effect+music) audio graph
+        std::size_t mAudioGraphId = 0;
         // Counter to generate unique element names for effect graphs
         std::size_t mEffectCounter = 0;
         bool mEnableMusic = true;

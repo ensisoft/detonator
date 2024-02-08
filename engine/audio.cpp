@@ -44,8 +44,15 @@ AudioEngine::~AudioEngine()
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
     if (mPlayer)
     {
-        mPlayer->Cancel(mEffectGraphId);
-        mPlayer->Cancel(mMusicGraphId);
+        if (mAudioGraphId)
+        {
+            mPlayer->Cancel(mAudioGraphId);
+        }
+        else
+        {
+            mPlayer->Cancel(mEffectGraphId);
+            mPlayer->Cancel(mMusicGraphId);
+        }
     }
 #endif
 }
@@ -63,13 +70,14 @@ void AudioEngine::Start()
     device->SetBufferSize(mBufferSize);
     mPlayer = std::make_unique<audio::Player>(std::move(device));
 
+#if defined(GAMESTUDIO_MULTIPLE_AUDIO_STREAMS)
     {
         auto effect_graph = std::make_unique<audio::AudioGraph>("FX");
-        auto* effect_gain = (*effect_graph)->AddElement(audio::Gain("gain", 1.0f));
-        auto* effect_mixer = (*effect_graph)->AddElement(audio::MixerSource("mixer", mFormat));
+        auto* effect_gain = (*effect_graph)->AddElement(audio::Gain("effect_gain", 1.0f));
+        auto* effect_mixer = (*effect_graph)->AddElement(audio::MixerSource("effect_mixer", mFormat));
         effect_mixer->SetNeverDone(true);
-        ASSERT((*effect_graph)->LinkElements("mixer", "out", "gain", "in"));
-        ASSERT((*effect_graph)->LinkGraph("gain", "out"));
+        ASSERT((*effect_graph)->LinkElements("effect_mixer", "out", "effect_gain", "in"));
+        ASSERT((*effect_graph)->LinkGraph("effect_gain", "out"));
         ASSERT(effect_graph->Prepare(*mLoader, p));
 
         auto proxy = std::make_unique<audio::SourceThreadProxy>(std::move(effect_graph));
@@ -81,11 +89,11 @@ void AudioEngine::Start()
     {
 
         auto music_graph = std::make_unique<audio::AudioGraph>("Music");
-        auto* music_gain = (*music_graph)->AddElement(audio::Gain("gain", 1.0f));
-        auto* music_mixer = (*music_graph)->AddElement(audio::MixerSource("mixer", mFormat));
+        auto* music_gain = (*music_graph)->AddElement(audio::Gain("music_gain", 1.0f));
+        auto* music_mixer = (*music_graph)->AddElement(audio::MixerSource("music_mixer", mFormat));
         music_mixer->SetNeverDone(true);
-        ASSERT((*music_graph)->LinkElements("mixer", "out", "gain", "in"));
-        ASSERT((*music_graph)->LinkGraph("gain", "out"));
+        ASSERT((*music_graph)->LinkElements("music_mixer", "out", "music_gain", "in"));
+        ASSERT((*music_graph)->LinkGraph("music_gain", "out"));
         ASSERT(music_graph->Prepare(*mLoader, p));
 
         auto proxy = std::make_unique<audio::SourceThreadProxy>(std::move(music_graph));
@@ -93,6 +101,33 @@ void AudioEngine::Start()
         mMusicGraphId = mPlayer->Play(std::move(proxy));
         DEBUG("Audio music graph is ready. [id=%1]", mMusicGraphId);
     }
+#else
+    auto audio_graph = std::make_unique<audio::AudioGraph>(mName.c_str());
+    auto main_mixer = (*audio_graph)->AddElement(audio::Mixer("mixer"));
+    auto effect_mixer = (*audio_graph)->AddElement(audio::MixerSource("effect_mixer", mFormat));
+    auto effect_gain = (*audio_graph)->AddElement(audio::Gain("effect_gain", 2.0f));
+    auto music_mixer = (*audio_graph)->AddElement(audio::MixerSource("music_mixer", mFormat));
+    auto music_gain = (*audio_graph)->AddElement(audio::Gain("music_gain", 2.0f));
+
+    effect_mixer->SetNeverDone(true);
+    music_mixer->SetNeverDone(true);
+
+    ASSERT((*audio_graph)->LinkElements("effect_mixer", "out", "effect_gain", "in"));
+    ASSERT((*audio_graph)->LinkElements("effect_gain", "out", "mixer", "in0"));
+    ASSERT((*audio_graph)->LinkElements("music_mixer", "out", "music_gain", "in"));
+    ASSERT((*audio_graph)->LinkElements("music_gain", "out", "mixer", "in1"));
+    ASSERT((*audio_graph)->LinkGraph("mixer", "out"));
+    ASSERT(audio_graph->Prepare(*mLoader, p));
+
+    auto proxy = std::make_unique<audio::SourceThreadProxy>(std::move(audio_graph));
+    mAudioGraphId = mPlayer->Play(std::move(proxy));
+    DEBUG("Audio graph is ready. [id=%1]", mAudioGraphId);
+
+    // they're all the same!
+    mMusicGraphId  = mAudioGraphId;
+    mEffectGraphId = mAudioGraphId;
+#endif
+
 #endif
 }
 
@@ -101,13 +136,27 @@ void AudioEngine::SetDebugPause(bool on_off)
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
     if (on_off)
     {
-        mPlayer->Pause(mEffectGraphId);
-        mPlayer->Pause(mMusicGraphId);
+        if (mAudioGraphId)
+        {
+            mPlayer->Pause(mAudioGraphId);
+        }
+        else
+        {
+            mPlayer->Pause(mEffectGraphId);
+            mPlayer->Pause(mMusicGraphId);
+        }
     }
     else
     {
-        mPlayer->Resume(mEffectGraphId);
-        mPlayer->Resume(mMusicGraphId);
+        if (mAudioGraphId)
+        {
+            mPlayer->Resume(mEffectGraphId);
+        }
+        else
+        {
+            mPlayer->Resume(mMusicGraphId);
+            mPlayer->Resume(mAudioGraphId);
+        }
     }
 #endif
 }
@@ -128,7 +177,7 @@ bool AudioEngine::PrepareMusicGraph(const GraphHandle& graph)
     audio::MixerSource::AddSourceCmd cmd;
     cmd.src    = std::move(instance);
     cmd.paused = true;
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("music_mixer", std::move(cmd)));
 #endif
     return true;
 }
@@ -150,7 +199,7 @@ void AudioEngine::ResumeMusic(const std::string& track, unsigned when)
     cmd.name      = track;
     cmd.paused    = false;
     cmd.millisecs = when;
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("music_mixer", std::move(cmd)));
 #endif
 }
 
@@ -161,7 +210,7 @@ void AudioEngine::PauseMusic(const std::string& track, unsigned when)
     cmd.name      = track;
     cmd.paused    = true;
     cmd.millisecs = when;
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("music_mixer", std::move(cmd)));
 #endif
 }
 
@@ -171,7 +220,7 @@ void AudioEngine::KillMusic(const std::string& track, unsigned when)
     audio::MixerSource::DeleteSourceCmd cmd;
     cmd.name      = track;
     cmd.millisecs = when;
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("music_mixer", std::move(cmd)));
 #endif
 }
 void AudioEngine::KillAllMusic(unsigned int when)
@@ -179,7 +228,7 @@ void AudioEngine::KillAllMusic(unsigned int when)
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
     audio::MixerSource::DeleteAllSrcCmd cmd;
     cmd.millisecs = when;
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("music_mixer", std::move(cmd)));
 #endif
 }
 
@@ -188,7 +237,7 @@ void AudioEngine::CancelMusicCmds(const std::string& track)
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
     audio::MixerSource::CancelSourceCmdCmd cmd;
     cmd.name = track;
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("music_mixer", std::move(cmd)));
 #endif
 }
 
@@ -204,7 +253,7 @@ void AudioEngine::SetMusicEffect(const std::string& track, unsigned duration, Ef
     audio::MixerSource::SetEffectCmd cmd;
     cmd.src    = track;
     cmd.effect = std::move(mixer_effect);
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("music_mixer", std::move(cmd)));
 #endif
 }
 
@@ -213,7 +262,7 @@ void AudioEngine::SetMusicGain(float gain)
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
     audio::Gain::SetGainCmd cmd;
     cmd.gain = gain;
-    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("gain", std::move(cmd)));
+    mPlayer->SendCommand(mMusicGraphId, audio::AudioGraph::MakeCommand("music_gain", std::move(cmd)));
 #endif
 }
 
@@ -239,13 +288,13 @@ bool AudioEngine::PlaySoundEffect(const GraphHandle& handle, unsigned when)
     audio::MixerSource::AddSourceCmd add_cmd;
     add_cmd.src    = std::move(graph);
     add_cmd.paused = true;
-    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(add_cmd)));
+    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("effect_mixer", std::move(add_cmd)));
 
     audio::MixerSource::PauseSourceCmd play_cmd;
     play_cmd.name      = name;
     play_cmd.paused    = false;
     play_cmd.millisecs = when;
-    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(play_cmd)));
+    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("effect_mixer", std::move(play_cmd)));
 
     ++mEffectCounter;
 #endif
@@ -257,7 +306,7 @@ void AudioEngine::SetSoundEffectGain(float gain)
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
     audio::Gain::SetGainCmd cmd;
     cmd.gain = gain;
-    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("gain", std::move(cmd)));
+    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("effect_gain", std::move(cmd)));
 #endif
 }
 void AudioEngine::KillAllSoundEffects()
@@ -265,7 +314,7 @@ void AudioEngine::KillAllSoundEffects()
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
     audio::MixerSource::DeleteAllSrcCmd cmd;
     cmd.millisecs = 0;
-    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("mixer", std::move(cmd)));
+    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("effect_mixer", std::move(cmd)));
 #endif
 }
 
@@ -298,7 +347,14 @@ void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& e
 }
 void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceEvent& event, AudioEventQueue* events)
 {
-    DEBUG("Audio engine source event. [id=%1]", event.id == mMusicGraphId ? "Music" : "FX");
+    if (event.id == mAudioGraphId)
+        DEBUG("Audio engine music+effect graph source event.");
+    else if (event.id == mMusicGraphId)
+        DEBUG("Audio engine music graph source event.");
+    else if (event.id == mEffectGraphId)
+        DEBUG("Audio engine effect graph source event.");
+    else BUG("Unknown audio graph id");
+
     if (events == nullptr)
         return;
 
@@ -307,7 +363,9 @@ void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceEvent& event, Au
         AudioEvent ev;
         ev.track = done->src->GetName();
         ev.type  = AudioEvent::Type::TrackDone;
-        if (event.id == mMusicGraphId)
+        if (event.id == mAudioGraphId)
+            ev.source = "audio";
+        else if (event.id == mMusicGraphId)
             ev.source = "music";
         else if (event.id == mEffectGraphId)
             ev.source = "effect";
