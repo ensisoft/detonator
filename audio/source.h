@@ -35,6 +35,7 @@
 #include "base/assert.h"
 #include "audio/command.h"
 #include "audio/buffer.h"
+#include "audio/format.h"
 
 namespace audio
 {
@@ -52,10 +53,7 @@ namespace audio
     class Source
     {
     public:
-        // The audio sample format.
-        enum class Format {
-            Float32, Int16, Int32
-        };
+        using Format = audio::SampleType;
         // dtor.
         virtual ~Source() = default;
         // Get the sample rate in Hz.
