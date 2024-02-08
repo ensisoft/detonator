@@ -190,6 +190,8 @@ add_library(AudioLib
     audio/sndfile.cpp
     audio/mpg123.cpp
     audio/pulseaudio.cpp
+    audio/sdl.cpp
+    audio/sokol.cpp
     audio/waveout.cpp
     audio/openal.cpp
     audio/source.cpp
@@ -373,6 +375,8 @@ add_executable(Detonator
     audio/sndfile.cpp
     audio/mpg123.cpp
     audio/pulseaudio.cpp
+    audio/sdl.cpp
+    audio/sokol.cpp
     audio/waveout.cpp
     audio/openal.cpp
     audio/source.cpp
@@ -684,6 +688,8 @@ add_executable(audio_test
     audio/pulseaudio.cpp
     audio/waveout.cpp
     audio/openal.cpp
+    audio/sdl.cpp
+    audio/sokol.cpp
     audio/source.cpp
     audio/player.cpp
     audio/element.cpp
@@ -701,6 +707,9 @@ if (UNIX)
     target_link_libraries(audio_test pulse)
     target_link_libraries(audio_test pthread)
 #    target_link_libraries(audio_test openal)
+#    target_link_libraries(audio_test SDL2)
+# for ALSA backend through sokol
+#    target_link_libraries(audio_test asound)
 endif()
 install(TARGETS audio_test DESTINATION "${CMAKE_CURRENT_LIST_DIR}/audio/test/")
 
@@ -1017,6 +1026,8 @@ add_executable(unit_test_audio
         audio/pulseaudio.cpp
         audio/openal.cpp
         audio/waveout.cpp
+        audio/sdl.cpp
+        audio/sokol.cpp
         audio/player.cpp
         audio/proxy.cpp)
 target_include_directories(unit_test_audio PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/test")
@@ -1025,6 +1036,9 @@ if (UNIX)
     target_link_libraries(unit_test_audio pulse)
     target_link_libraries(unit_test_audio pthread)
 #    target_link_libraries(unit_test_audio openal)
+#    target_link_libraries(unit_test_audio SDL2)
+# for ALSA backend through sokol
+#    target_link_libraries(unit_test_audio asound)
 endif()
 add_executable(unit_test_audio_graph
         audio/unit_test/unit_test_graph.cpp
