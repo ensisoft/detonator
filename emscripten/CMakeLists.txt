@@ -133,6 +133,8 @@ add_executable(GameEngine
     ../audio/mpg123.cpp
     ../audio/sndfile.cpp
     ../audio/openal.cpp
+    ../audio/sdl.cpp
+    ../audio/sokol.cpp
     ../audio/source.cpp
     ../audio/proxy.cpp
     ../base/assert.cpp
@@ -209,6 +211,8 @@ target_compile_options(GameEngine PRIVATE -sUSE_MPG123)
 target_compile_options(GameEngine PRIVATE -sUSE_HARFBUZZ)
 target_compile_options(GameEngine PRIVATE -sUSE_FREETYPE)
 target_compile_options(GameEngine PRIVATE -sUSE_BOOST_HEADERS)
+# SDL is needed for the SDL audio backend
+#target_compile_options(GameEngine PRIVATE -sUSE_SDL=2)
 
 # uncomment this in order to enable threading
 target_compile_options(GameEngine PRIVATE -pthread)
@@ -226,6 +230,8 @@ target_link_options(GameEngine PRIVATE -sEXPORTED_FUNCTIONS=_main,_gui_set_flag)
 target_link_options(GameEngine PRIVATE -sEXPORTED_RUNTIME_METHODS=ccall)
 target_link_options(GameEngine PRIVATE -sUSE_WEBGL2)
 target_link_options(GameEngine PRIVATE -sFULL_ES3)
+# SDL is needed for the SDL audio backend
+#target_link_options(GameEngine PRIVATE -sUSE_SDL=2)
 
 # uncomment this in order to enable threading
 target_link_options(GameEngine PRIVATE -pthread)
