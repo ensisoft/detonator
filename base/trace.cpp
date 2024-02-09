@@ -128,7 +128,8 @@ void ChromiumTraceJsonWriter::Write(const TraceEntry& entry)
         markers += m;
         markers.push_back(' ');
     }
-    markers.pop_back();
+    if (!markers.empty())
+        markers.pop_back();
 
 constexpr static auto* JsonString =
   R"(%c { "pid":0, "tid":0, "ph":"X", "ts":%u, "dur":%u, "name":"%s", "args": { "markers": "%s", "comment": "%s" } }
