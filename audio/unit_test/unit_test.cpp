@@ -30,6 +30,7 @@
 #include "audio/source.h"
 #include "audio/player.h"
 #include "audio/device.h"
+#include "audio/algo.h"
 
 class TestSource : public audio::Source
 {
@@ -311,10 +312,47 @@ void unit_test_thread_proxy()
     }
 }
 
+void perf_test_buffer_mixing()
+{
+    TEST_CASE(test::Type::Performance)
+
+    // take 10 float buffers and mix together.
+
+    std::vector<audio::BufferHandle> buffers;
+    buffers.resize(1000);
+    for (auto& buffer : buffers)
+    {
+        audio::Format format;
+        format.channel_count = 2;
+        format.sample_type   = audio::SampleType::Float32;
+        format.sample_rate   = 44100;
+
+        buffer = std::make_shared<audio::VectorBuffer>(1024*10);
+        buffer->SetByteSize(1024*10);
+        buffer->SetFormat(format);
+
+        const auto count = buffer->GetByteSize() / sizeof(float);
+        auto* floats = (float*)buffer->GetPtr();
+        for (size_t i=0; i<count; ++i)
+            floats[i] = 0.2f;
+    }
+
+    test::PerfTest("mixing float32", 1, [&buffers]() {
+        audio::MixBuffers(buffers, 0.1f);
+    });
+
+    for (auto& buffer : buffers)
+    {
+        test::DevNull("%f", *(float*)buffer->GetPtr());
+    }
+
+}
+
 void run_tests()
 {
 #if defined(__EMSCRIPTEN__)
     unit_test_thread_proxy();
+    perf_test_buffer_mixing();
 #else
     unit_test_success();
     unit_test_format_fail();
@@ -323,6 +361,8 @@ void run_tests()
     unit_test_cancel();
     unit_test_shutdown_with_active_streams();
     unit_test_thread_proxy();
+
+    perf_test_buffer_mixing();
 #endif
 }
 
