@@ -29,6 +29,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <functional>
+#include <optional>
 
 #include "base/assert.h"
 #include "base/bitflag.h"
@@ -640,6 +641,9 @@ namespace engine
             UIStyle::WidgetShape shape = UIStyle::WidgetShape::Rectangle;
         };
         std::vector<ClippingMask> mClippingMaskStack;
+        // cached stencil mask value needed for the next stencil
+        // test when drawing a widget.
+        mutable std::optional<uint8_t> mClippingStencilMaskValue;
 
         base::bitflag<Flags> mFlags;
 
@@ -665,7 +669,6 @@ namespace engine
         // single iteration of paint.
         mutable std::unordered_set<std::string> mFailedProperties;
     };
-
 
     class UIKeyMap
     {
