@@ -1023,6 +1023,7 @@ add_test(NAME unit_test_uikit COMMAND unit_test_uikit)
 # audio tests
 add_executable(unit_test_audio
         audio/unit_test/unit_test.cpp
+        audio/format.cpp
         audio/pulseaudio.cpp
         audio/openal.cpp
         audio/waveout.cpp
