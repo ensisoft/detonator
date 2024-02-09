@@ -629,6 +629,11 @@ PlayWindow::PlayWindow(app::Workspace& workspace, bool is_separate_process) : mW
 
 PlayWindow::~PlayWindow()
 {
+    mTraceLogger.reset();
+    mTraceWriter.reset();
+    base::SetThreadTrace(nullptr);
+    base::EnableTracing(false);
+
     Shutdown();
 
     mThreadPool->Shutdown();
