@@ -1114,6 +1114,8 @@ void UIPainter::BeginDrawWidgets()
     {
         material.used = false;
     }
+
+    mClippingStencilMaskValue.reset();
 }
 
 void UIPainter::EndDrawWidgets()
@@ -1149,6 +1151,7 @@ void UIPainter::PushMask(const MaskStruct& mask)
         clip.rect.Translate(border_thickness, border_thickness);
 
         mClippingMaskStack.push_back(std::move(clip));
+        mClippingStencilMaskValue.reset();
     }
     else BUG("Unimplemented clipping mask for widget klass.");
 }
@@ -1157,6 +1160,7 @@ void UIPainter::PopMask()
     ASSERT(!mClippingMaskStack.empty());
 
     mClippingMaskStack.pop_back();
+    mClippingStencilMaskValue.reset();
 }
 
 void UIPainter::RealizeMask()
@@ -1228,6 +1232,9 @@ uint8_t UIPainter::StencilPass() const
     if (mClippingMaskStack.empty() || !mFlags.test(Flags::ClipWidgets))
         return 0;
 
+    if (mClippingStencilMaskValue.has_value())
+        return mClippingStencilMaskValue.value();
+
     // start with clear 0 stencil. Each mask tests against the stencil
     // value which increments on every write.
     // can't just bitwise and since the stencil bits outside the rasterized
@@ -1244,6 +1251,7 @@ uint8_t UIPainter::StencilPass() const
         DrawShape(mask.rect, gfx::CreateMaterialFromColor(gfx::Color::White), overlap, mask.shape);
         ++stencil_val;
     }
+    mClippingStencilMaskValue = stencil_val;
     return stencil_val;
 }
 
@@ -1316,6 +1324,10 @@ void UIPainter::OutlineShape(const gfx::FRect& shape_rect, const gfx::Material& 
 
     if (const auto stencil_value = StencilPass())
     {
+        // we're trashing the stencil buffer here. outline drawing uses
+        // the stencil buffer.
+        mClippingStencilMaskValue.reset();
+
         const gfx::StencilMaskPass mask(gfx::StencilWriteValue(0), *mPainter,
                                      gfx::StencilMaskPass::StencilFunc::Overwrite);
         DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), mask, shape);
@@ -1325,6 +1337,10 @@ void UIPainter::OutlineShape(const gfx::FRect& shape_rect, const gfx::Material& 
     }
     else
     {
+        // we're trashing the stencil buffer here. outline drawing uses
+        // the stencil buffer.
+        mClippingStencilMaskValue.reset();
+
         const gfx::StencilMaskPass overlap(gfx::StencilClearValue(1),
                                            gfx::StencilWriteValue(0), *mPainter,
                                            gfx::StencilMaskPass::StencilFunc::Overwrite);
