@@ -67,7 +67,18 @@ namespace base
     class TraceLog : public Trace
     {
     public:
-        explicit TraceLog(size_t capacity, size_t threadId = GetThreadId()) noexcept
+        // Some known threadIDs so that the actual thread ID can be
+        // for example AudioThread+1, AudioThread+2 so each component/
+        // subsystem can have their own thread ids inside some range
+        // without stomping on each other's IDs
+        enum ThreadId {
+            MainThread = 0,
+            AudioThread = 100,
+            RenderTread = 200,
+            TaskThread  = 300
+        };
+
+        explicit TraceLog(size_t capacity, size_t threadId = 0) noexcept
         {
             mCallTrace.resize(capacity);
             mStartTime  = std::chrono::high_resolution_clock::now();
@@ -137,7 +148,6 @@ namespace base
         inline const TraceEntry& GetEntry(size_t index) const noexcept
         { return mCallTrace[index]; }
 
-        static size_t GetThreadId() noexcept;
     private:
         unsigned GetTime() const
         {

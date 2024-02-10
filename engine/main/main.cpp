@@ -563,7 +563,7 @@ int main(int argc, char* argv[])
                 using TraceWriter = base::LockedTraceWriter<base::TextFileTraceWriter>;
                 trace_writer.reset(new TraceWriter((base::TextFileTraceWriter(trace_file))));
             }
-            trace_logger.reset(new base::TraceLog(1000));
+            trace_logger.reset(new base::TraceLog(1000, base::TraceLog::MainThread));
 
             if (opt.WasGiven("--trace-start"))
             {

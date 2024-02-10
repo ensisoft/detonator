@@ -1811,7 +1811,7 @@ void PlayWindow::ToggleTracing(bool enable)
         using TraceWriter = base::LockedTraceWriter<base::ChromiumTraceJsonWriter>;
 
         mTraceWriter.reset(new TraceWriter((base::ChromiumTraceJsonWriter("trace.json"))));
-        mTraceLogger.reset(new base::TraceLog(1000));
+        mTraceLogger.reset(new base::TraceLog(1000, base::TraceLog::ThreadId::MainThread));
         base::SetThreadTrace(mTraceLogger.get());
         base::EnableTracing(true);
         mEngine->SetTracer(mTraceLogger.get(), mTraceWriter.get());

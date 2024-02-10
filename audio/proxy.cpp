@@ -226,9 +226,12 @@ unsigned SourceThreadProxy::CopyBuffer(VectorBuffer* source, void* device_buff, 
 
 void SourceThreadProxy::ThreadLoop()
 {
+    static std::atomic<size_t> ThreadId = 0;
+
     DEBUG("Hello from audio source thread. [name='%1']", mSource->GetName());
     std::uint64_t bytes_read = 0;
     std::unique_ptr<base::TraceLog> trace;
+    std::size_t my_thread_id = ThreadId++;
 
     try
     {
@@ -240,9 +243,8 @@ void SourceThreadProxy::ThreadLoop()
                 std::lock_guard<std::mutex> lock(TraceWriterMutex);
                 if (TraceWriter && !base::GetThreadTrace())
                 {
-                    // todo: audio thread ID if there are multiple audio source
-                    // threads
-                    trace = std::make_unique<base::TraceLog>(1000);
+                    // reserve AudioThread 0 for Player Thread
+                    trace = std::make_unique<base::TraceLog>(1000, base::TraceLog::ThreadId::AudioThread + 1 + my_thread_id);
                     base::SetThreadTrace(trace.get());
                 }
                 else if (!TraceWriter && base::GetThreadTrace())
