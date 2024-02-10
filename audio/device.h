@@ -72,6 +72,27 @@ namespace audio
         static
         std::unique_ptr<Device> Create(const char* appname, const Format* hint = nullptr);
 
+        inline std::string GetBackend() const
+        {
+            // implemented as a device member function in case in the future
+            // the device selection is a dynamic runtime decision rather than
+            // compile/build time decision.
+            #if defined(AUDIO_USE_PULSEAUDIO)
+                return "Pulseaudio";
+            #elif defined(AUDIO_USE_OPENAL)
+                return "OpenAL";
+            #elif defined(AUDIO_USE_SDL2)
+                return "SDL2";
+            #elif defined(AUDIO_USE_SOKOL)
+                return "Sokol";
+            #elif defined(AUDIO_USE_WAVEOUT)
+                return "Waveout";
+            #else
+            # error missing audio backend
+            #endif
+                return "";
+        }
+
     protected:
     private:
     };

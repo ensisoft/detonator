@@ -103,8 +103,15 @@ int main(int argc, char* argv[])
     base::SetGlobalLog(&logger);
     base::EnableDebugLog(true);
 
+    INFO("DETONATOR2D Audio test app");
+    INFO("Copyright (c) 2020-2024 Sami Vaisanen");
+    INFO("https://www.ensisoft.com");
+    INFO("https://github.com/ensisoft/detonator");
+
     auto device = audio::Device::Create("audio_test");
     device->SetBufferSize(10); // milliseconds
+    INFO("Using audio backend '%1'.", device->GetBackend());
+
     audio::Player player(std::move(device));
 
     if (test_sine)
