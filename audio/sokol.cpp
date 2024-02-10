@@ -70,7 +70,7 @@ namespace audio
             return State::Ready;
         }
 
-        virtual void SetBufferSize(unsigned milliseconds)
+        virtual void SetBufferSize(unsigned milliseconds) override
         {
             mBufferSize = milliseconds;
         }
@@ -97,11 +97,13 @@ namespace audio
                                                                 mSource->GetRateHz(),
                                                                 buffer_size_ms);
                 const auto frame_size_bytes = audio::GetFrameSizeInBytes(format);
-                const auto buffer_size_frames = buffer_size_bytes / frame_size_bytes;
+                // seems cranky about the buffer sizes so round up to next POT
+                // maybe that helps..
+                const auto buffer_size_frames = base::NextPOT(buffer_size_bytes / frame_size_bytes);
 
-                // todo: fix the buffer size in frames
+                const auto actual_buffer_size = buffer_size_frames * frame_size_bytes;
                 // may throw
-                mSource->Prepare(frame_size_bytes * 2048);
+                mSource->Prepare(actual_buffer_size);
 
                 saudio_desc desc;
                 std::memset(&desc, 0, sizeof(desc));
@@ -110,15 +112,15 @@ namespace audio
                 desc.num_channels       = mSource->GetNumChannels();
                 desc.stream_userdata_cb = write_callback_trampoline;
                 desc.logger.func        = log_callback;
-                // todo: this fails
-                //desc.buffer_frames      = 2048; // buffer_size_frames;
+                desc.buffer_frames      = buffer_size_frames;
                 saudio_setup(desc);
                 if (!saudio_isvalid())
                     throw std::runtime_error("saudio_setup failed.");
 
-                //auto foo = saudio_buffer_frames();
+                const auto millisecond_size = audio::GetMillisecondByteCount(format);
+                const auto millisecond_count = actual_buffer_size / millisecond_size;
 
-                DEBUG("Sokol audio stream is open on source. [source='%1']", mSource->GetName());
+                DEBUG("Sokol audio stream is open on source. [source='%1', buffer=%2ms]", mSource->GetName(), millisecond_count);
             }
             ~SokolStream()
             {
