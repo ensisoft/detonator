@@ -119,6 +119,11 @@ void GraphClass::Preload(const Loader& loader, const PreloadParams& params) cons
         if (!source->Prepare(loader, prep))
             continue;
 
+        // hack hack hack but set the loop count to 1 to make
+        // sure that we're not stuck indefinitely in the loop
+        // below trying to complete the source.
+        file->SetLoopCount(1);
+
         if (pcm_caching && *pcm_caching)
         {
             BufferAllocator allocator;
