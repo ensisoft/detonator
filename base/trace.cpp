@@ -24,7 +24,6 @@
 namespace {
 static thread_local base::Trace* thread_tracer = nullptr;
 static thread_local bool enable_tracing = false;
-static thread_local size_t this_thread_id = 0;
 } // namespace
 
 namespace base
@@ -163,17 +162,6 @@ constexpr static auto* JsonString =
 void ChromiumTraceJsonWriter::Flush()
 {
     std::fflush(mFile);
-}
-
-// static
-size_t TraceLog::GetThreadId() noexcept
-{
-    if (this_thread_id == 0)
-    {
-        static std::atomic<size_t> ThreadCounter = 1;
-        this_thread_id = ThreadCounter++;
-    }
-    return this_thread_id;
 }
 
 } // namespace
