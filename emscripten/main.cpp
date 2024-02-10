@@ -354,7 +354,6 @@ public:
         init.surface_width    = canvas_render_width;
         init.surface_height   = canvas_render_height;
         base::JsonReadSafe(json["application"], "game_script", &init.game_script);
-        mEngine->Init(init);
 
         engine::Engine::EngineConfig config;
         config.updates_per_second = 60.0f;
@@ -398,7 +397,7 @@ public:
             base::JsonReadSafe(audio, "buffer_size", &config.audio.buffer_size);
             base::JsonReadSafe(audio, "pcm_caching", &config.audio.enable_pcm_caching);
         }
-        mEngine->SetEngineConfig(config);
+        mEngine->Init(init, config);
         // doesn't exist here.
         mEngine->SetTracer(nullptr, nullptr);
 

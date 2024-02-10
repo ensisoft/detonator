@@ -135,10 +135,10 @@ namespace gui
         bool InFullScreen() const;
         void SetFullScreen(bool fullscreen);
         void SetDebugOptions() const;
-        void SetEngineConfig() const;
         void Barf(const std::string& msg);
         bool LoadLibrary();
         void ToggleTracing(bool enable);
+        void InitializeEngine(bool preview);
 
     private:
         class WindowContext;

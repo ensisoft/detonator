@@ -276,10 +276,6 @@ namespace engine
             // the default clear color.
             Color4f clear_color = {0.2f, 0.3f, 0.4f, 1.0f};
         };
-        // Set the game engine configuration. Called once in the beginning
-        // before Start is called.
-        virtual void SetEngineConfig(const EngineConfig& conf)
-        {}
 
         // Called once on application startup. The arguments
         // are the arguments given to the application the command line
@@ -313,7 +309,7 @@ namespace engine
 
         // Initialize the engine and its resources and subsystems
         // such as the graphics and audio.
-        virtual void Init(const InitParams& init) {}
+        virtual void Init(const InitParams& init, const EngineConfig& config) {}
 
         struct ContentClass {
             ClassLibrary::ClassType type;

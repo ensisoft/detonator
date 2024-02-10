@@ -1227,7 +1227,7 @@ public:
         INFO("Test case: '%1'", mTestList[mTestIndex]->GetName());
     }
 
-    virtual void Init(const InitParams& init) override
+    virtual void Init(const InitParams& init, const EngineConfig& conf) override
     {
         mDevice  = dev::CreateDevice(init.context)->GetSharedGraphicsDevice();
         mPainter = gfx::Painter::Create(mDevice);
