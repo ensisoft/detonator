@@ -27,6 +27,7 @@
 #include "base/utility.h"
 #include "base/math.h"
 #include "base/logging.h"
+#include "base/trace.h"
 #include "audio/element.h"
 #include "audio/sndfile.h"
 #include "audio/mpg123.h"
@@ -81,6 +82,8 @@ bool Playlist::Prepare(const Loader& loader, const PrepareParams& params)
 
 void Playlist::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
+    TRACE_SCOPE("Playlist");
+
     if (mSrcIndex == mSrcs.size())
         return;
     BufferHandle buffer;
@@ -127,6 +130,8 @@ bool StereoMaker::Prepare(const Loader& loader, const PrepareParams& params)
 
 void StereoMaker::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
+    TRACE_SCOPE("StereoMaker");
+
     BufferHandle buffer;
     if (!mIn.PullBuffer(buffer))
         return;
@@ -207,6 +212,8 @@ bool StereoJoiner::Prepare(const Loader& loader, const PrepareParams& params)
 
 void StereoJoiner::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
+    TRACE_SCOPE("StereoJoiner");
+
     BufferHandle left;
     BufferHandle right;
     if (!mInLeft.HasBuffers())
@@ -291,6 +298,8 @@ bool StereoSplitter::Prepare(const Loader& loader, const PrepareParams& params)
 
 void StereoSplitter::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
+    TRACE_SCOPE("StereoSplitter");
+
     BufferHandle buffer;
     if (!mIn.HasBuffers())
         return;
@@ -383,6 +392,8 @@ bool Splitter::Prepare(const Loader& loader, const PrepareParams& params)
 }
 void Splitter::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
+    TRACE_SCOPE("Splitter");
+
     BufferHandle src_buffer;
     if (!mIn.PullBuffer(src_buffer))
         return;
@@ -408,6 +419,8 @@ bool Queue::Prepare(const Loader& loader, const PrepareParams& params)
 
 void Queue::Process(Allocator& allocator, EventQueue& events, unsigned int milliseconds)
 {
+    TRACE_SCOPE("Queue");
+
     BufferHandle buffer;
     if (mIn.PullBuffer(buffer))
         mQueue.push(std::move(buffer));
@@ -481,6 +494,8 @@ bool Mixer::Prepare(const Loader& loader, const PrepareParams& params)
 
 void Mixer::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
+    TRACE_SCOPE("Mixer");
+
     // The mixing here only looks at incoming buffers and combines them together
     // in chunks of whole buffers. No buffer splitting or queueing is supported.
     // This works only as long as every incoming buffer contains an equal amount
@@ -546,6 +561,8 @@ bool Delay::Prepare(const Loader& loader, const PrepareParams& params)
 }
 void Delay::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
+    TRACE_SCOPE("Delay");
+
     if (mDelay > 0u)
         return;
     BufferHandle buffer;
@@ -588,6 +605,8 @@ bool Effect::Prepare(const Loader& loader, const PrepareParams& params)
 
 void Effect::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
+    TRACE_SCOPE("Effect");
+
     BufferHandle buffer;
     if (!mIn.PullBuffer(buffer))
         return;
@@ -665,6 +684,8 @@ bool Gain::Prepare(const Loader& loader, const PrepareParams& params)
 
 void Gain::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
+    TRACE_SCOPE("Gain");
+
     BufferHandle buffer;
     if (!mIn.PullBuffer(buffer))
         return;
@@ -758,6 +779,8 @@ bool Resampler::Prepare(const Loader& loader, const PrepareParams& params)
 
 void Resampler::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
+    TRACE_SCOPE("Resampler");
+
     BufferHandle src_buffer;
     if (!mIn.PullBuffer(src_buffer))
         return;
@@ -1074,6 +1097,8 @@ bool FileSource::Prepare(const Loader& loader, const PrepareParams& params)
 
 void FileSource::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
+    TRACE_SCOPE("FileSource");
+
     if (mOpenDecoderTask.IsValid())
     {
         // wait here? maybe not... generate silence ?
@@ -1105,12 +1130,15 @@ void FileSource::Process(Allocator& allocator, EventQueue& events, unsigned mill
     void* buff = buffer->GetPtr();
 
     size_t ret = 0;
-    if (mFormat.sample_type == SampleType::Float32)
-        ret = mDecoder->ReadFrames((float*)buff, frames);
-    else if (mFormat.sample_type == SampleType::Int32)
-        ret = mDecoder->ReadFrames((int*)buff, frames);
-    else if (mFormat.sample_type == SampleType::Int16)
-        ret = mDecoder->ReadFrames((short*)buff, frames);
+    TRACE_BLOCK("Decode",
+        if (mFormat.sample_type == SampleType::Float32)
+            ret = mDecoder->ReadFrames((float*)buff, frames);
+        else if (mFormat.sample_type == SampleType::Int32)
+            ret = mDecoder->ReadFrames((int*)buff, frames);
+        else if (mFormat.sample_type == SampleType::Int16)
+            ret = mDecoder->ReadFrames((short*)buff, frames);
+        else BUG("Missing sampletype");
+    );
 
     if (mPCMBuffer && !mPCMBuffer->complete)
     {
@@ -1481,6 +1509,8 @@ void MixerSource::Advance(unsigned int ms)
 
 void MixerSource::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
+    TRACE_SCOPE("MixerSource");
+
     std::vector<BufferHandle> src_buffers;
 
     for (auto& pair : mSources)
@@ -1518,16 +1548,19 @@ void MixerSource::Process(Allocator& allocator, EventQueue& events, unsigned mil
     const float src_gain = 1.0f; // / src_buffers.size();
     const auto& format   = mFormat;
 
-    if (format.sample_type == SampleType::Int32)
-        ret = format.channel_count == 1 ? MixBuffers<int, 1>(src_buffers, src_gain)
-                                        : MixBuffers<int, 2>(src_buffers, src_gain);
-    else if (format.sample_type == SampleType::Float32)
-        ret = format.channel_count == 1 ? MixBuffers<float, 1>(src_buffers,src_gain)
-                                        : MixBuffers<float, 2>(src_buffers, src_gain);
-    else if (format.sample_type == SampleType::Int16)
-        ret = format.channel_count == 1 ? MixBuffers<short, 1>(src_buffers, src_gain)
-                                        : MixBuffers<short, 2>(src_buffers, src_gain);
-    else WARN("Audio mixer output format is unsupported. [elem=%1, format=%2]", mName, format.sample_type);
+    {
+        TRACE_SCOPE("MixBuffers");
+        if (format.sample_type == SampleType::Int32)
+            ret = format.channel_count == 1 ? MixBuffers<int, 1>(src_buffers, src_gain)
+                                            : MixBuffers<int, 2>(src_buffers, src_gain);
+        else if (format.sample_type == SampleType::Float32)
+            ret = format.channel_count == 1 ? MixBuffers<float, 1>(src_buffers,src_gain)
+                                            : MixBuffers<float, 2>(src_buffers, src_gain);
+        else if (format.sample_type == SampleType::Int16)
+            ret = format.channel_count == 1 ? MixBuffers<short, 1>(src_buffers, src_gain)
+                                            : MixBuffers<short, 2>(src_buffers, src_gain);
+        else WARN("Audio mixer output format is unsupported. [elem=%1, format=%2]", mName, format.sample_type);
+    }
     mOut.PushBuffer(ret);
 }
 
@@ -1642,6 +1675,8 @@ bool ZeroSource::Prepare(const Loader& loader, const PrepareParams& params)
 
 void ZeroSource::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
+    TRACE_SCOPE("ZeroSource");
+
     const auto frame_size = GetFrameSizeInBytes(mFormat);
     const auto frames_per_ms = mFormat.sample_rate / 1000;
     const auto frames_wanted = frames_per_ms * milliseconds;
@@ -1683,6 +1718,8 @@ bool SineSource::Prepare(const Loader& loader, const PrepareParams& params)
 
 void SineSource::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
+    TRACE_SCOPE("SineSource");
+
     if (mDuration)
     {
         ASSERT(mDuration > mMilliSecs);

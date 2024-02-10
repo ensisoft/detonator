@@ -21,6 +21,7 @@
 #include "audio/source.h"
 #include "base/assert.h"
 #include "base/logging.h"
+#include "base/trace.h"
 
 namespace audio
 {
@@ -227,50 +228,81 @@ void SourceThreadProxy::ThreadLoop()
 {
     DEBUG("Hello from audio source thread. [name='%1']", mSource->GetName());
     std::uint64_t bytes_read = 0;
+    std::unique_ptr<base::TraceLog> trace;
+
     try
     {
         for (;;)
         {
-            VectorBuffer* buffer = nullptr;
-            while (!buffer)
+            // enable disable tracing if the state has changed
+            // as indicated by the trace writer variable
             {
-                std::unique_lock<decltype(mMutex)> lock(mMutex);
-
-                if (mShutdown)
-                    return;
-
-                while (!mCommands.empty())
+                std::lock_guard<std::mutex> lock(TraceWriterMutex);
+                if (TraceWriter && !base::GetThreadTrace())
                 {
-                    std::unique_ptr<Command> cmd;
-                    cmd = std::move(mCommands.front());
-                    mCommands.pop();
-                    mSource->RecvCommand(std::move(cmd));
+                    // todo: audio thread ID if there are multiple audio source
+                    // threads
+                    trace = std::make_unique<base::TraceLog>(1000);
+                    base::SetThreadTrace(trace.get());
                 }
-
-                if (!mEmptyQueue.empty())
+                else if (!TraceWriter && base::GetThreadTrace())
                 {
-                    buffer = mEmptyQueue.front();
-                    mEmptyQueue.pop();
+                    trace.reset();
+                    base::SetThreadTrace(nullptr);
                 }
-
-                if (!buffer)
-                {
-                    mCondition.wait(lock);
-                }
+                base::EnableTracing(EnableTrace);
             }
+
+            TRACE_START();
+            TRACE_ENTER(MainLoop);
+
+            VectorBuffer* buffer = nullptr;
+            TRACE_BLOCK("GetBuffer",
+                while (!buffer)
+                {
+                    std::unique_lock<decltype(mMutex)> lock(mMutex);
+
+                    if (mShutdown)
+                    {
+                        TRACE_LEAVE(MainLoop);
+                        return;
+                    }
+
+                    while (!mCommands.empty())
+                    {
+                        std::unique_ptr<Command> cmd;
+                        cmd = std::move(mCommands.front());
+                        mCommands.pop();
+                        mSource->RecvCommand(std::move(cmd));
+                    }
+
+                    if (!mEmptyQueue.empty())
+                    {
+                        buffer = mEmptyQueue.front();
+                        mEmptyQueue.pop();
+                    }
+
+                    if (!buffer)
+                    {
+                        mCondition.wait(lock);
+                    }
+                }
+            );
+
 
             const auto buffer_size  = buffer->GetCapacity();
             const auto buffer_used  = buffer->GetByteSize();
             const auto buffer_avail = buffer_size - buffer_used;
             auto* ptr = (char*)buffer->GetPtr() + buffer_used;
 
-            const auto ret = mSource->FillBuffer(ptr, buffer_avail);
-            ASSERT(ret <= buffer_avail);
-            ASSERT(ret + buffer_used <= buffer_size);
+            TRACE_BLOCK("FillBuffer",
+                const auto ret = mSource->FillBuffer(ptr, buffer_avail);
+                ASSERT(ret <= buffer_avail);
+                ASSERT(ret + buffer_used <= buffer_size);
 
-            buffer->SetByteSize(buffer_used + ret);
-
-            bytes_read += ret;
+                buffer->SetByteSize(buffer_used + ret);
+                bytes_read += ret;
+            );
 
             const bool has_more = mSource->HasMore(bytes_read);
             if (!has_more)
@@ -294,6 +326,18 @@ void SourceThreadProxy::ThreadLoop()
                     break;
                 }
             }
+            TRACE_LEAVE(MainLoop);
+
+            // take a mutex on the trace writer to make sure that it will
+            // not be deleted from underneath us while we're dumping
+            // this thread's trace log to the writer.
+            {
+                std::lock_guard<std::mutex> lock(TraceWriterMutex);
+                if (TraceWriter && trace)
+                {
+                    trace->Write(*TraceWriter);
+                }
+            }
         }
         DEBUG("Audio source thread exit. [name='%1']", mSource->GetName());
     }
@@ -305,5 +349,12 @@ void SourceThreadProxy::ThreadLoop()
         mCondition.notify_one();
     }
 } // ThreadLoop
+
+// static
+base::TraceWriter* SourceThreadProxy::TraceWriter;
+// static
+std::mutex SourceThreadProxy::TraceWriterMutex;
+// static
+bool SourceThreadProxy::EnableTrace = false;
 
 } // nameespace
