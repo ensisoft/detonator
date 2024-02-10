@@ -787,8 +787,7 @@ int main(int argc, char* argv[])
         params.surface_width    = window.GetSurfaceWidth();
         params.surface_height   = window.GetSurfaceHeight();
         base::JsonReadSafe(json["application"], "game_script", &params.game_script);
-        engine->Init(params);
-        engine->SetEngineConfig(config);
+        engine->Init(params, config);
         engine->SetTracer(trace_logger.get(), trace_writer.get());
 
         // do pre-load / splash screen content load

@@ -68,6 +68,8 @@ void AudioEngine::Start()
 
     auto device = audio::Device::Create(mName.c_str(), &mFormat);
     device->SetBufferSize(mBufferSize);
+    DEBUG("Created audio device '%1'. [format=%2, buffer=%3ms]", device->GetBackend(), mFormat, mBufferSize);
+
     mPlayer = std::make_unique<audio::Player>(std::move(device));
 
 #if defined(GAMESTUDIO_MULTIPLE_AUDIO_STREAMS)

@@ -1153,17 +1153,7 @@ void PlayWindow::InitGame(bool clean_game_home)
         env.game_home          = app::ToUtf8(QDir::toNativeSeparators(game_home));
         mEngine->SetEnvironment(env);
 
-        engine::Engine::InitParams params;
-        params.editing_mode     = true; // allow changes to "static" content take place.
-        params.preview_mode     = false;
-        params.game_script      = app::ToUtf8(settings.game_script);
-        params.application_name = app::ToUtf8(settings.application_name);
-        params.context          = mWindowContext.get();
-        params.surface_width    = mSurface->width();
-        params.surface_height   = mSurface->height();
-        mEngine->Init(params);
-
-        SetEngineConfig();
+        InitializeEngine(false);
 
         {
             engine::Engine::LoadingScreenSettings loading_screen_settings;
@@ -1257,17 +1247,7 @@ void PlayWindow::InitPreview(const QString& script)
         // env.game_home          = ...
         mEngine->SetEnvironment(env);
 
-        engine::Engine::InitParams params;
-        params.editing_mode     = true; // allow changes to "static" content take place.
-        params.preview_mode     = true; // yes, we're doing preview now!
-        params.game_script      = app::ToUtf8(script);
-        params.application_name = app::ToUtf8(settings.application_name);
-        params.context          = mWindowContext.get();
-        params.surface_width    = mSurface->width();
-        params.surface_height   = mSurface->height();
-        mEngine->Init(params);
-
-        SetEngineConfig();
+        InitializeEngine(true);
 
         if (!mEngine->Load())
         {
@@ -1708,40 +1688,6 @@ void PlayWindow::SetDebugOptions() const
     mGameLibSetGlobalLogger(mLogger.get(), log_debug, log_warn, log_info, log_error);
 }
 
-void PlayWindow::SetEngineConfig() const
-{
-    const auto& settings = mWorkspace.GetProjectSettings();
-
-    engine::Engine::EngineConfig config;
-    config.ticks_per_second                = settings.ticks_per_second;
-    config.updates_per_second              = settings.updates_per_second;
-    config.physics.enabled                 = settings.enable_physics;
-    config.physics.num_velocity_iterations = settings.num_velocity_iterations;
-    config.physics.num_position_iterations = settings.num_position_iterations;
-    config.physics.gravity                 = settings.physics_gravity;
-    config.physics.scale                   = settings.physics_scale;
-    config.default_mag_filter              = settings.default_mag_filter;
-    config.default_min_filter              = settings.default_min_filter;
-    config.clear_color                     = ToGfx(settings.clear_color);
-    config.mouse_cursor.show               = settings.mouse_pointer_visible;
-    config.mouse_cursor.material           = app::ToUtf8(settings.mouse_pointer_material);
-    config.mouse_cursor.drawable           = app::ToUtf8(settings.mouse_pointer_drawable);
-    config.mouse_cursor.hotspot            = settings.mouse_pointer_hotspot;
-    config.mouse_cursor.size               = settings.mouse_pointer_size;
-    config.audio.sample_type               = settings.audio_sample_type;
-    config.audio.sample_rate               = settings.audio_sample_rate;
-    config.audio.buffer_size               = settings.audio_buffer_size;
-    config.audio.channels                  = settings.audio_channels;
-    config.audio.enable_pcm_caching        = settings.enable_audio_pcm_caching;
-    if (settings.mouse_pointer_units == app::Workspace::ProjectSettings::MousePointerUnits::Pixels)
-        config.mouse_cursor.units = engine::Engine::EngineConfig::MouseCursorUnits::Pixels;
-    else if (settings.mouse_pointer_units == app::Workspace::ProjectSettings::MousePointerUnits::Units)
-        config.mouse_cursor.units = engine::Engine::EngineConfig::MouseCursorUnits::Units;
-    else BUG("Unhandled mouse cursor/pointer units.");
-
-    mEngine->SetEngineConfig(config);
-}
-
 void PlayWindow::Barf(const std::string& msg)
 {
     mEngine.reset();
@@ -1826,6 +1772,49 @@ void PlayWindow::ToggleTracing(bool enable)
         mEngine->SetTracer(nullptr, nullptr);
         mEngine->SetTracingOn(false);
     }
+}
+
+void PlayWindow::InitializeEngine(bool preview)
+{
+    const auto& settings = mWorkspace.GetProjectSettings();
+
+    engine::Engine::InitParams params;
+    params.editing_mode     = true; // allow changes to "static" content take place.
+    params.preview_mode     = preview;
+    params.game_script      = app::ToUtf8(settings.game_script);
+    params.application_name = app::ToUtf8(settings.application_name);
+    params.context          = mWindowContext.get();
+    params.surface_width    = mSurface->width();
+    params.surface_height   = mSurface->height();
+
+    engine::Engine::EngineConfig config;
+    config.ticks_per_second                = settings.ticks_per_second;
+    config.updates_per_second              = settings.updates_per_second;
+    config.physics.enabled                 = settings.enable_physics;
+    config.physics.num_velocity_iterations = settings.num_velocity_iterations;
+    config.physics.num_position_iterations = settings.num_position_iterations;
+    config.physics.gravity                 = settings.physics_gravity;
+    config.physics.scale                   = settings.physics_scale;
+    config.default_mag_filter              = settings.default_mag_filter;
+    config.default_min_filter              = settings.default_min_filter;
+    config.clear_color                     = ToGfx(settings.clear_color);
+    config.mouse_cursor.show               = settings.mouse_pointer_visible;
+    config.mouse_cursor.material           = app::ToUtf8(settings.mouse_pointer_material);
+    config.mouse_cursor.drawable           = app::ToUtf8(settings.mouse_pointer_drawable);
+    config.mouse_cursor.hotspot            = settings.mouse_pointer_hotspot;
+    config.mouse_cursor.size               = settings.mouse_pointer_size;
+    config.audio.sample_type               = settings.audio_sample_type;
+    config.audio.sample_rate               = settings.audio_sample_rate;
+    config.audio.buffer_size               = settings.audio_buffer_size;
+    config.audio.channels                  = settings.audio_channels;
+    config.audio.enable_pcm_caching        = settings.enable_audio_pcm_caching;
+    if (settings.mouse_pointer_units == app::Workspace::ProjectSettings::MousePointerUnits::Pixels)
+        config.mouse_cursor.units = engine::Engine::EngineConfig::MouseCursorUnits::Pixels;
+    else if (settings.mouse_pointer_units == app::Workspace::ProjectSettings::MousePointerUnits::Units)
+        config.mouse_cursor.units = engine::Engine::EngineConfig::MouseCursorUnits::Units;
+    else BUG("Unhandled mouse cursor/pointer units.");
+
+    mEngine->Init(params, config);
 }
 
 } // namespace

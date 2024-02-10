@@ -78,16 +78,26 @@ public:
     virtual bool GetNextRequest(Request* out) override
     { return mRequests.GetNext(out); }
 
-    virtual void Init(const InitParams& init) override
+    virtual void Init(const InitParams& init, const EngineConfig& conf) override
     {
-        DEBUG("Engine initializing. [surface=%1x%2]", init.surface_width, init.surface_height);
+        DEBUG("Engine initializing.");
+        audio::Format audio_format;
+        audio_format.channel_count = static_cast<unsigned>(conf.audio.channels); // todo: use enum
+        audio_format.sample_rate   = conf.audio.sample_rate;
+        audio_format.sample_type   = conf.audio.sample_type;
+
         mAudio = std::make_unique<engine::AudioEngine>(init.application_name);
         mAudio->SetClassLibrary(mClasslib);
         mAudio->SetLoader(mAudioLoader);
+        mAudio->SetFormat(audio_format);
+        mAudio->SetBufferSize(conf.audio.buffer_size);
+        mAudio->EnableCaching(conf.audio.enable_pcm_caching);
         mAudio->Start();
+
         mDevice  = dev::CreateDevice(init.context)->GetSharedGraphicsDevice();
-        mSurfaceWidth  = init.surface_width;
-        mSurfaceHeight = init.surface_height;
+        mDevice->SetDefaultTextureFilter(conf.default_min_filter);
+        mDevice->SetDefaultTextureFilter(conf.default_mag_filter);
+
         mRuntime = std::make_unique<engine::LuaRuntime>("lua", init.game_script, mGameHome, init.application_name);
         mRuntime->SetClassLibrary(mClasslib);
         mRuntime->SetPhysicsEngine(&mPhysics);
@@ -97,6 +107,7 @@ public:
         mRuntime->SetEditingMode(init.editing_mode);
         mRuntime->SetPreviewMode(init.preview_mode);
         mRuntime->Init();
+
         mRuntime->SetSurfaceSize(init.surface_width, init.surface_height);
         mUIEngine.SetClassLibrary(mClasslib);
         mUIEngine.SetLoader(mEngineDataLoader);
@@ -106,7 +117,14 @@ public:
         mRenderer.SetEditingMode(init.editing_mode);
         mRenderer.SetName("Engine");
         mRenderer.EnableEffect(engine::Renderer::Effects::Bloom, true);
+
         mPhysics.SetClassLibrary(mClasslib);
+        mPhysics.SetScale(conf.physics.scale);
+        mPhysics.SetGravity(conf.physics.gravity);
+        mPhysics.SetNumPositionIterations(conf.physics.num_position_iterations);
+        mPhysics.SetNumVelocityIterations(conf.physics.num_velocity_iterations);
+        mPhysics.SetTimestep(1.0f / conf.updates_per_second);
+
         mFlags.set(Flags::EditingMode,     init.editing_mode);
         mFlags.set(Flags::Running,         true);
         mFlags.set(Flags::Fullscreen,      false);
@@ -116,6 +134,40 @@ public:
         mFlags.set(Flags::ShowDebugs,      true);
         mFlags.set(Flags::EnableBloom,     true);
         mFlags.set(Flags::EnablePhysics,   true);
+        mFlags.set(Flags::ShowMouseCursor, conf.mouse_cursor.show);
+        mFlags.set(Flags::EnablePhysics, conf.physics.enabled);
+
+        auto mouse_drawable = mClasslib->FindDrawableClassById(conf.mouse_cursor.drawable);
+        DEBUG("Mouse material='%1',drawable='%2'", conf.mouse_cursor.material, conf.mouse_cursor.drawable);
+        if (!mouse_drawable)
+        {
+            WARN("No such mouse cursor drawable found. [drawable='%1']", conf.mouse_cursor.drawable);
+            mouse_drawable = std::make_shared<gfx::ArrowCursorClass>();
+            mCursorSize    = glm::vec2(20.0f, 20.0f);
+            mCursorHotspot = glm::vec2(0.0f, 0.0f);
+        }
+        else
+        {
+            mCursorSize    = conf.mouse_cursor.size;
+            mCursorHotspot = conf.mouse_cursor.hotspot;
+        }
+        auto mouse_material = mClasslib->FindMaterialClassById(conf.mouse_cursor.material);
+        if (!mouse_material)
+        {
+            WARN("No such mouse cursor material found. [material='%1']", conf.mouse_cursor.material);
+            auto material = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color);
+            material->SetBaseColor(gfx::Color::HotPink);
+        }
+        mMouseDrawable = gfx::CreateDrawableInstance(mouse_drawable);
+        mMouseMaterial = gfx::CreateMaterialInstance(mouse_material);
+
+        mClearColor = conf.clear_color;
+        mGameTimeStep = 1.0f / conf.updates_per_second;
+        mGameTickStep = 1.0f / conf.ticks_per_second;
+        mSurfaceWidth  = init.surface_width;
+        mSurfaceHeight = init.surface_height;
+        mCursorUnits   = conf.mouse_cursor.units;
+        DEBUG("Graphics surface %1x%2]", init.surface_width, init.surface_height);
     }
 
     struct LoadingScreen : public Engine::LoadingScreen {
@@ -330,56 +382,6 @@ public:
         DEBUG("Game install directory: '%1'.", env.directory);
         DEBUG("Game home: '%1'.", env.game_home);
         DEBUG("User home: '%1'.", env.user_home);
-    }
-    virtual void SetEngineConfig(const EngineConfig& conf) override
-    {
-        audio::Format audio_format;
-        audio_format.channel_count = static_cast<unsigned>(conf.audio.channels); // todo: use enum
-        audio_format.sample_rate   = conf.audio.sample_rate;
-        audio_format.sample_type   = conf.audio.sample_type;
-        mAudio->SetFormat(audio_format);
-        mAudio->SetBufferSize(conf.audio.buffer_size);
-        mAudio->EnableCaching(conf.audio.enable_pcm_caching);
-        DEBUG("Configure audio engine. [format=%1 buff_size=%2ms]", audio_format, conf.audio.buffer_size);
-
-        mPhysics.SetScale(conf.physics.scale);
-        mPhysics.SetGravity(conf.physics.gravity);
-        mPhysics.SetNumPositionIterations(conf.physics.num_position_iterations);
-        mPhysics.SetNumVelocityIterations(conf.physics.num_velocity_iterations);
-        mPhysics.SetTimestep(1.0f / conf.updates_per_second);
-        mDevice->SetDefaultTextureFilter(conf.default_min_filter);
-        mDevice->SetDefaultTextureFilter(conf.default_mag_filter);
-        mClearColor = conf.clear_color;
-        mGameTimeStep = 1.0f / conf.updates_per_second;
-        mGameTickStep = 1.0f / conf.ticks_per_second;
-
-        auto mouse_drawable = mClasslib->FindDrawableClassById(conf.mouse_cursor.drawable);
-        DEBUG("Mouse material='%1',drawable='%2'", conf.mouse_cursor.material, conf.mouse_cursor.drawable);
-        if (!mouse_drawable)
-        {
-            WARN("No such mouse cursor drawable found. [drawable='%1']", conf.mouse_cursor.drawable);
-            mouse_drawable = std::make_shared<gfx::ArrowCursorClass>();
-            mCursorSize    = glm::vec2(20.0f, 20.0f);
-            mCursorHotspot = glm::vec2(0.0f, 0.0f);
-        }
-        else
-        {
-            mCursorSize    = conf.mouse_cursor.size;
-            mCursorHotspot = conf.mouse_cursor.hotspot;
-        }
-        auto mouse_material = mClasslib->FindMaterialClassById(conf.mouse_cursor.material);
-        if (!mouse_material)
-        {
-            WARN("No such mouse cursor material found. [material='%1']", conf.mouse_cursor.material);
-            auto material = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color);
-            material->SetBaseColor(gfx::Color::HotPink);
-        }
-        mMouseDrawable = gfx::CreateDrawableInstance(mouse_drawable);
-        mMouseMaterial = gfx::CreateMaterialInstance(mouse_material);
-        mCursorUnits   = conf.mouse_cursor.units;
-
-        mFlags.set(Flags::ShowMouseCursor, conf.mouse_cursor.show);
-        mFlags.set(Flags::EnablePhysics, conf.physics.enabled);
     }
 
     virtual void Draw() override
