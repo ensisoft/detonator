@@ -1806,13 +1806,15 @@ bool PlayWindow::LoadLibrary()
 
 void PlayWindow::ToggleTracing(bool enable)
 {
-     if (enable && !mTraceWriter)
+    if (enable && !mTraceWriter)
     {
-        mTraceWriter.reset(new base::ChromiumTraceJsonWriter("trace.json"));
+        using TraceWriter = base::LockedTraceWriter<base::ChromiumTraceJsonWriter>;
+
+        mTraceWriter.reset(new TraceWriter((base::ChromiumTraceJsonWriter("trace.json"))));
         mTraceLogger.reset(new base::TraceLog(1000));
         base::SetThreadTrace(mTraceLogger.get());
         base::EnableTracing(true);
-        mEngine->SetTracer(mTraceLogger.get());
+        mEngine->SetTracer(mTraceLogger.get(), mTraceWriter.get());
         mEngine->SetTracingOn(true);
     }
     else if (!enable && mTraceWriter)
@@ -1821,7 +1823,7 @@ void PlayWindow::ToggleTracing(bool enable)
         mTraceLogger.reset();
         base::SetThreadTrace(nullptr);
         base::EnableTracing(false);
-        mEngine->SetTracer(nullptr);
+        mEngine->SetTracer(nullptr, nullptr);
         mEngine->SetTracingOn(false);
     }
 }

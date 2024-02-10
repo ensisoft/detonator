@@ -128,6 +128,9 @@ namespace engine
         // Tick the audio engine/player and optionally receive a list of
         // audio events that have happened.
         void Update(AudioEventQueue* events = nullptr);
+
+        void SetAudioThreadTraceWriter(base::TraceWriter* writer);
+        void EnableAudioThreadTrace(bool on_off);
     private:
         void OnAudioPlayerEvent(const audio::Player::SourceCompleteEvent& event, AudioEventQueue* events);
         void OnAudioPlayerEvent(const audio::Player::SourceEvent& event, AudioEventQueue* events);
