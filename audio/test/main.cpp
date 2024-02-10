@@ -39,6 +39,7 @@ int main(int argc, char* argv[])
 
     std::string file;
     unsigned loops = 1;
+    unsigned buffer_size_ms = 10;
     bool mp3_files = false;
     bool ogg_files = false;
     bool flac_files = false;
@@ -76,6 +77,8 @@ int main(int argc, char* argv[])
             file = argv[++i];
         else if (!std::strcmp(argv[i], "--thread"))
             source_thread = true;
+        else if (!std::strcmp(argv[i], "--ms"))
+            buffer_size_ms = std::stoul(std::string(argv[++i]));
     }
 
     if (!(flac_files || ogg_files || mp3_files || pcm_8bit_files || pcm_16bit_files || pcm_24bit_files || test_sine || test_graph) && file.empty())
@@ -94,7 +97,8 @@ int main(int argc, char* argv[])
             "\t--loops\t\tNumber of loops to use to play each file.\n"
             "\t--int16\t\tUse 16bit integers for audio format.\n"
             "\t--int32\t\tUse 32bit integers for audio format.\n"
-            "\t--file\t\tA specific test file to add.\n");
+            "\t--file\t\tA specific test file to add.\n"
+            "\t--ms\t\tBuffer size in milliseconds. Default = 10ms\n");
         std::printf("Have a good day.\n");
         return 0;
     }
@@ -109,7 +113,7 @@ int main(int argc, char* argv[])
     INFO("https://github.com/ensisoft/detonator");
 
     auto device = audio::Device::Create("audio_test");
-    device->SetBufferSize(10); // milliseconds
+    device->SetBufferSize(buffer_size_ms); // milliseconds
     INFO("Using audio backend '%1'.", device->GetBackend());
 
     audio::Player player(std::move(device));
