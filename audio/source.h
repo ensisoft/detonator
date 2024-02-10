@@ -18,6 +18,7 @@
 
 #include "config.h"
 
+#include <atomic>
 #include <string>
 #include <vector>
 #include <memory>
@@ -33,6 +34,7 @@
 #endif
 
 #include "base/assert.h"
+#include "base/trace.h"
 #include "audio/command.h"
 #include "audio/buffer.h"
 #include "audio/format.h"
@@ -131,6 +133,17 @@ namespace audio
 
         unsigned WaitBuffer(void* device_buff, unsigned device_buff_size);
 
+        static void SetThreadTraceWriter(base::TraceWriter* writer)
+        {
+            std::lock_guard<std::mutex> lock(TraceWriterMutex);
+            TraceWriter = writer;
+        }
+        static void EnableThreadTrace(bool enable)
+        {
+            std::lock_guard<std::mutex> lock(TraceWriterMutex);
+            EnableTrace = enable;
+        }
+
     private:
         unsigned FillBuffer(void* device_buff, unsigned device_buff_size, bool wait_buffer);
         unsigned CopyBuffer(VectorBuffer* source, void* device_buff, unsigned device_buff_size);
@@ -149,6 +162,10 @@ namespace audio
         bool mShutdown = false;
         bool mSourceDone = false;
         bool mFirstBuffer = true;
+
+        static std::mutex TraceWriterMutex;
+        static base::TraceWriter* TraceWriter;
+        static bool EnableTrace;
     };
 
     // AudioFile implements reading audio samples from an

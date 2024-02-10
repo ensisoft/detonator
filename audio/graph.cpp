@@ -23,6 +23,7 @@
 #include "base/format.h"
 #include "base/logging.h"
 #include "base/hash.h"
+#include "base/trace.h"
 #include "data/writer.h"
 #include "data/reader.h"
 #include "audio/graph.h"
@@ -657,6 +658,8 @@ bool Graph::Prepare(const Loader& loader, const PrepareParams& params)
 
 void Graph::Process(Allocator& allocator, EventQueue& events, unsigned milliseconds)
 {
+    TRACE_SCOPE("Graph");
+
     // Evaluate the elements in topological order and then
     // dispatch the buffers according to the element/port links.
     for (auto& source : mTopoOrder)
@@ -689,7 +692,7 @@ void Graph::Process(Allocator& allocator, EventQueue& events, unsigned milliseco
         }
 
         // process the audio buffers.
-        source->Process(allocator, events, milliseconds);
+        TRACE_CALL("Element::Process", source->Process(allocator, events, milliseconds));
 
         // dispatch the resulting buffers by iterating over the output
         // ports and finding their assigned input ports.
@@ -852,6 +855,7 @@ unsigned AudioGraph::FillBuffer(void* buff, unsigned max_bytes)
 
     if (mPendingBuffer)
     {
+        TRACE_SCOPE("PendingBuffer");
         const auto pending = mPendingBuffer->GetByteSize() - mPendingOffset;
         const auto min_bytes = std::min(pending, (size_t)max_bytes);
         const auto* ptr = static_cast<const uint8_t*>(mPendingBuffer->GetPtr());
@@ -874,6 +878,7 @@ unsigned AudioGraph::FillBuffer(void* buff, unsigned max_bytes)
         }
         virtual BufferHandle Allocate(size_t bytes) override
         {
+            TRACE_SCOPE("AllocateBuffer");
             if (mDeviceBuffer && mDeviceBuffer->GetCapacity() >= bytes)
             {
                 auto ret  = mDeviceBuffer;
@@ -887,8 +892,8 @@ unsigned AudioGraph::FillBuffer(void* buff, unsigned max_bytes)
         BufferHandle mDeviceBuffer;
     } allocator(buff, max_bytes);
 
-    mGraph.Process(allocator, mEvents, milliseconds);
-    mGraph.Advance(milliseconds);
+    TRACE_CALL("Graph::Process", mGraph.Process(allocator, mEvents, milliseconds));
+    TRACE_CALL("Graph::Advance", mGraph.Advance(milliseconds));
     mMillisecs += milliseconds;
 
     BufferHandle buffer;
