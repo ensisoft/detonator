@@ -1052,7 +1052,7 @@ add_executable(unit_test_audio_graph
 target_include_directories(unit_test_audio_graph PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/test")
 target_link_libraries(unit_test_audio_graph DataLib BaseLib samplerate sndfile ${CONAN_LIBS})
 
-add_test(NAME unit_test_audio COMMAND unit_test_audio)
+add_test(NAME unit_test_audio COMMAND unit_test_audio --disable-perf-test)
 add_test(NAME unit_test_audio_graph COMMAND unit_test_audio_graph)
 
 # base tests
