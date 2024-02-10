@@ -767,6 +767,11 @@ public:
             mTraceLogger.reset(new base::TraceLog(1000, base::TraceLog::MainThread));
             base::SetThreadTrace(mTraceLogger.get());
             base::EnableTracing(true);
+            // even though we don't have a engine library separately we
+            // have to make these calls here in order to propagate the state
+            // changes through the engine to the audio thread(s) etc.
+            mEngine->SetTracer(mTraceLogger.get(), mTraceWriter.get());
+            mEngine->SetTracingOn(true);
         }
         else if (!mTraceEnabledCounter && mTraceWriter)
         {
@@ -774,6 +779,11 @@ public:
             mTraceLogger.reset();
             base::SetThreadTrace(nullptr);
             base::EnableTracing(false);
+            // even though we don't have a engine library separately we
+            // have to make these calls here in order to propagate the state
+            // changes through the engine to the audio thread(s) etc.
+            mEngine->SetTracer(nullptr, nullptr);
+            mEngine->SetTracingOn(false);
         }
     }
 
