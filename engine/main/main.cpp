@@ -554,8 +554,15 @@ int main(int argc, char* argv[])
         if (opt.WasGiven("--trace-file"))
         {
             if (base::EndsWith(trace_file, ".json"))
-                trace_writer.reset(new base::ChromiumTraceJsonWriter(trace_file));
-            else trace_writer.reset(new base::TextFileTraceWriter(trace_file));
+            {
+                using TraceWriter = base::LockedTraceWriter<base::ChromiumTraceJsonWriter>;
+                trace_writer.reset(new TraceWriter((base::ChromiumTraceJsonWriter(trace_file))));
+            }
+            else
+            {
+                using TraceWriter = base::LockedTraceWriter<base::TextFileTraceWriter>;
+                trace_writer.reset(new TraceWriter((base::TextFileTraceWriter(trace_file))));
+            }
             trace_logger.reset(new base::TraceLog(1000));
 
             if (opt.WasGiven("--trace-start"))
@@ -782,7 +789,7 @@ int main(int argc, char* argv[])
         base::JsonReadSafe(json["application"], "game_script", &params.game_script);
         engine->Init(params);
         engine->SetEngineConfig(config);
-        engine->SetTracer(trace_logger.get());
+        engine->SetTracer(trace_logger.get(), trace_writer.get());
 
         // do pre-load / splash screen content load
         {
@@ -1012,7 +1019,7 @@ int main(int argc, char* argv[])
 
         } // main loop
 
-        engine->SetTracer(nullptr);
+        engine->SetTracer(nullptr, nullptr);
 
         engine->Stop();
         engine->Save();

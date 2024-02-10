@@ -177,7 +177,7 @@ namespace engine
         virtual void DebugPrintString(const std::string& str)
         {}
 
-        virtual void SetTracer(base::Trace* tracer)
+        virtual void SetTracer(base::Trace* tracer, base::TraceWriter* writer)
         {}
         virtual void SetTracingOn(bool on_off)
         {}

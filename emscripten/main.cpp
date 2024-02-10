@@ -398,7 +398,7 @@ public:
         }
         mEngine->SetEngineConfig(config);
         // doesn't exist here.
-        mEngine->SetTracer(nullptr);
+        mEngine->SetTracer(nullptr, nullptr);
 
 
         // We're no longer doing this here because the loading screen must
@@ -718,7 +718,7 @@ public:
             SetFullScreen(false);
 
         DEBUG("Starting shutdown sequence.");
-        mEngine->SetTracer(nullptr);
+        mEngine->SetTracer(nullptr, nullptr);
         mEngine->Stop();
         mEngine->Save();
         mEngine->Shutdown();
@@ -761,7 +761,9 @@ public:
 
         if (mTraceEnabledCounter && !mTraceWriter)
         {
-            mTraceWriter.reset(new base::ChromiumTraceJsonWriter("/trace.json"));
+            using TraceWriter = base::LockedTraceWriter<base::ChromiumTraceJsonWriter>;
+
+            mTraceWriter.reset(new TraceWriter((base::ChromiumTraceJsonWriter("/trace.json"))));
             mTraceLogger.reset(new base::TraceLog(1000));
             base::SetThreadTrace(mTraceLogger.get());
             base::EnableTracing(true);

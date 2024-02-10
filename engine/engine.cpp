@@ -301,13 +301,19 @@ public:
         print.message = message;
         mDebugPrints.push_back(std::move(print));
     }
-    virtual void SetTracer(base::Trace* tracer) override
+    virtual void SetTracer(base::Trace* tracer, base::TraceWriter* writer) override
     {
         base::SetThreadTrace(tracer);
+
+        if (mAudio)
+            mAudio->SetAudioThreadTraceWriter(writer);
     }
     virtual void SetTracingOn(bool on_off) override
     {
         base::EnableTracing(on_off);
+
+        if (mAudio)
+            mAudio->EnableAudioThreadTrace(on_off);
     }
 
     virtual void SetEnvironment(const Environment& env) override

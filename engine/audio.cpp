@@ -375,4 +375,26 @@ void AudioEngine::OnAudioPlayerEvent(const audio::Player::SourceEvent& event, Au
     }
 }
 
+void AudioEngine::SetAudioThreadTraceWriter(base::TraceWriter* writer)
+{
+#if defined(GAMESTUDIO_ENABLE_AUDIO)
+  #if defined(AUDIO_USE_PLAYER_THREAD)
+       // todo: enable tracing in the audio player thread
+  #else
+      audio::SourceThreadProxy::SetThreadTraceWriter(writer);
+  #endif
+#endif
+}
+
+void AudioEngine::EnableAudioThreadTrace(bool on_off)
+{
+#if defined(GAMESTUDIO_ENABLE_AUDIO)
+  #if defined(AUDIO_USE_PLAYER_THREAD)
+      // todo
+  #else
+      audio::SourceThreadProxy::EnableThreadTrace(on_off);
+  #endif
+#endif
+}
+
 } // namespace
