@@ -16,16 +16,24 @@
 
 #include "config.h"
 
+#include <atomic>
+
 #include "base/assert.h"
 #include "base/trace.h"
 
 namespace {
 static thread_local base::Trace* thread_tracer = nullptr;
 static thread_local bool enable_tracing = false;
+static thread_local size_t this_thread_id = 0;
 } // namespace
 
 namespace base
 {
+
+Trace* GetThreadTrace()
+{
+    return thread_tracer;
+}
 
 void SetThreadTrace(Trace* trace)
 {
@@ -83,7 +91,11 @@ TextFileTraceWriter::TextFileTraceWriter(const std::string& file)
 }
 TextFileTraceWriter::~TextFileTraceWriter() noexcept
 {
-    std::fclose(mFile);
+    // could be moved.
+    if (mFile)
+    {
+        std::fclose(mFile);
+    }
 }
 
 void TextFileTraceWriter::Write(const TraceEntry& entry)
@@ -112,15 +124,20 @@ ChromiumTraceJsonWriter::ChromiumTraceJsonWriter(const std::string& file)
 
 ChromiumTraceJsonWriter::~ChromiumTraceJsonWriter() noexcept
 {
-    std::fprintf(mFile, "] }\n");
-    std::fflush(mFile);
-    std::fclose(mFile);
+    // could be moved
+    if (mFile)
+    {
+        std::fprintf(mFile, "] }\n");
+        std::fflush(mFile);
+        std::fclose(mFile);
+    }
 }
 
 void ChromiumTraceJsonWriter::Write(const TraceEntry& entry)
 {
     const auto duration = entry.finish_time - entry.start_time;
     const auto start    = entry.start_time;
+    const auto threadId = entry.tid;
 
     std::string markers;
     for (const auto& m : entry.markers)
@@ -132,10 +149,13 @@ void ChromiumTraceJsonWriter::Write(const TraceEntry& entry)
         markers.pop_back();
 
 constexpr static auto* JsonString =
-  R"(%c { "pid":0, "tid":0, "ph":"X", "ts":%u, "dur":%u, "name":"%s", "args": { "markers": "%s", "comment": "%s" } }
+  R"(%c { "pid":0, "tid":%u, "ph":"X", "ts":%u, "dur":%u, "name":"%s", "args": { "markers": "%s", "comment": "%s" } }
 )";
 
-    std::fprintf(mFile, JsonString, mCommaNeeded ? ',' : ' ', start, duration,
+    std::fprintf(mFile, JsonString, mCommaNeeded ? ',' : ' ',
+                 (unsigned)threadId,
+                 (unsigned)start,
+                 (unsigned)duration,
                  entry.name, markers.c_str(), entry.comment.c_str());
 
     mCommaNeeded = true;
@@ -143,6 +163,17 @@ constexpr static auto* JsonString =
 void ChromiumTraceJsonWriter::Flush()
 {
     std::fflush(mFile);
+}
+
+// static
+size_t TraceLog::GetThreadId() noexcept
+{
+    if (this_thread_id == 0)
+    {
+        static std::atomic<size_t> ThreadCounter = 1;
+        this_thread_id = ThreadCounter++;
+    }
+    return this_thread_id;
 }
 
 } // namespace

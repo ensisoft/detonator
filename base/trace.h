@@ -23,6 +23,7 @@
 #include <chrono>
 #include <cstdio>
 #include <exception>
+#include <mutex>
 
 #include "base/platform.h"
 #include "base/assert.h"
@@ -34,6 +35,7 @@ namespace base
         unsigned start_time  = 0;
         unsigned finish_time = 0;
         unsigned level       = 0;
+        unsigned tid         = 0;
         std::vector<std::string> markers;
         std::string comment;
     };
@@ -65,10 +67,11 @@ namespace base
     class TraceLog : public Trace
     {
     public:
-        TraceLog(size_t capacity)
+        explicit TraceLog(size_t capacity, size_t threadId = GetThreadId()) noexcept
         {
             mCallTrace.resize(capacity);
             mStartTime  = std::chrono::high_resolution_clock::now();
+            mThreadId   = threadId;
         }
         virtual void Start() override
         {
@@ -85,6 +88,7 @@ namespace base
             ASSERT(mTraceIndex < mCallTrace.size());
             TraceEntry entry;
             entry.name        = name;
+            entry.tid         = mThreadId;
             entry.level       = mStackDepth++;
             entry.start_time  = GetTime();
             entry.finish_time = 0;
@@ -132,6 +136,8 @@ namespace base
         { return mTraceIndex; }
         inline const TraceEntry& GetEntry(size_t index) const noexcept
         { return mCallTrace[index]; }
+
+        static size_t GetThreadId() noexcept;
     private:
         unsigned GetTime() const
         {
@@ -144,6 +150,7 @@ namespace base
         std::vector<TraceEntry> mCallTrace;
         std::size_t mTraceIndex = 0;
         std::size_t mStackDepth = 0;
+        std::size_t mThreadId   = 0;
         std::chrono::high_resolution_clock::time_point mStartTime;
     };
 
@@ -151,8 +158,13 @@ namespace base
     {
     public:
         TextFileTraceWriter(const std::string& file);
+        TextFileTraceWriter(TextFileTraceWriter&& other)
+          : mFile(other.mFile)
+        {
+            other.mFile = nullptr;
+        }
        ~TextFileTraceWriter() noexcept;
-        TextFileTraceWriter() = default;
+        TextFileTraceWriter() = delete;
         virtual void Write(const TraceEntry& entry) override;
         virtual void Flush() override;
         TextFileTraceWriter& operator=(const TextFileTraceWriter&) = delete;
@@ -164,6 +176,12 @@ namespace base
     {
     public:
         ChromiumTraceJsonWriter(const std::string& file);
+        ChromiumTraceJsonWriter(ChromiumTraceJsonWriter&& other)
+          : mFile(other.mFile)
+        {
+            other.mFile = nullptr;
+        }
+        ChromiumTraceJsonWriter(const ChromiumTraceJsonWriter&) = delete;
        ~ChromiumTraceJsonWriter() noexcept;
         ChromiumTraceJsonWriter();
         virtual void Write(const TraceEntry& entry) override;
@@ -174,6 +192,29 @@ namespace base
         bool mCommaNeeded = false;
     };
 
+    template<typename WrappedWriter>
+    class LockedTraceWriter : public TraceWriter
+    {
+    public:
+        explicit LockedTraceWriter(WrappedWriter&& writer) noexcept
+           : mWriter(std::move(writer))
+        {}
+        virtual void Write(const TraceEntry& entry) override
+        {
+            std::lock_guard<std::mutex> lock(mMutex);
+            mWriter.Write(entry);
+        }
+        virtual void Flush() override
+        {
+            std::lock_guard<std::mutex> lock(mMutex);
+            mWriter.Flush();
+        }
+    private:
+        std::mutex mMutex;
+        WrappedWriter mWriter;
+    };
+
+    Trace* GetThreadTrace();
     void SetThreadTrace(Trace* trace);
     void TraceStart();
     void TraceWrite(TraceWriter& writer);
