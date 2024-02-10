@@ -216,6 +216,8 @@ public:
         INFO("Copyright (c) 2010-2023 Sami Väisänen");
         INFO("http://www.ensisoft.com");
         INFO("https://github.com/ensisoft/detonator");
+        INFO("DEBUG log is %1", global_log_debug ? "ON" : "OFF");
+        INFO("If you can't see  the DEBUG logs check the console log levels!");
 
 #if defined(AUDIO_LOCK_FREE_QUEUE)
         INFO("AUDIO_LOCK_FREE_QUEUE=1");
