@@ -31,7 +31,6 @@
 #include "base/platform.h"
 #include "base/logging.h"
 #include "base/trace.h"
-#include "base/threadpool.h"
 #include "audio/loader.h"
 #include "audio/format.h"
 #include "game/loader.h"
@@ -574,7 +573,10 @@ namespace interop {
 
             mRuntime = nullptr;
         }
-
+        inline operator bool() const noexcept
+        {
+            return mRuntime != nullptr;
+        }
     private:
         Type* mRuntime = nullptr;
     };
@@ -599,13 +601,10 @@ struct Gamestudio_Loaders {
 
 extern "C" {
     GAMESTUDIO_API void Gamestudio_CreateRuntime(interop::IRuntime**);
-
     GAMESTUDIO_API void Gamestudio_CreateFileLoaders(Gamestudio_Loaders* out);
     GAMESTUDIO_API void Gamestudio_SetGlobalLogger(base::Logger* logger, bool debug_log, bool warn_log,  bool info_log, bool err_log);
-    GAMESTUDIO_API void Gamestudio_SetGlobalThreadPool(base::ThreadPool* pool);
 } // extern "C"
 
 typedef void (*Gamestudio_CreateFileLoadersFunc)(Gamestudio_Loaders*);
 typedef void (*Gamestudio_SetGlobalLoggerFunc)(base::Logger*, bool, bool, bool, bool);
-typedef void (*Gamestudio_SetGlobalThreadPoolFunc)(base::ThreadPool*);
 typedef void (*Gamestudio_CreateRuntimeFunc)(interop::IRuntime**);

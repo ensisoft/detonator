@@ -161,8 +161,6 @@ namespace gui
         // entry point functions into the game/app library.
         Gamestudio_CreateEngineFunc mGameLibCreateEngine = nullptr;
         Gamestudio_SetGlobalLoggerFunc mGameLibSetGlobalLogger = nullptr;
-        Gamestudio_SetGlobalThreadPoolFunc  mGameLibSteGlobalThreadPool = nullptr;
-
         interop::Runtime mInteropRuntime;
 
         // Qt's Open GL context for the QWindow.
@@ -221,8 +219,6 @@ namespace gui
         std::unique_ptr<base::TraceLog> mTraceLogger;
         std::unique_ptr<base::TraceWriter> mTraceWriter;
         std::vector<bool> mEnableTrace;
-
-        std::unique_ptr<base::ThreadPool> mThreadPool;
     };
 
 } // namespace
