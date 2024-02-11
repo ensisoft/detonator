@@ -1765,6 +1765,9 @@ void PlayWindow::ToggleTracing(bool enable)
         base::EnableTracing(true);
         mEngine->SetTracer(mTraceLogger.get(), mTraceWriter.get());
         mEngine->SetTracingOn(true);
+        mInteropRuntime->SetThisThreadTracer(mTraceLogger.get());
+        mInteropRuntime->SetGlobalTraceWriter(mTraceWriter.get());
+        mInteropRuntime->EnableTracing(true);
     }
     else if (!enable && mTraceWriter)
     {
@@ -1774,6 +1777,9 @@ void PlayWindow::ToggleTracing(bool enable)
         base::EnableTracing(false);
         mEngine->SetTracer(nullptr, nullptr);
         mEngine->SetTracingOn(false);
+        mInteropRuntime->SetThisThreadTracer(nullptr);
+        mInteropRuntime->SetGlobalTraceWriter(nullptr);
+        mInteropRuntime->EnableTracing(true);
     }
 }
 
