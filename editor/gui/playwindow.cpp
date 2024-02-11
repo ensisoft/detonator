@@ -917,23 +917,17 @@ void PlayWindow::Shutdown()
     }
     catch (const std::exception &e)
     {
-        DEBUG("Exception in app shutdown.");
-        ERROR(e.what());
+        ERROR("Exception in app shutdown. [error='%1']", e.what());
     }
     mEngine.reset();
-
-    if (mGameLibSetGlobalLogger)
-        mGameLibSetGlobalLogger(nullptr, false, false, false, false);
 
     if (mInteropRuntime)
     {
         mInteropRuntime->ShutdownThreads();
+        mInteropRuntime->SetGlobalLogger(nullptr);
         mInteropRuntime.Reset();
     }
-
     mLibrary.unload();
-    mGameLibCreateEngine = nullptr;
-    mGameLibSetGlobalLogger = nullptr;
 }
 
 void PlayWindow::LoadState(const QString& key_prefix, const QWidget* parent)
@@ -1662,7 +1656,7 @@ void PlayWindow::SetFullScreen(bool fullscreen)
     SetDebugOptions();
 }
 
-void PlayWindow::SetDebugOptions() const
+void PlayWindow::SetDebugOptions()
 {
     engine::Engine::DebugOptions debug;
     debug.debug_draw_flags.set_from_value(~0);
@@ -1680,7 +1674,11 @@ void PlayWindow::SetDebugOptions() const
     const auto log_warn  = true;
     const auto log_info  = true;
     const auto log_error = true;
-    mGameLibSetGlobalLogger(mLogger.get(), log_debug, log_warn, log_info, log_error);
+    mInteropRuntime->SetGlobalLogger(mLogger.get());
+    mInteropRuntime->EnableLogEvent(base::LogEvent::Debug, log_debug);
+    mInteropRuntime->EnableLogEvent(base::LogEvent::Warning, log_warn);
+    mInteropRuntime->EnableLogEvent(base::LogEvent::Info, log_info);
+    mInteropRuntime->EnableLogEvent(base::LogEvent::Error, log_error);
 }
 
 void PlayWindow::Barf(const std::string& msg)
@@ -1717,23 +1715,13 @@ bool PlayWindow::LoadLibrary()
         return false;
     }
 
-    mGameLibCreateEngine    = (Gamestudio_CreateEngineFunc)mLibrary.resolve("Gamestudio_CreateEngine");
-    mGameLibSetGlobalLogger = (Gamestudio_SetGlobalLoggerFunc)mLibrary.resolve("Gamestudio_SetGlobalLogger");
-    if (!mGameLibCreateEngine)
-        ERROR("Failed to resolve 'Gamestudio_CreateEngine'.");
-    else if (!mGameLibSetGlobalLogger)
-        ERROR("Failed to resolve 'Gamestudio_SetGlobalLogger'.");
-    if (!mGameLibCreateEngine || !mGameLibSetGlobalLogger)
+    auto* CreateEngine = (Gamestudio_CreateEngineFunc)mLibrary.resolve("Gamestudio_CreateEngine");
+    if (!CreateEngine)
     {
-        Barf("Failed to resolve engine library entry points.");
-        return false;
+        Barf("Failed to resolve CreateEngine library entry point.");
+        ERROR("Failed to resolve CreateEngine library entry point. [file='%1', error='%2']",
+              library, mLibrary.errorString());
     }
-
-    interop::Runtime runtime;
-    CreateRuntime(&runtime.get_ref());
-    runtime->AddRealThread();
-    runtime->AddRealThread();
-    runtime->AddMainThread();
 
     // right now we only have a UI for toggling the debug logs,
     // so keep everything else turned on
@@ -1741,9 +1729,19 @@ bool PlayWindow::LoadLibrary()
     const auto log_warn  = true;
     const auto log_info  = true;
     const auto log_error = true;
-    mGameLibSetGlobalLogger(mLogger.get(), log_debug, log_warn, log_info, log_error);
 
-    std::unique_ptr<engine::Engine> engine(mGameLibCreateEngine());
+    interop::Runtime runtime;
+    CreateRuntime(&runtime.get_ref());
+    runtime->SetGlobalLogger(mLogger.get());
+    runtime->EnableLogEvent(base::LogEvent::Debug, log_debug);
+    runtime->EnableLogEvent(base::LogEvent::Warning, log_warn);
+    runtime->EnableLogEvent(base::LogEvent::Info, log_info);
+    runtime->EnableLogEvent(base::LogEvent::Error, log_error);
+    runtime->AddRealThread();
+    runtime->AddRealThread();
+    runtime->AddMainThread();
+
+    std::unique_ptr<engine::Engine> engine(CreateEngine());
     if (!engine)
     {
         Barf("Failed to create engine instance.");

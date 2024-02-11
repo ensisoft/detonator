@@ -80,7 +80,6 @@ extern "C" _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
 // entry point functions that are resolved when the game library is loaded.
 Gamestudio_CreateEngineFunc        GameLibCreateEngine;
 Gamestudio_CreateFileLoadersFunc   GameLibCreateLoaders;
-Gamestudio_SetGlobalLoggerFunc     GameLibSetGlobalLogger;
 Gamestudio_CreateRuntimeFunc       GameLibCreateRuntime;
 
 #if defined(POSIX_OS)
@@ -592,19 +591,22 @@ int main(int argc, char* argv[])
 
         GameLibCreateEngine    = (Gamestudio_CreateEngineFunc)LoadFunction("Gamestudio_CreateEngine");
         GameLibCreateLoaders   = (Gamestudio_CreateFileLoadersFunc)LoadFunction("Gamestudio_CreateFileLoaders");
-        GameLibSetGlobalLogger = (Gamestudio_SetGlobalLoggerFunc)LoadFunction("Gamestudio_SetGlobalLogger");
         GameLibCreateRuntime = (Gamestudio_CreateRuntimeFunc) LoadFunction("Gamestudio_CreateRuntime");
 
         interop::Runtime runtime;
         GameLibCreateRuntime(&runtime.get_ref());
-        runtime->AddRealThread();
-        runtime->AddRealThread();
-        runtime->AddMainThread();
 
         // we've created the logger object, so pass it to the engine library
         // which has its own copies of the global state.
-        GameLibSetGlobalLogger(&logger,
-            global_log_debug, global_log_warn, global_log_info, global_log_error);
+        runtime->SetGlobalLogger(&logger);
+        runtime->EnableLogEvent(base::LogEvent::Debug, global_log_debug);
+        runtime->EnableLogEvent(base::LogEvent::Warning, global_log_warn);
+        runtime->EnableLogEvent(base::LogEvent::Info, global_log_info);
+        runtime->EnableLogEvent(base::LogEvent::Error, global_log_error);
+
+        runtime->AddRealThread();
+        runtime->AddRealThread();
+        runtime->AddMainThread();
 
         // The implementations of these types are built into the engine
         // so the engine needs to give this application a pointer back.
@@ -1043,7 +1045,7 @@ int main(int argc, char* argv[])
 
         window.Destroy();
 
-        GameLibSetGlobalLogger(nullptr, false, false, false, false);
+        runtime->SetGlobalLogger(nullptr);
         DEBUG("Exiting...");
     }
     catch (const std::exception& e)

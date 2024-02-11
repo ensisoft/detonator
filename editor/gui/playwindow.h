@@ -134,7 +134,7 @@ namespace gui
         void AskToggleFullScreen();
         bool InFullScreen() const;
         void SetFullScreen(bool fullscreen);
-        void SetDebugOptions() const;
+        void SetDebugOptions();
         void Barf(const std::string& msg);
         bool LoadLibrary();
         void ToggleTracing(bool enable);
@@ -158,9 +158,7 @@ namespace gui
         QString mGameWorkingDir;
         // loader for the game/app library.
         QLibrary mLibrary;
-        // entry point functions into the game/app library.
-        Gamestudio_CreateEngineFunc mGameLibCreateEngine = nullptr;
-        Gamestudio_SetGlobalLoggerFunc mGameLibSetGlobalLogger = nullptr;
+
         interop::Runtime mInteropRuntime;
 
         // Qt's Open GL context for the QWindow.

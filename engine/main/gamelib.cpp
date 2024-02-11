@@ -35,16 +35,6 @@ GAMESTUDIO_EXPORT void Gamestudio_CreateFileLoaders(Gamestudio_Loaders* out)
     out->ResourceLoader = engine::FileResourceLoader::Create();
 }
 
-GAMESTUDIO_EXPORT void Gamestudio_SetGlobalLogger(base::Logger* logger,
-    bool debug_log, bool warn_log, bool info_log, bool error_log)
-{
-    base::SetGlobalLog(logger);
-    base::EnableLogEvent(base::LogEvent::Debug, debug_log);
-    base::EnableLogEvent(base::LogEvent::Warning, warn_log);
-    base::EnableLogEvent(base::LogEvent::Info, info_log);
-    base::EnableLogEvent(base::LogEvent::Error, error_log);
-}
-
 GAMESTUDIO_EXPORT void Gamestudio_CreateRuntime(interop::IRuntime** factory)
 {
     class Runtime : public interop::IRuntime {
@@ -74,6 +64,15 @@ GAMESTUDIO_EXPORT void Gamestudio_CreateRuntime(interop::IRuntime** factory)
         virtual void ExecuteMainThread() override
         {
             mThreadPool.ExecuteMainThread();
+        }
+
+        virtual void SetGlobalLogger(base::Logger* logger) override
+        {
+            base::SetGlobalLog(logger);
+        }
+        virtual void EnableLogEvent(base::LogEvent event, bool on_off) override
+        {
+            base::EnableLogEvent(event, on_off);
         }
 
         virtual void Release() override
