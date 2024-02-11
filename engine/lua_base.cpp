@@ -86,7 +86,33 @@ void BindBase(sol::state& L)
             [](std::string str)                 { base::TraceComment(std::move(str));        },
             [](std::string str, unsigned index) { base::TraceComment(std::move(str), index); }
     );
-    trace["enter"]  = &base::TraceBeginScope;
+
+    trace["enter"] = sol::overload(
+            [](std::string scope_name) {
+                if (!base::IsTracingEnabled())
+                    return 0u;
+
+                auto* tracer = base::GetThreadTrace();
+                if (!tracer)
+                    return 0u;
+
+                const char* ptr = tracer->StoreString(std::move(scope_name));
+                return tracer->BeginScope(ptr);
+            },
+            [](std::string scope_name, std::string comment) {
+                if (!base::IsTracingEnabled())
+                    return 0u;
+                auto* tracer = base::GetThreadTrace();
+                if (!tracer)
+                    return 0u;
+                const char* ptr = tracer->StoreString(std::move(scope_name));
+
+                const auto index = tracer->BeginScope(ptr);
+                tracer->Comment(std::move(comment), index);
+                return index;
+            }
+    );
+
     trace["leave"]  = &base::TraceEndScope;
 
     sol::constructors<base::FRect(), base::FRect(float, float, float, float)> rect_ctors;

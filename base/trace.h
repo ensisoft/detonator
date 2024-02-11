@@ -62,6 +62,8 @@ namespace base
 
         virtual unsigned GetCurrentTraceIndex() const = 0;
 
+        virtual const char* StoreString(std::string str) = 0;
+
         inline void Marker(std::string marker)
         {
             const auto index = GetCurrentTraceIndex();
@@ -101,6 +103,7 @@ namespace base
         {
             mTraceIndex = 0;
             mStackDepth = 0;
+            mDynamicStrings.clear();
         }
         virtual void Write(TraceWriter& writer) const override
         {
@@ -144,6 +147,12 @@ namespace base
             return mTraceIndex - 1;
         }
 
+        virtual const char* StoreString(std::string str) override
+        {
+            mDynamicStrings.push_back(std::move(str));
+            return mDynamicStrings.back().c_str();
+        }
+
         inline void RenameBlock(const char* name, unsigned index) noexcept
         {
             ASSERT(index < mTraceIndex);
@@ -169,6 +178,7 @@ namespace base
         std::size_t mStackDepth = 0;
         std::size_t mThreadId   = 0;
         std::chrono::high_resolution_clock::time_point mStartTime;
+        std::vector<std::string> mDynamicStrings;
     };
 
     class TextFileTraceWriter : public TraceWriter
