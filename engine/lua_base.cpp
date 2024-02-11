@@ -79,8 +79,12 @@ void BindBase(sol::state& L)
 
     auto trace = L.create_named_table("trace");
     trace["marker"] = sol::overload(
-            [](const std::string& str) { base::TraceMarker(str); },
-            [](const std::string& str, unsigned index) { base::TraceMarker(str, index); }
+            [](std::string str)                 { base::TraceMarker(std::move(str));       },
+            [](std::string str, unsigned index) { base::TraceMarker(std::move(str), index); }
+    );
+    trace["comment"] = sol::overload(
+            [](std::string str)                 { base::TraceComment(std::move(str));        },
+            [](std::string str, unsigned index) { base::TraceComment(std::move(str), index); }
     );
     trace["enter"]  = &base::TraceBeginScope;
     trace["leave"]  = &base::TraceEndScope;
