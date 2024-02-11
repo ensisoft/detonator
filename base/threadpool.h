@@ -30,11 +30,13 @@
 
 namespace base
 {
+    class TraceWriter;
+
     class ThreadTask
     {
     public:
         enum class Flags {
-            Error
+            Error, Tracing
         };
 
         enum class Affinity {
@@ -84,7 +86,7 @@ namespace base
             {
                 DoTask();
             }
-            catch (const std::exception& e)
+            catch (const std::exception&)
             {
                mException = std::current_exception();
             }
@@ -186,6 +188,9 @@ namespace base
         void WaitAll();
 
         void ExecuteMainThread();
+
+        void SetThreadTraceWriter(base::TraceWriter* writer);
+        void EnableThreadTrace(bool enable);
 
     private:
         struct State;

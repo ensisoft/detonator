@@ -773,6 +773,8 @@ public:
             // changes through the engine to the audio thread(s) etc.
             mEngine->SetTracer(mTraceLogger.get(), mTraceWriter.get());
             mEngine->SetTracingOn(true);
+            mThreadPool->SetThreadTraceWriter(mTraceWriter.get());
+            mThreadPool->EnableThreadTrace(true);
         }
         else if (!mTraceEnabledCounter && mTraceWriter)
         {
@@ -785,6 +787,8 @@ public:
             // changes through the engine to the audio thread(s) etc.
             mEngine->SetTracer(nullptr, nullptr);
             mEngine->SetTracingOn(false);
+            mThreadPool->SetThreadTraceWriter(nullptr);
+            mThreadPool->EnableThreadTrace(false);
         }
     }
 

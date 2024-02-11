@@ -25,6 +25,7 @@
 #include "base/assert.h"
 #include "base/logging.h"
 #include "base/threadpool.h"
+#include "base/trace.h"
 
 namespace {
     base::ThreadPool* global_thread_pool;
@@ -46,8 +47,9 @@ public:
 class ThreadPool::RealThread : public ThreadPool::Thread
 {
 public:
-    explicit RealThread(std::shared_ptr<State> state) noexcept
+    explicit RealThread(std::shared_ptr<State> state, std::size_t id) noexcept
        : mState(std::move(state))
+       , mThreadId(id)
     {}
 
     virtual void Submit(std::shared_ptr<ThreadTask> task) override
@@ -75,18 +77,56 @@ public:
         }));
     }
 
+    void SetThreadTraceWriter(base::TraceWriter* writer)
+    {
+        std::lock_guard<std::mutex> lock(mMutex);
+        mTraceWriter = writer;
+        mCondition.notify_one();
+    }
+    void EnableThreadTrace(bool enable)
+    {
+        std::lock_guard<std::mutex> lock(mMutex);
+        mEnableTrace = enable;
+        mCondition.notify_one();
+    }
+
 private:
     void ThreadMain()
     {
-        DEBUG("Hello from thread pool thread.");
+        DEBUG("Hello from thread pool thread %1.", mThreadId);
+        std::unique_ptr<base::TraceLog> trace;
+
         while (true)
         {
+            // enable disable tracing on this thread
+            {
+                std::lock_guard<std::mutex> lock(mMutex);
+                if (mTraceWriter && !base::GetThreadTrace())
+                {
+                    trace = std::make_unique<base::TraceLog>(1000, base::TraceLog::ThreadId::TaskThread + mThreadId);
+                    base::SetThreadTrace(trace.get());
+                }
+                else if (!mTraceWriter && base::GetThreadTrace())
+                {
+                    trace.reset();
+                    base::SetThreadTrace(nullptr);
+                }
+                base::EnableTracing(mEnableTrace);
+            }
+
             std::shared_ptr<ThreadTask> task;
             bool running = true;
+
+            // most of the trace calls are commented out because of the large
+            // volume of data that is generated. Only have kept the task tracing
+            // for now and only when the flag is set.
+            TRACE_START();
+            ///TRACE_ENTER(MainLoop);
 
             // use an explicit scope here to make sure the lock is
             // released as soon as we have something
             {
+                ///TRACE_SCOPE("WaitTask");
                 std::unique_lock<std::mutex> lock(mMutex);
 
                 // use a loop in order to protect against spurious
@@ -105,14 +145,37 @@ private:
             }
 
             if (!running)
+            {
+                ///TRACE_LEAVE(MainLoop);
                 break;
+            }
 
-            if (!task)
-                continue;
+            if (task)
+            {
+                if (task->TestFlag(ThreadTask::Flags::Tracing))
+                {
+                    TRACE_CALL("Task::Execute", task->Execute());
+                }
+                else
+                {
+                    task->Execute();
+                }
+                mState->num_tasks--;
+            }
 
-            task->Execute();
+            ///TRACE_LEAVE(MainLoop);
 
-            mState->num_tasks--;
+            // take a mutex on the trace writer to make sure that it will
+            // not be deleted from underneath us while we're dumping
+            // this thread's trace log to the writer.
+            {
+                std::lock_guard<std::mutex> lock(mMutex);
+                if (mTraceWriter && trace)
+                {
+                    trace->Write(*mTraceWriter);
+                }
+            }
+
         }
         DEBUG("Thread pool thread exiting...");
     }
@@ -123,7 +186,11 @@ private:
     std::condition_variable mCondition;
     std::unique_ptr<std::thread> mThread;
     std::queue<std::shared_ptr<ThreadTask>> mTaskQueue;
+
+    base::TraceWriter* mTraceWriter;
+    bool mEnableTrace = false;
     bool mRunThread = true;
+    std::size_t mThreadId = 0;
 };
 
 class ThreadPool::MainThread : public ThreadPool::Thread
@@ -140,6 +207,8 @@ public:
 
     void ExecuteMainThread()
     {
+        ///TRACE_SCOPE("ExecuteMainThread");
+
         while (!queue_.empty())
         {
             auto task = queue_.front();
@@ -147,7 +216,16 @@ public:
             queue_.pop();
 
             if (!task->IsComplete())
-                task->Execute();
+            {
+                if (task->TestFlag(ThreadTask::Flags::Tracing))
+                {
+                    TRACE_CALL("Task::Execute", task->Execute());
+                }
+                else
+                {
+                    task->Execute();
+                }
+            }
 
             state_->num_tasks--;
         }
@@ -188,7 +266,7 @@ ThreadPool::~ThreadPool()
 
 void ThreadPool::AddRealThread()
 {
-    auto thread = std::make_unique<RealThread>(mState);
+    auto thread = std::make_unique<RealThread>(mState, mRealThreads.size());
     thread->Start();
     mRealThreads.push_back(std::move(thread));
     DEBUG("Added real thread pool thread.");
@@ -274,6 +352,21 @@ void ThreadPool::ExecuteMainThread()
 {
     if (mMainThread)
         mMainThread->ExecuteMainThread();
+}
+
+void ThreadPool::SetThreadTraceWriter(base::TraceWriter* writer)
+{
+    for (auto& thread : mRealThreads)
+    {
+        thread->SetThreadTraceWriter(writer);
+    }
+}
+void ThreadPool::EnableThreadTrace(bool enable)
+{
+    for (auto& thread : mRealThreads)
+    {
+        thread->EnableThreadTrace(enable);
+    }
 }
 
 ThreadPool* GetGlobalThreadPool()
