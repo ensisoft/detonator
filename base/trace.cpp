@@ -50,26 +50,41 @@ void TraceWrite(TraceWriter& writer)
         thread_tracer->Write(writer);
 }
 
-unsigned TraceBeginScope(const char* name, std::string comment)
+unsigned TraceBeginScope(const char* name)
 {
     if (thread_tracer && enable_tracing)
-        return thread_tracer->BeginScope(name, comment);
+        return thread_tracer->BeginScope(name);
     return 0;
 }
+
 void TraceEndScope(unsigned index)
 {
     if (thread_tracer && enable_tracing)
         thread_tracer->EndScope(index);
 }
-void TraceMarker(const std::string& str)
+
+void TraceMarker(std::string str)
 {
     if (thread_tracer && enable_tracing)
-        thread_tracer->Marker(str);
+        thread_tracer->Marker(std::move(str));
 }
-void TraceMarker(const std::string& str, unsigned index)
+
+void TraceMarker(std::string str, unsigned index)
 {
     if (thread_tracer && enable_tracing)
-        thread_tracer->Marker(str, index);
+        thread_tracer->Marker(std::move(str), index);
+}
+
+void TraceComment(std::string str)
+{
+    if (thread_tracer && enable_tracing)
+        thread_tracer->Comment(std::move(str));
+}
+
+void TraceComment(std::string str, unsigned index)
+{
+    if (thread_tracer && enable_tracing)
+        thread_tracer->Comment(std::move(str), index);
 }
 
 bool IsTracingEnabled()

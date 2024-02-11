@@ -302,6 +302,7 @@ void unit_test_rect_mapping()
     }
 }
 
+namespace tracing_test {
 void bar()
 {
     TRACE_SCOPE("bar");
@@ -314,11 +315,21 @@ void foo()
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
     bar();
 }
+void keke()
+{
+    TRACE_SCOPE("keke");
+    base::TraceComment("keke");
+    base::TraceMarker("keke");
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+}
+
 void meh()
 {
     TRACE_SCOPE("meh", "foo=%u", 123);
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    keke();
 }
+} // tracing test
 
 void unit_test_trace()
 {
@@ -328,11 +339,13 @@ void unit_test_trace()
     base::EnableTracing(true);
     base::TraceStart();
     {
+        using namespace tracing_test;
+
         TRACE_SCOPE("unit_test");
         foo();
         meh();
     }
-    TEST_REQUIRE(trace.GetNumEntries() == 4);
+    TEST_REQUIRE(trace.GetNumEntries() == 5);
     TEST_REQUIRE(trace.GetEntry(0).level == 0);
     TEST_REQUIRE(trace.GetEntry(0).name == std::string("unit_test"));
     TEST_REQUIRE(trace.GetEntry(1).level == 1);
@@ -342,6 +355,10 @@ void unit_test_trace()
     TEST_REQUIRE(trace.GetEntry(3).level == 1);
     TEST_REQUIRE(trace.GetEntry(3).name == std::string("meh"));
     TEST_REQUIRE(trace.GetEntry(3).comment == "foo=123");
+    TEST_REQUIRE(trace.GetEntry(4).name == std::string("keke"));
+    TEST_REQUIRE(trace.GetEntry(4).comment == "keke");
+    TEST_REQUIRE(trace.GetEntry(4).markers.size() ==  1);
+    TEST_REQUIRE(trace.GetEntry(4).markers[0] == "keke");
 
     for (size_t i=0; i<trace.GetNumEntries(); ++i)
     {

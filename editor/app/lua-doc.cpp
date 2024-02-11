@@ -433,16 +433,31 @@ void InitLuaDoc()
     DOC_TABLE("trace");
     DOC_FUNCTION_1("void", "marker", "Set a marker message in the application trace.",
                  "string", "message");
+
     DOC_FUNCTION_2("void", "marker", "Set a marker message in the application trace in the given trace entry.<br>"
                                    "The given trace entry index MUST BE VALID.<br>"
                                    "Do not call this function unless you know what you're doing.<br>"
                                    "For a safer alternative use the overload without index.",
-                 "string", "message",
-                 "unsigned", "index");
+                 "string", "message", "unsigned", "index");
+    DOC_FUNCTION_1("void", "marker", "Set a marker message in the application trace in the current trace entry.<br>",
+                   "string", "message");
+
+    DOC_FUNCTION_2("void", "comment", "Set a comment message in the application trace in the given trace entry.<br>"
+                                     "The given trace entry index MUST BE VALID.<br>"
+                                     "Do not call this function unless you know what you're doing.<br>"
+                                     "For a safer alternative use the overload without index.",
+                   "string", "message", "unsigned", "index");
+    DOC_FUNCTION_1("void", "comment", "Set a comment message in the application trace in the current trace entry.<br>",
+                   "string", "message");
+
     DOC_FUNCTION_1("unsigned", "enter", "Enter a new tracing scope for measuring time spent inside the scope.<br>"
                                  "You must manually call trace.leave with index that you received from this call. "
                                  "Not doing so will likely crash the application. ",
                  "string", "scope_name");
+    DOC_FUNCTION_2("unsigned", "enter", "Enter a new tracing scope for measuring time spent inside the scope.<br>"
+                                        "You must manually call trace.leave with index that you received from this call. "
+                                        "Not doing so will likely crash the application. ",
+                   "string", "scope_name", "string", "comment");
     DOC_FUNCTION_1("void", "leave", "Leave a tracing scope that was entered previously.<br>"
                                   "The index must be from a previous call to trace.enter.",
                  "unsigned", "index");

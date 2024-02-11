@@ -55,12 +55,25 @@ namespace base
         virtual ~Trace() = default;
         virtual void Start() = 0;
         virtual void Write(TraceWriter& writer) const = 0;
-        virtual unsigned BeginScope(const char* name, std::string comment) = 0;
+        virtual unsigned BeginScope(const char* name) = 0;
         virtual void EndScope(unsigned index) = 0;
         virtual void Marker(std::string marker, unsigned index) = 0;
-        virtual void Marker(std::string marker) = 0;
         virtual void Comment(std::string comment, unsigned index) = 0;
-        virtual void Comment(std::string comment) = 0;
+
+        virtual unsigned GetCurrentTraceIndex() const = 0;
+
+        inline void Marker(std::string marker)
+        {
+            const auto index = GetCurrentTraceIndex();
+
+            Marker(std::move(marker), index);
+        }
+        inline void Comment(std::string comment)
+        {
+            const auto index = GetCurrentTraceIndex();
+
+            Comment(std::move(comment), index);
+        }
     private:
     };
 
@@ -94,7 +107,7 @@ namespace base
             for (size_t i=0; i<mTraceIndex; ++i)
                 writer.Write(mCallTrace[i]);
         }
-        virtual unsigned BeginScope(const char* name, std::string comment) override
+        virtual unsigned BeginScope(const char* name) override
         {
             ASSERT(mTraceIndex < mCallTrace.size());
             TraceEntry entry;
@@ -103,7 +116,6 @@ namespace base
             entry.level       = mStackDepth++;
             entry.start_time  = GetTime();
             entry.finish_time = 0;
-            entry.comment     = std::move(comment);
             mCallTrace[mTraceIndex] = std::move(entry);
             return mTraceIndex++;
         }
@@ -113,11 +125,6 @@ namespace base
             ASSERT(mStackDepth);
             mCallTrace[index].finish_time = GetTime();
             mStackDepth--;
-        }
-        virtual void Marker(std::string str) override
-        {
-            ASSERT(mTraceIndex > 0 && mTraceIndex < mCallTrace.size());
-            mCallTrace[mTraceIndex-1].markers.push_back(std::move(str));
         }
         virtual void Marker(std::string str, unsigned index) override
         {
@@ -131,10 +138,10 @@ namespace base
             mCallTrace[index].comment = std::move(str);
         }
 
-        virtual void Comment(std::string str) override
+        virtual unsigned GetCurrentTraceIndex() const override
         {
             ASSERT(mTraceIndex > 0 && mTraceIndex < mCallTrace.size());
-            mCallTrace[mTraceIndex-1].comment = std::move(str);
+            return mTraceIndex - 1;
         }
 
         inline void RenameBlock(const char* name, unsigned index) noexcept
@@ -228,27 +235,49 @@ namespace base
     void SetThreadTrace(Trace* trace);
     void TraceStart();
     void TraceWrite(TraceWriter& writer);
-    void TraceMarker(const std::string& str, unsigned index);
-    void TraceMarker(const std::string& str);
+    void TraceMarker(std::string str);
+    void TraceMarker(std::string str, unsigned index);
+
+    void TraceComment(std::string str);
+    void TraceComment(std::string str, unsigned index);
+
     void EnableTracing(bool on_off);
     bool IsTracingEnabled();
 
-    unsigned TraceBeginScope(const char* name, std::string comment);
+    unsigned TraceBeginScope(const char* name);
     void TraceEndScope(unsigned index);
 
     struct AutoTracingScope {
-        AutoTracingScope(const char* name, std::string comment)
-        { index = TraceBeginScope(name, std::move(comment)); }
-       ~AutoTracingScope()
-        { TraceEndScope(index); }
+        AutoTracingScope(const char* name, std::string comment) noexcept
+        {
+            index = TraceBeginScope(name);
+            TraceComment(std::move(comment), index);
+
+        }
+        explicit AutoTracingScope(const char* name) noexcept
+        {
+            index = TraceBeginScope(name);
+        }
+       ~AutoTracingScope() noexcept
+        {
+            TraceEndScope(index);
+        }
     private:
         unsigned index = 0;
     };
 
     struct ManualTracingScope {
-        ManualTracingScope(const char* name, std::string comment)
-        { index = TraceBeginScope(name, std::move(comment)); }
-       ~ManualTracingScope()
+        ManualTracingScope(const char* name, std::string comment) noexcept
+        {
+            index = TraceBeginScope(name);
+            TraceComment(std::move(comment), index);
+
+        }
+        explicit ManualTracingScope(const char* name) noexcept
+        {
+            index = TraceBeginScope(name);
+        }
+       ~ManualTracingScope() noexcept
         {
             if (std::uncaught_exceptions())
             {
@@ -257,7 +286,7 @@ namespace base
             }
             ASSERT(index == -1 && "No matching call to TraceEndScope found.");
         }
-        void EndScope()
+        void EndScope() noexcept
         {
             TraceEndScope(index);
             index = -1;
@@ -287,12 +316,12 @@ namespace base
 #  define TRACE_SCOPE(name, ...) base::AutoTracingScope _trace(name, base::detail::FormatTraceComment(__VA_ARGS__))
 #  define TRACE_ENTER(name, ...) base::ManualTracingScope foo_##name(#name, base::detail::FormatTraceComment(__VA_ARGS__))
 #  define TRACE_LEAVE(name) foo_##name.EndScope()
-#  define TRACE_CALL(name, call, ...)                                                          \
+#  define TRACE_CALL(name, call, ...)                                                        \
 do {                                                                                         \
    base::AutoTracingScope _trace(name, base::detail::FormatTraceComment(__VA_ARGS__));       \
    call;                                                                                     \
 } while (0)
-#  define TRACE_BLOCK(name, block, ...)                                                        \
+#  define TRACE_BLOCK(name, block, ...)                                                      \
 do {                                                                                         \
    base::AutoTracingScope _trace(name, base::detail::FormatTraceComment(__VA_ARGS__));       \
    block                                                                                     \
