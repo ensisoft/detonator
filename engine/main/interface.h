@@ -517,6 +517,10 @@ namespace interop {
         virtual void SetGlobalLogger(base::Logger* logger) = 0;
         virtual void EnableLogEvent(base::LogEvent event, bool on_off) = 0;
 
+        virtual void SetThisThreadTracer(base::TraceLog* tracer) = 0;
+        virtual void SetGlobalTraceWriter(base::TraceWriter* writer) = 0;
+        virtual void EnableTracing(bool on_off) = 0;
+
         virtual void Release() = 0;
     protected:
         virtual ~IRuntime() = 0;

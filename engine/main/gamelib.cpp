@@ -74,6 +74,19 @@ GAMESTUDIO_EXPORT void Gamestudio_CreateRuntime(interop::IRuntime** factory)
         {
             base::EnableLogEvent(event, on_off);
         }
+        virtual void SetThisThreadTracer(base::TraceLog* tracer) override
+        {
+            base::SetThreadTrace(tracer);
+        }
+
+        virtual void SetGlobalTraceWriter(base::TraceWriter* writer) override
+        {
+
+        }
+        virtual void EnableTracing(bool on_off) override
+        {
+            base::EnableTracing(on_off);
+        }
 
         virtual void Release() override
         {

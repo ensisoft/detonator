@@ -355,15 +355,11 @@ public:
     }
     virtual void SetTracer(base::Trace* tracer, base::TraceWriter* writer) override
     {
-        base::SetThreadTrace(tracer);
-
         if (mAudio)
             mAudio->SetAudioThreadTraceWriter(writer);
     }
     virtual void SetTracingOn(bool on_off) override
     {
-        base::EnableTracing(on_off);
-
         if (mAudio)
             mAudio->EnableAudioThreadTrace(on_off);
     }

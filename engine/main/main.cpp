@@ -788,6 +788,8 @@ int main(int argc, char* argv[])
         base::JsonReadSafe(json["application"], "game_script", &params.game_script);
         engine->Init(params, config);
         engine->SetTracer(trace_logger.get(), trace_writer.get());
+        runtime->SetThisThreadTracer(trace_logger.get());
+        runtime->SetGlobalTraceWriter(trace_writer.get());
 
         // do pre-load / splash screen content load
         {
@@ -835,6 +837,7 @@ int main(int argc, char* argv[])
         engine->Start();
 
         engine->SetTracingOn(trace_enabled_counter > 0);
+        runtime->EnableTracing(trace_enabled_counter > 0);
 
         // Connect the engine's window event listener to the window.
         if (auto* listener = engine->GetWindowListener())
@@ -890,6 +893,7 @@ int main(int argc, char* argv[])
                 DEBUG("Performance tracing update. [value=%1]", enabled ? "ON" : "OFF");
                 base::EnableTracing(enabled);
                 engine->SetTracingOn(enabled);
+                runtime->EnableTracing(enabled);
             }
 
             TRACE_START();
@@ -1046,6 +1050,8 @@ int main(int argc, char* argv[])
         window.Destroy();
 
         runtime->SetGlobalLogger(nullptr);
+        runtime->SetGlobalTraceWriter(nullptr);
+        runtime->SetThisThreadTracer(nullptr);
         DEBUG("Exiting...");
     }
     catch (const std::exception& e)
