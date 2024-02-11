@@ -81,11 +81,13 @@ GAMESTUDIO_EXPORT void Gamestudio_CreateRuntime(interop::IRuntime** factory)
 
         virtual void SetGlobalTraceWriter(base::TraceWriter* writer) override
         {
-
+            mThreadPool.SetThreadTraceWriter(writer);
         }
         virtual void EnableTracing(bool on_off) override
         {
             base::EnableTracing(on_off);
+
+            mThreadPool.EnableThreadTrace(on_off);
         }
 
         virtual void Release() override
