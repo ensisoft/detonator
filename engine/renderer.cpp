@@ -130,18 +130,27 @@ void Renderer::Draw(gfx::Device& device, const game::Tilemap* map)
         constexpr auto draw_render_layers = true;
         constexpr auto draw_data_layers   = false;
         constexpr auto use_tile_batching = true;
-        PrepareMapTileBatches(*map, batches, draw_render_layers, draw_data_layers, obey_klass_flags, use_tile_batching);
-        GenerateMapDrawPackets(*map, batches, packets);
+        TRACE_CALL("PrepareMapTileBatches", PrepareMapTileBatches(*map, batches, draw_render_layers, draw_data_layers, obey_klass_flags, use_tile_batching));
+        TRACE_CALL("GenerateMapDrawPackets", GenerateMapDrawPackets(*map, batches, packets));
     }
 
     const auto scene_packet_start_index = packets.size();
 
     // create the draw packets based on the scene's paint nodes.
-    for (auto& [key, paint] : mPaintNodes)
     {
-        CreateDrawResources<Entity, EntityNode>(paint);
-        GenerateDrawPackets<Entity, EntityNode>(paint, packets, nullptr);
-        paint.visited = true;
+        TRACE_SCOPE("IteratePaintNodes");
+        for (auto& [key, paint] : mPaintNodes)
+        {
+            {
+                TRACE_SCOPE("CreateDrawResources");
+                CreateDrawResources<Entity, EntityNode>(paint);
+            }
+            {
+                TRACE_SCOPE("GenerateDrawPackets");
+                GenerateDrawPackets<Entity, EntityNode>(paint, packets, nullptr);
+            }
+            paint.visited = true;
+        };
     }
 
     if (map)
@@ -150,16 +159,16 @@ void Renderer::Draw(gfx::Device& device, const game::Tilemap* map)
         // In other words, whenever a draw packet is generated from a scene's paint
         // node map that node to a position on the map tile grid for combining it
         // with the map's tile rendering.
-        ComputeTileCoordinates(*map, scene_packet_start_index, packets);
+        TRACE_CALL("ComputeTileCoordinates", ComputeTileCoordinates(*map, scene_packet_start_index, packets));
         // Sort all packets based on the map based sorting criteria
-        SortTilePackets(packets);
+        TRACE_CALL("SortTilePackets", SortTilePackets(packets));
     }
     else
     {
-        OffsetPacketLayers(packets);
+        TRACE_CALL("OffsetPacketLayers", OffsetPacketLayers(packets));
     }
 
-    DrawScenePackets(device, packets);
+    TRACE_CALL("DrawScenePackets", DrawScenePackets(device, packets));
 }
 
 void Renderer::Draw(const Entity& entity,
@@ -1321,6 +1330,7 @@ void Renderer::DrawScenePackets(gfx::Device& device, std::vector<DrawPacket>& pa
     // render packet must be considered!
     std::vector<std::vector<RenderLayer>> layers;
 
+    TRACE_ENTER(CreateDrawCmd);
     for (auto& packet : packets)
     {
         if (!packet.material || !packet.drawable)
@@ -1380,8 +1390,10 @@ void Renderer::DrawScenePackets(gfx::Device& device, std::vector<DrawPacket>& pa
             layer.mask_expose_list.push_back(draw);
         else BUG("Missing packet render pass mapping.");
     }
+    TRACE_LEAVE(CreateDrawCmd);
 
     // set the state for each draw packet.
+    TRACE_ENTER(ArrangeLayers);
     for (auto& scene_layer : layers)
     {
         for (auto& entity_layer : scene_layer)
@@ -1420,6 +1432,7 @@ void Renderer::DrawScenePackets(gfx::Device& device, std::vector<DrawPacket>& pa
             }
         }
     }
+    TRACE_LEAVE(ArrangeLayers);
 
     const gfx::Color4f bloom_color(mBloom.red, mBloom.green, mBloom.blue, 1.0f);
     const BloomPass bloom(mRendererName,  bloom_color, mBloom.threshold, painter);
@@ -1439,8 +1452,8 @@ void Renderer::DrawScenePackets(gfx::Device& device, std::vector<DrawPacket>& pa
     }
 
     MainRenderPass main(painter);
-    main.Draw(layers);
-    main.Composite(IsEnabled(Effects::Bloom) ? &bloom : nullptr);
+    TRACE_CALL("MainRenderPass::Draw", main.Draw(layers));
+    TRACE_CALL("MainRenderPass::Composite", main.Composite(IsEnabled(Effects::Bloom) ? &bloom : nullptr));
 
 }
 
