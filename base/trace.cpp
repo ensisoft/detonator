@@ -87,6 +87,12 @@ void TraceComment(std::string str, unsigned index)
         thread_tracer->Comment(std::move(str), index);
 }
 
+void TraceEvent(std::string name)
+{
+    if (thread_tracer && enable_tracing)
+        thread_tracer->Event(std::move(name));
+}
+
 bool IsTracingEnabled()
 {
     return enable_tracing;
@@ -121,6 +127,11 @@ void TextFileTraceWriter::Write(const TraceEntry& entry)
     for (const auto& m : entry.markers)
         std::fprintf(mFile, " %s ", m.c_str());
     std::fprintf(mFile, "\n\n");
+}
+
+void TextFileTraceWriter::Write(const struct TraceEvent& event)
+{
+    // todo:
 }
 
 void TextFileTraceWriter::Flush()
@@ -162,11 +173,15 @@ void ChromiumTraceJsonWriter::Write(const TraceEntry& entry)
     if (!markers.empty())
         markers.pop_back();
 
-constexpr static auto* JsonString =
+    // ph = type
+    // ph = X -> complete event
+    // ph = i -> instant event
+
+
+constexpr static auto* JsonFormat =
   R"(%c { "pid":0, "tid":%u, "ph":"X", "ts":%u, "dur":%u, "name":"%s", "args": { "markers": "%s", "comment": "%s" } }
 )";
-
-    std::fprintf(mFile, JsonString, mCommaNeeded ? ',' : ' ',
+    std::fprintf(mFile, JsonFormat, mCommaNeeded ? ',' : ' ',
                  (unsigned)threadId,
                  (unsigned)start,
                  (unsigned)duration,
@@ -174,6 +189,20 @@ constexpr static auto* JsonString =
 
     mCommaNeeded = true;
 }
+
+void ChromiumTraceJsonWriter::Write(const struct TraceEvent& event)
+{
+    constexpr static auto* JsonFormat =
+R"(%c { "pid":0, "tid":%u, "ph":"i", "ts":%u, "s":"g", "name":"%s"  }
+)";
+    std::fprintf(mFile, JsonFormat, mCommaNeeded ? ',': ' ',
+                 (unsigned)event.tid,
+                 (unsigned)event.time,
+                 event.name.c_str());
+
+    mCommaNeeded = true;
+}
+
 void ChromiumTraceJsonWriter::Flush()
 {
     std::fflush(mFile);

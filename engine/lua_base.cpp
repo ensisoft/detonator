@@ -113,7 +113,8 @@ void BindBase(sol::state& L)
             }
     );
 
-    trace["leave"]  = &base::TraceEndScope;
+    trace["leave"] = &base::TraceEndScope;
+    trace["event"] = &base::TraceEvent;
 
     sol::constructors<base::FRect(), base::FRect(float, float, float, float)> rect_ctors;
     auto rect = base.new_usertype<base::FRect>("FRect", rect_ctors);
