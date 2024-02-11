@@ -461,6 +461,7 @@ void InitLuaDoc()
     DOC_FUNCTION_1("void", "leave", "Leave a tracing scope that was entered previously.<br>"
                                   "The index must be from a previous call to trace.enter.",
                  "unsigned", "index");
+    DOC_FUNCTION_1("void", "event", "Record an instantaneous trace event.", "string", "name");
 
     DOC_TABLE("base.FRect");
     DOC_METHOD_0("base.FRect", "new", "Construct a new axis aligned rectangle without any size.");

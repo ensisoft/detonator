@@ -40,11 +40,18 @@ namespace base
         std::string comment;
     };
 
+    struct TraceEvent {
+        std::string name;
+        unsigned time = 0;
+        unsigned tid  = 0;
+    };
+
     class TraceWriter
     {
     public:
         virtual ~TraceWriter() = default;
         virtual void Write(const TraceEntry& entry) = 0;
+        virtual void Write(const TraceEvent& event) = 0;
         virtual void Flush() = 0;
     private:
     };
@@ -59,6 +66,7 @@ namespace base
         virtual void EndScope(unsigned index) = 0;
         virtual void Marker(std::string marker, unsigned index) = 0;
         virtual void Comment(std::string comment, unsigned index) = 0;
+        virtual void Event(std::string name) = 0;
 
         virtual unsigned GetCurrentTraceIndex() const = 0;
 
@@ -104,11 +112,15 @@ namespace base
             mTraceIndex = 0;
             mStackDepth = 0;
             mDynamicStrings.clear();
+            mTraceEvents.clear();
         }
         virtual void Write(TraceWriter& writer) const override
         {
             for (size_t i=0; i<mTraceIndex; ++i)
                 writer.Write(mCallTrace[i]);
+
+            for (const auto& event : mTraceEvents)
+                writer.Write(event);
         }
         virtual unsigned BeginScope(const char* name) override
         {
@@ -139,6 +151,14 @@ namespace base
         {
             ASSERT(index < mTraceIndex);
             mCallTrace[index].comment = std::move(str);
+        }
+        virtual void Event(std::string name) override
+        {
+            TraceEvent event;
+            event.name = std::move(name);
+            event.time = GetTime();
+            event.tid  = mThreadId;
+            mTraceEvents.push_back(std::move(event));
         }
 
         virtual unsigned GetCurrentTraceIndex() const override
@@ -179,6 +199,7 @@ namespace base
         std::size_t mThreadId   = 0;
         std::chrono::high_resolution_clock::time_point mStartTime;
         std::vector<std::string> mDynamicStrings;
+        std::vector<TraceEvent> mTraceEvents;
     };
 
     class TextFileTraceWriter : public TraceWriter
@@ -193,6 +214,7 @@ namespace base
        ~TextFileTraceWriter() noexcept;
         TextFileTraceWriter() = delete;
         virtual void Write(const TraceEntry& entry) override;
+        virtual void Write(const TraceEvent& event) override;
         virtual void Flush() override;
         TextFileTraceWriter& operator=(const TextFileTraceWriter&) = delete;
     private:
@@ -212,6 +234,7 @@ namespace base
        ~ChromiumTraceJsonWriter() noexcept;
         ChromiumTraceJsonWriter();
         virtual void Write(const TraceEntry& entry) override;
+        virtual void Write(const TraceEvent& event) override;
         virtual void Flush() override;
         ChromiumTraceJsonWriter& operator=(const ChromiumTraceJsonWriter&) = delete;
     private:
@@ -230,6 +253,11 @@ namespace base
         {
             std::lock_guard<std::mutex> lock(mMutex);
             mWriter.Write(entry);
+        }
+        virtual void Write(const TraceEvent& event) override
+        {
+            std::lock_guard<std::mutex> lock(mMutex);
+            mWriter.Write(event);
         }
         virtual void Flush() override
         {
@@ -250,6 +278,8 @@ namespace base
 
     void TraceComment(std::string str);
     void TraceComment(std::string str, unsigned index);
+
+    void TraceEvent(std::string name);
 
     void EnableTracing(bool on_off);
     bool IsTracingEnabled();
@@ -336,6 +366,7 @@ do {                                                                            
    base::AutoTracingScope _trace(name, base::detail::FormatTraceComment(__VA_ARGS__));       \
    block                                                                                     \
 } while (0)
+#  define TRACE_EVENT(name) base::TraceEvent(name)
 #else
 #  define TRACE_START()
 #  define TRACE_SCOPE(name, ...)
@@ -345,10 +376,11 @@ do {                                                                            
 do {                                  \
   call;                               \
 } while(0)
-#define TRACE_BLOCK(name, block, ...) \
+#  define TRACE_BLOCK(name, block, ...) \
 do {                                  \
  block;                               \
 } while(0)
+#  define TRACE_EVENT(name)
 #endif
 
 
