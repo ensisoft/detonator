@@ -935,6 +935,8 @@ void PlayWindow::Shutdown()
     if (mGameLibSteGlobalThreadPool)
         mGameLibSteGlobalThreadPool(nullptr);
 
+    mInteropRuntime.Reset();
+
     mLibrary.unload();
     mGameLibCreateEngine = nullptr;
     mGameLibSetGlobalLogger = nullptr;
@@ -1713,6 +1715,15 @@ bool PlayWindow::LoadLibrary()
         return false;
     }
 
+    auto* CreateRuntime = (Gamestudio_CreateRuntimeFunc)mLibrary.resolve("Gamestudio_CreateRuntime");
+    if (!CreateRuntime)
+    {
+        Barf("Failed to resolve CreateRuntime library entry point.");
+        ERROR("Failed to resolve CreateRuntime library entry point. [file='%1', error='%2']",
+              library, mLibrary.errorString());
+        return false;
+    }
+
     mGameLibCreateEngine    = (Gamestudio_CreateEngineFunc)mLibrary.resolve("Gamestudio_CreateEngine");
     mGameLibSetGlobalLogger = (Gamestudio_SetGlobalLoggerFunc)mLibrary.resolve("Gamestudio_SetGlobalLogger");
     mGameLibSteGlobalThreadPool = (Gamestudio_SetGlobalThreadPoolFunc)mLibrary.resolve("Gamestudio_SetGlobalThreadPool");
@@ -1728,6 +1739,9 @@ bool PlayWindow::LoadLibrary()
         return false;
     }
 
+    interop::Runtime runtime;
+    CreateRuntime(&runtime.get_ref());
+
     // right now we only have a UI for toggling the debug logs,
     // so keep everything else turned on
     const auto log_debug = GetValue(mUI.actionToggleDebugLog);
@@ -1738,7 +1752,6 @@ bool PlayWindow::LoadLibrary()
 
     mGameLibSteGlobalThreadPool(mThreadPool.get());
 
-
     std::unique_ptr<engine::Engine> engine(mGameLibCreateEngine());
     if (!engine)
     {
@@ -1747,6 +1760,7 @@ bool PlayWindow::LoadLibrary()
         return false;
     }
     mEngine = std::move(engine);
+    mInteropRuntime = std::move(runtime);
     return true;
 }
 

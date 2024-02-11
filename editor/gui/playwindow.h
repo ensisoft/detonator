@@ -162,6 +162,9 @@ namespace gui
         Gamestudio_CreateEngineFunc mGameLibCreateEngine = nullptr;
         Gamestudio_SetGlobalLoggerFunc mGameLibSetGlobalLogger = nullptr;
         Gamestudio_SetGlobalThreadPoolFunc  mGameLibSteGlobalThreadPool = nullptr;
+
+        interop::Runtime mInteropRuntime;
+
         // Qt's Open GL context for the QWindow.
         QOpenGLContext mContext;
         // This is the actual OpenGL renderable surface.

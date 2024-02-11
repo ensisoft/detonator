@@ -23,6 +23,11 @@
 // helper stuff for dependency management for now.
 // see interface.h for more details.
 
+namespace interop {
+    IRuntime::~IRuntime()
+    {}
+}
+
 extern "C" {
 GAMESTUDIO_EXPORT void Gamestudio_CreateFileLoaders(Gamestudio_Loaders* out)
 {
@@ -43,6 +48,28 @@ GAMESTUDIO_EXPORT void Gamestudio_SetGlobalLogger(base::Logger* logger,
 GAMESTUDIO_EXPORT void Gamestudio_SetGlobalThreadPool(base::ThreadPool* pool)
 {
     base::SetGlobalThreadPool(pool);
+}
+
+
+GAMESTUDIO_EXPORT void Gamestudio_CreateRuntime(interop::IRuntime** factory)
+{
+    class Runtime : public interop::IRuntime {
+    public:
+        virtual ~Runtime()
+        {
+            DEBUG("Delete library binary interop runtime.");
+        }
+        Runtime()
+        {
+            DEBUG("Created library binary interop runtime.");
+        }
+        virtual void Release() override
+        {
+            delete this;
+        }
+    private:
+    };
+    *factory = new Runtime();
 }
 
 } // extern "C"
