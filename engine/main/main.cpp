@@ -82,6 +82,7 @@ Gamestudio_CreateEngineFunc        GameLibCreateEngine;
 Gamestudio_CreateFileLoadersFunc   GameLibCreateLoaders;
 Gamestudio_SetGlobalLoggerFunc     GameLibSetGlobalLogger;
 Gamestudio_SetGlobalThreadPoolFunc GameLibSetGlobalThreadPool;
+Gamestudio_CreateRuntimeFunc       GameLibCreateRuntime;
 
 #if defined(POSIX_OS)
 void* application_library;
@@ -601,6 +602,10 @@ int main(int argc, char* argv[])
         GameLibCreateLoaders   = (Gamestudio_CreateFileLoadersFunc)LoadFunction("Gamestudio_CreateFileLoaders");
         GameLibSetGlobalLogger = (Gamestudio_SetGlobalLoggerFunc)LoadFunction("Gamestudio_SetGlobalLogger");
         GameLibSetGlobalThreadPool = (Gamestudio_SetGlobalThreadPoolFunc)LoadFunction("Gamestudio_SetGlobalThreadPool");
+        GameLibCreateRuntime = (Gamestudio_CreateRuntimeFunc) LoadFunction("Gamestudio_CreateRuntime");
+
+        interop::Runtime runtime;
+        GameLibCreateRuntime(&runtime.get_ref());
 
         // we've created the logger object, so pass it to the engine library
         // which has its own copies of the global state.

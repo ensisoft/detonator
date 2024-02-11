@@ -494,6 +494,7 @@ namespace engine
 #  define GAMESTUDIO_API
 #endif
 
+
 // Main interface for bootstrapping/loading the game/app
 extern "C" {
     // return a new app implementation allocated on the free store.
@@ -501,6 +502,81 @@ extern "C" {
 } // extern "C"
 
 typedef engine::Engine* (*Gamestudio_CreateEngineFunc)();
+
+namespace interop {
+    // a pseudo COM interface for binary fire-walling stuff
+    // so that we can (hopefully) avoid issues related to static
+    // etc in several binary / link unit.
+    class IRuntime
+    {
+    public:
+        virtual void Release() = 0;
+    protected:
+        virtual ~IRuntime() = 0;
+    };
+
+    template<typename Type>
+    class Pointer
+    {
+    public:
+        explicit Pointer(Type* object) noexcept
+          : mRuntime(object)
+        {}
+        Pointer() = default;
+        ~Pointer()
+        {
+            if (mRuntime)
+                mRuntime->Release();
+        }
+        Pointer(Pointer&& other)
+           : mRuntime(other.mRuntime)
+        {
+            other.mRuntime = nullptr;
+        }
+        Pointer(const Pointer&) = delete;
+        Pointer& operator=(const Pointer&) = delete;
+
+        inline Pointer& operator=(Pointer&& other)
+        {
+            Pointer tmp(std::move(other));
+            std::swap(mRuntime, tmp.mRuntime);
+            return *this;
+        }
+        inline Type* operator->() noexcept
+        {
+            return mRuntime;
+        }
+        inline const Type* operator->() const noexcept
+        {
+            return mRuntime;
+        }
+        inline Type* get() noexcept
+        {
+            return mRuntime;
+        }
+        inline const Type* get() const noexcept
+        {
+            return mRuntime;
+        }
+        inline Type*& get_ref() noexcept
+        {
+            return mRuntime;
+        }
+        inline void Reset() noexcept
+        {
+            if (mRuntime)
+                mRuntime->Release();
+
+            mRuntime = nullptr;
+        }
+
+    private:
+        Type* mRuntime = nullptr;
+    };
+
+    using Runtime = Pointer<IRuntime>;
+
+} // namespace
 
 // The below interface only exists currently for simplifying
 // the structure of the builds. I.e the dependencies for creating
@@ -517,6 +593,8 @@ struct Gamestudio_Loaders {
 };
 
 extern "C" {
+    GAMESTUDIO_API void Gamestudio_CreateRuntime(interop::IRuntime**);
+
     GAMESTUDIO_API void Gamestudio_CreateFileLoaders(Gamestudio_Loaders* out);
     GAMESTUDIO_API void Gamestudio_SetGlobalLogger(base::Logger* logger, bool debug_log, bool warn_log,  bool info_log, bool err_log);
     GAMESTUDIO_API void Gamestudio_SetGlobalThreadPool(base::ThreadPool* pool);
@@ -525,3 +603,4 @@ extern "C" {
 typedef void (*Gamestudio_CreateFileLoadersFunc)(Gamestudio_Loaders*);
 typedef void (*Gamestudio_SetGlobalLoggerFunc)(base::Logger*, bool, bool, bool, bool);
 typedef void (*Gamestudio_SetGlobalThreadPoolFunc)(base::ThreadPool*);
+typedef void (*Gamestudio_CreateRuntimeFunc)(interop::IRuntime**);
