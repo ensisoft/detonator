@@ -63,11 +63,29 @@ GAMESTUDIO_EXPORT void Gamestudio_CreateRuntime(interop::IRuntime** factory)
         {
             DEBUG("Created library binary interop runtime.");
         }
+        virtual void AddRealThread() override
+        {
+            mThreadPool.AddRealThread();
+        }
+        virtual void AddMainThread() override
+        {
+            mThreadPool.AddMainThread();
+        }
+        virtual void ShutdownThreads() override
+        {
+            mThreadPool.ExecuteMainThread();
+        }
+        virtual void ExecuteMainThread() override
+        {
+            mThreadPool.ExecuteMainThread();
+        }
+
         virtual void Release() override
         {
             delete this;
         }
     private:
+        base::ThreadPool mThreadPool;
     };
     *factory = new Runtime();
 }
