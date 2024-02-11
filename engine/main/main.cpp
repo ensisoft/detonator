@@ -81,7 +81,6 @@ extern "C" _declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
 Gamestudio_CreateEngineFunc        GameLibCreateEngine;
 Gamestudio_CreateFileLoadersFunc   GameLibCreateLoaders;
 Gamestudio_SetGlobalLoggerFunc     GameLibSetGlobalLogger;
-Gamestudio_SetGlobalThreadPoolFunc GameLibSetGlobalThreadPool;
 Gamestudio_CreateRuntimeFunc       GameLibCreateRuntime;
 
 #if defined(POSIX_OS)
@@ -580,13 +579,6 @@ int main(int argc, char* argv[])
             base::EnableTracing(trace_enabled_counter == 1);
         }
 
-        // initialize the thread pool
-        base::ThreadPool global_thread_pool;
-        global_thread_pool.AddRealThread();
-        global_thread_pool.AddRealThread();
-        global_thread_pool.AddMainThread();
-        base::SetGlobalThreadPool(&global_thread_pool);
-
         std::string library;
         std::string content;
         std::string title;
@@ -601,18 +593,18 @@ int main(int argc, char* argv[])
         GameLibCreateEngine    = (Gamestudio_CreateEngineFunc)LoadFunction("Gamestudio_CreateEngine");
         GameLibCreateLoaders   = (Gamestudio_CreateFileLoadersFunc)LoadFunction("Gamestudio_CreateFileLoaders");
         GameLibSetGlobalLogger = (Gamestudio_SetGlobalLoggerFunc)LoadFunction("Gamestudio_SetGlobalLogger");
-        GameLibSetGlobalThreadPool = (Gamestudio_SetGlobalThreadPoolFunc)LoadFunction("Gamestudio_SetGlobalThreadPool");
         GameLibCreateRuntime = (Gamestudio_CreateRuntimeFunc) LoadFunction("Gamestudio_CreateRuntime");
 
         interop::Runtime runtime;
         GameLibCreateRuntime(&runtime.get_ref());
+        runtime->AddRealThread();
+        runtime->AddRealThread();
+        runtime->AddMainThread();
 
         // we've created the logger object, so pass it to the engine library
         // which has its own copies of the global state.
         GameLibSetGlobalLogger(&logger,
             global_log_debug, global_log_warn, global_log_info, global_log_error);
-
-        GameLibSetGlobalThreadPool(&global_thread_pool);
 
         // The implementations of these types are built into the engine
         // so the engine needs to give this application a pointer back.
@@ -901,7 +893,7 @@ int main(int argc, char* argv[])
             TRACE_START();
             TRACE_ENTER(Frame);
 
-            TRACE_CALL("ThreadPool::ExecuteMainThread", global_thread_pool.ExecuteMainThread());
+            TRACE_CALL("ThreadPool::ExecuteMainThread", runtime->ExecuteMainThread());
 
             // indicate beginning of the main loop iteration.
             TRACE_CALL("Engine::BeginMainLoop", engine->BeginMainLoop());
@@ -1029,7 +1021,7 @@ int main(int argc, char* argv[])
         engine->Save();
         engine->Shutdown();
 
-        global_thread_pool.Shutdown();
+        runtime->ShutdownThreads();
 
         engine.reset();
 
