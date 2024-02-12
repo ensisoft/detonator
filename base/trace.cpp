@@ -17,6 +17,7 @@
 #include "config.h"
 
 #include <atomic>
+#include <chrono>
 
 #include "base/assert.h"
 #include "base/trace.h"
@@ -102,6 +103,19 @@ void EnableTracing(bool on_off)
 {
     enable_tracing = on_off;
 }
+
+// static
+unsigned int TraceLog::GetTime()
+{
+    using clock = std::chrono::high_resolution_clock;
+
+    static auto start_time = clock::now();
+
+    const auto now = clock::now();
+    const auto gone = now - start_time;
+    return std::chrono::duration_cast<std::chrono::microseconds>(gone).count();
+}
+
 
 TextFileTraceWriter::TextFileTraceWriter(const std::string& file)
 {

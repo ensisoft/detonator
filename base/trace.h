@@ -20,7 +20,6 @@
 
 #include <vector>
 #include <string>
-#include <chrono>
 #include <cstdio>
 #include <exception>
 #include <mutex>
@@ -104,7 +103,6 @@ namespace base
         explicit TraceLog(size_t capacity, size_t threadId = 0) noexcept
         {
             mCallTrace.resize(capacity);
-            mStartTime  = std::chrono::high_resolution_clock::now();
             mThreadId   = threadId;
         }
         virtual void Start() override
@@ -185,19 +183,12 @@ namespace base
         { return mCallTrace[index]; }
 
     private:
-        unsigned GetTime() const
-        {
-            using clock = std::chrono::high_resolution_clock;
-            const auto now = clock::now();
-            const auto gone = now - mStartTime;
-            return std::chrono::duration_cast<std::chrono::microseconds>(gone).count();
-        }
+        static unsigned GetTime();
     private:
         std::vector<TraceEntry> mCallTrace;
         std::size_t mTraceIndex = 0;
         std::size_t mStackDepth = 0;
         std::size_t mThreadId   = 0;
-        std::chrono::high_resolution_clock::time_point mStartTime;
         std::vector<std::string> mDynamicStrings;
         std::vector<TraceEvent> mTraceEvents;
     };
