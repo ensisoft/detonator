@@ -25,6 +25,7 @@
 #include <vector>
 #include <unordered_map>
 #include <memory>
+#include <mutex>
 
 #if defined(POSIX_OS)
 #  include <sys/types.h>
@@ -393,6 +394,8 @@ public:
     // gfx::resource loader impl
     virtual gfx::ResourceHandle LoadResource(const gfx::Loader::ResourceDesc& desc) override
     {
+        std::lock_guard<std::mutex> lock(mLoaderLock);
+
         const auto& uri = desc.uri;
 
         const auto& filename = ResolveURI(uri);
@@ -411,6 +414,8 @@ public:
     // GameDataLoader impl
     virtual EngineDataHandle LoadEngineDataUri(const std::string& uri) const override
     {
+        std::lock_guard<std::mutex> lock(mLoaderLock);
+
         const auto& filename = ResolveURI(uri);
         auto it = mGameDataBufferCache.find(filename);
         if (it != mGameDataBufferCache.end())
@@ -426,6 +431,8 @@ public:
     }
     virtual EngineDataHandle LoadEngineDataFile(const std::string& filename) const override
     {
+        std::lock_guard<std::mutex> lock(mLoaderLock);
+
         // expect this to be a path relative to the content path
         // this loading function is only used to load the Lua files
         // which don't yet proper resource URIs. When that is fixed
@@ -446,6 +453,8 @@ public:
     }
     virtual EngineDataHandle LoadEngineDataId(const std::string& id) const override
     {
+        std::lock_guard<std::mutex> lock(mLoaderLock);
+
         if (const auto* uri = base::SafeFind(mObjectIdUriMap, id))
         {
             const auto& filename = ResolveURI(*uri);
@@ -469,6 +478,8 @@ public:
     virtual audio::SourceStreamHandle OpenAudioStream(const std::string& uri,
         AudioIOStrategy strategy, bool enable_file_caching) const override
     {
+        std::lock_guard<std::mutex> lock(mLoaderLock);
+
         // always cache on this GARBAGE PLATFORM since the filesystem
         // is an absolute JOKE.
 #if __EMSCRIPTEN__
@@ -565,6 +576,8 @@ public:
     // game::Loader impl
     virtual game::TilemapDataHandle LoadTilemapData(const game::Loader::TilemapDataDesc& desc) const override
     {
+        std::lock_guard<std::mutex> lock(mLoaderLock);
+
         const auto& filename = ResolveURI(desc.uri);
 
         std::vector<char> buffer;
@@ -606,9 +619,11 @@ public:
     { mContentPath = path; }
     virtual void PreloadFiles() override
     {
+        std::lock_guard<std::mutex> lock(mLoaderLock);
+
         DEBUG("Preloading file buffers.");
         const char* dirs[] = {
-          "audio", "fonts", "lua", "textures", "ui/style", "shaders/es2"
+          "audio", "fonts", "lua", "textures", "ui/style", "ui/keymap", "shaders/es2"
         };
         size_t bytes_loaded = 0;
         for (size_t i=0; i<base::ArraySize(dirs); ++i)
@@ -701,6 +716,8 @@ private:
     // we have no use for the actual object so the whole thing can be
     // simplified to juse ID->URI mapping.
     std::unordered_map<std::string, std::string> mObjectIdUriMap;
+
+    mutable std::mutex mLoaderLock;
 };
 
 // static
