@@ -104,6 +104,10 @@ target_link_options(UnitTestThread PRIVATE -sWASM)
 target_link_options(UnitTestThread PRIVATE -sALLOW_MEMORY_GROWTH)
 target_link_options(UnitTestThread PRIVATE -pthread)
 
+# Shitscripten shitting itself on string decode
+# https://github.com/emscripten-core/emscripten/issues/18034
+target_link_options(UnitTestThread PRIVATE -sTEXTDECODER=0)
+
 # You can't just spawn a thread in WASM but the thread (web worker)
 # creation must happen from the main thread's event loop (or something)
 # So if the main thread creates a thread and waits/joins it without ever
@@ -230,6 +234,11 @@ target_link_options(GameEngine PRIVATE -sEXPORTED_FUNCTIONS=_main,_gui_set_flag)
 target_link_options(GameEngine PRIVATE -sEXPORTED_RUNTIME_METHODS=ccall)
 target_link_options(GameEngine PRIVATE -sUSE_WEBGL2)
 target_link_options(GameEngine PRIVATE -sFULL_ES3)
+
+# Shitscripten shitting itself on string decode
+# https://github.com/emscripten-core/emscripten/issues/18034
+target_link_options(GameEngine PRIVATE -sTEXTDECODER=0)
+
 # SDL is needed for the SDL audio backend
 #target_link_options(GameEngine PRIVATE -sUSE_SDL=2)
 
