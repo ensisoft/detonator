@@ -26,6 +26,7 @@
 
 #include "base/platform.h"
 #include "base/assert.h"
+#include "base/snafu.h"
 
 namespace base
 {
@@ -50,7 +51,7 @@ namespace base
     public:
         virtual ~TraceWriter() = default;
         virtual void Write(const TraceEntry& entry) = 0;
-        virtual void Write(const TraceEvent& event) = 0;
+        virtual void Write(const struct TraceEvent& event) = 0;
         virtual void Flush() = 0;
     private:
     };
@@ -152,7 +153,7 @@ namespace base
         }
         virtual void Event(std::string name) override
         {
-            TraceEvent event;
+            struct TraceEvent event;
             event.name = std::move(name);
             event.time = GetTime();
             event.tid  = mThreadId;
@@ -190,7 +191,7 @@ namespace base
         std::size_t mStackDepth = 0;
         std::size_t mThreadId   = 0;
         std::vector<std::string> mDynamicStrings;
-        std::vector<TraceEvent> mTraceEvents;
+        std::vector<struct TraceEvent> mTraceEvents;
     };
 
     class TextFileTraceWriter : public TraceWriter
@@ -205,7 +206,7 @@ namespace base
        ~TextFileTraceWriter() noexcept;
         TextFileTraceWriter() = delete;
         virtual void Write(const TraceEntry& entry) override;
-        virtual void Write(const TraceEvent& event) override;
+        virtual void Write(const struct TraceEvent& event) override;
         virtual void Flush() override;
         TextFileTraceWriter& operator=(const TextFileTraceWriter&) = delete;
     private:
@@ -225,7 +226,7 @@ namespace base
        ~ChromiumTraceJsonWriter() noexcept;
         ChromiumTraceJsonWriter();
         virtual void Write(const TraceEntry& entry) override;
-        virtual void Write(const TraceEvent& event) override;
+        virtual void Write(const struct TraceEvent& event) override;
         virtual void Flush() override;
         ChromiumTraceJsonWriter& operator=(const ChromiumTraceJsonWriter&) = delete;
     private:
@@ -245,7 +246,7 @@ namespace base
             std::lock_guard<std::mutex> lock(mMutex);
             mWriter.Write(entry);
         }
-        virtual void Write(const TraceEvent& event) override
+        virtual void Write(const struct TraceEvent& event) override
         {
             std::lock_guard<std::mutex> lock(mMutex);
             mWriter.Write(event);
