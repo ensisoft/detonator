@@ -14,6 +14,7 @@
 #undef GetCurrentTime
 #undef DrawState
 #undef near
+#undef TraceEvent
 
 // this is needed by some headers such as zlib
 // #undef far
