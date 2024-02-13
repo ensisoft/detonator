@@ -138,7 +138,7 @@ namespace gui
         void Barf(const std::string& msg);
         bool LoadLibrary();
         void ToggleTracing(bool enable);
-        void InitializeEngine(bool preview);
+        void InitializeEngine(const engine::Engine::InitParams& init);
 
     private:
         class WindowContext;

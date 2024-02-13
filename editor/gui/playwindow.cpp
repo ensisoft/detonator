@@ -1142,7 +1142,15 @@ void PlayWindow::InitGame(bool clean_game_home)
         env.game_home          = app::ToUtf8(QDir::toNativeSeparators(game_home));
         mEngine->SetEnvironment(env);
 
-        InitializeEngine(false);
+        engine::Engine::InitParams params;
+        params.editing_mode     = true; // allow changes to "static" content take place.
+        params.preview_mode     = false;
+        params.game_script      = app::ToUtf8(settings.game_script);
+        params.application_name = app::ToUtf8(settings.application_name);
+        params.context          = mWindowContext.get();
+        params.surface_width    = mSurface->width();
+        params.surface_height   = mSurface->height();
+        InitializeEngine(params);
 
         {
             engine::Engine::LoadingScreenSettings loading_screen_settings;
@@ -1236,7 +1244,15 @@ void PlayWindow::InitPreview(const QString& script)
         // env.game_home          = ...
         mEngine->SetEnvironment(env);
 
-        InitializeEngine(true);
+        engine::Engine::InitParams params;
+        params.editing_mode     = true; // allow changes to "static" content take place.
+        params.preview_mode     = true; // yes, we're doing preview now!
+        params.game_script      = app::ToUtf8(script);
+        params.application_name = app::ToUtf8(settings.application_name);
+        params.context          = mWindowContext.get();
+        params.surface_width    = mSurface->width();
+        params.surface_height   = mSurface->height();
+        InitializeEngine(params);
 
         if (!mEngine->Load())
         {
@@ -1783,19 +1799,9 @@ void PlayWindow::ToggleTracing(bool enable)
     }
 }
 
-void PlayWindow::InitializeEngine(bool preview)
+void PlayWindow::InitializeEngine(const engine::Engine::InitParams& init)
 {
     const auto& settings = mWorkspace.GetProjectSettings();
-
-    engine::Engine::InitParams params;
-    params.editing_mode     = true; // allow changes to "static" content take place.
-    params.preview_mode     = preview;
-    params.game_script      = app::ToUtf8(settings.game_script);
-    params.application_name = app::ToUtf8(settings.application_name);
-    params.context          = mWindowContext.get();
-    params.surface_width    = mSurface->width();
-    params.surface_height   = mSurface->height();
-
     engine::Engine::EngineConfig config;
     config.ticks_per_second                = settings.ticks_per_second;
     config.updates_per_second              = settings.updates_per_second;
@@ -1823,7 +1829,7 @@ void PlayWindow::InitializeEngine(bool preview)
         config.mouse_cursor.units = engine::Engine::EngineConfig::MouseCursorUnits::Units;
     else BUG("Unhandled mouse cursor/pointer units.");
 
-    mEngine->Init(params, config);
+    mEngine->Init(init, config);
 }
 
 } // namespace
