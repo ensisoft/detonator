@@ -301,6 +301,7 @@ public:
         mResourceLoader->SetApplicationPath("/");
         mResourceLoader->SetContentPath("/" + content);
         mResourceLoader->LoadResourceLoadingInfo(content_json);
+        mResourceLoader->PreloadFiles();
 
         mThreadPool = std::make_unique<base::ThreadPool>();
         mThreadPool->AddRealThread();
