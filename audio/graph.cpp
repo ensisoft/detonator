@@ -112,7 +112,7 @@ void GraphClass::Preload(const Loader& loader, const PreloadParams& params) cons
         const auto* file_caching = GetOptionalArg<bool>(element.args, "file_caching", element.name);
         const auto* pcm_caching = GetOptionalArg<bool>(element.args, "pcm_caching", element.name);
 
-        DEBUG("Preloading audio file '%1'", file->GetFileName());
+        DEBUG("Probing audio file '%1'", file->GetFileName());
 
         audio::Element::PrepareParams prep;
         prep.enable_pcm_caching = params.enable_pcm_caching;
@@ -126,6 +126,8 @@ void GraphClass::Preload(const Loader& loader, const PreloadParams& params) cons
 
         if (pcm_caching && *pcm_caching)
         {
+            DEBUG("Decoding audio file '%1'", file->GetFileName());
+
             BufferAllocator allocator;
             BufferHandle buffer;
             std::queue<std::unique_ptr<Event>> events;
