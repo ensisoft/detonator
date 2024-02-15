@@ -23,6 +23,7 @@
 #include <cstdio>
 #include <exception>
 #include <mutex>
+#include <forward_list>
 
 #include "base/platform.h"
 #include "base/assert.h"
@@ -168,8 +169,8 @@ namespace base
 
         virtual const char* StoreString(std::string str) override
         {
-            mDynamicStrings.push_back(std::move(str));
-            return mDynamicStrings.back().c_str();
+            mDynamicStrings.push_front(std::move(str));
+            return mDynamicStrings.front().c_str();
         }
 
         inline void RenameBlock(const char* name, unsigned index) noexcept
@@ -190,7 +191,7 @@ namespace base
         std::size_t mTraceIndex = 0;
         std::size_t mStackDepth = 0;
         std::size_t mThreadId   = 0;
-        std::vector<std::string> mDynamicStrings;
+        std::forward_list<std::string> mDynamicStrings;
         std::vector<struct TraceEvent> mTraceEvents;
     };
 
