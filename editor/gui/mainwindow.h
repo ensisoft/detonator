@@ -191,6 +191,7 @@ namespace gui
         void OpenExternalAudio(const QString& file);
         void OpenNewWidget(gui::MainWidget* widget);
         bool FocusWidget(const QString& id);
+        void ActOnWidget(const QString& action);
         void RefreshWidget();
         void RefreshWidgetActions();
         void LaunchScript(const QString& id);
