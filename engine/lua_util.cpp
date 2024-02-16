@@ -147,6 +147,22 @@ namespace engine
         [](int min, int max) {
             return math::rand(min, max);
         });
+    util["DistanceIsLess"] = [](const glm::vec2& a, const glm::vec2& b, float maximum) {
+        const auto& diff = a - b;
+        return diff.x*diff.x + diff.y*diff.y < maximum*maximum;
+    };
+    util["DistanceIsLessOrEqual"] = [](const glm::vec2& a, const glm::vec2& b, float maximum) {
+        const auto& diff = a - b;
+        return diff.x*diff.x + diff.y*diff.y <= maximum*maximum;
+    };
+    util["DistanceIsMore"] = [](const glm::vec2& a, const glm::vec2& b, float minimum) {
+        const auto& diff = a - b;
+        return diff.x*diff.x + diff.y*diff.y > minimum*minimum;
+    };
+    util["DistanceIsMoreOrEqual"] = [](const glm::vec2& a, const glm::vec2& b, float minimum) {
+        const auto& diff = a - b;
+        return diff.x*diff.x + diff.y*diff.y >= minimum*minimum;
+    };
 
     // see comments at RandomEngine about why this is done.
     util["RandomSeed"] = &RandomEngine::SeedGlobal;

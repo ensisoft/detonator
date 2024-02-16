@@ -266,6 +266,14 @@ void InitLuaDoc()
     DOC_TABLE("gfx.Material");
 
     DOC_TABLE("util");
+    DOC_FUNCTION_3("bool", "DistanceIsLess", "Check whether the distance between two points is less than the maximum.",
+                   "glm.vec2", "a", "glm.vec2", "b", "float", "maximum");
+    DOC_FUNCTION_3("bool", "DistanceIsLessOrEqual", "Check whether the distance between two points is less or equal to maximum",
+                   "glm.vec2", "a", "glm.vec2", "b", "float", "maximum");
+    DOC_FUNCTION_3("bool", "DistanceIsMore", "Check whether the distance between two points is more than the minimum.",
+                   "glm.vec2", "a", "glm.vec2", "b", "float", "minimum");
+    DOC_FUNCTION_3("bool", "DistanceIsMoreOrEqual", "Check whether the distance between two points is more or equal to minimum.",
+                   "glm.vec2", "a", "glm.vec2", "b", "float", "minimum");
     DOC_FUNCTION_1("float", "GetRotationFromMatrix", "Get the rotational component from the given matrix.",
                  "glm.mat4", "matrix");
     DOC_FUNCTION_1("glm.vec2", "GetScaleFromMatrix", "Get the scale component from the given matrix.",
