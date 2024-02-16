@@ -1376,6 +1376,22 @@ void EntityWidget::on_actionNodeDelete_triggered()
         RealizeEntityChange(mState.entity);
     }
 }
+
+void EntityWidget::on_actionNodeCut_triggered()
+{
+    if (auto* node = GetCurrentNode())
+    {
+        emit RequestAction("cut");
+    }
+}
+void EntityWidget::on_actionNodeCopy_triggered()
+{
+    if (auto* node = GetCurrentNode())
+    {
+        emit RequestAction("copy");
+    }
+}
+
 void EntityWidget::on_actionNodeVarRef_triggered()
 {
     if (const auto* node = GetCurrentNode())
@@ -2823,6 +2839,8 @@ void EntityWidget::on_tree_customContextMenuRequested(QPoint)
     SetEnabled(mUI.actionNodeComment, node != nullptr);
     SetEnabled(mUI.actionNodeRename, node != nullptr);
     SetEnabled(mUI.actionNodeRenameAll, count > 0);
+    SetEnabled(mUI.actionNodeCopy, node != nullptr);
+    SetEnabled(mUI.actionNodeCut, node != nullptr);
 
     QMenu menu(this);
     menu.addAction(mUI.actionNodeMoveUpLayer);
@@ -2834,6 +2852,9 @@ void EntityWidget::on_tree_customContextMenuRequested(QPoint)
     menu.addSeparator();
     menu.addAction(mUI.actionNodeVarRef);
     menu.addAction(mUI.actionNodeComment);
+    menu.addSeparator();
+    menu.addAction(mUI.actionNodeCut);
+    menu.addAction(mUI.actionNodeCopy);
     menu.addSeparator();
     menu.addAction(mUI.actionNodeDelete);
     menu.exec(QCursor::pos());

@@ -4143,6 +4143,30 @@
     <string>Rename all entity nodes</string>
    </property>
   </action>
+  <action name="actionNodeCopy">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/copy.png</normaloff>:/16x16_ico_png/copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy selected node</string>
+   </property>
+  </action>
+  <action name="actionNodeCut">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/cut.png</normaloff>:/16x16_ico_png/cut.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cut</string>
+   </property>
+   <property name="toolTip">
+    <string>Cut selected node</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

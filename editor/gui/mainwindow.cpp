@@ -3056,6 +3056,7 @@ ChildWindow* MainWindow::ShowWidget(MainWidget* widget, bool new_window)
         connect(widget, &MainWidget::RequestScriptLaunch, this, &MainWindow::LaunchScript);
         connect(widget, &MainWidget::RefreshActions,      this, &MainWindow::RefreshWidgetActions);
         connect(widget, &MainWidget::FocusWidget,         this, &MainWindow::FocusWidget);
+        connect(widget, &MainWidget::RequestAction,       this, &MainWindow::ActOnWidget);
         widget->setProperty("_main_window_connected_", true);
     }
 
@@ -3269,6 +3270,17 @@ bool MainWindow::FocusWidget(const QString& id)
         }
     }
     return false;
+}
+
+void MainWindow::ActOnWidget(const QString& action)
+{
+    auto* widget = qobject_cast<MainWidget*>(sender());
+
+    if (action == "cut")
+        widget->Cut(mClipboard);
+    else if (action == "copy")
+        widget->Copy(mClipboard);
+    else BUG("Unhandled widget action");
 }
 
 void MainWindow::ImportFiles(const QStringList& files)
