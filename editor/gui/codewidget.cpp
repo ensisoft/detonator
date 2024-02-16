@@ -333,7 +333,13 @@ void TextEditor::keyPressEvent(QKeyEvent* event)
         }
     }
 
-    if (ctrl && (key == Qt::Key_F))
+    if (ctrl && (key == Qt::Key_D))
+    {
+        QTextCursor cursor = textCursor();
+        cursor.deleteChar();
+        setTextCursor(cursor);
+    }
+    else if(ctrl && (key == Qt::Key_F))
     {
         QTextCursor cursor = textCursor();
         cursor.movePosition(QTextCursor::MoveOperation::NextCharacter);
