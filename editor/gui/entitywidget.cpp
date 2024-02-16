@@ -868,7 +868,7 @@ void EntityWidget::Copy(Clipboard& clipboard) const
         }, json, node);
 
         clipboard.Clear();
-        clipboard.SetType("application/json/entity");
+        clipboard.SetType("application/json/entity/node");
         clipboard.SetText(json.ToString());
         NOTE("Copied JSON to application clipboard.");
     }
@@ -880,9 +880,9 @@ void EntityWidget::Paste(const Clipboard& clipboard)
         NOTE("Clipboard is empty.");
         return;
     }
-    else if (clipboard.GetType() != "application/json/entity")
+    else if (clipboard.GetType() != "application/json/entity/node")
     {
-        NOTE("No entity JSON data found in clipboard.");
+        NOTE("No entity node JSON data found in clipboard.");
         return;
     }
 
