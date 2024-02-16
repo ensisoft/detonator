@@ -1593,13 +1593,13 @@ EntityClass& EntityClass::operator=(const EntityClass& other)
     return *this;
 }
 
-Entity::Entity(const std::shared_ptr<const EntityClass>& klass)
-  : mClass(klass)
+Entity::Entity(std::shared_ptr<const EntityClass> klass)
+  : mClass(std::move(klass))
   , mInstanceId(FastId(10))
-  , mInstanceTag(klass->GetTag())
-  , mLifetime(klass->GetLifetime())
-  , mFlags(klass->GetFlags())
-  , mIdleTrackId(klass->GetIdleTrackId())
+  , mInstanceTag(mClass->GetTag())
+  , mLifetime(mClass->GetLifetime())
+  , mFlags(mClass->GetFlags())
+  , mIdleTrackId(mClass->GetIdleTrackId())
 {
     std::unordered_map<const EntityNodeClass*, EntityNode*> map;
 
@@ -1623,9 +1623,9 @@ Entity::Entity(const std::shared_ptr<const EntityClass>& klass)
     );
 
     // assign the script variables.
-    for (size_t i=0; i<klass->GetNumScriptVars(); ++i)
+    for (size_t i=0; i<mClass->GetNumScriptVars(); ++i)
     {
-        auto var = klass->GetSharedScriptVar(i);
+        auto var = mClass->GetSharedScriptVar(i);
         if (!var->IsReadOnly())
             mScriptVars.push_back(*var);
     }
@@ -2150,7 +2150,7 @@ const ScriptVar* Entity::FindScriptVarById(const std::string& id) const
 }
 
 std::unique_ptr<Entity> CreateEntityInstance(std::shared_ptr<const EntityClass> klass)
-{ return std::make_unique<Entity>(klass); }
+{ return std::make_unique<Entity>(std::move(klass)); }
 
 std::unique_ptr<Entity> CreateEntityInstance(const EntityClass& klass)
 { return CreateEntityInstance(std::make_shared<const EntityClass>(klass)); }

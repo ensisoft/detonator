@@ -2002,7 +2002,7 @@ namespace game
         // Construct a new entity with the initial state based
         // on the entity class object's state.
         explicit Entity(const EntityArgs& args);
-        explicit Entity(const std::shared_ptr<const EntityClass>& klass);
+        explicit Entity(std::shared_ptr<const EntityClass> klass);
         explicit Entity(const EntityClass& klass);
         Entity(const Entity& other) = delete;
         
