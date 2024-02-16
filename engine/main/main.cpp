@@ -327,33 +327,38 @@ void LoadWindowState(const std::string& file, wdk::Window& window)
         return;
     }
 
+    const auto& mode = wdk::GetCurrentVideoMode();
+
     unsigned surface_width = 0;
     unsigned surface_height = 0;
     int window_xpos = 0;
     int window_ypos = 0;
-    base::JsonReadSafe(json["window"], "width",  &surface_width);
-    base::JsonReadSafe(json["window"], "height", &surface_height);
-    base::JsonReadSafe(json["window"], "xpos",   &window_xpos);
-    base::JsonReadSafe(json["window"], "ypos",   &window_ypos);
-    DEBUG("Previous window state %1x%2 @ %3%,%4.", surface_width, surface_height, window_xpos, window_ypos);
+    if (base::JsonReadSafe(json["window"], "width",  &surface_width) &&
+        base::JsonReadSafe(json["window"], "height", &surface_height))
+    {
+        DEBUG("Previous window size %1x%2.", surface_width, surface_height);
+        if (surface_width && surface_height)
+        {
+            surface_width  = std::min(mode.xres, surface_width);
+            surface_height = std::min(mode.yres, surface_height);
+            if ((surface_width != window.GetSurfaceWidth()) || (surface_height != window.GetSurfaceHeight()))
+                window.SetSize(surface_width, surface_height);
+        }
+    }
 
-    // try to relocate the window in case the current coordinates
-    // would place it offscreen.
-    const auto& mode = wdk::GetCurrentVideoMode();
-    if (window_xpos >= mode.xres)
-        window_xpos = 0;
-    if (window_ypos >= mode.yres)
-        window_ypos = 0;
-
-    window.Move(window_xpos, window_ypos);
-
-    surface_width  = std::min(mode.xres, surface_width);
-    surface_height = std::min(mode.yres, surface_height);
-    ASSERT(surface_width && surface_height);
-    if ((surface_width != window.GetSurfaceWidth()) ||
-        (surface_height != window.GetSurfaceHeight()))
-        window.SetSize(surface_width, surface_height);
-
+    if (base::JsonReadSafe(json["window"], "xpos",   &window_xpos) &&
+        base::JsonReadSafe(json["window"], "ypos",   &window_ypos))
+    {
+        DEBUG("Previous window pos @ %1,%2.", window_xpos, window_ypos);
+        // try to relocate the window in case the current coordinates
+        // would place it offscreen.
+        if (window_xpos >= mode.xres)
+            window_xpos = 0;
+        if (window_ypos >= mode.yres)
+            window_ypos = 0;
+        window.Move(window_xpos, window_ypos);
+    }
+    
     ProcessEvents(window);
 }
 
