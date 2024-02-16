@@ -5852,7 +5852,7 @@
       },
       "id": "IgheUebp5E",
       "idle_track": "",
-      "lifetime": 1.0,
+      "lifetime": 0.5,
       "name": "Rocket Explosion",
       "nodes": [
         {
@@ -5889,7 +5889,7 @@
               "y": 0.0,
               "z": 0.0
             },
-            "timescale": 1.0
+            "timescale": 2.0
           },
           "flags": {
             "VisibleInEditor": true
@@ -5909,127 +5909,6 @@
             "y": 2900.0
           },
           "tag": ""
-        },
-        {
-          "class": "e5bEYdqnYl",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "8exJylNDfi",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": true,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "HyJsrevpdz",
-            "material_params": [
-              {
-                "name": "kBaseColor",
-                "value": {
-                  "a": 1.0,
-                  "b": 0.04563973471522331,
-                  "g": 0.3948424458503723,
-                  "r": 0.9398947358131409
-                }
-              }
-            ],
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "q": 1.0,
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "timescale": 10.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Copy of Node 1",
-          "position": {
-            "x": 0.0,
-            "y": -0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 1000.0,
-            "y": 1000.0
-          },
-          "tag": ""
-        },
-        {
-          "class": "lUDaAiKaCE",
-          "drawable_item": {
-            "depth": 1.0,
-            "drawable": "4Ckmwoylp6",
-            "flags": {
-              "DepthTest": false,
-              "DoubleSided": false,
-              "FlipHorizontally": false,
-              "FlipVertically": false,
-              "PP_EnableBloom": true,
-              "RestartDrawable": false,
-              "UpdateDrawable": true,
-              "UpdateMaterial": true,
-              "VisibleInGame": true
-            },
-            "layer": 0,
-            "linewidth": 1.0,
-            "material": "HyJsrevpdz",
-            "offset": {
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "renderpass": "DrawColor",
-            "renderproj": "Orthographic",
-            "renderstyle": "Solid",
-            "renderview": "AxisAligned",
-            "rotator": {
-              "q": 1.0,
-              "x": 0.0,
-              "y": 0.0,
-              "z": 0.0
-            },
-            "timescale": 6.0
-          },
-          "flags": {
-            "VisibleInEditor": true
-          },
-          "name": "Copy of Node 0",
-          "position": {
-            "x": 0.5,
-            "y": 50.5
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          },
-          "size": {
-            "x": 500.0,
-            "y": 500.0
-          },
-          "tag": ""
         }
       ],
       "render_tree": {
@@ -6037,18 +5916,6 @@
           {
             "node": {
               "id": "p0MH0dy75P"
-            }
-          },
-          {
-            "children": [
-              {
-                "node": {
-                  "id": "lUDaAiKaCE"
-                }
-              }
-            ],
-            "node": {
-              "id": "e5bEYdqnYl"
             }
           }
         ],
@@ -6872,7 +6739,7 @@
       "resource_name": "Enemy/Advanced",
       "resource_ver": 1,
       "script_file": "FXdfIUPul3",
-      "tag": "",
+      "tag": "#enemy",
       "tracks": [
         {
           "actuators": [
@@ -10998,7 +10865,7 @@
         {
           "name": "kBaseColor",
           "value": {
-            "a": 0.4274509847164154,
+            "a": 0.5215686559677124,
             "b": 1.0,
             "g": 1.0,
             "r": 1.0

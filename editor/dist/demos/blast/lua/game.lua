@@ -12,6 +12,7 @@ local developer_ui = false
 
 function LoadGame()
     collectgarbage('setpause', 100)
+    collectgarbage('stop')
 
     Game:DebugPrint('LoadGame')
 
@@ -67,6 +68,7 @@ function EndPlay(scene, map)
 end
 
 function Tick(game_time, dt)
+    collectgarbage('step')
 end
 
 function Update(game_time, dt)
