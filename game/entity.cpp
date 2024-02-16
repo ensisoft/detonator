@@ -28,6 +28,7 @@
 #include "base/assert.h"
 #include "base/utility.h"
 #include "base/hash.h"
+#include "base/trace.h"
 #include "data/reader.h"
 #include "data/writer.h"
 #include "game/treeop.h"
@@ -1604,20 +1605,22 @@ Entity::Entity(const std::shared_ptr<const EntityClass>& klass)
 
     // build render tree, first create instances of all node classes
     // then build the render tree based on the node instances
-    for (size_t i=0; i<mClass->GetNumNodes(); ++i)
-    {
-        auto node_klass = mClass->GetSharedEntityNodeClass(i);
-        auto node_inst  = CreateEntityNodeInstance(node_klass);
-        node_inst->SetEntity(this);
-        map[node_klass.get()] = node_inst.get();
-        mNodes.push_back(std::move(node_inst));
-    }
-    // build render tree by mapping class entity node class objects
-    // to entity node instance objects
-    mRenderTree.FromTree(mClass->GetRenderTree(),
-        [&map](const EntityNodeClass* node) {
-            return map[node];
-        });
+    TRACE_BLOCK("Entity::Entity::BuildRenderTree", 
+        for (size_t i = 0; i < mClass->GetNumNodes(); ++i)
+        {
+            auto node_klass = mClass->GetSharedEntityNodeClass(i);
+            auto node_inst = CreateEntityNodeInstance(node_klass);
+            node_inst->SetEntity(this);
+            map[node_klass.get()] = node_inst.get();
+            mNodes.push_back(std::move(node_inst));
+        }
+        // build render tree by mapping class entity node class objects
+        // to entity node instance objects
+        mRenderTree.FromTree(mClass->GetRenderTree(),
+            [&map](const EntityNodeClass* node) {
+                return map[node];
+            });
+    );
 
     // assign the script variables.
     for (size_t i=0; i<klass->GetNumScriptVars(); ++i)

@@ -18,6 +18,7 @@
 
 #include "base/assert.h"
 #include "base/logging.h"
+#include "base/trace.h"
 #include "audio/device.h"
 #include "audio/format.h"
 #include "audio/element.h"
@@ -270,6 +271,8 @@ void AudioEngine::SetMusicGain(float gain)
 
 bool AudioEngine::PlaySoundEffect(const GraphHandle& handle, unsigned when)
 {
+    TRACE_SCOPE("AudioEngine::PlaySoundEffect");
+
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
     if (!mEnableEffects)
         return true;

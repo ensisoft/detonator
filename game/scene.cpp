@@ -26,6 +26,7 @@
 #include "base/format.h"
 #include "base/logging.h"
 #include "base/threadpool.h"
+#include "base/trace.h"
 #include "base/hash.h"
 #include "data/reader.h"
 #include "data/writer.h"
@@ -1210,6 +1211,8 @@ void Scene::KillEntity(Entity* entity)
 
 Entity* Scene::SpawnEntity(const EntityArgs& args, bool link_to_root)
 {
+    TRACE_SCOPE("Scene::SpawnEntity");
+
     ASSERT(args.klass);
 
     auto* task_pool = args.async_spawn ? base::GetGlobalThreadPool() : nullptr;

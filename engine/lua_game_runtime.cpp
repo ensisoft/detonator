@@ -914,6 +914,8 @@ void LuaRuntime::Update(double game_time, double dt)
             }
             if (entity->TestFlag(Entity::Flags::UpdateEntity))
             {
+                TRACE_SCOPE("Lua::Entity::Update");
+                base::TraceComment(entity->GetClassName());
                 CallLua((*env)["Update"], entity, game_time, dt);
             }
         }
@@ -1273,6 +1275,8 @@ void LuaRuntime::DispatchMouseEvent(const std::string& method, const MouseEvent&
 
 sol::object LuaRuntime::CallCrossEnvMethod(sol::object object, const std::string& method, sol::variadic_args args)
 {
+    TRACE_SCOPE("LuaRuntime::CallCrossEnvMethod");
+
     sol::environment* env = nullptr;
     std::string target_name;
     std::string target_type;
