@@ -17,6 +17,7 @@ function SpawnExplosion(pos, kind)
     args.name = 'explosion'
     args.position = pos
     args.layer = 1
+    args.async = true
     Scene:SpawnEntity(args, true)
 end
 

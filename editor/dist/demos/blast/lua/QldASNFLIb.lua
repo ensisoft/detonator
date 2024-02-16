@@ -16,6 +16,7 @@ function Explode(redmine, mine_pos)
     args.name = 'blast radius'
     args.position = mine_pos
     args.layer = 4
+    args.async = true
     Scene:SpawnEntity(args, true)
 
     -- which enemy ships are close enough to be affected
@@ -26,8 +27,7 @@ function Explode(redmine, mine_pos)
         if enemy:GetTag() == '#enemy' then
             local ship_node = enemy:GetNode(0)
             local ship_pos = ship_node:GetTranslation()
-            local distance = glm.length(mine_pos - ship_pos)
-            if distance <= 550 then
+            if (util.DistanceIsLessOrEqual(ship_pos, mine_pos, 550.0)) then
                 CallMethod(enemy, 'RocketBlast', redmine)
             end
         end
@@ -42,7 +42,6 @@ function Explode(redmine, mine_pos)
     event.message = 'explosion'
     event.to = 'game'
     Game:PostEvent(event)
-
 end
 
 -- Called when the game play begins for a scene.
@@ -73,11 +72,10 @@ function Update(redmine, game_time, dt)
     local num_entities = Scene:GetNumEntities()
     for i = 0, num_entities - 1, 1 do
         local enemy = Scene:GetEntity(i)
-        if enemy:GetClassName() == 'Enemy' then
-            local ship_body = enemy:FindNodeByClassName('Body')
+        if enemy:GetTag() == '#enemy' then
+            local ship_body = enemy:GetNode(0)
             local ship_pos = ship_body:GetTranslation()
-            local distance = glm.length(mine_pos - ship_pos)
-            if distance <= 50 then
+            if (util.DistanceIsLessOrEqual(ship_pos, mine_pos, 50.0)) then
                 Explode(redmine, mine_pos)
                 return
             end

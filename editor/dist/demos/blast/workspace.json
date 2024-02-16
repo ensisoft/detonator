@@ -83,6 +83,7 @@
         "checked_for_packing": 1
     },
     "5LKG2wBRGq": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_UIG3lUtmPm": ""
     },
@@ -217,6 +218,7 @@
         "checked_for_packing": 1
     },
     "HJjE3ufNfH": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "HSH0115zhS": {
@@ -252,7 +254,6 @@
         "__version": 1,
         "checked_for_packing": 1,
         "comment_e5bEYdqnYl": "",
-        "comment_lUDaAiKaCE": "",
         "comment_p0MH0dy75P": ""
     },
     "JC7z1URQ70": {
@@ -300,6 +301,7 @@
         "checked_for_packing": 1
     },
     "N3a4mW4y8f": {
+        "__version": 1,
         "checked_for_packing": 1,
         "elem_ThigMFJO7K_pos_x": 0,
         "elem_ThigMFJO7K_pos_y": 0,
@@ -334,6 +336,7 @@
         "mapping_count": 0
     },
     "OelfGJjBAI": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "OiyvAkqpIL": {
@@ -350,6 +353,7 @@
         "checked_for_packing": 1
     },
     "P2MU282H5r": {
+        "__version": 1,
         "checked_for_packing": 1,
         "elem_XsiMxqXwTg_pos_x": -202,
         "elem_XsiMxqXwTg_pos_y": -52,
@@ -446,7 +450,22 @@
         "checked_for_packing": 1
     },
     "XSYiC5gMBy": {
+        "__version": 1,
         "checked_for_packing": 1,
+        "comment_2EZBxk2B3Q": "",
+        "comment_4o5u3l92vL": "",
+        "comment_5SA63hC5Z2": "",
+        "comment_6nq03R9DmZ": "",
+        "comment_8PzAFGlbeM": "",
+        "comment_Ayv1nxMGYq": "",
+        "comment_DuvPy8gU5I": "",
+        "comment_E2lM8sty72": "",
+        "comment_GGIdUwPv7C": "",
+        "comment_M75Yphs7Kn": "",
+        "comment_pwdBMGRud0": "",
+        "comment_takuX6vO1m": "",
+        "comment_unyS0aUhWg": "",
+        "comment_z0JEsREDqX": "",
         "track_H2yYAsNllZ": {
             "STHQ9Dm3pH": "kv4U4GjrhC",
             "num_timelines": 2,
@@ -647,6 +666,7 @@
         "checked_for_packing": 1
     },
     "gMY5RFLgyd": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_J6Iz1GtmLH": ""
     },
@@ -699,6 +719,7 @@
         "checked_for_packing": 1
     },
     "nIPOk1ImdI": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_PBKj4sTrr2": ""
     },
@@ -720,6 +741,7 @@
         "checked_for_packing": 1
     },
     "pNT0bA0bpw": {
+        "__version": 1,
         "checked_for_packing": 1,
         "comment_2tozdk6Tzf": "",
         "comment_WOIwH6Bxgh": "",
@@ -813,7 +835,7 @@
         "window_has_border": true,
         "window_height": 800,
         "window_mode": "Windowed",
-        "window_vsync": false,
+        "window_vsync": true,
         "window_width": 1200,
         "working_folder": "${workspace}"
     },
@@ -915,6 +937,7 @@
         "checked_for_packing": 1
     },
     "sBjTBK97Mf": {
+        "__version": 1,
         "checked_for_packing": 1,
         "local_emitter_h": 1,
         "local_emitter_w": 1,
@@ -952,6 +975,7 @@
         }
     },
     "sg20xzpylY": {
+        "__version": 1,
         "checked_for_packing": 1
     },
     "u7zlrYWxAM": {
@@ -984,7 +1008,7 @@
         "packing_param_combine_textures": true,
         "packing_param_copy_html5": true,
         "packing_param_copy_native": true,
-        "packing_param_delete_prev": false,
+        "packing_param_delete_prev": true,
         "packing_param_generate_html5": true,
         "packing_param_generate_html5_filesys": true,
         "packing_param_max_tex_height": "1024",
