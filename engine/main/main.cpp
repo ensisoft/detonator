@@ -42,6 +42,9 @@
 #elif defined(WINDOWS_OS)
 #  include <Windows.h>
 #  include <Shlobj.h>
+#  include <timeapi.h>
+#  pragma comment(lib, "Dwmapi.lib")
+#  pragma comment(lib, "Winmm.lib")
 #endif
 
 #include "base/platform.h"
@@ -398,6 +401,15 @@ int main(int argc, char* argv[])
     DEBUG("Enabled floating point exceptions");
      */
 #endif
+
+#if defined(WINDOWS_OS)
+    // try to adjust the timer resolution to something better.
+    // https://learn.microsoft.com/en-us/windows/win32/api/timeapi/nf-timeapi-timebeginperiod
+    timeBeginPeriod(1); // 1 millisecond
+    // https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setpriorityclass
+    SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
+#endif
+
     int exit_code = EXIT_SUCCESS;
     try
     {
