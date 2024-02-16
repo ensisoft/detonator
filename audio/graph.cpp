@@ -570,6 +570,8 @@ bool Graph::HasElement(Element* element) const
 
 bool Graph::Prepare(const Loader& loader, const PrepareParams& params)
 {
+    TRACE_SCOPE("Graph::Prepare");
+
     // This is the so called Kahn's algorithm
     // https://en.wikipedia.org/wiki/Topological_sorting
     auto edges = mSrcMap;
