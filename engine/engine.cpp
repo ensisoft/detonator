@@ -264,7 +264,7 @@ public:
         const float surf_height = mSurfaceHeight;
 
         mDevice->BeginFrame();
-        mDevice->ClearColor(mClearColor);
+        mDevice->ClearColor(gfx::Color::Black);
         mDevice->ClearDepth(1.0f);
 
         if (my_screen->splash)
@@ -315,6 +315,8 @@ public:
             const auto& window = gfx::FRect(0.0f, 0.0f, mSurfaceWidth, mSurfaceHeight);
             const auto& text   = gfx::FRect(0.0f, 0.0f, 500.0f, 300.0f);
             const auto& rect   = CenterRectOnRect(window, text);
+
+            gfx::FillRect(painter, rect, gfx::Color::Black);
 
             gfx::DrawTextRect(painter,  base::FormatString("DETONATOR 2D\n\n%1\n\nLoading ... %2/%3 ", klass.name, index, last),
                               my_screen->font, 26, rect,
