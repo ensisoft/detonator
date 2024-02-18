@@ -35,28 +35,49 @@ add_executable(UnitTest
     ../game/unit_test/unit_test_entity.cpp
     ../game/unit_test/unit_test_scene.cpp
     ../game/unit_test/unit_test_animation.cpp
-    ../base/trace.cpp
-    ../base/logging.cpp
-    ../base/assert.cpp
-    ../base/json.cpp
-    ../base/utility.cpp
-    ../base/threadpool.cpp
-    ../data/json.cpp
-    ../audio/graph.cpp
-    ../audio/loader.cpp
-    ../audio/player.cpp
+    ../engine/unit_test/unit_test_lua.cpp
     ../audio/element.cpp
     ../audio/format.cpp
+    ../audio/graph.cpp
+    ../audio/loader.cpp
     ../audio/mpg123.cpp
+    ../audio/openal.cpp
+    ../audio/player.cpp
+    ../audio/proxy.cpp
     ../audio/sndfile.cpp
     ../audio/source.cpp
-    ../audio/proxy.cpp
-    ../audio/openal.cpp
-    ../game/scriptvar.cpp
-    ../game/animation.cpp
+    ../base/assert.cpp
+    ../base/format.cpp
+    ../base/json.cpp
+    ../base/logging.cpp
+    ../base/threadpool.cpp
+    ../base/trace.cpp
+    ../base/utility.cpp
+    ../data/io.cpp
+    ../data/json.cpp
+    ../engine/audio.cpp
+    ../engine/camera.cpp
+    ../engine/lua_base.cpp
+    ../engine/lua_data.cpp
+    ../engine/lua_game.cpp
+    ../engine/lua_game_runtime.cpp
+    ../engine/lua_gfx.cpp
+    ../engine/lua_glm.cpp
+    ../engine/lua_uik.cpp
+    ../engine/lua_util.cpp
+    ../engine/lua_wdk.cpp
+    ../engine/physics.cpp
+    ../engine/state.cpp
     ../game/actuator.cpp
+    ../game/animation.cpp
     ../game/entity.cpp
-    ../game/scene.cpp)
+    ../game/scene.cpp
+    ../game/scriptvar.cpp
+    ../game/tilemap.cpp
+    ../uikit/animation.cpp
+    ../uikit/widget.cpp
+    ../uikit/window.cpp
+        )
 target_compile_definitions(UnitTest PRIVATE UNIT_TEST_BUNDLE)
 target_compile_options(UnitTest PRIVATE -O3)
 target_compile_options(UnitTest PRIVATE -fexceptions)
@@ -67,6 +88,8 @@ target_link_options(UnitTest PRIVATE -sALLOW_MEMORY_GROWTH)
 target_link_options(UnitTest PRIVATE -sUSE_MPG123)
 target_link_libraries(UnitTest sndfile)
 target_link_libraries(UnitTest samplerate)
+target_link_libraries(UnitTest Lua)
+target_link_libraries(UnitTest box2d)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/UnitTest.js"   DESTINATION "${CMAKE_CURRENT_LIST_DIR}/bin")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/UnitTest.wasm" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/bin")
 

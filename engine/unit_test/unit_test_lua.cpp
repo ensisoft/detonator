@@ -34,6 +34,8 @@
 #include "engine/event.h"
 #include "engine/state.h"
 
+namespace {
+
 bool Eq(const engine::GameEventValue& lhs, const engine::GameEventValue& rhs)
 {
     return lhs == rhs;
@@ -2114,11 +2116,12 @@ end
     }
 }
 
+} // NAMESPACE
+
+EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
-    base::OStreamLogger log(std::cout);
-    base::SetGlobalLog(&log);
-    base::EnableDebugLog(true);
+    test::TestLogger logger("unit_test_lua.log");
 
     unit_test_util();
     unit_test_glm();
@@ -2138,3 +2141,4 @@ int test_main(int argc, char* argv[])
     unit_test_game_main_script_load_failure();
     return 0;
 }
+) // TEST_MAIN
