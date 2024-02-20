@@ -657,21 +657,21 @@ EntityNode::EntityNode(const EntityNode& other)
 }
 
 EntityNode::EntityNode(EntityNode&& other)
-{
-    mClass       = std::move(other.mClass);
-    mInstId      = std::move(other.mInstId);
-    mName        = std::move(other.mName);
-    mScale       = std::move(other.mScale);
-    mSize        = std::move(other.mSize);
-    mPosition    = std::move(other.mPosition);
-    mRotation    = std::move(other.mRotation);
-    mRigidBody   = std::move(other.mRigidBody);
-    mDrawable    = std::move(other.mDrawable);
-    mTextItem    = std::move(other.mTextItem);
-    mSpatialNode = std::move(other.mSpatialNode);
-    mFixture     = std::move(other.mFixture);
-    mMapNode     = std::move(other.mMapNode);
-}
+   : mClass       (std::move(other.mClass))
+   , mInstId      (std::move(other.mInstId))
+   , mName        (std::move(other.mName))
+   , mPosition    (std::move(other.mPosition))
+   , mScale       (std::move(other.mScale))
+   , mSize        (std::move(other.mSize))
+   , mRotation    (std::move(other.mRotation))
+   , mRigidBody   (std::move(other.mRigidBody))
+   , mDrawable    (std::move(other.mDrawable))
+   , mTextItem    (std::move(other.mTextItem))
+   , mSpatialNode (std::move(other.mSpatialNode))
+   , mFixture     (std::move(other.mFixture))
+   , mMapNode     (std::move(other.mMapNode))
+   , mEntity      (std::move(other.mEntity))
+{}
 
 EntityNode::EntityNode(const EntityNodeClass& klass)
   : EntityNode(std::make_shared<EntityNodeClass>(klass))
