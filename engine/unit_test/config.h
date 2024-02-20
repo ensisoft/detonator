@@ -8,6 +8,7 @@
 #define AUDIO_USE_PLAYER_THREAD
 
 #define SOL_ALL_SAFETIES_ON 1
+#define SOL_SAFE_NUMERICS 1
 
 #if defined(LINUX_OS)
 #  define AUDIO_USE_PULSEAUDIO
