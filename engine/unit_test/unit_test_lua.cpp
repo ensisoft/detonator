@@ -30,6 +30,7 @@
 #include "game/scene.h"
 #include "engine/lua.h"
 #include "engine/lua_game_runtime.h"
+#include "engine/lua.h"
 #include "engine/loader.h"
 #include "engine/event.h"
 #include "engine/state.h"
@@ -2116,6 +2117,219 @@ end
     }
 }
 
+enum class EntityUpdateMeasurement {
+    RuntimeLua,
+    RuntimeNative,
+    BenchmarkNative,
+    BenchmarkLua,
+    EntityBatch1,
+};
+
+template<EntityUpdateMeasurement target>
+void measure_entity_update_time()
+{
+    TEST_CASE(test::Type::Other)
+
+    base::OverwriteTextFile("bullet.lua", R"(
+function Update(bullet, game_time, dt)
+    local bullet_node = bullet:GetNode(0)
+    local bullet_pos = bullet_node:GetTranslation()
+    local velocity = bullet.velocity
+    bullet_pos.y = bullet_pos.y + dt * velocity
+    bullet_node:SetTranslation(bullet_pos)
+end
+)");
+
+    game::ScriptVar velocity("velocity", 1.0f);
+    velocity.SetArray(false);
+
+    game::EntityNodeClass body;
+    body.SetName("body");
+    body.SetSize(10.0f, 10.0f);
+    body.SetTranslation(0.0f, 0.0f);
+
+    auto bullet_class = std::make_shared<game::EntityClass>();
+    bullet_class->SetName("Bullet");
+    bullet_class->SetSriptFileId("bullet");
+    bullet_class->SetFlag(game::EntityClass::Flags::UpdateEntity, true);
+    bullet_class->AddScriptVar(velocity);
+    bullet_class->AddNode(std::move(body));
+    bullet_class->LinkChild(nullptr, bullet_class->FindNodeByName("body"));
+
+    auto scene_class = std::make_shared<game::SceneClass>();
+    scene_class->SetName("scene");
+
+    game::Scene scene(scene_class);
+
+    scene.BeginLoop();
+    for (size_t i=0; i<1000; ++i)
+    {
+        game::EntityArgs args;
+        args.klass = bullet_class;
+        scene.SpawnEntity(args);
+    }
+    scene.EndLoop();
+    scene.BeginLoop();
+    scene.EndLoop();
+    TEST_REQUIRE(scene.GetNumEntities() == 1000);
+
+    TestLoader loader;
+
+    engine::LuaRuntime script(".", "", "", "");
+    script.SetDataLoader(&loader);
+    script.Init();
+    script.BeginPlay(&scene, nullptr);
+
+    if (target == EntityUpdateMeasurement::RuntimeLua)
+    {
+
+        auto ret = test::TimedTest(1000, [&script]() {
+            script.Update(0.0, 0.0f);
+        });
+
+        test::PrintTestTimes("Bullet Update (Lua)", ret);
+    }
+
+    if (target == EntityUpdateMeasurement::RuntimeNative)
+    {
+        const auto ret = test::TimedTest(1000, [&scene] {
+            for (size_t i=0; i<scene.GetNumEntities(); ++i) {
+                auto& entity = scene.GetEntity(i);
+                auto& node   = entity.GetNode(0);
+                auto pos = node.GetTranslation();
+                const auto variable = entity.FindScriptVarByName("velocity");
+                const auto velocity = variable->GetValue<float>();
+                pos.y += velocity * 1.0f;
+                node.SetTranslation(pos);
+            }
+        });
+        test::PrintTestTimes("Bullet Update (Native)", ret);
+    }
+
+
+    if (target == EntityUpdateMeasurement::BenchmarkNative)
+    {
+        struct Bullet {
+            glm::vec2 position {0.0f, 0.0f};
+            glm::vec2 velocity {1.0f, 1.0f};
+        };
+        std::vector<Bullet> bullets;
+        bullets.resize(1000);
+
+        const auto ret = test::TimedTest(1000, [&bullets] {
+            for (auto& bullet : bullets) {
+                bullet.position += bullet.velocity * 1.0f;
+            }
+        });
+        test::PrintTestTimes("Bullet Update Benchmark (Native)", ret);
+    }
+
+
+    if (target == EntityUpdateMeasurement::BenchmarkLua)
+    {
+        sol::state lua;
+        lua.open_libraries();
+
+        struct Bullet {
+            glm::vec2 position {0.0f, 0.0f};
+            glm::vec2 velocity {1.0f, 1.0f};;
+        };
+        auto bullet_type = lua.new_usertype<Bullet>("Bullet");
+
+        bullet_type["position"] = &Bullet::position;
+        bullet_type["velocity"] = &Bullet::velocity;
+
+        bullet_type["GetPosition"] = [](const Bullet& bullet) {
+            return bullet.position;
+        };
+        bullet_type["SetPosition"] = [](Bullet& bullet, glm::vec2 pos) {
+            bullet.position = pos;
+        };
+        bullet_type["GetVelocity"] = [](const Bullet& bullet) {
+            return bullet.velocity;
+        };
+
+        std::vector<Bullet> bullets;
+        bullets.resize(1000);
+
+        lua.script(R"(
+function Update(bullet, game_time, dt)
+    local velocity = bullet.velocity;
+    bullet.position = bullet.position + velocity * dt;
+end
+
+function Update2(bullet, game_time, dt)
+    local velocity = bullet:GetVelocity()
+    local position = bullet:GetPosition()
+    position.y = position.y + velocity.y * dt;
+    bullet:SetPosition(position);
+end
+
+function Update3(bullets, game_time, dt)
+   for i=1, #bullets do
+       local bullet = bullets[i]
+       local velocity = bullet.velocity
+       local position = bullet.position
+       position.y = position.y + velocity.y * dt
+       bullet.position = position
+   end
+end
+
+        )");
+
+        const auto ret = test::TimedTest(1000, [&bullets, &lua] {
+
+            /*
+            auto func = lua["Update"];
+            for (auto& bullet : bullets)
+            {
+                //lua["Update"](bullet, 0.0, 1.0f);
+                func(bullet, 0.0, 1.0);
+            }
+             */
+
+            lua["Update3"](bullets, 0.0, 1.0);
+        });
+        test::PrintTestTimes("Bullet Update Benchmark (Lua)", ret);
+    }
+
+    if (target == EntityUpdateMeasurement::EntityBatch1)
+    {
+        std::vector<std::unique_ptr<game::Entity>> bullets;
+        for (size_t i=0; i<1000; ++i)
+        {
+            auto bullet = game::CreateEntityInstance(bullet_class);
+            bullets.push_back(std::move(bullet));
+        }
+
+        sol::state lua;
+        lua.open_libraries();
+
+        engine::BindGameLib(lua);
+        engine::BindGLM(lua);
+
+        lua.script(R"(
+function Update(bullets, game_time, dt)
+   for i=1, #bullets do
+       local bullet = bullets[i]
+       local bullet_node = bullet:GetNode(0)
+       local bullet_pos = bullet_node:GetTranslation()
+       local velocity = bullet.velocity
+       bullet_pos.y = bullet_pos.y + dt * velocity
+       bullet_node:SetTranslation(bullet_pos)
+   end
+end
+        )");
+
+        auto ret = test::TimedTest(1000, [&bullets, &lua]() {
+            lua["Update"](bullets, 0.0, 0.0f);
+        });
+
+        test::PrintTestTimes("Batch update 1 (Lua)", ret);
+    }
+
+}
+
 } // NAMESPACE
 
 EXPORT_TEST_MAIN(
@@ -2139,6 +2353,12 @@ int test_main(int argc, char* argv[])
     unit_test_entity_shared_globals();
     unit_test_game_main_script_load_success();
     unit_test_game_main_script_load_failure();
+
+    measure_entity_update_time<EntityUpdateMeasurement::RuntimeLua>();
+    measure_entity_update_time<EntityUpdateMeasurement::RuntimeNative>();
+    measure_entity_update_time<EntityUpdateMeasurement::BenchmarkLua>();
+    measure_entity_update_time<EntityUpdateMeasurement::BenchmarkNative>();
+    measure_entity_update_time<EntityUpdateMeasurement::EntityBatch1>();
     return 0;
 }
 ) // TEST_MAIN
