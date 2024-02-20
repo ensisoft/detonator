@@ -42,7 +42,7 @@
 // sol overload resolution requires a define
 // SOL_ALL_SAFETIES_ON will take care of that
 
-#ifndef SOL_ALL_SAFETIES_ON
+#ifndef SOL_SAFE_NUMERICS
 #  error we need SOL safety flags for correct function
 #else
 #  pragma message "SOL SAFETIES ARE ON  !"
