@@ -2322,7 +2322,7 @@ namespace game
         // The current animation if any.
         std::vector<std::unique_ptr<Animation>> mCurrentAnimations;
         // the list of nodes that are in the entity.
-        std::vector<std::unique_ptr<EntityNode>> mNodes;
+        std::vector<EntityNode> mNodes;
         // the list of read-write script variables. read-only ones are
         // shared between all instances and the EntityClass.
         std::vector<ScriptVar> mScriptVars;
