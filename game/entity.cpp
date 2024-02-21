@@ -1603,16 +1603,21 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
 {
     std::unordered_map<const EntityNodeClass*, EntityNode*> map;
 
+    // important! don't allocate just make sure that the vector
+    // can hold our nodes without allocation, thus the pointers
+    // taken to elements in the vector will remain valid.
+    mNodes.reserve(mClass->GetNumNodes());
+
     // build render tree, first create instances of all node classes
     // then build the render tree based on the node instances
     TRACE_BLOCK("Entity::Entity::BuildRenderTree", 
         for (size_t i = 0; i < mClass->GetNumNodes(); ++i)
         {
             auto node_klass = mClass->GetSharedEntityNodeClass(i);
-            auto node_inst = CreateEntityNodeInstance(node_klass);
-            node_inst->SetEntity(this);
-            map[node_klass.get()] = node_inst.get();
-            mNodes.push_back(std::move(node_inst));
+            EntityNode node(node_klass);
+            node.SetEntity(this);
+            mNodes.push_back(std::move(node));
+            map[node_klass.get()] = &mNodes.back();
         }
         // build render tree by mapping class entity node class objects
         // to entity node instance objects
@@ -1662,16 +1667,16 @@ Entity::Entity(const EntityArgs& args) : Entity(args.klass)
 
     for (auto& node : mNodes)
     {
-        if (mRenderTree.GetParent(node.get()))
+        if (mRenderTree.GetParent(&node))
             continue;
         // if this is a top level node (i.e. under the root node)
         // then bake the entity transform into this node.
         const auto& rotation    = node->GetRotation();
         const auto& translation = node->GetTranslation();
         const auto& scale       = node->GetScale();
-        node->SetRotation(rotation + args.rotation);
-        node->SetTranslation(translation + args.position);
-        node->SetScale(scale * args.scale);
+        node.SetRotation(rotation + args.rotation);
+        node.SetTranslation(translation + args.position);
+        node.SetScale(scale * args.scale);
     }
     mControlFlags.set(ControlFlags::EnableLogging, args.enable_logging);
 }
@@ -1683,68 +1688,68 @@ Entity::Entity(const EntityClass& klass)
 EntityNode& Entity::GetNode(size_t index)
 {
     ASSERT(index < mNodes.size());
-    return *mNodes[index].get();
+    return mNodes[index];
 }
 EntityNode* Entity::FindNodeByClassName(const std::string& name)
 {
     for (auto& node : mNodes)
-        if (node->GetClassName() == name)
-            return node.get();
+        if (node.GetClassName() == name)
+            return &node;
     return nullptr;
 }
 EntityNode* Entity::FindNodeByClassId(const std::string& id)
 {
     for (auto& node : mNodes)
-        if (node->GetClassId() == id)
-            return node.get();
+        if (node.GetClassId() == id)
+            return &node;
     return nullptr;
 }
 EntityNode* Entity::FindNodeByInstanceId(const std::string& id)
 {
     for (auto& node : mNodes)
-        if (node->GetId() == id)
-            return node.get();
+        if (node.GetId() == id)
+            return &node;
     return nullptr;
 }
 EntityNode* Entity::FindNodeByInstanceName(const std::string& name)
 {
     for (auto& node : mNodes)
-        if (node->GetName() == name)
-            return node.get();
+        if (node.GetName() == name)
+            return &node;
     return nullptr;
 }
 
 const EntityNode& Entity::GetNode(size_t index) const
 {
     ASSERT(index < mNodes.size());
-    return *mNodes[index].get();
+    return mNodes[index];
 }
 const EntityNode* Entity::FindNodeByClassName(const std::string& name) const
 {
     for (auto& node : mNodes)
-        if (node->GetClassName() == name)
-            return node.get();
+        if (node.GetClassName() == name)
+            return &node;
     return nullptr;
 }
 const EntityNode* Entity::FindNodeByClassId(const std::string& id) const
 {
     for (auto& node : mNodes)
-        if (node->GetClassId() == id)
-            return node.get();
+        if (node.GetClassId() == id)
+            return &node;
     return nullptr;
 }
 const EntityNode* Entity::FindNodeByInstanceId(const std::string& id) const
 {
     for (auto& node : mNodes)
-        if (node->GetId() == id)
-            return node.get();
+        if (node.GetId() == id)
+            return &node;
     return nullptr;
 }
 const EntityNode* Entity::FindNodeByInstanceName(const std::string& name) const
 {
     for (const auto& node : mNodes)
-        if (node->GetName() == name)
-            return node.get();
+        if (node.GetName() == name)
+            return &node;
     return nullptr;
 }
 
@@ -1881,7 +1886,7 @@ void Entity::Update(float dt, std::vector<Event>* events)
     {
         for (auto& animation : mCurrentAnimations)
         {
-            animation->Apply(*node);
+            animation->Apply(node);
         }
     }
 
@@ -1895,19 +1900,19 @@ void Entity::Update(float dt, std::vector<Event>* events)
             animation->Restart();
             for (auto& node: mNodes)
             {
-                if (!mRenderTree.GetParent(node.get()))
+                if (!mRenderTree.GetParent(&node))
                     continue;
 
-                const auto& klass = node->GetClass();
+                const auto& klass = node.GetClass();
                 const auto& rotation = klass.GetRotation();
                 const auto& translation = klass.GetTranslation();
                 const auto& scale = klass.GetScale();
                 // if the node is a child node (i.e. has a parent) then reset the
                 // node's transformation based on the node's transformation relative
                 // to its parent in the entity class.
-                node->SetTranslation(translation);
-                node->SetRotation(rotation);
-                node->SetScale(scale);
+                node.SetTranslation(translation);
+                node.SetRotation(rotation);
+                node.SetScale(scale);
             }
         }
 
