@@ -28,6 +28,7 @@
 #include <unordered_set>
 #include <set>
 #include <optional>
+#include <tuple>
 
 #include "base/assert.h"
 #include "base/platform.h"
@@ -35,15 +36,24 @@
 namespace base
 {
 
-template<typename T>
+template<typename T> inline
 T EvenMultiple(T value, T multiple)
 {
     return ((value + multiple - 1) / multiple) * multiple;
 }
 
 template<typename T, size_t N> inline
-size_t ArraySize(const T (&array)[N])
-{ return N; }
+constexpr size_t ArraySize(const T (&array)[N])
+{
+    return N;
+}
+
+template<size_t Index, typename... Args> constexpr inline
+decltype(auto) GetType(Args... args)
+{
+    return std::get<Index>(std::forward_as_tuple(args...));
+}
+
 
 inline bool IsPowerOfTwo(unsigned i)
 {
