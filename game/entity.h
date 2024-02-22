@@ -1544,8 +1544,6 @@ namespace game
         int GetLayer() const noexcept
         { return mClass->GetLayer(); }
 
-        // Reset node's state to initial class state.
-        void Reset();
         // Get the transform that applies to this node
         // and the subsequent hierarchy of nodes.
         glm::mat4 GetNodeTransform() const;

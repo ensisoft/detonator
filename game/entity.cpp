@@ -689,25 +689,6 @@ const Fixture* EntityNode::GetFixture() const
 const MapNode* EntityNode::GetMapNode() const
 { return mMapNode.get(); }
 
-void EntityNode::Reset()
-{
-    delete mTransform;
-    mTransform = new EntityNodeTransform(*mClass);
-
-    if (mClass->HasDrawable())
-        mDrawable = std::make_unique<DrawableItem>(mClass->GetSharedDrawable());
-    if (mClass->HasRigidBody())
-        mRigidBody = std::make_unique<RigidBodyItem>(mClass->GetSharedRigidBody());
-    if (mClass->HasTextItem())
-        mTextItem = std::make_unique<TextItem>(mClass->GetSharedTextItem());
-    if (mClass->HasSpatialNode())
-        mSpatialNode = std::make_unique<SpatialNode>(mClass->GetSharedSpatialNode());
-    if (mClass->HasFixture())
-        mFixture = std::make_unique<Fixture>(mClass->GetSharedFixture());
-    if (mClass->HasMapNode())
-        mMapNode = std::make_unique<MapNode>(mClass->GetSharedMapNode());
-}
-
 glm::mat4 EntityNode::GetNodeTransform() const
 {
     Transform transform;
