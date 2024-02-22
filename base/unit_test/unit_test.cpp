@@ -22,10 +22,12 @@
 
 #include "base/test_minimal.h"
 #include "base/test_float.h"
+#include "base/test_help.h"
 #include "base/color4f.h"
 #include "base/types.h"
 #include "base/trace.h"
 #include "base/utility.h"
+#include "base/allocator.h"
 
 #if !defined(UNIT_TEST_BUNDLE)
 #  include "base/json.cpp"
@@ -33,33 +35,6 @@
 #  include "base/trace.cpp"
 #  include "base/assert.cpp"
 #endif
-
-bool operator==(const base::Color4f& lhs, const base::Color4f& rhs)
-{
-    return real::equals(lhs.Red(), rhs.Red()) &&
-           real::equals(lhs.Green(), rhs.Green()) &&
-           real::equals(lhs.Blue(), rhs.Blue()) &&
-           real::equals(lhs.Alpha(), rhs.Alpha());
-}
-
-bool operator==(const base::Rect<float>& lhs,
-                const base::Rect<float>& rhs)
-{
-    return real::equals(lhs.GetX(), rhs.GetX()) &&
-           real::equals(lhs.GetY(), rhs.GetY()) &&
-           real::equals(lhs.GetWidth(), rhs.GetWidth()) &&
-           real::equals(lhs.GetHeight(), rhs.GetHeight());
-}
-
-template<typename T>
-bool operator==(const base::Rect<T>& lhs,
-                const base::Rect<T>& rhs)
-{
-    return lhs.GetX() == rhs.GetX() &&
-           lhs.GetY() == rhs.GetY() &&
-           lhs.GetWidth() == rhs.GetWidth() &&
-           lhs.GetHeight() == rhs.GetHeight();
-}
 
 template<typename T>
 void unit_test_rect()
@@ -389,6 +364,166 @@ void unit_test_util()
     }
 }
 
+void unit_test_allocator()
+{
+    TEST_CASE(test::Type::Feature)
+
+    struct Kiwi {
+        std::string foo;
+    };
+    struct Banana {
+        std::string foo;
+        double value;
+    };
+
+    using Allocator = base::Allocator<Kiwi, Banana>;
+
+    {
+        Allocator allocator;
+
+        auto* kiwi0 = allocator.CreateObject<Kiwi>(0);
+        kiwi0->foo = "kiwi0";
+
+        auto* banana0 = allocator.CreateObject<Banana>(0);
+        banana0->foo = "banana0";
+        banana0->value = 123;
+
+        {
+            TEST_REQUIRE(allocator.GetObject<Kiwi>(0)->foo == "kiwi0");
+            TEST_REQUIRE(allocator.GetObject<Banana>(0)->foo == "banana0");
+            TEST_REQUIRE(allocator.GetObject<Banana>(0)->value == 123);
+        }
+
+        allocator.DestroyObject(0, kiwi0);
+        TEST_REQUIRE(allocator.GetObject<Kiwi>(0) == nullptr);
+        TEST_REQUIRE(allocator.GetObject<Banana>(0) != nullptr);
+        TEST_REQUIRE(allocator.GetObject<Banana>(0)->foo == "banana0");
+        TEST_REQUIRE(allocator.GetObject<Banana>(0)->value == 123);
+
+        allocator.DestroyObject(0, banana0);
+        TEST_REQUIRE(allocator.GetObject<Banana>(0) == nullptr);
+    }
+
+    {
+        Allocator allocator;
+        auto index0 = allocator.GetNextIndex();
+        TEST_REQUIRE(index0 == 0);
+        TEST_REQUIRE(allocator.GetCount() == 1);
+
+        auto* kiwi0 = allocator.CreateObject<Kiwi>(index0);
+        kiwi0->foo = "kiwi0";
+
+        auto index1 = allocator.GetNextIndex();
+        TEST_REQUIRE(index1 == 1);
+        TEST_REQUIRE(allocator.GetCount() == 2);
+        auto* kiwi1 = allocator.CreateObject<Kiwi>(index1);
+        kiwi1->foo = "kiwi1";
+
+
+        allocator.DestroyAll(index0);
+        allocator.FreeIndex(index0);
+        TEST_REQUIRE(allocator.GetObject<Kiwi>(0) == nullptr);
+        TEST_REQUIRE(allocator.GetCount() == 1);
+
+
+        auto index2 = allocator.GetNextIndex();
+        TEST_REQUIRE(index2 == 0);
+        TEST_REQUIRE(allocator.GetCount() == 2);
+        TEST_REQUIRE(allocator.GetObject<Kiwi>(0) == nullptr);
+        auto kiwi2 = allocator.CreateObject<Kiwi>(index2);
+        kiwi2->foo = "kiwi2";
+
+        allocator.DestroyAll(index2);
+        allocator.FreeIndex(index2);
+
+        allocator.DestroyAll(index1);
+        allocator.FreeIndex(index1);
+
+        TEST_REQUIRE(allocator.GetCount() == 0);
+        TEST_REQUIRE(allocator.GetNextIndex() == 1);
+        TEST_REQUIRE(allocator.GetNextIndex() == 0);
+
+        allocator.FreeIndex(0);
+        allocator.FreeIndex(1);
+
+    }
+
+    {
+        Allocator allocator;
+        auto index0 = allocator.GetNextIndex();
+        auto index1 = allocator.GetNextIndex();
+        auto index2 = allocator.GetNextIndex();
+        allocator.CreateObject<Kiwi>(0);
+        allocator.CreateObject<Kiwi>(2);
+
+        TEST_REQUIRE(allocator.GetObject<Kiwi>(0) != nullptr);
+        TEST_REQUIRE(allocator.GetObject<Kiwi>(1) == nullptr);
+        TEST_REQUIRE(allocator.GetObject<Kiwi>(2) != nullptr);
+        allocator.GetObject<Kiwi>(0)->foo = "kiwi0";
+        allocator.GetObject<Kiwi>(2)->foo = "kiwi2";
+
+        using Sequence = base::AllocatorSequence<Kiwi, Kiwi, Banana>;
+        Sequence sequence(&allocator);
+
+        auto beg = sequence.begin();
+        auto end = sequence.end();
+        TEST_REQUIRE(beg != end);
+        TEST_REQUIRE(beg->foo == "kiwi0");
+        ++beg;
+        TEST_REQUIRE(beg->foo == "kiwi2");
+        ++beg;
+        TEST_REQUIRE(beg == end);
+
+        beg = sequence.begin();
+        end = sequence.end();
+        TEST_REQUIRE(beg->foo == "kiwi0");
+        beg++;
+        TEST_REQUIRE(beg->foo == "kiwi2");
+        beg++;
+        TEST_REQUIRE(beg == end);
+
+        allocator.Cleanup();
+    }
+
+    {
+
+        auto ret = test::TimedTest(1000, []() {
+            std::vector<Kiwi> vector;
+            for (size_t i=0; i<1000; ++i)
+            {
+                vector.emplace_back(Kiwi{});
+                auto& back = vector.back();
+                back.foo = "kiwi";
+            }
+            for (size_t i=0; i<1000; ++i)
+            {
+                vector[i].foo = "iwik";
+            }
+            vector.clear();
+        });
+        test::PrintTestTimes("Vector push_back (Kiwi)", ret);
+    }
+    {
+        auto ret = test::TimedTest(1000, []() {
+            base::Allocator<Kiwi> allocator;
+            for (size_t i=0; i<1000; ++i)
+            {
+                auto index = allocator.GetNextIndex();
+                auto* kiwi = allocator.CreateObject<Kiwi>(index);
+                kiwi->foo = "kiwi";
+            }
+            for (size_t i=0; i<1000; ++i)
+            {
+                auto* kiwi = allocator.GetObject<Kiwi>(i);
+                kiwi->foo = "iwik";
+            }
+            allocator.Cleanup();
+        });
+        test::PrintTestTimes("Allocator CreateObject (Kiwi)", ret);
+    }
+
+}
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
@@ -404,6 +539,8 @@ int test_main(int argc, char* argv[])
     unit_test_trace();
 
     unit_test_util();
+
+    unit_test_allocator();
     return 0;
 }
 ) // TEST_MAIN
