@@ -614,11 +614,9 @@ EntityNode::EntityNode(std::shared_ptr<const EntityNodeClass> klass)
   : mClass(klass)
   , mInstId(FastId(10))
   , mName(mClass->GetName())
-  , mPosition(mClass->GetTranslation())
-  , mScale(mClass->GetScale())
-  , mSize(mClass->GetSize())
-  , mRotation(mClass->GetRotation())
 {
+    mTransform = new EntityNodeTransform(*klass);
+
     if (mClass->HasDrawable())
         mDrawable = std::make_unique<DrawableItem>(mClass->GetSharedDrawable());
     if (mClass->HasRigidBody())
@@ -637,10 +635,7 @@ EntityNode::EntityNode(EntityNode&& other)
    : mClass       (std::move(other.mClass))
    , mInstId      (std::move(other.mInstId))
    , mName        (std::move(other.mName))
-   , mPosition    (std::move(other.mPosition))
-   , mScale       (std::move(other.mScale))
-   , mSize        (std::move(other.mSize))
-   , mRotation    (std::move(other.mRotation))
+   , mTransform   (std::move(other.mTransform))
    , mRigidBody   (std::move(other.mRigidBody))
    , mDrawable    (std::move(other.mDrawable))
    , mTextItem    (std::move(other.mTextItem))
@@ -648,11 +643,18 @@ EntityNode::EntityNode(EntityNode&& other)
    , mFixture     (std::move(other.mFixture))
    , mMapNode     (std::move(other.mMapNode))
    , mEntity      (std::move(other.mEntity))
-{}
+{
+    other.mTransform = nullptr;
+}
 
 EntityNode::EntityNode(const EntityNodeClass& klass)
   : EntityNode(std::make_shared<EntityNodeClass>(klass))
 {}
+
+EntityNode::~EntityNode()
+{
+    delete mTransform;
+}
 
 DrawableItem* EntityNode::GetDrawable()
 { return mDrawable.get(); }
@@ -689,10 +691,9 @@ const MapNode* EntityNode::GetMapNode() const
 
 void EntityNode::Reset()
 {
-    mPosition = mClass->GetTranslation();
-    mScale    = mClass->GetScale();
-    mSize     = mClass->GetSize();
-    mRotation = mClass->GetRotation();
+    delete mTransform;
+    mTransform = new EntityNodeTransform(*mClass);
+
     if (mClass->HasDrawable())
         mDrawable = std::make_unique<DrawableItem>(mClass->GetSharedDrawable());
     if (mClass->HasRigidBody())
@@ -710,19 +711,21 @@ void EntityNode::Reset()
 glm::mat4 EntityNode::GetNodeTransform() const
 {
     Transform transform;
-    transform.Scale(mScale);
-    transform.RotateAroundZ(mRotation);
-    transform.Translate(mPosition);
+    transform.Scale(mTransform->scale);
+    transform.RotateAroundZ(mTransform->rotation);
+    transform.Translate(mTransform->translation);
     return transform.GetAsMatrix();
 }
 
 glm::mat4 EntityNode::GetModelTransform() const
 {
+    const auto& size = mTransform->size;
+
     Transform transform;
-    transform.Scale(mSize);
+    transform.Scale(size);
     // offset the object so that the center of the shape is aligned
     // with the position parameter.
-    transform.Translate(-mSize.x * 0.5f, -mSize.y * 0.5f);
+    transform.Translate(-size.x * 0.5f, -size.y * 0.5f);
     return transform.GetAsMatrix();
 }
 
