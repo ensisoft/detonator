@@ -1360,8 +1360,8 @@ namespace game
 
         EntityNode(std::shared_ptr<const EntityNodeClass> klass);
         EntityNode(const EntityNodeClass& klass);
-        EntityNode(const EntityNode& other);
         EntityNode(EntityNode&& other);
+        EntityNode(const EntityNode& other) = delete;
 
         // instance setters.
         void SetScale(const glm::vec2& scale) noexcept
@@ -1485,6 +1485,8 @@ namespace game
         { return *mClass.get(); }
         const EntityNodeClass* operator->() const noexcept
         { return mClass.get(); }
+
+        EntityNode& operator=(const EntityNode&) = delete;
     private:
         // the class object.
         std::shared_ptr<const EntityNodeClass> mClass;
