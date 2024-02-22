@@ -1352,6 +1352,70 @@ namespace game
     };
     class Entity;
 
+    struct EntityNodeTransform {
+        // translation of the node relative to its parent.
+        glm::vec2 translation = {0.0f, 0.0f};
+        // Nodes scaling factor. applies to this node
+        // and all of its children.
+        glm::vec2 scale = {1.0f, 1.0f};
+        // node's box size. used to generate collision shapes
+        // and to resize the drawable shape (if any)
+        glm::vec2 size = {1.0f, 1.0f};
+        // Rotation around z axis in radians relative to parent.
+        float rotation = 0.0f;
+
+        EntityNodeTransform() = default;
+        EntityNodeTransform(const EntityNodeClass& klass)
+          : translation(klass.GetTranslation())
+          , scale(klass.GetScale())
+          , size(klass.GetSize())
+          , rotation(klass.GetRotation())
+        {}
+
+        inline void SetScale(const glm::vec2& scale) noexcept
+        { this->scale = scale; }
+        inline void SetScale(float sx, float sy) noexcept
+        { this->scale = glm::vec2(sx, sy); }
+        inline void SetSize(const glm::vec2& size) noexcept
+        { this->size = size; }
+        inline void SetSize(float width, float height) noexcept
+        { this->size = glm::vec2(width, height); }
+        inline void SetTranslation(const glm::vec2& pos) noexcept
+        { this->translation = pos; }
+        inline void SetTranslation(float x, float y) noexcept
+        { this->translation = glm::vec2(x, y); }
+        inline void SetRotation(float rotation) noexcept
+        { this->rotation = rotation; }
+        inline void Translate(const glm::vec2& vec) noexcept
+        { this->translation += vec; }
+        inline void Translate(float dx, float dy) noexcept
+        { this->translation += glm::vec2(dx, dy); }
+        inline void Rotate(float dr) noexcept
+        { this->rotation += dr; }
+        inline void Grow(const glm::vec2& vec) noexcept
+        { this->size += vec; }
+        inline void Grow(float dx, float dy) noexcept
+        { this->size += glm::vec2(dx, dy); }
+
+        inline glm::vec2 GetTranslation() const noexcept
+        { return this->translation; }
+        inline glm::vec2 GetScale() const noexcept
+        { return this->scale; }
+        inline glm::vec2 GetSize() const noexcept
+        { return this->size; }
+        inline float GetRotation() const noexcept
+        { return this->rotation; }
+
+        inline float GetWidth() const noexcept
+        { return this->size.x; }
+        inline float GetHeight() const noexcept
+        { return this->size.y; }
+        inline float GetX() const noexcept
+        { return this->translation.x; }
+        inline float GetY() const noexcept
+        { return this->translation.y; }
+    };
+
     class EntityNode
     {
     public:
@@ -1362,36 +1426,38 @@ namespace game
         EntityNode(const EntityNodeClass& klass);
         EntityNode(EntityNode&& other);
         EntityNode(const EntityNode& other) = delete;
+        ~EntityNode();
 
         // instance setters.
         void SetScale(const glm::vec2& scale) noexcept
-        { mScale = scale; }
+        { mTransform->scale = scale; }
         void SetScale(float sx, float sy) noexcept
-        { mScale = glm::vec2(sx, sy); }
+        { mTransform->scale = glm::vec2(sx, sy); }
         void SetSize(const glm::vec2& size) noexcept
-        { mSize = size; }
+        { mTransform->size = size; }
         void SetSize(float width, float height) noexcept
-        { mSize = glm::vec2(width, height); }
+        { mTransform->size = glm::vec2(width, height); }
         void SetTranslation(const glm::vec2& pos) noexcept
-        { mPosition = pos; }
+        { mTransform->translation = pos; }
         void SetTranslation(float x, float y) noexcept
-        { mPosition = glm::vec2(x, y); }
+        { mTransform->translation = glm::vec2(x, y); }
         void SetRotation(float rotation) noexcept
-        { mRotation = rotation; }
+        { mTransform->rotation = rotation; }
+        void Translate(const glm::vec2& vec) noexcept
+        { mTransform->translation += vec; }
+        void Translate(float dx, float dy) noexcept
+        { mTransform->translation += glm::vec2(dx, dy); }
+        void Rotate(float dr) noexcept
+        { mTransform->rotation += dr; }
+        void Grow(const glm::vec2& vec) noexcept
+        { mTransform->size += vec; }
+        void Grow(float dx, float dy) noexcept
+        { mTransform->size += glm::vec2(dx, dy); }
+
         void SetName(const std::string& name)
         { mName = name; }
         void SetEntity(Entity* entity) noexcept
         { mEntity = entity; }
-        void Translate(const glm::vec2& vec) noexcept
-        { mPosition += vec; }
-        void Translate(float dx, float dy) noexcept
-        { mPosition += glm::vec2(dx, dy); }
-        void Rotate(float dr) noexcept
-        { mRotation += dr; }
-        void Grow(const glm::vec2& vec) noexcept
-        { mSize += vec; }
-        void Grow(float dx, float dy) noexcept
-        { mSize += glm::vec2(dx, dy); }
 
         // instance getters.
         const std::string& GetId() const noexcept
@@ -1401,19 +1467,26 @@ namespace game
         const std::string& GetTag() const noexcept
         { return mClass->GetTag(); }
         const glm::vec2& GetTranslation() const noexcept
-        { return mPosition; }
+        { return mTransform->translation; }
         const glm::vec2& GetScale() const noexcept
-        { return mScale; }
+        { return mTransform->scale; }
         const glm::vec2& GetSize() const noexcept
-        { return mSize; }
+        { return mTransform->size; }
         float GetRotation() const noexcept
-        { return mRotation; }
+        { return mTransform->rotation; }
+
         bool TestFlag(Flags flags) const noexcept
         { return mClass->TestFlag(flags); }
         Entity* GetEntity() noexcept
         { return mEntity; }
         const Entity* GetEntity() const noexcept
         { return mEntity; }
+
+        inline EntityNodeTransform* GetTransform() noexcept
+        { return mTransform; }
+
+        inline const EntityNodeTransform* GetTransform() const noexcept
+        { return mTransform; }
 
         // Get the node's drawable item if any. If no drawable
         // item is set then returns nullptr.
@@ -1494,16 +1567,8 @@ namespace game
         std::string mInstId;
         // the instance name.
         std::string mName;
-        // translation of the node relative to its parent.
-        glm::vec2 mPosition = {0.0f, 0.0f};
-        // Nodes scaling factor. applies to this node
-        // and all of its children.
-        glm::vec2 mScale = {1.0f, 1.0f};
-        // node's box size. used to generate collision shapes
-        // and to resize the drawable shape (if any)
-        glm::vec2 mSize = {1.0f, 1.0f};
-        // Rotation around z axis in radians relative to parent.
-        float mRotation = 0.0f;
+        // transformation object
+        EntityNodeTransform* mTransform = nullptr;
         // rigid body if any.
         std::unique_ptr<RigidBodyItem> mRigidBody;
         // drawable if any.
