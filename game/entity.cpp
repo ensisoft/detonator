@@ -633,29 +633,6 @@ EntityNode::EntityNode(std::shared_ptr<const EntityNodeClass> klass)
         mMapNode = std::make_unique<MapNode>(mClass->GetSharedMapNode());
 }
 
-EntityNode::EntityNode(const EntityNode& other)
-  : mClass(other.mClass)
-  , mInstId(other.mInstId)
-  , mName(other.mName)
-  , mPosition(other.mPosition)
-  , mScale(other.mScale)
-  , mSize(other.mSize)
-  , mRotation(other.mRotation)
-{
-    if (other.HasRigidBody())
-        mRigidBody = std::make_unique<RigidBodyItem>(*other.GetRigidBody());
-    if (other.HasDrawable())
-        mDrawable = std::make_unique<DrawableItem>(*other.GetDrawable());
-    if (other.HasTextItem())
-        mTextItem = std::make_unique<TextItem>(*other.GetTextItem());
-    if (other.HasSpatialNode())
-        mSpatialNode = std::make_unique<SpatialNode>(*other.GetSpatialNode());
-    if (other->HasFixture())
-        mFixture = std::make_unique<Fixture>(*other.GetFixture());
-    if (other->HasMapNode())
-        mMapNode = std::make_unique<MapNode>(*other.GetMapNode());
-}
-
 EntityNode::EntityNode(EntityNode&& other)
    : mClass       (std::move(other.mClass))
    , mInstId      (std::move(other.mInstId))
