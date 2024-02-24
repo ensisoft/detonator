@@ -1666,6 +1666,36 @@ Entity::Entity(const EntityArgs& args) : Entity(args.klass)
         node.SetTranslation(translation + args.position);
         node.SetScale(scale * args.scale);
     }
+
+    for (auto& pair : args.vars)
+    {
+        const auto& name  = pair.first;
+        const auto& value = pair.second;
+        if (auto* var = FindScriptVarByName(name))
+        {
+            if (var->IsReadOnly()) {
+                WARN("Entity variable is read only. Value cannot be set. [entity='%1', var='%1']", mInstanceName, name);
+                continue;
+            } else if (var->IsArray()) {
+                WARN("Setting array script variables on entity create is currently unsupported. [entity='%1', var='%2']", mInstanceName, name);
+                continue;
+            }
+            const auto expected_type = var->GetType();
+            if (expected_type == ScriptVar::Type::String && std::holds_alternative<std::string>(value))
+                var->SetValue(std::get<std::string>(value));
+            else if (expected_type == ScriptVar::Type::Integer && std::holds_alternative<int>(value))
+                var->SetValue(std::get<int>(value));
+            else if (expected_type == ScriptVar::Type::Float && std::holds_alternative<float>(value))
+                var->SetValue(std::get<float>(value));
+            else if (expected_type == ScriptVar::Type::Vec2 && std::holds_alternative<glm::vec2>(value))
+                var->SetValue(std::get<glm::vec2>(value));
+            else if (expected_type == ScriptVar::Type::Boolean && std::holds_alternative<bool>(value))
+                var->SetValue(std::get<bool>(value));
+            else WARN("Unsupported entity script var type on entity create. [entity='%1', var='%2']", mInstanceName, name);
+        }
+        else WARN("No such entity script variable. [entity='%1', var='%2']", mInstanceName, name);
+    }
+
     mControlFlags.set(ControlFlags::EnableLogging, args.enable_logging);
 }
 

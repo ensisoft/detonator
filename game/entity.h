@@ -2074,6 +2074,14 @@ namespace game
         int layer = 0;
         // delay before spawning/placing the entity into the scene.
         float delay = 0.0f;
+
+        // nerfed version of ScriptVar data, missing support
+        // for vectors and object references.
+        using ScriptVarValue = std::variant<bool, float, int,
+                std::string, glm::vec2>;
+        // The set of Script vars to set on the entity
+        // immediately when it's spawned.
+        std::unordered_map<std::string, ScriptVarValue> vars;
     };
 
     class Entity
