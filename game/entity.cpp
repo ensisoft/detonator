@@ -739,14 +739,15 @@ EntityClass::EntityClass()
 {
     mClassId = base::RandomString(10);
     mFlags.set(Flags::VisibleInEditor, true);
-    mFlags.set(Flags::VisibleInGame, true);
-    mFlags.set(Flags::LimitLifetime, false);
-    mFlags.set(Flags::KillAtLifetime, true);
-    mFlags.set(Flags::KillAtBoundary, true);
-    mFlags.set(Flags::TickEntity, true);
-    mFlags.set(Flags::UpdateEntity, true);
-    mFlags.set(Flags::WantsKeyEvents, false);
-    mFlags.set(Flags::WantsMouseEvents, false);
+    mFlags.set(Flags::VisibleInGame,   true);
+    mFlags.set(Flags::LimitLifetime,   false);
+    mFlags.set(Flags::KillAtLifetime,  true);
+    mFlags.set(Flags::KillAtBoundary,  true);
+    mFlags.set(Flags::TickEntity,      true);
+    mFlags.set(Flags::UpdateEntity,    true);
+    mFlags.set(Flags::PostUpdate,      true);
+    mFlags.set(Flags::WantsKeyEvents,  false);
+    mFlags.set(Flags::WantsMouseEvents,false);
 }
 
 EntityClass::EntityClass(const EntityClass& other)
@@ -1266,7 +1267,7 @@ std::size_t EntityClass::GetHash() const
     hash = base::hash_combine(hash, mTag);
     hash = base::hash_combine(hash, mIdleTrackId);
     hash = base::hash_combine(hash, mScriptFile);
-    hash = base::hash_combine(hash, mFlags.value());
+    hash = base::hash_combine(hash, mFlags);
     hash = base::hash_combine(hash, mLifetime);
     // include the node hashes in the animation hash
     // this covers both the node values and their traversal order
