@@ -33,6 +33,7 @@
 #include <variant>
 #include <queue>
 
+#include "base/allocator.h"
 #include "base/bitflag.h"
 #include "base/utility.h"
 #include "base/math.h"
@@ -1372,27 +1373,27 @@ namespace game
           , rotation(klass.GetRotation())
         {}
 
-        inline void SetScale(const glm::vec2& scale) noexcept
+        inline void SetScale(glm::vec2 scale) noexcept
         { this->scale = scale; }
         inline void SetScale(float sx, float sy) noexcept
         { this->scale = glm::vec2(sx, sy); }
-        inline void SetSize(const glm::vec2& size) noexcept
+        inline void SetSize(glm::vec2 size) noexcept
         { this->size = size; }
         inline void SetSize(float width, float height) noexcept
         { this->size = glm::vec2(width, height); }
-        inline void SetTranslation(const glm::vec2& pos) noexcept
+        inline void SetTranslation(glm::vec2 pos) noexcept
         { this->translation = pos; }
         inline void SetTranslation(float x, float y) noexcept
         { this->translation = glm::vec2(x, y); }
         inline void SetRotation(float rotation) noexcept
         { this->rotation = rotation; }
-        inline void Translate(const glm::vec2& vec) noexcept
+        inline void Translate(glm::vec2 vec) noexcept
         { this->translation += vec; }
         inline void Translate(float dx, float dy) noexcept
         { this->translation += glm::vec2(dx, dy); }
         inline void Rotate(float dr) noexcept
         { this->rotation += dr; }
-        inline void Grow(const glm::vec2& vec) noexcept
+        inline void Grow(glm::vec2 vec) noexcept
         { this->size += vec; }
         inline void Grow(float dx, float dy) noexcept
         { this->size += glm::vec2(dx, dy); }
@@ -1416,77 +1417,112 @@ namespace game
         { return this->translation.y; }
     };
 
+    class EntityNodeData {
+    public:
+        EntityNodeData(std::string id, std::string name) noexcept
+           : mInstanceId(std::move(id))
+           , mInstanceName(std::move(name))
+        {}
+        inline void SetName(std::string name) noexcept
+        { mInstanceName = std::move(name); }
+        inline std::string GetName() const noexcept
+        { return mInstanceName; }
+        inline std::string GetId() const noexcept
+        { return mInstanceId; }
+        inline Entity* GetEntity() noexcept
+        { return mEntity; }
+    private:
+        friend class EntityNode;
+        // the instance id.
+        std::string mInstanceId;
+        // the instance name.
+        std::string mInstanceName;
+        // The entity that owns this node.
+        Entity* mEntity = nullptr;
+    };
+
+    using EntityNodeAllocator = base::Allocator<EntityNodeTransform, EntityNodeData>;
+    using EntityNodeTransformSequence = base::AllocatorSequence<EntityNodeTransform,
+            EntityNodeTransform, EntityNodeData>;
+    using EntityNodeDataSequence = base::AllocatorSequence<EntityNodeData,
+            EntityNodeTransform, EntityNodeData>;
+
     class EntityNode
     {
     public:
         using Flags = EntityNodeClass::Flags;
         using DrawableItemType = DrawableItem;
 
-        EntityNode(std::shared_ptr<const EntityNodeClass> klass);
-        EntityNode(const EntityNodeClass& klass);
-        EntityNode(EntityNode&& other);
+        explicit EntityNode(std::shared_ptr<const EntityNodeClass> klass, EntityNodeAllocator* allocator = nullptr);
+        explicit EntityNode(const EntityNodeClass& klass, EntityNodeAllocator* allocator = nullptr);
+        explicit EntityNode(EntityNode&& other);
+
         EntityNode(const EntityNode& other) = delete;
         ~EntityNode();
 
-        // instance setters.
-        void SetScale(const glm::vec2& scale) noexcept
+        void Release(EntityNodeAllocator* allocator);
+
+        // transformation
+        inline void SetScale(glm::vec2 scale) noexcept
         { mTransform->scale = scale; }
-        void SetScale(float sx, float sy) noexcept
+        inline void SetScale(float sx, float sy) noexcept
         { mTransform->scale = glm::vec2(sx, sy); }
-        void SetSize(const glm::vec2& size) noexcept
+        inline void SetSize(const glm::vec2& size) noexcept
         { mTransform->size = size; }
-        void SetSize(float width, float height) noexcept
+        inline void SetSize(float width, float height) noexcept
         { mTransform->size = glm::vec2(width, height); }
-        void SetTranslation(const glm::vec2& pos) noexcept
+        inline void SetTranslation(glm::vec2 pos) noexcept
         { mTransform->translation = pos; }
-        void SetTranslation(float x, float y) noexcept
+        inline void SetTranslation(float x, float y) noexcept
         { mTransform->translation = glm::vec2(x, y); }
-        void SetRotation(float rotation) noexcept
+        inline void SetRotation(float rotation) noexcept
         { mTransform->rotation = rotation; }
-        void Translate(const glm::vec2& vec) noexcept
+        inline void Translate(const glm::vec2& vec) noexcept
         { mTransform->translation += vec; }
-        void Translate(float dx, float dy) noexcept
+        inline void Translate(float dx, float dy) noexcept
         { mTransform->translation += glm::vec2(dx, dy); }
-        void Rotate(float dr) noexcept
+        inline void Rotate(float dr) noexcept
         { mTransform->rotation += dr; }
-        void Grow(const glm::vec2& vec) noexcept
+        inline void Grow(glm::vec2 vec) noexcept
         { mTransform->size += vec; }
-        void Grow(float dx, float dy) noexcept
+        inline void Grow(float dx, float dy) noexcept
         { mTransform->size += glm::vec2(dx, dy); }
-
-        void SetName(const std::string& name)
-        { mName = name; }
-        void SetEntity(Entity* entity) noexcept
-        { mEntity = entity; }
-
-        // instance getters.
-        const std::string& GetId() const noexcept
-        { return mInstId; }
-        const std::string& GetName() const noexcept
-        { return mName; }
-        const std::string& GetTag() const noexcept
-        { return mClass->GetTag(); }
-        const glm::vec2& GetTranslation() const noexcept
+        inline glm::vec2 GetTranslation() const noexcept
         { return mTransform->translation; }
-        const glm::vec2& GetScale() const noexcept
+        inline glm::vec2 GetScale() const noexcept
         { return mTransform->scale; }
-        const glm::vec2& GetSize() const noexcept
+        inline glm::vec2 GetSize() const noexcept
         { return mTransform->size; }
-        float GetRotation() const noexcept
+        inline float GetRotation() const noexcept
         { return mTransform->rotation; }
 
-        bool TestFlag(Flags flags) const noexcept
+        inline void SetName(std::string name) noexcept
+        { mNodeData->mInstanceName = std::move(name); }
+        inline std::string GetId() const noexcept
+        { return mNodeData->mInstanceId; }
+        inline std::string GetName() const noexcept
+        { return mNodeData->mInstanceName; }
+        inline Entity* GetEntity() noexcept
+        { return mNodeData->mEntity; }
+        inline const Entity* GetEntity() const noexcept
+        { return mNodeData->mEntity; }
+
+        inline std::string GetTag() const noexcept
+        { return mClass->GetTag(); }
+        inline bool TestFlag(Flags flags) const noexcept
         { return mClass->TestFlag(flags); }
-        Entity* GetEntity() noexcept
-        { return mEntity; }
-        const Entity* GetEntity() const noexcept
-        { return mEntity; }
+
+        inline void SetEntity(Entity* entity) noexcept
+        { mNodeData->mEntity = entity; }
 
         inline EntityNodeTransform* GetTransform() noexcept
         { return mTransform; }
-
         inline const EntityNodeTransform* GetTransform() const noexcept
         { return mTransform; }
+        inline EntityNodeData* GetData() noexcept
+        { return mNodeData; }
+        inline const EntityNodeData* GetData() const noexcept
+        { return mNodeData; }
 
         // Get the node's drawable item if any. If no drawable
         // item is set then returns nullptr.
@@ -1561,12 +1597,12 @@ namespace game
     private:
         // the class object.
         std::shared_ptr<const EntityNodeClass> mClass;
-        // the instance id.
-        std::string mInstId;
-        // the instance name.
-        std::string mName;
+        // Index of the data in the allocator.
+        std::size_t mAllocatorIndex = 0;
         // transformation object
         EntityNodeTransform* mTransform = nullptr;
+        // data object
+        EntityNodeData* mNodeData = nullptr;
         // rigid body if any.
         std::unique_ptr<RigidBodyItem> mRigidBody;
         // drawable if any.
@@ -1579,8 +1615,7 @@ namespace game
         std::unique_ptr<Fixture> mFixture;
         // map node if any.
         std::unique_ptr<MapNode> mMapNode;
-        // The entity that owns this node.
-        Entity* mEntity = nullptr;
+
     };
 
     class EntityClass
@@ -1959,6 +1994,9 @@ namespace game
         std::shared_ptr<const AnimatorClass> GEtSharedAnimatorClass(size_t index) const noexcept
         { return mAnimators[index]; }
 
+        EntityNodeAllocator& GetAllocator() const
+        { return mAllocator; }
+
         // Serialize the entity into JSON.
         void IntoJson(data::Writer& data) const;
 
@@ -1999,6 +2037,8 @@ namespace game
         // maximum lifetime after which the entity is
         // deleted if LimitLifetime flag is set.
         float mLifetime = 0.0f;
+    private:
+        mutable EntityNodeAllocator mAllocator;
     };
 
     // Collection of arguments for creating a new entity
@@ -2070,6 +2110,8 @@ namespace game
         explicit Entity(std::shared_ptr<const EntityClass> klass);
         explicit Entity(const EntityClass& klass);
         Entity(const Entity& other) = delete;
+
+        ~Entity();
         
         // Get the entity node by index. The index must be valid.
         EntityNode& GetNode(size_t index);
@@ -2232,13 +2274,13 @@ namespace game
             { return mSrcNode; }
             const EntityNode* GetDstNode() const noexcept
             { return mDstNode; }
-            const std::string& GetSrcId() const noexcept
+            const std::string GetSrcId() const noexcept
             { return mDstNode->GetId(); }
-            const std::string& GetDstId() const noexcept
+            const std::string GetDstId() const noexcept
             { return mDstNode->GetId(); }
-            const std::string& GetId() const noexcept
+            const std::string GetId() const noexcept
             { return mId; }
-            const std::string& GetName() const noexcept
+            const std::string GetName() const noexcept
             { return mClass->name; }
             const glm::vec2& GetSrcAnchorPoint() const noexcept
             { return mClass->src_node_anchor_point; }
@@ -2432,3 +2474,26 @@ namespace game
     std::unique_ptr<EntityNode> CreateEntityNodeInstance(std::shared_ptr<const EntityNodeClass> klass);
 
 } // namespace
+
+namespace std {
+    template<>
+    struct iterator_traits<game::EntityNodeTransformSequence::iterator> {
+        using value_type = game::EntityNodeTransform;
+        using pointer    = game::EntityNodeTransform*;
+        using reference  = game::EntityNodeTransform&;
+        using size_type  = size_t;
+        using difference_type = std::ptrdiff_t;
+        using iterator_category = std::forward_iterator_tag;
+    };
+
+    template<>
+    struct iterator_traits<game::EntityNodeDataSequence::iterator> {
+        using value_type = game::EntityNodeData;
+        using pointer    = game::EntityNodeData*;
+        using reference  = game::EntityNodeData&;
+        using size_type  = size_t;
+        using difference_type = std::ptrdiff_t;
+        using iterator_category = std::forward_iterator_tag;
+    };
+
+} // std
