@@ -1123,6 +1123,58 @@ void InitLuaDoc()
                                       "Nodes that are not enabled will not be indexed.");
     DOC_METHOD_1("void", "Enable", "Enable or disable spatial index.", "bool", "on_off");
 
+
+    DOC_TABLE2("game.EntityNodeTransform", "Entity node transform data.");
+    DOC_OBJECT_PROPERTY("glm.vec2", "translation", "Translation value relative to parent node.");
+    DOC_OBJECT_PROPERTY("glm.vec2", "scale", "Scale factor that applies to this node and its descendants.");
+    DOC_OBJECT_PROPERTY("glm.vec2", "size", "Node size in game units. Affects drawable items, rigid bodies, spatial nodes etc.");
+    DOC_OBJECT_PROPERTY("float", "rotation", "Rotation around the Z axis in radians.");
+    DOC_METHOD_1("void", "SetRotation", "Set a new rotation value in radians.", "float", "rotation");
+    DOC_METHOD_1("void", "SetScale", "Set a new scale value.", "glm.vec2", "scale");
+    DOC_METHOD_2("void", "SetScale", "Set a new scale value.", "float", "sx", "float", "sy");
+    DOC_METHOD_1("void", "SetSize", "Set a new size value.", "glm.vec2", "size");
+    DOC_METHOD_2("void", "SetSize", "Set a new size value", "float", "x", "float", "y");
+    DOC_METHOD_1("void", "SetTranslation", "Set a new translation value.", "glm.vec2", "translation");
+    DOC_METHOD_2("void", "SetTranslation", "Set a new translation value.", "float", "x", "float", "y");
+    DOC_METHOD_1("void", "Grow", "Apply a change in size.", "glm.vec2", "change");
+    DOC_METHOD_2("void", "Grow", "Apply a change in size.", "float", "dx", "float", "dy");
+    DOC_METHOD_2("void", "Translate", "Apply a change in translation.", "float", "dx", "float", "dy");
+    DOC_METHOD_1("void", "Translate", "Apply a change in translation", "glm.vec2", "change");
+    DOC_METHOD_1("void", "Rotate", "Apply a change in rotation in radians. ", "float", "r");
+    DOC_METHOD_0("glm.vec2", "GetTranslation", "Get the translation relative to parent.");
+    DOC_METHOD_0("glm.vec2", "GetSize", "Get the size value.");
+    DOC_METHOD_0("glm.vec2", "GetScale", "Get the scaling factor values.");
+    DOC_METHOD_0("float", "GetWidth", "Get the node's width.");
+    DOC_METHOD_0("float", "GetHeight", "Get the node's height.");
+    DOC_METHOD_0("float", "GetX", "Get the node's X position relative to parent.");
+    DOC_METHOD_0("float", "GetY", "Get the node's Y position relative to parent.");
+
+    DOC_TABLE2("game.EntityNodeData", "Generic entity node (meta) data.");
+    DOC_METHOD_0("string", "GetName", "Get the node instance name.");
+    DOC_METHOD_0("string", "GetId", "Get the node instance ID.");
+    DOC_METHOD_0("game.Entity", "GetEntity", "Get the entity this node belongs to.");
+
+
+    DOC_TABLE2("game.EntityNodeAllocator", "Entity node component allocator. One instance exists per each entity type.");
+    DOC_METHOD_0("unsigned", "GetHighIndex", "Get the maximum valid index for accessing node components.<br>"
+                                             "When iterating over the nodes' components this is the index to iterate to.<br>"
+                                             "Example: <br>"
+                                             "local hi = allocator:GetHighIndex()<br>"
+                                             "for i = 0, hi do<br>"
+                                             "  local transform = allocator:GetTransform(i)<br>"
+                                             "  if transform ~= nil then<br>"
+                                             "    ...<br>"
+                                             "  end<br>"
+                                             "end<br>");
+    DOC_METHOD_1("game.EntityNodeTransform", "GetTransform", "Get the entity node transform component.<br>"
+                                                             "Keep in mind that the returned object MAY BE nil.",
+                 "unsigned", "index");
+    DOC_METHOD_1("game.EntityNodeData", "GetNodeData", "Get the entity node data component. <br>"
+                                                       "Keep in mind that the returned object MAY BE nil.",
+                 "unsigned", "index");
+    // todo: document the iterator approach once the perf problem is solved.
+
+
     DOC_TABLE("game.EntityNode");
     DOC_METHOD_0("string", "GetName", "Get the entity node's human readable instance name.");
     DOC_METHOD_0("string", "GetId", "Get the entity node instance ID.");
