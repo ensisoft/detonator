@@ -610,12 +610,22 @@ EntityNodeClass& EntityNodeClass::operator=(const EntityNodeClass& other)
     return *this;
 }
 
-EntityNode::EntityNode(std::shared_ptr<const EntityNodeClass> klass)
-  : mClass(klass)
-  , mInstId(FastId(10))
-  , mName(mClass->GetName())
+EntityNode::EntityNode(std::shared_ptr<const EntityNodeClass> klass, EntityNodeAllocator* allocator)
+  : mClass(std::move(klass))
 {
-    mTransform = new EntityNodeTransform(*klass);
+    if (allocator)
+    {
+        std::lock_guard<std::mutex> lock(allocator->GetMutex());
+
+        mAllocatorIndex = allocator->GetNextIndex();
+        mTransform = allocator->CreateObject<EntityNodeTransform>(mAllocatorIndex, *mClass);
+        mNodeData  = allocator->CreateObject<EntityNodeData>(mAllocatorIndex, FastId(10), mClass->GetName());
+    }
+    else
+    {
+        mTransform = new EntityNodeTransform(*mClass);
+        mNodeData  = new EntityNodeData(FastId(10), mClass->GetName());
+    }
 
     if (mClass->HasDrawable())
         mDrawable = std::make_unique<DrawableItem>(mClass->GetSharedDrawable());
@@ -632,28 +642,43 @@ EntityNode::EntityNode(std::shared_ptr<const EntityNodeClass> klass)
 }
 
 EntityNode::EntityNode(EntityNode&& other)
-   : mClass       (std::move(other.mClass))
-   , mInstId      (std::move(other.mInstId))
-   , mName        (std::move(other.mName))
-   , mTransform   (std::move(other.mTransform))
-   , mRigidBody   (std::move(other.mRigidBody))
-   , mDrawable    (std::move(other.mDrawable))
-   , mTextItem    (std::move(other.mTextItem))
-   , mSpatialNode (std::move(other.mSpatialNode))
-   , mFixture     (std::move(other.mFixture))
-   , mMapNode     (std::move(other.mMapNode))
-   , mEntity      (std::move(other.mEntity))
+   : mClass         (std::move(other.mClass))
+   , mAllocatorIndex(std::move(other.mAllocatorIndex))
+   , mTransform     (std::move(other.mTransform))
+   , mNodeData      (std::move(other.mNodeData))
+   , mRigidBody     (std::move(other.mRigidBody))
+   , mDrawable      (std::move(other.mDrawable))
+   , mTextItem      (std::move(other.mTextItem))
+   , mSpatialNode   (std::move(other.mSpatialNode))
+   , mFixture       (std::move(other.mFixture))
+   , mMapNode       (std::move(other.mMapNode))
 {
     other.mTransform = nullptr;
+    other.mNodeData  = nullptr;
 }
 
-EntityNode::EntityNode(const EntityNodeClass& klass)
-  : EntityNode(std::make_shared<EntityNodeClass>(klass))
+EntityNode::EntityNode(const EntityNodeClass& klass, EntityNodeAllocator* allocator)
+  : EntityNode(std::make_shared<EntityNodeClass>(klass), allocator)
 {}
 
 EntityNode::~EntityNode()
 {
     delete mTransform;
+    delete mNodeData;
+}
+
+void EntityNode::Release(EntityNodeAllocator* allocator)
+{
+    if (mTransform)
+    {
+        std::lock_guard<std::mutex> lock(allocator->GetMutex());
+
+        allocator->DestroyObject(mAllocatorIndex, mTransform);
+        allocator->DestroyObject(mAllocatorIndex, mNodeData);
+        allocator->FreeIndex(mAllocatorIndex);
+        mTransform = nullptr;
+        mNodeData  = nullptr;
+    }
 }
 
 DrawableItem* EntityNode::GetDrawable()
@@ -1569,13 +1594,15 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
     // taken to elements in the vector will remain valid.
     mNodes.reserve(mClass->GetNumNodes());
 
+    auto& allocator = mClass->GetAllocator();
+
     // build render tree, first create instances of all node classes
     // then build the render tree based on the node instances
-    TRACE_BLOCK("Entity::Entity::BuildRenderTree", 
+    TRACE_BLOCK("Entity::Entity::BuildRenderTree",
         for (size_t i = 0; i < mClass->GetNumNodes(); ++i)
         {
             auto node_klass = mClass->GetSharedEntityNodeClass(i);
-            EntityNode node(node_klass);
+            EntityNode node(node_klass, &allocator);
             node.SetEntity(this);
             mNodes.push_back(std::move(node));
             map[node_klass.get()] = &mNodes.back();
@@ -1645,6 +1672,16 @@ Entity::Entity(const EntityArgs& args) : Entity(args.klass)
 Entity::Entity(const EntityClass& klass)
   : Entity(std::make_shared<EntityClass>(klass))
 {}
+
+Entity::~Entity()
+{
+    auto& allocator = mClass->GetAllocator();
+
+    for (auto& node: mNodes)
+    {
+        node.Release(&allocator);
+    }
+}
 
 EntityNode& Entity::GetNode(size_t index)
 {
