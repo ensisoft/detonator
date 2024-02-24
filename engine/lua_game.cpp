@@ -1506,6 +1506,71 @@ void BindGameLib(sol::state& L)
     game_event["to"]      = &GameEvent::to;
     game_event["message"] = &GameEvent::message;
 
+    auto transform = table.new_usertype<game::EntityNodeTransform>("EntityNodeTransform");
+    transform["translation"] = &EntityNodeTransform::translation;
+    transform["scale"]       = &EntityNodeTransform::scale;
+    transform["size"]        = &EntityNodeTransform::size;
+    transform["rotation"]    = &EntityNodeTransform::rotation;
+    transform["SetRotation"] = &EntityNodeTransform::SetRotation;
+    transform["SetScale"]    = sol::overload(
+        [](EntityNodeTransform& transform, float x, float y) {
+            transform.SetScale(x, y);
+        },
+        [](EntityNodeTransform& transform, const glm::vec2& vec) {
+            transform.SetScale(vec);
+        });
+    transform["SetTranslation"] = sol::overload(
+        [](EntityNodeTransform& transform, float x, float y) {
+            transform.SetTranslation(x, y);
+        },
+        [](EntityNodeTransform& transform, const glm::vec2& vec) {
+            transform.SetTranslation(vec);
+        });
+    transform["SetSize"] = sol::overload(
+        [](EntityNodeTransform& transform, float x, float y) {
+            transform.SetSize(x, y);
+        },
+        [](EntityNodeTransform& transform, const glm::vec2& vec) {
+            transform.SetSize(vec);
+        });
+    transform["Grow"] = sol::overload(
+        [](EntityNodeTransform& transform, float x, float y) {
+            transform.Grow(x, y);
+        },
+        [](EntityNodeTransform& transform, const glm::vec2& vec) {
+            transform.Grow(vec);
+        });
+    transform["Translate"] = sol::overload(
+        [](EntityNodeTransform& transform, float x, float y) {
+            transform.Translate(x, y);
+        },
+        [](EntityNodeTransform& transform, const glm::vec2& vec) {
+            transform.Translate(vec);
+        });
+    transform["Rotate"]         = &EntityNodeTransform::Rotate;
+    transform["GetTranslation"] = &EntityNodeTransform::GetTranslation;
+    transform["GetScale"]       = &EntityNodeTransform::GetScale;
+    transform["GetSize"]        = &EntityNodeTransform::GetSize;
+    transform["GetWidth"]       = &EntityNodeTransform::GetWidth;
+    transform["GetHeight"]      = &EntityNodeTransform::GetHeight;
+    transform["GetX"]           = &EntityNodeTransform::GetX;
+    transform["GetY"]           = &EntityNodeTransform::GetY;
+
+    auto nodedata = table.new_usertype<game::EntityNodeData>("EntityNodeData");
+    nodedata["SetName"]   = &EntityNodeData::SetName;
+    nodedata["GetName"]   = &EntityNodeData::GetName;
+    nodedata["GetId"]     = &EntityNodeData::GetId;
+    nodedata["GetEntity"] = &EntityNodeData::GetEntity;
+
+    auto allocator = table.new_usertype<game::EntityNodeAllocator>("EntityNodeAllocator");
+    allocator["GetHighIndex"]  = &game::EntityNodeAllocator::GetHighIndex;
+    allocator["GetTransform"]  = &game::EntityNodeAllocator::GetObject<game::EntityNodeTransform>;
+    allocator["GetNodeData"]   = &game::EntityNodeAllocator::GetObject<game::EntityNodeData>;
+    allocator["GetTransforms"] = [](game::EntityNodeAllocator* allocator) {
+        EntityNodeTransformSequence sequence(allocator);
+        return sol::as_container(std::move(sequence));
+    };
+
     auto kvstore = table.new_usertype<KeyValueStore>("KeyValueStore", sol::constructors<KeyValueStore()>(),
         sol::meta_function::index, [](const KeyValueStore& kv, const std::string& key, sol::this_state state) {
             sol::state_view lua(state);
