@@ -1369,10 +1369,44 @@ void Scene::EndLoop()
     if (mSpatialIndex)
         mSpatialIndex->Erase(killed_spatial_nodes);
 
-    // delete the entities that were killed from the container
-    mEntities.erase(std::remove_if(mEntities.begin(), mEntities.end(), [](const auto& entity) {
-        return entity->TestFlag(Entity::ControlFlags::Killed);
-    }), mEntities.end());
+    if (auto* task_pool = base::GetGlobalThreadPool())
+    {
+        // delete de-allocation to the task pool since allocation
+        // is also there which means that the there might be a lock
+        // on the entity node allocator which means the deletion
+        // is blocked until the allocator is unlocked.
+        std::vector<std::unique_ptr<Entity>> carcasses;
+
+        auto it = std::remove_if(mEntities.begin(), mEntities.end(), [](const auto& entity) {
+            return entity->TestFlag(Entity::ControlFlags::Killed);
+        });
+        std::move(it, mEntities.end(), std::back_inserter(carcasses));
+        mEntities.erase(it, mEntities.end());
+
+        class DeleteEntitiesTask : public base::ThreadTask {
+        public:
+            DeleteEntitiesTask(std::vector<std::unique_ptr<Entity>>&& carcasses)
+              : mCarcasses(std::move(carcasses))
+            {}
+        protected:
+            virtual void DoTask() override
+            {
+                // this is simple !
+                mCarcasses.clear();
+            }
+        private:
+            std::vector<std::unique_ptr<Entity>> mCarcasses;
+        };
+        auto task = std::make_unique<DeleteEntitiesTask>(std::move(carcasses));
+        task_pool->SubmitTask(std::move(task));
+    }
+    else
+    {
+        // delete the entities that were killed from the container
+        mEntities.erase(std::remove_if(mEntities.begin(), mEntities.end(), [](const auto& entity) {
+            return entity->TestFlag(Entity::ControlFlags::Killed);
+        }), mEntities.end());
+    }
 }
 
 std::vector<Scene::ConstSceneNode> Scene::CollectNodes() const
