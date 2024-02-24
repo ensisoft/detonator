@@ -969,7 +969,7 @@ void LuaRuntime::PostUpdate(double game_time)
     for (size_t i=0; i<mScene->GetNumEntities(); ++i)
     {
         auto* entity = &mScene->GetEntity(i);
-        if (!entity->TestFlag(Entity::Flags::UpdateEntity))
+        if (!entity->TestFlag(Entity::Flags::PostUpdate))
             continue;
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {

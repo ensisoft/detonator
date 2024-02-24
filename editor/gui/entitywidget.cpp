@@ -1596,6 +1596,11 @@ void EntityWidget::on_chkUpdateEntity_stateChanged(int)
 {
     mState.entity->SetFlag(game::EntityClass::Flags::UpdateEntity, GetValue(mUI.chkUpdateEntity));
 }
+void EntityWidget::on_chkPostUpdate_stateChanged(int)
+{
+    mState.entity->SetFlag(game::EntityClass::Flags::PostUpdate, GetValue(mUI.chkPostUpdate));
+}
+
 void EntityWidget::on_chkKeyEvents_stateChanged(int)
 {
     mState.entity->SetFlag(game::EntityClass::Flags::WantsKeyEvents, GetValue(mUI.chkKeyEvents));
@@ -3330,6 +3335,7 @@ void EntityWidget::DisplayEntityProperties()
     SetValue(mUI.chkKillAtBoundary, mState.entity->TestFlag(game::EntityClass::Flags::KillAtBoundary));
     SetValue(mUI.chkTickEntity, mState.entity->TestFlag(game::EntityClass::Flags::TickEntity));
     SetValue(mUI.chkUpdateEntity, mState.entity->TestFlag(game::EntityClass::Flags::UpdateEntity));
+    SetValue(mUI.chkPostUpdate, mState.entity->TestFlag(game::EntityClass::Flags::PostUpdate));
     SetValue(mUI.chkKeyEvents, mState.entity->TestFlag(game::EntityClass::Flags::WantsKeyEvents));
     SetValue(mUI.chkMouseEvents, mState.entity->TestFlag(game::EntityClass::Flags::WantsMouseEvents));
 
