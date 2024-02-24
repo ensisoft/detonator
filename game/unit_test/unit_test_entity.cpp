@@ -1046,6 +1046,47 @@ void unit_test_entity_animation_state()
     TEST_REQUIRE(std::get_if<game::Animator::EvalTransition>(&actions[3])->to->GetName() == "jump");
 }
 
+void unit_test_entity_args()
+{
+    TEST_CASE(test::Type::Feature)
+
+    game::ScriptVar some_int("int", 0, game::ScriptVar::ReadWrite);
+    game::ScriptVar some_float("float", 1.0f, game::ScriptVar::ReadWrite);
+
+    auto node = std::make_unique<game::EntityNodeClass>();
+    node->SetName("body");
+
+    auto entity = std::make_shared<game::EntityClass>();
+    entity->SetName("bullet");
+    entity->AddScriptVar(some_int);
+    entity->AddScriptVar(some_float);
+    entity->AddNode(std::move(node));
+    entity->LinkChild(nullptr, entity->FindNodeByName("body"));
+
+    game::EntityArgs args;
+    args.klass         = entity;
+    args.position      = glm::vec2 { 100.0f, -50.0f};
+    args.scale         = glm::vec2 { -2.0f, -1.0f};
+    args.name          = "instance-name";
+    args.id            = "instance-id";
+    args.rotation      = 2.0f;
+    args.layer         = 100;
+    args.vars["int"]   = 123;
+    args.vars["float"] = 50.0f;
+    auto instance = game::CreateEntityInstance(args);
+
+    TEST_REQUIRE(instance->GetName()  == "instance-name");
+    TEST_REQUIRE(instance->GetId()    == "instance-id");
+    TEST_REQUIRE(instance->GetLayer() == 100);
+    TEST_REQUIRE(instance->GetNumNodes() == 1);
+    TEST_REQUIRE(instance->FindScriptVarByName("int")->GetValue<int>() == 123);
+    TEST_REQUIRE(instance->FindScriptVarByName("float")->GetValue<float>() == 50.0f);
+    TEST_REQUIRE(instance->GetNode(0).GetTranslation() == glm::vec2(100.0f, -50.0f));
+    TEST_REQUIRE(instance->GetNode(0).GetScale()       == glm::vec2(-2.0f, -1.0f));
+    TEST_REQUIRE(instance->GetNode(0).GetRotation()    == 2.0f);
+
+}
+
 struct PerfTestDrawableTag{};
 
 namespace mem {
@@ -1200,6 +1241,7 @@ int test_main(int argc, char* argv[])
     unit_test_entity_class_coords();
     unit_test_entity_transformation_precision();
     unit_test_entity_animation_state();
+    unit_test_entity_args();
 
     measure_item_allocation_time();
     measure_entity_allocation_time();

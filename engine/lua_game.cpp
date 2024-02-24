@@ -1164,6 +1164,30 @@ void BindGameLib(sol::state& L)
                 ERROR("Failed to spawn entity. No such entity class. [klass='%1']", klass);
                 return (game::Entity*)nullptr;
             }
+            if (args_table["vars"].valid() && args_table["vars"].get_type() == sol::type::table) {
+                const sol::table& vars = args_table["vars"];
+                for (auto& pair : vars) {
+                    sol::object key = pair.first;
+                    sol::object val = pair.second;
+                    if (key.get_type() != sol::type::string)
+                    {
+                        WARN("Incorrect entity argument variable key type. [type='%1']", key.get_type());
+                        continue;
+                    }
+                    const auto& name = key.as<std::string>();
+                    if (val.is<int>())
+                        args.vars[name] = val.as<int>();
+                    else if (val.is<float>())
+                        args.vars[name] = val.as<float>();
+                    else if (val.is<bool>())
+                        args.vars[name] = val.as<bool>();
+                    else if (val.is<std::string>())
+                        args.vars[name] = val.as<std::string>();
+                    else if (val.is<glm::vec2>())
+                        args.vars[name] = val.as<glm::vec2>();
+                    else WARN("Unsupported entity spawn arg script var type. [var='%1']", name);
+                }
+            }
 
             args.id             = args_table.get_or("id", std::string(""));
             args.name           = args_table.get_or("name", std::string(""));
