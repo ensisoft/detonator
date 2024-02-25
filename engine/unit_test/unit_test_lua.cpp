@@ -2123,6 +2123,7 @@ enum class EntityUpdateMeasurement {
     BenchmarkNative,
     BenchmarkLua,
     EntityBatch1,
+    RuntimeNodesLua
 };
 
 template<EntityUpdateMeasurement target>
@@ -2213,15 +2214,31 @@ end
             glm::vec2 position {0.0f, 0.0f};
             glm::vec2 velocity {1.0f, 1.0f};
         };
-        std::vector<Bullet> bullets;
-        bullets.resize(1000);
 
-        const auto ret = test::TimedTest(1000, [&bullets] {
-            for (auto& bullet : bullets) {
-                bullet.position += bullet.velocity * 1.0f;
-            }
-        });
-        test::PrintTestTimes("Bullet Update Benchmark (Native)", ret);
+        {
+            std::vector<Bullet> bullets;
+            bullets.resize(1000);
+
+            const auto ret = test::TimedTest(1000, [&bullets] {
+                for (auto& bullet: bullets)
+                {
+                    bullet.position += bullet.velocity * 1.0f;
+                }
+            });
+            test::PrintTestTimes("Bullet Update Benchmark (Native, vector)", ret);
+        }
+        {
+            std::deque<Bullet> bullets;
+            bullets.resize(1000);
+
+            const auto ret = test::TimedTest(1000, [&bullets] {
+                for (auto& bullet: bullets)
+                {
+                    bullet.position += bullet.velocity * 1.0f;
+                }
+            });
+            test::PrintTestTimes("Bullet Update Benchmark (Native, deque)", ret);
+        }
     }
 
 
@@ -2229,15 +2246,21 @@ end
     {
         sol::state lua;
         lua.open_libraries();
+        engine::BindGLM(lua);
 
         struct Bullet {
             glm::vec2 position {0.0f, 0.0f};
-            glm::vec2 velocity {1.0f, 1.0f};;
+            glm::vec2 velocity {1.0f, 1.0f};
+
+            float px;
+            float py;
         };
         auto bullet_type = lua.new_usertype<Bullet>("Bullet");
 
         bullet_type["position"] = &Bullet::position;
         bullet_type["velocity"] = &Bullet::velocity;
+        bullet_type["px"] = &Bullet::px;
+        bullet_type["py"] = &Bullet::py;
 
         bullet_type["GetPosition"] = [](const Bullet& bullet) {
             return bullet.position;
@@ -2251,6 +2274,10 @@ end
 
         std::vector<Bullet> bullets;
         bullets.resize(1000);
+
+        std::vector<Bullet*> bullets_ptr;
+        for (auto& b : bullets)
+            bullets_ptr.push_back(&b);
 
         lua.script(R"(
 function Update(bullet, game_time, dt)
@@ -2275,9 +2302,17 @@ function Update3(bullets, game_time, dt)
    end
 end
 
+function Update4(bullets, game_time, dt)
+    for i=1, #bullets do
+       local bullet = bullets[i]
+       bullet.px = bullet.px + 1.0 * dt
+       bullet.py = bullet.py + 2.0 * dt
+    end
+end
+
         )");
 
-        const auto ret = test::TimedTest(1000, [&bullets, &lua] {
+        const auto ret = test::TimedTest(1000, [&bullets, &bullets_ptr, &lua] {
 
             /*
             auto func = lua["Update"];
@@ -2287,6 +2322,12 @@ end
                 func(bullet, 0.0, 1.0);
             }
              */
+
+            // using vector of objects is a bit faster than using
+            // a vector of pointers to objects
+
+            // using floats is slightly faster than using glm::vec2
+            //lua["Update4"](bullets, 0.0, 1.0);
 
             lua["Update3"](bullets, 0.0, 1.0);
         });
@@ -2325,9 +2366,106 @@ end
             lua["Update"](bullets, 0.0, 0.0f);
         });
 
-        test::PrintTestTimes("Batch update 1 (Lua)", ret);
+        test::PrintTestTimes("Batch Update Entity Test (Lua)", ret);
     }
 
+    if (target == EntityUpdateMeasurement::RuntimeNodesLua)
+    {
+        sol::state lua;
+        lua.open_libraries();
+
+        engine::BindGameLib(lua);
+        engine::BindGLM(lua);
+
+        lua.script(R"(
+function UpdateNodes1(nodes, game_time, dt, class)
+    local hi = nodes:GetHighIndex()
+    for i = 0, hi do
+        local transform = nodes:GetTransform(i)
+        if transform ~= nil then
+            transform.translation.y = transform.translation.y + dt * 5.0
+        end
+    end
+end
+
+-- vector hack
+function UpdateNodes2(nodes, game_time, dt)
+   for i=1, #nodes do
+      local transform = nodes[i]
+      transform.translation.y = transform.translation.y + dt * 5.0
+   end
+end
+
+
+function UpdateNodes3(nodes, game_time, dt)
+    local transforms = nodes:GetTransforms()
+    for i=1, #transforms do
+        local transform = transforms[i]
+        transform.translation.y = transform.translation.y + dt * 5.0
+    end
+end
+        )");
+
+        {
+            auto* allocator = &bullet_class->GetAllocator();
+            auto ret = test::TimedTest(1000, [allocator, &lua, bullet_class]() {
+                lua["UpdateNodes1"](allocator, 0.0, 0.0f);
+            });
+            test::PrintTestTimes("Batch Update Entity Nodes (Lua)", ret);
+        }
+
+        {
+
+            std::vector<game::EntityNodeTransform*> test;
+
+            auto* allocator = &bullet_class->GetAllocator();
+            auto ret = test::TimedTest(1000, [&allocator, &lua, &test]() {
+                test.clear();
+                test.reserve(allocator->GetHighIndex());
+                game::EntityNodeTransformSequence  sequence(allocator);
+
+                for (auto beg = sequence.begin(); beg != sequence.end(); ++beg) {
+                    test.push_back(&(*beg));
+                }
+                lua["UpdateNodes2"](test, 0.0, 0.0f);
+            });
+
+            test::PrintTestTimes("Batch Update Entity Nodes (Lua, vector hack)", ret);
+        }
+
+        {
+            auto* allocator = &bullet_class->GetAllocator();
+            auto ret = test::TimedTest(1000, [allocator, &lua, bullet_class]() {
+                lua["UpdateNodes3"](allocator, 0.0, 0.0f);
+            });
+            test::PrintTestTimes("Batch Update Entity Nodes (Lua iterator container)", ret);
+        }
+
+        {
+            auto* allocator = &bullet_class->GetAllocator();
+            auto ret = test::TimedTest(1000, [allocator, &lua, bullet_class]() {
+                /*
+                game::EntityNodeTransformSequence sequence(allocator);
+                auto beg = sequence.begin();
+                auto end = sequence.end();
+                for (; beg != end; ++beg) {
+                    auto& transform = *beg;
+                    transform.translation.y = transform.translation.y + 1.0f * 2.0f;
+                }
+                 */
+                // this is much faster than using the iterators huhu
+                const auto high = allocator->GetHighIndex();
+                for (size_t i=0; i<high; ++i)
+                {
+                    auto* transform = allocator->template GetObject<game::EntityNodeTransform>(i);
+                    if (transform) {
+                        transform->translation.y = transform->translation.y + 1.0 * 2.0;
+                    }
+                }
+            });
+            test::PrintTestTimes("Batch Update Entity Nodes (C++ iterator container)", ret);
+        }
+    }
 }
 
 } // NAMESPACE
@@ -2359,6 +2497,7 @@ int test_main(int argc, char* argv[])
     measure_entity_update_time<EntityUpdateMeasurement::BenchmarkLua>();
     measure_entity_update_time<EntityUpdateMeasurement::BenchmarkNative>();
     measure_entity_update_time<EntityUpdateMeasurement::EntityBatch1>();
+    measure_entity_update_time<EntityUpdateMeasurement::RuntimeNodesLua>();
     return 0;
 }
 ) // TEST_MAIN
