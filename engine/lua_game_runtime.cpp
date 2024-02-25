@@ -901,6 +901,32 @@ void LuaRuntime::Update(double game_time, double dt)
                    CallLua((*mSceneEnv)["Update"], mScene, game_time, dt));
     }
 
+    // currently unit_test_lua doesn't have class library set
+    // todo: fix the unit test and get rid of this if check
+    if (mClassLib)
+    {
+        TRACE_SCOPE("Lua::Entity::UpdateNodes");
+        for (auto pair : mEntityEnvs)
+        {
+            const auto& klassId = pair.first;
+            const auto& klass   = mClassLib->FindEntityClassById(klassId);
+            if (klass->TestFlag(game::EntityClass::Flags::UpdateNodes))
+            {
+                auto* allocator = &klass->GetAllocator();
+
+                // have to hold the allocator lock here to make sure
+                // that the allocator's world view stays consistent
+                // during the update.
+                // This might actually cause a bit of contention between
+                // any background entity allocation since the Lua updates
+                // are stupidly slow.
+                std::lock_guard<std::mutex> lock(allocator->GetMutex());
+
+                CallLua((*pair.second)["UpdateNodes"], allocator, game_time, dt, klass);
+            }
+        }
+    }
+
     TRACE_SCOPE("Lua::Entity::Update");
     for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
     {
