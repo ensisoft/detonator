@@ -528,6 +528,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     GetUserProperty(resource, "variables_group", mUI.variables);
     GetUserProperty(resource, "animations_group", mUI.animations);
     GetUserProperty(resource, "joints_group", mUI.joints);
+    GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
+    GetUserProperty(resource, "right_splitter", mUI.rightSplitter);
     GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
     GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
 
@@ -598,6 +600,18 @@ void EntityWidget::InitializeSettings(const UISettings& settings)
     SetValue(mUI.chkShowGrid,     settings.show_grid);
     SetValue(mUI.cmbGrid,         settings.grid);
     SetValue(mUI.zoom,            settings.zoom);
+
+    // try to make the default splitter partitions sane.
+    // looks like this garbage needs to be done *after* the
+    // widget has been shown (of course) so using a timer
+    // hack for a hack
+    QTimer::singleShot(0, this, [this]() {
+        QList<int> sizes;
+        sizes << mUI.leftLayout->sizeHint().width();
+        sizes << mUI.center->sizeHint().width();
+        sizes << mUI.rightSplitter->sizeHint().width();
+        mUI.mainSplitter->setSizes(sizes);
+    });
 }
 
 void EntityWidget::SetViewerMode()
@@ -723,6 +737,8 @@ bool EntityWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Entity", mUI.variables);
     settings.SaveWidget("Entity", mUI.animations);
     settings.SaveWidget("Entity", mUI.joints);
+    settings.SaveWidget("Entity", mUI.mainSplitter);
+    settings.SaveWidget("Entity", mUI.rightSplitter);
     return true;
 }
 bool EntityWidget::LoadState(const Settings& settings)
@@ -748,6 +764,8 @@ bool EntityWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Entity", mUI.variables);
     settings.LoadWidget("Entity", mUI.animations);
     settings.LoadWidget("Entity", mUI.joints);
+    settings.LoadWidget("Entity", mUI.mainSplitter);
+    settings.LoadWidget("Entity", mUI.rightSplitter);
 
     game::EntityClass klass;
     if (!klass.FromJson(json))
@@ -1257,6 +1275,8 @@ void EntityWidget::on_actionSave_triggered()
     SetUserProperty(resource, "variables_group", mUI.variables);
     SetUserProperty(resource, "animations_group", mUI.animations);
     SetUserProperty(resource, "joints_group", mUI.joints);
+    SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
+    SetUserProperty(resource, "right_splitter", mUI.rightSplitter);
 
     // save the track properties.
     for (const auto& [id, props] : mTrackProperties)
