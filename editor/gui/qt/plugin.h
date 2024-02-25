@@ -18,6 +18,7 @@
 
 #include "config.h"
 
+#include <QWidget>
 #include <QObject>
 #include <QtUiPlugin/QDesignerCustomWidgetInterface>
 #include <QtUiPlugin/QDesignerCustomWidgetCollectionInterface>
@@ -35,6 +36,57 @@ namespace gui {
 // Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QDesignerCustomWidgetCollectionInterface")
 
 // https://doc.qt.io/qt-6/qdesignercustomwidgetcollectioninterface.html#details
+
+namespace Ui {
+    class Style;
+}
+
+namespace gui {
+    // this is a dummy widget for the real WidgetStyleWidget in the editor.
+    // we can't use the real thing since it's got a dependency to editor's Workspace
+    // class and therefore a lot more transient dependencies.
+    // This dummy works for the designer just to visualize the widget
+    // Note that this must have the same Qt meta class name "gui::WidgetStyleWidget"
+    // as the real thing otherwise Qt Designer complains about a name mismatch
+    // between the name reported by the plugin and the actual object's class name.
+    class WidgetStyleWidget : public QWidget
+    {
+        Q_OBJECT
+
+    public:
+        WidgetStyleWidget(QWidget* parent = nullptr);
+       ~WidgetStyleWidget();
+    private:
+        Ui::Style* style = nullptr;
+    };
+} // gui
+
+
+class UikWidgetStyleWidgetPlugin : public QObject, public QDesignerCustomWidgetInterface
+{
+Q_OBJECT
+    Q_INTERFACES(QDesignerCustomWidgetInterface)
+
+public:
+    UikWidgetStyleWidgetPlugin(QObject* parent = nullptr);
+
+    virtual bool isContainer() const override;
+    virtual bool isInitialized() const override;
+    virtual QIcon icon() const override;
+    virtual QString domXml() const override;
+    virtual QString group() const override;
+    virtual QString includeFile() const override;
+    virtual QString name() const override;
+    virtual QString toolTip() const override;
+    virtual QString whatsThis() const override;
+    virtual QWidget *createWidget(QWidget *parent) override;
+    virtual void initialize(QDesignerFormEditorInterface *core) override;
+
+private:
+    bool initialized = false;
+};
+
+
 
 class QtSvgViewWidgetPlugin : public QObject, public QDesignerCustomWidgetInterface
 {
