@@ -34,6 +34,87 @@
 #include "../collapsible_widget.h"
 #include "../svg/svgview.h"
 
+#include "../ui_widgetstylewidget.h"
+
+namespace gui {
+
+    WidgetStyleWidget::WidgetStyleWidget(QWidget* parent)
+            : QWidget(parent)
+    {
+        style = new Ui::Style();
+        style->setupUi(this);
+    }
+
+    WidgetStyleWidget::~WidgetStyleWidget()
+    {
+        delete style;
+    }
+
+}
+
+UikWidgetStyleWidgetPlugin::UikWidgetStyleWidgetPlugin(QObject* parent)
+        : QObject(parent)
+{}
+
+bool UikWidgetStyleWidgetPlugin::isContainer() const
+{
+    return false;
+}
+bool UikWidgetStyleWidgetPlugin::isInitialized() const
+{
+    return initialized;
+}
+QIcon UikWidgetStyleWidgetPlugin::icon() const
+{
+    return QIcon();
+}
+QString UikWidgetStyleWidgetPlugin::domXml() const
+{
+    return "<ui language=\"c++\">\n"
+           " <widget class=\"gui::WidgetStyleWidget\" name=\"styleWidget\">\n"
+           "  <property name=\"geometry\">\n"
+           "   <rect>\n"
+           "    <x>0</x>\n"
+           "    <y>0</y>\n"
+           "    <width>400</width>\n"
+           "    <height>400</height>\n"
+           "   </rect>\n"
+           "  </property>\n"
+           " </widget>\n"
+           "</ui>\n";
+}
+QString UikWidgetStyleWidgetPlugin::group() const
+{
+    return "DETONATOR2D";
+}
+
+QString UikWidgetStyleWidgetPlugin::includeFile() const
+{
+    return "widgetstylewidget.h";
+}
+
+QString UikWidgetStyleWidgetPlugin::name() const
+{
+    return "gui::WidgetStyleWidget";
+}
+QString UikWidgetStyleWidgetPlugin::toolTip() const
+{
+    return "";
+}
+QString UikWidgetStyleWidgetPlugin::whatsThis() const
+{
+    return toolTip();
+}
+QWidget* UikWidgetStyleWidgetPlugin::createWidget(QWidget *parent)
+{
+    return new gui::WidgetStyleWidget(parent);
+}
+void UikWidgetStyleWidgetPlugin::initialize(QDesignerFormEditorInterface *core)
+{
+    initialized = true;
+}
+
+
 QtSvgViewWidgetPlugin::QtSvgViewWidgetPlugin(QObject* parent)
   : QObject(parent)
 {}
@@ -439,6 +520,7 @@ MyCustomWidgets::MyCustomWidgets(QObject* parent)
     widgets.append(new DoubleSpinBoxWidgetPlugin(this));
     widgets.append(new DoubleSliderWidgetPlugin(this));
     widgets.append(new QtSvgViewWidgetPlugin(this));
+    widgets.append(new UikWidgetStyleWidgetPlugin(this));
 }
 
 QList<QDesignerCustomWidgetInterface*> MyCustomWidgets::customWidgets() const
