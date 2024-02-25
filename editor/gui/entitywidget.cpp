@@ -1600,6 +1600,10 @@ void EntityWidget::on_chkPostUpdate_stateChanged(int)
 {
     mState.entity->SetFlag(game::EntityClass::Flags::PostUpdate, GetValue(mUI.chkPostUpdate));
 }
+void EntityWidget::on_chkUpdateNodes_stateChanged(int)
+{
+    mState.entity->SetFlag(game::EntityClass::Flags::UpdateNodes, GetValue(mUI.chkUpdateNodes));
+}
 
 void EntityWidget::on_chkKeyEvents_stateChanged(int)
 {
@@ -3336,6 +3340,7 @@ void EntityWidget::DisplayEntityProperties()
     SetValue(mUI.chkTickEntity, mState.entity->TestFlag(game::EntityClass::Flags::TickEntity));
     SetValue(mUI.chkUpdateEntity, mState.entity->TestFlag(game::EntityClass::Flags::UpdateEntity));
     SetValue(mUI.chkPostUpdate, mState.entity->TestFlag(game::EntityClass::Flags::PostUpdate));
+    SetValue(mUI.chkUpdateNodes, mState.entity->TestFlag(game::EntityClass::Flags::UpdateNodes));
     SetValue(mUI.chkKeyEvents, mState.entity->TestFlag(game::EntityClass::Flags::WantsKeyEvents));
     SetValue(mUI.chkMouseEvents, mState.entity->TestFlag(game::EntityClass::Flags::WantsMouseEvents));
 
@@ -3984,6 +3989,17 @@ end
 -- to do it. This function can be used to do thing such as evaluate AI or
 -- path finding etc.
 function Tick(%1, game_time, dt)
+end
+
+-- Called on every iteration of the game loop. game_time is the current
+-- game time so far in seconds not including the next time step dt.
+-- allocator is an instance of game.EntityNodeAllocator that provides
+-- the storage for the entity nodes. Keep in mind that this contains
+-- *all* the nodes of any specific entity type. So the combination of
+-- all the nodes across all entity instances 'klass' type.
+-- Any component for any given node (at some index) may be nil so you
+-- need to remember to check for nils before accessing.
+function UpdateNodes(allocator, game_time, dt, klass)
 end
 
 -- Called on every iteration of the game loop. game_time is the current

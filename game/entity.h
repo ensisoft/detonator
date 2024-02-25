@@ -1646,6 +1646,8 @@ namespace game
             TickEntity,
             // Invoke the update function on the entity
             UpdateEntity,
+            // Invoke the node update function on the entity
+            UpdateNodes,
             // Invoke the post update function on the entity.
             PostUpdate,
             // Whether to pass keyboard events to the entity or not

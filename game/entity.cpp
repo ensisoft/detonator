@@ -745,6 +745,7 @@ EntityClass::EntityClass()
     mFlags.set(Flags::KillAtBoundary,  true);
     mFlags.set(Flags::TickEntity,      true);
     mFlags.set(Flags::UpdateEntity,    true);
+    mFlags.set(Flags::UpdateNodes,     false);
     mFlags.set(Flags::PostUpdate,      true);
     mFlags.set(Flags::WantsKeyEvents,  false);
     mFlags.set(Flags::WantsMouseEvents,false);

@@ -134,6 +134,7 @@ namespace gui
         void on_chkTickEntity_stateChanged(int);
         void on_chkUpdateEntity_stateChanged(int);
         void on_chkPostUpdate_stateChanged(int);
+        void on_chkUpdateNodes_stateChanged(int);
         void on_chkKeyEvents_stateChanged(int);
         void on_chkMouseEvents_stateChanged(int);
         void on_btnAddIdleTrack_clicked();
