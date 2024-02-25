@@ -555,9 +555,9 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     DisplayCurrentWidgetProperties();
     mOriginalHash = mState.window.GetHash();
 
-
     mUI.windowKeyMap->lineEdit()->setReadOnly(true);
     mUI.windowStyleFile->lineEdit()->setReadOnly(true);
+
 }
 
 UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : UIWidget(workspace)
@@ -582,6 +582,8 @@ UIWidget::UIWidget(app::Workspace* workspace, const app::Resource& resource) : U
     GetUserProperty(resource, "camera_scale_x", mUI.scaleX);
     GetUserProperty(resource, "camera_scale_y", mUI.scaleY);
     GetUserProperty(resource, "camera_rotation", mUI.rotation);
+    GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
+    GetUserProperty(resource, "right_splitter", mUI.rightSplitter);
     mCameraWasLoaded = GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
                        GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
 
@@ -653,6 +655,18 @@ void UIWidget::InitializeContent()
     mState.window.LinkChild(mState.window.FindWidgetByName("Form"),
                             mState.window.FindWidgetByName("Button"));
     mOriginalHash = mState.window.GetHash();
+
+    // try to make the default splitter partitions sane.
+    // looks like this garbage needs to be done *after* the
+    // widget has been shown (of course) so using a timer
+    // hack for a hack
+    QTimer::singleShot(0, this, [this]() {
+        QList<int> sizes;
+        sizes << mUI.leftLayout->sizeHint().width();
+        sizes << mUI.center->sizeHint().width();
+        sizes << mUI.rightSplitter->sizeHint().width();
+        mUI.mainSplitter->setSizes(sizes);
+    });
 }
 
 void UIWidget::SetViewerMode()
@@ -744,6 +758,8 @@ bool UIWidget::SaveState(Settings& settings) const
     settings.SaveWidget("UI", mUI.cmbGrid);
     settings.SaveWidget("UI", mUI.zoom);
     settings.SaveWidget("UI", mUI.widget);
+    settings.SaveWidget("UI", mUI.mainSplitter);
+    settings.SaveWidget("UI", mUI.rightSplitter);
     return true;
 }
 bool UIWidget::LoadState(const Settings& settings)
@@ -767,6 +783,8 @@ bool UIWidget::LoadState(const Settings& settings)
     settings.LoadWidget("UI", mUI.chkClipWidgets);
     settings.LoadWidget("UI", mUI.zoom);
     settings.LoadWidget("UI", mUI.widget);
+    settings.LoadWidget("UI", mUI.mainSplitter);
+    settings.LoadWidget("UI", mUI.rightSplitter);
 
     if (!mState.window.FromJson(json))
         WARN("Failed to restore window state.");
@@ -1259,6 +1277,8 @@ void UIWidget::on_actionSave_triggered()
     SetUserProperty(resource, "show_tab_order", mUI.chkShowTabOrder);
     SetUserProperty(resource, "widget", mUI.widget);
     SetUserProperty(resource, "clip_widgets", mUI.chkClipWidgets);
+    SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
+    SetUserProperty(resource, "right_splitter", mUI.rightSplitter);
 
     mState.workspace->SaveResource(resource);
     mOriginalHash = mState.window.GetHash();
