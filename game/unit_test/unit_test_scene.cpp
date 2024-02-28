@@ -1224,6 +1224,10 @@ void unit_test_async_spawn()
 {
     TEST_CASE(test::Type::Feature)
 
+#if defined(DETONATOR_UNIT_TEST_WASM_BUILD)
+    return;
+#endif
+
     base::ThreadPool threadpool;
     threadpool.AddRealThread();
     threadpool.AddRealThread();
