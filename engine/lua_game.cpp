@@ -657,6 +657,33 @@ void BindGameLib(sol::state& L)
     spn["IsEnabled"] = &SpatialNode::IsEnabled;
     spn["Enable"]    = &SpatialNode::Enable;
 
+    auto transformer = table.new_usertype<NodeTransformer>("NodeTransformer");
+    transformer["Enable"]                 = &NodeTransformer::Enable;
+    transformer["IsEnabled"]              = &NodeTransformer::IsEnabled;
+    transformer["GetLinearVelocity"]      = &NodeTransformer::GetLinearVelocity;
+    transformer["GetLinearAcceleration"]  = &NodeTransformer::GetLinearAcceleration;
+    transformer["GetAngularVelocity"]     = &NodeTransformer::GetAngularVelocity;
+    transformer["GetAngularAcceleration"] = &NodeTransformer::GetAngularAcceleration;
+    transformer["GetIntegrator"] = [](const NodeTransformer& transformer) {
+        return magic_enum::enum_name(transformer.GetIntegrator());
+    };
+    transformer["SetAngularVelocity"] = &NodeTransformer::SetAngularVelocity;
+    transformer["SetAngularAcceleration"] = &NodeTransformer::SetAngularAcceleration;
+    transformer["SetLinearVelocity"] = sol::overload(
+        [](NodeTransformer& transformer, glm::vec2 vector) {
+            transformer.SetLinearVelocity(vector);
+        },
+        [](NodeTransformer& transformer, float x, float y) {
+            transformer.SetLinearVelocity(glm::vec2{x, y});
+        });
+    transformer["SetLinearAcceleration"] = sol::overload(
+        [](NodeTransformer& transformer, glm::vec2 vector) {
+            transformer.SetLinearAcceleration(vector);
+        },
+        [](NodeTransformer& transformer, float x, float y) {
+            transformer.SetLinearAcceleration(glm::vec2{x, y});
+        });
+
     auto entity_node = table.new_usertype<EntityNode>("EntityNode");
     entity_node["GetId"]          = &EntityNode::GetId;
     entity_node["GetName"]        = &EntityNode::GetName;
@@ -676,6 +703,7 @@ void BindGameLib(sol::state& L)
     entity_node["GetRigidBody"]   = (RigidBodyItem*(EntityNode::*)(void))&EntityNode::GetRigidBody;
     entity_node["GetTextItem"]    = (TextItem*(EntityNode::*)(void))&EntityNode::GetTextItem;
     entity_node["GetSpatialNode"] = (SpatialNode*(EntityNode::*)(void))&EntityNode::GetSpatialNode;
+    entity_node["GetTransformer"] = (NodeTransformer*(EntityNode::*)(void))&EntityNode::GetTransformer;
     entity_node["GetEntity"]      = (Entity*(EntityNode::*)(void))&EntityNode::GetEntity;
     entity_node["SetName"]        = &EntityNode::SetName;
     entity_node["SetRotation"]    = &EntityNode::SetRotation;
