@@ -65,6 +65,9 @@ void BindGlmVectorOp(sol::usertype<Vector>& vec)
     });
     vec["length"]    = [](const Vector& vec) { return glm::length(vec); };
     vec["normalize"] = [](const Vector& vec) { return glm::normalize(vec); };
+    vec["mul_add"]   = [](Vector& vec, const Vector& vec2, float dt) {
+        vec += vec2 * dt;
+    };
 }
 } // namespace
 
