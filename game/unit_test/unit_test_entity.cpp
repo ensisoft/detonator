@@ -123,6 +123,12 @@ void unit_test_entity_node()
     game::MapNodeClass map;
     map.SetMapSortPoint(glm::vec2{2.0f, 3.0f});
 
+    game::NodeTransformerClass transformer;
+    transformer.SetAngularAcceleration(1.0f);
+    transformer.SetAngularVelocity(5.0f);
+    transformer.SetLinearAcceleration(glm::vec2{1.0f, 2.0f});
+    transformer.SetLinearVelocity(glm::vec2{-1.0f, 2.0f});
+
     game::EntityNodeClass node;
     node.SetName("root");
     node.SetTag("#tag");
@@ -136,6 +142,7 @@ void unit_test_entity_node()
     node.SetSpatialNode(spatial);
     node.SetFixture(fix);
     node.SetMapNode(map);
+    node.SetTransformer(transformer);
 
     TEST_REQUIRE(node.HasDrawable());
     TEST_REQUIRE(node.HasRigidBody());
@@ -143,6 +150,7 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.HasSpatialNode());
     TEST_REQUIRE(node.HasFixture());
     TEST_REQUIRE(node.HasMapNode());
+    TEST_REQUIRE(node.HasTransformer());
     TEST_REQUIRE(node.GetName()         == "root");
     TEST_REQUIRE(node.GetSize()         == glm::vec2(100.0f, 100.0f));
     TEST_REQUIRE(node.GetTranslation()  == glm::vec2(150.0f, -150.0f));
@@ -184,6 +192,10 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.GetFixture()->GetPolygonShapeId() == "123232ddd");
     TEST_REQUIRE(node.GetFixture()->GetRigidBodyNodeId() == "81288");
     TEST_REQUIRE(node.GetMapNode()->GetSortPoint() == glm::vec2(2.0f, 3.0f));
+    TEST_REQUIRE(node.GetTransformer()->GetAngularAcceleration() == 1.0f);
+    TEST_REQUIRE(node.GetTransformer()->GetAngularVelocity() == 5.0f);
+    TEST_REQUIRE(node.GetTransformer()->GetLinearVelocity() == glm::vec2(-1.0f, 2.0f));
+    TEST_REQUIRE(node.GetTransformer()->GetLinearAcceleration() == glm::vec2(1.0f, 2.0f));
 
     // to/from json
     {
@@ -232,6 +244,10 @@ void unit_test_entity_node()
         TEST_REQUIRE(ret.GetFixture()->GetPolygonShapeId() == "123232ddd");
         TEST_REQUIRE(ret.GetFixture()->GetRigidBodyNodeId() == "81288");
         TEST_REQUIRE(ret.GetMapNode()->GetSortPoint() == glm::vec2(2.0f, 3.0f));
+        TEST_REQUIRE(ret.GetTransformer()->GetAngularAcceleration() == 1.0f);
+        TEST_REQUIRE(ret.GetTransformer()->GetAngularVelocity() == 5.0f);
+        TEST_REQUIRE(ret.GetTransformer()->GetLinearVelocity() == glm::vec2(-1.0f, 2.0f));
+        TEST_REQUIRE(ret.GetTransformer()->GetLinearAcceleration() == glm::vec2(1.0f, 2.0f));
         TEST_REQUIRE(ret.GetHash() == node.GetHash());
     }
 

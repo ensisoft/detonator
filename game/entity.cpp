@@ -46,6 +46,40 @@ namespace {
 namespace game
 {
 
+size_t NodeTransformerClass::GetHash() const noexcept
+{
+    size_t hash = 0;
+    hash = base::hash_combine(hash, mFlags);
+    hash = base::hash_combine(hash, mIntegrator);
+    hash = base::hash_combine(hash, mLinearVelocity);
+    hash = base::hash_combine(hash, mLinearAcceleration);
+    hash = base::hash_combine(hash, mAngularVelocity);
+    hash = base::hash_combine(hash, mAngularAcceleration);
+    return hash;
+}
+
+void NodeTransformerClass::IntoJson(data::Writer& data) const
+{
+    data.Write("flags",                mFlags);
+    data.Write("integrator",           mIntegrator);
+    data.Write("linear_velocity",      mLinearVelocity);
+    data.Write("linear_acceleration",  mLinearAcceleration);
+    data.Write("angular_velocity",     mAngularVelocity);
+    data.Write("angular_acceleration", mAngularAcceleration);
+}
+
+bool NodeTransformerClass::FromJson(const data::Reader& data)
+{
+    bool ok = true;
+    ok &= data.Read("flags",                &mFlags);
+    ok &= data.Read("integrator",           &mIntegrator);
+    ok &= data.Read("linear_velocity",      &mLinearVelocity);
+    ok &= data.Read("linear_acceleration",  &mLinearAcceleration);
+    ok &= data.Read("angular_velocity",     &mAngularVelocity);
+    ok &= data.Read("angular_acceleration", &mAngularAcceleration);
+    return ok;
+}
+
 size_t MapNodeClass::GetHash() const noexcept
 {
     size_t hash = 0;
@@ -370,6 +404,8 @@ EntityNodeClass::EntityNodeClass(const EntityNodeClass& other)
         mFixture = std::make_shared<FixtureClass>(*other.mFixture);
     if (other.mMapNode)
         mMapNode = std::make_shared<MapNodeClass>(*other.mMapNode);
+    if (other.mTransformer)
+        mTransformer = std::make_shared<NodeTransformerClass>(*other.mTransformer);
 }
 
 EntityNodeClass::EntityNodeClass(EntityNodeClass&& other)
@@ -388,6 +424,7 @@ EntityNodeClass::EntityNodeClass(EntityNodeClass&& other)
     mSpatialNode = std::move(other.mSpatialNode);
     mFixture     = std::move(other.mFixture);
     mMapNode     = std::move(other.mMapNode);
+    mTransformer = std::move(other.mTransformer);
 }
 
 std::size_t EntityNodeClass::GetHash() const
@@ -413,6 +450,8 @@ std::size_t EntityNodeClass::GetHash() const
         hash = base::hash_combine(hash, mFixture->GetHash());
     if (mMapNode)
         hash = base::hash_combine(hash, mMapNode->GetHash());
+    if (mTransformer)
+        hash = base::hash_combine(hash, mTransformer->GetHash());
     return hash;
 }
 
@@ -445,6 +484,10 @@ void EntityNodeClass::SetMapNode(const MapNodeClass& map)
 {
     mMapNode = std::make_shared<MapNodeClass>(map);
 }
+void EntityNodeClass::SetTransformer(const NodeTransformerClass& transformer)
+{
+    mTransformer = std::make_shared<NodeTransformerClass>(transformer);
+}
 
 void EntityNodeClass::CreateRigidBody()
 {
@@ -474,6 +517,11 @@ void EntityNodeClass::CreateFixture()
 void EntityNodeClass::CreateMapNode()
 {
     mMapNode = std::make_shared<MapNodeClass>();
+}
+
+void EntityNodeClass::CreateTransformer()
+{
+    mTransformer = std::make_shared<NodeTransformerClass>();
 }
 
 glm::mat4 EntityNodeClass::GetNodeTransform() const
@@ -544,6 +592,12 @@ void EntityNodeClass::IntoJson(data::Writer& data) const
         mMapNode->IntoJson(*chunk);
         data.Write("map_node", std::move(chunk));
     }
+    if (mTransformer)
+    {
+        auto chunk = data.NewWriteChunk();
+        mTransformer->IntoJson(*chunk);
+        data.Write("transformer", std::move(chunk));
+    }
 }
 
 template<typename T>
@@ -578,6 +632,7 @@ bool EntityNodeClass::FromJson(const data::Reader& data)
     ok &= ComponentClassFromJson(mName, "spatial_node",  data, mSpatialNode);
     ok &= ComponentClassFromJson(mName, "fixture",       data, mFixture);
     ok &= ComponentClassFromJson(mName, "map_node",      data, mMapNode);
+    ok &= ComponentClassFromJson(mName, "transformer",   data, mTransformer);
     return ok;
 }
 
@@ -606,6 +661,7 @@ EntityNodeClass& EntityNodeClass::operator=(const EntityNodeClass& other)
     mSpatialNode = std::move(tmp.mSpatialNode);
     mFixture     = std::move(tmp.mFixture);
     mMapNode     = std::move(tmp.mMapNode);
+    mTransformer = std::move(tmp.mTransformer);
     mBitFlags    = std::move(tmp.mBitFlags);
     return *this;
 }
@@ -639,6 +695,8 @@ EntityNode::EntityNode(std::shared_ptr<const EntityNodeClass> klass, EntityNodeA
         mFixture = std::make_unique<Fixture>(mClass->GetSharedFixture());
     if (mClass->HasMapNode())
         mMapNode = std::make_unique<MapNode>(mClass->GetSharedMapNode());
+    if (mClass->HasTransformer())
+        mTransformer = std::make_unique<NodeTransformer>(mClass->GetSharedTransformer());
 }
 
 EntityNode::EntityNode(EntityNode&& other)
@@ -652,6 +710,7 @@ EntityNode::EntityNode(EntityNode&& other)
    , mSpatialNode   (std::move(other.mSpatialNode))
    , mFixture       (std::move(other.mFixture))
    , mMapNode       (std::move(other.mMapNode))
+   , mTransformer   (std::move(other.mTransformer))
 {
     other.mTransform = nullptr;
     other.mNodeData  = nullptr;
@@ -696,6 +755,11 @@ Fixture* EntityNode::GetFixture()
 MapNode* EntityNode::GetMapNode()
 { return mMapNode.get(); }
 
+NodeTransformer* EntityNode::GetTransformer()
+{
+    return mTransformer.get();
+}
+
 const DrawableItem* EntityNode::GetDrawable() const
 { return mDrawable.get(); }
 
@@ -713,6 +777,11 @@ const Fixture* EntityNode::GetFixture() const
 
 const MapNode* EntityNode::GetMapNode() const
 { return mMapNode.get(); }
+
+const NodeTransformer* EntityNode::GetTransformer() const
+{
+    return mTransformer.get();
+}
 
 glm::mat4 EntityNode::GetNodeTransform() const
 {
@@ -1901,6 +1970,34 @@ void Entity::Update(float dt, std::vector<Event>* events)
         }
     }
     mEvents.clear();
+
+
+    for (auto& node : mNodes)
+    {
+        auto* transformer = node.GetTransformer();
+        if (!transformer || !transformer->IsEnabled())
+            continue;
+
+        const auto integrator = transformer->GetIntegrator();
+        if (integrator == NodeTransformerClass::Integrator::Euler)
+        {
+            {
+                float acceleration = transformer->GetAngularAcceleration();
+                float velocity = transformer->GetAngularVelocity();
+                velocity += acceleration * dt;
+                node.Rotate(velocity * dt);
+                transformer->SetAngularVelocity(velocity);
+            }
+
+            {
+                auto acceleration = transformer->GetLinearAcceleration();
+                auto velocity = transformer->GetLinearVelocity();
+                velocity += acceleration * dt;
+                node.Translate(velocity * dt);
+                transformer->SetLinearVelocity(velocity);
+            }
+        }
+    }
 
     if (mCurrentAnimations.empty())
         return;
