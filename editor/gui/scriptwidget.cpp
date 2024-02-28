@@ -478,6 +478,8 @@ private:
                 return "game.Drawable";
             else if (word.contains("text"))
                 return "game.TextItem";
+        else if (word.endsWith("transformer"))
+            return "game.NodeTransformer";
 
         return app::FindLuaDocTableMatch(word);
     }

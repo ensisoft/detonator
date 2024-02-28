@@ -252,6 +252,14 @@ namespace gui
         void on_btnResetTextRasterHeight_clicked();
         void on_mnVCenter_valueChanged(double);
         void on_mnHCenter_valueChanged(double);
+        void on_tfIntegrator_currentIndexChanged(int);
+        void on_tfVelocityX_valueChanged(double);
+        void on_tfVelocityY_valueChanged(double);
+        void on_tfVelocityA_valueChanged(double);
+        void on_tfAccelX_valueChanged(double);
+        void on_tfAccelY_valueChanged(double);
+        void on_tfAccelA_valueChanged(double);
+        void on_tfEnabled_stateChanged(int);
         void on_btnAddDrawable_clicked();
         void on_btnDelDrawable_clicked();
         void on_btnAddTextItem_clicked();
@@ -264,6 +272,8 @@ namespace gui
         void on_btnDelTilemapNode_clicked();
         void on_btnAddSpatialNode_clicked();
         void on_btnDelSpatialNode_clicked();
+        void on_btnAddTransformer_clicked();
+        void on_btnDelTransformer_clicked();
 
         void on_animator_toggled(bool on);
         void on_tree_customContextMenuRequested(QPoint);
@@ -287,6 +297,7 @@ namespace gui
         void ToggleSpatialNode(bool on);
         void ToggleFixture(bool on);
         void ToggleTilemapNode(bool on);
+        void ToggleTransformer(bool on);
 
     private:
         void PaintScene(gfx::Painter& painter, double secs);

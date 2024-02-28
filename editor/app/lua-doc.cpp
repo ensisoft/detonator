@@ -1005,6 +1005,19 @@ void InitLuaDoc()
     DOC_META_METHOD_0("...", "newindex", "Lua new index meta method.");
     DOC_OBJECT_PROPERTY("string", "name", "The name of the command.");
 
+    DOC_TABLE2("game.NodeTransformer", "Simple node motion and animation.");
+    DOC_METHOD_0("bool", "IsEnabled", "Check whether the transformer is enabled.");
+    DOC_METHOD_0("glm.vec2", "GetLinearVelocity", "Get the current linear velocity (u/s) of motion.");
+    DOC_METHOD_0("glm.vec2", "GetLinearAcceleration", "Get the current linear acceleration (u/s²) of motion.");
+    DOC_METHOD_0("float", "GetAngularVelocity", "Get the current angular (rotation) velocity (rad/s).");
+    DOC_METHOD_0("float", "GetAngularAcceleration", "Get the current angular (rotation) acceleration. (rad/s²).");
+    DOC_METHOD_0("string", "GetIntegrator", "Get the integrator name. ");
+    DOC_METHOD_1("void", "SetLinearVelocity", "Set the linear velocity.", "glm.vec2", "velocity");
+    DOC_METHOD_1("void", "SetLinearAcceleration", "Set the linear velocity.", "glm.vec2", "velocity");
+    DOC_METHOD_2("void", "SetLinearVelocity", "Set the linear velocity.", "float", "x", "float", "y");
+    DOC_METHOD_2("void", "SetLinearAcceleration", "Set the linear velocity.", "float", "x", "float", "y");
+    DOC_METHOD_1("void", "Enable", "Enable or disable the transformer.", "bool", "enable");
+
     DOC_TABLE("game.Drawable");
     DOC_METHOD_1("void", "Command", "Send a command to the gfx drawable in the renderer.", "string", "cmd_name");
     DOC_METHOD_2("void", "Command", "Send a command to the gfx drawable in the renderer.", "string", "cmd_name", "int|float|string", "cmd_arg");
@@ -1195,6 +1208,7 @@ void InitLuaDoc()
     DOC_METHOD_0("game.TextItem", "GetTextItem", "Get the node's text item if any. Returns nil if node has no text item.");
     DOC_METHOD_0("game.Drawable", "GetDrawable", "Get the node's drawable item if any. Returns nil if node has no drawable item.");
     DOC_METHOD_0("game.SpatialNode", "GetSpatialNode", "Get the node's spatial node if any. Returns nil if node has no spatial node.");
+    DOC_METHOD_0("game.NodeTransformer", "GetTransformer", "Get the node's transformer if any. Returns nil if node has no transformer.");
     DOC_METHOD_0("game.Entity", "GetEntity", "Get the entity that owns this entity node.");
     DOC_METHOD_1("void", "SetScale", "Set the node's scaling factor that applies to this node and its children.", "glm.vec2", "scale");
     DOC_METHOD_2("void", "SetScale", "Set the node's scaling factor that applies to this node and its children.", "float", "sx", "float", "sy");

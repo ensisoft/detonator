@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1880</width>
-    <height>1166</height>
+    <width>2055</width>
+    <height>1478</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -566,8 +566,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>400</width>
-               <height>422</height>
+               <width>452</width>
+               <height>753</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_17">
@@ -1441,7 +1441,7 @@
           <x>0</x>
           <y>0</y>
           <width>440</width>
-          <height>785</height>
+          <height>984</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -3705,6 +3705,181 @@
                 </widget>
                </widget>
               </item>
+              <item>
+               <widget class="QPushButton" name="btnAddTransformer">
+                <property name="text">
+                 <string>Add Node Transformer</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resource/resource.qrc">
+                  <normaloff>:/16x16_ico_png/vector.png</normaloff>:/16x16_ico_png/vector.png</iconset>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="gui::CollapsibleWidget" name="transformer">
+                <property name="collapsed" stdset="0">
+                 <bool>true</bool>
+                </property>
+                <property name="text" stdset="0">
+                 <string>Node Transformer</string>
+                </property>
+                <widget class="QWidget" name="page">
+                 <layout class="QVBoxLayout" name="verticalLayout_2">
+                  <item>
+                   <layout class="QGridLayout" name="gridLayout_8">
+                    <item row="3" column="1">
+                     <widget class="QDoubleSpinBox" name="tfVelocityA">
+                      <property name="minimum">
+                       <double>-1000.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="stepType">
+                       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="4" column="0">
+                     <widget class="QLabel" name="label_66">
+                      <property name="text">
+                       <string>Angular acceleration (rad/s²)</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="1">
+                     <widget class="QDoubleSpinBox" name="tfAccelX">
+                      <property name="prefix">
+                       <string/>
+                      </property>
+                      <property name="minimum">
+                       <double>-1000.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="stepType">
+                       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="1">
+                     <widget class="QDoubleSpinBox" name="tfVelocityX">
+                      <property name="prefix">
+                       <string/>
+                      </property>
+                      <property name="minimum">
+                       <double>-1000.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="stepType">
+                       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="2">
+                     <widget class="QDoubleSpinBox" name="tfAccelY">
+                      <property name="prefix">
+                       <string/>
+                      </property>
+                      <property name="minimum">
+                       <double>-1000.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="stepType">
+                       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="label_67">
+                      <property name="text">
+                       <string>Integrator</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="0">
+                     <widget class="QLabel" name="label_68">
+                      <property name="text">
+                       <string>Angular velocity (rad/s)</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="0">
+                     <widget class="QLabel" name="label_69">
+                      <property name="text">
+                       <string>Linear acceleration (u/s²)</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1" colspan="2">
+                     <widget class="QComboBox" name="tfIntegrator"/>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QLabel" name="label_70">
+                      <property name="text">
+                       <string>Linear velocity (u/s)</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="4" column="1">
+                     <widget class="QDoubleSpinBox" name="tfAccelA">
+                      <property name="minimum">
+                       <double>-1000.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="stepType">
+                       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="2">
+                     <widget class="QDoubleSpinBox" name="tfVelocityY">
+                      <property name="prefix">
+                       <string/>
+                      </property>
+                      <property name="minimum">
+                       <double>-1000.000000000000000</double>
+                      </property>
+                      <property name="maximum">
+                       <double>1000.000000000000000</double>
+                      </property>
+                      <property name="stepType">
+                       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="5" column="1">
+                     <widget class="QCheckBox" name="tfEnabled">
+                      <property name="text">
+                       <string>Enabled</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="btnDelTransformer">
+                    <property name="text">
+                     <string>Remove Node Transformer</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../resource/resource.qrc">
+                      <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </widget>
+              </item>
              </layout>
             </item>
             <item>
@@ -4392,6 +4567,17 @@
   <tabstop>spnEnabled</tabstop>
   <tabstop>btnDelSpatialNode</tabstop>
   <tabstop>widget</tabstop>
+  <tabstop>btnAddTransformer</tabstop>
+  <tabstop>transformer</tabstop>
+  <tabstop>tfIntegrator</tabstop>
+  <tabstop>tfVelocityX</tabstop>
+  <tabstop>tfVelocityY</tabstop>
+  <tabstop>tfAccelX</tabstop>
+  <tabstop>tfAccelY</tabstop>
+  <tabstop>tfVelocityA</tabstop>
+  <tabstop>tfAccelA</tabstop>
+  <tabstop>tfEnabled</tabstop>
+  <tabstop>btnDelTransformer</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
