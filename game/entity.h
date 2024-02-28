@@ -78,6 +78,63 @@ namespace game
         };
     } // namespace
 
+    class NodeTransformerClass
+    {
+    public:
+        enum class Integrator {
+            Euler
+        };
+        enum class Flags {
+            Enabled
+        };
+        NodeTransformerClass()
+        {
+            mFlags.set(Flags::Enabled, true);
+        }
+        inline void SetIntegrator(Integrator integrator) noexcept
+        { mIntegrator = integrator; }
+        inline Integrator GetIntegrator() const noexcept
+        { return mIntegrator; }
+        inline void SetLinearVelocity(glm::vec2 velocity) noexcept
+        { mLinearVelocity = velocity; }
+        inline void SetLinearAcceleration(glm::vec2 acceleration) noexcept
+        { mLinearAcceleration = acceleration; }
+        inline glm::vec2 GetLinearVelocity() const noexcept
+        { return mLinearVelocity; }
+        inline glm::vec2 GetLinearAcceleration() const noexcept
+        { return mLinearAcceleration; }
+        inline float GetAngularVelocity() const noexcept
+        { return mAngularVelocity; }
+        inline float GetAngularAcceleration() const noexcept
+        { return mAngularAcceleration; }
+        inline void SetAngularVelocity(float velocity) noexcept
+        { mAngularVelocity = velocity; }
+        inline void SetAngularAcceleration(float acceleration) noexcept
+        { mAngularAcceleration = acceleration;  }
+
+        inline bool TestFlag(Flags flag) const noexcept
+        { return mFlags.test(flag); }
+        inline void SetFlag(Flags flag, bool on_off) noexcept
+        { mFlags.set(flag, on_off); }
+        inline bool IsEnabled() const noexcept
+        { return TestFlag(Flags::Enabled); }
+        inline base::bitflag<Flags> GetFlags() const noexcept
+        { return mFlags; }
+
+        size_t GetHash() const noexcept;
+
+        void IntoJson(data::Writer& data) const;
+        bool FromJson(const data::Reader& data);
+
+    private:
+        base::bitflag<Flags> mFlags;
+        Integrator mIntegrator  = Integrator::Euler;
+        glm::vec2 mLinearVelocity     = {0.0f, 0.0f};
+        glm::vec2 mLinearAcceleration = {0.0f, 0.0f};
+        float mAngularVelocity = 0.0f;
+        float mAngularAcceleration = 0.0f;
+    };
+
     class MapNodeClass
     {
     public:
@@ -627,6 +684,58 @@ namespace game
         Color4f mTextColor = Color::White;
     };
 
+
+    class NodeTransformer
+    {
+    public:
+        using Integrator = NodeTransformerClass::Integrator;
+        using Flags = NodeTransformerClass::Flags;
+
+        explicit NodeTransformer(std::shared_ptr<const NodeTransformerClass> klass)
+          : mClass(std::move(klass))
+          , mFlags(mClass->GetFlags())
+          , mLinearVelocity(mClass->GetLinearVelocity())
+          , mLinearAcceleration(mClass->GetLinearAcceleration())
+          , mAngularVelocity(mClass->GetAngularVelocity())
+          , mAngularAcceleration(mClass->GetAngularAcceleration())
+        {}
+        inline void SetLinearVelocity(glm::vec2 velocity) noexcept
+        { mLinearVelocity = velocity; }
+        inline void SetLinearAcceleration(glm::vec2 acceleration) noexcept
+        { mLinearAcceleration = acceleration; }
+        inline glm::vec2 GetLinearVelocity() const noexcept
+        { return mLinearVelocity; }
+        inline glm::vec2 GetLinearAcceleration() const noexcept
+        { return mLinearAcceleration; }
+        inline float GetAngularVelocity() const noexcept
+        { return mAngularVelocity; }
+        inline float GetAngularAcceleration() const noexcept
+        { return mAngularAcceleration; }
+        inline void SetAngularVelocity(float velocity) noexcept
+        { mAngularVelocity = velocity; }
+        inline void SetAngularAcceleration(float acceleration) noexcept
+        { mAngularAcceleration = acceleration;  }
+        inline bool IsEnabled() const noexcept
+        { return mFlags.test(Flags::Enabled); }
+        inline Integrator GetIntegrator() const noexcept
+        { return mClass->GetIntegrator(); }
+        inline void SetFlag(Flags flag , bool on_off) noexcept
+        { mFlags.set(flag, on_off); }
+        inline void Enable(bool on_off) noexcept
+        { SetFlag(Flags::Enabled, on_off); }
+
+        inline const NodeTransformerClass& GetClass() const noexcept
+        { return *mClass; }
+        inline const NodeTransformerClass* operator->() const noexcept
+        { return mClass.get(); }
+    private:
+        std::shared_ptr<const NodeTransformerClass> mClass;
+        base::bitflag<Flags> mFlags;
+        glm::vec2 mLinearVelocity     = {0.0f, 0.0f};
+        glm::vec2 mLinearAcceleration = {0.0f, 0.0f};
+        float mAngularVelocity        = 0.0f;
+        float mAngularAcceleration    = 0.0f;
+    };
 
     class MapNode
     {
@@ -1193,6 +1302,9 @@ namespace game
         void SetFixture(const FixtureClass& fixture);
         // Attach a tilemap node to this node class.
         void SetMapNode(const MapNodeClass& map);
+        // Attach a transformer to this node class
+        void SetTransformer(const NodeTransformerClass& transformer);
+
         // Create and attach a rigid body with default settings.
         void CreateRigidBody();
         // Create and attach a drawable with default settings.
@@ -1205,6 +1317,8 @@ namespace game
         void CreateFixture();
         // Create and attach a map node with default settings.
         void CreateMapNode();
+        // Create and attach a transformer with default settings.
+        void CreateTransformer();
 
         void RemoveDrawable() noexcept
         { mDrawable.reset(); }
@@ -1218,6 +1332,8 @@ namespace game
         { mFixture.reset(); }
         void RemoveMapNode() noexcept
         { mMapNode.reset(); }
+        void RemoveTransformer() noexcept
+        { mTransformer.reset(); }
 
         // Get the rigid body shared class object if any.
         std::shared_ptr<const RigidBodyItemClass> GetSharedRigidBody() const noexcept
@@ -1238,6 +1354,9 @@ namespace game
         std::shared_ptr<const MapNodeClass> GetSharedMapNode() const noexcept
         { return mMapNode; }
 
+        std::shared_ptr<const NodeTransformerClass> GetSharedTransformer() const noexcept
+        { return mTransformer; }
+
         // Returns true if a rigid body has been set for this class.
         bool HasRigidBody() const noexcept
         { return !!mRigidBody; }
@@ -1252,6 +1371,8 @@ namespace game
         { return !!mFixture; }
         bool HasMapNode() const noexcept
         { return !!mMapNode; }
+        bool HasTransformer() const noexcept
+        { return !!mTransformer; }
 
         // Get the rigid body object if any. If no rigid body class object
         // has been set then returns nullptr.
@@ -1275,6 +1396,9 @@ namespace game
         { return mFixture.get(); }
         MapNodeClass* GetMapNode() noexcept
         { return mMapNode.get(); }
+        NodeTransformerClass* GetTransformer() noexcept
+        { return mTransformer.get(); }
+
         // Get the rigid body object if any. If no rigid body class object
         // has been set then returns nullptr.
         const RigidBodyItemClass* GetRigidBody() const noexcept
@@ -1295,6 +1419,9 @@ namespace game
         // then returns nullptr.
         const FixtureClass* GetFixture() const noexcept
         { return mFixture.get(); }
+
+        const NodeTransformerClass* GetTransformer() const noexcept
+        { return mTransformer.get(); }
 
         const MapNodeClass* GetMapNode() const noexcept
         { return mMapNode.get(); }
@@ -1346,8 +1473,8 @@ namespace game
         std::shared_ptr<SpatialNodeClass> mSpatialNode;
         // fixture if any.
         std::shared_ptr<FixtureClass> mFixture;
-
         std::shared_ptr<MapNodeClass> mMapNode;
+        std::shared_ptr<NodeTransformerClass> mTransformer;
         // bitflags that apply to node.
         base::bitflag<Flags> mBitFlags;
     };
@@ -1539,6 +1666,8 @@ namespace game
 
         MapNode* GetMapNode();
 
+        NodeTransformer* GetTransformer();
+
         // Get the node's drawable item if any. If now drawable
         // item is set then returns nullptr.
         const DrawableItem* GetDrawable() const;
@@ -1556,6 +1685,8 @@ namespace game
         const Fixture* GetFixture() const;
 
         const MapNode* GetMapNode() const;
+
+        const NodeTransformer* GetTransformer() const;
 
         bool HasRigidBody() const noexcept
         { return !!mRigidBody; }
@@ -1615,6 +1746,7 @@ namespace game
         std::unique_ptr<Fixture> mFixture;
         // map node if any.
         std::unique_ptr<MapNode> mMapNode;
+        std::unique_ptr<NodeTransformer> mTransformer;
 
     };
 
