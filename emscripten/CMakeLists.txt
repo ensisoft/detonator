@@ -79,6 +79,7 @@ add_executable(UnitTest
     ../uikit/window.cpp
         )
 target_compile_definitions(UnitTest PRIVATE UNIT_TEST_BUNDLE)
+target_compile_definitions(UnitTest PRIVATE DETONATOR_UNIT_TEST_WASM_BUILD)
 target_compile_options(UnitTest PRIVATE -O3)
 target_compile_options(UnitTest PRIVATE -fexceptions)
 target_compile_options(UnitTest PRIVATE -fbracket-depth=1024)
@@ -114,7 +115,7 @@ add_executable(UnitTestThread
         ../audio/proxy.cpp
         ../audio/openal.cpp)
 
-target_compile_definitions(UnitTestThread PRIVATE DETONATOR_UNIT_TEST_THREAD_BUILD)
+target_compile_definitions(UnitTestThread PRIVATE DETONATOR_UNIT_TEST_THREAD_WASM_BUILD)
 
 target_compile_definitions(UnitTestThread PRIVATE UNIT_TEST_BUNDLE)
 target_compile_definitions(UnitTestThread PRIVATE AUDIO_ENABLE_TEST_SOUND)
@@ -220,7 +221,7 @@ add_executable(GameEngine
     ../third_party/stb/stb_image.c
     )
 
-target_compile_definitions(GameEngine PRIVATE DETONATOR_GAME_ENGINE_BUILD)
+target_compile_definitions(GameEngine PRIVATE DETONATOR_GAME_ENGINE_WASM_BUILD)
 
 target_link_libraries(GameEngine box2d)
 target_link_libraries(GameEngine sndfile)

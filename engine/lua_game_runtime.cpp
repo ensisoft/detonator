@@ -941,7 +941,9 @@ void LuaRuntime::Update(double game_time, double dt)
             if (entity->TestFlag(Entity::Flags::UpdateEntity))
             {
                 TRACE_SCOPE("Lua::Entity::Update");
+#if defined(BASE_TRACING_ENABLE_TRACING)
                 base::TraceComment(entity->GetClassName());
+#endif
                 CallLua((*env)["Update"], entity, game_time, dt);
             }
         }
