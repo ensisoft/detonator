@@ -699,6 +699,8 @@ void InitLuaDoc()
     DOC_METHOD_0("glm.vec2", "normalize", "Return a normalized copy of the vector.");
     DOC_OBJECT_PROPERTY("float", "x", "X component of the vector.");
     DOC_OBJECT_PROPERTY("float", "y", "Y component of the vector.");
+    DOC_METHOD_2("void", "mul_add", "Add a multiple of some vector to this vector in place.",
+                 "glm.vec2", "vec", "float", "multiple");
 
     DOC_TABLE("glm.vec3");
     DOC_METHOD_0("glm.vec3", "new", "Construct a new glm.vec3.");
@@ -714,6 +716,8 @@ void InitLuaDoc()
     DOC_OBJECT_PROPERTY("float", "x", "X component of the vector.");
     DOC_OBJECT_PROPERTY("float", "y", "Y component of the vector.");
     DOC_OBJECT_PROPERTY("float", "z", "Z component of the vector.");
+    DOC_METHOD_2("void", "mul_add", "Add a multiple of some vector to this vector in place.",
+                 "glm.vec3", "vec", "float", "multiple");
 
     DOC_TABLE("glm.vec4");
     DOC_METHOD_0("glm.vec4", "new", "Construct a new glm.vec3.");
@@ -730,6 +734,8 @@ void InitLuaDoc()
     DOC_OBJECT_PROPERTY("float", "y", "Y component of the vector.");
     DOC_OBJECT_PROPERTY("float", "z", "Z component of the vector.");
     DOC_OBJECT_PROPERTY("float", "w", "W component of the vector.");
+    DOC_METHOD_2("void", "mul_add", "Add a multiple of some vector to this vector in place.",
+                 "glm.vec4", "vec", "float", "multiple");
 
     DOC_TABLE("wdk");
     DOC_FUNCTION_1("string", "KeyStr", "Convert a key symbol to a named key string.", "wdk.Keys", "key");

@@ -228,6 +228,11 @@ function divide_3(vector_a, vector_b)
    return vector_a / vector_b
 end
 
+function mul_add_test(vector_a, vector_b)
+    vector_a:mul_add(vector_b, 1.0)
+    return vector_a
+end
+
     )");
 
     // oob
@@ -313,6 +318,11 @@ end
         glm::vec2 ret = L["sub_vector"](a, b);
         TEST_REQUIRE(real::equals(ret.x, a.x - b.x));
         TEST_REQUIRE(real::equals(ret.y, a.y - b.y));
+    }
+
+    {
+        glm::vec2 ret = L["mul_add_test"](a, b);
+        TEST_REQUIRE(ret == a + b * 1.0f);
     }
 }
 
@@ -2310,6 +2320,13 @@ function Update4(bullets, game_time, dt)
     end
 end
 
+function Update5(bullets, game_time, dt)
+   for i=1, #bullets do
+       local bullet = bullets[i]
+       bullet.position:mul_add(bullet.velocity, dt)
+   end
+end
+
         )");
 
         const auto ret = test::TimedTest(1000, [&bullets, &bullets_ptr, &lua] {
@@ -2329,7 +2346,8 @@ end
             // using floats is slightly faster than using glm::vec2
             //lua["Update4"](bullets, 0.0, 1.0);
 
-            lua["Update3"](bullets, 0.0, 1.0);
+            //lua["Update3"](bullets, 0.0, 1.0);
+            lua["Update5"](bullets, 0.0, 1.0);
         });
         test::PrintTestTimes("Bullet Update Benchmark (Lua)", ret);
     }
