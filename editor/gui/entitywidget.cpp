@@ -488,6 +488,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<game::TextItemClass::HorizontalTextAlign>(mUI.tiHAlign);
     PopulateFromEnum<game::SpatialNodeClass::Shape>(mUI.spnShape);
     PopulateFromEnum<game::FixtureClass::CollisionShape>(mUI.fxShape);
+    PopulateFromEnum<game::NodeTransformerClass::Integrator>(mUI.tfIntegrator);
     PopulateFontNames(mUI.tiFontName);
     PopulateFontSizes(mUI.tiFontSize);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
@@ -2565,6 +2566,40 @@ void EntityWidget::on_mnHCenter_valueChanged(double)
     UpdateCurrentNodeProperties();
 }
 
+void EntityWidget::on_tfIntegrator_currentIndexChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
+void EntityWidget::on_tfVelocityX_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tfVelocityY_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tfVelocityA_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tfAccelX_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tfAccelY_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tfAccelA_valueChanged(double)
+{
+    UpdateCurrentNodeProperties();
+}
+void EntityWidget::on_tfEnabled_stateChanged(int)
+{
+    UpdateCurrentNodeProperties();
+}
+
 void EntityWidget::on_btnAddDrawable_clicked()
 {
     ToggleDrawable(true);
@@ -2722,6 +2757,15 @@ void EntityWidget::on_btnDelSpatialNode_clicked()
     ToggleSpatialNode(false);
 }
 
+void EntityWidget::on_btnAddTransformer_clicked()
+{
+    ToggleTransformer(true);
+}
+void EntityWidget::on_btnDelTransformer_clicked()
+{
+    ToggleTransformer(false);
+}
+
 void EntityWidget::ToggleSpatialNode(bool on)
 {
     if (auto* node = GetCurrentNode())
@@ -2836,6 +2880,26 @@ void EntityWidget::ToggleTilemapNode(bool on)
         DisplayCurrentNodeProperties();
 
         mUI.tilemapNode->Collapse(!on);
+    }
+}
+
+void EntityWidget::ToggleTransformer(bool on)
+{
+    if (auto* node = GetCurrentNode())
+    {
+        if (on && !node->HasTransformer())
+        {
+            game::NodeTransformerClass trans;
+            node->SetTransformer(trans);
+            DEBUG("Added transformer to node '%1'", node->GetName());
+        }
+        else if (!on && node->HasTransformer())
+        {
+            node->RemoveTransformer();
+        }
+        DisplayCurrentNodeProperties();
+
+        mUI.transformer->Collapse(!on);
     }
 }
 
@@ -3459,6 +3523,15 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetValue(mUI.fxIsSensor, false);
     SetValue(mUI.mnHCenter, 0.5f);
     SetValue(mUI.mnVCenter, 1.0f);
+
+    SetValue(mUI.tfIntegrator, game::NodeTransformerClass::Integrator::Euler);
+    SetValue(mUI.tfVelocityX, 0.0f);
+    SetValue(mUI.tfVelocityY, 0.0f);
+    SetValue(mUI.tfVelocityA, 0.0f);
+    SetValue(mUI.tfAccelX, 0.0f);
+    SetValue(mUI.tfAccelY, 0.0f);
+    SetValue(mUI.tfAccelA, 0.0f);
+    SetValue(mUI.tfEnabled, false);
     SetEnabled(mUI.nodeProperties, false);
     SetEnabled(mUI.nodeTransform, false);
     SetEnabled(mUI.nodeItems, false);
@@ -3470,12 +3543,14 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetVisible(mUI.btnAddFixture, true);
     SetVisible(mUI.btnAddTilemapNode, true);
     SetVisible(mUI.btnAddSpatialNode, true);
+    SetVisible(mUI.btnAddTransformer, true);
     SetVisible(mUI.drawable, false);
     SetVisible(mUI.textItem, false);
     SetVisible(mUI.rigidBody, false);
     SetVisible(mUI.fixture, false);
     SetVisible(mUI.tilemapNode, false);
     SetVisible(mUI.spatialNode, false);
+    SetVisible(mUI.transformer, false);
 
     if (const auto* node = GetCurrentNode())
     {
@@ -3633,6 +3708,22 @@ void EntityWidget::DisplayCurrentNodeProperties()
             const auto& center = map->GetSortPoint();
             SetValue(mUI.mnVCenter, center.y);
             SetValue(mUI.mnHCenter, center.x);
+        }
+        if (const auto* trans = node->GetTransformer())
+        {
+            SetVisible(mUI.btnAddTransformer, false);
+            SetVisible(mUI.transformer, true);
+
+            const auto& accel = trans->GetLinearAcceleration();
+            const auto& velo  = trans->GetLinearVelocity();
+            SetValue(mUI.tfIntegrator, trans->GetIntegrator());
+            SetValue(mUI.tfVelocityX, velo.x);
+            SetValue(mUI.tfVelocityY, velo.y);
+            SetValue(mUI.tfVelocityA, trans->GetAngularVelocity());
+            SetValue(mUI.tfAccelX, accel.x);
+            SetValue(mUI.tfAccelY, accel.y);
+            SetValue(mUI.tfAccelA, trans->GetAngularAcceleration());
+            SetValue(mUI.tfEnabled, trans->IsEnabled());
         }
     }
 }
@@ -3806,6 +3897,22 @@ void EntityWidget::UpdateCurrentNodeProperties()
         center.x = GetValue(mUI.mnHCenter);
         center.y = GetValue(mUI.mnVCenter);
         map->SetMapSortPoint(center);
+    }
+
+    if (auto* trans = node->GetTransformer())
+    {
+        glm::vec2 velocity;
+        glm::vec2 acceleration;
+        velocity.x = GetValue(mUI.tfVelocityX);
+        velocity.y = GetValue(mUI.tfVelocityY);
+        acceleration.x = GetValue(mUI.tfAccelX);
+        acceleration.y = GetValue(mUI.tfAccelY);
+        trans->SetIntegrator(GetValue(mUI.tfIntegrator));
+        trans->SetLinearAcceleration(acceleration);
+        trans->SetLinearVelocity(velocity);
+        trans->SetAngularVelocity(GetValue(mUI.tfVelocityA));
+        trans->SetAngularAcceleration(GetValue(mUI.tfAccelA));
+        trans->SetFlag(game::NodeTransformerClass::Flags::Enabled, GetValue(mUI.tfEnabled));
     }
 
     RealizeEntityChange(mState.entity);
