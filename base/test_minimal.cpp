@@ -33,6 +33,11 @@
 #  include <dlfcn.h> // for dlopen, dlsym
 #endif
 
+#if defined(__EMSCRIPTEN__)
+#  include <emscripten/emscripten.h>
+#  include <emscripten/html5.h>
+#endif
+
 namespace test {
 
 base::bitflag<Type>      EnabledTestTypes;
@@ -237,6 +242,53 @@ std::string GetPerformanceRecordFileName()
     return PerformanceRecordFile;
 }
 
+void ExecuteBundle(TestBundle* bundle, int argc, char* argv[])
+{
+    test::Print(test::Color::Info, "Running bundle '%s'\n", bundle->name.c_str());
+    test::Print(test::Color::Info, "============================================================\n");
+    bundle->test_main(argc, argv);
+    test::Print(test::Color::Info, "\n\n");
+}
+
+#if defined(__EMSCRIPTEN__)
+EM_BOOL ExecuteOneTest(double time, void* user_data)
+{
+    static size_t index = 0;
+    if (index == test::TestBundles.size())
+        return EM_FALSE;
+
+    try
+    {
+        auto* bundle = test::TestBundles[index++];
+
+        const int argc = 0;
+        char* argv[] = {nullptr};
+        ExecuteBundle(bundle, argc, argv);
+
+        if (index == test::TestBundles.size())
+        {
+            if (test::ErrorCount)
+                test::Print(test::Color::Warning, "Tests completed with errors.\n");
+            else test::Print(test::Color::Success, "Success!\n");
+        }
+    }
+    catch (const test::Fatality& fatality)
+    {
+        test::Print(test::Color::Error, "\n%s(%d): %s failed in function: '%s'\n",
+                    fatality.mFile, fatality.mLine, fatality.mExpression, fatality.mFunc);
+        test::Print(test::Color::Warning, "\nTesting finished early on fatality.\n");
+        return EM_FALSE;
+    }
+    catch (const std::exception & e)
+    {
+        test::Print(test::Color::Error, "\nTests didn't run to completion because an exception occurred!\n\n");
+        test::Print(test::Color::Error, "%s\n", e.what());
+        return EM_FALSE;
+    }
+    return index < test::TestBundles.size() ? EM_TRUE : EM_FALSE;
+}
+#endif
+
 } // namespace
 
 int main(int argc, char* argv[])
@@ -267,13 +319,14 @@ int main(int argc, char* argv[])
     try
     {
 #if defined(UNIT_TEST_BUNDLE)
+    #if defined(__EMSCRIPTEN__)
+        emscripten_request_animation_frame_loop(test::ExecuteOneTest, nullptr);
+    #else
         for (auto* bundle : test::TestBundles)
         {
-            test::Print(test::Color::Info, "Running bundle '%s'\n", bundle->name.c_str());
-            test::Print(test::Color::Info, "============================================================\n");
-            bundle->test_main(argc, argv);
-            test::Print(test::Color::Info, "\n\n");
+            test::ExecuteBundle(bundle, argc, argv);
         }
+    #endif
 #else
         extern int test_main(int argc, char* argv[]);
         test_main(argc, argv);
