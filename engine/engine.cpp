@@ -431,9 +431,14 @@ public:
             }
 
             TRACE_CALL("Renderer::BeginFrame", mRenderer.BeginFrame());
+            // Update the rendering state, animate materials and drawables.
+            TRACE_CALL("Renderer::Update", mRenderer.Update(mRenderTimeTotal, mRenderStep));
             TRACE_CALL("Renderer::DrawScene", mRenderer.Draw(*mDevice, mTilemap.get()));
             TRACE_CALL("Renderer::EndFrame", mRenderer.EndFrame());
             TRACE_CALL("DebugDraw", DrawDebugObjects());
+
+            mRenderTimeTotal += mRenderStep;
+            mRenderStep = 0;
         }
 
         {
@@ -541,75 +546,21 @@ public:
         // do simulation/animation update steps.
         while (mTimeAccum >= mGameTimeStep)
         {
-            // current game time from which we step forward
-            // in ticks later on.
-            auto tick_time = mGameTimeTotal;
-
-            if (mScene)
-            {
-                TRACE_CALL("Scene::BeginLoop", mScene->BeginLoop());
-                TRACE_CALL("Runtime:BeginLoop", mRuntime->BeginLoop());
-            }
-
             // Call UpdateGame with the *current* time. I.e. the game
             // is advancing one time step from current mGameTimeTotal.
             // this is consistent with the tick time accumulation below.
             TRACE_CALL("UpdateGame", UpdateGame(mGameTimeTotal, mGameTimeStep));
+
+            TRACE_CALL("UpdateGameUI", UpdateGameUI(mGameTimeTotal, mGameTimeStep));
+
             mGameTimeTotal += mGameTimeStep;
             mTimeAccum -= mGameTimeStep;
-            mTickAccum += mGameTimeStep;
 
-            // PostUpdate allows the game to perform activities with consistent
-            // world state after everything has settled down. It might be tempting
-            // to bake the functionality of "Rebuild" in the scene in the loop
-            // end functionality and let the game perform the "PostUpdate" actions in
-            // the Update function. But this has the problem that during the call
-            // to Update (on each entity instance) the world doesn't yet have
-            // consistent state because not every object that needs to move has
-            // moved. This might lead to incorrect conclusions when for exampling
-            // trying to detect whether things are colling/overlapping. For example
-            // if entity A's Update function updates A's position and checks whether
-            // A is hitting some other object those other objects may or may not have
-            // been moved already. To resolve this issue the game should move entity A
-            // in the Update function and then check for the collisions/overlap/whatever
-            // in the PostUpdate with consistent world state.
-            if (mScene)
-            {
-                // make sure to do this first in order to allow the scene to rebuild
-                // the spatial indices etc. before the game's PostUpdate runs.
-                TRACE_CALL("Scene::Rebuild", mScene->Rebuild());
-                // using the time we've arrived to now after having taken the previous
-                // delta step forward in game time.
-                TRACE_CALL("Runtime::PostUpdate", mRuntime->PostUpdate(mGameTimeTotal));
-            }
-
-            // todo: add mGame->PostUpdate here if needed
-            // TRACE_CALL("Game::PostUpdate", mGame->PostUpdate(mGameTimeTotal))
-
-            // It might be tempting to use the tick functionality to perform
-            // some type of movement in some types of games. For example
-            // a tetris-clone could move the pieces on tick steps instead of
-            // continuous updates. But to keep things simple the engine is only
-            // promising consistent world state to exist during the call to
-            // PostUpdate. In order to support a simple use case such as
-            // "move on tick" the game should set a flag on the Tick, perform
-            // move on update when the flag is set and then clear the flag.
-            while (mTickAccum >= mGameTickStep)
-            {
-                TRACE_CALL("Runtime::Tick", mRuntime->Tick(tick_time, mGameTickStep));
-                mTickAccum -= mGameTickStep;
-                tick_time += mGameTickStep;
-            }
-
-            if (mScene)
-            {
-                TRACE_CALL("Runtime::EndLoop", mRuntime->EndLoop());
-                TRACE_CALL("Scene::EndLoop", mScene->EndLoop());
-            }
-
+            // if we're paused for debugging stop after one step forward.
             mStepForward = false;
         }
-        TRACE_CALL("GameActions", PerformGameActions(dt));
+
+        TRACE_CALL("HandleGameActions", PerformGameActions(dt));
     }
     virtual void EndMainLoop() override
     {
@@ -1020,7 +971,8 @@ private:
     {
         if (mScene)
         {
-            TRACE_SCOPE("UpdateScene");
+            TRACE_CALL("Scene::BeginLoop", mScene->BeginLoop());
+            TRACE_CALL("Runtime:BeginLoop", mRuntime->BeginLoop());
 
             std::vector<game::Scene::Event> events;
             TRACE_CALL("Scene::Update", mScene->Update(dt, &events));
@@ -1041,37 +993,58 @@ private:
                 // dispatch the contact events (if any).
                 TRACE_CALL("Runtime::OnContactEvents", mRuntime->OnContactEvent(contacts));
             }
-
-            // Update renderers data structures from the scene.
-            // This involves creating new render nodes for new entities
-            // that have been spawned etc.
-            TRACE_CALL("Renderer::UpdateState", mRenderer.UpdateRenderStateFromScene(*mScene));
-            // Update the rendering state, animate materials and drawables.
-            TRACE_CALL("Renderer::Update", mRenderer.Update(game_time, dt));
         }
 
         TRACE_CALL("Runtime::Update", mRuntime->Update(game_time, dt));
 
-        // Update the UI system
+        // Tick game
         {
-            TRACE_SCOPE("UpdateUI");
+            mTickAccum += dt;
+            // current game time from which we step forward
+            // in ticks later on.
+            auto tick_time = game_time;
 
-            std::vector<engine::UIEngine::WidgetAction> widget_actions;
-            std::vector<engine::UIEngine::WindowAction> window_actions;
-            TRACE_CALL("UIEngine::UpdateWindow", mUIEngine.UpdateWindow(game_time, dt, &widget_actions));
-            TRACE_CALL("UIEngine::UpdateState", mUIEngine.UpdateState(game_time, dt, &window_actions));
-            TRACE_CALL("Runtime::OnUIAction", mRuntime->OnUIAction(mUIEngine.GetUI(), widget_actions));
-
-            for (const auto& w : window_actions)
+            while (mTickAccum >= mGameTickStep)
             {
-                if (const auto* ptr = std::get_if<engine::UIEngine::WindowOpen>(&w))
-                    mRuntime->OnUIOpen(ptr->window);
-                else if (const auto* ptr = std::get_if<engine::UIEngine::WindowUpdate>(&w))
-                    mRuntime->SetCurrentUI(ptr->window);
-                else if(const auto* ptr = std::get_if<engine::UIEngine::WindowClose>(&w))
-                    mRuntime->OnUIClose(ptr->window.get(), ptr->result);
-                else BUG("Missing UIEngine window event handling.");
+                TRACE_CALL("Runtime::Tick", mRuntime->Tick(tick_time, mGameTickStep));
+                mTickAccum -= mGameTickStep;
+                tick_time += mGameTickStep;
             }
+        }
+
+        // PostUpdate allows the game to perform activities with consistent
+        // world state after everything has settled down. It might be tempting
+        // to bake the functionality of "Rebuild" in the scene in the loop
+        // end functionality and let the game perform the "PostUpdate" actions in
+        // the Update function. But this has the problem that during the call
+        // to Update (on each entity instance) the world doesn't yet have
+        // consistent state because not every object that needs to move has
+        // moved. This might lead to incorrect conclusions when for exampling
+        // trying to detect whether things are colling/overlapping. For example
+        // if entity A's Update function updates A's position and checks whether
+        // A is hitting some other object those other objects may or may not have
+        // been moved already. To resolve this issue the game should move entity A
+        // in the Update function and then check for the collisions/overlap/whatever
+        // in the PostUpdate with consistent world state.
+        if (mScene)
+        {
+            // Update renderers data structures from the scene.
+            // This involves creating new render nodes for new entities
+            // that have been spawned etc. This needs to be done inside
+            // the begin/end loop in order to have the correct singalling
+            // i.e. entity control flags.
+            TRACE_CALL("Renderer::UpdateState", mRenderer.UpdateRenderStateFromScene(*mScene));
+            mRenderStep += dt;
+
+            // make sure to do this first in order to allow the scene to rebuild
+            // the spatial indices etc. before the game's PostUpdate runs.
+            TRACE_CALL("Scene::Rebuild", mScene->Rebuild());
+            // using the time we've arrived to now after having taken the previous
+            // delta step forward in game time.
+            TRACE_CALL("Runtime::PostUpdate", mRuntime->PostUpdate(game_time + dt));
+
+            TRACE_CALL("Runtime::EndLoop", mRuntime->EndLoop());
+            TRACE_CALL("Scene::EndLoop", mScene->EndLoop());
         }
 
         // update mouse pointer
@@ -1079,6 +1052,26 @@ private:
             gfx::Drawable::Environment env; // todo:
             mMouseMaterial->Update(dt);
             mMouseDrawable->Update(env, dt);
+        }
+    }
+
+    void UpdateGameUI(double game_time, float dt)
+    {
+        std::vector<engine::UIEngine::WidgetAction> widget_actions;
+        std::vector<engine::UIEngine::WindowAction> window_actions;
+        TRACE_CALL("UIEngine::UpdateWindow", mUIEngine.UpdateWindow(game_time, dt, &widget_actions));
+        TRACE_CALL("UIEngine::UpdateState", mUIEngine.UpdateState(game_time, dt, &window_actions));
+        TRACE_CALL("Runtime::OnUIAction", mRuntime->OnUIAction(mUIEngine.GetUI(), widget_actions));
+
+        for (const auto& w : window_actions)
+        {
+            if (const auto* ptr = std::get_if<engine::UIEngine::WindowOpen>(&w))
+                mRuntime->OnUIOpen(ptr->window);
+            else if (const auto* ptr = std::get_if<engine::UIEngine::WindowUpdate>(&w))
+                mRuntime->SetCurrentUI(ptr->window);
+            else if(const auto* ptr = std::get_if<engine::UIEngine::WindowClose>(&w))
+                mRuntime->OnUIClose(ptr->window.get(), ptr->result);
+            else BUG("Missing UIEngine window event handling.");
         }
     }
 
@@ -1312,8 +1305,13 @@ private:
     // available for taking update and tick steps.
     float mTickAccum = 0.0f;
     float mTimeAccum = 0.0f;
+
+    float mRenderStep = 0.0;
+
     // Total accumulated game time so far.
     double mGameTimeTotal = 0.0f;
+    double mRenderTimeTotal = 0.0;
+
     // The bitbag for storing game state.
     engine::KeyValueStore mStateStore;
     // debug stepping flag to control taking a single update step.
