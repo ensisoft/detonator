@@ -6,19 +6,24 @@ require('common')
 
 -- Called when the game play begins for a scene.
 function BeginPlay(bullet, scene, map)
+    local node = bullet:GetNode(0)
+    local transformer = node:GetTransformer()
+    if transformer ~= nil then
+        transformer:SetLinearVelocity(0.0, bullet.velocity)
+    end
 end
 
 -- Called on every low frequency game tick.
 function Tick(bullet, game_time, dt)
 end
 
+-- Called once per entity type with all the entity
+-- nodes assembled in the nodes collection.
+function UpdateNodes(nodes, game_time, dt, class)
+end
+
 -- Called on every iteration of game loop.
 function Update(bullet, game_time, dt)
-    local bullet_node = bullet:GetNode(0)
-    local bullet_pos = bullet_node:GetTranslation()
-    local velocity = bullet.velocity
-    bullet_pos.y = bullet_pos.y + dt * velocity
-    bullet_node:SetTranslation(bullet_pos)
 end
 
 function PostUpdate(bullet, game_time)

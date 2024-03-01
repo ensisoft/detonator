@@ -5,7 +5,8 @@ function SpawnHealthPack()
         p.y = -500.0
         p.x = util.Random(-450.0, 450.0)
         Scene:SpawnEntity('Health Pack', {
-            pos = p
+            pos = p,
+            async = true
         })
     end
 end

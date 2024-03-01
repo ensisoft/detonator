@@ -12,7 +12,7 @@ local developer_ui = false
 
 function LoadGame()
     collectgarbage('setpause', 100)
-    collectgarbage('stop')
+    -- collectgarbage('stop')
 
     Game:DebugPrint('LoadGame')
 

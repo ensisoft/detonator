@@ -170,6 +170,7 @@ function FireRocket(player)
     args.position = util.GetTranslationFromMatrix(matrix)
     args.name = 'rocket'
     args.logging = false
+    args.async = true
     Scene:SpawnEntity(args, true)
 end
 

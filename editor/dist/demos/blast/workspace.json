@@ -337,7 +337,8 @@
     },
     "OelfGJjBAI": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": 1,
+        "comment_5fYgMZDf5w": ""
     },
     "OiyvAkqpIL": {
         "__version": 1,
@@ -451,7 +452,6 @@
     },
     "XSYiC5gMBy": {
         "__version": 1,
-        "checked_for_packing": 1,
         "comment_2EZBxk2B3Q": "",
         "comment_4o5u3l92vL": "",
         "comment_5SA63hC5Z2": "",
@@ -583,7 +583,6 @@
     },
     "diUlEeS5JH": {
         "__version": 1,
-        "checked_for_packing": 1,
         "comment_2LJhfhUCPC": "",
         "comment_37wPuCDipF": "",
         "comment_6IMWYKiN1b": "",
@@ -797,7 +796,7 @@
         "game_viewport_width": 1200,
         "grab_mouse": false,
         "html5_developer_ui": false,
-        "loading_screen_font": "app://fonts/nulshock_bd.otf",
+        "loading_screen_font": "app://fonts/ethnocentric rg.otf",
         "logging_debug": false,
         "logging_error": false,
         "logging_info": false,
@@ -835,7 +834,7 @@
         "window_has_border": true,
         "window_height": 800,
         "window_mode": "Windowed",
-        "window_vsync": true,
+        "window_vsync": false,
         "window_width": 1200,
         "working_folder": "${workspace}"
     },
