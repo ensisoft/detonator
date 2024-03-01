@@ -908,7 +908,7 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
         connect(action, &QAction::toggled, this, &AnimationTrackWidget::ToggleShowResource);
         action->setData(magic_enum::enum_integer(val));
         action->setCheckable(true);
-        action->setChecked(mState.show_flags.test(val));
+        SetValue(action, mState.show_flags.test(val));
     }
 
     QMenu menu(this);
