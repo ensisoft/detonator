@@ -233,6 +233,13 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace,
         mState.actuator_to_timeline[actuator.GetId()] = app::ToUtf8(timeline);
     }
 
+    if (properties.contains("main_splitter"))
+        mUI.mainSplitter->restoreState(QByteArray::fromBase64(properties["main_splitter"].toString().toLatin1()));
+    if (properties.contains("center_splitter"))
+        mUI.centerSplitter->restoreState(QByteArray::fromBase64(properties["center_splitter"].toString().toLatin1()));
+    if (properties.contains("timeline_splitter"))
+        mUI.timelineSplitter->restoreState(QByteArray::fromBase64(properties["timeline_splitter"].toString().toLatin1()));
+
     RemoveDeletedItems();
     CreateTimelines();
 
@@ -319,6 +326,9 @@ bool AnimationTrackWidget::SaveState(Settings& settings) const
     settings.SaveWidget("TrackWidget", mUI.chkShowViewport);
     settings.SaveWidget("TrackWidget", mUI.chkSnap);
     settings.SaveWidget("TrackWidget", mUI.widget);
+    settings.SaveWidget("TrackWidget", mUI.mainSplitter);
+    settings.SaveWidget("TrackWidget", mUI.timelineSplitter);
+    settings.SaveWidget("TrackWidget", mUI.centerSplitter);
     settings.SaveAction("TrackWidget", mUI.actionUsePhysics);
     return true;
 }
@@ -356,6 +366,9 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
     settings.LoadWidget("TrackWidget", mUI.chkShowViewport);
     settings.LoadWidget("TrackWidget", mUI.chkSnap);
     settings.LoadWidget("TrackWidget", mUI.widget);
+    settings.LoadWidget("TrackWidget", mUI.mainSplitter);
+    settings.LoadWidget("TrackWidget", mUI.timelineSplitter);
+    settings.LoadWidget("TrackWidget", mUI.centerSplitter);
     settings.LoadAction("TrackWidget", mUI.actionUsePhysics);
 
     // restore entity
@@ -687,7 +700,10 @@ void AnimationTrackWidget::on_actionSave_triggered()
     ASSERT(parent);
 
     QVariantMap properties;
-    properties["use_physics"] = (bool)GetValue(mUI.actionUsePhysics);
+    properties["main_splitter"]     = QString::fromLatin1(mUI.mainSplitter->saveState().toBase64());
+    properties["center_splitter"]   = QString::fromLatin1(mUI.centerSplitter->saveState().toBase64());
+    properties["timeline_splitter"] = QString::fromLatin1(mUI.timelineSplitter->saveState().toBase64());
+    properties["use_physics"]   = (bool)GetValue(mUI.actionUsePhysics);
     properties["num_timelines"] = (int)mState.timelines.size();
     for (int i=0; i<(int)mState.timelines.size(); ++i)
     {
