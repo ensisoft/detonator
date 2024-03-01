@@ -105,14 +105,14 @@ function BasicWeaponry(ship)
 
     local weapon = ship:FindNodeByClassName('Weapon')
     local matrix = Scene:FindEntityNodeTransform(ship, weapon)
-    local args = game.EntityArgs:new()
-    args.class = ClassLib:FindEntityClassByName('Bullet/Enemy/Basic')
-    args.position = util.GetTranslationFromMatrix(matrix)
-    args.name = 'blue bullet'
-
-    local bullet = Scene:SpawnEntity(args, true)
-    bullet.velocity = ship.velocity.y + 100
-
+    Scene:SpawnEntity('Bullet/Enemy/Basic', {
+        pos = util.GetTranslationFromMatrix(matrix),
+        name = 'blue bullet',
+        async = true,
+        vars = {
+            velocity = ship.velocity.y + 100.0
+        }
+    })
 end
 
 function AdvancedWeaponry(ship)

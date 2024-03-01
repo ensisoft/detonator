@@ -8,7 +8,9 @@ end
 
 -- Called when the game play begins for a scene.
 function BeginPlay(asteroid, scene, map)
-
+    local node = asteroid:GetNode(0)
+    local transformer = node:GetTransformer()
+    transformer:SetLinearVelocity(0.0, asteroid.speed)
 end
 
 -- Called on every low frequency game tick.
@@ -18,11 +20,11 @@ end
 
 -- Called on every iteration of game loop.
 function Update(asteroid, game_time, dt)
-    local speed = asteroid.speed
-    local rock_body = asteroid:FindNodeByClassName('Body')
-    local rock_pos = rock_body:GetTranslation()
-    rock_pos.y = rock_pos.y + dt * speed
-    rock_body:SetTranslation(rock_pos)
+end
+
+function PostUpdate(asteroid, game_time, dt)
+    local node = asteroid:GetNode(0)
+    local asteroid_pos = node:GetTranslation()
 
     -- player's ship can get hurt if hit by an asteroid!
     local player = Scene:FindEntityByInstanceName('Player')
@@ -31,9 +33,8 @@ function Update(asteroid, game_time, dt)
     end
     local player_node = player:GetNode(0)
     local player_pos = player_node:GetTranslation()
-    local distance = glm.length(player_pos - rock_pos)
-    local radius = asteroid.radius
-    if distance <= radius then
+
+    if util.DistanceIsLessOrEqual(asteroid_pos, player_pos, asteroid.radius) then
         CallMethod(player, 'AsteroidHit', asteroid)
     end
 end
