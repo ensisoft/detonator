@@ -216,21 +216,37 @@ namespace game
     class KinematicActuatorClass : public detail::ActuatorClassBase<KinematicActuatorClass>
     {
     public:
+        enum class Target {
+            RigidBody,
+            Transformer
+        };
         // The interpolation method.
         using Interpolation = math::Interpolation;
 
-        Interpolation GetInterpolation() const
+        inline Target GetTarget() const noexcept
+        { return mTarget; }
+        inline Interpolation GetInterpolation() const noexcept
         { return mInterpolation; }
-        void SetInterpolation(Interpolation method)
+        inline void SetInterpolation(Interpolation method) noexcept
         { mInterpolation = method; }
-        glm::vec2 GetEndLinearVelocity() const
+        inline void SetTarget(Target target) noexcept
+        { mTarget = target; }
+        inline glm::vec2 GetEndLinearVelocity() const noexcept
         { return mEndLinearVelocity; }
-        float GetEndAngularVelocity() const
+        inline glm::vec2 GetEndLinearAcceleration() const noexcept
+        { return mEndLinearAcceleration; }
+        inline float GetEndAngularVelocity() const noexcept
         { return mEndAngularVelocity;}
-        void SetEndLinearVelocity(const glm::vec2 velocity)
+        inline float GetEndAngularAcceleration() const noexcept
+        { return mEndAngularAcceleration; }
+        inline void SetEndLinearVelocity(glm::vec2 velocity) noexcept
         { mEndLinearVelocity = velocity; }
-        void SetEndAngularVelocity(float velocity)
+        inline void SetEndLinearAcceleration(glm::vec2 acceleration) noexcept
+        { mEndLinearAcceleration = acceleration; }
+        inline void SetEndAngularVelocity(float velocity) noexcept
         { mEndAngularVelocity = velocity; }
+        inline void SetEndAngularAcceleration(float acceleration) noexcept
+        { mEndAngularAcceleration = acceleration; }
 
         virtual Type GetType() const override
         { return Type::Kinematic; }
@@ -240,10 +256,13 @@ namespace game
     private:
         // the interpolation method to be used.
         Interpolation mInterpolation = Interpolation::Linear;
+        Target mTarget = Target::RigidBody;
         // The ending linear velocity in meters per second.
-        glm::vec2 mEndLinearVelocity = {0.0f, 0.0f};
+        glm::vec2 mEndLinearVelocity     = {0.0f, 0.0f};
+        glm::vec2 mEndLinearAcceleration = {0.0f, 0.0f};
         // The ending angular velocity in radians per second.
         float mEndAngularVelocity = 0.0f;
+        float mEndAngularAcceleration = 0.0f;
     };
 
     // Modify node parameter value over time.
@@ -496,13 +515,13 @@ namespace game
     class KinematicActuator final : public Actuator
     {
     public:
-        KinematicActuator(const std::shared_ptr<const KinematicActuatorClass>& klass)
-          : mClass(klass)
+        explicit KinematicActuator(std::shared_ptr<const KinematicActuatorClass> klass) noexcept
+          : mClass(std::move(klass))
         {}
-        KinematicActuator(const KinematicActuatorClass& klass)
+        explicit KinematicActuator(const KinematicActuatorClass& klass)
           : mClass(std::make_shared<KinematicActuatorClass>(klass))
         {}
-        KinematicActuator(KinematicActuatorClass&& klass)
+        explicit KinematicActuator(KinematicActuatorClass&& klass)
           : mClass(std::make_shared<KinematicActuatorClass>(std::move(klass)))
         {}
         virtual void Start(EntityNode& node) override;
@@ -525,8 +544,10 @@ namespace game
         { return Type::Kinematic;}
     private:
         std::shared_ptr<const KinematicActuatorClass> mClass;
-        glm::vec2 mStartLinearVelocity = {0.0f, 0.0f};
-        float mStartAngularVelocity = 0.0f;
+        glm::vec2 mStartLinearVelocity     = {0.0f, 0.0f};
+        glm::vec2 mStartLinearAcceleration = {0.0f, 0.0f};
+        float mStartAngularVelocity     = 0.0f;
+        float mStartAngularAcceleration = 0.0f;
     };
 
     class SetFlagActuator final : public Actuator
