@@ -203,6 +203,10 @@ namespace math
     }
 
     namespace interp {
+        inline float step_start(float t) noexcept
+        { return t > 0.0f ? 1.0f : 0.0f; }
+        inline float step_end(float t) noexcept
+        { return t >= 1.0f ? 1.0f : 0.0f; }
         inline float step(float t) noexcept
         { return (t < 0.5f) ? 0.0f : 1.0f; }
         inline float cosine(float t) noexcept
@@ -221,8 +225,12 @@ namespace math
     // returns y1, For other values a mix of y0 and y1 is returned.
     // https://codeplea.com/simple-interpolation
     enum class Interpolation {
-        // No interpolation, a discrete jump from y0 to y1 when t is > 0.5.
+        // No interpolation, a discrete jump fro y0 to y1 then t > 0.0
+        StepStart,
+        // No interpolation, a discrete jump from y0 to y1 when t is >= 0.5.
         Step,
+        // No interpolation, a discrete jump from y0 to y1 when t is >= 1.0
+        StepEnd,
         // Linear interpolation also known as "lerp". Take a linear mix
         // of y0 and y1 in exact proportions per t.
         Linear,
@@ -259,9 +267,13 @@ namespace math
 
     inline float interpolate(float t, Interpolation method) noexcept
     {
-        if (method == Interpolation::Step)
+        if (method == Interpolation::StepStart)
+            return interp::step_start(t);
+        else if (method == Interpolation::Step)
             return interp::step(t);
-        if (method == Interpolation::Linear)
+        else if (method == Interpolation::StepEnd)
+            return interp::step_end(t);
+        else if (method == Interpolation::Linear)
             return math::clamp(0.0f, 1.0f, t);
         else if (method == Interpolation::Cosine)
             return interp::cosine(t);
