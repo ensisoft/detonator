@@ -80,40 +80,49 @@ std::size_t KinematicActuatorClass::GetHash() const
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mName);
     hash = base::hash_combine(hash, mNodeId);
+    hash = base::hash_combine(hash, mTarget);
     hash = base::hash_combine(hash, mInterpolation);
     hash = base::hash_combine(hash, mStartTime);
     hash = base::hash_combine(hash, mDuration);
     hash = base::hash_combine(hash, mEndLinearVelocity);
+    hash = base::hash_combine(hash, mEndLinearAcceleration);
     hash = base::hash_combine(hash, mEndAngularVelocity);
+    hash = base::hash_combine(hash, mEndAngularAcceleration);
     hash = base::hash_combine(hash, mFlags);
     return hash;
 }
 
 void KinematicActuatorClass::IntoJson(data::Writer& data) const
 {
-    data.Write("id",               mId);
-    data.Write("name",             mName);
-    data.Write("node",             mNodeId);
-    data.Write("method",           mInterpolation);
-    data.Write("starttime",        mStartTime);
-    data.Write("duration",         mDuration);
-    data.Write("linear_velocity",  mEndLinearVelocity);
-    data.Write("angular_velocity", mEndAngularVelocity);
-    data.Write("flags",            mFlags);
+    data.Write("id",                   mId);
+    data.Write("name",                 mName);
+    data.Write("node",                 mNodeId);
+    data.Write("method",               mInterpolation);
+    data.Write("target",               mTarget);
+    data.Write("starttime",            mStartTime);
+    data.Write("duration",             mDuration);
+    data.Write("linear_velocity",      mEndLinearVelocity);
+    data.Write("linear_acceleration",  mEndLinearAcceleration);
+    data.Write("angular_velocity",     mEndAngularVelocity);
+    data.Write("angular_acceleration", mEndAngularAcceleration);
+    data.Write("flags",                mFlags);
 }
 
 bool KinematicActuatorClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
-    ok &= data.Read("id",               &mId);
-    ok &= data.Read("name",             &mName);
-    ok &= data.Read("node",             &mNodeId);
-    ok &= data.Read("method",           &mInterpolation);
-    ok &= data.Read("starttime",        &mStartTime);
-    ok &= data.Read("duration",         &mDuration);
-    ok &= data.Read("linear_velocity",  &mEndLinearVelocity);
-    ok &= data.Read("angular_velocity", &mEndAngularVelocity);
-    ok &= data.Read("flags",            &mFlags);
+    ok &= data.Read("id",                   &mId);
+    ok &= data.Read("name",                 &mName);
+    ok &= data.Read("node",                 &mNodeId);
+    ok &= data.Read("method",               &mInterpolation);
+    ok &= data.Read("target",               &mTarget);
+    ok &= data.Read("starttime",            &mStartTime);
+    ok &= data.Read("duration",             &mDuration);
+    ok &= data.Read("linear_velocity",      &mEndLinearVelocity);
+    ok &= data.Read("linear_acceleration",  &mEndLinearAcceleration);
+    ok &= data.Read("angular_velocity",     &mEndAngularVelocity);
+    ok &= data.Read("angular_acceleration", &mEndAngularAcceleration);
+    ok &= data.Read("flags",                &mFlags);
     return ok;
 }
 
@@ -274,41 +283,98 @@ std::size_t MaterialActuatorClass::GetHash() const
 
 void KinematicActuator::Start(EntityNode& node)
 {
-    if (const auto* body = node.GetRigidBody())
+    const auto target = mClass->GetTarget();
+    if (target == KinematicActuatorClass::Target::RigidBody)
     {
-        mStartLinearVelocity  = body->GetLinearVelocity();
-        mStartAngularVelocity = body->GetAngularVelocity();
-        if (body->GetSimulation() == RigidBodyItemClass::Simulation::Static)
+        if (const auto* body = node.GetRigidBody())
         {
-            WARN("EntityNode '%1' is not dynamically or kinematically simulated.", node.GetName());
-            WARN("Kinematic actuator will have no effect.");
+            mStartLinearVelocity = body->GetLinearVelocity();
+            mStartAngularVelocity = body->GetAngularVelocity();
+            if (body->GetSimulation() == RigidBodyItemClass::Simulation::Static)
+            {
+                WARN("Kinematic actuator can't apply on a static rigid body. [actuator='%1', node='%2']", mClass->GetName(), node.GetName());
+            }
+        }
+        else
+        {
+            WARN("Kinematic actuator can't apply on a node without rigid body. [actuator='%1']", mClass->GetName());
         }
     }
-    else
+    else if (target == KinematicActuatorClass::Target::Transformer)
     {
-        WARN("EntityNode '%1' doesn't have a rigid body item.", node.GetName());
-        WARN("Kinematic actuator will have no effect.");
-    }
+        if (const auto* transformer = node.GetTransformer())
+        {
+            mStartLinearVelocity      = transformer->GetLinearVelocity();
+            mStartLinearAcceleration  = transformer->GetLinearAcceleration();
+            mStartAngularVelocity     = transformer->GetAngularVelocity();
+            mStartAngularAcceleration = transformer->GetAngularAcceleration();
+        }
+        else
+        {
+            WARN("Kinematic actuator can't apply on a node without a transformer. [actuator='%1']", mClass->GetName());
+        }
+    } else BUG("Missing kinematic actuator target.");
 }
 void KinematicActuator::Apply(EntityNode& node, float t)
 {
-    if (auto* body = node.GetRigidBody())
+    const auto target = mClass->GetTarget();
+    if (target == KinematicActuatorClass::Target::RigidBody)
     {
-        const auto method = mClass->GetInterpolation();
-        const auto linear_velocity = math::interpolate(mStartLinearVelocity, mClass->GetEndLinearVelocity(), t, method);
-        const auto angular_velocity = math::interpolate(mStartAngularVelocity, mClass->GetEndAngularVelocity(), t, method);
-        body->AdjustLinearVelocity(linear_velocity);
-        body->AdjustAngularVelocity(angular_velocity);
+        if (auto* body = node.GetRigidBody())
+        {
+            const auto method = mClass->GetInterpolation();
+            const auto linear_velocity = math::interpolate(mStartLinearVelocity,
+                                                           mClass->GetEndLinearVelocity(), t, method);
+            const auto angular_velocity = math::interpolate(mStartAngularVelocity,
+                                                            mClass->GetEndAngularVelocity(), t, method);
+            body->AdjustLinearVelocity(linear_velocity);
+            body->AdjustAngularVelocity(angular_velocity);
+        }
     }
+    else if (target == KinematicActuatorClass::Target::Transformer)
+    {
+        if (auto* transformer = node.GetTransformer())
+        {
+            const auto method = mClass->GetInterpolation();
+            const auto linear_velocity = math::interpolate(mStartLinearVelocity,
+                                                           mClass->GetEndLinearVelocity(), t, method);
+            const auto linear_acceleration = math::interpolate(mStartLinearAcceleration,
+                                                               mClass->GetEndLinearAcceleration(), t, method);
+            const auto angular_velocity = math::interpolate(mStartAngularVelocity,
+                                                            mClass->GetEndAngularVelocity(), t, method);
+            const auto angular_acceleration = math::interpolate(mStartAngularAcceleration,
+                                                                mClass->GetEndAngularAcceleration(), t, method);
+
+            transformer->SetLinearVelocity(linear_velocity);
+            transformer->SetLinearAcceleration(linear_acceleration);
+            transformer->SetAngularVelocity(angular_velocity);
+            transformer->SetAngularAcceleration(angular_acceleration);
+        }
+    } else BUG("Missing kinematic actuator target.");
 }
 
 void KinematicActuator::Finish(EntityNode& node)
 {
-    if (auto* body = node.GetRigidBody())
+    const auto target = mClass->GetTarget();
+    if (target == KinematicActuatorClass::Target::RigidBody)
     {
-        body->AdjustLinearVelocity(mClass->GetEndLinearVelocity());
-        body->AdjustAngularVelocity(mClass->GetEndAngularVelocity());
+        if (auto* body = node.GetRigidBody())
+        {
+            body->AdjustLinearVelocity(mClass->GetEndLinearVelocity());
+            body->AdjustAngularVelocity(mClass->GetEndAngularVelocity());
+        }
     }
+    else if (target == KinematicActuatorClass::Target::Transformer)
+    {
+        if (auto* transformer = node.GetTransformer())
+        {
+            transformer->SetLinearVelocity(mClass->GetEndLinearVelocity());
+            transformer->SetLinearAcceleration(mClass->GetEndLinearAcceleration());
+            transformer->SetAngularVelocity(mClass->GetEndAngularVelocity());
+            transformer->SetAngularAcceleration(mClass->GetEndAngularAcceleration());
+        }
+    }
+    else BUG("Missing kinematic actuator target.");
 }
 
 void SetFlagActuator::Start(EntityNode& node)
