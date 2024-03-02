@@ -845,7 +845,7 @@
              <enum>QFrame::Plain</enum>
             </property>
             <property name="currentIndex">
-             <number>4</number>
+             <number>2</number>
             </property>
             <widget class="QWidget" name="transformActuator">
              <layout class="QGridLayout" name="gridLayout_5">
@@ -1198,39 +1198,14 @@
               <property name="bottomMargin">
                <number>0</number>
               </property>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_27">
+                <property name="text">
+                 <string>Interpolation</string>
+                </property>
+               </widget>
+              </item>
               <item row="2" column="1">
-               <widget class="QDoubleSpinBox" name="kinematicEndVeloZ">
-                <property name="suffix">
-                 <string> rad/s</string>
-                </property>
-                <property name="minimum">
-                 <double>-1000.000000000000000</double>
-                </property>
-                <property name="maximum">
-                 <double>1000.000000000000000</double>
-                </property>
-                <property name="singleStep">
-                 <double>0.100000000000000</double>
-                </property>
-                <property name="stepType">
-                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-                </property>
-                <property name="value">
-                 <double>0.000000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QComboBox" name="kinematicInterpolation">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
                <layout class="QHBoxLayout" name="horizontalLayout_5">
                 <item>
                  <widget class="QDoubleSpinBox" name="kinematicEndVeloX">
@@ -1279,23 +1254,149 @@
                </layout>
               </item>
               <item row="1" column="0">
+               <widget class="QLabel" name="label_18">
+                <property name="text">
+                 <string>Target</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
                <widget class="QLabel" name="label_7">
                 <property name="text">
                  <string>Linear velocity</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="0">
+              <item row="3" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_7">
+                <item>
+                 <widget class="QDoubleSpinBox" name="kinematicEndAccelX">
+                  <property name="suffix">
+                   <string> m/s²</string>
+                  </property>
+                  <property name="minimum">
+                   <double>-1000.000000000000000</double>
+                  </property>
+                  <property name="maximum">
+                   <double>1000.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.100000000000000</double>
+                  </property>
+                  <property name="stepType">
+                   <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                  </property>
+                  <property name="value">
+                   <double>0.000000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QDoubleSpinBox" name="kinematicEndAccelY">
+                  <property name="suffix">
+                   <string> m/s²</string>
+                  </property>
+                  <property name="minimum">
+                   <double>-1000.000000000000000</double>
+                  </property>
+                  <property name="maximum">
+                   <double>1000.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.100000000000000</double>
+                  </property>
+                  <property name="stepType">
+                   <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                  </property>
+                  <property name="value">
+                   <double>0.000000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_19">
+                <property name="text">
+                 <string>Linear acceleration</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
                <widget class="QLabel" name="label_8">
                 <property name="text">
                  <string>Angular velocity</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_27">
+              <item row="4" column="1">
+               <widget class="QDoubleSpinBox" name="kinematicEndVeloZ">
+                <property name="suffix">
+                 <string> rad/s</string>
+                </property>
+                <property name="minimum">
+                 <double>-1000.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>1000.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
+                </property>
+                <property name="stepType">
+                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                </property>
+                <property name="value">
+                 <double>0.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QComboBox" name="kinematicInterpolation">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QComboBox" name="kinematicTarget">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <widget class="QLabel" name="label_20">
                 <property name="text">
-                 <string>Interpolation</string>
+                 <string>Angular acceleration</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="1">
+               <widget class="QDoubleSpinBox" name="kinematicEndAccelZ">
+                <property name="suffix">
+                 <string> rad/s²</string>
+                </property>
+                <property name="minimum">
+                 <double>-1000.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>1000.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
+                </property>
+                <property name="stepType">
+                 <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                </property>
+                <property name="value">
+                 <double>0.000000000000000</double>
                 </property>
                </widget>
               </item>
@@ -1629,9 +1730,13 @@
   <tabstop>setvalName</tabstop>
   <tabstop>setvalEndValue</tabstop>
   <tabstop>kinematicInterpolation</tabstop>
+  <tabstop>kinematicTarget</tabstop>
   <tabstop>kinematicEndVeloX</tabstop>
   <tabstop>kinematicEndVeloY</tabstop>
+  <tabstop>kinematicEndAccelX</tabstop>
+  <tabstop>kinematicEndAccelY</tabstop>
   <tabstop>kinematicEndVeloZ</tabstop>
+  <tabstop>kinematicEndAccelZ</tabstop>
   <tabstop>itemFlags</tabstop>
   <tabstop>flagAction</tabstop>
  </tabstops>

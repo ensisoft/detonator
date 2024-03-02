@@ -115,7 +115,6 @@ namespace gui
         void on_transformInterpolation_currentIndexChanged(int index);
         void on_setvalInterpolation_currentIndexChanged(int index);
         void on_setvalName_currentIndexChanged(int index);
-        void on_kinematicInterpolation_currentIndexChanged(int index);
         void on_transformEndPosX_valueChanged(double value);
         void on_transformEndPosY_valueChanged(double value);
         void on_transformEndSizeX_valueChanged(double value);
@@ -124,9 +123,17 @@ namespace gui
         void on_transformEndScaleY_valueChanged(double value);
         void on_transformEndRotation_valueChanged(double value);
         void on_setvalEndValue_ValueChanged();
+
+        void on_kinematicInterpolation_currentIndexChanged(int index);
+        void on_kinematicTarget_currentIndexChanged(int index);
         void on_kinematicEndVeloX_valueChanged(double value);
         void on_kinematicEndVeloY_valueChanged(double value);
         void on_kinematicEndVeloZ_valueChanged(double value);
+        void on_kinematicEndAccelX_valueChanged(double value);
+        void on_kinematicEndAccelY_valueChanged(double value);
+        void on_kinematicEndAccelZ_valueChanged(double value);
+
+
         void on_itemFlags_currentIndexChanged(int);
         void on_flagAction_currentIndexChanged(int index);
         void on_materialInterpolation_currentIndexChanged(int);
@@ -153,6 +160,7 @@ namespace gui
         void CreateTimelines();
         void RemoveDeletedItems();
         void ReturnToDefault();
+        void UpdateKinematicUnits();
         game::EntityNode* GetCurrentEntityNode();
         game::ActuatorClass* GetCurrentActuator();
         gui::TimelineWidget::TimelineItem* GetCurrentTimelineItem();

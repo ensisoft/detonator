@@ -785,6 +785,11 @@ inline void SetValue(QDoubleSpinBox* spin, float val)
     }
     spin->setValue(val);
 }
+inline void SetSuffix(QDoubleSpinBox* spin, const app::AnyString& suffix)
+{
+    QSignalBlocker s(spin);
+    spin->setSuffix(suffix);
+}
 
 inline void SetValue(color_widgets::ColorSelector* color, const gfx::Color4f& col)
 {
