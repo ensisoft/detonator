@@ -765,6 +765,27 @@ void AnimationTrackWidget::on_actionDeleteTimeline_triggered()
     ASSERT(index < mState.timelines.size());
     auto tl = mState.timelines[index];
 
+    size_t count = 0;
+    for (size_t i=0; i<mState.track->GetNumActuators(); ++i)
+    {
+        const auto& actuator = mState.track->GetActuatorClass(i);
+        const auto& timeline = mState.actuator_to_timeline[actuator.GetId()];
+        if (timeline == tl.selfId)
+            ++count;
+    }
+
+    if (count > 0)
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Question);
+        msg.setWindowTitle("Delete Timeline ?");
+        msg.setText("Timeline contains multiple actuators. Are you sure you want to delete?");
+        msg.setStandardButtons(QMessageBox::StandardButton::Yes |
+                               QMessageBox::StandardButton::No);
+        if (msg.exec() == QMessageBox::StandardButton::No)
+            return;
+    }
+
     for (size_t i=0; i<mState.track->GetNumActuators();)
     {
         const auto& actuator = mState.track->GetActuatorClass(i);
@@ -912,16 +933,26 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
     }
 
     QMenu menu(this);
-
     QMenu actuators(this);
-    actuators.setTitle("New Actuator ...");
+    actuators.setTitle("New Actuator On ...");
     actuators.setIcon(QIcon("icons:add.png"));
+
+    std::unordered_map<game::ActuatorClass::Type, QString> names;
+    names[game::ActuatorClass::Type::Transform] = "Node Transform";
+    names[game::ActuatorClass::Type::Kinematic] = "Rigid Body";
+    names[game::ActuatorClass::Type::Material]  = "Material Uniform";
+    names[game::ActuatorClass::Type::SetValue]  = "Property Value";
+    names[game::ActuatorClass::Type::SetFlag]   = "Property Flag";
+
     // build menu for adding actuators.
     for (const auto val : magic_enum::enum_values<game::ActuatorClass::Type>())
     {
         const std::string name(magic_enum::enum_name(val));
-        QAction* action = actuators.addAction(app::FromUtf8(name));
+        QAction* action = actuators.addAction(names[val]);
+        action->setIcon(QIcon("icons:add.png"));
+        action->setProperty("type", app::FromUtf8(name));
         action->setEnabled(false);
+
         connect(action, &QAction::triggered, this, &AnimationTrackWidget::AddActuatorAction);
         if (timeline)
         {
@@ -938,8 +969,8 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
     menu.addMenu(&actuators);
     menu.addSeparator();
     menu.addMenu(&add_timeline);
-    menu.addAction(mUI.actionDeleteTimeline);
     menu.addSeparator();
+    menu.addAction(mUI.actionDeleteTimeline);
     menu.addAction(mUI.actionDeleteActuator);
     menu.addAction(mUI.actionDeleteActuators);
     menu.addSeparator();
@@ -1118,6 +1149,7 @@ void AnimationTrackWidget::SetActuatorUIEnabled(bool enabled)
 
 void AnimationTrackWidget::SetActuatorUIDefaults()
 {
+    SetValue(mUI.actuatorGroup, "Actuator (Nothing selected");
     SetMinMax(mUI.actuatorStartTime, 0.0, 0.0f);
     SetMinMax(mUI.actuatorEndTime, 0.0, 0.0);
     SetValue(mUI.actuatorName, QString(""));
@@ -1458,11 +1490,9 @@ void AnimationTrackWidget::AddActuatorAction()
     // is set when the context menu with this QAction is opened.
     const auto seconds = action->data().toFloat();
     // the name of the action carries the type
-    QString text = action->text();
-    text.remove("New ");
-    text.remove(" Actuator");
+    const auto type_str = action->property("type").toString();
 
-    const auto type = magic_enum::enum_cast<game::ActuatorClass::Type>(app::ToUtf8(text));
+    const auto type = magic_enum::enum_cast<game::ActuatorClass::Type>(app::ToUtf8(type_str));
     ASSERT(type.has_value());
     AddActuatorFromTimeline(type.value(), seconds);
 }

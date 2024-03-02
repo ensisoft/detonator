@@ -190,6 +190,8 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
     QFont font;
     p.setFont(font);
 
+    const auto group = mFreezeItems ? QPalette::ColorGroup::Disabled : QPalette::ColorGroup::Active;
+
     // visualize the timelines and their items
     for (size_t i=0; i<max_num_visible_timelines; ++i)
     {
@@ -205,6 +207,9 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
         if (index == mHoveredTimeline)
             p.fillRect(box, QColor(70, 70, 70));
 
+        QPen pen;
+        pen.setColor(palette.color(group, QPalette::Text));
+        p.setPen(pen);
         p.drawText(box, Qt::AlignVCenter | Qt::AlignHCenter, timeline.GetName());
 
         for (size_t i=0; i<timeline.GetNumItems(); ++i)
@@ -214,24 +219,35 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
             const auto y0 = y;
             const QRect box(x0, y0, item.duration * pixels_per_one_second * mDuration, TimelineHeight);
 
-            const auto group = mFreezeItems ? QPalette::ColorGroup::Disabled : QPalette::ColorGroup::Active;
             QColor box_color;
             QColor pen_color;
-            if (&item == mSelected)
+
+            if (mFreezeItems)
             {
                 pen_color = palette.color(group, QPalette::HighlightedText);
-                box_color = palette.color(group, QPalette::Highlight);
-            }
-            else if (&item == mHovered && !mFreezeItems)
-            {
-                pen_color = palette.color(group, QPalette::HighlightedText);
-                box_color = item.color;
-                box_color.setAlpha(255);
+                box_color = Qt::lightGray;
             }
             else
             {
-                pen_color = palette.color(group, QPalette::Text);
-                box_color = mFreezeItems ? Qt::lightGray : item.color;
+                if (&item == mHovered)
+                {
+                    pen_color = palette.color(group, QPalette::HighlightedText);
+                    box_color = item.color;
+                    box_color.setAlpha(255);
+                    if (&item == mSelected)
+                        box_color = QColor(0x00, 200, 0x00, 255);
+                    else if (mSelected)
+                        box_color.setAlpha(200);
+                }
+                else
+                {
+                    pen_color = palette.color(group, QPalette::HighlightedText);
+                    box_color = item.color;
+                    if (&item == mSelected)
+                        box_color = QColor(0x00, 200, 0x00, 200);
+                    else if (mSelected)
+                        box_color = Qt::darkGray;
+                }
             }
             QPen pen;
             QPainterPath path;
@@ -247,7 +263,7 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
     {
         const auto xpos = timeline_start + mAlignmentBarTime * pixels_per_one_second * mDuration;
         QPen pen;
-        pen.setColor(Qt::green);
+        pen.setColor(palette.color(QPalette::Text));
         p.setPen(pen);
         p.drawLine(xpos, 0, xpos, viewport()->height());
     }

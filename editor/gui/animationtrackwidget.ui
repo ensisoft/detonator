@@ -1493,7 +1493,7 @@
      <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
    </property>
    <property name="text">
-    <string>Delete Actuators</string>
+    <string>Delete All Actuators</string>
    </property>
    <property name="toolTip">
     <string>Delete all actuators from all timelines</string>
