@@ -31,6 +31,7 @@
 #include "../spinboxwidget.h"
 #include "../rangewidget.h"
 #include "../treewidget.h"
+#include "../curvewidget.h"
 #include "../collapsible_widget.h"
 #include "../svg/svgview.h"
 
@@ -51,6 +52,71 @@ namespace gui {
     }
 
 }
+
+CurveWidgetPlugin::CurveWidgetPlugin(QObject* parent)
+        : QObject(parent)
+{}
+
+bool CurveWidgetPlugin::isContainer() const
+{
+    return false;
+}
+bool CurveWidgetPlugin::isInitialized() const
+{
+    return initialized;
+}
+QIcon CurveWidgetPlugin::icon() const
+{
+    return QIcon();
+}
+QString CurveWidgetPlugin::domXml() const
+{
+    return "<ui language=\"c++\">\n"
+           " <widget class=\"gui::CurveWidget\" name=\"curve\">\n"
+           "  <property name=\"geometry\">\n"
+           "   <rect>\n"
+           "    <x>0</x>\n"
+           "    <y>0</y>\n"
+           "    <width>200</width>\n"
+           "    <height>200</height>\n"
+           "   </rect>\n"
+           "  </property>\n"
+           " </widget>\n"
+           "</ui>\n";
+}
+QString CurveWidgetPlugin::group() const
+{
+    return "DETONATOR2D";
+}
+
+QString CurveWidgetPlugin::includeFile() const
+{
+    return "curvewidget.h";
+}
+
+QString CurveWidgetPlugin::name() const
+{
+    return "gui::CurveWidget";
+}
+QString CurveWidgetPlugin::toolTip() const
+{
+    return "";
+}
+QString CurveWidgetPlugin::whatsThis() const
+{
+    return toolTip();
+}
+QWidget* CurveWidgetPlugin::createWidget(QWidget *parent)
+{
+    return new gui::CurveWidget(parent);
+}
+void CurveWidgetPlugin::initialize(QDesignerFormEditorInterface *core)
+{
+    initialized = true;
+}
+
+
+
 
 UikWidgetStyleWidgetPlugin::UikWidgetStyleWidgetPlugin(QObject* parent)
         : QObject(parent)
@@ -521,6 +587,7 @@ MyCustomWidgets::MyCustomWidgets(QObject* parent)
     widgets.append(new DoubleSliderWidgetPlugin(this));
     widgets.append(new QtSvgViewWidgetPlugin(this));
     widgets.append(new UikWidgetStyleWidgetPlugin(this));
+    widgets.append(new CurveWidgetPlugin(this));
 }
 
 QList<QDesignerCustomWidgetInterface*> MyCustomWidgets::customWidgets() const

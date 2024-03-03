@@ -85,6 +85,8 @@ add_library(DetonatorQtDesignerPlugin SHARED
     ../rangewidget.cpp
     ../treewidget.h
     ../treewidget.cpp
+    ../curvewidget.cpp
+    ../curvewidget.h
     ../collapsible_widget.h
     ../collapsible_widget.ui
     ../collapsible_widget.cpp
