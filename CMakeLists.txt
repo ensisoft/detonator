@@ -568,6 +568,8 @@ add_executable(Detonator
     editor/gui/collapsible_widget.h
     editor/gui/collapsible_widget.ui
     editor/gui/collapsible_widget.cpp
+    editor/gui/curvewidget.cpp
+    editor/gui/curvewidget.h
     editor/gui/treewidget.h
     editor/gui/treewidget.cpp
     editor/gui/timelinewidget.h
