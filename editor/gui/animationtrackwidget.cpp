@@ -1170,7 +1170,7 @@ void AnimationTrackWidget::SetActuatorUIEnabled(bool enabled)
 
 void AnimationTrackWidget::SetActuatorUIDefaults()
 {
-    SetValue(mUI.actuatorGroup, "Actuator (Nothing selected");
+    SetValue(mUI.actuatorGroup, QString("Actuator (Nothing selected)"));
     SetMinMax(mUI.actuatorStartTime, 0.0, 0.0f);
     SetMinMax(mUI.actuatorEndTime, 0.0, 0.0);
     SetValue(mUI.actuatorName, QString(""));
@@ -1201,6 +1201,8 @@ void AnimationTrackWidget::SetActuatorUIDefaults()
     SetValue(mUI.kinematicEndAccelZ, 0.0f);
     SetValue(mUI.materialInterpolation, game::MaterialActuatorClass::Interpolation::Cosine);
 
+    mUI.curve->ClearFunction();
+
     if (!mState.track)
         return;
 
@@ -1228,6 +1230,8 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
         transform->SetEndSize(GetValue(mUI.transformEndSizeX), GetValue(mUI.transformEndSizeY));
         transform->SetEndScale(GetValue(mUI.transformEndScaleX), GetValue(mUI.transformEndScaleY));
         transform->SetEndRotation(qDegreesToRadians((float) GetValue(mUI.transformEndRotation)));
+
+        mUI.curve->SetFunction(transform->GetInterpolation());
     }
     else if (auto* setter = dynamic_cast<game::SetValueActuatorClass*>(actuator))
     {
@@ -1271,6 +1275,8 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
         else BUG("Unhandled value actuator value type.");
         setter->SetInterpolation(GetValue(mUI.setvalInterpolation));
         setter->SetParamName(name);
+
+        mUI.curve->SetFunction(setter->GetInterpolation());
     }
     else if (auto* kinematic = dynamic_cast<game::KinematicActuatorClass*>(actuator))
     {
@@ -1287,15 +1293,21 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
         kinematic->SetEndLinearAcceleration(linear_acceleration);
         kinematic->SetEndAngularVelocity(GetValue(mUI.kinematicEndVeloZ));
         kinematic->SetEndAngularAcceleration(GetValue(mUI.kinematicEndAccelZ));
+
+        mUI.curve->SetFunction(kinematic->GetInterpolation());
     }
     else if (auto* setflag = dynamic_cast<game::SetFlagActuatorClass*>(actuator))
     {
         setflag->SetFlagAction(GetValue(mUI.flagAction));
         setflag->SetFlagName(GetValue(mUI.itemFlags));
+
+        mUI.curve->ClearFunction();
     }
     else if (auto* material = dynamic_cast<game::MaterialActuatorClass*>(actuator))
     {
         material->SetInterpolation(GetValue(mUI.materialInterpolation));
+
+        mUI.curve->SetFunction(material->GetInterpolation());
     }
 
     //DEBUG("Updated actuator '%1' (%2)", actuator->GetName(), actuator->GetId());
@@ -1431,6 +1443,7 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         SetValue(mUI.transformEndScaleY, scale.y);
         SetValue(mUI.transformEndRotation, qRadiansToDegrees(rotation));
         mUI.actuatorProperties->setCurrentWidget(mUI.transformActuator);
+        mUI.curve->SetFunction(ptr->GetInterpolation());
 
         node->SetTranslation(pos);
         node->SetSize(size);
@@ -1460,6 +1473,8 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         SetValue(mUI.setvalInterpolation, ptr->GetInterpolation());
         SetValue(mUI.setvalName, ptr->GetParamName());
         mUI.actuatorProperties->setCurrentWidget(mUI.setvalActuator);
+
+        mUI.curve->SetFunction(ptr->GetInterpolation());
     }
     else if (const auto* ptr = dynamic_cast<const game::KinematicActuatorClass*>(actuator))
     {
@@ -1475,6 +1490,8 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         SetValue(mUI.kinematicEndAccelY,     linear_acceleration.y);
         UpdateKinematicUnits();
 
+        mUI.curve->SetFunction(ptr->GetInterpolation());
+
         mUI.actuatorProperties->setCurrentWidget(mUI.kinematicActuator);
     }
     else if (const auto* ptr = dynamic_cast<const game::SetFlagActuatorClass*>(actuator))
@@ -1482,11 +1499,15 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         SetValue(mUI.itemFlags, ptr->GetFlagName());
         SetValue(mUI.flagAction, ptr->GetFlagAction());
         mUI.actuatorProperties->setCurrentWidget(mUI.setflagActuator);
+
+        mUI.curve->ClearFunction();
     }
     else if (const auto* ptr = dynamic_cast<const game::MaterialActuatorClass*>(actuator))
     {
         SetValue(mUI.materialInterpolation, ptr->GetInterpolation());
         mUI.actuatorProperties->setCurrentWidget(mUI.materialActuator);
+
+        mUI.curve->SetFunction(ptr->GetInterpolation());
     }
     else
     {
