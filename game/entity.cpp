@@ -2041,6 +2041,7 @@ void Entity::Update(float dt, std::vector<Event>* events)
                 node.SetRotation(rotation);
                 node.SetScale(scale);
             }
+            continue;
         }
 
         VERBOSE("Entity animation is complete. [entity='%1/%2', animation='%3']",
