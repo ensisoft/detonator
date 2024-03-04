@@ -116,11 +116,11 @@ namespace gui
         void SetZoom(double zoom)
         { mZoomFactor = zoom; }
         TimelineItem* GetSelectedItem()
-        { return mSelected; }
+        { return mSelectedItem; }
         const TimelineItem* GetSelectedItem() const
-        { return mSelected; }
+        { return mSelectedItem; }
         void ClearSelection()
-        { mSelected = nullptr; }
+        { mSelectedItem = nullptr; }
         void SetFreezeItems(bool freeze)
         { mFreezeItems = freeze; }
         const Timeline* GetCurrentTimeline() const
@@ -161,8 +161,8 @@ namespace gui
     private:
         // the provider of the timeline data.
         TimelineModel* mModel = nullptr;
-        TimelineItem* mHovered = nullptr;
-        TimelineItem* mSelected = nullptr;
+        TimelineItem* mHoveredItem  = nullptr;
+        TimelineItem* mSelectedItem = nullptr;
         // The current list of items being visualized.
         std::vector<Timeline> mTimelines;
         // Index of the currently selected item's timeline.

@@ -62,10 +62,10 @@ TimelineWidget::TimelineWidget(QWidget* parent) : QAbstractScrollArea(parent)
 
 void TimelineWidget::Rebuild()
 {
-    const QString& id = mSelected ? mSelected->id : "";
+    const QString& id = mSelectedItem ? mSelectedItem->id : "";
 
-    mHovered  = nullptr;
-    mSelected = nullptr;
+    mHoveredItem  = nullptr;
+    mSelectedItem = nullptr;
 
     mTimelines.clear();
     mModel->Fetch(&mTimelines);
@@ -77,7 +77,7 @@ void TimelineWidget::Rebuild()
             auto& item = timeline.GetItem(i);
             if (item.id == id)
             {
-                mSelected = &item;
+                mSelectedItem = &item;
                 break;
             }
         }
@@ -123,8 +123,8 @@ const TimelineWidget::TimelineItem* TimelineWidget::SelectItem(const QString& id
             auto& item = timeline.GetItem(i);
             if (item.id == id)
             {
-                mSelected = &item;
-                return mSelected;
+                mSelectedItem = &item;
+                return mSelectedItem;
             }
         }
     }
@@ -204,7 +204,7 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
         const auto l = mDuration * pixels_per_one_second;
         const QRect box(x, y, l, TimelineHeight);
 
-        if (index == mHoveredTimeline)
+        if (index == mHoveredTimeline && !mHoveredItem)
             p.fillRect(box, QColor(70, 70, 70));
 
         QPen pen;
@@ -229,23 +229,23 @@ void TimelineWidget::paintEvent(QPaintEvent* event)
             }
             else
             {
-                if (&item == mHovered)
+                if (&item == mHoveredItem)
                 {
                     pen_color = palette.color(group, QPalette::HighlightedText);
                     box_color = item.color;
                     box_color.setAlpha(255);
-                    if (&item == mSelected)
+                    if (&item == mSelectedItem)
                         box_color = QColor(0x00, 200, 0x00, 255);
-                    else if (mSelected)
+                    else if (mSelectedItem)
                         box_color.setAlpha(200);
                 }
                 else
                 {
                     pen_color = palette.color(group, QPalette::HighlightedText);
                     box_color = item.color;
-                    if (&item == mSelected)
+                    if (&item == mSelectedItem)
                         box_color = QColor(0x00, 200, 0x00, 200);
-                    else if (mSelected)
+                    else if (mSelectedItem)
                         box_color = Qt::darkGray;
                 }
             }
@@ -296,20 +296,20 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent* mickey)
         if (mDraggingFromStart)
         {
             // move the start time only. (grows to the left)
-            moved_start = mSelected->starttime + drag_normalized;
-            moved_end = mSelected->starttime + mSelected->duration;
+            moved_start = mSelectedItem->starttime + drag_normalized;
+            moved_end = mSelectedItem->starttime + mSelectedItem->duration;
         }
         else if (mDraggingFromEnd)
         {
             // move the end time only. ( grows to the right)
-            moved_start = mSelected->starttime;
-            moved_end   = mSelected->starttime + mSelected->duration + drag_normalized;
+            moved_start = mSelectedItem->starttime;
+            moved_end   = mSelectedItem->starttime + mSelectedItem->duration + drag_normalized;
         }
         else
         {
             // move start and end time, i.e. the whole item.
-            moved_start = mSelected->starttime + drag_normalized;
-            moved_end = moved_start + mSelected->duration;
+            moved_start = mSelectedItem->starttime + drag_normalized;
+            moved_end = moved_start + mSelectedItem->duration;
         }
         moved_start = math::clamp(0.0f, 1.0f, moved_start);
         moved_end   = math::clamp(moved_start, 1.0f, moved_end);
@@ -374,13 +374,13 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent* mickey)
         for (size_t i=0; i<timeline.GetNumItems(); ++i)
         {
             const auto& item = timeline.GetItem(i);
-            if (&item == mSelected)
+            if (&item == mSelectedItem)
                 continue;
             const auto start = item.starttime;
             const auto end   = item.starttime + item.duration;
-            if (start >= mSelected->starttime)
+            if (start >= mSelectedItem->starttime)
                 hi_bound = std::min(hi_bound, start);
-            if (end <= mSelected->starttime)
+            if (end <= mSelectedItem->starttime)
                 lo_bound = std::max(lo_bound, end);
         }
         const bool resizing  = mDraggingFromStart || mDraggingFromEnd;
@@ -388,17 +388,17 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent* mickey)
         {
             const auto start = std::max(lo_bound, moved_start);
             const auto end   = std::min(hi_bound, moved_end);
-            mSelected->starttime = start;
-            mSelected->duration  = end - start;
+            mSelectedItem->starttime = start;
+            mSelectedItem->duration  = end - start;
         }
         else
         {
-            const auto duration = mSelected->duration;
+            const auto duration = mSelectedItem->duration;
             const auto wiggle_room = (hi_bound - lo_bound) - duration;
             const auto start = math::clamp(lo_bound, lo_bound + wiggle_room, moved_start);
-            mSelected->starttime = start;
+            mSelectedItem->starttime = start;
         }
-        emit SelectedItemDragged(mSelected);
+        emit SelectedItemDragged(mSelectedItem);
 
         //DEBUG("Dragged %1 seconds, (start = %2, end = %3)", drag_seconds,
         //      mSelected->starttime * mDuration,
@@ -413,7 +413,7 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent* mickey)
     // schedule update
     viewport()->update();
 
-    mHovered = nullptr;
+    mHoveredItem = nullptr;
     mHoveredTimeline = mTimelines.size();
     setCursor(Qt::ArrowCursor);
 
@@ -437,13 +437,13 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent* mickey)
         const auto end   = start + item.duration * pixels_per_one_second * mDuration;
         if (mouse_x >= start && mouse_x <= end)
         {
-            mHovered = &item;
+            mHoveredItem = &item;
             selected_item_left = start;
             selected_item_right = end;
             break;
         }
     }
-    if (mHovered)
+    if (mHoveredItem)
     {
         const bool on_left_edge = mouse_x >= selected_item_left &&
                 mouse_x <= selected_item_left + 10;
@@ -467,7 +467,7 @@ void TimelineWidget::mousePressEvent(QMouseEvent* mickey)
     // schedule an update
     viewport()->update();
 
-    mSelected = nullptr;
+    mSelectedItem = nullptr;
     emit SelectedItemChanged(nullptr);
 
     const auto& pos = mickey->pos();
@@ -498,7 +498,7 @@ void TimelineWidget::mousePressEvent(QMouseEvent* mickey)
         const auto end = start + item.duration * pixels_per_one_second * mDuration;
         if (mouse_x >= start && mouse_x <= end)
         {
-            mSelected = &item;
+            mSelectedItem = &item;
             mSelectedTimeline = index;
             selected_item_left = start;
             selected_item_right = end;
@@ -506,7 +506,7 @@ void TimelineWidget::mousePressEvent(QMouseEvent* mickey)
         }
     }
 
-    if (mickey->button() == Qt::LeftButton && mSelected)
+    if (mickey->button() == Qt::LeftButton && mSelectedItem)
     {
         mDraggingFromStart = false;
         mDraggingFromEnd   = false;
@@ -518,8 +518,8 @@ void TimelineWidget::mousePressEvent(QMouseEvent* mickey)
         else if (mouse_x >= selected_item_right - 10 && mouse_x <= selected_item_right)
             mDraggingFromEnd = true;
     }
-    if (mSelected)
-        emit SelectedItemChanged(mSelected);
+    if (mSelectedItem)
+        emit SelectedItemChanged(mSelectedItem);
 }
 void TimelineWidget::mouseReleaseEvent(QMouseEvent* mickey)
 {
@@ -581,7 +581,7 @@ void TimelineWidget::enterEvent(QEvent*)
 }
 void TimelineWidget::leaveEvent(QEvent*)
 {
-    mHovered = nullptr;
+    mHoveredItem = nullptr;
     // disabled for now as a hack solution to making
     // context menu work in animationtrackwidget.
     //mHoveredTimeline = mTimelines.size();
