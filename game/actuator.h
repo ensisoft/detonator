@@ -651,6 +651,17 @@ namespace game
             ASSERT(std::holds_alternative<T>(start));
             return math::interpolate(std::get<T>(start), std::get<T>(end), t, method);
         }
+        Color4f Interpolate(float t)
+        {
+            const auto method = mClass->GetInterpolation();
+            const auto end    = mClass->GetEndValue();
+            const auto start  = mStartValue;
+            ASSERT(std::holds_alternative<Color4f>(end));
+            ASSERT(std::holds_alternative<Color4f>(start));
+            auto ret = math::interpolate(sRGB_Decode(std::get<Color4f>(start)),
+                                         sRGB_Decode(std::get<Color4f>(end)), t, method);
+            return sRGB_Encode(ret);
+        }
     private:
         std::shared_ptr<const SetValueActuatorClass> mClass;
         ParamValue mStartValue;
