@@ -133,9 +133,9 @@ namespace gui
         void on_kinematicEndAccelY_valueChanged(double value);
         void on_kinematicEndAccelZ_valueChanged(double value);
 
-
         void on_itemFlags_currentIndexChanged(int);
         void on_flagAction_currentIndexChanged(int index);
+        void on_flagTime_valueChanged(double);
         void on_materialInterpolation_currentIndexChanged(int);
         void on_btnMaterialParameters_clicked();
         void SelectedItemChanged(const TimelineWidget::TimelineItem* item);

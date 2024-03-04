@@ -1138,6 +1138,14 @@ void AnimationTrackWidget::on_flagAction_currentIndexChanged(int)
     }
 }
 
+void AnimationTrackWidget::on_flagTime_valueChanged(double)
+{
+    if (auto* node = GetCurrentEntityNode())
+    {
+        SetSelectedActuatorProperties();
+    }
+}
+
 void AnimationTrackWidget::on_materialInterpolation_currentIndexChanged(int)
 {
     if (auto* node = GetCurrentEntityNode())
@@ -1205,6 +1213,9 @@ void AnimationTrackWidget::SetActuatorUIDefaults()
     SetValue(mUI.kinematicEndAccelY, 0.0f);
     SetValue(mUI.kinematicEndAccelZ, 0.0f);
     SetValue(mUI.materialInterpolation, game::MaterialActuatorClass::Interpolation::Cosine);
+    SetValue(mUI.itemFlags, game::SetFlagActuatorClass::FlagName::Drawable_VisibleInGame);
+    SetValue(mUI.flagAction, game::SetFlagActuatorClass::FlagAction::On);
+    SetValue(mUI.flagTime, 1.0f);
 
     mUI.curve->ClearFunction();
 
@@ -1305,6 +1316,7 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
     {
         setflag->SetFlagAction(GetValue(mUI.flagAction));
         setflag->SetFlagName(GetValue(mUI.itemFlags));
+        setflag->SetTime(GetValue(mUI.flagTime));
 
         mUI.curve->ClearFunction();
     }
@@ -1512,6 +1524,7 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
     {
         SetValue(mUI.itemFlags, ptr->GetFlagName());
         SetValue(mUI.flagAction, ptr->GetFlagAction());
+        SetValue(mUI.flagTime, ptr->GetTime());
         mUI.actuatorProperties->setCurrentWidget(mUI.setflagActuator);
 
         mUI.curve->ClearFunction();
