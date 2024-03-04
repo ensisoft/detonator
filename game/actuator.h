@@ -179,6 +179,10 @@ namespace game
             Drawable_UpdateDrawable,
             Drawable_Restart,
             Drawable_FlipHorizontally,
+            Drawable_FlipVertically,
+            Drawable_DoubleSided,
+            Drawable_DepthTest,
+            Drawable_PPEnableBloom,
             RigidBody_Bullet,
             RigidBody_Sensor,
             RigidBody_Enabled,
@@ -186,7 +190,10 @@ namespace game
             RigidBody_DiscardRotation,
             TextItem_VisibleInGame,
             TextItem_Blink,
-            TextItem_Underline
+            TextItem_Underline,
+            TextItem_PPEnableBloom,
+            SpatialNode_Enabled,
+            Transformer_Enabled
         };
 
         enum class FlagAction {
@@ -198,13 +205,13 @@ namespace game
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson(const data::Reader& data) override;
 
-        FlagAction GetFlagAction() const
+        inline FlagAction GetFlagAction() const noexcept
         { return mFlagAction; }
-        FlagName GetFlagName() const
+        inline FlagName GetFlagName() const noexcept
         { return mFlagName; }
-        void SetFlagName(const FlagName name)
+        inline void SetFlagName(const FlagName name) noexcept
         { mFlagName = name; }
-        void SetFlagAction(FlagAction action)
+        inline void SetFlagAction(FlagAction action) noexcept
         { mFlagAction = action; }
     private:
         FlagAction mFlagAction = FlagAction::Off;

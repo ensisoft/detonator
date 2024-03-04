@@ -755,6 +755,11 @@ Fixture* EntityNode::GetFixture()
 MapNode* EntityNode::GetMapNode()
 { return mMapNode.get(); }
 
+SpatialNode* EntityNode::GetSpatialNode()
+{
+    return mSpatialNode.get();
+}
+
 NodeTransformer* EntityNode::GetTransformer()
 {
     return mTransformer.get();

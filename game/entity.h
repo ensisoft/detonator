@@ -163,20 +163,20 @@ namespace game
             ReportOverlap
         };
         SpatialNodeClass();
-        std::size_t GetHash() const;
-        Shape GetShape() const noexcept
+
+        inline Shape GetShape() const noexcept
         { return mShape; }
-        void SetShape(Shape shape) noexcept
+        inline void SetShape(Shape shape) noexcept
         { mShape = shape; }
-        void SetFlag(Flags flag, bool on_off) noexcept
+        inline void SetFlag(Flags flag, bool on_off) noexcept
         { mFlags.set(flag, on_off); }
-        bool TestFlag(Flags flag) const noexcept
+        inline bool TestFlag(Flags flag) const noexcept
         { return mFlags.test(flag); }
-        base::bitflag<Flags> GetFlags() const noexcept
+        inline base::bitflag<Flags> GetFlags() const noexcept
         { return mFlags; }
 
+        std::size_t GetHash() const;
         void IntoJson(data::Writer& data) const;
-
         bool FromJson(const data::Reader& data);
     private:
         Shape mShape = Shape::AABB;
@@ -721,6 +721,8 @@ namespace game
         { return mClass->GetIntegrator(); }
         inline void SetFlag(Flags flag , bool on_off) noexcept
         { mFlags.set(flag, on_off); }
+        inline bool TestFlag(Flags flag) const noexcept
+        { return mFlags.test(flag); }
         inline void Enable(bool on_off) noexcept
         { SetFlag(Flags::Enabled, on_off); }
 
@@ -1195,22 +1197,25 @@ namespace game
         using Flags = SpatialNodeClass::Flags;
         using Shape = SpatialNodeClass::Shape;
         SpatialNode(std::shared_ptr<const SpatialNodeClass> klass) noexcept
-          : mClass(klass)
+          : mClass(std::move(klass))
           , mFlags(klass->GetFlags())
         {}
-        bool TestFlag(Flags flag) const noexcept
+        inline bool TestFlag(Flags flag) const noexcept
         { return mFlags.test(flag); }
-        Shape GetShape() const noexcept
+        inline Shape GetShape() const noexcept
         { return mClass->GetShape(); }
+        inline bool IsEnabled() const noexcept
+        { return mFlags.test(Flags::Enabled); }
+        inline void Enable(bool value) noexcept
+        { mFlags.set(Flags::Enabled, value); }
+        inline void SetFlag(Flags flag, bool on_off) noexcept
+        { mFlags.set(flag, on_off); }
+
         // class access
         const SpatialNodeClass& GetClass() const noexcept
         { return *mClass; }
         const SpatialNodeClass* operator->() const noexcept
         { return mClass.get(); }
-        inline bool IsEnabled() const noexcept
-        { return mFlags.test(Flags::Enabled); }
-        void Enable(bool value) noexcept
-        { mFlags.set(Flags::Enabled, value); }
     private:
         std::shared_ptr<const SpatialNodeClass> mClass;
         base::bitflag<Flags> mFlags;
@@ -1663,6 +1668,8 @@ namespace game
         // Get the node's fixture if any. If no fixture is et
         // then returns nullptr.
         Fixture* GetFixture();
+
+        SpatialNode* GetSpatialNode();
 
         MapNode* GetMapNode();
 

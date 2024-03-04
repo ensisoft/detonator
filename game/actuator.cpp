@@ -385,6 +385,8 @@ void SetFlagActuator::Start(EntityNode& node)
     const auto* draw = node.GetDrawable();
     const auto* body = node.GetRigidBody();
     const auto* text = node.GetTextItem();
+    const auto* spatial = node.GetSpatialNode();
+    const auto* transformer= node.GetTransformer();
 
     using FlagName = SetFlagActuatorClass::FlagName;
     const auto flag = mClass->GetFlagName();
@@ -399,6 +401,14 @@ void SetFlagActuator::Start(EntityNode& node)
         mStartState = draw->TestFlag(DrawableItem::Flags::RestartDrawable);
     else if (flag == FlagName::Drawable_FlipHorizontally)
         mStartState = draw->TestFlag(DrawableItem::Flags::FlipHorizontally);
+    else if (flag == FlagName::Drawable_FlipVertically)
+        mStartState = draw->TestFlag(DrawableItem::Flags::FlipVertically);
+    else if (flag == FlagName::Drawable_DoubleSided)
+        mStartState = draw->TestFlag(DrawableItem::Flags::DoubleSided);
+    else if (flag == FlagName::Drawable_DepthTest)
+        mStartState = draw->TestFlag(DrawableItem::Flags::DepthTest);
+    else if (flag == FlagName::Drawable_PPEnableBloom)
+        mStartState = draw->TestFlag(DrawableItem::Flags::PP_EnableBloom);
     else if (flag == FlagName::RigidBody_Bullet)
         mStartState = body->TestFlag(RigidBodyItem::Flags::Bullet);
     else if (flag == FlagName::RigidBody_Sensor)
@@ -415,6 +425,12 @@ void SetFlagActuator::Start(EntityNode& node)
         mStartState = text->TestFlag(TextItem::Flags::BlinkText);
     else if (flag == FlagName::TextItem_Underline)
         mStartState = text->TestFlag(TextItem::Flags::UnderlineText);
+    else if (flag == FlagName::TextItem_PPEnableBloom)
+        mStartState = text->TestFlag(TextItem::Flags::PP_EnableBloom);
+    else if (flag == FlagName::SpatialNode_Enabled)
+        mStartState = spatial->TestFlag(SpatialNode::Flags::Enabled);
+    else if (flag == FlagName::Transformer_Enabled)
+        mStartState = transformer->TestFlag(NodeTransformer::Flags::Enabled);
     else BUG("Unhandled flag in set flag actuator.");
 }
 void SetFlagActuator::Apply(EntityNode& node, float t)
@@ -438,6 +454,8 @@ void SetFlagActuator::Finish(EntityNode& node)
     auto* draw = node.GetDrawable();
     auto* body = node.GetRigidBody();
     auto* text = node.GetTextItem();
+    auto* spatial = node.GetSpatialNode();
+    auto* transformer = node.GetTransformer();
 
     using FlagName = SetFlagActuatorClass::FlagName;
     const auto flag = mClass->GetFlagName();
@@ -452,6 +470,14 @@ void SetFlagActuator::Finish(EntityNode& node)
         draw->SetFlag(DrawableItem::Flags::RestartDrawable, next_value);
     else if (flag == FlagName::Drawable_FlipHorizontally)
         draw->SetFlag(DrawableItem::Flags::FlipHorizontally, next_value);
+    else if (flag == FlagName::Drawable_FlipVertically)
+        draw->SetFlag(DrawableItem::Flags::FlipVertically, next_value);
+    else if (flag == FlagName::Drawable_DoubleSided)
+        draw->SetFlag(DrawableItem::Flags::DoubleSided, next_value);
+    else if (flag == FlagName::Drawable_DepthTest)
+        draw->SetFlag(DrawableItem::Flags::DepthTest, next_value);
+    else if (flag == FlagName::Drawable_PPEnableBloom)
+        draw->SetFlag(DrawableItem::Flags::PP_EnableBloom, next_value);
     else if (flag == FlagName::RigidBody_Bullet)
         body->SetFlag(RigidBodyItem::Flags::Bullet, next_value);
     else if (flag == FlagName::RigidBody_Sensor)
@@ -468,6 +494,12 @@ void SetFlagActuator::Finish(EntityNode& node)
         text->SetFlag(TextItem::Flags::BlinkText, next_value);
     else if (flag == FlagName::TextItem_Underline)
         text->SetFlag(TextItem::Flags::UnderlineText, next_value);
+    else if (flag == FlagName::TextItem_PPEnableBloom)
+        text->SetFlag(TextItem::Flags::PP_EnableBloom, next_value);
+    else if (flag == FlagName::SpatialNode_Enabled)
+        spatial->SetFlag(SpatialNode::Flags::Enabled, next_value);
+    else if (flag == FlagName::Transformer_Enabled)
+        transformer->SetFlag(NodeTransformer::Flags::Enabled, next_value);
     else BUG("Unhandled flag in set flag actuator.");
 
     // spams the log
@@ -479,6 +511,8 @@ bool SetFlagActuator::CanApply(EntityNode& node, bool verbose) const
     auto* draw = node.GetDrawable();
     auto* body = node.GetRigidBody();
     auto* text = node.GetTextItem();
+    auto* spatial = node.GetSpatialNode();
+    auto* transformer = node.GetTransformer();
 
     using FlagName = SetFlagActuatorClass::FlagName;
     const auto flag = mClass->GetFlagName();
@@ -487,12 +521,16 @@ bool SetFlagActuator::CanApply(EntityNode& node, bool verbose) const
         flag == FlagName::Drawable_UpdateMaterial ||
         flag == FlagName::Drawable_UpdateDrawable ||
         flag == FlagName::Drawable_Restart ||
-        flag == FlagName::Drawable_FlipHorizontally)
+        flag == FlagName::Drawable_FlipHorizontally ||
+        flag == FlagName::Drawable_FlipVertically ||
+        flag == FlagName::Drawable_DoubleSided ||
+        flag == FlagName::Drawable_DepthTest ||
+        flag == FlagName::Drawable_PPEnableBloom)
     {
         if (!draw && verbose)
         {
-            WARN("EntityNode '%1' doesn't have a drawable item.", node.GetName());
-            WARN("Setting a drawable flag '%1' will have no effect.", flag);
+            WARN("Can't apply a drawable flag on a node without drawable item. [actuator='%1', node='%2', flag=%3]",
+                 mClass->GetName(), node.GetName(), flag);
         }
         return draw != nullptr;
     }
@@ -504,21 +542,39 @@ bool SetFlagActuator::CanApply(EntityNode& node, bool verbose) const
     {
         if (!body && verbose)
         {
-            WARN("EntityNode '%1' doesn't have a rigid body.", node.GetName());
-            WARN("Setting a rigid body flag '%1' will have no effect.", flag);
+            WARN("Can't apply a rigid body flag on a node without a rigid body. [actuator='%1', node='%2', flag=%3]",
+                 mClass->GetName(), node.GetName(), flag);
         }
         return body != nullptr;
     }
     else if (flag == FlagName::TextItem_VisibleInGame ||
              flag == FlagName::TextItem_Underline ||
-             flag == FlagName::TextItem_Blink)
+             flag == FlagName::TextItem_Blink ||
+             flag == FlagName::TextItem_PPEnableBloom)
     {
         if (!text && verbose)
         {
-            WARN("EntityNode '%1' doesn't have a text item.", node.GetName());
-            WARN("Setting a text item flag '%1' will have no effect.", flag);
+            WARN("Can't apply a text item flag on a node without a text item. [actuator='%1', node='%2', flag=%3]",
+                 mClass->GetName(), node.GetName(), flag);
         }
         return text != nullptr;
+    }
+    else if (flag == FlagName::SpatialNode_Enabled)
+    {
+        if (!spatial && verbose)
+        {
+            WARN("Can't apply a spatial node flag on a node without a spatial item. [actuator='%1', node='%2', flag=%3]",
+                 mClass->GetName(), node.GetName(), flag);
+        }
+        return spatial != nullptr;
+    }
+    else if (flag == FlagName::Transformer_Enabled)
+    {
+        if (!transformer && verbose)
+        {
+            WARN("Can't apply a node transformer flag on a node without a transformer. [actuator='%1', node='%2', flag=%3]",
+                 mClass->GetName(), node.GetName(), flag);
+        }
     }
     else BUG("Unhandled flag in set flag actuator.");
     return true;
