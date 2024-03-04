@@ -101,12 +101,8 @@ function Update(game_time, dt)
 
     local ui = Game:GetTopUI()
 
-    if true then
-        return
-    end
-
-    local coins = ui:FindWidgetByName('coins')
-    coins:SetText('x' .. tostring(player.coins))
+    --    local coins = ui:FindWidgetByName('coins')
+    --    coins:SetText('x' .. tostring(player.coins))
 
     local node = player:FindNodeByClassName('Body')
     local pos = node:GetTranslation()
