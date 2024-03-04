@@ -283,13 +283,13 @@ namespace game
     public:
         // Enumeration of support node parameters that can be changed.
         enum class ParamName {
-            DrawableTimeScale,
-            LinearVelocityX,
-            LinearVelocityY,
-            LinearVelocity,
-            AngularVelocity,
-            TextItemText,
-            TextItemColor
+            Drawable_TimeScale,
+            RigidBody_LinearVelocityX,
+            RigidBody_LinearVelocityY,
+            RigidBody_LinearVelocity,
+            RigidBody_AngularVelocity,
+            TextItem_Text,
+            TextItem_Color
         };
 
         using ParamValue = std::variant<float,
@@ -326,7 +326,7 @@ namespace game
         // the interpolation method to be used.
         Interpolation mInterpolation = Interpolation::Linear;
         // which parameter to adjust
-        ParamName mParamName = ParamName::DrawableTimeScale;
+        ParamName mParamName = ParamName::Drawable_TimeScale;
         // the end value
         ParamValue mEndValue;
     };

@@ -259,7 +259,7 @@ void unit_test_setval_actuator()
     klass.SetStartTime(0.1f);
     klass.SetDuration(0.5f);
     klass.SetInterpolation(game::SetValueActuatorClass::Interpolation::Cosine);
-    klass.SetParamName(game::SetValueActuatorClass::ParamName::LinearVelocity);
+    klass.SetParamName(game::SetValueActuatorClass::ParamName::RigidBody_LinearVelocity);
     klass.SetEndValue(glm::vec2(2.0f, -3.0f));
 
     // serialize.
@@ -273,7 +273,7 @@ void unit_test_setval_actuator()
         TEST_REQUIRE(copy.GetNodeId()        == "1234");
         TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()      == real::float32(0.5f));
-        TEST_REQUIRE(copy.GetParamName() == game::SetValueActuatorClass::ParamName::LinearVelocity);
+        TEST_REQUIRE(copy.GetParamName() == game::SetValueActuatorClass::ParamName::RigidBody_LinearVelocity);
         TEST_REQUIRE(*copy.GetEndValue<glm::vec2>() == glm::vec2(2.0f, -3.0f));
         TEST_REQUIRE(copy.GetId() == klass.GetId());
         TEST_REQUIRE(copy.GetHash() == klass.GetHash());
@@ -287,7 +287,7 @@ void unit_test_setval_actuator()
         TEST_REQUIRE(copy.GetNodeId()        == "1234");
         TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()      == real::float32(0.5f));
-        TEST_REQUIRE(copy.GetParamName() == game::SetValueActuatorClass::ParamName::LinearVelocity);
+        TEST_REQUIRE(copy.GetParamName() == game::SetValueActuatorClass::ParamName::RigidBody_LinearVelocity);
         TEST_REQUIRE(*copy.GetEndValue<glm::vec2>() == glm::vec2(2.0f, -3.0f));
         TEST_REQUIRE(copy.GetId() == klass.GetId());
         TEST_REQUIRE(copy.GetHash() == klass.GetHash());
@@ -325,11 +325,11 @@ void unit_test_setval_actuator()
 
         game::EntityNode node(node_klass);
 
-        apply_value(game::SetValueActuatorClass::ParamName::DrawableTimeScale, 2.0f, node);
-        apply_value(game::SetValueActuatorClass::ParamName::LinearVelocity, glm::vec2(-1.0f, -1.0f), node);
-        apply_value(game::SetValueActuatorClass::ParamName::AngularVelocity, 4.0f, node);
-        apply_value(game::SetValueActuatorClass::ParamName::TextItemText, std::string("hello"), node);
-        apply_value(game::SetValueActuatorClass::ParamName::TextItemColor, game::Color::Blue, node);
+        apply_value(game::SetValueActuatorClass::ParamName::Drawable_TimeScale, 2.0f, node);
+        apply_value(game::SetValueActuatorClass::ParamName::RigidBody_LinearVelocity, glm::vec2(-1.0f, -1.0f), node);
+        apply_value(game::SetValueActuatorClass::ParamName::RigidBody_AngularVelocity, 4.0f, node);
+        apply_value(game::SetValueActuatorClass::ParamName::TextItem_Text, std::string("hello"), node);
+        apply_value(game::SetValueActuatorClass::ParamName::TextItem_Color, game::Color::Blue, node);
 
         const auto* draw = node.GetDrawable();
         const auto* body = node.GetRigidBody();
