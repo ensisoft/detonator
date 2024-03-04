@@ -1409,13 +1409,22 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
     float hi_bound = 1.0f;
     for (size_t i = 0; i < mState.track->GetNumActuators(); ++i)
     {
-        const auto& klass = mState.track->GetActuatorClass(i);
-        if (klass.GetId() == actuator->GetId())
+        const auto& other = mState.track->GetActuatorClass(i);
+        if (other.GetId() == actuator->GetId())
             continue;
-        else if (klass.GetNodeId() != actuator->GetNodeId())
+        else if (other.GetNodeId() != actuator->GetNodeId())
             continue;
-        const auto start = klass.GetStartTime();
-        const auto end = klass.GetStartTime() + klass.GetDuration();
+
+        // if the actuators are not on the same timeline then discard
+        // from this check
+        ASSERT(base::Contains(mState.actuator_to_timeline, actuator->GetId()));
+        ASSERT(base::Contains(mState.actuator_to_timeline, other.GetId()));
+        if (mState.actuator_to_timeline[actuator->GetId()] !=
+            mState.actuator_to_timeline[other.GetId()])
+            continue;
+
+        const auto start = other.GetStartTime();
+        const auto end = other.GetStartTime() + other.GetDuration();
         if (start >= actuator->GetStartTime())
             hi_bound = std::min(hi_bound, start);
         if (end <= actuator->GetStartTime())
