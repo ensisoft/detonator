@@ -507,13 +507,16 @@ void AnimationTrackWidget::Update(double secs)
     mUI.timeline->SetCurrentTime(mAnimationTime);
     mUI.timeline->Update();
     mUI.timeline->SetFreezeItems(false);
-    mUI.actionPlay->setEnabled(true);
-    mUI.actionPause->setEnabled(false);
-    mUI.actionStop->setEnabled(false);
-    mUI.actionReset->setEnabled(true);
-    mUI.actuatorGroup->setEnabled(true);
-    mUI.baseGroup->setEnabled(true);
+
+    SetEnabled(mUI.actionPlay,    true);
+    SetEnabled(mUI.actionPause,   false);
+    SetEnabled(mUI.actionStop,    false);
+    SetEnabled(mUI.actionReset,   true);
+    SetEnabled(mUI.actuatorGroup, true);
+    SetEnabled(mUI.baseGroup,     true);
+
     mPlayState = PlayState::Stopped;
+    mPlaybackAnimation.reset();
     ReturnToDefault();
     SelectedItemChanged(mUI.timeline->GetSelectedItem());
     NOTE("Animation finished.");
@@ -625,7 +628,7 @@ void AnimationTrackWidget::on_actionPlay_triggered()
     if (mPlayState == PlayState::Paused)
     {
         mPlayState = PlayState::Playing;
-        mUI.actionPause->setEnabled(true);
+        SetEnabled(mUI.actionPause, true);
         return;
     }
 
@@ -649,12 +652,13 @@ void AnimationTrackWidget::on_actionPlay_triggered()
     mPlayState = PlayState::Playing;
     mAnimationTime = 0.0f;
 
-    mUI.actionPlay->setEnabled(false);
-    mUI.actionPause->setEnabled(true);
-    mUI.actionStop->setEnabled(true);
-    mUI.actionReset->setEnabled(false);
-    mUI.actuatorGroup->setEnabled(false);
-    mUI.baseGroup->setEnabled(false);
+    SetEnabled(mUI.actionPlay,    false);
+    SetEnabled(mUI.actionPause,   true);
+    SetEnabled(mUI.actionStop,    true);
+    SetEnabled(mUI.actionReset,   false);
+    SetEnabled(mUI.actuatorGroup, false);
+    SetEnabled(mUI.baseGroup,     false);
+
     mUI.timeline->SetFreezeItems(true);
     mUI.timeline->SetCurrentTime(0.0f);
     mUI.timeline->Repaint();
@@ -663,23 +667,24 @@ void AnimationTrackWidget::on_actionPlay_triggered()
 void AnimationTrackWidget::on_actionPause_triggered()
 {
     mPlayState = PlayState::Paused;
-    mUI.actionPlay->setEnabled(true);
-    mUI.actionPause->setEnabled(false);
-    mUI.actionStop->setEnabled(true);
+    SetEnabled(mUI.actionPlay, true);
+    SetEnabled(mUI.actionPlay, false);
+    SetEnabled(mUI.actionStop, true);
 }
 
 void AnimationTrackWidget::on_actionStop_triggered()
 {
     mPlayState = PlayState::Stopped;
-    mUI.actionPlay->setEnabled(true);
-    mUI.actionPause->setEnabled(false);
-    mUI.actionStop->setEnabled(false);
-    mUI.actionReset->setEnabled(true);
+    SetEnabled(mUI.actionPlay,  true);
+    SetEnabled(mUI.actionPause, false);
+    SetEnabled(mUI.actionStop,  false);
+    SetEnabled(mUI.actionReset, true);
+    SetEnabled(mUI.actuatorGroup, true);
+    SetEnabled(mUI.baseGroup,     true);
+
     mUI.timeline->SetFreezeItems(false);
     mUI.timeline->SetCurrentTime(0.0f);
     mUI.timeline->Update();
-    mUI.actuatorGroup->setEnabled(true);
-    mUI.baseGroup->setEnabled(true);
     mPlaybackAnimation.reset();
 }
 
