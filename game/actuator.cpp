@@ -668,7 +668,14 @@ void SetValueActuator::Apply(EntityNode& node, float t)
     else if (param == ParamName::TextItem_Color)
         text->SetTextColor(Interpolate<Color4f>(t));
     else if (param == ParamName::TextItem_Text) {
-        // intentionally empty, can't interpolate
+        if (method == math::Interpolation::StepStart)
+            text->SetText(std::get<std::string>(mClass->GetEndValue()));
+        else if (method == math::Interpolation::Step && t >= 0.5f)
+            text->SetText(std::get<std::string>(mClass->GetEndValue()));
+        else if (method == math::Interpolation::StepEnd && t >= 1.0f)
+            text->SetText(std::get<std::string>(mClass->GetEndValue()));
+        else if (t >= 1.0f)
+            text->SetText(std::get<std::string>(mClass->GetEndValue()));
     } else BUG("Unhandled value actuator param type.");
 }
 
@@ -745,6 +752,19 @@ bool SetValueActuator::CanApply(EntityNode& node, bool verbose) const
             WARN("Can't set a text item value on a node without a text item. [actuator='%1', node='%2', value=%3]",
                  mClass->GetName(), node.GetName(), param);
         }
+        if (text)
+        {
+            const auto interpolation = mClass->GetInterpolation();
+            const auto step_change = interpolation == math::Interpolation::Step ||
+                                     interpolation == math::Interpolation::StepEnd ||
+                                     interpolation == math::Interpolation::StepStart;
+            if (!step_change && verbose)
+            {
+                WARN("Can't apply interpolation on text. [actuator='%1', node='%2', interpolation=%3]",
+                     mClass->GetName(), node.GetName(), interpolation);
+            }
+        }
+
         return text != nullptr;
     } else BUG("Unhandled value actuator param type.");
     return false;
