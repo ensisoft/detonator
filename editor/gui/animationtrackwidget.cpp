@@ -1202,7 +1202,7 @@ void AnimationTrackWidget::SetActuatorUIDefaults()
     SetValue(mUI.transformEndScaleY, 0.0f);
     SetValue(mUI.transformEndRotation, 0.0f);
     SetValue(mUI.setvalInterpolation, game::SetValueActuatorClass::Interpolation::Cosine);
-    SetValue(mUI.setvalName, game::SetValueActuatorClass::ParamName::DrawableTimeScale);
+    SetValue(mUI.setvalName, game::SetValueActuatorClass::ParamName::Drawable_TimeScale);
     SetValue(mUI.setvalEndValue, 0.0f);
     SetValue(mUI.kinematicTarget, game::KinematicActuatorClass::Target::RigidBody);
     SetValue(mUI.kinematicInterpolation, game::KinematicActuatorClass::Interpolation::Cosine);
@@ -1253,37 +1253,37 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
     {
         using Name = game::SetValueActuatorClass::ParamName;
         const auto name = (Name)GetValue(mUI.setvalName);
-        if (name == Name::DrawableTimeScale)
+        if (name == Name::Drawable_TimeScale)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::Float);
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
-        else if (name == Name::LinearVelocityX)
+        else if (name == Name::RigidBody_LinearVelocityX)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::Float);
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
-        else if (name == Name::LinearVelocityY)
+        else if (name == Name::RigidBody_LinearVelocityY)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::Float);
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
-        else if (name == Name::AngularVelocity)
+        else if (name == Name::RigidBody_AngularVelocity)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::Float);
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
-        else if (name == Name::LinearVelocity)
+        else if (name == Name::RigidBody_LinearVelocity)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::Vec2);
             setter->SetEndValue(mUI.setvalEndValue->GetAsVec2());
         }
-        else if (name == Name::TextItemText)
+        else if (name == Name::TextItem_Text)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::String);
             setter->SetEndValue(app::ToUtf8(mUI.setvalEndValue->GetAsString()));
         }
-        else if (name == Name::TextItemColor)
+        else if (name == Name::TextItem_Color)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::Color);
             setter->SetEndValue(ToGfx(mUI.setvalEndValue->GetAsColor()));
@@ -1480,19 +1480,19 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
     {
         const auto name = ptr->GetParamName();
         using Name = game::SetValueActuatorClass::ParamName;
-        if (name == Name::DrawableTimeScale)
+        if (name == Name::Drawable_TimeScale)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
-        else if (name == Name::LinearVelocity)
+        else if (name == Name::RigidBody_LinearVelocity)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<glm::vec2>());
-        else if (name == Name::LinearVelocityX)
+        else if (name == Name::RigidBody_LinearVelocityX)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
-        else if (name == Name::LinearVelocityY)
+        else if (name == Name::RigidBody_LinearVelocityY)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
-        else if (name == Name::AngularVelocity)
+        else if (name == Name::RigidBody_AngularVelocity)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
-        else if (name == Name::TextItemColor)
+        else if (name == Name::TextItem_Color)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<base::Color4f>());
-        else if (name == Name::TextItemText)
+        else if (name == Name::TextItem_Text)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<std::string>());
         else BUG("Unhandled set value actuator value type.");
 
@@ -1909,19 +1909,19 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::ActuatorClass::Type typ
         klass.SetDuration(node_duration);
         klass.SetParamName(GetValue(mUI.setvalName));
         klass.SetInterpolation(GetValue(mUI.setvalInterpolation));
-        if (value == ValName::DrawableTimeScale)
+        if (value == ValName::Drawable_TimeScale)
             klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::LinearVelocityX)
+        else if (value == ValName::RigidBody_LinearVelocityX)
             klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::LinearVelocityY)
+        else if (value == ValName::RigidBody_LinearVelocityY)
             klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::AngularVelocity)
+        else if (value == ValName::RigidBody_AngularVelocity)
             klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
-        else if (value == ValName::LinearVelocity)
+        else if (value == ValName::RigidBody_LinearVelocity)
             klass.SetEndValue(mUI.setvalEndValue->GetAsVec2());
-        else if (value == ValName::TextItemText)
+        else if (value == ValName::TextItem_Text)
             klass.SetEndValue(app::ToUtf8(mUI.setvalEndValue->GetAsString()));
-        else if (value == ValName::TextItemColor)
+        else if (value == ValName::TextItem_Color)
             klass.SetEndValue(ToGfx(mUI.setvalEndValue->GetAsColor()));
         else BUG("Unhandled value actuator value type.");
         actuator = app::FromUtf8(klass.GetId());

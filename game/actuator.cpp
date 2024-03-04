@@ -616,19 +616,19 @@ void SetValueActuator::Start(EntityNode& node)
     const auto* body = node.GetRigidBody();
     const auto* text = node.GetTextItem();
 
-    if (param == ParamName::DrawableTimeScale)
+    if (param == ParamName::Drawable_TimeScale)
         mStartValue = draw->GetTimeScale();
-    else if (param == ParamName::AngularVelocity)
+    else if (param == ParamName::RigidBody_AngularVelocity)
         mStartValue = body->GetAngularVelocity();
-    else if (param == ParamName::LinearVelocityX)
+    else if (param == ParamName::RigidBody_LinearVelocityX)
         mStartValue = body->GetLinearVelocity().x;
-    else if (param == ParamName::LinearVelocityY)
+    else if (param == ParamName::RigidBody_LinearVelocityY)
         mStartValue = body->GetLinearVelocity().y;
-    else if (param == ParamName::LinearVelocity)
+    else if (param == ParamName::RigidBody_LinearVelocity)
         mStartValue = body->GetLinearVelocity();
-    else if (param == ParamName::TextItemText)
+    else if (param == ParamName::TextItem_Text)
         mStartValue = text->GetText();
-    else if (param == ParamName::TextItemColor)
+    else if (param == ParamName::TextItem_Color)
         mStartValue = text->GetTextColor();
     else BUG("Unhandled node item value.");
 }
@@ -647,27 +647,27 @@ void SetValueActuator::Apply(EntityNode& node, float t)
     auto* body = node.GetRigidBody();
     auto* text = node.GetTextItem();
 
-    if (param == ParamName::DrawableTimeScale)
+    if (param == ParamName::Drawable_TimeScale)
         draw->SetTimeScale(Interpolate<float>(t));
-    else if (param == ParamName::AngularVelocity)
+    else if (param == ParamName::RigidBody_AngularVelocity)
         body->AdjustAngularVelocity(Interpolate<float>(t));
-    else if (param == ParamName::LinearVelocityX)
+    else if (param == ParamName::RigidBody_LinearVelocityX)
     {
         auto velocity = body->GetLinearVelocity();
         velocity.x = Interpolate<float>(t);
         body->AdjustLinearVelocity(velocity);
     }
-    else if (param == ParamName::LinearVelocityY)
+    else if (param == ParamName::RigidBody_LinearVelocityY)
     {
         auto velocity = body->GetLinearVelocity();
         velocity.y = Interpolate<float>(t);
         body->AdjustLinearVelocity(velocity);
     }
-    else if (param == ParamName::LinearVelocity)
+    else if (param == ParamName::RigidBody_LinearVelocity)
         body->AdjustLinearVelocity(Interpolate<glm::vec2>(t));
-    else if (param == ParamName::TextItemColor)
+    else if (param == ParamName::TextItem_Color)
         text->SetTextColor(Interpolate<Color4f>(t));
-    else if (param == ParamName::TextItemText) {
+    else if (param == ParamName::TextItem_Text) {
         // intentionally empty, can't interpolate
     } else BUG("Unhandled value actuator param type.");
 }
@@ -684,27 +684,27 @@ void SetValueActuator::Finish(EntityNode& node)
     const auto param = mClass->GetParamName();
     const auto end   = mClass->GetEndValue();
 
-    if (param == ParamName::DrawableTimeScale)
+    if (param == ParamName::Drawable_TimeScale)
         draw->SetTimeScale(std::get<float>(end));
-    else if (param == ParamName::AngularVelocity)
+    else if (param == ParamName::RigidBody_AngularVelocity)
         body->AdjustAngularVelocity(std::get<float>(end));
-    else if (param == ParamName::LinearVelocityX)
+    else if (param == ParamName::RigidBody_LinearVelocityX)
     {
         auto velocity = body->GetLinearVelocity();
         velocity.x = std::get<float>(end);
         body->AdjustLinearVelocity(velocity);
     }
-    else if (param == ParamName::LinearVelocityY)
+    else if (param == ParamName::RigidBody_LinearVelocityY)
     {
         auto velocity = body->GetLinearVelocity();
         velocity.y = std::get<float>(end);
         body->AdjustLinearVelocity(velocity);
     }
-    else if (param == ParamName::LinearVelocity)
+    else if (param == ParamName::RigidBody_LinearVelocity)
         body->AdjustLinearVelocity(std::get<glm::vec2>(end));
-    else if (param == ParamName::TextItemColor)
+    else if (param == ParamName::TextItem_Color)
         text->SetTextColor(std::get<Color4f>(end));
-    else if (param == ParamName::TextItemText) {
+    else if (param == ParamName::TextItem_Text) {
         text->SetText(std::get<std::string>(mClass->GetEndValue()));
     } else BUG("Unhandled value actuator param type.");
 }
@@ -716,34 +716,34 @@ bool SetValueActuator::CanApply(EntityNode& node, bool verbose) const
     const auto* body = node.GetRigidBody();
     const auto* text = node.GetTextItem();
 
-    if ((param == ParamName::DrawableTimeScale))
+    if ((param == ParamName::Drawable_TimeScale))
     {
         if (!draw && verbose)
         {
-            WARN("EntityNode '%1' doesn't have a drawable item.", node.GetName());
-            WARN("Setting drawable item value '%1' will have no effect.", param);
+            WARN("Can't set a drawable value on a node without a drawable item. [actuator='%1', node='%2', value=%3]",
+                 mClass->GetName(), node.GetName(), param);
         }
         return draw != nullptr;
     }
-    else if ((param == ParamName::LinearVelocityY ||
-              param == ParamName::LinearVelocityX ||
-              param == ParamName::LinearVelocity  ||
-              param == ParamName::AngularVelocity))
+    else if ((param == ParamName::RigidBody_LinearVelocityY ||
+              param == ParamName::RigidBody_LinearVelocityX ||
+              param == ParamName::RigidBody_LinearVelocity  ||
+              param == ParamName::RigidBody_AngularVelocity))
     {
         if (!body && verbose)
         {
-            WARN("EntityNode '%1' doesn't have a rigid body.", node.GetName());
-            WARN("Setting rigid body value '%1' will have no effect.", param);
+            WARN("Can't set a rigid body value on a node without a rigid body. [actuator='%1', node='%2', value=%3]",
+                 mClass->GetName(), node.GetName(), param);
         }
         return body != nullptr;
     }
-    else if ((param == ParamName::TextItemText ||
-              param == ParamName::TextItemColor))
+    else if ((param == ParamName::TextItem_Text ||
+              param == ParamName::TextItem_Color))
     {
         if (!text && verbose)
         {
-            WARN("EntityNode '%1' doesn't have a text item.", node.GetName());
-            WARN("Setting text item value '%1' will have no effect.", param);
+            WARN("Can't set a text item value on a node without a text item. [actuator='%1', node='%2', value=%3]",
+                 mClass->GetName(), node.GetName(), param);
         }
         return text != nullptr;
     } else BUG("Unhandled value actuator param type.");
