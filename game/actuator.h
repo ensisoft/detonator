@@ -209,13 +209,18 @@ namespace game
         { return mFlagAction; }
         inline FlagName GetFlagName() const noexcept
         { return mFlagName; }
+        inline float GetTime() const noexcept
+        { return mTime; }
         inline void SetFlagName(const FlagName name) noexcept
         { mFlagName = name; }
         inline void SetFlagAction(FlagAction action) noexcept
         { mFlagAction = action; }
+        inline void SetTime(float time) noexcept
+        { mTime = math::clamp(0.0f, 1.0f, time); }
     private:
         FlagAction mFlagAction = FlagAction::Off;
         FlagName   mFlagName   = FlagName::Drawable_FlipHorizontally;
+        float      mTime       = 1.0f;
     };
 
     // Modify the kinematic physics body properties, i.e.
@@ -562,14 +567,17 @@ namespace game
     public:
         using FlagAction = SetFlagActuatorClass::FlagAction;
 
-        SetFlagActuator(const std::shared_ptr<const SetFlagActuatorClass>& klass)
-            : mClass(klass)
+        explicit SetFlagActuator(std::shared_ptr<const SetFlagActuatorClass> klass) noexcept
+            : mClass(std::move(klass))
+            , mTime(mClass->GetTime())
         {}
-        SetFlagActuator(const SetFlagActuatorClass& klass)
+        explicit SetFlagActuator(const SetFlagActuatorClass& klass)
             : mClass(std::make_shared<SetFlagActuatorClass>(klass))
+            , mTime(mClass->GetTime())
         {}
-        SetFlagActuator(SetFlagActuatorClass&& klass)
+        explicit SetFlagActuator(SetFlagActuatorClass&& klass) noexcept
             : mClass(std::make_shared<SetFlagActuatorClass>(std::move(klass)))
+            , mTime(mClass->GetTime())
         {}
         virtual void Start(EntityNode& node) override;
         virtual void Apply(EntityNode& node, float t) override;
@@ -588,10 +596,13 @@ namespace game
         { return std::make_unique<SetFlagActuator>(*this); }
         virtual Type GetType() const override
         { return Type::SetFlag; }
+
         bool CanApply(EntityNode& node, bool verbose) const;
+        void SetFlag(EntityNode& node) const;
     private:
         std::shared_ptr<const SetFlagActuatorClass> mClass;
         bool mStartState = false;
+        float mTime = 0.0f;
     };
 
     // Modify node parameter over time.

@@ -45,6 +45,7 @@ std::size_t SetFlagActuatorClass::GetHash() const
     hash = base::hash_combine(hash, mDuration);
     hash = base::hash_combine(hash, mFlagAction);
     hash = base::hash_combine(hash, mFlags);
+    hash = base::hash_combine(hash, mTime);
     return hash;
 }
 
@@ -58,6 +59,7 @@ void SetFlagActuatorClass::IntoJson(data::Writer& data) const
     data.Write("duration",  mDuration);
     data.Write("action",    mFlagAction);
     data.Write("flags",     mFlags);
+    data.Write("time",      mTime);
 }
 
 bool SetFlagActuatorClass::FromJson(const data::Reader& data)
@@ -71,6 +73,7 @@ bool SetFlagActuatorClass::FromJson(const data::Reader& data)
     ok &= data.Read("duration",  &mDuration);
     ok &= data.Read("action",    &mFlagAction);
     ok &= data.Read("flags",     &mFlags);
+    ok &= data.Read("time",      &mTime);
     return ok;
 }
 
@@ -432,13 +435,36 @@ void SetFlagActuator::Start(EntityNode& node)
     else if (flag == FlagName::Transformer_Enabled)
         mStartState = transformer->TestFlag(NodeTransformer::Flags::Enabled);
     else BUG("Unhandled flag in set flag actuator.");
+
+    if (mTime == 0.0f)
+    {
+        SetFlag(node);
+        mTime = -1.0f;
+    }
+
 }
 void SetFlagActuator::Apply(EntityNode& node, float t)
 {
-    // no op.
+    if (t >= mTime && mTime != -1.0f)
+    {
+        SetFlag(node);
+        mTime = -1.0f;
+    }
 }
 void SetFlagActuator::Finish(EntityNode& node)
 {
+    if (mTime == 1.0f)
+    {
+        SetFlag(node);
+        mTime = -1.0f;
+    }
+}
+
+void SetFlagActuator::SetFlag(EntityNode& node) const
+{
+    if (mTime == -1)
+        return;
+
     if (!CanApply(node, false))
         return;
 
