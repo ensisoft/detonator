@@ -555,7 +555,7 @@ bool SetFlagActuator::CanApply(EntityNode& node, bool verbose) const
     {
         if (!draw && verbose)
         {
-            WARN("Can't apply a drawable flag on a node without drawable item. [actuator='%1', node='%2', flag=%3]",
+            WARN("Flag actuator can't apply a drawable flag on a node without drawable item. [actuator='%1', node='%2', flag=%3]",
                  mClass->GetName(), node.GetName(), flag);
         }
         return draw != nullptr;
@@ -568,7 +568,7 @@ bool SetFlagActuator::CanApply(EntityNode& node, bool verbose) const
     {
         if (!body && verbose)
         {
-            WARN("Can't apply a rigid body flag on a node without a rigid body. [actuator='%1', node='%2', flag=%3]",
+            WARN("Flag actuator can't apply a rigid body flag on a node without a rigid body. [actuator='%1', node='%2', flag=%3]",
                  mClass->GetName(), node.GetName(), flag);
         }
         return body != nullptr;
@@ -580,7 +580,7 @@ bool SetFlagActuator::CanApply(EntityNode& node, bool verbose) const
     {
         if (!text && verbose)
         {
-            WARN("Can't apply a text item flag on a node without a text item. [actuator='%1', node='%2', flag=%3]",
+            WARN("Flag actuator can't apply a text item flag on a node without a text item. [actuator='%1', node='%2', flag=%3]",
                  mClass->GetName(), node.GetName(), flag);
         }
         return text != nullptr;
@@ -589,7 +589,7 @@ bool SetFlagActuator::CanApply(EntityNode& node, bool verbose) const
     {
         if (!spatial && verbose)
         {
-            WARN("Can't apply a spatial node flag on a node without a spatial item. [actuator='%1', node='%2', flag=%3]",
+            WARN("Flag actuator can't apply a spatial node flag on a node without a spatial item. [actuator='%1', node='%2', flag=%3]",
                  mClass->GetName(), node.GetName(), flag);
         }
         return spatial != nullptr;
@@ -598,7 +598,7 @@ bool SetFlagActuator::CanApply(EntityNode& node, bool verbose) const
     {
         if (!transformer && verbose)
         {
-            WARN("Can't apply a node transformer flag on a node without a transformer. [actuator='%1', node='%2', flag=%3]",
+            WARN("Flag actuator can't apply a node transformer flag on a node without a transformer. [actuator='%1', node='%2', flag=%3]",
                  mClass->GetName(), node.GetName(), flag);
         }
     }
@@ -727,7 +727,7 @@ bool SetValueActuator::CanApply(EntityNode& node, bool verbose) const
     {
         if (!draw && verbose)
         {
-            WARN("Can't set a drawable value on a node without a drawable item. [actuator='%1', node='%2', value=%3]",
+            WARN("Value actuator can't set a drawable value on a node without a drawable item. [actuator='%1', node='%2', value=%3]",
                  mClass->GetName(), node.GetName(), param);
         }
         return draw != nullptr;
@@ -739,7 +739,7 @@ bool SetValueActuator::CanApply(EntityNode& node, bool verbose) const
     {
         if (!body && verbose)
         {
-            WARN("Can't set a rigid body value on a node without a rigid body. [actuator='%1', node='%2', value=%3]",
+            WARN("Value actuator can't set a rigid body value on a node without a rigid body. [actuator='%1', node='%2', value=%3]",
                  mClass->GetName(), node.GetName(), param);
         }
         return body != nullptr;
@@ -749,7 +749,7 @@ bool SetValueActuator::CanApply(EntityNode& node, bool verbose) const
     {
         if (!text && verbose)
         {
-            WARN("Can't set a text item value on a node without a text item. [actuator='%1', node='%2', value=%3]",
+            WARN("Value actuator can't set a text item value on a node without a text item. [actuator='%1', node='%2', value=%3]",
                  mClass->GetName(), node.GetName(), param);
         }
         if (text)
@@ -760,7 +760,7 @@ bool SetValueActuator::CanApply(EntityNode& node, bool verbose) const
                                      interpolation == math::Interpolation::StepStart;
             if (!step_change && verbose)
             {
-                WARN("Can't apply interpolation on text. [actuator='%1', node='%2', interpolation=%3]",
+                WARN("Value actuator can't apply interpolation on text. [actuator='%1', node='%2', interpolation=%3]",
                      mClass->GetName(), node.GetName(), interpolation);
             }
         }
