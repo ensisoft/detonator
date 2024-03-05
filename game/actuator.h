@@ -289,7 +289,15 @@ namespace game
             RigidBody_LinearVelocity,
             RigidBody_AngularVelocity,
             TextItem_Text,
-            TextItem_Color
+            TextItem_Color,
+            Transformer_LinearVelocity,
+            Transformer_LinearVelocityX,
+            Transformer_LinearVelocityY,
+            Transformer_LinearAcceleration,
+            Transformer_LinearAccelerationX,
+            Transformer_LinearAccelerationY,
+            Transformer_AngularVelocity,
+            Transformer_AngularAcceleration
         };
 
         using ParamValue = std::variant<float,
