@@ -1278,6 +1278,46 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
             mUI.setvalEndValue->SetType(Uniform::Type::Vec2);
             setter->SetEndValue(mUI.setvalEndValue->GetAsVec2());
         }
+        else if (name == Name::Transformer_LinearVelocity)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Vec2);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsVec2());
+        }
+        else if (name == Name::Transformer_LinearVelocityX)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::Transformer_LinearVelocityY)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::Transformer_LinearAcceleration)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Vec2);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsVec2());
+        }
+        else if (name == Name::Transformer_LinearAccelerationX)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::Transformer_LinearAccelerationY)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::Transformer_AngularVelocity)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::Transformer_AngularAcceleration)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
         else if (name == Name::TextItem_Text)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::String);
@@ -1489,6 +1529,22 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         else if (name == Name::RigidBody_LinearVelocityY)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
         else if (name == Name::RigidBody_AngularVelocity)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::Transformer_LinearVelocity)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<glm::vec2>());
+        else if (name == Name::Transformer_LinearVelocityX)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::Transformer_LinearVelocityY)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::Transformer_LinearAcceleration)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<glm::vec2>());
+        else if (name == Name::Transformer_LinearAccelerationX)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::Transformer_LinearAccelerationY)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::Transformer_AngularVelocity)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::Transformer_AngularAcceleration)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
         else if (name == Name::TextItem_Color)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<base::Color4f>());
