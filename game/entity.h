@@ -1198,7 +1198,7 @@ namespace game
         using Shape = SpatialNodeClass::Shape;
         SpatialNode(std::shared_ptr<const SpatialNodeClass> klass) noexcept
           : mClass(std::move(klass))
-          , mFlags(klass->GetFlags())
+          , mFlags(mClass->GetFlags())
         {}
         inline bool TestFlag(Flags flag) const noexcept
         { return mFlags.test(flag); }
