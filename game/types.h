@@ -37,6 +37,8 @@ namespace game
     using ISize  = base::ISize;
     using Color4f = base::Color4f;
     using Rotator = base::Rotator;
+    using FRadians = base::FRadians;
+    using FDegrees = base::FDegrees;
 
 } // namespace
 
