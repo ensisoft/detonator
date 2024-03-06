@@ -25,10 +25,10 @@
         </sizepolicy>
        </property>
        <property name="minimum">
-        <double>-100.000000000000000</double>
+        <double>-1000.000000000000000</double>
        </property>
        <property name="maximum">
-        <double>100.000000000000000</double>
+        <double>1000.000000000000000</double>
        </property>
        <property name="singleStep">
         <double>0.100000000000000</double>
@@ -47,10 +47,10 @@
         </sizepolicy>
        </property>
        <property name="minimum">
-        <double>-100.000000000000000</double>
+        <double>-1000.000000000000000</double>
        </property>
        <property name="maximum">
-        <double>100.000000000000000</double>
+        <double>1000.000000000000000</double>
        </property>
        <property name="singleStep">
         <double>0.100000000000000</double>
@@ -112,10 +112,10 @@
         </sizepolicy>
        </property>
        <property name="minimum">
-        <double>-100.000000000000000</double>
+        <double>-1000.000000000000000</double>
        </property>
        <property name="maximum">
-        <double>100.000000000000000</double>
+        <double>1000.000000000000000</double>
        </property>
        <property name="singleStep">
         <double>0.100000000000000</double>
@@ -134,10 +134,10 @@
         </sizepolicy>
        </property>
        <property name="minimum">
-        <double>-100.000000000000000</double>
+        <double>-1000.000000000000000</double>
        </property>
        <property name="maximum">
-        <double>100.000000000000000</double>
+        <double>1000.000000000000000</double>
        </property>
        <property name="singleStep">
         <double>0.100000000000000</double>
@@ -170,10 +170,10 @@
      <item row="2" column="5">
       <widget class="QSpinBox" name="value_i">
        <property name="minimum">
-        <number>-100</number>
+        <number>-1000</number>
        </property>
        <property name="maximum">
-        <number>100</number>
+        <number>1000</number>
        </property>
        <property name="stepType">
         <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
