@@ -54,6 +54,7 @@
 #undef ERROR
 #undef INFO
 #undef DEBUG
+#undef VERBOSE
 
 namespace app
 {
@@ -207,3 +208,7 @@ namespace app
 #undef DEBUG
 #define DEBUG(msg, ...) \
     base::WriteLog(base::LogEvent::Debug, __FILE__, __LINE__, app::ToUtf8(app::toString(msg, ## __VA_ARGS__)))
+
+#undef VERBOSE
+#define VERBOSE(msg, ...) \
+    base::WriteLog(base::LogEvent::Verbose, __FILE__, __LINE__, app::ToUtf8(app::toString(msg, ## __VA_ARGS__)))
