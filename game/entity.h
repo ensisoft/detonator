@@ -779,6 +779,7 @@ namespace game
           , mInstanceTimeScale(mClass->GetTimeScale())
           , mInstanceDepth(mClass->GetDepth())
           , mInstanceRotator(mClass->GetRotator())
+          , mInstanceOffset(mClass->GetOffset())
         {
             const auto* params = mClass->GetMaterialParams();
             if (!params->empty())
@@ -811,7 +812,7 @@ namespace game
         Rotator GetRotator() const noexcept
         { return mInstanceRotator; }
         glm::vec3 GetOffset() const noexcept
-        { return mClass->GetOffset(); }
+        { return mInstanceOffset; }
         bool TestFlag(Flags flag) const noexcept
         { return mInstanceFlags.test(flag); }
         bool IsVisible() const noexcept
@@ -830,6 +831,8 @@ namespace game
         { mInstanceDepth = depth; }
         void SetRotator(const Rotator& rotator) noexcept
         { mInstanceRotator = rotator; }
+        void SetOffset(glm::vec3 offset) noexcept
+        { mInstanceOffset = offset; }
 
         // When you set the material ID to another material remember
         // to consider whether you should also
@@ -951,6 +954,7 @@ namespace game
         float mInstanceTimeScale = 1.0f;
         float mInstanceDepth = 1.0f;
         Rotator mInstanceRotator;
+        glm::vec3 mInstanceOffset = {0.0f, 0.0f, 0.0f};
         mutable double mMaterialTime = 0.0f;
         mutable std::optional<double> mTimeAdjustment;
         mutable std::vector<Command> mCommands;
