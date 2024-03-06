@@ -73,20 +73,13 @@ namespace gui
     signals:
         void ValueChanged(const Uniform* uniform);
     private slots:
-        void on_value_x_valueChanged(double)
-        { emit ValueChanged(this); };
-        void on_value_y_valueChanged(double)
-        { emit ValueChanged(this); };
-        void on_value_z_valueChanged(double)
-        { emit ValueChanged(this); };
-        void on_value_w_valueChanged(double)
-        { emit ValueChanged(this); };
-        void on_color_colorChanged(QColor)
-        { emit ValueChanged(this); }
-        void on_string_editingFinished()
-        { emit ValueChanged(this); }
-        void on_value_i_valueChanged(int)
-        { emit ValueChanged(this); }
+        void on_value_x_valueChanged(double);
+        void on_value_y_valueChanged(double);
+        void on_value_z_valueChanged(double);
+        void on_value_w_valueChanged(double);
+        void on_color_colorChanged(QColor);
+        void on_string_editingFinished();
+        void on_value_i_valueChanged(int);
     private:
         Ui::Uniform* mUI = nullptr;
     private:

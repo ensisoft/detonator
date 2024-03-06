@@ -160,4 +160,40 @@ void Uniform::HideEverything()
     mUI->value_i->setVisible(false);
 }
 
+void Uniform::on_value_x_valueChanged(double)
+{
+    emit ValueChanged(this);
+    mUI->value_x->setFocus();
+}
+void Uniform::on_value_y_valueChanged(double)
+{
+    emit ValueChanged(this);
+    mUI->value_y->setFocus();
+}
+void Uniform::on_value_z_valueChanged(double)
+{
+    emit ValueChanged(this);
+    mUI->value_z->setFocus();
+}
+void Uniform::on_value_w_valueChanged(double)
+{
+    emit ValueChanged(this);
+    mUI->value_w->setFocus();
+}
+void Uniform::on_color_colorChanged(QColor)
+{
+    emit ValueChanged(this);
+    mUI->color->setFocus();
+}
+void Uniform::on_string_editingFinished()
+{
+    emit ValueChanged(this);
+    mUI->string->setFocus();
+}
+void Uniform::on_value_i_valueChanged(int)
+{
+    emit ValueChanged(this);
+    mUI->value_i->setFocus();
+}
+
 } // namespace
