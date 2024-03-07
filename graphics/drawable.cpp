@@ -1808,7 +1808,7 @@ bool PolygonMeshClass::FromJson(const data::Reader& reader)
 
         IndexBuffer index_buffer(&data.indices);
         ok &= index_buffer.FromJson(*inline_chunk);
-        mData->index_type = index_buffer.GetType();
+        data.index_type = index_buffer.GetType();
 
         mData = std::move(data);
     }
