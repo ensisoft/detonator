@@ -36,49 +36,67 @@ Uniform::~Uniform()
     delete mUI;
 }
 
-void Uniform::SetType(Type type)
+void Uniform::SetType(Type type, QString suffix)
 {
     HideEverything();
 
     if (type == Type::Float)
     {
-        mUI->value_x->setVisible(true);
+        SetVisible(mUI->value_x, true);
+        SetSuffix(mUI->value_x, suffix);
     }
     else if (type == Type::Int)
     {
-        mUI->value_i->setVisible(true);
+        SetVisible(mUI->value_i, true);
+        SetSuffix(mUI->value_i, suffix);
     }
     else if (type == Type::Vec2)
     {
-        mUI->value_x->setVisible(true);
-        mUI->value_y->setVisible(true);
-        mUI->label_x->setVisible(true);
-        mUI->label_y->setVisible(true);
+        SetVisible(mUI->value_x, true);
+        SetVisible(mUI->value_y, true);
+        SetVisible(mUI->label_x, true);
+        SetVisible(mUI->label_y, true);
+        SetSuffix(mUI->value_x, suffix);
+        SetSuffix(mUI->value_y, suffix);
+
     }
     else if (type == Type::Vec3)
     {
-        mUI->value_x->setVisible(true);
-        mUI->value_y->setVisible(true);
-        mUI->value_z->setVisible(true);
-        mUI->label_x->setVisible(true);
-        mUI->label_y->setVisible(true);
-        mUI->label_z->setVisible(true);
+        SetVisible(mUI->value_x, true);
+        SetVisible(mUI->value_y, true);
+        SetVisible(mUI->value_z, true);
+        SetVisible(mUI->label_x, true);
+        SetVisible(mUI->label_y, true);
+        SetVisible(mUI->label_z, true);
+
+        SetSuffix(mUI->value_x, suffix);
+        SetSuffix(mUI->value_y, suffix);
+        SetSuffix(mUI->value_z, suffix);
     }
     else if (type == Type::Vec4)
     {
-        mUI->value_x->setVisible(true);
-        mUI->value_y->setVisible(true);
-        mUI->value_z->setVisible(true);
-        mUI->value_w->setVisible(true);
-        mUI->label_x->setVisible(true);
-        mUI->label_y->setVisible(true);
-        mUI->label_z->setVisible(true);
-        mUI->label_w->setVisible(true);
+        SetVisible(mUI->value_x, true);
+        SetVisible(mUI->value_y, true);
+        SetVisible(mUI->value_z, true);
+        SetVisible(mUI->value_w, true);
+        SetVisible(mUI->label_x, true);
+        SetVisible(mUI->label_y, true);
+        SetVisible(mUI->label_z, true);
+        SetVisible(mUI->label_w, true);
+
+        SetSuffix(mUI->value_x, suffix);
+        SetSuffix(mUI->value_y, suffix);
+        SetSuffix(mUI->value_z, suffix);
+        SetSuffix(mUI->value_w, suffix);
     }
     else if (type == Type::Color)
-        mUI->color->setVisible(true);
+    {
+        SetVisible(mUI->color, true);
+    }
     else if (type == Type::String)
-        mUI->string->setVisible(true);
+    {
+        SetVisible(mUI->string, true);
+    }
 
     mType = type;
 }
@@ -147,17 +165,17 @@ QString Uniform::GetAsString() const
 
 void Uniform::HideEverything()
 {
-    mUI->label_x->setVisible(false);
-    mUI->label_y->setVisible(false);
-    mUI->label_z->setVisible(false);
-    mUI->label_w->setVisible(false);
-    mUI->value_x->setVisible(false);
-    mUI->value_y->setVisible(false);
-    mUI->value_z->setVisible(false);
-    mUI->value_w->setVisible(false);
-    mUI->color->setVisible(false);
-    mUI->string->setVisible(false);
-    mUI->value_i->setVisible(false);
+    SetVisible(mUI->label_x, false);
+    SetVisible(mUI->label_y, false);
+    SetVisible(mUI->label_z, false);
+    SetVisible(mUI->label_w, false);
+    SetVisible(mUI->value_x, false);
+    SetVisible(mUI->value_y, false);
+    SetVisible(mUI->value_z, false);
+    SetVisible(mUI->value_w, false);
+    SetVisible(mUI->color,   false);
+    SetVisible(mUI->string,  false);
+    SetVisible(mUI->value_i, false);
 }
 
 void Uniform::on_value_x_valueChanged(double)

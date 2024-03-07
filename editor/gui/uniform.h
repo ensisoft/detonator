@@ -44,7 +44,7 @@ namespace gui
         Uniform(QWidget* parent);
        ~Uniform();
 
-        void SetType(Type type);
+        void SetType(Type type, QString suffix = "");
         void SetValue(int value);
         void SetValue(float value);
         void SetValue(const glm::vec2& value);
