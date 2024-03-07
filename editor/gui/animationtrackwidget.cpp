@@ -1273,49 +1273,64 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
             mUI.setvalEndValue->SetType(Uniform::Type::Float);
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
+        else if (name == Name::RigidBody_LinearVelocityX)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float, " m/s");
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::RigidBody_LinearVelocityY)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float, " m/s");
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::RigidBody_AngularVelocity)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float, " rad/s");
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
         else if (name == Name::RigidBody_LinearVelocity)
         {
-            mUI.setvalEndValue->SetType(Uniform::Type::Vec2);
+            mUI.setvalEndValue->SetType(Uniform::Type::Vec2, " m/s");
             setter->SetEndValue(mUI.setvalEndValue->GetAsVec2());
         }
         else if (name == Name::Transformer_LinearVelocity)
         {
-            mUI.setvalEndValue->SetType(Uniform::Type::Vec2);
+            mUI.setvalEndValue->SetType(Uniform::Type::Vec2, " u/s");
             setter->SetEndValue(mUI.setvalEndValue->GetAsVec2());
         }
         else if (name == Name::Transformer_LinearVelocityX)
         {
-            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            mUI.setvalEndValue->SetType(Uniform::Type::Float, " u/s");
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
         else if (name == Name::Transformer_LinearVelocityY)
         {
-            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            mUI.setvalEndValue->SetType(Uniform::Type::Float, " u/s");
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
         else if (name == Name::Transformer_LinearAcceleration)
         {
-            mUI.setvalEndValue->SetType(Uniform::Type::Vec2);
+            mUI.setvalEndValue->SetType(Uniform::Type::Vec2, " u/s²");
             setter->SetEndValue(mUI.setvalEndValue->GetAsVec2());
         }
         else if (name == Name::Transformer_LinearAccelerationX)
         {
-            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            mUI.setvalEndValue->SetType(Uniform::Type::Float, " u/s²");
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
         else if (name == Name::Transformer_LinearAccelerationY)
         {
-            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            mUI.setvalEndValue->SetType(Uniform::Type::Float, " u/s²");
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
         else if (name == Name::Transformer_AngularVelocity)
         {
-            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            mUI.setvalEndValue->SetType(Uniform::Type::Float, " rad/s");
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
         else if (name == Name::Transformer_AngularAcceleration)
         {
-            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            mUI.setvalEndValue->SetType(Uniform::Type::Float, " rad/s²");
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
         else if (name == Name::TextItem_Text)
@@ -1523,29 +1538,29 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         if (name == Name::Drawable_TimeScale)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
         else if (name == Name::RigidBody_LinearVelocity)
-            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<glm::vec2>());
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<glm::vec2>(), " m/s");
         else if (name == Name::RigidBody_LinearVelocityX)
-            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), " m/s");
         else if (name == Name::RigidBody_LinearVelocityY)
-            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), " m/s");
         else if (name == Name::RigidBody_AngularVelocity)
-            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), " m/s");
         else if (name == Name::Transformer_LinearVelocity)
-            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<glm::vec2>());
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<glm::vec2>(), " u/s");
         else if (name == Name::Transformer_LinearVelocityX)
-            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), " u/s");
         else if (name == Name::Transformer_LinearVelocityY)
-            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), " u/s");
         else if (name == Name::Transformer_LinearAcceleration)
-            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<glm::vec2>());
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<glm::vec2>(), " u/s²");
         else if (name == Name::Transformer_LinearAccelerationX)
-            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), " u/s²");
         else if (name == Name::Transformer_LinearAccelerationY)
-            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), " u/s²");
         else if (name == Name::Transformer_AngularVelocity)
-            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), " rad/s");
         else if (name == Name::Transformer_AngularAcceleration)
-            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>(), " rad/s²");
         else if (name == Name::TextItem_Color)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<base::Color4f>());
         else if (name == Name::TextItem_Text)
