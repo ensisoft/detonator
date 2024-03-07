@@ -1258,17 +1258,37 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
             mUI.setvalEndValue->SetType(Uniform::Type::Float);
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
-        else if (name == Name::RigidBody_LinearVelocityX)
+        else if (name == Name::Drawable_RotationX)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float, " °");
+            setter->SetEndValue((float)qDegreesToRadians(mUI.setvalEndValue->GetAsFloat()));
+        }
+        else if (name == Name::Drawable_RotationY)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float, " °");
+            setter->SetEndValue((float)qDegreesToRadians(mUI.setvalEndValue->GetAsFloat()));
+        }
+        else if (name == Name::Drawable_RotationZ)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float, " °");
+            setter->SetEndValue((float)qDegreesToRadians(mUI.setvalEndValue->GetAsFloat()));
+        }
+        else if (name == Name::Drawable_TranslationX)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::Float);
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
-        else if (name == Name::RigidBody_LinearVelocityY)
+        else if (name == Name::Drawable_TranslationY)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::Float);
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
         }
-        else if (name == Name::RigidBody_AngularVelocity)
+        else if (name == Name::Drawable_TranslationZ)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::Drawable_SizeZ)
         {
             mUI.setvalEndValue->SetType(Uniform::Type::Float);
             setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
@@ -1537,6 +1557,20 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         using Name = game::SetValueActuatorClass::ParamName;
         if (name == Name::Drawable_TimeScale)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::Drawable_RotationX)
+            SetValue(mUI.setvalEndValue, qRadiansToDegrees(*ptr->GetEndValue<float>()), " °");
+        else if (name == Name::Drawable_RotationY)
+            SetValue(mUI.setvalEndValue, qRadiansToDegrees(*ptr->GetEndValue<float>()), " °");
+        else if (name == Name::Drawable_RotationZ)
+            SetValue(mUI.setvalEndValue, qRadiansToDegrees(*ptr->GetEndValue<float>()), " °");
+        else if (name == Name::Drawable_TranslationX)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::Drawable_TranslationY)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::Drawable_TranslationZ)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::Drawable_SizeZ)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
         else if (name == Name::RigidBody_LinearVelocity)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<glm::vec2>(), " m/s");
         else if (name == Name::RigidBody_LinearVelocityX)
@@ -1611,7 +1645,7 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
     {
         mUI.actuatorProperties->setEnabled(false);
     }
-    DEBUG("Selected timeline item '%1' (%2)", item->text, item->id);
+    VERBOSE("Selected timeline item '%1' (%2)", item->text, item->id);
 }
 
 void AnimationTrackWidget::SelectedItemDragged(const TimelineWidget::TimelineItem* item)
@@ -1981,6 +2015,20 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::ActuatorClass::Type typ
         klass.SetParamName(GetValue(mUI.setvalName));
         klass.SetInterpolation(GetValue(mUI.setvalInterpolation));
         if (value == ValName::Drawable_TimeScale)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        else if (value == ValName::Drawable_RotationX)
+            klass.SetEndValue(qDegreesToRadians(mUI.setvalEndValue->GetAsFloat()));
+        else if (value == ValName::Drawable_RotationY)
+            klass.SetEndValue(qDegreesToRadians(mUI.setvalEndValue->GetAsFloat()));
+        else if (value == ValName::Drawable_RotationZ)
+            klass.SetEndValue(qDegreesToRadians(mUI.setvalEndValue->GetAsFloat()));
+        else if (value == ValName::Drawable_TranslationX)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        else if (value == ValName::Drawable_TranslationY)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        else if (value == ValName::Drawable_TranslationZ)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        else if (value == ValName::Drawable_SizeZ)
             klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
         else if (value == ValName::RigidBody_LinearVelocityX)
             klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
