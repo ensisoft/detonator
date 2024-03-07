@@ -819,6 +819,12 @@ inline void SetValue(QSpinBox* spin, int value)
     QSignalBlocker s(spin);
     spin->setValue(value);
 }
+inline void SetSuffix(QSpinBox* spin, const app::AnyString& suffix)
+{
+    QSignalBlocker s(spin);
+    spin->setSuffix(suffix);
+}
+
 
 inline void SetMin(QDoubleSpinBox* spin, double min)
 {
@@ -873,31 +879,31 @@ inline void SetValue(QSlider* slider, NormalizedFloat value)
     slider->setValue(value.value * max);
 }
 
-inline void SetValue(Uniform* uniform, float value)
+inline void SetValue(Uniform* uniform, float value, const app::AnyString& suffix = "")
 {
     QSignalBlocker s(uniform);
-    uniform->SetType(Uniform::Type::Float);
+    uniform->SetType(Uniform::Type::Float, suffix);
     uniform->SetValue(value);
 }
 
-inline void SetValue(Uniform* uniform, const glm::vec2& value)
+inline void SetValue(Uniform* uniform, const glm::vec2& value, const app::AnyString& suffix = "")
 {
     QSignalBlocker s(uniform);
-    uniform->SetType(Uniform::Type::Vec2);
+    uniform->SetType(Uniform::Type::Vec2, suffix);
     uniform->SetValue(value);
 }
 
-inline void SetValue(Uniform* uniform, const glm::vec3& value)
+inline void SetValue(Uniform* uniform, const glm::vec3& value, const app::AnyString& suffix = "")
 {
     QSignalBlocker s(uniform);
-    uniform->SetType(Uniform::Type::Vec3);
+    uniform->SetType(Uniform::Type::Vec3, suffix);
     uniform->SetValue(value);
 }
 
-inline void SetValue(Uniform* uniform, const glm::vec4& value)
+inline void SetValue(Uniform* uniform, const glm::vec4& value, const app::AnyString& suffix = "")
 {
     QSignalBlocker s(uniform);
-    uniform->SetType(Uniform::Type::Vec4);
+    uniform->SetType(Uniform::Type::Vec4, suffix);
     uniform->SetValue(value);
 }
 inline void SetValue(Uniform* uniform, const QString& value)
