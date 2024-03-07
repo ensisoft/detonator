@@ -284,6 +284,13 @@ namespace game
         // Enumeration of support node parameters that can be changed.
         enum class ParamName {
             Drawable_TimeScale,
+            Drawable_RotationX,
+            Drawable_RotationY,
+            Drawable_RotationZ,
+            Drawable_TranslationX,
+            Drawable_TranslationY,
+            Drawable_TranslationZ,
+            Drawable_SizeZ,
             RigidBody_LinearVelocityX,
             RigidBody_LinearVelocityY,
             RigidBody_LinearVelocity,
@@ -650,26 +657,34 @@ namespace game
         bool CanApply(EntityNode& node, bool verbose) const;
     private:
         template<typename T>
-        T Interpolate(float t)
+        T Interpolate(float t, bool interpolate) const
         {
             const auto method = mClass->GetInterpolation();
             const auto end    = mClass->GetEndValue();
             const auto start  = mStartValue;
+
+            if (!interpolate)
+                return std::get<T>(end);
+
             ASSERT(std::holds_alternative<T>(end));
             ASSERT(std::holds_alternative<T>(start));
             return math::interpolate(std::get<T>(start), std::get<T>(end), t, method);
         }
-        Color4f Interpolate(float t)
+        Color4f Interpolate(float t, bool interpolate) const
         {
             const auto method = mClass->GetInterpolation();
             const auto end    = mClass->GetEndValue();
             const auto start  = mStartValue;
+            if (!interpolate)
+                return std::get<Color4f>(end); // this is already sRGB encoded.
+
             ASSERT(std::holds_alternative<Color4f>(end));
             ASSERT(std::holds_alternative<Color4f>(start));
             auto ret = math::interpolate(sRGB_Decode(std::get<Color4f>(start)),
                                          sRGB_Decode(std::get<Color4f>(end)), t, method);
             return sRGB_Encode(ret);
         }
+        void SetValue(EntityNode& node, float t, bool interpolate) const;
     private:
         std::shared_ptr<const SetValueActuatorClass> mClass;
         ParamValue mStartValue;

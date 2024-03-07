@@ -619,6 +619,20 @@ void SetValueActuator::Start(EntityNode& node)
 
     if (param == ParamName::Drawable_TimeScale)
         mStartValue = draw->GetTimeScale();
+    else if (param == ParamName::Drawable_RotationX)
+        mStartValue = draw->GetRotator().GetEulerAngleX().ToRadians();
+    else if (param == ParamName::Drawable_RotationY)
+        mStartValue = draw->GetRotator().GetEulerAngleY().ToRadians();
+    else if (param == ParamName::Drawable_RotationZ)
+        mStartValue = draw->GetRotator().GetEulerAngleZ().ToRadians();
+    else if (param == ParamName::Drawable_TranslationX)
+        mStartValue = draw->GetOffset().x;
+    else if (param == ParamName::Drawable_TranslationY)
+        mStartValue = draw->GetOffset().y;
+    else if (param == ParamName::Drawable_TranslationZ)
+        mStartValue = draw->GetOffset().z;
+    else if (param == ParamName::Drawable_SizeZ)
+        mStartValue = draw->GetDepth();
     else if (param == ParamName::RigidBody_AngularVelocity)
         mStartValue = body->GetAngularVelocity();
     else if (param == ParamName::RigidBody_LinearVelocityX)
@@ -652,6 +666,11 @@ void SetValueActuator::Start(EntityNode& node)
 
 void SetValueActuator::Apply(EntityNode& node, float t)
 {
+    SetValue(node, t, true);
+}
+
+void SetValueActuator::SetValue(EntityNode& node, float t, bool interpolate) const
+{
     if (!CanApply(node, false /*verbose*/))
         return;
 
@@ -666,58 +685,126 @@ void SetValueActuator::Apply(EntityNode& node, float t)
     auto* transformer = node.GetTransformer();
 
     if (param == ParamName::Drawable_TimeScale)
-        draw->SetTimeScale(Interpolate<float>(t));
+    {
+        draw->SetTimeScale(Interpolate<float>(t, interpolate));
+    }
+    else if (param == ParamName::Drawable_RotationX)
+    {
+        const auto& rotator = draw->GetRotator();
+        const auto& angles  = rotator.GetEulerAngles();
+        auto x = Interpolate<float>(t, interpolate);
+        auto y = std::get<1>(angles);
+        auto z = std::get<2>(angles);
+        draw->SetRotator(Rotator(FRadians(x), y, z));
+    }
+    else if (param == ParamName::Drawable_RotationY)
+    {
+        const auto& rotator = draw->GetRotator();
+        const auto& angles  = rotator.GetEulerAngles();
+        auto x = std::get<0>(angles);
+        auto y = Interpolate<float>(t, interpolate);
+        auto z = std::get<2>(angles);
+        draw->SetRotator(Rotator(x, FRadians(y), z));
+    }
+    else if (param == ParamName::Drawable_RotationZ)
+    {
+        const auto& rotator = draw->GetRotator();
+        const auto& angles  = rotator.GetEulerAngles();
+        auto x = std::get<0>(angles);
+        auto y = std::get<1>(angles);
+        auto z = Interpolate<float>(t, interpolate);
+        draw->SetRotator(Rotator(x, y, FRadians(z)));
+    }
+    else if (param == ParamName::Drawable_TranslationX)
+    {
+        auto vec = draw->GetOffset();
+        vec.x = Interpolate<float>(t, interpolate);
+        draw->SetOffset(vec);
+    }
+    else if (param == ParamName::Drawable_TranslationY)
+    {
+        auto vec = draw->GetOffset();
+        vec.y = Interpolate<float>(t, interpolate);
+        draw->SetOffset(vec);
+    }
+    else if (param == ParamName::Drawable_TranslationZ)
+    {
+        auto vec = draw->GetOffset();
+        vec.z = Interpolate<float>(t, interpolate);
+        draw->SetOffset(vec);
+    }
+    else if (param == ParamName::Drawable_SizeZ)
+    {
+        auto size = draw->GetDepth();
+        size = Interpolate<float>(t, interpolate);
+        draw->SetDepth(size);
+    }
     else if (param == ParamName::RigidBody_AngularVelocity)
-        body->AdjustAngularVelocity(Interpolate<float>(t));
+    {
+        body->AdjustAngularVelocity(Interpolate<float>(t, interpolate));
+    }
     else if (param == ParamName::RigidBody_LinearVelocityX)
     {
         auto velocity = body->GetLinearVelocity();
-        velocity.x = Interpolate<float>(t);
+        velocity.x = Interpolate<float>(t, interpolate);
         body->AdjustLinearVelocity(velocity);
     }
     else if (param == ParamName::RigidBody_LinearVelocityY)
     {
         auto velocity = body->GetLinearVelocity();
-        velocity.y = Interpolate<float>(t);
+        velocity.y = Interpolate<float>(t, interpolate);
         body->AdjustLinearVelocity(velocity);
     }
     else if (param == ParamName::RigidBody_LinearVelocity)
-        body->AdjustLinearVelocity(Interpolate<glm::vec2>(t));
+    {
+        body->AdjustLinearVelocity(Interpolate<glm::vec2>(t, interpolate));
+    }
     else if (param == ParamName::Transformer_LinearVelocity)
-        transformer->SetLinearVelocity(Interpolate<glm::vec2>(t));
+    {
+        transformer->SetLinearVelocity(Interpolate<glm::vec2>(t, interpolate));
+    }
     else if (param == ParamName::Transformer_LinearVelocityX)
     {
         auto velocity = transformer->GetLinearVelocity();
-        velocity.x = Interpolate<float>(t);
+        velocity.x = Interpolate<float>(t, interpolate);
         transformer->SetLinearVelocity(velocity);
     }
     else if (param == ParamName::Transformer_LinearVelocityY)
     {
         auto velocity = transformer->GetLinearVelocity();
-        velocity.y = Interpolate<float>(t);
+        velocity.y = Interpolate<float>(t, interpolate);
         transformer->SetLinearVelocity(velocity);
     }
     else if (param == ParamName::Transformer_LinearAcceleration)
-        transformer->SetLinearAcceleration(Interpolate<glm::vec2>(t));
+    {
+        transformer->SetLinearAcceleration(Interpolate<glm::vec2>(t, interpolate));
+    }
     else if (param == ParamName::Transformer_LinearAccelerationX)
     {
         auto accel = transformer->GetLinearAcceleration();
-        accel.x = Interpolate<float>(t);
+        accel.x = Interpolate<float>(t, interpolate);
         transformer->SetLinearAcceleration(accel);
     }
     else if (param == ParamName::Transformer_LinearAccelerationY)
     {
         auto accel = transformer->GetLinearAcceleration();
-        accel.y = Interpolate<float>(t);
+        accel.y = Interpolate<float>(t, interpolate);
         transformer->SetLinearAcceleration(accel);
     }
     else if (param == ParamName::Transformer_AngularVelocity)
-        transformer->SetAngularVelocity(Interpolate<float>(t));
+    {
+        transformer->SetAngularVelocity(Interpolate<float>(t, interpolate));
+    }
     else if (param == ParamName::Transformer_AngularAcceleration)
-        transformer->SetAngularAcceleration(Interpolate<float>(t));
+    {
+        transformer->SetAngularAcceleration(Interpolate<float>(t, interpolate));
+    }
     else if (param == ParamName::TextItem_Color)
-        text->SetTextColor(Interpolate<Color4f>(t));
-    else if (param == ParamName::TextItem_Text) {
+    {
+        text->SetTextColor(Interpolate<Color4f>(t, interpolate));
+    }
+    else if (param == ParamName::TextItem_Text)
+    {
         if (method == math::Interpolation::StepStart)
             text->SetText(std::get<std::string>(mClass->GetEndValue()));
         else if (method == math::Interpolation::Step && t >= 0.5f)
@@ -726,77 +813,13 @@ void SetValueActuator::Apply(EntityNode& node, float t)
             text->SetText(std::get<std::string>(mClass->GetEndValue()));
         else if (t >= 1.0f)
             text->SetText(std::get<std::string>(mClass->GetEndValue()));
+
     } else BUG("Unhandled value actuator param type.");
 }
 
 void SetValueActuator::Finish(EntityNode& node)
 {
-    if (!CanApply(node, false))
-        return;
-
-    auto* draw = node.GetDrawable();
-    auto* body = node.GetRigidBody();
-    auto* text = node.GetTextItem();
-    auto* transformer = node.GetTransformer();
-
-    const auto param = mClass->GetParamName();
-    const auto end   = mClass->GetEndValue();
-
-    if (param == ParamName::Drawable_TimeScale)
-        draw->SetTimeScale(std::get<float>(end));
-    else if (param == ParamName::RigidBody_AngularVelocity)
-        body->AdjustAngularVelocity(std::get<float>(end));
-    else if (param == ParamName::RigidBody_LinearVelocityX)
-    {
-        auto velocity = body->GetLinearVelocity();
-        velocity.x = std::get<float>(end);
-        body->AdjustLinearVelocity(velocity);
-    }
-    else if (param == ParamName::RigidBody_LinearVelocityY)
-    {
-        auto velocity = body->GetLinearVelocity();
-        velocity.y = std::get<float>(end);
-        body->AdjustLinearVelocity(velocity);
-    }
-    else if (param == ParamName::RigidBody_LinearVelocity)
-        body->AdjustLinearVelocity(std::get<glm::vec2>(end));
-    else if (param == ParamName::Transformer_LinearVelocity)
-        transformer->SetLinearVelocity(std::get<glm::vec2>(end));
-    else if (param == ParamName::Transformer_LinearVelocityX)
-    {
-        auto velocity = transformer->GetLinearVelocity();
-        velocity.x = std::get<float>(end);
-        transformer->SetLinearVelocity(velocity);
-    }
-    else if (param == ParamName::Transformer_LinearVelocityY)
-    {
-        auto velocity = transformer->GetLinearVelocity();
-        velocity.y = std::get<float>(end);
-        transformer->SetLinearVelocity(velocity);
-    }
-    else if (param == ParamName::Transformer_LinearAcceleration)
-        transformer->SetLinearAcceleration(std::get<glm::vec2>(end));
-    else if (param == ParamName::Transformer_LinearAccelerationX)
-    {
-        auto accel = transformer->GetLinearAcceleration();
-        accel.x = std::get<float>(end);
-        transformer->SetLinearAcceleration(accel);
-    }
-    else if (param == ParamName::Transformer_LinearAccelerationY)
-    {
-        auto accel = transformer->GetLinearAcceleration();
-        accel.y = std::get<float>(end);
-        transformer->SetLinearAcceleration(accel);
-    }
-    else if (param == ParamName::Transformer_AngularVelocity)
-        transformer->SetAngularVelocity(std::get<float>(end));
-    else if (param == ParamName::Transformer_AngularAcceleration)
-        transformer->SetAngularAcceleration(std::get<float>(end));
-    else if (param == ParamName::TextItem_Color)
-        text->SetTextColor(std::get<Color4f>(end));
-    else if (param == ParamName::TextItem_Text) {
-        text->SetText(std::get<std::string>(mClass->GetEndValue()));
-    } else BUG("Unhandled value actuator param type.");
+    SetValue(node, 1.0f, false);
 }
 
 bool SetValueActuator::CanApply(EntityNode& node, bool verbose) const
@@ -807,7 +830,14 @@ bool SetValueActuator::CanApply(EntityNode& node, bool verbose) const
     const auto* text = node.GetTextItem();
     const auto* transformer = node.GetTransformer();
 
-    if ((param == ParamName::Drawable_TimeScale))
+    if (param == ParamName::Drawable_TimeScale ||
+        param == ParamName::Drawable_RotationX ||
+        param == ParamName::Drawable_RotationY ||
+        param == ParamName::Drawable_RotationZ ||
+        param == ParamName::Drawable_TranslationX ||
+        param == ParamName::Drawable_TranslationY ||
+        param == ParamName::Drawable_TranslationZ ||
+        param == ParamName::Drawable_SizeZ)
     {
         if (!draw && verbose)
         {
