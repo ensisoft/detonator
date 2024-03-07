@@ -28,13 +28,23 @@
 namespace base
 {
     namespace detail {
+
+        // suppress warning about non-standard extension
+        // regarding the zero length array
+#if defined(__MSVC__)
+#  pragma warning(push)
+#  pragma warning(disable: 4200)
+#endif
         struct Memory {
             enum Flags {
                 Created = 0x1
             };
             uint32_t flags = 0;
-            char data[];
+            char data[]; // non-standard
         };
+#if defined(__MSVC__)
+#  pragma warning(pop)
+#endif
 
         class ObjectAllocator {
         public:
