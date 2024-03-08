@@ -49,6 +49,10 @@
 
 class QuaZip;
 
+namespace gui {
+    class DlgProgress;
+} // gui
+
 namespace app
 {
     class ResourceArchive
@@ -195,7 +199,7 @@ namespace app
 
         // Try to load the contents of the workspace from the current workspace dir.
         // Returns true on success. Any errors are logged.
-        bool LoadWorkspace(MigrationLog* log = nullptr);
+        bool LoadWorkspace(MigrationLog* log = nullptr, gui::DlgProgress* dlg = nullptr);
         // Try to save the contents of the workspace into the current workspace dir.
         // Returns true on success. Any errors are logged.
         bool SaveWorkspace();
@@ -765,7 +769,7 @@ namespace app
         void ResourcePackingUpdate(const QString& action, int step, int total);
 
     private:
-        bool LoadContent(const QString& file, MigrationLog* log);
+        bool LoadContent(const QString& file, MigrationLog* log, gui::DlgProgress* dlg);
         bool LoadProperties(const QString& file);
         void LoadUserSettings(const QString& file);
         bool SaveContent(const QString& file) const;
