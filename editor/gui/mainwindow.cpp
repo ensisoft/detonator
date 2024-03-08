@@ -78,6 +78,7 @@
 #include "editor/gui/dlgtilemap.h"
 #include "editor/gui/dlgvcs.h"
 #include "editor/gui/dlgsvg.h"
+#include "editor/gui/dlgprogress.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/gfxwidget.h"
 #include "editor/gui/animationtrackwidget.h"
@@ -432,8 +433,14 @@ bool MainWindow::LoadWorkspace(const QString& dir)
 
     app::MigrationLog migration_log;
 
+    DlgProgress dlg(this);
+    dlg.SetSeriousness(DlgProgress::Seriousness::NotSoSerious);
+    dlg.setWindowTitle("Loading Workspace...");
+    dlg.setWindowModality(Qt::WindowModal);
+    dlg.show();
+
     auto workspace = std::make_unique<app::Workspace>(dir);
-    if (!workspace->LoadWorkspace(&migration_log))
+    if (!workspace->LoadWorkspace(&migration_log, &dlg))
         return false;
 
     mWorkspace = std::move(workspace);

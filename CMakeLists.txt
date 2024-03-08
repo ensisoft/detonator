@@ -484,6 +484,9 @@ add_executable(Detonator
     editor/gui/dlgpackage.h
     editor/gui/dlgpackage.ui
     editor/gui/dlgpackage.cpp
+    editor/gui/dlgprogress.h
+    editor/gui/dlgprogress.ui
+    editor/gui/dlgprogress.cpp
     editor/gui/dlgproject.h
     editor/gui/dlgproject.ui
     editor/gui/dlgproject.cpp

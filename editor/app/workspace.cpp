@@ -38,6 +38,7 @@
 #  include <QPixmap>
 #  include <QDir>
 #  include <QStringList>
+#  include <QProgressDialog>
 #include "warnpop.h"
 
 #include <algorithm>
@@ -54,6 +55,7 @@
 #include "editor/app/packing.h"
 #include "editor/app/buffer.h"
 #include "editor/app/process.h"
+#include "editor/gui/dlgprogress.h"
 #include "graphics/resource.h"
 #include "graphics/color4f.h"
 #include "engine/ui.h"
@@ -118,8 +120,14 @@ template<typename ClassType>
 bool LoadResources(const char* type,
                    const data::Reader& data,
                    std::vector<std::unique_ptr<app::Resource>>& vector,
-                   app::MigrationLog* log = nullptr)
+                   app::MigrationLog* log = nullptr,
+                   gui::DlgProgress* dlg = nullptr)
 {
+#if defined(DETONATOR_EDITOR_BUILD)
+    if (dlg)
+        dlg->SetMessage("Loading " + app::toString(type) + "...");
+#endif
+
     DEBUG("Loading resources. [type='%1']", type);
     bool success = true;
     for (unsigned i=0; i<data.GetNumChunks(type); ++i)
@@ -149,7 +157,13 @@ bool LoadResources(const char* type,
         resource->SetProperty("__version", version);
         vector.push_back(std::move(resource));
         DEBUG("Loaded workspace resource. [name='%1']", name);
+
+#if defined(DETONATOR_EDITOR_BUILD)
+        if (dlg)
+            dlg->StepOne();
+#endif
     }
+
     return success;
 }
 
@@ -157,8 +171,14 @@ template<typename ClassType>
 bool LoadMaterials(const char* type,
                    const data::Reader& data,
                    std::vector<std::unique_ptr<app::Resource>>& vector,
-                   app::MigrationLog* log = nullptr)
+                   app::MigrationLog* log = nullptr,
+                   gui::DlgProgress* dlg = nullptr)
 {
+#if defined(DETONATOR_EDITOR_BUILD)
+    if (dlg)
+        dlg->SetMessage("Loading Materials...");
+#endif
+
     DEBUG("Loading resources. [type='%1']", type);
     bool success = true;
     for (unsigned i=0; i<data.GetNumChunks(type); ++i)
@@ -189,6 +209,11 @@ bool LoadMaterials(const char* type,
         resource->SetProperty("__version", version); // a small hack here.
         vector.push_back(std::move(resource));
         DEBUG("Loaded workspace resource. [name='%1']", name);
+
+#if defined(DETONATOR_EDITOR_BUILD)
+        if (dlg)
+            dlg->StepOne();
+#endif
     }
     return success;
 }
@@ -1818,9 +1843,9 @@ gfx::ResourceHandle Workspace::LoadAppResource(const std::string& URI)
     return ret;
 }
 
-bool Workspace::LoadWorkspace(MigrationLog* log)
+bool Workspace::LoadWorkspace(MigrationLog* log, gui::DlgProgress* dlg)
 {
-    if (!LoadContent(JoinPath(mWorkspaceDir, "content.json"), log) ||
+    if (!LoadContent(JoinPath(mWorkspaceDir, "content.json"), log, dlg) ||
         !LoadProperties(JoinPath(mWorkspaceDir, "workspace.json")))
         return false;
 
@@ -1967,7 +1992,7 @@ AnyString Workspace::MapFileToFilesystem(const AnyString& uri) const
     return ret;
 }
 
-bool Workspace::LoadContent(const QString& filename, MigrationLog* log)
+bool Workspace::LoadContent(const QString& filename, MigrationLog* log, gui::DlgProgress* dlg)
 {
     data::JsonFile file;
     const auto [json_ok, error] = file.Load(app::ToUtf8(filename));
@@ -1978,18 +2003,72 @@ bool Workspace::LoadContent(const QString& filename, MigrationLog* log)
     }
     data::JsonObject root = file.GetRootObject();
 
-    bool ok = true;
-    ok &= LoadMaterials<gfx::MaterialClass>("materials", root, mResources, log);
-    ok &= LoadResources<gfx::ParticleEngineClass>("particles", root, mResources, log);
-    ok &= LoadResources<gfx::PolygonMeshClass>("shapes", root, mResources, log);
-    ok &= LoadResources<game::EntityClass>("entities", root, mResources, log);
-    ok &= LoadResources<game::SceneClass>("scenes", root, mResources, log);
-    ok &= LoadResources<game::TilemapClass>("tilemaps", root, mResources, log);
-    ok &= LoadResources<Script>("scripts", root, mResources, log);
-    ok &= LoadResources<DataFile>("data_files", root, mResources, log);
-    ok &= LoadResources<audio::GraphClass>("audio_graphs", root, mResources, log);
-    ok &= LoadResources<uik::Window>("uis", root, mResources, log);
+#if defined(DETONATOR_EDITOR_BUILD)
+    if (dlg)
+    {
+        const auto resource_count = root.GetNumChunks("materials") +
+                                    root.GetNumChunks("particles") +
+                                    root.GetNumChunks("shapes") +
+                                    root.GetNumChunks("entities") +
+                                    root.GetNumChunks("scenes") +
+                                    root.GetNumChunks("tilemaps") +
+                                    root.GetNumChunks("scripts") +
+                                    root.GetNumChunks("data_files") +
+                                    root.GetNumChunks("audio_graphs") +
+                                    root.GetNumChunks("uis");
+        dlg->SetMinimum(0);
+        dlg->SetMaximum(resource_count);
+        dlg->SetValue(0);
 
+        std::atomic<bool> load_thread_done = false;
+
+        std::thread loader([this, &root, log, dlg, &load_thread_done] {
+            dlg->SetMessage("Loading workspace...");
+
+            LoadMaterials<gfx::MaterialClass>("materials", root, mResources, log, dlg);
+            LoadResources<gfx::ParticleEngineClass>("particles", root, mResources, log, dlg);
+            LoadResources<gfx::PolygonMeshClass>("shapes", root, mResources, log, dlg);
+            LoadResources<game::EntityClass>("entities", root, mResources, log, dlg);
+            LoadResources<game::SceneClass>("scenes", root, mResources, log, dlg);
+            LoadResources<game::TilemapClass>("tilemaps", root, mResources, log, dlg);
+            LoadResources<Script>("scripts", root, mResources, log, dlg);
+            LoadResources<DataFile>("data_files", root, mResources, log, dlg);
+            LoadResources<audio::GraphClass>("audio_graphs", root, mResources, log, dlg);
+            LoadResources<uik::Window>("uis", root, mResources, log, dlg);
+
+            load_thread_done.store(true, std::memory_order_release);
+        });
+
+        base::ElapsedTimer timer;
+        timer.Start();
+
+        // intentional slowdown to make the loading process a bit smoother
+        // if actually happened really fast.
+        while (!load_thread_done.load(std::memory_order_acquire) || timer.SinceStart() < .5)
+        {
+            QEventLoop footgun;
+            footgun.processEvents();
+            dlg->UpdateState();
+        }
+        loader.join();
+    }
+    else
+    {
+#endif
+        LoadMaterials<gfx::MaterialClass>("materials", root, mResources, log, dlg);
+        LoadResources<gfx::ParticleEngineClass>("particles", root, mResources, log, dlg);
+        LoadResources<gfx::PolygonMeshClass>("shapes", root, mResources, log, dlg);
+        LoadResources<game::EntityClass>("entities", root, mResources, log, dlg);
+        LoadResources<game::SceneClass>("scenes", root, mResources, log, dlg);
+        LoadResources<game::TilemapClass>("tilemaps", root, mResources, log, dlg);
+        LoadResources<Script>("scripts", root, mResources, log, dlg);
+        LoadResources<DataFile>("data_files", root, mResources, log, dlg);
+        LoadResources<audio::GraphClass>("audio_graphs", root, mResources, log, dlg);
+        LoadResources<uik::Window>("uis", root, mResources, log, dlg);
+
+#if defined(DETONATOR_EDITOR_BUILD)
+    }
+#endif
     // create an invariant that states that the primitive materials
     // are in the list of resources after the user defined ones.
     // this way the addressing scheme (when user clicks on an item
