@@ -3227,6 +3227,7 @@ void Workspace::ImportFilesAsResource(const QStringList& files)
         {
             Script script;
             script.SetFileURI(ToUtf8(uri));
+            script.SetTypeTag(Script::TypeTag::ScriptData);
             ScriptResource res(script, name);
             SaveResource(res);
             INFO("Imported new script file '%1' based on file '%2'", name, info.filePath());
