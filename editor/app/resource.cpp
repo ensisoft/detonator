@@ -166,7 +166,6 @@ namespace {
                 // visit the files instead of keeping all the current state
                 // and then recursing.?
                 ok &= PackScriptRecursive(module, packer);
-                ok &= packer.CopyFile(module, "lua/");
                 line.replace(module, packer.MapUri(module));
             }
             dst_stream << line;
