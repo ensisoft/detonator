@@ -241,7 +241,7 @@
           <item row="3" column="1" colspan="2">
            <widget class="QComboBox" name="scriptFile">
             <property name="placeholderText">
-             <string>None</string>
+             <string>Select Entity Script [None]</string>
             </property>
            </widget>
           </item>
@@ -382,7 +382,7 @@
           <item row="4" column="1" colspan="2">
            <widget class="QComboBox" name="idleTrack">
             <property name="placeholderText">
-             <string>None</string>
+             <string>Select Idle Animation [None]</string>
             </property>
            </widget>
           </item>
@@ -437,22 +437,9 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
-             <widget class="QLabel" name="label_58">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Script</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <widget class="QComboBox" name="animatorScript">
               <property name="placeholderText">
-               <string>None</string>
+               <string>Select Animator Script [None]</string>
               </property>
              </widget>
             </item>
