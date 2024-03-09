@@ -2,14 +2,15 @@
 -- You're free to delete functions that you don't need.
 
 -- Called when the game is first loaded.
--- This is the place where you might want to load some 
--- previous/initial game state. 
+-- This is the place where you might want to load some
+-- previous/initial game state.
 function LoadGame()
     Game:DebugPrint('LoadGame called.')
+    Game:SetViewport(-400,  -300, 800, 600)
     return true
 end
 
--- Called after the game has been loaded and the game can 
+-- Called after the game has been loaded and the game can
 -- be started. This is likely the place where the first
 -- game content is shown, such as a main menu.
 function StartGame()
@@ -18,13 +19,13 @@ end
 
 -- Called before the application exist.
 -- This is the last chance to persist any state that should
--- be restored on next game run. 
-function SaveGame() 
+-- be restored on next game run.
+function SaveGame()
     Game:DebugPrint('SaveGame called')
 end
 
 -- Called when the game play should stop, i.e. the application
--- is about to exit. 
+-- is about to exit.
 function StopGame()
     Game:DebugPrint('StopGame called')
 end
