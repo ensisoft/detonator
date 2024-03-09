@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1662</width>
-    <height>1311</height>
+    <width>1709</width>
+    <height>1457</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -1197,8 +1197,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>350</width>
-          <height>930</height>
+          <width>440</width>
+          <height>919</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -1682,14 +1682,24 @@
                 </property>
                </widget>
               </item>
-              <item row="8" column="3">
+              <item row="7" column="2">
+               <widget class="QComboBox" name="cmbColorSpace"/>
+              </item>
+              <item row="7" column="1">
+               <widget class="QLabel" name="label_26">
+                <property name="text">
+                 <string>Color Space</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="3">
                <widget class="QPushButton" name="btnEditTexture">
                 <property name="text">
                  <string>Edit Texture ...</string>
                 </property>
                </widget>
               </item>
-              <item row="9" column="3">
+              <item row="8" column="3">
                <widget class="QPushButton" name="btnSelectTextureRect">
                 <property name="text">
                  <string>Select Area ...</string>
@@ -2171,18 +2181,21 @@
   <tabstop>textureWidth</tabstop>
   <tabstop>textureHeight</tabstop>
   <tabstop>textureDepth</tabstop>
+  <tabstop>cmbColorSpace</tabstop>
+  <tabstop>btnEditTexture</tabstop>
+  <tabstop>btnSelectTextureRect</tabstop>
   <tabstop>chkAllowPacking</tabstop>
   <tabstop>chkAllowResizing</tabstop>
   <tabstop>chkPreMulAlpha</tabstop>
   <tabstop>chkBlurTexture</tabstop>
   <tabstop>chkDetectEdges</tabstop>
-  <tabstop>btnEditTexture</tabstop>
-  <tabstop>btnSelectTextureRect</tabstop>
   <tabstop>rectX</tabstop>
   <tabstop>rectY</tabstop>
   <tabstop>rectW</tabstop>
   <tabstop>rectH</tabstop>
   <tabstop>btnResetTextureRect</tabstop>
+  <tabstop>btnAddShader</tabstop>
+  <tabstop>btnResetShader</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
