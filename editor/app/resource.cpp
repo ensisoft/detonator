@@ -92,7 +92,7 @@ namespace {
 
     // pack script with dependencies by recursively reading
     // the script files and looking for other scripts via require
-    bool PackScriptRecursive(const app::AnyString& uri, app::ResourcePacker& packer)
+    bool PackScriptRecursive(const app::AnyString& uri, const app::AnyString& dir, app::ResourcePacker& packer)
     {
         // Read the contents of the Lua script file and look for dependent scripts
         // somehow we need to resolve those dependent scripts in order to package
@@ -165,14 +165,45 @@ namespace {
                 // and we should just explore the requires first and then
                 // visit the files instead of keeping all the current state
                 // and then recursing.?
-                ok &= PackScriptRecursive(module, packer);
+                ok &= PackScriptRecursive(module, "lua/", packer);
                 line.replace(module, packer.MapUri(module));
+            }
+            else
+            {
+                QStringList strs;
+                strs = module.split("/");
+                strs.push_front("lua");
+                strs.pop_back();
+                QString path = strs.join("/");
+                path += "/";
+                // relative path for example we have a scripts
+                // lua/game_script.lua
+                // lua/foo/foo.lua
+                //
+                // and game_script.lua does
+                //
+                //     require('foo/foo.lua')
+                //
+                //
+
+                DEBUG("Found dependent script. %1 depends on %2.", uri, module);
+                if (!module.endsWith(".lua"))
+                    module.append(".lua");
+
+                strs = uri.GetWide().split("/");
+                strs.pop_back();
+                strs.push_back(module);
+                module = strs.join("/");
+                DEBUG("Dependent script generated path is '%1'", module);
+                ok &= PackScriptRecursive(module, path, packer);
+                // do not change the outgoing line here, so it remains the
+                // same, for example require('foo/foo.lua')
             }
             dst_stream << line;
         }
         dst_stream.flush();
 
-        ok &= packer.WriteFile(uri, "lua/", dst_buffer.constData(), dst_buffer.length());
+        ok &= packer.WriteFile(uri, dir, dst_buffer.constData(), dst_buffer.length());
         return ok;
     }
 
@@ -439,7 +470,7 @@ bool PackResource(app::Script& script, ResourcePacker& packer)
 
     bool ok = true;
 
-    ok &= PackScriptRecursive(uri, packer);
+    ok &= PackScriptRecursive(uri, "lua/", packer);
     //packer.CopyFile(uri, "lua/");
 
     script.SetFileURI(packer.MapUri(uri));

@@ -1405,6 +1405,58 @@ void unit_test_packing_dependent_scripts()
         "end\n");
 }
 
+void unit_test_packing_dependent_scripts_subfolder()
+{
+    DeleteDir("TestWorkspace");
+    DeleteDir("TestPackage");
+
+    QDir d;
+    TEST_REQUIRE(d.mkpath("lua"));
+    TEST_REQUIRE(d.mkpath("lua/test"));
+
+    TEST_REQUIRE(app::WriteTextFile("lua/test/script.lua", "script.lua"));
+    TEST_REQUIRE(app::WriteTextFile("lua/game_script.lua",
+"require('test/script.lua')\n"
+"function Meh()\n"
+"  print('hello')\n"
+"end\n"));
+
+    MakeDir("TestWorkspace");
+    app::Workspace workspace("TestWorkspace");
+    workspace.GetProjectSettings().loading_font.clear();
+
+    app::Script script;
+    script.SetFileURI(workspace.MapFileToWorkspace(std::string("lua/game_script.lua")));
+    app::ScriptResource script_resource(script, "GameScript");
+
+    workspace.SaveResource(script_resource);
+
+    app::Workspace::ContentPackingOptions options;
+    options.directory          = "TestPackage";
+    options.package_name       = "test";
+    options.write_content_file = true;
+    options.write_config_file  = true;
+    options.combine_textures   = false;
+    options.resize_textures    = false;
+
+    std::vector<const app::Resource*> resources;
+    resources.push_back(&workspace.GetUserDefinedResource(0));
+    TEST_REQUIRE(workspace.BuildReleasePackage(resources, options));
+
+    TEST_REQUIRE(base::FileExists("TestPackage/test/lua/game_script.lua"));
+    TEST_REQUIRE(base::FileExists("TestPackage/test/lua/test/script.lua"));
+
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/lua/game_script.lua") ==
+"require('test/script.lua')\n"
+"function Meh()\n"
+"  print('hello')\n"
+"end\n");
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/lua/test/script.lua") == "script.lua");
+
+    DeleteDir("TestPackage");
+}
+
+
 void unit_test_json_export_import()
 {
     DeleteDir("TestWorkspace");
@@ -1992,6 +2044,9 @@ void unit_test_delete_with_data()
     }
 }
 
+
+
+
 int test_main(int argc, char* argv[])
 {
     QGuiApplication app(argc, argv);
@@ -2017,6 +2072,7 @@ int test_main(int argc, char* argv[])
     unit_test_packing_ui_style_resources();
     unit_test_packing_texture_name_collision_resample_bug();
     unit_test_packing_dependent_scripts();
+    unit_test_packing_dependent_scripts_subfolder();
     unit_test_json_export_import();
     unit_test_list_deps();
     unit_test_export_import_basic();
