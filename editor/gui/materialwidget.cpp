@@ -971,7 +971,7 @@ void MaterialWidget::AddNewTextureMapFromFile()
         auto source = std::make_unique<gfx::detail::TextureFileSource>(file);
         source->SetName(app::ToUtf8(name));
         source->SetFileName(file);
-        source->SetColorSpace(gfx::detail::TextureFileSource::ColorSpace::Linear);
+        source->SetColorSpace(gfx::detail::TextureFileSource::ColorSpace::sRGB);
 
         if (map->GetType() == gfx::TextureMap::Type::Texture2D)
         {
