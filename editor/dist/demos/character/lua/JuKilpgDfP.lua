@@ -3,10 +3,10 @@
 -- This script will be called for every instance of 'skeleton' in the scene during gameplay.
 -- You're free to delete functions you don't need.
 --
-require('walking')
-require('utility')
-require('weapon')
-require('damage')
+require('LPC/walking')
+require('LPC/utility')
+require('LPC/weapon')
+require('LPC/damage')
 
 function ArrowHit(skeleton)
     DealDamage(skeleton, 0.21)
