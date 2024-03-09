@@ -2724,7 +2724,7 @@
                 },
                 "id": "IXQDBTw7Ub",
                 "method": "Acceleration",
-                "name": "DrawableTimeScale",
+                "name": "Drawable_TimeScale",
                 "node": "bhTMTzzFAN",
                 "starttime": 0.0,
                 "value": 10.0
@@ -2740,7 +2740,7 @@
                 },
                 "id": "IBkiEWQ7n2",
                 "method": "Cosine",
-                "name": "DrawableTimeScale",
+                "name": "Drawable_TimeScale",
                 "node": "zaQ8SYuKGL",
                 "starttime": 0.0,
                 "value": 2.0
@@ -4349,7 +4349,7 @@
                 },
                 "id": "oDDSuTtIoz",
                 "method": "Cosine",
-                "name": "DrawableTimeScale",
+                "name": "Drawable_TimeScale",
                 "node": "WUKFECQ7pF",
                 "starttime": 0.0,
                 "value": 2.0
