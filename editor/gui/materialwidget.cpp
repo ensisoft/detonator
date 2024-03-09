@@ -100,6 +100,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     PopulateFromEnum<gfx::MaterialClass::Type>(mUI.materialType);
     PopulateFromEnum<gfx::MaterialClass::ParticleAction>(mUI.particleAction);
     PopulateFromEnum<gfx::TextureMap::Type>(mUI.textureMapType);
+    PopulateFromEnum<gfx::detail::TextureFileSource::ColorSpace>(mUI.cmbColorSpace);
 
     SetList(mUI.cmbModel, workspace->ListPrimitiveDrawables());
     SetValue(mUI.cmbModel, "Rectangle");
@@ -898,7 +899,16 @@ void MaterialWidget::on_chkBlurTexture_stateChanged(int)
 { SetTextureFlags(); }
 void MaterialWidget::on_chkDetectEdges_stateChanged(int)
 { SetTextureFlags(); }
-
+void MaterialWidget::on_cmbColorSpace_currentIndexChanged(int)
+{
+    if (auto* source = GetSelectedTextureSrc())
+    {
+        if (auto* ptr = dynamic_cast<gfx::detail::TextureFileSource*>(source))
+        {
+            ptr->SetColorSpace(GetValue(mUI.cmbColorSpace));
+        }
+    }
+}
 
 void MaterialWidget::on_textureMapName_textChanged(const QString& text)
 {
@@ -1615,6 +1625,7 @@ void MaterialWidget::GetTextureProperties()
     SetEnabled(mUI.chkPreMulAlpha,    false);
     SetEnabled(mUI.chkBlurTexture,    false);
     SetEnabled(mUI.chkDetectEdges,    false);
+    SetEnabled(mUI.cmbColorSpace,     false);
 
     SetEnabled(mUI.textureRect, false);
     SetValue(mUI.rectX, 0.0f);
@@ -1648,12 +1659,14 @@ void MaterialWidget::GetTextureProperties()
     if (const auto* ptr = dynamic_cast<const gfx::detail::TextureFileSource*>(source))
     {
         SetValue(mUI.textureSourceFile, ptr->GetFilename());
+        SetValue(mUI.cmbColorSpace,     ptr->GetColorSpace());
         SetValue(mUI.chkAllowPacking,   ptr->TestFlag(gfx::detail::TextureFileSource::Flags::AllowPacking));
         SetValue(mUI.chkAllowResizing,  ptr->TestFlag(gfx::detail::TextureFileSource::Flags::AllowResizing));
         SetValue(mUI.chkPreMulAlpha,    ptr->TestFlag(gfx::detail::TextureFileSource::Flags::PremulAlpha));
         SetEnabled(mUI.chkAllowPacking,  true);
         SetEnabled(mUI.chkAllowResizing, true);
         SetEnabled(mUI.chkPreMulAlpha,   true);
+        SetEnabled(mUI.cmbColorSpace,    true);
     }
 
     SetEnabled(mUI.chkBlurTexture, true);
