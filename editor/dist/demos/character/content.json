@@ -301,7 +301,7 @@
       "id": "69nkia7uBG",
       "idle_track": "",
       "lifetime": 0.0,
-      "name": "LPC/Character/Human",
+      "name": "LPC/Character/Player",
       "nodes": [
         {
           "class": "s6vk1lnag9",
@@ -748,10 +748,10 @@
         "node": null
       },
       "resource_id": "69nkia7uBG",
-      "resource_name": "LPC/Character/Human",
+      "resource_name": "LPC/Character/Player",
       "resource_ver": 1,
       "script_file": "J4xx3ThJjX",
-      "tag": "",
+      "tag": "#player",
       "vars": [
         {
           "flags": {
@@ -5835,20 +5835,20 @@
     },
     {
       "id": "J4xx3ThJjX",
-      "name": "LPC/Entity/Player",
+      "name": "LPC/Character/Player",
       "owner": "",
       "resource_id": "J4xx3ThJjX",
-      "resource_name": "LPC/Entity/Player",
+      "resource_name": "LPC/Character/Player",
       "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/J4xx3ThJjX.lua"
     },
     {
       "id": "7lLEJ9i9vM",
-      "name": "LPC/Entity/Animator",
+      "name": "LPC/Character/Animator",
       "owner": "",
       "resource_id": "7lLEJ9i9vM",
-      "resource_name": "LPC/Entity/Animator",
+      "resource_name": "LPC/Character/Animator",
       "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/7lLEJ9i9vM.lua"
@@ -5884,44 +5884,44 @@
       "uri": "ws://lua/JuKilpgDfP.lua"
     },
     {
-      "id": "1AKD9P4vQ6",
-      "name": "LPC/walking",
+      "id": "WGRN4W10Dz",
+      "name": "LCP/Weapon",
       "owner": "",
-      "resource_id": "1AKD9P4vQ6",
-      "resource_name": "LPC/walking",
+      "resource_id": "WGRN4W10Dz",
+      "resource_name": "LCP/Weapon",
       "resource_ver": 1,
       "type": "ScriptData",
-      "uri": "ws://lua/walking.lua"
+      "uri": "ws://lua/LPC/weapon.lua"
     },
     {
-      "id": "HJ2GwxRGzv",
-      "name": "LPC/utility",
+      "id": "2JjGkWM7Dw",
+      "name": "LPC/Damage",
       "owner": "",
-      "resource_id": "HJ2GwxRGzv",
-      "resource_name": "LPC/utility",
+      "resource_id": "2JjGkWM7Dw",
+      "resource_name": "LPC/Damage",
       "resource_ver": 1,
       "type": "ScriptData",
-      "uri": "ws://lua/utility.lua"
+      "uri": "ws://lua/LPC/damage.lua"
     },
     {
-      "id": "TWDXebwTRx",
-      "name": "LPC/weapon",
+      "id": "Jjvwup2aZw",
+      "name": "LPC/Utility",
       "owner": "",
-      "resource_id": "TWDXebwTRx",
-      "resource_name": "LPC/weapon",
+      "resource_id": "Jjvwup2aZw",
+      "resource_name": "LPC/Utility",
       "resource_ver": 1,
       "type": "ScriptData",
-      "uri": "ws://lua/weapon.lua"
+      "uri": "ws://lua/LPC/utility.lua"
     },
     {
-      "id": "kYIT5fZnX8",
-      "name": "LPC/damage",
+      "id": "MeIxMMaoEx",
+      "name": "LPC/Walking",
       "owner": "",
-      "resource_id": "kYIT5fZnX8",
-      "resource_name": "LPC/damage",
+      "resource_id": "MeIxMMaoEx",
+      "resource_name": "LPC/Walking",
       "resource_ver": 1,
       "type": "ScriptData",
-      "uri": "ws://lua/damage.lua"
+      "uri": "ws://lua/LPC/walking.lua"
     }
   ],
   "shapes": [

@@ -1,4 +1,4 @@
-require('utility')
+require('LPC/utility')
 
 -- Check if the entity is currently walking or not.
 function IsWalking(entity)
