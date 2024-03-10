@@ -32,18 +32,26 @@ varying float vParticleRandomValue;
 // normalized particle lifetime.
 varying float vParticleTime;
 
-float Line(float width, float pos, float x)
+float VLine(float thickness, float position, float x)
 {
-    return smoothstep(pos-width*0.5, pos, x) -
-           smoothstep(pos, pos+width*0.5, x);
+    return smoothstep(position-thickness*0.5, position, x) -
+        smoothstep(position, position+thickness*0.5, x);
+}
+
+float HLine(float thickness, float position, float x, float y)
+{
+    if (x >= 0.02 && x < 0.97)
+        return smoothstep(position-thickness*0.5, position, y) -
+            smoothstep(position, position+thickness*0.5, y);
+    return 0.0;
 }
 
 void FragmentShaderMain()
 {
     vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
 
-    float vert_width = EDGE_WIDTH * 1.0;
-    float hori_width = EDGE_WIDTH * 4.0;
+    float vert_width = EDGE_WIDTH * 2.0;
+    float hori_width = EDGE_WIDTH * 2.0;
 
     // smoothstep takes edge0, edge1, x and produces a value between
     // 0.0 and 1.0 with a smooth transition from edge0 to edge1.
@@ -52,10 +60,10 @@ void FragmentShaderMain()
     float foreground = 1.0 - smoothstep(kValue-0.05, kValue, coords.x);
 
     float background = clamp(
-        Line(vert_width, 0.0+vert_width*0.5, coords.x) +
-        Line(vert_width, 1.0-vert_width*0.5, coords.x) +
-        Line(hori_width, 0.0+hori_width*0.5, coords.y) +
-        Line(hori_width, 1.0-hori_width*0.5, coords.y),
+        VLine(0.02, 0.01, coords.x) +
+        VLine(0.02, 0.98, coords.x) +
+        HLine(0.04, 0.02, coords.x, coords.y) +
+        HLine(0.04, 0.98, coords.x, coords.y),
         0.0, 1.0);
 
     fs_out.color  = kFColor * foreground + kBColor * background;

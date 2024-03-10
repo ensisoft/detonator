@@ -1,47 +1,33 @@
 --
--- Entity 'skeleton' script.
--- This script will be called for every instance of 'skeleton' in the scene during gameplay.
+-- Entity 'entity' script.
+-- This script will be called for every instance of 'entity' in the scene during gameplay.
 -- You're free to delete functions you don't need.
 --
-require('ws://lua/LPC/walking.lua')
-require('ws://lua/LPC/utility.lua')
-require('ws://lua/LPC/weapon.lua')
-require('ws://lua/LPC/damage.lua')
-
-function ArrowHit(skeleton)
-    DealDamage(skeleton, 0.21)
-end
-
-function SpearThrust(skeleton)
-    DealDamage(skeleton, 0.41)
-end
-
-function DaggerStab(skeleton)
-    DealDamage(skeleton, 0.11)
-end
-
-function AcquireTarget(skeleton)
-    -- right now look for the puny human only
-    local target = Scene:FindEntityByInstanceName('Player')
-    if target == nil then
-        return nil
-    end
-    return target
-end
-
-function AttackTarget(skeleton, target)
-    local animator = skeleton:GetAnimator()
-    animator.attack = true
-end
-
 -- Called once when the game play begins for the entity in the scene.
-function BeginPlay(skeleton, scene, map)
-    local animator = skeleton:GetAnimator()
-    animator.attack = false
+function BeginPlay(entity, scene, map)
+    local body_node = entity:GetNode(0)
+    local transformer = body_node:GetTransformer()
+
+    local velocity = entity.velocity
+    local direction = glm.normalize(velocity)
+
+    -- remember dot = |a| * |b| * cos(c)
+    -- in other words dot product equals the magnitude of the vectors
+    -- times the cosine of the angle between then
+    -- with unit length vectors (i.e magnitude is 1.0) |a| and |b|
+    -- equal 1.0 then dot equals the cosine of the angle
+    local cosine = glm.dot(direction, game.X)
+    if direction.y < 0.0 then
+        body_node:SetRotation(-math.acos(cosine))
+    else
+        body_node:SetRotation(math.acos(cosine))
+    end
+
+    transformer:SetLinearVelocity(velocity)
 end
 
 -- Called once when the game play ends for the entity in the scene.
-function EndPlay(skeleton, scene, map)
+function EndPlay(entity, scene, map)
 end
 
 -- Called on every low frequency game tick. The tick frequency is
@@ -49,58 +35,54 @@ end
 -- such as move your game objects more smoothly then Update is the place
 -- to do it. This function can be used to do thing such as evaluate AI or
 -- path finding etc.
-function Tick(skeleton, game_time, dt)
-    if skeleton.health <= 0.0 then
-        return
-    end
-
-    -- if we're walking then our AI is done.
-    if IsWalking(skeleton) then
-        return
-    end
-
-    -- Look for a juicy target for some action!
-    local target = AcquireTarget(skeleton)
-    if target == nil then
-        return
-    end
-
-    -- What's the distance to target?
-    local dist = GetManhattanDistance(skeleton, target)
-    local min_dist = math.max(dist.x, dist.y)
-
-    -- too far? forget it..
-    if min_dist >= 300.0 then
-        return
-    end
-
-    -- close enough to attack, or should we walk closer?
-    if min_dist <= 30.0 then
-        AttackTarget(skeleton, target)
-    else
-        StartWalking(skeleton, GetPosition(target))
-        Game:DebugPrint('Distance to target ' .. tostring(dist))
-    end
+function Tick(entity, game_time, dt)
 end
 
 -- Called on every iteration of the game loop. game_time is the current
 -- game time so far in seconds not including the next time step dt.
-function Update(skeleton, game_time, dt)
-    if skeleton.health <= 0.0 then
-        return
-    end
+-- allocator is an instance of game.EntityNodeAllocator that provides
+-- the storage for the entity nodes. Keep in mind that this contains
+-- *all* the nodes of any specific entity type. So the combination of
+-- all the nodes across all entity instances 'klass' type.
+-- Any component for any given node (at some index) may be nil so you
+-- need to remember to check for nils before accessing.
+function UpdateNodes(allocator, game_time, dt, klass)
+end
 
-    -- walk until we're max 30.0 units away from the target on either axis
-    if Walk(skeleton, dt, 30.0) then
-        return
-    end
+-- Called on every iteration of the game loop. game_time is the current
+-- game time so far in seconds not including the next time step dt.
+function Update(entity, game_time, dt)
 end
 
 -- Called on every iteration of the game loop game after *all* entities
 -- in the scene have been updated. This means that all objects are in their
 -- final places and it's possible to do things such as query scene spatial
 -- nodes for finding interesting objects in any particular location.
-function PostUpdate(skeleton, game_time)
+function PostUpdate(bullet, game_time)
+    if bullet:IsDying() then
+        return
+    end
+
+    local bullet_body_node = bullet:GetNode(0)
+    local bullet_body_pos = bullet_body_node:GetTranslation()
+
+    local hit_nodes = Scene:QuerySpatialNodes(bullet_body_pos, 30.0, 'Closest')
+    local enemy_node = hit_nodes:Find(function(node)
+        local entity = node:GetEntity()
+        local tag = entity:GetTag()
+        if string.find(tag, 'enemy') then
+            return true
+        end
+        return false
+    end)
+
+    if enemy_node == nil then
+        return
+    end
+    local enemy = enemy_node:GetEntity()
+    CallMethod(enemy, 'BulletHit', bullet)
+
+    bullet:Die()
 end
 
 -- Called on collision events with other objects based on the information
@@ -109,11 +91,11 @@ end
 -- contact can exist over multiple time steps depending on the type of bodies etc.
 -- Node is this entity's entity node with rigid body that collided with the
 -- other entity's other_node's rigid body.
-function OnBeginContact(skeleton, node, other_entity, other_node)
+function OnBeginContact(entity, node, other_entity, other_node)
 end
 
 -- Similar to OnBeginContact except this happens when the contact ends.
-function OnEndContact(skeleton, node, other_entity, other_node)
+function OnEndContact(entity, node, other_entity, other_node)
 end
 
 -- Called on key down events. This is only called when the entity has enabled
@@ -126,11 +108,11 @@ end
 -- Note that because some platforms post repeated events when a key is
 -- continuously held you can get this event multiple times without getting
 -- the corresponding key up!
-function OnKeyDown(skeleton, symbol, modifier_bits)
+function OnKeyDown(entity, symbol, modifier_bits)
 end
 
 -- Called on key up events. See OnKeyDown for more details.
-function OnKeyUp(skeleton, symbol, modifier_bits)
+function OnKeyUp(entity, symbol, modifier_bits)
 end
 
 -- Called on mouse button press events. This is only called when the entity
@@ -139,15 +121,15 @@ end
 -- Mouse argument is of type game.MouseEvent and provides an aggregate of
 -- information about the event. You can find more details about this type in
 -- the Lua API doc.
-function OnMousePress(skeleton, mouse)
+function OnMousePress(entity, mouse)
 end
 
 -- Called on mouse button release events. See OnMousePress for more details.
-function OnMouseRelease(skeleton, mouse)
+function OnMouseRelease(entity, mouse)
 end
 
 -- Called on mouse move events. See OnMousePress for more details.
-function OnMouseMove(skeleton, mouse)
+function OnMouseMove(entity, mouse)
 end
 
 -- Called on game events. Game events are broad-casted to all entities in
@@ -155,12 +137,12 @@ end
 -- entities possibly interested in some game event. Use Game:PostEvent to
 -- post a new game event. Each entity will then receive the same event object
 -- in this callback and can proceed to process the information.
-function OnGameEvent(skeleton, event)
+function OnGameEvent(entity, event)
 end
 
 -- Called on animation finished events, i.e. when this entity has finished
 -- playing the animation in question.
-function OnAnimationFinished(skeleton, animation)
+function OnAnimationFinished(entity, animation)
 end
 
 -- Called on timer events. Timers are set on an Entity by calling SetTimer.
@@ -171,14 +153,11 @@ end
 -- In other words if the game updates at 60 Hz the timer frequency is then
 -- 1/60 seconds. If jitter is positive it means the timer is firing early
 -- and a negative value indicates the timer fired late.
-function OnTimer(skeleton, timer, jitter)
+function OnTimer(entity, timer, jitter)
 end
 
 -- Called on posted entity events. Events can be posted on particular entities
 -- by calling entity:PostEvent. Unlike game.GameEvents game.EntityEvent are
 -- entity specific and only ever delivered to a single entity (the receiver).
-function OnEvent(skeleton, event)
-    if event.message == 'strike' then
-        StrikeWithWeapon(skeleton, event.value)
-    end
+function OnEvent(entity, event)
 end

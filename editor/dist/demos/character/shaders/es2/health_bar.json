@@ -4,12 +4,18 @@
      {
         "type": "Color",
         "name": "kFColor",
-        "desc": "Foreground Color"
+        "desc": "Edge Color"
      },
      {
         "type": "Color",
         "name": "kBColor",
-        "desc": "Background Color"
+        "desc": "Fill Color"
+     },
+     {
+        "type": "Float",
+        "name": "kValue",
+        "desc": "Health",
+        "value": 0.5
      }
   ],
   "maps": [
