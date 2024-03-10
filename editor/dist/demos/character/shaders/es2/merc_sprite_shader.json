@@ -1,0 +1,24 @@
+{
+    "uniforms": [
+        {
+            "type": "Float",
+            "name": "kAimAngle",
+            "desc": "Aim Angle",
+            "value": 0.0
+        },
+        {
+            "type": "Int",
+            "name": "kState",
+            "desc": "State",
+            "value": 0
+        }
+    ],
+    "maps": [
+        {
+            "desc": "Merc Sprite Sheet",
+            "type": "Texture2D",
+            "name": "kSpriteSheet",
+            "sampler": "kSpriteSheet"
+        }
+    ]
+}

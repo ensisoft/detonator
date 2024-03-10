@@ -1,0 +1,17 @@
+{
+  "color_space": "sRGB",
+  "image_file": "char-sheet-alpha.png",
+  "image_height": 2240,
+  "image_width": 384,
+  "json_version": 1,
+  "made_with_app": "DETONATOR 2D",
+  "made_with_ver": "rel-???",
+  "mag_filter": "Default",
+  "min_filter": "Default",
+  "premulalpha_blend": false,
+  "premultiply_alpha": false,
+  "tile_height": 46,
+  "tile_width": 46,
+  "xoffset": 0,
+  "yoffset": 0
+}
