@@ -3,10 +3,10 @@
 -- This script will be called for every instance of 'skeleton' in the scene during gameplay.
 -- You're free to delete functions you don't need.
 --
-require('LPC/walking')
-require('LPC/utility')
-require('LPC/weapon')
-require('LPC/damage')
+require('ws://lua/LPC/walking.lua')
+require('ws://lua/LPC/utility.lua')
+require('ws://lua/LPC/weapon.lua')
+require('ws://lua/LPC/damage.lua')
 
 function ArrowHit(skeleton)
     DealDamage(skeleton, 0.21)

@@ -1,4 +1,4 @@
-require('LPC/utility')
+require('ws://lua/LPC/utility.lua')
 
 -- Check if the entity is currently walking or not.
 function IsWalking(entity)

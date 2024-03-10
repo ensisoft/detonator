@@ -17,17 +17,14 @@ end
 
 -- Called when the game play begins for an entity in the scene.
 function BeginPlay(player, scene, map)
-
 end
 
 -- Called when the game play ends for an entity in the scene.
 function EndPlay(player, scene, map)
-
 end
 
 -- Called on every low frequency game tick.
 function Tick(player, game_time, dt)
-
 end
 
 -- Called on every iteration of the game loop.

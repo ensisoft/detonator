@@ -3,7 +3,7 @@
 -- This script will be called for every instance of 'combat_dummy' in the scene during gameplay.
 -- You're free to delete functions you don't need.
 --
-require('LPC/damage')
+require('ws://lua/LPC/damage.lua')
 
 function DestroyDummy(dummy)
     local node = dummy:FindNodeByClassName('Body')

@@ -189,6 +189,96 @@
             "y": 30.0
           },
           "tag": ""
+        },
+        {
+          "class": "XIPxQeL8l0",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "_capsule",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "_Black",
+            "material_params": [
+              {
+                "name": "kBaseColor",
+                "value": {
+                  "a": 0.3843137323856354,
+                  "b": 0.0,
+                  "g": 0.0,
+                  "r": 0.04080262407660484
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Message",
+          "position": {
+            "x": 0.5,
+            "y": -149.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 418.760009765625,
+            "y": 322.6199951171875
+          },
+          "tag": "#prop",
+          "text_item": {
+            "flags": {
+              "BlinkText": false,
+              "PP_EnableBloom": true,
+              "StaticContent": false,
+              "UnderlineText": false,
+              "VisibleInGame": true
+            },
+            "font_name": "app://fonts/Schoolbell.ttf",
+            "font_size": 26,
+            "horizontal_align": "Center",
+            "layer": 1,
+            "line_height": 1.0,
+            "raster_height": 0,
+            "raster_width": 0,
+            "text": "Press Arrow Left / Right \nUp and Down to run\nin 8 directions\n",
+            "text_color": {
+              "a": 1.0,
+              "b": 0.330495148897171,
+              "g": 0.38727396726608276,
+              "r": 0.920851469039917
+            },
+            "vertical_align": "Center"
+          }
         }
       ],
       "render_tree": {
@@ -205,6 +295,11 @@
                 ],
                 "node": {
                   "id": "SG6PkNuB9h"
+                }
+              },
+              {
+                "node": {
+                  "id": "XIPxQeL8l0"
                 }
               }
             ],
@@ -575,8 +670,8 @@
           },
           "name": "Hello",
           "position": {
-            "x": 195.24000549316406,
-            "y": -215.92999267578125
+            "x": 1.5384674072265625,
+            "y": -212.30764770507813
           },
           "rotation": 0.0,
           "scale": {
@@ -584,8 +679,8 @@
             "y": 1.0
           },
           "size": {
-            "x": 418.760009765625,
-            "y": 322.6199951171875
+            "x": 408.7619934082031,
+            "y": 250.3123321533203
           },
           "tag": "#prop",
           "text_item": {
@@ -597,7 +692,7 @@
               "VisibleInGame": true
             },
             "font_name": "app://fonts/Schoolbell.ttf",
-            "font_size": 36,
+            "font_size": 26,
             "horizontal_align": "Center",
             "layer": 1,
             "line_height": 1.0,
@@ -2161,6 +2256,719 @@
       },
       "resource_id": "HBSEmKKuug",
       "resource_name": "LPC/Background",
+      "resource_ver": 1,
+      "script_file": "",
+      "tag": ""
+    },
+    {
+      "animators": [
+        {
+          "id": "guvf6HEfso",
+          "initial_state": "468yaoYZ51",
+          "name": "My Animator",
+          "script_id": "RR5yoJ3rxj",
+          "states": [
+            {
+              "id": "63Z0tn2jrC",
+              "name": "Active"
+            },
+            {
+              "id": "468yaoYZ51",
+              "name": "Idle"
+            },
+            {
+              "id": "R0zvZ900Ox",
+              "name": "Die"
+            },
+            {
+              "id": "XjrLutqPTs",
+              "name": "Attack"
+            }
+          ],
+          "transitions": [
+            {
+              "dst_state_id": "R0zvZ900Ox",
+              "duration": 0.0,
+              "id": "IRxr7u21Ia",
+              "name": "",
+              "src_state_id": "XjrLutqPTs"
+            },
+            {
+              "dst_state_id": "R0zvZ900Ox",
+              "duration": 0.0,
+              "id": "GwoD1LrUA6",
+              "name": "",
+              "src_state_id": "468yaoYZ51"
+            },
+            {
+              "dst_state_id": "R0zvZ900Ox",
+              "duration": 0.0,
+              "id": "RpEAwQ6xoZ",
+              "name": "",
+              "src_state_id": "63Z0tn2jrC"
+            },
+            {
+              "dst_state_id": "XjrLutqPTs",
+              "duration": 0.0,
+              "id": "3IsUSuxo1Q",
+              "name": "",
+              "src_state_id": "468yaoYZ51"
+            },
+            {
+              "dst_state_id": "468yaoYZ51",
+              "duration": 0.0,
+              "id": "RNC9hF4KzO",
+              "name": "",
+              "src_state_id": "XjrLutqPTs"
+            },
+            {
+              "dst_state_id": "63Z0tn2jrC",
+              "duration": 0.0,
+              "id": "qsDSrPBIf3",
+              "name": "",
+              "src_state_id": "468yaoYZ51"
+            },
+            {
+              "dst_state_id": "468yaoYZ51",
+              "duration": 0.0,
+              "id": "GUUhZhDRw7",
+              "name": "",
+              "src_state_id": "63Z0tn2jrC"
+            }
+          ]
+        }
+      ],
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "PostUpdate": false,
+        "TickEntity": false,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": true,
+        "WantsMouseEvents": false
+      },
+      "id": "Oazs2C0TQF",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Bandit/Bandit",
+      "nodes": [
+        {
+          "class": "1RZ8lBNXjt",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 0.0,
+            "y": -61.0
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 1.5,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": true,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 1.0,
+            "linear_damping": 1.0,
+            "polygon": "Y9mJKUQboN",
+            "restitution": 0.0,
+            "shape": "Polygon",
+            "simulation": "Dynamic"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 60.0,
+            "y": 120.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "qUZBodNR4l",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "zRjZSLqKyS",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Skin",
+          "position": {
+            "x": -9.819999694824219,
+            "y": 8.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 200.0,
+            "y": 200.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "1bsLLoRZMT",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "_capsule",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "_Black",
+            "material_params": [
+              {
+                "name": "kBaseColor",
+                "value": {
+                  "a": 0.3843137323856354,
+                  "b": 0.0,
+                  "g": 0.0,
+                  "r": 0.04080262407660484
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Message",
+          "position": {
+            "x": 0.0,
+            "y": -150.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 418.760009765625,
+            "y": 322.6199951171875
+          },
+          "tag": "#prop",
+          "text_item": {
+            "flags": {
+              "BlinkText": false,
+              "PP_EnableBloom": true,
+              "StaticContent": false,
+              "UnderlineText": false,
+              "VisibleInGame": true
+            },
+            "font_name": "app://fonts/Schoolbell.ttf",
+            "font_size": 26,
+            "horizontal_align": "Center",
+            "layer": 1,
+            "line_height": 1.0,
+            "raster_height": 0,
+            "raster_width": 0,
+            "text": "Press Arrow Left / Right to Walk\nPress Arrow Up to Jump\nPress Space to Attack",
+            "text_color": {
+              "a": 1.0,
+              "b": 0.330495148897171,
+              "g": 0.38727396726608276,
+              "r": 0.920851469039917
+            },
+            "vertical_align": "Center"
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "qUZBodNR4l"
+                }
+              },
+              {
+                "node": {
+                  "id": "1bsLLoRZMT"
+                }
+              }
+            ],
+            "node": {
+              "id": "1RZ8lBNXjt"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "Oazs2C0TQF",
+      "resource_name": "Bandit/Bandit",
+      "resource_ver": 1,
+      "script_file": "32oNogwII0",
+      "tag": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "PostUpdate": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "T7CSJGSr9s",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Bandit/Block",
+      "nodes": [
+        {
+          "class": "a0d6M7kxGr",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "3im7gYgEte",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 1.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "polygon": "",
+            "restitution": 0.0,
+            "shape": "Box",
+            "simulation": "Static"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 100.0,
+            "y": 100.0
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "a0d6M7kxGr"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "T7CSJGSr9s",
+      "resource_name": "Bandit/Block",
+      "resource_ver": 1,
+      "script_file": "",
+      "tag": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "PostUpdate": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "CPUAToxeNY",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Bandit/Crate",
+      "nodes": [
+        {
+          "class": "N8jak8K8Yy",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "KEChSTgnxU",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 1.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 1.0,
+            "linear_damping": 0.5,
+            "polygon": "ZOW84mNSWm",
+            "restitution": 0.5,
+            "shape": "Box",
+            "simulation": "Dynamic"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 50.0,
+            "y": 50.0
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "N8jak8K8Yy"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "CPUAToxeNY",
+      "resource_name": "Bandit/Crate",
+      "resource_ver": 1,
+      "script_file": "",
+      "tag": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "PostUpdate": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "WejbMZ2efw",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Instructions",
+      "nodes": [
+        {
+          "class": "SWRHlHeoP4",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 300.0,
+            "y": 200.0
+          },
+          "tag": "",
+          "text_item": {
+            "flags": {
+              "BlinkText": false,
+              "PP_EnableBloom": true,
+              "StaticContent": false,
+              "UnderlineText": false,
+              "VisibleInGame": true
+            },
+            "font_name": "app://fonts/ethnocentric rg.otf",
+            "font_size": 26,
+            "horizontal_align": "Left",
+            "layer": 1,
+            "line_height": 1.100000023841858,
+            "raster_height": 0,
+            "raster_width": 0,
+            "text": "F1  = LPC Demo\nF2 = Bandit Demo \nF3 = 8Dir demo\nEsc = Quit",
+            "text_color": {
+              "a": 1.0,
+              "b": 0.053192950785160065,
+              "g": 0.8357976675033569,
+              "r": 0.08307011425495148
+            },
+            "vertical_align": "Center"
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "SWRHlHeoP4"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "WejbMZ2efw",
+      "resource_name": "Instructions",
+      "resource_ver": 1,
+      "script_file": "",
+      "tag": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "PostUpdate": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "45KrnKlIIQ",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Bandit/IceBlock",
+      "nodes": [
+        {
+          "class": "aILKFCC3Qh",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "Hxhn1HHoak",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 1.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.0,
+            "linear_damping": 0.5,
+            "polygon": "",
+            "restitution": 0.0,
+            "shape": "Box",
+            "simulation": "Static"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 100.0,
+            "y": 100.0
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "aILKFCC3Qh"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "45KrnKlIIQ",
+      "resource_name": "Bandit/IceBlock",
       "resource_ver": 1,
       "script_file": "",
       "tag": ""
@@ -5539,6 +6347,1441 @@
           }
         }
       ]
+    },
+    {
+      "active_texture_map": "sXA3Fk6ZFL",
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "zRjZSLqKyS",
+      "name": "Bandit/Bandit",
+      "particle_action": "None",
+      "resource_id": "zRjZSLqKyS",
+      "resource_name": "Bandit/Bandit",
+      "resource_ver": 1,
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Opaque",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "sXA3Fk6ZFL",
+          "looping": true,
+          "name": "Idle",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/01-Idle/__Bandit02_Idle_000.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "PUQ4EBohIt",
+              "name": "__Bandit02_Idle_000",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/01-Idle/__Bandit02_Idle_001.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "pD08TWFuBO",
+              "name": "__Bandit02_Idle_001",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/01-Idle/__Bandit02_Idle_002.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "7FQMRrmTYj",
+              "name": "__Bandit02_Idle_002",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/01-Idle/__Bandit02_Idle_003.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "ZayoD3y2K8",
+              "name": "__Bandit02_Idle_003",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/01-Idle/__Bandit02_Idle_004.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "5lt5EGGRyh",
+              "name": "__Bandit02_Idle_004",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/01-Idle/__Bandit02_Idle_005.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "gsSRZJHiW9",
+              "name": "__Bandit02_Idle_005",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/01-Idle/__Bandit02_Idle_006.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "87gjdzuqey",
+              "name": "__Bandit02_Idle_006",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/01-Idle/__Bandit02_Idle_007.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "4dxR9ewo63",
+              "name": "__Bandit02_Idle_007",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/01-Idle/__Bandit02_Idle_008.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "8o5ByJ8YsA",
+              "name": "__Bandit02_Idle_008",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/01-Idle/__Bandit02_Idle_009.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "sOIeIhAC3M",
+              "name": "__Bandit02_Idle_009",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/01-Idle/__Bandit02_Idle_010.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "F0e1RG3bN0",
+              "name": "__Bandit02_Idle_010",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/01-Idle/__Bandit02_Idle_011.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "1mYkyp76zN",
+              "name": "__Bandit02_Idle_011",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 30.0,
+          "id": "bNWiib0LUd",
+          "looping": true,
+          "name": "Walk",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/02-Walk/__Bandit02_Walk_000.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "CBWm29zF9G",
+              "name": "__Bandit02_Walk_000",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/02-Walk/__Bandit02_Walk_001.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "Q6yCdkIkhq",
+              "name": "__Bandit02_Walk_001",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/02-Walk/__Bandit02_Walk_002.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "BtpumaSahX",
+              "name": "__Bandit02_Walk_002",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/02-Walk/__Bandit02_Walk_003.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "lAtEdFZIAX",
+              "name": "__Bandit02_Walk_003",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/02-Walk/__Bandit02_Walk_004.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "EgAjJzyM8Y",
+              "name": "__Bandit02_Walk_004",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/02-Walk/__Bandit02_Walk_005.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "yhWKmJ9xDK",
+              "name": "__Bandit02_Walk_005",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/02-Walk/__Bandit02_Walk_006.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "XgtzO1871H",
+              "name": "__Bandit02_Walk_006",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/02-Walk/__Bandit02_Walk_007.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "Pkef97GNzg",
+              "name": "__Bandit02_Walk_007",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 20.0,
+          "id": "D6r1PNLtkN",
+          "looping": false,
+          "name": "Attack",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/03-Attack/__Bandit02_Attack_000.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "H1UPAqiGA7",
+              "name": "__Bandit02_Attack_000",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/03-Attack/__Bandit02_Attack_001.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "EkeYw7JCO8",
+              "name": "__Bandit02_Attack_001",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/03-Attack/__Bandit02_Attack_002.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "vxMgFZYOWQ",
+              "name": "__Bandit02_Attack_002",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/03-Attack/__Bandit02_Attack_003.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "enTHMpnwuA",
+              "name": "__Bandit02_Attack_003",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/03-Attack/__Bandit02_Attack_004.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "FaPiHlD03j",
+              "name": "__Bandit02_Attack_004",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/03-Attack/__Bandit02_Attack_005.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "ueme9gXGy4",
+              "name": "__Bandit02_Attack_005",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/03-Attack/__Bandit02_Attack_006.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "MMy27wle7A",
+              "name": "__Bandit02_Attack_006",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/03-Attack/__Bandit02_Attack_007.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "ZGFmBa01Ng",
+              "name": "__Bandit02_Attack_007",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "uvF1f3ojZy",
+          "looping": false,
+          "name": "Jump",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/05-JumpUp/__Bandit02_JumpUP_000.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "lS9O86gFIK",
+              "name": "__Bandit02_JumpUP_000",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/05-JumpUp/__Bandit02_JumpUP_001.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "NxEs9aE7md",
+              "name": "__Bandit02_JumpUP_001",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/05-JumpUp/__Bandit02_JumpUP_002.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "9fHErixQaP",
+              "name": "__Bandit02_JumpUP_002",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/05-JumpUp/__Bandit02_JumpUP_003.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "RxEzBqD0pR",
+              "name": "__Bandit02_JumpUP_003",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/05-JumpUp/__Bandit02_JumpUP_004.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "lhrd5d7SgH",
+              "name": "__Bandit02_JumpUP_004",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/05-JumpUp/__Bandit02_JumpUP_005.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "tmoHDKSL1z",
+              "name": "__Bandit02_JumpUP_005",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/05-JumpUp/__Bandit02_JumpUP_006.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "ttBQQ3kUzU",
+              "name": "__Bandit02_JumpUP_006",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/05-JumpUp/__Bandit02_JumpUP_007.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "aeIKooEL9D",
+              "name": "__Bandit02_JumpUP_007",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "J6LsOEl3D9",
+          "looping": true,
+          "name": "Fall",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/06-FallDown/__Bandit02_FallDown_000.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "R5MOM0xZ0L",
+              "name": "__Bandit02_FallDown_000",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/06-FallDown/__Bandit02_FallDown_001.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "6MFHI6UpoN",
+              "name": "__Bandit02_FallDown_001",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/06-FallDown/__Bandit02_FallDown_002.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "lB6b1EPBdA",
+              "name": "__Bandit02_FallDown_002",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/06-FallDown/__Bandit02_FallDown_003.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "Evp4N2b5OY",
+              "name": "__Bandit02_FallDown_003",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/06-FallDown/__Bandit02_FallDown_004.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "j7dCBlow4h",
+              "name": "__Bandit02_FallDown_004",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/06-FallDown/__Bandit02_FallDown_005.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "1ER1H8HFmK",
+              "name": "__Bandit02_FallDown_005",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/06-FallDown/__Bandit02_FallDown_006.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "MzerkA3pCH",
+              "name": "__Bandit02_FallDown_006",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/06-FallDown/__Bandit02_FallDown_007.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "9JfuNbvRkC",
+              "name": "__Bandit02_FallDown_007",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        },
+        {
+          "fps": 10.0,
+          "id": "wkCZxevwEJ",
+          "looping": false,
+          "name": "Die",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/08-Die/__Bandit02_Die_000.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "4OF1pD96Bu",
+              "name": "__Bandit02_Die_000",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/08-Die/__Bandit02_Die_001.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "e8K42zuDlK",
+              "name": "__Bandit02_Die_001",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/08-Die/__Bandit02_Die_002.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "PSvLwNkCJN",
+              "name": "__Bandit02_Die_002",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/08-Die/__Bandit02_Die_003.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "xhglHT1HXE",
+              "name": "__Bandit02_Die_003",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/08-Die/__Bandit02_Die_004.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "PUeYT1AwiQ",
+              "name": "__Bandit02_Die_004",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/08-Die/__Bandit02_Die_005.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "ZwGha99MUd",
+              "name": "__Bandit02_Die_005",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/08-Die/__Bandit02_Die_006.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "EXl10TW9rM",
+              "name": "__Bandit02_Die_006",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/08-Die/__Bandit02_Die_007.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "Ab1kCOCCWD",
+              "name": "__Bandit02_Die_007",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite",
+      "uniforms": [
+        {
+          "name": "kAlphaCutoff",
+          "value": 0.5
+        }
+      ]
+    },
+    {
+      "active_texture_map": "",
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "KEChSTgnxU",
+      "name": "Bandit/Crate",
+      "particle_action": "None",
+      "resource_id": "KEChSTgnxU",
+      "resource_name": "Bandit/Crate",
+      "resource_ver": 1,
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Opaque",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "eMqvTv3Rha",
+          "looping": true,
+          "name": "Texture",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/props/Crate.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "SlY2rkKZAu",
+              "name": "Crate",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
+    },
+    {
+      "active_texture_map": "",
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "3im7gYgEte",
+      "name": "BanditStoneBlock",
+      "particle_action": "None",
+      "resource_id": "3im7gYgEte",
+      "resource_name": "BanditStoneBlock",
+      "resource_ver": 1,
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Opaque",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "AKF8fP5De7",
+          "looping": true,
+          "name": "Texture",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/props/StoneBlock.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "TimYRYwTTQ",
+              "name": "StoneBlock",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kAlphaCutoff",
+          "value": 0.009999999776482582
+        }
+      ]
+    },
+    {
+      "active_texture_map": "",
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "Hxhn1HHoak",
+      "name": "Bandit/IceBlock",
+      "particle_action": "None",
+      "resource_id": "Hxhn1HHoak",
+      "resource_name": "Bandit/IceBlock",
+      "resource_ver": 1,
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "XLxH1kYUQP",
+          "looping": true,
+          "name": "Texture",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://Bandit/props/IceBlock.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "9b5ro6aJSy",
+              "name": "IceBlock",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture"
     }
   ],
   "scenes": [
@@ -5761,6 +8004,49 @@
             "x": 1.0,
             "y": 1.0
           }
+        },
+        {
+          "entity": "WejbMZ2efw",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "gjHU44pPAY",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Instructions_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 350.0,
+            "y": -400.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
         }
       ],
       "quadtree_max_items": 4,
@@ -5791,12 +8077,1604 @@
             "node": {
               "id": "zZIuNiqRzL"
             }
+          },
+          {
+            "node": {
+              "id": "gjHU44pPAY"
+            }
           }
         ],
         "node": null
       },
       "resource_id": "s89fX2XxBH",
       "resource_name": "LPC",
+      "resource_ver": 1,
+      "script_file": "",
+      "tilemap": ""
+    },
+    {
+      "dynamic_spatial_index": "Disabled",
+      "id": "sZlOHsRPTp",
+      "name": "Bandit",
+      "nodes": [
+        {
+          "entity": "T7CSJGSr9s",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "MwObtnv25q",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Block_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -300.0,
+            "y": 50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "T7CSJGSr9s",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "jLhyWPmjHb",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Block_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": 50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "T7CSJGSr9s",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "uaKww4SfAA",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Block_2",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 100.0,
+            "y": 50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "T7CSJGSr9s",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "lzWwuOJMqj",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Block_3",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 200.0,
+            "y": 50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "T7CSJGSr9s",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "Iv0tnENNZN",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Block_4",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 300.0,
+            "y": 50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "T7CSJGSr9s",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "jpN995r8eI",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Block_6",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 150.0,
+            "y": -50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "T7CSJGSr9s",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "9O7Xlzp792",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Block_8",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 250.0,
+            "y": -150.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "CPUAToxeNY",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "1wQRD4aGOo",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Crate_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -183.00001525878906,
+            "y": -28.5000057220459
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "CPUAToxeNY",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "AnAlN9qXAB",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Crate_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -120.00000762939453,
+            "y": -36.50000762939453
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "CPUAToxeNY",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "TDQjjPCDwi",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Crate_2",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -151.00001525878906,
+            "y": -98.50001525878906
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "CPUAToxeNY",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "BzbxCiP983",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Crate_3",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -156.00001525878906,
+            "y": -166.50001525878906
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "CPUAToxeNY",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "PK7BUBo9lq",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Crate_4",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -150.0,
+            "y": -350.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "T7CSJGSr9s",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "pRWeSLipkY",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Block_12",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -400.0,
+            "y": 50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "Oazs2C0TQF",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "5NSLokO0kz",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Bandit_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -35.00001525878906,
+            "y": -2.0000228881835938
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "CPUAToxeNY",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "NpydyYCYa7",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Crate_5",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 100.0,
+            "y": -300.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "CPUAToxeNY",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "mkUqbdYW3w",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Crate_6",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 150.0,
+            "y": -300.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "WejbMZ2efw",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "nmoHvUqjgH",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Instructions_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 350.0,
+            "y": -400.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "45KrnKlIIQ",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "m8ztNrWivv",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/IceBlock_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -200.0,
+            "y": 50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "45KrnKlIIQ",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "riM7w8P8H2",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/IceBlock_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -100.0,
+            "y": 50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "45KrnKlIIQ",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "ghBO51n4OW",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/IceBlock_2",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 250.0,
+            "y": -50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "45KrnKlIIQ",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "F1jFt90NDg",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/IceBlock_3",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -400.0,
+            "y": -50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "MwObtnv25q"
+            }
+          },
+          {
+            "node": {
+              "id": "jLhyWPmjHb"
+            }
+          },
+          {
+            "node": {
+              "id": "uaKww4SfAA"
+            }
+          },
+          {
+            "node": {
+              "id": "lzWwuOJMqj"
+            }
+          },
+          {
+            "node": {
+              "id": "Iv0tnENNZN"
+            }
+          },
+          {
+            "node": {
+              "id": "jpN995r8eI"
+            }
+          },
+          {
+            "node": {
+              "id": "9O7Xlzp792"
+            }
+          },
+          {
+            "node": {
+              "id": "1wQRD4aGOo"
+            }
+          },
+          {
+            "node": {
+              "id": "AnAlN9qXAB"
+            }
+          },
+          {
+            "node": {
+              "id": "TDQjjPCDwi"
+            }
+          },
+          {
+            "node": {
+              "id": "BzbxCiP983"
+            }
+          },
+          {
+            "node": {
+              "id": "PK7BUBo9lq"
+            }
+          },
+          {
+            "node": {
+              "id": "pRWeSLipkY"
+            }
+          },
+          {
+            "node": {
+              "id": "5NSLokO0kz"
+            }
+          },
+          {
+            "node": {
+              "id": "NpydyYCYa7"
+            }
+          },
+          {
+            "node": {
+              "id": "mkUqbdYW3w"
+            }
+          },
+          {
+            "node": {
+              "id": "nmoHvUqjgH"
+            }
+          },
+          {
+            "node": {
+              "id": "m8ztNrWivv"
+            }
+          },
+          {
+            "node": {
+              "id": "riM7w8P8H2"
+            }
+          },
+          {
+            "node": {
+              "id": "ghBO51n4OW"
+            }
+          },
+          {
+            "node": {
+              "id": "F1jFt90NDg"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "sZlOHsRPTp",
+      "resource_name": "Bandit",
+      "resource_ver": 1,
+      "script_file": "",
+      "tilemap": ""
+    },
+    {
+      "dynamic_spatial_index": "Disabled",
+      "id": "wH2KNMq5QW",
+      "name": "_Bandit/Bandit_preview_scene_",
+      "nodes": [
+        {
+          "entity": "T7CSJGSr9s",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "hlug0UoxMN",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Block_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -350.0,
+            "y": 50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "T7CSJGSr9s",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "nQZ6HWGUEu",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Block_3",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -50.0,
+            "y": 50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "T7CSJGSr9s",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "A1JzoKhPE5",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Block_4",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 50.0,
+            "y": 50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "T7CSJGSr9s",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "wIJth1dSqy",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Block_5",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 150.0,
+            "y": 50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "T7CSJGSr9s",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "C10Ej9qSdh",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Block_6",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 250.0,
+            "y": 50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "T7CSJGSr9s",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "vSYZgX2Jda",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Block_7",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 350.0,
+            "y": 50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "T7CSJGSr9s",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "1OUPC9Em0C",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/Block_8",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 200.0,
+            "y": -50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "45KrnKlIIQ",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "P354Bl2NXA",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/IceBlock_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -250.0,
+            "y": 50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "45KrnKlIIQ",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "dQjtICdje8",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Bandit/IceBlock_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -150.0,
+            "y": 50.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "hlug0UoxMN"
+            }
+          },
+          {
+            "node": {
+              "id": "nQZ6HWGUEu"
+            }
+          },
+          {
+            "node": {
+              "id": "A1JzoKhPE5"
+            }
+          },
+          {
+            "node": {
+              "id": "wIJth1dSqy"
+            }
+          },
+          {
+            "node": {
+              "id": "C10Ej9qSdh"
+            }
+          },
+          {
+            "node": {
+              "id": "vSYZgX2Jda"
+            }
+          },
+          {
+            "node": {
+              "id": "1OUPC9Em0C"
+            }
+          },
+          {
+            "node": {
+              "id": "P354Bl2NXA"
+            }
+          },
+          {
+            "node": {
+              "id": "dQjtICdje8"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "wH2KNMq5QW",
+      "resource_name": "_Bandit/Bandit_preview_scene_",
+      "resource_ver": 1,
+      "script_file": "",
+      "tilemap": ""
+    },
+    {
+      "dynamic_spatial_index": "Disabled",
+      "id": "WY3KT3AnjS",
+      "name": "8Dir",
+      "nodes": [
+        {
+          "entity": "UdhtSlNfiN",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "jRQ8TilSeh",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "8-dir-char-template/Dummy_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": -0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "WejbMZ2efw",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "iFrb6i7Hv4",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Copy of Instructions_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 350.0,
+            "y": -400.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "jRQ8TilSeh"
+            }
+          },
+          {
+            "node": {
+              "id": "iFrb6i7Hv4"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "WY3KT3AnjS",
+      "resource_name": "8Dir",
       "resource_ver": 1,
       "script_file": "",
       "tilemap": ""
@@ -5922,6 +9800,26 @@
       "resource_ver": 1,
       "type": "ScriptData",
       "uri": "ws://lua/LPC/walking.lua"
+    },
+    {
+      "id": "32oNogwII0",
+      "name": "Bandit",
+      "owner": "",
+      "resource_id": "32oNogwII0",
+      "resource_name": "Bandit",
+      "resource_ver": 1,
+      "type": "Unspecified",
+      "uri": "ws://lua/32oNogwII0.lua"
+    },
+    {
+      "id": "RR5yoJ3rxj",
+      "name": "Bandit / Animator",
+      "owner": "",
+      "resource_id": "RR5yoJ3rxj",
+      "resource_name": "Bandit / Animator",
+      "resource_ver": 1,
+      "type": "Unspecified",
+      "uri": "ws://lua/RR5yoJ3rxj.lua"
     }
   ],
   "shapes": [
@@ -5959,6 +9857,44 @@
       "name": "8-dir-char-template/Pointer",
       "resource_id": "ZOW84mNSWm",
       "resource_name": "8-dir-char-template/Pointer",
+      "resource_ver": 1,
+      "static": true,
+      "uri": ""
+    },
+    {
+      "content_hash_hi": 1203231429,
+      "content_hash_lo": 1484009030,
+      "id": "Y9mJKUQboN",
+      "inline_data": {
+        "byte_order": "LE",
+        "command_buffer": "AgAAAAcAAAAAAAAA",
+        "index_buffer": "",
+        "index_type": "Index16",
+        "vertex_buffer": "xDYKPwAAAIDENgo/AAAAAAAAAAAAAACAAAAAAAAAAAAAAAAA11prvwAAAADXWms/kf+EPgAAgL+R/4Q+AACAP4y2TD8AAIC/jLZMPwAAgD8AAIA/11prvwAAgD/XWms/AACAPwAAAIAAAIA/AAAAAA==",
+        "vertex_layout": {
+          "attributes": [
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aPosition",
+              "offset": 0,
+              "size": 2
+            },
+            {
+              "divisor": 0,
+              "index": 0,
+              "name": "aTexCoord",
+              "offset": 8,
+              "size": 2
+            }
+          ],
+          "bytes": 16
+        }
+      },
+      "mesh": "Simple2D",
+      "name": "Bandit/Bandit",
+      "resource_id": "Y9mJKUQboN",
+      "resource_name": "Bandit/Bandit",
       "resource_ver": 1,
       "static": true,
       "uri": ""

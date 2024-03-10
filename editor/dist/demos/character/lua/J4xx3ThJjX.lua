@@ -3,9 +3,9 @@
 -- This script will be called for every instance of 'entity' in the scene during gameplay.
 -- You're free to delete functions you don't need.
 --
-require('LPC/walking')
-require('LPC/weapon')
-require('LPC/damage')
+require('ws://lua/LPC/walking.lua')
+require('ws://lua/LPC/weapon.lua')
+require('ws://lua/LPC/damage.lua')
 
 function ArrowHit(player)
     DealDamage(player, -0.21)

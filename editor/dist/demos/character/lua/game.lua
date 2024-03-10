@@ -10,6 +10,15 @@ Scenes[0] = {
     name = 'LPC',
     view = base.FRect:new(-500, -500, 1000, 1000)
 }
+Scenes[1] = {
+    name = 'Bandit',
+    view = base.FRect:new(-500, -500, 1000, 1000)
+}
+
+Scenes[2] = {
+    name = '8Dir',
+    view = base.FRect:new(-500, -500, 1000, 1000)
+}
 
 function LoadScene(index)
     local scene = Scenes[index]
@@ -61,7 +70,6 @@ end
 -- dt is the time step to take.
 -- Note that this is *not* called when then the game has been suspended.
 function Tick(game_time, dt)
-
 end
 
 -- High frequency game update function. The update frequency is
@@ -70,7 +78,6 @@ end
 -- dt is the time step to take.
 -- Note that this is *not* called when the game has been suspended.
 function Update(game_time, dt)
-
 end
 
 -- Event/input callback handlers.
@@ -88,11 +95,24 @@ end
 --    ...
 -- end
 function OnKeyDown(symbol, modifier_bits)
-
 end
 
 function OnKeyUp(symbol, modifier_bits)
+    if symbol == wdk.Keys.Escape then
+        Game:Quit(0)
+    end
 
+    if symbol == wdk.Keys.F1 then
+        LoadScene(0)
+    end
+
+    if symbol == wdk.Keys.F2 then
+        LoadScene(1)
+    end
+
+    if symbol == wdk.Keys.F3 then
+        LoadScene(2)
+    end
 end
 
 -- Called on mouse button press events.
@@ -103,12 +123,10 @@ end
 -- 'modifiers'    - modifier bits of keyboard mods that were pressed (if any).
 -- 'over_scene'   - true to indicate that the mouse cursor is over the scene viewport in window.
 function OnMousePress(mouse)
-
 end
 
 -- Called on mouse button release events.
 function OnMouseRelease(mouse)
-
 end
 
 -- Called on mouse move events.
@@ -117,13 +135,11 @@ end
 
 -- Called when the UI has been opened through a call to Game:OpenUI
 function OnUIOpen(ui)
-
 end
 
 -- Called when the UI is has been closed. Result is the int value
 -- given to Game:CloseUI.
 function OnUIClose(ui, result)
-
 end
 
 -- Called when the UI system translates some user input action
@@ -135,7 +151,6 @@ end
 -- 'type'  - type string ('ButtonPress' etc) of the action
 -- 'value' - value (int, float, bool, string) of the  action if any.
 function OnUIAction(ui, action)
-
 end
 
 -- Called when an audio event happens.
@@ -143,7 +158,6 @@ end
 -- 'type'  - the type of the event. 'MusicTrackDone' or 'SoundEffectDone'
 -- 'track' - the name of the audio track that generated the event.
 function OnAudioEvent(event)
-
 end
 
 -- Called when a game event has been posted.
@@ -153,5 +167,4 @@ end
 -- 'message' a text message identifying the event or carrying event information
 -- 'value' a value of bool, float, int, string, vec2/3/4, FRect, FSize, FPoint or Color4f
 function OnGameEvent(event)
-
 end
