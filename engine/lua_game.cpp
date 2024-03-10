@@ -786,6 +786,10 @@ void BindGameLib(sol::state& L)
     auto material_actuator = table.new_usertype<MaterialActuator>("MaterialActuator");
     BindActuatorInterface<MaterialActuator>(material_actuator);
 
+    auto animator_state = table.new_usertype<AnimationState>("AnimatorState");
+    animator_state["GetName"] = &AnimationState::GetName;
+    animator_state["GetId"]   = &AnimationState::GetId;
+
     auto animator = table.new_usertype<Animator>("Animator",
         sol::meta_function::index,     &GetAnimatorVar,
         sol::meta_function::new_index, &SetAnimatorVar);
@@ -794,6 +798,27 @@ void BindGameLib(sol::state& L)
     animator["HasValue"]  = &Animator::HasValue;
     animator["SetValue"]  = &SetAnimatorVar;
     animator["FindValue"] = &GetAnimatorVar;
+    animator["GetState"]  = [](const Animator& animator) {
+        return base::ToString(animator.GetAnimatorState());
+    };
+    animator["GetCurrentState"]      = &Animator::GetCurrentState;
+    animator["GetNextState"]         = &Animator::GetNextState;
+    animator["GetPrevState"]         = &Animator::GetPrevState;
+    animator["GetCurrentTransition"] = &Animator::GetTransition;
+    animator["IsInState"] = [](const Animator& animator, const std::string& name) {
+        if (const auto* state = animator.GetCurrentState())
+            return state->GetName() == name;
+        return false;
+    };
+    animator["IsInTransition"] = [](const Animator& animator, const std::string& from, const std::string& to) {
+        const auto* prev = animator.GetPrevState();
+        const auto* next = animator.GetNextState();
+        if (prev && next) {
+            if (prev->GetName() == from && next->GetName() == to)
+                return true;
+        }
+        return false;
+    };
 
     auto anim_class = table.new_usertype<AnimationClass>("AnimationClass");
     anim_class["GetName"]     = &AnimationClass::GetName;

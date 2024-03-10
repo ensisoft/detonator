@@ -1289,6 +1289,11 @@ void InitLuaDoc()
     DOC_TABLE("game.SetKinematicActuator");
     DOC_TABLE("game.MaterialActuator");
 
+
+    DOC_TABLE("game.AnimatorState");
+    DOC_METHOD_0("string", "GetName", "Get the animator state name.");
+    DOC_METHOD_0("string", "GetId", "Get the animator state ID.");
+
     DOC_TABLE("game.Animator");
     DOC_METHOD_0("string", "GetName", "Get the animator name.");
     DOC_METHOD_0("string", "GetId", "Get the animator class ID.");
@@ -1302,8 +1307,17 @@ void InitLuaDoc()
                                      "place the time measures the time spent in transition.");
     DOC_META_METHOD_0("...", "index", "Lua index meta method.");
     DOC_META_METHOD_0("...", "newindex", "Lua new index meta method.");
+    DOC_METHOD_0("string", "GetState", "Get the animator state. 'InTransition' or 'InState'");
+    DOC_METHOD_0("game.Animation", "GetCurrentState", "Get the current state the animator is in. This is not available during "
+                                                      "transitions but then you should use GetNextState and GetPrevState.");
+    DOC_METHOD_0("game.Animation", "GetNextState", "Get the next (target) state the animator is transitioning to. Only valid during transition.");
+    DOC_METHOD_0("game.Animation", "GetPrevState", "Get the previous (starting) state the animator started transitioning away from. Only valid during transition");
+    DOC_METHOD_1("bool", "IsInState", "Check whether the animator is currently in the given state.",
+                 "string", "name");
+    DOC_METHOD_2("bool", "IsInTransition", "Check whether the animator is currently transitioning from one specific state to another.",
+                 "string", "from", "string", "to");
 
-    DOC_TABLE("game.AnimationClass");
+    DOC_TABLE("game.Animation");
     DOC_METHOD_0("string", "GetName", "Get the animation class name.");
     DOC_METHOD_0("string", "GetId", "Get the animation class ID.");
     DOC_METHOD_0("float", "GetDuration", "Get the duration of the animation in seconds.");
