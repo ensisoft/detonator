@@ -805,19 +805,37 @@ void BindGameLib(sol::state& L)
     animator["GetNextState"]         = &Animator::GetNextState;
     animator["GetPrevState"]         = &Animator::GetPrevState;
     animator["GetCurrentTransition"] = &Animator::GetTransition;
-    animator["IsInState"] = [](const Animator& animator, const std::string& name) {
-        if (const auto* state = animator.GetCurrentState())
-            return state->GetName() == name;
-        return false;
-    };
-    animator["IsInTransition"] = [](const Animator& animator, const std::string& from, const std::string& to) {
-        const auto* prev = animator.GetPrevState();
-        const auto* next = animator.GetNextState();
-        if (prev && next) {
-            if (prev->GetName() == from && next->GetName() == to)
+    animator["IsInState"] = sol::overload(
+        [](const Animator& animator, const std::string& name) {
+            if (const auto* state = animator.GetCurrentState())
+                return state->GetName() == name;
+            return false;
+        },
+        [](const Animator& animator) {
+            if (animator.GetAnimatorState() == Animator::State::InState)
                 return true;
+            return false;
+        });
+    animator["IsInTransition"] = sol::overload(
+        [](const Animator& animator, const std::string& from, const std::string& to) {
+            const auto* prev = animator.GetPrevState();
+            const auto* next = animator.GetNextState();
+            if (prev && next) {
+                if (prev->GetName() == from && next->GetName() == to)
+                    return true;
+            }
+            return false;
+        },
+        [](const Animator& animator) {
+            if (animator.GetAnimatorState() == Animator::State::InTransition)
+                return true;
+            return false;
+        });
+    animator["GetStateName"] = [](const Animator& animator) {
+        if (const auto* state = animator.GetCurrentState()) {
+            return state->GetName();
         }
-        return false;
+        return std::string("");
     };
 
     auto anim_class = table.new_usertype<AnimationClass>("AnimationClass");
