@@ -116,6 +116,8 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
 
     // hide this for now.
     SetVisible(mUI.textureRect, false);
+
+    mUI.splitter->setSizes({250, 1000, 250});
 }
 
 MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& resource) : MaterialWidget(workspace)
