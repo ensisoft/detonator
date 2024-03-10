@@ -1314,8 +1314,11 @@ void InitLuaDoc()
     DOC_METHOD_0("game.Animation", "GetPrevState", "Get the previous (starting) state the animator started transitioning away from. Only valid during transition");
     DOC_METHOD_1("bool", "IsInState", "Check whether the animator is currently in the given state.",
                  "string", "name");
+    DOC_METHOD_0("bool", "IsInState", "Check whether the animator is currently in any state (i.e. not in transition).");
     DOC_METHOD_2("bool", "IsInTransition", "Check whether the animator is currently transitioning from one specific state to another.",
                  "string", "from", "string", "to");
+    DOC_METHOD_0("bool", "IsInTransition", "Check whether the animator is currently transitioning from one state to another.");
+    DOC_METHOD_0("string", "GetStateName", "Get the name of the current state. If in transition an empty string is returned.");
 
     DOC_TABLE("game.Animation");
     DOC_METHOD_0("string", "GetName", "Get the animation class name.");
