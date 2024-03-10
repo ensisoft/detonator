@@ -1880,6 +1880,9 @@ void InitLuaDoc()
                    "wdk.Keys", "key", "unsigned", "modifier_bits", "table", "mapping");
     DOC_FUNCTION_3("void", "KeyUp", "Receive native keyboard key up event nad convert it to a logical action key.",
                    "wdk.Keys", "key", "unsigned", "modifier_bits", "table", "mapping");
+    DOC_FUNCTION_1("void", "ClearKey", "Clear a key from the currently set set of keys.",
+                   "unsigned", "key");
+    DOC_FUNCTION_0("void", "ClearAll", "Clear all keys from the set of set keys.");
 
     DOC_TABLE2("KB.Keys", "This table defines logical game action keys such as Up, Down etc. "
                           "You can use these for logical actions in your game instead of relying on "

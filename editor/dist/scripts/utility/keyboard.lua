@@ -59,3 +59,7 @@ end
 KB.ClearKey = function(key)
     keydown_bits = keydown_bits & ~key
 end
+
+KB.ClearAll = function()
+    keydown_bits = 0
+end
