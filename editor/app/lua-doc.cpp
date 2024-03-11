@@ -266,6 +266,8 @@ void InitLuaDoc()
     DOC_TABLE("gfx.Material");
 
     DOC_TABLE("util");
+    DOC_FUNCTION_3("glm.vec2", "FindImpulse", "Find the required impulse in order to change the current velocity of an object to target velocity.",
+                                              "glm.vec2", "current_velocity", "glm.vec2", "target_velocity", "float", "mass");
     DOC_FUNCTION_3("bool", "DistanceIsLess", "Check whether the distance between two points is less than the maximum.",
                    "glm.vec2", "a", "glm.vec2", "b", "float", "maximum");
     DOC_FUNCTION_3("bool", "DistanceIsLessOrEqual", "Check whether the distance between two points is less or equal to maximum",

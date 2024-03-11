@@ -164,6 +164,19 @@ namespace engine
         return diff.x*diff.x + diff.y*diff.y >= minimum*minimum;
     };
 
+    util["FindImpulse"] = [](const glm::vec2& current_velocity,
+                             const glm::vec2& target_velocity, float mass) {
+        // find the impulse I required in order to change current
+        // velocity to target velocity.
+        //
+        // I = dM * = m * dV
+        //
+        // Impulse is the change in momentum which equals change in velocity * mass.
+        //
+        const auto& dV = target_velocity - current_velocity;
+        return dV * mass;
+    };
+
     // see comments at RandomEngine about why this is done.
     util["RandomSeed"] = &RandomEngine::SeedGlobal;
     util["Random"] = sol::overload(
