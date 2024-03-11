@@ -1050,19 +1050,27 @@ namespace game
         void SetFlag(Flags flag, bool on_off) noexcept
         { mInstanceFlags.set(flag, on_off); }
 
-        void ApplyLinearImpulseToCenter(const glm::vec2& impulse) noexcept
-        { mCenterImpulse = impulse; }
+        // Set an impulse to be applied to the center of the rigid
+        // body on the next update of the physics engine. Warning,
+        // this method will overwrite any previous impulse.
+        // Use AddLinearImpulseToCenter in order to combine the impulses.
+        void ApplyLinearImpulseToCenter(const glm::vec2& impulse) noexcept;
 
+        // Add (accumulate) a linear impulse to be applied to the center
+        // of the rigid body on the next update of the physics engine.
+        // The impulse is added to any previous impulse and the combination
+        // is the final impulse applied on the body.
+        void AddLinearImpulseToCenter(const glm::vec2& impulse) noexcept;
         // Set a new linear velocity adjustment to be applied
         // on the next update of the physics engine. The velocity
         // is in meters per second.
-        void AdjustLinearVelocity(const glm::vec2& velocity) noexcept
-        { mLinearVelocityAdjustment = velocity; }
+        void AdjustLinearVelocity(const glm::vec2& velocity) noexcept;
+
         // Set a new angular velocity adjustment to be applied
         // on the next update of the physics engine. The velocity
         // is in radians per second.
-        void AdjustAngularVelocity(float radians) noexcept
-        { mAngularVelocityAdjustment = radians; }
+        void AdjustAngularVelocity(float radians) noexcept;
+
         bool HasCenterImpulse() const noexcept
         { return mCenterImpulse.has_value(); }
         bool HasLinearVelocityAdjustment() const noexcept
@@ -1081,6 +1089,8 @@ namespace game
             mAngularVelocityAdjustment.reset();
             mCenterImpulse.reset();
         }
+        void ClearImpulse() noexcept
+        { mCenterImpulse.reset(); }
         void Enable(bool value) noexcept
         { SetFlag(Flags::Enabled, value); }
         bool IsEnabled() const noexcept

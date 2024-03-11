@@ -1090,11 +1090,30 @@ void InitLuaDoc()
     DOC_METHOD_0("float", "GetAngularVelocity", "Get the current angular (rotational) velocity (rad/s) of the rigid body.");
     DOC_METHOD_1("void", "Enable", "Enable or disable the body in physics simulation.", "bool", "enabled");
     DOC_METHOD_1("void", "ApplyImpulse", "Apply linear impulse to the center of the body.<br>"
-                                         "The impulse will be applied on the next iteration of the physics update.",
+                                         "The impulse will be applied on the next iteration of the physics update.<br>"
+                                         "Warning: This method will overwrite any previously set impulse! "
+                                         "If you don't want this use AddImpulse to combine the impulses.",
                  "glm.vec2", "impulse");
     DOC_METHOD_2("void", "ApplyImpulse", "Apply linear impulse to the center of the body.<br>"
                                          "The impulse will be applied on the next iteration of the physics update.",
                  "float", "x", "float", "y");
+    DOC_METHOD_1("void", "AddImpulse", "Add a new linear impulse to the center of the body.<br>"
+                                       "Unlike ApplyImpulse this method will combine the impulse with any previous impulse "
+                                       "thus letting the impulses to accumulate.",
+                 "glm.vec2", "impulse");
+    DOC_METHOD_2("void", "AddImpulse", "Add a new linear impulse to the center of the body.<br>"
+                                       "Unlike ApplyImpulse this method will combine the impulse with any previous impulse "
+                                       "thus letting the impulses to accumulate.",
+                 "float", "x", "float", "y");
+    DOC_METHOD_0("void", "ClearImpulse", "Clear any pending impulse set on the rigid body.");
+    DOC_METHOD_0("bool", "HasPendingImpulse", "Check whether the rigid body has a any currently pending impulse.");
+    DOC_METHOD_0("bool", "HasPendingLinearVelocityAdjustment", "Check whether the rigid body has any currently pending linear velocity adjustment.");
+    DOC_METHOD_0("bool", "HasPendingAngularVelocityAdjustment", "Check whether the rigid body has any currently pending angular velocity adjustment.");
+    DOC_METHOD_0("glm.vec2", "GetPendingImpulse", "Get the currently pending impulse. If no impulse is set then returns null vector (0.0, 0.0).");
+    DOC_METHOD_0("glm.vec2", "GetPendingLinearVelocityAdjustment", "Get the currently pending linear velocity adjustment if any. "
+                                                             "If no adjustment is set then returns the null vector (0.0, 0.0)");
+    DOC_METHOD_0("float", "GetPendingAngularVelocityAdjustment", "Get the currently pending angular velocity adjustment if any. "
+                                                                 "If no adjustment is set then return 0.0");
 
     DOC_METHOD_1("void", "AdjustLinearVelocity", "Set a value (m/s) to adjust the linear velocity of the the rigid body.<br>"
                                                  "The adjustment will be applied on the next iteration of the physics update",

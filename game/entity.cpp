@@ -203,6 +203,35 @@ bool RigidBodyItemClass::FromJson(const data::Reader& data)
     return ok;
 }
 
+void RigidBodyItem::ApplyLinearImpulseToCenter(const glm::vec2& impulse) noexcept
+{
+    if (mCenterImpulse.has_value())
+        WARN("Overwriting pending impulse on rigid body.");
+
+    mCenterImpulse = impulse;
+}
+
+void RigidBodyItem::AddLinearImpulseToCenter(const glm::vec2& impulse) noexcept
+{
+    mCenterImpulse = GetLinearImpulseToCenter() + impulse;
+}
+
+void RigidBodyItem::AdjustLinearVelocity(const glm::vec2& velocity) noexcept
+{
+    if (mLinearVelocityAdjustment.has_value())
+        WARN("Overwriting pending rigid body linear adjustment.");
+
+    mLinearVelocityAdjustment = velocity;
+}
+
+void RigidBodyItem::AdjustAngularVelocity(float radians) noexcept
+{
+    if (mAngularVelocityAdjustment.has_value())
+        WARN("Overwriting pending angular velocity adjustment.");
+
+    mAngularVelocityAdjustment = radians;
+}
+
 DrawableItemClass::DrawableItemClass()
 {
     mBitFlags.set(Flags::VisibleInGame,    true);

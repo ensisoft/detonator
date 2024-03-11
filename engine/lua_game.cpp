@@ -599,20 +599,30 @@ void BindGameLib(sol::state& L)
     };
 
     auto body = table.new_usertype<RigidBodyItem>("RigidBody");
-    body["IsEnabled"]             = &RigidBodyItem::IsEnabled;
-    body["IsSensor"]              = &RigidBodyItem::IsSensor;
-    body["IsBullet"]              = &RigidBodyItem::IsBullet;
-    body["CanSleep"]              = &RigidBodyItem::CanSleep;
-    body["DiscardRotation"]       = &RigidBodyItem::DiscardRotation;
-    body["GetFriction"]           = &RigidBodyItem::GetFriction;
-    body["GetRestitution"]        = &RigidBodyItem::GetRestitution;
-    body["GetAngularDamping"]     = &RigidBodyItem::GetAngularDamping;
-    body["GetLinearDamping"]      = &RigidBodyItem::GetLinearDamping;
-    body["GetDensity"]            = &RigidBodyItem::GetDensity;
-    body["GetPolygonShapeId"]     = &RigidBodyItem::GetPolygonShapeId;
-    body["GetLinearVelocity"]     = &RigidBodyItem::GetLinearVelocity;
-    body["GetAngularVelocity"]    = &RigidBodyItem::GetAngularVelocity;
-    body["Enable"]                = &RigidBodyItem::Enable;
+    body["IsEnabled"]                           = &RigidBodyItem::IsEnabled;
+    body["IsSensor"]                            = &RigidBodyItem::IsSensor;
+    body["IsBullet"]                            = &RigidBodyItem::IsBullet;
+    body["CanSleep"]                            = &RigidBodyItem::CanSleep;
+    body["DiscardRotation"]                     = &RigidBodyItem::DiscardRotation;
+    body["GetFriction"]                         = &RigidBodyItem::GetFriction;
+    body["GetRestitution"]                      = &RigidBodyItem::GetRestitution;
+    body["GetAngularDamping"]                   = &RigidBodyItem::GetAngularDamping;
+    body["GetLinearDamping"]                    = &RigidBodyItem::GetLinearDamping;
+    body["GetDensity"]                          = &RigidBodyItem::GetDensity;
+    body["GetPolygonShapeId"]                   = &RigidBodyItem::GetPolygonShapeId;
+    body["GetLinearVelocity"]                   = &RigidBodyItem::GetLinearVelocity;
+    body["GetAngularVelocity"]                  = &RigidBodyItem::GetAngularVelocity;
+    body["Enable"]                              = &RigidBodyItem::Enable;
+    body["AdjustAngularVelocity"]               = &RigidBodyItem::AdjustAngularVelocity;
+    body["TestFlag"]                            = &TestFlag<RigidBodyItem>;
+    body["SetFlag"]                             = &SetFlag<RigidBodyItem>;
+    body["ClearImpulse"]                        = &RigidBodyItem::ClearImpulse;
+    body["HasPendingImpulse"]                   = &RigidBodyItem::HasCenterImpulse;
+    body["HasPendingLinearVelocityAdjustment"]  = &RigidBodyItem::HasLinearVelocityAdjustment;
+    body["HasPendingAngularVelocityAdjustment"] = &RigidBodyItem::HasAngularVelocityAdjustment;
+    body["GetPendingImpulse"]                   = &RigidBodyItem::GetLinearImpulseToCenter;
+    body["GetPendingLinearVelocityAdjustment"]  = &RigidBodyItem::GetLinearVelocityAdjustment;
+    body["GetPendingAngularVelocityAdjustment"] = &RigidBodyItem::GetAngularVelocityAdjustment;
     body["ApplyImpulse"]          = sol::overload(
         [](RigidBodyItem& body, const glm::vec2& impulse) {
             body.ApplyLinearImpulseToCenter(impulse);
@@ -628,10 +638,15 @@ void BindGameLib(sol::state& L)
         [](RigidBodyItem& body, float x, float y) {
             body.AdjustLinearVelocity(glm::vec2(x, y));
         });
-    body["AdjustAngularVelocity"] = &RigidBodyItem::AdjustAngularVelocity;
-    body["TestFlag"]              = &TestFlag<RigidBodyItem>;
-    body["SetFlag"]               = &SetFlag<RigidBodyItem>;
-    body["GetSimulationType"]     = [](const RigidBodyItem* item) {
+    body["AddImpulse"] = sol::overload(
+        [](RigidBodyItem& body, const glm::vec2& impulse) {
+            body.AddLinearImpulseToCenter(impulse);
+        },
+        [](RigidBodyItem& body, float x, float y) {
+            body.AddLinearImpulseToCenter(glm::vec2{x, y});
+        });
+
+    body["GetSimulationType"] = [](const RigidBodyItem* item) {
         return magic_enum::enum_name(item->GetSimulation());
     };
     body["GetCollisionShapeType"] = [](const RigidBodyItem* item) {
