@@ -3438,6 +3438,7 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         if (!mutable_copies[i]->Pack(file_packer))
         {
             ERROR("Resource packing failed. [name='%1']", mutable_copies[i]->GetName());
+            ++errors;
         }
     }
 
@@ -3485,7 +3486,7 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         if (!json_file.isOpen())
         {
             ERROR("Failed to open content JSON file. [file='%1', error='%2']", json_filename, json_file.error());
-            return false;
+            ++errors;
         }
 
         // finally serialize
@@ -3502,7 +3503,7 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         if (json_file.write(&str[0], str.size()) == -1)
         {
             ERROR("Failed to write content JSON file. [file='%1', error='%2']", json_filename, json_file.error());
-            return false;
+            ++errors;
         }
         json_file.flush();
         json_file.close();
@@ -3523,15 +3524,6 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
     {
         emit ResourcePackingUpdate("Writing config JSON file...", 0, 0);
 
-        const auto& json_filename = JoinPath(options.directory, "config.json");
-        QFile json_file;
-        json_file.setFileName(json_filename);
-        json_file.open(QIODevice::WriteOnly);
-        if (!json_file.isOpen())
-        {
-            ERROR("Failed to open config JSON file. [file='%1', error='%2']", json_filename, json_file.error());
-            return false;
-        }
         nlohmann:: json json;
         base::JsonWrite(json, "json_version",   1);
         base::JsonWrite(json, "made_with_app",  APP_TITLE);
@@ -3620,14 +3612,26 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
             base::JsonWrite(json["application"], "game_script", file_packer.MapUri(mSettings.game_script));
         }
 
-        const auto& str = json.dump(2);
-        if (json_file.write(&str[0], str.size()) == -1)
+        const auto& json_filename = JoinPath(options.directory, "config.json");
+        QFile json_file;
+        json_file.setFileName(json_filename);
+        json_file.open(QIODevice::WriteOnly);
+        if (!json_file.isOpen())
         {
-            ERROR("Failed to write config JSON file. [file='%1', error='%2']", json_filename, json_file.error());
-            return false;
+            ERROR("Failed to open config JSON file. [file='%1', error='%2']", json_filename, json_file.error());
+            ++errors;
         }
-        json_file.flush();
-        json_file.close();
+        else
+        {
+            const auto& str = json.dump(2);
+            if (json_file.write(&str[0], str.size()) == -1)
+            {
+                ERROR("Failed to write config JSON file. [file='%1', error='%2']", json_filename, json_file.error());
+                ++errors;
+            }
+            json_file.flush();
+            json_file.close();
+        }
     }
 
     if (options.write_html5_content_fs_image)
@@ -3643,7 +3647,7 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         }
         else if (!FileExists(package_script))
         {
-            ERROR("Emscripten filesystem package script not found. [script='%1']", package_script);
+            ERROR("Emscripten filesystem package script was not found. [script='%1']", package_script);
             ++errors;
         }
         else
