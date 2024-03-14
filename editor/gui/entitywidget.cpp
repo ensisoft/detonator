@@ -829,7 +829,7 @@ bool EntityWidget::CanTakeAction(Actions action, const Clipboard* clipboard) con
     switch (action)
     {
         case Actions::CanPaste:
-            if (clipboard->GetType() == "application/json/entity")
+            if (clipboard->GetType() == "application/json/entity/node")
                 return true;
             return false;
         case Actions::CanCopy:
