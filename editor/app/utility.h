@@ -44,6 +44,7 @@
 
 #include "base/assert.h"
 #include "base/snafu.h"
+#include "editor/app/types.h"
 
 // general dumping ground for utility type of functionality
 // preferably not specific to any GUI or application.
@@ -59,6 +60,9 @@ QString FindImageJsonFile(const QString& image_file);
 // Find the image file associated with a json file (if any)
 QString FindJsonImageFile(const QString& json_file);
 
+QString GetAppDir();
+QString FixWorkspacePath(QString path);
+app::AnyString MapWorkspaceUri(const app::AnyString& uri, const QString& workspace);
 
 // Center the source rectangle on target by applying a scale and translation.
 QRect CenterRectOnTarget(const QRect& target, const QRect& source);
