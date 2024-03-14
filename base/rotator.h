@@ -44,7 +44,7 @@ namespace base
         Rotator(FAngle<Unit> x,
                 FAngle<Unit> y,
                 FAngle<Unit> z) noexcept
-           : mQuaternion(FromEulerXYZ(x, y, z))
+           : mQuaternion(QuaternionFromEulerXYZ(x, y, z))
         {}
 
         Rotator() = default;
@@ -119,6 +119,21 @@ namespace base
                            }}};
         }
 
+        template<typename Unit>
+        static glm::quat QuaternionFromEulerXYZ(FAngle<Unit> x, FAngle<Unit> y, FAngle<Unit> z) noexcept
+        {
+            return glm::quat {
+                glm::vec3 { x.ToRadians(),
+                            y.ToRadians(),
+                            z.ToRadians() }
+                };
+        }
+
+        inline Rotator& operator*=(const Rotator& other) noexcept
+        {
+            mQuaternion *= other.mQuaternion;
+            return *this;
+        }
 
     private:
         template<typename Unit = base::detail::Radians> inline
@@ -132,5 +147,10 @@ namespace base
     private:
         glm::quat mQuaternion = {1.0f, 0.0f, 0.0f, 0.0f};     // zero rotation
     };
+
+    inline Rotator lerp(const Rotator& q0, const Rotator& q1, float t) noexcept
+    {
+        return Rotator(glm::mix(q0.GetAsQuaternion(), q1.GetAsQuaternion(), t));
+    }
 
 } // namespace
