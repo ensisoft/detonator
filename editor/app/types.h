@@ -177,9 +177,17 @@ namespace app
         {
             return mStr.contains(filter, casing);
         }
+        bool Contains(const AnyString& filter, Qt::CaseSensitivity casing = Qt::CaseSensitive) const
+        {
+            return mStr.contains(filter, casing);
+        }
         bool StartsWith(const AnyString& other) const
         {
             return mStr.startsWith(other);
+        }
+        bool EndsWith(const AnyString& other, Qt::CaseSensitivity casing = Qt::CaseSensitive) const
+        {
+            return mStr.endsWith(other);
         }
         QStringList Split(const AnyString& split) const
         {

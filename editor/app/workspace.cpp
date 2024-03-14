@@ -1986,8 +1986,8 @@ QStringList Workspace::ListFileResources(const ModelIndexList& indices) const
     // but only captures all the resource URIs
     class Phoney : public ResourcePacker {
     public:
-        explicit Phoney(const QString& workspace)
-          : mWorkspaceDir(workspace)
+        explicit Phoney(const Workspace* workspace)
+          : mWorkspace(workspace)
         {}
 
         virtual bool CopyFile(const AnyString& uri, const AnyString& dir) override
@@ -2001,13 +2001,13 @@ QStringList Workspace::ListFileResources(const ModelIndexList& indices) const
             RecordURI(uri);
             return true;
         }
-        virtual bool ReadFile(const app::AnyString& uri, QByteArray* bytes) const override
+        virtual bool ReadFile(const AnyString& uri, QByteArray* bytes) const override
         {
-            return app::detail::LoadArrayBuffer(MapWorkspaceUri(uri, mWorkspaceDir), bytes);
+            return app::detail::LoadArrayBuffer(mWorkspace->MapFileToFilesystem(uri), bytes);
         }
-        virtual app::AnyString MapUri(const app::AnyString& uri) const override
+        virtual AnyString MapUri(const AnyString& uri) const override
         { return uri; }
-        virtual bool HasMapping(const app::AnyString& uri) const override
+        virtual bool HasMapping(const AnyString& uri) const override
         { return true; }
 
         QStringList ListUris() const
@@ -2017,26 +2017,39 @@ QStringList Workspace::ListFileResources(const ModelIndexList& indices) const
                 ret.push_back(uri);
             return ret;
         }
-        void RecordURI(const app::AnyString& uri)
+        void RecordURI(const AnyString& uri)
         {
+            if (uri.EndsWith("png", Qt::CaseInsensitive) ||
+                uri.EndsWith("jpg", Qt::CaseInsensitive) ||
+                uri.EndsWith("jpeg", Qt::CaseInsensitive)  ||
+                uri.EndsWith("bmp", Qt::CaseInsensitive))
+            {
+                const auto image_file = mWorkspace->MapFileToFilesystem(uri);
+                const auto image_desc = FindImageJsonFile(image_file);
+                if (!image_desc.isEmpty())
+                {
+                    mURIs.insert(mWorkspace->MapFileToWorkspace(image_desc));
+                }
+            }
+
             // hack for now to copy the bitmap font image.
             // this will not work if:
             // - the file extension is not .png
             // - the file name is same as the .json file base name
-            if (base::Contains(uri, "fonts/") && base::EndsWith(uri, ".json"))
+            if (uri.Contains("fonts/") && uri.EndsWith(".json"))
             {
-                const auto& src_png_uri = app::ReplaceAll(uri, ".json", ".png");
+                const auto& src_png_uri = ReplaceAll(uri, ".json", ".png");
                 mURIs.insert(src_png_uri);
             }
             mURIs.insert(uri); // keep track of the URIs we're seeing
         }
 
     private:
-        const QString mWorkspaceDir;
+        const Workspace* mWorkspace;
     private:
         mutable std::unordered_set<app::AnyString> mURIs;
 
-    } packer(mWorkspaceDir);
+    } packer(this);
 
     for (size_t index : indices)
     {
