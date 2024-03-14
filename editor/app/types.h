@@ -177,6 +177,14 @@ namespace app
         {
             return mStr.contains(filter, casing);
         }
+        bool StartsWith(const AnyString& other) const
+        {
+            return mStr.startsWith(other);
+        }
+        QStringList Split(const AnyString& split) const
+        {
+            return mStr.split(split);
+        }
 
         AnyString& operator=(const QString& str)
         {

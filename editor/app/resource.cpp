@@ -91,9 +91,27 @@ namespace {
         return ok;
     }
 
+    // Create an anchor using the URI for resolving relative scripts.
+    // For example if we have a script URI such as ws://something/lua/foobar.lua
+    // which refers to scripts in the same folder the ws://something/lua as
+    // the anchor.
+    app::AnyString ScriptAnchor(const app::AnyString& uri)
+    {
+        ASSERT(uri.StartsWith("ws://") ||
+               uri.StartsWith("fs://") ||
+               uri.StartsWith("app://") ||
+               uri.StartsWith("zip://"));
+        QStringList components = uri.Split("/");
+        components.pop_back();
+        return components.join("/");
+    }
+
     // pack script with dependencies by recursively reading
     // the script files and looking for other scripts via require
-    bool PackScriptRecursive(const app::AnyString& uri, const app::AnyString& dir, app::ResourcePacker& packer)
+    bool PackScriptRecursive(const app::AnyString& uri,
+                             const app::AnyString& dir,
+                             const app::AnyString& anchor,
+                             app::ResourcePacker& packer)
     {
         // Read the contents of the Lua script file and look for dependent scripts
         // somehow we need to resolve those dependent scripts in order to package
@@ -158,7 +176,7 @@ namespace {
                 module.startsWith("fs://")  ||
                 module.startsWith("ws://"))
             {
-                DEBUG("Found dependent script. %1 depends on %2", uri, module);
+                DEBUG("Found dependent script. '%1' depends on '%2'.", uri, module);
                 if (!module.endsWith(".lua"))
                     module.append(".lua");
 
@@ -166,17 +184,11 @@ namespace {
                 // and we should just explore the requires first and then
                 // visit the files instead of keeping all the current state
                 // and then recursing.?
-                ok &= PackScriptRecursive(module, "lua/", packer);
+                ok &= PackScriptRecursive(module, "lua/",  ScriptAnchor(module), packer);
                 line.replace(module, packer.MapUri(module));
             }
             else
             {
-                QStringList strs;
-                strs = module.split("/");
-                strs.push_front("lua");
-                strs.pop_back();
-                QString path = strs.join("/");
-                path += "/";
                 // relative path for example we have a scripts
                 // lua/game_script.lua
                 // lua/foo/foo.lua
@@ -186,17 +198,20 @@ namespace {
                 //     require('foo/foo.lua')
                 //
                 //
+                QStringList paths = module.split("/");
+                paths.push_front("lua");
+                paths.pop_back();
+                QString path = paths.join("/");
 
-                DEBUG("Found dependent script. %1 depends on %2.", uri, module);
+                DEBUG("Found dependent script. '%1' depends on '%2'.", uri, module);
                 if (!module.endsWith(".lua"))
                     module.append(".lua");
 
-                strs = uri.GetWide().split("/");
-                strs.pop_back();
-                strs.push_back(module);
-                module = strs.join("/");
+                module = anchor + "/" + module;
+
                 DEBUG("Dependent script generated path is '%1'", module);
-                ok &= PackScriptRecursive(module, path, packer);
+                ok &= PackScriptRecursive(module, path, anchor, packer);
+
                 // do not change the outgoing line here, so it remains the
                 // same, for example require('foo/foo.lua')
             }
@@ -205,6 +220,9 @@ namespace {
         dst_stream.flush();
 
         ok &= packer.WriteFile(uri, dir, dst_buffer.constData(), dst_buffer.length());
+        if (!ok) {
+            ERROR("Error while packing script. [uri='%1']", uri);
+        }
         return ok;
     }
 
@@ -471,8 +489,7 @@ bool PackResource(app::Script& script, ResourcePacker& packer)
 
     bool ok = true;
 
-    ok &= PackScriptRecursive(uri, "lua/", packer);
-    //packer.CopyFile(uri, "lua/");
+    ok &= PackScriptRecursive(uri, "lua/", ScriptAnchor(uri), packer);
 
     script.SetFileURI(packer.MapUri(uri));
 
