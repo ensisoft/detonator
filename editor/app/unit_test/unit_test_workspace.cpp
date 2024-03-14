@@ -1414,7 +1414,13 @@ void unit_test_packing_dependent_scripts_subfolder()
     TEST_REQUIRE(d.mkpath("lua"));
     TEST_REQUIRE(d.mkpath("lua/test"));
 
-    TEST_REQUIRE(app::WriteTextFile("lua/test/script.lua", "script.lua"));
+    TEST_REQUIRE(app::WriteTextFile("lua/test/other.lua", "other.lua"));
+    TEST_REQUIRE(app::WriteTextFile("lua/test/script.lua",
+"require('test/other.lua')\n"
+"function Meh()\n"
+"  print('hello')\n"
+"end\n"));
+
     TEST_REQUIRE(app::WriteTextFile("lua/game_script.lua",
 "require('test/script.lua')\n"
 "function Meh()\n"
@@ -1445,13 +1451,19 @@ void unit_test_packing_dependent_scripts_subfolder()
 
     TEST_REQUIRE(base::FileExists("TestPackage/test/lua/game_script.lua"));
     TEST_REQUIRE(base::FileExists("TestPackage/test/lua/test/script.lua"));
+    TEST_REQUIRE(base::FileExists("TestPackage/test/lua/test/other.lua"));
 
     TEST_REQUIRE(app::ReadTextFile("TestPackage/test/lua/game_script.lua") ==
 "require('test/script.lua')\n"
 "function Meh()\n"
 "  print('hello')\n"
 "end\n");
-    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/lua/test/script.lua") == "script.lua");
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/lua/test/script.lua") ==
+"require('test/other.lua')\n"
+"function Meh()\n"
+"  print('hello')\n"
+"end\n");
+    TEST_REQUIRE(app::ReadTextFile("TestPackage/test/lua/test/other.lua") == "other.lua");
 
     DeleteDir("TestPackage");
 }
