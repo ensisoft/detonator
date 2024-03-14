@@ -106,6 +106,87 @@ namespace {
         return components.join("/");
     }
 
+    class LuaBuffer {
+    public:
+        LuaBuffer(QByteArray& array)
+        {
+            QByteArray line;
+            for (int i=0; i<array.size(); ++i)
+            {
+                line.append(array[i]);
+                if (array[i] == '\n')
+                {
+                    mLines.push_back(line);
+                    line.clear();
+                }
+            }
+            if (!line.isEmpty())
+                mLines.push_back(line);
+        }
+        size_t LineCount() const noexcept
+        { return mLines.size(); }
+        QString GetLine(size_t i) const noexcept
+        { return mLines[i]; }
+
+        QString GetLineOrNothing(size_t i)const noexcept
+        {
+            if (i >= mLines.size())
+                return "";
+            return mLines[i];
+        }
+
+    private:
+        int mPosition = 0;
+        std::vector<QString> mLines;
+    };
+
+    bool DiscardLuaContent(const LuaBuffer& buffer, size_t* index)
+    {
+        const auto& line = buffer.GetLine(*index);
+        const auto& trim = line.trimmed();
+        if (trim.startsWith("--"))
+            return true;
+
+        static const char* callbacks[] = {
+            "OnBeginContact",
+            "OnEndContact",
+            "OnKeyDown",
+            "OnKeyUp",
+            "OnMousePress",
+            "OnMouseRelease",
+            "OnMouseMove",
+            "OnGameEvent",
+            "OnAnimationFinished",
+            "OnEntityTimer",
+            "OnEntityEvent",
+            "OnTimer",
+            "OnEvent",
+            "OnUIOpen",
+            "OnUIClose",
+            "OnUIAction",
+            "OnAudioEvent",
+            "Tick",
+            "Update",
+            "UpdateNodes",
+            "PostUpdate",
+            "BeginPlay",
+            "EndPlay",
+            "SpawnEntity",
+            "KillEntity"
+        };
+
+        for (size_t i=0; i<base::ArraySize(callbacks); ++i)
+        {
+            if (trim.startsWith("function") && trim.contains(callbacks[i])) {
+                if (buffer.GetLineOrNothing(*index + 1).startsWith("end")) {
+                    *index += 2;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     // pack script with dependencies by recursively reading
     // the script files and looking for other scripts via require
     bool PackScriptRecursive(const app::AnyString& uri,
@@ -126,37 +207,13 @@ namespace {
         QByteArray dst_buffer;
         QTextStream dst_stream(&dst_buffer);
         dst_stream.setCodec("UTF-8");
-
-        class MyStream {
-        public:
-            MyStream(QByteArray& array) : mArray(array)
-            {}
-            QString ReadLine()
-            {
-                QByteArray tmp;
-                for (;mPosition<mArray.size(); ++mPosition)
-                {
-                    tmp.append(mArray[mPosition]);
-                    if (mArray[mPosition] == '\n')
-                    {
-                        ++mPosition;
-                        break;
-                    }
-                }
-                return QString::fromUtf8(tmp);
-            }
-            bool AtEnd() const
-            { return mPosition == mArray.size(); }
-        private:
-            const QByteArray& mArray;
-            int mPosition = 0;
-        } src_stream(src_buffer);
+        LuaBuffer src_stream(src_buffer);
 
         bool ok = true;
 
-        while (!src_stream.AtEnd())
+        for (size_t i=0; i<src_stream.LineCount(); ++i)
         {
-            QString line = src_stream.ReadLine();
+            QString line = src_stream.GetLine(i);
             QRegularExpression require;
             // \s* matches any number of empty space
             // [^']* matches any number of any characters except for '
@@ -166,7 +223,8 @@ namespace {
             QRegularExpressionMatch match = require.match(line);
             if (!match.hasMatch())
             {
-                dst_stream << line;
+                if (!DiscardLuaContent(src_stream, &i))
+                    dst_stream << line;
                 continue;
             }
             ASSERT(require.captureCount() == 1);
