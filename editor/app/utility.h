@@ -62,7 +62,8 @@ QString FindJsonImageFile(const QString& json_file);
 
 QString GetAppDir();
 QString FixWorkspacePath(QString path);
-app::AnyString MapWorkspaceUri(const app::AnyString& uri, const QString& workspace);
+AnyString MapWorkspaceUri(const AnyString& uri, const QString& workspace);
+AnyString MapFileName(const AnyString& uri, const QString& workspace);
 
 // Center the source rectangle on target by applying a scale and translation.
 QRect CenterRectOnTarget(const QRect& target, const QRect& source);
