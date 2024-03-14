@@ -544,6 +544,8 @@ DlgAnimator::DlgAnimator(QWidget* parent,
     ShowProperties((detail::StateLink*)nullptr);
     UpdateStateList();
     SetValue(mUI.cmbInitState, ListItemId(mAnimator.GetInitialStateId()));
+
+    mUI.splitter->setSizes({100, 600});
 }
 
 DlgAnimator::~DlgAnimator()
