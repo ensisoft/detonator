@@ -453,7 +453,7 @@ public:
                 self.height = 1.0f;
                 self.xpos   = 0.0f;
                 self.ypos   = 0.0f;
-                self.uri    = packer.MapFileToPackage(packer.CopyFile(img_file, "textures", img_name));
+                self.uri    = packer.MapFileToPackage(packer.DoCopyFile(img_file, "textures", img_name));
                 relocation_map[tex.file] = std::move(self);
             }
         } // for
@@ -493,7 +493,7 @@ public:
                     QString file = image_map[rc.cookie];
 
                     GeneratedTextureEntry gen;
-                    gen.uri    = packer.MapFileToPackage(packer.CopyFile(file, "textures"));
+                    gen.uri    = packer.MapFileToPackage(packer.DoCopyFile(file, "textures"));
                     gen.width  = 1.0f;
                     gen.height = 1.0f;
                     gen.xpos   = 0.0f;
@@ -1990,13 +1990,13 @@ QStringList Workspace::ListFileResources(const ModelIndexList& indices) const
           : mWorkspaceDir(workspace)
         {}
 
-        virtual bool CopyFile(const app::AnyString& uri, const std::string& dir) override
+        virtual bool CopyFile(const AnyString& uri, const AnyString& dir) override
         {
             RecordURI(uri);
             return true;
         }
 
-        virtual bool WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) override
+        virtual bool WriteFile(const AnyString& uri, const AnyString& dir, const void* data, size_t len) override
         {
             RecordURI(uri);
             return true;

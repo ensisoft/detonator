@@ -30,7 +30,7 @@ WorkspaceResourcePacker::WorkspaceResourcePacker(const QString& package_dir, con
   , mWorkspaceDir(workspace_dir)
 {}
 
-bool WorkspaceResourcePacker::CopyFile(const app::AnyString& uri, const std::string& dir)
+bool WorkspaceResourcePacker::CopyFile(const AnyString& uri, const AnyString& dir)
 {
     // sort of hack here, probe the uri and skip the copy of a
     // custom shader .json descriptor. it's not needed in the
@@ -56,7 +56,7 @@ bool WorkspaceResourcePacker::CopyFile(const app::AnyString& uri, const std::str
     }
 
     const auto& src_file = MapFileToFilesystem(uri);
-    const auto& dst_file = CopyFile(src_file, app::FromUtf8(dir));
+    const auto& dst_file = DoCopyFile(src_file, dir);
     if (dst_file.isEmpty())
         return false;
 
@@ -66,13 +66,13 @@ bool WorkspaceResourcePacker::CopyFile(const app::AnyString& uri, const std::str
     // if the font is a .json+.png font then copy the .png file too!
     if (base::Contains(uri, "fonts/") && base::EndsWith(uri, ".json"))
     {
-        const auto& png_uri = app::ReplaceAll(uri, ".json", ".png");
+        const auto& png_uri  = ReplaceAll(uri, ".json", ".png");
         const auto& png_file = MapFileToFilesystem(png_uri);
-        CopyFile(png_file, app::FromUtf8(dir));
+        DoCopyFile(png_file, dir);
     }
     return true;
 }
-bool WorkspaceResourcePacker::WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len)
+bool WorkspaceResourcePacker::WriteFile(const AnyString& uri, const AnyString& dir, const void* data, size_t len)
 {
     if (const auto* dupe = base::SafeFind(mUriMapping, uri))
     {
@@ -80,7 +80,7 @@ bool WorkspaceResourcePacker::WriteFile(const app::AnyString& uri, const std::st
         return true;
     }
     const auto& src_file = MapFileToFilesystem(uri);
-    const auto& dst_file = WriteFile(src_file, app::FromUtf8(dir), data, len);
+    const auto& dst_file = DoWriteFile(src_file, dir, data, len);
     if (dst_file.isEmpty())
         return false;
 
@@ -88,18 +88,18 @@ bool WorkspaceResourcePacker::WriteFile(const app::AnyString& uri, const std::st
     mUriMapping[uri] = dst_uri;
     return true;
 }
-bool WorkspaceResourcePacker::ReadFile(const app::AnyString& uri, QByteArray* bytes) const
+bool WorkspaceResourcePacker::ReadFile(const AnyString& uri, QByteArray* bytes) const
 {
     const auto& file = MapFileToFilesystem(uri);
     return app::detail::LoadArrayBuffer(file, bytes);
 }
-bool WorkspaceResourcePacker::HasMapping(const app::AnyString& uri) const
+bool WorkspaceResourcePacker::HasMapping(const AnyString& uri) const
 {
     if (mUriMapping.find(uri) != mUriMapping.end())
         return true;
     return false;
 }
-app::AnyString WorkspaceResourcePacker::MapUri(const app::AnyString& uri) const
+AnyString WorkspaceResourcePacker::MapUri(const AnyString& uri) const
 {
     if (const auto* mapping = base::SafeFind(mUriMapping, uri))
         return *mapping;
@@ -107,9 +107,9 @@ app::AnyString WorkspaceResourcePacker::MapUri(const app::AnyString& uri) const
     return QString("");
 }
 
-QString WorkspaceResourcePacker::WriteFile(const QString& src_file, const QString& dst_dir, const void* data, size_t len)
+QString WorkspaceResourcePacker::DoWriteFile(const QString& src_file, const QString& dst_dir, const void* data, size_t len)
 {
-    if (!app::MakePath(app::JoinPath(mPackageDir, dst_dir)))
+    if (!MakePath(JoinPath(mPackageDir, dst_dir)))
     {
         ERROR("Failed to create directory. [dir='%1/%2']", mPackageDir, dst_dir);
         return "";
@@ -130,14 +130,14 @@ QString WorkspaceResourcePacker::WriteFile(const QString& src_file, const QStrin
     file.close();
     return dst_file;
 }
-QString WorkspaceResourcePacker::CopyFile(const QString& src_file, const QString& dst_dir, const QString& filename)
+QString WorkspaceResourcePacker::DoCopyFile(const QString& src_file, const QString& dst_dir, const QString& filename)
 {
     if (const auto* dupe = base::SafeFind(mFileMap, src_file))
     {
         DEBUG("Skipping duplicate file copy. [file='%1']", src_file);
         return *dupe;
     }
-    if (!app::MakePath(app::JoinPath(mPackageDir, dst_dir)))
+    if (!MakePath(JoinPath(mPackageDir, dst_dir)))
     {
         ERROR("Failed to create directory. [dir='%1/%2']", mPackageDir, dst_dir);
         mNumErrors++;
@@ -166,9 +166,9 @@ QString WorkspaceResourcePacker::CreateFileName(const QString& src_file, const Q
     }
     const auto& src_path = src_info.absoluteFilePath();
     const auto& src_name = src_info.fileName();
-    const auto& dst_path = app::JoinPath(mPackageDir, dst_dir);
+    const auto& dst_path = JoinPath(mPackageDir, dst_dir);
     QString dst_name = filename.isEmpty() ? src_name : filename;
-    QString dst_file = app::JoinPath(dst_path, dst_name);
+    QString dst_file = JoinPath(dst_path, dst_name);
 
     // use a silly race-condition laden loop trying to figure out whether
     // a file with this name already exists or not and if so then generate
@@ -193,7 +193,7 @@ QString WorkspaceResourcePacker::CreateFileName(const QString& src_file, const Q
     }
     return dst_file;
 }
-QString WorkspaceResourcePacker::MapFileToFilesystem(const app::AnyString& uri) const
+QString WorkspaceResourcePacker::MapFileToFilesystem(const AnyString& uri) const
 {
     return MapWorkspaceUri(uri, mWorkspaceDir);
 }
@@ -234,7 +234,7 @@ ZipArchiveImporter::ZipArchiveImporter(const QString& zip_file, const QString& z
   , mZip(zip)
 {}
 
-bool ZipArchiveImporter::CopyFile(const app::AnyString& uri, const std::string& dir)
+bool ZipArchiveImporter::CopyFile(const AnyString& uri, const AnyString& dir)
 {
     // Skip resources that are part of the editor itself.
     if (base::StartsWith(uri, "app://"))
@@ -246,7 +246,7 @@ bool ZipArchiveImporter::CopyFile(const app::AnyString& uri, const std::string& 
 
     if (CopyFile(src_file, dir, &dst_name))
     {
-        auto mapping = app::toString("ws://%1/%2", mZipDir, dst_name);
+        auto mapping = toString("ws://%1/%2", mZipDir, dst_name);
         DEBUG("New zip URI mapping. [uri='%1', mapping='%2']", uri, mapping);
         mUriMapping[uri] = mapping;
     }
@@ -257,7 +257,7 @@ bool ZipArchiveImporter::CopyFile(const app::AnyString& uri, const std::string& 
     // - the file name is same as the .json file base name
     if (base::Contains(dir, "fonts/") && base::EndsWith(uri, ".json"))
     {
-        const auto& src_png_uri  = app::ReplaceAll(uri, ".json", ".png");
+        const auto& src_png_uri  = ReplaceAll(uri, ".json", ".png");
         const auto& src_png_file = MapUriToZipFile(src_png_uri);
 
         QString dst_png_name;
@@ -265,7 +265,7 @@ bool ZipArchiveImporter::CopyFile(const app::AnyString& uri, const std::string& 
     }
     return true;
 }
-bool ZipArchiveImporter::WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len)
+bool ZipArchiveImporter::WriteFile(const AnyString& uri, const AnyString& dir, const void* data, size_t len)
 {
     // write the file contents into the workspace directory.
 
@@ -278,8 +278,8 @@ bool ZipArchiveImporter::WriteFile(const app::AnyString& uri, const std::string&
 
     // the dir part of the filepath should already have been baked in the zip
     // when exporting and the filename already contains the directory/path
-    const auto& dst_dir  = app::JoinPath({mWorkspaceDir, mZipDir, app::FromUtf8(dir)});
-    const auto& dst_file = app::JoinPath({mWorkspaceDir, mZipDir, info.name});
+    const auto& dst_dir  = JoinPath({mWorkspaceDir, mZipDir, dir});
+    const auto& dst_file = JoinPath({mWorkspaceDir, mZipDir, info.name});
 
     if (!app::MakePath(dst_dir))
     {
@@ -296,12 +296,12 @@ bool ZipArchiveImporter::WriteFile(const app::AnyString& uri, const std::string&
     }
     file.write((const char*)data, len);
     file.close();
-    auto mapping = base::FormatString("ws://%1/%2", app::ToUtf8(mZipDir), app::ToUtf8(info.name));
+    auto mapping = toString("ws://%1/%2", mZipDir, info.name);
     DEBUG("New zip URI mapping. [uri='%1', mapping='%2']", uri, mapping);
     mUriMapping[uri] = std::move(mapping);
     return true;
 }
-bool ZipArchiveImporter::ReadFile(const app::AnyString& uri, QByteArray* array) const
+bool ZipArchiveImporter::ReadFile(const AnyString& uri, QByteArray* array) const
 {
     const auto& src_file = MapUriToZipFile(uri);
     if (!FindZipFile(src_file))
@@ -312,13 +312,13 @@ bool ZipArchiveImporter::ReadFile(const app::AnyString& uri, QByteArray* array) 
     zip_file.close();
     return true;
 }
-bool ZipArchiveImporter::HasMapping(const app::AnyString& uri) const
+bool ZipArchiveImporter::HasMapping(const AnyString& uri) const
 {
     if (mUriMapping.find(uri) != mUriMapping.end())
         return true;
     return false;
 }
-app::AnyString ZipArchiveImporter::MapUri(const app::AnyString& uri) const
+app::AnyString ZipArchiveImporter::MapUri(const AnyString& uri) const
 {
     if (base::StartsWith(uri, "app://"))
         return uri;
@@ -328,7 +328,7 @@ app::AnyString ZipArchiveImporter::MapUri(const app::AnyString& uri) const
     return *mapping;
 }
 
-bool ZipArchiveImporter::CopyFile(const QString& src_file, const std::string& dir, QString*  dst_name)
+bool ZipArchiveImporter::CopyFile(const QString& src_file, const AnyString& dir, QString*  dst_name)
 {
     // copy file from the zip into the workspace directory.
 
@@ -345,10 +345,10 @@ bool ZipArchiveImporter::CopyFile(const QString& src_file, const std::string& di
 
     // the dir part of the filepath should already have been baked in the zip
     // when exporting and the filename already contains the directory/path
-    const auto& dst_dir  = app::JoinPath({mWorkspaceDir, mZipDir, app::FromUtf8(dir)});
-    const auto& dst_file = app::JoinPath({mWorkspaceDir, mZipDir, info.name});
+    const auto& dst_dir  = JoinPath({mWorkspaceDir, mZipDir, dir});
+    const auto& dst_file = JoinPath({mWorkspaceDir, mZipDir, info.name});
 
-    if (!app::MakePath(dst_dir))
+    if (!MakePath(dst_dir))
     {
         ERROR("Failed to create directory. [dir='%1']", dst_dir);
         return false;
@@ -406,7 +406,7 @@ ZipArchiveExporter::ZipArchiveExporter(const QString& filename, const QString& w
 }
 
 
-bool ZipArchiveExporter::CopyFile(const app::AnyString& uri, const std::string& dir)
+bool ZipArchiveExporter::CopyFile(const AnyString& uri, const AnyString& dir)
 {
     // don't package resources that are part of the editor.
     // todo: this would need some kind of versioning in order to
@@ -430,22 +430,22 @@ bool ZipArchiveExporter::CopyFile(const app::AnyString& uri, const std::string& 
     }
     const auto& src_path = src_info.absoluteFilePath();
     const auto& src_name = src_info.fileName();
-    const auto& dst_dir  = app::FromUtf8(dir);
+    const auto& dst_dir  = dir;
 
     QString dst_name = src_name;
-    QString dst_file = app::JoinPath(dst_dir, dst_name);
+    QString dst_file = JoinPath(dst_dir, dst_name);
     unsigned rename_attempt = 0;
     while (base::Contains(mFileNames, dst_name))
     {
-        dst_name = app::toString("%1_%2", rename_attempt++, src_name);
-        dst_file = app::JoinPath(dst_dir, dst_name);
+        dst_name = toString("%1_%2", rename_attempt++, src_name);
+        dst_file = JoinPath(dst_dir, dst_name);
     }
 
     if (!CopyFile(src_file, dst_file))
         return false;
 
     mFileNames.insert(dst_name);
-    mUriMapping[uri] = base::FormatString("zip://%1%2", dir, app::ToUtf8(dst_name));
+    mUriMapping[uri] = toString("zip://%1%2", dir, dst_name);
 
     // hack for now to copy the bitmap font image.
     // this will not work if:
@@ -461,7 +461,7 @@ bool ZipArchiveExporter::CopyFile(const app::AnyString& uri, const std::string& 
     }
     return true;
 }
-bool ZipArchiveExporter::WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len)
+bool ZipArchiveExporter::WriteFile(const app::AnyString& uri, const AnyString& dir, const void* data, size_t len)
 {
     if (const auto* dupe = base::SafeFind(mUriMapping, uri))
     {
@@ -484,23 +484,23 @@ bool ZipArchiveExporter::WriteFile(const app::AnyString& uri, const std::string&
     zip_file.write((const char*)data, len);
     zip_file.close();
     ASSERT(base::EndsWith(dir, "/"));
-    mUriMapping[uri] = base::FormatString("zip://%1%2", dir, app::ToUtf8(src_name));
+    mUriMapping[uri] = toString("zip://%1%2", dir, src_name);
     DEBUG("Wrote new file into zip archive. [file='%1']", dst_name);
     return true;
 }
-bool ZipArchiveExporter::ReadFile(const app::AnyString& uri, QByteArray* bytes) const
+bool ZipArchiveExporter::ReadFile(const AnyString& uri, QByteArray* bytes) const
 {
     const auto& file = MapFileToFilesystem(uri);
     return app::detail::LoadArrayBuffer(file, bytes);
 }
-bool ZipArchiveExporter::HasMapping(const app::AnyString& uri) const
+bool ZipArchiveExporter::HasMapping(const AnyString& uri) const
 {
     if (mUriMapping.find(uri) != mUriMapping.end())
         return true;
     return false;
 }
 
-app::AnyString ZipArchiveExporter::MapUri(const app::AnyString& uri) const
+AnyString ZipArchiveExporter::MapUri(const AnyString& uri) const
 {
     if (base::StartsWith(uri, "app://"))
         return uri;
@@ -528,7 +528,7 @@ void ZipArchiveExporter::WriteBytes(const QByteArray& bytes, const char* name)
 bool ZipArchiveExporter::CopyFile(const QString& src_file, const QString& dst_file)
 {
     std::vector<char> buffer;
-    if (!app::ReadBinaryFile(src_file, buffer))
+    if (!ReadBinaryFile(src_file, buffer))
     {
         ERROR("Failed to read file contents. [file='%1']", src_file);
         return false;
