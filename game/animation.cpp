@@ -630,6 +630,8 @@ void Animator::Update(float dt, std::vector<Action>* actions)
         // this is safe because we explicitly set to 0.0 on start of transition.
         if (mTime == 0.0f)
         {
+            ASSERT(mPrev);
+            ASSERT(mNext);
             actions->push_back( LeaveState { mPrev } );
             actions->push_back( StartTransition { mPrev, mNext, mTransition } );
         }
@@ -670,6 +672,8 @@ void Animator::Update(float dt, std::vector<Action>* actions)
 }
 void Animator::Update(const AnimationTransition* transition, const AnimationState* next)
 {
+    ASSERT(transition);
+    ASSERT(next);
     mTime       = 0.0f;
     mTransition = transition;
     mNext       = next;
