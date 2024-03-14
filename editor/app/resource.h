@@ -48,17 +48,7 @@
 
 namespace app
 {
-    class ResourcePacker
-    {
-    public:
-        virtual ~ResourcePacker() = default;
-        virtual bool CopyFile(const app::AnyString& uri, const std::string& dir) = 0;
-        virtual bool WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) = 0;
-        virtual bool ReadFile(const app::AnyString& uri, QByteArray* bytes) const = 0;
-        virtual bool HasMapping(const app::AnyString& uri) const = 0;
-        virtual app::AnyString MapUri(const app::AnyString& uri) const = 0;
-    private:
-    };
+    class ResourcePacker;
 
     class MigrationLog
     {

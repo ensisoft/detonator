@@ -33,6 +33,7 @@
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
 #include "editor/app/resource.h"
+#include "editor/app/packer.h"
 
 namespace {
     void PushBack(QStringList& list, const QString& id)
