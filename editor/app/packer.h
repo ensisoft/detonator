@@ -35,11 +35,11 @@ namespace app
     {
     public:
         virtual ~ResourcePacker() = default;
-        virtual bool CopyFile(const app::AnyString& uri, const std::string& dir) = 0;
-        virtual bool WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) = 0;
-        virtual bool ReadFile(const app::AnyString& uri, QByteArray* bytes) const = 0;
-        virtual bool HasMapping(const app::AnyString& uri) const = 0;
-        virtual app::AnyString MapUri(const app::AnyString& uri) const = 0;
+        virtual bool CopyFile(const AnyString& uri, const AnyString& dir) = 0;
+        virtual bool WriteFile(const AnyString& uri, const AnyString& dir, const void* data, size_t len) = 0;
+        virtual bool ReadFile(const AnyString& uri, QByteArray* bytes) const = 0;
+        virtual bool HasMapping(const AnyString& uri) const = 0;
+        virtual AnyString MapUri(const AnyString& uri) const = 0;
     private:
     };
 
@@ -49,19 +49,19 @@ namespace app
     public:
         WorkspaceResourcePacker(const QString& package_dir, const QString& workspace_dir);
 
-        virtual bool CopyFile(const app::AnyString& uri, const std::string& dir) override;
-        virtual bool WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) override;
-        virtual bool ReadFile(const app::AnyString& uri, QByteArray* bytes) const override;
-        virtual bool HasMapping(const app::AnyString& uri) const override;
-        virtual app::AnyString MapUri(const app::AnyString& uri) const override;
+        virtual bool CopyFile(const AnyString& uri, const AnyString& dir) override;
+        virtual bool WriteFile(const AnyString& uri, const AnyString& dir, const void* data, size_t len) override;
+        virtual bool ReadFile(const AnyString& uri, QByteArray* bytes) const override;
+        virtual bool HasMapping(const AnyString& uri) const override;
+        virtual AnyString MapUri(const AnyString& uri) const override;
 
         using app::ResourcePacker::HasMapping;
         using app::ResourcePacker::MapUri;
 
-        QString WriteFile(const QString& src_file, const QString& dst_dir, const void* data, size_t len);
-        QString CopyFile(const QString& src_file, const QString& dst_dir, const QString& filename = QString(""));
+        QString DoWriteFile(const QString& src_file, const QString& dst_dir, const void* data, size_t len);
+        QString DoCopyFile(const QString& src_file, const QString& dst_dir, const QString& filename = QString(""));
         QString CreateFileName(const QString& src_file, const QString& dst_dir, const QString& filename) const;
-        QString MapFileToFilesystem(const app::AnyString& uri) const;
+        QString MapFileToFilesystem(const AnyString& uri) const;
         QString MapFileToPackage(const QString& file) const;
 
         inline unsigned GetNumErrors() const noexcept
@@ -85,12 +85,12 @@ namespace app
     {
     public:
         ZipArchiveImporter(const QString& zip_file, const QString& zip_dir, const QString& workspace_dir, QuaZip& zip);
-        virtual bool CopyFile(const app::AnyString& uri, const std::string& dir) override;
-        virtual bool WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) override;
-        virtual bool ReadFile(const app::AnyString& uri, QByteArray* array) const override;
-        virtual bool HasMapping(const app::AnyString& uri) const override;
-        virtual app::AnyString MapUri(const app::AnyString& uri) const override;
-        bool CopyFile(const QString& src_file, const std::string& dir, QString*  dst_name);
+        virtual bool CopyFile(const AnyString& uri, const AnyString& dir) override;
+        virtual bool WriteFile(const AnyString& uri, const AnyString& dir, const void* data, size_t len) override;
+        virtual bool ReadFile(const AnyString& uri, QByteArray* array) const override;
+        virtual bool HasMapping(const AnyString& uri) const override;
+        virtual AnyString MapUri(const AnyString& uri) const override;
+        bool CopyFile(const QString& src_file, const AnyString& dir, QString*  dst_name);
     private:
         QString MapUriToZipFile(const std::string& uri) const;
         bool FindZipFile(const QString& unix_style_name) const;
@@ -107,11 +107,11 @@ namespace app
     {
     public:
         ZipArchiveExporter(const QString& filename, const QString& workspace_dir);
-        virtual bool CopyFile(const app::AnyString& uri, const std::string& dir) override;
-        virtual bool WriteFile(const app::AnyString& uri, const std::string& dir, const void* data, size_t len) override;
-        virtual bool ReadFile(const app::AnyString& uri, QByteArray* array) const override;
-        virtual bool HasMapping(const app::AnyString& uri) const override;
-        virtual app::AnyString MapUri(const app::AnyString& uri) const override;
+        virtual bool CopyFile(const AnyString& uri, const AnyString& dir) override;
+        virtual bool WriteFile(const AnyString& uri, const AnyString& dir, const void* data, size_t len) override;
+        virtual bool ReadFile(const AnyString& uri, QByteArray* array) const override;
+        virtual bool HasMapping(const AnyString& uri) const override;
+        virtual AnyString MapUri(const AnyString& uri) const override;
 
         void WriteText(const std::string& text, const char* name);
         void WriteBytes(const QByteArray& bytes, const char* name);
