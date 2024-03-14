@@ -30,7 +30,6 @@
 #include "base/json.h"
 #include "base/utility.h"
 #include "editor/app/format.h"
-#include "editor/app/utility.h"
 
 namespace app
 {
@@ -113,7 +112,7 @@ namespace app
           : mKey(key)
         {}
         PropertyKey(const std::string& key)
-          : mKey(FromUtf8(key))
+          : mKey(QString::fromUtf8(key.c_str()))
         {}
 
         template<typename T>
@@ -148,19 +147,25 @@ namespace app
           : mStr(str)
         {}
         AnyString(const std::string& str)
-          : mStr(FromUtf8(str))
+          : mStr(QString::fromUtf8(str.c_str()))
         {}
         operator QString () const
         { return mStr; }
         operator QVariant () const
         { return mStr; }
         operator std::string () const
-        { return app::ToUtf8(mStr); }
+        {
+            const auto& bytes = mStr.toUtf8();
+            return std::string(bytes.data(), bytes.size());
+        }
 
         const QString& GetWide() const
         { return mStr; }
         const std::string GetUtf8() const
-        { return app::ToUtf8(mStr); }
+        {
+            const auto& bytes = mStr.toUtf8();
+            return std::string(bytes.data(), bytes.size());
+        }
 
         const quint64 GetHash() const
         { return qHash(mStr); }
@@ -185,7 +190,7 @@ namespace app
         }
         AnyString& operator=(const std::string& str)
         {
-            mStr = FromUtf8(str);
+            mStr = QString::fromUtf8(str.c_str());
             return *this;
         }
     private:
@@ -205,7 +210,7 @@ namespace app
     };
 
     inline bool operator==(const AnyString& lhs, const char* rhs)
-    { return lhs.mStr == FromUtf8(rhs); }
+    { return lhs.mStr == QString::fromUtf8(rhs); }
 
     inline bool operator==(const AnyString& lhs, const AnyString& rhs)
     { return lhs.mStr == rhs.mStr; }
