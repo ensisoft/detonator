@@ -242,7 +242,8 @@ private:
             auto* this_ = static_cast<PlaybackStream*>(user);
             if (!this_->source_)
                 return;
-            WARN("PulseAudio stream underflow callback. [name='%1']", this_->source_->GetName());
+            if (base::IsLogEventEnabled(base::LogEvent::Verbose))
+                WARN("PulseAudio stream underflow callback. [name='%1']", this_->source_->GetName());
         }
 
         static void drain_callback(pa_stream* stream, int success, void* user)
