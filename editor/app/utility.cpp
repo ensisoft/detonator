@@ -140,6 +140,48 @@ QString FindJsonImageFile(const QString& json_file)
     return "";
 }
 
+QString GetAppDir()
+{
+    static const auto& dir = QDir::toNativeSeparators(QCoreApplication::applicationDirPath());
+#if defined(POSIX_OS)
+    return dir + "/";
+#elif defined(WINDOWS_OS)
+    return dir + "\\";
+#else
+# error unimplemented function
+#endif
+    return dir;
+}
+
+QString FixWorkspacePath(QString path)
+{
+    path = app::CleanPath(path);
+#if defined(POSIX_OS)
+    if (!path.endsWith("/"))
+        path.append("/");
+#elif defined(WINDOWS_OS)
+    if (!path.endsWith("\\"))
+        path.append("\\");
+#endif
+    return path;
+}
+app::AnyString MapWorkspaceUri(const app::AnyString& uri, const QString& workspace)
+{
+    // see comments in AddFileToWorkspace.
+    // this is basically the same as MapFilePath except this API
+    // is internal to only this application whereas MapFilePath is part of the
+    // API exposed to the graphics/ subsystem.
+    QString ret = uri;
+    if (ret.startsWith("ws://"))
+        ret = app::CleanPath(ret.replace("ws://", workspace));
+    else if (ret.startsWith("app://"))
+        ret = app::CleanPath(ret.replace("app://", GetAppDir()));
+    else if (ret.startsWith("fs://"))
+        ret.remove(0, 5);
+    // return as is
+    return ret;
+}
+
 
 QRect CenterRectOnTarget(const QRect& target, const QRect& source)
 {
