@@ -1778,13 +1778,26 @@ Entity::Entity(const EntityArgs& args) : Entity(args.klass)
         const auto& value = pair.second;
         if (auto* var = FindScriptVarByName(name))
         {
-            if (var->IsReadOnly()) {
-                WARN("Entity variable is read only. Value cannot be set. [entity='%1', var='%1']", mInstanceName, name);
-                continue;
-            } else if (var->IsArray()) {
+            if (var->IsArray()) {
                 WARN("Setting array script variables on entity create is currently unsupported. [entity='%1', var='%2']", mInstanceName, name);
                 continue;
             }
+
+            const bool read_only = var->IsReadOnly();
+            // a bit of a kludge here but we know that the read only variables
+            // are shared between each entity instance, i.e. FindScriptVar returns
+            // a pointer to the script var in the class object.
+            // So create a mutable copy since we're actually writing to the
+            // variable here.
+            if (var->IsReadOnly())
+            {
+                mScriptVars.push_back(*var);
+                var = &mScriptVars.back();
+            }
+
+            // todo: provide a non-const find for script variable.
+            const_cast<ScriptVar*>(var)->SetReadOnly(false);
+
             const auto expected_type = var->GetType();
             if (expected_type == ScriptVar::Type::String && std::holds_alternative<std::string>(value))
                 var->SetValue(std::get<std::string>(value));
@@ -1797,6 +1810,8 @@ Entity::Entity(const EntityArgs& args) : Entity(args.klass)
             else if (expected_type == ScriptVar::Type::Boolean && std::holds_alternative<bool>(value))
                 var->SetValue(std::get<bool>(value));
             else WARN("Unsupported entity script var type on entity create. [entity='%1', var='%2']", mInstanceName, name);
+
+            const_cast<ScriptVar*>(var)->SetReadOnly(read_only);
         }
         else WARN("No such entity script variable. [entity='%1', var='%2']", mInstanceName, name);
     }
