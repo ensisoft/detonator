@@ -278,6 +278,27 @@ inline void SetSelection(QTableView* view, const QModelIndexList& selection)
         }
     }
 }
+inline void SetCurrent(QTableView* view, const QModelIndex& index)
+{
+    QSignalBlocker s(view);
+
+    auto* data_model = view->model();
+    auto* selection_model = view->selectionModel();
+
+    if (auto* proxy = qobject_cast<QSortFilterProxyModel*>(data_model))
+    {
+        selection_model->setCurrentIndex(proxy->mapFromSource(index),
+                                         QItemSelectionModel::SelectionFlag::ClearAndSelect |
+                                         QItemSelectionModel::SelectionFlag::Rows);
+
+    }
+    else
+    {
+        selection_model->setCurrentIndex(index, QItemSelectionModel::SelectionFlag::ClearAndSelect |
+                                                QItemSelectionModel::SelectionFlag::Rows);
+
+    }
+}
 
 inline QModelIndex GetSelectedIndex(const QTableView* view)
 {
