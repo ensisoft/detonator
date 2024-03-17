@@ -258,6 +258,27 @@ inline QModelIndexList GetSelection(const QTableView* view)
     return selection;
 }
 
+inline void SetSelection(QTableView* view, const QModelIndexList& selection)
+{
+    QSignalBlocker f(view);
+
+    auto* data_model = view->model();
+    auto* selection_model = view->selectionModel();
+    selection_model->clearSelection();
+    if (auto* proxy = qobject_cast<QSortFilterProxyModel*>(data_model))
+    {
+        for (const auto& item : selection) {
+            selection_model->select(proxy->mapFromSource(item), QItemSelectionModel::ClearAndSelect |
+                                                                QItemSelectionModel::SelectionFlag::Rows);
+        }
+    } else {
+        for (const auto& item : selection) {
+            selection_model->select(item, QItemSelectionModel::SelectionFlag::ClearAndSelect |
+                                          QItemSelectionModel::SelectionFlag::Rows);
+        }
+    }
+}
+
 inline QModelIndex GetSelectedIndex(const QTableView* view)
 {
     const auto& list = GetSelection(view);

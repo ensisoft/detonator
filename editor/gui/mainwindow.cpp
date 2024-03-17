@@ -1560,7 +1560,28 @@ void MainWindow::on_actionRenameResource_triggered()
 void MainWindow::on_actionDuplicateResource_triggered()
 {
     const auto& selected = GetSelection(mUI.workspace);
-    mWorkspace->DuplicateResources(selected);
+    QModelIndexList result;
+    mWorkspace->DuplicateResources(selected, &result);
+
+    SetSelection(mUI.workspace, result);
+
+    if (result.size() == 1)
+    {
+        auto& resource = mWorkspace->GetResource(result[0]);
+
+        bool accepted = false;
+        const auto& name = QInputDialog::getText(this,
+            tr("Rename Resource"),
+            tr("Resource Name:"),
+            QLineEdit::Normal,
+            resource.GetName(),
+            &accepted);
+        if (accepted)
+        {
+            resource.SetName(name);
+            mWorkspace->UpdateResource(&resource);
+        }
+    }
 }
 
 void MainWindow::on_actionDependencies_triggered()
