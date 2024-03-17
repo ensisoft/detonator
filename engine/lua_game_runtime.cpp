@@ -601,6 +601,11 @@ void LuaRuntime::Init()
         self.mActionQueue.push(action);
     };
 
+    auto lua_math = mLuaState->get<sol::table>("math");
+    // this was at last available in Lua 5.2
+    // but no longer available in Lua 5.5
+    lua_math["atan2"] = [](float y, float x) { return std::atan2(y, x); };
+
     if (!mGameScript.empty())
     {
         mGameEnv = std::make_unique<sol::environment>(*mLuaState, sol::create, mLuaState->globals());
