@@ -337,7 +337,7 @@ namespace app
         void DeleteResource(const AnyString& id, std::vector<QString>* dead_files = nullptr);
 
         // Create duplicate copies of the selected resources.
-        void DuplicateResources(const ModelIndexList& list);
+        void DuplicateResources(const ModelIndexList& list, QModelIndexList* result = nullptr);
 
         // Export the raw JSON of the the selected resources.
         bool ExportResourceJson(const ModelIndexList& list, const QString& filename) const;

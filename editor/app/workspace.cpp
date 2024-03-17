@@ -2431,7 +2431,7 @@ void Workspace::DeleteResource(const AnyString& id, std::vector<QString>* dead_f
     }
 }
 
-void Workspace::DuplicateResources(const ModelIndexList& list)
+void Workspace::DuplicateResources(const ModelIndexList& list, QModelIndexList* result)
 {
     RECURSION_GUARD(this, "ResourceList");
 
@@ -2499,16 +2499,19 @@ void Workspace::DuplicateResources(const ModelIndexList& list)
 
     for (size_t i=0; i<dupes.size(); ++i)
     {
-        const auto index = insert_index[dupes[i].get()] + i;
+        const auto row = insert_index[dupes[i].get()] + i;
 
-        beginInsertRows(QModelIndex(), index, index);
+        beginInsertRows(QModelIndex(), row, row);
 
         auto* dupe_ptr = dupes[i].get();
-        mResources.insert(mResources.begin() + index, std::move(dupes[i]));
+        mResources.insert(mResources.begin() + row, std::move(dupes[i]));
         mUserResourceCount++;
         endInsertRows();
 
         emit ResourceAdded(dupe_ptr);
+
+        if (result)
+            result->push_back(this->index(row, 0));
     }
 }
 
