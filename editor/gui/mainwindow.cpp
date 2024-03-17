@@ -180,6 +180,7 @@ MainWindow::MainWindow(QApplication& app) : mApplication(app)
     mUI.actionCopy->setShortcut(QKeySequence::Copy);
     mUI.actionPaste->setShortcut(QKeySequence::Paste);
     mUI.actionUndo->setShortcut(QKeySequence::Undo);
+    mUI.workspace->installEventFilter(this);
 
     ShowHelpWidget();
 
@@ -2832,6 +2833,45 @@ void MainWindow::dropEvent(QDropEvent* event)
         files.append(name);
     }
     ImportFiles(files);
+}
+
+bool MainWindow::eventFilter(QObject* destination, QEvent* event)
+{
+    // when to call base class and when to return false/true
+    // see this example:
+    // https://doc.qt.io/qt-5/qobject.html#eventFilter
+
+    if (destination != mUI.workspace)
+        return QMainWindow::eventFilter(destination, event);
+
+    if (event->type() == QEvent::Type::KeyPress)
+    {
+        const auto* key = static_cast<QKeyEvent*>(event);
+        if (key->key() == Qt::Key_Return)
+        {
+            on_actionEditResource_triggered();
+            return true;
+        }
+        const bool ctrl = key->modifiers() & Qt::ControlModifier;
+        const bool shift = key->modifiers() & Qt::ShiftModifier;
+
+        auto selection = GetSelection(mUI.workspace);
+        if (selection.size() != 1)
+            return false;
+
+        auto current = selection[0].row();
+        const auto max = GetCount(mUI.workspace);
+
+        if (ctrl && key->key() == Qt::Key_N)
+            current = math::wrap(0, max-1, current+1);
+        else if (ctrl && key->key() == Qt::Key_P)
+            current = math::wrap(0, max-1, current-1);
+        else return false;
+
+        SetCurrent(mUI.workspace,mWorkspace->index(current, 0));
+        return true;
+    }
+    return false;
 }
 
 void MainWindow::LaunchGame(bool clean)

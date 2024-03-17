@@ -228,6 +228,7 @@ namespace gui
         virtual void closeEvent(QCloseEvent* event) override;
         virtual void dragEnterEvent(QDragEnterEvent* drag) override;
         virtual void dropEvent(QDropEvent* event) override;
+        virtual bool eventFilter(QObject* destination, QEvent* event) override;
 
     private:
         Ui::MainWindow mUI;
