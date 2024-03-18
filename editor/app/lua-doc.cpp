@@ -748,6 +748,7 @@ void InitLuaDoc()
                                         "The key value is one of the symbolic keys in wdk.Keys. <br>"
                                         "This function is only available on desktop Windows and Linux. ",
                                         "wdk.Keys", "key");
+
     DOC_FUNCTION_2("bool", "TestMod", "Test whether the given modifier bit is set in the bitset of modifier keys.",
                  "unsigned", "modifier_bits", "wdk.Mods", "modifier");
 
@@ -1899,6 +1900,8 @@ void InitLuaDoc()
     DOC_TABLE2("KB", "Keyboard utilities for common keyboard handling functionality such as mapping wdk.Keys to logical action keys.<br>"
                      "require('app://scripts/utility/keyboard.lua')");
     DOC_FUNCTION_1("bool", "TestKeyDown", "Test whether the logical game action key is currently active or not, i.e. down or not.",
+                   "unsigned", "key");
+    DOC_FUNCTION_1("bool", "TestKeyUp", "Test whether the logical game action key is currently inactive or not, i.e. up or not.",
                    "unsigned", "key");
     DOC_FUNCTION_3("void", "KeyDown", "Receive native keyboard key down event and convert it to a logical action key based on the key map.",
                    "wdk.Keys", "key", "unsigned", "modifier_bits", "table", "mapping");
