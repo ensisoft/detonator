@@ -40,6 +40,10 @@ KB.TestKeyDown = function(key)
     return keydown_bits & key ~= 0
 end
 
+KB.TestKeyUp = function(key)
+    return keydown_bits & key == 0
+end
+
 KB.KeyDown = function(symbol, modifier_bits, map)
     local action = map[symbol]
     if action == nil then
