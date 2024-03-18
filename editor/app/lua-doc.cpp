@@ -1781,7 +1781,10 @@ void InitLuaDoc()
     DOC_METHOD_1("void", "KillMusic", "Kill the named music graph immediately.", "string", "name");
     DOC_METHOD_2("void", "KillMusic", "Kill the named music graph after some delay (in milliseconds) elapses.",
                  "string", "name", "unsigned", "delay");
-    DOC_METHOD_0("void", "KillAllMusic", "Kill all currently playing music graphs.");
+    DOC_METHOD_0("void", "KillAllMusic", "Kill all currently playing music graphs immediately.");
+    DOC_METHOD_1("void", "KillAllMusic", "Kill all currently playing music after some delay (in milliseconds) elapses.",
+                 "unsigned", "delay");
+
     DOC_METHOD_1("void", "CancelMusicCmds", "Cancel all pending named music graph commands.<br>"
                                             "The music graph should be previously created with PrepareMusicGraph or PlayMusic.",
                  "string", "name");
@@ -1797,6 +1800,12 @@ void InitLuaDoc()
     DOC_METHOD_1("void", "EnableEffects", "Enable or disable actual sound effect playing. "
                                           "Toggling the flag does not affect currently playing effects.<br>"
                                           "The initial value is enabled.", "bool", "on_off");
+    DOC_METHOD_0("void", "KillAllSoundEffects", "Kill all current sounds effects immediately.");
+    DOC_METHOD_1("void", "KillAllSoundEffects", "Kill all current sound effects after some delay (in milliseconds) elapses.",
+                 "unsigned", "delay");
+    DOC_METHOD_1("void", "KillSoundEffect", "Kill the named sound effect audio graph immediately.", "string", "name");
+    DOC_METHOD_2("void", "KillSoundEffect", "Kill the named sound effect audio graph after some delay (in milliseconds) elapses.",
+                 "string", "name", "unsigned", "delay");
 
     DOC_TABLE("game.AudioEvent");
     DOC_OBJECT_PROPERTY("string", "type", "The type of the audio event.<br>"
