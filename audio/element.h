@@ -937,6 +937,7 @@ namespace audio
         // by its name. If no such source is found then nothing is done.
 
         struct DeleteAllSrcCmd {
+            std::string name; // not used.
             unsigned millisecs = 0;
         };
 
@@ -1044,7 +1045,8 @@ namespace audio
             bool paused = false;
         };
         using LateCommand = std::variant<PauseSourceCmd,
-                DeleteSourceCmd>;
+                DeleteSourceCmd,
+                DeleteAllSrcCmd>;
         std::vector<LateCommand> mCommands;
         std::unordered_map<std::string, Source> mSources;
         SingleSlotPort mOut;

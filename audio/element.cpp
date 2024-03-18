@@ -1584,6 +1584,12 @@ void MixerSource::ReceiveCommand(Command& cmd)
             mCommands.push_back(*ptr);
         else PauseSource(ptr->name, ptr->paused);
     }
+    else if (auto* ptr = cmd.GetIf<DeleteAllSrcCmd>())
+    {
+        if (ptr->millisecs)
+            mCommands.push_back(*ptr);
+        else DeleteSources();
+    }
     else BUG("Unexpected command.");
 }
 
