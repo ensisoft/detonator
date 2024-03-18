@@ -122,7 +122,9 @@ namespace engine
         // for the gain value, but you likely want to keep this around (0.0f, 1.0f)
         void SetSoundEffectGain(float gain);
         // Kill all currently playing sound effects.
-        void KillAllSoundEffects();
+        void KillAllSoundEffects(unsigned when);
+
+        void KillSoundEffect(const std::string& track, unsigned when);
 
         using AudioEventQueue = std::vector<AudioEvent>;
         // Tick the audio engine/player and optionally receive a list of

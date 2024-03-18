@@ -314,11 +314,21 @@ void AudioEngine::SetSoundEffectGain(float gain)
     mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("effect_gain", std::move(cmd)));
 #endif
 }
-void AudioEngine::KillAllSoundEffects()
+void AudioEngine::KillAllSoundEffects(unsigned when)
 {
 #if defined(GAMESTUDIO_ENABLE_AUDIO)
     audio::MixerSource::DeleteAllSrcCmd cmd;
-    cmd.millisecs = 0;
+    cmd.millisecs = when;
+    mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("effect_mixer", std::move(cmd)));
+#endif
+}
+
+void AudioEngine::KillSoundEffect(const std::string& track, unsigned when)
+{
+#if defined(GAMESTUDIO_ENABLE_AUDIO)
+    audio::MixerSource::DeleteSourceCmd cmd;
+    cmd.name = track;
+    cmd.millisecs = when;
     mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("effect_mixer", std::move(cmd)));
 #endif
 }

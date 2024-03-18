@@ -1581,8 +1581,29 @@ void BindGameLib(sol::state& L)
                 }
                 return engine.PlaySoundEffect(klass, 0);
             });
-    audio["SetSoundEffectGain"] = &AudioEngine::SetSoundEffectGain;
-    audio["EnableEffects"]      = &AudioEngine::EnableEffects;
+    audio["SetSoundEffectGain"]  = &AudioEngine::SetSoundEffectGain;
+    audio["EnableEffects"]       = &AudioEngine::EnableEffects;
+    audio["KillSoundEffect"]     = sol::overload(
+        [](AudioEngine& engine, const std::string& track) {
+            engine.KillSoundEffect(track, 0);
+        },
+        [](AudioEngine& engine, const std::string& track, unsigned when) {
+            engine.KillSoundEffect(track, when);
+        });
+    audio["KillAllMusic"] = sol::overload(
+        [](AudioEngine& engine) {
+            engine.KillAllMusic(0);
+        },
+        [](AudioEngine& engine, unsigned when) {
+            engine.KillAllMusic(when);
+        });
+    audio["KillAllSoundEffects"] = sol::overload(
+        [](AudioEngine& engine) {
+            engine.KillAllSoundEffects(0);
+        },
+        [](AudioEngine& engine, unsigned when) {
+            engine.KillAllSoundEffects(when);
+        });
 
     auto audio_event = table.new_usertype<AudioEvent>("AudioEvent");
     audio_event["source"] = sol::readonly_property(&AudioEvent::source);
