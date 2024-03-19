@@ -277,7 +277,7 @@ bool AudioEngine::PlaySoundEffect(const GraphHandle& handle, unsigned when)
     if (!mEnableEffects)
         return true;
 
-    const auto name   = "FX#" + std::to_string(mEffectCounter);
+    const auto name   = handle->GetName();
     const auto paused = when != 0;
 
     auto graph = std::make_unique<audio::Graph>(name, handle);
@@ -300,8 +300,6 @@ bool AudioEngine::PlaySoundEffect(const GraphHandle& handle, unsigned when)
     play_cmd.paused    = false;
     play_cmd.millisecs = when;
     mPlayer->SendCommand(mEffectGraphId, audio::AudioGraph::MakeCommand("effect_mixer", std::move(play_cmd)));
-
-    ++mEffectCounter;
 #endif
     return true;
 }
