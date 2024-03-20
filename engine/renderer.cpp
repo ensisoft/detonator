@@ -1372,12 +1372,14 @@ void Renderer::DrawScenePackets(gfx::Device& device, std::vector<DrawPacket>& pa
         painter.Prime(draw);
 
         const auto render_layer_index = packet.render_layer;
+        ASSERT(render_layer_index >= 0);
         if (render_layer_index >= layers.size())
             layers.resize(render_layer_index + 1);
 
         auto& render_layer = layers[render_layer_index];
 
         const auto packet_index = packet.packet_index;
+        ASSERT(packet_index >= 0);
         if (packet_index >= render_layer.size())
             render_layer.resize(packet_index + 1);
 
@@ -1613,6 +1615,19 @@ void Renderer::SortTilePackets(std::vector<DrawPacket>& packets) const
         }
         return false;
     });
+
+    // make sure the packet index (the layer index coming from scene/entity
+    // render node) is zero or greater.
+    int32_t first_packet_index = std::numeric_limits<int32_t>::max();
+    for (auto& packet : packets)
+    {
+        first_packet_index = std::min(first_packet_index, packet.packet_index);
+    }
+    for (auto& packet : packets)
+    {
+        packet.packet_index -= first_packet_index;
+        ASSERT(packet.packet_index >= 0);
+    }
 
     // assign draw packets to render layers while keeping the relative ordering the same
 
