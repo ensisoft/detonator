@@ -1526,6 +1526,11 @@ void TilemapWidget::on_layerDepth_valueChanged(int)
     ModifyCurrentLayer();
 }
 
+void TilemapWidget::on_renderLayer_valueChanged(int)
+{
+    ModifyCurrentLayer();
+}
+
 void TilemapWidget::on_chkLayerVisible_stateChanged(int)
 {
     ModifyCurrentLayer();
@@ -1939,6 +1944,7 @@ void TilemapWidget::DisplayLayerProperties()
     SetValue(mUI.cmbLayerResolution, -1);
     SetValue(mUI.cmbLayerCache,      -1);
     SetValue(mUI.layerDepth,          0);
+    SetValue(mUI.renderLayer,         0);
     SetValue(mUI.chkLayerVisible,   false);
     SetValue(mUI.chkLayerEnabled,   false);
     SetValue(mUI.chkLayerReadOnly,  false);
@@ -1966,6 +1972,7 @@ void TilemapWidget::DisplayLayerProperties()
         SetValue(mUI.cmbLayerCache,      layer->GetCache());
         SetValue(mUI.cmbLayerResolution, layer->GetResolution());
         SetValue(mUI.layerDepth,         layer->GetDepth() * -1);
+        SetValue(mUI.renderLayer,        layer->GetRenderLayer());
         SetValue(mUI.chkLayerVisible,    layer->IsVisible());
         SetValue(mUI.chkLayerEnabled,    layer->IsEnabled());
         SetValue(mUI.chkLayerReadOnly,   layer->IsReadOnly());
@@ -2901,6 +2908,7 @@ void TilemapWidget::ModifyCurrentLayer()
         layer->SetEnabled(GetValue(mUI.chkLayerEnabled));
         layer->SetReadOnly(GetValue(mUI.chkLayerReadOnly));
         layer->SetDepth(GetValue(mUI.layerDepth)*-1);
+        layer->SetRenderLayer(GetValue(mUI.renderLayer));
 
         auto* instance = GetCurrentLayerInstance();
         instance->SetFlags(layer->GetFlags());
