@@ -217,6 +217,15 @@ void Renderer::Draw(const game::Tilemap& map,
 
     SortTilePackets(packets);
 
+    // this rendering path doesn't use the runtime rendering path (DrawScenePackets)
+    // therefore we must do our own sorting here to get the packets sorted
+    // according to render layers as well.
+    std::stable_sort(packets.begin(), packets.end(), [](const auto& lhs, const auto& rhs) {
+        if (lhs.render_layer < rhs.render_layer)
+            return true;
+        return false;
+    });
+
     // put the data packets (indicated by editor) first
     std::stable_partition(packets.begin(), packets.end(),
                           [](const auto& packet) {
@@ -280,8 +289,8 @@ void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
             packet.transform    = from_map_to_scene;
             packet.map_row      = batch.row;
             packet.map_col      = batch.col;
-            packet.map_layer    = batch.layer;
-            packet.render_layer = 0;
+            packet.map_layer    = batch.layer_index;
+            packet.render_layer = batch.render_layer;
             packet.packet_index = 0;
             packet.pass         = RenderPass::DrawColor;
             packets.push_back(std::move(packet));
@@ -303,8 +312,8 @@ void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
             packet.transform    = glm::mat4(1.0f);
             packet.map_row      = batch.row;
             packet.map_col      = batch.col;
-            packet.map_layer    = batch.layer;
-            packet.render_layer = 0;
+            packet.map_layer    = batch.layer_index;
+            packet.render_layer = batch.render_layer;
             packet.packet_index = 0;
             packet.pass         = RenderPass::DrawColor;
             packets.push_back(std::move(packet));
@@ -1512,13 +1521,14 @@ void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
             {
                 batches.emplace_back();
                 auto& batch = batches.back();
-                batch.material  = GetTileMaterial(map, layer_index, material_index);
-                batch.layer     = layer_index;
-                batch.depth     = layer.GetDepth();
-                batch.row       = row;
-                batch.col       = col;
-                batch.tile_size = layer_tile_size;
-                batch.type      = TileBatch::Type::Render;
+                batch.material     = GetTileMaterial(map, layer_index, material_index);
+                batch.layer_index  = layer_index;
+                batch.depth        = layer.GetDepth();
+                batch.render_layer = layer.GetRenderLayer();
+                batch.row          = row;
+                batch.col          = col;
+                batch.tile_size    = layer_tile_size;
+                batch.type         = TileBatch::Type::Render;
             }
 
             // append to tile to the current batch
@@ -1589,13 +1599,14 @@ void Renderer::PrepareDataLayerTileBatches(const game::Tilemap& map,
 
             TileBatch batch;
             batch.tiles.push_back(tile);
-            batch.material  = gfx::CreateMaterialInstance(gfx::CreateMaterialClassFromColor(color));
-            batch.depth     = layer.GetDepth();
-            batch.row       = row;
-            batch.col       = col;
-            batch.layer     = layer_index;
-            batch.type      = TileBatch::Type::Data;
-            batch.tile_size = layer_tile_size;
+            batch.material     = gfx::CreateMaterialInstance(gfx::CreateMaterialClassFromColor(color));
+            batch.depth        = layer.GetDepth();
+            batch.row          = row;
+            batch.col          = col;
+            batch.layer_index  = layer_index;
+            batch.render_layer = layer.GetRenderLayer();
+            batch.type         = TileBatch::Type::Data;
+            batch.tile_size    = layer_tile_size;
             batches.push_back(std::move(batch));
         }
     }
@@ -1603,6 +1614,20 @@ void Renderer::PrepareDataLayerTileBatches(const game::Tilemap& map,
 
 void Renderer::SortTilePackets(std::vector<DrawPacket>& packets) const
 {
+    OffsetPacketLayers(packets);
+
+    // layer is the layer index coming from the tilemap
+    // the sorting order applies *inside* a render layer.
+    // the render layer sorting happens later, so as long
+    // as the relative ordering is correct the renderer
+    // will then put the packets in render layers properly.
+
+    // row 0, col 0, layer 0
+    // row 0, col 0, layer 1
+    // row 0, col 1, layer 1
+    // ...
+    // row 1, col 0, layer 0,
+    // row 2, col 0, layer 1
     std::sort(packets.begin(), packets.end(), [](const auto& lhs, const auto& rhs) {
         if (lhs.map_row < rhs.map_row)
             return true;
@@ -1615,35 +1640,6 @@ void Renderer::SortTilePackets(std::vector<DrawPacket>& packets) const
         }
         return false;
     });
-
-    // make sure the packet index (the layer index coming from scene/entity
-    // render node) is zero or greater.
-    int32_t first_packet_index = std::numeric_limits<int32_t>::max();
-    for (auto& packet : packets)
-    {
-        first_packet_index = std::min(first_packet_index, packet.packet_index);
-    }
-    for (auto& packet : packets)
-    {
-        packet.packet_index -= first_packet_index;
-        ASSERT(packet.packet_index >= 0);
-    }
-
-    // assign draw packets to render layers while keeping the relative ordering the same
-
-    uint32_t current_render_layer = 0;
-    uint32_t current_row = 0;
-    uint32_t current_col = 0;
-    for (uint32_t i=0; i<packets.size(); ++i)
-    {
-        // if the row or the column changes start a new render layer
-        if (packets[i].map_row != current_row || packets[i].map_col != current_col)
-            ++current_render_layer;
-
-        packets[i].render_layer = current_render_layer;
-        current_row = packets[i].map_row;
-        current_col = packets[i].map_col;
-    }
 }
 
 bool Renderer::CullDrawPacket(const DrawPacket& packet, const glm::mat4& projection, const glm::mat4& modelview) const
@@ -1748,7 +1744,7 @@ void Renderer::ComputeTileCoordinates(const game::Tilemap& map,
         ASSERT(map_row < map_height && map_col < map_width);
         packet.map_row   = map_row;
         packet.map_col   = map_col;
-        packet.map_layer = std::max(0, packet.render_layer);
+        packet.map_layer = 0;//std::max(0, packet.render_layer);
         //DEBUG("map pos = %1", map_plane_pos);
         //DEBUG("map row = %1, col = %2", map_row, map_col);
     }

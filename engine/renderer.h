@@ -243,7 +243,9 @@ namespace engine
             Type type = Type::Render;
             std::vector<gfx::TileBatch::Tile> tiles;
             std::shared_ptr<const gfx::Material> material;
-            std::uint16_t layer = 0;
+            // the index of the layer in the map
+            std::uint16_t layer_index = 0;
+            std::int16_t render_layer = 0;
             std::int16_t depth  = 0;
             std::uint32_t row   = 0;
             std::uint32_t col   = 0;
