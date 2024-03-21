@@ -378,6 +378,8 @@ namespace game
         { return mStorage; }
         int GetDepth() const
         { return mDepth; }
+        int GetRenderLayer() const
+        { return mRenderLayer; }
         void SetId(const std::string& id)
         { mId = id; }
         void SetName(const std::string& name)
@@ -408,6 +410,8 @@ namespace game
         { mFlags = flags; }
         void SetDepth(int depth)
         { mDepth = depth; }
+        void SetRenderLayer(int layer)
+        { mRenderLayer = layer; }
 
         void SetType(Type type);
 
@@ -502,6 +506,7 @@ namespace game
         Resolution mResolution = Resolution::Original;
         DefaultValue  mDefault;
         int mDepth = 0;
+        int mRenderLayer = 0;
     };
 
     class TilemapLayer
@@ -528,6 +533,7 @@ namespace game
         virtual unsigned GetWidth() const = 0;
         virtual unsigned GetHeight() const = 0;
         virtual int GetDepth() const = 0;
+        virtual int GetRenderLayer() const = 0;
         virtual void SetPaletteMaterialId(const std::string& material, size_t index) = 0;
         virtual void SetMapDimensions(unsigned width, unsigned  height) = 0;
 
@@ -658,6 +664,8 @@ namespace game
             { return mClass->MapDimension(mMapHeight); }
             virtual int GetDepth() const override
             { return mClass->GetDepth(); }
+            virtual int GetRenderLayer() const override
+            { return mClass->GetRenderLayer(); }
             virtual float GetTileSizeScaler() const override
             { return mClass->GetTileSizeScaler(); }
             virtual bool SetTilePaletteIndex(uint8_t index, unsigned row, unsigned col) override
