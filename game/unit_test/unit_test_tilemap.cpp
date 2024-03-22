@@ -452,6 +452,94 @@ void test_tilemap_class()
     }
 }
 
+void test_mixed_resolution_tile_access()
+{
+    TEST_CASE(test::Type::Feature)
+
+    auto map = std::make_shared<game::TilemapClass>();
+    map->SetMapWidth(100);
+    map->SetMapHeight(50);
+
+    {
+        auto layer = std::make_shared<game::TilemapLayerClass>();
+        layer->SetStorage(game::TilemapLayerClass::Storage::Dense);
+        layer->SetResolution(game::TilemapLayerClass::Resolution::Original);
+        layer->SetCache(game::TilemapLayerClass::Cache::Automatic);
+        layer->SetType(game::TilemapLayerClass::Type::DataUInt8);
+        map->AddLayer(layer);
+    }
+
+    {
+        auto layer = std::make_shared<game::TilemapLayerClass>();
+        layer->SetStorage(game::TilemapLayerClass::Storage::Dense);
+        layer->SetResolution(game::TilemapLayerClass::Resolution::DownScale2);
+        layer->SetCache(game::TilemapLayerClass::Cache::Automatic);
+        layer->SetType(game::TilemapLayerClass::Type::DataUInt8);
+        map->AddLayer(layer);
+    }
+
+    {
+        auto layer = std::make_shared<game::TilemapLayerClass>();
+        layer->SetStorage(game::TilemapLayerClass::Storage::Dense);
+        layer->SetResolution(game::TilemapLayerClass::Resolution::UpScale2);
+        layer->SetCache(game::TilemapLayerClass::Cache::Automatic);
+        layer->SetType(game::TilemapLayerClass::Type::DataUInt8);
+        map->AddLayer(layer);
+    }
+
+    {
+        auto data = std::make_shared<TestVectorData>();
+        auto klass = map->GetSharedLayerClass(0);
+        klass->Initialize(map->GetMapWidth(),
+                          map->GetMapHeight(), *data);
+        auto layer = game::CreateTilemapLayer(klass,
+                                              map->GetMapWidth(),
+                                              map->GetMapHeight());
+        layer->Load(data, 0);
+
+        TEST_REQUIRE((*layer)->GetResolution() == game::TilemapLayerClass::Resolution::Original);
+        TEST_REQUIRE(layer->GetWidth() == 100);
+        TEST_REQUIRE(layer->GetHeight() == 50);
+        TEST_REQUIRE(layer->SetTileValue(1, 0, 0));
+        TEST_REQUIRE(layer->SetTileValue(1, 49, 99));
+    }
+
+    {
+        auto data = std::make_shared<TestVectorData>();
+        auto klass = map->GetSharedLayerClass(1);
+        klass->Initialize(map->GetMapWidth(),
+                          map->GetMapHeight(), *data);
+        auto layer = game::CreateTilemapLayer(klass,
+                                              map->GetMapWidth(),
+                                              map->GetMapHeight());
+        layer->Load(data, 0);
+
+        TEST_REQUIRE((*layer)->GetResolution() == game::TilemapLayerClass::Resolution::DownScale2);
+        TEST_REQUIRE(layer->GetWidth() == 50);
+        TEST_REQUIRE(layer->GetHeight() == 25);
+        TEST_REQUIRE(layer->SetTileValue(1, 0, 0));
+        TEST_REQUIRE(layer->SetTileValue(1, 24, 49));
+    }
+
+    {
+        auto data = std::make_shared<TestVectorData>();
+        auto klass = map->GetSharedLayerClass(2);
+        klass->Initialize(map->GetMapWidth(),
+                          map->GetMapHeight(), *data);
+        auto layer = game::CreateTilemapLayer(klass,
+                                              map->GetMapWidth(),
+                                              map->GetMapHeight());
+        layer->Load(data, 0);
+
+        TEST_REQUIRE((*layer)->GetResolution() == game::TilemapLayerClass::Resolution::UpScale2);
+        TEST_REQUIRE(layer->GetWidth() == 200);
+        TEST_REQUIRE(layer->GetHeight() == 100);
+        TEST_REQUIRE(layer->SetTileValue(1, 0, 0));
+        TEST_REQUIRE(layer->SetTileValue(1, 99, 199));
+    }
+
+}
+
 void test_tile_access_basic(game::TilemapLayerClass::Storage storage)
 {
     TEST_CASE(test::Type::Feature)
@@ -835,6 +923,8 @@ int test_main(int argc, char* argv[])
     test_details();
     test_tilemap_layer();
     test_tilemap_class();
+
+    test_mixed_resolution_tile_access();
 
     test_tile_access_basic(game::TilemapLayerClass::Storage::Dense);
     test_tile_access_basic(game::TilemapLayerClass::Storage::Dense);
