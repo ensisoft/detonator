@@ -44,6 +44,7 @@
 #include "editor/gui/settings.h"
 #include "editor/gui/dlgtilelayer.h"
 #include "editor/gui/dlgmaterial.h"
+#include "editor/gui/dlgtiletool.h"
 #include "editor/gui/palettematerial.h"
 
 namespace{
@@ -403,12 +404,12 @@ private:
 class TilemapWidget::TileBrushTool : public MouseTool
 {
 public:
-    TileBrushTool(const Tool& tool, State& state, game::TilemapLayer& layer)
+    TileBrushTool(std::shared_ptr<const TileTool> tool, State& state, game::TilemapLayer& layer)
       : mTool(tool)
       , mState(state)
       , mLayer(layer)
     {
-        auto klass = state.workspace->GetMaterialClassById(tool.material);
+        auto klass = state.workspace->GetMaterialClassById(mTool->material);
         mMaterial = gfx::CreateMaterialInstance(klass);
     }
     virtual void Render(gfx::Painter& scene_painter, gfx::Painter& tile_painter) const override
@@ -434,12 +435,12 @@ public:
                                                                perspective);
         gfx::FRect tool_bounds;
         gfx::TileBatch batch;
-        for (unsigned row=0; row<mTool.height; ++row)
+        for (unsigned row=0; row<mTool->height; ++row)
         {
-            for (unsigned col=0; col<mTool.width; ++col)
+            for (unsigned col=0; col<mTool->width; ++col)
             {
-                const auto tile_row = mTileRow + row - mTool.height / 2;
-                const auto tile_col = mTileCol + col - mTool.width / 2;
+                const auto tile_row = mTileRow + row - mTool->height / 2;
+                const auto tile_col = mTileCol + col - mTool->width / 2;
                 if (tile_row < 0 || tile_row >= mLayer.GetHeight()||
                     tile_col < 0 || tile_col >= mLayer.GetWidth())
                     continue;
@@ -466,7 +467,14 @@ public:
             batch.SetProjection(gfx::TileBatch::Projection::Dimetric);
         else BUG("missing tile projection.");
 
-        // draw the tilebatch
+        // re-create the material if the tool's material setting has changed.
+        if (mMaterial->GetClassId() != mTool->material)
+        {
+            auto klass = mState.workspace->GetMaterialClassById(mTool->material);
+            mMaterial = gfx::CreateMaterialInstance(klass);
+        }
+
+        // draw the tile batch
         scene_painter.Draw(batch, tile_projection_transform_matrix, *mMaterial);
 
         // draw a rect around the tool on the tile plane
@@ -501,20 +509,26 @@ public:
 
         mActive = true;
 
-        if (mLayer->HasRenderComponent() && mTool.apply_material)
+        if (mLayer->HasRenderComponent() && mTool->apply_material)
         {
             // Figure out a new palette entry if needed.
-            if (mTool.palette_index == PaletteIndexAutomatic)
+            if (mTool->palette_index == PaletteIndexAutomatic)
             {
-                mTool.palette_index = mLayer->FindMaterialIndex(mTool.material);
-                if (mTool.palette_index == 0xff)
-                    mTool.palette_index = mLayer->FindNextAvailableMaterialIndex();
-                // validation should have been done before the tool was started.
-                ASSERT(mTool.palette_index >= 0 && mTool.palette_index < 0xff);
+                mToolMaterialPaletteIndex = mLayer->FindMaterialIndex(mTool->material);
+                if (mToolMaterialPaletteIndex == 0xff)
+                    mToolMaterialPaletteIndex = mLayer->FindNextAvailableMaterialIndex();
             }
+            else
+            {
+                mToolMaterialPaletteIndex = mTool->palette_index;
+            }
+            // validation should have been done before the tool was started.
+            ASSERT(mToolMaterialPaletteIndex >= 0 && mToolMaterialPaletteIndex < 0xff);
+
             auto* layer_klass = mState.klass->FindLayerById(mLayer.GetClassId());
-            layer_klass->SetPaletteMaterialId(mTool.material, mTool.palette_index);
+            layer_klass->SetPaletteMaterialId(mTool->material, mToolMaterialPaletteIndex);
         }
+        mToolDataValue = mTool->value;
 
         // apply tool on the spot already, so that if the user simply
         // clicks the button without moving the mouse the tile under
@@ -527,15 +541,21 @@ public:
             mActive = false;
         return false;
     }
+    virtual bool Validate() const override
+    {
+        if (mState.workspace->IsValidMaterial(mMaterial->GetClassId()))
+            return true;
+        return false;
+    }
 
     void ApplyTool()
     {
-        for (unsigned row=0; row<mTool.height; ++row)
+        for (unsigned row=0; row<mTool->height; ++row)
         {
-            for (unsigned col=0; col<mTool.width; ++col)
+            for (unsigned col=0; col<mTool->width; ++col)
             {
-                const auto tile_row = mTileRow + row - mTool.height / 2;
-                const auto tile_col = mTileCol + col - mTool.width / 2;
+                const auto tile_row = mTileRow + row - mTool->height / 2;
+                const auto tile_col = mTileCol + col - mTool->width / 2;
                 // discard tiles outside of the actual tile area.
                 if (tile_row < 0 || tile_row >= mLayer.GetHeight()||
                     tile_col < 0 || tile_col >= mLayer.GetWidth())
@@ -543,13 +563,13 @@ public:
 
                 // apply the material assigned to the tool onto the tiles
                 // in the current layer's render component.
-                if (mLayer->HasRenderComponent() && mTool.apply_material)
-                    mLayer.SetTilePaletteIndex(mTool.palette_index, tile_row, tile_col);
+                if (mLayer->HasRenderComponent() && mTool->apply_material)
+                    mLayer.SetTilePaletteIndex(mToolMaterialPaletteIndex, tile_row, tile_col);
 
                 // apply the data value assigned to the tool onto the tiles
                 // in the current layer's data component.
-                if (mLayer->HasDataComponent() && mTool.apply_value)
-                    mLayer.SetTileValue(mTool.value, tile_row, tile_col);
+                if (mLayer->HasDataComponent() && mTool->apply_value)
+                    mLayer.SetTileValue(mToolDataValue, tile_row, tile_col);
             }
         }
 
@@ -559,10 +579,12 @@ public:
     void SetTileCol(int col)
     { mTileCol = col; }
 private:
-    TilemapWidget::Tool mTool;
+    std::shared_ptr<const TileTool> mTool;
     TilemapWidget::State& mState;
     game::TilemapLayer& mLayer;
-    std::unique_ptr<gfx::Material> mMaterial;
+    mutable std::unique_ptr<gfx::Material> mMaterial;
+    std::int32_t mToolMaterialPaletteIndex = 0;
+    std::int32_t mToolDataValue = 0;
     int mTileRow = 0;
     int mTileCol =0;
     bool mActive = false;
@@ -610,16 +632,12 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
     PopulateFromEnum<game::TilemapLayerClass::Storage>(mUI.cmbLayerStorage);
     PopulateFromEnum<game::TilemapLayerClass::Cache>(mUI.cmbLayerCache);
     PopulateFromEnum<game::TilemapLayerClass::Resolution>(mUI.cmbLayerResolution);
-    PopulateFromEnum<TilemapWidget::ToolFunction>(mUI.cmbToolFunction);
-    PopulateFromEnum<TilemapWidget::ToolShape>(mUI.cmbToolShape);
+
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.zoom, 1.0f);
     const auto& materials = mState.workspace->ListAllMaterials();
-    SetList(mUI.cmbToolMaterial, materials);
     SetList(mUI.cmbTileMaterial, materials);
-    SetRange(mUI.toolValue, -0x800000, 0xffffff); // min is 24 bit signed and max is 24bit unsigned
     SetRange(mUI.tileValue, -0x800000, 0xffffff); // min is 24 bit signed and max is 24bit unsigned
-    SetEnabled(mUI.actionPalette, false);
     SetVisible(mUI.transform, false);
 
     // generate a list of widgets for the layer color palette.
@@ -640,10 +658,8 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
     }
 
     GenerateTools();
-    UpdateToolCombo();
     UpdateToolToolbar();
-    SetCurrentTool(mTools[0].id);
-    ShowCurrentTool();
+    SetCurrentTool(mTools[0]->id);
 
     DisplayMapProperties();
     DisplayLayerProperties();
@@ -723,6 +739,13 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace, const app::Resource& res
     GetUserProperty(resource, "current_layer", &current_layer);
     GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
 
+    QPoint tile_tool_pos;
+    if (GetUserProperty(resource, "tile_tool_pos", &tile_tool_pos))
+        mDlgTileToolPosition = tile_tool_pos;
+    QSize tile_tool_size;
+    if (GetUserProperty(resource, "tile_tool_size", &tile_tool_size))
+        mDlgTileToolSize = tile_tool_size;
+
     mTools.clear();
 
     size_t num_tools = 0;
@@ -731,18 +754,17 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace, const app::Resource& res
     {
         QJsonObject json;
         GetProperty(resource, PropertyKey("tool", i), &json);
-        Tool tool;
-        ToolFromJson(tool, json);
+        auto tool = std::make_shared<Tool>();
+        ToolFromJson(*tool, json);
         mTools.push_back(std::move(tool));
     }
 
     mModel->Reset();
     SelectRow(mUI.layers, current_layer);
     ReplaceDeletedResources();
-    UpdateToolCombo();
     UpdateToolToolbar();
-    SetCurrentTool(mTools.empty() ? "" : mTools[0].id);
-    ShowCurrentTool();
+    SetCurrentTool(mTools.empty() ? "" : mTools[0]->id);
+
     DisplayMapProperties();
     DisplayLayerProperties();
     DisplayCurrentCameraLocation();
@@ -770,8 +792,7 @@ void TilemapWidget::AddActions(QToolBar& bar)
     bar.addSeparator();
     for (auto* action : mToolActions)
         bar.addAction(action);
-    bar.addSeparator();
-    bar.addAction(mUI.actionPalette);
+    bar.addAction(mUI.actionTools);
 
 }
 void TilemapWidget::AddActions(QMenu& menu)
@@ -780,8 +801,7 @@ void TilemapWidget::AddActions(QMenu& menu)
     menu.addSeparator();
     for (auto* action : mToolActions)
         menu.addAction(action);
-    menu.addSeparator();
-    menu.addAction(mUI.actionPalette);
+    menu.addAction(mUI.actionTools);
 }
 bool TilemapWidget::SaveState(Settings& settings) const
 {
@@ -804,13 +824,18 @@ bool TilemapWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Tilemap", mUI.cmbGrid);
     settings.SaveWidget("Tilemap", mUI.zoom);
     settings.SaveWidget("Tilemap", mUI.mainSplitter);
+    if (mDlgTileToolSize.has_value())
+        settings.SetValue("Tilemap", "tile_tool_size", mDlgTileToolSize.value());
+    if (mDlgTileToolPosition.has_value())
+        settings.SetValue("Tilemap", "tile_tool_pos", mDlgTileToolPosition.value());
+
 
     settings.SetValue("Tilemap", "num_tools", mTools.size());
     for (size_t i=0; i<mTools.size(); ++i)
     {
         const auto& tool = mTools[i];
         QJsonObject json;
-        ToolIntoJson(tool, json);
+        ToolIntoJson(*tool, json);
         settings.SetValue("Tilemap", PropertyKey("tool", i), json);
     }
 
@@ -864,6 +889,15 @@ bool TilemapWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Tilemap", mUI.zoom);
     settings.LoadWidget("Tilemap", mUI.mainSplitter);
 
+    QSize tile_tool_size;
+    QPoint tile_tool_pos;
+    settings.GetValue("Tilemap", "tile_tool_size", &tile_tool_size);
+    settings.GetValue("Tilemap", "tile_tool_pos", &tile_tool_pos);
+    if (!tile_tool_size.isEmpty())
+        mDlgTileToolSize = tile_tool_size;
+    if (!tile_tool_pos.isNull())
+        mDlgTileToolPosition = tile_tool_pos;
+
     mState.klass = std::make_shared<game::TilemapClass>();
     if (mState.klass->FromJson(json))
         WARN("Failed to restore tilemap state.");
@@ -880,8 +914,8 @@ bool TilemapWidget::LoadState(const Settings& settings)
     {
         QJsonObject json;
         settings.GetValue("Tilemap", PropertyKey("tool", i), &json);
-        Tool tool;
-        ToolFromJson(tool, json);
+        auto tool = std::make_shared<Tool>();
+        ToolFromJson(*tool, json);
         mTools.push_back(std::move(tool));
     }
 
@@ -927,10 +961,9 @@ bool TilemapWidget::LoadState(const Settings& settings)
 
     mModel->Reset();
     SelectRow(mUI.layers, current_layer);
-    UpdateToolCombo();
     UpdateToolToolbar();
-    SetCurrentTool(mTools.empty() ? "" : mTools[0].id);
-    ShowCurrentTool();
+    SetCurrentTool(mTools.empty() ? "" : mTools[0]->id);
+
     DisplayMapProperties();
     DisplayLayerProperties();
     DisplayCurrentCameraLocation();
@@ -1037,9 +1070,7 @@ bool TilemapWidget::OnEscape()
 }
 bool TilemapWidget::OnKeyDown(QKeyEvent* key)
 {
-    if (key->key() == Qt::Key_Space)
-        return OpenMaterialPaletteOnCurrentTool();
-    else if (key->key() == Qt::Key_1)
+    if (key->key() == Qt::Key_1)
         return SelectLayerOnKey(0);
     else if (key->key() == Qt::Key_2)
         return SelectLayerOnKey(1);
@@ -1210,13 +1241,18 @@ void TilemapWidget::on_actionSave_triggered()
     SetUserProperty(resource, "zoom", mUI.zoom);
     SetUserProperty(resource, "current_layer", GetCurrentRow(mUI.layers));
     SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
+    if (mDlgTileToolPosition.has_value())
+        SetUserProperty(resource, "tile_tool_pos", mDlgTileToolPosition.value());
+    if (mDlgTileToolSize.has_value())
+        SetUserProperty(resource, "tile_tool_size", mDlgTileToolSize.value());
+
 
     SetProperty(resource, "num_tools", mTools.size());
     for (size_t i=0; i<mTools.size(); ++i)
     {
         const auto& tool = mTools[i];
         QJsonObject json;
-        ToolIntoJson(tool, json);
+        ToolIntoJson(*tool, json);
         SetProperty(resource, PropertyKey("tool", i), json);
     }
 
@@ -1226,9 +1262,31 @@ void TilemapWidget::on_actionSave_triggered()
     mHash = hash;
 }
 
-void TilemapWidget::on_actionPalette_triggered()
+void TilemapWidget::on_actionTools_triggered()
 {
-    OpenMaterialPaletteOnCurrentTool();
+    if (mDlgTileTool) {
+        mDlgTileTool->activateWindow();
+        return;
+    }
+
+    mDlgTileTool = std::make_unique<DlgTileTool>(mState.workspace, this, &mTools);
+    mDlgTileTool->SetClass(mState.klass);
+    mDlgTileTool->setWindowFlag(Qt::WindowStaysOnTopHint, false);
+    mDlgTileTool->show();
+    mDlgTileTool->NotifyToolBoxUpdate = [this]() {
+        UpdateToolToolbar();
+    };
+
+    connect(mDlgTileTool.get(), &QDialog::finished, this, [this]() {
+        mDlgTileToolPosition = mDlgTileTool->pos();
+        mDlgTileToolSize     = mDlgTileTool->size();
+        mDlgTileTool.reset();
+    });
+
+    if (mDlgTileToolPosition.has_value())
+        mDlgTileTool->move(mDlgTileToolPosition.value());
+    if (mDlgTileToolSize.has_value())
+        mDlgTileTool->resize(mDlgTileToolSize.value());
 }
 
 void TilemapWidget::on_actionMoveLayerUp_triggered()
@@ -1383,136 +1441,7 @@ void TilemapWidget::on_widgetColor_colorChanged(QColor color)
     mUI.widget->SetClearColor(ToGfx(color));
 }
 
-void TilemapWidget::on_cmbTool_currentIndexChanged(int index)
-{
-    SetCurrentTool(mTools[index].id);
-    ShowCurrentTool();
-}
-void TilemapWidget::on_cmbTool_editTextChanged(const QString& text)
-{
-    if (auto* tool = GetCurrentTool())
-    {
-        // careful, this signal is invoked also when the user
-        // has changed the combo index.
-        tool->name = text;
-        UpdateToolToolbar();
-        UpdateToolCombo();
-    }
-}
 
-void TilemapWidget::on_btnAddTool_clicked()
-{
-    Tool tool;
-    tool.name          = "My Tool";
-    tool.id            = app::RandomString();
-    tool.tool          = ToolFunction::TileBrush;
-    tool.shape         = ToolShape::Rectangle;
-    tool.width         = 10;
-    tool.height        = 10;
-    tool.material      = "_checkerboard";
-    tool.palette_index = PaletteIndexAutomatic;
-    mTools.push_back(tool);
-    UpdateToolToolbar();
-    UpdateToolCombo();
-    SetCurrentTool(tool.id);
-    ShowCurrentTool();
-    SetEnabled(mUI.btnDelTool, true);
-}
-void TilemapWidget::on_btnDelTool_clicked()
-{
-    if (auto* tool = GetCurrentTool())
-    {
-        QString other;
-        for (auto it = mTools.begin(); it != mTools.end(); ++it)
-        {
-            if ((*it).id == tool->id)
-            {
-                it = mTools.erase(it);
-                if (it != mTools.end())
-                    other = it->id;
-                break;
-            }
-            other = it->id;
-        }
-        UpdateToolToolbar();
-        UpdateToolCombo();
-        SetCurrentTool(other);
-        ShowCurrentTool();
-    }
-    SetEnabled(mUI.btnDelTool, !mTools.empty());
-}
-
-void TilemapWidget::on_btnSelectToolMaterial_clicked()
-{
-    if (auto* tool = GetCurrentTool())
-    {
-        DlgMaterial dlg(this, mState.workspace, tool->material);
-        dlg.SetPreviewScale(GetMaterialPreviewScale(*mState.klass));
-        if (dlg.exec() == QDialog::Rejected)
-            return;
-        tool->material = app::ToUtf8(dlg.GetSelectedMaterialId());
-        ShowCurrentTool();
-    }
-}
-
-void TilemapWidget::on_btnSetToolMaterialParams_clicked()
-{
-
-}
-
-void TilemapWidget::on_btnEditToolMaterial_clicked()
-{
-    const QString materialId = GetItemId(mUI.cmbToolMaterial);
-    emit OpenResource(materialId);
-}
-
-void TilemapWidget::on_btnResetPaletteIndex_clicked()
-{
-    SetValue(mUI.toolPaletteIndex, -1);
-    ModifyCurrentTool();
-}
-
-void TilemapWidget::on_cmbToolFunction_currentIndexChanged(int)
-{
-    ModifyCurrentTool();
-    ShowCurrentTool();
-}
-void TilemapWidget::on_cmbToolShape_currentIndexChanged(int)
-{
-    ModifyCurrentTool();
-}
-void TilemapWidget::on_toolWidth_valueChanged(int)
-{
-    ModifyCurrentTool();
-}
-void TilemapWidget::on_toolHeight_valueChanged(int)
-{
-    ModifyCurrentTool();
-}
-
-void TilemapWidget::on_cmbToolMaterial_currentIndexChanged(int)
-{
-    ModifyCurrentTool();
-    ShowCurrentTool();
-}
-
-void TilemapWidget::on_toolPaletteIndex_valueChanged(int)
-{
-    ModifyCurrentTool();
-}
-void TilemapWidget::on_toolValue_valueChanged(int)
-{
-    ModifyCurrentTool();
-}
-
-void TilemapWidget::on_chkToolMaterial_stateChanged(int)
-{
-    ModifyCurrentTool();
-}
-void TilemapWidget::on_chkToolValue_stateChanged(int)
-{
-    ModifyCurrentTool();
-}
 
 void TilemapWidget::on_layers_doubleClicked(const QModelIndex& index)
 {
@@ -1776,9 +1705,9 @@ void TilemapWidget::StartTool(const QString& id)
     mCurrentTool.reset();
 
     SetCurrentTool(id);
-    ShowCurrentTool();
 
-    auto* tool  = GetCurrentTool();
+    size_t tool_index = 0;
+    auto* tool  = GetCurrentTool(&tool_index);
     auto* layer = GetCurrentLayerInstance();
     ASSERT(tool);
     ASSERT(layer);
@@ -1805,12 +1734,11 @@ void TilemapWidget::StartTool(const QString& id)
 
     if (tool->tool == ToolFunction::TileBrush)
     {
-        auto mouse_tool = std::make_unique<TileBrushTool>(*tool, mState, *layer);
+        auto mouse_tool = std::make_unique<TileBrushTool>(mTools[tool_index], mState, *layer);
         mouse_tool->SetTileCol(tile_col);
         mouse_tool->SetTileRow(tile_row);
         mCurrentTool = std::move(mouse_tool);
     }
-    SetEnabled(mUI.actionPalette, true);
 
     for (auto* action : mToolActions)
     {
@@ -1833,7 +1761,6 @@ void TilemapWidget::ResourceAdded(const app::Resource* resource)
         for (auto* widget : mPaletteMaterialWidgets)
             widget->UpdateMaterialList(materials);
 
-        SetList(mUI.cmbToolMaterial, materials);
         SetList(mUI.cmbTileMaterial, materials);
     }
 }
@@ -1849,10 +1776,16 @@ void TilemapWidget::ResourceRemoved(const app::Resource* resource)
 
         mState.renderer.ClearPaintState();
 
-        SetList(mUI.cmbToolMaterial, materials);
         SetList(mUI.cmbTileMaterial, materials);
         DisplayLayerProperties();
-        ShowCurrentTool();
+    }
+    if (mCurrentTool)
+    {
+        if (!mCurrentTool->Validate())
+        {
+            mCurrentTool.reset();
+            UncheckTools();
+        }
     }
 }
 void TilemapWidget::ResourceUpdated(const app::Resource* resource)
@@ -1865,8 +1798,15 @@ void TilemapWidget::ResourceUpdated(const app::Resource* resource)
 
         mState.renderer.ClearPaintState();
 
-        SetList(mUI.cmbToolMaterial, materials);
         SetList(mUI.cmbTileMaterial, materials);
+    }
+    if (mCurrentTool)
+    {
+        if (!mCurrentTool->Validate())
+        {
+            mCurrentTool.reset();
+            UncheckTools();
+        }
     }
 }
 
@@ -2524,27 +2464,10 @@ void TilemapWidget::MouseWheel(QWheelEvent* wheel)
     auto* tool = GetCurrentTool(&tool_index);
     ASSERT(tool);
 
-    // scroll over the tools using the mouse wheel.
-    if (wheel->modifiers() == Qt::ShiftModifier)
-    {
-        const int curr_tool_index = tool_index;
-        const int next_tool_index = math::wrap(0, (int)(mTools.size() - 1), curr_tool_index - num_vertical_steps);
-        StartTool(mTools[next_tool_index].id);
-    }
-    else
-    {
-        const auto& materials = mState.workspace->ListAllMaterials();
-        int index;
-        for (index=0; index<materials.size(); ++index)
-        {
-            if (materials[index].id == tool->material)
-                break;
-        }
-        index = math::wrap(0, (int)materials.size()-1, index - num_vertical_steps);
-        SetValue(mUI.cmbToolMaterial, ListItemId(materials[index].id));
-        ModifyCurrentTool();
-        StartTool(mTools[tool_index].id);
-    }
+    const int curr_tool_index = tool_index;
+    const int next_tool_index = math::wrap(0, (int)(mTools.size() - 1), curr_tool_index - num_vertical_steps);
+    StartTool(mTools[next_tool_index]->id);
+
 }
 
 void TilemapWidget::MouseZoom(std::function<void()> zoom_function)
@@ -2583,8 +2506,6 @@ bool TilemapWidget::KeyPress(QKeyEvent* key)
     }
     else if (key->key() == Qt::Key_Delete)
         on_btnDeleteTileMaterial_clicked();
-    else if (key->key() == Qt::Key_Space)
-        return OpenMaterialPaletteOnCurrentTool();
     else if (key->key() == Qt::Key_1)
         return SelectLayerOnKey(0);
     else if (key->key() == Qt::Key_2)
@@ -2653,134 +2574,121 @@ void TilemapWidget::GenerateTools()
         return;
 
     {
-        Tool conf;
-        conf.id     = app::RandomString();
-        conf.tool   = ToolFunction::TileBrush;
-        conf.shape  = ToolShape::Rectangle;
-        conf.name   = "Brush 1";
-        conf.width  = 1;
-        conf.height = 1;
-        conf.material = "_checkerboard";
-        conf.palette_index = PaletteIndexAutomatic;
-        mTools.push_back(conf);
+        auto tool = std::make_shared<Tool>();
+        tool->id     = app::RandomString();
+        tool->tool   = ToolFunction::TileBrush;
+        tool->shape  = ToolShape::Rectangle;
+        tool->name   = "Brush 1";
+        tool->width  = 1;
+        tool->height = 1;
+        tool->material = "_checkerboard";
+        tool->palette_index = PaletteIndexAutomatic;
+        mTools.push_back(tool);
     }
 
     {
-        Tool conf;
-        conf.id     = app::RandomString();
-        conf.tool   = ToolFunction::TileBrush;
-        conf.shape  = ToolShape::Rectangle;
-        conf.name   = "Brush 2";
-        conf.width  = 2;
-        conf.height = 2;
-        conf.material = "_checkerboard";
-        conf.palette_index = PaletteIndexAutomatic;
-        mTools.push_back(conf);
+        auto tool = std::make_shared<Tool>();
+        tool->id     = app::RandomString();
+        tool->tool   = ToolFunction::TileBrush;
+        tool->shape  = ToolShape::Rectangle;
+        tool->name   = "Brush 2";
+        tool->width  = 2;
+        tool->height = 2;
+        tool->material = "_checkerboard";
+        tool->palette_index = PaletteIndexAutomatic;
+        mTools.push_back(tool);
     }
 
     {
-        Tool conf;
-        conf.id     = app::RandomString();
-        conf.tool   = ToolFunction::TileBrush;
-        conf.shape  = ToolShape::Rectangle;
-        conf.name   = "Brush 3";
-        conf.width  = 4;
-        conf.height = 4;
-        conf.material = "_checkerboard";
-        conf.palette_index = PaletteIndexAutomatic;
-        mTools.push_back(conf);
+        auto tool = std::make_shared<Tool>();
+        tool->id     = app::RandomString();
+        tool->tool   = ToolFunction::TileBrush;
+        tool->shape  = ToolShape::Rectangle;
+        tool->name   = "Brush 3";
+        tool->width  = 4;
+        tool->height = 4;
+        tool->material = "_checkerboard";
+        tool->palette_index = PaletteIndexAutomatic;
+        mTools.push_back(tool);
     }
 
     {
-        Tool conf;
-        conf.id     = app::RandomString();
-        conf.tool   = ToolFunction::TileBrush;
-        conf.shape  = ToolShape::Rectangle;
-        conf.name   = "Brush 4";
-        conf.width  = 10;
-        conf.height = 10;
-        conf.material = "_checkerboard";
-        conf.palette_index = PaletteIndexAutomatic;
-        mTools.push_back(conf);
+        auto tool = std::make_shared<Tool>();
+        tool->id     = app::RandomString();
+        tool->tool   = ToolFunction::TileBrush;
+        tool->shape  = ToolShape::Rectangle;
+        tool->name   = "Brush 4";
+        tool->width  = 10;
+        tool->height = 10;
+        tool->material = "_checkerboard";
+        tool->palette_index = PaletteIndexAutomatic;
+        mTools.push_back(tool);
     }
 
     {
-        Tool conf;
-        conf.id     = app::RandomString();
-        conf.tool   = ToolFunction::TileBrush;
-        conf.shape  = ToolShape::Rectangle;
-        conf.name   = "Brush 5";
-        conf.width  = 20;
-        conf.height = 20;
-        conf.material = "_checkerboard";
-        conf.palette_index = PaletteIndexAutomatic;
-        mTools.push_back(conf);
+        auto tool = std::make_shared<Tool>();
+        tool->id     = app::RandomString();
+        tool->tool   = ToolFunction::TileBrush;
+        tool->shape  = ToolShape::Rectangle;
+        tool->name   = "Brush 5";
+        tool->width  = 20;
+        tool->height = 20;
+        tool->material = "_checkerboard";
+        tool->palette_index = PaletteIndexAutomatic;
+        mTools.push_back(tool);
     }
 
     {
-        Tool conf;
-        conf.id     = app::RandomString();
-        conf.tool   = ToolFunction::TileBrush;
-        conf.shape  = ToolShape::Rectangle;
-        conf.name   = "Brush 6";
-        conf.width  = 50;
-        conf.height = 50;
-        conf.material = "_checkerboard";
-        conf.palette_index = PaletteIndexAutomatic;
-        mTools.push_back(conf);
+        auto tool = std::make_shared<Tool>();
+        tool->id     = app::RandomString();
+        tool->tool   = ToolFunction::TileBrush;
+        tool->shape  = ToolShape::Rectangle;
+        tool->name   = "Brush 6";
+        tool->width  = 50;
+        tool->height = 50;
+        tool->material = "_checkerboard";
+        tool->palette_index = PaletteIndexAutomatic;
+        mTools.push_back(tool);
     }
 
     {
-        Tool conf;
-        conf.id     = app::RandomString();
-        conf.tool   = ToolFunction::TileBrush;
-        conf.shape  = ToolShape::Rectangle;
-        conf.name   = "Brush 7";
-        conf.width  = 100;
-        conf.height = 100;
-        conf.material = "_checkerboard";
-        conf.palette_index = PaletteIndexAutomatic;
-        mTools.push_back(conf);
+        auto tool = std::make_shared<Tool>();
+        tool->id     = app::RandomString();
+        tool->tool   = ToolFunction::TileBrush;
+        tool->shape  = ToolShape::Rectangle;
+        tool->name   = "Brush 7";
+        tool->width  = 100;
+        tool->height = 100;
+        tool->material = "_checkerboard";
+        tool->palette_index = PaletteIndexAutomatic;
+        mTools.push_back(tool);
     }
 
     {
-        Tool conf;
-        conf.id     = app::RandomString();
-        conf.tool   = ToolFunction::TileBrush;
-        conf.shape  = ToolShape::Rectangle;
-        conf.name   = "Brush 8";
-        conf.width  = 256;
-        conf.height = 256;
-        conf.material = "_checkerboard";
-        conf.palette_index = PaletteIndexAutomatic;
-        mTools.push_back(conf);
+        auto tool = std::make_shared<Tool>();
+        tool->id     = app::RandomString();
+        tool->tool   = ToolFunction::TileBrush;
+        tool->shape  = ToolShape::Rectangle;
+        tool->name   = "Brush 8";
+        tool->width  = 256;
+        tool->height = 256;
+        tool->material = "_checkerboard";
+        tool->palette_index = PaletteIndexAutomatic;
+        mTools.push_back(tool);
     }
 
     {
-        Tool conf;
-        conf.id     = app::RandomString();
-        conf.tool   = ToolFunction::TileBrush;
-        conf.shape  = ToolShape::Rectangle;
-        conf.name   = "Brush 9";
-        conf.width  = 512;
-        conf.height = 512;
-        conf.material = "_checkerboard";
-        conf.palette_index = PaletteIndexAutomatic;
-        mTools.push_back(conf);
+        auto tool = std::make_shared<Tool>();
+        tool->id     = app::RandomString();
+        tool->tool   = ToolFunction::TileBrush;
+        tool->shape  = ToolShape::Rectangle;
+        tool->name   = "Brush 9";
+        tool->width  = 512;
+        tool->height = 512;
+        tool->material = "_checkerboard";
+        tool->palette_index = PaletteIndexAutomatic;
+        mTools.push_back(tool);
     }
-
-}
-void TilemapWidget::UpdateToolCombo()
-{
-    std::vector<ListItem> items;
-    for (const auto tool : mTools)
-    {
-        ListItem item;
-        item.name = tool.name;
-        item.id   = tool.id;
-        items.push_back(std::move(item));
-    }
-    SetList(mUI.cmbTool, items);
 }
 
 void TilemapWidget::UpdateToolToolbar()
@@ -2797,15 +2705,15 @@ void TilemapWidget::UpdateToolToolbar()
     {
         const auto& tool = mTools[i];
         QAction* action = new QAction(this);
-        action->setText(tool.name);
-        action->setData(tool.id);
+        action->setText(tool->name);
+        action->setData(tool->id);
         action->setCheckable(true);
         action->setChecked(false);
         action->setEnabled(layer != nullptr);
         if (i < 9)
             action->setShortcut(QKeySequence(Qt::CTRL | (Qt::Key_1 + i)));
 
-        if (tool.tool == ToolFunction::TileBrush)
+        if (tool->tool == ToolFunction::TileBrush)
             action->setIcon(QIcon("icons:brush.png"));
 
         connect(action, &QAction::triggered,this, &TilemapWidget::StartToolAction);
@@ -2815,89 +2723,20 @@ void TilemapWidget::UpdateToolToolbar()
     emit RefreshActions();
 }
 
-void TilemapWidget::ModifyCurrentTool()
-{
-    if (auto* tool = GetCurrentTool())
-    {
-        tool->name           = (const QString&)GetValue(mUI.cmbTool);
-        tool->tool           = GetValue(mUI.cmbToolFunction);
-        tool->width          = GetValue(mUI.toolWidth);
-        tool->height         = GetValue(mUI.toolHeight);
-        tool->shape          = GetValue(mUI.cmbToolShape);
-        tool->material       = GetItemId(mUI.cmbToolMaterial);
-        tool->palette_index  = GetValue(mUI.toolPaletteIndex);
-        tool->value          = GetValue(mUI.toolValue);
-        tool->apply_material = GetValue(mUI.chkToolMaterial);
-        tool->apply_value    = GetValue(mUI.chkToolValue);
-    }
-}
-
 void TilemapWidget::UncheckTools()
 {
     for (auto* action : mToolActions)
         action->setChecked(false);
-
-    SetEnabled(mUI.actionPalette, false);
 }
 
-void TilemapWidget::ShowCurrentTool()
+void TilemapWidget::SetCurrentTool(const QString& id)
 {
-    if (auto* tool = GetCurrentTool())
-    {
-        SetEnabled(mUI.cmbTool,                  true);
-        SetEnabled(mUI.cmbToolFunction,          true);
-        SetEnabled(mUI.cmbToolShape,             true);
-        SetEnabled(mUI.toolWidth,                true);
-        SetEnabled(mUI.toolHeight,               true);
-        SetEnabled(mUI.cmbToolMaterial,          true);
-        SetEnabled(mUI.btnSelectToolMaterial,    true);
-        SetEnabled(mUI.btnSetToolMaterialParams, false);
-        SetEnabled(mUI.btnEditToolMaterial,      true);
-        SetEnabled(mUI.chkToolMaterial,          true);
-        SetEnabled(mUI.chkToolValue,             true);
-
-        SetValue(mUI.cmbToolMaterial,  ListItemId(tool->material));
-        SetValue(mUI.cmbToolFunction,  tool->tool);
-        SetValue(mUI.cmbToolShape,     tool->shape);
-        SetValue(mUI.toolWidth,        tool->width);
-        SetValue(mUI.toolHeight,       tool->height);
-        SetValue(mUI.toolPaletteIndex, tool->palette_index);
-        SetValue(mUI.toolValue,        tool->value);
-        SetValue(mUI.chkToolMaterial,  tool->apply_material);
-        SetValue(mUI.chkToolValue,     tool->apply_value);
-
-        if (mState.workspace->IsUserDefinedResource(tool->material))
-            SetEnabled(mUI.btnEditToolMaterial, true);
-        else SetEnabled(mUI.btnEditToolMaterial, false);
-    }
-    else
-    {
-
-        SetEnabled(mUI.cmbTool,                  false);
-        SetEnabled(mUI.cmbToolFunction,          false);
-        SetEnabled(mUI.cmbToolShape,             false);
-        SetEnabled(mUI.toolWidth,                false);
-        SetEnabled(mUI.toolHeight,               false);
-        SetEnabled(mUI.cmbToolMaterial,          false);
-        SetEnabled(mUI.btnSelectToolMaterial,    false);
-        SetEnabled(mUI.btnSetToolMaterialParams, false);
-        SetEnabled(mUI.btnEditToolMaterial,      false);
-        SetEnabled(mUI.toolValue,                false);
-        SetEnabled(mUI.chkToolMaterial,          false);
-        SetEnabled(mUI.chkToolValue,             false);
-
-        SetValue(mUI.cmbToolFunction, -1);
-        SetValue(mUI.cmbToolShape,    -1);
-        SetValue(mUI.toolWidth,        0);
-        SetValue(mUI.toolHeight,       0);
-        SetValue(mUI.cmbToolMaterial, -1);
-        SetValue(mUI.toolValue,        0);
-    }
+    mCurrentToolId = id;
 }
 
-TilemapWidget::Tool* TilemapWidget::GetCurrentTool(size_t* index)
+TileTool* TilemapWidget::GetCurrentTool(size_t* index)
 {
-    if (mTools.empty())
+    if (mCurrentToolId.isEmpty())
         return nullptr;
 
     size_t counter = 0;
@@ -2906,16 +2745,11 @@ TilemapWidget::Tool* TilemapWidget::GetCurrentTool(size_t* index)
 
     for (*index=0; *index<mTools.size(); ++*index)
     {
-        if (mTools[*index].id == GetItemId(mUI.cmbTool))
-            return &mTools[*index];
+        if (mTools[*index]->id == mCurrentToolId)
+            return mTools[*index].get();
     }
     BUG("No such tool was found.");
     return nullptr;
-}
-
-void TilemapWidget::SetCurrentTool(const QString& id)
-{
-    SetValue(mUI.cmbTool, ListItemId(id));
 }
 
 void TilemapWidget::ModifyCurrentLayer()
@@ -2998,12 +2832,12 @@ void TilemapWidget::ReplaceDeletedResources()
 {
     for (auto& tool : mTools)
     {
-        if (tool.material.empty())
+        if (tool->material.empty())
             continue;
-        if (mState.workspace->IsValidMaterial(tool.material))
+        if (mState.workspace->IsValidMaterial(tool->material))
             continue;
-        tool.material = "_checkerboard";
-        WARN("Tilemap brush tool material was reset to checkerboard. [tool='%1']", tool.name);
+        tool->material = "_checkerboard";
+        WARN("Tilemap brush tool material was reset to checkerboard. [tool='%1']", tool->name);
     }
     for (unsigned i=0; i<mState.klass->GetNumLayers(); ++i)
     {
@@ -3049,25 +2883,6 @@ void TilemapWidget::ClearUnusedPaletteEntries()
     {
         klass->ClearMaterialId(i);
     }
-}
-
-bool TilemapWidget::OpenMaterialPaletteOnCurrentTool()
-{
-    if (!mCurrentTool)
-        return false;
-
-    if (auto* tool = GetCurrentTool())
-    {
-        DlgMaterial dlg(this, mState.workspace, tool->material);
-        dlg.SetPreviewScale(GetMaterialPreviewScale(*mState.klass));
-        if (dlg.exec() == QDialog::Rejected)
-            return false;
-        SetValue(mUI.cmbToolMaterial, ListItemId(dlg.GetSelectedMaterialId()));
-        ModifyCurrentTool();
-        StartTool(tool->id);
-        return true;
-    }
-    return false;
 }
 
 bool TilemapWidget::SelectLayerOnKey(unsigned int index)

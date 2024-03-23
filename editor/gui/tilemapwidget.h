@@ -29,6 +29,7 @@
 #include "engine/renderer.h"
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/tool.h"
+#include "editor/gui/dlgtiletool.h"
 
 namespace gui
 {
@@ -78,7 +79,7 @@ namespace gui
         void on_tileScaleY_valueChanged(double);
         void on_btnApplyMapSize_clicked();
         void on_actionSave_triggered();
-        void on_actionPalette_triggered();
+        void on_actionTools_triggered();
         void on_actionNewLayer_triggered();
         void on_actionEditLayer_triggered();
         void on_actionDeleteLayer_triggered();
@@ -92,23 +93,6 @@ namespace gui
         void on_btnViewPlus90_clicked();
         void on_btnMoreViewportSettings_clicked();
         void on_widgetColor_colorChanged(QColor color);
-        void on_cmbTool_currentIndexChanged(int);
-        void on_cmbTool_editTextChanged(const QString& text);
-        void on_btnAddTool_clicked();
-        void on_btnDelTool_clicked();
-        void on_btnSelectToolMaterial_clicked();
-        void on_btnSetToolMaterialParams_clicked();
-        void on_btnEditToolMaterial_clicked();
-        void on_btnResetPaletteIndex_clicked();
-        void on_cmbToolFunction_currentIndexChanged(int);
-        void on_cmbToolShape_currentIndexChanged(int);
-        void on_toolWidth_valueChanged(int);
-        void on_toolHeight_valueChanged(int);
-        void on_cmbToolMaterial_currentIndexChanged(int);
-        void on_toolPaletteIndex_valueChanged(int);
-        void on_toolValue_valueChanged(int);
-        void on_chkToolMaterial_stateChanged(int);
-        void on_chkToolValue_stateChanged(int);
         void on_layers_doubleClicked(const QModelIndex& index);
         void on_layerName_textChanged();
         void on_cmbLayerCache_currentIndexChanged(int);
@@ -153,22 +137,19 @@ namespace gui
         const game::TilemapLayer* GetCurrentLayerInstance() const;
         size_t GetCurrentLayerIndex() const;
         void GenerateTools();
-        void UpdateToolCombo();
         void UpdateToolToolbar();
-        void ModifyCurrentTool();
-        void ShowCurrentTool();
         void UncheckTools();
-        struct Tool;
-        Tool* GetCurrentTool(size_t* index = nullptr);
         void SetCurrentTool(const QString& id);
         void ModifyCurrentLayer();
+        void ReplaceDeletedResources();
+        void ClearUnusedPaletteEntries();
+        bool SelectLayerOnKey(unsigned index);
+
+        using Tool = TileTool;
+        Tool* GetCurrentTool(size_t* index = nullptr);
         bool ValidateToolAgainstLayer(const Tool& tool, const game::TilemapLayer& layer);
         void ToolIntoJson(const Tool& tool, QJsonObject& json) const;
         void ToolFromJson(Tool& tool, const QJsonObject& json) const;
-        void ReplaceDeletedResources();
-        void ClearUnusedPaletteEntries();
-        bool OpenMaterialPaletteOnCurrentTool();
-        bool SelectLayerOnKey(unsigned index);
     private:
         Ui::Tilemap mUI;
     private:
@@ -177,28 +158,13 @@ namespace gui
         class TileBrushTool;
         class TileSelectTool;
 
-        enum class ToolFunction {
-            TileBrush
-        };
-        enum class ToolShape {
-            Rectangle
-        };
+        using ToolFunction = TileToolFunction;
+        using ToolShape    = TileToolShape;
+        std::vector<std::shared_ptr<Tool>> mTools;
 
-        struct Tool {
-            ToolFunction tool = ToolFunction::TileBrush;
-            ToolShape shape = ToolShape::Rectangle;
-            QString id;
-            QString name;
-            std::string material;
-            std::int32_t value = 0;
-            int palette_index = -1;
-            unsigned width  = 0;
-            unsigned height = 0;
-            bool apply_material = true;
-            bool apply_value = false;
-        };
-        std::vector<Tool> mTools;
         std::vector<QAction*> mToolActions;
+
+        QString mCurrentToolId;
 
         // tile selection. dimensions in tiles.
         struct TileSelection {
@@ -218,6 +184,10 @@ namespace gui
             float camera_offset_y = 0.0f;
             engine::Renderer renderer;
         } mState;
+
+        std::unique_ptr<DlgTileTool> mDlgTileTool;
+        std::optional<QPoint> mDlgTileToolPosition;
+        std::optional<QSize> mDlgTileToolSize;
 
         std::unique_ptr<MouseTool> mCurrentTool;
         std::unique_ptr<MouseTool> mCameraTool;

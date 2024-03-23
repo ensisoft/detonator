@@ -1397,7 +1397,12 @@ inline void SetProperty(Resource& res, const PropertyKey& key, double value)
 template<typename Resource>
 inline void SetProperty(Resource& res, const PropertyKey& key, quint64 value)
 { res.SetProperty(key, value); }
-
+template<typename Resource>
+inline void SetProperty(Resource& res, const PropertyKey& key, const QPoint& value)
+{ res.SetProperty(key, value); }
+template<typename Resource>
+inline void SetProperty(Resource& res, const PropertyKey& key, const QSize& value)
+{ res.SetProperty(key, value); }
 
 #if !defined(__MSVC__)
 // this overload cannot happen on 64bit MSVC build because size_t is unsigned __int64 which
@@ -1485,7 +1490,12 @@ inline void SetUserProperty(Resource& res, const PropertyKey& key, double value)
 template<typename Resource>
 inline void SetUserProperty(Resource& res, const PropertyKey& key, quint64 value)
 { res.SetUserProperty(key, value); }
-
+template<typename Resource>
+inline void SetUserProperty(Resource& res, const PropertyKey& key, const QPoint& value)
+{ res.SetUserProperty(key, value); }
+template<typename Resource>
+inline void SetUserProperty(Resource& res, const PropertyKey& key, const QSize& value)
+{ res.SetUserProperty(key, value); }
 
 #if !defined(__MSVC__)
 // this overload cannot happen on 64bit MSVC build because size_t is unsigned __int64 which
