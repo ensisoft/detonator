@@ -1496,9 +1496,9 @@ void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
     const auto layer_tile_depth_units  = map_tile_depth_units * layer.GetTileSizeScaler();
 
     const auto cuboid_scale_factors = GetTileCuboidFactors(map.GetPerspective());
-    const auto layer_tile_size = glm::vec3 { map_tile_width_units * cuboid_scale_factors.x,
-                                             map_tile_height_units * cuboid_scale_factors.y,
-                                             map_tile_depth_units * cuboid_scale_factors.z };
+    const auto layer_tile_size = glm::vec3 { layer_tile_width_units * cuboid_scale_factors.x,
+                                             layer_tile_height_units * cuboid_scale_factors.y,
+                                             layer_tile_depth_units * cuboid_scale_factors.z };
 
     for (unsigned row=tile_row; row<max_row; ++row)
     {
@@ -1575,9 +1575,9 @@ void Renderer::PrepareDataLayerTileBatches(const game::Tilemap& map,
     const auto layer_tile_depth_units  = map_tile_depth_units * layer.GetTileSizeScaler();
 
     const auto cuboid_scale_factors = GetTileCuboidFactors(map.GetPerspective());
-    const auto layer_tile_size = glm::vec3 { map_tile_width_units * cuboid_scale_factors.x,
-                                             map_tile_height_units * cuboid_scale_factors.y,
-                                             map_tile_depth_units * cuboid_scale_factors.y };
+    const auto layer_tile_size = glm::vec3 { layer_tile_width_units * cuboid_scale_factors.x,
+                                             layer_tile_height_units * cuboid_scale_factors.y,
+                                             layer_tile_depth_units * cuboid_scale_factors.y };
 
     for (unsigned row=tile_row; row<max_row; ++row)
     {
