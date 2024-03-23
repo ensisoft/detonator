@@ -207,6 +207,10 @@ MainWindow::MainWindow(QApplication& app) : mApplication(app)
     // the "real" thing, i.e the workspace object.
     mLoader = std::make_unique<GfxResourceLoader>();
     gfx::SetResourceLoader(mLoader.get());
+
+    // hack but we need to set the mainwindow object
+    // as the receiver of these events
+    ActionEvent::GetReceiver() = this;
 }
 
 MainWindow::~MainWindow()
@@ -2604,7 +2608,7 @@ void MainWindow::OpenResource(const QString& id)
                 this->activateWindow();
             }
         }
-    }
+    } else ERROR("No such resource could be opened. [id='%1']", id);
 }
 
 void MainWindow::OpenRecentWorkspace()
@@ -2763,6 +2767,14 @@ bool MainWindow::event(QEvent* event)
     {
         RunGameLoopOnce();
         return true;
+    }
+    else if (event->type() == ActionEvent::GetIdentity())
+    {
+        const auto* action_event = static_cast<const ActionEvent*>(event);
+        const auto& action_data = action_event->GetAction();
+        if (const auto* ptr = std::get_if<ActionEvent::OpenResource>(&action_data)) {
+            OpenResource(ptr->id);
+        }
     }
     return QMainWindow::event(event);
 }
