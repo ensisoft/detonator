@@ -206,6 +206,7 @@ namespace gui
             unsigned start_col = 0;
             unsigned width  = 0;
             unsigned height = 0;
+            game::TilemapLayerClass::Resolution resolution;
         };
 
         struct State {
