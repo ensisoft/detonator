@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QCoreApplication>
 #  include <QEvent>
 #  include <QPoint>
 #  include <QPointF>
@@ -27,6 +28,7 @@
 
 #include <atomic>
 #include <tuple>
+#include <variant>
 
 #include "base/types.h"
 
@@ -62,6 +64,46 @@ namespace gui
             return GetCounter() > 0;
         }
     private:
+    };
+
+
+    class ActionEvent : public QEvent
+    {
+    public:
+        struct OpenResource {
+            QString id;
+        };
+        using Action = std::variant<OpenResource>;
+
+        explicit ActionEvent(OpenResource action)
+           : QEvent(GetIdentity())
+           , mAction(std::move(action))
+        {}
+
+        inline const Action& GetAction() const noexcept
+        { return mAction; }
+
+        static QEvent::Type GetIdentity()
+        {
+            static auto id = QEvent::registerEventType();
+            return (QEvent::Type)id;
+        }
+
+        template<typename Action>
+        static void Post(Action action)
+        {
+            auto* event = new ActionEvent(action);
+            QCoreApplication::postEvent(GetReceiver(), event);
+        }
+
+        static QObject*& GetReceiver()
+        {
+            static QObject* the_receiver;
+            return the_receiver;
+        }
+    private:
+        Action mAction;
+
     };
 
 
