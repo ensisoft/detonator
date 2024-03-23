@@ -383,10 +383,11 @@ public:
             return true;
 
         TileSelection tile_selection;
-        tile_selection.start_row = selection_tile_ypos;
-        tile_selection.start_col = selection_tile_xpos;
-        tile_selection.width     = selection_tile_width;
-        tile_selection.height    = selection_tile_height;
+        tile_selection.start_row  = selection_tile_ypos;
+        tile_selection.start_col  = selection_tile_xpos;
+        tile_selection.width      = selection_tile_width;
+        tile_selection.height     = selection_tile_height;
+        tile_selection.resolution = mLayer->GetResolution();
         mState.selection = tile_selection;
         return true;
     }
@@ -648,6 +649,18 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
     DisplayLayerProperties();
     DisplayCurrentCameraLocation();
     setWindowTitle("My Map");
+
+    auto* selection_model = mUI.layers->selectionModel();
+    connect(selection_model, &QItemSelectionModel::selectionChanged, this,
+            [this](const auto& selected, const auto& deselected) {
+        if (!mState.selection.has_value())
+            return;
+        if (const auto* layer = GetCurrentLayer()) {
+            if (layer->GetResolution() == mState.selection->resolution)
+                return;
+        }
+        mState.selection.reset();
+    });
 }
 
 TilemapWidget::TilemapWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -1861,6 +1874,9 @@ void TilemapWidget::LayerSelectionChanged(const QItemSelection, const QItemSelec
         mCurrentTool.reset();
         UncheckTools();
     }
+    if (mState.selection.has_value() && mState.selection->resolution != current->GetResolution())
+        mState.selection.reset();
+
     DisplayLayerProperties();
     DisplaySelection();
 
@@ -3055,6 +3071,11 @@ bool TilemapWidget::SelectLayerOnKey(unsigned int index)
     if (index < mState.klass->GetNumLayers())
     {
         SelectRow(mUI.layers, index);
+
+        const auto* layer = GetCurrentLayer();
+        if (mState.selection.has_value() && mState.selection->resolution != layer->GetResolution())
+            mState.selection.reset();
+
         DisplayLayerProperties();
         return true;
     }
