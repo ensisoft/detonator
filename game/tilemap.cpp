@@ -411,10 +411,10 @@ public:
                            const game::TilemapData& src,
                            game::TilemapData& dst)
     {
-        const auto src_num_rows = src_map_size.GetHeight();
-        const auto dst_num_rows = dst_map_size.GetHeight();
-        const auto src_num_cols = src_map_size.GetWidth();
-        const auto dst_num_cols = dst_map_size.GetWidth();
+        const auto src_num_rows = klass.MapDimension(src_map_size.GetHeight());
+        const auto dst_num_rows = klass.MapDimension(dst_map_size.GetHeight());
+        const auto src_num_cols = klass.MapDimension(src_map_size.GetWidth());
+        const auto dst_num_cols = klass.MapDimension(dst_map_size.GetWidth());
 
         const void* def_tile = klass.GetDefaultTileValue();
         const auto tile_size = klass.GetTileDataSize();

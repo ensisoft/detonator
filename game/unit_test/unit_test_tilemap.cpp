@@ -823,7 +823,65 @@ void test_layer_resize(game::TilemapLayerClass::Storage storage)
             game::USize {1000, 450}, // height shrinks
             game::USize {1000, 500},
             game::USize {1000, 450},
-        }
+        },
+
+        {
+            game::TilemapLayerClass::Resolution::UpScale2,
+            game::USize {1000, 500},
+            game::USize {1050, 500}, // width grows
+            game::USize {2000, 1000},
+            game::USize {2100, 1000},
+        },
+        {
+            game::TilemapLayerClass::Resolution::UpScale2,
+            game::USize {1000, 500},
+            game::USize {950,  500}, // width shrinks
+            game::USize {2000, 1000},
+            game::USize {1900, 1000},
+        },
+        {
+            game::TilemapLayerClass::Resolution::UpScale2,
+            game::USize {1000, 500},
+            game::USize {1000, 550}, // height grows
+            game::USize {2000, 1000},
+            game::USize {2000, 1100},
+        },
+        {
+            game::TilemapLayerClass::Resolution::UpScale2,
+            game::USize {1000, 500},
+            game::USize {1000, 450}, // height shrinks
+            game::USize {2000, 1000},
+            game::USize {2000, 900},
+        },
+
+        {
+                game::TilemapLayerClass::Resolution::DownScale2,
+                game::USize {1000, 500},
+                game::USize {1050, 500}, // width grows
+                game::USize {500, 250},
+                game::USize {525, 250},
+        },
+        {
+                game::TilemapLayerClass::Resolution::DownScale2,
+                game::USize {1000, 500},
+                game::USize {950,  500}, // width shrinks
+                game::USize {500, 250},
+                game::USize {475, 250},
+        },
+        {
+                game::TilemapLayerClass::Resolution::DownScale2,
+                game::USize {1000, 500},
+                game::USize {1000, 550}, // height grows
+                game::USize {500, 250},
+                game::USize {500, 275},
+        },
+        {
+                game::TilemapLayerClass::Resolution::DownScale2,
+                game::USize {1000, 500},
+                game::USize {1000, 450}, // height shrinks
+                game::USize {500, 250},
+                game::USize {500, 225},
+        },
 
     };
 
@@ -861,14 +919,17 @@ void test_layer_resize(game::TilemapLayerClass::Storage storage)
         klass->Initialize(src_map_width, src_map_height, *data);
         layer->Load(data, 0);
 
-        TileType tile;
-        tile.data = 55;
-
-        const auto min_row = std::min(src_layer_height, dst_layer_height);
-        const auto min_col = std::min(src_layer_width, dst_layer_width);
-
-        ptr->SetTile(tile, 0, 0);
-        ptr->SetTile(tile, min_row-1, min_col-1);
+        // fill the layer with data.
+        // todo: use a non-constant value.
+        for (unsigned row=0; row<src_layer_height; ++row)
+        {
+            for (unsigned col=0; col<src_layer_width; ++col)
+            {
+                TileType tile;
+                tile.data = 55;
+                ptr->SetTile(tile, row, col);
+            }
+        }
         ptr->FlushCache();
         ptr->Save();
 
@@ -888,8 +949,17 @@ void test_layer_resize(game::TilemapLayerClass::Storage storage)
 
             TEST_REQUIRE(layer->GetWidth() == dst_layer_width);
             TEST_REQUIRE(layer->GetHeight() == dst_layer_height);
-            TEST_REQUIRE(ptr->GetTile(0, 0).data == 55);
-            TEST_REQUIRE(ptr->GetTile(min_row-1, min_col-1).data == 55);
+
+            // verify that the previously written data is still there.
+            const auto min_row = std::min(src_layer_height, dst_layer_height);
+            const auto min_col = std::min(src_layer_width, dst_layer_width);
+            for (unsigned row=0; row<min_row; ++row)
+            {
+                for (unsigned col=0; col<min_col; ++col)
+                {
+                    TEST_REQUIRE(ptr->GetTile(row, col).data == 55);
+                }
+            }
 
             layer->FlushCache();
             layer->Save();
