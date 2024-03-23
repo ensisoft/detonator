@@ -944,6 +944,7 @@ void unit_test_axis_aligned_map()
     engine::Renderer renderer;
     renderer.SetClassLibrary(&library);
     renderer.SetEditingMode(false);
+    renderer.SetTileSizeFudge(0.0f);
 
     engine::Renderer::Surface surface;
     surface.size = painter->GetSurfaceSize();

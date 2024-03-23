@@ -263,11 +263,12 @@ void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
 
         if (batch.type == TileBatch::Type::Render)
         {
+
             const auto tile_render_size = ComputeTileRenderSize(from_map_to_scene, batch.tile_size, map_view);
             const auto tile_render_width_scale = map->GetTileRenderWidthScale();
             const auto tile_render_height_scale = map->GetTileRenderHeightScale();
-            const auto tile_width_render_units = tile_render_size.x * tile_render_width_scale;
-            const auto tile_height_render_units = tile_render_size.y * tile_render_height_scale;
+            const auto tile_width_render_units = tile_render_size.x * tile_render_width_scale + mTileSizeFudge;
+            const auto tile_height_render_units = tile_render_size.y * tile_render_height_scale + mTileSizeFudge;
 
             auto tiles = std::make_unique<gfx::TileBatch>(std::move(batch.tiles));
             tiles->SetTileWorldSize(batch.tile_size);
