@@ -2261,7 +2261,7 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
             model.Scale(map_width_tiles, map_height_tiles);
             model.MoveTo(0.0f, 0.0f);
             tile_painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline), model,
-                              gfx::CreateMaterialFromColor(gfx::Color::Green));
+                              gfx::CreateMaterialFromColor(gfx::Color::DarkYellow));
         }
 
         // draw the selection if any
@@ -2273,8 +2273,8 @@ void TilemapWidget::PaintScene(gfx::Painter& painter, double sec)
                         layer_tile_height * selection.height);
             model.MoveTo(layer_tile_width * selection.start_col,
                          layer_tile_height * selection.start_row);
-            //tile_painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline, 2.0f), model,
-            //                  gfx::CreateMaterialFromColor(gfx::Color::Green));
+            tile_painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline), model,
+                              gfx::CreateMaterialFromColor(gfx::Color::Green));
         }
 
         // visualize the tile under the mouse pointer.
