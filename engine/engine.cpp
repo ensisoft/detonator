@@ -865,7 +865,7 @@ private:
                 TRACE_CALL("Tilemap::Load", mTilemap->Load(*mGameLoader, 1024)); // todo:
                 DEBUG("Created tilemap instance");
             }
-        }
+        } else mTilemap.reset();
         mScene->SetMap(mTilemap.get());
         TRACE_CALL("Runtime::BeginPlay", mRuntime->BeginPlay(mScene.get(), mTilemap.get()));
     }
