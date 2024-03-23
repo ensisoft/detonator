@@ -721,6 +721,7 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace, const app::Resource& res
     GetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "current_layer", &current_layer);
+    GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
 
     mTools.clear();
 
@@ -802,6 +803,7 @@ bool TilemapWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Tilemap", mUI.chkShowGrid);
     settings.SaveWidget("Tilemap", mUI.cmbGrid);
     settings.SaveWidget("Tilemap", mUI.zoom);
+    settings.SaveWidget("Tilemap", mUI.mainSplitter);
 
     settings.SetValue("Tilemap", "num_tools", mTools.size());
     for (size_t i=0; i<mTools.size(); ++i)
@@ -860,6 +862,7 @@ bool TilemapWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Tilemap", mUI.chkShowGrid);
     settings.LoadWidget("Tilemap", mUI.cmbGrid);
     settings.LoadWidget("Tilemap", mUI.zoom);
+    settings.LoadWidget("Tilemap", mUI.mainSplitter);
 
     mState.klass = std::make_shared<game::TilemapClass>();
     if (mState.klass->FromJson(json))
@@ -1206,6 +1209,7 @@ void TilemapWidget::on_actionSave_triggered()
     SetUserProperty(resource, "show_grid", mUI.chkShowGrid);
     SetUserProperty(resource, "zoom", mUI.zoom);
     SetUserProperty(resource, "current_layer", GetCurrentRow(mUI.layers));
+    SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
 
     SetProperty(resource, "num_tools", mTools.size());
     for (size_t i=0; i<mTools.size(); ++i)
