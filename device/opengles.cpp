@@ -1713,7 +1713,7 @@ private:
             {
                 if (bytes)
                     DEBUG("Loaded texture data. [name='%1', size=%2x%3, format=%4, handle=%5]", mName, xres, yres, format, mHandle);
-                else DEBUG("Allocated texture storage. [name='%1', size=%2x%3, format=%4, handle=%5]", mName, xres, yres, format, mHandle);
+                else VERBOSE("Allocated texture storage. [name='%1', size=%2x%3, format=%4, handle=%5]", mName, xres, yres, format, mHandle);
             }
         }
 
@@ -2350,7 +2350,7 @@ private:
             // check if we have a texture object as resolve target coming from the outside.
             // if the client has configured the resolve target texture then we use that
             // otherwise we create our own color buffer.
-            if (!mResolveTarget)
+            if (!mResolveTarget || (mResolveTarget == mTexture.get()))
             {
                 // create our own color target. This is currently texture in order to facilitate
                 // the subsequent use of the rendered output, but with GL ES3 it could also be a

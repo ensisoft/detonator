@@ -2123,6 +2123,47 @@ void main() {
     TEST_REQUIRE(result_green.Compare(gfx::Color::Green));
 }
 
+void unit_test_fbo_change_size()
+{
+    TEST_CASE(test::Type::Feature)
+
+    auto dev = CreateDevice();
+    auto* fbo = dev->MakeFramebuffer("fbo");
+
+    gfx::Framebuffer::Config conf;
+    conf.format = gfx::Framebuffer::Format::ColorRGBA8;
+    conf.width  = 10;
+    conf.height = 10;
+    fbo->SetConfig(conf);
+
+    dev->BeginFrame();
+    dev->ClearColor(gfx::Color::Red, fbo);
+    dev->EndFrame();
+
+    {
+        gfx::Texture* color = nullptr;
+        fbo->Resolve(&color);
+        TEST_REQUIRE(color->GetWidth() == 10);
+        TEST_REQUIRE(color->GetHeight() == 10);
+    }
+
+    conf.width = 20;
+    conf.height = 30;
+    fbo->SetConfig(conf);
+
+    dev->BeginFrame();
+    dev->ClearColor(gfx::Color::Blue, fbo);
+    dev->EndFrame();
+
+    {
+        gfx::Texture* color = nullptr;
+        fbo->Resolve(&color);
+        TEST_REQUIRE(color->GetWidth() == 20);
+        TEST_REQUIRE(color->GetHeight() == 30);
+    }
+
+}
+
 void unit_test_index_draw_cmd_bug()
 {
     TEST_CASE(test::Type::Feature)
@@ -2226,6 +2267,7 @@ int test_main(int argc, char* argv[])
     unit_test_repeated_uniform_bug();
     unit_test_fbo_texture_delete_bug();
     unit_test_fbo_change_color_target_bug();
+    unit_test_fbo_change_size();
     unit_test_index_draw_cmd_bug();
     return 0;
 }
