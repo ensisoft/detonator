@@ -165,6 +165,8 @@ namespace engine
         { mPacketFilter = filter; }
         inline void SetStyle(RenderingStyle style) noexcept
         { mStyle = style; }
+        inline void SetTileSizeFudge(float fudge) noexcept
+        { mTileSizeFudge = fudge; }
 
         void BeginFrame();
 
@@ -370,6 +372,12 @@ namespace engine
         Camera mCamera;
         Surface mSurface;
         RenderingStyle mStyle = RenderingStyle::Normal;
+        // render units (= scene units?)
+        // add a little fudge to the renderable tile size in order to try to
+        // close any possible gap between the tiles. if the tiles are exactly
+        // the size they're supposed to be it's possible that some gaps
+        // appear between them.
+        float mTileSizeFudge = 0.5f;
 
         PacketFilter* mPacketFilter = nullptr;
     };
