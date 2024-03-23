@@ -787,106 +787,115 @@ void test_layer_resize(game::TilemapLayerClass::Storage storage)
 {
     TEST_CASE(test::Type::Feature)
 
+    struct TestCase {
+        game::TilemapLayerClass::Resolution resolution;
+        game::USize src_map_size;
+        game::USize dst_map_size;
+        game::USize src_layer_size;
+        game::USize dst_layer_size;
+    };
+
+    const TestCase cases[] = {
+        {
+            game::TilemapLayerClass::Resolution::Original,
+            game::USize {1000, 500},
+            game::USize {1050, 500}, // width grows
+            game::USize {1000, 500},
+            game::USize {1050, 500},
+        },
+        {
+            game::TilemapLayerClass::Resolution::Original,
+            game::USize {1000, 500},
+            game::USize {950,  500}, // width shrinks
+            game::USize {1000, 500},
+            game::USize {950,  500},
+        },
+        {
+            game::TilemapLayerClass::Resolution::Original,
+            game::USize {1000, 500},
+            game::USize {1000, 550}, // height grows
+            game::USize {1000, 500},
+            game::USize {1000, 550},
+        },
+         {
+            game::TilemapLayerClass::Resolution::Original,
+            game::USize {1000, 500},
+            game::USize {1000, 450}, // height shrinks
+            game::USize {1000, 500},
+            game::USize {1000, 450},
+        }
+
+    };
+
     auto type = game::detail::TilemapLayerTraits<TileType>::LayerType;
 
-    auto klass = std::make_shared<game::TilemapLayerClass>();
-    klass->SetStorage(storage);
-    klass->SetResolution(game::TilemapLayerClass::Resolution::Original);
-    klass->SetCache(game::TilemapLayerClass::Cache::Cache64);
-    klass->SetType(type);
-
-    TileType default_tile;
-    default_tile.data = 60;
-    klass->SetDefaultTileValue(default_tile);
-
-    const auto map_width  = 1000;
-    const auto map_height = 500;
-    auto layer = game::CreateTilemapLayer(klass, map_width, map_height);
-    TEST_REQUIRE(layer->GetWidth() == 1000);
-    TEST_REQUIRE(layer->GetHeight() == 500);
-    auto* ptr = game::TilemapLayerCast<game::detail::TilemapLayerBase<TileType>>(layer);
-
-    auto data = std::make_shared<TestVectorData>();
-    klass->Initialize(map_width, map_height, *data);
-    layer->Load(data, 0);
-
-    TileType tile;
-    tile.data = 55;
-    ptr->SetTile(tile, 0, 0);
-    ptr->SetTile(tile, 0, 1);
-    ptr->SetTile(tile, 499, 999);
-    ptr->FlushCache();
-    ptr->Save();
-
-    // width grows
+    for (size_t i=0; i<base::ArraySize(cases); ++i)
     {
-        auto resize = std::make_shared<TestVectorData>();
-        klass->Initialize(1050, 500, *resize);
-        klass->ResizeCopy(game::USize(1000, 500),
-                          game::USize(1050, 500), *data, *resize);
-        layer->SetMapDimensions(1050, 500);
-        layer->Load(resize, 1024);
+        const auto& test = cases[i];
 
-        TEST_REQUIRE(layer->GetWidth() == 1050);
-        TEST_REQUIRE(layer->GetHeight() == 500);
-        TEST_REQUIRE(ptr->GetTile(0, 0).data == 55);
-        TEST_REQUIRE(ptr->GetTile(0, 1).data == 55);
-        TEST_REQUIRE(ptr->GetTile(499, 999).data == 55);
-        layer->FlushCache();
-        layer->Save();
-        data = resize;
-    }
+        auto klass = std::make_shared<game::TilemapLayerClass>();
+        klass->SetStorage(storage);
+        klass->SetResolution(test.resolution);
+        klass->SetCache(game::TilemapLayerClass::Cache::Cache64);
+        klass->SetType(type);
 
-    // width shrinks
-    {
-        auto resize = std::make_shared<TestVectorData>();
-        klass->Initialize(1000, 500, *resize);
-        klass->ResizeCopy(game::USize(1050, 500),
-                          game::USize(1000, 500), *data, *resize);
-        layer->SetMapDimensions(1000, 500);
-        layer->Load(resize, 1024);
+        TileType default_tile;
+        default_tile.data = 60;
+        klass->SetDefaultTileValue(default_tile);
 
-        TEST_REQUIRE(layer->GetWidth() == 1000);
-        TEST_REQUIRE(layer->GetHeight() == 500);
-        TEST_REQUIRE(ptr->GetTile(0, 0).data == 55);
-        TEST_REQUIRE(ptr->GetTile(0, 1).data == 55);
-        TEST_REQUIRE(ptr->GetTile(499, 999).data == 55);
+        const auto src_map_width  = test.src_map_size.GetWidth();
+        const auto src_map_height = test.src_map_size.GetHeight();
+        const auto src_layer_width = test.src_layer_size.GetWidth();
+        const auto src_layer_height = test.src_layer_size.GetHeight();
+        const auto dst_map_width  = test.dst_map_size.GetWidth();
+        const auto dst_map_height = test.dst_map_size.GetHeight();
+        const auto dst_layer_width  = test.dst_layer_size.GetWidth();
+        const auto dst_layer_height = test.dst_layer_size.GetHeight();
 
-        data = resize;
-    }
+        auto layer = game::CreateTilemapLayer(klass, src_map_width, src_map_height);
+        TEST_REQUIRE(layer->GetWidth()  == src_layer_width);
+        TEST_REQUIRE(layer->GetHeight() == src_layer_height);
+        auto* ptr = game::TilemapLayerCast<game::detail::TilemapLayerBase<TileType>>(layer);
 
-    // height grows
-    {
-        auto resize = std::make_shared<TestVectorData>();
-        klass->Initialize(1000, 550, *resize);
-        klass->ResizeCopy(game::USize(1000, 500),
-                          game::USize(1000, 550), *data, *resize);
-        layer->SetMapDimensions(1000, 550);
-        layer->Load(resize, 1024);
+        auto data = std::make_shared<TestVectorData>();
+        klass->Initialize(src_map_width, src_map_height, *data);
+        layer->Load(data, 0);
 
-        TEST_REQUIRE(layer->GetWidth() == 1000);
-        TEST_REQUIRE(layer->GetHeight() == 550);
-        TEST_REQUIRE(ptr->GetTile(0, 0).data == 55);
-        TEST_REQUIRE(ptr->GetTile(0, 1).data == 55);
-        TEST_REQUIRE(ptr->GetTile(499, 999).data == 55);
+        TileType tile;
+        tile.data = 55;
 
-        data = resize;
-    }
+        const auto min_row = std::min(src_layer_height, dst_layer_height);
+        const auto min_col = std::min(src_layer_width, dst_layer_width);
 
-    // height shrinks
-    {
-        auto resize = std::make_shared<TestVectorData>();
-        klass->Initialize(1000, 500, *resize);
-        klass->ResizeCopy(game::USize(1000, 550),
-                          game::USize(1000, 500), *data, *resize);
-        layer->SetMapDimensions(1000, 500);
-        layer->Load(resize, 1024);
+        ptr->SetTile(tile, 0, 0);
+        ptr->SetTile(tile, min_row-1, min_col-1);
+        ptr->FlushCache();
+        ptr->Save();
 
-        TEST_REQUIRE(layer->GetWidth() == 1000);
-        TEST_REQUIRE(layer->GetHeight() == 500);
-        TEST_REQUIRE(ptr->GetTile(0, 0).data == 55);
-        TEST_REQUIRE(ptr->GetTile(0, 1).data == 55);
-        TEST_REQUIRE(ptr->GetTile(499, 999).data == 55);
+        // apply changes in layer size.
+        {
+            // create new data buffer.
+            auto resize = std::make_shared<TestVectorData>();
+            // initialize the map data structure in the data buffer.
+            klass->Initialize(dst_map_width, dst_map_height, *resize);
+            // resize the map and copy data over from the old data buffer
+            // into the new data buffer.
+            klass->ResizeCopy(test.src_map_size,
+                              test.dst_map_size,
+                              *data, *resize);
+            layer->SetMapDimensions(dst_map_width, dst_map_height);
+            layer->Load(resize, 1024);
+
+            TEST_REQUIRE(layer->GetWidth() == dst_layer_width);
+            TEST_REQUIRE(layer->GetHeight() == dst_layer_height);
+            TEST_REQUIRE(ptr->GetTile(0, 0).data == 55);
+            TEST_REQUIRE(ptr->GetTile(min_row-1, min_col-1).data == 55);
+
+            layer->FlushCache();
+            layer->Save();
+            data = resize;
+        }
+
     }
 }
 
