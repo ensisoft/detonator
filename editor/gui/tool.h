@@ -231,6 +231,10 @@ namespace gui
         virtual bool KeyPress(QKeyEvent* key) { return false; }
         // Return true if the tool was cancelled as a result of some input action.
         virtual bool IsCancelled() const { return false; }
+        // Check the conditions of the tool after some changes such as a resource
+        // update has occurred. Returns true if the tool can still apply
+        // or false if the tool is no longer valid.
+        virtual bool Validate() const { return true; }
 
         // Dummy migration shims. Plan is to get rid of the transform param
         // but it can't be done until every caller has been refactored!

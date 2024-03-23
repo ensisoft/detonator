@@ -527,6 +527,9 @@ add_executable(Detonator
     editor/gui/dlgtileimport.h
     editor/gui/dlgtileimport.ui
     editor/gui/dlgtileimport.cpp
+    editor/gui/dlgtiletool.h
+    editor/gui/dlgtiletool.ui
+    editor/gui/dlgtiletool.cpp
     editor/gui/dlgimport.h
     editor/gui/dlgimport.ui
     editor/gui/dlgimport.cpp
