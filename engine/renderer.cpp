@@ -295,7 +295,7 @@ void Renderer::GenerateMapDrawPackets(const game::Tilemap& map,
             packet.pass         = RenderPass::DrawColor;
             packets.push_back(std::move(packet));
         }
-        else if (batch.type == TileBatch::Type::Data)
+        else if (batch.type == TileBatch::Type::Data && mEditingMode)
         {
             auto tiles = std::make_unique<gfx::TileBatch>(std::move(batch.tiles));
             tiles->SetTileWorldSize(batch.tile_size);
@@ -419,7 +419,7 @@ void Renderer::PrepareMapTileBatches(const game::Tilemap& map,
             else BUG("Unknown render layer type.");
         }
 
-        if (draw_data_layer && layer->HasDataComponent())
+        if (draw_data_layer && layer->HasDataComponent() && mEditingMode)
         {
             if (type == game::TilemapLayer::Type::Render_DataUInt4)
                 PrepareDataLayerTileBatches<game::TilemapLayer_Render_DataUInt4>(map, layer, visible_region, batches, layer_index, use_batching);
