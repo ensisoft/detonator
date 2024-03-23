@@ -17,6 +17,8 @@
 #include "config.h"
 
 #include "warnpush.h"
+#  include <QPoint>
+#  include <QSize>
 #include "warnpop.h"
 
 #include "base/test_minimal.h"
@@ -38,6 +40,9 @@ void unit_test_settings_json()
         s.SetValue("foo", "utf8-string", std::string("joo joo €€"));
         s.SetValue("foo", "uint64", size_t(0xffffffffffffffff));
         s.SetValue("foo", "fruit", Fruits::Kiwi);
+
+        s.SetValue("foo", "size", QSize(10, 20));
+        s.SetValue("foo", "point", QPoint(20, 10));
         TEST_REQUIRE(s.Save());
     }
 
@@ -63,6 +68,11 @@ void unit_test_settings_json()
         Fruits f;
         TEST_REQUIRE(s.GetValue("foo", "fruit", &f));
         TEST_REQUIRE(f == Fruits::Kiwi);
+
+        QSize size;
+        TEST_REQUIRE(s.GetValue("foo", "size", &size));
+        TEST_REQUIRE(size.width() == 10);
+        TEST_REQUIRE(size.height() == 20);
     }
 }
 

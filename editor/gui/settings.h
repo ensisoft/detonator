@@ -78,6 +78,8 @@ namespace gui
         bool GetValue(const QString& module, const app::PropertyKey& key, data::JsonObject* out) const;
         bool GetValue(const QString& module, const app::PropertyKey& key, QByteArray* out) const;
         bool GetValue(const QString& module, const app::PropertyKey& key, QJsonObject* json) const;
+        bool GetValue(const QString& module, const app::PropertyKey& key, QSize* size) const;
+        bool GetValue(const QString& module, const app::PropertyKey& key, QPoint* point) const;
 
         // Get a value from the settings object under the specific key
         // under a specific module. If the module/key pair doesn't exist
@@ -115,6 +117,8 @@ namespace gui
         void SetValue(const QString& module, const app::PropertyKey& key, const data::JsonObject& json);
         void SetValue(const QString& module, const app::PropertyKey& key, const QByteArray& bytes);
         void SetValue(const QString& module, const app::PropertyKey& key, const QJsonObject& json);
+        void SetValue(const QString& module, const app::PropertyKey& key, const QSize& size);
+        void SetValue(const QString& module, const app::PropertyKey& key, const QPoint& point);
 
         // Save the state of a widget.
         void SaveWidget(const QString& module, const QTableView* table);

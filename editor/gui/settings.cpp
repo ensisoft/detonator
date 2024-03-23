@@ -113,6 +113,39 @@ bool Settings::GetValue(const QString& module, const app::PropertyKey& key, QJso
     return true;
 }
 
+bool Settings::GetValue(const QString& module, const app::PropertyKey& key, QSize* size) const
+{
+    const auto& w_var = mSettings->GetValue(module + "/" + key + "_w");
+    const auto& h_var = mSettings->GetValue(module + "/" + key + "_h");
+    if (!w_var.isValid()  || !h_var.isValid())
+        return false;
+
+    size->setWidth(w_var.toInt());
+    size->setHeight(h_var.toInt());
+    return true;
+}
+bool Settings::GetValue(const QString& module, const app::PropertyKey& key, QPoint* point) const
+{
+    const auto& x_var = mSettings->GetValue(module + "/" + key + "_x");
+    const auto& y_var = mSettings->GetValue(module + "/" + key + "_y");
+    if (!x_var.isValid()  || !y_var.isValid())
+        return false;
+
+    point->setX(x_var.toInt());
+    point->setY(y_var.toInt());
+    return true;
+}
+
+void Settings::SetValue(const QString& module, const app::PropertyKey& key, const QSize& size)
+{
+    mSettings->SetValue(module + "/" + key + "_w", size.width());
+    mSettings->SetValue(module + "/" + key + "_h", size.height());
+}
+void Settings::SetValue(const QString& module, const app::PropertyKey& key, const QPoint& point)
+{
+    mSettings->SetValue(module + "/" + key + "_x", point.x());
+    mSettings->SetValue(module + "/" + key + "_y", point.y());
+}
 void Settings::SetValue(const QString& module, const app::PropertyKey& key, const std::string& value)
 {
     SetValue(module, key, app::FromUtf8(value));
