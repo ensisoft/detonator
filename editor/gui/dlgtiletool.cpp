@@ -16,10 +16,12 @@
 
 #define LOGTAG "gui"
 
+#include "engine/camera.h"
 #include "editor/gui/dlgtiletool.h"
 #include "editor/gui/dlgmaterial.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/types.h"
+#include "editor/gui/nerd.h"
 
 namespace {
     constexpr auto PaletteIndexAutomatic = -1;
@@ -57,12 +59,33 @@ DlgTileTool::DlgTileTool(const app::Workspace* workspace, QWidget* parent, ToolB
     connect(workspace, &app::Workspace::ResourceRemoved, this, &DlgTileTool::ResourceRemoved);
     connect(workspace, &app::Workspace::ResourceUpdated, this, &DlgTileTool::ResourceUpdated);
 
+    connect(&mTimer, &QTimer::timeout, mUI.widget, &GfxWidget::triggerPaint);
+    connect(this, &QDialog::finished, mUI.widget, &GfxWidget::dispose);
+
+    mUI.widget->onPaintScene = std::bind(&DlgTileTool::PaintScene, this, std::placeholders::_1,
+                                         std::placeholders::_2);
+    mUI.widget->onZoomIn = [this]() {
+        const float value = GetValue(mUI.zoom);
+        SetValue(mUI.zoom, value + 0.1f);
+    };
+    mUI.widget->onZoomOut = [this]() {
+        const float value = GetValue(mUI.zoom);
+        SetValue(mUI.zoom, value - 0.1f);
+    };
+
+    mTimer.setInterval(1000.0/60.0f);
+    mTimer.start();
+
     UpdateToolCombo();
     if (!mTools->empty())
     {
         SetCurrentTool((*mTools)[0]->id);
         ShowCurrentTool();
     }
+
+    // hide this for now
+    SetVisible(mUI.transform, false);
+    SetValue(mUI.zoom, 1.0f);
 }
 
 void DlgTileTool::on_cmbTool_currentIndexChanged(int index)
@@ -190,6 +213,11 @@ void DlgTileTool::on_data_toggled()
     ModifyCurrentTool();
 }
 
+void DlgTileTool::on_widgetColor_colorChanged(QColor color)
+{
+    mUI.widget->SetClearColor(ToGfx(color));
+}
+
 void DlgTileTool::ResourceAdded(const app::Resource* resource)
 {
     if (resource->IsMaterial())
@@ -204,6 +232,9 @@ void DlgTileTool::ResourceRemoved(const app::Resource* resource)
     {
         const auto& materials = mWorkspace->ListAllMaterials();
         SetList(mUI.cmbToolMaterial, materials);
+
+        if (mMaterial && mMaterial->GetClassId() == resource->GetId())
+            mMaterial.reset();
     }
 }
 void DlgTileTool::ResourceUpdated(const app::Resource* resource)
@@ -212,7 +243,107 @@ void DlgTileTool::ResourceUpdated(const app::Resource* resource)
     {
         const auto& materials = mWorkspace->ListAllMaterials();
         SetList(mUI.cmbToolMaterial, materials);
+
+        if (mMaterial && mMaterial->GetClassId() == resource->GetId())
+            mMaterial.reset();
     }
+}
+
+void DlgTileTool::PaintScene(gfx::Painter& painter, double)
+{
+    const auto width  = mUI.widget->width();
+    const auto height = mUI.widget->height();
+    const float zoom = GetValue(mUI.zoom);
+    const float xs = GetValue(mUI.scaleY);
+    const float ys = GetValue(mUI.scaleY);
+
+    SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
+
+    const auto* tool = GetCurrentTool();
+    if (!tool)
+        return;
+
+    const auto perspective = mClass->GetPerspective();
+    const auto tile_scaler       = 1.0f;
+    const auto tile_width_units  = mClass->GetTileWidth() * tile_scaler;
+    const auto tile_height_units = mClass->GetTileHeight() * tile_scaler;
+    const auto tile_depth_units  = mClass->GetTileDepth() * tile_scaler;
+
+
+
+    // Create tile painter for drawing in tile coordinate space.
+    gfx::Painter tile_painter(painter.GetDevice());
+    tile_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, perspective));
+    tile_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, engine::Projection::Orthographic));
+    tile_painter.SetPixelRatio({1.0f*xs*zoom, 1.0f*ys*zoom});
+    tile_painter.SetViewport(0, 0, width, height);
+    tile_painter.SetSurfaceSize(width, height);
+
+    gfx::Painter scene_painter(painter.GetDevice());
+    scene_painter.SetViewMatrix(CreateViewMatrix(mUI, mState, engine::GameView::AxisAligned));
+    scene_painter.SetProjectionMatrix(CreateProjectionMatrix(mUI, engine::Projection::Orthographic));
+    scene_painter.SetPixelRatio({1.0f*xs*zoom, 1.0f*ys*zoom});
+    scene_painter.SetViewport(0, 0, width, height);
+    scene_painter.SetSurfaceSize(width, height);
+
+    // This matrix will project a coordinate in isometric tile world space into
+    // 2D screen space/surface coordinate.
+    const auto& tile_projection_transform_matrix = engine::GetProjectionTransformMatrix(tile_painter.GetProjMatrix(),
+                                                                                        tile_painter.GetViewMatrix(),
+                                                                                        scene_painter.GetProjMatrix(),
+                                                                                        scene_painter.GetViewMatrix());
+
+    const auto tile_render_width_scale  = mClass->GetTileRenderWidthScale();
+    const auto tile_render_height_scale = mClass->GetTileRenderHeightScale();
+    const auto cuboid_scale = engine::GetTileCuboidFactors(perspective);
+    const auto tile_size = glm::vec3{tile_width_units, tile_height_units, tile_depth_units};
+    const auto render_size = engine::ComputeTileRenderSize(tile_projection_transform_matrix,
+                                                           {tile_width_units, tile_height_units},
+                                                           perspective);
+
+    gfx::TileBatch batch;
+    for (unsigned row=0; row<tool->height; ++row)
+    {
+        for (unsigned col=0; col<tool->width; ++col)
+        {
+            gfx::TileBatch::Tile tile;
+            tile.pos.x = col - (tool->width / 2.0f);
+            tile.pos.y = row - (tool->height / 2.0f);
+            tile.pos.z = 0;
+            batch.AddTile(tile);
+        }
+    }
+    batch.SetTileWorldSize(tile_size * cuboid_scale);
+    batch.SetTileRenderWidth(render_size.x * tile_render_width_scale);
+    batch.SetTileRenderHeight(render_size.y * tile_render_height_scale);
+    batch.SetTileShape(gfx::TileBatch::TileShape::Automatic);
+    if (perspective == game::Tilemap::Perspective::AxisAligned)
+        batch.SetProjection(gfx::TileBatch::Projection::AxisAligned);
+    else if (perspective == game::Tilemap::Perspective::Dimetric)
+        batch.SetProjection(gfx::TileBatch::Projection::Dimetric);
+    else BUG("missing tile projection.");
+
+    // re-create the material if the tool's material setting has changed.
+    if (!mMaterial || mMaterial->GetClassId() != tool->material)
+    {
+        auto klass = mWorkspace->GetMaterialClassById(tool->material);
+        mMaterial = gfx::CreateMaterialInstance(klass);
+    }
+
+    scene_painter.Draw(batch, tile_projection_transform_matrix, *mMaterial);
+
+    const auto tool_cols_tiles  = tool->width;
+    const auto tool_rows_tiles  = tool->height;
+    const auto tile_grid_width  = tool_cols_tiles * tile_width_units;
+    const auto tile_grid_height = tool_rows_tiles * tile_height_units;
+
+    gfx::Transform transform;
+    transform.Resize(tile_grid_width, tile_grid_height);
+    transform.Translate(-tile_grid_width*0.5f, -tile_grid_height*0.5f);
+    tile_painter.Draw(gfx::Grid(tool_cols_tiles - 1, tool_rows_tiles - 1, true),
+                      transform,
+                      gfx::CreateMaterialFromColor(gfx::Color::LightGray));
+
 }
 
 void DlgTileTool::ShowCurrentTool()

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>387</width>
-    <height>526</height>
+    <width>885</width>
+    <height>579</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,9 +17,21 @@
    <iconset resource="../resource/resource.qrc">
     <normaloff>:/16x16_ico_png/tilemap.png</normaloff>:/16x16_ico_png/tilemap.png</iconset>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_4">
+  <layout class="QHBoxLayout" name="horizontalLayout_5">
    <item>
     <widget class="QGroupBox" name="groupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>400</width>
+       <height>0</height>
+      </size>
+     </property>
      <property name="title">
       <string>Tools</string>
      </property>
@@ -336,11 +348,319 @@
         </layout>
        </widget>
       </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Tile Palette</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
+       <widget class="gui::GfxWidget" name="widget" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QDoubleSpinBox" name="zoom">
+          <property name="minimum">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>5.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="stepType">
+           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="color_widgets::ColorSelector" name="widgetColor">
+          <property name="minimumSize">
+           <size>
+            <width>30</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::TabFocus</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="transform">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>Transform</string>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <property name="leftMargin">
+          <number>4</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>4</number>
+         </property>
+         <property name="bottomMargin">
+          <number>4</number>
+         </property>
+         <item>
+          <widget class="QDoubleSpinBox" name="translateX">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="prefix">
+            <string>x = </string>
+           </property>
+           <property name="minimum">
+            <double>-10000.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>10000.000000000000000</double>
+           </property>
+           <property name="stepType">
+            <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="translateY">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="prefix">
+            <string>y = </string>
+           </property>
+           <property name="minimum">
+            <double>-10000.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>10000.000000000000000</double>
+           </property>
+           <property name="stepType">
+            <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="scaleX">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="prefix">
+            <string>x = </string>
+           </property>
+           <property name="suffix">
+            <string/>
+           </property>
+           <property name="minimum">
+            <double>0.100000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>100.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.100000000000000</double>
+           </property>
+           <property name="stepType">
+            <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="scaleY">
+           <property name="prefix">
+            <string>y = </string>
+           </property>
+           <property name="suffix">
+            <string/>
+           </property>
+           <property name="minimum">
+            <double>0.100000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>100.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.100000000000000</double>
+           </property>
+           <property name="stepType">
+            <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="rotation">
+           <property name="wrapping">
+            <bool>true</bool>
+           </property>
+           <property name="prefix">
+            <string/>
+           </property>
+           <property name="suffix">
+            <string> °</string>
+           </property>
+           <property name="minimum">
+            <double>-180.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>180.000000000000000</double>
+           </property>
+           <property name="stepType">
+            <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="btnViewPlus90">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>+ 90°</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../resource/resource.qrc">
+             <normaloff>:/16x16_ico_png/arrow_rotate_clockwise.png</normaloff>:/16x16_ico_png/arrow_rotate_clockwise.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="btnViewMinus90">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>- 90°</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../resource/resource.qrc">
+             <normaloff>:/16x16_ico_png/arrow_rotate_anticlockwise.png</normaloff>:/16x16_ico_png/arrow_rotate_anticlockwise.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="btnViewReset">
+           <property name="text">
+            <string>Reset</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../resource/resource.qrc">
+             <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>color_widgets::ColorPreview</class>
+   <extends>QWidget</extends>
+   <header>color_preview.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>color_widgets::ColorSelector</class>
+   <extends>color_widgets::ColorPreview</extends>
+   <header>color_selector.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>gui::GfxWidget</class>
+   <extends>QWidget</extends>
+   <header>gfxwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>cmbTool</tabstop>
   <tabstop>btnAddTool</tabstop>
