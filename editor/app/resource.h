@@ -211,174 +211,70 @@ namespace app
         { return GetType() == Type::Tilemap; }
 
         // property helpers.
-        // There's a lot of stuff that goes into QVariant but then doesn't
-        // serialize correctly. For instance QColor and QByteArray.
-
-        // Set a resource specific property value. If the property exists already the previous
-        // value is overwritten. Otherwise, it's added.
-        inline void SetProperty(const PropertyKey& key, const QJsonObject& json)
-        { SetVariantProperty(key, json); }
-        inline void SetProperty(const PropertyKey& key, const QByteArray& bytes)
-        { SetVariantProperty(key, bytes.toBase64()); }
-        inline void SetProperty(const PropertyKey& key, const QColor& color)
-        { SetVariantProperty(key, color); }
-        inline void SetProperty(const PropertyKey& key, const char* str)
-        { SetVariantProperty(key, QString(str)); }
-        inline void SetProperty(const PropertyKey& key, const QString& value)
+        inline void SetProperty(const PropertyKey& key, const PropertyValue& value)
         { SetVariantProperty(key, value); }
-        inline void SetProperty(const PropertyKey& key, const std::string& value)
-        { SetVariantProperty(key, app::FromUtf8(value)); }
-        inline void SetProperty(const PropertyKey key, const AnyString& value)
-        { SetVariantProperty(key, value.GetWide()); }
-        inline void SetProperty(const PropertyKey& key, quint64 value)
-        { SetVariantProperty(key, value); }
-        inline void SetProperty(const PropertyKey& key, qint64 value)
-        { SetVariantProperty(key, value); }
-        inline void SetProperty(const PropertyKey& key, unsigned value)
-        { SetVariantProperty(key, value); }
-        inline void SetProperty(const PropertyKey& key, int value)
-        { SetVariantProperty(key, value); }
-        inline void SetProperty(const PropertyKey& key, double value)
-        { SetVariantProperty(key, value); }
-        inline void SetProperty(const PropertyKey& key, float value)
-        { SetVariantProperty(key, value); }
-        inline void SetProperty(const PropertyKey& key, const QVariantMap& map)
-        {
-            ASSERT(ValidateQVariantMapJsonSupport(map));
-            SetVariantProperty(key, map);
-        }
 
         // Return the value of the property identified by name.
         // If the property doesn't exist returns a null variant.
-        std::string GetProperty(const PropertyKey& key, const std::string& def) const
-        {
-            const auto& ret = GetVariantProperty(key);
-            if (ret.isNull())
-                return def;
-            const auto& str = ret.toString();
-            return app::ToUtf8(str);
-        }
-
-        QByteArray GetProperty(const PropertyKey& key, const QByteArray& def) const
-        {
-            const auto& ret  = GetVariantProperty(key);
-            if (ret.isNull())
-                return def;
-            const auto& str = ret.toString();
-            if (!str.isEmpty())
-                return QByteArray::fromBase64(str.toLatin1());
-            return QByteArray();
-        }
-        bool GetProperty(const PropertyKey& key, QByteArray* out) const
-        {
-            const auto& ret = GetVariantProperty(key);
-            if (ret.isNull())
-                return false;
-            const auto& str = ret.toString();
-            if (!str.isEmpty())
-                *out = QByteArray::fromBase64(str.toLatin1());
-            return true;
-        }
         template<typename T>
         T GetProperty(const PropertyKey& key, const T& def) const
         {
-            const auto& ret = GetVariantProperty(key);
-            if (ret.isNull())
+            const auto& variant = GetVariantProperty(key);
+            if (variant.isNull())
                 return def;
-            return qvariant_cast<T>(ret);
+
+            const PropertyValue property(variant);
+
+            T value;
+            property.GetValue(&value);
+
+            return value;
         }
         template<typename T>
         bool GetProperty(const PropertyKey& key, T* out) const
         {
-            const auto& ret = GetVariantProperty(key);
-            if (ret.isNull())
+            const auto& variant = GetVariantProperty(key);
+            if (variant.isNull())
                 return false;
-            *out = qvariant_cast<T>(ret);
+
+            const PropertyValue property(variant);
+            property.GetValue(out);
             return true;
         }
 
         // Set a user specific property value. If the property exists already the previous
         // value is overwritten. Otherwise, it's added.
-        inline void SetUserProperty(const PropertyKey& key, const QJsonObject& json)
-        { SetUserVariantProperty(key, json); }
-        inline void SetUserProperty(const PropertyKey& key, const QByteArray& bytes)
-        { SetUserVariantProperty(key, bytes.toBase64()); }
-        inline void SetUserProperty(const PropertyKey& key, const QColor& color)
-        { SetUserVariantProperty(key, color); }
-        inline void SetUserProperty(const PropertyKey& key, const QString& value)
+        inline void SetUserProperty(const PropertyKey& key, const PropertyValue& value)
         { SetUserVariantProperty(key, value); }
-        inline void SetUserProperty(const PropertyKey& key, const std::string& value)
-        { SetUserVariantProperty(key, app::FromUtf8(value)); }
-        inline void SetUserProperty(const PropertyKey& key, const AnyString& value)
-        { SetUserVariantProperty(key, value.GetWide()); }
-        inline void SetUserProperty(const PropertyKey& key, const char* value)
-        { SetUserVariantProperty(key, QString(value)); }
-        inline void SetUserProperty(const PropertyKey& key, quint64 value)
-        { SetUserVariantProperty(key, value); }
-        inline void SetUserProperty(const PropertyKey& key, qint64 value)
-        { SetUserVariantProperty(key, value); }
-        inline void SetUserProperty(const PropertyKey& key, unsigned value)
-        { SetUserVariantProperty(key, value); }
-        inline void SetUserProperty(const PropertyKey& key, int value)
-        { SetUserVariantProperty(key, value); }
-        inline void SetUserProperty(const PropertyKey& key, double value)
-        { SetUserVariantProperty(key, value); }
-        inline void SetUserProperty(const PropertyKey& key, float value)
-        { SetUserVariantProperty(key, value); }
-        inline void SetUserProperty(const PropertyKey& key, const QVariantMap& map)
-        {
-            ASSERT(ValidateQVariantMapJsonSupport(map));
-            SetVariantProperty(key, map);
-        }
 
         // Return the value of the property identified by name.
         // If the property doesn't exist returns a null variant.
-        std::string GetUserProperty(const PropertyKey& key, const std::string& def) const
-        {
-            const auto& ret = GetUserVariantProperty(key);
-            if (ret.isNull())
-                return def;
-            const auto& str = ret.toString();
-            return app::ToUtf8(str);
-        }
-
-        QByteArray GetUserProperty(const PropertyKey& key, const QByteArray& def) const
-        {
-            const auto& ret  = GetUserVariantProperty(key);
-            if (ret.isNull())
-                return def;
-            const auto& str = ret.toString();
-            if (!str.isEmpty())
-                return QByteArray::fromBase64(str.toLatin1());
-            return QByteArray();
-        }
-        bool GetUserProperty(const PropertyKey& key, QByteArray* out) const
-        {
-            const auto& ret = GetUserVariantProperty(key);
-            if (ret.isNull())
-                return false;
-            const auto& str = ret.toString();
-            if (!str.isEmpty())
-                *out = QByteArray::fromBase64(str.toLatin1());
-            return true;
-        }
         template<typename T>
         T GetUserProperty(const PropertyKey& key, const T& def) const
         {
-            const auto& ret = GetUserVariantProperty(key);
-            if (ret.isNull())
+            const auto& variant = GetUserVariantProperty(key);
+            if (variant.isNull())
                 return def;
-            return qvariant_cast<T>(ret);
+
+            const PropertyValue property(variant);
+
+            T value;
+            property.GetValue(&value);
+
+            return value;
         }
         template<typename T>
         bool GetUserProperty(const PropertyKey& key, T* out) const
         {
-            if (!HasUserProperty(key))
+            const auto& variant = GetUserVariantProperty(key);
+            if (variant.isNull())
                 return false;
-            const auto& ret = GetUserVariantProperty(key);
-            *out = qvariant_cast<T>(ret);
+
+            const PropertyValue property(variant);
+            property.GetValue(out);
             return true;
         }
+
 
         template<typename Content>
         bool GetContent(Content** content)

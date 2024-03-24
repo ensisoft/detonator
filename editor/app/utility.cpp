@@ -642,34 +642,6 @@ QString GetAppInstFilePath(const QString& name)
     return JoinPath(QCoreApplication::applicationDirPath(), name);
 }
 
-bool ValidateQVariantJsonSupport(const QVariant& variant)
-{
-    // Qt API brainfart (QVariant::Type is deprecated)
-    const auto type = (QMetaType::Type)variant.type();
-    if (type == QMetaType::Type::QVariantMap)
-        return ValidateQVariantMapJsonSupport(qvariant_cast<QVariantMap>(variant));
-
-    // todo:there's more but these should work at least.
-    return type == QMetaType::Type::Float ||
-           type == QMetaType::Type::Double ||
-           type == QMetaType::Type::Int ||
-           type == QMetaType::Type::UInt ||
-           type == QMetaType::Type::QString ||
-           type == QMetaType::Type::QStringList ||
-           type == QMetaType::Type::QColor ||
-           type == QMetaType::Type::ULongLong ||
-           type == QMetaType::Type::LongLong ||
-           type == QMetaType::Type::Bool;
-}
-bool ValidateQVariantMapJsonSupport(const QVariantMap& map)
-{
-    for (const auto& value : map)
-    {
-        if (!ValidateQVariantJsonSupport(value))
-            return false;
-    }
-    return true;
-}
 
 size_t VariantHash(const QVariant& variant)
 {

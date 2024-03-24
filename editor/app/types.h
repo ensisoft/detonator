@@ -19,6 +19,13 @@
 #include "warnpush.h"
 #  include <QString>
 #  include <QModelIndexList>
+#  include <QSize>
+#  include <QPoint>
+#  include <QByteArray>
+#  include <QJsonObject>
+#  include <QVariant>
+#  include <QVariantMap>
+#  include <QMetaType>
 #include "warnpop.h"
 
 #include <string>
@@ -99,55 +106,19 @@ namespace app
         std::vector<size_t> mIndices;
     };
 
-
-    // Facilitate implicit conversion from different
-    // types into a property key string.
-    class PropertyKey
-    {
-    public:
-        PropertyKey(const char* key)
-          : mKey(key)
-        {}
-        PropertyKey(const QString& key)
-          : mKey(key)
-        {}
-        PropertyKey(const std::string& key)
-          : mKey(QString::fromUtf8(key.c_str()))
-        {}
-
-        template<typename T>
-        PropertyKey(const char* key, T value)
-          : mKey(toString("%1:%2", key, value))
-        {}
-        template<typename T>
-        PropertyKey(const QString& key, T value)
-          : mKey(toString("%1:%2", key, value))
-        {}
-        template<typename T>
-        PropertyKey(const std::string& key, T value)
-          : mKey(toString("%1:%2", key, value))
-        {}
-        operator const QString& () const
-        { return mKey; }
-        const QString& key() const
-        { return mKey; }
-    private:
-        QString mKey;
-    };
-
     class AnyString
     {
     public:
         AnyString() = default;
 
         AnyString(const char* str)
-          : mStr(str)
+                : mStr(str)
         {}
         AnyString(const QString& str)
-          : mStr(str)
+                : mStr(str)
         {}
         AnyString(const std::string& str)
-          : mStr(QString::fromUtf8(str.c_str()))
+                : mStr(QString::fromUtf8(str.c_str()))
         {}
         operator QString () const
         { return mStr; }
@@ -245,6 +216,188 @@ namespace app
 
     inline bool operator<(const AnyString& lhs, const AnyString& rhs)
     { return lhs.mStr < rhs.mStr; }
+
+
+
+
+    // Facilitate implicit conversion from different
+    // types into a property key string.
+    class PropertyKey
+    {
+    public:
+        PropertyKey(const char* key)
+          : mKey(key)
+        {}
+        PropertyKey(const QString& key)
+          : mKey(key)
+        {}
+        PropertyKey(const std::string& key)
+          : mKey(QString::fromUtf8(key.c_str()))
+        {}
+
+        template<typename T>
+        PropertyKey(const char* key, T value)
+          : mKey(toString("%1:%2", key, value))
+        {}
+        template<typename T>
+        PropertyKey(const QString& key, T value)
+          : mKey(toString("%1:%2", key, value))
+        {}
+        template<typename T>
+        PropertyKey(const std::string& key, T value)
+          : mKey(toString("%1:%2", key, value))
+        {}
+        operator const QString& () const
+        { return mKey; }
+        const QString& key() const
+        { return mKey; }
+    private:
+        QString mKey;
+    };
+
+    bool ValidateQVariantMapJsonSupport(const QVariantMap& map);
+
+    template<typename T>
+    bool ValidateQVariantJsonSupport(const T& value)
+    {
+        const QVariant variant(value);
+        // Qt API brainfart (QVariant::Type is deprecated)
+        const auto type = (QMetaType::Type)variant.type();
+        if (type == QMetaType::Type::QVariantMap)
+            return ValidateQVariantMapJsonSupport(qvariant_cast<QVariantMap>(variant));
+
+        // todo:there's more but these should work at least.
+        return type == QMetaType::Type::Float ||
+               type == QMetaType::Type::Double ||
+               type == QMetaType::Type::Int ||
+               type == QMetaType::Type::UInt ||
+               type == QMetaType::Type::QString ||
+               type == QMetaType::Type::QStringList ||
+               type == QMetaType::Type::QColor ||
+               type == QMetaType::Type::ULongLong ||
+               type == QMetaType::Type::LongLong ||
+               type == QMetaType::Type::Bool ||
+               type == QMetaType::Type::QJsonObject ||
+               type == QMetaType::Type::QStringList;
+    }
+    inline bool ValidateQVariantJsonSupport(const QVariantMap& map)
+    {
+        return ValidateQVariantMapJsonSupport(map);
+    }
+
+
+    inline bool ValidateQVariantMapJsonSupport(const QVariantMap& map)
+    {
+        for (const auto& value : map)
+        {
+            if (!ValidateQVariantJsonSupport(value))
+                return false;
+        }
+        return true;
+    }
+
+    class PropertyValue
+    {
+    public:
+        PropertyValue(const QJsonObject& json)
+        { SetVariantProperty(json); }
+        PropertyValue(const QByteArray& bytes)
+        { SetVariantProperty(QString::fromLatin1(bytes.toBase64())); }
+        PropertyValue(const QColor& color)
+        { SetVariantProperty(color); }
+        PropertyValue(const char* str)
+        { SetVariantProperty(QString(str)); }
+        PropertyValue(const QString& value)
+        { SetVariantProperty(value); }
+        PropertyValue(const std::string& value)
+        { SetVariantProperty(QString::fromUtf8(value.c_str())); }
+        PropertyValue(const AnyString& value)
+        { SetVariantProperty(value.GetWide()); }
+        PropertyValue(quint64 value)
+        { SetVariantProperty(value); }
+        PropertyValue(qint64 value)
+        { SetVariantProperty(value); }
+        PropertyValue(unsigned value)
+        { SetVariantProperty(value); }
+        PropertyValue(int value)
+        { SetVariantProperty(value); }
+        PropertyValue(double value)
+        { SetVariantProperty(value); }
+        PropertyValue(float value)
+        { SetVariantProperty(value); }
+        PropertyValue(const QSize& value)
+        {
+            QVariantMap map;
+            map["width"]  = value.width();
+            map["height"] = value.height();
+            SetVariantProperty(map);
+        }
+        PropertyValue(const QPoint& value)
+        {
+            QVariantMap map;
+            map["x"] = value.x();
+            map["y"] = value.y();
+            SetVariantProperty(map);
+        }
+        PropertyValue(const QVariantMap& map)
+        { SetVariantProperty(map); }
+        PropertyValue(const QStringList& strings)
+        { SetVariantProperty(strings); }
+
+        PropertyValue(const QVariant& variant)
+            : mVariantValue(variant)
+        {
+            ASSERT(!mVariantValue.isNull());
+        }
+
+        template<typename T>
+        void GetValue(T* out) const
+        {
+            *out = qvariant_cast<T>(mVariantValue);
+        }
+
+        void GetValue(std::string* out) const
+        {
+            const auto& str = mVariantValue.toString();
+            *out = std::string(str.toUtf8());
+        }
+        void GetValue(QByteArray* out) const
+        {
+            const auto& str = mVariantValue.toString();
+            if (!str.isEmpty())
+                *out = QByteArray::fromBase64(str.toLatin1());
+        }
+        void GetValue(QPoint* out) const
+        {
+            const auto& map = mVariantValue.toMap();
+            out->setX(map["x"].toInt());
+            out->setY(map["y"].toInt());
+        }
+        void GetValue(QSize* out) const
+        {
+            const auto& map = mVariantValue.toMap();
+            out->setWidth(map["width"].toInt());
+            out->setHeight(map["height"].toInt());
+        }
+
+        operator QVariant () const
+        { return mVariantValue; }
+    private:
+        template<typename T>
+        void SetVariantProperty(const T& value)
+        {
+            ASSERT(ValidateQVariantJsonSupport(value));
+            mVariantValue = value;
+        }
+
+        void SetVariantProperty(const QVariantMap& map)
+        {
+            ASSERT(ValidateQVariantMapJsonSupport(map));
+            mVariantValue = map;
+        }
+    private:
+        QVariant mVariantValue;
+    };
 
 
     template<typename Key, typename Value>
