@@ -359,121 +359,87 @@ namespace app
         // Returns true if workspace has a property by the given name.
         bool HasProperty(const PropertyKey& key) const
         { return mProperties.contains(key); }
+        // Delete the property from the workspace.
+        void DeleteProperty(const PropertyKey& key)
+        { mProperties.remove(key);  }
         // Set a property value. If the property exists already the previous
         // value is overwritten. Otherwise, it's added.
-        void SetProperty(const PropertyKey& key, const QVariant& value)
-        { mProperties[key] = value; }
-        void SetProperty(const PropertyKey& key, const QString& value)
-        { mProperties[key] = value; }
-        void SetProperty(const PropertyKey& key, const std::string& value)
-        { mProperties[key] = FromUtf8(value); }
-        void SetProperty(const PropertyKey& key, const AnyString& value)
-        { mProperties[key] = value.GetWide(); }
-        // Return the value of the property identified by name.
-        // If the property doesn't exist returns default value.
-        QVariant GetProperty(const PropertyKey& name, const QVariant& def) const
-        {
-            QVariant ret = mProperties[name];
-            if (ret.isNull())
-                return def;
-            return ret;
-        }
-        // Return the value of the property identified by name.
-        // If the property doesn't exist returns a null variant.
-        QVariant GetProperty(const PropertyKey& name) const
-        { return mProperties[name]; }
+        void SetProperty(const PropertyKey& key, const PropertyValue& value)
+        { SetVariantProperty(key, value); }
 
         // Return the value of the property identified by name.
         // If the property doesn't exist returns the default value.
         template<typename T>
-        T GetProperty(const PropertyKey& name, const T& def) const
+        T GetProperty(const PropertyKey& key, const T& def) const
         {
-            if (!HasProperty(name))
+            const auto& variant = GetVariantProperty(key);
+            if (variant.isNull())
                 return def;
-            const auto& ret = GetProperty(name);
-            return qvariant_cast<T>(ret);
+
+            const PropertyValue property(variant);
+
+            T value;
+            property.GetValue(&value);
+
+            return value;
         }
         // Get the value of a property.
         // If the property exists returns true and stores the value in the T pointer
         // otherwise return false and T* is left unmodified.
         template<typename T>
-        bool GetProperty(const PropertyKey& name, T* out) const
+        bool GetProperty(const PropertyKey& key, T* out) const
         {
-            if (!HasProperty(name))
+            const auto& variant = GetVariantProperty(key);
+            if (variant.isNull())
                 return false;
-            const auto& ret = GetProperty(name);
-            *out = qvariant_cast<T>(ret);
+
+            const PropertyValue property(variant);
+            property.GetValue(out);
             return true;
         }
-        void DeleteProperty(const PropertyKey& key)
-        { mProperties.remove(key);  }
+
 
         // User specific workspace properties.
         bool HasUserProperty(const PropertyKey& name) const
         { return mUserProperties.contains(name); }
+        // Delete the user property from the workspace
+        void DeleteUserProperty(const PropertyKey& key)
+        { mUserProperties.remove(key); }
         // Set a property value. If the property exists already the previous
         // value is overwritten. Otherwise, it's added.
-        void SetUserProperty(const PropertyKey& name, const QVariant& value)
-        {
-            mUserProperties[name] = value;
-            emit UserPropertyUpdated(name, value);
-        }
-        void SetUserProperty(const PropertyKey& name, const QByteArray& bytes)
-        {
-            // QByteArray goes into variant but the JSON serialization through
-            // QJsonObject::fromVariantMap doesn't seem to work right.
-            QString base64 = bytes.toBase64();
-            mUserProperties[name] = base64;
-            emit UserPropertyUpdated(name, base64);
-        }
-        // Return the value of the property identified by name.
-        // If the property doesn't exist returns the default value.
-        QByteArray GetUserProperty(const PropertyKey& name, const QByteArray& def) const
-        {
-            QVariant ret = mUserProperties[name];
-            if (ret.isNull())
-                return def;
-            QString base64 = ret.toString();
-            if (!base64.isEmpty())
-                return QByteArray::fromBase64(base64.toLatin1());
-            return {};
-        }
+        void SetUserProperty(const PropertyKey& key, const PropertyValue& value)
+        { SetUserVariantProperty(key, value); }
+
         // Return the value of the property identified by name.
         // If the property doesn't exist returns the default value.
         template<typename T>
-        T GetUserProperty(const PropertyKey& name, const T& def) const
+        T GetUserProperty(const PropertyKey& key, const T& def) const
         {
-            QVariant ret = mUserProperties[name];
-            if (ret.isNull())
+            const auto& variant = GetUserVariantProperty(key);
+            if (variant.isNull())
                 return def;
-            return qvariant_cast<T>(ret);
+
+            const PropertyValue property(variant);
+
+            T value;
+            property.GetValue(&value);
+
+            return value;
         }
         // Get the value of a property.
         // If the property exists returns true and stores the value in the T pointer
         // otherwise return false and T* is left unmodified.
         template<typename T>
-        bool GetUserProperty(const PropertyKey& name, T* out) const
+        bool GetUserProperty(const PropertyKey& key, T* out) const
         {
-            QVariant ret = mUserProperties[name];
-            if (ret.isNull())
-                return false;
-            *out = qvariant_cast<T>(ret);
-            return true;
-        }
-        bool GetUserProperty(const PropertyKey& name, QByteArray* out) const
-        {
-            QVariant ret = mUserProperties[name];
-            if (ret.isNull())
-                return false;
-            QString base64 = ret.toString();
-            if (base64.isEmpty())
+            const auto& variant = GetUserVariantProperty(key);
+            if (variant.isNull())
                 return false;
 
-            *out = QByteArray::fromBase64(base64.toLatin1());
+            const PropertyValue property(variant);
+            property.GetValue(out);
             return true;
         }
-        void DeleteUserProperty(const PropertyKey& key)
-        { mUserProperties.remove(key); }
 
         // Project settings.
         struct ProjectSettings {
@@ -775,6 +741,23 @@ namespace app
         bool SaveContent(const QString& file) const;
         bool SaveProperties(const QString& file) const;
         void SaveUserSettings(const QString& file) const;
+
+        void SetVariantProperty(const PropertyKey& key, const QVariant& value)
+        { mProperties[key] = value; }
+        void SetUserVariantProperty(const PropertyKey& key, const QVariant& value)
+        { mUserProperties[key] = value; }
+        QVariant GetVariantProperty(const PropertyKey& key) const
+        {
+            if (mProperties.contains(key))
+                return mProperties[key];
+            return QVariant();
+        }
+        QVariant GetUserVariantProperty(const PropertyKey& key) const
+        {
+            if (mUserProperties.contains(key))
+                return mUserProperties[key];
+            return QVariant();
+        }
 
     private:
         // this is the list of resources that we save/load
