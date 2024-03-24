@@ -164,6 +164,9 @@ int test_main(int argc, char* argv[])
     r.SetProperty("bytes", bytes);
     r.SetProperty("color", QColor::fromRgb(100, 120, 120, 200));
     r.SetProperty("big_value", quint64(2129019692383711403));
+    r.SetProperty("size", QSize(10, 20));
+    r.SetProperty("point", QPoint(20, 10));
+    r.SetProperty("strings", QStringList({"one", "two"}));
     QJsonObject json;
     app::JsonWrite(json, "foo", QString("foobar"));
     app::JsonWrite(json, "int", 123);
@@ -202,6 +205,8 @@ int test_main(int argc, char* argv[])
     TEST_REQUIRE(r.GetProperty("float", 0.0f) == real::float32(123.0f));
     TEST_REQUIRE(r.GetProperty("bytes", QByteArray()) == bytes);
     TEST_REQUIRE(r.GetProperty("color", QColor()) == QColor::fromRgb(100, 120, 120, 200));
+    TEST_REQUIRE(r.GetProperty("size", QSize(0, 0)) == QSize(10, 20));
+    TEST_REQUIRE(r.GetProperty("point", QPoint(0, 0)) == QPoint(20, 10));
 
     TEST_REQUIRE(r.GetProperty("big_value", quint64(0)) == 2129019692383711403);
     map = r.GetProperty("variant_map", map);
@@ -245,6 +250,9 @@ int test_main(int argc, char* argv[])
     TEST_REQUIRE(r.GetProperty("c_string", QString("")) == "const char*");
     TEST_REQUIRE(r.GetProperty("q_string", QString("")) == "qt string");
     TEST_REQUIRE(r.GetProperty("std_string", std::string()) == "std string");
+    TEST_REQUIRE(r.GetProperty("size", QSize(0, 0)) == QSize(10, 20));
+    TEST_REQUIRE(r.GetProperty("point", QPoint(0, 0)) == QPoint(20, 10));
+    TEST_REQUIRE(r.GetProperty("strings", QStringList()) == QStringList({"one", "two"}));
 
     TEST_REQUIRE(r.HasUserProperty("int"));
     TEST_REQUIRE(r.HasUserProperty("bytes"));
