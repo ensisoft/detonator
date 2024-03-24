@@ -20,6 +20,7 @@
 
 #include "warnpush.h"
 #  include <QDialog>
+#  include <QTimer>
 #  include "ui_dlgtiletool.h"
 #include "warnpop.h"
 
@@ -87,11 +88,14 @@ namespace gui
         void on_toolValue_valueChanged(int);
         void on_material_toggled();
         void on_data_toggled();
+        void on_widgetColor_colorChanged(QColor color);
 
         void ResourceAdded(const app::Resource* resource);
         void ResourceRemoved(const app::Resource* resource);
         void ResourceUpdated(const app::Resource* resource);
+
     private:
+        void PaintScene(gfx::Painter& painter, double);
         void ShowCurrentTool();
         TileTool* GetCurrentTool();
         void SetCurrentTool(const QString& id);
@@ -103,5 +107,12 @@ namespace gui
         const app::Workspace* mWorkspace = nullptr;
         ToolBox* mTools = nullptr;
         std::shared_ptr<game::TilemapClass> mClass;
+        std::unique_ptr<gfx::Material> mMaterial;
+        QTimer mTimer;
+
+        struct State {
+            float camera_offset_x = 0.0f;
+            float camera_offset_y = 0.0f;
+        } mState;
     };
 } // namespace
