@@ -149,7 +149,7 @@ namespace gui
         Tool* GetCurrentTool(size_t* index = nullptr);
         bool ValidateToolAgainstLayer(const Tool& tool, const game::TilemapLayer& layer);
         void ToolIntoJson(const Tool& tool, QJsonObject& json) const;
-        void ToolFromJson(Tool& tool, const QJsonObject& json) const;
+        bool ToolFromJson(Tool& tool, const QJsonObject& json) const;
     private:
         Ui::Tilemap mUI;
     private:

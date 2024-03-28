@@ -29,6 +29,7 @@
 #include <cstdint>
 #include <functional>
 
+#include "graphics/material.h"
 #include "editor/app/workspace.h"
 
 namespace gui
@@ -45,13 +46,22 @@ namespace gui
         TileToolShape shape   = TileToolShape::Rectangle;
         QString id;
         QString name;
-        std::string material;
-        std::int32_t value = 0;
-        int palette_index = -1;
+
+        struct Tile {
+            std::string material;
+            std::int32_t value  = 0;
+            int palette_index   = -1;
+            bool apply_material = true;
+            bool apply_value    = false;
+
+            // filled at runtime when the tool is used.
+            mutable std::unique_ptr<gfx::Material> instance;
+            mutable std::int32_t material_palette_index = 0;
+            mutable std::int32_t data_value = 0;
+        };
+        std::vector<Tile> tiles;
         unsigned width  = 0;
         unsigned height = 0;
-        bool apply_material = true;
-        bool apply_value = false;
     };
 
 
@@ -89,6 +99,8 @@ namespace gui
         void on_material_toggled();
         void on_data_toggled();
         void on_widgetColor_colorChanged(QColor color);
+        void on_tileCol_valueChanged(int);
+        void on_tileRow_valueChanged(int);
 
         void ResourceAdded(const app::Resource* resource);
         void ResourceRemoved(const app::Resource* resource);
@@ -96,10 +108,17 @@ namespace gui
 
     private:
         void PaintScene(gfx::Painter& painter, double);
+        bool KeyPress(QKeyEvent* key);
+        void MousePress(QMouseEvent* mickey);
+        void MouseDoubleClick(QMouseEvent* mickey);
         void ShowCurrentTool();
+        void ShowCurrentTile();
         TileTool* GetCurrentTool();
+        TileTool::Tile* GetCurrentTile();
+        TileTool::Tile* GetTileUnderMouse(unsigned* col, unsigned* row);
         void SetCurrentTool(const QString& id);
         void ModifyCurrentTool();
+        void ModifyCurrentTile();
         void UpdateToolCombo();
     private:
         Ui::DlgTileTool mUI;
@@ -107,7 +126,6 @@ namespace gui
         const app::Workspace* mWorkspace = nullptr;
         ToolBox* mTools = nullptr;
         std::shared_ptr<game::TilemapClass> mClass;
-        std::unique_ptr<gfx::Material> mMaterial;
         QTimer mTimer;
 
         struct State {
