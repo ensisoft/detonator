@@ -426,6 +426,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
        </widget>
       </item>
       <item>
@@ -461,6 +464,16 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="chkGrid">
+          <property name="text">
+           <string>Show grid</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="color_widgets::ColorSelector" name="widgetColor">
@@ -729,7 +742,9 @@
   <tabstop>btnResetPaletteIndex</tabstop>
   <tabstop>data</tabstop>
   <tabstop>toolValue</tabstop>
+  <tabstop>widget</tabstop>
   <tabstop>zoom</tabstop>
+  <tabstop>chkGrid</tabstop>
   <tabstop>widgetColor</tabstop>
   <tabstop>translateX</tabstop>
   <tabstop>translateY</tabstop>

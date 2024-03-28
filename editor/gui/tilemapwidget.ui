@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1977</width>
-    <height>1298</height>
+    <height>1297</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1316,13 +1316,16 @@
   <action name="actionNewLayer">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+     <normaloff>:/32x32_ico_png/add.png</normaloff>:/32x32_ico_png/add.png</iconset>
    </property>
    <property name="text">
     <string>New Layer</string>
    </property>
    <property name="toolTip">
     <string>Add a new layer</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
   <action name="actionDeleteLayer">
