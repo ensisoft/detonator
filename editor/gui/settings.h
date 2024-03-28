@@ -49,12 +49,21 @@ namespace gui
         // Construct a new settings object for reading the
         // settings from a specific file. The contents are in JSON.
         Settings(const QString& filename);
+        // Construct a new settings object without any backing file.
+        // The settings are only in memory.
+        Settings() : Settings("")
+        {}
+
         // Load the settings from the backing store.
         // Returns true if successful, otherwise false and the error is logged.
         bool Load();
         // Save the settings to the backing store.
         // Returns true if successful, otherwise false and the error is logged.
         bool Save();
+
+        QString ToString() const;
+
+        bool FromString(const QString& str);
 
         template<typename T>
         bool GetValue(const QString& module, const app::PropertyKey& key, T* out) const
@@ -154,6 +163,8 @@ namespace gui
         {
         public:
             virtual ~StorageImpl() = default;
+            virtual bool FromString(const QString&) = 0;
+            virtual QString ToString() const = 0;
             virtual QVariant GetValue(const QString& key) const = 0;
             virtual void SetValue(const QString& key, const QVariant& value) = 0;
             virtual bool Load() = 0;
@@ -168,6 +179,16 @@ namespace gui
             AppSettingsStorage(const QString& organization, const QString& application)
               : mSettings(organization, application)
             {}
+            virtual QString ToString() const override
+            {
+                BUG("Not implemented");
+                return "";
+            }
+            virtual bool FromString(const QString&) override
+            {
+                BUG("Not implemented");
+                return false;
+            }
             virtual QVariant GetValue(const QString& key) const override
             { return mSettings.value(key); }
             virtual void SetValue(const QString& key, const QVariant& value) override
@@ -179,6 +200,7 @@ namespace gui
                 mSettings.sync();
                 return true;
             }
+
         private:
             QSettings mSettings;
         };
@@ -190,6 +212,8 @@ namespace gui
             JsonFileSettingsStorage(const QString& file)
               : mFilename(file)
             {}
+            virtual bool FromString(const QString& str) override;
+            virtual QString ToString() const override ;
             virtual QVariant GetValue(const QString& key) const override
             { return mValues[key]; }
             virtual void SetValue(const QString& key, const QVariant& value) override;
