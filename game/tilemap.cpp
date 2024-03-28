@@ -793,9 +793,11 @@ bool TilemapLayerClass::FromJson(const data::Reader& data)
 bool TilemapLayerClass::HasRenderComponent(Type type)
 {
     if (type == Type::Render ||
+        type == Type::Render_DataSInt4 ||
         type == Type::Render_DataUInt4 ||
-        type == Type::Render_DataUInt8 ||
         type == Type::Render_DataSInt8 ||
+        type == Type::Render_DataUInt8 ||
+        type == Type::Render_DataSInt24 ||
         type == Type::Render_DataUInt24)
         return true;
     return false;
