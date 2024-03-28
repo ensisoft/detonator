@@ -57,6 +57,16 @@ bool Settings::Save()
     return mSettings->Save();
 }
 
+QString Settings::ToString() const
+{
+    return mSettings->ToString();
+}
+
+bool Settings::FromString(const QString& str)
+{
+    return mSettings->FromString(str);
+}
+
 bool Settings::GetValue(const QString& module, const app::PropertyKey& key, std::size_t* out) const
 {
     const auto& lo_var = mSettings->GetValue(module + "/" + key + "_lo");
@@ -399,6 +409,30 @@ void Settings::JsonFileSettingsStorage::SetValue(const QString& key, const QVari
 {
     ASSERT(app::ValidateQVariantJsonSupport(value));
     mValues[key] = value;
+}
+
+bool Settings::JsonFileSettingsStorage::FromString(const QString& str)
+{
+    if (str.isEmpty())
+        return true;
+    const auto& buffer = str.toLatin1();
+
+    const QJsonDocument& docu = QJsonDocument::fromJson(buffer);
+    if (docu.isNull())
+        return false;
+
+    const auto& root = docu.object();
+    mValues = root.toVariantMap();
+    return true;
+}
+
+
+QString Settings::JsonFileSettingsStorage::ToString() const
+{
+    const QJsonObject json(QJsonObject::fromVariantMap(mValues));
+    const QJsonDocument docu(json);
+    return QString::fromLatin1(docu.toJson());
+
 }
 
 bool Settings::JsonFileSettingsStorage::Load()
