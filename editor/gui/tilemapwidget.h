@@ -30,6 +30,7 @@
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/tool.h"
 #include "editor/gui/dlgtiletool.h"
+#include "editor/gui/settings.h"
 
 namespace gui
 {
@@ -186,8 +187,7 @@ namespace gui
         } mState;
 
         std::unique_ptr<DlgTileTool> mDlgTileTool;
-        std::optional<QPoint> mDlgTileToolPosition;
-        std::optional<QSize> mDlgTileToolSize;
+        Settings mTileToolSettings;
 
         std::unique_ptr<MouseTool> mCurrentTool;
         std::unique_ptr<MouseTool> mCameraTool;

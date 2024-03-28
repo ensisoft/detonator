@@ -34,6 +34,8 @@
 
 namespace gui
 {
+    class Settings;
+
     enum class TileToolFunction {
         TileBrush
     };
@@ -79,6 +81,10 @@ namespace gui
 
         inline void SetClass(std::shared_ptr<game::TilemapClass> klass) noexcept
         { mClass = std::move(klass); }
+
+        void SaveState(Settings& settings) const;
+        void LoadState(const Settings& settings);
+
 
     private slots:
         void on_cmbTool_currentIndexChanged(int index);

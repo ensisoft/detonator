@@ -730,6 +730,7 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace, const app::Resource& res
 
 
     int current_layer = -1;
+    QString tile_tool_settings;
     GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x);
     GetUserProperty(resource, "camera_offset_y", &mState.camera_offset_y);
     GetUserProperty(resource, "camera_scale_x", mUI.scaleX);
@@ -744,13 +745,8 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace, const app::Resource& res
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "current_layer", &current_layer);
     GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
-
-    QPoint tile_tool_pos;
-    if (GetUserProperty(resource, "tile_tool_pos", &tile_tool_pos))
-        mDlgTileToolPosition = tile_tool_pos;
-    QSize tile_tool_size;
-    if (GetUserProperty(resource, "tile_tool_size", &tile_tool_size))
-        mDlgTileToolSize = tile_tool_size;
+    GetUserProperty(resource, "tile_tool_settings", &tile_tool_settings);
+    mTileToolSettings.FromString(tile_tool_settings);
 
     mTools.clear();
 
@@ -830,11 +826,7 @@ bool TilemapWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Tilemap", mUI.cmbGrid);
     settings.SaveWidget("Tilemap", mUI.zoom);
     settings.SaveWidget("Tilemap", mUI.mainSplitter);
-    if (mDlgTileToolSize.has_value())
-        settings.SetValue("Tilemap", "tile_tool_size", mDlgTileToolSize.value());
-    if (mDlgTileToolPosition.has_value())
-        settings.SetValue("Tilemap", "tile_tool_pos", mDlgTileToolPosition.value());
-
+    settings.SetValue("Tilemap", "tile_tool_settings", mTileToolSettings.ToString());
 
     settings.SetValue("Tilemap", "num_tools", mTools.size());
     for (size_t i=0; i<mTools.size(); ++i)
@@ -895,14 +887,9 @@ bool TilemapWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Tilemap", mUI.zoom);
     settings.LoadWidget("Tilemap", mUI.mainSplitter);
 
-    QSize tile_tool_size;
-    QPoint tile_tool_pos;
-    settings.GetValue("Tilemap", "tile_tool_size", &tile_tool_size);
-    settings.GetValue("Tilemap", "tile_tool_pos", &tile_tool_pos);
-    if (!tile_tool_size.isEmpty())
-        mDlgTileToolSize = tile_tool_size;
-    if (!tile_tool_pos.isNull())
-        mDlgTileToolPosition = tile_tool_pos;
+    QString tile_tool_settings;
+    settings.GetValue("Tilemap", "tile_tool_settings", &tile_tool_settings);
+    mTileToolSettings.FromString(tile_tool_settings);
 
     mState.klass = std::make_shared<game::TilemapClass>();
     if (mState.klass->FromJson(json))
@@ -1247,11 +1234,7 @@ void TilemapWidget::on_actionSave_triggered()
     SetUserProperty(resource, "zoom", mUI.zoom);
     SetUserProperty(resource, "current_layer", GetCurrentRow(mUI.layers));
     SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
-    if (mDlgTileToolPosition.has_value())
-        SetUserProperty(resource, "tile_tool_pos", mDlgTileToolPosition.value());
-    if (mDlgTileToolSize.has_value())
-        SetUserProperty(resource, "tile_tool_size", mDlgTileToolSize.value());
-
+    SetUserProperty(resource, "tile_tool_settings", mTileToolSettings.ToString());
 
     SetProperty(resource, "num_tools", mTools.size());
     for (size_t i=0; i<mTools.size(); ++i)
@@ -1284,15 +1267,11 @@ void TilemapWidget::on_actionTools_triggered()
     };
 
     connect(mDlgTileTool.get(), &QDialog::finished, this, [this]() {
-        mDlgTileToolPosition = mDlgTileTool->pos();
-        mDlgTileToolSize     = mDlgTileTool->size();
+        mDlgTileTool->SaveState(mTileToolSettings);
         mDlgTileTool.reset();
     });
 
-    if (mDlgTileToolPosition.has_value())
-        mDlgTileTool->move(mDlgTileToolPosition.value());
-    if (mDlgTileToolSize.has_value())
-        mDlgTileTool->resize(mDlgTileToolSize.value());
+    mDlgTileTool->LoadState(mTileToolSettings);
 }
 
 void TilemapWidget::on_actionMoveLayerUp_triggered()
