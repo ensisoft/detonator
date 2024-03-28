@@ -62,8 +62,10 @@ DlgTileTool::DlgTileTool(const app::Workspace* workspace, QWidget* parent, ToolB
     connect(&mTimer, &QTimer::timeout, mUI.widget, &GfxWidget::triggerPaint);
     connect(this, &QDialog::finished, mUI.widget, &GfxWidget::dispose);
 
-    mUI.widget->onPaintScene = std::bind(&DlgTileTool::PaintScene, this, std::placeholders::_1,
-                                         std::placeholders::_2);
+    mUI.widget->onPaintScene       = std::bind(&DlgTileTool::PaintScene, this, std::placeholders::_1, std::placeholders::_2);
+    mUI.widget->onKeyPress         = std::bind(&DlgTileTool::KeyPress, this, std::placeholders::_1);
+    mUI.widget->onMousePress       = std::bind(&DlgTileTool::MousePress, this, std::placeholders::_1);
+    mUI.widget->onMouseDoubleClick = std::bind(&DlgTileTool::MouseDoubleClick, this, std::placeholders::_1);
     mUI.widget->onZoomIn = [this]() {
         const float value = GetValue(mUI.zoom);
         SetValue(mUI.zoom, value + 0.1f);
@@ -81,6 +83,7 @@ DlgTileTool::DlgTileTool(const app::Workspace* workspace, QWidget* parent, ToolB
     {
         SetCurrentTool((*mTools)[0]->id);
         ShowCurrentTool();
+        ShowCurrentTile();
     }
 
     // hide this for now
@@ -106,11 +109,15 @@ void DlgTileTool::on_btnAddTool_clicked()
     tool->id            = app::RandomString();
     tool->tool          = TileToolFunction::TileBrush;
     tool->shape         = TileToolShape::Rectangle;
-    tool->width         = 10;
-    tool->height        = 10;
-    tool->material      = "_checkerboard";
-    tool->palette_index = PaletteIndexAutomatic;
+    tool->width         = 1;
+    tool->height        = 1;
+
+    TileTool::Tile tile;
+    tile.material      = "_checkerboard";
+    tile.palette_index = PaletteIndexAutomatic;
+    tool->tiles.push_back(std::move(tile));
     mTools->push_back(tool);
+
     UpdateToolCombo();
     SetCurrentTool(tool->id);
     ShowCurrentTool();
@@ -142,13 +149,13 @@ void DlgTileTool::on_btnDelTool_clicked()
 
 void DlgTileTool::on_btnSelectToolMaterial_clicked()
 {
-    if (auto* tool = GetCurrentTool())
+    if (auto* tile = GetCurrentTile())
     {
-        DlgMaterial dlg(this, mWorkspace, tool->material);
+        DlgMaterial dlg(this, mWorkspace, tile->material);
         dlg.SetPreviewScale(GetMaterialPreviewScale(*mClass));
         if (dlg.exec() == QDialog::Rejected)
             return;
-        tool->material = app::ToUtf8(dlg.GetSelectedMaterialId());
+        tile->material = app::ToUtf8(dlg.GetSelectedMaterialId());
         ShowCurrentTool();
     }
 }
@@ -168,7 +175,7 @@ void DlgTileTool::on_btnEditToolMaterial_clicked()
 void DlgTileTool::on_btnResetPaletteIndex_clicked()
 {
     SetValue(mUI.toolPaletteIndex, -1);
-    ModifyCurrentTool();
+    ModifyCurrentTile();
 }
 
 void DlgTileTool::on_cmbToolFunction_currentIndexChanged(int)
@@ -191,31 +198,53 @@ void DlgTileTool::on_toolHeight_valueChanged(int)
 
 void DlgTileTool::on_cmbToolMaterial_currentIndexChanged(int)
 {
-    ModifyCurrentTool();
-    ShowCurrentTool();
+    ModifyCurrentTile();
 }
 
 void DlgTileTool::on_toolPaletteIndex_valueChanged(int)
 {
-    ModifyCurrentTool();
+    ModifyCurrentTile();
 }
 void DlgTileTool::on_toolValue_valueChanged(int)
 {
-    ModifyCurrentTool();
+    ModifyCurrentTile();
 }
 
 void DlgTileTool::on_material_toggled()
 {
-    ModifyCurrentTool();
+    ModifyCurrentTile();
 }
 void DlgTileTool::on_data_toggled()
 {
-    ModifyCurrentTool();
+    ModifyCurrentTile();
 }
 
 void DlgTileTool::on_widgetColor_colorChanged(QColor color)
 {
     mUI.widget->SetClearColor(ToGfx(color));
+}
+
+void DlgTileTool::on_tileCol_valueChanged(int)
+{
+    if (const auto* tool = GetCurrentTool())
+    {
+        int value = GetValue(mUI.tileCol);
+        if (value >= tool->width)
+            SetValue(mUI.tileCol, tool->width-1);
+
+        ShowCurrentTile();
+    }
+}
+void DlgTileTool::on_tileRow_valueChanged(int)
+{
+    if (const auto* tool = GetCurrentTool())
+    {
+        int value = GetValue(mUI.tileRow);
+        if (value >= tool->height)
+            SetValue(mUI.tileRow, tool->height-1);
+
+        ShowCurrentTile();
+    }
 }
 
 void DlgTileTool::ResourceAdded(const app::Resource* resource)
@@ -233,8 +262,14 @@ void DlgTileTool::ResourceRemoved(const app::Resource* resource)
         const auto& materials = mWorkspace->ListAllMaterials();
         SetList(mUI.cmbToolMaterial, materials);
 
-        if (mMaterial && mMaterial->GetClassId() == resource->GetId())
-            mMaterial.reset();
+        if (auto* tool = GetCurrentTool())
+        {
+            for (auto& tile : tool->tiles)
+            {
+                if (tile.material == resource->GetId())
+                    tile.material = "_checkerboard";
+            }
+        }
     }
 }
 void DlgTileTool::ResourceUpdated(const app::Resource* resource)
@@ -244,8 +279,14 @@ void DlgTileTool::ResourceUpdated(const app::Resource* resource)
         const auto& materials = mWorkspace->ListAllMaterials();
         SetList(mUI.cmbToolMaterial, materials);
 
-        if (mMaterial && mMaterial->GetClassId() == resource->GetId())
-            mMaterial.reset();
+        if (auto* tool = GetCurrentTool())
+        {
+            for (auto& tile : tool->tiles)
+            {
+                if (tile.material == resource->GetId())
+                    tile.instance.reset();
+            }
+        }
     }
 }
 
@@ -268,8 +309,6 @@ void DlgTileTool::PaintScene(gfx::Painter& painter, double)
     const auto tile_width_units  = mClass->GetTileWidth() * tile_scaler;
     const auto tile_height_units = mClass->GetTileHeight() * tile_scaler;
     const auto tile_depth_units  = mClass->GetTileDepth() * tile_scaler;
-
-
 
     // Create tile painter for drawing in tile coordinate space.
     gfx::Painter tile_painter(painter.GetDevice());
@@ -301,50 +340,120 @@ void DlgTileTool::PaintScene(gfx::Painter& painter, double)
                                                            {tile_width_units, tile_height_units},
                                                            perspective);
 
-    gfx::TileBatch batch;
     for (unsigned row=0; row<tool->height; ++row)
     {
         for (unsigned col=0; col<tool->width; ++col)
         {
+            const auto& tile_data = tool->tiles[row * tool->width + col];
+            if (!tile_data.apply_material)
+                continue;
+
             gfx::TileBatch::Tile tile;
             tile.pos.x = col - (tool->width / 2.0f);
             tile.pos.y = row - (tool->height / 2.0f);
             tile.pos.z = 0;
+
+            gfx::TileBatch batch;
             batch.AddTile(tile);
+            batch.SetTileWorldSize(tile_size * cuboid_scale);
+            batch.SetTileRenderWidth(render_size.x * tile_render_width_scale);
+            batch.SetTileRenderHeight(render_size.y * tile_render_height_scale);
+            batch.SetTileShape(gfx::TileBatch::TileShape::Automatic);
+            if (perspective == game::Tilemap::Perspective::AxisAligned)
+                batch.SetProjection(gfx::TileBatch::Projection::AxisAligned);
+            else if (perspective == game::Tilemap::Perspective::Dimetric)
+                batch.SetProjection(gfx::TileBatch::Projection::Dimetric);
+            else BUG("missing tile projection.");
+
+            // re-create the material if the tool's material setting has changed.
+            if (!tile_data.instance ||
+                tile_data.instance->GetClassId() != tile_data.material) {
+                auto klass = mWorkspace->GetMaterialClassById(tile_data.material);
+                tile_data.instance = gfx::CreateMaterialInstance(klass);
+            }
+            scene_painter.Draw(batch, tile_projection_transform_matrix, *tile_data.instance);
         }
     }
-    batch.SetTileWorldSize(tile_size * cuboid_scale);
-    batch.SetTileRenderWidth(render_size.x * tile_render_width_scale);
-    batch.SetTileRenderHeight(render_size.y * tile_render_height_scale);
-    batch.SetTileShape(gfx::TileBatch::TileShape::Automatic);
-    if (perspective == game::Tilemap::Perspective::AxisAligned)
-        batch.SetProjection(gfx::TileBatch::Projection::AxisAligned);
-    else if (perspective == game::Tilemap::Perspective::Dimetric)
-        batch.SetProjection(gfx::TileBatch::Projection::Dimetric);
-    else BUG("missing tile projection.");
 
-    // re-create the material if the tool's material setting has changed.
-    if (!mMaterial || mMaterial->GetClassId() != tool->material)
-    {
-        auto klass = mWorkspace->GetMaterialClassById(tool->material);
-        mMaterial = gfx::CreateMaterialInstance(klass);
-    }
-
-    scene_painter.Draw(batch, tile_projection_transform_matrix, *mMaterial);
-
-    const auto tool_cols_tiles  = tool->width;
-    const auto tool_rows_tiles  = tool->height;
-    const auto tile_grid_width  = tool_cols_tiles * tile_width_units;
+    const auto tool_cols_tiles = tool->width;
+    const auto tool_rows_tiles = tool->height;
+    const auto tile_grid_width = tool_cols_tiles * tile_width_units;
     const auto tile_grid_height = tool_rows_tiles * tile_height_units;
 
-    gfx::Transform transform;
-    transform.Resize(tile_grid_width, tile_grid_height);
-    transform.Translate(-tile_grid_width*0.5f, -tile_grid_height*0.5f);
-    tile_painter.Draw(gfx::Grid(tool_cols_tiles - 1, tool_rows_tiles - 1, true),
-                      transform,
-                      gfx::CreateMaterialFromColor(gfx::Color::LightGray));
+    // visualize the tool tile grid
+    {
+        gfx::Transform transform;
+        transform.Resize(tile_grid_width, tile_grid_height);
+        transform.Translate(-tile_grid_width * 0.5f, -tile_grid_height * 0.5f);
+        tile_painter.Draw(gfx::Grid(tool_cols_tiles - 1, tool_rows_tiles - 1, true), transform,
+                          gfx::CreateMaterialFromColor(gfx::Color::LightGray));
+    }
+
+    // visualize the currently selected tile
+    {
+        const unsigned current_tile_col = GetValue(mUI.tileCol);
+        const unsigned current_tile_row = GetValue(mUI.tileRow);
+        gfx::Transform transform;
+        transform.Resize(tile_width_units, tile_height_units);
+        transform.Translate(-tile_grid_width * 0.5f, -tile_grid_height * 0.5f);
+        transform.Translate(tile_width_units * current_tile_col,
+                            tile_height_units * current_tile_row);
+        tile_painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline), transform,
+                          gfx::CreateMaterialFromColor(gfx::Color::Green), 2.0f);
+    }
+
+    // visualize the tile under the mouse
+    unsigned tile_col = 0;
+    unsigned tile_row = 0;
+    if (GetTileUnderMouse(&tile_col, &tile_row))
+    {
+        gfx::Transform transform;
+        transform.Resize(tile_width_units, tile_height_units);
+        transform.Translate(-tile_grid_width *0.5f, -tile_grid_height * 0.5f);
+        transform.Translate(tile_width_units * tile_col,
+                            tile_height_units * tile_row);
+        tile_painter.Draw(gfx::Rectangle(gfx::Rectangle::Style::Outline), transform,
+                          gfx::CreateMaterialFromColor(gfx::Color::HotPink), 2.0f);
+    }
 
 }
+
+bool DlgTileTool::KeyPress(QKeyEvent* key)
+{
+    if (key->key() == Qt::Key_Escape)
+    {
+        close();
+    }
+    else if (key->key() == Qt::Key_Space)
+    {
+        on_btnSelectToolMaterial_clicked();
+    }
+    return true;
+}
+
+void DlgTileTool::MousePress(QMouseEvent* event)
+{
+    unsigned tile_col = 0;
+    unsigned tile_row = 0;
+    if  (GetTileUnderMouse(&tile_col, &tile_row))
+    {
+        SetValue(mUI.tileCol, tile_col);
+        SetValue(mUI.tileRow, tile_row);
+    }
+}
+
+void DlgTileTool::MouseDoubleClick(QMouseEvent* mickey)
+{
+    unsigned tile_col = 0;
+    unsigned tile_row = 0;
+    if (GetTileUnderMouse(&tile_col, &tile_row))
+    {
+        SetValue(mUI.tileCol, tile_col);
+        SetValue(mUI.tileRow, tile_row);
+        on_btnSelectToolMaterial_clicked();
+    }
+}
+
 
 void DlgTileTool::ShowCurrentTool()
 {
@@ -363,20 +472,11 @@ void DlgTileTool::ShowCurrentTool()
         SetEnabled(mUI.material,                 true);
         SetEnabled(mUI.data,                     true);
 
-        SetValue(mUI.cmbToolMaterial,  ListItemId(tool->material));
         SetValue(mUI.toolName,         tool->name);
         SetValue(mUI.cmbToolFunction,  tool->tool);
         SetValue(mUI.cmbToolShape,     tool->shape);
         SetValue(mUI.toolWidth,        tool->width);
         SetValue(mUI.toolHeight,       tool->height);
-        SetValue(mUI.toolPaletteIndex, tool->palette_index);
-        SetValue(mUI.toolValue,        tool->value);
-        SetValue(mUI.material,         tool->apply_material);
-        SetValue(mUI.data,             tool->apply_value);
-
-        if (mWorkspace->IsUserDefinedResource(tool->material))
-            SetEnabled(mUI.btnEditToolMaterial, true);
-        else SetEnabled(mUI.btnEditToolMaterial, false);
     }
     else
     {
@@ -405,6 +505,32 @@ void DlgTileTool::ShowCurrentTool()
     }
 }
 
+void DlgTileTool::ShowCurrentTile()
+{
+    if (const auto* tile = GetCurrentTile())
+    {
+        SetValue(mUI.cmbToolMaterial,  ListItemId(tile->material));
+        SetValue(mUI.toolPaletteIndex, tile->palette_index);
+        SetValue(mUI.toolValue,        tile->value);
+        SetValue(mUI.material,         tile->apply_material);
+        SetValue(mUI.data,             tile->apply_value);
+        SetEnabled(mUI.currentTile, true);
+
+        if (mWorkspace->IsUserDefinedResource(tile->material))
+            SetEnabled(mUI.btnEditToolMaterial, true);
+        else SetEnabled(mUI.btnEditToolMaterial, false);
+    }
+    else
+    {
+        SetValue(mUI.cmbToolMaterial, -1);
+        SetValue(mUI.toolPaletteIndex, 0);
+        SetValue(mUI.toolValue,        0);
+        SetValue(mUI.material,         false);
+        SetValue(mUI.data,             false);
+        SetEnabled(mUI.currentTile, false);
+    }
+}
+
 TileTool* DlgTileTool::GetCurrentTool()
 {
     if (mTools->empty())
@@ -419,6 +545,64 @@ TileTool* DlgTileTool::GetCurrentTool()
     return nullptr;
 }
 
+TileTool::Tile* DlgTileTool::GetCurrentTile()
+{
+    if (auto* tool = GetCurrentTool())
+    {
+        const unsigned col = GetValue(mUI.tileCol);
+        const unsigned row = GetValue(mUI.tileRow);
+        ASSERT(col < tool->width);
+        ASSERT(row < tool->height);
+        auto& tile = tool->tiles[row * tool->width + col];
+        return &tile;
+    }
+    return nullptr;
+}
+
+TileTool::Tile* DlgTileTool::GetTileUnderMouse(unsigned* col, unsigned* row)
+{
+    auto* tool = GetCurrentTool();
+    if (!tool)
+        return nullptr;
+
+    const auto width  = mUI.widget->width();
+    const auto height = mUI.widget->height();
+
+    const auto& mickey = mUI.widget->mapFromGlobal(QCursor::pos());
+    if (mickey.x() < 0 || mickey.x() > width)
+        return nullptr;
+    if (mickey.y() < 0 || mickey.y() > height)
+        return nullptr;
+
+    const auto perspective = mClass->GetPerspective();
+    const auto tile_scaler       = 1.0f;
+    const auto tile_width_units  = mClass->GetTileWidth() * tile_scaler;
+    const auto tile_height_units = mClass->GetTileHeight() * tile_scaler;
+    const auto tile_depth_units  = mClass->GetTileDepth() * tile_scaler;
+
+    const auto tile_render_width_scale  = mClass->GetTileRenderWidthScale();
+    const auto tile_render_height_scale = mClass->GetTileRenderHeightScale();
+
+    const auto tool_cols_tiles = tool->width;
+    const auto tool_rows_tiles = tool->height;
+
+    const auto tile_grid_width = tool_cols_tiles * tile_width_units;
+    const auto tile_grid_height = tool_rows_tiles * tile_height_units;
+
+    const glm::vec2 tile_coord = MapWindowCoordinateToWorld(mUI, mState, mickey, perspective);
+    const unsigned tile_col = (tile_coord.x + tile_grid_width * 0.5f) / tile_width_units;
+    const unsigned tile_row = (tile_coord.y + tile_grid_height * 0.5f) / tile_height_units;
+    VERBOSE("TileTool tile plane coordinate = %1 maps to => row=%2. col=%3", tile_coord, tile_row, tile_col);
+    if (tile_col >= tool_cols_tiles)
+        return nullptr;
+    if (tile_row >= tool_rows_tiles)
+        return nullptr;
+
+    *col = tile_col;
+    *row = tile_row;
+    return &tool->tiles[tile_row * tool->width + tile_col];
+}
+
 void DlgTileTool::SetCurrentTool(const QString& id)
 {
     SetValue(mUI.cmbTool, ListItemId(id));
@@ -428,16 +612,66 @@ void DlgTileTool::ModifyCurrentTool()
 {
     if (auto* tool = GetCurrentTool())
     {
-        tool->name           = (const QString&)GetValue(mUI.toolName);
-        tool->tool           = GetValue(mUI.cmbToolFunction);
-        tool->width          = GetValue(mUI.toolWidth);
-        tool->height         = GetValue(mUI.toolHeight);
-        tool->shape          = GetValue(mUI.cmbToolShape);
-        tool->material       = GetItemId(mUI.cmbToolMaterial);
-        tool->palette_index  = GetValue(mUI.toolPaletteIndex);
-        tool->value          = GetValue(mUI.toolValue);
-        tool->apply_material = GetValue(mUI.material);
-        tool->apply_value    = GetValue(mUI.data);
+        const auto previous_width = tool->width;
+        const auto previous_height = tool->height;
+
+        tool->name   = (const QString&)GetValue(mUI.toolName);
+        tool->tool   = GetValue(mUI.cmbToolFunction);
+        tool->width  = GetValue(mUI.toolWidth);
+        tool->height = GetValue(mUI.toolHeight);
+        tool->shape  = GetValue(mUI.cmbToolShape);
+        if (previous_width == tool->width && previous_height == tool->height)
+            return;
+
+        auto previous_tiles = std::move(tool->tiles);
+        tool->tiles = std::vector<TileTool::Tile> {};
+
+        for (unsigned row=0; row<tool->height; ++row)
+        {
+            for (unsigned col=0; col<tool->width; ++col)
+            {
+                if (row < previous_height && col < previous_width)
+                {
+                    const auto index = row * previous_width + col;
+                    tool->tiles.push_back(std::move(previous_tiles[index]));
+                }
+                else
+                {
+                    TileTool::Tile tile;
+                    tile.material       = "_checkerboard";
+                    tile.palette_index  = PaletteIndexAutomatic;
+                    tile.apply_material = false;
+                    tile.apply_value    = false;
+                    tool->tiles.push_back(std::move(tile));
+                }
+            }
+        }
+        const auto tile_col = GetValue(mUI.tileCol);
+        const auto tile_row = GetValue(mUI.tileRow);
+        if (tile_col >= tool->width)
+            SetValue(mUI.tileCol, tool->width - 1);
+        if (tile_row >= tool->height)
+            SetValue(mUI.tileRow, tool->height - 1);
+    }
+}
+
+void DlgTileTool::ModifyCurrentTile()
+{
+    if (auto* tile = GetCurrentTile())
+    {
+        tile->material       = GetItemId(mUI.cmbToolMaterial);
+        tile->palette_index  = GetValue(mUI.toolPaletteIndex);
+        tile->value          = GetValue(mUI.toolValue);
+        tile->apply_material = GetValue(mUI.material);
+        tile->apply_value    = GetValue(mUI.data);
+
+        if (tile->apply_material)
+        {
+            if (!mWorkspace->IsValidMaterial(tile->material))
+                tile->material = "_checkerboard";
+        }
+        SetValue(mUI.tileCol, 0);
+        SetValue(mUI.tileRow, 0);
     }
 }
 
