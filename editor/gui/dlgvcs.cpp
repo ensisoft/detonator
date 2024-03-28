@@ -241,14 +241,14 @@ void DlgVCS::BeginScan()
         const QStringList& uris = mWorkspace->ListFileResources(i);
         for (QString uri : uris)
         {
-            if (uri_set.find(uri) != uri_set.end())
-                continue;
-
-            AppendLog(app::toString("Found resource file '%1'", uri));
-
             if (uri.startsWith("ws://"))
             {
                 uri = uri.mid(5);
+                if (uri_set.find(uri) != uri_set.end())
+                    continue;
+
+                AppendLog(app::toString("Found resource file '%1'.", uri));
+
                 uri_set.insert(uri);
                 TableModel::FileResource file;
                 file.status = TableModel::FileStatus::Found;
@@ -260,6 +260,11 @@ void DlgVCS::BeginScan()
             else if (uri.startsWith("fs://"))
             {
                 uri = uri.mid(5);
+                if (uri_set.find(uri) != uri_set.end())
+                    continue;
+
+                AppendLog(app::toString("Found resource file '%1'.", uri));
+
                 TableModel::FileResource file;
                 file.status = TableModel::FileStatus::Failed;
                 file.sync   = TableModel::SyncAction::None;
@@ -267,6 +272,10 @@ void DlgVCS::BeginScan()
                 file.resource = res.GetName();
                 mModel->AddItem((std::move(file)));
                 files_outside_workspace = true;
+            }
+            else
+            {
+                AppendLog(app::toString("Don't know how to handle fle '%1'.", uri));
             }
         }
     }
