@@ -620,6 +620,7 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace)
     mUI.widget->onMousePress   = std::bind(&TilemapWidget::MousePress,   this, std::placeholders::_1);
     mUI.widget->onMouseRelease = std::bind(&TilemapWidget::MouseRelease, this, std::placeholders::_1);
     mUI.widget->onMouseWheel   = std::bind(&TilemapWidget::MouseWheel,   this, std::placeholders::_1);
+    mUI.widget->onMouseDoubleClick = std::bind(&TilemapWidget::MouseDoubleClick, this, std::placeholders::_1);
     mUI.widget->onKeyPress     = std::bind(&TilemapWidget::KeyPress,     this, std::placeholders::_1);
     mUI.widget->onPaintScene   = std::bind(&TilemapWidget::PaintScene,   this, std::placeholders::_1, std::placeholders::_2);
     mUI.widget->onZoomIn       = [this]() { MouseZoom(std::bind(&TilemapWidget::ZoomIn, this)); };
@@ -792,6 +793,8 @@ void TilemapWidget::AddActions(QToolBar& bar)
 {
     bar.addAction(mUI.actionSave);
     bar.addSeparator();
+    bar.addAction(mUI.actionNewLayer);
+    bar.addSeparator();
     for (auto* action : mToolActions)
         bar.addAction(action);
     bar.addAction(mUI.actionTools);
@@ -800,6 +803,8 @@ void TilemapWidget::AddActions(QToolBar& bar)
 void TilemapWidget::AddActions(QMenu& menu)
 {
     menu.addAction(mUI.actionSave);
+    menu.addSeparator();
+    menu.addAction(mUI.actionNewLayer);
     menu.addSeparator();
     for (auto* action : mToolActions)
         menu.addAction(action);
@@ -1376,9 +1381,19 @@ void TilemapWidget::on_btnDeleteLayer_clicked()
     const auto& indices = GetSelection(mUI.layers);
     if (indices.isEmpty())
         return;
+
     const auto index  = indices[0].row();
     const auto& layer = mState.klass->GetLayer(index);
     const auto& data  = mLayerData[layer.GetId()];
+
+    QMessageBox msg(this);
+    msg.setIcon(QMessageBox::Question);
+    msg.setText("Are you sure you want to delete the layer?");
+    msg.setWindowTitle(app::toString("Delete Layer %1", layer.GetName()));
+    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+    if (msg.exec() == QMessageBox::Cancel)
+        return;
+
     data->Delete(*mState.klass, layer, *mState.workspace);
 
     mModel->DeleteLayer(index);
@@ -1802,9 +1817,14 @@ void TilemapWidget::LayerSelectionChanged(const QItemSelection, const QItemSelec
     {
         mCurrentTool.reset();
         UncheckTools();
+        if (mState.selection.has_value())
+            mState.selection.reset();
     }
-    if (mState.selection.has_value() && mState.selection->resolution != current->GetResolution())
-        mState.selection.reset();
+    else
+    {
+        if (mState.selection.has_value() && mState.selection->resolution != current->GetResolution())
+            mState.selection.reset();
+    }
 
     DisplayLayerProperties();
     DisplaySelection();
@@ -2421,7 +2441,9 @@ void TilemapWidget::MouseRelease(QMouseEvent* event)
 }
 void TilemapWidget::MouseDoubleClick(QMouseEvent* mickey)
 {
-
+    MousePress(mickey);
+    MouseRelease(mickey);
+    on_btnSelectTileMaterial_clicked();
 }
 
 void TilemapWidget::MouseWheel(QWheelEvent* wheel)
@@ -2484,12 +2506,35 @@ void TilemapWidget::MouseZoom(std::function<void()> zoom_function)
 
 bool TilemapWidget::KeyPress(QKeyEvent* key)
 {
+    auto move_selection = [this](int dx, int dy) {
+        if (!mState.selection.has_value())
+            return;
+        const auto* layer = GetCurrentLayer();
+        const auto num_cols = layer->MapDimension(mState.klass->GetMapWidth());
+        const auto num_rows = layer->MapDimension(mState.klass->GetMapHeight());
+
+        auto& selection = mState.selection.value();
+
+        const int start_col = selection.start_col;
+        const int start_row = selection.start_row;
+        const int width     = selection.width;
+        const int height    = selection.height;
+        if (start_col + dx >= 0 && start_col + width + dx <= num_cols)
+            selection.start_col = (unsigned)(start_col + dx);
+        if (start_row + dy >= 0 && start_row + height + dy <= num_rows)
+            selection.start_row = (unsigned)(start_row + dy);
+
+        ASSERT(selection.start_col + selection.width <= num_cols);
+        ASSERT(selection.start_row + selection.height <= num_rows);
+        DisplaySelection();
+    };
+
     if (key->key() == Qt::Key_Escape)
     {
         OnEscape();
         return true;
     }
-    else if (key->key() == Qt::Key_Delete)
+    else if (key->key() == Qt::Key_Delete || key->key() == Qt::Key_Backspace)
         on_btnDeleteTileMaterial_clicked();
     else if (key->key() == Qt::Key_1)
         return SelectLayerOnKey(0);
@@ -2509,6 +2554,16 @@ bool TilemapWidget::KeyPress(QKeyEvent* key)
         return SelectLayerOnKey(7);
     else if (key->key() == Qt::Key_9)
         return SelectLayerOnKey(8);
+    else if (key->key() == Qt::Key_Up)
+        move_selection(0, -1);
+    else if (key->key() == Qt::Key_Down)
+        move_selection(0, 1);
+    else if (key->key() == Qt::Key_Left)
+        move_selection(-1, 0);
+    else if (key->key() == Qt::Key_Right)
+        move_selection(1, 0);
+    else if (key->key() == Qt::Key_Space)
+        on_btnSelectTileMaterial_clicked();
     return false;
 }
 
@@ -2762,8 +2817,6 @@ void TilemapWidget::ReplaceDeletedResources()
     {
         for (auto& tile : tool->tiles)
         {
-            if (tile.material.empty())
-                continue;
             if (mState.workspace->IsValidMaterial(tile.material))
                 continue;
             tile.material = "_checkerboard";

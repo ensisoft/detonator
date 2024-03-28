@@ -97,6 +97,7 @@ void DlgTileTool::SaveState(Settings& settings) const
     settings.SetValue("dialog", "geometry", saveGeometry());
     settings.SaveWidget("dialog", mUI.zoom);
     settings.SaveWidget("dialog", mUI.widget);
+    settings.SaveWidget("dialog", mUI.chkGrid);
 }
 void DlgTileTool::LoadState(const Settings& settings)
 {
@@ -106,6 +107,7 @@ void DlgTileTool::LoadState(const Settings& settings)
 
     settings.LoadWidget("dialog", mUI.zoom);
     settings.LoadWidget("dialog", mUI.widget);
+    settings.LoadWidget("dialog", mUI.chkGrid);
 }
 
 void DlgTileTool::on_cmbTool_currentIndexChanged(int index)
@@ -173,6 +175,7 @@ void DlgTileTool::on_btnSelectToolMaterial_clicked()
         if (dlg.exec() == QDialog::Rejected)
             return;
         tile->material = app::ToUtf8(dlg.GetSelectedMaterialId());
+        tile->apply_material = true;
         ShowCurrentTool();
     }
 }
@@ -398,6 +401,7 @@ void DlgTileTool::PaintScene(gfx::Painter& painter, double)
     const auto tile_grid_height = tool_rows_tiles * tile_height_units;
 
     // visualize the tool tile grid
+    if (GetValue(mUI.chkGrid))
     {
         gfx::Transform transform;
         transform.Resize(tile_grid_width, tile_grid_height);
@@ -435,15 +439,55 @@ void DlgTileTool::PaintScene(gfx::Painter& painter, double)
 
 }
 
-bool DlgTileTool::KeyPress(QKeyEvent* key)
+bool DlgTileTool::KeyPress(QKeyEvent* event)
 {
-    if (key->key() == Qt::Key_Escape)
+    const auto key = event->key();
+
+    auto move_selection = [this](int dx, int dy) {
+        if (auto* tool = GetCurrentTool())
+        {
+            int col = GetValue(mUI.tileCol);
+            int row = GetValue(mUI.tileRow);
+            if (col + dx >= 0 && col + dx < int(tool->width))
+                SetValue(mUI.tileCol, col + dx);
+            if (row + dy >= 0 && row + dy < int(tool->height))
+                SetValue(mUI.tileRow, row + dy);
+            ShowCurrentTile();
+        }
+    };
+
+    if (key == Qt::Key_Escape)
     {
         close();
     }
-    else if (key->key() == Qt::Key_Space)
+    else if (key == Qt::Key_Space)
     {
         on_btnSelectToolMaterial_clicked();
+    }
+    else if (key == Qt::Key_Delete || key == Qt::Key_Backspace)
+    {
+        if (auto* tile = GetCurrentTile())
+        {
+            tile->material = "_checkerboard";
+            tile->apply_material = false;
+            ShowCurrentTile();
+        }
+    }
+    else if (key == Qt::Key_Up)
+    {
+        move_selection(0, -1);
+    }
+    else if (key == Qt::Key_Down)
+    {
+        move_selection(0, 1);
+    }
+    else if (key == Qt::Key_Left)
+    {
+        move_selection(-1, 0);
+    }
+    else if (key == Qt::Key_Right)
+    {
+        move_selection(1, 0);
     }
     return true;
 }
@@ -456,6 +500,7 @@ void DlgTileTool::MousePress(QMouseEvent* event)
     {
         SetValue(mUI.tileCol, tile_col);
         SetValue(mUI.tileRow, tile_row);
+        ShowCurrentTile();
     }
 }
 
@@ -687,8 +732,6 @@ void DlgTileTool::ModifyCurrentTile()
             if (!mWorkspace->IsValidMaterial(tile->material))
                 tile->material = "_checkerboard";
         }
-        SetValue(mUI.tileCol, 0);
-        SetValue(mUI.tileRow, 0);
     }
 }
 
