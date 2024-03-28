@@ -22,6 +22,7 @@
 #include "editor/gui/utility.h"
 #include "editor/gui/types.h"
 #include "editor/gui/nerd.h"
+#include "editor/gui/settings.h"
 
 namespace {
     constexpr auto PaletteIndexAutomatic = -1;
@@ -89,6 +90,22 @@ DlgTileTool::DlgTileTool(const app::Workspace* workspace, QWidget* parent, ToolB
     // hide this for now
     SetVisible(mUI.transform, false);
     SetValue(mUI.zoom, 1.0f);
+}
+
+void DlgTileTool::SaveState(Settings& settings) const
+{
+    settings.SetValue("dialog", "geometry", saveGeometry());
+    settings.SaveWidget("dialog", mUI.zoom);
+    settings.SaveWidget("dialog", mUI.widget);
+}
+void DlgTileTool::LoadState(const Settings& settings)
+{
+    QByteArray geometry;
+    if (settings.GetValue("dialog", "geometry", &geometry))
+        restoreGeometry(geometry);
+
+    settings.LoadWidget("dialog", mUI.zoom);
+    settings.LoadWidget("dialog", mUI.widget);
 }
 
 void DlgTileTool::on_cmbTool_currentIndexChanged(int index)
