@@ -2013,9 +2013,6 @@
    <property name="text">
     <string>Reload Shaders</string>
    </property>
-   <property name="shortcut">
-    <string>Alt+Shift+S</string>
-   </property>
   </action>
   <action name="actionReloadTextures">
    <property name="icon">
@@ -2024,9 +2021,6 @@
    </property>
    <property name="text">
     <string>Reload Textures</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+Shift+T</string>
    </property>
   </action>
   <action name="actionAddBitmap">
