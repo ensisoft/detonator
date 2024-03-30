@@ -174,8 +174,9 @@ namespace {
 // Returns true if the call was executed, or false to indicate that
 // there's no such function to call. Throws an exception on script error.
 template<typename... Args>
-bool CallLua(const sol::protected_function& func, const Args&... args)
+bool CallLua(const sol::environment& env, const char* name, const Args&... args)
 {
+    const sol::protected_function& func = env[name];
     if (!func.valid())
         return false;
     const auto& result = func(args...);
@@ -193,6 +194,7 @@ bool CallLua(const sol::protected_function& func, const Args&... args)
         return true;
     const sol::error err = result;
 
+    ERROR("Error in calling into Lua. [function='%1']", name);
     // todo: Lua code has failed. This information should likely be
     // propagated in a logical Lua error object rather than by
     // throwing an exception.
@@ -200,8 +202,9 @@ bool CallLua(const sol::protected_function& func, const Args&... args)
 }
 
 template<typename Ret, typename... Args>
-bool CallLua(Ret* retval, const sol::protected_function& func, const Args&... args)
+bool CallLua(Ret* retval, const sol::environment& env, const char* name, const Args&... args)
 {
+    const sol::protected_function& func = env[name];
     if (!func.valid())
         return false;
     const auto& result = func(args...);
@@ -218,12 +221,16 @@ bool CallLua(Ret* retval, const sol::protected_function& func, const Args&... ar
     if (result.valid())
     {
         if (result.return_count() != 1)
+        {
+            ERROR("Error in calling into lua. No return value. [function='%1']", name);
             throw GameError("No return value from Lua.");
+        }
         *retval = result;
         return true;
     }
     const sol::error err = result;
 
+    ERROR("Error in calling into Lua. [function='%1']", name);
     // todo: Lua code has failed. This information should likely be
     // propagated in a logical Lua error object rather than by
     // throwing an exception.
@@ -271,7 +278,7 @@ void LuaRuntime::SetSurfaceSize(unsigned int width, unsigned int height)
         (*mLuaState)["SurfaceWidth"]  = width;
         (*mLuaState)["SurfaceHeight"] = height;
         if (mPreviewMode || mEditingMode && mGameEnv)
-            CallLua((*mGameEnv)["OnRenderingSurfaceResized"], width, height);
+            CallLua(*mGameEnv, "OnRenderingSurfaceResized", width, height);
     }
 }
 
@@ -641,7 +648,7 @@ void LuaRuntime::Init()
 bool LuaRuntime::LoadGame()
 {
     if (mGameEnv)
-        CallLua((*mGameEnv)["LoadGame"]);
+        CallLua(*mGameEnv, "LoadGame");
     // tood: return value.
     return true;
 }
@@ -649,18 +656,18 @@ bool LuaRuntime::LoadGame()
 void LuaRuntime::StartGame()
 {
     if (mGameEnv)
-        CallLua((*mGameEnv)["StartGame"]);
+        CallLua(*mGameEnv, "StartGame");
 }
 
 void LuaRuntime::SaveGame()
 {
     if (mGameEnv)
-        CallLua((*mGameEnv)["SaveGame"]);
+        CallLua(*mGameEnv, "SaveGame");
 }
 void LuaRuntime::StopGame()
 {
     if (mGameEnv)
-        CallLua((*mGameEnv)["StopGame"]);
+        CallLua(*mGameEnv, "StopGame");
 }
 
 void LuaRuntime::BeginPlay(Scene* scene, Tilemap* map)
@@ -818,27 +825,27 @@ void LuaRuntime::BeginPlay(Scene* scene, Tilemap* map)
     (*mLuaState)["Map"]   = mTilemap;
 
     if (mGameEnv)
-        CallLua((*mGameEnv)["BeginPlay"], scene, map);
+        CallLua(*mGameEnv, "BeginPlay", scene, map);
 
     if (mSceneEnv)
-        CallLua((*mSceneEnv)["BeginPlay"], scene, map);
+        CallLua(*mSceneEnv, "BeginPlay", scene, map);
 
     for (size_t i=0; i<scene->GetNumEntities(); ++i)
     {
         auto* entity = &mScene->GetEntity(i);
         if (mSceneEnv)
-            CallLua((*mSceneEnv)["SpawnEntity"], scene, map, entity);
+            CallLua(*mSceneEnv, "SpawnEntity", scene, map, entity);
 
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
-            CallLua((*env)["BeginPlay"], entity, scene, map);
+            CallLua(*env, "BeginPlay", entity, scene, map);
         }
 
         if (auto* animator = entity->GetAnimator())
         {
             if (auto* env = GetTypeEnv(animator->GetClass()))
             {
-                CallLua((*env)["Init"], animator, entity);
+                CallLua(*env, "Init", animator, entity);
             }
         }
     }
@@ -847,10 +854,10 @@ void LuaRuntime::BeginPlay(Scene* scene, Tilemap* map)
 void LuaRuntime::EndPlay(Scene* scene, Tilemap* map)
 {
     if (mGameEnv)
-        CallLua((*mGameEnv)["EndPlay"], scene, map);
+        CallLua(*mGameEnv, "EndPlay", scene, map);
 
     if (mSceneEnv)
-        CallLua((*mSceneEnv)["EndPlay"], scene, map);
+        CallLua(*mSceneEnv, "EndPlay", scene, map);
 
     mSceneEnv.reset();
     mEntityEnvs.clear();
@@ -865,7 +872,7 @@ void LuaRuntime::Tick(double game_time, double dt)
     if (mGameEnv)
     {
         TRACE_CALL("Lua::Game::Tick",
-                   CallLua((*mGameEnv)["Tick"], game_time, dt));
+                   CallLua(*mGameEnv, "Tick", game_time, dt));
     }
 
     if (mScene)
@@ -873,7 +880,7 @@ void LuaRuntime::Tick(double game_time, double dt)
         if (mSceneEnv)
         {
             TRACE_CALL("Lua::Scene::Tick",
-                       CallLua((*mSceneEnv)["Tick"], mScene, game_time, dt));
+                       CallLua(*mSceneEnv, "Tick", mScene, game_time, dt));
         }
 
         TRACE_SCOPE("Lua::Entity::Tick");
@@ -884,7 +891,7 @@ void LuaRuntime::Tick(double game_time, double dt)
                 continue;
             if (auto* env = GetTypeEnv(entity->GetClass()))
             {
-                CallLua((*env)["Tick"], entity, game_time, dt);
+                CallLua(*env, "Tick", entity, game_time, dt);
             }
         }
     }
@@ -894,7 +901,7 @@ void LuaRuntime::Update(double game_time, double dt)
     if (mGameEnv)
     {
         TRACE_CALL("Lua::Game::Update",
-                   CallLua((*mGameEnv)["Update"], game_time, dt));
+                   CallLua(*mGameEnv, "Update", game_time, dt));
     }
 
     if (!mScene)
@@ -903,7 +910,7 @@ void LuaRuntime::Update(double game_time, double dt)
     if (mSceneEnv)
     {
         TRACE_CALL("Lua::Scene::Update",
-                   CallLua((*mSceneEnv)["Update"], mScene, game_time, dt));
+                   CallLua(*mSceneEnv, "Update", mScene, game_time, dt));
     }
 
     // currently unit_test_lua doesn't have class library set
@@ -927,7 +934,7 @@ void LuaRuntime::Update(double game_time, double dt)
                 // are stupidly slow.
                 std::lock_guard<std::mutex> lock(allocator->GetMutex());
 
-                CallLua((*pair.second)["UpdateNodes"], allocator, game_time, dt, klass);
+                CallLua(*pair.second, "UpdateNodes", allocator, game_time, dt, klass);
             }
         }
     }
@@ -941,7 +948,7 @@ void LuaRuntime::Update(double game_time, double dt)
             const auto& finished_animations = entity->GetFinishedAnimations();
             for (const auto* anim : finished_animations)
             {
-                CallLua((*env)["OnAnimationFinished"], entity, anim);
+                CallLua(*env, "OnAnimationFinished", entity, anim);
             }
             if (entity->TestFlag(Entity::Flags::UpdateEntity))
             {
@@ -949,7 +956,7 @@ void LuaRuntime::Update(double game_time, double dt)
 #if defined(BASE_TRACING_ENABLE_TRACING)
                 base::TraceComment(entity->GetClassName());
 #endif
-                CallLua((*env)["Update"], entity, game_time, dt);
+                CallLua(*env, "Update", entity, game_time, dt);
             }
         }
 
@@ -972,25 +979,25 @@ void LuaRuntime::Update(double game_time, double dt)
             for (auto& action : actions)
             {
                 if (auto* ptr = std::get_if<Animator::EnterState>(&action))
-                    CallLua(e["EnterState"], animator, ptr->state->GetName(), entity);
+                    CallLua(e, "EnterState", animator, ptr->state->GetName(), entity);
                 else if (auto* ptr = std::get_if<Animator::LeaveState>(&action))
-                    CallLua(e["LeaveState"], animator, ptr->state->GetName(), entity);
+                    CallLua(e, "LeaveState", animator, ptr->state->GetName(), entity);
                 else if (auto* ptr = std::get_if<Animator::UpdateState>(&action))
-                    CallLua(e["UpdateState"], animator, ptr->state->GetName(), ptr->time, ptr->dt, entity);
+                    CallLua(e, "UpdateState", animator, ptr->state->GetName(), ptr->time, ptr->dt, entity);
                 else if (auto* ptr = std::get_if<Animator::EvalTransition>(&action))
                 {
                     // if the call to Lua succeeds and the return value is true then update the animator to
                     // take a transition from the current state to the next state.
                     bool return_value_from_lua = false;
-                    if (CallLua(&return_value_from_lua, e["EvalTransition"], animator, ptr->from->GetName(), ptr->to->GetName(), entity) && return_value_from_lua)
+                    if (CallLua(&return_value_from_lua, e, "EvalTransition", animator, ptr->from->GetName(), ptr->to->GetName(), entity) && return_value_from_lua)
                         entity->UpdateAnimator(ptr->transition, ptr->to);
                 }
                 else if (auto* ptr = std::get_if<Animator::StartTransition>(&action))
-                    CallLua(e["StartTransition"], animator, ptr->from->GetName(), ptr->to->GetName(), ptr->transition->GetDuration(), entity);
+                    CallLua(e, "StartTransition", animator, ptr->from->GetName(), ptr->to->GetName(), ptr->transition->GetDuration(), entity);
                 else if (auto* ptr = std::get_if<Animator::FinishTransition>(&action))
-                    CallLua(e["FinishTransition"], animator, ptr->from->GetName(), ptr->to->GetName(),entity);
+                    CallLua(e, "FinishTransition", animator, ptr->from->GetName(), ptr->to->GetName(),entity);
                 else if (auto* ptr = std::get_if<Animator::UpdateTransition>(&action))
-                    CallLua(e["UpdateTransition"], animator, ptr->from->GetName(), ptr->to->GetName(), ptr->transition->GetDuration(), ptr->time, ptr->dt, entity);
+                    CallLua(e, "UpdateTransition", animator, ptr->from->GetName(), ptr->to->GetName(), ptr->transition->GetDuration(), ptr->time, ptr->dt, entity);
             }
         }
     }
@@ -1006,7 +1013,7 @@ void LuaRuntime::PostUpdate(double game_time)
             continue;
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
-            CallLua((*env)["PostUpdate"], entity, game_time);
+            CallLua(*env, "PostUpdate", entity, game_time);
         }
     }
 }
@@ -1023,18 +1030,18 @@ void LuaRuntime::BeginLoop()
             continue;
 
         if (mSceneEnv)
-            CallLua((*mSceneEnv)["SpawnEntity"], mScene, mTilemap, entity);
+            CallLua(*mSceneEnv, "SpawnEntity", mScene, mTilemap, entity);
 
         if (auto* env = GetTypeEnv(entity->GetClass()))
         {
-            CallLua((*env)["BeginPlay"], entity, mScene, mTilemap);
+            CallLua(*env, "BeginPlay", entity, mScene, mTilemap);
         }
 
         if (auto* animator = entity->GetAnimator())
         {
             if (auto* env = GetTypeEnv(animator->GetClass()))
             {
-                CallLua((*env)["Init"], animator, entity);
+                CallLua(*env, "Init", animator, entity);
             }
         }
     }
@@ -1051,11 +1058,11 @@ void LuaRuntime::EndLoop()
          if (!entity->TestFlag(game::Entity::ControlFlags::Killed))
              continue;
          if (mSceneEnv)
-             CallLua((*mSceneEnv)["KillEntity"], mScene, mTilemap, entity);
+             CallLua(*mSceneEnv, "KillEntity", mScene, mTilemap, entity);
 
          if (auto* env = GetTypeEnv(entity->GetClass()))
          {
-             CallLua((*env)["EndPlay"], entity, mScene, mTilemap);
+             CallLua(*env, "EndPlay", entity, mScene, mTilemap);
          }
      }
 }
@@ -1091,37 +1098,37 @@ void LuaRuntime::OnContactEvent(const std::vector<ContactEvent>& contacts)
         const auto& klassB = entityB->GetClass();
 
         if (mGameEnv)
-            CallLua((*mGameEnv)[function], entityA, entityB, nodeA, nodeB);
+            CallLua(*mGameEnv, function, entityA, entityB, nodeA, nodeB);
 
         if (mSceneEnv)
-            CallLua((*mSceneEnv)[function](mScene, entityA, nodeA, entityB, nodeB));
+            CallLua(*mSceneEnv, function, mScene, entityA, nodeA, entityB, nodeB);
 
         if (auto* env = GetTypeEnv(klassA))
         {
-            CallLua((*env)[function], entityA, nodeA, entityB, nodeB);
+            CallLua(*env, function, entityA, nodeA, entityB, nodeB);
         }
         if (auto* env = GetTypeEnv(klassB))
         {
-            CallLua((*env)[function], entityB, nodeB, entityA, nodeA);
+            CallLua(*env, function, entityB, nodeB, entityA, nodeA);
         }
     }
 }
 void LuaRuntime::OnGameEvent(const GameEvent& event)
 {
     if (mGameEnv)
-        CallLua((*mGameEnv)["OnGameEvent"], event);
+        CallLua(*mGameEnv, "OnGameEvent", event);
 
     if (mScene)
     {
         if (mSceneEnv)
-            CallLua((*mSceneEnv)["OnGameEvent"], mScene, event);
+            CallLua(*mSceneEnv, "OnGameEvent", mScene, event);
 
         for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
         {
             auto* entity = &mScene->GetEntity(i);
             if (auto* env = GetTypeEnv(entity->GetClass()))
             {
-                CallLua((*env)["OnGameEvent"], entity, event);
+                CallLua(*env, "OnGameEvent", entity, event);
             }
         }
     }
@@ -1130,7 +1137,7 @@ void LuaRuntime::OnGameEvent(const GameEvent& event)
 void LuaRuntime::OnAudioEvent(const AudioEvent& event)
 {
     if (mGameEnv)
-        CallLua((*mGameEnv)["OnAudioEvent"], event);
+        CallLua(*mGameEnv, "OnAudioEvent", event);
 }
 
 void LuaRuntime::OnSceneEvent(const std::vector<game::Scene::Event>& events)
@@ -1141,22 +1148,22 @@ void LuaRuntime::OnSceneEvent(const std::vector<game::Scene::Event>& events)
         {
             auto* entity = ptr->entity;
             if (mSceneEnv)
-                CallLua((*mSceneEnv)["OnEntityTimer"], mScene, entity, ptr->event.name, ptr->event.jitter);
+                CallLua(*mSceneEnv, "OnEntityTimer", mScene, entity, ptr->event.name, ptr->event.jitter);
 
             if (auto* env = GetTypeEnv(entity->GetClass()))
             {
-                CallLua((*env)["OnTimer"], entity, ptr->event.name, ptr->event.jitter);
+                CallLua(*env, "OnTimer", entity, ptr->event.name, ptr->event.jitter);
             }
         }
         else if (const auto* ptr = std::get_if<game::Scene::EntityEventPostedEvent>(&event))
         {
             auto* entity = ptr->entity;
             if (mSceneEnv)
-                CallLua((*mSceneEnv)["OnEntityEvent"], mScene, entity, ptr->event);
+                CallLua(*mSceneEnv, "OnEntityEvent", mScene, entity, ptr->event);
 
             if (auto* env = GetTypeEnv(entity->GetClass()))
             {
-                CallLua((*env)["OnEvent"], entity, ptr->event);
+                CallLua(*env, "OnEvent", entity, ptr->event);
             }
         }
     }
@@ -1190,56 +1197,56 @@ void LuaRuntime::OnMouseRelease(const MouseEvent& mouse)
 void LuaRuntime::OnUIOpen(uik::Window* ui)
 {
     if (mGameEnv)
-        CallLua((*mGameEnv)["OnUIOpen"], ui);
+        CallLua(*mGameEnv, "OnUIOpen", ui);
 
     if (mScene &&  mSceneEnv)
-        CallLua((*mSceneEnv)["OnUIOpen"], mScene, ui);
+        CallLua(*mSceneEnv, "OnUIOpen", mScene, ui);
 
     if (auto* env = GetTypeEnv(*ui))
     {
-        CallLua((*env)["OnUIOpen"], ui);
+        CallLua(*env, "OnUIOpen", ui);
     }
 }
 void LuaRuntime::OnUIClose(uik::Window* ui, int result)
 {
     if (mGameEnv)
-        CallLua((*mGameEnv)["OnUIClose"], ui, result);
+        CallLua(*mGameEnv, "OnUIClose", ui, result);
 
     if (mScene && mSceneEnv)
-        CallLua((*mSceneEnv)["OnUIClose"], mScene, ui, result);
+        CallLua(*mSceneEnv, "OnUIClose", mScene, ui, result);
 
     if (auto* env = GetTypeEnv(*ui))
     {
-        CallLua((*env)["OnUIClose"], ui, result);
+        CallLua(*env, "OnUIClose", ui, result);
     }
 }
 void LuaRuntime::OnUIAction(uik::Window* ui, const WidgetActionList& actions)
 {
     for (const auto& action : actions)
     {
-        std::string method;
+        const char* method;
         if (uik::IsNotification(action.type))
             method = "OnUINotify";
         else method = "OnUIAction";
 
         if (mGameEnv)
-            CallLua((*mGameEnv)[method], ui, action);
+            CallLua(*mGameEnv, method, ui, action);
 
         if (mScene && mSceneEnv)
-            CallLua((*mSceneEnv)[method], mScene, ui, action);
+            CallLua(*mSceneEnv, method, mScene, ui, action);
 
         if (auto* env = GetTypeEnv(*ui))
         {
-            CallLua((*env)[method], ui, action);
+            CallLua(*env, method, ui, action);
         }
     }
 }
 
 template<typename KeyEvent>
-void LuaRuntime::DispatchKeyboardEvent(const std::string& method, const KeyEvent& key)
+void LuaRuntime::DispatchKeyboardEvent(const char* method, const KeyEvent& key)
 {
     if (mGameEnv)
-        CallLua((*mGameEnv)[method],
+        CallLua(*mGameEnv, method,
                 static_cast<int>(key.symbol),
                 static_cast<int>(key.modifiers.value()));
 
@@ -1247,7 +1254,7 @@ void LuaRuntime::DispatchKeyboardEvent(const std::string& method, const KeyEvent
     {
         if (auto* env = GetTypeEnv(*mWindow))
         {
-            CallLua((*env)[method], mWindow,
+            CallLua(*env, method, mWindow,
                     static_cast<int>(key.symbol),
                     static_cast<int>(key.modifiers.value()));
         }
@@ -1256,7 +1263,7 @@ void LuaRuntime::DispatchKeyboardEvent(const std::string& method, const KeyEvent
     if (mScene)
     {
         if (mSceneEnv)
-            CallLua((*mSceneEnv)[method], mScene,
+            CallLua(*mSceneEnv, method, mScene,
                     static_cast<int>(key.symbol),
                     static_cast<int>(key.modifiers.value()));
 
@@ -1267,7 +1274,7 @@ void LuaRuntime::DispatchKeyboardEvent(const std::string& method, const KeyEvent
                 continue;
             if (auto* env = GetTypeEnv(entity->GetClass()))
             {
-                CallLua((*env)[method], entity,
+                CallLua(*env, method, entity,
                         static_cast<int>(key.symbol),
                         static_cast<int>(key.modifiers.value()));
             }
@@ -1275,23 +1282,23 @@ void LuaRuntime::DispatchKeyboardEvent(const std::string& method, const KeyEvent
     }
 }
 
-void LuaRuntime::DispatchMouseEvent(const std::string& method, const MouseEvent& mouse)
+void LuaRuntime::DispatchMouseEvent(const char* method, const MouseEvent& mouse)
 {
     if (mGameEnv)
-        CallLua((*mGameEnv)[method], mouse);
+        CallLua(*mGameEnv, method, mouse);
 
     if (mWindow && mWindow->TestFlag(uik::Window::Flags::WantsMouseEvents))
     {
         if (auto* env = GetTypeEnv(*mWindow))
         {
-            CallLua((*env)[method], mWindow, mouse);
+            CallLua(*env, method, mWindow, mouse);
         }
     }
 
     if (mScene)
     {
         if (mSceneEnv)
-            CallLua((*mSceneEnv)[method], mScene, mouse);
+            CallLua(*mSceneEnv, method, mScene, mouse);
 
         for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
         {
@@ -1300,7 +1307,7 @@ void LuaRuntime::DispatchMouseEvent(const std::string& method, const MouseEvent&
                 continue;
             if (auto* env = GetTypeEnv(entity->GetClass()))
             {
-                CallLua((*env)[method], entity, mouse);
+                CallLua(*env, method, entity, mouse);
             }
         }
     }
