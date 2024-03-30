@@ -153,8 +153,6 @@ const char* GetFileName(const char* file)
 
 const char* GetTestName(const char* function_name)
 {
-    return function_name;
-
     // this for __PRETTY_FUNCTION__
     // skip over the return type in the function name
     //function_name = std::strstr(function_name, " ");
@@ -163,6 +161,12 @@ const char* GetTestName(const char* function_name)
     //if (std::strstr(function_name, "__cdecl ") == function_name)
     //    function_name += std::strlen("__cdecl ");
     //return function_name;
+#if defined(__MSVC__)
+    if (std::strstr(function_name, "`anonymous-namespace'::") == function_name)
+        return function_name + std::strlen("`anonymous-namespace'::");
+#endif
+
+    return function_name;
 }
 
 void
