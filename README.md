@@ -1,13 +1,19 @@
-DETONATOR 2D 💥💣
+💣💥 DETONATOR 2D 💥💣
 ===================
 An OpenGL ES based 2D game engine and editor for Linux, Windows and HTML5. Designed for simple single player games such
-as puzzle games, platformers, side scrollers and tile based real time strategy and tactics.  
-🍄🧩🗺️
+as puzzle games, platformers, side scrollers and tile based real time strategy and tactics. 🍄🧩🗺️
 
-[![SHMUP DEMO](screens/blast-thumbnail.png)](https://www.ensisoft.com/github/blast.mp4)
-  
+![Demos](screens/demos.gif "Animated demo content GIF")
 
-### CURRENT TOP FEATURES !
+### 💥 CURRENT TOP FEATURES !
+
+* Supports native Windows and Linux.
+* Supports HTML5 and WASM.
+* Fully featured editor for game development.
+* Fully documented Lua API for game development.
+* Demo content and examples.
+
+<details><summary>Click here for more features</summary>
 
 * Windows, Linux and HTML5/WASM support
 * Qt5 based WYSIWYG editor
@@ -40,63 +46,27 @@ as puzzle games, platformers, side scrollers and tile based real time strategy a
   * SVG viewer and PNG exporter
   * VCS (Git) integration for syncing project changes to Git
 
-<br>
-
-
-
-### DOWNLOAD LATEST WINDOWS BINARY
-
-https://github.com/ensisoft/detonator/releases/tag/rel-4
-
-### ROADMAP
-
-<details><summary>Click here for roadmap</summary> 
-
-#### Functional Features
-
-* Tilemap features
-  * Height layer for tile height adjustment
-  * Lua APIs for data access etc.
-  * Logical data layer related algorithms such as path finding
-  * Compression etc. performance improvements
-  * Chunked data loading
-  * ~~Isometric tilemap integration with scene+entity system~~  DONE
-
-* Game play system
-  * Game state loading and saving
-
-* Platform support
-  * HighDPI content scaling (mobile device support) [#84][i84]
-  * Content rotation in landscape mode [#165](i165)
-  * Touch screen input [#164](i164)
-  * OpenGL ES3 backend and WebGL2 support [#55][i55]
-    * Instanced rendering, transform feedback, compute shaders, MSAA FBO
-
-* Rendering features
-  * Lights and shadows
-  * Fluid dynamics in the particle simulations
-  * Partial 3D object support for specific objects
-    * Think objects such as coins, diamonds, player's ship etc.
-  * Some post processing effects
-    * Bloom DONE but sucks because RGBA render target, no floating point FBO :(
-
-#### Performance Features
-* Acceleration structures for rendering and physics
-* Plenty of asset baking features
-  * For example audio pre-render when possible
-
-#### Minor Features
-* See issues for more details
-
 </details>
 
-[i55]:  https://github.com/ensisoft/detonator/issues/55
-[i84]:  https://github.com/ensisoft/detonator/issues/84
-[i165]: https://github.com/ensisoft/detonator/issues/165
-[i164]: https://github.com/ensisoft/detonator/issues/164
+## GETTING STARTED
 
-### SCREENSHOTS
+1. Download the latest binary from the releases page<br>
+   https://github.com/ensisoft/detonator/releases
+2. Unzip the .zip file anywhere on your computer for example <strong>C:\detonator</strong> 
+4. Run <strong>C:\detonator\Detonator.exe</strong>
 
+#### How to Uninstall
+If you want to remove the app simply delete the detonator folder.<br>
+All user settings are stored in <strong>C:\Users\<username>.GameStudio</strong> and can also be deleted.
+
+#### Install from Sources
+<i>
+If you're a developer type and want to use the latest look below in the DEV ZONE for details
+on how to build the project from the sources.</i>
+
+![Demos](screens/editor-demo.gif "Animated demo content GIF")
+
+<details><summary>Click here for more screenshots</summary>
 
 ![Screenshot](screens/editor-tilemap.png "Map editor")
 Create tile based maps using the tile editor. The map supports multiple layers and both isometric and axis aligned perspective.
@@ -137,24 +107,17 @@ a code completion system!
 Create different types of particle effects in the particle editor by conveniently adjusting several sliders 
 and knobs that control the particle effect. 
 
+</details>
+
 ## DEV ZONE
 ### [Build Instructions](BUILDING.md)
 ### [System Architecture](ARCHITECTURE.md)
 ### [Design Document](DESIGN.md)
 ### [Tracing & Profiling](PROFILING.md)
+### [Development Roadmap](ROADMAP.md)
 
-### Engine Subsystems
+## THANKS 🙏
 
-* [Audio](audio/README.md "Audio readme") 🎼
-* [Graphics](graphics/README.md "Graphics readme") (todo)
-* [Game](game/README.md "Game readme") (todo) 👾
-* [Engine](engine/README.md "Engine readme") (todo)
-* [UI](uikit/README.md "UIKit readme")
-* [WDK](https://github.com/ensisoft/wdk/blob/master/README.md "WDK readme")
-
-
-## THANKS
-
-This project would not be possible without the following 🙏 
+This project would not be possible without the following 
 * Qt, GLM, Freetype, Harfbuzz, Lua, sol3, STB, nlohmann/json, mpg123, libsndfile, Box2D, Emscripten and many others!
 * Royalty free art from [https://opengameart.com](https://opengameart.com "https://opengameart.com")

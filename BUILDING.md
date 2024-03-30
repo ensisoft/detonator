@@ -55,7 +55,7 @@ In other words if your code does:
 ```
 
 You're deadlocking forever since the main thread (the currently) calling thread must return to the
-browsers event loop in order to launch the thread, but joining the thread will block the calling thread!
+browser's event loop in order to launch the thread, but joining the thread will block the calling thread!
 
 The way to work around this is to use the Emscripten '-sPTHREAD_POOL_SIZE=n' build parameter which adds
 code to initialize N number of threads on the application launch so that they're ready to go.  
