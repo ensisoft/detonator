@@ -3,6 +3,19 @@ DETONATOR 2D 💥💣
 
 ## System Architecture
 
+High level overview of the software stack and the runtime operation. 
+See the subsystem documentation regarding more details about any
+particular engine subsystem.
+
+### Engine Subsystems
+
+* [Audio](audio/README.md "Audio readme") 🎼
+* [Graphics](graphics/README.md "Graphics readme") (todo)
+* [Game](game/README.md "Game readme") (todo) 👾
+* [Engine](engine/README.md "Engine readme") (todo)
+* [UI](uikit/README.md "UIKit readme")
+* [WDK](https://github.com/ensisoft/wdk/blob/master/README.md "WDK readme")
+
 ### Software Stack
 
 ![Archicture diagram](docu/stack.png "Stack")
@@ -13,7 +26,7 @@ DETONATOR 2D 💥💣
 1. There's a standard game engine that is built into a shared library called GameEngine.dll or libGameEngine.so.
 2. A launcher application called GameMain will read a config.json file. This JSON file contains information about
    windowing, context creation etc.
-    1. The launcher application will load the engine library and create an <Engine> object instance.
+    1. The launcher application will load the engine library and create an <Engine> instance.
     2. The launcher application will create the native window system window and also create the Open GL rendering context,
        which it will then give to the engine instance.
        1. The engine instance will use the context to create the graphics device object.

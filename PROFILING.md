@@ -65,7 +65,7 @@ the tracing Lua api calls. Just be careful the balance the calls to *enter* and 
 
 ## HTML5/WASM Tracing
 
-When the page has loaded and the game is running there are two ways to star the tracing.
+When the page has loaded and the game is running there are two ways to start the tracing.
 
 1. Press F12 to show the developer control panel (if not already visible). Then check the tracing checkbox.
 2. Control the tracing from the game itself with the Lua API.
