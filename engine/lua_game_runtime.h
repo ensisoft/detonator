@@ -95,8 +95,8 @@ namespace engine
         sol::environment* GetTypeEnv(const uik::Window& window);
         sol::object CallCrossEnvMethod(sol::object object, const std::string& method, sol::variadic_args va);
         template<typename KeyEvent>
-        void DispatchKeyboardEvent(const std::string& method, const KeyEvent& key);
-        void DispatchMouseEvent(const std::string& method, const MouseEvent& mouse);
+        void DispatchKeyboardEvent(const char* method, const KeyEvent& key);
+        void DispatchMouseEvent(const char* method, const MouseEvent& mouse);
     private:
         const std::string mLuaPath;
         const std::string mGameScript;
