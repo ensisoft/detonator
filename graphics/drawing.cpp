@@ -155,14 +155,35 @@ void DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape
 void DrawShapeOutline(Painter& painter, const FRect& rect, const Drawable& shape,
                       const Material& material, float line_width)
 {
-    // todo: this algorithm produces crappy results with diagonal lines
-    // for example when drawing right angled triangle even with line widths > 1.0f
-    // the results aren't looking that great.
-
     const auto width  = rect.GetWidth();
     const auto height = rect.GetHeight();
     const auto x = rect.GetX();
     const auto y = rect.GetY();
+
+    if (shape.GetType() == Drawable::Type::SimpleShape && line_width < 10.0f)
+    {
+        if (GetSimpleShapeType(shape) == SimpleShapeType::Rectangle)
+        {
+            const auto lw50  = line_width * 0.5f;
+            const auto lw100 = line_width;
+
+            LineBatch2D batch;
+            batch.AddLine(x, y+lw50, x+width, y+lw50);
+            batch.AddLine(x, y+height-lw50, x+width, y+height-lw50);
+
+            batch.AddLine(x+lw50, y+lw50, x+lw50, y+height);
+            batch.AddLine(x+width-lw50, y+lw50, x+width-lw50, y+height);
+
+            gfx::Transform transform;
+            painter.Draw(batch, transform, material,
+                         Painter::LegacyDrawState(line_width));
+            return;
+        }
+    }
+
+    // todo: this algorithm produces crappy results with diagonal lines
+    // for example when drawing right angled triangle even with line widths > 1.0f
+    // the results aren't looking that great.
 
     Transform outline_transform;
     outline_transform.Resize(width, height);
