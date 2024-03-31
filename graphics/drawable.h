@@ -1561,4 +1561,15 @@ namespace gfx
         else BUG("Unknown drawable shape type.");
     }
 
+    inline SimpleShapeType GetSimpleShapeType(const Drawable& drawable)
+    {
+        if (const auto* ptr = dynamic_cast<const SimpleShapeInstance*>(&drawable))
+            return ptr->GetShape();
+        else if (const auto* ptr = dynamic_cast<const SimpleShape*>(&drawable))
+            return ptr->GetShape();
+        BUG("Not a simple shape!");
+        return SimpleShapeType::Rectangle;
+    }
+
+
 } // namespace
