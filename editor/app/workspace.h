@@ -408,7 +408,10 @@ namespace app
         // Set a property value. If the property exists already the previous
         // value is overwritten. Otherwise, it's added.
         void SetUserProperty(const PropertyKey& key, const PropertyValue& value)
-        { SetUserVariantProperty(key, value); }
+        {
+            SetUserVariantProperty(key, value);
+            emit UserPropertyUpdated(key, value);
+        }
 
         // Return the value of the property identified by name.
         // If the property doesn't exist returns the default value.
