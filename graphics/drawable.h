@@ -1360,13 +1360,28 @@ namespace gfx
         glm::vec2 mTileRenderSize = {0.0f, 0.0f};
     };
 
-    class DynamicLine3D : public Drawable
+    class LineBatch3D : public Drawable
     {
     public:
-        DynamicLine3D(const glm::vec3& a, const glm::vec3& b, float line_width=1.0f) noexcept
-          : mPointA(a)
-          , mPointB(b)
+        struct Line {
+            glm::vec3 start = {0.0f, 0.0f, 0.0f};
+            glm::vec3 end   = {0.0f, 0.0f, 0.0f};
+        };
+
+        LineBatch3D() = default;
+        LineBatch3D(const glm::vec3& start, const glm::vec3& end)
+        {
+            Line line;
+            line.start = start;
+            line.end   = end;
+            mLines.push_back(line);
+        }
+        explicit LineBatch3D(std::vector<Line> lines) noexcept
+          : mLines(std::move(lines))
         {}
+        inline void AddLine(Line line)
+        { mLines.push_back(std::move(line)); }
+
         virtual void ApplyDynamicState(const Environment& environment, ProgramState& program, RasterState& state) const override;
         virtual std::string GetShader(const Environment& environment, const Device& device) const override;
         virtual std::string GetShaderId(const Environment& environment) const override;
@@ -1378,8 +1393,7 @@ namespace gfx
         virtual Usage GetUsage() const override
         { return Usage::Stream; }
     private:
-        glm::vec3 mPointA;
-        glm::vec3 mPointB;
+        std::vector<Line> mLines;
     };
 
 
