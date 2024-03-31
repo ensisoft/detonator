@@ -13,12 +13,15 @@ find_package(Qt5Designer REQUIRED)
 # some Qt types.
 find_package(Qt5 REQUIRED COMPONENTS Core Network Svg OpenGL)
 
+find_package(Boost REQUIRED)
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include_directories(${Qt5Designer_INCLUDE_DIRS})
 
+include_directories(${Boost_INCLUDE_DIRS})
 
 # see this bug report about C++14 and Qt
 # https://bugreports.qt.io/browse/QTBUG-53002
