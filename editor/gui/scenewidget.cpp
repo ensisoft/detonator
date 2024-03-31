@@ -601,6 +601,8 @@ SceneWidget::SceneWidget(app::Workspace* workspace, const app::Resource& resourc
     GetUserProperty(resource, "bloom_red",       &mBloom.red);
     GetUserProperty(resource, "bloom_green",     &mBloom.green);
     GetUserProperty(resource, "bloom_blue",      &mBloom.blue);
+    GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
+    GetUserProperty(resource, "right_splitter", mUI.rightSplitter);
 
     UpdateResourceReferences();
     DisplayCurrentNodeProperties();
@@ -688,6 +690,8 @@ bool SceneWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Scene", mUI.sceneIndexGroup);
     settings.SaveWidget("Scene", mUI.bloomGroup);
     settings.SaveWidget("Scene", mUI.cmbPerspective);
+    settings.SaveWidget("Scene", mUI.mainSplitter);
+    settings.SaveWidget("Scene", mUI.rightSplitter);
     return true;
 }
 bool SceneWidget::LoadState(const Settings& settings)
@@ -717,6 +721,8 @@ bool SceneWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Scene", mUI.sceneIndexGroup);
     settings.LoadWidget("Scene", mUI.bloomGroup);
     settings.LoadWidget("Scene", mUI.cmbPerspective);
+    settings.LoadWidget("Scene", mUI.mainSplitter);
+    settings.LoadWidget("Scene", mUI.rightSplitter);
 
     if (!mState.scene->FromJson(json))
         WARN("Failed to restore scene state.");
@@ -1241,6 +1247,8 @@ void SceneWidget::on_actionSave_triggered()
     SetUserProperty(resource, "bloom_red",       mBloom.red);
     SetUserProperty(resource, "bloom_green",     mBloom.green);
     SetUserProperty(resource, "bloom_blue",      mBloom.blue);
+    SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
+    SetUserProperty(resource, "right_splitter", mUI.rightSplitter);
 
     mState.workspace->SaveResource(resource);
     mOriginalHash = mState.scene->GetHash();
