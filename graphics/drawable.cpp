@@ -3293,7 +3293,54 @@ Drawable::Primitive TileBatch::GetPrimitive() const
     return Primitive::Points;
 }
 
+void LineBatch2D::ApplyDynamicState(const Environment &environment, ProgramState &program, RasterState &state) const
+{
+    program.SetUniform("kProjectionMatrix",  *environment.proj_matrix);
+    program.SetUniform("kModelViewMatrix", *environment.view_matrix * *environment.model_matrix);
+}
 
+std::string LineBatch2D::GetShader(const Environment& environment, const Device& device) const
+{
+    return MakeSimple2DVertexShader(device);
+}
+
+std::string LineBatch2D::GetShaderId(const Environment& environment) const
+{
+    return "simple-2D-vertex-shader";
+}
+
+std::string LineBatch2D::GetShaderName(const Environment& environment) const
+{
+    return "Simple2DVertexShader";
+}
+
+std::string LineBatch2D::GetGeometryId(const Environment &environment) const
+{
+    return "line-buffer-2d";
+}
+bool LineBatch2D::Construct(const Environment& environment, Geometry::CreateArgs& create) const
+{
+    std::vector<Vertex2D> vertices;
+    for (const auto& line : mLines)
+    {
+        Vertex2D a;
+        // the -y hack exists because we're using the generic 2D vertex
+        // shader that the shapes with triangle rasterization also use.
+        a.aPosition = Vec2 { line.start.x, -line.start.y };
+        Vertex2D b;
+        b.aPosition = Vec2 { line.end.x, -line.end.y };
+        vertices.push_back(a);
+        vertices.push_back(b);
+    }
+    create.content_name = "2D Line Batch";
+    create.usage = Geometry::Usage::Stream;
+    auto& geometry = create.buffer;
+
+    geometry.SetVertexBuffer(vertices);
+    geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
+    geometry.AddDrawCmd(Geometry::DrawType::Lines);
+    return true;
+}
 
 void LineBatch3D::ApplyDynamicState(const Environment& environment, ProgramState& program, RasterState& state) const
 {
