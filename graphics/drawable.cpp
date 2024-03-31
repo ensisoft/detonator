@@ -3293,48 +3293,53 @@ Drawable::Primitive TileBatch::GetPrimitive() const
     return Primitive::Points;
 }
 
-void DynamicLine3D::ApplyDynamicState(const Environment& environment, ProgramState& program, RasterState& state) const
+
+
+void LineBatch3D::ApplyDynamicState(const Environment& environment, ProgramState& program, RasterState& state) const
 {
     program.SetUniform("kProjectionMatrix",  *environment.proj_matrix);
     program.SetUniform("kModelViewMatrix", *environment.view_matrix * *environment.model_matrix);
 }
 
-std::string DynamicLine3D::GetShader(const Environment& environment, const Device& device) const
+std::string LineBatch3D::GetShader(const Environment& environment, const Device& device) const
 {
     return MakeSimple3DVertexShader(device);
 }
 
-std::string DynamicLine3D::GetShaderId(const Environment& environment) const
+std::string LineBatch3D::GetShaderId(const Environment& environment) const
 {
     return "simple-3D-vertex-shader";
 }
 
-std::string DynamicLine3D::GetShaderName(const Environment& environment) const
+std::string LineBatch3D::GetShaderName(const Environment& environment) const
 {
     return "Simple3DVertexShader";
 }
 
-std::string DynamicLine3D::GetGeometryId(const Environment& environment) const
+std::string LineBatch3D::GetGeometryId(const Environment& environment) const
 {
-    return "line-buffer";
+    return "line-buffer-3D";
 }
 
-bool DynamicLine3D::Construct(const Environment& environment, Geometry::CreateArgs& create) const
+bool LineBatch3D::Construct(const Environment& environment, Geometry::CreateArgs& create) const
 {
     // it's also possible to draw without generating geometry by simply having
     // the two line end points as uniforms in the vertex shader and then using
     // gl_VertexID (which is not available in GL ES2) to distinguish the vertex
     // invocation and use that ID to choose the right vertex end point.
     std::vector<Vertex3D> vertices;
-    Vertex3D a;
-    a.aPosition = Vec3 { mPointA.x, mPointA.y, mPointA.z };
-    Vertex3D b;
-    b.aPosition = Vec3 { mPointB.x, mPointB.y, mPointB.z };
+    for (const auto& line : mLines)
+    {
+        Vertex3D a;
+        a.aPosition = Vec3 { line.start.x, line.start.y, line.start.z };
+        Vertex3D b;
+        b.aPosition = Vec3 { line.end.x, line.end.y, line.end.z };
 
-    vertices.push_back(a);
-    vertices.push_back(b);
+        vertices.push_back(a);
+        vertices.push_back(b);
+    }
 
-    create.content_name = "3D Line";
+    create.content_name = "3D Line Batch";
     create.usage = Geometry::Usage::Stream;
     auto& geometry = create.buffer;
 

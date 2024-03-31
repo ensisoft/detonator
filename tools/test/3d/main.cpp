@@ -446,11 +446,11 @@ void DrawBasisVectors(RenderPass& pass, gfx::Painter& painter, const glm::mat4& 
     const glm::vec3 x = {100.0f, 0.0f ,0.0f};
     const glm::vec3 y = {0.0f, 100.0f, 0.0f};
     const glm::vec3 z = {0.0f, 0.0f, 100.0f};
-    pass.Draw(model_to_world, gfx::DynamicLine3D(origin, x, 1.0f),
+    pass.Draw(model_to_world, gfx::LineBatch3D(origin, x),
               gfx::MaterialInstance(gfx::CreateMaterialClassFromColor(gfx::Color::Green)), painter, false);
-    pass.Draw(model_to_world, gfx::DynamicLine3D(origin, y, 1.0f),
+    pass.Draw(model_to_world, gfx::LineBatch3D(origin, y),
               gfx::MaterialInstance(gfx::CreateMaterialClassFromColor(gfx::Color::Red)), painter, false);
-    pass.Draw(model_to_world, gfx::DynamicLine3D(origin, z, 1.0f),
+    pass.Draw(model_to_world, gfx::LineBatch3D(origin, z),
               gfx::MaterialInstance(gfx::CreateMaterialClassFromColor(gfx::Color::Blue)), painter, false);
 }
 
