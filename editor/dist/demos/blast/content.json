@@ -4402,7 +4402,7 @@
             },
             "layer": -2,
             "linewidth": 1.0,
-            "material": "MHJxCtplnp",
+            "material": "CopZZzjQd4",
             "offset": {
               "x": 0.0,
               "y": 0.0,
@@ -5738,7 +5738,7 @@
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
-            "layer": 0,
+            "layer": 3,
             "linewidth": 1.0,
             "material": "Kb5sHrP5bL",
             "material_params": [
@@ -5746,9 +5746,9 @@
                 "name": "kBaseColor",
                 "value": {
                   "a": 1.0,
-                  "b": 0.16833752393722534,
-                  "g": 0.26253145933151245,
-                  "r": 0.9946593642234802
+                  "b": 0.9324635863304138,
+                  "g": 0.6411840915679932,
+                  "r": 0.6212100386619568
                 }
               }
             ],
@@ -5775,16 +5775,16 @@
           "name": "Copy of Node 3",
           "position": {
             "x": 0.0,
-            "y": -0.0
+            "y": 0.0
           },
           "rotation": 0.0,
           "scale": {
-            "x": 1.0,
-            "y": 0.699999988079071
+            "x": 0.5,
+            "y": 0.5
           },
           "size": {
-            "x": 786.8446655273438,
-            "y": 436.4712219238281
+            "x": 786.8400268554688,
+            "y": 436.4700012207031
           },
           "tag": ""
         },
@@ -5804,7 +5804,7 @@
               "UpdateMaterial": true,
               "VisibleInGame": true
             },
-            "layer": 1,
+            "layer": 2,
             "linewidth": 1.0,
             "material": "CeOxBBO4ib",
             "material_params": [
@@ -5814,7 +5814,7 @@
                   "a": 1.0,
                   "b": 0.0,
                   "g": 0.0,
-                  "r": 0.0
+                  "r": 0.057999543845653534
                 }
               }
             ],
@@ -5840,8 +5840,8 @@
           },
           "name": "Copy of Node 4",
           "position": {
-            "x": 0.0,
-            "y": 0.0
+            "x": 12.0,
+            "y": 13.999969482421875
           },
           "rotation": 0.0,
           "scale": {
@@ -5849,8 +5849,8 @@
             "y": 1.0
           },
           "size": {
-            "x": 783.2000122070313,
-            "y": 414.29998779296875
+            "x": 808.9402465820313,
+            "y": 447.15545654296875
           },
           "tag": ""
         },
@@ -5873,6 +5873,26 @@
             "layer": -1,
             "linewidth": 1.0,
             "material": "YL23jp6zHS",
+            "material_params": [
+              {
+                "name": "kEndColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.8108797073364258,
+                  "g": 0.30614176392555237,
+                  "r": 0.26074618101119995
+                }
+              },
+              {
+                "name": "kStartColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.8688944578170776,
+                  "g": 0.8688944578170776,
+                  "r": 0.9730678200721741
+                }
+              }
+            ],
             "offset": {
               "x": 0.0,
               "y": 0.0,
@@ -5895,8 +5915,8 @@
           },
           "name": "Copy of Particles",
           "position": {
-            "x": 0.0,
-            "y": -14.289999961853027
+            "x": 2.0,
+            "y": -22.000015258789063
           },
           "rotation": 0.0,
           "scale": {
@@ -5904,8 +5924,8 @@
             "y": 1.0
           },
           "size": {
-            "x": 695.02001953125,
-            "y": 216.3800048828125
+            "x": 675.864501953125,
+            "y": 235.34934997558594
           },
           "tag": ""
         }
@@ -5915,15 +5935,13 @@
           {
             "children": [
               {
-                "children": [
-                  {
-                    "node": {
-                      "id": "C4H57D4RGm"
-                    }
-                  }
-                ],
                 "node": {
                   "id": "8Sr3RyhHdm"
+                }
+              },
+              {
+                "node": {
+                  "id": "C4H57D4RGm"
                 }
               }
             ],
@@ -7217,6 +7235,233 @@
       "resource_ver": 1,
       "script_file": "",
       "tag": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "PostUpdate": false,
+        "TickEntity": false,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "RSplpYxIZr",
+      "idle_track": "",
+      "lifetime": 0.0,
+      "name": "Enemy/Demo",
+      "nodes": [
+        {
+          "class": "MLb3BAvtKz",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 1",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": -1.5707963705062866,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 150.0,
+            "y": 108.56999969482422
+          },
+          "tag": ""
+        },
+        {
+          "class": "HYWdnKUCFx",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "Z3Pe1h4eXI",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": -0.0,
+            "y": -0.0
+          },
+          "rotation": 3.1415927410125732,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 100.0,
+            "y": 100.0
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "HYWdnKUCFx"
+                }
+              }
+            ],
+            "node": {
+              "id": "MLb3BAvtKz"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "RSplpYxIZr",
+      "resource_name": "Enemy/Demo",
+      "resource_ver": 1,
+      "script_file": "IlR7Jl84BY",
+      "tag": "",
+      "vars": [
+        {
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": false
+          },
+          "floats": [
+            0.0
+          ],
+          "id": "AeOD8Fl6O1",
+          "name": "circ_angle"
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": false
+          },
+          "floats": [
+            1.0
+          ],
+          "id": "uP6ufDqvoK",
+          "name": "inf_angle_dir"
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": false
+          },
+          "floats": [
+            0.0
+          ],
+          "id": "s45rKw6s1x",
+          "name": "inf_angle_accum"
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": false
+          },
+          "floats": [
+            0.0
+          ],
+          "id": "sBhsESAjIG",
+          "name": "inf_angle"
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": false
+          },
+          "id": "WfKT8KrCKR",
+          "name": "inf_origin",
+          "vec2s": [
+            {
+              "object": {
+                "x": 0.0,
+                "y": 0.0
+              }
+            }
+          ]
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": false
+          },
+          "id": "029din9WXP",
+          "name": "circ_origin",
+          "vec2s": [
+            {
+              "object": {
+                "x": 0.0,
+                "y": 0.0
+              }
+            }
+          ]
+        },
+        {
+          "bools": [
+            0
+          ],
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": false
+          },
+          "id": "aAb40HLl9p",
+          "name": "is_odd"
+        },
+        {
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": false
+          },
+          "floats": [
+            300.0
+          ],
+          "id": "iSTbTf2O3v",
+          "name": "circ_radius"
+        }
+      ]
     }
   ],
   "materials": [
@@ -7642,7 +7887,7 @@
                 "width": 350
               },
               "effects": {
-                "Blur": true,
+                "Blur": false,
                 "Edges": false
               },
               "id": "JQw78NDo0F",
@@ -11588,8 +11833,8 @@
       "coordinate_space": "Global",
       "delay": 0.0,
       "direction": "Outwards",
-      "direction_sector_size": 6.2831854820251465,
-      "direction_sector_start_angle": 0.0,
+      "direction_sector_size": 0.0,
+      "direction_sector_start_angle": 1.5707963705062866,
       "gravity": {
         "x": 0.0,
         "y": 0.30000001192092896
@@ -11602,21 +11847,21 @@
       "init_rect_xpos": 0.0,
       "init_rect_ypos": 0.0,
       "max_alpha": 1.0,
-      "max_lifetime": 0.699999988079071,
+      "max_lifetime": 4.039999961853027,
       "max_point_size": 129.0,
       "max_time": 3.4028234663852886e+38,
-      "max_velocity": 56.650001525878906,
+      "max_velocity": 43.650001525878906,
       "max_xpos": 1.0,
       "max_ypos": 1.0,
       "min_alpha": 1.0,
-      "min_lifetime": 0.5,
+      "min_lifetime": 2.0199999809265137,
       "min_point_size": 53.0,
       "min_time": 0.0,
-      "min_velocity": 14.359999656677246,
+      "min_velocity": 10.260000228881836,
       "mode": "Continuous",
       "motion": "Linear",
       "name": "Menu Particles",
-      "num_particles": 500.0,
+      "num_particles": 50.0,
       "placement": "Edge",
       "resource_id": "kvOgLarfY3",
       "resource_name": "Menu Particles",
@@ -12816,7 +13061,7 @@
           "parent_render_tree_node": "",
           "position": {
             "x": 0.0,
-            "y": 0.0
+            "y": -50.0
           },
           "rotation": 0.0,
           "scale": {
@@ -12901,14 +13146,390 @@
           "name": "Title_0",
           "parent_render_tree_node": "",
           "position": {
-            "x": -200.0,
-            "y": -250.0
+            "x": 0.0,
+            "y": -50.0
           },
           "rotation": 0.0,
           "scale": {
             "x": 1.0,
             "y": 1.0
           }
+        },
+        {
+          "entity": "RSplpYxIZr",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "SldGkMf4t9",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Enemy/Demo_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 300.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "RSplpYxIZr",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": true,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "aEak2fEsoZ",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Enemy/Demo_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": -300.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "values": [
+            {
+              "bools": [
+                1
+              ],
+              "id": "aAb40HLl9p"
+            }
+          ]
+        },
+        {
+          "entity": "RSplpYxIZr",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": true,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "pQzbEySvFi",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Enemy/Demo_2",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -300.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "values": [
+            {
+              "bools": [
+                1
+              ],
+              "id": "aAb40HLl9p"
+            }
+          ]
+        },
+        {
+          "entity": "RSplpYxIZr",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": true,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "bAyrCd7sMd",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Enemy/Demo_3",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -200.0,
+            "y": -200.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "values": [
+            {
+              "bools": [
+                1
+              ],
+              "id": "aAb40HLl9p"
+            }
+          ]
+        },
+        {
+          "entity": "RSplpYxIZr",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "Yf6KgSN8vO",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Enemy/Demo_4",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 200.0,
+            "y": -200.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "RSplpYxIZr",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "sLUzWO3N7F",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Enemy/Demo_5",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 200.0,
+            "y": 200.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "RSplpYxIZr",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "LGawIRBmSH",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Enemy/Demo_6",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": 300.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        },
+        {
+          "entity": "RSplpYxIZr",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": true,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "4xZOsRi1lw",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Enemy/Demo_7",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -200.0,
+            "y": 200.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "values": [
+            {
+              "bools": [
+                1
+              ],
+              "id": "aAb40HLl9p"
+            }
+          ]
         }
       ],
       "render_tree": {
@@ -12926,6 +13547,46 @@
           {
             "node": {
               "id": "NMhTGn41FR"
+            }
+          },
+          {
+            "node": {
+              "id": "SldGkMf4t9"
+            }
+          },
+          {
+            "node": {
+              "id": "aEak2fEsoZ"
+            }
+          },
+          {
+            "node": {
+              "id": "pQzbEySvFi"
+            }
+          },
+          {
+            "node": {
+              "id": "bAyrCd7sMd"
+            }
+          },
+          {
+            "node": {
+              "id": "Yf6KgSN8vO"
+            }
+          },
+          {
+            "node": {
+              "id": "sLUzWO3N7F"
+            }
+          },
+          {
+            "node": {
+              "id": "LGawIRBmSH"
+            }
+          },
+          {
+            "node": {
+              "id": "4xZOsRi1lw"
             }
           }
         ],
@@ -13088,6 +13749,16 @@
       "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/n1HW3heypW.lua"
+    },
+    {
+      "id": "IlR7Jl84BY",
+      "name": "Enemy/Demo",
+      "owner": "",
+      "resource_id": "IlR7Jl84BY",
+      "resource_name": "Enemy/Demo",
+      "resource_ver": 1,
+      "type": "Unspecified",
+      "uri": "ws://lua/IlR7Jl84BY.lua"
     }
   ],
   "uis": [
@@ -13127,7 +13798,7 @@
                 "h": 800.0,
                 "w": 1200.0
               },
-              "style": "{\"materials\":[{\"key\":\"background\",\"type\":\"Null\"},{\"key\":\"border\",\"type\":\"Null\"}]}",
+              "style": "{\"materials\":[{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"background\",\"type\":\"Null\"}]}",
               "tab_index": 0,
               "type": "Form",
               "widgets": [
@@ -13150,7 +13821,7 @@
                     "h": 105.0,
                     "w": 399.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"font-size\",\"value\":24},{\"key\":\"text-size\",\"value\":22},{\"key\":\"edit-text-size\",\"value\":22}]}",
+                  "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":22},{\"key\":\"text-size\",\"value\":22},{\"key\":\"font-size\",\"value\":24},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
                   "tab_index": 0,
                   "text": "GAME OVER",
                   "type": "Label"
@@ -13174,7 +13845,7 @@
                     "h": 98.0,
                     "w": 499.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"text-size\",\"value\":22},{\"key\":\"edit-text-size\",\"value\":22},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-blink\",\"value\":true},{\"key\":\"font-size\",\"value\":24}]}",
+                  "style": "{\"properties\":[{\"key\":\"font-size\",\"value\":24},{\"key\":\"text-blink\",\"value\":true},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"edit-text-size\",\"value\":22},{\"key\":\"text-size\",\"value\":22},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"}]}",
                   "tab_index": 0,
                   "text": "NEW HIGHSCORE",
                   "type": "Label"
@@ -13198,7 +13869,7 @@
                     "h": 105.0,
                     "w": 399.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"font-size\",\"value\":24},{\"key\":\"edit-text-size\",\"value\":22},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"text-size\",\"value\":22},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                  "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-size\",\"value\":22},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"edit-text-size\",\"value\":22},{\"key\":\"font-size\",\"value\":24}]}",
                   "tab_index": 0,
                   "text": "SCORE",
                   "type": "Label"
@@ -13222,7 +13893,7 @@
                     "h": 50.0,
                     "w": 300.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"edit-text-size\",\"value\":10}]}",
+                  "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":10},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
                   "tab_index": 0,
                   "text": "Press Esc to exit",
                   "type": "Label"
@@ -13269,12 +13940,12 @@
                 "h": 800.0,
                 "w": 1200.0
               },
-              "style": "{\"materials\":[{\"key\":\"background\",\"type\":\"Null\"},{\"key\":\"border\",\"type\":\"Null\"}]}",
+              "style": "{\"materials\":[{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"background\",\"type\":\"Null\"}]}",
               "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
-                  "animation": "$OnOpen\nresize 640 420\ninterpolation EaseOutBounce\nduration 0.8\n\n$OnClose\nresize 640 10\ninterpolation EaseInBounce\nduration 0.8",
+                  "animation": "$OnOpen\nresize 700 420\ninterpolation EaseOutBounce\nduration 0.8\n\n$OnClose\nresize 700 10\ninterpolation EaseInBounce\nduration 0.8",
                   "flags": {
                     "ClipChildren": true,
                     "Enabled": true,
@@ -13284,14 +13955,14 @@
                   "id": "Lbumj6mQ20",
                   "name": "Form",
                   "position": {
-                    "x": 50.0,
-                    "y": 350.0
+                    "x": 250.0,
+                    "y": 200.0
                   },
                   "size": {
                     "h": 10.0,
-                    "w": 640.0
+                    "w": 700.0
                   },
-                  "style": "{\"materials\":[{\"color0\":{\"a\":0.4274509847164154,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"color1\":{\"a\":0.3843137323856354,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"color2\":{\"a\":0.6039215922355652,\"b\":0.18796062469482422,\"g\":0.10872053354978561,\"r\":0.10766766220331192},\"color3\":{\"a\":0.29411765933036804,\"b\":0.30696573853492737,\"g\":0.0632181242108345,\"r\":0.04434271901845932},\"key\":\"background\",\"type\":\"Gradient\"}],\"properties\":[{\"key\":\"shape\",\"value\":\"Rectangle\"},{\"key\":\"border-width\",\"value\":1.0}]}",
+                  "style": "{\"materials\":[{\"color\":{\"a\":0.7843137383460999,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"background\",\"type\":\"Color\"}],\"properties\":[{\"key\":\"border-width\",\"value\":1.0},{\"key\":\"shape\",\"value\":\"Rectangle\"}]}",
                   "tab_index": 0,
                   "type": "Form",
                   "widgets": [
@@ -13314,7 +13985,7 @@
                         "h": 100.0,
                         "w": 300.0
                       },
-                      "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":14},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"edit-text-size\",\"value\":18},{\"key\":\"font-size\",\"value\":24},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                      "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"font-size\",\"value\":24},{\"key\":\"edit-text-size\",\"value\":18},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"text-size\",\"value\":14}]}",
                       "tab_index": 0,
                       "text": "Space UI\nUnLuckY Studio",
                       "type": "Label"
@@ -13336,9 +14007,9 @@
                       },
                       "size": {
                         "h": 100.0,
-                        "w": 350.0
+                        "w": 400.0
                       },
-                      "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":18},{\"key\":\"text-size\",\"value\":14},{\"key\":\"font-size\",\"value\":24},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                      "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"font-size\",\"value\":24},{\"key\":\"text-size\",\"value\":14},{\"key\":\"edit-text-size\",\"value\":18}]}",
                       "tab_index": 0,
                       "text": "Music\nJuhani Junkala",
                       "type": "Label"
@@ -13360,9 +14031,9 @@
                       },
                       "size": {
                         "h": 100.0,
-                        "w": 350.0
+                        "w": 400.0
                       },
-                      "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":18},{\"key\":\"edit-text-size\",\"value\":18},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"border-width\",\"value\":2.0},{\"key\":\"font-size\",\"value\":24}]}",
+                      "style": "{\"properties\":[{\"key\":\"font-size\",\"value\":24},{\"key\":\"border-width\",\"value\":2.0},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"edit-text-size\",\"value\":18},{\"key\":\"text-size\",\"value\":18}]}",
                       "tab_index": 0,
                       "text": "DETONATOR 2D\nSami Vaisanen\n",
                       "type": "Label"
@@ -13378,14 +14049,14 @@
                       "id": "f10WnBGial",
                       "name": "close",
                       "position": {
-                        "x": 579.5,
-                        "y": 19.0
+                        "x": 652.5,
+                        "y": 12.5
                       },
                       "size": {
                         "h": 37.27000045776367,
                         "w": 40.90999984741211
                       },
-                      "style": "{\"properties\":[{\"key\":\"mouse-over/text-horizontal-align\",\"value\":\"Center\"},{\"key\":\"mouse-over/text-size\",\"value\":24},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"}]}",
+                      "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"mouse-over/text-size\",\"value\":24},{\"key\":\"mouse-over/text-horizontal-align\",\"value\":\"Center\"}]}",
                       "tab_index": 0,
                       "text": "x",
                       "type": "PushButton"
@@ -13402,14 +14073,14 @@
                       "line_height": 2.0,
                       "name": "shmup",
                       "position": {
-                        "x": 350.0,
+                        "x": 400.0,
                         "y": 150.0
                       },
                       "size": {
                         "h": 100.0,
                         "w": 250.0
                       },
-                      "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"font-size\",\"value\":24},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"edit-text-size\",\"value\":18},{\"key\":\"text-size\",\"value\":14}]}",
+                      "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":14},{\"key\":\"edit-text-size\",\"value\":18},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"font-size\",\"value\":24},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"}]}",
                       "tab_index": 0,
                       "text": "SHMUP Pack3\nJanaSChumi",
                       "type": "Label"
@@ -13428,14 +14099,14 @@
                   "line_height": 1.0,
                   "name": "press_esc",
                   "position": {
-                    "x": 250.0,
-                    "y": 300.0
+                    "x": 500.0,
+                    "y": 150.0
                   },
                   "size": {
                     "h": 50.0,
                     "w": 450.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":10},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-blink\",\"value\":true}]}",
+                  "style": "{\"properties\":[{\"key\":\"text-blink\",\"value\":true},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-horizontal-align\",\"value\":\"Right\"},{\"key\":\"edit-text-size\",\"value\":10}]}",
                   "tab_index": 0,
                   "text": "Press Any Key to exit",
                   "type": "Label"
@@ -13452,14 +14123,14 @@
                   "line_height": 1.0,
                   "name": "credits",
                   "position": {
-                    "x": 50.0,
-                    "y": 300.0
+                    "x": 250.0,
+                    "y": 150.0
                   },
                   "size": {
                     "h": 50.0,
                     "w": 200.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"}]}",
+                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"text-horizontal-align\",\"value\":\"Left\"}]}",
                   "tab_index": 0,
                   "text": "CREDITS",
                   "type": "Label"
@@ -13499,19 +14170,19 @@
               "id": "kDgyUDq6fR",
               "name": "Form_2",
               "position": {
-                "x": -0.0,
+                "x": 0.0,
                 "y": 0.0
               },
               "size": {
                 "h": 800.0,
                 "w": 1200.0
               },
-              "style": "{\"materials\":[{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"background\",\"type\":\"Null\"}]}",
+              "style": "{\"materials\":[{\"key\":\"background\",\"type\":\"Null\"},{\"key\":\"border\",\"type\":\"Null\"}]}",
               "tab_index": 0,
               "type": "Form",
               "widgets": [
                 {
-                  "animation": "$OnOpen\nresize 640 420\ninterpolation EaseOutBounce\nduration 0.8\n\n$OnClose\nresize 640 10\ninterpolation EaseInBounce\nduration 0.8",
+                  "animation": "$OnOpen\nresize 700 420\ninterpolation EaseOutBounce\nduration 0.8\n\n$OnClose\nresize 700 10\ninterpolation EaseInBounce\nduration 0.8",
                   "flags": {
                     "ClipChildren": true,
                     "Enabled": true,
@@ -13521,14 +14192,14 @@
                   "id": "ri8naa05Ws",
                   "name": "Form",
                   "position": {
-                    "x": 50.0,
-                    "y": 350.0
+                    "x": 250.0,
+                    "y": 200.0
                   },
                   "size": {
                     "h": 10.0,
-                    "w": 640.0
+                    "w": 700.0
                   },
-                  "style": "{\"materials\":[{\"color0\":{\"a\":0.4274509847164154,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"color1\":{\"a\":0.3843137323856354,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"color2\":{\"a\":0.6039215922355652,\"b\":0.18796062469482422,\"g\":0.10872053354978561,\"r\":0.10766766220331192},\"color3\":{\"a\":0.29411765933036804,\"b\":0.30696573853492737,\"g\":0.0632181242108345,\"r\":0.04434271901845932},\"key\":\"background\",\"type\":\"Gradient\"},{\"key\":\"border\",\"material\":\"_Silver\",\"type\":\"Reference\"}],\"properties\":[{\"key\":\"shape\",\"value\":\"Rectangle\"}]}",
+                  "style": "{\"materials\":[{\"color\":{\"a\":0.7843137383460999,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"background\",\"type\":\"Color\"}],\"properties\":[{\"key\":\"shape\",\"value\":\"Rectangle\"}]}",
                   "tab_index": 0,
                   "type": "Form",
                   "widgets": [
@@ -13545,14 +14216,14 @@
                       "id": "raEf5y5Iiv",
                       "name": "play_music",
                       "position": {
-                        "x": 80.0,
-                        "y": 60.0
+                        "x": 200.0,
+                        "y": 50.0
                       },
                       "size": {
                         "h": 30.0,
                         "w": 300.0
                       },
-                      "style": "{\"materials\":[{\"key\":\"check-mark-checked\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Normal/Ok_BTN.png\",\"type\":\"Texture\"}],\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                      "style": "{\"materials\":[{\"key\":\"check-mark-checked\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Normal/Ok_BTN.png\",\"type\":\"Texture\"}],\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"}]}",
                       "tab_index": 0,
                       "text": "Play Music",
                       "type": "CheckBox"
@@ -13570,14 +14241,14 @@
                       "id": "fPdlpSge6E",
                       "name": "play_effects",
                       "position": {
-                        "x": 80.0,
-                        "y": 120.0
+                        "x": 200.0,
+                        "y": 100.0
                       },
                       "size": {
                         "h": 30.0,
                         "w": 302.0
                       },
-                      "style": "{\"materials\":[{\"key\":\"check-mark-checked\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Normal/Ok_BTN.png\",\"type\":\"Texture\"}],\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"}]}",
+                      "style": "{\"materials\":[{\"key\":\"check-mark-checked\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Normal/Ok_BTN.png\",\"type\":\"Texture\"}],\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
                       "tab_index": 1,
                       "text": "Play Effects",
                       "type": "CheckBox"
@@ -13593,14 +14264,14 @@
                       "id": "fSQBA6fkb1",
                       "name": "music_volume",
                       "position": {
-                        "x": 80.0,
-                        "y": 240.0
+                        "x": 200.0,
+                        "y": 200.0
                       },
                       "size": {
                         "h": 15.0,
                         "w": 300.0
                       },
-                      "style": "{\"materials\":[{\"key\":\"slider-background\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/Loading_Bar_3_2.png\",\"type\":\"Texture\"},{\"key\":\"slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Normal/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"mouse-over/slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Active/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"pressed/slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Active/Hangar_BTN.png\",\"type\":\"Texture\"}]}",
+                      "style": "{\"materials\":[{\"key\":\"pressed/slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Active/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"mouse-over/slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Active/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Normal/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"slider-background\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/Loading_Bar_3_2.png\",\"type\":\"Texture\"}]}",
                       "tab_index": 2,
                       "type": "Slider",
                       "value": 0.5
@@ -13617,14 +14288,14 @@
                       "line_height": 1.0,
                       "name": "Label_1",
                       "position": {
-                        "x": 80.0,
-                        "y": 180.0
+                        "x": 200.0,
+                        "y": 150.0
                       },
                       "size": {
                         "h": 50.0,
                         "w": 300.0
                       },
-                      "style": "{\"properties\":[{\"key\":\"text-horizontal-align\",\"value\":\"Left\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                      "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"text-horizontal-align\",\"value\":\"Left\"}]}",
                       "tab_index": 0,
                       "text": "Music Volume",
                       "type": "Label"
@@ -13641,14 +14312,14 @@
                       "line_height": 1.0,
                       "name": "Label_1",
                       "position": {
-                        "x": 80.0,
-                        "y": 280.0
+                        "x": 200.0,
+                        "y": 250.0
                       },
                       "size": {
                         "h": 50.0,
                         "w": 300.0
                       },
-                      "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"text-horizontal-align\",\"value\":\"Left\"}]}",
+                      "style": "{\"properties\":[{\"key\":\"text-horizontal-align\",\"value\":\"Left\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
                       "tab_index": 0,
                       "text": "Effects volume",
                       "type": "Label"
@@ -13664,14 +14335,14 @@
                       "id": "SYHjWAwIb2",
                       "name": "effects_volume",
                       "position": {
-                        "x": 80.0,
-                        "y": 340.0
+                        "x": 200.0,
+                        "y": 300.0
                       },
                       "size": {
                         "h": 15.0,
                         "w": 300.0
                       },
-                      "style": "{\"materials\":[{\"key\":\"slider-background\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/Loading_Bar_3_2.png\",\"type\":\"Texture\"},{\"key\":\"mouse-over/slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Active/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Normal/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"pressed/slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Active/Hangar_BTN.png\",\"type\":\"Texture\"}]}",
+                      "style": "{\"materials\":[{\"key\":\"pressed/slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Active/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Normal/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"mouse-over/slider-knob\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/BTNs/Active/Hangar_BTN.png\",\"type\":\"Texture\"},{\"key\":\"slider-background\",\"metafile\":\"\",\"name\":\"\",\"texture\":\"ws://textures/Space UI/Loading_Bar_3_2.png\",\"type\":\"Texture\"}]}",
                       "tab_index": 3,
                       "type": "Slider",
                       "value": 0.5
@@ -13687,14 +14358,14 @@
                       "id": "rqy9jheasX",
                       "name": "close",
                       "position": {
-                        "x": 586.3599853515625,
-                        "y": 15.449999809265137
+                        "x": 650.0,
+                        "y": 13.75
                       },
                       "size": {
                         "h": 37.27000045776367,
                         "w": 40.90999984741211
                       },
-                      "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"mouse-over/text-size\",\"value\":24},{\"key\":\"mouse-over/text-horizontal-align\",\"value\":\"Center\"}]}",
+                      "style": "{\"properties\":[{\"key\":\"mouse-over/text-horizontal-align\",\"value\":\"Center\"},{\"key\":\"mouse-over/text-size\",\"value\":24},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"}]}",
                       "tab_index": 4,
                       "text": "x",
                       "type": "PushButton"
@@ -13713,14 +14384,14 @@
                   "line_height": 1.0,
                   "name": "settings",
                   "position": {
-                    "x": 50.0,
-                    "y": 300.0
+                    "x": 250.0,
+                    "y": 150.0
                   },
                   "size": {
                     "h": 50.0,
                     "w": 200.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"}]}",
+                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"text-horizontal-align\",\"value\":\"Left\"}]}",
                   "tab_index": 0,
                   "text": "SETTINGS",
                   "type": "Label"
@@ -13737,14 +14408,14 @@
                   "line_height": 1.0,
                   "name": "press_esc",
                   "position": {
-                    "x": 250.0,
-                    "y": 300.0
+                    "x": 550.0,
+                    "y": 150.0
                   },
                   "size": {
                     "h": 50.0,
-                    "w": 450.0
+                    "w": 400.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":10},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-blink\",\"value\":true}]}",
+                  "style": "{\"properties\":[{\"key\":\"edit-text-size\",\"value\":10},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"text-blink\",\"value\":true},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-horizontal-align\",\"value\":\"Right\"}]}",
                   "tab_index": 0,
                   "text": "Press Any Key to exit",
                   "type": "Label"
@@ -13791,7 +14462,7 @@
                 "h": 800.0,
                 "w": 1200.0
               },
-              "style": "{\"materials\":[{\"key\":\"background\",\"type\":\"Null\"},{\"key\":\"border\",\"type\":\"Null\"}]}",
+              "style": "{\"materials\":[{\"key\":\"border\",\"type\":\"Null\"},{\"key\":\"background\",\"type\":\"Null\"}]}",
               "tab_index": 0,
               "type": "Form",
               "widgets": [
@@ -13807,14 +14478,14 @@
                   "line_height": 1.0,
                   "name": "hiscore",
                   "position": {
-                    "x": 100.0,
+                    "x": 300.0,
                     "y": 700.0
                   },
                   "size": {
                     "h": 50.0,
                     "w": 600.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"8Ifryfhw43/text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"8Ifryfhw43/font-size\",\"value\":24},{\"key\":\"8Ifryfhw43/edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"8Ifryfhw43/edit-text-size\",\"value\":22},{\"key\":\"8Ifryfhw43/text-size\",\"value\":22},{\"key\":\"text-blink\",\"value\":true},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                  "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-blink\",\"value\":true},{\"key\":\"8Ifryfhw43/text-size\",\"value\":22},{\"key\":\"8Ifryfhw43/edit-text-size\",\"value\":22},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"8Ifryfhw43/edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"8Ifryfhw43/font-size\",\"value\":24},{\"key\":\"8Ifryfhw43/text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
                   "tab_index": 0,
                   "text": "No highscore set!",
                   "type": "Label"
@@ -13831,20 +14502,20 @@
                   "line_height": 1.0,
                   "name": "Label_4",
                   "position": {
-                    "x": 100.0,
-                    "y": 300.0
+                    "x": 300.0,
+                    "y": 50.0
                   },
                   "size": {
                     "h": 105.0,
                     "w": 603.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"font-size\",\"value\":24},{\"key\":\"text-size\",\"value\":22},{\"key\":\"edit-text-size\",\"value\":22},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"}]}",
+                  "style": "{\"properties\":[{\"key\":\"edit-text-font\",\"value\":\"ws://fonts/MAXI_L_S.TTF\"},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"edit-text-size\",\"value\":22},{\"key\":\"text-size\",\"value\":22},{\"key\":\"font-size\",\"value\":24}]}",
                   "tab_index": 0,
                   "text": "Press space to shoot.\n\nPress 1 to launch a mine.",
                   "type": "Label"
                 },
                 {
-                  "animation": "$OnOpen\nmove 300 550\ninterpolation EaseOutBounce\ndelay 0.6\nduration 0.5",
+                  "animation": "$OnOpen\nmove 500 550\ninterpolation EaseOutBounce\ndelay 0.6\nduration 0.5",
                   "flags": {
                     "ClipChildren": true,
                     "Enabled": true,
@@ -13861,13 +14532,13 @@
                     "h": 50.0,
                     "w": 200.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"mouse-over/text-size\",\"value\":24},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"}]}",
+                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"mouse-over/text-size\",\"value\":24}]}",
                   "tab_index": 1,
                   "text": "credits",
                   "type": "PushButton"
                 },
                 {
-                  "animation": "$OnOpen\nmove 300 600\ninterpolation EaseOutBounce\ndelay 0.9\nduration 0.5",
+                  "animation": "$OnOpen\nmove 500 600\ninterpolation EaseOutBounce\ndelay 0.9\nduration 0.5",
                   "flags": {
                     "ClipChildren": true,
                     "Enabled": true,
@@ -13884,13 +14555,13 @@
                     "h": 50.0,
                     "w": 200.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"mouse-over/text-size\",\"value\":24},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"}]}",
+                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"mouse-over/text-size\",\"value\":24}]}",
                   "tab_index": 2,
                   "text": "settings",
                   "type": "PushButton"
                 },
                 {
-                  "animation": "@nope\n0%\nposition 300 500\n25%\nposition 275.0 500\n75% \nposition  325.0 500\n100%\nposition 300.0 500.0\n\n$OnIdle\ndelay 1.0\nidle-for 1.0\nanimate @nope\nduration 0.5\nloops infinite\ninterpolation EaseInOutBounce\n\n$OnOpen\nmove 300 500\ninterpolation EaseOutBounce\ndelay 0.3\nduration 0.5\n\n",
+                  "animation": "@nope\n0%\nposition 500 500\n25%\nposition 475.0 500\n75% \nposition  525.0 500\n100%\nposition 500.0 500.0\n\n$OnIdle\ndelay 1.0\nidle-for 1.0\nanimate @nope\nduration 0.5\nloops infinite\ninterpolation EaseInOutBounce\n\n$OnOpen\nmove 500 500\ninterpolation EaseOutBounce\ndelay 0.3\nduration 0.5\n\n",
                   "flags": {
                     "ClipChildren": true,
                     "Enabled": true,
@@ -13907,13 +14578,13 @@
                     "h": 50.0,
                     "w": 200.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"mouse-over/text-size\",\"value\":24},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"}]}",
+                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"mouse-over/text-size\",\"value\":24}]}",
                   "tab_index": 0,
                   "text": "exit",
                   "type": "PushButton"
                 },
                 {
-                  "animation": "$OnOpen\nmove 300 450\ninterpolation EaseOutBounce\nduration 0.4\n\n@idle\n0% \nposition 300.0 450.0\n50%\nposition 300.0 445.0\n100%\nposition 300.0 455.0\n\n$OnIdle\nanimate @idle\nloops infinite\nduration 0.15\nidle-for 0.5\ninterpolation EasInOutBounce\n",
+                  "animation": "$OnOpen\nmove 500 450\ninterpolation EaseOutBounce\nduration 0.4\n\n@idle\n0% \nposition 500.0 450.0\n50%\nposition 500.0 445.0\n100%\nposition 500.0 455.0\n\n$OnIdle\nanimate @idle\nloops infinite\nduration 0.15\nidle-for 0.5\ninterpolation EasInOutBounce\n",
                   "flags": {
                     "ClipChildren": true,
                     "Enabled": true,
@@ -13930,7 +14601,7 @@
                     "h": 50.0,
                     "w": 200.0
                   },
-                  "style": "{\"properties\":[{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"},{\"key\":\"mouse-over/text-size\",\"value\":36},{\"key\":\"text-size\",\"value\":26}]}",
+                  "style": "{\"properties\":[{\"key\":\"text-size\",\"value\":26},{\"key\":\"mouse-over/text-size\",\"value\":36},{\"key\":\"text-font\",\"value\":\"app://fonts/ethnocentric rg.otf\"}]}",
                   "tab_index": 3,
                   "text": "play",
                   "type": "PushButton"
