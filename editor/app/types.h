@@ -325,6 +325,8 @@ namespace app
         { SetVariantProperty(value); }
         PropertyValue(float value)
         { SetVariantProperty(value); }
+        PropertyValue(bool value)
+        { SetVariantProperty(value); }
         PropertyValue(const QSize& value)
         {
             QVariantMap map;
