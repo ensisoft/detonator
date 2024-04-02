@@ -50,7 +50,7 @@ namespace app
         IPCHost(const IPCHost& other) = delete;
         ~IPCHost() ;
 
-        bool Open(const QString& ipc_socke_name);
+        bool Open(const QString& ipc_socket_name);
         void Close();
         bool IsConnected() const
         { return mClient != nullptr; }
