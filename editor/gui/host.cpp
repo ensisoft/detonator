@@ -297,6 +297,24 @@ void Main(int argc, char* argv[])
     window.SaveState("play_window");
     window.Shutdown();
     gfx::SetResourceLoader(nullptr);
+
+    // this is the real f*n magic here that is required on Win10
+    // to make sure that QLocalSocket actually does send all the
+    // data that might still be buffered in the socket.
+    // Calling QLocalSocket::waitForBytesWritten(-1) does not actually
+    // work as "documented":
+    //
+    // Smells like a Qt bug related to
+    //   a) having message loop
+    //   b) not calling exec
+    //   c) not callilng quit
+
+    for (int i=0; i<10; ++i)
+    {
+        app.processEvents();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
     DEBUG("Exiting...");
 }
 

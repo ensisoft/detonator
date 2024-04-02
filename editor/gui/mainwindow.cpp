@@ -2894,6 +2894,8 @@ void MainWindow::LaunchGame(bool clean)
         return;
     else if (mGameProcess.IsRunning())
         return;
+    else if (mIPCHost)
+        return;
 
     const auto& settings = mWorkspace->GetProjectSettings();
     if (settings.GetApplicationLibrary().isEmpty())
@@ -2959,6 +2961,9 @@ void MainWindow::LaunchGame(bool clean)
                 &app::IPCHost::ResourceUpdated);
         connect(ipc.get(), &app::IPCHost::UserPropertyUpdated, mWorkspace.get(),
                 &app::Workspace::UpdateUserProperty);
+        //ipc->OnUserPropertyUpdate = [this](const QString& key, const QVariant& data) {
+        //    mWorkspace->UpdateUserProperty(key, data);
+        //};
         DEBUG("Local socket is open.");
 
         QStringList game_host_args;
@@ -2986,8 +2991,14 @@ void MainWindow::LaunchGame(bool clean)
             if (mGameProcess.GetError() != app::Process::Error::None)
                 ERROR("Game process error: '%1'", mGameProcess.GetError());
 
-            mIPCHost->Close();
-            mIPCHost.reset();
+            // try to make sure to read all the data coming from the client
+            // socket before closign the socket. todo: fix this, get rid of
+            // the timer hack, add a socket connection state management.
+            QTimer::singleShot(1000, this, [this]() {
+                mIPCHost->Close();
+                mIPCHost.reset();
+                DEBUG("IPC Host socket close");
+            });
         };
         mGameProcess.onStdOut = [](const QString& msg) {
             if (msg.isEmpty())

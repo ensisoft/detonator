@@ -208,9 +208,13 @@ void IPCHost::ReadMessage()
             mClientStream >> name;
             mClientStream >> data;
             if (!mClientStream.commitTransaction())
+            {
+                ERROR("IPC transaction failure.");
                 return;
+            }
 
-            DEBUG("Read new IPC property update message. [prop='%1']", name);
+            DEBUG("Read new IPC property update message. [prop='%1', type=%2, valid=%3]",
+                  name, data.type(), data.isValid());
             emit UserPropertyUpdated(name, data);
         }
         else if (type == MessageType::JsonMessage)
@@ -249,8 +253,8 @@ IPCClient::~IPCClient()
     if (mSocket.isOpen())
     {
         mSocket.disconnectFromServer();
+        mSocket.close();
     }
-    mSocket.close();
 }
 
 bool IPCClient::Open(const QString& ipc_socket_name)
@@ -269,9 +273,10 @@ void IPCClient::Close()
 {
     if (mSocket.isOpen())
     {
+        mSocket.waitForBytesWritten(-1);
         mSocket.disconnectFromServer();
+        mSocket.close();
     }
-    mSocket.close();
 }
 
 template<typename ClassType>
@@ -318,7 +323,7 @@ void IPCClient::UserPropertyUpdated(const QString& name, const QVariant& data)
     }
 
     mSocket.flush();
-    DEBUG("Sent IPC property update. [prop='%1']", name);
+    DEBUG("Sent IPC property update. [prop='%1', type=%2]", name, data.type());
 }
 
 void IPCClient::SendJsonMessage(const QJsonObject& json)
