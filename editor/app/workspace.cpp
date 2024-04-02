@@ -3172,7 +3172,24 @@ void Workspace::UpdateResource(const Resource* resource)
 
 void Workspace::UpdateUserProperty(const QString& name, const QVariant& data)
 {
+    if (!data.isValid())
+    {
+        ERROR("User property is not valid!. [key='%1']", name);
+        return;
+    }
+    const auto& prev = GetUserVariantProperty(name);
+    if (prev.isValid())
+    {
+        if (data.type() != prev.type()) {
+            ERROR("User property has unexpected type on property update! [key'%1', expected='%2', received='%3'",
+                 name, prev.type(), data.type());
+            return;
+        }
+    }
+
     mUserProperties[name] = data;
+    DEBUG("Updated user property. [key='%1', type=%2]", name, data.type());
+
 }
 
 void WorkspaceProxy::DebugPrint() const
