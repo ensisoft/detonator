@@ -1012,7 +1012,7 @@ void PlayWindow::SaveState(const QString& key_prefix)
     mWorkspace.SetUserProperty(key_prefix + "_show_eventlog", mUI.dockWidget->isVisible());
     mWorkspace.SetUserProperty(key_prefix + "_geometry", saveGeometry());
     mWorkspace.SetUserProperty(key_prefix + "_toolbar_and_dock_state", saveState());
-    mWorkspace.SetUserProperty(key_prefix + "_log_bits", mAppEventLog.GetShowBits());
+    mWorkspace.SetUserProperty(key_prefix + "_log_bits", (qint64)mAppEventLog.GetShowBits());
     mWorkspace.SetUserProperty(key_prefix + "_debug_draw", (bool)GetValue(mUI.actionToggleDebugDraw));
     mWorkspace.SetUserProperty(key_prefix + "_debug_log", (bool)GetValue(mUI.actionToggleDebugLog));
     mWorkspace.SetUserProperty(key_prefix + "_debug_msg", (bool)GetValue(mUI.actionToggleDebugMsg));
