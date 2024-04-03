@@ -130,6 +130,21 @@ namespace engine
  void BindUtil(sol::state& L)
 {
     auto util = L.create_named_table("util");
+
+    util["lerp"] = sol::overload(
+        [](float y0, float y1, float t) {
+            return math::lerp(y0, y1, t);
+        },
+        [](const glm::vec2& y0, const glm::vec2& y1, float t) {
+            return math::lerp(y0, y1, t);
+        },
+        [](const glm::vec3& y0, const glm::vec3& y1, float t) {
+            return math::lerp(y0, y1, t);
+        },
+        [](const glm::vec4& y0, const glm::vec4& y1, float t) {
+            return math::lerp(y0, y1, t);
+        });
+
     util["GetRotationFromMatrix"]    = &GetRotationFromMatrix;
     util["GetScaleFromMatrix"]       = &GetScaleFromMatrix;
     util["GetTranslationFromMatrix"] = &GetTranslationFromMatrix;
