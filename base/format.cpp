@@ -194,6 +194,22 @@ std::string ToChars(int value)
     return std::to_string(value);
 }
 
+std::string ToHex(const Color4f& color)
+{
+    const uint8_t R = (uint8_t)math::clamp(0.0f, 255.0f, 255.0f * color.Red());
+    const uint8_t G = (uint8_t)math::clamp(0.0f, 255.0f, 255.0f * color.Green());
+    const uint8_t B = (uint8_t)math::clamp(0.0f, 255.0f, 255.0f * color.Blue());
+    const uint8_t A = (uint8_t)math::clamp(0.0f, 255.0f, 255.0f * color.Alpha());
+
+    char hex_string[10];
+
+    // Format the hex string
+    std::sprintf(hex_string, "#%02X%02X%02X%02X", R, G, B, A);
+
+    return hex_string;
+
+}
+
 bool FromChars(const std::string& str, float* value)
 {
     std::stringstream ss(str);
@@ -217,6 +233,8 @@ bool FromChars(const std::string& str, unsigned* value)
     ss >> *value;
     return !ss.fail();
 }
+
+
 
 } // namespace
 

@@ -177,10 +177,13 @@ namespace base
      // I.e. the format always uses . as the decimal point.
     std::string ToChars(float value);
     std::string ToChars(int value);
+    std::string ToHex(const Color4f& color);
 
     bool FromChars(const std::string& str, float* value);
     bool FromChars(const std::string& str, int* value);
     bool FromChars(const std::string& str, unsigned* value);
+
+
 
 } // base
 

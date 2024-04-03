@@ -248,6 +248,7 @@ void BindBase(sol::state& L)
             base::Color4f(float, float, float, float),
             base::Color4f(int, int, int, int)> color_ctors;
     auto color = base.new_usertype<base::Color4f>("Color4f", color_ctors);
+    color["ToHexStr"]   = [](const base::Color4f& color) { return base::ToHex(color); };
     color["GetRed"]     = &base::Color4f::Red;
     color["GetGreen"]   = &base::Color4f::Green;
     color["GetBlue"]    = &base::Color4f::Blue;
