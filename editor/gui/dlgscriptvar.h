@@ -48,6 +48,7 @@ namespace gui
         void on_btnResetMaterialRef_clicked();
         void on_chkArray_stateChanged(int);
         void on_varType_currentIndexChanged(int);
+        void on_color_colorChanged(const QColor& color);
         void on_strValue_textChanged(const QString& text);
         void on_intValue_valueChanged(int value);
         void on_floatValue_valueChanged(double value);
@@ -90,6 +91,7 @@ namespace gui
         void on_btnResetEntityRef_clicked();
         void on_btnResetMaterialRef_clicked();
         void on_index_valueChanged(int);
+        void on_color_colorChanged(const QColor& color);
         void on_strValue_textChanged(const QString& text);
         void on_intValue_valueChanged(int value);
         void on_floatValue_valueChanged(double value);

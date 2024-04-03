@@ -30,6 +30,7 @@
 #include "base/bitflag.h"
 #include "base/utility.h"
 #include "data/fwd.h"
+#include "game/types.h"
 
 namespace game
 {
@@ -80,6 +81,7 @@ namespace game
                 std::vector<glm::vec2>,
                 std::vector<glm::vec3>,
                 std::vector<glm::vec4>,
+                std::vector<Color4f>,
                 std::vector<EntityReference>,
                 std::vector<EntityNodeReference>,
                 std::vector<MaterialReference>>;
@@ -92,6 +94,7 @@ namespace game
             Vec2,
             Vec3,
             Vec4,
+            Color,
             Boolean,
             EntityReference,
             EntityNodeReference,

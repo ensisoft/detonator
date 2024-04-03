@@ -2236,7 +2236,8 @@ namespace game
         // for vectors and object references.
         using ScriptVarValue = std::variant<bool, float, int,
                 std::string,
-                glm::vec2, glm::vec3, glm::vec4>;
+                glm::vec2, glm::vec3, glm::vec4,
+                Color4f>;
         // The set of Script vars to set on the entity
         // immediately when it's spawned.
         std::unordered_map<std::string, ScriptVarValue> vars;

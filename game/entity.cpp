@@ -1813,6 +1813,8 @@ Entity::Entity(const EntityArgs& args) : Entity(args.klass)
                 var->SetValue(std::get<glm::vec4>(value));
             else if (expected_type == ScriptVar::Type::Boolean && std::holds_alternative<bool>(value))
                 var->SetValue(std::get<bool>(value));
+            else if (expected_type == ScriptVar::Type::Color && std::holds_alternative<Color4f>(value))
+                var->SetValue(std::get<Color4f>(value));
             else WARN("Unsupported entity script var type on entity create. [entity='%1', var='%2']", mInstanceName, name);
 
             const_cast<ScriptVar*>(var)->SetReadOnly(read_only);

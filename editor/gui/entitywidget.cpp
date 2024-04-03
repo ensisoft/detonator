@@ -228,6 +228,18 @@ private:
                 if (!var.IsArray())
                     return var.GetValue<int>();
                 return QString("[0]=%1 ...").arg(var.GetArray<int>()[0]);
+            case game::ScriptVar::Type::Color:
+            {
+                if (!var.IsArray())
+                {
+                    const auto& color = var.GetValue<game::Color4f>();
+                    return app::toString(base::ToHex(color));
+                }
+                const auto& color = var.GetArray<game::Color4f>()[0];
+                return app::toString("[0]=%1 ...", base::ToHex(color));
+            }
+            break;
+
             case game::ScriptVar::Type::Vec2: {
                 if (!var.IsArray()) {
                     const auto& val = var.GetValue<glm::vec2>();

@@ -297,6 +297,7 @@ namespace engine
 
     using MaterialClassHandle = engine::ClassLibrary::ClassHandle<const gfx::MaterialClass>;
 
+    BindArrayInterface<base::Color4f, ArrayDataPointer>(util, "ColorArrayInterface");
     BindArrayInterface<int,         ArrayDataPointer>(util, "IntArrayInterface");
     BindArrayInterface<float,       ArrayDataPointer>(util, "FloatArrayInterface");
     BindArrayInterface<bool,        ArrayDataPointer>(util, "BoolArrayInterface");

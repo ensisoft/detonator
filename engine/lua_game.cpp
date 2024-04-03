@@ -105,7 +105,14 @@ sol::object ObjectFromScriptVarValue(const ScriptVar& var, sol::this_state state
     sol::state_view lua(state);
     const auto type = var.GetType();
     const auto read_only = var.IsReadOnly();
-    if (type == ScriptVar::Type::Boolean)
+    if (type == ScriptVar::Type::Color)
+    {
+        using ArrayType = ArrayInterface<base::Color4f, ArrayDataPointer>;
+        if (var.IsArray())
+            return sol::make_object(lua, ArrayType(read_only, &var.GetArray<base::Color4f>()));
+        return sol::make_object(lua, var.GetValue<base::Color4f>());
+    }
+    else if (type == ScriptVar::Type::Boolean)
     {
         using ArrayType = ArrayInterface<bool, ArrayDataPointer>;
         if (var.IsArray())
@@ -323,6 +330,8 @@ void SetScriptVar(Type& object, const char* key, sol::object value, sol::this_st
         }
     }
 
+    if (value.is<base::Color4f>() && var->HasType<base::Color4f>())
+        var->SetValue(value.as<base::Color4f>());
     if (value.is<int>() && var->HasType<int>())
         var->SetValue(value.as<int>());
     else if (value.is<float>() && var->HasType<float>())
@@ -1293,6 +1302,8 @@ void BindGameLib(sol::state& L)
                         args.vars[name] = val.as<glm::vec3>();
                     else if (val.is<glm::vec4>())
                         args.vars[name] = val.as<glm::vec4>();
+                    else if (val.is<base::Color4f>())
+                        args.vars[name] = val.as<base::Color4f>();
                     else WARN("Unsupported entity spawn arg script var type. [var='%1']", name);
                 }
             }

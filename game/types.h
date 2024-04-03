@@ -39,6 +39,7 @@ namespace game
     using Rotator = base::Rotator;
     using FRadians = base::FRadians;
     using FDegrees = base::FDegrees;
+    using Color = base::Color;
 
 } // namespace
 
