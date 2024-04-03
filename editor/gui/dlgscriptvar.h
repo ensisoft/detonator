@@ -51,8 +51,10 @@ namespace gui
         void on_strValue_textChanged(const QString& text);
         void on_intValue_valueChanged(int value);
         void on_floatValue_valueChanged(double value);
-        void on_vec2ValueX_valueChanged(double value);
-        void on_vec2ValueY_valueChanged(double value);
+        void on_vecValueX_valueChanged(double value);
+        void on_vecValueY_valueChanged(double value);
+        void on_vecValueZ_valueChanged(double value);
+        void on_vecValueW_valueChanged(double value);
         void on_boolValueTrue_clicked(bool checked);
         void on_boolValueFalse_clicked(bool checked);
         void on_index_valueChanged(int);
@@ -91,8 +93,10 @@ namespace gui
         void on_strValue_textChanged(const QString& text);
         void on_intValue_valueChanged(int value);
         void on_floatValue_valueChanged(double value);
-        void on_vec2ValueX_valueChanged(double value);
-        void on_vec2ValueY_valueChanged(double value);
+        void on_vecValueX_valueChanged(double value);
+        void on_vecValueY_valueChanged(double value);
+        void on_vecValueZ_valueChanged(double value);
+        void on_vecValueW_valueChanged(double value);
         void on_boolValueTrue_clicked(bool checked);
         void on_boolValueFalse_clicked(bool checked);
         void on_cmbEntityRef_currentIndexChanged(int);

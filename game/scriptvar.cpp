@@ -275,6 +275,10 @@ void ScriptVar::IntoJson(const VariantType& variant, data::Writer& writer)
         write_bool_array("bools", variant, writer);
     else if (type == Type::Vec2)
         write_object_array<glm::vec2>("vec2s", variant, writer);
+    else if (type == Type::Vec3)
+        write_object_array<glm::vec3>("vec3s", variant, writer);
+    else if (type == Type::Vec4)
+        write_object_array<glm::vec4>("vec4s", variant, writer);
     else if (type == Type::EntityReference)
         write_reference_array<EntityReference>("entity_refs", variant, writer);
     else if (type == Type::EntityNodeReference)
@@ -315,6 +319,10 @@ bool ScriptVar::FromJson(const data::Reader& reader, VariantType* variant)
             return read_bool_array("bools", reader, variant);
         else if (reader.HasArray("vec2s"))
             return read_object_array<glm::vec2>("vec2s", reader, variant);
+        else if (reader.HasArray("vec3s"))
+            return read_object_array<glm::vec3>("vec3s", reader, variant);
+        else if (reader.HasArray("vec4s"))
+            return read_object_array<glm::vec4>("vec4s", reader, variant);
         else if (reader.HasArray("entity_refs"))
             return read_reference_array<EntityReference>("entity_refs", reader, variant);
         else if (reader.HasArray("entity_node_refs"))
@@ -340,6 +348,10 @@ ScriptVar::Type ScriptVar::GetTypeFromVariant(const VariantType& variant)
         return Type::String;
     else if (std::holds_alternative<std::vector<glm::vec2>>(variant))
         return Type::Vec2;
+    else if (std::holds_alternative<std::vector<glm::vec3>>(variant))
+        return Type::Vec3;
+    else if (std::holds_alternative<std::vector<glm::vec4>>(variant))
+        return Type::Vec4;
     else if (std::holds_alternative<std::vector<EntityNodeReference>>(variant))
         return Type::EntityNodeReference;
     else if (std::holds_alternative<std::vector<EntityReference>>(variant))

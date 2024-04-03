@@ -1807,6 +1807,10 @@ Entity::Entity(const EntityArgs& args) : Entity(args.klass)
                 var->SetValue(std::get<float>(value));
             else if (expected_type == ScriptVar::Type::Vec2 && std::holds_alternative<glm::vec2>(value))
                 var->SetValue(std::get<glm::vec2>(value));
+            else if (expected_type == ScriptVar::Type::Vec3 && std::holds_alternative<glm::vec3>(value))
+                var->SetValue(std::get<glm::vec3>(value));
+            else if (expected_type == ScriptVar::Type::Vec4 && std::holds_alternative<glm::vec4>(value))
+                var->SetValue(std::get<glm::vec4>(value));
             else if (expected_type == ScriptVar::Type::Boolean && std::holds_alternative<bool>(value))
                 var->SetValue(std::get<bool>(value));
             else WARN("Unsupported entity script var type on entity create. [entity='%1', var='%2']", mInstanceName, name);
