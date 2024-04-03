@@ -78,6 +78,8 @@ namespace game
                 std::vector<int>,
                 std::vector<std::string>,
                 std::vector<glm::vec2>,
+                std::vector<glm::vec3>,
+                std::vector<glm::vec4>,
                 std::vector<EntityReference>,
                 std::vector<EntityNodeReference>,
                 std::vector<MaterialReference>>;
@@ -88,6 +90,8 @@ namespace game
             Integer,
             Float,
             Vec2,
+            Vec3,
+            Vec4,
             Boolean,
             EntityReference,
             EntityNodeReference,

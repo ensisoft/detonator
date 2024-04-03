@@ -96,6 +96,58 @@ void test_script_var()
     }
 
     {
+        std::vector<glm::vec3> data;
+        data.push_back(glm::vec3(0.0f, 1.0f, 2.0f));
+        data.push_back(glm::vec3(-1.0f, 3.0f, 2.0f));
+
+        game::ScriptVar var("foo", data, true);
+        TEST_REQUIRE(var.IsReadOnly() == true);
+        TEST_REQUIRE(var.IsArray() == true);
+        TEST_REQUIRE(var.GetName() == "foo");
+        TEST_REQUIRE(var.GetType() == game::ScriptVar::Type::Vec3);
+        TEST_REQUIRE(var.GetArray<glm::vec3>()[0] == data[0]);
+        TEST_REQUIRE(var.GetArray<glm::vec3>()[1] == data[1]);
+
+        data::JsonObject json;
+        var.IntoJson(json);
+        game::ScriptVar ret;
+        TEST_REQUIRE(ret.FromJson(json));
+        TEST_REQUIRE(ret.IsReadOnly() == true);
+        TEST_REQUIRE(ret.IsArray() == true);
+        TEST_REQUIRE(ret.GetName() == "foo");
+        TEST_REQUIRE(ret.GetType() == game::ScriptVar::Type::Vec3);
+        TEST_REQUIRE(ret.GetArray<glm::vec3>()[0] == data[0]);
+        TEST_REQUIRE(ret.GetArray<glm::vec3>()[1] == data[1]);
+
+    }
+
+    {
+        std::vector<glm::vec4> data;
+        data.push_back(glm::vec4(0.0f, 1.0f, 2.0f, 5.0f));
+        data.push_back(glm::vec4(-1.0f, 3.0f, 2.0f, 5.0f));
+
+        game::ScriptVar var("foo", data, true);
+        TEST_REQUIRE(var.IsReadOnly() == true);
+        TEST_REQUIRE(var.IsArray() == true);
+        TEST_REQUIRE(var.GetName() == "foo");
+        TEST_REQUIRE(var.GetType() == game::ScriptVar::Type::Vec4);
+        TEST_REQUIRE(var.GetArray<glm::vec4>()[0] == data[0]);
+        TEST_REQUIRE(var.GetArray<glm::vec4>()[1] == data[1]);
+
+        data::JsonObject json;
+        var.IntoJson(json);
+        game::ScriptVar ret;
+        TEST_REQUIRE(ret.FromJson(json));
+        TEST_REQUIRE(ret.IsReadOnly() == true);
+        TEST_REQUIRE(ret.IsArray() == true);
+        TEST_REQUIRE(ret.GetName() == "foo");
+        TEST_REQUIRE(ret.GetType() == game::ScriptVar::Type::Vec4);
+        TEST_REQUIRE(ret.GetArray<glm::vec4>()[0] == data[0]);
+        TEST_REQUIRE(ret.GetArray<glm::vec4>()[1] == data[1]);
+
+    }
+
+    {
         std::vector<bool> data;
         data.push_back(true);
         data.push_back(false);

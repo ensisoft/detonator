@@ -308,6 +308,38 @@ private:
                             .arg(QString::number(val.y, 'f', 2));
                 }
             }
+            case game::ScriptVar::Type::Vec3: {
+                if (!var.IsArray()) {
+                    const auto& val = var.GetValue<glm::vec3>();
+                    return QString("[%1,%2,%3]")
+                            .arg(QString::number(val.x, 'f', 2))
+                            .arg(QString::number(val.y, 'f', 2))
+                            .arg(QString::number(val.z, 'f', 2));
+                } else {
+                    const auto& val = var.GetArray<glm::vec3>()[0];
+                    return QString("[0]=[%1,%2,%3] ...")
+                            .arg(QString::number(val.x, 'f', 2))
+                            .arg(QString::number(val.y, 'f', 2))
+                            .arg(QString::number(val.z, 'f', 2));
+                }
+            }
+            case game::ScriptVar::Type::Vec4: {
+                if (!var.IsArray()) {
+                    const auto& val = var.GetValue<glm::vec4>();
+                    return QString("[%1,%2,%3,%4]")
+                            .arg(QString::number(val.x, 'f', 2))
+                            .arg(QString::number(val.y, 'f', 2))
+                            .arg(QString::number(val.z, 'f', 2))
+                            .arg(QString::number(val.w, 'f', 2));
+                } else {
+                    const auto& val = var.GetArray<glm::vec4>()[0];
+                    return QString("[0]=[%1,%2,%3,%4] ...")
+                            .arg(QString::number(val.x, 'f', 2))
+                            .arg(QString::number(val.y, 'f', 2))
+                            .arg(QString::number(val.z, 'f', 2))
+                            .arg(QString::number(val.w, 'f', 2));
+                }
+            }
             case game::ScriptVar::Type::EntityNodeReference:
                 if (!var.IsArray()) {
                     return "Nil";

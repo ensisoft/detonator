@@ -150,6 +150,38 @@ private:
                         .arg(QString::number(vec.y, 'f', 2));
             }
             break;
+            case game::ScriptVar::Type::Vec3: {
+                const auto& array = std::get<std::vector<glm::vec3>>(value);
+                const auto& vec = array[0];
+                if (array.size() == 1)
+                    return QString("%1,%2,%3")
+                            .arg(QString::number(vec.x, 'f', 2))
+                            .arg(QString::number(vec.y, 'f', 2))
+                            .arg(QString::number(vec.z, 'f', 2));
+
+                return QString("[0]=%1,%2,%3 ...")
+                        .arg(QString::number(vec.x, 'f', 2))
+                        .arg(QString::number(vec.y, 'f', 2))
+                        .arg(QString::number(vec.z, 'f', 2));
+            }
+            break;
+            case game::ScriptVar::Type::Vec4: {
+                const auto& array = std::get<std::vector<glm::vec4>>(value);
+                const auto& vec = array[0];
+                if (array.size() == 1)
+                    return QString("%1,%2,%3,%4")
+                            .arg(QString::number(vec.x, 'f', 2))
+                            .arg(QString::number(vec.y, 'f', 2))
+                            .arg(QString::number(vec.z, 'f', 2))
+                            .arg(QString::number(vec.w, 'f', 2));
+
+                return QString("[0]=%1,%2,%3,%4 ...")
+                        .arg(QString::number(vec.x, 'f', 2))
+                        .arg(QString::number(vec.y, 'f', 2))
+                        .arg(QString::number(vec.z, 'f', 2))
+                        .arg(QString::number(vec.w, 'f', 2));
+            }
+                break;
             case game::ScriptVar::Type::EntityReference: {
                 const auto& array = std::get<std::vector<game::ScriptVar::EntityReference>>(value);
                 if (array.size() == 1)

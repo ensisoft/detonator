@@ -302,6 +302,8 @@ namespace engine
     BindArrayInterface<bool,        ArrayDataPointer>(util, "BoolArrayInterface");
     BindArrayInterface<std::string, ArrayDataPointer>(util, "StringArrayInterface");
     BindArrayInterface<glm::vec2,   ArrayDataPointer>(util, "Vec2ArrayInterface");
+    BindArrayInterface<glm::vec3,   ArrayDataPointer>(util, "Vec3ArrayInterface");
+    BindArrayInterface<glm::vec4,   ArrayDataPointer>(util, "Vec4ArrayInterface");
     BindArrayInterface<std::string, ArrayDataObject>(util, "StringArray");
     BindArrayInterface<Entity*,     ArrayObjectReference>(util, "EntityRefArray");
     BindArrayInterface<EntityNode*, ArrayObjectReference>(util, "EntityNodeRefArray");

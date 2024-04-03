@@ -132,7 +132,21 @@ void DlgScriptVar::on_varType_currentIndexChanged(int)
             {
                 std::vector<glm::vec2> arr;
                 mVar.SetNewArrayType(std::move(arr));
-                mUI.vec2ValueX->setFocus();
+                mUI.vecValueX->setFocus();
+            }
+            break;
+        case game::ScriptVar::Type::Vec3:
+            {
+                std::vector<glm::vec3> arr;
+                mVar.SetNewArrayType(std::move(arr));
+                mUI.vecValueX->setFocus();
+            }
+            break;
+        case game::ScriptVar::Type::Vec4:
+            {
+                std::vector<glm::vec4> arr;
+                mVar.SetNewArrayType(std::move(arr));
+                mUI.vecValueX->setFocus();
             }
             break;
         case game::ScriptVar::Type::Integer:
@@ -204,11 +218,20 @@ void DlgScriptVar::on_floatValue_valueChanged(double)
 {
     SetArrayValue(GetValue(mUI.index));
 }
-void DlgScriptVar::on_vec2ValueX_valueChanged(double)
+void DlgScriptVar::on_vecValueX_valueChanged(double)
 {
     SetArrayValue(GetValue(mUI.index));
 }
-void DlgScriptVar::on_vec2ValueY_valueChanged(double)
+void DlgScriptVar::on_vecValueY_valueChanged(double)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+
+void DlgScriptVar::on_vecValueZ_valueChanged(double value)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+void DlgScriptVar::on_vecValueW_valueChanged(double value)
 {
     SetArrayValue(GetValue(mUI.index));
 }
@@ -246,8 +269,10 @@ void DlgScriptVar::UpdateArrayType()
     SetEnabled(mUI.strValue,         false);
     SetEnabled(mUI.intValue,         false);
     SetEnabled(mUI.floatValue,       false);
-    SetEnabled(mUI.vec2ValueX,       false);
-    SetEnabled(mUI.vec2ValueY,       false);
+    SetEnabled(mUI.vecValueX,        false);
+    SetEnabled(mUI.vecValueY,        false);
+    SetEnabled(mUI.vecValueZ,        false);
+    SetEnabled(mUI.vecValueW,        false);
     SetEnabled(mUI.boolValueTrue,    false);
     SetEnabled(mUI.boolValueFalse,   false);
     SetEnabled(mUI.cmbEntityRef,     false);
@@ -257,8 +282,10 @@ void DlgScriptVar::UpdateArrayType()
     SetVisible(mUI.strValue,          false);
     SetVisible(mUI.intValue,          false);
     SetVisible(mUI.floatValue,        false);
-    SetVisible(mUI.vec2ValueX,        false);
-    SetVisible(mUI.vec2ValueY,        false);
+    SetVisible(mUI.vecValueX,         false);
+    SetVisible(mUI.vecValueY,         false);
+    SetVisible(mUI.vecValueZ,         false);
+    SetVisible(mUI.vecValueW,         false);
     SetVisible(mUI.boolValueTrue,     false);
     SetVisible(mUI.boolValueFalse,    false);
     SetVisible(mUI.cmbEntityRef,      false);
@@ -300,10 +327,32 @@ void DlgScriptVar::UpdateArrayType()
     }
     else if (type == game::ScriptVar::Type::Vec2)
     {
-        SetEnabled(mUI.vec2ValueX, true);
-        SetEnabled(mUI.vec2ValueY, true);
-        SetVisible(mUI.vec2ValueX, true);
-        SetVisible(mUI.vec2ValueY, true);
+        SetEnabled(mUI.vecValueX, true);
+        SetEnabled(mUI.vecValueY, true);
+        SetVisible(mUI.vecValueX, true);
+        SetVisible(mUI.vecValueY, true);
+        SetVisible(mUI.lblVec2, true);
+    }
+    else if (type == game::ScriptVar::Type::Vec3)
+    {
+        SetEnabled(mUI.vecValueX, true);
+        SetEnabled(mUI.vecValueY, true);
+        SetEnabled(mUI.vecValueZ, true);
+        SetVisible(mUI.vecValueX, true);
+        SetVisible(mUI.vecValueY, true);
+        SetVisible(mUI.vecValueZ, true);
+        SetVisible(mUI.lblVec2, true);
+    }
+    else if (type == game::ScriptVar::Type::Vec4)
+    {
+        SetEnabled(mUI.vecValueX, true);
+        SetEnabled(mUI.vecValueY, true);
+        SetEnabled(mUI.vecValueZ, true);
+        SetEnabled(mUI.vecValueW, true);
+        SetVisible(mUI.vecValueX, true);
+        SetVisible(mUI.vecValueY, true);
+        SetVisible(mUI.vecValueZ, true);
+        SetVisible(mUI.vecValueW, true);
         SetVisible(mUI.lblVec2, true);
     }
     else if (type  == game::ScriptVar::Type::Boolean)
@@ -384,8 +433,25 @@ void DlgScriptVar::SetArrayValue(unsigned index)
     {
         auto& arr = mVar.GetArray<glm::vec2>();
         ASSERT(index < arr.size());
-        arr[index] = glm::vec2(GetValue(mUI.vec2ValueX),
-                               GetValue(mUI.vec2ValueY));
+        arr[index] = glm::vec2(GetValue(mUI.vecValueX),
+                               GetValue(mUI.vecValueY));
+    }
+    else if (type == game::ScriptVar::Type::Vec3)
+    {
+        auto& arr = mVar.GetArray<glm::vec3>();
+        ASSERT(index < arr.size());
+        arr[index] = glm::vec3(GetValue(mUI.vecValueX),
+                               GetValue(mUI.vecValueY),
+                               GetValue(mUI.vecValueZ));
+    }
+    else if (type == game::ScriptVar::Type::Vec4)
+    {
+        auto& arr = mVar.GetArray<glm::vec4>();
+        ASSERT(index < arr.size());
+        arr[index] = glm::vec4(GetValue(mUI.vecValueX),
+                               GetValue(mUI.vecValueY),
+                               GetValue(mUI.vecValueZ),
+                               GetValue(mUI.vecValueW));
     }
     else if (type  == game::ScriptVar::Type::Boolean)
     {
@@ -440,8 +506,25 @@ void DlgScriptVar::ShowArrayValue(unsigned index)
     {
         const auto& arr = mVar.GetArray<glm::vec2>();
         ASSERT(index < arr.size());
-        SetValue(mUI.vec2ValueX, arr[index].x);
-        SetValue(mUI.vec2ValueY, arr[index].y);
+        SetValue(mUI.vecValueX, arr[index].x);
+        SetValue(mUI.vecValueY, arr[index].y);
+    }
+    else if (type == game::ScriptVar::Type::Vec3)
+    {
+        const auto& arr = mVar.GetArray<glm::vec3>();
+        ASSERT(index < arr.size());
+        SetValue(mUI.vecValueX, arr[index].x);
+        SetValue(mUI.vecValueY, arr[index].y);
+        SetValue(mUI.vecValueZ, arr[index].z);
+    }
+    else if (type == game::ScriptVar::Type::Vec4)
+    {
+        const auto& arr = mVar.GetArray<glm::vec4>();
+        ASSERT(index < arr.size());
+        SetValue(mUI.vecValueX, arr[index].x);
+        SetValue(mUI.vecValueY, arr[index].y);
+        SetValue(mUI.vecValueZ, arr[index].z);
+        SetValue(mUI.vecValueW, arr[index].w);
     }
     else if (type  == game::ScriptVar::Type::Boolean)
     {
@@ -489,8 +572,10 @@ DlgScriptVal::DlgScriptVal(const std::vector<ResourceListItem>& nodes,
     SetVisible(mUI.strValue, false);
     SetVisible(mUI.intValue, false);
     SetVisible(mUI.floatValue, false);
-    SetVisible(mUI.vec2ValueX, false);
-    SetVisible(mUI.vec2ValueY, false);
+    SetVisible(mUI.vecValueX, false);
+    SetVisible(mUI.vecValueY, false);
+    SetVisible(mUI.vecValueZ, false);
+    SetVisible(mUI.vecValueW, false);
     SetVisible(mUI.boolValueTrue, false);
     SetVisible(mUI.boolValueFalse, false);
     SetVisible(mUI.lblString, false);
@@ -511,8 +596,10 @@ DlgScriptVal::DlgScriptVal(const std::vector<ResourceListItem>& nodes,
     SetEnabled(mUI.strValue, true);
     SetEnabled(mUI.intValue, true);
     SetEnabled(mUI.floatValue, true);
-    SetEnabled(mUI.vec2ValueX, true);
-    SetEnabled(mUI.vec2ValueY, true);
+    SetEnabled(mUI.vecValueX, true);
+    SetEnabled(mUI.vecValueY, true);
+    SetEnabled(mUI.vecValueZ, true);
+    SetEnabled(mUI.vecValueW, true);
     SetEnabled(mUI.boolValueTrue, true);
     SetEnabled(mUI.boolValueFalse, true);
 
@@ -534,12 +621,32 @@ DlgScriptVal::DlgScriptVal(const std::vector<ResourceListItem>& nodes,
     {
         case game::ScriptVar::Type::Vec2:
             {
-                SetVisible(mUI.vec2ValueX, true);
-                SetVisible(mUI.vec2ValueY, true);
+                SetVisible(mUI.vecValueX, true);
+                SetVisible(mUI.vecValueY, true);
                 SetVisible(mUI.lblVec2, true);
-                mUI.vec2ValueX->setFocus();
+                mUI.vecValueX->setFocus();
             }
             break;
+        case game::ScriptVar::Type::Vec3:
+            {
+                SetVisible(mUI.vecValueX, true);
+                SetVisible(mUI.vecValueY, true);
+                SetVisible(mUI.vecValueZ, true);
+                SetVisible(mUI.lblVec2, true);
+                mUI.vecValueX->setFocus();
+            }
+            break;
+        case game::ScriptVar::Type::Vec4:
+            {
+                SetVisible(mUI.vecValueX, true);
+                SetVisible(mUI.vecValueY, true);
+                SetVisible(mUI.vecValueZ, true);
+                SetVisible(mUI.vecValueW, true);
+                SetVisible(mUI.lblVec2, true);
+                mUI.vecValueX->setFocus();
+            }
+            break;
+
         case game::ScriptVar::Type::Float:
             {
                 SetVisible(mUI.floatValue, true);
@@ -644,11 +751,20 @@ void DlgScriptVal::on_floatValue_valueChanged(double)
 {
     SetArrayValue(GetValue(mUI.index));
 }
-void DlgScriptVal::on_vec2ValueX_valueChanged(double)
+void DlgScriptVal::on_vecValueX_valueChanged(double)
 {
     SetArrayValue(GetValue(mUI.index));
 }
-void DlgScriptVal::on_vec2ValueY_valueChanged(double)
+void DlgScriptVal::on_vecValueY_valueChanged(double)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+
+void DlgScriptVal::on_vecValueZ_valueChanged(double value)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+void DlgScriptVal::on_vecValueW_valueChanged(double value)
 {
     SetArrayValue(GetValue(mUI.index));
 }
@@ -701,8 +817,25 @@ void DlgScriptVal::SetArrayValue(unsigned index)
     {
         auto& arr = game::ScriptVar::GetVectorFromVariant<glm::vec2>(mVal);
         ASSERT(index < arr.size());
-        arr[index] = glm::vec2(GetValue(mUI.vec2ValueX),
-                               GetValue(mUI.vec2ValueY));
+        arr[index] = glm::vec2(GetValue(mUI.vecValueX),
+                               GetValue(mUI.vecValueY));
+    }
+    else if (type == game::ScriptVar::Type::Vec3)
+    {
+        auto& arr = game::ScriptVar::GetVectorFromVariant<glm::vec3>(mVal);
+        ASSERT(index < arr.size());
+        arr[index] = glm::vec3(GetValue(mUI.vecValueX),
+                               GetValue(mUI.vecValueY),
+                               GetValue(mUI.vecValueZ));
+    }
+    else if (type == game::ScriptVar::Type::Vec4)
+    {
+        auto& arr = game::ScriptVar::GetVectorFromVariant<glm::vec4>(mVal);
+        ASSERT(index < arr.size());
+        arr[index] = glm::vec4(GetValue(mUI.vecValueX),
+                               GetValue(mUI.vecValueY),
+                               GetValue(mUI.vecValueZ),
+                               GetValue(mUI.vecValueW));
     }
     else if (type  == game::ScriptVar::Type::Boolean)
     {
@@ -756,8 +889,25 @@ void DlgScriptVal::ShowArrayValue(unsigned index)
     {
         const auto& arr = game::ScriptVar::GetVectorFromVariant<glm::vec2>(mVal);
         ASSERT(index < arr.size());
-        SetValue(mUI.vec2ValueX, arr[index].x);
-        SetValue(mUI.vec2ValueY, arr[index].y);
+        SetValue(mUI.vecValueX, arr[index].x);
+        SetValue(mUI.vecValueY, arr[index].y);
+    }
+    else if (type == game::ScriptVar::Type::Vec3)
+    {
+        const auto& arr = game::ScriptVar::GetVectorFromVariant<glm::vec3>(mVal);
+        ASSERT(index < arr.size());
+        SetValue(mUI.vecValueX, arr[index].x);
+        SetValue(mUI.vecValueY, arr[index].y);
+        SetValue(mUI.vecValueZ, arr[index].z);
+    }
+    else if (type == game::ScriptVar::Type::Vec4)
+    {
+        const auto& arr = game::ScriptVar::GetVectorFromVariant<glm::vec4>(mVal);
+        ASSERT(index < arr.size());
+        SetValue(mUI.vecValueX, arr[index].x);
+        SetValue(mUI.vecValueY, arr[index].y);
+        SetValue(mUI.vecValueZ, arr[index].z);
+        SetValue(mUI.vecValueW, arr[index].w);
     }
     else if (type  == game::ScriptVar::Type::Boolean)
     {

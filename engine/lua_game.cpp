@@ -139,7 +139,21 @@ sol::object ObjectFromScriptVarValue(const ScriptVar& var, sol::this_state state
         if (var.IsArray())
             return sol::make_object(lua, ArrayType(read_only, &var.GetArray<glm::vec2>()));
         return sol::make_object(lua, var.GetValue<glm::vec2>());
-    } else BUG("Unhandled ScriptVar type.");
+    }
+    else if (type == ScriptVar::Type::Vec3)
+    {
+        using ArrayType = ArrayInterface<glm::vec3, ArrayDataPointer>;
+        if (var.IsArray())
+            return sol::make_object(lua, ArrayType(read_only, &var.GetArray<glm::vec3>()));
+        return sol::make_object(lua, var.GetValue<glm::vec3>());
+    }
+    else if (type == ScriptVar::Type::Vec4)
+    {
+        using ArrayType = ArrayInterface<glm::vec4, ArrayDataPointer>;
+        if (var.IsArray())
+            return sol::make_object(lua, ArrayType(read_only, &var.GetArray<glm::vec4>()));
+        return sol::make_object(lua, var.GetValue<glm::vec4>());
+    }  else BUG("Unhandled ScriptVar type.");
 }
 
 template<typename T>
@@ -319,6 +333,10 @@ void SetScriptVar(Type& object, const char* key, sol::object value, sol::this_st
         var->SetValue(value.as<std::string>());
     else if (value.is<glm::vec2>() && var->HasType<glm::vec2>())
         var->SetValue(value.as<glm::vec2>());
+    else if (value.is<glm::vec3>() && var->HasType<glm::vec3>())
+        var->SetValue(value.as<glm::vec3>());
+    else if (value.is<glm::vec4>() && var->HasType<glm::vec4>())
+        var->SetValue(value.as<glm::vec4>());
     else if (value.is<game::EntityNode*>() && var->HasType<game::ScriptVar::EntityNodeReference>())
         var->SetValue(game::ScriptVar::EntityNodeReference{value.as<game::EntityNode*>()->GetClassId()});
     else if (value.is<game::Entity*>() && var->HasType<game::ScriptVar::EntityReference>())
@@ -1271,6 +1289,10 @@ void BindGameLib(sol::state& L)
                         args.vars[name] = val.as<std::string>();
                     else if (val.is<glm::vec2>())
                         args.vars[name] = val.as<glm::vec2>();
+                    else if (val.is<glm::vec3>())
+                        args.vars[name] = val.as<glm::vec3>();
+                    else if (val.is<glm::vec4>())
+                        args.vars[name] = val.as<glm::vec4>();
                     else WARN("Unsupported entity spawn arg script var type. [var='%1']", name);
                 }
             }
