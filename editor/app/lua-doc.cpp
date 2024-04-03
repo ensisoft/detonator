@@ -615,6 +615,7 @@ void InitLuaDoc()
     DOC_METHOD_4("base.Color4f", "new", "Construct a new color with int [0, 255] channel values.",
                  "int", "r", "int", "g", "int", "b", "int", "a");
     DOC_META_METHOD_1("string", "tostring", "Lua tostring meta method.", "base.Color4f", "color");
+    DOC_METHOD_0("string", "ToHexStr", "Convert to a hexadecimal string in web notation. #RRGGBBAA");
     DOC_METHOD_0("base.Color4f", "Copy", "Create a copy of this object.");
     DOC_METHOD_0("float", "GetRed", "Get normalized red channel value.");
     DOC_METHOD_0("float", "GetGreen", "Get normalized green channel value.");
