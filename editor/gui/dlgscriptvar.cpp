@@ -128,6 +128,13 @@ void DlgScriptVar::on_varType_currentIndexChanged(int)
     const game::ScriptVar::Type type = GetValue(mUI.varType);
     switch (type)
     {
+        case game::ScriptVar::Type::Color:
+        {
+            std::vector<game::Color4f> arr;
+            mVar.SetNewArrayType(std::move(arr));
+            mUI.color->setFocus();
+        }
+        break;
         case game::ScriptVar::Type::Vec2:
             {
                 std::vector<glm::vec2> arr;
@@ -206,6 +213,11 @@ void DlgScriptVar::on_varType_currentIndexChanged(int)
     UpdateArrayIndex();
 }
 
+void DlgScriptVar::on_color_colorChanged(const QColor& color)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+
 void DlgScriptVar::on_strValue_textChanged(const QString& text)
 {
     SetArrayValue(GetValue(mUI.index));
@@ -278,7 +290,9 @@ void DlgScriptVar::UpdateArrayType()
     SetEnabled(mUI.cmbEntityRef,     false);
     SetEnabled(mUI.cmbEntityNodeRef, false);
     SetEnabled(mUI.cmbMaterialRef,   false);
+    SetEnabled(mUI.color,            false);
 
+    SetVisible(mUI.color,             false);
     SetVisible(mUI.strValue,          false);
     SetVisible(mUI.intValue,          false);
     SetVisible(mUI.floatValue,        false);
@@ -297,6 +311,7 @@ void DlgScriptVar::UpdateArrayType()
     SetVisible(mUI.cmbMaterialRef,    false);
     SetVisible(mUI.btnResetMaterialRef, false);
 
+    SetVisible(mUI.lblColor,      false);
     SetVisible(mUI.lblString,     false);
     SetVisible(mUI.lblInteger,    false);
     SetVisible(mUI.lblFloat,      false);
@@ -307,7 +322,13 @@ void DlgScriptVar::UpdateArrayType()
     SetVisible(mUI.lblMaterial,   false);
 
     const auto type = mVar.GetType();
-    if (type == game::ScriptVar::Type::String)
+    if (type == game::ScriptVar::Type::Color)
+    {
+        SetEnabled(mUI.color, true);
+        SetVisible(mUI.color, true);
+        SetVisible(mUI.lblColor, true);
+    }
+    else if (type == game::ScriptVar::Type::String)
     {
         SetEnabled(mUI.strValue, true);
         SetVisible(mUI.strValue, true);
@@ -411,7 +432,13 @@ void DlgScriptVar::UpdateArrayIndex()
 void DlgScriptVar::SetArrayValue(unsigned index)
 {
     const auto type = mVar.GetType();
-    if (type == game::ScriptVar::Type::String)
+    if (type == game::ScriptVar::Type::Color)
+    {
+        auto& arr = mVar.GetArray<game::Color4f>();
+        ASSERT(index < arr.size());
+        arr[index] = GetValue(mUI.color);
+    }
+    else if (type == game::ScriptVar::Type::String)
     {
         auto& arr = mVar.GetArray<std::string>();
         ASSERT(index < arr.size());
@@ -484,7 +511,13 @@ void DlgScriptVar::SetArrayValue(unsigned index)
 void DlgScriptVar::ShowArrayValue(unsigned index)
 {
     const auto type = mVar.GetType();
-    if (type == game::ScriptVar::Type::String)
+    if (type == game::ScriptVar::Type::Color)
+    {
+        const auto& arr = mVar.GetArray<game::Color4f>();
+        ASSERT(index < arr.size());
+        SetValue(mUI.color, arr[index]);
+    }
+    else if (type == game::ScriptVar::Type::String)
     {
         const auto& arr = mVar.GetArray<std::string>();
         ASSERT(index < arr.size());
@@ -569,6 +602,7 @@ DlgScriptVal::DlgScriptVal(const std::vector<ResourceListItem>& nodes,
     SetVisible(mUI.props, false);
     SetVisible(mUI.value, true);
 
+    SetVisible(mUI.color, false);
     SetVisible(mUI.strValue, false);
     SetVisible(mUI.intValue, false);
     SetVisible(mUI.floatValue, false);
@@ -578,6 +612,7 @@ DlgScriptVal::DlgScriptVal(const std::vector<ResourceListItem>& nodes,
     SetVisible(mUI.vecValueW, false);
     SetVisible(mUI.boolValueTrue, false);
     SetVisible(mUI.boolValueFalse, false);
+    SetVisible(mUI.lblColor, false);
     SetVisible(mUI.lblString, false);
     SetVisible(mUI.lblInteger, false);
     SetVisible(mUI.lblFloat, false);
@@ -593,6 +628,7 @@ DlgScriptVal::DlgScriptVal(const std::vector<ResourceListItem>& nodes,
     SetVisible(mUI.cmbMaterialRef, false);
     SetVisible(mUI.btnResetMaterialRef, false);
 
+    SetEnabled(mUI.color, true);
     SetEnabled(mUI.strValue, true);
     SetEnabled(mUI.intValue, true);
     SetEnabled(mUI.floatValue, true);
@@ -619,6 +655,14 @@ DlgScriptVal::DlgScriptVal(const std::vector<ResourceListItem>& nodes,
 
     switch (game::ScriptVar::GetTypeFromVariant(value))
     {
+        case game::ScriptVar::Type::Color:
+        {
+            SetVisible(mUI.lblColor, true);
+            SetVisible(mUI.color, true);
+            mUI.color->setFocus();
+        }
+        break;
+
         case game::ScriptVar::Type::Vec2:
             {
                 SetVisible(mUI.vecValueX, true);
@@ -739,6 +783,11 @@ void DlgScriptVal::on_index_valueChanged(int)
     ShowArrayValue(GetValue(mUI.index));
 }
 
+void DlgScriptVal::on_color_colorChanged(const QColor& color)
+{
+    SetArrayValue(GetValue(mUI.index));
+}
+
 void DlgScriptVal::on_strValue_textChanged(const QString& text)
 {
     SetArrayValue(GetValue(mUI.index));
@@ -795,7 +844,13 @@ void DlgScriptVal::on_cmbMaterialRef_currentIndexChanged(int)
 void DlgScriptVal::SetArrayValue(unsigned index)
 {
     const auto type = game::ScriptVar::GetTypeFromVariant(mVal);
-    if (type == game::ScriptVar::Type::String)
+    if (type == game::ScriptVar::Type::Color)
+    {
+        auto& arr = game::ScriptVar::GetVectorFromVariant<game::Color4f>(mVal);
+        ASSERT(index < arr.size());
+        arr[index] = GetValue(mUI.color);
+    }
+    else if (type == game::ScriptVar::Type::String)
     {
         auto& arr = game::ScriptVar::GetVectorFromVariant<std::string>(mVal);
         ASSERT(index < arr.size());
@@ -867,7 +922,14 @@ void DlgScriptVal::SetArrayValue(unsigned index)
 void DlgScriptVal::ShowArrayValue(unsigned index)
 {
     const auto type = game::ScriptVar::GetTypeFromVariant(mVal);
-    if (type == game::ScriptVar::Type::String)
+
+    if (type == game::ScriptVar::Type::Color)
+    {
+        const auto& arr = game::ScriptVar::GetVectorFromVariant<game::Color4f>(mVal);
+        ASSERT(index < arr.size());
+        SetValue(mUI.color, arr[index]);
+    }
+    else if (type == game::ScriptVar::Type::String)
     {
         const auto& arr = game::ScriptVar::GetVectorFromVariant<std::string>(mVal);
         ASSERT(index < arr.size());

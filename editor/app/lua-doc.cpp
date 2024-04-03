@@ -361,6 +361,20 @@ void InitLuaDoc()
     DOC_METHOD_0("int", "Last", "Get the last item in the array. The array must not be empty.");
     DOC_METHOD_1("void", "PushBack", "Push back (append) a new item at the end of the array.", "int", "value");
 
+    DOC_TABLE("util.ColorArrayInterface");
+    DOC_METHOD_0("bool", "IsEmpty", "Check whether the array is empty or not.");
+    DOC_METHOD_0("unsigned", "Size", "Get the number of items in the array.");
+    DOC_METHOD_0("bool", "IsReadOnly", "Check whether the array is read only.");
+    DOC_METHOD_1("base.Color4f", "GetItem", "Get an array item at the given index. The index must be valid. The first item is at index 1.",
+                 "unsigned", "index");
+    DOC_METHOD_2("void", "SetItem", "Set an array item to a new value at the given index. The index must be valid. The first item is at index 1.",
+                 "unsigned", "index", "base.Color4f", "value");
+    DOC_METHOD_0("void", "PopBack", "Pop the last item off of the array. If the array is empty nothing is done.");
+    DOC_METHOD_0("void", "PopFront", "Pop the first item off of the array. If the array is empty nothing is done.");
+    DOC_METHOD_0("base.Color4f", "First", "Get the first item in the array. The array must not be empty.");
+    DOC_METHOD_0("base.Color4f", "Last", "Get the last item in the array. The array must not be empty.");
+    DOC_METHOD_1("void", "PushBack", "Push back (append) a new item at the end of the array.", "base.Color4f", "value");
+
     DOC_TABLE("util.FloatArrayInterface");
     DOC_METHOD_0("bool", "IsEmpty", "Check whether the array is empty or not.");
     DOC_METHOD_0("unsigned", "Size", "Get the number of items in the array.");
@@ -421,7 +435,7 @@ void InitLuaDoc()
     DOC_METHOD_0("bool", "IsEmpty", "Check whether the array is empty or not.");
     DOC_METHOD_0("unsigned", "Size", "Get the number of items in the array.");
     DOC_METHOD_0("bool", "IsReadOnly", "Check whether the array is read only.");
-    DOC_METHOD_1("glm.vec2", "GetItem", "Get an array item at the given index. The index must be valid. The first item is at index 1.",
+    DOC_METHOD_1("glm.vec3", "GetItem", "Get an array item at the given index. The index must be valid. The first item is at index 1.",
                  "unsigned", "index");
     DOC_METHOD_2("void", "SetItem", "Set an array item to a new value at the given index. The index must be valid. The first item is at index 1.",
                  "unsigned", "index", "glm.vec3", "value");

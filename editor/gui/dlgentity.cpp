@@ -137,6 +137,19 @@ private:
                 return QString("[0]=%1 ...").arg(array[0]);
             }
             break;
+
+            case game::ScriptVar::Type::Color:
+            {
+                const auto& array = std::get<std::vector<game::Color4f>>(value);
+                const auto& color = array[0];
+                if (array.size() == 1) {
+                    return app::toString(base::ToHex(color));
+                } else {
+                    return app::toString("[0]=%1 ...", base::ToHex(color));
+                }
+            }
+            break;
+
             case game::ScriptVar::Type::Vec2: {
                 const auto& array = std::get<std::vector<glm::vec2>>(value);
                 const auto& vec = array[0];

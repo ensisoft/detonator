@@ -148,6 +148,32 @@ void test_script_var()
     }
 
     {
+        std::vector<game::Color4f> data;
+        data.push_back(game::Color::Red);
+        data.push_back(game::Color::Green);
+
+        game::ScriptVar var("foo", data, true);
+        TEST_REQUIRE(var.IsReadOnly() == true);
+        TEST_REQUIRE(var.IsArray() == true);
+        TEST_REQUIRE(var.GetName() == "foo");
+        TEST_REQUIRE(var.GetType() == game::ScriptVar::Type::Color);
+        TEST_REQUIRE(var.GetArray<game::Color4f>()[0] == data[0]);
+        TEST_REQUIRE(var.GetArray<game::Color4f>()[1] == data[1]);
+
+        data::JsonObject json;
+        var.IntoJson(json);
+        game::ScriptVar ret;
+        TEST_REQUIRE(ret.FromJson(json));
+        TEST_REQUIRE(ret.IsReadOnly() == true);
+        TEST_REQUIRE(ret.IsArray() == true);
+        TEST_REQUIRE(ret.GetName() == "foo");
+        TEST_REQUIRE(ret.GetType() == game::ScriptVar::Type::Color);
+        TEST_REQUIRE(ret.GetArray<game::Color4f>()[0] == data[0]);
+        TEST_REQUIRE(ret.GetArray<game::Color4f>()[1] == data[1]);
+
+    }
+
+    {
         std::vector<bool> data;
         data.push_back(true);
         data.push_back(false);
