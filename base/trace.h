@@ -122,34 +122,22 @@ namespace base
             for (const auto& event : mTraceEvents)
                 writer.Write(event);
         }
-        virtual unsigned BeginScope(const char* name) override
-        {
-            ASSERT(mTraceIndex < mCallTrace.size());
-            TraceEntry entry;
-            entry.name        = name;
-            entry.tid         = mThreadId;
-            entry.level       = mStackDepth++;
-            entry.start_time  = GetTime();
-            entry.finish_time = 0;
-            mCallTrace[mTraceIndex] = std::move(entry);
-            return mTraceIndex++;
-        }
-        virtual void EndScope(unsigned index) override
-        {
-            ASSERT(index < mCallTrace.size());
-            ASSERT(mStackDepth);
-            mCallTrace[index].finish_time = GetTime();
-            mStackDepth--;
-        }
+        virtual unsigned BeginScope(const char* name) override;
+        virtual void EndScope(unsigned index) override;
+
         virtual void Marker(std::string str, unsigned index) override
         {
-            ASSERT(index < mTraceIndex);
+            ASSERT(index <= mTraceIndex);
+            if (index == mCallTrace.size())
+                return;
             mCallTrace[index].markers.push_back(std::move(str));
         }
 
         virtual void Comment(std::string str, unsigned index) override
         {
-            ASSERT(index < mTraceIndex);
+            ASSERT(index <= mTraceIndex);
+            if (index == mCallTrace.size())
+                return;
             mCallTrace[index].comment = std::move(str);
         }
         virtual void Event(std::string name) override
@@ -175,7 +163,9 @@ namespace base
 
         inline void RenameBlock(const char* name, unsigned index) noexcept
         {
-            ASSERT(index < mTraceIndex);
+            ASSERT(index <= mTraceIndex);
+            if (index == mCallTrace.size())
+                return;
             mCallTrace[index].name = name;
         }
 
@@ -193,6 +183,7 @@ namespace base
         std::size_t mThreadId   = 0;
         std::forward_list<std::string> mDynamicStrings;
         std::vector<struct TraceEvent> mTraceEvents;
+        bool mMaxStackSizeExceededWarning = false;
     };
 
     class TextFileTraceWriter : public TraceWriter
