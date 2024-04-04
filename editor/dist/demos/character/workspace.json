@@ -1,105 +1,120 @@
 {
     "0QYMqlEbml": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "0dTWpI1Me5": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "1Lmrz5nn9j": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "1hZL9xquTo": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "2DIHwO8Cqo": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "2FZsU62h53": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "2JjGkWM7Dw": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "2Nw1Qj9C5j": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "2TZXqo5RdE": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "2UQn9OXvxx": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "2ohLK3pIux": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "2zTJ4peMyW": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "2zni47uP4d": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "32oNogwII0": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "3RzyKnnELb": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "3gXOD2IhGi": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "3im7gYgEte": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "45KrnKlIIQ": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_aILKFCC3Qh": ""
     },
     "4XebKJFl6E": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_Ze24OqRDMn": ""
     },
     "528LJjXXAA": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "57djXhQN4Z": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "59WubFuFwk": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "5FdaYIIRiM": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_2YG2JES08A": "",
         "comment_4RPa0LW6RA": "",
         "comment_X3GTqzIPkk": "",
         "comment_qH6wMtLDgr": ""
     },
     "5N6rzKovar": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "5RrDFZUv4k": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "elem_dSTkCUJxtW_pos_x": -768,
         "elem_dSTkCUJxtW_pos_y": -207,
         "mapping_count": 0
     },
     "5qR2nFLdOr": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "5qonmrw7px": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "69nkia7uBG": {
         "__version": 1,
@@ -143,7 +158,7 @@
             "src_point_y:iSRBkUNaPz": -712,
             "src_point_y:uLqRIQOx46": -712
         },
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_0hLkkYFQPJ": "",
         "comment_EDSEr5TLWp": "",
         "comment_LWhWAOSjyx": "",
@@ -153,29 +168,32 @@
         "comment_twJ4I5Q7kK": ""
     },
     "6AvH8rBpLR": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "6UXWgkX59N": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "77t6jPvjW1": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "7FXOrs17Nq": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "7lLEJ9i9vM": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "8N7BmAmgYL": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "8rXd69rvn1": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "elem_O00Letmha9_pos_x": -139,
         "elem_O00Letmha9_pos_y": -24,
         "elem_RF3Lp1eu7R_pos_x": -404,
@@ -191,19 +209,20 @@
         "mapping_count": 2
     },
     "9iqRAxeiDj": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "ABXs1ktjwD": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "AFmNqXIZB4": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "AWExQiuWgf": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_jmPXbaRGqI": "",
         "comment_l3DH0ryh1Q": "",
         "comment_lp3EsUUTsk": "",
@@ -211,23 +230,27 @@
     },
     "Agn7Ll853d": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "BH5y29ivk0": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "BT2F7Z5hGL": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "BdMfIzkp2d": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "Bwf3rgPN6j": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "C1b1AhIAIf": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_WLST0ZxIsj": "",
         "track_Fz49FYCiXA": {
             "center_splitter": "AAAA/wAAAAEAAAADAAABIwAAAp0AAAE8Af////8BAAAAAQA=",
@@ -243,30 +266,36 @@
     },
     "CPUAToxeNY": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_N8jak8K8Yy": ""
     },
     "DDrxI60R5y": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "DFRO8f967k": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "DXCitfLk68": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "Dv3En2rQaH": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "E5gjOv83ff": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "EOzBPYNSQj": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "EZskU34zrp": {
         "__version": 1,
+        "checked_for_packing": true,
         "comment_6sqaWnMiz7": "",
         "comment_g0vkt3eXTE": "",
         "comment_jW0eLXKfWl": "",
@@ -293,105 +322,117 @@
         }
     },
     "FHBTAflmre": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "FSj7l9Dgwl": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "GEqGx5T87e": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "GyAWxHouEY": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "HBSEmKKuug": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_1deYiyAPoI": ""
     },
     "HwSMq307AY": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "Hxhn1HHoak": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "J1jNlGfJgX": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "J464Qen2qv": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "J4xx3ThJjX": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "Jjvwup2aZw": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "JuKilpgDfP": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "KEChSTgnxU": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "KHnqtB85vy": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "KnPvBZqDs4": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "LFeXxgYAwG": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "LLq889I6UO": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "Li1gMjv4ev": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "LquUtSSpdP": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "LrOeQkw47I": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "M8Cqt8qtGb": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "MaeqFLv5eg": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "MeIxMMaoEx": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "NaRoLPQ4E5": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "Ne7xKkxWtm": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "Nlom5D8fDK": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "O6o4pdfxGl": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "OL0Gut1pfN": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "Oazs2C0TQF": {
         "__version": 1,
@@ -447,50 +488,59 @@
             "src_point_y:RpEAwQ6xoZ": -420,
             "src_point_y:qsDSrPBIf3": -568
         },
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_1RZ8lBNXjt": "",
         "comment_1bsLLoRZMT": "",
         "comment_qUZBodNR4l": ""
     },
     "PFHeR5z8le": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "PNY7DAf1xN": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "Q7N3tmXusL": {
         "__version": 1,
+        "checked_for_packing": true,
         "comment_SdHCyyytzS": "",
         "comment_oXSlSgSjM6": "",
         "comment_yS5OUUFUwk": ""
     },
     "QOPlhzDfx4": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "QXmpKL7qTd": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "RGER2xwOqi": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "RR5yoJ3rxj": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "SK9YOZ0AYQ": {
         "__version": 1,
+        "checked_for_packing": true,
         "comment_uzBGYteMTh": ""
     },
     "SZnUCxYHWO": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "SlIqJYQn2J": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_OijiQzol4w": ""
     },
     "SsblETgmwZ": {
         "__version": 1,
+        "checked_for_packing": true,
         "num_tools": 5,
         "tool:0": {
             "height": 1,
@@ -734,14 +784,16 @@
     },
     "T7CSJGSr9s": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_a0d6M7kxGr": ""
     },
     "TMWEz9PpPm": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "TkkzDE08h4": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "U1XmAR70Dj": {
         "__version": 1,
@@ -797,7 +849,7 @@
             "src_point_y:othAlfk1Wr": -475,
             "src_point_y:ugX6hSA45a": -475
         },
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_7Crfe3nh27": "",
         "comment_Ev2HUk2eXz": "",
         "comment_I5uXgDruJd": "",
@@ -805,20 +857,23 @@
         "comment_pqNFaHvqyI": ""
     },
     "UDj60sAMma": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "UFwmx9qGQs": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "UQYOBDGDRi": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "elem_jiN0yJxT2Q_pos_x": 0,
         "elem_jiN0yJxT2Q_pos_y": 0,
         "mapping_count": 0
     },
     "UUx4b6WsuW": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "UdhtSlNfiN": {
         "__version": 1,
@@ -840,176 +895,206 @@
             "src_point_y:U99KpBiEUN": -209,
             "src_point_y:wBJXvKbIiQ": -352
         },
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_SG6PkNuB9h": "",
         "comment_XIPxQeL8l0": "",
         "comment_bRJsbUq08P": "",
         "comment_jDW6aXJ5PZ": ""
     },
     "UhUGHLBsDK": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "UsOj3ea7Sf": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "WGRN4W10Dz": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "WY3KT3AnjS": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "WZBr22zLiC": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "WejbMZ2efw": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_SWRHlHeoP4": ""
     },
     "X6jH7ZUDrO": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "XFu97RXb8t": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "XOtk86rK7p": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "XPpuj13v1f": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "XQugyzOWnA": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "Xg0GdRiaQU": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "Y9mJKUQboN": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "material": ""
     },
     "YAX7F8rFl4": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "YBFOUKbHlT": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "ZOW84mNSWm": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "material": ""
     },
     "ZWBeBgNUhB": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "a5192ODHlI": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "aMLzpNsdRU": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "as8Mninqp2": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "ayNiGRKsSq": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "brALYmXebW": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "eMopCf3otI": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "f85ZCt9KqW": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "fW04Lutwft": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "gfsYMKiqmg": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "hBXgLe8Alw": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "hOE3x5XMO3": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "iMP1G8Nztj": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "io73OI74FB": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "jDu24bf6rJ": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "jS7kGm3IkK": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "kIu4EZyf2O": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "kYDARs1JwJ": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "kyGFRsxBfR": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "l78iKUxYpt": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "lKWarvA3wS": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "lgormkkAP8": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "loARbUs1bn": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "lv1MSXu1NU": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "m4K1b2apZl": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_AqvX8Eaq7K": "",
         "comment_Rt5XKp4WQZ": "",
         "comment_hDTrsO1O2U": "",
         "comment_zGbj2nak5p": ""
     },
     "mJS7uninPD": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "n6HabgDMgi": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "nLBr9A3FhH": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "nneqd4aFlL": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "oaRCIQk650": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "pnKj8mixy5": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "project": {
         "application_identifier": "FpdPRbNGTfO5",
@@ -1086,66 +1171,72 @@
         "working_folder": "${workspace}"
     },
     "qF9KeKKQdL": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "qQzzv1O6qU": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "qiYGxNXLTv": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "qutgyqYBOj": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "r7XlZHD5We": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "rDpZrE3UuD": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "rHEFZtfFL0": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "rUR1h8fyjX": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "s89fX2XxBH": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "sSPaqjs9ZF": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "sUFADPSjD3": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "sZlOHsRPTp": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "t08Py6lZBb": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "t1YfjyevnO": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "t6moJJH0Jb": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "u9p9Izh8rv": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "uehlmqhSGz": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "elem_s43vk4mYM2_pos_x": -325,
         "elem_s43vk4mYM2_pos_y": -137,
         "elem_ujfReIvb71_pos_x": -616,
@@ -1162,28 +1253,31 @@
     },
     "v3gahEDshf": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "vHygmkluU4": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "vSNBrbf7Uu": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "vlTIdw4iq5": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "w8RHEQyKd0": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "wGwODfbgnB": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "wH2KNMq5QW": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "workspace": {
         "packing_param_combine_textures": true,
@@ -1204,32 +1298,37 @@
     },
     "wrQHZ3iizg": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "wswjut7TuG": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "x0Zsbl53Ue": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "elem_o14gAvTrXs_pos_x": 0,
         "elem_o14gAvTrXs_pos_y": 0,
         "mapping_count": 0
     },
     "x5rT0OEsQs": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "xhP9qWugC0": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "y6r2LiZguT": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "zCpu7JKpe1": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "zRjZSLqKyS": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     }
 }

@@ -3,8 +3,17 @@
         "__version": 1,
         "checked_for_packing": 1
     },
+    "9CxQaKSgMC": {
+        "__version": 1,
+        "checked_for_packing": 1
+    },
+    "9fLWNBkZvX": {
+        "__version": 1,
+        "checked_for_packing": 1
+    },
     "E0qZ7nA8br": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": 1
     },
     "Fj66N4PDUG": {
         "__version": 1,
@@ -52,10 +61,12 @@
         "material": "Fj66N4PDUG"
     },
     "id5BsoCSrO": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": 1
     },
     "iiKBwhkDbI": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": 1
     },
     "lQlseaZOEX": {
         "__version": 1,
@@ -165,9 +176,6 @@
         "window_width": 1000,
         "working_folder": "${workspace}"
     },
-    "qjAAk1z2DN": {
-        "__version": 1
-    },
     "qv7w7J7Aiv": {
         "__version": 1,
         "checked_for_packing": 1,
@@ -179,6 +187,7 @@
     },
     "tqHo3nK0b9": {
         "__version": 1,
+        "checked_for_packing": 1,
         "comment_2qZDXrpOrX": "",
         "comment_mqxbWFGIg9": "",
         "comment_xYSBrgLxKL": "",
@@ -197,20 +206,20 @@
         }
     },
     "workspace": {
-        "packing_param_combine_textures": true,
-        "packing_param_copy_html5": true,
-        "packing_param_copy_native": true,
-        "packing_param_delete_prev": true,
-        "packing_param_generate_html5": true,
-        "packing_param_generate_html5_filesys": true,
+        "packing_param_combine_textures": 1,
+        "packing_param_copy_html5": 1,
+        "packing_param_copy_native": 1,
+        "packing_param_delete_prev": 1,
+        "packing_param_generate_html5": 1,
+        "packing_param_generate_html5_filesys": 1,
         "packing_param_max_tex_height": "256",
         "packing_param_max_tex_width": "256",
         "packing_param_output_dir": "ws://dist",
         "packing_param_pack_height": "1024",
         "packing_param_pack_width": "1024",
-        "packing_param_resize_large_textures": true,
+        "packing_param_resize_large_textures": 1,
         "packing_param_tex_padding": 2,
-        "packing_param_write_config": true,
+        "packing_param_write_config": 1,
         "packing_param_write_content": true
     },
     "zJgI2SZT3X": {

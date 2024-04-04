@@ -1248,6 +1248,432 @@
           "value": 0.0
         }
       ]
+    },
+    {
+      "active_texture_map": "Kq4gzA1263",
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "9CxQaKSgMC",
+      "name": "Biird",
+      "particle_action": "None",
+      "resource_id": "9CxQaKSgMC",
+      "resource_name": "Biird",
+      "resource_ver": 1,
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "Kq4gzA1263",
+          "looping": true,
+          "name": "Sprite",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-1.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "yIXRxHdW8n",
+              "name": "frame-1",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-2.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "BY7W3TUXq4",
+              "name": "frame-2",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-3.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "7KkbXbdMZ0",
+              "name": "frame-3",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-4.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "gRSzA9oT7d",
+              "name": "frame-4",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-5.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "1geANxhSkl",
+              "name": "frame-5",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-6.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "TL2R5PYvIh",
+              "name": "frame-6",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-7.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "eUkuT0e9bI",
+              "name": "frame-7",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-8.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "eACLTygb2j",
+              "name": "frame-8",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
+    },
+    {
+      "active_texture_map": "3MAkfADqnS",
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "9fLWNBkZvX",
+      "name": "Bird",
+      "particle_action": "None",
+      "resource_id": "9fLWNBkZvX",
+      "resource_name": "Bird",
+      "resource_ver": 1,
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 10.0,
+          "id": "3MAkfADqnS",
+          "looping": true,
+          "name": "Sprite",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-1.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "BUy37KfGdA",
+              "name": "frame-1",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-2.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "vOpqdHibQw",
+              "name": "frame-2",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-3.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "QNDgaWmXGq",
+              "name": "frame-3",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-4.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "QMdhzbRwO6",
+              "name": "frame-4",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-5.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "p1iN5QO3OK",
+              "name": "frame-5",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-6.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "lLmJUNwNej",
+              "name": "frame-6",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-7.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "X0du5MiXGP",
+              "name": "frame-7",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            },
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/FlappyBird/Flying/frame-8.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "ZAhi9OHkd5",
+              "name": "frame-8",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Sprite"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Sprite"
     }
   ],
   "scenes": [
@@ -1457,71 +1883,6 @@
         "node": null
       },
       "resource_id": "iiKBwhkDbI",
-      "resource_name": "My Scene",
-      "resource_ver": 1,
-      "script_file": "",
-      "tilemap": ""
-    },
-    {
-      "dynamic_spatial_index": "Disabled",
-      "id": "qjAAk1z2DN",
-      "name": "My Scene",
-      "nodes": [
-        {
-          "entity": "tqHo3nK0b9",
-          "flag_set_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "PostUpdate": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "UpdateNodes": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "flag_val_bits": {
-            "KillAtBoundary": false,
-            "KillAtLifetime": false,
-            "LimitLifetime": false,
-            "PostUpdate": false,
-            "TickEntity": false,
-            "UpdateEntity": false,
-            "UpdateNodes": false,
-            "VisibleInEditor": true,
-            "VisibleInGame": true,
-            "WantsKeyEvents": false,
-            "WantsMouseEvents": false
-          },
-          "id": "opuDInSJY5",
-          "idle_animation_id": "",
-          "layer": 0,
-          "name": "FlappyBird_0",
-          "parent_render_tree_node": "",
-          "position": {
-            "x": 0.0,
-            "y": 0.0
-          },
-          "rotation": 0.0,
-          "scale": {
-            "x": 1.0,
-            "y": 1.0
-          }
-        }
-      ],
-      "render_tree": {
-        "children": [
-          {
-            "node": {
-              "id": "opuDInSJY5"
-            }
-          }
-        ],
-        "node": null
-      },
-      "resource_id": "qjAAk1z2DN",
       "resource_name": "My Scene",
       "resource_ver": 1,
       "script_file": "",
