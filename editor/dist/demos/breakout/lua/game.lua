@@ -1,5 +1,7 @@
 -- Top level game callbacks.
 -- You're free to delete functions that you don't need.
+require('app://scripts/utility/camera.lua')
+
 _GameStates = {
     Menu = 1,
     Play = 2
@@ -23,9 +25,13 @@ end
 
 -- Called when the game is started.
 function StartGame()
-    Game:SetViewport(base.FRect:new(-500.0, -400.0, 1000.0, 800.0))
+    local viewport = base.FRect:new(-500.0, -400.0, 1000.0, 800.0)
+
+    Game:SetViewport(viewport)
     Game:Play('MainMenu')
     Game:OpenUI('MainMenu')
+
+    Camera.SetViewport(viewport)
 end
 
 -- Called as a response to Game:Play when an instance
@@ -58,7 +64,7 @@ end
 -- dt is the time step to take.
 -- Note that this is *not* called when the game has been suspended.
 function Update(game_time, dt)
-
+    Game:SetViewport(Camera.Update(dt))
 end
 
 -- Event/input callback handlers.
@@ -200,11 +206,16 @@ function OnGameEvent(event)
                 _State.current_state = _GameStates.Menu
             else
                 Game:DebugPrint('Level: ' .. tostring(next_level))
-                Game:Play(scene)
+                local scene = Game:Play(scene)
                 _State.current_level = next_level
                 local hud = Game:GetTopUI()
                 local level = hud:FindWidgetByName('level')
                 level:SetText(tostring(_State.current_level))
+
+                scene:SpawnEntity('Confetti', {
+                    async = true
+                })
+
             end
         end
     elseif event.from == 'brick' then
@@ -212,6 +223,11 @@ function OnGameEvent(event)
             _State.current_score = _State.current_score + event.value
             local hud = Game:GetTopUI()
             hud.score:SetText(tostring(_State.current_score))
+
+            local y = util.Random(1.0, 2.0)
+            local x = util.Random(-1.0, 2.0)
+            Camera.Shake(glm.vec2:new(x, y), 0.5, 10)
+
         end
     elseif event.from == 'paddle' then
         if event.message == 'extra-points' then

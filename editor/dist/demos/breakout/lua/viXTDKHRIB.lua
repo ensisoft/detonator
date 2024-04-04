@@ -35,6 +35,21 @@ function DropPowerup(brick)
     powerup_body:Enable(true)
 end
 
+function PopParticles(brick)
+    local brick_node = brick:GetNode(0)
+    local brick_pos = brick_node:GetTranslation()
+    local brick_color = brick.color
+
+    Scene:SpawnEntity('Brick Particles', {
+        pos = brick_pos,
+        async = true,
+        layer = 2,
+        vars = {
+            color = brick_color
+        }
+    })
+end
+
 -- Called when the game play begins for an entity in the scene.
 function BeginPlay(brick, scene, map)
 
@@ -112,5 +127,6 @@ function BallHit(brick, ball)
     brick:Die()
 
     DropPowerup(brick)
+    PopParticles(brick)
 end
 
