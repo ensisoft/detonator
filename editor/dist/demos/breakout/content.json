@@ -1004,6 +1004,61 @@
             "y": 20.0
           },
           "tag": ""
+        },
+        {
+          "class": "rK7eEMtkQf",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "fb4IaFw1R2",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "vSs0xqS3fS",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.5,
+            "y": 0.5
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 33.333335876464844,
+            "y": 36.66667175292969
+          },
+          "tag": ""
         }
       ],
       "render_tree": {
@@ -1018,6 +1073,11 @@
               {
                 "node": {
                   "id": "w9atEDaYRN"
+                }
+              },
+              {
+                "node": {
+                  "id": "rK7eEMtkQf"
                 }
               }
             ],
@@ -1197,7 +1257,7 @@
       "resource_name": "Gray Brick",
       "resource_ver": 1,
       "script_file": "viXTDKHRIB",
-      "tag": "",
+      "tag": "brick",
       "vars": [
         {
           "bools": [
@@ -1222,6 +1282,25 @@
             0
           ],
           "name": "hit_count"
+        },
+        {
+          "colors": [
+            {
+              "object": {
+                "a": 1.0,
+                "b": 0.7529411911964417,
+                "g": 0.7529411911964417,
+                "r": 0.7529411911964417
+              }
+            }
+          ],
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": true
+          },
+          "id": "iMq6YvUo5s",
+          "name": "color"
         }
       ]
     },
@@ -1338,7 +1417,7 @@
       "resource_name": "Yellow Brick",
       "resource_ver": 1,
       "script_file": "viXTDKHRIB",
-      "tag": "",
+      "tag": "brick",
       "vars": [
         {
           "flags": {
@@ -1363,6 +1442,25 @@
           },
           "id": "py40Ln0bAb",
           "name": "immortal"
+        },
+        {
+          "colors": [
+            {
+              "object": {
+                "a": 1.0,
+                "b": 0.0120241092517972,
+                "g": 0.8054169416427612,
+                "r": 0.9243152737617493
+              }
+            }
+          ],
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": true
+          },
+          "id": "T2316KIEgT",
+          "name": "color"
         }
       ]
     },
@@ -1462,7 +1560,7 @@
       "resource_name": "Green Brick",
       "resource_ver": 1,
       "script_file": "viXTDKHRIB",
-      "tag": "",
+      "tag": "brick",
       "vars": [
         {
           "flags": {
@@ -1487,6 +1585,25 @@
           },
           "id": "bxFqM6Xyxb",
           "name": "immortal"
+        },
+        {
+          "colors": [
+            {
+              "object": {
+                "a": 1.0,
+                "b": 0.2980392277240753,
+                "g": 0.8313725590705872,
+                "r": 0.6705729961395264
+              }
+            }
+          ],
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": true
+          },
+          "id": "EwCuzZpBS1",
+          "name": "color"
         }
       ]
     },
@@ -1586,7 +1703,7 @@
       "resource_name": "Red Brick",
       "resource_ver": 1,
       "script_file": "viXTDKHRIB",
-      "tag": "",
+      "tag": "brick",
       "vars": [
         {
           "flags": {
@@ -1611,6 +1728,25 @@
           },
           "id": "vCxEuX7z0Z",
           "name": "immortal"
+        },
+        {
+          "colors": [
+            {
+              "object": {
+                "a": 1.0,
+                "b": 0.1109025701880455,
+                "g": 0.1109025701880455,
+                "r": 0.8137941360473633
+              }
+            }
+          ],
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": true
+          },
+          "id": "kNyUZy7JAn",
+          "name": "color"
         }
       ]
     },
@@ -1710,7 +1846,7 @@
       "resource_name": "Purple Brick",
       "resource_ver": 1,
       "script_file": "viXTDKHRIB",
-      "tag": "",
+      "tag": "brick",
       "vars": [
         {
           "flags": {
@@ -1735,6 +1871,25 @@
           },
           "id": "u8klgFThAx",
           "name": "immortal"
+        },
+        {
+          "colors": [
+            {
+              "object": {
+                "a": 1.0,
+                "b": 0.5843137502670288,
+                "g": 0.3490196168422699,
+                "r": 0.5137255191802979
+              }
+            }
+          ],
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": true
+          },
+          "id": "A8FOBjn0NW",
+          "name": "color"
         }
       ]
     },
@@ -1834,7 +1989,7 @@
       "resource_name": "Blue Brick",
       "resource_ver": 1,
       "script_file": "viXTDKHRIB",
-      "tag": "",
+      "tag": "brick",
       "vars": [
         {
           "flags": {
@@ -1859,6 +2014,25 @@
           },
           "id": "yyokeFraaw",
           "name": "immortal"
+        },
+        {
+          "colors": [
+            {
+              "object": {
+                "a": 1.0,
+                "b": 1.0,
+                "g": 0.7923399806022644,
+                "r": 0.0
+              }
+            }
+          ],
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": true
+          },
+          "id": "yGBLDWY8fj",
+          "name": "color"
         }
       ]
     },
@@ -3797,6 +3971,585 @@
           "name": "points"
         }
       ]
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": true,
+        "PostUpdate": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "gQ4nsFs4L3",
+      "idle_track": "",
+      "lifetime": 1.0,
+      "name": "Brick Particles",
+      "nodes": [
+        {
+          "class": "YmSfngBxpE",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "dn9XJGsQt0",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "AOdUyA9mYj",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 40.0,
+            "y": 20.0
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "YmSfngBxpE"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "gQ4nsFs4L3",
+      "resource_name": "Brick Particles",
+      "resource_ver": 1,
+      "script_file": "RvaCI57v3k",
+      "tag": "",
+      "vars": [
+        {
+          "colors": [
+            {
+              "object": {
+                "a": 1.0,
+                "b": 1.0,
+                "g": 1.0,
+                "r": 1.0
+              }
+            }
+          ],
+          "flags": {
+            "Array": false,
+            "Private": true,
+            "ReadOnly": true
+          },
+          "id": "7PMljPMH4r",
+          "name": "color"
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": true,
+        "PostUpdate": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "E65Ptr22QY",
+      "idle_track": "",
+      "lifetime": 2.0,
+      "name": "Confetti",
+      "nodes": [
+        {
+          "class": "PseXINzA2Q",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "5xCJbUrrKL",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "AOdUyA9mYj",
+            "material_params": [
+              {
+                "name": "kBaseColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.051499199122190475,
+                  "g": 0.051499199122190475,
+                  "r": 0.7978789806365967
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": -200.0,
+            "y": -200.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 300.0,
+            "y": 200.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "nwSjgvWjoU",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "5xCJbUrrKL",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "AOdUyA9mYj",
+            "material_params": [
+              {
+                "name": "kBaseColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.6505531668663025,
+                  "g": 0.27521172165870667,
+                  "r": 0.17822538316249847
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 1",
+          "position": {
+            "x": 50.0,
+            "y": -150.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 300.0,
+            "y": 300.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "svrvsEZnfH",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "5xCJbUrrKL",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "AOdUyA9mYj",
+            "material_params": [
+              {
+                "name": "kBaseColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.6787060499191284,
+                  "g": 0.051499199122190475,
+                  "r": 0.7978789806365967
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 2",
+          "position": {
+            "x": 300.0,
+            "y": -250.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 200.0,
+            "y": 200.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "J5BMM4hBXC",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "5xCJbUrrKL",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "AOdUyA9mYj",
+            "material_params": [
+              {
+                "name": "kBaseColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.6787060499191284,
+                  "g": 0.051499199122190475,
+                  "r": 0.7978789806365967
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 3",
+          "position": {
+            "x": -350.0,
+            "y": -250.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 200.0,
+            "y": 200.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "aCadWfGAx7",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "5xCJbUrrKL",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "AOdUyA9mYj",
+            "material_params": [
+              {
+                "name": "kBaseColor",
+                "value": {
+                  "a": 1.0,
+                  "b": 0.08213931322097778,
+                  "g": 0.5804226994514465,
+                  "r": 0.2054627239704132
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "q": 1.0,
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 4",
+          "position": {
+            "x": -0.0,
+            "y": -250.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 300.0,
+            "y": 300.0
+          },
+          "tag": ""
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "PseXINzA2Q"
+            }
+          },
+          {
+            "node": {
+              "id": "nwSjgvWjoU"
+            }
+          },
+          {
+            "node": {
+              "id": "svrvsEZnfH"
+            }
+          },
+          {
+            "node": {
+              "id": "J5BMM4hBXC"
+            }
+          },
+          {
+            "node": {
+              "id": "aCadWfGAx7"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "E65Ptr22QY",
+      "resource_name": "Confetti",
+      "resource_ver": 1,
+      "script_file": "",
+      "tag": ""
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": true,
+        "PostUpdate": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "IQlAouf52m",
+      "idle_track": "",
+      "lifetime": 5.0,
+      "name": "Help",
+      "nodes": [
+        {
+          "class": "f3zfn3lyPQ",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Help",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 700.0,
+            "y": 100.0
+          },
+          "tag": "",
+          "text_item": {
+            "flags": {
+              "BlinkText": false,
+              "PP_EnableBloom": true,
+              "StaticContent": false,
+              "UnderlineText": false,
+              "VisibleInGame": true
+            },
+            "font_name": "app://fonts/G7_Cube_5.ttf",
+            "font_size": 20,
+            "horizontal_align": "Center",
+            "layer": 0,
+            "line_height": 1.0,
+            "raster_height": 0,
+            "raster_width": 0,
+            "text": "Mouse controls\nMove left or right to control the paddle\nClick left button to release ball",
+            "text_color": {
+              "a": 1.0,
+              "b": 0.6046845316886902,
+              "g": 0.8220645189285278,
+              "r": 0.7336995601654053
+            },
+            "vertical_align": "Center"
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "f3zfn3lyPQ"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "IQlAouf52m",
+      "resource_name": "Help",
+      "resource_ver": 1,
+      "script_file": "",
+      "tag": ""
     }
   ],
   "materials": [
@@ -4751,6 +5504,203 @@
           "value": 0.0
         }
       ]
+    },
+    {
+      "active_texture_map": "",
+      "flags": {
+        "BlendFrames": true,
+        "PremultipliedAlpha": false,
+        "Static": false
+      },
+      "id": "AOdUyA9mYj",
+      "name": "White Particle",
+      "particle_action": "None",
+      "resource_id": "AOdUyA9mYj",
+      "resource_name": "White Particle",
+      "resource_ver": 1,
+      "shader_src": "",
+      "shader_uri": "",
+      "surface": "Transparent",
+      "texture_mag_filter": "Default",
+      "texture_maps": [
+        {
+          "fps": 0.0,
+          "id": "fOFCAJygD5",
+          "looping": true,
+          "name": "Texture",
+          "rect_name0": "",
+          "rect_name1": "",
+          "sampler_name0": "",
+          "sampler_name1": "",
+          "textures": [
+            {
+              "colorspace": "sRGB",
+              "effects": {
+                "Blur": false,
+                "Edges": false
+              },
+              "file": "ws://textures/particleWhite_2.png",
+              "flags": {
+                "AllowPacking": true,
+                "AllowResizing": true,
+                "PremulAlpha": false
+              },
+              "id": "TiLt0JrgIX",
+              "name": "particleWhite_2",
+              "rect": {
+                "h": 1.0,
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0
+              },
+              "type": "Filesystem"
+            }
+          ],
+          "type": "Texture2D"
+        }
+      ],
+      "texture_min_filter": "Default",
+      "texture_wrap_x": "Clamp",
+      "texture_wrap_y": "Clamp",
+      "type": "Texture",
+      "uniforms": [
+        {
+          "name": "kTextureVelocity",
+          "value": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 10.0
+          }
+        }
+      ]
+    }
+  ],
+  "particles": [
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": -1.0,
+      "boundary": "Clamp",
+      "coordinate_space": "Global",
+      "delay": 0.0,
+      "direction": "Outwards",
+      "direction_sector_size": 6.2831854820251465,
+      "direction_sector_start_angle": 0.0,
+      "gravity": {
+        "x": 0.0,
+        "y": 0.30000001192092896
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": -99.0,
+      "id": "fb4IaFw1R2",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 0.3700000047683716,
+      "max_lifetime": 0.20000000298023224,
+      "max_point_size": 30.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 1.0,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 0.28999999165534973,
+      "min_lifetime": 0.20000000298023224,
+      "min_point_size": 20.0,
+      "min_time": 0.0,
+      "min_velocity": 0.0,
+      "mode": "Continuous",
+      "motion": "Linear",
+      "name": "Fading Balls",
+      "num_particles": 30.0,
+      "placement": "Center",
+      "resource_id": "fb4IaFw1R2",
+      "resource_name": "Fading Balls",
+      "resource_ver": 1,
+      "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": -1.0,
+      "boundary": "Clamp",
+      "coordinate_space": "Global",
+      "delay": 0.0,
+      "direction": "Outwards",
+      "direction_sector_size": 1.483529806137085,
+      "direction_sector_start_angle": -2.3038346767425537,
+      "gravity": {
+        "x": 0.0,
+        "y": 300.0
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": -83.0,
+      "id": "dn9XJGsQt0",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 1.0,
+      "max_lifetime": 10.0,
+      "max_point_size": 30.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 322.8900146484375,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 1.0,
+      "min_lifetime": 1.0,
+      "min_point_size": 7.0,
+      "min_time": 0.0,
+      "min_velocity": 1.0,
+      "mode": "Once",
+      "motion": "Projectile",
+      "name": "Brick Particles",
+      "num_particles": 100.0,
+      "placement": "Inside",
+      "resource_id": "dn9XJGsQt0",
+      "resource_name": "Brick Particles",
+      "resource_ver": 1,
+      "shape": "Rectangle"
+    },
+    {
+      "alpha_over_dist": 0.0,
+      "alpha_over_time": 0.0,
+      "boundary": "Clamp",
+      "coordinate_space": "Global",
+      "delay": 0.0,
+      "direction": "Outwards",
+      "direction_sector_size": 0.01745329238474369,
+      "direction_sector_start_angle": -1.5707963705062866,
+      "gravity": {
+        "x": 0.0,
+        "y": 300.0
+      },
+      "growth_over_dist": 0.0,
+      "growth_over_time": 0.0,
+      "id": "5xCJbUrrKL",
+      "init_rect_height": 1.0,
+      "init_rect_width": 1.0,
+      "init_rect_xpos": 0.0,
+      "init_rect_ypos": 0.0,
+      "max_alpha": 1.0,
+      "max_lifetime": 10.0,
+      "max_point_size": 13.0,
+      "max_time": 3.4028234663852886e+38,
+      "max_velocity": 234.5399932861328,
+      "max_xpos": 1.0,
+      "max_ypos": 1.0,
+      "min_alpha": 1.0,
+      "min_lifetime": 1.0,
+      "min_point_size": 1.0,
+      "min_time": 0.0,
+      "min_velocity": 100.27999877929688,
+      "mode": "Once",
+      "motion": "Projectile",
+      "name": "Confetti",
+      "num_particles": 500.0,
+      "placement": "Inside",
+      "resource_id": "5xCJbUrrKL",
+      "resource_name": "Confetti",
+      "resource_ver": 1,
+      "shape": "Circle"
     }
   ],
   "scenes": [
@@ -15950,6 +16900,49 @@
             "x": 1.0,
             "y": 1.0
           }
+        },
+        {
+          "entity": "IQlAouf52m",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "GLCY3DWTwo",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Help_0",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": 0.0,
+            "y": 150.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
         }
       ],
       "render_tree": {
@@ -16247,6 +17240,11 @@
           {
             "node": {
               "id": "zz8nP63Kv2"
+            }
+          },
+          {
+            "node": {
+              "id": "GLCY3DWTwo"
             }
           }
         ],
@@ -26213,6 +27211,16 @@
       "resource_ver": 1,
       "type": "Unspecified",
       "uri": "ws://lua/Bl5XaXGkl0.lua"
+    },
+    {
+      "id": "RvaCI57v3k",
+      "name": "Brick Particles",
+      "owner": "",
+      "resource_id": "RvaCI57v3k",
+      "resource_name": "Brick Particles",
+      "resource_ver": 1,
+      "type": "Unspecified",
+      "uri": "ws://lua/RvaCI57v3k.lua"
     }
   ],
   "shapes": [

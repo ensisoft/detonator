@@ -35,8 +35,8 @@ function KillEntity(level, map, carcass)
     local num_entities = level:GetNumEntities()
     for i = 0, num_entities - 1, 1 do
         local entity = level:GetEntity(i)
-        local klass = entity:GetClassName()
-        if string.match(klass, "Brick") then
+        local tag = entity:GetTag()
+        if string.match(tag, "brick") then
             if entity:HasBeenKilled() == false and entity.immortal == false then
                 num_bricks = num_bricks + 1
             end
@@ -51,7 +51,6 @@ function KillEntity(level, map, carcass)
     level_clear.to = 'game'
     level_clear.message = 'level-clear'
     Game:PostEvent(level_clear)
-
 end
 
 -- Called on every low frequency game tick.

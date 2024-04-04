@@ -1,22 +1,22 @@
 {
     "10togPdjU7": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "1Oau6Iem5r": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "2yOBoPmBaI": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "elem_HWXOWk3B4g_pos_x": 0,
         "elem_HWXOWk3B4g_pos_y": 0,
         "mapping_count": 0
     },
     "3IA4wv52oL": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_BRTD8xxbwl": "",
         "comment_ESN3M54I6j": "",
         "comment_JFpPZIPERW": "",
@@ -35,121 +35,153 @@
     },
     "3J49aF64Jm": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "4RNSFQ1Pyg": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "elem_2Qlif27snN_pos_x": -173,
         "elem_2Qlif27snN_pos_y": -38,
         "mapping_count": 0
     },
     "4zi9n5RIXq": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
+    },
+    "5xCJbUrrKL": {
+        "__version": 1,
+        "checked_for_packing": true,
+        "local_emitter_h": 0.46,
+        "local_emitter_w": 0.44,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "AOdUyA9mYj",
+        "transform_height": 176,
+        "transform_rotation": 0,
+        "transform_width": 172,
+        "transform_xpos": -45,
+        "transform_ypos": -81,
+        "use_lifetime": true
     },
     "7kkLq83FnE": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "847gBr2NKv": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "8xZogKY3K1": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "9G2p8G3zMT": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_EmqTxBzJEm": "",
         "comment_oJR9TmL7Zs": "",
         "comment_w9atEDaYRN": ""
     },
     "9wG7A0qhYE": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "A37AEUMH3I": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
+    },
+    "AOdUyA9mYj": {
+        "__version": 1,
+        "checked_for_packing": true
     },
     "AdiJbNNuTp": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "Bl5XaXGkl0": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "CaLjAijfzQ": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_0f03OL4uHi": ""
+    },
+    "E65Ptr22QY": {
+        "__version": 1,
+        "checked_for_packing": true
     },
     "EjfqiKs7A1": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "EtyRugQve2": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "Gou7Wgfk1C": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_iwdFQ6Isf0": "",
         "comment_kSxTUHLd2d": ""
     },
     "HRXSPeXFUN": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "HjhabB4y2A": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "elem_hsNS566ktU_pos_x": 0,
         "elem_hsNS566ktU_pos_y": 0,
         "mapping_count": 0
     },
+    "IQlAouf52m": {
+        "__version": 1,
+        "checked_for_packing": true,
+        "comment_f3zfn3lyPQ": ""
+    },
     "J160KPStMB": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_8ApxuFjM8q": ""
     },
     "Jw14oLX1CD": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_zoQd2IkbRD": ""
     },
     "KA0GT192DW": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_Ez48JJPwlB": ""
     },
     "KeITJIrx1I": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "MUQDA03a25": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "OgRnbBquEI": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "REfs8QQaG3": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "elem_ah1Mpk1Bw3_pos_x": 0,
         "elem_ah1Mpk1Bw3_pos_y": 0,
         "mapping_count": 0
     },
+    "RvaCI57v3k": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
     "UThqytvfHf": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "elem_iaIUp48Qzz_pos_x": -147,
         "elem_iaIUp48Qzz_pos_y": -63,
         "elem_rkXAwUrIp1_pos_x": -373,
@@ -166,53 +198,88 @@
     },
     "WGNKEJwulf": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "Xg0GdRiaQU": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "YOZ0Sp88fq": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_Qv0PsreOKT": ""
     },
     "ZadrbaYdqx": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "ZnDr4JGpLL": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "dJCYf3a5vx": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_I5LlUuBW7O": "",
         "comment_bFTLN2fimL": "",
         "comment_omyQ6afIog": ""
     },
+    "dn9XJGsQt0": {
+        "__version": 1,
+        "checked_for_packing": true,
+        "local_emitter_h": 1,
+        "local_emitter_w": 1,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "AOdUyA9mYj",
+        "transform_height": 32,
+        "transform_rotation": 0,
+        "transform_width": 56,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_lifetime": true
+    },
     "eX85urYgUe": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_pDgWQNCf5A": ""
+    },
+    "fb4IaFw1R2": {
+        "__version": 1,
+        "checked_for_packing": true,
+        "local_emitter_h": 1,
+        "local_emitter_w": 1,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "vSs0xqS3fS",
+        "transform_height": 500,
+        "transform_rotation": 0,
+        "transform_width": 500,
+        "transform_xpos": 0,
+        "transform_ypos": 0,
+        "use_lifetime": true
+    },
+    "gQ4nsFs4L3": {
+        "__version": 1,
+        "checked_for_packing": true,
+        "comment_YmSfngBxpE": ""
     },
     "gRY0JNbDCj": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "hhgetGS5Y3": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "hu9jOD5B5Z": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_sGCtz9orSI": ""
     },
     "ijOB1QBrNK": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_DPQ1nWvM1N": "",
         "comment_KL3ejlwasA": "",
         "comment_OwEjn76unJ": "",
@@ -243,16 +310,16 @@
     },
     "kZPKqhUrT6": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "kkBOwiYNRn": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_rvstkGSTml": ""
     },
     "ltMbxDy6wk": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_85RJ7mzZLx": "",
         "comment_Afa0MGoR0m": "",
         "comment_durb5kh0O0": "",
@@ -321,23 +388,23 @@
     },
     "mCZ77Xsgvh": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "elem_lI3HDnTgut_pos_x": 1,
         "elem_lI3HDnTgut_pos_y": 2,
         "mapping_count": 0
     },
     "mJ0wHRoy15": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "mSF0NAZ4A5": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_S9juUdy3La": ""
     },
     "noUSSIDS18": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "elem_0qj7loZ69Z_pos_x": -144,
         "elem_0qj7loZ69Z_pos_y": -112,
         "elem_TyEDHgeYYH_pos_x": -403,
@@ -354,7 +421,7 @@
     },
     "p1xeOon2ua": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_abydQXbENJ": ""
     },
     "project": {
@@ -433,15 +500,15 @@
     },
     "q9wPieFpP5": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "rAn0G88CKj": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "vH008bpGRC": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "elem_CgaDam1DdH_pos_x": -524,
         "elem_CgaDam1DdH_pos_y": -112,
         "elem_dDQXZTtI14_pos_x": -268,
@@ -458,11 +525,11 @@
     },
     "vSs0xqS3fS": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "viXTDKHRIB": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "workspace": {
         "packing_param_combine_textures": true,
@@ -483,15 +550,15 @@
     },
     "xAdKk03Llg": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "xZLaeqWePM": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "xttv1jSmTp": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_C4PXv84PoK": "",
         "comment_IOAkT7MOY2": "",
         "comment_Udp7gxZBCi": "",
@@ -510,7 +577,7 @@
     },
     "yZllA8JJYo": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "material": ""
     }
 }
