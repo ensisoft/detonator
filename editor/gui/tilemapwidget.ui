@@ -353,7 +353,7 @@
      <widget class="QGroupBox" name="center">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-        <horstretch>0</horstretch>
+        <horstretch>1</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
@@ -1140,8 +1140,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>416</width>
-                   <height>426</height>
+                   <width>94</width>
+                   <height>24</height>
                   </rect>
                  </property>
                  <property name="sizePolicy">
