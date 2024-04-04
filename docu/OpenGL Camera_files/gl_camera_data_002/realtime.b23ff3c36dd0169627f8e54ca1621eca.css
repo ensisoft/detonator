@@ -1,0 +1,1 @@
+html *{margin:0;padding:0;cursor:pointer}div{text-align:center;font-family:"Helvetica Neue",arial,sans-serif;border:2px solid #dbdfe4;background:rgba(244,244,244,.9);color:#656c7a;padding:7px 0;font-size:13px;line-height:1;z-index:1000}div.north{border-top:0;border-radius:0 0 4px 4px}div.south{border-bottom:0;border-radius:4px 4px 0 0}

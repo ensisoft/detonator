@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html data-darkreader-mode="dynamic" data-darkreader-scheme="dark" class=" tflhs idc0_347" lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><style class="darkreader darkreader--fallback" media="screen"></style><style class="darkreader darkreader--text" media="screen"></style><style class="darkreader darkreader--invert" media="screen">.jfk-bubble.gtx-bubble, .captcheck_answer_label > input + img, span#closed_text > img[src^="https://www.gstatic.com/images/branding/googlelogo"], span[data-href^="https://www.hcaptcha.com/"] > #icon, #bit-notification-bar-iframe, ::-webkit-calendar-picker-indicator {
+    filter: invert(100%) hue-rotate(180deg) contrast(90%) !important;
+}</style><style class="darkreader darkreader--inline" media="screen">[data-darkreader-inline-bgcolor] {
+  background-color: var(--darkreader-inline-bgcolor) !important;
+}
+[data-darkreader-inline-bgimage] {
+  background-image: var(--darkreader-inline-bgimage) !important;
+}
+[data-darkreader-inline-border] {
+  border-color: var(--darkreader-inline-border) !important;
+}
+[data-darkreader-inline-border-bottom] {
+  border-bottom-color: var(--darkreader-inline-border-bottom) !important;
+}
+[data-darkreader-inline-border-left] {
+  border-left-color: var(--darkreader-inline-border-left) !important;
+}
+[data-darkreader-inline-border-right] {
+  border-right-color: var(--darkreader-inline-border-right) !important;
+}
+[data-darkreader-inline-border-top] {
+  border-top-color: var(--darkreader-inline-border-top) !important;
+}
+[data-darkreader-inline-boxshadow] {
+  box-shadow: var(--darkreader-inline-boxshadow) !important;
+}
+[data-darkreader-inline-color] {
+  color: var(--darkreader-inline-color) !important;
+}
+[data-darkreader-inline-fill] {
+  fill: var(--darkreader-inline-fill) !important;
+}
+[data-darkreader-inline-stroke] {
+  stroke: var(--darkreader-inline-stroke) !important;
+}
+[data-darkreader-inline-outline] {
+  outline-color: var(--darkreader-inline-outline) !important;
+}
+[data-darkreader-inline-stopcolor] {
+  stop-color: var(--darkreader-inline-stopcolor) !important;
+}</style><style class="darkreader darkreader--variables" media="screen">:root {
+   --darkreader-neutral-background: #131516;
+   --darkreader-neutral-text: #d8d4cf;
+   --darkreader-selection-background: #004daa;
+   --darkreader-selection-text: #e8e6e3;
+}</style><style class="darkreader darkreader--root-vars" media="screen"></style><style class="darkreader darkreader--user-agent" media="screen">html {
+    background-color: #181a1b !important;
+}
+html {
+    color-scheme: dark !important;
+}
+html, body, input, textarea, select, button, dialog {
+    background-color: #181a1b;
+}
+html, body, input, textarea, select, button {
+    border-color: #736b5e;
+    color: #e8e6e3;
+}
+a {
+    color: #3391ff;
+}
+table {
+    border-color: #545b5e;
+}
+::placeholder {
+    color: #b2aba1;
+}
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+    background-color: #404400 !important;
+    color: #e8e6e3 !important;
+}
+::-webkit-scrollbar {
+    background-color: #202324;
+    color: #aba499;
+}
+::-webkit-scrollbar-thumb {
+    background-color: #454a4d;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: #575e62;
+}
+::-webkit-scrollbar-thumb:active {
+    background-color: #484e51;
+}
+::-webkit-scrollbar-corner {
+    background-color: #181a1b;
+}
+* {
+    scrollbar-color: #454a4d #202324;
+}
+::selection {
+    background-color: #004daa !important;
+    color: #e8e6e3 !important;
+}
+::-moz-selection {
+    background-color: #004daa !important;
+    color: #e8e6e3 !important;
+}</style>
+
+<title>OpenGL Camera</title>
+
+<meta charset="utf-8">
+<meta name="description" content="OpenGL orbit camera">
+<meta name="keywords" content="OpenGL, camera, matrix">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Song Ho Ahn">
+<meta name="generator" content="editplus">
+<meta name="robots" content="index,follow">
+
+<!-- favicon -->
+<link rel="icon" type="image/x-icon" href="http://www.songho.ca/favicon.ico">
+
+<!-- CSS -->
+<link rel="stylesheet" media="screen" href="OpenGL%20Camera_files/screen.css"><style class="darkreader darkreader--sync" media="screen"></style>
+<link rel="stylesheet" media="print" href="OpenGL%20Camera_files/print.css">
+
+<!-- Javascript -->
+<script src="OpenGL%20Camera_files/songho.js"></script><meta name="darkreader" content="5e2866718e508909fb9de7c098fbd5c6"><style class="darkreader darkreader--override" media="screen">.vimvixen-hint {
+    background-color: #7b5300 !important;
+    border-color: #d8b013 !important;
+    color: #f3e8c8 !important;
+}
+::placeholder {
+    opacity: 0.5 !important;
+}
+#edge-translate-panel-body,
+.MuiTypography-body1,
+.nfe-quote-text {
+    color: var(--darkreader-neutral-text) !important;
+}
+gr-main-header {
+    background-color: #0f3a48 !important;
+}
+.tou-z65h9k,
+.tou-mignzq,
+.tou-1b6i2ox,
+.tou-lnqlqk {
+    background-color: var(--darkreader-neutral-background) !important;
+}
+.tou-75mvi {
+    background-color: #032029 !important;
+}
+.tou-ta9e87,
+.tou-1w3fhi0,
+.tou-1b8t2us,
+.tou-py7lfi,
+.tou-1lpmd9d,
+.tou-1frrtv8,
+.tou-17ezmgn {
+    background-color: #0a0a0a !important;
+}
+.tou-uknfeu {
+    background-color: #231603 !important;
+}
+.tou-6i3zyv {
+    background-color: #19576c !important;
+}
+embed[type="application/pdf"] { filter: invert(100%) contrast(90%); }</style>
+<!-- <script src="files/js/gl_camera.js"></script> -->
+<script type="text/javascript" async="" src="OpenGL%20Camera_files/embed.js"></script><script src="OpenGL%20Camera_files/menu.js" id="L2pzL21lbnUuanM="></script></head>
+
+
+<body>
+<div id="wrap">
+
+<div id="menublock" class="include-html"><nav id="menu">
+<ul>
+<li>
+<a href="http://www.songho.ca/index.html" id="menu_home"><img src="OpenGL%20Camera_files/songho_small.png" style="padding-right:5px" alt="songho.ca icon">songho.ca</a>
+</li>
+
+<li>
+<a href="http://www.songho.ca/dsp/index.html" id="menu_dsp"><span class="plusminus"></span>DSP</a>
+    <ul id="menu_ul_dsp" style="height: 234px;">
+        <li><a href="http://www.songho.ca/dsp/signal/signals.html" id="menu_dsp_signals">Signals</a></li>
+        <li><a href="http://www.songho.ca/dsp/system/systems.html" id="menu_dsp_systems">Systems</a></li>
+        <li><a href="http://www.songho.ca/dsp/convolution/convolution.html" id="menu_dsp_convolution">Convolution</a>
+            <ul>
+                <li><a href="http://www.songho.ca/dsp/convolution/convolution2d_example.html" id="menu_dsp_convolution2">Example of 2D Convolution</a></li>
+                <li><a href="http://www.songho.ca/dsp/convolution/convolution2d_separable.html" id="menu_dsp_separable">2D Separable Convolution</a></li>
+                <li><a href="http://www.songho.ca/dsp/convolution/convolution_commutative.html" id="menu_dsp_commutative">Proof of Commutative Convolution</a></li>
+            </ul>
+        </li>
+        <!--
+        <li><a href="/dsp/window/window.html" id="menu_dsp_window">Window Filters</a></li>
+        -->
+        <li><a href="http://www.songho.ca/dsp/luminance/luminance.html" id="menu_dsp_luminance">Luminance</a></li>
+        <li><a href="http://www.songho.ca/dsp/histogram/histogram.html" id="menu_dsp_histogram">Histogram</a></li>
+        <li><a href="http://www.songho.ca/dsp/cannyedge/cannyedge.html" id="menu_dsp_canny">Canny Edge Detection</a></li>
+    </ul>
+</li>
+
+<li>
+<a href="http://www.songho.ca/opengl/index.html" id="menu_gl"><span class="plusminus"></span>OpenGL</a>
+    <ul id="menu_ul_gl" style="height: 520px;">
+        <li><a href="http://www.songho.ca/opengl/gl_overview.html" id="menu_gl_overview">Overview</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_pipeline.html" id="menu_gl_pipeline">Rendering Pipeline</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_transform.html" id="menu_gl_transform">Transformations &amp; Coordinate Systems</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_projectionmatrix.html" id="menu_gl_projection">Projection Matrix</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_normaltransform.html" id="menu_gl_normal">Normal Vector Transformation</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_rotate.html" id="menu_gl_rotation">Rotation Along Axis</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_quaternion.html" id="menu_gl_quaternion">Quaternion to Matrix</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_anglestoaxes.html" id="menu_gl_angle">Angles to Axes</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_lookattoaxes.html" id="menu_gl_lookat">LookAt to Axes</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_camera.html" id="menu_gl_camera">Camera</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_matrix.html" id="menu_gl_matrix">Matrix Class (C++)</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_vertexarray.html" id="menu_gl_vertexarray">Vertex2D Array</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_displaylist.html" id="menu_gl_displaylist">Display List</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_vbo.html" id="menu_gl_vbo">Vertex2D Buffer Object (VBO)</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_pbo.html" id="menu_gl_pbo">Pixel Buffer Object (PBO)</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_fbo.html" id="menu_gl_fbo">Frame Buffer Object (FBO)</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_tessellation.html" id="menu_gl_tessellation">GLU Tessellation</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_mvc.html" id="menu_gl_mvc">Windows GUI Application with MVC</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_sphere.html" id="menu_gl_sphere">Sphere, Icosphere, Cubesphere</a></li>
+        <li><a href="http://www.songho.ca/opengl/gl_cylinder.html" id="menu_gl_cylinder">Cylinder, Prism, Pipe</a></li>
+        <!--
+        <li><a href="/opengl/gl_cone.html" id="menu_gl_cone">Cone, Pyramid</a></li>
+        <li><a href="/opengl/gl_torus.html" id="menu_gl_torus">Torus</a></li>
+        -->
+    </ul>
+</li>
+
+<li>
+<a href="http://www.songho.ca/math/index.html" id="menu_math"><span class="plusminus"></span>Math</a>
+    <ul id="menu_ul_math" style="height: 182px;">
+        <li><a href="http://www.songho.ca/math/homogeneous/homogeneous.html" id="menu_math_homogeneous">Homogeneous Coordinates</a></li>
+        <li><a href="http://www.songho.ca/math/euler/euler.html" id="menu_math_euler">Euler's Equation</a></li>
+        <li><a href="http://www.songho.ca/math/quaternion/quaternion.html" id="menu_math_quaternion">Quaternion</a></li>
+        <li><a href="http://www.songho.ca/math/line/line.html" id="menu_math_line">Line Equation</a></li>
+        <li><a href="http://www.songho.ca/math/plane/plane.html" id="menu_math_plane">Plane Equation</a></li>
+        <li><a href="http://www.songho.ca/math/taylor/taylor_exp.html" id="menu_math_taylorexp">Taylor Series: Exponential Function</a></li>
+        <li><a href="http://www.songho.ca/math/taylor/taylor_tri.html" id="menu_math_taylortri">Taylor Series: Trigonometric Function</a></li>
+    </ul>
+</li>
+
+<li>
+<a href="http://www.songho.ca/misc/index.html" id="menu_misc"><span class="plusminus"></span>Misc</a>
+    <ul id="menu_ul_misc" style="height: 208px;">
+        <li><a href="http://www.songho.ca/misc/sse/sse.html" id="menu_misc_sse">SSE (Streaming SIMD Extension)</a></li>
+        <li><a href="http://www.songho.ca/misc/alignment/dataalign.html" id="menu_misc_dataalign">Data Alignment</a></li>
+        <li><a href="http://www.songho.ca/misc/timer/timer.html" id="menu_misc_timer">High-Resolution Timer (C++)</a></li>
+        <li><a href="http://www.songho.ca/misc/tokenizer/tokenizer.html" id="menu_misc_tokenizer">String Tokenizer (C++)</a></li>
+        <li><a href="http://www.songho.ca/misc/logger/logger.html" id="menu_misc_logger">JavaScript Logger</a></li>
+        <li><a href="http://www.songho.ca/misc/treeview/treeview.html" id="menu_misc_treeview">Windows TreeView (Win32)</a>
+            <ul>
+                <li><a href="http://www.songho.ca/misc/treeview/treeviewnotify.html" id="menu_misc_treeviewnotify">TreeView Notification</a></li>
+                <li><a href="http://www.songho.ca/misc/treeview/treeviewstyles.html" id="menu_misc_treeviewstyles">TreeView Styles</a></li>
+            </ul>
+
+        </li>
+    </ul>
+</li>
+</ul>
+<p>
+&nbsp;
+</p>
+</nav>
+</div>
+
+<!-- main content block (left+right) -->
+<div id="mainblock">
+
+<div id="leftblock">
+<div class="innerblock">
+
+<h1>OpenGL Camera</h1>
+
+<h3><em>Under Construction...</em></h3>
+
+<p>
+<b>Related Topics:</b> <a href="http://www.songho.ca/opengl/gl_transform.html">OpenGL Transform</a>, <a href="http://www.songho.ca/opengl/gl_projectionmatrix.html">OpenGL Projection Matrix</a>, <a href="http://www.songho.ca/opengl/gl_quaternion.html">Quaternion to Rotation Matrix</a>
+<br>
+<b>Download:</b> <a href="http://www.songho.ca/opengl/files/OrbitCamera.zip">OrbitCamera.zip</a>, <a href="http://www.songho.ca/opengl/files/trackball.zip">trackball.zip</a>
+</p>
+
+<ul>
+	<li><a href="#overview">Overview</a></li>
+	<li><a href="#lookat">Camera LookAt</a></li>
+	<li><a href="#rotate">Camera Rotation (Pitch, Yaw, Roll)</a></li>
+	<li><a href="#shift">Camera Shifting</a></li>
+	<li><a href="#forward">Camera Forwarding</a></li>
+	<li><a href="#example1">Example: Orbit Camera</a></li>
+	<li><a href="#example2">Example: Trackball</a></li>
+</ul>
+
+<h3 id="overview">Overview</h3>
+<figure class="fr w50">
+<img src="OpenGL%20Camera_files/gl_camera01.png" alt="OpenGL Eye Space">
+<figcaption>OpenGL camera is always at origin and facing to -Z in eye space</figcaption>
+</figure>
+<p>
+OpenGL doesn't explicitly define neither camera object nor a specific 
+matrix for camera transformation. Instead, OpenGL transforms the entire 
+scene (<em>including the camera</em>) inversely to a space, where a fixed camera is at the origin (0,0,0) and always looking along -Z axis. This space is called <strong>eye space</strong>.
+</p>
+<p>
+Because of this, OpenGL uses a single GL_MODELVIEW matrix for both 
+object transformation to world space and camera (view) transformation to
+ eye space.
+</p>
+<p>
+You may break it down into 2 logical sub matrices;
+<br>
+<img src="OpenGL%20Camera_files/gl_camera_eq01.png" alt="OpenGL ModelView matrix combined" width="260" height="17">
+</p>
+
+<p>
+That is, each object in a scene is transformed with its own <strong>M</strong><sub>model</sub> first, then the entire scene is transformed reversely with <strong>M</strong><sub>view</sub>. In this page, we will discuss only <strong>M</strong><sub>view</sub> for camera transformation in OpenGL.
+</p>
+
+<h3 id="lookat">LookAt</h3>
+<p>
+<a href="http://www.opengl.org/sdk/docs/man2/xhtml/gluLookAt.xml">gluLookAt()</a> is used to construct a viewing matrix where a camera is located at the eye position <img src="OpenGL%20Camera_files/gl_camera_eq04.png" alt="eye position" width="87" height="21"> and looking at (or rotating to) the target point <img src="OpenGL%20Camera_files/gl_camera_eq05.png" alt="target position" width="85" height="21">.
+ The eye position and target are defined in world space. This section 
+describes how to implement the viewing matrix equivalent to <strong>gluLookAt()</strong>.
+</p>
+<p>
+Camera's <strong>lookAt</strong> transformation consists of 2 transformations; translating the whole scene inversely from the eye position to the origin (<strong>M<sub>T</sub></strong>), and then rotating the scene with reverse orientation (<strong>M<sub>R</sub></strong>), so the camera is positioned at the origin and facing to the -Z axis.
+<br>
+<img src="OpenGL%20Camera_files/gl_camera_eq07.png" alt="view matrix of lookAt" width="766" height="157">
+</p>
+
+<figure class="fr w50">
+<img src="OpenGL%20Camera_files/gl_camera02.gif" alt="Camera lookAt animation">
+<figcaption>OpenGL camera's lookAt() transformation</figcaption>
+</figure>
+<p>
+Suppose a camera is located at (2, 0, 3) and looking at (0, 0, 0) in 
+world space. In order to construct the viewing matrix for this case, we 
+need to translate the world to (-2, 0, -3) and rotate it about -33.7 
+degree along Y-axis. As a result, the virtual camera becomes facing to 
+-Z axis at the origin.
+</p>
+<p>
+The translation part of lookAt is easy. You simply move the camera position to the origin. The translation matrix <strong>M<sub>T</sub></strong> would be (replacing the 4th coloumn with the negated eye position);
+<br>
+<img src="OpenGL%20Camera_files/gl_camera_eq06.png" alt="lookAt's translation matrix" width="221" height="174">
+</p>
+<figure class="fl w40">
+<img src="OpenGL%20Camera_files/gl_camera05.png" alt="left, up and forward vector">
+<figcaption>Left, Up and Forward vectors from target to eye</figcaption>
+</figure>
+<p>
+The rotation part <strong>M<sub>R</sub></strong> of lookAt is much 
+harder than translation because you have to calculate 1st, 2nd and 3rd 
+columns of the rotation matrix all together.
+</p>
+<p>
+First, compute the normalized forward vector <img src="OpenGL%20Camera_files/gl_f.png" alt="forward vector" width="10" height="18"> from the target position <strong>v<sub>t</sub></strong> to the eye position <strong>v<sub>e</sub></strong>
+ of the rotation matrix. Note that the forward vector is from the target
+ to the eye position, not eye to target because the scene is actually 
+rotated, not the camera is.
+<br>
+<img src="OpenGL%20Camera_files/gl_camera_eq08.png" alt="forward vector" width="363" height="80">
+</p>
+<p>
+Second, compute the normalized left vector <img src="OpenGL%20Camera_files/gl_l.png" alt="left vector" width="5" height="14">
+ by performing cross product with a given camera's up vector. If the up 
+vector is not provided, you may use (0, 1, 0) by assuming the camera is 
+straight up to +Y axis.
+<br>
+<img src="OpenGL%20Camera_files/gl_camera_eq09.png" alt="left vector" width="123" height="78">
+</p>
+<p>
+Finally, re-calculate the normalized up vector <img src="OpenGL%20Camera_files/gl_u.png" alt="up vector" width="11" height="9">
+ by doing cross product the forward and left vectors, so all 3 vectors 
+are orthonormal (perpendicular and unit length). Note we do not 
+normalize the up vector because the cross product of 2 perpendicular 
+unit vectors also produces a unit vector.
+<br>
+<img src="OpenGL%20Camera_files/gl_camera_eq10.png" alt="up vector" width="82" height="18">
+</p>
+
+<div>
+These 3 basis vectors, <img src="OpenGL%20Camera_files/gl_l.png" alt="left vector" width="5" height="14">, <img src="OpenGL%20Camera_files/gl_u.png" alt="up vector" width="11" height="9"> and <img src="OpenGL%20Camera_files/gl_f.png" alt="forward vector" width="10" height="18"> are used to construct the rotation matrix <strong>M<sub>R</sub></strong>
+ of lookAt, however, the rotation matrix must be inverted. Suppose a 
+camera is located above a scene. The whole scene must rotate downward 
+inversely, so the camera is facing to -Z axis. In a similar way, if the 
+camera is located at the left of the scene, the scene should rotate to 
+right in order to align the camera to -Z axis. The following diagrams 
+show why the rotation matrix must be inverted.
+</div>
+<div class="flexrow" style="gap:20px">
+<figure style="flex:1 1 300px">
+<img src="OpenGL%20Camera_files/gl_camera03.gif" alt="Camera pitch animation">
+<figcaption>The scene rotates downward if the camera is above</figcaption>
+</figure>
+<figure style="flex:1 1 300px">
+<img src="OpenGL%20Camera_files/gl_camera04.gif" alt="Camera yaw animation">
+<figcaption>The scene rotates to right if the camera is at left</figcaption>
+</figure>
+</div>
+<br>
+
+<p>
+Therefore, the rotation part <strong>M<sub>R</sub></strong> of lookAt is
+ finding the rotation matrix from the target to the eye position, then 
+invert it. And, the inverse matrix is equal to its transpose matrix 
+because it is orthogonal which each column has unit length and 
+perpendicular to the other column.
+<br>
+<img src="OpenGL%20Camera_files/gl_camera_eq11.png" alt="Ratation matrix of lookAt" width="642" height="184">
+</p>
+
+<p>
+Finally, the view matrix for camera's lookAt transform is multiplying <strong>M<sub>T</sub></strong> and <strong>M<sub>R</sub></strong> together;
+<br>
+<img src="OpenGL%20Camera_files/gl_camera_eq12.png" alt="OpenGL LookAt matrix" width="770" height="150">
+</p>
+
+<p>
+Here is C++ snippet to construct the view matrix for camera's lookAt transformation. Please see the details in <a href="http://www.songho.ca/opengl/files/OrbitCamera.zip">OrbitCamera.cpp</a>.
+</p>
+<pre><code class="codeblock">
+<span class="comment">// dependency: Vector3 and Matrix4</span>
+struct Vector3
+{
+    float x;
+    float y;
+    float z;
+};
+
+class Matrix4
+{
+    float m[16];
+}
+
+<span class="comment">///////////////////////////////////////////////////////////////////////////////
+// equivalent to gluLookAt()
+// It returns 4x4 matrix
+///////////////////////////////////////////////////////////////////////////////</span>
+Matrix4 lookAt(Vector3&amp; eye, Vector3&amp; target, Vector3&amp; upDir)
+{
+    <span class="comment">// compute the forward vector from target to eye</span>
+    Vector3 forward = eye - target;
+    forward.normalize();                 <span class="comment">// make unit length</span>
+
+    <span class="comment">// compute the left vector</span>
+    Vector3 left = upDir.cross(forward); <span class="comment">// cross product</span>
+    left.normalize();
+
+    <span class="comment">// recompute the orthonormal up vector</span>
+    Vector3 up = forward.cross(left);    <span class="comment">// cross product</span>
+
+    <span class="comment">// init 4x4 matrix</span>
+    Matrix4 matrix;
+    matrix.identity();
+
+    <span class="comment">// set rotation part, inverse rotation matrix: M^-1 = M^T for Euclidean transform</span>
+    matrix[0] = left.x;
+    matrix[4] = left.y;
+    matrix[8] = left.z;
+    matrix[1] = up.x;
+    matrix[5] = up.y;
+    matrix[9] = up.z;
+    matrix[2] = forward.x;
+    matrix[6] = forward.y;
+    matrix[10]= forward.z;
+
+    <span class="comment">// set translation part</span>
+    matrix[12]= -left.x * eye.x - left.y * eye.y - left.z * eye.z;
+    matrix[13]= -up.x * eye.x - up.y * eye.y - up.z * eye.z;
+    matrix[14]= -forward.x * eye.x - forward.y * eye.y - forward.z * eye.z;
+
+    return matrix;
+}
+
+</code></pre>
+
+
+<h3 id="rotate">Rotation (Pitch, Yaw, Roll)</h3>
+<figure class="fl w50">
+<img src="OpenGL%20Camera_files/gl_camera07.png" alt="camera pitch, yaw roll">
+<figcaption>Camera Rotations; Pitch, Yaw and Roll</figcaption>
+</figure>
+<p>
+Other types of camera's rotations are <strong>pitch</strong>, <strong>yaw</strong> and <strong>roll</strong> rotating at the position of the camera. <strong>Pitch</strong> is rotating the camera up and down around the camera's local left axis (+X axis). <strong>Yaw</strong> is rotating left and right around the camera's local up axis (+Y axis). And, <strong>roll</strong> is rotating it around the camera's local forward axis (+Z axis).
+</p>
+<p>
+It is used for a free-look style camera, VR headset movements or first-person shooter camera interface.</p>
+<p>
+First, you need to move the whole scene inversely from the camera's position to the origin (0,0,0), same as <a href="#lookat">lookAt()</a> function. Then, rotate the scene along the rotation axis; pitch (X), yaw (Y) and roll (Z) independently.
+</p>
+<p>
+If multiple rotations are applied, combine them sequentially. Note that a
+ different order of rotations produces a different result. A commonly 
+used rotation order is <strong>roll → yaw → pitch</strong>.
+</p>
+<p>
+Keep it mind that the directions of the rotations (right-hand rule); a 
+positive pitch angle is rotating the camera downward, a positive yaw 
+angle means rotating the camera left, and a positive roll angle is 
+rotating the camera clockwise.
+</p>
+
+<h3 id="shift">Shifting</h3>
+<p>
+</p>
+
+<h3 id="forward">Forwarding</h3>
+<p>
+</p>
+
+<h3 id="example1">Example: OpenGL Orbit Camera</h3>
+<p>
+<img src="OpenGL%20Camera_files/gl_orbitCamera01.png" class="responsive" alt="OpenGL OrbitCamera">
+</p>
+<p>
+Download source and binary:
+<br>
+<em>(Updated: 2021-03-10)</em>
+</p>
+<p>
+<a href="http://www.songho.ca/opengl/files/OrbitCamera.zip"><img src="OpenGL%20Camera_files/windows-folder-icon32.png" style="vertical-align:middle; padding-right:5px;" alt="" width="32" height="32">OrbitCamera.zip</a> <em>(include VS 2015 project)</em>
+</p>
+
+
+<h3 id="example2">Example: Trackball</h3>
+<p>
+<img src="OpenGL%20Camera_files/gl_trackball01.png" class="responsive" alt="OpenGL Trackball">
+</p>
+<p>
+Download: <a href="http://www.songho.ca/opengl/files/trackball.zip">trackball.zip</a>
+</p>
+
+
+
+<!-- footer -->
+<div id="footer">
+<div style="float:left">
+©&nbsp;2016 - 2021 <a href="mailto:song.ahn@gmail.com">Song Ho Ahn (<span lang="ko">안성호</span>)</a>
+</div>
+<div style="float:right">
+<img src="OpenGL%20Camera_files/html5_gray32.png" alt="HTML5 Logo" width="32" height="32">
+</div>
+<div style="float:right">
+<a href="https://validator.w3.org/check?uri=referer"><img src="OpenGL%20Camera_files/I_heart_validator.png" alt="HTML Validator" width="80" height="15"></a>
+</div>
+</div>
+
+<!-- nav -->
+<div style="clear:both; font-size:80%">
+<a href="http://www.songho.ca/opengl/index.html">←Back</a>
+</div>
+
+
+</div>
+</div> <!-- END OF LEFTBLOCK -->
+
+
+<!-- right content block ============================================ -->
+<div id="rightblock">
+<div class="innerblock">
+
+<!-- DISQUS block =============================== -->
+<div id="commentblock">
+<div id="buttonDisqus" class="cssbutton">Show Comments</div>
+
+<div id="disqus_thread" style="display: none;"><iframe id="dsq-app5461" name="dsq-app5461" allowtransparency="true" scrolling="no" tabindex="0" title="Disqus" style="width: 1px !important; min-width: 100% !important; border: medium none !important; overflow: hidden !important; height: 13795px !important; --darkreader-inline-border-top: currentcolor; --darkreader-inline-border-right: currentcolor; --darkreader-inline-border-bottom: currentcolor; --darkreader-inline-border-left: currentcolor;" src="OpenGL%20Camera_files/a_002.html" data-darkreader-inline-border-top="" data-darkreader-inline-border-right="" data-darkreader-inline-border-bottom="" data-darkreader-inline-border-left="" horizontalscrolling="no" verticalscrolling="no" width="100%" frameborder="0"></iframe><iframe id="indicator-north" name="indicator-north" allowtransparency="true" scrolling="no" tabindex="0" title="Disqus" style="width: 772px !important; border: medium none !important; overflow: hidden !important; top: 0px !important; min-width: 772px !important; max-width: 772px !important; position: fixed !important; z-index: 2147483646 !important; height: 22px !important; min-height: 22px !important; max-height: 22px !important; display: none !important; --darkreader-inline-border-top: currentcolor; --darkreader-inline-border-right: currentcolor; --darkreader-inline-border-bottom: currentcolor; --darkreader-inline-border-left: currentcolor;" data-darkreader-inline-border-top="" data-darkreader-inline-border-right="" data-darkreader-inline-border-bottom="" data-darkreader-inline-border-left="" frameborder="0"></iframe><iframe id="indicator-south" name="indicator-south" allowtransparency="true" scrolling="no" tabindex="0" title="Disqus" style="width: 772px !important; border: medium none !important; overflow: hidden !important; bottom: 0px !important; min-width: 772px !important; max-width: 772px !important; position: fixed !important; z-index: 2147483646 !important; height: 22px !important; min-height: 22px !important; max-height: 22px !important; display: none !important; --darkreader-inline-border-top: currentcolor; --darkreader-inline-border-right: currentcolor; --darkreader-inline-border-bottom: currentcolor; --darkreader-inline-border-left: currentcolor;" data-darkreader-inline-border-top="" data-darkreader-inline-border-right="" data-darkreader-inline-border-bottom="" data-darkreader-inline-border-left="" frameborder="0"></iframe></div>
+<script>
+var disqus_shortname = 'songho'; // required: replace example with your forum shortname
+//var disqus_identifier = 'test';
+(function() {
+    var dsq=document.createElement('script'); dsq.type='text/javascript'; dsq.async=true;
+    dsq.src='https://'+disqus_shortname+'.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();
+</script>
+<noscript>
+Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+</noscript>
+
+</div>
+<!-- END OF DISQUS BLOCK ======================== -->
+
+<div>
+&nbsp;
+</div>
+
+</div>
+</div>
+<!-- END OF RIGHT BLOCK ============================================= -->
+
+</div>
+<!-- END OF MAIN BLOCK ============================================== -->
+
+</div>
+<!-- END OF WRAP ==================================================== -->
+
+
+
+<iframe style="display: none;"></iframe></body></html>
