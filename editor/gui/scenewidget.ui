@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1614</width>
-    <height>727</height>
+    <width>1779</width>
+    <height>1094</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -288,8 +288,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>381</width>
-               <height>419</height>
+               <width>272</width>
+               <height>722</height>
               </rect>
              </property>
              <property name="maximumSize">
@@ -461,7 +461,7 @@
                 <widget class="QWidget" name="sceneBoundsPage">
                  <layout class="QGridLayout" name="gridLayout_11">
                   <item row="1" column="1">
-                   <widget class="gui::DoubleSpinBox" name="spinLeftBoundary" native="true">
+                   <widget class="gui::DoubleSpinBox" name="spinLeftBoundary">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                       <horstretch>0</horstretch>
@@ -503,7 +503,7 @@
                    </widget>
                   </item>
                   <item row="2" column="1">
-                   <widget class="gui::DoubleSpinBox" name="spinRightBoundary" native="true">
+                   <widget class="gui::DoubleSpinBox" name="spinRightBoundary">
                     <property name="focusPolicy">
                      <enum>Qt::WheelFocus</enum>
                     </property>
@@ -539,7 +539,7 @@
                    </widget>
                   </item>
                   <item row="3" column="1">
-                   <widget class="gui::DoubleSpinBox" name="spinTopBoundary" native="true">
+                   <widget class="gui::DoubleSpinBox" name="spinTopBoundary">
                     <property name="focusPolicy">
                      <enum>Qt::WheelFocus</enum>
                     </property>
@@ -575,7 +575,7 @@
                    </widget>
                   </item>
                   <item row="4" column="1">
-                   <widget class="gui::DoubleSpinBox" name="spinBottomBoundary" native="true">
+                   <widget class="gui::DoubleSpinBox" name="spinBottomBoundary">
                     <property name="focusPolicy">
                      <enum>Qt::WheelFocus</enum>
                     </property>
@@ -787,7 +787,7 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="gui::DoubleSlider" name="bloomGSlide" native="true">
+                     <widget class="gui::DoubleSlider" name="bloomGSlide">
                       <property name="maximum" stdset="0">
                        <double>1.000000000000000</double>
                       </property>
@@ -824,7 +824,7 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="gui::DoubleSlider" name="bloomThresholdSlide" native="true">
+                     <widget class="gui::DoubleSlider" name="bloomThresholdSlide">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                         <horstretch>0</horstretch>
@@ -867,7 +867,7 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="gui::DoubleSlider" name="bloomBSlide" native="true">
+                     <widget class="gui::DoubleSlider" name="bloomBSlide">
                       <property name="maximum" stdset="0">
                        <double>1.000000000000000</double>
                       </property>
@@ -894,7 +894,7 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="gui::DoubleSlider" name="bloomRSlide" native="true">
+                     <widget class="gui::DoubleSlider" name="bloomRSlide">
                       <property name="maximum" stdset="0">
                        <double>1.000000000000000</double>
                       </property>
@@ -987,6 +987,12 @@
       </layout>
      </widget>
      <widget class="QGroupBox" name="center">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>1</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="title">
        <string>Viewport</string>
       </property>
@@ -1107,7 +1113,7 @@
              </widget>
             </item>
             <item>
-             <widget class="color_widgets::ColorSelector" name="widgetColor" native="true">
+             <widget class="color_widgets::ColorSelector" name="widgetColor">
               <property name="minimumSize">
                <size>
                 <width>30</width>
@@ -1354,9 +1360,9 @@
       </property>
       <widget class="QGroupBox" name="groupBox_2">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
+         <verstretch>1</verstretch>
         </sizepolicy>
        </property>
        <property name="minimumSize">
@@ -1378,7 +1384,7 @@
         <item>
          <widget class="gui::TreeWidget" name="tree">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -2059,6 +2065,16 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>color_widgets::ColorPreview</class>
+   <extends>QWidget</extends>
+   <header>color_preview.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>color_widgets::ColorSelector</class>
+   <extends>color_widgets::ColorPreview</extends>
+   <header>color_selector.hpp</header>
+  </customwidget>
+  <customwidget>
    <class>gui::TreeWidget</class>
    <extends>QFrame</extends>
    <header>treewidget.h</header>
@@ -2070,16 +2086,6 @@
    <header>collapsible_widget.h</header>
    <addpagemethod>AddPage</addpagemethod>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>color_widgets::ColorPreview</class>
-   <extends>QWidget</extends>
-   <header>color_preview.hpp</header>
-  </customwidget>
-  <customwidget>
-   <class>color_widgets::ColorSelector</class>
-   <extends>color_widgets::ColorPreview</extends>
-   <header>color_selector.hpp</header>
   </customwidget>
   <customwidget>
    <class>gui::DoubleSpinBox</class>
