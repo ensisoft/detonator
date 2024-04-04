@@ -463,7 +463,7 @@ font: 16pt &quot;Sans Serif&quot;;</string>
   <action name="actionClose">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/app_close_window.png</normaloff>:/16x16_ico_png/app_close_window.png</iconset>
+     <normaloff>:/32x32_ico_png/exit.png</normaloff>:/32x32_ico_png/exit.png</iconset>
    </property>
    <property name="text">
     <string>Close</string>
