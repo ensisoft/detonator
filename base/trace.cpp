@@ -21,6 +21,7 @@
 
 #include "base/assert.h"
 #include "base/trace.h"
+#include "base/logging.h"
 
 namespace {
 static thread_local base::Trace* thread_tracer = nullptr;
@@ -29,6 +30,46 @@ static thread_local bool enable_tracing = false;
 
 namespace base
 {
+
+unsigned TraceLog::BeginScope(const char* name)
+{
+    if (mTraceIndex == mCallTrace.size())
+    {
+        if (!mMaxStackSizeExceededWarning)
+        {
+            WARN("Tracing scopes exceed maximum trace stack size. [max='%1']", mCallTrace.size());
+            WARN("Your tracing will be incomplete!!");
+            WARN("You must increase the maximum trace entry count in order receive complete trace.");
+            WARN("This message is printed once per run.");
+            mMaxStackSizeExceededWarning = true;
+        }
+        return mTraceIndex;
+    }
+
+    ASSERT(mTraceIndex < mCallTrace.size());
+    TraceEntry entry;
+    entry.name        = name;
+    entry.tid         = mThreadId;
+    entry.level       = mStackDepth++;
+    entry.start_time  = GetTime();
+    entry.finish_time = 0;
+    mCallTrace[mTraceIndex] = std::move(entry);
+    return mTraceIndex++;
+}
+
+void TraceLog::EndScope(unsigned int index)
+{
+    ASSERT(index <= mCallTrace.size());
+    ASSERT(mStackDepth);
+
+    // if the index is the maximum we are ignoring this
+    // stack pop.
+    if (index == mTraceIndex)
+        return;
+
+    mCallTrace[index].finish_time = GetTime();
+    mStackDepth--;
+}
 
 Trace* GetThreadTrace()
 {
