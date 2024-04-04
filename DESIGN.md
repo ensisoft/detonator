@@ -3,6 +3,27 @@ DETONATOR 2D 💥💣
 
 ## Software Design Document 💭
 
+## Audio Thread
+
+The audio engine inside DETONATOR 2D engine can use a separate audio thread for audio playback.<br>
+There are several build variables that control this feature.
+
+[escripten/config.h](emscripten/config.h)
+
+```
+  #define AUDIO_USE_LOCK_FREE_QUEUE
+  #define AUDIO_USE_PLAYER_THREAD
+```
+
+One of the problems is that Web Audio can only be used from the browsers main thread. If any
+other thread is trying to use the Web Audio interface the requests are silently proxied to the
+main thread! This means that the original design that would run the audio device in it's own thread does
+not work well since it'll implicitly synchronize with the main thread and kill all parallelism.
+
+The current solution is to wrap the audio *source* objects inside threads so that the audio
+graph evaluation runs in parallel and then use the main thread to take the produced audio
+buffers and push them to WebAudio in the OpenAL device stream callbacks.
+
 ## C++ Objects That Represent User Types
 In a game engine there's a typically a need to let the user define new game content and create new resource types such as
 scenes, entities, UIs and materials. For example the user might want to define a material called "marble" and there needs
