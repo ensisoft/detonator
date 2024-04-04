@@ -4,6 +4,46 @@
 
 List of known issues that are not clearly identified as DETONATOR 2D bugs (yet).
 
+### HTML5/WASM Thread support
+
+Supporting threads using pthread requires some more complicated steps in the Emscripten build AND in the game deployment.
+
+1. Turn on the pthread support in the Emscripten build in [emscripten/CMakeLists.txt](emscripten/CMakeLists.txt)
+
+```
+   target_compile_options(GameEngine PRIVATE -pthread)
+   ...
+   target_link_options(GameEngine PRIVATE -pthread)
+   ...
+   install(FILES "${CMAKE_CURRENT_BINARY_DIR}/GameEngine.worker.js" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/../editor/dist")
+```
+
+2. When you deploy your game to a web server the host must turn on HTTP Cross-Origin policy flags in order to enable SharedArrayBuffer.<br>
+   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer 
+   <br>This can be done with a .htaccess file. See sample below 
+
+```
+Header set Access-Control-Allow-Origin  "https://your-domain.com"
+Header set Cross-Origin-Embedder-Policy "require-corp"
+Header set Cross-Origin-Resource-Policy "same-site"
+Header set Cross-Origin-Opener-Policy   "same-origin"
+Header set Access-Control-Allow-Headers "range"
+```
+
+3. The threads must be launched by the main thread from the browser's main event loop.
+   In other words if your code does:
+
+```
+    auto thread = std.:thread(...);
+    thread.join(); 
+```
+
+You're deadlocking forever since the main thread (the currently) calling thread must return to the
+browser's event loop in order to launch the thread, but joining the thread will block the calling thread!
+
+The way to work around this is to use the Emscripten `-sPTHREAD_POOL_SIZE=n` build parameter which adds
+code to initialize N number of threads on the application launch so that they're ready to go.
+
 ### LINUX (Native)
 
 Pulseaudio  audio issue that happens occasionally. Pulseaudio sound is crackling a lot and several buffer 
