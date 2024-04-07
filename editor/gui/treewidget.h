@@ -154,6 +154,8 @@ namespace gui
         void clickEvent(TreeItem* item);
 
     protected:
+        virtual void focusOutEvent(QFocusEvent* ford) override;
+        virtual void focusInEvent(QFocusEvent* ford) override;
         virtual void paintEvent(QPaintEvent* event) override;
         virtual void mouseMoveEvent(QMouseEvent* mickey) override;
         virtual void mousePressEvent(QMouseEvent* mickey) override;

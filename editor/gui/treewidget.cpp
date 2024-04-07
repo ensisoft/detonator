@@ -72,7 +72,10 @@ void RenderTreeItem(const gui::TreeWidget::TreeItem& item, const QRect& box, con
     const QIcon& ico = item.GetIcon();
     if (!ico.isNull())
     {
-        ico.paint(&painter, box.translated(0, 0), Qt::AlignLeft, item.GetIconMode());
+        // hack +2 offset because ico.paint doesn't respect the
+        // transform set on the painter...
+        ico.paint(&painter, box.translated(2, 2), Qt::AlignLeft, item.GetIconMode());
+
     }
 }
 
@@ -174,17 +177,41 @@ void TreeWidget::ClearSelection()
     emit currentRowChanged();
 }
 
+void TreeWidget::focusOutEvent(QFocusEvent* ford)
+{
+    QAbstractScrollArea::focusOutEvent(ford);
+
+    viewport()->update();
+}
+
+void TreeWidget::focusInEvent(QFocusEvent* ford)
+{
+    QAbstractScrollArea::focusInEvent(ford);
+
+    viewport()->update();
+}
+
 void TreeWidget::paintEvent(QPaintEvent* event)
 {
     const QPalette& palette = this->palette();
 
     const unsigned kBaseLevel    = 1;
     const unsigned kLevelOffset  = 15; // px
-    const unsigned window_width  = viewport()->width();
-    const unsigned window_height = viewport()->height();
+
+    auto rect = this->viewport()->rect();
+    rect.translate(2.0, 2.0);
+    rect.setWidth(rect.width() - 4);
+    rect.setHeight(rect.height() - 4);
+
+    const unsigned window_width  = rect.width();
+    const unsigned window_height = rect.height();
 
     QPainter painter(viewport());
     painter.fillRect(viewport()->rect(), palette.color(QPalette::Base));
+
+    QTransform transform;
+    transform.translate(2.0f, 2.0f);
+    painter.setTransform(transform);
 
     for (size_t i=0; i<mItems.size(); ++i)
     {
@@ -252,6 +279,22 @@ void TreeWidget::paintEvent(QPaintEvent* event)
             RenderTreeItem(item, QRect(xpos, ypos, window_width, mItemHeight),
                            palette, painter, true, false);
         }
+    }
+
+    if (hasFocus())
+    {
+        painter.resetTransform();
+
+        QPen pen;
+        pen.setWidth(1.0);
+        pen.setColor(QColor(0x14, 0x8c, 0xd2, 0xff));
+        painter.setPen(pen);
+
+        auto rect = viewport()->rect();
+        rect.translate(1, 1);
+        rect.setWidth(rect.width() - 2);
+        rect.setHeight(rect.height() -2);
+        painter.drawRect(rect);
     }
 }
 
