@@ -586,13 +586,6 @@
           <property name="contextMenuPolicy">
            <enum>Qt::CustomContextMenu</enum>
           </property>
-          <property name="styleSheet">
-           <string notr="true">QFrame:hover {
-  border: 1px solid #148CD2;
-  color: #F0F0F0;
-}
-</string>
-          </property>
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>
