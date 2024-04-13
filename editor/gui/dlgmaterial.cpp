@@ -278,14 +278,80 @@ void DlgMaterial::MouseWheel(QWheelEvent* wheel)
     mUI.vScroll->setValue(mScrollOffsetRow);
 }
 
-bool DlgMaterial::KeyPress(QKeyEvent* key)
+bool DlgMaterial::KeyPress(QKeyEvent* event)
 {
-    if (key->key() == Qt::Key_Escape)
+    const auto key = event->key();
+
+    if (key == Qt::Key_Escape)
     {
         reject();
         return true;
     }
-    return false;
+    else if (key == Qt::Key_Return)
+    {
+        if (mSelectedMaterialId.isEmpty())
+            return false;
+        accept();
+        return true;
+    }
+
+    if (mMaterials.empty())
+        return false;
+
+    size_t index = 0;
+    for (; index < mMaterials.size(); ++index)
+    {
+        if (mMaterials[index].id == mSelectedMaterialId)
+            break;
+    }
+    if (index == mMaterials.size())
+    {
+        mScrollOffsetRow    = 0;
+        mSelectedMaterialId = mMaterials[0].id;
+    }
+
+    const auto BoxWidth  = GetBoxWidth(mPreviewScale);
+    const auto BoxHeight = GetBoxHeight(mPreviewScale);
+
+    const auto width    = mUI.widget->width();
+    const auto height   = mUI.widget->height();
+    const auto num_cols = width / (BoxWidth + BoxMargin);
+    const auto num_rows = mMaterials.size() / num_cols;
+
+    if (key == Qt::Key_Left)
+    {
+        if (index > 0)
+            index--;
+        else index = mMaterials.size()-1;
+    }
+    else if(key == Qt::Key_Right)
+    {
+        if (index < mMaterials.size() - 1)
+            index++;
+        else index = 0;
+    }
+    else if (key == Qt::Key_Down)
+    {
+        index += num_cols;
+        if (index >= mMaterials.size())
+            index = mMaterials.size() - 1;
+    }
+    else if (key == Qt::Key_Up)
+    {
+        index -= num_cols;
+        if (index >= mMaterials.size())
+            index = 0;
+    }
+
+    const auto visible_rows = height / (BoxHeight + BoxMargin);
+
+    const auto row = index / num_cols;
+    if (row < mScrollOffsetRow || row > mScrollOffsetRow + visible_rows)
+        mScrollOffsetRow = row;
+
+    ASSERT(index < mMaterials.size());
+    mSelectedMaterialId = mMaterials[index].id;
+    return true;
 }
 
 } // namespace
