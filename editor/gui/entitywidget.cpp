@@ -3424,9 +3424,29 @@ bool EntityWidget::KeyPress(QKeyEvent* key)
         case Qt::Key_Escape:
             OnEscape();
             break;
+        case Qt::Key_Space:
+            if (auto* node = GetCurrentNode()) {
+                if (key->modifiers() & Qt::Key_Shift)
+                {
+                    if (auto* drawable = node->GetDrawable())
+                        on_btnSelectMaterial_clicked();
+                    else if (auto* text = node->GetTextItem())
+                        on_btnSelectFont_clicked();
+                }
+                else
+                {
+                    if (auto* text = node->GetTextItem())
+                        on_btnSelectFont_clicked();
+                    else if (auto* drawable = node->GetDrawable())
+                        on_btnSelectMaterial_clicked();
+                }
+                mUI.widget->setFocus();
+            }
+            break;
         default:
             return false;
     }
+
     return true;
 }
 
