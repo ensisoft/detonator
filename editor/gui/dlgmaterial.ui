@@ -26,8 +26,11 @@
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="QLineEdit" name="filter">
+        <property name="text">
+         <string/>
+        </property>
         <property name="placeholderText">
-         <string>Filter materials</string>
+         <string>Find material by name</string>
         </property>
         <property name="clearButtonEnabled">
          <bool>true</bool>
