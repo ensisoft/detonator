@@ -27,7 +27,7 @@
       <item>
        <widget class="QLineEdit" name="filter">
         <property name="placeholderText">
-         <string>Filter fonts</string>
+         <string>Find font by name</string>
         </property>
         <property name="clearButtonEnabled">
          <bool>true</bool>
