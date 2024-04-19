@@ -488,14 +488,39 @@ void IsoscelesTriangleGeometry::Generate(const Environment& env, Style style, Ge
 }
 
 // static
-void RightTriangleGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry)
+void RightTriangleGeometry::Generate(const Environment& env, Style style, GeometryBuffer& geometry, const RightTriangleArgs& args)
 {
-    const Vertex2D verts[3] = {
+    const Vertex2D bottom_left[3] = {
         { {0.0f,  0.0f}, {0.0f, 0.0f} },
         { {0.0f, -1.0f}, {0.0f, 1.0f} },
         { {1.0f, -1.0f}, {1.0f, 1.0f} }
     };
-    geometry.SetVertexBuffer(verts, 3);
+    const Vertex2D bottom_right[3] = {
+        { {0.0f, -1.0f}, {0.0f, 1.0f} },
+        { {1.0f, -1.0f}, {1.0f, 1.0f} },
+        { {1.0f,  0.0f}, {1.0f, 0.0f} }
+    };
+    const Vertex2D top_left[3] = {
+        { {0.0f,  0.0f}, {0.0f, 0.0f} },
+        { {0.0f, -1.0f}, {0.0f, 1.0f} },
+        { {1.0f,  0.0f}, {1.0f, 0.0f} }
+    };
+    const Vertex2D top_right[3] = {
+        { {0.0f,  0.0f}, {0.0f, 0.0f} },
+        { {1.0f, -1.0f}, {1.0f, 1.0f} },
+        { {1.0f,  0.0f}, {1.0f, 0.0f} }
+    };
+
+    if (args.corner == RightTriangleArgs::Corner::BottomLeft)
+        geometry.SetVertexBuffer(bottom_left, 3);
+    else if (args.corner == RightTriangleArgs::Corner::BottomRight)
+        geometry.SetVertexBuffer(bottom_right, 3);
+    else if (args.corner == RightTriangleArgs::Corner::TopLeft)
+        geometry.SetVertexBuffer(top_left, 3);
+    else if (args.corner == RightTriangleArgs::Corner::TopRight)
+        geometry.SetVertexBuffer(top_right, 3);
+    else BUG("No such right triangle geometry");
+
     geometry.SetVertexLayout(GetVertexLayout<Vertex2D>());
 
     if (style == Style::Solid)
@@ -1286,7 +1311,7 @@ void ConstructSimpleShape(const SimpleShapeArgs& args,
     else if (type == SimpleShapeType::Rectangle)
         detail::RectangleGeometry::Generate(environment, style, geometry);
     else if (type == SimpleShapeType::RightTriangle)
-        detail::RightTriangleGeometry::Generate(environment, style, geometry);
+        detail::RightTriangleGeometry::Generate(environment, style, geometry, std::get<RightTriangleArgs>(args));
     else if (type == SimpleShapeType::RoundRect)
         detail::RoundRectGeometry::Generate(environment, style, geometry, std::get<RoundRectShapeArgs>(args).corner_radius);
     else if (type == SimpleShapeType::SemiCircle)

@@ -276,6 +276,14 @@ namespace gfx
         using Environment = Drawable::Environment;
         using Style = SimpleShapeStyle;
 
+        struct RightTriangleArgs {
+            enum class Corner {
+                BottomLeft, BottomRight,
+                TopLeft, TopRight
+            };
+            Corner corner = Corner::BottomLeft;
+        };
+
         struct ArrowGeometry {
             static void Generate(const Environment& env, Style style, GeometryBuffer& geometry);
         };
@@ -298,7 +306,7 @@ namespace gfx
             static void Generate(const Environment& env, Style style, GeometryBuffer& device);
         };
         struct RightTriangleGeometry {
-            static void Generate(const Environment& env, Style style, GeometryBuffer& geometry);
+            static void Generate(const Environment& env, Style style, GeometryBuffer& geometry, const RightTriangleArgs& args);
         };
         struct TrapezoidGeometry {
             static void Generate(const Environment& env, Style style, GeometryBuffer& device);
@@ -367,6 +375,7 @@ namespace gfx
 
 
     namespace detail {
+
         struct SectorShapeArgs {
             float fill_percentage = 0.25f;
         };
@@ -384,7 +393,7 @@ namespace gfx
         };
 
         using SimpleShapeArgs = std::variant<std::monostate, SectorShapeArgs, RoundRectShapeArgs,
-                CylinderShapeArgs, ConeShapeArgs, SphereShapeArgs>;
+                CylinderShapeArgs, ConeShapeArgs, SphereShapeArgs, RightTriangleArgs>;
         using SimpleShapeEnvironment = DrawableClass::Environment;
 
         void ConstructSimpleShape(const SimpleShapeArgs& args,
@@ -453,6 +462,15 @@ namespace gfx
             explicit SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
                                      std::string name = "") noexcept
               : SimpleShapeClass(type, std::monostate(), std::move(id), std::move(name))
+            {}
+        };
+
+        template<>
+        struct SimpleShapeClassTypeShim<SimpleShapeType::RightTriangle> : public SimpleShapeClass {
+            explicit SimpleShapeClassTypeShim(std::string id = base::RandomString(10),
+                                              std::string name = "",
+                                              RightTriangleArgs::Corner corner =  RightTriangleArgs::Corner::BottomLeft) noexcept
+              : SimpleShapeClass(SimpleShapeType::RightTriangle, RightTriangleArgs{corner}, std::move(id), std::move(name))
             {}
         };
 
@@ -596,6 +614,15 @@ namespace gfx
         {
             explicit SimpleShapeInstanceTypeShim(Style style = Style::Solid) noexcept
               : SimpleShape(type, style)
+            {}
+        };
+
+        template<>
+        struct SimpleShapeInstanceTypeShim<SimpleShapeType::RightTriangle> : public SimpleShape
+        {
+            explicit SimpleShapeInstanceTypeShim(Style style = Style::Solid,
+                                                 RightTriangleArgs::Corner corner = RightTriangleArgs::Corner::BottomLeft) noexcept
+              : SimpleShape(SimpleShapeType::RightTriangle, RightTriangleArgs{corner}, style)
             {}
         };
 
