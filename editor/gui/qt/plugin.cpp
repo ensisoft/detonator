@@ -27,6 +27,7 @@
 #include <QtDesigner/QDesignerPropertySheetExtension>
 
 #include "plugin.h"
+#include "../timewidget.h"
 #include "../doubleslider.h"
 #include "../spinboxwidget.h"
 #include "../rangewidget.h"
@@ -52,6 +53,67 @@ namespace gui {
     }
 
 }
+
+TimeWidgetPlugin::TimeWidgetPlugin(QObject* parent)
+        : QObject(parent)
+{}
+
+bool TimeWidgetPlugin::isContainer() const
+{
+    return false;
+}
+bool TimeWidgetPlugin::isInitialized() const
+{
+    return initialized;
+}
+QIcon TimeWidgetPlugin::icon() const
+{
+    return QIcon();
+}
+QString TimeWidgetPlugin::domXml() const
+{
+    return "<ui language=\"c++\">\n"
+           " <widget class=\"gui::TimeWidget\" name=\"time\">\n"
+           "  <property name=\"geometry\">\n"
+           "   <rect>\n"
+           "    <x>0</x>\n"
+           "    <y>0</y>\n"
+           "    <width>200</width>\n"
+           "    <height>20</height>\n"
+           "   </rect>\n"
+           "  </property>\n"
+           " </widget>\n"
+           "</ui>\n";
+}
+QString TimeWidgetPlugin::group() const
+{
+    return "DETONATOR2D";
+}
+QString TimeWidgetPlugin::includeFile() const
+{
+    return "timewidget.h";
+}
+QString TimeWidgetPlugin::name() const
+{
+    return "gui::TimeWidget";
+}
+QString TimeWidgetPlugin::toolTip() const
+{
+    return "";
+}
+QString TimeWidgetPlugin::whatsThis() const
+{
+    return "";
+}
+QWidget* TimeWidgetPlugin::createWidget(QWidget *parent)
+{
+    return new gui::TimeWidget(parent);
+}
+void TimeWidgetPlugin::initialize(QDesignerFormEditorInterface *core)
+{
+    initialized = true;
+}
+
 
 CurveWidgetPlugin::CurveWidgetPlugin(QObject* parent)
         : QObject(parent)
@@ -114,8 +176,6 @@ void CurveWidgetPlugin::initialize(QDesignerFormEditorInterface *core)
 {
     initialized = true;
 }
-
-
 
 
 UikWidgetStyleWidgetPlugin::UikWidgetStyleWidgetPlugin(QObject* parent)
@@ -588,6 +648,7 @@ MyCustomWidgets::MyCustomWidgets(QObject* parent)
     widgets.append(new QtSvgViewWidgetPlugin(this));
     widgets.append(new UikWidgetStyleWidgetPlugin(this));
     widgets.append(new CurveWidgetPlugin(this));
+    widgets.append(new TimeWidgetPlugin(this));
 }
 
 QList<QDesignerCustomWidgetInterface*> MyCustomWidgets::customWidgets() const

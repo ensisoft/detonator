@@ -20,6 +20,7 @@
 
 #include "warnpush.h"
 #  include <QWidget>
+#  include <QtUiPlugin/QDesignerExportWidget>
 #include "warnpop.h"
 
 namespace Ui {
@@ -28,7 +29,7 @@ namespace Ui {
 
 namespace gui
 {
-    class TimeWidget : public QWidget
+    class DESIGNER_PLUGIN_EXPORT TimeWidget : public QWidget
     {
         Q_OBJECT
 
