@@ -94,6 +94,9 @@ add_library(DetonatorQtDesignerPlugin SHARED
     ../collapsible_widget.ui
     ../collapsible_widget.cpp
     ../widgetstylewidget.ui
+    ../timewidget.h
+    ../timewidget.ui
+    ../timewidget.cpp
     ../../resource/resource.qrc)
 
 
