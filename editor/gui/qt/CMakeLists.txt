@@ -106,6 +106,7 @@ target_include_directories(DetonatorQtDesignerPlugin PRIVATE "${CMAKE_CURRENT_LI
 target_link_libraries(DetonatorQtDesignerPlugin Qt5::Designer Qt5::Svg Qt5::OpenGL)
 target_link_libraries(DetonatorQtDesignerPlugin QtColorWidgets)
 target_compile_definitions(DetonatorQtDesignerPlugin PRIVATE DETONATOR_DESIGNER_PLUGIN_BUILD)
+target_compile_definitions(DetonatorQtDesignerPlugin PRIVATE BASE_FORMAT_SUPPORT_MAGIC_ENUM)
 
 
 # install
