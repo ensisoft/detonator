@@ -1114,6 +1114,13 @@ AudioWidget::AudioWidget(app::Workspace* workspace)
     GetSelectedElementProperties();
     mGraphHash = GetHash();
 
+    // Add random resize since the fucking scroll area
+    // always has wrong size in the beginning and is either
+    // too wide or too narrow! why is this such fucking
+    // madness every time??
+    auto size = mUI.qtFuckingHatesYou->size();
+    mUI.qtFuckingHatesYou->resize(600, size.height());
+
     setWindowTitle("My Graph");
 }
 AudioWidget::AudioWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -1140,6 +1147,9 @@ AudioWidget::AudioWidget(app::Workspace* workspace, const app::Resource& resourc
     on_outElem_currentIndexChanged(0);
     SetValue(mUI.outPort, ListItemId(klass->GetGraphOutputElementPort()));
     GetSelectedElementProperties();
+
+    GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
+    GetUserProperty(resource, "right_splitter", mUI.rightSplitter);
 
     mGraphHash = GetHash();
 }
@@ -1266,6 +1276,8 @@ bool AudioWidget::SaveState(Settings& settings) const
     settings.SetValue("Audio", "graph_out_port", (QString)GetItemId(mUI.outPort));
     settings.SaveWidget("Audio", mUI.graphName);
     settings.SaveWidget("Audio", mUI.graphID);
+    settings.SaveWidget("Audio", mUI.mainSplitter);
+    settings.SaveWidget("Audio", mUI.rightSplitter);
     return true;
 }
 bool AudioWidget::LoadState(const Settings& settings)
@@ -1279,6 +1291,8 @@ bool AudioWidget::LoadState(const Settings& settings)
     settings.GetValue("Audio", "graph_out_port", &graph_out_port);
     settings.LoadWidget("Audio", mUI.graphName);
     settings.LoadWidget("Audio", mUI.graphID);
+    settings.LoadWidget("Audio", mUI.mainSplitter);
+    settings.LoadWidget("Audio", mUI.rightSplitter);
 
     mScene->FromJson(json);
 
@@ -1595,6 +1609,9 @@ void AudioWidget::on_actionSave_triggered()
     }
 
     app::AudioResource resource(std::move(klass), GetValue(mUI.graphName));
+    SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
+    SetUserProperty(resource, "right_splitter", mUI.rightSplitter);
+
     mScene->SaveState(resource);
 
     mWorkspace->SaveResource(resource);
