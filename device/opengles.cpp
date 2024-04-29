@@ -755,7 +755,7 @@ public:
             return;
 
         const auto index_buffer_type = mygeom->GetIndexBufferType();
-        const auto index_byte_size = gfx::Geometry::GetIndexByteSize(index_buffer_type);
+        const auto index_byte_size = gfx::GetIndexByteSize(index_buffer_type);
         const auto index_buffer_byte_size = mygeom->GetIndexBufferByteSize();
         const auto buffer_index_count = index_buffer_byte_size / index_byte_size;
 

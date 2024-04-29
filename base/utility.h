@@ -18,6 +18,8 @@
 
 #include "config.h"
 
+#include <cstring> // for memcpy
+
 #include <memory> // for unique_ptr
 #include <string>
 #include <vector>
@@ -35,6 +37,51 @@
 
 namespace base
 {
+
+enum class ByteOrder {
+    LE, BE
+};
+
+inline ByteOrder GetByteOrder() noexcept
+{
+    constexpr uint32_t value = 1;
+    if (*(const char*)&value == 1)
+        return ByteOrder::LE;
+
+    return ByteOrder::BE;
+}
+
+template<typename T>
+void SwizzleBuffer(void* buffer, size_t bytes)
+{
+    const auto count = bytes / sizeof(T);
+
+    auto* ptr = reinterpret_cast<T*>(buffer);
+
+    for (size_t i=0; i<count; ++i)
+    {
+        unsigned char buffer[sizeof(T)];
+        std::memcpy(buffer, &ptr[i], sizeof(T));
+
+        if constexpr (sizeof(T) == 8)
+        {
+            std::swap(buffer[0], buffer[7]);
+            std::swap(buffer[1], buffer[6]);
+            std::swap(buffer[2], buffer[5]);
+            std::swap(buffer[3], buffer[4]);
+        }
+        else if constexpr (sizeof(T) == 4)
+        {
+            std::swap(buffer[0], buffer[3]);
+            std::swap(buffer[1], buffer[2]);
+        }
+        else if constexpr (sizeof(T) == 2)
+        {
+            std::swap(buffer[0], buffer[1]);
+        }
+        std::memcpy(&ptr[i], buffer, sizeof(T));
+    }
+}
 
 template<typename T> inline
 T EvenMultiple(T value, T multiple)
