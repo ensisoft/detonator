@@ -212,6 +212,7 @@ add_executable(GameEngine
     ../graphics/bitmap.cpp
     ../graphics/text.cpp
     ../graphics/utility.cpp
+    ../graphics/vertex.cpp
     ../wdk/wdk/keys.cpp
     ../uikit/animation.cpp
     ../uikit/window.cpp
