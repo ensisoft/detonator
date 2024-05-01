@@ -32,6 +32,7 @@
 #include "graphics/shader.h"
 #include "graphics/geometry.h"
 #include "graphics/framebuffer.h"
+#include "graphics/drawcmd.h"
 
 // We need this to create the rendering context.
 #include "wdk/opengl/context.h"

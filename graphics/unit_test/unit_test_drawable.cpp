@@ -21,6 +21,7 @@
 #include "data/json.h"
 #include "graphics/drawable.h"
 #include "graphics/geometry.h"
+#include "graphics/drawcmd.h"
 #include "graphics/tool/geometry.h"
 
 bool operator==(const gfx::Vec2& lhs, const gfx::Vec2& rhs)

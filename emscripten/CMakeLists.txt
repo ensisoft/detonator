@@ -209,6 +209,7 @@ add_executable(GameEngine
     ../graphics/image.cpp
     ../graphics/loader.cpp
     ../graphics/drawing.cpp
+    ../graphics/drawcmd.cpp
     ../graphics/bitmap.cpp
     ../graphics/text.cpp
     ../graphics/utility.cpp

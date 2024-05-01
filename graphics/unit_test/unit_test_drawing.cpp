@@ -41,6 +41,7 @@
 #include "graphics/painter.h"
 #include "graphics/transform.h"
 #include "graphics/shaderpass.h"
+#include "graphics/drawcmd.h"
 #include "graphics/tool/geometry.h"
 
 bool operator==(const gfx::Vertex2D& lhs, const gfx::Vertex2D& rhs)

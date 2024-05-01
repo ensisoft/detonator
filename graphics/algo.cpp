@@ -27,6 +27,7 @@
 #include "graphics/algo.h"
 #include "graphics/device.h"
 #include "graphics/geometry.h"
+#include "graphics/drawcmd.h"
 #include "graphics/program.h"
 #include "graphics/texture.h"
 #include "graphics/framebuffer.h"

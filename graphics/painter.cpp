@@ -22,6 +22,7 @@
 #include <string>
 
 #include "base/format.h"
+#include "graphics/drawcmd.h"
 #include "graphics/device.h"
 #include "graphics/shader.h"
 #include "graphics/program.h"

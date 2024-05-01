@@ -30,6 +30,7 @@
 #include "graphics/painter.h"
 #include "graphics/drawable.h"
 #include "graphics/geometry.h"
+#include "graphics/drawcmd.h"
 #include "editor/app/import.h"
 #include "editor/app/eventlog.h"
 

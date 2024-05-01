@@ -51,6 +51,7 @@
 #include "graphics/image.h"
 #include "graphics/transform.h"
 #include "graphics/utility.h"
+#include "graphics/drawcmd.h"
 
 // some good information here about text rendering
 // https://gankra.github.io/blah/text-hates-you/

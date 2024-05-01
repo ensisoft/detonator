@@ -16,67 +16,10 @@
 
 #include <cstring>
 
-#include "warnpush.h"
-#  include <base64/base64.h>
-#include "warnpop.h"
-
-#include "base/hash.h"
-#include "base/logging.h"
-#include "base/utility.h"
-#include "data/reader.h"
-#include "data/writer.h"
 #include "graphics/geometry.h"
-
-namespace {
-    void AddLine(gfx::VertexBuffer& buffer, const void* v0, const void* v1)
-    {
-        buffer.PushBack(v0);
-        buffer.PushBack(v1);
-    }
-
-} // namespace
 
 namespace gfx
 {
-
-void CommandStream::IntoJson(data::Writer& writer) const
-{
-    // expect tightly packed and 32bits for the type enum
-    // in order to make the serialization simple
-    static_assert(sizeof(DrawCommand) == sizeof(uint32_t) * 3);
-
-    const auto bytes = mCount * sizeof(DrawCommand);
-    writer.Write("byte_order", base::GetByteOrder());
-    writer.Write("command_buffer", base64::Encode((const unsigned char*)mCommands, bytes));
-}
-
-bool CommandBuffer::FromJson(const data::Reader& reader)
-{
-    bool ok = true;
-
-    auto byte_order = base::ByteOrder::LE;
-
-    std::string data;
-    ok &= reader.Read("byte_order", &byte_order);
-    ok &= reader.Read("command_buffer", &data);
-    data = base64::Decode(data);
-
-    const auto count = data.size() / sizeof(DrawCommand);
-    mBuffer->resize(count);
-
-    if (count == 0)
-        return ok;
-
-    // expect tightly packed and 32bits for the type enum
-    // in order to make the serialization simple
-    static_assert(sizeof(Geometry::DrawCommand) == sizeof(uint32_t) * 3);
-
-    std::memcpy(mBuffer->data(), data.data(), data.size());
-
-    if (byte_order != base::GetByteOrder())
-        base::SwizzleBuffer<uint32_t>(mBuffer->data(), mBuffer->size() * sizeof(DrawCommand));
-    return ok;
-}
 
 void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe)
 {
@@ -94,6 +37,11 @@ void CreateWireframe(const GeometryBuffer& geometry, GeometryBuffer& wireframe)
     const auto vertex_count = vertices.GetCount();
     const auto index_count  = indices.GetCount();
     const auto has_index = indices.IsValid();
+
+    auto AddLine = [](gfx::VertexBuffer& buffer, const void* v0, const void* v1) {
+        buffer.PushBack(v0);
+        buffer.PushBack(v1);
+    };
 
     for (size_t i=0; i<geometry.GetNumDrawCmds(); ++i)
     {

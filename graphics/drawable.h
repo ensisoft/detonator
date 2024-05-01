@@ -50,6 +50,7 @@ namespace gfx
     class Shader;
     class Geometry;
     class Program;
+    class CommandBuffer;
 
     // DrawableClass defines a new type of drawable.
     class DrawableClass

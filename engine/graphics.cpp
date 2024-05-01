@@ -27,6 +27,7 @@
 #include "graphics/shaderpass.h"
 #include "graphics/utility.h"
 #include "graphics/algo.h"
+#include "graphics/drawcmd.h"
 
 namespace {
 class BloomShader : public gfx::ShaderProgram
