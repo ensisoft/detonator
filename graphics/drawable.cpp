@@ -33,6 +33,7 @@
 #include "data/reader.h"
 #include "data/writer.h"
 #include "data/json.h"
+#include "graphics/drawcmd.h"
 #include "graphics/drawable.h"
 #include "graphics/device.h"
 #include "graphics/shader.h"

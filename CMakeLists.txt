@@ -210,6 +210,7 @@ add_library(GfxLib
     graphics/drawing.cpp
     graphics/drawable.cpp
     graphics/geometry.cpp
+    graphics/drawcmd.cpp
     graphics/vertex.cpp
     graphics/material.cpp
     graphics/shaderpass.cpp
@@ -244,6 +245,7 @@ add_library(GfxLibTesting
     graphics/algo.cpp
     graphics/bitmap.cpp
     graphics/utility.cpp
+    graphics/drawcmd.cpp
     graphics/drawing.cpp
     graphics/drawable.cpp
     graphics/geometry.cpp
@@ -736,6 +738,7 @@ add_executable(graphics_test
     graphics/shaderpass.cpp
     graphics/drawable.cpp
     graphics/geometry.cpp
+    graphics/drawcmd.cpp
     graphics/vertex.cpp
     graphics/drawing.cpp
     graphics/painter.cpp

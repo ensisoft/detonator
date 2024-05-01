@@ -39,6 +39,7 @@
 #include "base/utility.h"
 #include "base/trace.h"
 #include "base/bitflag.h"
+#include "graphics/drawcmd.h"
 #include "graphics/resource.h"
 #include "graphics/shader.h"
 #include "graphics/program.h"
