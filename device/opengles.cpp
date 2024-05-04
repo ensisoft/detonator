@@ -2178,12 +2178,18 @@ private:
             {
                 if (line.find("gl_Position") != std::string::npos)
                     type = GL_VERTEX_SHADER;
-                else if (line.find("gl_FragColor") != std::string::npos)
+                else if (line.find("gl_FragColor") != std::string::npos ||
+                         line.find("fragOutColor") != std::string::npos)
                     type = GL_FRAGMENT_SHADER;
             }
             if (type == GL_NONE)
             {
                 ERROR("Failed to identify shader type. [name='%1']", mName);
+                DEBUG("In order for the automatic shader type identification to work your shader must have one of the following:");
+                DEBUG("GLSL 100 (ES2) gl_Position => vertex shader");
+                DEBUG("GLSL 300 (ES3) gl_Position => vertex shader");
+                DEBUG("GLSL 100 (ES2) gl_FragColor => fragment shader");
+                DEBUG("GLSL 300 (ES3) fragOutColor => fragment shader");
                 return;
             }
 
