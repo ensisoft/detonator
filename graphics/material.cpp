@@ -35,7 +35,7 @@
 #include "graphics/program.h"
 #include "graphics/resource.h"
 #include "graphics/loader.h"
-#include "graphics/shaderpass.h"
+#include "graphics/shaderprogram.h"
 #include "graphics/algo.h"
 
 //                  == Notes about shaders ==

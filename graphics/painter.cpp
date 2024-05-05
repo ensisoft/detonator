@@ -28,7 +28,7 @@
 #include "graphics/program.h"
 #include "graphics/geometry.h"
 #include "graphics/painter.h"
-#include "graphics/shaderpass.h"
+#include "graphics/shaderprogram.h"
 
 namespace gfx
 {

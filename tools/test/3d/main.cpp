@@ -37,7 +37,7 @@
 #include "graphics/painter.h"
 #include "graphics/drawable.h"
 #include "graphics/material.h"
-#include "graphics/shaderpass.h"
+#include "graphics/shaderprogram.h"
 #include "graphics/utility.h"
 #include "graphics/transform.h"
 #include "graphics/device.h"

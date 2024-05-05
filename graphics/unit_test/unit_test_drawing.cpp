@@ -40,7 +40,7 @@
 #include "graphics/geometry.h"
 #include "graphics/painter.h"
 #include "graphics/transform.h"
-#include "graphics/shaderpass.h"
+#include "graphics/shaderprogram.h"
 #include "graphics/drawcmd.h"
 #include "graphics/tool/geometry.h"
 
