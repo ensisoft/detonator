@@ -28,6 +28,7 @@
 #include "graphics/shader.h"
 #include "graphics/program.h"
 #include "graphics/geometry.h"
+#include "graphics/instance.h"
 
 namespace gfx
 {
@@ -179,6 +180,8 @@ namespace gfx
         virtual ProgramPtr CreateProgram(const std::string& id, const Program::CreateArgs& args) = 0;
         virtual GeometryPtr FindGeometry(const std::string& id) = 0;
         virtual GeometryPtr CreateGeometry(const std::string& id, Geometry::CreateArgs args) = 0;
+        virtual GeometryInstancePtr FindGeometryInstance(const std::string& id) = 0;
+        virtual GeometryInstancePtr CreateGeometryInstance(const std::string& id, GeometryInstance::CreateArgs args) = 0;
         virtual Texture* FindTexture(const std::string& name) = 0;
         virtual Texture* MakeTexture(const std::string& name) = 0;
         virtual Framebuffer* FindFramebuffer(const std::string& name) = 0;
@@ -255,6 +258,7 @@ namespace gfx
             unsigned num_texture_units = 0;
             unsigned max_fbo_width = 0;
             unsigned max_fbo_height = 0;
+            bool instanced_rendering = false;
         };
         virtual void GetDeviceCaps(DeviceCaps* caps) const = 0;
     private:

@@ -33,11 +33,24 @@
 #include "graphics/geometry.h"
 #include "graphics/framebuffer.h"
 #include "graphics/drawcmd.h"
+#include "graphics/instance.h"
 
 // We need this to create the rendering context.
 #include "wdk/opengl/context.h"
 #include "wdk/opengl/config.h"
 #include "wdk/opengl/surface.h"
+
+template<typename Pixel>
+size_t CountPixels(const gfx::Bitmap<Pixel>& bmp, gfx::Color color)
+{
+    size_t ret = 0;
+    for (unsigned y=0; y<bmp.GetHeight(); ++y) {
+        for (unsigned x=0; x<bmp.GetWidth(); ++x)
+            if (bmp.GetPixel(y, x) == color)
+                ++ret;
+    }
+    return ret;
+}
 
 // setup context for headless rendering.
 class TestContext : public dev::Context
@@ -149,6 +162,11 @@ gfx::GeometryPtr MakeQuad(gfx::Device& dev)
 std::shared_ptr<gfx::Device> CreateDevice()
 {
     return dev::CreateDevice(std::make_shared<TestContext>(10, 10))->GetSharedGraphicsDevice();
+}
+
+std::shared_ptr<gfx::Device> CreateDevice(unsigned render_width, unsigned render_height)
+{
+    return dev::CreateDevice(std::make_shared<TestContext>(render_width, render_height))->GetSharedGraphicsDevice();
 }
 
 void unit_test_shader()
@@ -1925,6 +1943,161 @@ void unit_test_algo_texture_read()
     TEST_REQUIRE(*rgba_ret == bmp);
 }
 
+void unit_test_instanced_rendering()
+{
+    auto dev = CreateDevice(200, 200);
+
+    constexpr const char* fragment_src =
+R"(#version 300 es
+precision highp float;
+out vec4 fragOutColor;
+void main() {
+  fragOutColor = vec4(1.0, 1.0, 1.0, 1.0);
+}
+)";
+
+    constexpr const char* vertex_src =
+R"(#version 300 es
+in vec2 aPosition;
+
+// per instance attributes
+in vec2 iaSize;
+in vec2 iaPosition;
+
+void main() {
+  vec2 pos = aPosition * iaSize + iaPosition;
+  gl_Position = vec4(pos.xy, 0.0, 1.0);
+}
+)";
+
+    auto program = MakeTestProgram(*dev, vertex_src, fragment_src);
+
+    gfx::Device::State state;
+    state.bWriteColor  = true;
+    state.blending     = gfx::Device::State::BlendOp::None;
+    state.stencil_func = gfx::Device::State::StencilFunc::Disabled;
+    state.viewport     = gfx::IRect(0, 0, 200, 200);
+
+#pragma pack(push, 1)
+    struct InstanceAttribute {
+        gfx::Vec2 iaSize;
+        gfx::Vec2 iaPosition;
+    };
+#pragma pack(pop)
+    static const gfx::GeometryInstanceDataLayout layout(sizeof(InstanceAttribute), {
+        {"iaSize",     0, 2, 0, offsetof(InstanceAttribute, iaSize)    },
+        {"iaPosition", 0, 2, 0, offsetof(InstanceAttribute, iaPosition)}
+    });
+
+    // create reference (expected result)
+    gfx::RgbaBitmap reference;
+    reference.Resize(200, 200);
+    reference.Fill(gfx::Color::DarkRed);
+
+    gfx::URect rect;
+    rect.Resize(20, 20);
+    rect.Move(100, 100);
+    rect.Translate(-50, -50);
+    rect.Translate(-10, -10);
+    reference.Fill(rect, gfx::Color::White);
+
+    rect.Move(100, 100);
+    rect.Translate(-50, 50);
+    rect.Translate(-10, -10);
+    reference.Fill(rect, gfx::Color::White);
+
+    rect.Move(100, 100);
+    rect.Translate(50, -50);
+    rect.Translate(-10, -10);
+    reference.Fill(rect, gfx::Color::White);
+
+    rect.Move(100, 100);
+    rect.Translate(50, 50);
+    rect.Translate(-10, -10);
+    reference.Fill(rect, gfx::Color::White);
+
+
+    std::vector<InstanceAttribute> instances;
+    instances.resize(4);
+    instances[0].iaSize     = gfx::Vec2 {  0.1f,  0.1f };
+    instances[0].iaPosition = gfx::Vec2 { -0.5f,  0.5f };
+    instances[1].iaSize     = gfx::Vec2 {  0.1f,  0.1f };
+    instances[1].iaPosition = gfx::Vec2 {  0.5f,  0.5f };
+    instances[2].iaSize     = gfx::Vec2 {  0.1f,  0.1f };
+    instances[2].iaPosition = gfx::Vec2 {  0.5f, -0.5f };
+    instances[3].iaSize     = gfx::Vec2 {  0.1f,  0.1f };
+    instances[3].iaPosition = gfx::Vec2 { -0.5f, -0.5f };
+
+    gfx::GeometryInstance::CreateArgs instance_args;
+    instance_args.usage = gfx::GeometryInstanceBuffer::Usage::Static;
+    instance_args.buffer.SetVertexLayout(layout);
+    instance_args.buffer.SetInstanceBuffer(instances);
+    auto inst = dev->CreateGeometryInstance("inst", std::move(instance_args));
+
+    // instanced draw arrays
+    {
+        constexpr const gfx::Vertex2D vertices[] = {
+            { {-1,  1}, {0, 1} },
+            { {-1, -1}, {0, 0} },
+            { { 1, -1}, {1, 0} },
+
+            { {-1,  1}, {0, 1} },
+            { { 1, -1}, {1, 0} },
+            { { 1,  1}, {1, 1} }
+        };
+
+        gfx::Geometry::CreateArgs args;
+        args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+        args.buffer.SetVertexBuffer(vertices, 6);
+        args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+        auto geom = dev->CreateGeometry("geom", std::move(args));
+
+        const gfx::GeometryDrawCommand draw(*geom, *inst);
+
+        dev->BeginFrame();
+           dev->ClearColor(gfx::Color::DarkRed);
+           dev->Draw(*program, draw, state);
+        dev->EndFrame();
+
+        const auto& bmp = dev->ReadColorBuffer(200, 200);
+        TEST_REQUIRE(bmp == reference);
+        TEST_REQUIRE(CountPixels(bmp, gfx::Color::White) == 20*20*4);
+    }
+
+    // instanced draw elements
+    {
+        constexpr const gfx::Vertex2D vertices[] = {
+            { {-1,  1}, {0, 1} },
+            { {-1, -1}, {0, 0} },
+            { { 1, -1}, {1, 0} },
+            { { 1,  1}, {1, 1} }
+        };
+        constexpr const gfx::Index16 indices[] = {
+            0, 1, 2, // bottom triangle
+            0, 2, 3  // top triangle
+        };
+
+        gfx::Geometry::CreateArgs args;
+        args.buffer.SetVertexLayout(gfx::GetVertexLayout<gfx::Vertex2D>());
+        args.buffer.SetVertexBuffer(vertices, 4);
+        args.buffer.SetIndexBuffer(indices, 6);
+        args.buffer.AddDrawCmd(gfx::Geometry::DrawType::Triangles);
+        auto geom = dev->CreateGeometry("geom", std::move(args));
+
+        const gfx::GeometryDrawCommand draw(*geom, *inst);
+
+        dev->BeginFrame();
+        dev->ClearColor(gfx::Color::DarkRed);
+        dev->Draw(*program, draw, state);
+        dev->EndFrame();
+
+        const auto& bmp = dev->ReadColorBuffer(200, 200);
+        TEST_REQUIRE(bmp == reference);
+        TEST_REQUIRE(CountPixels(bmp, gfx::Color::White) == 20*20*4);
+    }
+}
+
+
 // When drawing multiple times within a single frame with either
 // a single material or multiple materials that all map to the same
 // underlying GL program object the set of uniforms that need to
@@ -2226,6 +2399,7 @@ void main() {
 }
 
 
+EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
     for (int i=1; i<argc; ++i)
@@ -2263,6 +2437,11 @@ int test_main(int argc, char* argv[])
     unit_test_algo_texture_flip();
     unit_test_algo_texture_read();
 
+    if (TestContext::GL_ES_Version == 3)
+    {
+        unit_test_instanced_rendering();
+    }
+
     // bugs
     unit_test_empty_draw_lost_uniform_bug();
     unit_test_repeated_uniform_bug();
@@ -2272,3 +2451,4 @@ int test_main(int argc, char* argv[])
     unit_test_index_draw_cmd_bug();
     return 0;
 }
+) // TEST_MAIN
