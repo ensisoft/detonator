@@ -274,10 +274,13 @@ struct OpenGLFunctions
     PFNGLDEPTHFUNCPROC               glDepthFunc;
     PFNGLVIEWPORTPROC                glViewport;
     PFNGLDRAWARRAYSPROC              glDrawArrays;
+    PFNGLDRAWARRAYSINSTANCEDPROC     glDrawArraysInstanced;
     PFNGLDRAWELEMENTSPROC            glDrawElements;
+    PFNGLDRAWELEMENTSINSTANCEDPROC   glDrawElementsInstanced;
     PFNGLGETATTRIBLOCATIONPROC       glGetAttribLocation;
     PFNGLVERTEXATTRIBPOINTERPROC     glVertexAttribPointer;
     PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
+    PFNGLVERTEXATTRIBDIVISORPROC     glVertexAttribDivisor;
     PFNGLGETSTRINGPROC               glGetString;
     PFNGLGETUNIFORMLOCATIONPROC      glGetUniformLocation;
     PFNGLUNIFORM1IPROC               glUniform1i;
@@ -371,10 +374,13 @@ public:
         RESOLVE(glDepthFunc);
         RESOLVE(glViewport);
         RESOLVE(glDrawArrays);
+        RESOLVE(glDrawArraysInstanced);
         RESOLVE(glDrawElements);
+        RESOLVE(glDrawElementsInstanced);
         RESOLVE(glGetAttribLocation);
         RESOLVE(glVertexAttribPointer);
         RESOLVE(glEnableVertexAttribArray);
+        RESOLVE(glVertexAttribDivisor);
         RESOLVE(glGetString);
         RESOLVE(glGetUniformLocation);
         RESOLVE(glUniform1i);
@@ -535,6 +541,7 @@ public:
         mShaders.clear();
         mPrograms.clear();
         mGeoms.clear();
+        mInstances.clear();
 
         for (auto& buffer : mBuffers[0])
         {
@@ -667,6 +674,27 @@ public:
         return geometry;
     }
 
+    virtual gfx::GeometryInstancePtr FindGeometryInstance(const std::string& id) override
+    {
+        auto it = mInstances.find(id);
+        if (it == std::end(mInstances))
+            return nullptr;
+        return it->second;
+    }
+
+    virtual gfx::GeometryInstancePtr CreateGeometryInstance(const std::string& id, gfx::GeometryInstance::CreateArgs args) override
+    {
+        auto instance = std::make_shared<GeometryInstanceImpl>(this);
+        instance->SetFrameStamp(mFrameNumber);
+        instance->SetName(args.content_name);
+        instance->SetDataHash(args.content_hash);
+        instance->SetUsage(args.usage);
+        instance->SetBuffer(std::move(args.buffer));
+        instance->Upload();
+        mInstances[id] = instance;
+        return instance;
+    }
+
     virtual gfx::Texture* FindTexture(const std::string& name) override
     {
         auto it = mTextures.find(name);
@@ -738,8 +766,11 @@ public:
 
         const auto* myprog = static_cast<const ProgImpl*>(&program);
         const auto* mygeom = static_cast<const GeomImpl*>(geometry.GetGeometry());
+        const auto* myinst = static_cast<const GeometryInstanceImpl*>(geometry.GetInstance());
         myprog->SetFrameStamp(mFrameNumber);
         mygeom->SetFrameStamp(mFrameNumber);
+        if (myinst)
+            myinst->SetFrameStamp(mFrameNumber);
 
         // start using this program
         //GL_CALL(glUseProgram(myprog->GetHandle()));
@@ -1055,6 +1086,8 @@ public:
 
         // start drawing geometry.
 
+        const uint8_t* instance_base_ptr = myinst ? (const uint8_t*)myinst->GetVertexBufferByteOffset() : nullptr;
+
         // the brain-damaged API goes like this... when using DrawArrays with a client side
         // data pointer the glVertexAttribPointer 'pointer' argument is actually a pointer
         // to the vertex data. But when using a VBO the pointer is not a pointer but an offset
@@ -1067,14 +1100,15 @@ public:
 
         const auto* vertex_buffer = &mBuffers[0][mygeom->GetVertexBufferIndex()];
         const auto* index_buffer = mygeom->UsesIndexBuffer() ? &mBuffers[1][mygeom->GetIndexBufferIndex()] : nullptr;
+        const auto* instance_buffer = myinst ? &mBuffers[0][myinst->GetVertexBufferIndex()] : nullptr;
 
         TRACE_ENTER(BindBuffers);
-        GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer->name));
 
         if (index_buffer)
             GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer->name));
 
         // first enable the vertex attributes.
+        GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer->name));
         for (const auto& attr : vertex_layout.attributes)
         {
             const GLint location = mGL.glGetAttribLocation(myprog->GetHandle(), attr.name.c_str());
@@ -1086,9 +1120,39 @@ public:
             GL_CALL(glVertexAttribPointer(location, size, GL_FLOAT, GL_FALSE, stride, attr_ptr));
             GL_CALL(glEnableVertexAttribArray(location));
         }
+
+        if (instance_buffer)
+        {
+            const auto& per_instance_vertex_layout = myinst->GetVertexLayout();
+
+            GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, instance_buffer->name));
+            for (const auto& attr : per_instance_vertex_layout.attributes)
+            {
+                const GLint location = mGL.glGetAttribLocation(myprog->GetHandle(), attr.name.c_str());
+                if (location == -1)
+                    continue;
+                const auto size = attr.num_vector_components;
+                const auto stride = per_instance_vertex_layout.vertex_struct_size;
+                const auto attr_ptr = instance_base_ptr + attr.offset;
+                GL_CALL(glVertexAttribPointer(location, size, GL_FLOAT, GL_FALSE, stride, attr_ptr));
+                GL_CALL(glVertexAttribDivisor(location, 1)); // per instance attribute
+                GL_CALL(glEnableVertexAttribArray(location));
+            }
+        }
+
         TRACE_LEAVE(BindBuffers);
 
         TRACE_ENTER(DrawGeometry);
+
+        GLenum index_type;
+        if (index_buffer_type == gfx::Geometry::IndexType::Index16)
+            index_type = GL_UNSIGNED_SHORT;
+        else if (index_buffer_type == gfx::Geometry::IndexType::Index32)
+            index_type = GL_UNSIGNED_INT;
+        else BUG("missing index type");
+
+        const GLsizei instance_count = myinst ? myinst->GetInstanceCount() : 0;
+
         // go through the draw commands and submit the calls
         const auto& cmds = geometry.GetNumDrawCmds();
         for (size_t i=0; i<cmds; ++i)
@@ -1116,26 +1180,18 @@ public:
                 draw_mode = GL_LINE_LOOP;
             else BUG("Unknown draw primitive type.");
 
-            if (index_buffer)
-            {
-                GLenum index_type;
-                if (index_buffer_type == gfx::Geometry::IndexType::Index16)
-                    index_type = GL_UNSIGNED_SHORT;
-                else if (index_buffer_type == gfx::Geometry::IndexType::Index32)
-                    index_type = GL_UNSIGNED_INT;
-                else BUG("missing index type");
+            // the byte offset from where to source the indices for the
+            // draw is the base index buffer offset assigned for the geometry
+            // plus the draw offset that is relative to the base offset.
+            const uint8_t* index_buffer_draw_offset = index_buffer_offset + offset * index_byte_size;
 
-                // the byte offset from where to source the indices for the
-                // draw is the base index buffer offset assigned for the geometry
-                // the draw offset that is relative to the base offset.
-                const uint8_t* draw_offset = index_buffer_offset + offset * index_byte_size;
-
-                GL_CALL(glDrawElements(draw_mode, count, index_type, (const void*)draw_offset));
-            }
-            else
-            {
-                GL_CALL(glDrawArrays(draw_mode, offset, count));
-            }
+            if (index_buffer && instance_buffer)
+                GL_CALL(glDrawElementsInstanced(draw_mode, count, index_type, (const void*)index_buffer_draw_offset, instance_count));
+            else if (index_buffer)
+                GL_CALL(glDrawElements(draw_mode, count, index_type, (const void*)index_buffer_draw_offset));
+            else if (instance_buffer)
+                GL_CALL(glDrawArraysInstanced(draw_mode, offset, count, instance_count));
+            else GL_CALL(glDrawArrays(draw_mode, offset, count));
         }
         TRACE_LEAVE(DrawGeometry);
     }
@@ -1219,6 +1275,15 @@ public:
                 const auto last_used_frame_number = impl->GetFrameStamp();
                 if (mFrameNumber - last_used_frame_number >= max_num_idle_frames)
                     it = mGeoms.erase(it);
+                else ++it;
+            }
+
+            for (auto it = mInstances.begin(); it != mInstances.end(); )
+            {
+                auto* impl = static_cast<GeometryInstanceImpl*>(it->second.get());
+                const auto last_used_frame_number = impl->GetFrameStamp();
+                if (mFrameNumber - last_used_frame_number >= max_num_idle_frames)
+                    it = mInstances.erase(it);
                 else ++it;
             }
         }
@@ -1366,9 +1431,14 @@ public:
         GL_CALL(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &num_texture_units));
         GL_CALL(glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &max_fbo_size));
 
-        caps->num_texture_units     = num_texture_units;
-        caps->max_fbo_height        = max_fbo_size;
-        caps->max_fbo_width         = max_fbo_size;
+        caps->num_texture_units = num_texture_units;
+        caps->max_fbo_height    = max_fbo_size;
+        caps->max_fbo_width     = max_fbo_size;
+
+        const auto version = mContext->GetVersion();
+        if (version == dev::Context::Version::WebGL_2 ||
+            version == dev::Context::Version::OpenGL_ES3)
+            caps->instanced_rendering = true;
     }
 
     virtual gfx::Device* AsGraphicsDevice() override
@@ -1879,6 +1949,80 @@ private:
         bool mHasMips   = false;
         bool mFBOBound  = false;
         mutable bool mWarnOnce  = true;
+    };
+
+    class GeometryInstanceImpl : public gfx::GeometryInstance
+    {
+    public:
+        explicit GeometryInstanceImpl(OpenGLES2GraphicsDevice* device) noexcept
+          : mDevice(device)
+        {}
+       ~GeometryInstanceImpl()
+        {
+            if (mBufferSize)
+            {
+                mDevice->FreeBuffer(mBufferIndex, mBufferOffset, mBufferSize, mUsage, BufferType::VertexBuffer);
+            }
+        }
+        void Upload() const
+        {
+            if (!mPendingUpload.has_value())
+                return;
+
+            auto upload = std::move(mPendingUpload.value());
+
+            mPendingUpload.reset();
+
+            const auto vertex_bytes = upload.GetVertexBytes();
+            const auto vertex_ptr   = upload.GetVertexDataPtr();
+            if (vertex_bytes == 0)
+                return;
+
+            std::tie(mBufferIndex, mBufferOffset) = mDevice->AllocateBuffer(vertex_bytes, mUsage, BufferType::VertexBuffer);
+            mDevice->UploadBuffer(mBufferIndex,
+                                  mBufferOffset,
+                                  vertex_ptr, vertex_bytes,
+                                  mUsage, BufferType::VertexBuffer);
+            mBufferSize = vertex_bytes;
+            mLayout = std::move(upload.GetLayout());
+            if (mUsage == Usage::Static)
+            {
+                DEBUG("Uploaded geometry instance buffer data. [name='%1', bytes='%2', usage='%3']", mName, vertex_bytes, mUsage);
+            }
+        }
+
+        inline void SetBuffer(gfx::GeometryInstanceBuffer&& buffer) noexcept
+        { mPendingUpload = std::move(buffer); }
+        inline void SetUsage(Usage usage) noexcept
+        { mUsage = usage; }
+        inline void SetDataHash(size_t hash) noexcept
+        { mHash = hash; }
+        inline void SetName(const std::string& name) noexcept
+        { mName = name; }
+        inline void SetFrameStamp(size_t frame_number) const noexcept
+        { mFrameNumber = frame_number; }
+        inline size_t GetFrameStamp() const noexcept
+        { return mFrameNumber; }
+        inline size_t GetVertexBufferByteOffset() const noexcept
+        { return mBufferOffset; }
+        inline size_t GetVertexBufferIndex() const noexcept
+        { return mBufferIndex; }
+        inline size_t GetInstanceCount() const noexcept
+        { return mBufferSize / mLayout.vertex_struct_size; }
+        inline const gfx::GeometryInstanceDataLayout& GetVertexLayout() const noexcept
+        { return mLayout; }
+
+    private:
+        OpenGLES2GraphicsDevice* mDevice = nullptr;
+        std::size_t mHash = 0;
+        std::string mName;
+        Usage mUsage = Usage::Static;
+        mutable std::size_t mFrameNumber = 0;
+        mutable std::size_t mBufferSize   = 0;
+        mutable std::size_t mBufferOffset = 0;
+        mutable std::size_t mBufferIndex  = 0;
+        mutable std::optional<gfx::GeometryInstanceBuffer> mPendingUpload;
+        mutable gfx::GeometryInstanceDataLayout mLayout;
     };
 
     class GeomImpl : public gfx::Geometry
@@ -2627,6 +2771,7 @@ private:
         std::size_t mFrameNumber;
     };
 private:
+    std::map<std::string, std::shared_ptr<gfx::GeometryInstance>> mInstances;
     std::map<std::string, std::shared_ptr<gfx::Geometry>> mGeoms;
     std::map<std::string, std::shared_ptr<gfx::Shader>> mShaders;
     std::map<std::string, std::shared_ptr<gfx::Program>> mPrograms;

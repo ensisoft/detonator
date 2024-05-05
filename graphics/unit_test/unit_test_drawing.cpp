@@ -259,6 +259,17 @@ public:
     {
         return nullptr;
     }
+
+    virtual gfx::GeometryInstancePtr FindGeometryInstance(const std::string& id) override
+    {
+        return nullptr;
+    }
+
+    virtual gfx::GeometryInstancePtr CreateGeometryInstance(const std::string& id,gfx::GeometryInstance::CreateArgs args) override
+    {
+        return nullptr;
+    }
+
     // Resource deletion APIs
     virtual void DeleteShaders() override
     {}
