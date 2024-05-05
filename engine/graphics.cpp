@@ -24,7 +24,7 @@
 #include "graphics/texture.h"
 #include "graphics/program.h"
 #include "graphics/renderpass.h"
-#include "graphics/shaderpass.h"
+#include "graphics/shaderprogram.h"
 #include "graphics/utility.h"
 #include "graphics/algo.h"
 #include "graphics/drawcmd.h"

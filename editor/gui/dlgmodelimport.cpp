@@ -26,7 +26,7 @@
 #include "editor/gui/dlgmodelimport.h"
 #include "editor/gui/drawing.h"
 #include "editor/app/workspace.h"
-#include "graphics/shaderpass.h"
+#include "graphics/shaderprogram.h"
 #include "graphics/painter.h"
 #include "graphics/utility.h"
 

@@ -15,7 +15,7 @@
 
 #include "config.h"
 
-#include "graphics/shaderpass.h"
+#include "graphics/shaderprogram.h"
 #include "graphics/device.h"
 
 namespace gfx {
