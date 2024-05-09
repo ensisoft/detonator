@@ -1118,10 +1118,11 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
         data.texture_rotation = GetTextureRotation();
         data.texture_scale    = GetTextureScale();
 
-        auto snippet = source.GetSnippet(0);
+        auto snippet = source.GetSource();
 
         snippet = FoldUniforms(snippet, data);
-        source.ClearSnippets();
+        source.ClearSource();
+        source.ClearData();
         source.AddSource(std::move(snippet));
     }
     return source;
@@ -1812,10 +1813,9 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
 ShaderSource MaterialClass::GetColorShaderSource(const State& state, const Device& device) const
 {
     ShaderSource source;
+    source.AddUniform("kBaseColor",     ShaderSource::UniformType::Color4f);
+    source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
     source.AddSource(R"(
-uniform vec4 kBaseColor;
-varying float vParticleAlpha;
-
 void FragmentShaderMain()
 {
   vec4 color = kBaseColor;
@@ -1829,17 +1829,17 @@ void FragmentShaderMain()
 ShaderSource MaterialClass::GetGradientShaderSource(const State& state, const Device& device) const
 {
     ShaderSource source;
+    source.AddUniform("kColor0", ShaderSource::UniformType::Color4f);
+    source.AddUniform("kColor1", ShaderSource::UniformType::Color4f);
+    source.AddUniform("kColor2", ShaderSource::UniformType::Color4f);
+    source.AddUniform("kColor3", ShaderSource::UniformType::Color4f);
+    source.AddUniform("kOffset", ShaderSource::UniformType::Vec2f);
+    source.AddUniform("kRenderPoints", ShaderSource::UniformType::Float);
+
+    source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
+    source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
+
     source.AddSource(R"(
-uniform vec4 kColor0;
-uniform vec4 kColor1;
-uniform vec4 kColor2;
-uniform vec4 kColor3;
-uniform vec2 kOffset;
-uniform float kRenderPoints;
-
-varying vec2 vTexCoord;
-varying float vParticleAlpha;
-
 vec4 MixGradient(vec2 coords)
 {
   vec4 top = mix(kColor0, kColor1, coords.x);
@@ -1867,27 +1867,27 @@ ShaderSource MaterialClass::GetSpriteShaderSource(const State& state, const Devi
     // todo: maybe pack some of shader uniforms
 
     ShaderSource source;
+    source.AddUniform("kTexture0", ShaderSource::UniformType::Sampler2D);
+    source.AddUniform("kTexture1", ShaderSource::UniformType::Sampler2D);
+    source.AddUniform("kTextureBox0", ShaderSource::UniformType::Vec4f);
+    source.AddUniform("kTextureBox1", ShaderSource::UniformType::Vec4f);
+    source.AddUniform("kBaseColor", ShaderSource::UniformType::Color4f);
+    source.AddUniform("kRenderPoints", ShaderSource::UniformType::Float);
+    source.AddUniform("kAlphaCutoff", ShaderSource::UniformType::Float);
+    source.AddUniform("kTime", ShaderSource::UniformType::Float);
+    source.AddUniform("kBlendCoeff", ShaderSource::UniformType::Float);
+    source.AddUniform("kApplyRandomParticleRotation", ShaderSource::UniformType::Float);
+    source.AddUniform("kTextureScale", ShaderSource::UniformType::Vec2f);
+    source.AddUniform("kTextureVelocity", ShaderSource::UniformType::Vec3f);
+    source.AddUniform("kTextureRotation", ShaderSource::UniformType::Float);
+    source.AddUniform("kTextureWrap", ShaderSource::UniformType::Vec2i); // 0 disabled, 1 clamp, 2 wrap
+    source.AddUniform("kAlphaMask", ShaderSource::UniformType::Vec2f);
+
+    source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
+    source.AddVarying("vParticleRandomValue", ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
+
     source.AddSource(R"(
-uniform sampler2D kTexture0;
-uniform sampler2D kTexture1;
-uniform vec4 kTextureBox0;
-uniform vec4 kTextureBox1;
-uniform vec4 kBaseColor;
-uniform float kRenderPoints;
-uniform float kAlphaCutoff;
-uniform float kTime;
-uniform float kBlendCoeff;
-uniform float kApplyRandomParticleRotation;
-uniform vec2 kTextureScale;
-uniform vec3 kTextureVelocity;
-uniform float kTextureRotation;
-uniform ivec2 kTextureWrap;
-uniform vec2 kAlphaMask;
-
-varying vec2 vTexCoord;
-varying float vParticleRandomValue;
-varying float vParticleAlpha;
-
 // Support texture coordinate wrapping (clamp or repeat)
 // for cases when hardware texture sampler setting is
 // insufficient, i.e. when sampling from a sub rectangle
@@ -2064,25 +2064,24 @@ ShaderSource MaterialClass::GetTextureShaderSource(const State& state, const Dev
     // todo: pack some of the uniforms ?
 
     ShaderSource source;
+    source.AddUniform("kTexture", ShaderSource::UniformType::Sampler2D);
+    source.AddUniform("kTextureBox", ShaderSource::UniformType::Vec4f);
+    source.AddUniform("kAlphaMask", ShaderSource::UniformType::Float);
+    source.AddUniform("kRenderPoints", ShaderSource::UniformType::Float);
+    source.AddUniform("kAlphaCutoff", ShaderSource::UniformType::Float);
+    source.AddUniform("kApplyRandomParticleRotation", ShaderSource::UniformType::Float);
+    source.AddUniform("kTime", ShaderSource::UniformType::Float);
+    source.AddUniform("kTextureScale", ShaderSource::UniformType::Vec2f);
+    source.AddUniform("kTextureVelocity", ShaderSource::UniformType::Vec3f);
+    source.AddUniform("kTextureRotation", ShaderSource::UniformType::Float);
+    source.AddUniform("kBaseColor", ShaderSource::UniformType::Color4f);
+    source.AddUniform("kTextureWrap", ShaderSource::UniformType::Vec2i); // 0 disabled, 1 clamp, 2 wrap
+
+    source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
+    source.AddVarying("vParticleRandomValue", ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
+
     source.AddSource(R"(
-uniform sampler2D kTexture;
-uniform vec4 kTextureBox;
-uniform float kAlphaMask;
-uniform float kRenderPoints;
-uniform float kAlphaCutoff;
-uniform float kApplyRandomParticleRotation;
-uniform float kTime;
-uniform vec2 kTextureScale;
-uniform vec3 kTextureVelocity;
-uniform float kTextureRotation;
-uniform vec4 kBaseColor;
-// 0 disabled, 1 clamp, 2 wrap
-uniform ivec2 kTextureWrap;
-
-varying vec2 vTexCoord;
-varying float vParticleRandomValue;
-varying float vParticleAlpha;
-
 // Support texture coordinate wrapping (clamp or repeat)
 // for cases when hardware texture sampler setting is
 // insufficient, i.e. when sampling from a sub rectangle
@@ -2434,22 +2433,29 @@ void TextMaterial::ApplyStaticState(const Environment& env, Device& device, gfx:
 {}
 ShaderSource TextMaterial::GetShader(const Environment& env, const Device& device) const
 {
-    constexpr auto* text_shader_bitmap = R"(
-uniform sampler2D kTexture;
-uniform vec4 kColor;
-uniform float kTime;
-varying vec2 vTexCoord;
-
+    const auto format = mText.GetRasterFormat();
+    if (format == TextBuffer::RasterFormat::Bitmap)
+    {
+        ShaderSource source;
+        source.AddUniform("kTexture", ShaderSource::UniformType::Sampler2D);
+        source.AddUniform("kColor", ShaderSource::UniformType::Color4f);
+        source.AddUniform("kTime", ShaderSource::UniformType::Float);
+        source.AddVarying("vTexCoord", ShaderSource::UniformType::Vec2f);
+        source.AddSource(R"(
 void FragmentShaderMain() {
    float alpha = texture2D(kTexture, vTexCoord).a;
    vec4 color = vec4(kColor.r, kColor.g, kColor.b, kColor.a * alpha);
    fs_out.color = color;
 }
-        )";
-    constexpr auto* text_shader_texture = R"(
-uniform sampler2D kTexture;
-varying vec2 vTexCoord;
-
+        )");
+        return source;
+    }
+    else if (format == TextBuffer::RasterFormat::Texture)
+    {
+        ShaderSource source;
+        source.AddUniform("kTexture", ShaderSource::UniformType::Sampler2D);
+        source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
+        source.AddSource(R"(
 void FragmentShaderMain() {
     mat3 flip = mat3(vec3(1.0,  0.0, 0.0),
                      vec3(0.0, -1.0, 0.0),
@@ -2458,13 +2464,9 @@ void FragmentShaderMain() {
     vec4 color = texture2D(kTexture, tex.xy);
     fs_out.color = color;
 }
-    )";
-
-    const auto format = mText.GetRasterFormat();
-    if (format == TextBuffer::RasterFormat::Bitmap)
-        return ShaderSource(text_shader_bitmap);
-    else if (format == TextBuffer::RasterFormat::Texture)
-        return ShaderSource(text_shader_texture);
+    )");
+        return source;
+    }
     else if (format == TextBuffer::RasterFormat::None)
         return ShaderSource();
     else BUG("Unhandled texture raster format.");
