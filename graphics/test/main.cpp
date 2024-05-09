@@ -2592,6 +2592,85 @@ private:
     double mTime = 0.0;
 };
 
+
+class DepthLayerTest : public GraphicsTest
+{
+public:
+    virtual void Render(gfx::Painter& painter) override
+    {
+        const auto surface_size = painter.GetSurfaceSize();
+        const auto surface_width = surface_size.GetWidth();
+        const auto surface_height = surface_size.GetHeight();
+
+        const auto near_plane_distance = -10.0f;
+        const auto far_plane_distance = 100.0f;
+
+        // this projection matrix maps world space coordinates so that when,
+        // surface_width  = 100
+        // surface_height = 100
+        //
+        // world x =   0.0 => clip -1.0f
+        // world x = 100.0 => clip  1.0f
+        // world y =   0.0 => clip  1.0f
+        // world y   100.0 => clip -1.0f
+        //
+        // this essentially flips the coordinates on Y axis.
+        // Z (depth) remains the same thus when we're looking
+        // along the negative z axis (into depth, positive Z coming
+        // out the screen and pointing towards *you*) moving
+        // more into negative z direction moves away from
+        // the viewer adding more depth
+        //
+
+        painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0.0f, surface_width,
+                                                                    0.0f, surface_height,
+                                                                    near_plane_distance, far_plane_distance));
+
+        gfx::Painter::DrawState state;
+        state.depth_test = gfx::Painter::DepthTest::LessOrEQual;
+
+        gfx::detail::GenericShaderProgram program;
+
+        // layer 0
+        gfx::Transform trans;
+        trans.Resize(300.0f, 300.0f);
+        trans.Translate(300.0f, 300.0f, 0.0f);
+        painter.Draw(gfx::Rectangle(), trans,
+                     gfx::CreateMaterialFromColor(gfx::Color::DarkGreen),
+                     state, program);
+
+        // layer 1, this should paint behind layer 0
+        trans.Translate(75.0f, 75.0f, -10.0f);
+        painter.Draw(gfx::Rectangle(), trans,
+                     gfx::CreateMaterialFromColor(gfx::Color::DarkRed),
+                     state, program);
+
+        // layer 2, this should paint between 0 and 1
+        trans.MoveTo(300.0f, 300.0f, 0.0f);
+        trans.Translate(30.0f, -50.0f, -5.0f);
+        painter.Draw(gfx::Rectangle(), trans,
+                     gfx::CreateMaterialFromColor(gfx::Color::DarkBlue),
+                     state, program);
+
+        // layer 3, this should paint on top of layer 0
+        trans.MoveTo(300.0f, 300.0f, 0.0f);
+        trans.Translate(100.0f, 100.0f, 5.0f);
+        trans.Resize(100.0f, 100.0f);
+        painter.Draw(gfx::Rectangle(), trans,
+                     gfx::CreateMaterialFromColor(gfx::Color::DarkYellow),
+                     state, program);
+
+    }
+
+    virtual std::string GetName() const override
+    { return "DepthLayerTest"; }
+    virtual bool IsFeatureTest() const override
+    { return false; }
+private:
+
+};
+
+
 int main(int argc, char* argv[])
 {
     base::OStreamLogger logger(std::cout);
@@ -2771,6 +2850,7 @@ int main(int argc, char* argv[])
     tests.emplace_back(new PrecisionTest);
     tests.emplace_back(new Draw3DTest);
     tests.emplace_back(new Shape3DTest);
+    tests.emplace_back(new DepthLayerTest);
 
     // GL ES3 specific tests
     if (version == 3)
@@ -2851,6 +2931,7 @@ int main(int argc, char* argv[])
 
                 gfx_device->BeginFrame();
                 gfx_device->ClearColor(gfx::Color::Black);
+                gfx_device->ClearDepth(1.0f);
                 painter->SetViewport(0, 0, surface_width, surface_height);
                 painter->SetSurfaceSize(surface_width, surface_height);
                 painter->SetProjectionMatrix(gfx::MakeOrthographicProjection(surface_width , surface_height));
