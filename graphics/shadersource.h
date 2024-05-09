@@ -22,6 +22,9 @@
 #  include <glm/vec2.hpp>
 #  include <glm/vec3.hpp>
 #  include <glm/vec4.hpp>
+#  include <glm/mat2x2.hpp>
+#  include <glm/mat3x3.hpp>
+#  include <glm/mat4x4.hpp>
 #include "warnpop.h"
 
 #include <variant>
@@ -37,6 +40,31 @@ namespace gfx
     class ShaderSource
     {
     public:
+        enum class ShaderDataType {
+            Int,
+            Float,
+            Vec2f, Vec3f, Vec4f,
+            Vec2i, Vec3i, Vec4i,
+            Mat2f, Mat3f, Mat4f,
+            Color4f,
+            Sampler2D
+        };
+        using AttributeType = ShaderDataType;
+        using UniformType   = ShaderDataType;
+        using VaryingType   = ShaderDataType;
+        using ConstantType  = ShaderDataType;
+
+        enum class ShaderDataDeclarationType {
+            Attribute, Uniform, Varying, Constant
+        };
+
+        using ShaderDataDeclarationValue = std::variant<
+                int,  float,
+                Color4f,
+                glm::vec2, glm::vec3, glm::vec4,
+                glm::ivec2, glm::ivec3, glm::ivec4,
+                glm::mat2, glm::mat3, glm::mat4>;
+
         enum class Type {
             NotSet, Vertex, Fragment
         };
@@ -49,9 +77,17 @@ namespace gfx
         enum class Precision {
             NotSet, Low, Medium, High
         };
+
+        struct ShaderDataDeclaration {
+            ShaderDataDeclarationType decl_type = ShaderDataDeclarationType::Attribute;
+            ShaderDataType data_type = ShaderDataType::Float;
+            std::string name;
+            std::optional<ShaderDataDeclarationValue> constant_value;
+        };
+
         explicit ShaderSource(std::string source)
         {
-            mSnippets.push_back(std::move(source));
+            mSource.push_back(std::move(source));
         }
         ShaderSource() = default;
 
@@ -62,15 +98,36 @@ namespace gfx
         inline void SetVersion(Version version) noexcept
         { mVersion = version; }
         inline void AddSource(std::string source)
-        { mSnippets.push_back(std::move(source)); }
+        { mSource.push_back(std::move(source)); }
+        inline void AddData(const ShaderDataDeclaration& data)
+        { mData.push_back(data); }
         inline bool IsEmpty() const noexcept
-        { return mSnippets.empty(); }
-        inline size_t GetSnippetCount() const noexcept
-        { return mSnippets.size(); }
-        inline std::string GetSnippet(size_t index) const noexcept
-        { return base::SafeIndex(mSnippets, index); }
-        inline void ClearSnippets() noexcept
-        { mSnippets.clear(); }
+        { return mSource.empty(); }
+        inline size_t GetSourceCount() const noexcept
+        { return mSource.size(); }
+        inline std::string GetSource(size_t index) const noexcept
+        { return base::SafeIndex(mSource, index); }
+        inline void ClearSource() noexcept
+        { mSource.clear(); }
+        inline void ClearData() noexcept
+        { mData.clear(); }
+
+        void AddAttribute(std::string name, AttributeType type)
+        {
+            AddData({ShaderDataDeclarationType::Attribute, type, std::move(name)});
+        }
+        void AddUniform(std::string name, UniformType type)
+        {
+            AddData({ShaderDataDeclarationType::Uniform, type, std::move(name)});
+        }
+        void AddConstant(std::string name, ConstantType type)
+        {
+            AddData({ShaderDataDeclarationType::Constant, type, std::move(name)});
+        }
+        void AddVarying(std::string name, VaryingType type)
+        {
+            AddData({ShaderDataDeclarationType::Varying, type, std::move(name)});
+        }
 
         // Get the actual shader source string by combining
         // the shader source object's contents (i.e. data
@@ -90,6 +147,15 @@ namespace gfx
         Type mType = Type::NotSet;
         Version mVersion = Version::NotSet;
         Precision mPrecision = Precision::NotSet;
-        std::vector<std::string> mSnippets;
+        // Data are the shader data declarations such as uniforms,
+        // constants, varyings and (vertex) attributes.
+        // These are the shader program's data interface
+        // the interface mechanism for data flow from vertex
+        // shader to the fragment shader.
+        std::vector<ShaderDataDeclaration> mData;
+        // Source are the actual GLSL shader code functions etc.
+        // Currently basically everything else other than the
+        // data declarations.
+        std::vector<std::string> mSource;
     };
 } // namespace
