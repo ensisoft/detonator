@@ -25,6 +25,7 @@
 #include "graphics/program.h"
 #include "graphics/renderpass.h"
 #include "graphics/shaderprogram.h"
+#include "graphics/shadersource.h"
 #include "graphics/utility.h"
 #include "graphics/algo.h"
 #include "graphics/drawcmd.h"
@@ -48,12 +49,14 @@ public:
         ret += "+bloom";
         return ret;
     }
-    virtual std::string GetShader(const gfx::Material& material, const gfx::Material::Environment& env, const gfx::Device& device) const override
+    virtual gfx::ShaderSource GetShader(const gfx::Material& material, const gfx::Material::Environment& env, const gfx::Device& device) const override
     {
-        std::string source(R"(
-#version 100
-precision highp float;
+        gfx::ShaderSource source;
+        source.SetType(gfx::ShaderSource::Type::Fragment);
+        source.SetVersion(gfx::ShaderSource::Version::GLSL_100);
+        source.SetPrecision(gfx::ShaderSource::Precision::High);
 
+        source.AddSource(R"(
 struct FS_OUT {
    vec4 color;
 } fs_out;
@@ -78,7 +81,7 @@ void main() {
     gl_FragColor = color;
 
 })");
-        source.append(material.GetShader(env, device));
+        source.Merge(material.GetShader(env, device));
         return source;
     }
     virtual std::string GetName() const override

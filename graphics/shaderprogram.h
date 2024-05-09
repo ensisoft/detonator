@@ -30,6 +30,8 @@
 
 namespace gfx
 {
+    class ShaderSource;
+
     // Shader program provides the GPU shader sources for generating
     // device specific GPU shader programs based on materials and drawables.
     // Both materials and drawables provide some part of the shader functionality
@@ -49,9 +51,9 @@ namespace gfx
         // The default implementation will simply call the drawable in order to generate the ID.
         virtual std::string GetShaderId(const Drawable& drawable, const Drawable::Environment& env) const;
         // Get the device specific material (fragment) shader source.
-        virtual std::string GetShader(const Material& material, const Material::Environment& env, const Device& device) const;
+        virtual ShaderSource GetShader(const Material& material, const Material::Environment& env, const Device& device) const;
         // Get the device specific drawable (vertex) shader source.
-        virtual std::string GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const;
+        virtual ShaderSource GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const;
         // Get the human readable debug name for the material shader.
         virtual std::string GetShaderName(const Material& material, const Material::Environment& env) const;
         // Get the human readable debug name for the drawable shader.

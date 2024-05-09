@@ -16,6 +16,7 @@
 #include "config.h"
 
 #include "graphics/shaderprogram.h"
+#include "graphics/shadersource.h"
 #include "graphics/device.h"
 
 namespace gfx {
@@ -28,12 +29,14 @@ std::string ShaderProgram::GetShaderId(const Drawable& drawable, const Drawable:
 {
     return drawable.GetShaderId(env);
 }
-std::string ShaderProgram::GetShader(const Material& material, const Material::Environment& env, const Device& device) const
+ShaderSource ShaderProgram::GetShader(const Material& material, const Material::Environment& env, const Device& device) const
 {
-    std::string source(R"(
-#version 100
-precision highp float;
+    ShaderSource source;
+    source.SetType(ShaderSource::Type::Fragment);
+    source.SetVersion(ShaderSource::Version::GLSL_100);
+    source.SetPrecision(ShaderSource::Precision::High);
 
+    source.AddSource(R"(
 struct FS_OUT {
    vec4 color;
 } fs_out;
@@ -63,17 +66,18 @@ void main() {
 }
 )");
 
-    source.append(material.GetShader(env, device));
+    source.Merge(material.GetShader(env, device));
     return source;
 }
-std::string ShaderProgram::GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const
+ShaderSource ShaderProgram::GetShader(const Drawable& drawable, const Drawable::Environment& env, const Device& device) const
 {
     // careful here, WebGL shits itself if the source is concatenated together
     // so that the vertex source (with varyings) comes after the main.
+    ShaderSource source;
+    source.SetType(ShaderSource::Type::Vertex);
+    source.SetVersion(ShaderSource::Version::GLSL_100);
 
-    std::string source(R"(
-#version 100
-
+    source.AddSource(R"(
 struct VS_OUT {
    vec4 position;
 } vs_out;
@@ -82,8 +86,8 @@ void VertexShaderMain();
 
 )");
 
-source.append(drawable.GetShader(env, device));
-source.append(R"(
+    source.Merge(drawable.GetShader(env, device));
+    source.AddSource(R"(
 
 void main() {
    VertexShaderMain();

@@ -47,6 +47,7 @@
 namespace gfx
 {
     class Device;
+    class ShaderSource;
 
     // Interface for acquiring texture data. Possible implementations
     // might load the data from a file or generate it on the fly.
@@ -1060,7 +1061,7 @@ namespace gfx
         // of the class.
         std::size_t GetHash() const noexcept;
 
-        std::string GetShader(const State& state, const Device& device) const noexcept;
+        ShaderSource GetShader(const State& state, const Device& device) const noexcept;
         // Apply the material properties onto the given program object based
         // on the material class and the material instance state.
         bool ApplyDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
@@ -1127,11 +1128,11 @@ namespace gfx
 
     private:
         TextureMap* SelectTextureMap(const State& state) const noexcept;
-        std::string GetShaderSource(const State& state, const Device& device) const;
-        std::string GetColorShaderSource(const State& state, const Device& device) const;
-        std::string GetGradientShaderSource(const State& state, const Device& device) const;
-        std::string GetSpriteShaderSource(const State& state, const Device& device) const;
-        std::string GetTextureShaderSource(const State& state, const Device& device) const;
+        ShaderSource GetShaderSource(const State& state, const Device& device) const;
+        ShaderSource GetColorShaderSource(const State& state, const Device& device) const;
+        ShaderSource GetGradientShaderSource(const State& state, const Device& device) const;
+        ShaderSource GetSpriteShaderSource(const State& state, const Device& device) const;
+        ShaderSource GetTextureShaderSource(const State& state, const Device& device) const;
         bool ApplySpriteDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
         bool ApplyCustomDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
         bool ApplyTextureDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
@@ -1195,8 +1196,7 @@ namespace gfx
         virtual void ApplyStaticState(const Environment& env, Device& device, ProgramState& program) const = 0;
         // Get the device specific shader source applicable for this material, its state
         // and the given environment in which it should execute.
-        // Should return an empty string on any error.
-        virtual std::string GetShader(const Environment& env, const Device& device) const = 0;
+        virtual ShaderSource GetShader(const Environment& env, const Device& device) const = 0;
         // Get the shader ID applicable for this material, its state and the given
         // environment in which it should execute.
         virtual std::string GetShaderId(const Environment& env) const = 0;
@@ -1242,7 +1242,7 @@ namespace gfx
         // Apply the material properties to the given program object and set the rasterizer state.
         virtual bool ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& raster) const override;
         virtual void ApplyStaticState(const Environment& env, Device& device, ProgramState& program) const override;
-        virtual std::string GetShader(const Environment& env, const Device& device) const override;
+        virtual ShaderSource GetShader(const Environment& env, const Device& device) const override;
         virtual std::string GetShaderId(const Environment& env) const override;
         virtual std::string GetShaderName(const Environment& env) const override;
 
@@ -1296,7 +1296,7 @@ namespace gfx
         TextMaterial(TextBuffer&& text);
         virtual bool ApplyDynamicState(const Environment& env, Device& device, ProgramState& program, RasterState& raster) const override;
         virtual void ApplyStaticState(const Environment& env, Device& device, ProgramState& program) const override;
-        virtual std::string GetShader(const Environment& env, const Device& device) const override;
+        virtual ShaderSource GetShader(const Environment& env, const Device& device) const override;
         virtual std::string GetShaderId(const Environment&) const override;
         virtual std::string GetShaderName(const Environment&) const override;
         virtual std::string GetClassId() const override;

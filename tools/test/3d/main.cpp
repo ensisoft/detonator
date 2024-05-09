@@ -38,6 +38,7 @@
 #include "graphics/drawable.h"
 #include "graphics/material.h"
 #include "graphics/shaderprogram.h"
+#include "graphics/shadersource.h"
 #include "graphics/utility.h"
 #include "graphics/transform.h"
 #include "graphics/device.h"
@@ -392,8 +393,13 @@ public:
     {
         return "DepthToColor";
     }
-    virtual std::string GetShader(const gfx::Material& material, const gfx::Material::Environment& env, const gfx::Device& device) const override
+    virtual gfx::ShaderSource GetShader(const gfx::Material& material, const gfx::Material::Environment& env, const gfx::Device& device) const override
     {
+        gfx::ShaderSource source;
+        source.SetType(gfx::ShaderSource::Type::Fragment);
+        source.SetVersion(gfx::ShaderSource::Version::GLSL_100);
+        source.SetPrecision(gfx::ShaderSource::Precision::High);
+
         // this shader maps the interpolated fragment depth (the .z component)
         // to a color value linearly. (important to keep this in mind when using
         // the output values, if rendering to a texture if the sRGB encoding happens
@@ -402,16 +408,13 @@ public:
         // Remember that in the OpenGL pipeline by default the NDC values (-1.0 to 1.0 on all axis)
         // are mapped to depth values so that -1.0 is least depth and 1.0 is maximum depth.
         // (OpenGL and ES3 have glDepthRange for modifying this mapping.)
-        constexpr const auto* depth_to_color = R"(
-#version 100
-precision highp float;
-
+        source.AddSource(R"(
 void main() {
    gl_FragColor.rgb = vec3(gl_FragCoord.z);
    gl_FragColor.a = 1.0;
 }
-)";
-        return depth_to_color;
+)");
+        return source;
     }
     virtual std::string GetName() const override
     { return "DepthTextureShader"; }

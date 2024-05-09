@@ -41,6 +41,7 @@
 #include "graphics/resource.h"
 #include "graphics/transform.h"
 #include "graphics/loader.h"
+#include "graphics/shadersource.h"
 
 namespace {
 float HalfRound(float value)
@@ -76,7 +77,7 @@ std::string NameAspectRatio(float width, float height, RoundFunc Round, const ch
     return ret;
 }
 
-std::string MakeSimple2DVertexShader(const gfx::Device& device)
+gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device)
 {
     // the varyings vParticleRandomValue, vParticleAlpha and vParticleTime
     // are used to support per particle features.
@@ -88,7 +89,8 @@ std::string MakeSimple2DVertexShader(const gfx::Device& device)
     // NDC (normalized device coordinates) (x grows right to 1.0 and
     // y grows up to 1.0 to the top of the screen).
 
-constexpr auto* src = R"(
+    gfx::ShaderSource source;
+    source.AddSource(R"(
 attribute vec2 aPosition;
 attribute vec2 aTexCoord;
 
@@ -109,13 +111,14 @@ void VertexShaderMain()
     vParticleTime        = 0.0;
     gl_Position  = kProjectionMatrix * kModelViewMatrix * vertex;
 }
-)";
-    return src;
+)");
+    return source;
 }
 
-std::string MakeSimple3DVertexShader(const gfx::Device& device)
+gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device)
 {
-constexpr const auto* src = R"(
+    gfx::ShaderSource source;
+    source.AddSource(R"(
 attribute vec3 aPosition;
 attribute vec2 aTexCoord;
 
@@ -137,13 +140,14 @@ void VertexShaderMain()
 
 }
 
-)";
-    return src;
+)");
+    return source;
 }
 
-std::string MakeModel3DVertexShader(const gfx::Device& device)
+gfx::ShaderSource MakeModel3DVertexShader(const gfx::Device& device)
 {
-constexpr const auto* src = R"(
+    gfx::ShaderSource source;
+    source.AddSource(R"(
 attribute vec3 aPosition;
 attribute vec2 aTexCoord;
 attribute vec3 aNormal;
@@ -166,9 +170,8 @@ void VertexShaderMain()
 
 }
 
-)";
-
-    return src;
+)");
+    return source;
 }
 
 } // namespace
@@ -1361,7 +1364,7 @@ void SimpleShapeInstance::ApplyDynamicState(const Environment& env, ProgramState
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
 }
-std::string SimpleShapeInstance::GetShader(const Environment& env, const Device& device) const
+ShaderSource SimpleShapeInstance::GetShader(const Environment& env, const Device& device) const
 {
     if (Is3DShape(mClass->GetShapeType()))
         return MakeSimple3DVertexShader(device);
@@ -1422,7 +1425,7 @@ void SimpleShape::ApplyDynamicState(const Environment& env, ProgramState& progra
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
 }
-std::string SimpleShape::GetShader(const Environment& env, const Device& device) const
+ShaderSource SimpleShape::GetShader(const Environment& env, const Device& device) const
 {
     if (Is3DShape(mShape))
         return MakeSimple3DVertexShader(device);
@@ -1490,7 +1493,7 @@ std::string Grid::GetShaderId(const Environment&) const
     return "simple-2D-vertex-shader";
 }
 
-std::string Grid::GetShader(const Environment&, const Device& device) const
+ShaderSource Grid::GetShader(const Environment&, const Device& device) const
 {
     return MakeSimple2DVertexShader(device);
 }
@@ -2008,7 +2011,7 @@ void PolygonMeshInstance::ApplyDynamicState(const Environment& env, ProgramState
     program.SetUniform("kProjectionMatrix", kProjectionMatrix);
     program.SetUniform("kModelViewMatrix", kModelViewMatrix);
 }
-std::string PolygonMeshInstance::GetShader(const Environment& env, const Device& device) const
+ShaderSource PolygonMeshInstance::GetShader(const Environment& env, const Device& device) const
 {
     const auto mesh = GetMeshType();
     if (mesh == MeshType::Simple2D)
@@ -2018,7 +2021,7 @@ std::string PolygonMeshInstance::GetShader(const Environment& env, const Device&
     else if (mesh == MeshType::Model3D)
         return MakeModel3DVertexShader(device); // todo:
     else BUG("No such vertex shader");
-    return "";
+    return ShaderSource("");
 }
 
 std::string PolygonMeshInstance::GetGeometryId(const Environment& env) const
@@ -2102,7 +2105,7 @@ std::string ParticleEngineClass::GetGeometryId(const Environment& env) const
     return "particle-buffer";
 }
 
-std::string ParticleEngineClass::GetShader(const Environment& env, const Device& device) const
+ShaderSource ParticleEngineClass::GetShader(const Environment& env, const Device& device) const
 {
     // this shader doesn't actually write to vTexCoord because when
     // particle (GL_POINTS) rasterization is done the fragment shader
@@ -2153,11 +2156,11 @@ void VertexShaderMain()
 }
     )";
     if (mParams->coordinate_space == CoordinateSpace::Local)
-        return local_src;
+        return ShaderSource(local_src);
     else if (mParams->coordinate_space == CoordinateSpace::Global)
-        return global_src;
+        return ShaderSource(global_src);
     else BUG("Missing particle shader simulation space source.");
-    return "";
+    return ShaderSource("");
 }
 
 std::string ParticleEngineClass::GetShaderName(const Environment& env) const
@@ -3038,7 +3041,7 @@ void ParticleEngineInstance::ApplyDynamicState(const Environment& env, ProgramSt
     mClass->ApplyDynamicState(env, program);
 }
 
-std::string ParticleEngineInstance::GetShader(const Environment& env, const Device& device) const
+ShaderSource ParticleEngineInstance::GetShader(const Environment& env, const Device& device) const
 {
     return mClass->GetShader(env, device);
 }
@@ -3136,7 +3139,7 @@ void TileBatch::ApplyDynamicState(const Environment& env, ProgramState& program,
     program.SetUniform("kTileCoordinateSpaceTransform", *env.model_matrix);
 }
 
-std::string TileBatch::GetShader(const Environment& env, const Device& device) const
+ShaderSource TileBatch::GetShader(const Environment& env, const Device& device) const
 {
     // the shader uses dummy varyings vParticleAlpha, vParticleRandomValue
     // and vTexCoord. Even though we're now rendering GL_POINTS this isn't
@@ -3217,11 +3220,11 @@ void VertexShaderMain()
 }
 )";
     if (shape == TileShape::Square)
-        return square_tile_source;
+        return ShaderSource(square_tile_source);
     else if (shape == TileShape::Rectangle)
-        return rectangle_tile_source;
+        return ShaderSource(rectangle_tile_source);
     else BUG("Missing tile batch shader source.");
-    return "";
+    return ShaderSource("");
 }
 
 std::string TileBatch::GetShaderId(const Environment& env) const
@@ -3325,7 +3328,7 @@ void LineBatch2D::ApplyDynamicState(const Environment &environment, ProgramState
     program.SetUniform("kModelViewMatrix", *environment.view_matrix * *environment.model_matrix);
 }
 
-std::string LineBatch2D::GetShader(const Environment& environment, const Device& device) const
+ShaderSource LineBatch2D::GetShader(const Environment& environment, const Device& device) const
 {
     return MakeSimple2DVertexShader(device);
 }
@@ -3374,7 +3377,7 @@ void LineBatch3D::ApplyDynamicState(const Environment& environment, ProgramState
     program.SetUniform("kModelViewMatrix", *environment.view_matrix * *environment.model_matrix);
 }
 
-std::string LineBatch3D::GetShader(const Environment& environment, const Device& device) const
+ShaderSource LineBatch3D::GetShader(const Environment& environment, const Device& device) const
 {
     return MakeSimple3DVertexShader(device);
 }
@@ -3427,7 +3430,7 @@ void DebugDrawableBase::ApplyDynamicState(const Environment& env, ProgramState& 
     mDrawable->ApplyDynamicState(env, program, state);
 }
 
-std::string DebugDrawableBase::GetShader(const Environment& env, const Device& device) const
+ShaderSource DebugDrawableBase::GetShader(const Environment& env, const Device& device) const
 {
     return mDrawable->GetShader(env, device);
 }
