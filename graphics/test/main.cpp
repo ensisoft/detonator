@@ -44,6 +44,7 @@
 #include "graphics/shader.h"
 #include "graphics/program.h"
 #include "graphics/renderpass.h"
+#include "graphics/shadersource.h"
 #include "graphics/utility.h"
 #include "graphics/tool/geometry.h"
 #include "wdk/opengl/config.h"
@@ -2018,19 +2019,18 @@ public:
         public:
             virtual std::string GetName() const override
             { return "TestProgram"; }
-            virtual std::string GetShader(const gfx::Material& material, const gfx::Material::Environment& env, const gfx::Device& device) const override
+            virtual gfx::ShaderSource GetShader(const gfx::Material& material, const gfx::Material::Environment& env, const gfx::Device& device) const override
             {
-                return material.GetShader(env, device);
+                auto source = material.GetShader(env, device);
+                source.SetType(gfx::ShaderSource::Type::Fragment);
+                source.SetPrecision(gfx::ShaderSource::Precision::High);
+                source.SetVersion(gfx::ShaderSource::Version::GLSL_100);
+                return source;
             }
-            //virtual
-
         private:
         } program;
 
         srgb_out.SetShaderSrc(R"(
-#version 100
-precision highp float;
-
 uniform float kColor;
 
 float sRGB_encode(float value)
@@ -2053,9 +2053,6 @@ void main() {
 })");
 
         linear_out.SetShaderSrc(R"(
-#version 100
-precision highp float;
-
 uniform float kColor;
 
 void main() {

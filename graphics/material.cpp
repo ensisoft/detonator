@@ -35,7 +35,7 @@
 #include "graphics/program.h"
 #include "graphics/resource.h"
 #include "graphics/loader.h"
-#include "graphics/shaderprogram.h"
+#include "graphics/shadersource.h"
 #include "graphics/algo.h"
 
 //                  == Notes about shaders ==
@@ -1098,10 +1098,10 @@ std::size_t MaterialClass::GetHash() const noexcept
     return hash;
 }
 
-std::string MaterialClass::GetShader(const State& state, const Device& device) const noexcept
+ShaderSource MaterialClass::GetShader(const State& state, const Device& device) const noexcept
 {
-    std::string source = GetShaderSource(state, device);
-    if (source.empty())
+    auto source = GetShaderSource(state, device);
+    if (source.IsEmpty())
         return source;
 
     if (IsStatic())
@@ -1117,7 +1117,12 @@ std::string MaterialClass::GetShader(const State& state, const Device& device) c
         data.texture_velocity = GetTextureVelocity();
         data.texture_rotation = GetTextureRotation();
         data.texture_scale    = GetTextureScale();
-        source = FoldUniforms(source, data);
+
+        auto snippet = source.GetSnippet(0);
+
+        snippet = FoldUniforms(snippet, data);
+        source.ClearSnippets();
+        source.AddSource(std::move(snippet));
     }
     return source;
 }
@@ -1761,7 +1766,7 @@ TextureMap* MaterialClass::SelectTextureMap(const State& state) const noexcept
     return mTextureMaps[0].get();
 }
 
-std::string MaterialClass::GetShaderSource(const State& state, const Device& device) const
+ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& device) const
 {
     // First check the inline source within the material. If that doesn't
     // exist then check the shader URI for loading the shader from the URI.
@@ -1769,7 +1774,7 @@ std::string MaterialClass::GetShaderSource(const State& state, const Device& dev
     // use one of the built-in shaders!
 
     if (!mShaderSrc.empty())
-        return mShaderSrc;
+        return ShaderSource(mShaderSrc);
 
     if (!mShaderUri.empty())
     {
@@ -1781,11 +1786,11 @@ std::string MaterialClass::GetShaderSource(const State& state, const Device& dev
         if (!buffer)
         {
             ERROR("Failed to load custom material shader source file. [name='%1', uri='%2']", mName, mShaderUri);
-            return "";
+            return ShaderSource();
         }
         const char* beg = (const char*)buffer->GetData();
         const char* end = beg + buffer->GetByteSize();
-        return std::string(beg, end);
+        return ShaderSource(std::string(beg, end));
     }
 
     if (mType == Type::Color)
@@ -1799,14 +1804,15 @@ std::string MaterialClass::GetShaderSource(const State& state, const Device& dev
     else  if (mType == Type::Custom)
     {
         ERROR("Material has no shader source specified. [name='%1']", mName);
-        return "";
+        return ShaderSource("");
     } else BUG("Unknown material type.");
-    return "";
+    return ShaderSource("");
 }
 
-std::string MaterialClass::GetColorShaderSource(const State& state, const Device& device) const
+ShaderSource MaterialClass::GetColorShaderSource(const State& state, const Device& device) const
 {
-    constexpr const auto* source = R"(
+    ShaderSource source;
+    source.AddSource(R"(
 uniform vec4 kBaseColor;
 varying float vParticleAlpha;
 
@@ -1816,13 +1822,14 @@ void FragmentShaderMain()
   color.a *= vParticleAlpha;
   fs_out.color = color;
 }
-)";
+)");
     return source;
 }
 
-std::string MaterialClass::GetGradientShaderSource(const State& state, const Device& device) const
+ShaderSource MaterialClass::GetGradientShaderSource(const State& state, const Device& device) const
 {
-    constexpr const auto* source = R"(
+    ShaderSource source;
+    source.AddSource(R"(
 uniform vec4 kColor0;
 uniform vec4 kColor1;
 uniform vec4 kColor2;
@@ -1851,14 +1858,16 @@ void FragmentShaderMain()
   fs_out.color.rgb = vec3(pow(color.rgb, vec3(2.2)));
   fs_out.color.a   = color.a * vParticleAlpha;
 }
-)";
+)");
     return source;
 }
 
-std::string MaterialClass::GetSpriteShaderSource(const State& state, const Device& device) const
+ShaderSource MaterialClass::GetSpriteShaderSource(const State& state, const Device& device) const
 {
     // todo: maybe pack some of shader uniforms
-    constexpr const auto* source = R"(
+
+    ShaderSource source;
+    source.AddSource(R"(
 uniform sampler2D kTexture0;
 uniform sampler2D kTexture1;
 uniform vec4 kTextureBox0;
@@ -1958,7 +1967,7 @@ void FragmentShaderMain()
 
     fs_out.color = color;
 }
-)";
+)");
     return source;
 }
 
@@ -2050,10 +2059,12 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
     return true;
 }
 
-std::string MaterialClass::GetTextureShaderSource(const State& state, const Device& device) const
+ShaderSource MaterialClass::GetTextureShaderSource(const State& state, const Device& device) const
 {
-// todo: pack some of the uniforms ?
-    constexpr const auto* source = R"(
+    // todo: pack some of the uniforms ?
+
+    ShaderSource source;
+    source.AddSource(R"(
 uniform sampler2D kTexture;
 uniform vec4 kTextureBox;
 uniform float kAlphaMask;
@@ -2146,7 +2157,7 @@ void FragmentShaderMain()
 
     fs_out.color = color;
 }
-)";
+)");
     return source;
 }
 
@@ -2338,7 +2349,7 @@ std::string MaterialInstance::GetShaderName(const Environment& env) const
     return mClass->GetShaderName(state);
 }
 
-std::string MaterialInstance::GetShader(const Environment& env, const Device& device) const
+ShaderSource MaterialInstance::GetShader(const Environment& env, const Device& device) const
 {
     MaterialClass::State state;
     state.editing_mode  = env.editing_mode;
@@ -2421,9 +2432,9 @@ bool TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
 }
 void TextMaterial::ApplyStaticState(const Environment& env, Device& device, gfx::ProgramState& program) const
 {}
-std::string TextMaterial::GetShader(const Environment& env, const Device& device) const
+ShaderSource TextMaterial::GetShader(const Environment& env, const Device& device) const
 {
-constexpr auto* text_shader_bitmap = R"(
+    constexpr auto* text_shader_bitmap = R"(
 uniform sampler2D kTexture;
 uniform vec4 kColor;
 uniform float kTime;
@@ -2435,7 +2446,7 @@ void FragmentShaderMain() {
    fs_out.color = color;
 }
         )";
-constexpr auto* text_shader_texture = R"(
+    constexpr auto* text_shader_texture = R"(
 uniform sampler2D kTexture;
 varying vec2 vTexCoord;
 
@@ -2451,13 +2462,13 @@ void FragmentShaderMain() {
 
     const auto format = mText.GetRasterFormat();
     if (format == TextBuffer::RasterFormat::Bitmap)
-        return text_shader_bitmap;
+        return ShaderSource(text_shader_bitmap);
     else if (format == TextBuffer::RasterFormat::Texture)
-        return text_shader_texture;
+        return ShaderSource(text_shader_texture);
     else if (format == TextBuffer::RasterFormat::None)
-        return "";
+        return ShaderSource();
     else BUG("Unhandled texture raster format.");
-    return "";
+    return ShaderSource();
 }
 std::string TextMaterial::GetShaderId(const Environment& env) const
 {

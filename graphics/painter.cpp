@@ -29,6 +29,7 @@
 #include "graphics/geometry.h"
 #include "graphics/painter.h"
 #include "graphics/shaderprogram.h"
+#include "graphics/shadersource.h"
 
 namespace gfx
 {
@@ -192,13 +193,13 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
         ShaderPtr material_shader = mDevice->FindShader(material_gpu_id);
         if (material_shader == nullptr)
         {
-            std::string material_shader_source = program.GetShader(material, material_environment, *mDevice);
-            if (material_shader_source.empty())
+            const auto& material_shader_source = program.GetShader(material, material_environment, *mDevice);
+            if (material_shader_source.IsEmpty())
                 return nullptr;
 
             Shader::CreateArgs args;
             args.name   = material.GetShaderName(material_environment);
-            args.source = material_shader_source;
+            args.source = material_shader_source.GetSource();
             material_shader = mDevice->CreateShader(material_gpu_id, args);
         }
         if (!material_shader->IsValid())
@@ -207,13 +208,13 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
         ShaderPtr drawable_shader = mDevice->FindShader(drawable_gpu_id);
         if (drawable_shader == nullptr)
         {
-            std::string drawable_shader_source = program.GetShader(drawable, drawable_environment, *mDevice);
-            if (drawable_shader_source.empty())
+            const auto& drawable_shader_source = program.GetShader(drawable, drawable_environment, *mDevice);
+            if (drawable_shader_source.IsEmpty())
                 return nullptr;
 
             Shader::CreateArgs args;
             args.name   = drawable.GetShaderName(drawable_environment);
-            args.source = drawable_shader_source;
+            args.source = drawable_shader_source.GetSource();
             drawable_shader = mDevice->CreateShader(drawable_gpu_id, args);
         }
         if (!drawable_shader->IsValid())

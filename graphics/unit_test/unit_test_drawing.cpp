@@ -41,6 +41,7 @@
 #include "graphics/painter.h"
 #include "graphics/transform.h"
 #include "graphics/shaderprogram.h"
+#include "graphics/shadersource.h"
 #include "graphics/drawcmd.h"
 #include "graphics/tool/geometry.h"
 
@@ -1077,8 +1078,8 @@ void unit_test_material_uniform_folding()
         klass.SetBaseColor(gfx::Color::White);
         klass.SetStatic(true);
         auto source = klass.GetShader(state, device);
-        TEST_REQUIRE(base::Contains(source, "uniform vec4 kBaseColor;") == false);
-        TEST_REQUIRE(base::Contains(source, "const vec4 kBaseColor = vec4(1.00,1.00,1.00,1.00);"));
+        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec4 kBaseColor;") == false);
+        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec4 kBaseColor = vec4(1.00,1.00,1.00,1.00);"));
     }
 
     {
@@ -1091,14 +1092,14 @@ void unit_test_material_uniform_folding()
         klass.SetColor(gfx::Color::White, gfx::GradientClass::ColorIndex::TopRight);
         klass.SetStatic(true);
         auto source = klass.GetShader(state, device);
-        TEST_REQUIRE(base::Contains(source, "uniform vec4 kColor0;") == false);
-        TEST_REQUIRE(base::Contains(source, "uniform vec4 kColor1;") == false);
-        TEST_REQUIRE(base::Contains(source, "uniform vec4 kColor2;") == false);
-        TEST_REQUIRE(base::Contains(source, "uniform vec4 kColor3;") == false);
-        TEST_REQUIRE(base::Contains(source, "const vec4 kColor0 = vec4(0.00,1.00,0.00,1.00);"));
-        TEST_REQUIRE(base::Contains(source, "const vec4 kColor1 = vec4(1.00,1.00,1.00,1.00);"));
-        TEST_REQUIRE(base::Contains(source, "const vec4 kColor2 = vec4(0.00,0.00,1.00,1.00);"));
-        TEST_REQUIRE(base::Contains(source, "const vec4 kColor3 = vec4(1.00,0.00,0.00,1.00);"));
+        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec4 kColor0;") == false);
+        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec4 kColor1;") == false);
+        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec4 kColor2;") == false);
+        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec4 kColor3;") == false);
+        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec4 kColor0 = vec4(0.00,1.00,0.00,1.00);"));
+        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec4 kColor1 = vec4(1.00,1.00,1.00,1.00);"));
+        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec4 kColor2 = vec4(0.00,0.00,1.00,1.00);"));
+        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec4 kColor3 = vec4(1.00,0.00,0.00,1.00);"));
     }
 
     {
@@ -1113,13 +1114,13 @@ void unit_test_material_uniform_folding()
         klass.SetTextureScaleX(2.0);
         klass.SetTextureScaleY(3.0);
         auto source = klass.GetShader(state, device);
-        TEST_REQUIRE(base::Contains(source, "uniform vec4 kBaseColor;") == false);
-        TEST_REQUIRE(base::Contains(source, "uniform vec2 kTextureScale") == false);
-        TEST_REQUIRE(base::Contains(source, "uniform vec2 kTextureVelocityXY") == false);
-        TEST_REQUIRE(base::Contains(source, "uniform float kTextureVelocityZ") == false);
-        TEST_REQUIRE(base::Contains(source, "const vec4 kBaseColor = vec4(1.00,1.00,1.00,1.00);"));
-        TEST_REQUIRE(base::Contains(source, "const vec2 kTextureScale = vec2(2.00,3.00);"));
-        TEST_REQUIRE(base::Contains(source, "const vec3 kTextureVelocity = vec3(4.00,5.00,-1.00);"));
+        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec4 kBaseColor;") == false);
+        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec2 kTextureScale") == false);
+        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec2 kTextureVelocityXY") == false);
+        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform float kTextureVelocityZ") == false);
+        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec4 kBaseColor = vec4(1.00,1.00,1.00,1.00);"));
+        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec2 kTextureScale = vec2(2.00,3.00);"));
+        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec3 kTextureVelocity = vec3(4.00,5.00,-1.00);"));
     }
 
     {
@@ -1133,11 +1134,11 @@ void unit_test_material_uniform_folding()
         klass.SetTextureScaleX(2.0);
         klass.SetTextureScaleY(3.0);
         auto source = klass.GetShader(state, device);
-        TEST_REQUIRE(base::Contains(source, "uniform vec2 kTextureScale") == false);
-        TEST_REQUIRE(base::Contains(source, "uniform vec2 kTextureVelocityXY") == false);
-        TEST_REQUIRE(base::Contains(source, "uniform float kTextureVelocityZ") == false);
-        TEST_REQUIRE(base::Contains(source, "const vec2 kTextureScale = vec2(2.00,3.00);"));
-        TEST_REQUIRE(base::Contains(source, "const vec3 kTextureVelocity = vec3(4.00,5.00,-1.00);"));
+        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec2 kTextureScale") == false);
+        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform vec2 kTextureVelocityXY") == false);
+        TEST_REQUIRE(base::Contains(source.GetSource(), "uniform float kTextureVelocityZ") == false);
+        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec2 kTextureScale = vec2(2.00,3.00);"));
+        TEST_REQUIRE(base::Contains(source.GetSource(), "const vec3 kTextureVelocity = vec3(4.00,5.00,-1.00);"));
     }
 }
 
