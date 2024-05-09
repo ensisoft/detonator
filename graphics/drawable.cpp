@@ -90,18 +90,18 @@ gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device)
     // y grows up to 1.0 to the top of the screen).
 
     gfx::ShaderSource source;
+    source.AddAttribute("aPosition", gfx::ShaderSource::AttributeType::Vec2f);
+    source.AddAttribute("aTexCoord", gfx::ShaderSource::AttributeType::Vec2f);
+
+    source.AddUniform("kProjectionMatrix", gfx::ShaderSource::UniformType::Mat4f);
+    source.AddUniform("kModelViewMatrix", gfx::ShaderSource::UniformType::Mat4f);
+
+    source.AddVarying("vTexCoord", gfx::ShaderSource::VaryingType::Vec2f);
+    source.AddVarying("vParticleRandomValue", gfx::ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleAlpha", gfx::ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleTime", gfx::ShaderSource::VaryingType::Float);
+
     source.AddSource(R"(
-attribute vec2 aPosition;
-attribute vec2 aTexCoord;
-
-uniform mat4 kProjectionMatrix;
-uniform mat4 kModelViewMatrix;
-
-varying vec2 vTexCoord;
-varying float vParticleRandomValue;
-varying float vParticleAlpha;
-varying float vParticleTime;
-
 void VertexShaderMain()
 {
     vec4 vertex  = vec4(aPosition.x, aPosition.y * -1.0, 0.0, 1.0);
@@ -118,18 +118,18 @@ void VertexShaderMain()
 gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device)
 {
     gfx::ShaderSource source;
+    source.AddAttribute("aPosition", gfx::ShaderSource::AttributeType::Vec3f);
+    source.AddAttribute("aTexCoord", gfx::ShaderSource::AttributeType::Vec2f);
+
+    source.AddUniform("kProjectionMatrix", gfx::ShaderSource::UniformType::Mat4f);
+    source.AddUniform("kModelViewMatrix", gfx::ShaderSource::UniformType::Mat4f);
+
+    source.AddVarying("vTexCoord", gfx::ShaderSource::VaryingType::Vec2f);
+    source.AddVarying("vParticleRandomValue", gfx::ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleAlpha", gfx::ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleTime", gfx::ShaderSource::VaryingType::Float);
+
     source.AddSource(R"(
-attribute vec3 aPosition;
-attribute vec2 aTexCoord;
-
-uniform mat4 kProjectionMatrix;
-uniform mat4 kModelViewMatrix;
-
-varying vec2 vTexCoord;
-varying float vParticleRandomValue;
-varying float vParticleAlpha;
-varying float vParticleTime;
-
 void VertexShaderMain()
 {
     vTexCoord = aTexCoord;
@@ -137,9 +137,7 @@ void VertexShaderMain()
     vParticleAlpha       = 1.0;
     vParticleTime        = 0.0;
     gl_Position = kProjectionMatrix * kModelViewMatrix * vec4(aPosition.xyz, 1.0);
-
 }
-
 )");
     return source;
 }
@@ -147,19 +145,19 @@ void VertexShaderMain()
 gfx::ShaderSource MakeModel3DVertexShader(const gfx::Device& device)
 {
     gfx::ShaderSource source;
+    source.AddAttribute("aPosition", gfx::ShaderSource::AttributeType::Vec3f);
+    source.AddAttribute("aNormal", gfx::ShaderSource::AttributeType::Vec3f);
+    source.AddAttribute("aTexCoord", gfx::ShaderSource::AttributeType::Vec2f);
+
+    source.AddUniform("kProjectionMatrix", gfx::ShaderSource::UniformType::Mat4f);
+    source.AddUniform("kModelViewMatrix", gfx::ShaderSource::UniformType::Mat4f);
+
+    source.AddVarying("vTexCoord", gfx::ShaderSource::VaryingType::Vec2f);
+    source.AddVarying("vParticleRandomValue", gfx::ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleAlpha", gfx::ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleTime", gfx::ShaderSource::VaryingType::Float);
+
     source.AddSource(R"(
-attribute vec3 aPosition;
-attribute vec2 aTexCoord;
-attribute vec3 aNormal;
-
-uniform mat4 kProjectionMatrix;
-uniform mat4 kModelViewMatrix;
-
-varying vec2 vTexCoord;
-varying float vParticleRandomValue;
-varying float vParticleAlpha;
-varying float vParticleTime;
-
 void VertexShaderMain()
 {
     vTexCoord = aTexCoord;
@@ -167,9 +165,7 @@ void VertexShaderMain()
     vParticleAlpha       = 1.0;
     vParticleTime        = 0.0;
     gl_Position = kProjectionMatrix * kModelViewMatrix * vec4(aPosition.xyz, 1.0);
-
 }
-
 )");
     return source;
 }
@@ -2107,21 +2103,21 @@ std::string ParticleEngineClass::GetGeometryId(const Environment& env) const
 
 ShaderSource ParticleEngineClass::GetShader(const Environment& env, const Device& device) const
 {
-    // this shader doesn't actually write to vTexCoord because when
-    // particle (GL_POINTS) rasterization is done the fragment shader
-    // must use gl_PointCoord instead.
-    constexpr auto* local_src = R"(
-attribute vec2 aPosition;
-attribute vec4 aData;
-
-uniform mat4 kProjectionMatrix;
-uniform mat4 kModelViewMatrix;
-
-varying vec2  vTexCoord;
-varying float vParticleRandomValue;
-varying float vParticleAlpha;
-varying float vParticleTime;
-
+    if (mParams->coordinate_space == CoordinateSpace::Local)
+    {
+        ShaderSource source;
+        source.AddAttribute("aPosition", ShaderSource::AttributeType::Vec2f);
+        source.AddAttribute("aData", ShaderSource::AttributeType::Vec4f);
+        source.AddUniform("kProjectionMatrix", ShaderSource::UniformType::Mat4f);
+        source.AddUniform("kModelViewMatrix", ShaderSource::UniformType::Mat4f);
+        source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
+        source.AddVarying("vParticleRandomValue", ShaderSource::VaryingType::Float);
+        source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
+        source.AddVarying("vParticleTime", ShaderSource::VaryingType::Float);
+        // this shader doesn't actually write to vTexCoord because when
+        // particle (GL_POINTS) rasterization is done the fragment shader
+        // must use gl_PointCoord instead.
+        source.AddSource(R"(
 void VertexShaderMain()
 {
     vec4 vertex  = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
@@ -2131,20 +2127,24 @@ void VertexShaderMain()
     vParticleTime        = aData.w;
     gl_Position  = kProjectionMatrix * kModelViewMatrix * vertex;
 }
-    )";
-
-    constexpr auto* global_src = R"(
-attribute vec2 aPosition;
-attribute vec4 aData;
-
-uniform mat4 kProjectionMatrix;
-uniform mat4 kViewMatrix;
-
-varying vec2 vTexCoord;
-varying float vParticleRandomValue;
-varying float vParticleAlpha;
-varying float vParticleTime;
-
+    )");
+        return source;
+    }
+    else if (mParams->coordinate_space == CoordinateSpace::Global)
+    {
+        ShaderSource source;
+        source.AddAttribute("aPosition", ShaderSource::AttributeType::Vec2f);
+        source.AddAttribute("aData", ShaderSource::AttributeType::Vec4f);
+        source.AddUniform("kProjectionMatrix", ShaderSource::UniformType::Mat4f);
+        source.AddUniform("kViewMatrix", ShaderSource::UniformType::Mat4f);
+        source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
+        source.AddVarying("vParticleRandomValue", ShaderSource::VaryingType::Float);
+        source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
+        source.AddVarying("vParticleTime", ShaderSource::VaryingType::Float);
+        // this shader doesn't actually write to vTexCoord because when
+        // particle (GL_POINTS) rasterization is done the fragment shader
+        // must use gl_PointCoord instead.
+        source.AddSource(R"(
 void VertexShaderMain()
 {
   vec4 vertex = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
@@ -2154,12 +2154,11 @@ void VertexShaderMain()
   vParticleTime        = aData.w;
   gl_Position  = kProjectionMatrix * kViewMatrix * vertex;
 }
-    )";
-    if (mParams->coordinate_space == CoordinateSpace::Local)
-        return ShaderSource(local_src);
-    else if (mParams->coordinate_space == CoordinateSpace::Global)
-        return ShaderSource(global_src);
+    )");
+        return source;
+    }
     else BUG("Missing particle shader simulation space source.");
+    
     return ShaderSource("");
 }
 

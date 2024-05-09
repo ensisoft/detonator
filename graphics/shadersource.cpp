@@ -18,7 +18,99 @@
 
 #include "base/assert.h"
 #include "base/utility.h"
+#include "base/format.h"
+#include "base/logging.h"
 #include "graphics/shadersource.h"
+
+namespace {
+    std::string ToConst(float value)
+    {
+        return base::ToChars(value);
+    }
+    std::string ToConst(const gfx::Color4f& sRGB)
+    {
+        // convert to linear.
+        const auto& color = sRGB_Decode(sRGB);
+
+        return base::FormatString("vec4(%1,%2,%3,%4)",
+                                  base::ToChars(color.Red()),
+                                  base::ToChars(color.Green()),
+                                  base::ToChars(color.Blue()),
+                                  base::ToChars(color.Alpha()));
+    }
+    std::string ToConst(const glm::vec2& vec2)
+    {
+        return base::FormatString("vec2(%1,%2)",
+                                  base::ToChars(vec2.x),
+                                  base::ToChars(vec2.y));
+    }
+    std::string ToConst(const glm::vec3& vec3)
+    {
+        return base::FormatString("vec3(%1,%2,%3)",
+                                  base::ToChars(vec3.x),
+                                  base::ToChars(vec3.y),
+                                  base::ToChars(vec3.z));
+    }
+    std::string ToConst(const glm::vec4& vec4)
+    {
+        return base::FormatString("vec4(%1,%2,%3,%4)",
+                                  base::ToChars(vec4.x),
+                                  base::ToChars(vec4.y),
+                                  base::ToChars(vec4.z),
+                                  base::ToChars(vec4.w));
+    }
+    template<typename T>
+    std::string ToConst(const T& value)
+    {
+        BUG("Not implemented!");
+        return "";
+    }
+
+    bool ValidateConstDataType(float, gfx::ShaderSource::ShaderDataType type)
+    {
+        return type == gfx::ShaderSource::ShaderDataType::Float;
+    }
+    bool ValidateConstDataType(int, gfx::ShaderSource::ShaderDataType type)
+    {
+        return type == gfx::ShaderSource::ShaderDataType::Int;
+    }
+    bool ValidateConstDataType(const glm::vec2&, gfx::ShaderSource::ShaderDataType type)
+    {
+        return type == gfx::ShaderSource::ShaderDataType::Vec2f;
+    }
+    bool ValidateConstDataType(const glm::vec3&, gfx::ShaderSource::ShaderDataType type)
+    {
+        return type == gfx::ShaderSource::ShaderDataType::Vec3f;
+    }
+    bool ValidateConstDataType(const glm::vec4&, gfx::ShaderSource::ShaderDataType type)
+    {
+        return type == gfx::ShaderSource::ShaderDataType::Vec4f;
+    }
+    bool ValidateConstDataType(const glm::ivec2&, gfx::ShaderSource::ShaderDataType type)
+    {
+        return type == gfx::ShaderSource::ShaderDataType::Vec2i;
+    }
+    bool ValidateConstDataType(const glm::ivec3&, gfx::ShaderSource::ShaderDataType type)
+    {
+        return type == gfx::ShaderSource::ShaderDataType::Vec3i;
+    }
+    bool ValidateConstDataType(const glm::ivec4&, gfx::ShaderSource::ShaderDataType type)
+    {
+        return type == gfx::ShaderSource::ShaderDataType::Vec4i;
+    }
+    bool ValidateConstDataType(const gfx::Color4f, gfx::ShaderSource::ShaderDataType type)
+    {
+        return type == gfx::ShaderSource::ShaderDataType::Color4f;
+    }
+
+    template<typename T>
+    bool ValidateConstDataType(T, gfx::ShaderSource::ShaderDataType)
+    {
+        BUG("Not implemented");
+        return false;
+    }
+
+} // namespace
 
 namespace gfx
 {
@@ -45,9 +137,78 @@ std::string ShaderSource::GetSource() const
             BUG("Missing GLSL fragment shader floating point precision handling.");
     }
 
-    for (const auto& snip : mSnippets)
+    for (const auto& data : mData)
     {
-        ss << snip;
+        if (data.decl_type == ShaderDataDeclarationType::Attribute)
+            ss << "attribute ";
+        else if (data.decl_type == ShaderDataDeclarationType::Uniform)
+            ss << "uniform ";
+        else if (data.decl_type == ShaderDataDeclarationType::Constant)
+            ss << "const ";
+        else if (data.decl_type == ShaderDataDeclarationType::Varying)
+            ss << "varying ";
+        else BUG("Missing GLSL data declaration type handling.");
+
+        if (data.data_type == ShaderDataType::Int)
+            ss << "int ";
+        else if (data.data_type == ShaderDataType::Float)
+            ss << "float ";
+        else if (data.data_type == ShaderDataType::Vec2f)
+            ss << "vec2 ";
+        else if (data.data_type == ShaderDataType::Vec3f)
+            ss << "vec3 ";
+        else if (data.data_type == ShaderDataType::Vec4f)
+            ss << "vec4 ";
+        else if (data.data_type == ShaderDataType::Vec2i)
+            ss << "ivec2 ";
+        else if (data.data_type == ShaderDataType::Vec3i)
+            ss << "ivec3 ";
+        else if (data.data_type == ShaderDataType::Vec4i)
+            ss << "ivec4 ";
+        else if (data.data_type == ShaderDataType::Mat2f)
+            ss << "mat2 ";
+        else if (data.data_type == ShaderDataType::Mat3f)
+            ss << "mat3 ";
+        else if (data.data_type == ShaderDataType::Mat4f)
+            ss << "mat4 ";
+        else if (data.data_type == ShaderDataType::Color4f)
+            ss << "vec4 ";
+        else if (data.data_type == ShaderDataType::Sampler2D)
+        {
+            if (data.decl_type != ShaderDataDeclarationType::Uniform)
+            {
+                ERROR("Shader uses sampler2D data declaration that isn't a uniform.");
+                return "";
+            }
+            ss << "sampler2D ";
+        }
+        else BUG("Missing GLSL data type handling.");
+
+
+        if (data.decl_type == ShaderDataDeclarationType::Constant)
+        {
+            ASSERT(data.constant_value.has_value());
+
+            ss << data.name;
+            ss << " = ";
+            std::visit([&ss, &data](auto the_value) {
+                ASSERT(ValidateConstDataType(the_value, data.data_type));
+
+                ss << ToConst(the_value);
+            }, data.constant_value.value());
+            ss << ";";
+        }
+        else
+        {
+            ss << data.name;
+            ss << ";";
+        }
+        ss << "\n";
+    }
+
+    for (const auto& src : mSource)
+    {
+        ss << src;
     }
 
     return ss.str();
@@ -57,9 +218,14 @@ void ShaderSource::Merge(const ShaderSource& other)
 {
     ASSERT(IsCompatible(other));
 
-    for (const auto& other_snip : other.mSnippets)
+    for (const auto& other_source : other.mSource)
     {
-        mSnippets.push_back(other_snip);
+        mSource.push_back(other_source);
+    }
+
+    for (const auto& other_data : other.mData)
+    {
+        mData.push_back(other_data);
     }
 }
 
