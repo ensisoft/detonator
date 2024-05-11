@@ -115,6 +115,25 @@ namespace {
 namespace gfx
 {
 
+void ShaderSource::FoldUniform(const std::string& name, ShaderDataDeclarationValue value)
+{
+    for (auto& decl : mData)
+    {
+        if (decl.decl_type != ShaderDataDeclarationType::Uniform)
+            continue;
+        if (decl.name != name)
+            continue;
+
+        std::visit([&decl](auto the_value)  {
+            ASSERT(ValidateConstDataType(the_value, decl.data_type));
+        }, value);
+
+        decl.decl_type = ShaderDataDeclarationType::Constant;
+        decl.constant_value = std::move(value);
+        break;
+    }
+}
+
 std::string ShaderSource::GetSource() const
 {
     std::stringstream ss;

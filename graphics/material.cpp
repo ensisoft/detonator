@@ -96,79 +96,6 @@
 // shader effect.
 //
 
-namespace {
-    using namespace base;
-    std::string ToConst(float value)
-    { return base::ToChars(value); }
-    std::string ToConst(const gfx::Color4f& color)
-    {
-        return base::FormatString("vec4(%1,%2,%3,%4)",
-                                  ToChars(color.Red()),
-                                  ToChars(color.Green()),
-                                  ToChars(color.Blue()),
-                                  ToChars(color.Alpha()));
-    }
-    std::string ToConst(const glm::vec2& vec2)
-    { return base::FormatString("vec2(%1,%2)", ToChars(vec2.x), ToChars(vec2.y)); }
-    std::string ToConst(const glm::vec3& vec3)
-    { return base::FormatString("vec3(%1,%2,%3)", ToChars(vec3.x), ToChars(vec3.y), ToChars(vec3.z)); }
-    std::string ToConst(const glm::vec4& vec4)
-    { return base::FormatString("vec4(%1,%2,%3,%4)", ToChars(vec4.x), ToChars(vec4.y), ToChars(vec4.z), ToChars(vec4.w)); }
-
-    struct ShaderData {
-        float alpha_cutoff = 0.0f;
-        float gamma = 0.0f;
-        float texture_rotation = 0;
-        glm::vec2 texture_scale;
-        glm::vec3 texture_velocity;
-        gfx::Color4f base_color;
-        gfx::Color4f color_map[4];
-        glm::vec2 gradient_offset;
-    };
-    std::string FoldUniforms(const std::string& src, const ShaderData& data)
-    {
-        std::string code;
-        std::string line;
-        std::stringstream ss(src);
-        while (std::getline(ss, line))
-        {
-            if (base::Contains(line, "uniform"))
-            {
-                const auto original = line;
-                if (base::Contains(line, "kAlphaCutoff"))
-                    line = base::FormatString("const float kAlphaCutoff = %1;", ToConst(data.alpha_cutoff));
-                else if (base::Contains(line, "kBaseColor"))
-                    line = base::FormatString("const vec4 kBaseColor = %1;", ToConst(data.base_color));
-                else if (base::Contains(line, "kTextureScale"))
-                    line = base::FormatString("const vec2 kTextureScale = %1;", ToConst(data.texture_scale));
-                else if (base::Contains(line, "kTextureVelocityXY"))
-                    line = base::FormatString("const vec2 kTextureVelocityXY = %1;", ToConst(glm::vec2(data.texture_velocity)));
-                else if (base::Contains(line, "kTextureVelocityZ"))
-                    line = base::FormatString("const float kTextureVelocityZ = %1;", ToConst(data.texture_velocity.z));
-                else if (base::Contains(line, "kTextureVelocity"))
-                    line = base::FormatString("const vec3 kTextureVelocity = %1;", ToConst(data.texture_velocity));
-                else if (base::Contains(line, "kTextureRotation"))
-                    line = base::FormatString("const float kTextureRotation = %1;", ToConst(data.texture_rotation));
-                else if (base::Contains(line, "kColor0"))
-                    line = base::FormatString("const vec4 kColor0 = %1;", ToConst(data.color_map[0]));
-                else if (base::Contains(line, "kColor1"))
-                    line = base::FormatString("const vec4 kColor1 = %1;", ToConst(data.color_map[1]));
-                else if (base::Contains(line, "kColor2"))
-                    line = base::FormatString("const vec4 kColor2 = %1;", ToConst(data.color_map[2]));
-                else if (base::Contains(line, "kColor3"))
-                    line = base::FormatString("const vec4 kColor3 = %1;", ToConst(data.color_map[3]));
-                else if (base::Contains(line, "kOffset"))
-                    line = base::FormatString("const vec2 kOffset = %1;", ToConst(data.gradient_offset));
-                if (original != line)
-                    DEBUG("'%1' => '%2", original, line);
-            }
-            code.append(line);
-            code.append("\n");
-        }
-        return code;
-    }
-} // namespace
-
 namespace gfx
 {
 
@@ -1106,24 +1033,21 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
 
     if (IsStatic())
     {
-        ShaderData data;
-        data.alpha_cutoff     = GetAlphaCutoff();
-        data.base_color       = GetColor(ColorIndex::BaseColor);
-        data.color_map[0]     = GetColor(ColorIndex::TopLeft);
-        data.color_map[1]     = GetColor(ColorIndex::TopRight);
-        data.color_map[2]     = GetColor(ColorIndex::BottomLeft);
-        data.color_map[3]     = GetColor(ColorIndex::BottomRight);
-        data.gradient_offset  = GetColorWeight();
-        data.texture_velocity = GetTextureVelocity();
-        data.texture_rotation = GetTextureRotation();
-        data.texture_scale    = GetTextureScale();
-
-        auto snippet = source.GetSource();
-
-        snippet = FoldUniforms(snippet, data);
-        source.ClearSource();
-        source.ClearData();
-        source.AddSource(std::move(snippet));
+        // fold a set of known uniforms to constants in the shader
+        // code so that we don't need to set them at runtime.
+        // the tradeoff is that this creates more shader programs!
+        source.FoldUniform("kAlphaCutoff", GetAlphaCutoff());
+        source.FoldUniform("kBaseColor", GetColor(ColorIndex::BaseColor));
+        source.FoldUniform("kColor0", GetColor(ColorIndex::TopLeft));
+        source.FoldUniform("kColor1", GetColor(ColorIndex::TopRight));
+        source.FoldUniform("kColor2", GetColor(ColorIndex::BottomLeft));
+        source.FoldUniform("kColor3", GetColor(ColorIndex::BottomRight));
+        source.FoldUniform("kOffset", GetColorWeight());
+        source.FoldUniform("kTextureVelocity", GetTextureVelocity());
+        source.FoldUniform("kTextureVelocityXY", glm::vec2(GetTextureVelocity()));
+        source.FoldUniform("kTextureVelocityZ", GetTextureVelocity().z);
+        source.FoldUniform("kTextureRotation", GetTextureRotation());
+        source.FoldUniform("kTextureScale", GetTextureScale());
     }
     return source;
 }

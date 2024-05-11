@@ -129,6 +129,8 @@ namespace gfx
             AddData({ShaderDataDeclarationType::Varying, type, std::move(name)});
         }
 
+        void FoldUniform(const std::string& name, ShaderDataDeclarationValue value);
+
         // Get the actual shader source string by combining
         // the shader source object's contents (i.e. data
         // declarations and source code snippets) together.
