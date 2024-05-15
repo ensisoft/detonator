@@ -4144,7 +4144,7 @@ size_t EntityWidget::ComputeHash() const
         hash = base::hash_combine(hash, app::FromUtf8(key));
         for (const auto& value : props)
         {
-            hash = app::VariantHash(value);
+            hash = base::hash_combine(hash, app::VariantHash(value));
         }
     }
     // include the node specific comments
