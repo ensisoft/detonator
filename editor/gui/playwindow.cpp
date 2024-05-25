@@ -646,7 +646,16 @@ void PlayWindow::RunGameLoopOnce()
 
     TemporaryCurrentDirChange cwd(mGameWorkingDir);
 
-    mContext.makeCurrent(mSurface);
+    // there's an issue that sometimes when toggling between fullscreen
+    // and windowed mode the rendering operations start reporting OpenGL
+    // errors (for example glUseProgram). Maybe the fact that we must
+    // re-create the rendering surface when toggling causes some issue
+    // and the context is not properly make current.
+    if (!mContext.makeCurrent(mSurface))
+    {
+        ERROR("Failed to set the current OpenGL context.");
+        return;
+    }
     try
     {
         // Remember that the tracing state cannot be changed while the
