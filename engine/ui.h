@@ -538,7 +538,8 @@ namespace engine
                 , mPainter(painter)
         {}
         enum class Flags {
-            ClipWidgets
+            ClipWidgets,
+            DesignMode
         };
 
         // uik::Painter implementation.
