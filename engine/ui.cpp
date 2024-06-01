@@ -1376,100 +1376,126 @@ bool UIPainter::GetMaterial(const std::string& key, gfx::Material** material) co
 
 gfx::Material* UIPainter::GetWidgetMaterial(const std::string& id, const PaintStruct& ps, const std::string& key) const
 {
-    gfx::Material* ret = nullptr;
-
-    std::string prefix;
+    std::string state_prefix;
     if (ps.enabled == false)
-        prefix = "disabled/";
+        state_prefix = "disabled/";
     else if (ps.pressed)
-        prefix = "pressed/";
+        state_prefix = "pressed/";
     else if (ps.focused)
-        prefix = "focused/";
+        state_prefix = "focused/";
     else if (ps.moused)
-        prefix = "mouse-over/";
+        state_prefix = "mouse-over/";
 
     // if the paint operation has associated material definitions these take
     // precedence over any other styling information
     if (ps.style_materials)
     {
-        // check if we have this particular material key in the set of paint materials
-        if (const auto* val = base::SafeFind(*ps.style_materials, prefix + key))
-        {
-            size_t hash = 0;
-            hash = base::hash_combine(hash, *val);
-            // look for an existing material instance
-            for (auto& material : mWidgetMaterials)
+        auto create_material = [this, &id, &ps](const std::string& material_key) {
+            // check if we have this particular material key in the set of paint materials
+            if (const auto* val = base::SafeFind(*ps.style_materials, material_key))
             {
-                if (material.hash != hash)
-                    continue;
-                else if (material.key != prefix + key)
-                    continue;
-                else if (material.widget != id)
-                    continue;
-
-                material.used = true;
-                return material.material.get();
-            }
-            // create a new material instance if the material definition is valid/parses properly
-            WidgetMaterial material;
-            material.used     = true;
-            material.hash     = hash;
-            material.widget   = id;
-            material.key      = prefix + key;
-            if (auto klass = mStyle->MakeMaterial(*val))
-            {
-                material.material = gfx::CreateMaterialInstance(klass);
-                ret = material.material.get();
-            }
-            mWidgetMaterials.push_back(std::move(material));
-            return ret;
-        }
-    }
-    if (ps.style_properties)
-    {
-        if (const auto* val = base::SafeFind(*ps.style_properties, prefix + key + "-color"))
-        {
-            if (std::holds_alternative<gfx::Color4f>(*val))
-            {
-                gfx::Color4f color = std::get<gfx::Color4f>(*val);
-
                 size_t hash = 0;
-                hash = base::hash_combine(hash, color);
+                hash = base::hash_combine(hash, *val);
+                // look for an existing material instance
                 for (auto& material: mWidgetMaterials)
                 {
                     if (material.hash != hash)
                         continue;
-                    else if (material.key != prefix + key + "-color")
+                    else if (material.key != material_key)
                         continue;
                     else if (material.widget != id)
                         continue;
+
                     material.used = true;
                     return material.material.get();
                 }
-                auto klass = gfx::CreateMaterialClassFromColor(color);
+                // create a new material instance if the material definition is valid/parses properly
                 WidgetMaterial material;
-                material.used = true;
-                material.hash = hash;
+                material.used   = true;
+                material.hash   = hash;
                 material.widget = id;
-                material.key = prefix + key + "-color";
-                material.material = gfx::CreateMaterialInstance(klass);
+                material.key    = material_key;
+
+                if (auto klass = mStyle->MakeMaterial(*val))
+                {
+                    material.material = gfx::CreateMaterialInstance(klass);
+                }
                 mWidgetMaterials.push_back(std::move(material));
                 return mWidgetMaterials.back().material.get();
             }
+            return (gfx::Material*)nullptr;
+        };
+        if (TestFlag(Flags::DesignMode))
+        {
+            if (auto* material = create_material("design-mode/" + state_prefix + key))
+                return material;
         }
+        if (auto* material = create_material(state_prefix + key))
+            return material;
     }
 
-    if (ps.enabled == false)
-        ret = GetWidgetMaterial(id, ps.klass, "disabled/" + key);
-    else if (ps.pressed)
-        ret = GetWidgetMaterial(id, ps.klass, "pressed/" + key);
-    else if (ps.focused)
-        ret = GetWidgetMaterial(id, ps.klass, "focused/" + key);
-    else if (ps.moused)
-        ret = GetWidgetMaterial(id, ps.klass, "mouse-over/" + key);
-    if (!ret)
-        ret = GetWidgetMaterial(id, ps.klass, key);
-    return ret;
+    // check if the material is defined as a -color property, i.e.
+    // property that ends with a -color suffix.
+    if (ps.style_properties)
+    {
+        auto create_material = [this, &id, &ps](const std::string& material_property_key) {
+            if (const auto* val = base::SafeFind(*ps.style_properties, material_property_key))
+            {
+                if (std::holds_alternative<gfx::Color4f>(*val))
+                {
+                    gfx::Color4f color = std::get<gfx::Color4f>(*val);
+
+                    size_t hash = 0;
+                    hash = base::hash_combine(hash, color);
+                    for (auto& material: mWidgetMaterials)
+                    {
+                        if (material.hash != hash)
+                            continue;
+                        else if (material.key != material_property_key)
+                            continue;
+                        else if (material.widget != id)
+                            continue;
+                        material.used = true;
+                        return material.material.get();
+                    }
+                    auto klass = gfx::CreateMaterialClassFromColor(color);
+
+                    WidgetMaterial material;
+                    material.used     = true;
+                    material.hash     = hash;
+                    material.widget   = id;
+                    material.key      = material_property_key;
+                    material.material = gfx::CreateMaterialInstance(klass);
+                    mWidgetMaterials.push_back(std::move(material));
+
+                    return mWidgetMaterials.back().material.get();
+                }
+            }
+            return (gfx::Material*)nullptr;
+        };
+
+        if (TestFlag(Flags::DesignMode))
+        {
+            if (auto* material = create_material("design-mode/" + state_prefix + key + "-color"))
+                return material;
+        }
+        if (auto* material = create_material(state_prefix + key + "-color"))
+            return material;
+    }
+
+    if (TestFlag(Flags::DesignMode))
+    {
+        if (auto* material = GetWidgetMaterial(id, ps.klass, "design-mode/" + state_prefix + key))
+            return material;
+
+        if (auto* material = GetWidgetMaterial(id, ps.klass, "design-mode/" + key))
+            return material;
+    }
+
+    if (auto* material = GetWidgetMaterial(id, ps.klass, state_prefix + key))
+        return material;
+
+    return GetWidgetMaterial(id, ps.klass, key);
 }
 
 gfx::Material* UIPainter::GetWidgetMaterial(const std::string& id,
@@ -1503,47 +1529,64 @@ UIProperty UIPainter::GetWidgetProperty(const std::string& id,
                                         const PaintStruct& ps,
                                         const std::string& key) const
 {
-    UIProperty prop;
+    // if the widget is disabled it cannot be pressed, focused or moused.
+    // if the widget is enabled check whether it's
+    //  1. pressed  2. focused, 3. moused
+    // if none of the above rules are hit then the widget is "normal"
 
+    std::string state_prefix;
+    if (ps.enabled == false)
+        state_prefix = "disabled/";
+    else if (ps.pressed)
+        state_prefix = "pressed/";
+    else if (ps.focused)
+        state_prefix = "focused/";
+    else if (ps.moused)
+        state_prefix = "mouse-over/";
+
+    // if the paint operation has an associated property map with
+    // a specific property value then  that takes precedence over
+    // any other style properties
     if (ps.style_properties)
     {
-        // if the paint operation has an associated property map with
-        // a specific property value then  that takes precedence over
-        // any other style properties
-        std::string prefix;
-        if (ps.enabled == false)
-            prefix = "disabled/";
-        else if (ps.pressed)
-            prefix = "pressed/";
-        else if (ps.focused)
-            prefix = "focused/";
-        else if (ps.moused)
-            prefix = "mouse-over/";
-
-        if (const auto* val = base::SafeFind(*ps.style_properties, prefix + key))
+        if (TestFlag(Flags::DesignMode))
         {
+            if (const auto* val = base::SafeFind(*ps.style_properties, "design-mode/" + state_prefix + key))
+            {
+                UIProperty prop;
+                std::visit([&prop](const auto& variant_value) {
+                    prop.SetValue(variant_value);
+                }, *val);
+                return prop;
+            }
+        }
+
+        if (const auto* val = base::SafeFind(*ps.style_properties, state_prefix + key))
+        {
+            UIProperty prop;
             std::visit([&prop](const auto& variant_value) {
                 prop.SetValue(variant_value);
             }, *val);
             return prop;
         }
     }
-    // check the properties based on some simple rules.
-    // if the widget is disabled it cannot be pressed, focused or moused.
-    // if the widget is enabled check whether it's
-    //  1. pressed  2. focused, 3. moused
-    // if none of the above rules are hit then the widget is "normal"
-    if (ps.enabled == false)
-        prop = GetWidgetProperty(id, ps.klass, "disabled/" + key);
-    else if (ps.pressed)
-        prop = GetWidgetProperty(id, ps.klass, "pressed/" + key);
-    else if (ps.focused)
-        prop = GetWidgetProperty(id, ps.klass, "focused/" + key);
-    else if (ps.moused)
-        prop = GetWidgetProperty(id, ps.klass, "mouse-over/" + key);
-    if (!prop)
-        prop = GetWidgetProperty(id, ps.klass, key);
-    return prop;
+
+    if (TestFlag(Flags::DesignMode))
+    {
+        if (auto prop = GetWidgetProperty(id, ps.klass, "design-mode/" + state_prefix + key))
+            return prop;
+
+        if (auto prop = GetWidgetProperty(id, ps.klass, "design-mode/" + key))
+            return prop;
+    }
+
+    if (auto prop = GetWidgetProperty(id, ps.klass, state_prefix + key))
+        return prop;
+
+    if (auto prop = GetWidgetProperty(id, ps.klass, key))
+        return prop;
+
+    return UIProperty();
 }
 
 UIProperty UIPainter::GetWidgetProperty(const std::string& id,
