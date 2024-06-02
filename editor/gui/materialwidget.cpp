@@ -812,7 +812,10 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
     GetTextureProperties();
 }
 void MaterialWidget::on_surfaceType_currentIndexChanged(int)
-{ SetMaterialProperties(); }
+{
+    SetMaterialProperties();
+    GetMaterialProperties();
+}
 void MaterialWidget::on_activeMap_currentIndexChanged(int)
 { SetMaterialProperties(); }
 void MaterialWidget::on_gamma_valueChanged(double)
@@ -1470,6 +1473,7 @@ void MaterialWidget::GetMaterialProperties()
     SetEnabled(mUI.textureMap,         false);
     SetEnabled(mUI.textureProp,        false);
     SetEnabled(mUI.textureRect,        false);
+    SetEnabled(mUI.btnAddShader,       false);
 
     SetVisible(mUI.builtInProperties,  false);
     SetVisible(mUI.gradientMap,        false);
@@ -1479,6 +1483,9 @@ void MaterialWidget::GetMaterialProperties()
     SetVisible(mUI.chkBlendPreMulAlpha,false);
     SetVisible(mUI.chkStaticInstance,  false);
     SetVisible(mUI.chkBlendFrames,     false);
+    SetVisible(mUI.alphaCutoff,        false);
+    SetVisible(mUI.lblAlphaCutoff,     false);
+    SetVisible(mUI.grpRenderFlags,     false);
 
     SetValue(mUI.materialID,          mMaterial->GetId());
     SetValue(mUI.materialType,        mMaterial->GetType());
@@ -1505,11 +1512,13 @@ void MaterialWidget::GetMaterialProperties()
     if (mMaterial->GetType() == gfx::MaterialClass::Type::Custom)
     {
         SetPlaceholderText(mUI.shaderFile, "None Selected");
+        SetEnabled(mUI.btnAddShader, true);
         SetEnabled(mUI.shaderFile,      true);
         SetEnabled(mUI.actionSelectShader, true);
         SetEnabled(mUI.actionCreateShader, true);
         SetEnabled(mUI.actionEditShader,   mMaterial->HasShaderUri());
         SetEnabled(mUI.btnResetShader,  mMaterial->HasShaderUri());
+        SetVisible(mUI.grpRenderFlags, false);
     }
     else
     {
@@ -1520,6 +1529,7 @@ void MaterialWidget::GetMaterialProperties()
         SetEnabled(mUI.actionEditShader,   mMaterial->HasShaderUri());
         SetEnabled(mUI.btnResetShader,  mMaterial->HasShaderUri());
 
+        SetVisible(mUI.grpRenderFlags,      true);
         SetVisible(mUI.builtInProperties,   true);
         SetEnabled(mUI.chkStaticInstance,   true);
         SetVisible(mUI.chkStaticInstance,   true);
@@ -1543,6 +1553,8 @@ void MaterialWidget::GetMaterialProperties()
             {
                 SetEnabled(mUI.particleAction, true);
                 SetEnabled(mUI.activeMap,      true);
+                SetVisible(mUI.alphaCutoff,    true);
+                SetVisible(mUI.lblAlphaCutoff, true);
             }
         }
     }

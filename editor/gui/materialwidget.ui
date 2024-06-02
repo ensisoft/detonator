@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>2055</width>
-    <height>1173</height>
+    <width>1979</width>
+    <height>1070</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -199,9 +199,9 @@
            </layout>
           </item>
           <item>
-           <widget class="QGroupBox" name="groupBox_4">
+           <widget class="QGroupBox" name="grpRenderFlags">
             <property name="title">
-             <string>Render flags</string>
+             <string>Material flags</string>
             </property>
             <property name="flat">
              <bool>true</bool>
@@ -221,19 +221,6 @@
               </widget>
              </item>
              <item>
-              <widget class="QCheckBox" name="chkStaticInstance">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Static instance (no runtime params))</string>
-               </property>
-              </widget>
-             </item>
-             <item>
               <widget class="QCheckBox" name="chkBlendFrames">
                <property name="enabled">
                 <bool>true</bool>
@@ -246,6 +233,19 @@
                </property>
                <property name="text">
                 <string>Blend animation frames</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="chkStaticInstance">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Static instance (no runtime uniforms)</string>
                </property>
               </widget>
              </item>
@@ -270,7 +270,7 @@
           </size>
          </property>
          <property name="title">
-          <string>Material properties</string>
+          <string>Material properties and uniforms</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
@@ -341,7 +341,7 @@
              </widget>
             </item>
             <item row="0" column="0">
-             <widget class="QLabel" name="label_39">
+             <widget class="QLabel" name="lblAlphaCutoff">
               <property name="text">
                <string>Alpha cutoff</string>
               </property>
@@ -625,7 +625,7 @@
           </size>
          </property>
          <property name="title">
-          <string>Shader uniforms</string>
+          <string>Custom shader uniforms</string>
          </property>
         </widget>
        </item>
@@ -1206,7 +1206,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>636</width>
+            <width>612</width>
             <height>919</height>
            </rect>
           </property>
@@ -2156,24 +2156,26 @@
   <tabstop>materialType</tabstop>
   <tabstop>surfaceType</tabstop>
   <tabstop>shaderFile</tabstop>
+  <tabstop>btnAddShader</tabstop>
+  <tabstop>btnResetShader</tabstop>
   <tabstop>chkBlendPreMulAlpha</tabstop>
-  <tabstop>chkStaticInstance</tabstop>
   <tabstop>chkBlendFrames</tabstop>
+  <tabstop>chkStaticInstance</tabstop>
   <tabstop>alphaCutoff</tabstop>
   <tabstop>baseColor</tabstop>
   <tabstop>particleAction</tabstop>
   <tabstop>activeMap</tabstop>
   <tabstop>gradientOffsetY</tabstop>
   <tabstop>colorMap0</tabstop>
-  <tabstop>colorMap1</tabstop>
   <tabstop>colorMap2</tabstop>
+  <tabstop>colorMap1</tabstop>
   <tabstop>colorMap3</tabstop>
   <tabstop>gradientOffsetX</tabstop>
   <tabstop>scaleX</tabstop>
   <tabstop>scaleY</tabstop>
-  <tabstop>rotation</tabstop>
   <tabstop>velocityX</tabstop>
   <tabstop>velocityY</tabstop>
+  <tabstop>rotation</tabstop>
   <tabstop>velocityZ</tabstop>
   <tabstop>minFilter</tabstop>
   <tabstop>magFilter</tabstop>
@@ -2205,20 +2207,18 @@
   <tabstop>textureHeight</tabstop>
   <tabstop>textureDepth</tabstop>
   <tabstop>cmbColorSpace</tabstop>
-  <tabstop>btnEditTexture</tabstop>
-  <tabstop>btnSelectTextureRect</tabstop>
   <tabstop>chkAllowPacking</tabstop>
   <tabstop>chkAllowResizing</tabstop>
   <tabstop>chkPreMulAlpha</tabstop>
   <tabstop>chkBlurTexture</tabstop>
   <tabstop>chkDetectEdges</tabstop>
+  <tabstop>btnEditTexture</tabstop>
+  <tabstop>btnSelectTextureRect</tabstop>
   <tabstop>rectX</tabstop>
   <tabstop>rectY</tabstop>
   <tabstop>rectW</tabstop>
   <tabstop>rectH</tabstop>
   <tabstop>btnResetTextureRect</tabstop>
-  <tabstop>btnAddShader</tabstop>
-  <tabstop>btnResetShader</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
