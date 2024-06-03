@@ -920,6 +920,8 @@ namespace gfx
         { return TestFlag(Flags::Static); }
         inline bool BlendFrames() const noexcept
         { return TestFlag(Flags::BlendFrames); }
+        inline bool HasCustomShader() const noexcept
+        { return !mShaderSrc.empty() || !mShaderUri.empty(); }
 
         // Material uniform API for setting/getting "Known" uniforms.
         inline void SetAlphaCutoff(float cutoff) noexcept
