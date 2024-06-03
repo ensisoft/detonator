@@ -82,6 +82,28 @@ public:
     virtual std::shared_ptr<Stream> Prepare(std::unique_ptr<Source> source) override
     {
         const auto name = source->GetName();
+        const auto samplerate = source->GetRateHz();
+        const auto format     = source->GetFormat();
+        const auto channels   = source->GetNumChannels();
+
+        // Update, pulseaudio API seems to have broken semantics and no
+        // longer fails with garbage audio parameters.
+        // Adding this manual validation here.
+        const auto valid_channels = channels == 1 || channels == 2;
+        const auto valid_format   = format == audio::Source::Format::Float32 ||
+                                    format == audio::Source::Format::Int32 ||
+                                    format == audio::Source::Format::Int16;
+        const auto valid_rate     = samplerate == 8000  || samplerate == 11025 ||
+                                    samplerate == 12000 || samplerate == 16000 ||
+                                    samplerate == 22050 || samplerate == 24000 ||
+                                    samplerate == 32000 || samplerate == 44100 ||
+                                    samplerate == 48000 || samplerate == 88200 ||
+                                    samplerate == 96000;
+        if (!valid_channels || !valid_format || !valid_rate)
+        {
+            ERROR("Invalid pulseaudio source format. [name='%s']", name);
+            return nullptr;
+        }
         try
         {
             auto stream = std::make_shared<PlaybackStream>(std::move(source), context_, buffer_size_);
@@ -128,10 +150,14 @@ private:
         PlaybackStream(std::unique_ptr<Source> source, pa_context* context, unsigned buffer_size_ms)
             : source_(std::move(source))
         {
+            const auto channels   = source_->GetNumChannels();
+            const auto samplerate = source_->GetRateHz();
+            const auto format     = source_->GetFormat();
+            const auto& name      = source_->GetName();
             DEBUG("Creating new PulseAudio playback stream. [name='%1', channels=%2, rate=%3, format=%4]",
                   source_->GetName(), source_->GetNumChannels(),
                   source_->GetRateHz(), source_->GetFormat());
-            const auto& name  = source_->GetName();
+
             pa_sample_spec spec;
             spec.channels = source_->GetNumChannels();
             spec.rate     = source_->GetRateHz();
