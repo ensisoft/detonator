@@ -40,6 +40,8 @@
 #include "graphics/transform.h"
 #include "graphics/drawing.h"
 #include "graphics/types.h"
+#include "graphics/shadersource.h"
+#include "graphics/shaderprogram.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/resource.h"
 #include "editor/app/utility.h"
@@ -52,6 +54,7 @@
 #include "editor/gui/uniform.h"
 #include "editor/gui/sampler.h"
 #include "editor/gui/dlgtexturerect.h"
+#include "editor/gui/dlgtextedit.h"
 #include "editor/gui/materialwidget.h"
 
 namespace gui
@@ -89,6 +92,7 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
         menu->addAction(mUI.actionCreateShader);
         menu->addAction(mUI.actionSelectShader);
         menu->addAction(mUI.actionEditShader);
+        menu->addAction(mUI.actionShowShader);
         mUI.btnAddShader->setMenu(menu);
     }
 
@@ -108,9 +112,9 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
     SetValue(mUI.materialName, mMaterial->GetName());
     setWindowTitle(GetValue(mUI.materialName));
 
-    GetMaterialProperties();
-    GetTextureMapProperties();
-    GetTextureProperties();
+    ShowMaterialProperties();
+    ShowTextureMapProperties();
+    ShowTextureProperties();
 
     SetValue(mUI.zoom, 1.0f);
 
@@ -133,9 +137,9 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
     GetUserProperty(resource, "time", mUI.kTime);
 
     ApplyShaderDescription();
-    GetMaterialProperties();
-    GetTextureMapProperties();
-    GetTextureProperties();
+    ShowMaterialProperties();
+    ShowTextureMapProperties();
+    ShowTextureProperties();
 }
 
 MaterialWidget::~MaterialWidget()
@@ -178,8 +182,13 @@ void MaterialWidget::AddActions(QToolBar& bar)
     bar.addSeparator();
     bar.addAction(mUI.actionSave);
     bar.addSeparator();
+    bar.addAction(mUI.actionCreateShader);
+    bar.addAction(mUI.actionSelectShader);
+    bar.addAction(mUI.actionEditShader);
+    bar.addSeparator();
     bar.addAction(mUI.actionReloadShaders);
     bar.addAction(mUI.actionReloadTextures);
+
 }
 void MaterialWidget::AddActions(QMenu& menu)
 {
@@ -189,6 +198,17 @@ void MaterialWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionStop);
     menu.addSeparator();
     menu.addAction(mUI.actionSave);
+    menu.addSeparator();
+    menu.addAction(mUI.actionCreateShader);
+    menu.addAction(mUI.actionSelectShader);
+    menu.addAction(mUI.actionEditShader);
+
+    // we don't add these to the menu since they're
+    // already added to the *Edit* menu globally for
+    // every type of main widget. So adding these again
+    // for the material menu would only create confusion.
+    //menu.addAction(mUI.actionReloadShaders);
+    //menu.addAction(mUI.actionReloadTextures);
 }
 
 bool MaterialWidget::LoadState(const Settings& settings)
@@ -210,14 +230,14 @@ bool MaterialWidget::LoadState(const Settings& settings)
     }
 
     ApplyShaderDescription();
-    GetMaterialProperties();
+    ShowMaterialProperties();
 
     QString selected_item;
     if (settings.GetValue("Material", "selected_item", &selected_item))
         SelectItem(mUI.textures, ListItemId(selected_item));
 
-    GetTextureMapProperties();
-    GetTextureProperties();
+    ShowTextureMapProperties();
+    ShowTextureProperties();
     return true;
 }
 
@@ -286,7 +306,7 @@ void MaterialWidget::ReloadTextures()
     // reset material instance so that any one time error logging will take place.
     mMaterialInst.reset();
 
-    GetTextureProperties();
+    ShowTextureProperties();
 
     NOTE("Reloaded textures.");
 }
@@ -398,10 +418,10 @@ void MaterialWidget::on_actionNewMap_triggered()
     const auto maps = mMaterial->GetNumTextureMaps();
     mMaterial->SetNumTextureMaps(maps + 1);
     mMaterial->SetTextureMap(maps, std::move(map));
-    GetMaterialProperties();
+    ShowMaterialProperties();
     SelectLastItem(mUI.textures);
-    GetTextureMapProperties();
-    GetTextureProperties();
+    ShowTextureMapProperties();
+    ShowTextureProperties();
 }
 
 void MaterialWidget::on_actionDelMap_triggered()
@@ -412,10 +432,10 @@ void MaterialWidget::on_actionDelMap_triggered()
         if (index < mMaterial->GetNumTextureMaps())
             mMaterial->DeleteTextureMap(index);
 
-        GetMaterialProperties();
+        ShowMaterialProperties();
         SelectLastItem(mUI.textures);
-        GetTextureMapProperties();
-        GetTextureProperties();
+        ShowTextureMapProperties();
+        ShowTextureProperties();
     }
 }
 
@@ -449,10 +469,10 @@ void MaterialWidget::on_actionRemoveTexture_triggered()
 
     qDeleteAll(items);
 
-    GetMaterialProperties();
+    ShowMaterialProperties();
     SelectLastItem(mUI.textures);
-    GetTextureProperties();
-    GetTextureMapProperties();
+    ShowTextureProperties();
+    ShowTextureMapProperties();
 }
 
 void MaterialWidget::on_actionReloadShaders_triggered()
@@ -463,10 +483,10 @@ void MaterialWidget::on_actionReloadShaders_triggered()
 
     ReloadShaders();
     ApplyShaderDescription();
-    GetMaterialProperties();
+    ShowMaterialProperties();
     SelectItem(mUI.textures, ListItemId(selected_item));
-    GetTextureMapProperties();
-    GetTextureProperties();
+    ShowTextureMapProperties();
+    ShowTextureProperties();
 
 }
 void MaterialWidget::on_actionReloadTextures_triggered()
@@ -485,149 +505,27 @@ void MaterialWidget::on_actionSelectShader_triggered()
     mMaterial->SetShaderUri(mWorkspace->MapFileToWorkspace(shader));
     ApplyShaderDescription();
     ReloadShaders();
-    GetMaterialProperties();
+    ShowMaterialProperties();
 }
 
 void MaterialWidget::on_actionCreateShader_triggered()
 {
-    QString name = GetValue(mUI.materialName);
-    name.replace(' ', '_');
-    const auto& glsl_uri = QString("ws://shaders/es2/%1.glsl").arg(name);
-    const auto& json_uri = QString("ws://shaders/es2/%1.json").arg(name);
-    const auto& glsl_file = mWorkspace->MapFileToFilesystem(glsl_uri);
-    const auto& json_file = mWorkspace->MapFileToFilesystem(json_uri);
-
-    const QString files[2] = {
-        glsl_file, json_file
-    };
-    for (int i=0; i<2; ++i)
-    {
-        const auto& file = files[i];
-        if (!FileExists(file))
-            continue;
-
-        QMessageBox msg(this);
-        msg.setIcon(QMessageBox::Question);
-        msg.setWindowTitle("File Exists");
-        msg.setText(tr("A file by the same name already exists in the project folder.\n%1\nOverwrite file ?").arg(files[i]));
-        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        if (msg.exec() == QMessageBox::No)
-            return;
-    }
-    const auto& path = mWorkspace->MapFileToFilesystem(QString("ws://shaders/es2"));
-    if (!app::MakePath(path))
-    {
-        ERROR("Failed to create path. [path='%1']", path);
-        QMessageBox msg(this);
-        msg.setIcon(QMessageBox::Critical);
-        msg.setWindowTitle("Filesystem Error");
-        msg.setText(tr("Failed to create file system path.\n%1").arg(path));
-        msg.exec();
-        return;
-    }
-constexpr auto glsl = R"(
-// built-in uniforms
-
-// material time in seconds.
-uniform float kTime;
-
-// when rendering particles with points the material
-// shader must sample gl_PointCoord for texture coordinates
-// instead of the texcoord varying from the vertex shader.
-// the value kRenderPoints will be set to 1.0 so for portability
-// the material shader can do:
-//   vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
-uniform float kRenderPoints;
-
-// custom uniforms that need to match the json description
-uniform vec4 kColor;
-uniform sampler2D kNoise;
-uniform vec2 kNoiseRect;
-
-// varyings from vertex stage.
-varying vec2 vTexCoord;
-
-// per particle data.
-// these are only written when the drawable is a particle engine
-varying float vParticleAlpha;
-// particle random value.
-varying float vParticleRandomValue;
-// normalized particle lifetime.
-varying float vParticleTime;
-
-void FragmentShaderMain() {
-    vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
-    float a = texture2D(kNoise, coords).a;
-    float r = coords.x + a + kTime;
-    float g = coords.y + a;
-    float b = kTime;
-    vec3 col = vec3(0.5) + 0.5*cos(vec3(r, g, b));
-    fs_out.color.rgb = col * kColor.rgb;
-    fs_out.color.a   = 1.0;
-}
-)";
-constexpr auto json = R"(
-{
-  "uniforms": [
-     {
-        "type": "Color",
-        "name": "kColor",
-        "desc": "Color",
-        "value": {"r":1.0, "g":1.0, "b":1.0, "a":1.0}
-     }
-  ],
-  "maps": [
-     {
-        "type": "Texture2D",
-        "name": "kNoise",
-        "rect": "kNoiseRect",
-        "desc": "Noise"
-     }
-  ]
-}
-)";
-    const char* content[2] = { glsl, json };
-
-    for (int i=0; i<2; ++i)
-    {
-        QString error_str;
-        QFile::FileError err_val = QFile::FileError::NoError;
-        if (!app::WriteTextFile(files[i], content[i], &err_val, &error_str))
-        {
-            ERROR("Failed to write shader glsl file. [file='%1', error=%2]", files[i], error_str);
-            QMessageBox msg(this);
-            msg.setIcon(QMessageBox::Critical);
-            msg.setWindowTitle("Filesystem Error");
-            msg.setText(tr("Failed to write file.\n%1\n%2").arg(files[i]).arg(error_str));
-            msg.exec();
-            return;
-        }
-    }
-
-    gfx::NoiseBitmapGenerator noise;
-    noise.SetWidth(100);
-    noise.SetHeight(100);
-    // todo: fix this
-    // the min/max prime indices need to be kept in sync with DlgBitmap!
-    noise.Randomize(1, 1000, 3);
-
-    auto tex = gfx::GenerateNoiseTexture(std::move(noise));
-    tex->SetName("Noise");
-
-    gfx::TextureMap2D map;
-    map.SetType(gfx::TextureMap::Type::Texture2D);
-    map.SetName("kNoise");
-    map.SetNumTextures(1);
-    map.SetTextureSource(0, std::move(tex));
-    map.SetRectUniformName("kNoiseRect");
-    map.SetSamplerName("kNoise");
-    mMaterial->SetShaderUri(app::ToUtf8(glsl_uri));
-    mMaterial->SetNumTextureMaps(1);
-    mMaterial->SetTextureMap(0, std::move(map));
+    const auto type = mMaterial->GetType();
+    if (type == gfx::MaterialClass::Type::Custom)
+        CreateCustomShaderStub();
+    else if (type == gfx::MaterialClass::Type::Color)
+        CreateColorShaderStub();
+    else if (type == gfx::MaterialClass::Type::Gradient)
+        CreateGradientShaderStub();
+    else if (type == gfx::MaterialClass::Type::Texture)
+        CreateTextureShaderStub();
+    else if (type == gfx::MaterialClass::Type::Sprite)
+        CreateSpriteShaderStub();
+    else BUG("Unhandled material type for shader generation.");
 
     ApplyShaderDescription();
     ReloadShaders();
-    GetMaterialProperties();
+    ShowMaterialProperties();
 }
 
 void MaterialWidget::on_actionEditShader_triggered()
@@ -639,6 +537,24 @@ void MaterialWidget::on_actionEditShader_triggered()
     emit OpenExternalShader(glsl);
 }
 
+void MaterialWidget::on_actionShowShader_triggered()
+{
+    auto* device = mUI.widget->GetDevice();
+
+    gfx::detail::GenericShaderProgram program;
+
+    gfx::Material::Environment environment;
+    environment.render_points = false;
+    environment.editing_mode  = false; // we want to see the shader as it will be, so using false here
+    const auto& source = program.GetShader(gfx::MaterialInstance(mMaterial), environment, *device);
+
+    DlgTextEdit dlg(this);
+    dlg.SetText(source.GetSource());
+    dlg.SetReadOnly(true);
+    dlg.SetTitle("Shader Source");
+    dlg.exec();
+}
+
 void MaterialWidget::on_btnResetShader_clicked()
 {
     if (mMaterial->HasShaderUri())
@@ -647,6 +563,7 @@ void MaterialWidget::on_btnResetShader_clicked()
         SetEnabled(mUI.actionEditShader, false);
         SetEnabled(mUI.btnResetShader, false);
         SetValue(mUI.shaderFile, QString(""));
+        ShowMaterialProperties();
     }
 }
 
@@ -661,10 +578,10 @@ void MaterialWidget::on_btnResetTextureMap_clicked()
     {
         map->SetNumTextures(0);
 
-        GetMaterialProperties();
+        ShowMaterialProperties();
         SelectItem(mUI.textures, ListItemId(map->GetId()));
-        GetTextureMapProperties();
-        GetTextureProperties();
+        ShowTextureMapProperties();
+        ShowTextureProperties();
     }
 }
 
@@ -692,7 +609,7 @@ void MaterialWidget::on_btnEditTexture_clicked()
             ptr->SetTextBuffer(std::move(text));
 
             // update the preview.
-            GetTextureProperties();
+            ShowTextureProperties();
         }
         else if (auto* ptr = dynamic_cast<gfx::detail::TextureBitmapGeneratorSource*>(source))
         {
@@ -706,7 +623,7 @@ void MaterialWidget::on_btnEditTexture_clicked()
             ptr->SetGenerator(dlg.GetResult());
 
             // update the preview.
-            GetTextureProperties();
+            ShowTextureProperties();
         }
     }
 }
@@ -717,7 +634,7 @@ void MaterialWidget::on_btnResetTextureRect_clicked()
     {
         mMaterial->SetTextureRect(src->GetId(), gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
 
-        GetTextureProperties();
+        ShowTextureProperties();
     }
 }
 
@@ -732,14 +649,14 @@ void MaterialWidget::on_btnSelectTextureRect_clicked()
 
         mMaterial->SetTextureRect(src->GetId(), dlg.GetRect());
 
-        GetTextureProperties();
+        ShowTextureProperties();
     }
 }
 
 void MaterialWidget::on_textures_itemSelectionChanged()
 {
-    GetTextureProperties();
-    GetTextureMapProperties();
+    ShowTextureProperties();
+    ShowTextureMapProperties();
 }
 
 void MaterialWidget::on_textures_customContextMenuRequested(const QPoint&)
@@ -807,14 +724,14 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
     *mMaterial = other;
 
     ClearCustomUniforms();
-    GetMaterialProperties();
-    GetTextureMapProperties();
-    GetTextureProperties();
+    ShowMaterialProperties();
+    ShowTextureMapProperties();
+    ShowTextureProperties();
 }
 void MaterialWidget::on_surfaceType_currentIndexChanged(int)
 {
     SetMaterialProperties();
-    GetMaterialProperties();
+    ShowMaterialProperties();
 }
 void MaterialWidget::on_activeMap_currentIndexChanged(int)
 { SetMaterialProperties(); }
@@ -952,8 +869,8 @@ void MaterialWidget::on_findMap_textChanged(const QString& needle)
         if (haystack.contains(needle, Qt::CaseInsensitive))
         {
             SelectItem(mUI.textures, index);
-            GetTextureMapProperties();
-            GetTextureProperties();
+            ShowTextureMapProperties();
+            ShowTextureProperties();
             mUI.textures->scrollToItem(item);
             return;
         }
@@ -1003,10 +920,10 @@ void MaterialWidget::AddNewTextureMapFromFile()
         }
     }
 
-    GetMaterialProperties();
+    ShowMaterialProperties();
     SelectLastItem(mUI.textures);
-    GetTextureMapProperties();
-    GetTextureProperties();
+    ShowTextureMapProperties();
+    ShowTextureProperties();
 }
 
 void MaterialWidget::AddNewTextureMapFromText()
@@ -1043,10 +960,10 @@ void MaterialWidget::AddNewTextureMapFromText()
         map->SetTextureRect(0, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
     }
 
-    GetMaterialProperties();
+    ShowMaterialProperties();
     SelectLastItem(mUI.textures);
-    GetTextureMapProperties();
-    GetTextureProperties();
+    ShowTextureMapProperties();
+    ShowTextureProperties();
 }
 
 void MaterialWidget::AddNewTextureMapFromBitmap()
@@ -1080,16 +997,488 @@ void MaterialWidget::AddNewTextureMapFromBitmap()
         map->SetTextureRect(0, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
     }
 
-    GetMaterialProperties();
+    ShowMaterialProperties();
     SelectLastItem(mUI.textures);
-    GetTextureMapProperties();
-    GetTextureProperties();
+    ShowTextureMapProperties();
+    ShowTextureProperties();
 }
 void MaterialWidget::UniformValueChanged(const Uniform* uniform)
 {
     //DEBUG("Uniform '%1' was modified.", uniform->GetName());
     SetMaterialProperties();
 }
+
+void MaterialWidget::CreateCustomShaderStub()
+{
+    QString name = GetValue(mUI.materialName);
+    name.replace(' ', '_');
+    const auto& glsl_uri = QString("ws://shaders/es2/%1.glsl").arg(name);
+    const auto& json_uri = QString("ws://shaders/es2/%1.json").arg(name);
+    const auto& glsl_file = mWorkspace->MapFileToFilesystem(glsl_uri);
+    const auto& json_file = mWorkspace->MapFileToFilesystem(json_uri);
+
+    const QString files[2] = {
+            glsl_file, json_file
+    };
+    for (int i=0; i<2; ++i)
+    {
+        const auto& file = files[i];
+        if (!FileExists(file))
+            continue;
+
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Question);
+        msg.setWindowTitle("File Exists");
+        msg.setText(tr("A file by the same name already exists in the project folder.\n%1\nOverwrite file ?").arg(files[i]));
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        if (msg.exec() == QMessageBox::No)
+            return;
+    }
+    const auto& path = mWorkspace->MapFileToFilesystem(QString("ws://shaders/es2"));
+    if (!app::MakePath(path))
+    {
+        ERROR("Failed to create path. [path='%1']", path);
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setWindowTitle("Filesystem Error");
+        msg.setText(tr("Failed to create file system path.\n%1").arg(path));
+        msg.exec();
+        return;
+    }
+    constexpr auto glsl = R"(
+// built-in uniforms
+
+// material time in seconds.
+uniform float kTime;
+
+// when rendering particles with points the material
+// shader must sample gl_PointCoord for texture coordinates
+// instead of the texcoord varying from the vertex shader.
+// the value kRenderPoints will be set to 1.0 so for portability
+// the material shader can do:
+//   vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
+uniform float kRenderPoints;
+
+// custom uniforms that need to match the json description
+uniform vec4 kColor;
+uniform sampler2D kNoise;
+uniform vec2 kNoiseRect;
+
+// varyings from vertex stage.
+varying vec2 vTexCoord;
+
+// per particle data.
+// these are only written when the drawable is a particle engine
+varying float vParticleAlpha;
+// particle random value.
+varying float vParticleRandomValue;
+// normalized particle lifetime.
+varying float vParticleTime;
+
+void FragmentShaderMain() {
+    vec2 coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
+    float a = texture2D(kNoise, coords).a;
+    float r = coords.x + a + kTime;
+    float g = coords.y + a;
+    float b = kTime;
+    vec3 col = vec3(0.5) + 0.5*cos(vec3(r, g, b));
+    fs_out.color.rgb = col * kColor.rgb;
+    fs_out.color.a   = 1.0;
+}
+)";
+    constexpr auto json = R"(
+{
+  "uniforms": [
+     {
+        "type": "Color",
+        "name": "kColor",
+        "desc": "Color",
+        "value": {"r":1.0, "g":1.0, "b":1.0, "a":1.0}
+     }
+  ],
+  "maps": [
+     {
+        "type": "Texture2D",
+        "name": "kNoise",
+        "rect": "kNoiseRect",
+        "desc": "Noise"
+     }
+  ]
+}
+)";
+    const char* content[2] = { glsl, json };
+
+    for (int i=0; i<2; ++i)
+    {
+        QString error_str;
+        QFile::FileError err_val = QFile::FileError::NoError;
+        if (!app::WriteTextFile(files[i], content[i], &err_val, &error_str))
+        {
+            ERROR("Failed to write shader glsl file. [file='%1', error=%2]", files[i], error_str);
+            QMessageBox msg(this);
+            msg.setIcon(QMessageBox::Critical);
+            msg.setWindowTitle("Filesystem Error");
+            msg.setText(tr("Failed to write file.\n%1\n%2").arg(files[i]).arg(error_str));
+            msg.exec();
+            return;
+        }
+    }
+
+    gfx::NoiseBitmapGenerator noise;
+    noise.SetWidth(100);
+    noise.SetHeight(100);
+    // todo: fix this
+    // the min/max prime indices need to be kept in sync with DlgBitmap!
+    noise.Randomize(1, 1000, 3);
+
+    auto tex = gfx::GenerateNoiseTexture(std::move(noise));
+    tex->SetName("Noise");
+
+    gfx::TextureMap2D map;
+    map.SetType(gfx::TextureMap::Type::Texture2D);
+    map.SetName("kNoise");
+    map.SetNumTextures(1);
+    map.SetTextureSource(0, std::move(tex));
+    map.SetRectUniformName("kNoiseRect");
+    map.SetSamplerName("kNoise");
+    mMaterial->SetShaderUri(app::ToUtf8(glsl_uri));
+    mMaterial->SetNumTextureMaps(1);
+    mMaterial->SetTextureMap(0, std::move(map));
+}
+
+void MaterialWidget::CreateColorShaderStub()
+{
+    // Remember to update the API version
+    // indicator in the source if the Uniform API changes!
+
+    constexpr const char* glsl = R"(
+// warning. do not delete the below line.
+// MAPI=1
+
+//// material uniforms  ////
+
+// material instance time in seconds.
+uniform float kTime;
+
+// the base color set for the material
+uniform vec4 kBaseColor;
+
+//// varyings from vertex stage ////
+
+// particle specific values. only used / needed
+// when the material is used to render particles.
+varying float vParticleAlpha;
+varying float vParticleRandomValue;
+varying float vParticleTime;
+
+// texture coordinates
+varying vec2 vTexCoord;
+
+void FragmentShaderMain()
+{
+    // your code here
+
+    fs_out.color = kBaseColor;
+}
+    )";
+
+    CreateShaderStubFromSource(glsl);
+}
+void MaterialWidget::CreateGradientShaderStub()
+{
+    // Remember to update the API version
+    // indicator in the source if the Uniform API changes!
+
+    constexpr const char* glsl = R"(
+// warning. do not delete the below line.
+// MAPI=1
+
+//// material uniforms ////
+
+// material instance time in seconds.
+uniform float kTime;
+
+// top left gradient color
+uniform vec4 kColor0;
+// top right gradient color
+uniform vec4 kColor1;
+// bottom left gradient color
+uniform vec4 kColor2;
+// bottom right gradient color
+uniform vec4 kColor3;
+
+//// varyings from vertex stage ////
+
+// particle specific values. only used / needed
+// when the material is used to render particles.
+varying float vParticleAlpha;
+varying float vParticleRandomValue;
+varying float vParticleTime;
+
+// texture coordinates
+varying vec2 vTexCoord;
+
+void FragmentShaderMain()
+{
+    // your code here
+
+    vec4 top = mix(kColor0, kColor1, vTexCoord.x);
+    vec4 bot = mix(kColor2, kColor3, vTexCoord.x);
+    fs_out.color = mix(top, bot, vTexCoord.y);
+}
+    )";
+
+
+    CreateShaderStubFromSource(glsl);
+}
+void MaterialWidget::CreateTextureShaderStub()
+{
+    // Remember to update the API version
+    // indicator in the source if the Uniform API changes!
+
+     constexpr const char* glsl = R"(
+// warning. do not delete the below line.
+// MAPI=1
+
+//// material uniforms ////
+
+// material instance time in seconds.
+uniform float kTime;
+
+// The current texture to sample from.
+uniform sampler2D kTexture;
+
+// Texture box (sub-rectangle) from which to read
+// the texture. This is a packed uniform so that xy
+// components define the texture box translation
+// and zw define the size of the box.
+// You can use these data to transform the incoming
+// texture coordinates so that the sampling happens
+// from the desired area of the texture (the texture rect)
+uniform vec4 kTextureBox;
+
+// texture sampling scaling coefficients.
+uniform vec2 kTextureScale;
+
+// texture sampling velocity, xy and z = rotation (radians)
+// per seconds.
+uniform vec3 kTextureVelocity;
+
+// Texture wrapping mode. xy = both x and y axis of the texture
+// 0 = disabled
+// 1 = clamp
+// 2 = wrap
+uniform ivec2 kTextureWrap;
+
+// Texture sampling coordinate base rotation (in radians)
+uniform float kTextureRotation;
+
+// Base color set for material.
+uniform vec4 kBaseColor;
+
+// Flag to indicate whether the texture is an alpha mask
+// or not. Alpha masks only have valid data for the alpha
+// channel.
+// 0.0 = texture is normal color data
+// 1.0 = texture is an alpha mask
+uniform float kAlphaMask;
+
+// Flag to indicate whether the current rendering is
+// rendering points. (GL_POINTS)
+// When points are being rendered normal texture coordinates
+// no longer apply but 'gl_PointCoord' must be used instead.
+//
+//  to cover both cases you can do
+//
+//  vec2 c = mix(vTexCoord, gl_PointCord, kRenderPoints);
+//
+uniform float kRenderPoints;
+
+// Flag to indicate whether random particle rotation
+// should be used.
+// 0.0 = no rotation
+// 1.0 = rotation
+uniform float kApplyRandomParticleRotation;
+
+// Alpha cutoff threshold value set on the material.
+uniform float kAlphaCutoff;
+
+//// varyings from vertex stage ////
+
+// particle specific values. only used / needed
+// when the material is used to render particles.
+varying float vParticleAlpha;
+varying float vParticleRandomValue;
+varying float vParticleTime;
+
+// texture coordinates
+varying vec2 vTexCoord;
+
+
+void FragmentShaderMain()
+{
+    // your code here
+
+    fs_out.color = texture2D(kTexture, vTexCoord) * kBaseColor;
+}
+    )";
+
+    CreateShaderStubFromSource(glsl);
+}
+
+
+void MaterialWidget::CreateSpriteShaderStub()
+{
+    // Remember to update the API version
+    // indicator in the source if the Uniform API changes!
+
+    constexpr const char* glsl = R"(
+// warning. do not delete the below line.
+// MAPI=1
+
+//// material uniforms ////
+
+// material instance time in seconds.
+uniform float kTime;
+
+// The current textures to sample from.
+// When the sprite cycle runs the current frame
+// is bound in kTexture0 and the next frame is bound in kTexture1.
+// Blend coefficient tells you how far into the transition between
+// the two frames we are.  In other words if kBlendCoeff = 0.5 the
+// animation cycle time is exactly between two frames.
+uniform sampler2D kTexture0;
+uniform sampler2D kTexture1;
+
+// The blending factor for blending the animation frames
+// N and N+1 (kTexture0 and kTexture1)
+uniform float kBlendCoeff;
+
+// Texture box (sub-rectangle) from which to read
+// the texture. This is a packed uniform so that xy
+// components define the texture box translation
+// and zw define the size of the box.
+// You can use these data to transform the incoming
+// texture coordinates so that the sampling happens
+// from the desired area of the texture (the texture rect)
+uniform vec4 kTextureBox0;
+uniform vec4 kTextureBox1;
+
+// texture sampling scaling coefficients.
+uniform vec2 kTextureScale;
+
+// texture sampling velocity, xy and z = rotation (radians)
+// per seconds.
+uniform vec3 kTextureVelocity;
+
+// Texture wrapping mode. xy = both x and y axis of the texture
+// 0 = disabled
+// 1 = clamp
+// 2 = wrap
+uniform ivec2 kTextureWrap;
+
+// Texture sampling coordinate base rotation (in radians)
+uniform float kTextureRotation;
+
+// Base color set for material.
+uniform vec4 kBaseColor;
+
+// Flag to indicate whether the texture is an alpha mask
+// or not. Alpha masks only have valid data for the alpha
+// channel.
+// 0.0 = texture is normal color data
+// 1.0 = texture is an alpha mask
+uniform float kAlphaMask;
+
+// Flag to indicate whether the current rendering is
+// rendering points. (GL_POINTS)
+// When points are being rendered normal texture coordinates
+// no longer apply but 'gl_PointCoord' must be used instead.
+//
+//  to cover both cases you can do
+//
+//  vec2 c = mix(vTexCoord, gl_PointCord, kRenderPoints);
+//
+uniform float kRenderPoints;
+
+// Flag to indicate whether random particle rotation
+// should be used.
+// 0.0 = no rotation
+// 1.0 = rotation
+uniform float kApplyRandomParticleRotation;
+
+// Alpha cutoff threshold value set on the material.
+uniform float kAlphaCutoff;
+
+//// varyings from vertex stage ////
+
+// particle specific values. only used / needed
+// when the material is used to render particles.
+varying float vParticleAlpha;
+varying float vParticleRandomValue;
+varying float vParticleTime;
+
+// texture coordinates
+varying vec2 vTexCoord;
+
+void FragmentShaderMain()
+{
+    // your code here.
+
+    fs_out.color = mix(texture2D(kTexture0, vTexCoord),
+                       texture2D(kTexture1, vTexCoord),
+                       kBlendCoeff) * kBaseColor;
+}
+    )";
+
+    CreateShaderStubFromSource(glsl);
+}
+
+void MaterialWidget::CreateShaderStubFromSource(const char* source)
+{
+    QString name = GetValue(mUI.materialName);
+    name.replace(' ', '_');
+    const auto& glsl_uri  = app::toString("ws://shaders/es2/%1.glsl", name);
+    const auto& glsl_path = mWorkspace->MapFileToFilesystem(app::toString("ws://shaders/es2"));
+    const auto& glsl_file = mWorkspace->MapFileToFilesystem(glsl_uri);
+
+    if (FileExists(glsl_file))
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Question);
+        msg.setWindowTitle("File Exists");
+        msg.setText(tr("A file by the same name already exists in the project folder.\n%1\nOverwrite file ?").arg(glsl_file));
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        if (msg.exec() == QMessageBox::No)
+            return;
+    }
+
+    if (!app::MakePath(glsl_path))
+    {
+        ERROR("Failed to create path. [path='%1']", glsl_path);
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setWindowTitle("Filesystem Error");
+        msg.setText(tr("Failed to create file system path.\n%1").arg(glsl_path));
+        msg.exec();
+        return;
+    }
+
+    QString error_str;
+    QFile::FileError err_val = QFile::FileError::NoError;
+    if (!app::WriteTextFile(glsl_file, source, &err_val, &error_str))
+    {
+        ERROR("Failed to write shader glsl file. [file='%1', error=%2]", glsl_file, error_str);
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setWindowTitle("Filesystem Error");
+        msg.setText(tr("Failed to write file.\n%1\n%2").arg(glsl_file).arg(error_str));
+        msg.exec();
+        return;
+    }
+    mMaterial->SetShaderUri(app::ToUtf8(glsl_uri));
+}
+
 
 void MaterialWidget::ClearCustomUniforms()
 {
@@ -1460,7 +1849,7 @@ void MaterialWidget::SetMaterialProperties()
     }
 }
 
-void MaterialWidget::GetMaterialProperties()
+void MaterialWidget::ShowMaterialProperties()
 {
     SetEnabled(mUI.shaderFile,         false);
     SetEnabled(mUI.actionSelectShader, false);
@@ -1474,6 +1863,9 @@ void MaterialWidget::GetMaterialProperties()
     SetEnabled(mUI.textureProp,        false);
     SetEnabled(mUI.textureRect,        false);
     SetEnabled(mUI.btnAddShader,       false);
+    SetEnabled(mUI.actionCreateShader, false);
+    SetEnabled(mUI.actionEditShader,   false);
+    SetEnabled(mUI.actionSelectShader, false);
 
     SetVisible(mUI.builtInProperties,  false);
     SetVisible(mUI.gradientMap,        false);
@@ -1522,7 +1914,8 @@ void MaterialWidget::GetMaterialProperties()
     }
     else
     {
-        SetPlaceholderText(mUI.shaderFile, "Built-in");
+        SetPlaceholderText(mUI.shaderFile, "Using The Built-in Shader");
+        SetEnabled(mUI.btnAddShader,    true);
         SetEnabled(mUI.shaderFile,      true);
         SetEnabled(mUI.actionSelectShader, true); // allow an alternative shader to be used from the file
         SetEnabled(mUI.actionCreateShader, true);
@@ -1531,8 +1924,10 @@ void MaterialWidget::GetMaterialProperties()
 
         SetVisible(mUI.grpRenderFlags,      true);
         SetVisible(mUI.builtInProperties,   true);
-        SetEnabled(mUI.chkStaticInstance,   true);
-        SetVisible(mUI.chkStaticInstance,   true);
+        // the static instance constant folding doesn't work
+        // with custom shader source. the user needs to do the
+        // work manually then.
+        SetVisible(mUI.chkStaticInstance,   !mMaterial->HasCustomShader());
 
         if (mMaterial->GetType() == gfx::MaterialClass::Type::Gradient)
         {
@@ -1624,7 +2019,7 @@ void MaterialWidget::GetMaterialProperties()
     }
 }
 
-void MaterialWidget::GetTextureProperties()
+void MaterialWidget::ShowTextureProperties()
 {
     SetEnabled(mUI.textureProp, false);
     SetValue(mUI.textureSourceFile,   QString(""));
@@ -1690,7 +2085,7 @@ void MaterialWidget::GetTextureProperties()
 
 }
 
-void MaterialWidget::GetTextureMapProperties()
+void MaterialWidget::ShowTextureMapProperties()
 {
     SetEnabled(mUI.textureMap, false);
     SetValue(mUI.textureMapID,       QString(""));
@@ -1779,6 +2174,16 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     bool dummy   = false;
     bool success = true;
 
+    if (mMaterial->GetType() == gfx::MaterialClass::Type::Custom)
+    {
+        const auto& uri = mMaterial->GetShaderUri();
+        if (uri.empty())
+        {
+            message = "No shader has been selected.";
+            success = false;
+        }
+    }
+
     for (unsigned i=0; i<mMaterial->GetNumTextureMaps(); ++i)
     {
         const auto& map = mMaterial->GetTextureMap(i);
@@ -1788,15 +2193,6 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
             success = false;
             message = base::FormatString("Missing texture map on '%1'", map->GetName());
             break;
-        }
-    }
-    if (mMaterial->GetType() == gfx::MaterialClass::Type::Custom)
-    {
-        const auto& uri = mMaterial->GetShaderUri();
-        if (uri.empty())
-        {
-            message = "No shader has been selected.";
-            success = false;
         }
     }
 

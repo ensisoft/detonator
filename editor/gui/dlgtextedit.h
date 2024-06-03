@@ -45,6 +45,13 @@ namespace gui
         void SetText(const app::AnyString& str, const std::string& format);
         app::AnyString GetText() const;
         app::AnyString GetText(const std::string& format) const;
+
+        void SetReadOnly(bool readonly)
+        {
+            mUI.text->setReadOnly(readonly);
+            mUI.btnCancel->setVisible(!readonly);
+        }
+
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();

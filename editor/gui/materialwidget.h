@@ -89,6 +89,7 @@ namespace gui
         void on_actionCreateShader_triggered();
         void on_actionSelectShader_triggered();
         void on_actionEditShader_triggered();
+        void on_actionShowShader_triggered();
         void on_btnResetShader_clicked();
         void on_btnAddTextureMap_clicked();
         void on_btnResetTextureMap_clicked();
@@ -149,14 +150,21 @@ namespace gui
         void UniformValueChanged(const Uniform* uniform);
 
     private:
+        void CreateCustomShaderStub();
+        void CreateColorShaderStub();
+        void CreateGradientShaderStub();
+        void CreateTextureShaderStub();
+        void CreateSpriteShaderStub();
+        void CreateShaderStubFromSource(const char* source);
+
         void ClearCustomUniforms();
         void ApplyShaderDescription();
         void SetTextureRect();
         void SetTextureFlags();
         void SetMaterialProperties();
-        void GetMaterialProperties();
-        void GetTextureProperties();
-        void GetTextureMapProperties();
+        void ShowMaterialProperties();
+        void ShowTextureProperties();
+        void ShowTextureMapProperties();
         void PaintScene(gfx::Painter& painter, double sec);
         gfx::TextureMap* GetSelectedTextureMap();
         gfx::TextureSource* GetSelectedTextureSrc();

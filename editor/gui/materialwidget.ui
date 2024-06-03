@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1979</width>
-    <height>1070</height>
+    <height>1228</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -968,7 +968,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_4">
+        <spacer name="verticalSpacer_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -2098,22 +2098,22 @@
   <action name="actionCreateShader">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+     <normaloff>:/32x32_ico_png/add.png</normaloff>:/32x32_ico_png/add.png</iconset>
    </property>
    <property name="text">
     <string>New Shader</string>
    </property>
    <property name="toolTip">
-    <string>Create new shader from source</string>
+    <string>Create source for a new shader</string>
    </property>
   </action>
   <action name="actionSelectShader">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/workspace_open.png</normaloff>:/16x16_ico_png/workspace_open.png</iconset>
+     <normaloff>:/32x32_ico_png/folder.png</normaloff>:/32x32_ico_png/folder.png</iconset>
    </property>
    <property name="text">
-    <string>From File</string>
+    <string>Select Shader</string>
    </property>
    <property name="toolTip">
     <string>Select existing shader source from file</string>
@@ -2122,13 +2122,25 @@
   <action name="actionEditShader">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
+     <normaloff>:/32x32_ico_png/edit.png</normaloff>:/32x32_ico_png/edit.png</iconset>
    </property>
    <property name="text">
     <string>Edit Shader</string>
    </property>
    <property name="toolTip">
-    <string>Edit the shader in the shader editor</string>
+    <string>Edit the shader source in the shader editor</string>
+   </property>
+  </action>
+  <action name="actionShowShader">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/style_edit.png</normaloff>:/16x16_ico_png/style_edit.png</iconset>
+   </property>
+   <property name="text">
+    <string>Show Source</string>
+   </property>
+   <property name="toolTip">
+    <string>Show the final shader source</string>
    </property>
   </action>
  </widget>
