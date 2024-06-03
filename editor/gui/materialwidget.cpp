@@ -120,8 +120,6 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
 
     // hide this for now.
     SetVisible(mUI.textureRect, false);
-
-    mUI.splitter->setSizes({250, 1000, 250});
 }
 
 MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& resource) : MaterialWidget(workspace)
@@ -135,6 +133,8 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace, const app::Resource& r
     GetUserProperty(resource, "zoom", mUI.zoom);
     GetUserProperty(resource, "widget", mUI.widget);
     GetUserProperty(resource, "time", mUI.kTime);
+    GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
+    GetUserProperty(resource, "right_splitter", mUI.rightSplitter);
 
     ApplyShaderDescription();
     ShowMaterialProperties();
@@ -221,6 +221,8 @@ bool MaterialWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Material", mUI.cmbModel);
     settings.LoadWidget("Material", mUI.widget);
     settings.LoadWidget("Material", mUI.kTime);
+    settings.LoadWidget("Material", mUI.mainSplitter);
+    settings.LoadWidget("Material", mUI.rightSplitter);
 
     mMaterial = gfx::MaterialClass::ClassFromJson(json);
     if (!mMaterial)
@@ -252,6 +254,8 @@ bool MaterialWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Material", mUI.cmbModel);
     settings.SaveWidget("Material", mUI.widget);
     settings.SaveWidget("Material", mUI.kTime);
+    settings.SaveWidget("Material", mUI.mainSplitter);
+    settings.SaveWidget("Material", mUI.rightSplitter);
     if (auto* item = GetSelectedItem(mUI.textures))
         settings.SetValue("Material", "selected_item", (QString)GetItemId(item));
     return true;
@@ -399,6 +403,8 @@ void MaterialWidget::on_actionSave_triggered()
     SetUserProperty(resource, "widget", mUI.widget);    
     SetUserProperty(resource, "zoom", mUI.zoom);
     SetUserProperty(resource, "time", mUI.kTime);
+    SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
+    SetUserProperty(resource, "right_splitter", mUI.rightSplitter);
 
     mWorkspace->SaveResource(resource);
     mOriginalHash = mMaterial->GetHash();
@@ -1780,12 +1786,12 @@ void MaterialWidget::SetMaterialProperties()
 
     if (math::equals((float)GetValue(mUI.rotation), 0.0f))
         mMaterial->DeleteUniform("kTextureRotation");
-    else mMaterial->SetTextureRotation(GetValue(mUI.rotation));
+    else mMaterial->SetTextureRotation(qDegreesToRadians((float)GetValue(mUI.rotation)));
 
     glm::vec2 linear_texture_velocity;
     linear_texture_velocity.x = GetValue(mUI.velocityX);
     linear_texture_velocity.y = GetValue(mUI.velocityY);
-    float angular_texture_velocity = GetValue(mUI.velocityZ);
+    const float angular_texture_velocity = qDegreesToRadians((float)GetValue(mUI.velocityZ));
     if (math::equals(glm::vec3(linear_texture_velocity, angular_texture_velocity), glm::vec3(0.0f, 0.0f, 0.0f)))
         mMaterial->DeleteUniform("kTextureVelocity");
     else mMaterial->SetTextureVelocity(linear_texture_velocity, angular_texture_velocity);
@@ -1891,10 +1897,10 @@ void MaterialWidget::ShowMaterialProperties()
     SetValue(mUI.particleAction,      mMaterial->GetParticleAction());
     SetValue(mUI.scaleX,              mMaterial->GetTextureScaleX());
     SetValue(mUI.scaleY,              mMaterial->GetTextureScaleY());
-    SetValue(mUI.rotation,            mMaterial->GetTextureRotation());
+    SetValue(mUI.rotation,            qRadiansToDegrees(mMaterial->GetTextureRotation()));
     SetValue(mUI.velocityX,           mMaterial->GetTextureVelocityX());
     SetValue(mUI.velocityY,           mMaterial->GetTextureVelocityY());
-    SetValue(mUI.velocityZ,           mMaterial->GetTextureVelocityZ());
+    SetValue(mUI.velocityZ,           qRadiansToDegrees(mMaterial->GetTextureVelocityZ()));
     SetValue(mUI.minFilter,           mMaterial->GetTextureMinFilter());
     SetValue(mUI.magFilter,           mMaterial->GetTextureMagFilter());
     SetValue(mUI.wrapX,               mMaterial->GetTextureWrapX());
