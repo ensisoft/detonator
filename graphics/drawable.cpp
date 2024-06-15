@@ -2088,12 +2088,7 @@ std::string PolygonMeshInstance::GetShaderName(const Environment& env) const
 
 std::string ParticleEngineClass::GetProgramId(const Environment& env) const
 {
-    if (mParams->coordinate_space == CoordinateSpace::Local)
-        return "local-particle-program";
-    else if (mParams->coordinate_space == CoordinateSpace::Global)
-        return "global-particle-program";
-    else BUG("Unknown particle program coordinate space.");
-    return "";
+    return "particle-program";
 }
 
 std::string ParticleEngineClass::GetGeometryId(const Environment& env) const
@@ -2103,24 +2098,22 @@ std::string ParticleEngineClass::GetGeometryId(const Environment& env) const
 
 ShaderSource ParticleEngineClass::GetShader(const Environment& env, const Device& device) const
 {
-    if (mParams->coordinate_space == CoordinateSpace::Local)
-    {
-        ShaderSource source;
-        source.AddAttribute("aPosition", ShaderSource::AttributeType::Vec2f);
-        source.AddAttribute("aData", ShaderSource::AttributeType::Vec4f);
-        source.AddUniform("kProjectionMatrix", ShaderSource::UniformType::Mat4f);
-        source.AddUniform("kModelViewMatrix", ShaderSource::UniformType::Mat4f);
-        source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
-        source.AddVarying("vParticleRandomValue", ShaderSource::VaryingType::Float);
-        source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
-        source.AddVarying("vParticleTime", ShaderSource::VaryingType::Float);
-        // this shader doesn't actually write to vTexCoord because when
-        // particle (GL_POINTS) rasterization is done the fragment shader
-        // must use gl_PointCoord instead.
-        source.AddSource(R"(
+    ShaderSource source;
+    source.AddAttribute("aPosition", ShaderSource::AttributeType::Vec2f);
+    source.AddAttribute("aData", ShaderSource::AttributeType::Vec4f);
+    source.AddUniform("kProjectionMatrix", ShaderSource::UniformType::Mat4f);
+    source.AddUniform("kModelViewMatrix", ShaderSource::UniformType::Mat4f);
+    source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
+    source.AddVarying("vParticleRandomValue", ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
+    source.AddVarying("vParticleTime", ShaderSource::VaryingType::Float);
+    // this shader doesn't actually write to vTexCoord because when
+    // particle (GL_POINTS) rasterization is done the fragment shader
+    // must use gl_PointCoord instead.
+    source.AddSource(R"(
 void VertexShaderMain()
 {
-    vec4 vertex  = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
+    vec4 vertex = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
     gl_PointSize = aData.x;
     vParticleRandomValue = aData.y;
     vParticleAlpha       = aData.z;
@@ -2128,48 +2121,13 @@ void VertexShaderMain()
     gl_Position  = kProjectionMatrix * kModelViewMatrix * vertex;
 }
     )");
-        return source;
-    }
-    else if (mParams->coordinate_space == CoordinateSpace::Global)
-    {
-        ShaderSource source;
-        source.AddAttribute("aPosition", ShaderSource::AttributeType::Vec2f);
-        source.AddAttribute("aData", ShaderSource::AttributeType::Vec4f);
-        source.AddUniform("kProjectionMatrix", ShaderSource::UniformType::Mat4f);
-        source.AddUniform("kViewMatrix", ShaderSource::UniformType::Mat4f);
-        source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
-        source.AddVarying("vParticleRandomValue", ShaderSource::VaryingType::Float);
-        source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
-        source.AddVarying("vParticleTime", ShaderSource::VaryingType::Float);
-        // this shader doesn't actually write to vTexCoord because when
-        // particle (GL_POINTS) rasterization is done the fragment shader
-        // must use gl_PointCoord instead.
-        source.AddSource(R"(
-void VertexShaderMain()
-{
-  vec4 vertex = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
-  gl_PointSize = aData.x;
-  vParticleRandomValue = aData.y;
-  vParticleAlpha       = aData.z;
-  vParticleTime        = aData.w;
-  gl_Position  = kProjectionMatrix * kViewMatrix * vertex;
-}
-    )");
-        return source;
-    }
-    else BUG("Missing particle shader simulation space source.");
-    
-    return ShaderSource("");
+    return source;
+
 }
 
 std::string ParticleEngineClass::GetShaderName(const Environment& env) const
 {
-    if (mParams->coordinate_space == CoordinateSpace::Local)
-        return "LocalParticleShader";
-    else if (mParams->coordinate_space == CoordinateSpace::Global)
-        return "GlobalParticleShader";
-    else BUG("Missing particle shader name.");
-    return "";
+    return "ParticleShader";
 }
 
 bool ParticleEngineClass::Construct(const Drawable::Environment& env,  const InstanceState& state, Geometry::CreateArgs& create) const
@@ -2240,7 +2198,7 @@ void ParticleEngineClass::ApplyDynamicState(const Environment& env, ProgramState
         const auto& kViewMatrix = *env.view_matrix;
         const auto& kProjectionMatrix = *env.proj_matrix;
         program.SetUniform("kProjectionMatrix", kProjectionMatrix);
-        program.SetUniform("kViewMatrix", kViewMatrix);
+        program.SetUniform("kModelViewMatrix", kViewMatrix);
     }
     else if (mParams->coordinate_space == CoordinateSpace::Local)
     {
