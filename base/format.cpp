@@ -19,6 +19,7 @@
 #include <cstdio>
 #include <locale>
 #include <codecvt>
+#include <cctype>
 #include "base/types.h"
 #include "base/format.h"
 
@@ -177,6 +178,49 @@ std::string ToString(const base::FDegrees& angle)
 
 namespace base
 {
+
+std::string ToUtf8(const std::wstring& str)
+{
+    // this way of converting is deprecated since c++17 but
+    // this works good enough for now so we'll go with it.
+    using convert_type = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_type, wchar_t> converter;
+    std::string converted_str = converter.to_bytes(str);
+    return converted_str;
+}
+
+std::wstring FromUtf8(const std::string& str)
+{
+    // this way of converting is deprecated since c++17 but
+    // this works good enough for now so we'll go with it.
+    using convert_type = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_type, wchar_t> converter;
+    std::wstring converted_str = converter.from_bytes(str);
+    return converted_str;
+}
+
+std::wstring ToUpper(const std::wstring& str)
+{
+    std::wstring ret;
+    for (auto c : str)
+        ret.push_back(towupper(c));
+    return ret;
+}
+
+std::wstring ToLower(const std::wstring& str)
+{
+    std::wstring ret;
+    for (auto c : str)
+        ret.push_back(towlower(c));
+    return ret;
+}
+
+std::string ToUpperUtf8(const std::string& str)
+{ return ToUtf8(ToUpper(FromUtf8(str))); }
+
+std::string ToLowerUtf8(const std::string& str)
+{ return ToUtf8(ToLower(FromUtf8(str))); }
+
 std::string ToChars(float value)
 {
     // c++17 has to_chars in <charconv> but GCC (stdlib) doesn't
@@ -233,8 +277,6 @@ bool FromChars(const std::string& str, unsigned* value)
     ss >> *value;
     return !ss.fail();
 }
-
-
 
 } // namespace
 
