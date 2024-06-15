@@ -173,6 +173,15 @@ namespace base
     // bring ToString also into base namespace scope
     using detail::ToString;
 
+    std::string ToUtf8(const std::wstring& str);
+    std::wstring FromUtf8(const std::string& str);
+    // ToUpper/Lower are only provided for wide strings in order to avoid
+    // potential issues with multibyte narrow string encoding.
+    std::wstring ToUpper(const std::wstring& str);
+    std::wstring ToLower(const std::wstring& str);
+    std::string ToUpperUtf8(const std::string& str);
+    std::string ToLowerUtf8(const std::string& str);
+
      // format float value to a string ignoring the user's locale.
      // I.e. the format always uses . as the decimal point.
     std::string ToChars(float value);

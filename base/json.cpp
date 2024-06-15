@@ -26,6 +26,7 @@
 
 #include <fstream>
 
+#include "base/format.h"
 #include "base/json.h"
 #include "base/types.h"
 #include "base/utility.h" // for FromUtf8 for win32

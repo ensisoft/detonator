@@ -1078,8 +1078,8 @@ add_test(NAME unit_test_audio_graph COMMAND unit_test_audio_graph)
 
 # base tests
 add_executable(unit_test_thread  base/unit_test/unit_test_thread.cpp base/assert.cpp base/logging.cpp base/trace.cpp base/threadpool.cpp)
-add_executable(unit_test_grid    base/unit_test/unit_test_grid.cpp)
-add_executable(unit_test_mem     base/unit_test/unit_test_memory.cpp)
+add_executable(unit_test_grid    base/unit_test/unit_test_grid.cpp base/format.cpp)
+add_executable(unit_test_mem     base/unit_test/unit_test_memory.cpp base/format.cpp)
 add_executable(unit_test_math    base/unit_test/unit_test_math.cpp)
 add_executable(unit_test_cmdline base/unit_test/unit_test_cmdline.cpp)
 add_executable(unit_test_logging base/unit_test/unit_test_log.cpp)

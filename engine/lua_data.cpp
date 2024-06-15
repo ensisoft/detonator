@@ -27,6 +27,7 @@
 #include "base/types.h"
 #include "base/color4f.h"
 #include "base/utility.h"
+#include "base/format.h"
 #include "engine/lua.h"
 #include "data/io.h"
 #include "data/json.h"

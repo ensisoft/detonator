@@ -25,6 +25,7 @@
 #include <random>
 #include <cstring>
 
+#include "base/format.h"
 #include "base/utility.h"
 
 #if defined(__MSVC__)
@@ -69,47 +70,6 @@ std::string RandomString(size_t len)
     return ret;
 }
 
-std::string ToUtf8(const std::wstring& str)
-{
-    // this way of converting is deprecated since c++17 but
-    // this works good enough for now so we'll go with it.
-    using convert_type = std::codecvt_utf8<wchar_t>;
-    std::wstring_convert<convert_type, wchar_t> converter;
-    std::string converted_str = converter.to_bytes(str);
-    return converted_str;
-}
-
-std::wstring FromUtf8(const std::string& str)
-{
-    // this way of converting is deprecated since c++17 but
-    // this works good enough for now so we'll go with it.
-    using convert_type = std::codecvt_utf8<wchar_t>;
-    std::wstring_convert<convert_type, wchar_t> converter;
-    std::wstring converted_str = converter.from_bytes(str);
-    return converted_str;
-}
-
-std::wstring ToUpper(const std::wstring& str)
-{
-    std::wstring ret;
-    for (auto c : str)
-        ret.push_back(std::towupper(c));
-    return ret;
-}
-
-std::wstring ToLower(const std::wstring& str)
-{
-    std::wstring ret;
-    for (auto c : str)
-        ret.push_back(std::towlower(c));
-    return ret;
-}
-
-std::string ToUpperUtf8(const std::string& str)
-{ return ToUtf8(ToUpper(FromUtf8(str))); }
-
-std::string ToLowerUtf8(const std::string& str)
-{ return ToUtf8(ToLower(FromUtf8(str))); }
 
 bool FileExists(const std::string& filename)
 {
