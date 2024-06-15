@@ -323,6 +323,7 @@ ParticleEditorWidget::ParticleEditorWidget(app::Workspace* workspace, const app:
     GetUserProperty(resource, "show_bounds", mUI.chkShowBounds);
     GetUserProperty(resource, "show_emitter", mUI.chkShowEmitter);
     GetUserProperty(resource, "widget", mUI.widget);
+    GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
     if (mWorkspace->IsValidMaterial(material))
     {
         SetValue(mUI.materials, ListItemId(material));
@@ -426,6 +427,7 @@ bool ParticleEditorWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Particle", mUI.cmbGrid);
     settings.SaveWidget("Particle", mUI.zoom);
     settings.SaveWidget("Particle", mUI.widget);
+    settings.SaveWidget("Particle", mUI.mainSplitter);
     return true;
 }
 
@@ -453,6 +455,7 @@ bool ParticleEditorWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Particle", mUI.cmbGrid);
     settings.LoadWidget("Particle", mUI.zoom);
     settings.LoadWidget("Particle", mUI.widget);
+    settings.LoadWidget("Particle", mUI.mainSplitter);
 
     mClass = std::make_shared<gfx::ParticleEngineClass>();
     if (!mClass->FromJson(json))
@@ -625,6 +628,7 @@ void ParticleEditorWidget::on_actionSave_triggered()
     SetUserProperty(particle_resource, "show_bounds", mUI.chkShowBounds);
     SetUserProperty(particle_resource, "show_emitter", mUI.chkShowEmitter);
     SetUserProperty(particle_resource, "widget", mUI.widget);
+    SetUserProperty(particle_resource, "main_splitter", mUI.mainSplitter);
 
     mWorkspace->SaveResource(particle_resource);
     mOriginalHash = mClass->GetHash();
