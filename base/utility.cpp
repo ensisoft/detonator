@@ -46,6 +46,20 @@ double GetTime()
     return us.count() / (1000.0 * 1000.0);
 }
 
+std::vector<std::string> SplitString(const std::string& str, char separator)
+{
+    std::vector<std::string> ret;
+    std::stringstream ss(str);
+    std::string line;
+    while (std::getline(ss, line, separator))
+    {
+        if (line.empty())
+            continue;
+        ret.push_back(line);
+    }
+    return ret;
+}
+
 std::string RandomString(size_t len)
 {
     static const char* alphabet =

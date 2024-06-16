@@ -173,6 +173,9 @@ namespace base
     // bring ToString also into base namespace scope
     using detail::ToString;
 
+    // Trim leading and trailing whitespace from the string
+    std::string TrimString(const std::string& str);
+
     std::string ToUtf8(const std::wstring& str);
     std::wstring FromUtf8(const std::string& str);
     // ToUpper/Lower are only provided for wide strings in order to avoid

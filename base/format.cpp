@@ -179,6 +179,11 @@ std::string ToString(const base::FDegrees& angle)
 namespace base
 {
 
+std::string TrimString(const std::string& str)
+{
+    return boost::trim_copy(str);
+}
+
 std::string ToUtf8(const std::wstring& str)
 {
     // this way of converting is deprecated since c++17 but
