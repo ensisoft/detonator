@@ -258,6 +258,9 @@ namespace gfx
             return {};
         }
 
+        // Get the drawable class instance if any. Warning, this may be null for
+        // drawable objects that aren't based on any drawable clas!
+        virtual const DrawableClass* GetClass() const { return nullptr; }
     private:
     };
 
@@ -556,6 +559,9 @@ namespace gfx
         virtual Type GetType() const override;
         virtual Primitive GetPrimitive() const override;
         virtual Usage GetUsage() const override;
+
+        virtual const DrawableClass* GetClass() const override
+        { return mClass.get(); }
 
         inline Shape GetShape() const noexcept
         { return mClass->GetShapeType(); }
@@ -935,6 +941,9 @@ namespace gfx
 
         virtual size_t GetContentHash() const override;
 
+        virtual const DrawableClass* GetClass() const override
+        { return mClass.get(); }
+
     private:
         std::shared_ptr<const PolygonMeshClass> mClass;
         std::string mSubMeshKey;
@@ -1283,7 +1292,9 @@ namespace gfx
         { return Primitive::Points; }
         virtual Usage GetUsage() const override
         { return Usage::Stream; }
-
+        virtual const DrawableClass* GetClass() const override
+        { return mClass.get(); }
+        
         // Get the current number of alive particles.
         inline size_t GetNumParticlesAlive() const noexcept
         { return mState->particles.size(); }
