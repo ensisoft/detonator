@@ -85,10 +85,6 @@ namespace gfx
             std::optional<ShaderDataDeclarationValue> constant_value;
         };
 
-        explicit ShaderSource(std::string source)
-        {
-            mSource.push_back(std::move(source));
-        }
         ShaderSource() = default;
 
         inline void SetType(Type type) noexcept
@@ -101,6 +97,8 @@ namespace gfx
         { mSource.push_back(std::move(source)); }
         inline void AddData(const ShaderDataDeclaration& data)
         { mData.push_back(data); }
+        inline void AddData(ShaderDataDeclaration&& data)
+        { mData.push_back(std::move(data)); }
         inline bool IsEmpty() const noexcept
         { return mSource.empty(); }
         inline size_t GetSourceCount() const noexcept
@@ -111,6 +109,23 @@ namespace gfx
         { mSource.clear(); }
         inline void ClearData() noexcept
         { mData.clear(); }
+
+        inline Type GetType() const noexcept
+        { return mType; }
+        inline Precision GetPrecision() const noexcept
+        { return mPrecision; }
+        inline Version GetVersion() const noexcept
+        { return mVersion; }
+
+        const ShaderDataDeclaration* FindDataDeclaration(const std::string& key) const
+        {
+            for (const auto& data : mData)
+            {
+                if (data.name == key)
+                    return &data;
+            }
+            return nullptr;
+        }
 
         void AddAttribute(std::string name, AttributeType type)
         {
@@ -145,6 +160,8 @@ namespace gfx
         // with the other shader source, i.e. the shader type,
         // version and precision qualifiers match.
         bool IsCompatible(const ShaderSource& other) const noexcept;
+
+        static ShaderSource FromRawSource(std::string source);
     private:
         Type mType = Type::NotSet;
         Version mVersion = Version::NotSet;

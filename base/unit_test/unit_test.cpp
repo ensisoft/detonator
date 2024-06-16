@@ -524,6 +524,47 @@ void unit_test_allocator()
 
 }
 
+void unit_test_string()
+{
+    TEST_CASE(test::Type::Feature)
+
+    // split string on space
+    {
+        std::vector<std::string> ret;
+        ret = base::SplitString("foobar");
+        TEST_REQUIRE(ret.size() == 1);
+        TEST_REQUIRE(ret[0] == "foobar");
+
+        ret = base::SplitString("foo bar");
+        TEST_REQUIRE(ret.size() == 2);
+        TEST_REQUIRE(ret[0] == "foo");
+        TEST_REQUIRE(ret[1] == "bar");
+
+        ret = base::SplitString("foo      bar");
+        TEST_REQUIRE(ret.size() == 2);
+        TEST_REQUIRE(ret[0] == "foo");
+        TEST_REQUIRE(ret[1] == "bar");
+    }
+
+    // split string on new line
+    {
+        std::vector<std::string> ret;
+        ret = base::SplitString("foobar\n", '\n');
+        TEST_REQUIRE(ret.size() == 1);
+        TEST_REQUIRE(ret[0] == "foobar");
+
+        ret = base::SplitString("foo\nbar", '\n');
+        TEST_REQUIRE(ret.size() == 2);
+        TEST_REQUIRE(ret[0] == "foo");
+        TEST_REQUIRE(ret[1] == "bar");
+
+        ret = base::SplitString("foo\n bar", '\n');
+        TEST_REQUIRE(ret.size() == 2);
+        TEST_REQUIRE(ret[0] == "foo");
+        TEST_REQUIRE(ret[1] == " bar");
+    }
+}
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
@@ -541,6 +582,8 @@ int test_main(int argc, char* argv[])
     unit_test_util();
 
     unit_test_allocator();
+
+    unit_test_string();
     return 0;
 }
 ) // TEST_MAIN

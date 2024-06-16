@@ -343,6 +343,8 @@ inline bool EndsWith(const std::wstring& str, const std::wstring& what)
     return std::equal(what.rbegin(), what.rend(), str.rbegin());
 }
 
+std::vector<std::string> SplitString(const std::string& str, char separator = ' ');
+
 std::string RandomString(size_t len);
 std::string JoinPath(const std::string& a, const std::string& b);
 std::ifstream OpenBinaryInputStream(const std::string& filename);

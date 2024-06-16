@@ -1699,7 +1699,7 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
     // use one of the built-in shaders!
 
     if (!mShaderSrc.empty())
-        return ShaderSource(mShaderSrc);
+        return ShaderSource::FromRawSource(mShaderSrc);
 
     if (!mShaderUri.empty())
     {
@@ -1715,7 +1715,7 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
         }
         const char* beg = (const char*)buffer->GetData();
         const char* end = beg + buffer->GetByteSize();
-        return ShaderSource(std::string(beg, end));
+        return ShaderSource::FromRawSource(std::string(beg, end));
     }
 
     if (mType == Type::Color)
@@ -1729,9 +1729,9 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
     else  if (mType == Type::Custom)
     {
         ERROR("Material has no shader source specified. [name='%1']", mName);
-        return ShaderSource("");
+        return ShaderSource();
     } else BUG("Unknown material type.");
-    return ShaderSource("");
+    return ShaderSource();
 }
 
 ShaderSource MaterialClass::GetColorShaderSource(const State& state, const Device& device) const

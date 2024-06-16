@@ -2017,7 +2017,7 @@ ShaderSource PolygonMeshInstance::GetShader(const Environment& env, const Device
     else if (mesh == MeshType::Model3D)
         return MakeModel3DVertexShader(device); // todo:
     else BUG("No such vertex shader");
-    return ShaderSource("");
+    return ShaderSource();
 }
 
 std::string PolygonMeshInstance::GetGeometryId(const Environment& env) const
@@ -3177,11 +3177,11 @@ void VertexShaderMain()
 }
 )";
     if (shape == TileShape::Square)
-        return ShaderSource(square_tile_source);
+        return ShaderSource::FromRawSource(square_tile_source);
     else if (shape == TileShape::Rectangle)
-        return ShaderSource(rectangle_tile_source);
+        return ShaderSource::FromRawSource(rectangle_tile_source);
     else BUG("Missing tile batch shader source.");
-    return ShaderSource("");
+    return ShaderSource();
 }
 
 std::string TileBatch::GetShaderId(const Environment& env) const

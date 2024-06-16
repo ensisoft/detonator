@@ -110,6 +110,66 @@ namespace {
         return false;
     }
 
+    std::optional<gfx::ShaderSource::ShaderDataDeclarationType> DeclTypeFromString(const std::string& str)
+    {
+        using t = gfx::ShaderSource::ShaderDataDeclarationType;
+
+        if (str == "attribute")
+            return t::Attribute;
+        else if (str == "uniform")
+            return t::Uniform;
+        else if (str == "varying")
+            return t::Varying;
+        else if (str == "const")
+            return t::Constant;
+
+        return std::nullopt;
+    }
+
+    std::optional<gfx::ShaderSource::ShaderDataType> DataTypeFromString(const std::string& str)
+    {
+        using t = gfx::ShaderSource::ShaderDataType;
+
+        if (str == "int")
+            return t::Int;
+        else if (str == "float")
+            return t::Float;
+        else if (str == "vec2")
+            return t::Vec2f;
+        else if (str == "vec3")
+            return t::Vec3f;
+        else if (str == "vec4")
+            return t::Vec4f;
+        else if (str == "ivec2")
+            return t::Vec2i;
+        else if (str == "ivec3")
+            return t::Vec3i;
+        else if (str == "ivec4")
+            return t::Vec4i;
+        else if (str == "mat2")
+            return t::Mat2f;
+        else if (str == "mat3")
+            return t::Mat3f;
+        else if (str == "mat4")
+            return t::Mat4f;
+        else if (str =="sampler2D")
+            return t::Sampler2D;
+
+        return std::nullopt;
+    }
+
+    std::optional<std::string> GetTokenName(const std::string& str)
+    {
+        std::string ret;
+        for (size_t i=0; i<str.size(); ++i)
+        {
+            if (str[i] == ';')
+                return base::TrimString(ret);
+            ret += str[i];
+        }
+        return std::nullopt;
+    }
+
 } // namespace
 
 namespace gfx
@@ -269,6 +329,80 @@ bool ShaderSource::IsCompatible(const ShaderSource& other) const noexcept
             return false;
     }
     return true;
+}
+
+// static
+ShaderSource ShaderSource::FromRawSource(std::string raw_source)
+{
+    // Go over the raw GLSL source and try to extract higher
+    // level information out of it so that more reasoning
+    // can be done later on in terms of understanding the
+    // shader uniforms/varyings etc.
+
+    auto GetToken = [](const std::vector<std::string>& tokens, size_t index) {
+        if (index >= tokens.size())
+            return std::string("");
+        return tokens[index];
+    };
+
+    ShaderSource source;
+
+    std::string glsl_code;
+
+    std::stringstream ss(raw_source);
+    std::string line;
+    while (std::getline(ss, line))
+    {
+        const auto& trimmed = base::TrimString(line);
+        if (trimmed.empty())
+            continue;
+        if (base::StartsWith(trimmed, "#version"))
+        {
+            if (base::Contains(trimmed, "100"))
+                source.SetVersion(ShaderSource::Version::GLSL_100);
+            else if (base::Contains(trimmed, "300 es"))
+                source.SetVersion(ShaderSource::Version::GLSL_300);
+            else WARN("Unsupported GLSL version '%1'.", trimmed);
+        }
+        else if (base::StartsWith(trimmed, "precision"))
+        {
+            if (base::Contains(trimmed, "lowp"))
+                source.SetPrecision(ShaderSource::Precision::Low);
+            else if (base::Contains(trimmed, "mediump"))
+                source.SetPrecision(ShaderSource::Precision::Medium);
+            else if (base::Contains(trimmed, "highp"))
+                source.SetPrecision(ShaderSource::Precision::High);
+            else WARN("Unsupported GLSL precision '%1'.]", trimmed);
+        }
+        else if (base::StartsWith(trimmed, "attribute") ||
+                 base::StartsWith(trimmed, "uniform") ||
+                 base::StartsWith(trimmed, "varying"))
+        {
+            const auto& parts = base::SplitString(trimmed);
+            const auto& decl_type = DeclTypeFromString(GetToken(parts, 0));
+            const auto& data_type = DataTypeFromString(GetToken(parts, 1));
+            const auto& name = GetTokenName(GetToken(parts, 2));
+            if (!decl_type.has_value() || !data_type.has_value() || !name.has_value())
+            {
+                WARN("Failed to parse GLSL declaration '%1'.", trimmed);
+                glsl_code.append(trimmed);
+                continue;
+            }
+            ShaderDataDeclaration decl;
+            decl.data_type = data_type.value();
+            decl.decl_type = decl_type.value();
+            decl.name      = name.value();
+            source.AddData(std::move(decl));
+        }
+        else
+        {
+            glsl_code.append(line);
+            glsl_code.append("\n");
+        }
+    }
+
+    source.AddSource(glsl_code);
+    return source;
 }
 
 } // namespace
