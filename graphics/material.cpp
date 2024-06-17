@@ -1737,6 +1737,9 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
 ShaderSource MaterialClass::GetColorShaderSource(const State& state, const Device& device) const
 {
     ShaderSource source;
+    source.SetType(ShaderSource::Type::Fragment);
+    source.SetPrecision(ShaderSource::Precision::High);
+    source.SetVersion(ShaderSource::Version::GLSL_100);
     source.AddUniform("kBaseColor",     ShaderSource::UniformType::Color4f);
     source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
     source.AddSource(R"(
@@ -1753,6 +1756,9 @@ void FragmentShaderMain()
 ShaderSource MaterialClass::GetGradientShaderSource(const State& state, const Device& device) const
 {
     ShaderSource source;
+    source.SetType(ShaderSource::Type::Fragment);
+    source.SetPrecision(ShaderSource::Precision::High);
+    source.SetVersion(ShaderSource::Version::GLSL_100);
     source.AddUniform("kColor0", ShaderSource::UniformType::Color4f);
     source.AddUniform("kColor1", ShaderSource::UniformType::Color4f);
     source.AddUniform("kColor2", ShaderSource::UniformType::Color4f);
@@ -1791,6 +1797,9 @@ ShaderSource MaterialClass::GetSpriteShaderSource(const State& state, const Devi
     // todo: maybe pack some of shader uniforms
 
     ShaderSource source;
+    source.SetType(ShaderSource::Type::Fragment);
+    source.SetPrecision(ShaderSource::Precision::High);
+    source.SetVersion(ShaderSource::Version::GLSL_100);
     source.AddUniform("kTexture0", ShaderSource::UniformType::Sampler2D);
     source.AddUniform("kTexture1", ShaderSource::UniformType::Sampler2D);
     source.AddUniform("kTextureBox0", ShaderSource::UniformType::Vec4f);
@@ -1988,6 +1997,9 @@ ShaderSource MaterialClass::GetTextureShaderSource(const State& state, const Dev
     // todo: pack some of the uniforms ?
 
     ShaderSource source;
+    source.SetType(ShaderSource::Type::Fragment);
+    source.SetPrecision(ShaderSource::Precision::High);
+    source.SetVersion(ShaderSource::Version::GLSL_100);
     source.AddUniform("kTexture", ShaderSource::UniformType::Sampler2D);
     source.AddUniform("kTextureBox", ShaderSource::UniformType::Vec4f);
     source.AddUniform("kAlphaMask", ShaderSource::UniformType::Float);
@@ -2361,6 +2373,9 @@ ShaderSource TextMaterial::GetShader(const Environment& env, const Device& devic
     if (format == TextBuffer::RasterFormat::Bitmap)
     {
         ShaderSource source;
+        source.SetType(ShaderSource::Type::Fragment);
+        source.SetPrecision(ShaderSource::Precision::High);
+        source.SetVersion(ShaderSource::Version::GLSL_100);
         source.AddUniform("kTexture", ShaderSource::UniformType::Sampler2D);
         source.AddUniform("kColor", ShaderSource::UniformType::Color4f);
         source.AddUniform("kTime", ShaderSource::UniformType::Float);
@@ -2377,6 +2392,9 @@ void FragmentShaderMain() {
     else if (format == TextBuffer::RasterFormat::Texture)
     {
         ShaderSource source;
+        source.SetType(ShaderSource::Type::Fragment);
+        source.SetPrecision(ShaderSource::Precision::High);
+        source.SetVersion(ShaderSource::Version::GLSL_100);
         source.AddUniform("kTexture", ShaderSource::UniformType::Sampler2D);
         source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
         source.AddSource(R"(

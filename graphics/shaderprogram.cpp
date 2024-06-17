@@ -15,6 +15,7 @@
 
 #include "config.h"
 
+#include "base/logging.h"
 #include "graphics/shaderprogram.h"
 #include "graphics/shadersource.h"
 #include "graphics/device.h"
@@ -31,6 +32,13 @@ std::string ShaderProgram::GetShaderId(const Drawable& drawable, const Drawable:
 }
 ShaderSource ShaderProgram::GetShader(const Material& material, const Material::Environment& env, const Device& device) const
 {
+    // todo: right now everything is using 'GLSL 100' shaders
+    // but when/if something generates GLSL 300 es shaders
+    // (based on the device type) then the code here also
+    // has to change so that the right (compatible) GLSL
+    // code is generated/selected before merging the shader
+    // source together.
+
     ShaderSource source;
     source.SetType(ShaderSource::Type::Fragment);
     source.SetVersion(ShaderSource::Version::GLSL_100);
@@ -66,6 +74,15 @@ void main() {
 }
 )");
 
+    const auto& src = material.GetShader(env, device);
+    if (!src.IsCompatible(source))
+    {
+        const auto* klass = material.GetClass();
+        ERROR("Material (fragment) shader source is not compatible with the generic shader program source. [material='%1']",
+              klass ? klass->GetName() : material.GetShaderName(env));
+        return ShaderSource();
+    }
+
     source.Merge(material.GetShader(env, device));
     return source;
 }
@@ -86,6 +103,14 @@ void VertexShaderMain();
 
 )");
 
+    const auto& src = drawable.GetShader(env, device);
+    if (!src.IsCompatible(source))
+    {
+        const auto* klass = drawable.GetClass();
+        ERROR("Drawable (vertex) shader source is not compatible with the generic shader program source. [drawable='%1']",
+              klass ? klass->GetName() : drawable.GetShaderName(env));
+        return ShaderSource();
+    }
     source.Merge(drawable.GetShader(env, device));
     source.AddSource(R"(
 
