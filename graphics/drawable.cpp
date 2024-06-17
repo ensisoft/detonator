@@ -90,6 +90,8 @@ gfx::ShaderSource MakeSimple2DVertexShader(const gfx::Device& device)
     // y grows up to 1.0 to the top of the screen).
 
     gfx::ShaderSource source;
+    source.SetVersion(gfx::ShaderSource::Version::GLSL_100);
+    source.SetType(gfx::ShaderSource::Type::Vertex);
     source.AddAttribute("aPosition", gfx::ShaderSource::AttributeType::Vec2f);
     source.AddAttribute("aTexCoord", gfx::ShaderSource::AttributeType::Vec2f);
 
@@ -118,6 +120,8 @@ void VertexShaderMain()
 gfx::ShaderSource MakeSimple3DVertexShader(const gfx::Device& device)
 {
     gfx::ShaderSource source;
+    source.SetVersion(gfx::ShaderSource::Version::GLSL_100);
+    source.SetType(gfx::ShaderSource::Type::Vertex);
     source.AddAttribute("aPosition", gfx::ShaderSource::AttributeType::Vec3f);
     source.AddAttribute("aTexCoord", gfx::ShaderSource::AttributeType::Vec2f);
 
@@ -145,6 +149,8 @@ void VertexShaderMain()
 gfx::ShaderSource MakeModel3DVertexShader(const gfx::Device& device)
 {
     gfx::ShaderSource source;
+    source.SetVersion(gfx::ShaderSource::Version::GLSL_100);
+    source.SetType(gfx::ShaderSource::Type::Vertex);
     source.AddAttribute("aPosition", gfx::ShaderSource::AttributeType::Vec3f);
     source.AddAttribute("aNormal", gfx::ShaderSource::AttributeType::Vec3f);
     source.AddAttribute("aTexCoord", gfx::ShaderSource::AttributeType::Vec2f);
@@ -2099,6 +2105,8 @@ std::string ParticleEngineClass::GetGeometryId(const Environment& env) const
 ShaderSource ParticleEngineClass::GetShader(const Environment& env, const Device& device) const
 {
     ShaderSource source;
+    source.SetVersion(gfx::ShaderSource::Version::GLSL_100);
+    source.SetType(gfx::ShaderSource::Type::Vertex);
     source.AddAttribute("aPosition", ShaderSource::AttributeType::Vec2f);
     source.AddAttribute("aData", ShaderSource::AttributeType::Vec4f);
     source.AddUniform("kProjectionMatrix", ShaderSource::UniformType::Mat4f);
@@ -3106,6 +3114,8 @@ ShaderSource TileBatch::GetShader(const Environment& env, const Device& device) 
     const auto shape = ResolveTileShape();
 
     constexpr const auto*  square_tile_source = R"(
+#version 100
+
 attribute vec3 aTilePosition;
 
 uniform mat4 kTileTransform;
@@ -3139,6 +3149,8 @@ void VertexShaderMain()
 
 
     constexpr const auto* rectangle_tile_source = R"(
+#version 100
+
 attribute vec3 aTilePosition;
 attribute vec2 aTileCorner;
 
