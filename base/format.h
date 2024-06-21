@@ -195,7 +195,9 @@ namespace base
     bool FromChars(const std::string& str, int* value);
     bool FromChars(const std::string& str, unsigned* value);
 
+    bool FromHex(const std::string& str, Color4f* value);
 
+    Color4f ColorFromHex(const std::string& str, const Color4f& backup = base::Color::White);
 
 } // base
 

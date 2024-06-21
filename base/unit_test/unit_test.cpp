@@ -565,6 +565,48 @@ void unit_test_string()
     }
 }
 
+void unit_test_color()
+{
+    TEST_CASE(test::Type::Feature)
+
+    {
+        struct TestCase {
+            base::Color color;
+            const char* hex;
+        };
+
+        const TestCase tests[] = {
+            {base::Color::Red, "#FF0000FF"},
+            {base::Color::Green, "#00FF00FF"},
+            {base::Color::Blue, "#0000FFFF"},
+            {base::Color::White, "#FFFFFFFF"}
+        };
+        for (auto c : tests)
+        {
+            const auto& str = ToHex(base::Color4f(c.color));
+            TEST_REQUIRE(str == c.hex);
+            base::Color4f color;
+            TEST_REQUIRE(FromHex(str, &color));
+            TEST_REQUIRE(color == c.color);
+        }
+    }
+
+    {
+        base::Color4f color;
+        TEST_REQUIRE(FromHex("#ffFFffFF", &color));
+        TEST_REQUIRE(color == base::Color::White);
+    }
+
+    {
+        base::Color4f color;
+        TEST_REQUIRE(!FromHex("#ffFFffFFasg", &color));
+        TEST_REQUIRE(!FromHex("#as", &color));
+        TEST_REQUIRE(!FromHex("#ff", &color));
+        TEST_REQUIRE(!FromHex("faffaas", &color));
+        TEST_REQUIRE(!FromHex("#ffgjffaa", &color));
+    }
+}
+
 EXPORT_TEST_MAIN(
 int test_main(int argc, char* argv[])
 {
@@ -584,6 +626,7 @@ int test_main(int argc, char* argv[])
     unit_test_allocator();
 
     unit_test_string();
+    unit_test_color();
     return 0;
 }
 ) // TEST_MAIN

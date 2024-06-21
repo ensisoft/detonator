@@ -283,6 +283,36 @@ bool FromChars(const std::string& str, unsigned* value)
     return !ss.fail();
 }
 
+bool FromHex(const std::string& str, Color4f* value)
+{
+    if (str.size() != 9)
+        return false;
+
+    int r = 0;
+    int g = 0;
+    int b = 0;
+    int a = 0;
+    char hex_string[10];
+    if (std::sscanf(str.c_str(), "#%8s", hex_string) != 1)
+        return false;
+
+    // Parse the hex value into the rgba components
+    if (std::sscanf(hex_string, "%2x%2x%2x%2x", &r, &g, &b, &a) != 4)
+        return false;
+
+    *value = Color4f{r, g, b, a};
+
+    return true;
+}
+
+Color4f ColorFromHex(const std::string& str, const Color4f& backup)
+{
+    Color4f value;
+    if (!FromHex(str, &value))
+        return backup;
+    return value;
+}
+
 } // namespace
 
 #if defined(__MSVC__)
