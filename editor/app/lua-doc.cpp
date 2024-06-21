@@ -641,8 +641,12 @@ void InitLuaDoc()
     DOC_METHOD_1("void", "SetAlpha", "Set normalized alpha channel value.", "float", "alpha");
     DOC_METHOD_1("void", "SetColor", "Set color based on base.Colors color value.", "base.Colors", "color");
     DOC_METHOD_1("void", "SetColor", "Set color based on base.Colors color name.", "string", "color");
+    DOC_METHOD_1("bool", "SetFromHex", "Set the color value based on a web style hexadecimal string."
+                                       "Returns true if the string was valid or false on an invalid string.", "string", "hex");
     DOC_FUNCTION_1("base.Color4f", "FromEnum", "Construct a new color from base.Colors color value.", "base.Colors", "color");
     DOC_FUNCTION_1("base.Color4f", "FromEnum", "Construct a new color from base.Colors color name.", "string", "color");
+    DOC_FUNCTION_1("base.Color4f", "FromHex", "Construct anew color object by parsing a  web style hexadecimal string, such as #ff0000ff."
+                                              "Returns a nil object if the given string could not be parsed.", "string", "hex");
 
     DOC_TABLE("data.Reader");
     DOC_METHOD_1("bool, float", "ReadFloat", "Read a float value from the data chunk.", "string", "key");
