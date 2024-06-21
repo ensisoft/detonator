@@ -271,6 +271,13 @@ void BindBase(sol::state& L)
                 throw GameError("No such color name: " + name);
             color = base::Color4f(color_value.value());
         });
+    color["SetFromHex"] = [](base::Color4f& color, const std::string& str) {
+        Color4f value;
+        if (base::FromHex(str, &value))
+            return false;
+        color = value;
+        return true;
+    };
     color["FromEnum"] = sol::overload(
         [](int value) {
             const auto color_value = magic_enum::enum_cast<base::Color>(value);
@@ -284,6 +291,13 @@ void BindBase(sol::state& L)
                 throw GameError("No such color name: " + name);
             return base::Color4f(color_value.value());
         });
+    color["FromHex"] = [](const std::string& str, sol::this_state state) {
+        sol::state_view lua(state);
+        Color4f color;
+        if (!base::FromHex(str, &color))
+            return sol::make_object(lua, sol::nil);
+        return sol::make_object(lua, color);
+    };
     color.set_function(sol::meta_function::to_string, [](const base::Color4f& color) { return base::ToString(color); });
 }
 
