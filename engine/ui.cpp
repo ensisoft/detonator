@@ -29,6 +29,9 @@
 #include "base/json.h"
 #include "base/math.h"
 #include "base/trace.h"
+#include "data/reader.h"
+#include "data/writer.h"
+#include "data/json.h"
 #include "graphics/material.h"
 #include "graphics/drawable.h"
 #include "graphics/drawing.h"
@@ -130,6 +133,8 @@ bool ParseMaterials(const nlohmann::json& json, std::vector<MaterialPair>& mater
             material.reset(new detail::UIMaterialReference);
         else if (type == UIMaterial::Type::Texture)
             material.reset(new detail::UITexture);
+        else if (type == UIMaterial::Type::ClassObject)
+            material.reset(new detail::UIMaterialClassObject);
         else BUG("Unhandled material type.");
         if (!material->FromJson(json))
         {
@@ -317,6 +322,33 @@ void UITexture::IntoJson(nlohmann::json& json) const
     base::JsonWrite(json, "texture", mTextureUri);
     base::JsonWrite(json, "metafile", mMetafileUri);
     base::JsonWrite(json, "name", mTextureName);
+}
+
+
+bool UIMaterialClassObject::FromJson(const nlohmann::json& json)
+{
+    std::string class_definition;
+    if (!base::JsonReadSafe(json, "class", &class_definition))
+        return false;
+
+    data::JsonObject data;
+
+    const auto [ok, error] = data.ParseString(class_definition);
+    if (!ok)
+        return false;
+
+    mClass = gfx::MaterialClass::ClassFromJson(data);
+    if (!mClass)
+        return false;
+
+    return true;
+}
+
+void UIMaterialClassObject::IntoJson(nlohmann::json& json) const
+{
+    data::JsonObject data;
+    mClass->IntoJson(data);
+    base::JsonWrite(json, "class", data.ToString());
 }
 
 } // detail

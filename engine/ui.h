@@ -62,11 +62,13 @@ namespace engine
             Gradient,
             // Material is generated, and it uses a single color.
             Color,
-            // Material is a reference to another material resource
-            // that needs to be loaded through the ClassLibrary.
+            // Material is a to a material reference available through
+            // the class library.
             Reference,
             // Material uses a texture.
             Texture,
+            // Material is based on a class object that isn't a class library reference.
+            ClassObject,
             // There's no material to be used.
             Null
         };
@@ -233,6 +235,25 @@ namespace engine
             { mMaterialId = std::move(id); }
         private:
             std::string mMaterialId;
+        };
+
+        class UIMaterialClassObject : public UIMaterial
+        {
+        public:
+            explicit UIMaterialClassObject(std::shared_ptr<const gfx::MaterialClass> klass) noexcept
+              : mClass(klass)
+            {}
+            UIMaterialClassObject() = default;
+            virtual MaterialClass GetClass(const ClassLibrary*, const Loader*) const override
+            { return mClass; }
+            virtual bool FromJson(const nlohmann::json&) override;
+            virtual void IntoJson(nlohmann::json& json) const override;
+            virtual Type GetType() const override
+            { return Type::ClassObject;  }
+            virtual bool IsAvailable(const ClassLibrary&) const override
+            { return true; }
+        private:
+            std::shared_ptr<const gfx::MaterialClass> mClass;
         };
 
     } // detail
