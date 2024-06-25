@@ -90,6 +90,10 @@ public:
     {}
     void DrawProgressBar(const WidgetId&, const PaintStruct& ps, std::optional<float> percentage) const override
     {}
+    void DrawScrollBar(const WidgetId&, const PaintStruct& ps, const uik::FRect& handle) const override
+    {
+
+    }
     virtual void DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob, bool on_off) const override
     {
 

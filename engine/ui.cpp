@@ -1103,6 +1103,39 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps, std::
     }
 }
 
+void UIPainter::DrawScrollBar(const WidgetId& id, const PaintStruct& ps, const uik::FRect& handle) const
+{
+    const auto& rect = ps.rect;
+    const auto vertical = rect.GetHeight() > rect.GetWidth();
+
+    const auto& Key = [vertical](std::string key) {
+        return vertical ? "vertical-" + key : "horizontal-" + key;
+    };
+
+    if (const auto* material = GetWidgetMaterial(id, ps, Key("scrollbar-background")))
+    {
+        const auto shape = GetWidgetProperty(id, ps, Key("scrollbar-shape"), UIStyle::WidgetShape::RoundRect);
+        FillShape(ps.rect, *material, shape);
+    }
+    if (const auto* material = GetWidgetMaterial(id, ps, Key("scrollbar-handle")))
+    {
+        const auto shape = GetWidgetProperty(id, ps, Key("scrollbar-handle-shape"), UIStyle::WidgetShape::RoundRect);
+        FillShape(handle, *material, shape);
+    }
+    if (const auto* material = GetWidgetMaterial(id, ps, Key("scrollbar-handle-border")))
+    {
+        const auto shape = GetWidgetProperty(id, ps, Key("scrollbar-handle-shape"), UIStyle::WidgetShape::RoundRect);
+        const auto width = GetWidgetProperty(id, ps, Key("scrollbar-handle-border-width"), 1.0f);
+        OutlineShape(handle, *material, shape, width);
+    }
+    if (const auto* material = GetWidgetMaterial(id, ps, Key("scrollbar-border")))
+    {
+        const auto shape = GetWidgetProperty(id, ps, Key("scrollbar-shape"), UIStyle::WidgetShape::RoundRect);
+        const auto width = GetWidgetProperty(id, ps, Key("scrollbar-border-width"), 1.0f);
+        OutlineShape(ps.rect, *material, shape, width);
+    }
+}
+
 void UIPainter::DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob, bool on_off) const
 {
     if (const auto* material = GetWidgetMaterial(id, ps, on_off ? "toggle-background-on" : "toggle-background-off"))
