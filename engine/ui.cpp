@@ -982,13 +982,20 @@ void UIPainter::DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon
         else if (const auto* material = GetWidgetMaterial(id, ps, "button-icon"))
             mPainter->Draw(gfx::IsoscelesTriangle(), icon, *material);
     }
-    else if (btn == ButtonIcon::ArrowDown)
+    else
     {
         // expecting that the material would have something like a pre-rendered down button
         // so in this case the geometry should not be rotated.
         float rotation = 0.0f;
         if (!GetWidgetMaterial(id, ps,"button-icon-arrow-down"))
-            rotation = math::Pi;
+        {
+            if (btn == ButtonIcon::ArrowDown)
+                rotation = math::Pi;
+            else if (btn == ButtonIcon::ArrowLeft)
+                rotation = math::Pi * 0.5 * -1.0;
+            else if (btn == ButtonIcon::ArrowRight)
+                rotation = math::Pi * 0.5;
+        }
 
         gfx::Transform icon;
         icon.Resize(ico_size, ico_size);

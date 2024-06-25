@@ -122,7 +122,7 @@ namespace uik
         virtual void DrawRadioButton(const WidgetId& id, const PaintStruct& ps, bool selected) const = 0;
 
         enum class ButtonIcon {
-            None, ArrowUp, ArrowDown
+            None, ArrowUp, ArrowDown, ArrowLeft, ArrowRight
         };
         virtual void DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon btn) const = 0;
 
