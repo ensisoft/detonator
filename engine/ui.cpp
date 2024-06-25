@@ -1558,7 +1558,9 @@ gfx::Material* UIPainter::GetWidgetMaterial(const std::string& id,
     auto it = mFailedProperties.find("widget/" + key);
     if (it == mFailedProperties.end())
     {
-        WARN("UI material is not defined. [key='%1']" , key);
+        if (!base::Contains(key, "design-mode"))
+            WARN("UI material is not defined. [key='%1']" , key);
+
         mFailedProperties.insert("widget/" + key);
     }
     return nullptr;
