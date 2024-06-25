@@ -251,6 +251,8 @@ namespace uik
 
         virtual void CopyStateFrom(const Widget* other) = 0;
 
+        virtual FRect GetClippingRect() const = 0;
+
         // helpers
 
         // Get the rectangle of this widget wrt its parent.
@@ -673,6 +675,7 @@ namespace uik
             static constexpr auto WantsKeyEvents   = false;
             static constexpr auto WantsUpdate      = false;
             static constexpr auto WantsPoll        = false;
+            static constexpr auto HasClippingRect  = false;
         };
 
         template<typename WidgetModel>
@@ -1002,6 +1005,15 @@ namespace uik
                 ASSERT(other->GetType() == this->GetType());
 
                 *this = *static_cast<const BasicWidgetType *>(other);
+            }
+
+            virtual FRect GetClippingRect() const override
+            {
+                if constexpr(Traits::HasClippingRect)
+                {
+                    return WidgetModel::GetClippingRect(GetRect());
+                }
+                return GetRect();
             }
         protected:
         };
