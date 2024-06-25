@@ -327,8 +327,10 @@ void Window::Paint(TransientState& state, Painter& painter, double time, PaintHo
                                                   widget->TestFlag(Widget::Flags::VisibleInEditor);
             const bool enabled = state.enabled && widget->TestFlag(Widget::Flags::Enabled);
 
-            FRect widget_rect = widget->GetRect();
-            widget_rect.Translate(mParentWidgetOrigin);
+            FRect widget_area_rect = widget->GetRect();
+            FRect widget_clip_rect = widget->GetClippingRect();
+            widget_area_rect.Translate(mParentWidgetOrigin);
+            widget_clip_rect.Translate(mParentWidgetOrigin);
 
             if (visible)
             {
@@ -336,7 +338,7 @@ void Window::Paint(TransientState& state, Painter& painter, double time, PaintHo
 
                 Widget::PaintEvent paint;
                 paint.clip    = state.clip;
-                paint.rect    = widget_rect;
+                paint.rect    = widget_area_rect;
                 paint.focused = (widget == mFocusedWidget);
                 paint.moused  = (widget == mWidgetUnderMouse);
                 paint.enabled = enabled;
@@ -361,7 +363,7 @@ void Window::Paint(TransientState& state, Painter& painter, double time, PaintHo
                     mask.id    = widget->GetId();
                     mask.klass = widget->GetClassName();
                     mask.name  = widget->GetName();
-                    mask.rect  = widget_rect;
+                    mask.rect  = widget_clip_rect;
 
                     // Push the current widget's clipping mask onto the painter's clip stack.
                     // The clipping mask is added to the previous masks and is then used
@@ -373,7 +375,7 @@ void Window::Paint(TransientState& state, Painter& painter, double time, PaintHo
             PaintState ps;
             ps.enabled = enabled;
             ps.visible = visible;
-            ps.clip    = widget_rect;
+            ps.clip    = widget_clip_rect;
             mState.push(ps);
 
             mParentWidgetOrigin += widget->GetPosition();
