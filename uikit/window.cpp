@@ -36,28 +36,45 @@ using namespace uik;
 template<typename T>
 class HitTestVisitor : public base::RenderTree<Widget>::TVisitor<T> {
 public:
-    HitTestVisitor(const FPoint& point, bool check_flags)
+    HitTestVisitor(const FPoint& point, bool check_flags, bool do_clipping)
         : mPoint(point)
         , mCheckFlags(check_flags)
+        , mClipWidgets(do_clipping)
     {
         WidgetState state;
         state.enabled = true;
         state.visible = true;
-        mState.push(state);
+        mState.push_back(state);
     }
     virtual void EnterNode(T* widget) override
     {
         if (!widget)
             return;
-        const auto state = mState.top();
+
+        FRect widget_area_rect;
+        FRect widget_clip_rect;
+        widget_area_rect = widget->GetRect();
+        widget_clip_rect = widget->GetClippingRect();
+        widget_area_rect.Translate(mWidgetOrigin);
+        widget_clip_rect.Translate(mWidgetOrigin);
+
+        const auto state = mState.back();
         const bool visible = state.visible & widget->TestFlag(Widget::Flags::VisibleInGame);
         const bool enabled = state.enabled & widget->TestFlag(Widget::Flags::Enabled);
         if ((mCheckFlags && visible && enabled) || !mCheckFlags)
         {
-            FRect rect = widget->GetRect();
-            rect.Translate(mWidgetOrigin);
-            if (rect.TestPoint(mPoint))
+            if (mClipWidgets)
             {
+                auto clipping_rect = EvaluateClip();
+                if (clipping_rect.has_value())
+                    widget_area_rect = Intersect(clipping_rect.value(), widget_area_rect);
+            }
+
+            if (widget_area_rect.TestPoint(mPoint))
+            {
+                FRect rect = widget->GetRect();
+                rect.Translate(mWidgetOrigin);
+
                 mHitWidget  = widget;
                 mHitPoint   = rect.MapToLocal(mPoint);
                 mWidgetRect = rect;
@@ -66,7 +83,8 @@ public:
         WidgetState next;
         next.enabled = enabled;
         next.visible = visible;
-        mState.push(next);
+        next.clip_rect = widget_clip_rect;
+        mState.push_back(next);
         mWidgetOrigin += widget->GetPosition();
     }
     virtual void LeaveNode(T* widget) override
@@ -74,22 +92,38 @@ public:
         if (!widget)
             return;
         mWidgetOrigin -= widget->GetPosition();
-        mState.pop();
+        mState.pop_back();
     }
-    FPoint GetHitPoint() const
+    inline FPoint GetHitPoint() const noexcept
     { return mHitPoint; }
-    FRect GetWidgetRect() const
+    inline FRect GetWidgetRect() const noexcept
     { return mWidgetRect; }
-    T* GetHitWidget() const
+    inline T* GetHitWidget() const noexcept
     { return mHitWidget; }
+private:
+    std::optional<FRect> EvaluateClip() const noexcept
+    {
+        if (mState.size() == 1)
+            return std::nullopt;
+
+        FRect clip;
+        clip = mState[1].clip_rect;
+        for (size_t i=2; i<mState.size(); ++i) {
+            clip = Intersect(clip, mState[i].clip_rect);
+        }
+        return clip;
+    }
+
 private:
     const FPoint& mPoint;
     const bool mCheckFlags = false;
+    const bool mClipWidgets = false;
     struct WidgetState {
         bool visible = true;
         bool enabled = true;
+        FRect clip_rect;
     };
-    std::stack<WidgetState> mState;
+    std::vector<WidgetState> mState;
     T* mHitWidget = nullptr;
     FPoint mHitPoint;
     FPoint mWidgetOrigin;
@@ -97,9 +131,9 @@ private:
 };
 
 
-const Widget* hit_test(const RenderTree& tree, const FPoint& point, FPoint* where, FRect* rect, bool flags)
+const Widget* hit_test(const RenderTree& tree, const FPoint& point, FPoint* where, FRect* rect, bool flags, bool do_clipping)
 {
-    HitTestVisitor<const Widget>visitor(point, flags);
+    HitTestVisitor<const Widget>visitor(point, flags, do_clipping);
     tree.PreOrderTraverse(visitor);
     if (where)
         *where = visitor.GetHitPoint();
@@ -108,9 +142,9 @@ const Widget* hit_test(const RenderTree& tree, const FPoint& point, FPoint* wher
     return visitor.GetHitWidget();
 }
 
-Widget* hit_test(RenderTree& tree, const FPoint& point, FPoint* where, FRect* rect, bool flags)
+Widget* hit_test(RenderTree& tree, const FPoint& point, FPoint* where, FRect* rect, bool flags, bool do_clipping)
 {
-    HitTestVisitor<Widget>visitor(point, flags);
+    HitTestVisitor<Widget>visitor(point, flags, do_clipping);
     tree.PreOrderTraverse(visitor);
     if (where)
         *where = visitor.GetHitPoint();
@@ -265,14 +299,14 @@ void Window::DeleteWidget(const Widget* carcass)
     }
 }
 
-Widget* Window::HitTest(const FPoint& window, FPoint* widget, bool flags)
+Widget* Window::HitTest(const FPoint& window, FPoint* widget, bool flags, bool do_clipping)
 {
-    return hit_test(mRenderTree, window, widget, nullptr, flags);
+    return hit_test(mRenderTree, window, widget, nullptr, flags, do_clipping);
 }
 
-const Widget* Window::HitTest(const FPoint& window, FPoint* widget, bool flags)const
+const Widget* Window::HitTest(const FPoint& window, FPoint* widget, bool flags, bool do_clipping)const
 {
-    return hit_test(mRenderTree, window, widget, nullptr, flags);
+    return hit_test(mRenderTree, window, widget, nullptr, flags, do_clipping);
 }
 
 void Window::Paint(TransientState& state, Painter& painter, double time, PaintHook* hook) const
@@ -1063,12 +1097,13 @@ std::vector<Window::WidgetAction> Window::send_mouse_event(const MouseEvent& mou
     // only consider widgets with the appropriate flags
     // i.e. enabled and visible.
     const bool consider_flags = true;
+    const bool do_clipping = true;
     Widget* old_widget_under_mouse = nullptr;
     state.GetValue(mId + "/widget-under-mouse", &old_widget_under_mouse);
 
     FPoint widget_pos;
     FRect widget_rect;
-    Widget* new_widget_under_mouse = hit_test(mRenderTree, mouse.window_mouse_pos , &widget_pos, &widget_rect, consider_flags);
+    Widget* new_widget_under_mouse = hit_test(mRenderTree, mouse.window_mouse_pos , &widget_pos, &widget_rect, consider_flags, do_clipping);
     if (new_widget_under_mouse != old_widget_under_mouse)
     {
         if (old_widget_under_mouse)
