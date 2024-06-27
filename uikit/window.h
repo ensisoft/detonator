@@ -226,9 +226,15 @@ namespace uik
                 callback(widget.get());
         }
 
+        enum FindRectFlags {
+            IncludeChildren = 0x1,
+            ExcludeHidden = 0x2,
+            ClipChildren = 0x4
+        };
+
         // Find the window coordinate rectangle for the given widget.
         // If the widget is not found the result is undefined.
-        FRect FindWidgetRect(const Widget* widget) const;
+        FRect FindWidgetRect(const Widget* widget, unsigned child_flags = 0u) const;
 
         FRect GetBoundingRect() const;
 
