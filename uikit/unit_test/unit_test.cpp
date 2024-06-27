@@ -1575,6 +1575,75 @@ duration 1.0
 
 }
 
+void unit_test_find_widget_rect()
+{
+    TEST_CASE(test::Type::Feature)
+
+    {
+        uik::Window win;
+
+        uik::Form form;
+        form.SetName("form");
+        form.SetPosition(25.0f, 20.0f);
+        form.SetSize(100.0f, 100.0f);
+
+        uik::Label label;
+        label.SetName("label");
+        label.SetSize(50.0f, 50.0f);
+        label.SetPosition(10.0f, 10.0f);
+
+        auto* f = win.AddWidget(form);
+        win.LinkChild(nullptr, f);
+
+        auto* l = win.AddWidget(label);
+        win.LinkChild(f, l);
+
+        auto rect = win.FindWidgetRect(f);
+        TEST_REQUIRE(rect.GetPosition() == uik::FPoint(25.0f, 20.0f));
+        TEST_REQUIRE(rect.GetSize() == uik::FSize(100.0f, 100.0f));
+
+        rect = win.FindWidgetRect(l);
+        TEST_REQUIRE(rect.GetPosition() == uik::FPoint(35.0f, 30.0f));
+        TEST_REQUIRE(rect.GetSize() == uik::FSize(50.0f, 50.0f));
+
+        f->SetPosition(0.0f, 0.0f);
+        f->SetSize(100.0f, 100.0f);
+
+        rect = win.FindWidgetRect(f);
+        TEST_REQUIRE(rect.GetPosition() == uik::FPoint(0.0f, 0.0f));
+        TEST_REQUIRE(rect.GetSize() == uik::FSize(100.0f, 100.0f));
+
+        rect = win.FindWidgetRect(l);
+        TEST_REQUIRE(rect.GetPosition() == uik::FPoint(10.0f, 10.0f));
+        TEST_REQUIRE(rect.GetSize() == uik::FSize(50.0f, 50.0f));
+
+
+        l->SetPosition(100.0f, 100.0f);
+        l->SetSize(50.0f, 50.0f);
+
+        rect = win.FindWidgetRect(f);
+        TEST_REQUIRE(rect.GetPosition() == uik::FPoint(0.0f, 0.0f));
+        TEST_REQUIRE(rect.GetSize() == uik::FSize(100.0f, 100.0f));
+
+        rect = win.FindWidgetRect(f, uik::Window::FindRectFlags::IncludeChildren);
+        TEST_REQUIRE(rect.GetPosition() == uik::FPoint(0.0f, 0.0f));
+        TEST_REQUIRE(rect.GetSize() == uik::FSize(150.0f, 150.0f));
+
+        rect = win.FindWidgetRect(f, uik::Window::FindRectFlags::IncludeChildren |
+                                     uik::Window::FindRectFlags::ClipChildren);
+        TEST_REQUIRE(rect.GetPosition() == uik::FPoint(0.0f, 0.0f));
+        TEST_REQUIRE(rect.GetSize() == uik::FSize(100.0f, 100.0f));
+
+
+        l->SetVisible(false);
+
+        rect = win.FindWidgetRect(f, uik::Window::FindRectFlags::IncludeChildren |
+                                     uik::Window::FindRectFlags::ExcludeHidden);
+        TEST_REQUIRE(rect.GetPosition() == uik::FPoint(0.0f, 0.0f));
+        TEST_REQUIRE(rect.GetSize() == uik::FSize(100.0f, 100.0f));
+    }
+}
+
 // looping state and start state are stale on restart (re-trigger)
 void bug_incorrect_state_on_restart()
 {
@@ -1708,10 +1777,10 @@ int test_main(int argc, char* argv[])
     unit_test_keyboard_radiobutton_select();
     unit_test_animation_parse();
     unit_test_widget_animation_on_open();
+    unit_test_find_widget_rect();
 
     bug_restart_animation_too_soon();
     bug_incorrect_state_on_restart();
-
     bug_clipmask_when_parent_invisible();
     return 0;
 }

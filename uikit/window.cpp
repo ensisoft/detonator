@@ -594,44 +594,135 @@ void Window::Style(Painter& painter) const
     }
 }
 
-FRect Window::FindWidgetRect(const Widget* widget) const
+FRect Window::FindWidgetRect(const Widget* widget, unsigned child_flags) const
 {
     class PrivateVisitor : public ConstVisitor {
     public:
-        PrivateVisitor(const Widget* widget) : mWidget(widget)
+        using Flags = Window::FindRectFlags;
+
+        PrivateVisitor(const Widget* widget, unsigned child_flags)
+           : mWidget(widget)
+           , mChildFlags(child_flags)
         {}
         virtual void EnterNode(const Widget* widget) override
         {
             if (widget == nullptr)
                 return;
 
+            const bool include_children = mChildFlags & Flags::IncludeChildren;
+
             if (mWidget == widget)
             {
-                FRect rect = widget->GetRect();
-                rect.Translate(mWidgetOrigin);
-                mRect = rect;
-                mDone = true;
-                return;
+                FRect widget_area_rect = widget->GetRect();
+                FRect widget_clip_rect = widget->GetClippingRect();
+                widget_area_rect.Translate(mWidgetOrigin);
+                widget_clip_rect.Translate(mWidgetOrigin);
+
+                mRect = widget_area_rect;
+
+                if (!include_children)
+                    mSearchDone = true;
+
+                mActiveBranch = true;
+                State s;
+                s.clip_rect = widget_clip_rect;
+                s.visible   = widget->IsVisible();
+                ASSERT(mState.empty());
+                mState.push_back(s);
             }
+            else if (include_children && mActiveBranch)
+            {
+                IncludeChildWidget(widget);
+
+                FRect widget_clip_rect = widget->GetClippingRect();
+                widget_clip_rect.Translate(mWidgetOrigin);
+
+                State s;
+                s.clip_rect = widget_clip_rect;
+                s.visible   = mState.back().visible & widget->IsVisible();
+                mState.push_back(s);
+            }
+
             mWidgetOrigin += widget->GetPosition();
         }
         virtual void LeaveNode(const Widget* widget) override
         {
             if (widget == nullptr)
                 return;
+
             mWidgetOrigin -= widget->GetPosition();
+
+            const bool include_children = mChildFlags & Flags::IncludeChildren;
+
+            if (mWidget == widget)
+            {
+                ASSERT(mState.size() == 1);
+                mState.pop_back();
+            }
+            else if (include_children && mActiveBranch)
+            {
+                ASSERT(!mState.empty());
+                mState.pop_back();
+            }
+
+            if (mWidget == widget)
+                mActiveBranch = false;
+
         }
         virtual bool IsDone() const override
-        { return mDone; }
-        FRect GetRect() const
+        { return mSearchDone; }
+
+        inline FRect GetRect() const noexcept
         { return mRect; }
+
+    private:
+        void IncludeChildWidget(const Widget* widget) noexcept
+        {
+            const auto exclude_hidden = mChildFlags & Flags::ExcludeHidden;
+            const auto clip_children = mChildFlags & Flags::ClipChildren;
+
+            const auto& state = mState.back();
+            const bool visible = state.visible & widget->IsVisible();
+
+            if (!visible && exclude_hidden)
+                return;
+
+            FRect rect = widget->GetRect();
+            rect.Translate(mWidgetOrigin);
+
+            if (clip_children)
+            {
+                const auto& clip_rect = EvaluateClip();
+                rect = Intersect(clip_rect, rect);
+            }
+
+            mRect = Union(mRect, rect);
+        }
+        FRect EvaluateClip() const
+        {
+            FRect clip = mState[0].clip_rect;
+            for (size_t i=1; i<mState.size(); ++i)
+                clip = Intersect(mState[i].clip_rect, clip);
+
+            return clip;
+        }
+
     private:
         const Widget* mWidget = nullptr;
+        const unsigned mChildFlags = 0;
+
+        struct State {
+            FRect clip_rect;
+            bool visible;
+        };
+        std::vector<State> mState;
+
         FRect mRect;
         FPoint mWidgetOrigin;
-        bool mDone = false;
+        bool mActiveBranch = false;
+        bool mSearchDone = false;
     };
-    PrivateVisitor visitor(widget);
+    PrivateVisitor visitor(widget, child_flags);
     mRenderTree.PreOrderTraverse(visitor);
     return visitor.GetRect();
 }
