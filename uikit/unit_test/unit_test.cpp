@@ -228,11 +228,6 @@ public:
         return {};
     }
 
-    virtual uik::FRect GetClippingRect() const override
-    {
-        return GetRect();
-    }
-
     virtual std::unique_ptr<Widget> Copy() const override
     { return std::make_unique<TestWidget>(); }
     virtual std::unique_ptr<Widget> Clone() const override
