@@ -174,6 +174,8 @@ namespace uik
         // and stored in widget_point.
         const Widget* HitTest(const FPoint& window_point, FPoint* widget_point = nullptr, bool consider_flags = false, bool do_clipping = false) const;
 
+        void InitDesignTime(TransientState& state);
+
         // Paint the window and its widgets.
         void Paint(TransientState& state, Painter& painter, double time = 0.0, PaintHook* hook = nullptr) const;
 
@@ -231,6 +233,10 @@ namespace uik
             ExcludeHidden = 0x2,
             ClipChildren = 0x4
         };
+
+        // Finds the content rectangle that encloses all child widgets relative to the parent widget.
+        // The content rectangle is the smallest rectangle that can completely contain all the child widgets.
+        FRect FindContentRect(const Widget* parent, unsigned child_flags) const;
 
         // Find the window coordinate rectangle for the given widget.
         // If the widget is not found the result is undefined.
@@ -393,6 +399,8 @@ namespace uik
         Widget* AddWidgetPtr(std::unique_ptr<Widget> widget);
 
         bool CanFocus(const Widget* widget) const;
+
+        void InitScrollAreaWidgets(TransientState& state, bool design_time);
     private:
         std::string mId;
         std::string mName;

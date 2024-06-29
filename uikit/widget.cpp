@@ -26,6 +26,7 @@
 #include "base/hash.h"
 #include "base/format.h"
 #include "base/json.h"
+#include "base/logging.h"
 #include "data/reader.h"
 #include "data/writer.h"
 #include "uikit/widget.h"
@@ -1211,6 +1212,634 @@ bool GroupBoxModel::FromJson(const data::Reader& data)
     return data.Read("text", &mText);
 }
 
+void ScrollAreaModel::UpdateContentRect(const uik::FRect& content,
+                                        const uik::FRect& widget,
+                                        const std::string& widgetId,
+                                        TransientState& state)
+
+
+{
+    mContentRect = content;
+    mHorizontalScrollPos = 0.0f;
+    mVerticalScrollPos   = 0.0f;
+}
+
+FRect ScrollAreaModel::GetClippingRect(const uik::FRect& widget_rect) const noexcept
+{
+    Viewport viewport;
+    ComputeViewport(widget_rect, mContentRect, &viewport);
+
+    // the viewport is relative to the widget's top left
+    // so remember to translate it to the widget's position.
+
+    FRect clip;
+    clip.Resize(viewport.rect.GetSize());
+    clip.Translate(viewport.rect.GetPosition());
+    clip.Translate(widget_rect.GetPosition());
+    return clip;
+}
+
+FPoint ScrollAreaModel::GetChildOffset(const uik::FRect& widget_rect) const noexcept
+{
+    Viewport viewport;
+    ComputeViewport(widget_rect, mContentRect, &viewport);
+
+    const auto content_width  = ComputeContentWidth(mContentRect);
+    const auto content_height = ComputeContentHeight(mContentRect);
+    const auto viewport_width  = viewport.rect.GetWidth();
+    const auto viewport_height = viewport.rect.GetHeight();
+    const auto horizontal_scroll_distance = content_width - viewport_width;
+    const auto vertical_scroll_distance   = content_height - viewport_height;
+
+    FPoint offset;
+    offset.Translate(-horizontal_scroll_distance * mHorizontalScrollPos,
+                     -vertical_scroll_distance * mVerticalScrollPos);
+    return offset;
+}
+
+size_t ScrollAreaModel::GetHash(size_t hash) const
+{
+    hash = base::hash_combine(hash, mVerticalScrollBarMode);
+    hash = base::hash_combine(hash, mHorizontalScrollBarMode);
+    hash = base::hash_combine(hash, mContentRect);
+    hash = base::hash_combine(hash, mFlags);
+    return hash;
+}
+
+void ScrollAreaModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
+{
+    const auto& rect = paint.rect;
+    const auto& painter = ps.painter;
+
+    bool design_mode = false;
+    ps.state->GetValue("design-mode", &design_mode);
+
+    Painter::PaintStruct p;
+    p.focused = false;
+    p.pressed = false;
+    p.moused  = false;
+    p.enabled = paint.enabled;
+    p.rect    = paint.rect;
+    p.clip    = paint.clip;
+    p.time    = paint.time;
+    p.klass   = "scroll-area";
+    p.style_properties = ps.style_properties;
+    p.style_materials  = ps.style_materials;
+
+    if (design_mode)
+    {
+        p.klass = "scroll-area-internal";
+        ps.painter->DrawWidgetBackground(ps.widgetId, p);
+    }
+    p.klass = "scroll-area";
+
+    Viewport viewport;
+    ComputeViewport(paint.rect, mContentRect, &viewport);
+
+    FRect vertical_scroll_bar_up_button;
+    FRect vertical_scroll_bar_down_button;
+    FRect vertical_scroll_bar_rect;
+    FRect vertical_scroll_bar_handle;
+    const bool draw_vertical_scrollbar = ComputeVerticalScrollBar(paint.rect, viewport.rect,
+                                             mContentRect,
+                                             viewport.vertical_scrollbar_visible,
+                                             viewport.horizontal_scrollbar_visible,
+                                             &vertical_scroll_bar_up_button,
+                                             &vertical_scroll_bar_down_button,
+                                             &vertical_scroll_bar_rect,
+                                             &vertical_scroll_bar_handle,
+                                             mVerticalScrollPos);
+    FRect horizontal_scroll_bar_left_button;
+    FRect horizontal_scroll_bar_right_button;
+    FRect horizontal_scroll_bar_rect;
+    FRect horizontal_scroll_bar_handle;
+    const bool draw_horizontal_scrollbar = ComputeHorizontalScrollBar(paint.rect, viewport.rect,
+                                               mContentRect,
+                                               viewport.vertical_scrollbar_visible,
+                                               viewport.horizontal_scrollbar_visible,
+                                               &horizontal_scroll_bar_left_button,
+                                               &horizontal_scroll_bar_right_button,
+                                               &horizontal_scroll_bar_rect,
+                                               &horizontal_scroll_bar_handle,
+                                               mHorizontalScrollPos);
+    if (draw_vertical_scrollbar)
+    {
+        p.rect = vertical_scroll_bar_up_button;
+        p.moused = ps.state->GetValue(ps.widgetId + "/btn-up-mouse-over", false);
+        p.pressed = ps.state->GetValue(ps.widgetId + "/btn-up-pressed", false) ||
+                    ps.state->GetValue(ps.widgetId + "/key-up-pressed", false);
+        painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::ArrowUp);
+
+        p.rect = vertical_scroll_bar_down_button;
+        p.moused = ps.state->GetValue(ps.widgetId + "/btn-down-mouse-over", false);
+        p.pressed = ps.state->GetValue(ps.widgetId + "/btn-down-pressed", false) ||
+                    ps.state->GetValue(ps.widgetId + "/key-down-pressed", false);
+        painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::ArrowDown);
+
+        p.rect = vertical_scroll_bar_rect;
+        p.moused = ps.state->GetValue(ps.widgetId + "/vertical-scrollbar-handle-mouse-over", false);
+        p.pressed = ps.state->GetValue(ps.widgetId + "/vertical-scrollbar-handle-pressed", false);
+        painter->DrawScrollBar(ps.widgetId, p, vertical_scroll_bar_handle);
+    }
+
+    if (draw_horizontal_scrollbar)
+    {
+        p.rect = horizontal_scroll_bar_left_button;
+        p.moused = ps.state->GetValue(ps.widgetId + "/btn-left-mouse-over", false);
+        p.pressed = ps.state->GetValue(ps.widgetId + "/btn-left-pressed", false) ||
+                    ps.state->GetValue(ps.widgetId + "/key-left-pressed", false);
+        painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::ArrowLeft);
+
+        p.rect = horizontal_scroll_bar_right_button;
+        p.moused = ps.state->GetValue(ps.widgetId + "/btn-right-mouse-over", false);
+        p.pressed = ps.state->GetValue(ps.widgetId + "/btn-right-pressed", false) ||
+                    ps.state->GetValue(ps.widgetId + "/key-right-pressed", false);
+        painter->DrawButton(ps.widgetId, p, Painter::ButtonIcon::ArrowRight);
+
+        p.rect = horizontal_scroll_bar_rect;
+        p.moused = ps.state->GetValue(ps.widgetId + "/horizontal-scrollbar-handle-mouse-over", false);
+        p.pressed = ps.state->GetValue(ps.widgetId + "/horizontal-scrollbar-handle-pressed", false);
+        painter->DrawScrollBar(ps.widgetId, p, horizontal_scroll_bar_handle);
+    }
+}
+
+WidgetAction ScrollAreaModel::MouseEnter(const MouseStruct&)
+{
+    return WidgetAction {};
+}
+WidgetAction ScrollAreaModel::MousePress(const MouseEvent& mouse, const MouseStruct& ms)
+{
+    Viewport viewport;
+    ComputeViewport(mouse.widget_window_rect, mContentRect, &viewport);
+
+    FRect vertical_scroll_bar_up_button;
+    FRect vertical_scroll_bar_down_button;
+    FRect vertical_scroll_bar_rect;
+    FRect vertical_scroll_bar_handle;
+    const bool draw_vertical_scrollbar = ComputeVerticalScrollBar(mouse.widget_window_rect, viewport.rect,
+                                             mContentRect,
+                                             viewport.vertical_scrollbar_visible,
+                                             viewport.horizontal_scrollbar_visible,
+                                             &vertical_scroll_bar_up_button,
+                                             &vertical_scroll_bar_down_button,
+                                             &vertical_scroll_bar_rect,
+                                             &vertical_scroll_bar_handle,
+                                             mVerticalScrollPos);
+    if (draw_vertical_scrollbar) {
+        ms.state->SetValue(ms.widgetId + "/btn-up-pressed",
+                           vertical_scroll_bar_up_button.TestPoint(mouse.window_mouse_pos));
+        ms.state->SetValue(ms.widgetId + "/btn-down-pressed",
+                           vertical_scroll_bar_down_button.TestPoint(mouse.window_mouse_pos));
+        if (vertical_scroll_bar_handle.TestPoint(mouse.window_mouse_pos))
+        {
+            ms.state->SetValue(ms.widgetId + "/vertical-scrollbar-handle-pressed", true);
+            ms.state->SetValue(ms.widgetId + "/mouse-grab-pos", mouse.window_mouse_pos);
+            return WidgetAction {
+                WidgetActionType::MouseGrabBegin
+            };
+        }
+        else if (vertical_scroll_bar_up_button.TestPoint(mouse.window_mouse_pos))
+        {
+            mVerticalScrollPos = math::clamp(0.0f, 1.0f, mVerticalScrollPos - 0.1f);
+        }
+        else if (vertical_scroll_bar_down_button.TestPoint(mouse.window_mouse_pos))
+        {
+            mVerticalScrollPos = math::clamp(0.0f, 1.0f, mVerticalScrollPos + 0.1f);
+        }
+    }
+
+    FRect horizontal_scroll_bar_left_button;
+    FRect horizontal_scroll_bar_right_button;
+    FRect horizontal_scroll_bar_rect;
+    FRect horizontal_scroll_bar_handle;
+    const bool draw_horizontal_scrollbar = ComputeHorizontalScrollBar(mouse.widget_window_rect, viewport.rect,
+                                               mContentRect,
+                                               viewport.vertical_scrollbar_visible,
+                                               viewport.horizontal_scrollbar_visible,
+                                               &horizontal_scroll_bar_left_button,
+                                               &horizontal_scroll_bar_right_button,
+                                               &horizontal_scroll_bar_rect,
+                                               &horizontal_scroll_bar_handle,
+                                               mHorizontalScrollPos);
+    if (draw_horizontal_scrollbar) {
+        ms.state->SetValue(ms.widgetId + "/btn-left-pressed",
+                           horizontal_scroll_bar_left_button.TestPoint(mouse.window_mouse_pos));
+        ms.state->SetValue(ms.widgetId + "/btn-right-pressed",
+                           horizontal_scroll_bar_right_button.TestPoint(mouse.window_mouse_pos));
+        if (horizontal_scroll_bar_handle.TestPoint(mouse.window_mouse_pos))
+        {
+            ms.state->SetValue(ms.widgetId + "/horizontal-scrollbar-handle-pressed", true);
+            ms.state->SetValue(ms.widgetId +"/mouse-grab-pos", mouse.window_mouse_pos);
+            return WidgetAction {
+                WidgetActionType::MouseGrabBegin
+            };
+        }
+        else if (horizontal_scroll_bar_left_button.TestPoint(mouse.window_mouse_pos))
+        {
+            mHorizontalScrollPos = math::clamp(0.0f, 1.0f, mHorizontalScrollPos - 0.1f);
+        }
+        else if (horizontal_scroll_bar_right_button.TestPoint(mouse.window_mouse_pos))
+        {
+            mHorizontalScrollPos = math::clamp(0.0f, 1.0f, mHorizontalScrollPos + 0.1f);
+        }
+    }
+    return WidgetAction {};
+}
+WidgetAction ScrollAreaModel::MouseMove(const MouseEvent& mouse, const MouseStruct& ms)
+{
+    Viewport viewport;
+    ComputeViewport(mouse.widget_window_rect, mContentRect, &viewport);
+
+    FRect vertical_scroll_bar_up_button;
+    FRect vertical_scroll_bar_down_button;
+    FRect vertical_scroll_bar_rect;
+    FRect vertical_scroll_bar_handle;
+    const bool draw_vertical_scrollbar = ComputeVerticalScrollBar(mouse.widget_window_rect, viewport.rect,
+                                             mContentRect,
+                                             viewport.vertical_scrollbar_visible,
+                                             viewport.horizontal_scrollbar_visible,
+                                             &vertical_scroll_bar_up_button,
+                                             &vertical_scroll_bar_down_button,
+                                             &vertical_scroll_bar_rect,
+                                             &vertical_scroll_bar_handle, 0.0f);
+
+    FRect horizontal_scroll_bar_left_button;
+    FRect horizontal_scroll_bar_right_button;
+    FRect horizontal_scroll_bar_rect;
+    FRect horizontal_scroll_bar_handle;
+    const bool draw_horizontal_scrollbar = ComputeHorizontalScrollBar(mouse.widget_window_rect, viewport.rect,
+                                               mContentRect,
+                                               viewport.vertical_scrollbar_visible,
+                                               viewport.horizontal_scrollbar_visible,
+                                               &horizontal_scroll_bar_left_button,
+                                               &horizontal_scroll_bar_right_button,
+                                               &horizontal_scroll_bar_rect,
+                                               &horizontal_scroll_bar_handle, 0.0f);
+
+    if (ms.state->GetValue(ms.widgetId + "/horizontal-scrollbar-handle-pressed", false))
+    {
+        FPoint mouse_pos;
+        ms.state->GetValue(ms.widgetId + "/mouse-grab-pos", &mouse_pos);
+        ms.state->SetValue(ms.widgetId + "/mouse-grab-pos", mouse.window_mouse_pos);
+        const auto mouse_delta = mouse.window_mouse_pos - mouse_pos;
+
+        const auto scrollable_length = horizontal_scroll_bar_rect.GetWidth() -
+                                       horizontal_scroll_bar_handle.GetWidth();
+        const auto mouse_delta_normalized = mouse_delta.GetX() / scrollable_length;
+        mHorizontalScrollPos = math::clamp(0.0f, 1.0f, mHorizontalScrollPos + mouse_delta_normalized);
+
+        return WidgetAction {};
+    }
+    else if (ms.state->GetValue(ms.widgetId + "/vertical-scrollbar-handle-pressed", false))
+    {
+        FPoint mouse_pos;
+        ms.state->GetValue(ms.widgetId + "/mouse-grab-pos", &mouse_pos);
+        ms.state->SetValue(ms.widgetId + "/mouse-grab-pos", mouse.window_mouse_pos);
+        const auto mouse_delta = mouse.window_mouse_pos - mouse_pos;
+
+        const auto scrollable_length = vertical_scroll_bar_rect.GetHeight() -
+                                       vertical_scroll_bar_handle.GetHeight();
+        const auto mouse_delta_normalized = mouse_delta.GetY() / scrollable_length;
+        mVerticalScrollPos = math::clamp(0.0f, 1.0f, mVerticalScrollPos + mouse_delta_normalized);
+
+        return WidgetAction {};
+
+    }
+
+    if (draw_vertical_scrollbar) {
+        ms.state->SetValue(ms.widgetId + "/btn-up-mouse-over",
+                           vertical_scroll_bar_up_button.TestPoint(mouse.window_mouse_pos));
+        ms.state->SetValue(ms.widgetId + "/btn-down-mouse-over",
+                           vertical_scroll_bar_down_button.TestPoint(mouse.window_mouse_pos));
+        ms.state->SetValue(ms.widgetId + "/vertical-scrollbar-handle-mouse-over",
+                           vertical_scroll_bar_handle.TestPoint(mouse.window_mouse_pos));
+    }
+    if (draw_horizontal_scrollbar) {
+        ms.state->SetValue(ms.widgetId + "/btn-left-mouse-over",
+                           horizontal_scroll_bar_left_button.TestPoint(mouse.window_mouse_pos));
+        ms.state->SetValue(ms.widgetId + "/btn-right-mouse-over",
+                           horizontal_scroll_bar_right_button.TestPoint(mouse.window_mouse_pos));
+        ms.state->SetValue(ms.widgetId + "/horizontal-scrollbar-handle-mouse-over",
+                           horizontal_scroll_bar_handle.TestPoint(mouse.window_mouse_pos));
+    }
+    return WidgetAction {};
+}
+WidgetAction ScrollAreaModel::MouseRelease(const MouseEvent& mouse, const MouseStruct& ms)
+{
+    ms.state->SetValue(ms.widgetId + "/btn-up-pressed", false);
+    ms.state->SetValue(ms.widgetId + "/btn-down-pressed", false);
+    ms.state->SetValue(ms.widgetId + "/btn-left-pressed", false);
+    ms.state->SetValue(ms.widgetId + "/btn-right-pressed", false);
+
+    const auto mouse_grab = ms.state->GetValue(ms.widgetId + "/horizontal-scrollbar-handle-pressed", false) ||
+                            ms.state->GetValue(ms.widgetId + "/vertical-scrollbar-handle-pressed", false);
+    ms.state->SetValue(ms.widgetId + "/horizontal-scrollbar-handle-pressed", false);
+    ms.state->SetValue(ms.widgetId + "/vertical-scrollbar-handle-pressed", false);
+
+    if (mouse_grab)
+        return WidgetAction{ WidgetActionType::MouseGrabEnd };
+
+    return WidgetAction {};
+}
+WidgetAction ScrollAreaModel::MouseLeave(const MouseStruct& ms)
+{
+    ms.state->SetValue(ms.widgetId + "/btn-right-mouse-over", false);
+    ms.state->SetValue(ms.widgetId + "/btn-left-mouse-over", false);
+    ms.state->SetValue(ms.widgetId + "/btn-up-mouse-over", false);
+    ms.state->SetValue(ms.widgetId + "/btn-down-mouse-over", false);
+    ms.state->SetValue(ms.widgetId + "/horizontal-scrollbar-handle-mouse-over", false);
+    ms.state->SetValue(ms.widgetId + "/vertical-scrollbar-handle-mouse-over", false);
+    return WidgetAction {};
+}
+
+WidgetAction ScrollAreaModel::PollAction(const PollStruct& ps)
+{
+    const auto step = 0.05f;
+
+    if (ps.state->GetValue(ps.widgetId + "/btn-up-pressed", false))
+        mVerticalScrollPos = math::clamp(0.0f, 1.0f, mVerticalScrollPos - step);
+    else if (ps.state->GetValue(ps.widgetId + "/btn-down-pressed", false))
+        mVerticalScrollPos = math::clamp(0.0f, 1.0f, mVerticalScrollPos + step);
+    else if (ps.state->GetValue(ps.widgetId + "/btn-left-pressed", false))
+        mHorizontalScrollPos = math::clamp(0.0f, 1.0f, mHorizontalScrollPos - step);
+    else if (ps.state->GetValue(ps.widgetId + "/btn-right-pressed", false))
+        mHorizontalScrollPos = math::clamp(0.0f, 1.0f, mHorizontalScrollPos + step);
+
+    return WidgetAction {};
+}
+
+void ScrollAreaModel::IntoJson(data::Writer& data) const
+{
+    data.Write("vertical_scroll_bar_mode", mVerticalScrollBarMode);
+    data.Write("horizontal_scroll_bar_mode", mHorizontalScrollBarMode);
+    data.Write("content_rect", mContentRect);
+    data.Write("flags", mFlags);
+}
+bool ScrollAreaModel::FromJson(const data::Reader& data)
+{
+    bool ok = true;
+    ok &= data.Read("vertical_scroll_bar_mode", &mVerticalScrollBarMode);
+    ok &= data.Read("horizontal_scroll_bar_mode", &mHorizontalScrollBarMode);
+    ok &= data.Read("content_rect", &mContentRect);
+    ok &= data.Read("flags", &mFlags);
+    return ok;
+}
+
+void ScrollAreaModel::ComputeViewport(const FRect& widget_rect,
+                                      const FRect& content_rect,
+                                      Viewport* viewport) const
+{
+    // there's a circular dependency so that in order to compute the scroll distance
+    // we need to know the viewport size and in order to know the viewport size we
+    // need ot know the scroll distance, AND in order to know viewport height we
+    // must know whether the horizontal scrollbar is visible AND in order to know
+    // the viewport width we must know whether the vertical scrollbar is visible.
+    // (a proper circle jerk)
+
+    // try to solve this iteratively by starting with an assumption
+    // that both scroll bars are hidden, compute the viewport size
+    // then update scroll bar visibility and iterate until scrollbar
+    // visibility no longer changes.
+
+    bool vertical_scrollbar_visible   = false;
+    bool horizontal_scrollbar_visible = false;
+    auto ComputeViewportSize = [&vertical_scrollbar_visible,
+                                &horizontal_scrollbar_visible, this](const FRect& content, const FRect& widget) {
+
+        const auto widget_height = widget.GetHeight();
+        const auto widget_width  = widget.GetWidth();
+
+        if (mVerticalScrollBarMode == ScrollBarMode::Automatic)
+        {
+            const auto viewport_height = widget_height - (horizontal_scrollbar_visible ?
+                                                          GetHorizontalScrollBarHeight() : 0.0f);
+
+            const auto content_height = ComputeContentHeight(content);
+            vertical_scrollbar_visible = content_height > viewport_height;
+        }
+        else if (mVerticalScrollBarMode == ScrollBarMode::AlwaysOn)
+        {
+            vertical_scrollbar_visible = true;
+        }
+        else if (mVerticalScrollBarMode == ScrollBarMode::AlwaysOff)
+        {
+            vertical_scrollbar_visible = false;
+        }
+
+        // determine horizontal scrollbar visibility and then
+        // adjust vertical height depending on horizontal scrollbar
+        if (mHorizontalScrollBarMode == ScrollBarMode::Automatic)
+        {
+            const auto viewport_width = widget_width - (vertical_scrollbar_visible ?
+                                                        GetVerticalScrollBarWidth() : 0.0f);
+
+            const auto content_width = ComputeContentWidth(content);
+            horizontal_scrollbar_visible = content_width > viewport_width;
+        }
+        else if (mHorizontalScrollBarMode == ScrollBarMode::AlwaysOn)
+        {
+            horizontal_scrollbar_visible = true;
+        }
+        else if (mHorizontalScrollBarMode == ScrollBarMode::AlwaysOff)
+        {
+            horizontal_scrollbar_visible = false;
+        }
+        FRect viewport;
+        // when the vertical scrollbar is visible the viewport reduces in width.
+        viewport.SetWidth(vertical_scrollbar_visible ? widget_width - GetVerticalScrollBarWidth()
+                                                     : widget_width);
+        // when the horizontal scrollbar is visible the viewport reduces in height
+        viewport.SetHeight(horizontal_scrollbar_visible ? widget_height - GetHorizontalScrollBarHeight()
+                                                        : widget_height);
+        return viewport;
+    };
+
+    FRect viewport_rect;
+
+    bool scrollbar_visibility_changed = false;
+
+    // iterate until the scrollbar visibility stabilizes
+    // i.e. the visibility of both scrollbars is unchanged.
+    do
+    {
+        const auto was_vertical_scrollbar_visible = vertical_scrollbar_visible;
+        const auto was_horizontal_scrollbar_visible = horizontal_scrollbar_visible;
+
+        viewport_rect = ComputeViewportSize(content_rect, widget_rect);
+
+        scrollbar_visibility_changed = (was_horizontal_scrollbar_visible != horizontal_scrollbar_visible) ||
+                                       (was_vertical_scrollbar_visible != vertical_scrollbar_visible);
+    }
+    while (scrollbar_visibility_changed);
+
+    viewport->horizontal_scrollbar_visible = horizontal_scrollbar_visible;
+    viewport->vertical_scrollbar_visible   = vertical_scrollbar_visible;
+    viewport->rect = viewport_rect;
+}
+
+bool ScrollAreaModel::ComputeVerticalScrollBar(const FRect& widget_rect,
+                                               const FRect& viewport_rect,
+                                               const FRect& content_rect,
+                                               bool vertical_scrollbar,
+                                               bool horizontal_scrollbar,
+                                               FRect* btn_up,
+                                               FRect* btn_down,
+                                               FRect* scroll_bar,
+                                               FRect* scroll_bar_handle,
+                                               float handle_pos) const
+{
+    if (!vertical_scrollbar)
+        return false;
+
+    const auto widget_width  = widget_rect.GetWidth();
+    const auto widget_height = widget_rect.GetHeight();
+    const auto scrollbar_width = GetVerticalScrollBarWidth();
+    const auto btn_width = scrollbar_width;
+    const auto btn_height = scrollbar_width;
+    const auto show_vertical_buttons = AreVerticalScrollButtonsVisible();
+    const auto vertical_scrollbar_buttons_height = show_vertical_buttons ? 2.0f * btn_height : 0.0f;
+
+    if (widget_width <= scrollbar_width)
+        return false;
+    if (widget_height <= vertical_scrollbar_buttons_height)
+        return false;
+
+    const auto viewport_height = viewport_rect.GetHeight();
+    const auto content_height = ComputeContentHeight(content_rect);
+    const auto scroll_bar_handle_length_normalized = math::clamp(0.0f, 1.0f, viewport_height / content_height);
+    const auto scroll_bar_length = widget_height - vertical_scrollbar_buttons_height;
+    const auto scroll_bar_handle_length = scroll_bar_handle_length_normalized * scroll_bar_length;
+    const auto scroll_bar_drag_length = scroll_bar_length - scroll_bar_handle_length;
+
+    if (btn_up)
+    {
+        btn_up->Resize(btn_width, btn_height);
+        btn_up->Move(widget_rect.GetPosition());
+        btn_up->Translate(widget_width - btn_width, 0.0f);
+    }
+
+    if (btn_down)
+    {
+        btn_down->Resize(btn_width, btn_height);
+        btn_down->Move(widget_rect.GetPosition());
+        btn_down->Translate(widget_width - btn_width, widget_height - btn_height);
+    }
+
+    if (scroll_bar)
+    {
+        scroll_bar->Resize(btn_width, widget_height - btn_height * 2.0f);
+        scroll_bar->Move(widget_rect.GetPosition());
+        scroll_bar->Translate(widget_width - btn_width, btn_height);
+    }
+
+    if (scroll_bar_handle)
+    {
+        scroll_bar_handle->Resize(btn_width, scroll_bar_handle_length);
+        scroll_bar_handle->Move(widget_rect.GetPosition());
+        scroll_bar_handle->Translate(widget_width, 0.0f);
+        scroll_bar_handle->Translate(-btn_width, btn_height);
+        // move the handle based on the current position
+        scroll_bar_handle->Translate(0.0f, scroll_bar_drag_length * handle_pos);
+    }
+    return true;
+}
+
+bool ScrollAreaModel::ComputeHorizontalScrollBar(const FRect& widget_rect,
+                                                 const FRect& viewport_rect,
+                                                 const FRect& content_rect,
+                                                 bool vertical_scrollbar,
+                                                 bool horizontal_scrollbar,
+                                                 FRect* btn_left,
+                                                 FRect* btn_right,
+                                                 FRect* scroll_bar,
+                                                 FRect* scroll_bar_handle,
+                                                 float handle_pos) const
+{
+    if (!horizontal_scrollbar)
+        return false;
+
+    const auto scrollbar_height = GetHorizontalScrollBarHeight();
+    const auto btn_width  = scrollbar_height;
+    const auto btn_height = scrollbar_height;
+    const auto widget_width  = widget_rect.GetWidth();
+    const auto widget_height = widget_rect.GetHeight();
+
+    const auto vertical_scrollbar_width = vertical_scrollbar ? GetVerticalScrollBarWidth() : 0.0f;
+    const auto show_horizontal_buttons  = AreHorizontalScrollButtonsVisible();
+    const auto horizontal_scrollbar_buttons_width =  show_horizontal_buttons ? 2.0f * btn_width : 0.0f;
+
+    if (widget_height <= scrollbar_height)
+        return false;
+
+    // horizontal scrollbar left and right buttons + vertical scrollbar (if any)
+    if (widget_width <= (horizontal_scrollbar_buttons_width + vertical_scrollbar_width))
+        return false;
+
+    //const auto viewport_width = widget_width - vertical_scrollbar_width;
+    const auto viewport_width = viewport_rect.GetHeight();
+    const auto content_width = ComputeContentWidth(content_rect);
+
+    // the available width for the scroll bar is the width of the widget
+    // minus vertical scroll bar width (if it's visible) and minus the
+    // left, right buttons at both ends.
+    const auto scroll_bar_length = widget_width - horizontal_scrollbar_buttons_width - vertical_scrollbar_width;
+    const auto scroll_bar_handle_length_normalized = math::clamp(0.0f, 1.0f, viewport_width / content_width);
+    const auto scroll_bar_handle_length = scroll_bar_handle_length_normalized * scroll_bar_length;
+    const auto scroll_bar_drag_length = scroll_bar_length - scroll_bar_handle_length;
+
+    if (btn_left)
+    {
+        btn_left->Resize(btn_width, btn_height);
+        btn_left->Move(widget_rect.GetPosition());
+        btn_left->Translate(0.0f, widget_height - btn_height);
+    }
+
+    if (btn_right)
+    {
+        btn_right->Resize(btn_width, btn_height);
+        btn_right->Move(widget_rect.GetPosition());
+        btn_right->Translate(widget_width, widget_height);
+        btn_right->Translate(-vertical_scrollbar_width - btn_width, -btn_height);
+    }
+
+    if (scroll_bar)
+    {
+        scroll_bar->Resize(scroll_bar_length, btn_height);
+        scroll_bar->Move(widget_rect.GetPosition());
+        scroll_bar->Translate(btn_width, widget_height - btn_height);
+    }
+
+    if (scroll_bar_handle)
+    {
+        scroll_bar_handle->Resize(scroll_bar_handle_length, btn_height);
+        scroll_bar_handle->Move(widget_rect.GetPosition());
+        scroll_bar_handle->Translate(btn_width, widget_height - btn_height);
+        // move the handle based on the current position
+        scroll_bar_handle->Translate(scroll_bar_drag_length * handle_pos, 0.0f);
+    }
+    return true;
+}
+
+float ScrollAreaModel::GetVerticalScrollBarWidth() const
+{
+    return 25.0f;
+}
+
+float ScrollAreaModel::GetHorizontalScrollBarHeight() const
+{
+    return 25.0f;
+}
+
+float ScrollAreaModel::ComputeContentWidth(const FRect& content) const
+{
+    return content.GetWidth();
+}
+
+float ScrollAreaModel::ComputeContentHeight(const FRect& content) const
+{
+    return content.GetHeight();
+}
+
 } // namespace detail
 
 void Widget::SetColor(const std::string& key, const Color4f& color)
@@ -1268,6 +1897,8 @@ std::unique_ptr<Widget> CreateWidget(uik::Widget::Type type)
         return std::make_unique<uik::RadioButton>();
     else if (type == Widget::Type::ToggleBox)
         return std::make_unique<uik::ToggleBox>();
+    else if (type == Widget::Type::ScrollArea)
+        return std::make_unique<uik::ScrollArea>();
     else BUG("Unhandled widget type.");
     return nullptr;
 }
@@ -1295,6 +1926,8 @@ std::string Widget::GetWidgetClassName(uik::Widget::Type type)
         return "radiobutton";
     else if (type == Widget::Type::ToggleBox)
         return "togglebox";
+    else if (type == Widget::Type::ScrollArea)
+        return "scroll-area";
     else BUG("Unhandled widget type.");
     return "";
 }
@@ -1322,6 +1955,8 @@ Widget::Type Widget::GetWidgetClassType(const std::string& klass)
         return Widget::Type::RadioButton;
     else if (klass == "togglebox")
         return Widget::Type::ToggleBox;
+    else if (klass == "scroll-area")
+        return Widget::Type::ScrollArea;
     else BUG("No such widget class.");
     return Widget::Type::RadioButton;
 }

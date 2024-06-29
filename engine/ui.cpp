@@ -1210,7 +1210,7 @@ bool UIPainter::ParseStyle(const std::string& tag, const std::string& style)
 
 void UIPainter::PushMask(const MaskStruct& mask)
 {
-    if (mask.klass == "form" || mask.klass == "groupbox")
+    if (mask.klass == "form" || mask.klass == "groupbox" || mask.klass == "scroll-area")
     {
         ClippingMask clip;
         clip.name  = mask.name;

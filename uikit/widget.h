@@ -61,7 +61,10 @@ namespace uik
             // A slider with a knob that moves left/right or up/down
             Slider,
             // Progress indicator
-            ProgressBar
+            ProgressBar,
+            // An area that can be bigger than the widget's own size
+            // and lets the user to scroll the contents vertically/horizontally
+            ScrollArea
         };
 
         enum class Flags {
@@ -251,16 +254,22 @@ namespace uik
 
         virtual void CopyStateFrom(const Widget* other) = 0;
 
-        virtual FRect GetClippingRect() const = 0;
-
-        // helpers
-
         // Get the rectangle of this widget wrt its parent.
         // In other words a child widget occupies some area inside
         // it's parent that area is described by this rectangle.
-        inline FRect GetRect() const noexcept
+        virtual FRect GetRect() const noexcept
         { return FRect(GetPosition(), GetSize()); }
 
+        virtual FRect GetClippingRect() const noexcept
+        { return GetRect(); }
+
+        virtual FRect GetViewportRect() const noexcept
+        { return GetRect(); }
+
+        virtual FPoint GetChildOffset() const noexcept
+        { return FPoint(0.0f, 0.0); }
+
+        // helpers
         void SetColor(const std::string& key, const Color4f& color);
         void SetMaterial(const std::string& key, const std::string& material);
         void SetGradient(const std::string& key,
@@ -272,15 +281,18 @@ namespace uik
         inline bool IsContainer() const noexcept
         {
             const auto type = GetType();
-            if (type == Type::GroupBox || type == Type::Form)
+            if (type == Type::GroupBox || type == Type::Form || type == Type::ScrollArea)
                 return true;
             return false;
         }
         inline bool CanFocus() const noexcept
         {
             const auto type = GetType();
-            if (type == Type::GroupBox || type == Type::Form ||
-                type == Type::Label || type == Type::ProgressBar)
+            if (type == Type::GroupBox ||
+                type == Type::Form ||
+                type == Type::Label ||
+                type == Type::ProgressBar ||
+                type == Type::ScrollArea)
                 return false;
             return true;
         }
@@ -357,6 +369,8 @@ namespace uik
             TransientState* state = nullptr;
             double time  = 0.0;
             float dt     = 0.0f;
+            // Widget's local rect
+            FRect rect;
         };
         struct KeyStruct {
             std::string widgetId;
@@ -668,18 +682,142 @@ namespace uik
             std::string mText;
         };
 
+        class ScrollAreaModel
+        {
+        public:
+            enum class ScrollBarMode {
+                Automatic, AlwaysOff, AlwaysOn
+            };
+            enum class Flags {
+                ShowVerticalScrollButtons,
+                ShowHorizontalScrollButtons
+            };
+
+            ScrollAreaModel()
+            {
+                mFlags.set(Flags::ShowHorizontalScrollButtons, true);
+                mFlags.set(Flags::ShowVerticalScrollButtons, true);
+            }
+
+            inline ScrollBarMode GetVerticalScrollBarMode() const noexcept
+            { return mVerticalScrollBarMode; }
+            inline ScrollBarMode GetHorizontalScrollBarMode() const noexcept
+            { return mHorizontalScrollBarMode; }
+            inline void SetVerticalScrollBarMode(ScrollBarMode mode) noexcept
+            { mVerticalScrollBarMode = mode; }
+            inline void SetHorizontalScrollBarMode(ScrollBarMode mode) noexcept
+            { mHorizontalScrollBarMode = mode; }
+            inline void ShowVerticalScrollButtons(bool on_off) noexcept
+            { SetFlag(Flags::ShowVerticalScrollButtons, on_off); }
+            inline void ShowHorizontalScrollButtons(bool on_off) noexcept
+            { SetFlag(Flags::ShowHorizontalScrollButtons, on_off); }
+            inline bool AreVerticalScrollButtonsVisible() const noexcept
+            { return TestFlag(Flags::ShowVerticalScrollButtons); }
+            inline bool AreHorizontalScrollButtonsVisible() const noexcept
+            { return TestFlag(Flags::ShowHorizontalScrollButtons); }
+            inline bool TestFlag(Flags flag) const noexcept
+            { return mFlags.test(flag); }
+            inline void SetFlag(Flags flag, bool on_off) noexcept
+            { mFlags.set(flag, on_off); }
+
+            void UpdateContentRect(const uik::FRect& content,
+                                   const uik::FRect& widget,
+
+                                   const std::string& widgetId,
+                                   TransientState& state);
+
+            FRect GetClippingRect(const FRect& widget_rect) const noexcept;
+
+            FPoint GetChildOffset(const FRect& widget_rect) const noexcept;
+
+            WidgetAction MouseEnter(const MouseStruct&);
+            WidgetAction MousePress(const MouseEvent& mouse, const MouseStruct&);
+            WidgetAction MouseMove(const MouseEvent& mouse, const MouseStruct& ms);
+            WidgetAction MouseRelease(const MouseEvent& mouse, const MouseStruct& ms);
+            WidgetAction MouseLeave(const MouseStruct&);
+            WidgetAction PollAction(const PollStruct& ps);
+
+            size_t GetHash(size_t hash) const;
+            void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
+            void IntoJson(data::Writer& data) const;
+            bool FromJson(const data::Reader& data);
+
+            struct Viewport {
+                bool vertical_scrollbar_visible = false;
+                bool horizontal_scrollbar_visible = false;
+                FRect rect;
+            };
+            void ComputeViewport(const FRect& widget_rect,
+                                 const FRect& content_rect,
+                                 Viewport* viewport) const;
+        private:
+            bool ComputeVerticalScrollBar(const FRect& widget_rect,
+                                          const FRect& viewport_rect,
+                                          const FRect& content_rect,
+                                          bool vertical_scrollbar,
+                                          bool horizontal_scrollbar,
+                                          FRect* btn_up,
+                                          FRect* btn_down,
+                                          FRect* scroll_bar,
+                                          FRect* scroll_bar_handle,
+                                          float handle_pos) const;
+
+            bool ComputeHorizontalScrollBar(const FRect& widget_rect,
+                                            const FRect& viewport_rect,
+                                            const FRect& content_rect,
+                                            bool vertical_scrollbar,
+                                            bool horizontal_scrollbar,
+                                            FRect* btn_left,
+                                            FRect* btn_right,
+                                            FRect* scroll_bar,
+                                            FRect* scroll_bar_handle,
+                                            float handle_pos) const;
+
+            float GetVerticalScrollBarWidth() const;
+            float GetHorizontalScrollBarHeight() const;
+            float ComputeContentWidth(const FRect& content) const;
+            float ComputeContentHeight(const FRect& content) const;
+
+        private:
+            ScrollBarMode mVerticalScrollBarMode = ScrollBarMode::Automatic;
+            ScrollBarMode mHorizontalScrollBarMode = ScrollBarMode::Automatic;
+            // strictly speaking this should be in transient state but
+            // it's a bit too complicated. Also there could be a parameter
+            // to indicate how this is computed, i.e. it could also be
+            // statically configured when the UI is designed.
+            FRect mContentRect;
+            float mVerticalScrollPos = 0.0f;
+            float mHorizontalScrollPos = 0.0f;
+            base::bitflag<Flags> mFlags;
+        };
+
+
         struct WidgetTraits {
-            static constexpr auto InitialWidth  = 100;
-            static constexpr auto InitialHeight = 30;
-            static constexpr auto WantsMouseEvents = false;
-            static constexpr auto WantsKeyEvents   = false;
-            static constexpr auto WantsUpdate      = false;
-            static constexpr auto WantsPoll        = false;
-            static constexpr auto HasClippingRect  = false;
+            static constexpr auto InitialWidth      = 100;
+            static constexpr auto InitialHeight     = 30;
+            static constexpr auto WantsMouseEvents  = false;
+            static constexpr auto WantsKeyEvents    = false;
+            static constexpr auto WantsUpdate       = false;
+            static constexpr auto WantsPoll         = false;
+            static constexpr auto HasClippingRect   = false;
+            static constexpr auto HasViewportRect   = false;
+            static constexpr auto HasChildTransform = false;
         };
 
         template<typename WidgetModel>
         struct WidgetModelTraits;
+
+        template<>
+        struct WidgetModelTraits<ScrollAreaModel> : public WidgetTraits
+        {
+            static constexpr auto Type = Widget::Type::ScrollArea;
+            static constexpr auto InitialWidth      = 200;
+            static constexpr auto InitialHeight     = 200;
+            static constexpr auto WantsMouseEvents  = true;
+            static constexpr auto WantsPoll         = true;
+            static constexpr auto HasClippingRect   = true;
+            static constexpr auto HasChildTransform = true;
+        };
 
         template<>
         struct WidgetModelTraits<FormModel> : public WidgetTraits
@@ -901,6 +1039,7 @@ namespace uik
                     ps.widgetName = mName;
                     ps.time       = time;
                     ps.dt         = dt;
+                    ps.rect       = GetRect();
                     return WidgetModel::PollAction(ps);
                 }
                 else return WidgetAction {};
@@ -1007,13 +1146,31 @@ namespace uik
                 *this = *static_cast<const BasicWidgetType *>(other);
             }
 
-            virtual FRect GetClippingRect() const override
+            virtual FRect GetClippingRect() const noexcept override
             {
                 if constexpr(Traits::HasClippingRect)
                 {
                     return WidgetModel::GetClippingRect(GetRect());
                 }
                 return GetRect();
+            }
+
+            virtual FRect GetViewportRect() const noexcept override
+            {
+                if constexpr (Traits::HasViewportRect)
+                {
+                    return WidgetModel::GetViewportRect(GetRect());
+                }
+                return GetRect();
+            }
+
+            virtual FPoint GetChildOffset() const noexcept override
+            {
+                if constexpr (Traits::HasChildTransform)
+                {
+                    return WidgetModel::GetChildOffset(GetRect());
+                }
+                return FPoint(0.0f, 0.0f);
             }
         protected:
         };
@@ -1029,6 +1186,7 @@ namespace uik
     using GroupBox    = detail::BasicWidget<detail::GroupBoxModel>;
     using Form        = detail::BasicWidget<detail::FormModel>;
     using RadioButton = detail::BasicWidget<detail::RadioButtonModel>;
+    using ScrollArea  = detail::BasicWidget<detail::ScrollAreaModel>;
 
     template<typename T>
     T* WidgetCast(Widget* widget)
