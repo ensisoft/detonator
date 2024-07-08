@@ -29,7 +29,7 @@
         <widget class="QGroupBox" name="baseProperties">
          <property name="minimumSize">
           <size>
-           <width>0</width>
+           <width>440</width>
            <height>0</height>
           </size>
          </property>
@@ -854,7 +854,7 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>0</width>
+            <width>440</width>
             <height>0</height>
            </size>
           </property>
@@ -925,7 +925,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>374</width>
+             <width>440</width>
              <height>943</height>
             </rect>
            </property>
@@ -1423,7 +1423,7 @@
                   </size>
                  </property>
                  <property name="currentIndex">
-                  <number>5</number>
+                  <number>9</number>
                  </property>
                  <widget class="QWidget" name="spinPage">
                   <layout class="QGridLayout" name="gridLayout_4">
@@ -1841,6 +1841,30 @@
                       </size>
                      </property>
                     </spacer>
+                   </item>
+                  </layout>
+                 </widget>
+                 <widget class="QWidget" name="scrollAreaPage">
+                  <layout class="QGridLayout" name="gridLayout_8">
+                   <item row="0" column="0">
+                    <widget class="QLabel" name="label_20">
+                     <property name="text">
+                      <string>Vertical scrollbar</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="1">
+                    <widget class="QComboBox" name="cmbScrollAreaVerticalScrollbarMode"/>
+                   </item>
+                   <item row="1" column="0">
+                    <widget class="QLabel" name="label_21">
+                     <property name="text">
+                      <string>Horizontal scrollbar</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="1">
+                    <widget class="QComboBox" name="cmbScrollAreaHorizontalScrollbarMode"/>
                    </item>
                   </layout>
                  </widget>
@@ -2361,6 +2385,18 @@
     <string>Close the open window</string>
    </property>
   </action>
+  <action name="actionNewScrollArea">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/placeholder.png</normaloff>:/32x32_ico_png/placeholder.png</iconset>
+   </property>
+   <property name="text">
+    <string>ScrollArea</string>
+   </property>
+   <property name="toolTip">
+    <string>Place a new scroll area</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -2474,6 +2510,8 @@
   <tabstop>btnText</tabstop>
   <tabstop>lblText</tabstop>
   <tabstop>lblLineHeight</tabstop>
+  <tabstop>cmbScrollAreaVerticalScrollbarMode</tabstop>
+  <tabstop>cmbScrollAreaHorizontalScrollbarMode</tabstop>
   <tabstop>normalGroup</tabstop>
   <tabstop>disabledGroup</tabstop>
   <tabstop>mouseOverGroup</tabstop>

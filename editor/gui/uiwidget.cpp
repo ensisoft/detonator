@@ -49,6 +49,7 @@
 #include "editor/gui/scriptwidget.h"
 #include "editor/gui/settings.h"
 #include "editor/gui/tool.h"
+#include "editor/gui/main.h"
 #include "editor/gui/uiwidget.h"
 #include "editor/gui/utility.h"
 #include "graphics/drawing.h"
@@ -205,6 +206,7 @@ enum WidgetIndex {
     RadioButton,
     ToggleBox,
     Form,
+    ScrollArea,
     LAST
 };
 
@@ -269,6 +271,7 @@ public:
     virtual void Render(gfx::Painter&, gfx::Painter&) const override
     {
         uik::TransientState state;
+        state.SetValue("design-mode", true);
         uik::Widget::PaintEvent paint;
         paint.focused = false;
         paint.moused  = false;
@@ -530,6 +533,8 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
 
     PopulateUIStyles(mUI.windowStyleFile);
     PopulateUIKeyMaps(mUI.windowKeyMap);
+    PopulateFromEnum<uik::ScrollArea::ScrollBarMode>(mUI.cmbScrollAreaVerticalScrollbarMode);
+    PopulateFromEnum<uik::ScrollArea::ScrollBarMode>(mUI.cmbScrollAreaHorizontalScrollbarMode);
     PopulateFromEnum<uik::CheckBox::Check>(mUI.chkPlacement);
     PopulateFromEnum<uik::RadioButton::Check>(mUI.rbPlacement);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
@@ -715,6 +720,7 @@ void UIWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionNewRadioButton);
     bar.addAction(mUI.actionNewToggleBox);
     bar.addAction(mUI.actionNewForm);
+    bar.addAction(mUI.actionNewScrollArea);
 }
 void UIWidget::AddActions(QMenu& menu)
 {
@@ -737,6 +743,7 @@ void UIWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionNewRadioButton);
     menu.addAction(mUI.actionNewToggleBox);
     menu.addAction(mUI.actionNewForm);
+    menu.addAction(mUI.actionNewScrollArea);
 }
 bool UIWidget::SaveState(Settings& settings) const
 {
@@ -1199,6 +1206,7 @@ void UIWidget::on_actionPlay_triggered()
     SetEnabled(mUI.actionNewForm,        false);
     SetEnabled(mUI.actionNewLabel,       false);
     SetEnabled(mUI.actionNewPushButton,  false);
+    SetEnabled(mUI.actionNewScrollArea,  false);
 
     mUI.widget->setFocus();
 }
@@ -1238,6 +1246,7 @@ void UIWidget::on_actionStop_triggered()
     SetEnabled(mUI.actionNewProgressBar, true);
     SetEnabled(mUI.actionNewRadioButton, true);
     SetEnabled(mUI.actionNewToggleBox,   true);
+    SetEnabled(mUI.actionNewScrollArea,  true);
     SetEnabled(mUI.cmbGrid,              true);
     SetEnabled(mUI.zoom,                 true);
     SetEnabled(mUI.chkSnap,              true);
@@ -1246,6 +1255,7 @@ void UIWidget::on_actionStop_triggered()
     SetEnabled(mUI.chkShowBounds,        true);
     SetEnabled(mUI.chkShowTabOrder,      true);
     mMessageQueue.clear();
+    DisplayCurrentWidgetProperties();
 }
 
 void UIWidget::on_actionClose_triggered()
@@ -1327,6 +1337,11 @@ void UIWidget::on_actionNewRadioButton_triggered()
 void UIWidget::on_actionNewToggleBox_triggered()
 {
     PlaceNewWidget(WidgetIndex::ToggleBox);
+}
+
+void UIWidget::on_actionNewScrollArea_triggered()
+{
+    PlaceNewWidget(WidgetIndex::ScrollArea);
 }
 
 void UIWidget::on_actionNewGroupBox_triggered()
@@ -1660,6 +1675,7 @@ void UIWidget::on_btnEditWidgetStyle_clicked()
         boost::erase_all(style_string, id + "/");
         // set the actual style string.
         widget->SetStyleString(std::move(style_string));
+        widget->QueryStyle(*mState.painter);
 
         DisplayCurrentWidgetProperties();
     }
@@ -1693,6 +1709,7 @@ void UIWidget::on_btnEditWidgetStyleString_clicked()
             return;
         }
         widget->SetStyleString(new_style_string);
+        widget->QueryStyle(*mState.painter);
         SetValue(mUI.widgetStyleString, new_style_string);
     }
 }
@@ -1705,6 +1722,7 @@ void UIWidget::on_btnResetWidgetStyle_clicked()
         mState.style->DeleteMaterials(widget->GetId());
         mState.style->DeleteProperties(widget->GetId());
         mState.painter->DeleteMaterialInstances(widget->GetId());
+        widget->QueryStyle(*mState.painter);
 
         DisplayCurrentWidgetProperties();
     }
@@ -1736,6 +1754,14 @@ void UIWidget::on_btnResetWidgetAnimationString_clicked()
 
         DisplayCurrentWidgetProperties();
     }
+}
+void UIWidget::on_cmbScrollAreaVerticalScrollbarMode_currentIndexChanged(int)
+{
+    UpdateCurrentWidgetProperties();
+}
+void UIWidget::on_cmbScrollAreaHorizontalScrollbarMode_currentIndexChanged(int)
+{
+    UpdateCurrentWidgetProperties();
 }
 
 void UIWidget::on_btnEditWindowStyle_clicked()
@@ -1776,6 +1802,7 @@ void UIWidget::on_btnEditWindowStyle_clicked()
     boost::erase_all(style_string, "window/");
     // set the actual style string.
     mState.window.SetStyleString(std::move(style_string));
+    mState.window.Style(*mState.painter);
 }
 
 void UIWidget::on_btnEditWindowStyleString_clicked()
@@ -1803,6 +1830,7 @@ void UIWidget::on_btnEditWindowStyleString_clicked()
         return;
     }
     mState.window.SetStyleString(new_style_string);
+    mState.window.Style(*mState.painter);
     SetValue(mUI.windowStyleString, new_style_string);
 }
 
@@ -1812,6 +1840,7 @@ void UIWidget::on_btnResetWindowStyle_clicked()
     mState.style->DeleteMaterials("window");
     mState.style->DeleteProperties("window");
     mState.painter->DeleteMaterialInstances("window");
+    mState.window.Style(*mState.painter);
 
     SetValue(mUI.windowStyleString, QString(""));
 }
@@ -2057,6 +2086,84 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
 
     gfx::Painter ui_painter(painter);
 
+
+    if (!mState.style->HasMaterial("scroll-area-internal/design-mode/background"))
+    {
+        gfx::TextBuffer::Text text_and_style;
+        text_and_style.text = "scroll area";
+        text_and_style.font = "app://fonts/orbitron-medium.otf";
+        text_and_style.fontsize = 32;
+        text_and_style.lineheight = 1.0f;
+
+        gfx::TextBuffer text;
+        text.SetBufferSize(400, 200);
+        text.SetText(text_and_style);
+
+        gfx::detail::TextureTextBufferSource texture_source;
+        texture_source.SetTextBuffer(text);
+
+        gfx::TextureMap2D texture_map;
+        texture_map.SetType(gfx::TextureMap::Type::Texture2D);
+        texture_map.SetName("kTexture");
+        texture_map.SetNumTextures(1);
+        texture_map.SetTextureSource(0, texture_source.Clone());
+        texture_map.SetSamplerName("kTexture");
+        texture_map.SetRectUniformName("kTextureRect");
+
+        auto klass = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Texture,
+            std::string("_design-mode-widget-scroll-area"));
+        klass->SetBaseColor(base::ColorFromHex("#e3e3e335"));
+        klass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+        klass->SetTextureWrapX(gfx::MaterialClass::TextureWrapping::Repeat);
+        klass->SetTextureWrapY(gfx::MaterialClass::TextureWrapping::Repeat);
+        klass->SetNumTextureMaps(1);
+        klass->SetTextureMap(0, texture_map);
+        klass->SetShaderSrc(R"(
+#version 100
+precision highp float;
+
+uniform sampler2D kTexture;
+uniform vec4 kTextureRect;
+uniform vec4 kBaseColor;
+
+varying vec2 vTexCoord;
+
+uniform mat4 kModelViewMatrix;
+
+vec2 RotateCoords(vec2 coords, float angle)
+{
+    coords = coords - vec2(0.5, 0.5);
+    coords = mat2(cos(angle), -sin(angle),
+                  sin(angle),  cos(angle)) * coords;
+    coords += vec2(0.5, 0.5);
+    return coords;
+}
+
+void FragmentShaderMain()
+{
+    vec4 xvector = kModelViewMatrix * vec4(1.0, 0.0, 0.0, 0.0);
+    vec4 yvector = kModelViewMatrix * vec4(0.0, 1.0, 0.0, 0.0);
+
+    float xdim = length(xvector);
+    float ydim = length(yvector);
+
+    vec2 sample_pos = vec2(xdim, ydim) * vTexCoord;
+    sample_pos -= vec2(xdim*0.5, ydim*0.5);
+    sample_pos = RotateCoords(sample_pos, 3.147*-0.25);
+    sample_pos += vec2(xdim*0.5, ydim*0.5);
+
+    sample_pos /= vec2(200.0, 100.0);
+
+    fs_out.color = texture2D(kTexture, sample_pos).a * kBaseColor;
+}
+)");
+
+        mState.style->SetMaterial("scroll-area-internal/design-mode/background",
+            engine::detail::UIMaterialClassObject(klass));
+        mState.style->SetProperty("scroll-area-internal/design-mode/shape",
+            engine::UIStyle::WidgetShape::Rectangle);
+    }
+
     mState.painter->SetPainter(&ui_painter);
     mState.painter->SetStyle(mState.style.get());
     if (mPlayState == PlayState::Stopped)
@@ -2076,18 +2183,32 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
             }
             virtual void EndPaintWidget(const uik::Widget* widget, const uik::TransientState& state, const PaintEvent& paint, uik::Painter& painter) override
             {
+                const auto& widget_rect = paint.rect;
+
+                if (Editor::DebugEditor())
+                {
+                    if (const auto* scroll_area = uik::WidgetCast<uik::ScrollArea>(widget))
+                    {
+                        uik::FRect content_rect;
+                        content_rect = mState.window.FindContentRect(scroll_area,
+                            uik::Window::FindRectFlags::IncludeChildren |
+                            uik::Window::FindRectFlags::ClipChildren |
+                            uik::Window::FindRectFlags::ExcludeHidden);
+                        content_rect.Translate(widget_rect.GetPosition());
+                        gfx::DrawRectOutline(*mState.painter->GetPainter(), content_rect, gfx::Color::DarkYellow);
+                    }
+                }
+
                 if (!mPaintTabOrder)
                     return;
                 if (!widget->CanFocus())
                     return;
                 const auto tab_index = widget->GetTabIndex();
 
-                const auto& rect = paint.rect;
                 gfx::FRect rc;
                 rc.Resize(20.0f, 20.0f);
-                rc.Translate(rect.GetX(), rect.GetY());
-                rc.Translate(rect.GetWidth(), rect.GetHeight());
-                //rc.Translate(10.0f, 1.0f);
+                rc.Translate(widget_rect.GetX(), widget_rect.GetY());
+                rc.Translate(widget_rect.GetWidth(), widget_rect.GetHeight());
                 ShowMessage(base::FormatString("%1.", tab_index), rc, *mState.painter->GetPainter());
             }
         private:
@@ -2097,7 +2218,10 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
 
         // paint the design state copy of the window.
         uik::TransientState s;
+        s.SetValue("design-mode", true);
         mState.painter->SetFlag(engine::UIPainter::Flags::ClipWidgets, GetValue(mUI.chkClipWidgets));
+        mState.painter->SetFlag(engine::UIPainter::Flags::DesignMode, true);
+        mState.window.InitDesignTime(s);
         mState.window.Paint(s , *mState.painter, 0.0, &hook);
 
         // draw the window outline
@@ -2107,6 +2231,7 @@ void UIWidget::PaintScene(gfx::Painter& painter, double sec)
     else
     {
         mState.painter->SetFlag(engine::UIPainter::Flags::ClipWidgets, true);
+        mState.painter->SetFlag(engine::UIPainter::Flags::DesignMode, false);
         mState.active_window->Paint(*mState.active_state, *mState.painter, mPlayTime);
     }
 
@@ -2330,7 +2455,7 @@ bool UIWidget::KeyPress(QKeyEvent* key)
             mod_string += "Shift+";
         if (mods.test(wdk::Keymod::Alt))
             mod_string += "Alt+";
-        DEBUG("UI virtual key mapping %1%2 => %3", mod_string, sym, e.key);
+        VERBOSE("UI virtual key mapping %1%2 => %3", mod_string, sym, e.key);
 
         const auto& actions = mState.active_window->KeyDown(e, *mState.active_state);
         for (const auto& action : actions)
@@ -2477,6 +2602,11 @@ void UIWidget::UpdateCurrentWidgetProperties()
         {
             toggle->SetChecked(GetValue(mUI.toggleChecked));
         }
+        else if (auto* scroll = uik::WidgetCast<uik::ScrollArea>(widget))
+        {
+            scroll->SetVerticalScrollBarMode(GetValue(mUI.cmbScrollAreaVerticalScrollbarMode));
+            scroll->SetHorizontalScrollBarMode(GetValue(mUI.cmbScrollAreaHorizontalScrollbarMode));
+        }
     }
 }
 
@@ -2590,6 +2720,12 @@ void UIWidget::DisplayCurrentWidgetProperties()
             mUI.stackedWidget->setCurrentWidget(mUI.togglePage);
             SetValue(mUI.toggleChecked, toggle->IsChecked());
         }
+        else if (const auto* scroll = uik::WidgetCast<uik::ScrollArea>(widget))
+        {
+            mUI.stackedWidget->setCurrentWidget(mUI.scrollAreaPage);
+            SetValue(mUI.cmbScrollAreaVerticalScrollbarMode, scroll->GetVerticalScrollBarMode());
+            SetValue(mUI.cmbScrollAreaHorizontalScrollbarMode, scroll->GetHorizontalScrollBarMode());
+        }
         else
         {
             SetEnabled(mUI.widgetData, false);
@@ -2698,8 +2834,16 @@ void UIWidget::PlaceNewWidget(unsigned int index)
     {
         widget = std::make_unique<uik::Form>();
         mUI.actionNewForm->setChecked(true);
-    } else BUG("Unhandled widget index.");
+    }
+    else if (index == WidgetIndex::ScrollArea)
+    {
+        widget = std::make_unique<uik::ScrollArea>();
+        mUI.actionNewScrollArea->setChecked(true);
+    }
+    else BUG("Unhandled widget index.");
 
+    widget->QueryStyle(*mState.painter);
+    
     const auto snap = (bool)GetValue(mUI.chkSnap);
     const auto grid = (GridDensity)GetValue(mUI.cmbGrid);
     auto tool = std::make_unique<PlaceWidgetTool>(mState, std::move(widget), snap, (unsigned)grid);
@@ -2869,6 +3013,7 @@ void UIWidget::UncheckPlacementActions()
     mUI.actionNewRadioButton->setChecked(false);
     mUI.actionNewProgressBar->setChecked(false);
     mUI.actionNewToggleBox->setChecked(false);
+    mUI.actionNewScrollArea->setChecked(false);
 }
 
 void UIWidget::UpdateDeletedResourceReferences()

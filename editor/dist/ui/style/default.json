@@ -58,12 +58,33 @@
     },
 
     {
+      "key": "scroll-area/shape",
+      "value": "Rect"
+    },
+
+    {
       "key": "widget/disabled/text-color",
       "value": "Gray"
     },
     {
       "key": "widget/disabled/text-font",
       "value": "app://fonts/orbitron-light.otf"
+    },
+    {
+      "key": "widget/vertical-scrollbar-width",
+      "value": 15.0
+    },
+    {
+      "key": "widget/horizontal-scrollbar-height",
+      "value": 15.0
+    },
+    {
+      "key": "widget/horizontal-scrollbar-buttons-visible",
+      "value": true
+    },
+    {
+      "key": "widget/vertical-scrollbar-buttons-visible",
+      "value": true
     }
   ],
 
@@ -169,6 +190,101 @@
       "color2": "Black",
       "color3": "Black",
       "gamma": 2.2
+    },
+
+
+    {
+      "key": "widget/vertical-scrollbar-background",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Black",
+      "color3": "Black",
+      "gamma": 2.2
+    },
+    {
+      "key": "widget/vertical-scrollbar-handle",
+      "type": "Gradient",
+      "color0": "Black",
+      "color1": "Black",
+      "color2": "Gray",
+      "color3": "Gray",
+      "gamma": 2.2
+    },
+    {
+      "key": "widget/mouse-over/vertical-scrollbar-handle",
+      "type": "Gradient",
+      "color0": "Black",
+      "color1": "Black",
+      "color2": "LightGray",
+      "color3": "LightGray",
+      "gamma": 2.2
+    },
+    {
+      "key": "widget/pressed/vertical-scrollbar-handle",
+      "type": "Gradient",
+      "color0": "Black",
+      "color1": "Black",
+      "color2": "LightGray",
+      "color3": "LightGray",
+      "gamma": 2.2
+    },
+    {
+      "key": "widget/pressed/vertical-scrollbar-handle-border",
+      "type": "Gradient",
+      "color0": "Gray",
+      "color1": "Gray",
+      "color2": "LightGray",
+      "color3": "LightGray",
+      "gamma": 2.0
+    },
+
+
+    {
+      "key": "widget/horizontal-scrollbar-background",
+      "type": "Gradient",
+      "color0": "Black",
+      "color1": "Black",
+      "color2": "LightGray",
+      "color3": "LightGray",
+      "gamma": 2.2
+    },
+
+    {
+      "key": "widget/horizontal-scrollbar-handle",
+      "type": "Gradient",
+      "color0": "Gray",
+      "color1": "Gray",
+      "color2": "Black",
+      "color3": "Black",
+      "gamma": 2.2
+    },
+    {
+      "key": "widget/mouse-over/horizontal-scrollbar-handle",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Black",
+      "color3": "Black",
+      "gamma": 2.2
+    },
+    {
+      "key": "widget/pressed/horizontal-scrollbar-handle",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Black",
+      "color3": "Black",
+      "gamma": 2.2
+    },
+    {
+      "key": "widget/pressed/horizontal-scrollbar-handle-border",
+      "type": "Gradient",
+      "color0": "LightGray",
+      "color1": "LightGray",
+      "color2": "Gray",
+      "color3": "Gray",
+      "gamma": 2.0
     },
 
 
