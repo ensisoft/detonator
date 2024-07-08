@@ -977,10 +977,23 @@ void UIPainter::DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon
         icon.MoveTo(ps.rect.GetPosition());
         icon.Translate(btn_width*0.5, btn_height*0.5);
         icon.Translate(ico_size*-0.5, ico_size*-0.5);
-        if (const auto* material = GetWidgetMaterial(id, ps, "button-icon-arrow-up"))
-            mPainter->Draw(gfx::Rectangle(), icon, *material);
-        else if (const auto* material = GetWidgetMaterial(id, ps, "button-icon"))
-            mPainter->Draw(gfx::IsoscelesTriangle(), icon, *material);
+
+        if (const auto value = StencilPass())
+        {
+            gfx::StencilTestColorWritePass pass(gfx::StencilPassValue(value), *mPainter);
+            if (const auto* material = GetWidgetMaterial(id, ps, "button-icon-arrow-up"))
+                pass.Draw(gfx::Rectangle(), icon, *material);
+            else if (const auto* material = GetWidgetMaterial(id, ps, "button-icon"))
+                pass.Draw(gfx::IsoscelesTriangle(), icon, *material);
+        }
+        else
+        {
+            gfx::GenericRenderPass pass(*mPainter);
+            if (const auto* material = GetWidgetMaterial(id, ps, "button-icon-arrow-up"))
+                pass.Draw(gfx::Rectangle(), icon, *material);
+            else if (const auto* material = GetWidgetMaterial(id, ps, "button-icon"))
+                pass.Draw(gfx::IsoscelesTriangle(), icon, *material);
+        }
     }
     else
     {
@@ -1005,10 +1018,23 @@ void UIPainter::DrawButton(const WidgetId& id, const PaintStruct& ps, ButtonIcon
         icon.Translate(ps.rect.GetPosition());
         icon.Translate(btn_width*0.5, btn_height*0.5);
         icon.Translate(ico_size*-0.5, ico_size*-0.5);
-        if (const auto* material = GetWidgetMaterial(id, ps, "button-icon-arrow-down"))
-            mPainter->Draw(gfx::Rectangle(), icon, *material);
-        else if (const auto* material = GetWidgetMaterial(id, ps, "button-icon"))
-            mPainter->Draw(gfx::IsoscelesTriangle(), icon, *material);
+
+        if (const auto value = StencilPass())
+        {
+            gfx::StencilTestColorWritePass pass(gfx::StencilPassValue(value), *mPainter);
+            if (const auto* material = GetWidgetMaterial(id, ps, "button-icon-arrow-down"))
+                pass.Draw(gfx::Rectangle(), icon, *material);
+            else if (const auto* material = GetWidgetMaterial(id, ps, "button-icon"))
+                pass.Draw(gfx::IsoscelesTriangle(), icon, *material);
+        }
+        else
+        {
+            gfx::GenericRenderPass pass(*mPainter);
+            if (const auto* material = GetWidgetMaterial(id, ps, "button-icon-arrow-down"))
+                pass.Draw(gfx::Rectangle(), icon, *material);
+            else if (const auto* material = GetWidgetMaterial(id, ps, "button-icon"))
+                pass.Draw(gfx::IsoscelesTriangle(), icon, *material);
+        }
     }
 }
 
