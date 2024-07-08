@@ -1263,7 +1263,27 @@ size_t ScrollAreaModel::GetHash(size_t hash) const
     hash = base::hash_combine(hash, mHorizontalScrollBarMode);
     hash = base::hash_combine(hash, mContentRect);
     hash = base::hash_combine(hash, mFlags);
+    hash = base::hash_combine(hash, mVerticalScrollBarWidth);
+    hash = base::hash_combine(hash, mHorizontalScrollBarHeight);
     return hash;
+}
+
+void ScrollAreaModel::QueryStyle(const Painter& painter, const std::string& widgetId)
+{
+    Painter::WidgetStyleKey key;
+    key.klass = "scroll-area";
+    key.id    = widgetId;
+
+    bool ok = true;
+    ok &= painter.QueryStyle(key, "vertical-scrollbar-width", &mVerticalScrollBarWidth);
+    ok &= painter.QueryStyle(key, "horizontal-scrollbar-height", &mHorizontalScrollBarHeight);
+    bool vertical_scrollbar_buttons_visible   = AreVerticalScrollButtonsVisible();
+    bool horizontal_scrollbar_buttons_visible = AreHorizontalScrollButtonsVisible();
+    ok &= painter.QueryStyle(key, "vertical-scrollbar-buttons-visible", &vertical_scrollbar_buttons_visible);
+    ok &= painter.QueryStyle(key, "horizontal-scrollbar-buttons-visible", &horizontal_scrollbar_buttons_visible);
+
+    ShowVerticalScrollButtons(vertical_scrollbar_buttons_visible);
+    ShowHorizontalScrollButtons(horizontal_scrollbar_buttons_visible);
 }
 
 void ScrollAreaModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
@@ -1571,7 +1591,9 @@ WidgetAction ScrollAreaModel::PollAction(const PollStruct& ps)
 void ScrollAreaModel::IntoJson(data::Writer& data) const
 {
     data.Write("vertical_scroll_bar_mode", mVerticalScrollBarMode);
+    data.Write("vertical_scroll_bar_width", mVerticalScrollBarWidth);
     data.Write("horizontal_scroll_bar_mode", mHorizontalScrollBarMode);
+    data.Write("horizontal_scroll_bar_height", mHorizontalScrollBarHeight);
     data.Write("content_rect", mContentRect);
     data.Write("flags", mFlags);
 }
@@ -1579,7 +1601,9 @@ bool ScrollAreaModel::FromJson(const data::Reader& data)
 {
     bool ok = true;
     ok &= data.Read("vertical_scroll_bar_mode", &mVerticalScrollBarMode);
+    ok &= data.Read("vertical_scroll_bar_width", &mVerticalScrollBarWidth);
     ok &= data.Read("horizontal_scroll_bar_mode", &mHorizontalScrollBarMode);
+    ok &= data.Read("horizontal_scroll_bar_height", &mHorizontalScrollBarHeight);
     ok &= data.Read("content_rect", &mContentRect);
     ok &= data.Read("flags", &mFlags);
     return ok;
@@ -1711,14 +1735,14 @@ bool ScrollAreaModel::ComputeVerticalScrollBar(const FRect& widget_rect,
     const auto scroll_bar_handle_length = scroll_bar_handle_length_normalized * scroll_bar_length;
     const auto scroll_bar_drag_length = scroll_bar_length - scroll_bar_handle_length;
 
-    if (btn_up)
+    if (btn_up && show_vertical_buttons)
     {
         btn_up->Resize(btn_width, btn_height);
         btn_up->Move(widget_rect.GetPosition());
         btn_up->Translate(widget_width - btn_width, 0.0f);
     }
 
-    if (btn_down)
+    if (btn_down && show_vertical_buttons)
     {
         btn_down->Resize(btn_width, btn_height);
         btn_down->Move(widget_rect.GetPosition());
@@ -1727,17 +1751,17 @@ bool ScrollAreaModel::ComputeVerticalScrollBar(const FRect& widget_rect,
 
     if (scroll_bar)
     {
-        scroll_bar->Resize(btn_width, widget_height - btn_height * 2.0f);
+        scroll_bar->Resize(scrollbar_width, widget_height - vertical_scrollbar_buttons_height);
         scroll_bar->Move(widget_rect.GetPosition());
-        scroll_bar->Translate(widget_width - btn_width, btn_height);
+        scroll_bar->Translate(widget_width - scrollbar_width, show_vertical_buttons ? btn_height : 0.0f);
     }
 
     if (scroll_bar_handle)
     {
-        scroll_bar_handle->Resize(btn_width, scroll_bar_handle_length);
+        scroll_bar_handle->Resize(scrollbar_width, scroll_bar_handle_length);
         scroll_bar_handle->Move(widget_rect.GetPosition());
         scroll_bar_handle->Translate(widget_width, 0.0f);
-        scroll_bar_handle->Translate(-btn_width, btn_height);
+        scroll_bar_handle->Translate(-scrollbar_width, show_vertical_buttons ? btn_height : 0.0f);
         // move the handle based on the current position
         scroll_bar_handle->Translate(0.0f, scroll_bar_drag_length * handle_pos);
     }
@@ -1787,14 +1811,14 @@ bool ScrollAreaModel::ComputeHorizontalScrollBar(const FRect& widget_rect,
     const auto scroll_bar_handle_length = scroll_bar_handle_length_normalized * scroll_bar_length;
     const auto scroll_bar_drag_length = scroll_bar_length - scroll_bar_handle_length;
 
-    if (btn_left)
+    if (btn_left && show_horizontal_buttons)
     {
         btn_left->Resize(btn_width, btn_height);
         btn_left->Move(widget_rect.GetPosition());
         btn_left->Translate(0.0f, widget_height - btn_height);
     }
 
-    if (btn_right)
+    if (btn_right && show_horizontal_buttons)
     {
         btn_right->Resize(btn_width, btn_height);
         btn_right->Move(widget_rect.GetPosition());
@@ -1804,16 +1828,18 @@ bool ScrollAreaModel::ComputeHorizontalScrollBar(const FRect& widget_rect,
 
     if (scroll_bar)
     {
-        scroll_bar->Resize(scroll_bar_length, btn_height);
+        scroll_bar->Resize(scroll_bar_length, scrollbar_height);
         scroll_bar->Move(widget_rect.GetPosition());
-        scroll_bar->Translate(btn_width, widget_height - btn_height);
+        scroll_bar->Translate(show_horizontal_buttons ? btn_width : 0.0f,
+                widget_height - scrollbar_height);
     }
 
     if (scroll_bar_handle)
     {
-        scroll_bar_handle->Resize(scroll_bar_handle_length, btn_height);
+        scroll_bar_handle->Resize(scroll_bar_handle_length, scrollbar_height);
         scroll_bar_handle->Move(widget_rect.GetPosition());
-        scroll_bar_handle->Translate(btn_width, widget_height - btn_height);
+        scroll_bar_handle->Translate(show_horizontal_buttons ? btn_width : 0.0f,
+                                     widget_height - scrollbar_height);
         // move the handle based on the current position
         scroll_bar_handle->Translate(scroll_bar_drag_length * handle_pos, 0.0f);
     }
@@ -1822,12 +1848,12 @@ bool ScrollAreaModel::ComputeHorizontalScrollBar(const FRect& widget_rect,
 
 float ScrollAreaModel::GetVerticalScrollBarWidth() const
 {
-    return 25.0f;
+    return mVerticalScrollBarWidth;
 }
 
 float ScrollAreaModel::GetHorizontalScrollBarHeight() const
 {
-    return 25.0f;
+    return mHorizontalScrollBarHeight;
 }
 
 float ScrollAreaModel::ComputeContentWidth(const FRect& content) const

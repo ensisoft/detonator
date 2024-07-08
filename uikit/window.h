@@ -192,7 +192,7 @@ namespace uik
         // Apply the style information from each widget (and the window) onto the
         // painter. With painters that support styling and parsing widgets' style
         // strings this will prime the painter for subsequent paint operations.
-        void Style(Painter& painter) const;
+        void Style(Painter& painter);
 
         // Visit the window's widget hierarchy starting from the given
         // root widget.
