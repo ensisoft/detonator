@@ -127,6 +127,10 @@ namespace base
         { mX = x; }
         inline void SetY(T y) noexcept
         { mY = y; }
+        inline void Translate(T dx, T dy) noexcept
+        { mX += dx; mY += dy; }
+        inline void Translate(const Point& p) noexcept
+        { mX += p.mX; mY += p.mY; }
 
         Point& operator+=(const Point& other) noexcept
         {
@@ -441,6 +445,12 @@ namespace base
             const auto half = T(2);
             return {mX + mWidth/half, mY + mHeight/half};
         }
+
+        void MakeRelativeTo(const Rect& other) noexcept
+        {
+            mX -= other.mX;
+            mY -= other.mY;
+        }
     private:
         T mX = 0;
         T mY = 0;
@@ -503,6 +513,14 @@ namespace base
         const auto y = (bigger.GetHeight() - smaller.GetHeight()) / T(2);
         return Rect<T>(bigger.GetX() + x,
                        bigger.GetY() + y, smaller.GetWidth(), smaller.GetHeight());
+    }
+
+    template<typename T>
+    Rect<T> MakeRelativeRect(const Rect<T>& reference_rect, const Rect<T>& target_rect) noexcept
+    {
+        Rect ret(target_rect);
+        ret.MakeRelativeTo(reference_rect);
+        return ret;
     }
 
     template<typename T>
