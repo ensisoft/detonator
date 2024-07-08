@@ -57,8 +57,40 @@
 #include "editor/app/eventlog.h"
 #include "editor/app/utility.h"
 #include "editor/gui/types.h"
+#include "editor/gui/main.h"
 #include "editor/gui/mainwindow.h"
 #include "editor/gui/viewwindow.h"
+
+namespace gui {
+
+bool Editor::notify(QObject* receiver, QEvent* e)
+{
+    try
+    {
+        return QApplication::notify(receiver, e);
+    }
+    catch (const std::exception& e)
+    {
+        ERROR("Uncaught exception: '%1'", e.what());
+    }
+    return false;
+}
+
+// static
+bool Editor::mDebugEditor = false;
+
+// static
+bool Editor::DebugEditor()
+{
+    return mDebugEditor;
+}
+// static
+void Editor::SetEditorDebug(bool on_off)
+{
+    mDebugEditor = on_off;
+}
+
+} // namespace
 
 void copyright()
 {
@@ -428,6 +460,7 @@ int Main(int argc, char* argv[])
     options.Add("--no-session", "Don't load any previous window session within a workspace.");
     options.Add("--help", "Print this help.");
     options.Add("--verbose", "Enable verbose debug logs.");
+    options.Add("--debug-editor", "Enable editor debug features.");
 
     bool viewer_mode = false;
     std::string arg_parse_error;
@@ -455,6 +488,12 @@ int Main(int argc, char* argv[])
     if (options.WasGiven("--verbose"))
     {
         base::EnableLogEvent(base::LogEvent::Verbose, true);
+    }
+
+    if (options.WasGiven("--debug-editor"))
+    {
+        gui::Editor::SetEditorDebug(true);
+        DEBUG("Editor debug features are enabled.");
     }
 
     // turn on Qt logging: QT_LOGGING_RULES = qt.qpa.gl
