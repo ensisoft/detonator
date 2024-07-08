@@ -31,6 +31,22 @@ namespace base
 {
 
 template<typename Node>
+void ListTree(const RenderTree<Node>& tree, const Node* parent, std::vector<const Node*>* result)
+{
+    tree.PreOrderTraverseForEach([&result](const Node* child) {
+        result->push_back(child);
+    }, parent);
+}
+
+template<typename Node>
+void ListTree(RenderTree<Node>& tree, Node* parent, std::vector<Node*>* result)
+{
+    tree.PreorderTraverseForEach([&result](Node* child) {
+        result->push_back(child);
+    }, parent);
+}
+
+template<typename Node>
 void ListChildren(const RenderTree<Node>& tree, const Node* parent, std::vector<const Node*>* result)
 {
     tree.ForEachChild([&result](const Node* child) {
