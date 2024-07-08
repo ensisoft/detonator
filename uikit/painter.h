@@ -20,6 +20,7 @@
 
 #include <string>
 #include <optional>
+#include <variant>
 
 #include "uikit/types.h"
 
@@ -163,6 +164,32 @@ namespace uik
         // Should return true if styling was successfully parsed and understood or
         // false to indicate an error.
         virtual bool ParseStyle(const std::string& tag, const std::string& style) = 0;
+
+        using WidgetStyleProperty = std::variant<int, float, unsigned, bool>;
+
+        struct WidgetStyleKey {
+            std::string id;
+            std::string klass;
+            std::string state;
+        };
+
+        virtual bool QueryStyle(const WidgetStyleKey& key,  const std::string& attr, WidgetStyleProperty* prop) const
+        { return false; }
+
+        template<typename T>
+        inline bool QueryStyle(const WidgetStyleKey& key, const std::string& attr, T* value) const
+        {
+            WidgetStyleProperty  prop;
+            if (!QueryStyle(key, attr, &prop))
+                return false;
+
+            if (!std::holds_alternative<T>(prop))
+                return false;
+
+            *value = std::get<T>(prop);
+            return true;
+        }
+
     private:
     };
 

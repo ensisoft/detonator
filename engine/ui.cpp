@@ -1234,6 +1234,33 @@ bool UIPainter::ParseStyle(const std::string& tag, const std::string& style)
     return mStyle->ParseStyleString(tag, style);
 }
 
+bool UIPainter::QueryStyle(const WidgetStyleKey& key, const std::string& attr, WidgetStyleProperty* property) const
+{
+    const auto& prop_key = key.state.empty() ? attr : key.state + "/" + attr;
+    const auto& prop_val = GetWidgetProperty(key.id, key.klass, prop_key);
+
+    if (!prop_val.HasValue())
+        return false;
+
+    const auto& value = prop_val.GetValue();
+    if (const auto* ptr = std::get_if<int>(&value))
+        *property = *ptr;
+    else if (const auto* ptr = std::get_if<unsigned>(&value))
+        *property = *ptr;
+    else if (const auto* ptr = std::get_if<float>(&value))
+        *property = *ptr;
+    else if(const auto* ptr = std::get_if<bool>(&value))
+        *property = *ptr;
+    else
+    {
+        WARN("Incompatible style query with mismatched data types. [class='%1', key='%2']",
+             key.klass, prop_key);
+        return false;
+    }
+    return true;
+}
+
+
 void UIPainter::PushMask(const MaskStruct& mask)
 {
     if (mask.klass == "form" || mask.klass == "groupbox" || mask.klass == "scroll-area")
