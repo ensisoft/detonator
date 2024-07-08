@@ -625,8 +625,15 @@ namespace engine
         void DrawText(const std::string& text, const std::string& font_name, int font_size,
                       const gfx::FRect& rect, const gfx::Color4f & color, unsigned alignment, unsigned properties,
                       float line_height) const;
-        void FillShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape) const;
-        void OutlineShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape, float width) const;
+        enum class ShapeDirection {
+            Horizontal,
+            Vertical
+        };
+        void FillShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape,
+                       ShapeDirection direction = ShapeDirection::Horizontal) const;
+        void OutlineShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape,
+                          float width, ShapeDirection direction = ShapeDirection::Horizontal) const;
+
         bool GetMaterial(const std::string& key, gfx::Material** material) const;
         gfx::Material* GetWidgetMaterial(const std::string& id,
                                          const PaintStruct& ps,
@@ -653,7 +660,8 @@ namespace engine
                             const T& value) const;
 
         template<typename RenderPass>
-        void DrawShape(const gfx::FRect& rect, const gfx::Material& material, const RenderPass& pass, UIStyle::WidgetShape shape) const;
+        void DrawShape(const gfx::FRect& rect, const gfx::Material& material, const RenderPass& pass, UIStyle::WidgetShape shape,
+                       ShapeDirection direction) const;
 
     private:
         UIStyle* mStyle = nullptr;

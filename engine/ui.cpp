@@ -1132,33 +1132,34 @@ void UIPainter::DrawProgressBar(const WidgetId& id, const PaintStruct& ps, std::
 void UIPainter::DrawScrollBar(const WidgetId& id, const PaintStruct& ps, const uik::FRect& handle) const
 {
     const auto& rect = ps.rect;
-    const auto vertical = rect.GetHeight() > rect.GetWidth();
+    const auto direction = rect.GetHeight() > rect.GetWidth() ? ShapeDirection::Vertical : ShapeDirection::Horizontal;
 
-    const auto& Key = [vertical](std::string key) {
-        return vertical ? "vertical-" + key : "horizontal-" + key;
+    const auto& Key = [direction](std::string key) {
+        return direction == ShapeDirection::Vertical ? "vertical-" + key
+                                                     : "horizontal-" + key;
     };
 
     if (const auto* material = GetWidgetMaterial(id, ps, Key("scrollbar-background")))
     {
         const auto shape = GetWidgetProperty(id, ps, Key("scrollbar-shape"), UIStyle::WidgetShape::RoundRect);
-        FillShape(ps.rect, *material, shape);
+        FillShape(ps.rect, *material, shape, direction);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, Key("scrollbar-handle")))
     {
         const auto shape = GetWidgetProperty(id, ps, Key("scrollbar-handle-shape"), UIStyle::WidgetShape::RoundRect);
-        FillShape(handle, *material, shape);
+        FillShape(handle, *material, shape, direction);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, Key("scrollbar-handle-border")))
     {
         const auto shape = GetWidgetProperty(id, ps, Key("scrollbar-handle-shape"), UIStyle::WidgetShape::RoundRect);
         const auto width = GetWidgetProperty(id, ps, Key("scrollbar-handle-border-width"), 1.0f);
-        OutlineShape(handle, *material, shape, width);
+        OutlineShape(handle, *material, shape, width, direction);
     }
     if (const auto* material = GetWidgetMaterial(id, ps, Key("scrollbar-border")))
     {
         const auto shape = GetWidgetProperty(id, ps, Key("scrollbar-shape"), UIStyle::WidgetShape::RoundRect);
         const auto width = GetWidgetProperty(id, ps, Key("scrollbar-border-width"), 1.0f);
-        OutlineShape(ps.rect, *material, shape, width);
+        OutlineShape(ps.rect, *material, shape, width, direction);
     }
 }
 
@@ -1373,7 +1374,8 @@ uint8_t UIPainter::StencilPass() const
     {
         gfx::StencilMaskPass overlap(gfx::StencilWriteValue(stencil_val), *mPainter,
                                      gfx::StencilMaskPass::StencilFunc::OverlapIncrement);
-        DrawShape(mask.rect, gfx::CreateMaterialFromColor(gfx::Color::White), overlap, mask.shape);
+        DrawShape(mask.rect, gfx::CreateMaterialFromColor(gfx::Color::White), overlap, mask.shape,
+                  ShapeDirection::Horizontal);
         ++stencil_val;
     }
     mClippingStencilMaskValue = stencil_val;
@@ -1409,32 +1411,34 @@ void UIPainter::DrawText(const std::string& text, const std::string& font_name, 
     if (const auto value = StencilPass())
     {
         gfx::StencilTestColorWritePass pass(gfx::StencilPassValue(value), *mPainter);
-        DrawShape(rect, material, pass, UIStyle::WidgetShape::Rectangle);
+        DrawShape(rect, material, pass, UIStyle::WidgetShape::Rectangle, ShapeDirection::Horizontal);
     }
     else
     {
         gfx::GenericRenderPass pass(*mPainter);
-        DrawShape(rect, material, pass, UIStyle::WidgetShape::Rectangle);
+        DrawShape(rect, material, pass, UIStyle::WidgetShape::Rectangle, ShapeDirection::Horizontal);
     }
 
     //gfx::DrawTextRect(*mPainter, text, font_name, font_size, rect, color, alignment, properties, line_height);
 }
 
-void UIPainter::FillShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape) const
+void UIPainter::FillShape(const gfx::FRect& rect, const gfx::Material& material, UIStyle::WidgetShape shape,
+                          ShapeDirection direction ) const
 {
     if (const auto value = StencilPass())
     {
         gfx::StencilTestColorWritePass pass(gfx::StencilPassValue(value), *mPainter);
-        DrawShape(rect, material, pass, shape);
+        DrawShape(rect, material, pass, shape, direction);
     }
     else
     {
         gfx::GenericRenderPass pass(*mPainter);
-        DrawShape(rect, material, pass, shape);
+        DrawShape(rect, material, pass, shape, direction);
     }
 }
 
-void UIPainter::OutlineShape(const gfx::FRect& shape_rect, const gfx::Material& material, UIStyle::WidgetShape shape, float thickness) const
+void UIPainter::OutlineShape(const gfx::FRect& shape_rect, const gfx::Material& material, UIStyle::WidgetShape shape,
+                             float thickness, ShapeDirection direction) const
 {
     const auto width  = shape_rect.GetWidth();
     const auto height = shape_rect.GetHeight();
@@ -1455,10 +1459,10 @@ void UIPainter::OutlineShape(const gfx::FRect& shape_rect, const gfx::Material& 
 
         const gfx::StencilMaskPass mask(gfx::StencilWriteValue(0), *mPainter,
                                      gfx::StencilMaskPass::StencilFunc::Overwrite);
-        DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), mask, shape);
+        DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), mask, shape, direction);
 
         const gfx::StencilTestColorWritePass cover(stencil_value, *mPainter);
-        DrawShape(shape_rect, material, cover, shape);
+        DrawShape(shape_rect, material, cover, shape, direction);
     }
     else
     {
@@ -1469,10 +1473,10 @@ void UIPainter::OutlineShape(const gfx::FRect& shape_rect, const gfx::Material& 
         const gfx::StencilMaskPass overlap(gfx::StencilClearValue(1),
                                            gfx::StencilWriteValue(0), *mPainter,
                                            gfx::StencilMaskPass::StencilFunc::Overwrite);
-        DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), overlap, shape);
+        DrawShape(mask_rect, gfx::CreateMaterialFromColor(gfx::Color::White), overlap, shape, direction);
 
         const gfx::StencilTestColorWritePass cover(gfx::StencilPassValue(1), *mPainter);
-        DrawShape(shape_rect, material, cover, shape);
+        DrawShape(shape_rect, material, cover, shape, direction);
     }
 }
 
@@ -1767,11 +1771,23 @@ T UIPainter::GetWidgetProperty(const std::string& id,
 }
 
 template<typename RenderPass>
-void UIPainter::DrawShape(const gfx::FRect& rect, const gfx::Material& material, const RenderPass& pass, UIStyle::WidgetShape shape) const
+void UIPainter::DrawShape(const gfx::FRect& rect, const gfx::Material& material, const RenderPass& pass,
+                          UIStyle::WidgetShape shape, ShapeDirection direction) const
 {
     gfx::Transform transform;
     transform.Resize(rect);
     transform.Translate(rect);
+
+    if (direction == ShapeDirection::Vertical)
+    {
+        const auto width  = rect.GetWidth();
+        const auto height = rect.GetHeight();
+        transform.Push();
+        transform.Translate(-0.5f, -0.5f);
+        transform.RotateAroundZ(math::Pi*0.5);
+        transform.Translate(0.5f, 0.5f);
+    }
+
 
     if (shape == UIStyle::WidgetShape::Rectangle)
         pass.Draw(gfx::Rectangle(), transform, material);
