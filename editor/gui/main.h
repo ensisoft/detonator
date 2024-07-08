@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#define LOGTAG "main"
 
 #pragma once
 
@@ -27,23 +26,19 @@
 
 #include "editor/app/eventlog.h"
 
-class MyApp : public QApplication
-{
-    Q_OBJECT
-
-public:
-    MyApp(int argc, char* argv[]) : QApplication(argc, argv)
-    {}
-    virtual bool notify(QObject* receiver, QEvent* e)
+namespace gui {
+    class Editor : public QApplication
     {
-        try
-        {
-            return QApplication::notify(receiver, e);
-        }
-        catch (const std::exception& e)
-        {
-            ERROR("Uncaught exception: '%1'", e.what());
-        }
-        return false;
-    }
-};
+        Q_OBJECT
+
+    public:
+        Editor(int argc, char* argv[]) : QApplication(argc, argv)
+        {}
+        virtual bool notify(QObject* receiver, QEvent* e);
+    public:
+        static bool DebugEditor();
+        static void SetEditorDebug(bool on_off);
+    private:
+        static bool mDebugEditor;
+    };
+} // namespace
