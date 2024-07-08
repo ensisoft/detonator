@@ -724,17 +724,18 @@ void Window::Update(TransientState& state, double time, float dt, AnimationState
     }
 }
 
-void Window::Style(Painter& painter) const
+void Window::Style(Painter& painter)
 {
     if (!mStyleString.empty())
         painter.ParseStyle("window", mStyleString);
 
-    for (const auto& widget : mWidgets)
+    for (auto& widget : mWidgets)
     {
         const auto& style = widget->GetStyleString();
-        if (style.empty())
-            continue;
-        painter.ParseStyle(widget->GetId(), style);
+        if (!style.empty())
+            painter.ParseStyle(widget->GetId(), style);
+
+        widget->QueryStyle(painter);
     }
 }
 

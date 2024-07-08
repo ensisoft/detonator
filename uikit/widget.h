@@ -134,6 +134,13 @@ namespace uik
         // problem.
         virtual bool FromJson(const data::Reader& data) = 0;
 
+        // query the painter (and the underlying style) for style settings
+        // that impact the widget's functionality. for example line height
+        // or scroll bar width. These are the style settings that are needed
+        // in order to perform the widget logic properly and are thus
+        // not only stylistic but also functional.
+        virtual void QueryStyle(const Painter& painter) {}
+
         // The current transient state of the widget for painting operations.
         struct PaintEvent {
             // The widget has the current keyboard focus.
@@ -738,6 +745,7 @@ namespace uik
             WidgetAction PollAction(const PollStruct& ps);
 
             size_t GetHash(size_t hash) const;
+            void QueryStyle(const Painter& painter, const std::string& widgetId);
             void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
             void IntoJson(data::Writer& data) const;
             bool FromJson(const data::Reader& data);
@@ -788,6 +796,8 @@ namespace uik
             FRect mContentRect;
             float mVerticalScrollPos = 0.0f;
             float mHorizontalScrollPos = 0.0f;
+            float mVerticalScrollBarWidth = 25.0f;
+            float mHorizontalScrollBarHeight = 25.0f;
             base::bitflag<Flags> mFlags;
         };
 
@@ -802,6 +812,7 @@ namespace uik
             static constexpr auto HasClippingRect   = false;
             static constexpr auto HasViewportRect   = false;
             static constexpr auto HasChildTransform = false;
+            static constexpr auto HasStyleQuery     = false;
         };
 
         template<typename WidgetModel>
@@ -817,6 +828,7 @@ namespace uik
             static constexpr auto WantsPoll         = true;
             static constexpr auto HasClippingRect   = true;
             static constexpr auto HasChildTransform = true;
+            static constexpr auto HasStyleQuery     = true;
         };
 
         template<>
@@ -988,6 +1000,14 @@ namespace uik
                 hash = base::hash_combine(hash, BaseWidget::GetHash());
                 hash = base::hash_combine(hash, WidgetModel::GetHash(0));
                 return hash;
+            }
+
+            virtual void QueryStyle(const Painter& painter) override
+            {
+                if constexpr (Traits::HasStyleQuery)
+                {
+                    WidgetModel::QueryStyle(painter, mId);
+                }
             }
 
             virtual void Paint(const PaintEvent& paint, const TransientState& state, Painter& painter) const override
