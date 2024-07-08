@@ -90,6 +90,7 @@ namespace gui
         void on_actionNewProgressBar_triggered();
         void on_actionNewRadioButton_triggered();
         void on_actionNewToggleBox_triggered();
+        void on_actionNewScrollArea_triggered();
         void on_actionWidgetDelete_triggered();
         void on_actionWidgetDuplicate_triggered();
         void on_actionWidgetOrder_triggered();
@@ -135,6 +136,8 @@ namespace gui
         void on_btnResetWidgetStyle_clicked();
         void on_btnEditWidgetAnimationString_clicked();
         void on_btnResetWidgetAnimationString_clicked();
+        void on_cmbScrollAreaVerticalScrollbarMode_currentIndexChanged(int);
+        void on_cmbScrollAreaHorizontalScrollbarMode_currentIndexChanged(int);
 
         void on_btnEditWindowStyle_clicked();
         void on_btnEditWindowStyleString_clicked();
