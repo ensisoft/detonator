@@ -580,6 +580,7 @@ namespace engine
         virtual void DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob, bool on_off) const override;
         virtual void EndDrawWidgets() override;
         virtual bool ParseStyle(const std::string& tag, const std::string& style) override;
+        virtual bool QueryStyle(const WidgetStyleKey& key, const std::string& attr, WidgetStyleProperty* property) const override;
 
         virtual void PushMask(const MaskStruct& mask) override;
         virtual void PopMask() override;
