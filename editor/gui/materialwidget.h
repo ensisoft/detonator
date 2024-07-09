@@ -189,5 +189,6 @@ namespace gui
         std::size_t mOriginalHash = 0;
         std::vector<Uniform*> mUniforms;
         std::vector<Sampler*> mSamplers;
+
     };
 } // namespace

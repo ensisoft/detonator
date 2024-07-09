@@ -2357,6 +2357,7 @@ private:
             {
                 GL_CALL(glDeleteShader(shader));
                 ERROR("Shader compile error. [name='%1', info='%2']", mName, compile_info);
+                mError = compile_info;
                 return;
             }
             else
@@ -2371,6 +2372,8 @@ private:
         { return mShader != 0; }
         virtual std::string GetName() const override
         { return mName; }
+        virtual std::string GetError() const override
+        { return mError; }
 
         inline void SetName(std::string name) noexcept
         { mName = std::move(name); }
@@ -2385,6 +2388,7 @@ private:
         GLuint mShader  = 0;
         GLuint mVersion = 0;
         std::string mName;
+        std::string mError;
     };
     struct Extensions;
 
