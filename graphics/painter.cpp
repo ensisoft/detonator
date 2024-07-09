@@ -203,7 +203,12 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
             material_shader = mDevice->CreateShader(material_gpu_id, args);
         }
         if (!material_shader->IsValid())
+        {
+            auto error = material_shader->GetError();
+            if (!error.empty())
+                mErrors.push_back(std::move(error));
             return nullptr;
+        }
 
         ShaderPtr drawable_shader = mDevice->FindShader(drawable_gpu_id);
         if (drawable_shader == nullptr)
@@ -218,7 +223,12 @@ ProgramPtr Painter::GetProgram(const ShaderProgram& program,
             drawable_shader = mDevice->CreateShader(drawable_gpu_id, args);
         }
         if (!drawable_shader->IsValid())
+        {
+            auto error = drawable_shader->GetError();
+            if (!error.empty())
+                mErrors.push_back(std::move(error));
             return nullptr;
+        }
 
         const auto& gpu_program_name = base::FormatString("%1(%2, %3)",
                                               program.GetName(),

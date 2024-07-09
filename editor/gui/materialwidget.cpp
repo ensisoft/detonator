@@ -301,6 +301,8 @@ void MaterialWidget::ReloadShaders()
     // reset material instance so that any one time error logging will take place.
     mMaterialInst.reset();
 
+    mUI.widget->GetPainter()->ClearErrors();
+
     NOTE("Reloaded shaders.");
 }
 void MaterialWidget::ReloadTextures()
@@ -2223,6 +2225,11 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
     if (mMaterialInst->HasError())
     {
         ShowError("Error in material!", gfx::FPoint(10.0f, 10.0f), painter);
+    }
+    if (painter.GetErrorCount())
+    {
+        ShowMessage("Shader compile error:", gfx::FPoint(10.0f, 10.0f), painter);
+        ShowMessage(painter.GetError(0), gfx::FPoint(10.0f, 30.0f), painter);
     }
 }
 

@@ -37,6 +37,8 @@ namespace gfx
         // Get the (human-readable) name for the shader object.
         // Used for improved debug/log messages.
         virtual std::string GetName() const { return ""; }
+        // Get the (human-readable) shader (compile) error string if any.
+        virtual std::string GetError() const { return ""; };
     private:
     };
 
