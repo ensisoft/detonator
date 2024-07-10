@@ -28,24 +28,30 @@
 #include "graphics/text.h"
 #include "graphics/material.h"
 
+namespace app {
+    class Workspace;
+} // app
+
 namespace gui
 {
     class DlgText : public QDialog
     {
         Q_OBJECT
     public:
-        DlgText(QWidget* parent, gfx::TextBuffer& text);
+        DlgText(QWidget* parent, const app::Workspace* workspace, gfx::TextBuffer& text);
 
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
-        void on_btnFont_clicked();
+        void on_btnSelectFont_clicked();
+        void on_btnBrowseFont_clicked();
         void on_btnAdjust_clicked();
     private:
         void PaintScene(gfx::Painter& painter, double secs);
     private:
         Ui::DlgText mUI;
     private:
+        const app::Workspace* mWorkspace = nullptr;
         gfx::TextBuffer& mText;
         QTimer mTimer;
         bool mAdjustOnce = false;

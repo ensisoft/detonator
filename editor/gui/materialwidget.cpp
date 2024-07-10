@@ -605,7 +605,7 @@ void MaterialWidget::on_btnEditTexture_clicked()
         {
             // make a copy for editing.
             gfx::TextBuffer text(ptr->GetTextBuffer());
-            DlgText dlg(this, text);
+            DlgText dlg(this, mWorkspace, text);
             if (dlg.exec() == QDialog::Rejected)
                 return;
 
@@ -943,7 +943,7 @@ void MaterialWidget::AddNewTextureMapFromText()
     // anything set in this text buffer will be default
     // when the dialog is opened.
     gfx::TextBuffer text(100, 100);
-    DlgText dlg(this, text);
+    DlgText dlg(this, mWorkspace, text);
     if (dlg.exec() == QDialog::Rejected)
         return;
 
