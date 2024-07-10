@@ -27,14 +27,17 @@
 #include "graphics/text.h"
 #include "graphics/drawing.h"
 #include "graphics/material.h"
+#include "editor/app/workspace.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/dlgtext.h"
+#include "editor/gui/dlgfont.h"
 
 namespace gui
 {
 
-DlgText::DlgText(QWidget* parent, gfx::TextBuffer& text)
+DlgText::DlgText(QWidget* parent, const app::Workspace* workspace, gfx::TextBuffer& text)
     : QDialog(parent)
+    , mWorkspace(workspace)
     , mText(text)
 {
     mUI.setupUi(this);
@@ -83,14 +86,30 @@ void DlgText::on_btnCancel_clicked()
 {
     reject();
 }
-void DlgText::on_btnFont_clicked()
+void DlgText::on_btnSelectFont_clicked()
 {
-    const auto& list = QFileDialog::getOpenFileNames(this,
-        tr("Select Font File"), "", tr("Font (*.ttf *.otf)"));
-    if (list.isEmpty())
+    DlgFont::DisplaySettings disp;
+    disp.font_size  = GetValue(mUI.fontSize);
+    disp.underline  = GetValue(mUI.underline);
+    disp.text_color = Qt::darkGray;
+
+    QString current_font = GetValue(mUI.cmbFont);
+    DlgFont dlg(this, mWorkspace, current_font, disp);
+    if (dlg.exec() == QDialog::Rejected)
         return;
 
-    mUI.cmbFont->setCurrentText(list[0]);
+    SetValue(mUI.cmbFont, dlg.GetSelectedFontURI());
+}
+
+void DlgText::on_btnBrowseFont_clicked()
+{
+    const auto& font = QFileDialog::getOpenFileName(this,
+        tr("Select Font File"), "", tr("Font (*.ttf *.otf)"));
+    if (font.isEmpty())
+        return;
+    const auto& uri = mWorkspace->MapFileToWorkspace(font);
+
+    SetValue(mUI.cmbFont, uri);
 }
 
 void DlgText::on_btnAdjust_clicked()
