@@ -1965,11 +1965,27 @@ void UIWidget::TreeCurrentWidgetChangedEvent()
 
 void UIWidget::TreeDragEvent(TreeWidget::TreeItem* item, TreeWidget::TreeItem* target)
 {
+    auto& tree = mState.window.GetRenderTree();
+
     auto* src_widget = static_cast<uik::Widget*>(item->GetUserData());
     auto* dst_widget = static_cast<uik::Widget*>(target->GetUserData());
+
+    // let the sibling widgets to be re-arranged by changing
+    // the relative order of the widgets by shuffling the
+    // widgets around according to their current indices
+    if (dst_widget && src_widget && !dst_widget->IsContainer())
+    {
+        auto* dst_parent = tree.GetParent(dst_widget);
+        auto* src_parent = tree.GetParent(src_widget);
+        if (dst_parent == src_parent)
+        {
+            tree.ReOrderChildren(dst_parent, src_widget, dst_widget);
+            return;
+        }
+    }
+
     if (dst_widget && !dst_widget->IsContainer())
         return;
-    auto& tree = mState.window.GetRenderTree();
 
     // check if we're trying to drag a parent onto its own child.
     if (base::SearchChild(tree, dst_widget, src_widget))
@@ -3060,6 +3076,7 @@ QString GenerateUIScriptSource(QString window)
 -- UI Window '%1' script.
 -- This script will be called for every instance of '%1'.
 -- You're free to delete functions you don't need.
+
 --
 -- Called whenever the UI has been opened. This is a good place for
 -- setting some initial widget state.

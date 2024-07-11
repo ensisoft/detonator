@@ -1159,6 +1159,13 @@ Window& Window::operator=(const Window& other)
     return *this;
 }
 
+void Window::SwapWidgetPosition(size_t src_index, size_t dst_index)
+{
+    ASSERT(src_index < mWidgets.size());
+    ASSERT(dst_index < mWidgets.size());
+    std::swap(mWidgets[src_index], mWidgets[dst_index]);
+}
+
 bool Window::FromJson(const data::Reader& data)
 {
     bool ok = true;
