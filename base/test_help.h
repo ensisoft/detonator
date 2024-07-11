@@ -70,6 +70,15 @@ static bool operator!=(const glm::quat& lhs, const glm::quat& rhs)
 #endif
 
 namespace base {
+static bool operator==(const FDegrees& lhs, const FDegrees& rhs)
+{
+    return lhs.GetValue() == rhs.GetValue();
+}
+static bool operator==(const FRadians& lhs, const FRadians& rhs)
+{
+    return lhs.GetValue() == rhs.GetValue();
+}
+
 static bool operator==(const Color4f& lhs, const Color4f& rhs)
 {
     return real::equals(lhs.Red(), rhs.Red()) &&

@@ -60,6 +60,8 @@ namespace data
         virtual bool Read(const char* name, glm::vec2* out) const override;
         virtual bool Read(const char* name, glm::vec3* out) const override;
         virtual bool Read(const char* name, glm::vec4* out) const override;
+        virtual bool Read(const char* name, base::FDegrees* degrees) const override;
+        virtual bool Read(const char* name, base::FRadians* radians) const override;
         virtual bool Read(const char* name, base::FRect* rect) const override;
         virtual bool Read(const char* name, base::FPoint* point) const override;
         virtual bool Read(const char* name, base::FSize* point) const override;
@@ -84,6 +86,8 @@ namespace data
         virtual void Write(const char* name, const glm::vec2& value) override;
         virtual void Write(const char* name, const glm::vec3& value) override;
         virtual void Write(const char* name, const glm::vec4& value) override;
+        virtual void Write(const char* name, const base::FDegrees& degrees) override;
+        virtual void Write(const char* name, const base::FRadians& radians) override;
         virtual void Write(const char* name, const base::FRect& value) override;
         virtual void Write(const char* name, const base::FPoint& value) override;
         virtual void Write(const char* name, const base::FSize& value) override;
