@@ -102,6 +102,29 @@ bool JsonObject::Read(const char* name, glm::vec4* out) const
 {
     return base::JsonReadSafe(*mJson, name, out);
 }
+
+bool JsonObject::Read(const char* name, base::FDegrees* degrees) const
+{
+    float value = 0.0f;
+    if (base::JsonReadSafe(*mJson, name, &value))
+    {
+        *degrees = base::FDegrees { value };
+        return true;
+    }
+    return false;
+}
+
+bool JsonObject::Read(const char* name, base::FRadians* radians) const
+{
+    float value = 0.0f;
+    if (base::JsonReadSafe(*mJson, name, &value))
+    {
+        *radians = base::FRadians { value };
+        return true;
+    }
+    return false;
+}
+
 bool JsonObject::Read(const char* name, base::FRect* out) const
 {
     return base::JsonReadSafe(*mJson, name, out);
@@ -212,6 +235,15 @@ void JsonObject::Write(const char* name, const glm::vec4& value)
 {
     base::JsonWrite(*mJson, name, value);
 }
+void JsonObject::Write(const char* name, const base::FDegrees& degrees)
+{
+    base::JsonWrite(*mJson, name, degrees.GetValue());
+}
+void JsonObject::Write(const char* name, const base::FRadians& radians)
+{
+    base::JsonWrite(*mJson, name, radians.GetValue());
+}
+
 void JsonObject::Write(const char* name, const base::FRect& value)
 {
     base::JsonWrite(*mJson, name, value);

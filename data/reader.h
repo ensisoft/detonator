@@ -58,6 +58,8 @@ namespace data
         virtual bool Read(const char* name, glm::vec2* out) const = 0;
         virtual bool Read(const char* name, glm::vec3* out) const = 0;
         virtual bool Read(const char* name, glm::vec4* out) const = 0;
+        virtual bool Read(const char* name, base::FDegrees* degrees) const = 0;
+        virtual bool Read(const char* name, base::FRadians* radians) const = 0;
         virtual bool Read(const char* name, base::FRect* rect) const = 0;
         virtual bool Read(const char* name, base::FPoint* point) const = 0;
         virtual bool Read(const char* name, base::FSize* point) const = 0;

@@ -52,6 +52,8 @@ namespace data
         virtual void Write(const char* name, const glm::vec2& vec) = 0;
         virtual void Write(const char* name, const glm::vec3& vec) = 0;
         virtual void Write(const char* name, const glm::vec4& vec) = 0;
+        virtual void Write(const char* name, const base::FDegrees& degrees) = 0;
+        virtual void Write(const char* name, const base::FRadians& radians) = 0;
         virtual void Write(const char* name, const base::FRect& rect) = 0;
         virtual void Write(const char* name, const base::FPoint& point) = 0;
         virtual void Write(const char* name, const base::FSize& point) = 0;

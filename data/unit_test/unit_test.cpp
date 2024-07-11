@@ -59,6 +59,8 @@ void unit_test_basic()
     json.Write("size", base::FSize(50.0f, 50.0f));
     json.Write("color", base::Color4f(base::Color::HotPink));
     json.Write("rotation", base::Rotator(1.0f, 2.0f, 3.0f, 4.0f));
+    json.Write("radians", base::FRadians(2.5f));
+    json.Write("degrees", base::FDegrees(1.5f));
 
     TEST_REQUIRE(json.HasValue("double"));
     TEST_REQUIRE(json.HasValue("float"));
@@ -92,6 +94,8 @@ void unit_test_basic()
     TestValue("size", json, base::FSize(50.0f, 50.0f));
     TestValue("color", json, base::Color4f(base::Color::HotPink));
     TestValue("rotation", json, base::Rotator(1.0f, 2.0f, 3.0f, 4.0f));
+    TestValue("radians", json, base::FRadians(2.5f));
+    TestValue("degrees", json, base::FDegrees(1.5f));
 }
 
 void unit_test_bitflag()
