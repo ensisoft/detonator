@@ -1600,6 +1600,25 @@ namespace gfx
             return Is3DShape(instance->GetShape());
         else BUG("Unknown drawable shape type.");
     }
+    inline bool Is3DShape(const DrawableClass& klass)
+    {
+        const auto type = klass.GetType();
+        if (type == Drawable::Type::Polygon)
+        {
+            if (const auto* polygon = dynamic_cast<const PolygonMeshClass*>(&klass))
+            {
+                const auto mesh = polygon->GetMeshType();
+                if (mesh == PolygonMeshClass::MeshType::Simple3D ||
+                    mesh == PolygonMeshClass::MeshType::Model3D)
+                    return true;
+            }
+        }
+        if (type != DrawableClass::Type::SimpleShape)
+            return false;
+        if (const auto* simple = dynamic_cast<const SimpleShapeClass*>(&klass))
+            return Is3DShape(simple->GetShapeType());
+        else BUG("Unknown drawable shape type");
+    }
 
     inline SimpleShapeType GetSimpleShapeType(const Drawable& drawable)
     {
