@@ -147,6 +147,32 @@ namespace base
             mChildren[parent].push_back(child);
             mParents[child] = parent;
         }
+
+        // re-order the children so that the node 'before' comes right before
+        // the 'after' node
+        void ReOrderChildren(const Element* parent, const Element* before, const Element* after)
+        {
+            auto it = mChildren.find(parent);
+            if (it == mChildren.end())
+                return;
+            auto& children = it->second;
+            size_t before_index = 0;
+            size_t after_index  = 0;
+            for (; before_index<children.size(); ++before_index) {
+                if (children[before_index] == before)
+                    break;
+            }
+            for (; after_index<children.size(); ++after_index) {
+                if (children[after_index] == after)
+                    break;
+            }
+            if (before_index == children.size() || after_index == children.size())
+                return;
+
+            children.erase(children.begin() + before_index);
+            children.insert(children.begin() + after_index, before);
+        }
+
         // Break a child node away from its parent. The descendants
         // of child are still retained as node's children.
         // If the child node is currently not linked to any parent
