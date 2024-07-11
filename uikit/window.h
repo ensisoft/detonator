@@ -386,6 +386,8 @@ namespace uik
         const Widget* HitTest(float x, float y, FPoint* widget_coord = nullptr, bool consider_flags = false, bool do_clipping = false) const
         { return HitTest(FPoint(x, y), widget_coord, consider_flags, do_clipping); }
 
+        void SwapWidgetPosition(size_t src_index, size_t dst_index);
+
         Window& operator=(const Window& other);
 
         bool FromJson(const data::Reader& data);
