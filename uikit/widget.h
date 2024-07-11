@@ -983,12 +983,13 @@ namespace uik
 
             BasicWidget()
             {
-                mId   = base::RandomString(10);
-                mSize = FSize(Traits::InitialWidth, Traits::InitialHeight);
-                mFlags.set(Flags::Enabled, true);
-                mFlags.set(Flags::VisibleInGame, true);
-                mFlags.set(Flags::VisibleInEditor, true);
-                mFlags.set(Flags::ClipChildren, true);
+                InitDefault();
+            }
+
+            template<typename... Args>
+            BasicWidget(Args&&... args) : WidgetModel(std::forward<Args>(args)...)
+            {
+                InitDefault();
             }
 
             virtual Type GetType() const override
@@ -1193,6 +1194,16 @@ namespace uik
                 return FPoint(0.0f, 0.0f);
             }
         protected:
+        private:
+            void InitDefault()
+            {
+                mId   = base::RandomString(10);
+                mSize = FSize(Traits::InitialWidth, Traits::InitialHeight);
+                mFlags.set(Flags::Enabled,         true);
+                mFlags.set(Flags::VisibleInGame,   true);
+                mFlags.set(Flags::VisibleInEditor, true);
+                mFlags.set(Flags::ClipChildren,    true);
+            }
         };
     } // detail
 
