@@ -460,23 +460,23 @@ namespace app
     private:
     };
 
-    template<typename BaseType, typename Content = BaseType>
+    template<typename BaseType, typename DerivedType = BaseType>
     class GameResource : public GameResourceBase<BaseType>
     {
     public:
         static constexpr auto TypeValue = detail::ResourceTypeTraits<BaseType>::Type;
 
-        GameResource(const Content& content, const AnyString& name)
+        GameResource(const DerivedType& content, const AnyString& name)
         {
-            mContent = std::make_shared<Content>(content);
+            mContent = std::make_shared<DerivedType>(content);
             SetName(name);
         }
-        GameResource(Content&& content, const AnyString& name)
+        GameResource(DerivedType&& content, const AnyString& name)
         {
-            mContent = std::make_shared<Content>(std::move(content));
+            mContent = std::make_shared<DerivedType>(std::move(content));
             SetName(name);
         }
-        GameResource(std::shared_ptr<Content> content, const AnyString& name)
+        GameResource(std::shared_ptr<DerivedType> content, const AnyString& name)
         {
             mContent = content;
             SetName(name);
@@ -485,23 +485,23 @@ namespace app
         GameResource(std::unique_ptr<T> content, const AnyString& name)
         {
             std::shared_ptr<T> shared(std::move(content));
-            mContent = std::static_pointer_cast<Content>(shared);
+            mContent = std::static_pointer_cast<DerivedType>(shared);
             SetName(name);
         }
         template<typename T>
         GameResource(std::shared_ptr<T> content, const AnyString& name)
         {
-            mContent = std::static_pointer_cast<Content>(content);
+            mContent = std::static_pointer_cast<DerivedType>(content);
             SetName(name);
         }
         GameResource(const AnyString& name)
         {
-            mContent = std::make_shared<Content>();
+            mContent = std::make_shared<DerivedType>();
             SetName(name);
         }
         GameResource(const GameResource& other)
         {
-            mContent   = std::make_shared<Content>(*other.mContent);
+            mContent   = std::make_shared<DerivedType>(*other.mContent);
             mProps     = other.mProps;
             mUserProps = other.mUserProps;
             mPrimitive = other.mPrimitive;
@@ -608,9 +608,9 @@ namespace app
         virtual std::shared_ptr<BaseType> GetSharedResource() override
         { return mContent; }
 
-        Content* GetContent()
+        DerivedType* GetContent()
         { return mContent.get(); }
-        const Content* GetContent() const
+        const DerivedType* GetContent() const
         { return mContent.get(); }
         const QVariantMap& GetProperties() const
         { return mProps;}
@@ -628,13 +628,13 @@ namespace app
     protected:
         virtual void* GetIf(const std::type_info& expected_type) override
         {
-            if (typeid(Content) == expected_type)
+            if (typeid(DerivedType) == expected_type)
                 return (void*)mContent.get();
             return nullptr;
         }
         virtual const void* GetIf(const std::type_info& expected_type) const override
         {
-            if (typeid(Content) == expected_type)
+            if (typeid(DerivedType) == expected_type)
                 return (const void*)mContent.get();
             return nullptr;
         }
@@ -647,7 +647,7 @@ namespace app
         virtual QVariant GetUserVariantProperty(const PropertyKey& key) const override
         { return mUserProps[key]; }
     private:
-        std::shared_ptr<Content> mContent;
+        std::shared_ptr<DerivedType> mContent;
         QVariantMap mProps;
         QVariantMap mUserProps;
         bool mPrimitive = false;
