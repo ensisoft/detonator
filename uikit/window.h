@@ -97,10 +97,11 @@ namespace uik
 
         // Add a new widget instance to the window.
         template<typename WidgetType>
-        auto AddWidget(WidgetType&& widget)
+        WidgetType* AddWidget(const WidgetType& widget)
         {
-            auto w = std::make_unique<std::decay_t<WidgetType>>(std::forward<WidgetType>(widget));
-            return (std::decay_t<WidgetType>*)AddWidgetPtr(std::move(w));
+            auto w = std::make_unique<WidgetType>(widget);
+
+            return (WidgetType*)AddWidgetPtr(std::move(w));
         }
 
         Widget* DuplicateWidget(const Widget* widget);
