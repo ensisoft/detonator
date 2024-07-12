@@ -64,7 +64,9 @@ namespace uik
             ProgressBar,
             // An area that can be bigger than the widget's own size
             // and lets the user to scroll the contents vertically/horizontally
-            ScrollArea
+            ScrollArea,
+            // A widget that refers to a drawable shape and material
+            ShapeWidget
         };
 
         enum class Flags {
@@ -801,6 +803,51 @@ namespace uik
             base::bitflag<Flags> mFlags;
         };
 
+        class ShapeModel
+        {
+        public:
+            ShapeModel() = default;
+            ShapeModel(std::string drawableId, std::string materialId)
+              : mDrawableId(std::move(drawableId))
+              , mMaterialId(std::move(materialId))
+            {}
+
+            inline void SetDrawableId(std::string id)
+            { mDrawableId = std::move(id); }
+            inline void SetMaterialId(std::string id)
+            { mMaterialId = std::move(id); }
+            inline std::string GetDrawableId() const
+            { return mDrawableId; }
+            inline std::string GetMaterialId() const
+            { return mMaterialId; }
+            inline uik::FPoint GetContentRotationCenter() const noexcept
+            { return mContentRotationCenter; }
+
+            inline void SetContentRotationCenter(uik::FPoint point)
+            { mContentRotationCenter = point; }
+
+            template<typename Unit>
+            inline void SetContentRotation(const FAngle<Unit> angle) noexcept
+            { mContentRotation = angle; }
+
+            template<typename Unit>
+            inline void RotateContent(const FAngle<Unit> angle) noexcept
+            { mContentRotation += angle; }
+
+            inline FRadians GetContentRotation() const noexcept
+            { return mContentRotation; }
+
+            std::size_t GetHash(size_t hash) const;
+            void Paint(const PaintEvent& paint, const PaintStruct& ps) const;
+            void IntoJson(data::Writer& data) const;
+            bool FromJson(const data::Reader& data);
+        private:
+            std::string mDrawableId;
+            std::string mMaterialId;
+            uik::FRadians mContentRotation;
+            uik::FPoint  mContentRotationCenter;
+        };
+
 
         struct WidgetTraits {
             static constexpr auto InitialWidth      = 100;
@@ -817,6 +864,14 @@ namespace uik
 
         template<typename WidgetModel>
         struct WidgetModelTraits;
+
+        template<>
+        struct WidgetModelTraits<ShapeModel> : public WidgetTraits
+        {
+            static constexpr auto Type = Widget::Type::ShapeWidget;
+            static constexpr auto InitialWidth  = 100;
+            static constexpr auto InitialHeight = 100;
+        };
 
         template<>
         struct WidgetModelTraits<ScrollAreaModel> : public WidgetTraits
@@ -1218,6 +1273,7 @@ namespace uik
     using Form        = detail::BasicWidget<detail::FormModel>;
     using RadioButton = detail::BasicWidget<detail::RadioButtonModel>;
     using ScrollArea  = detail::BasicWidget<detail::ScrollAreaModel>;
+    using ShapeWidget = detail::BasicWidget<detail::ShapeModel>;
 
     template<typename T>
     T* WidgetCast(Widget* widget)

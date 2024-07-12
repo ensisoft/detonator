@@ -1866,6 +1866,61 @@ float ScrollAreaModel::ComputeContentHeight(const FRect& content) const
     return content.GetHeight();
 }
 
+std::size_t ShapeModel::GetHash(size_t hash) const
+{
+    hash = base::hash_combine(hash, mDrawableId);
+    hash = base::hash_combine(hash, mMaterialId);
+    hash = base::hash_combine(hash, mContentRotation);
+    hash = base::hash_combine(hash, mContentRotationCenter);
+    return hash;
+}
+
+void ShapeModel::Paint(const PaintEvent& paint, const PaintStruct& ps) const
+{
+    Painter::PaintStruct p;
+    p.focused = false;
+    p.pressed = false;
+    p.moused  = false;
+    p.enabled = paint.enabled;
+    p.rect    = paint.rect;
+    p.clip    = paint.clip;
+    p.time    = paint.time;
+    p.klass   = "shape-widget";
+
+    if (mDrawableId.empty())
+    {
+        return;
+    }
+    if (mMaterialId.empty())
+    {
+        return;
+    }
+
+    Painter::Shape shape;
+    shape.drawableId = mDrawableId;
+    shape.materialId = mMaterialId;
+    shape.rotation   = mContentRotation.ToRadians();
+    shape.rotation_point = mContentRotationCenter;
+    ps.painter->DrawShape(ps.widgetId, p, shape);
+}
+
+void ShapeModel::IntoJson(data::Writer& data) const
+{
+    data.Write("drawable", mDrawableId);
+    data.Write("material", mMaterialId);
+    data.Write("content_rotation", mContentRotation);
+    data.Write("content_rotation_center", mContentRotationCenter);
+}
+bool ShapeModel::FromJson(const data::Reader& data)
+{
+    bool ok = true;
+    ok &= data.Read("drawable", &mDrawableId);
+    ok &= data.Read("material", &mMaterialId);
+    ok &= data.Read("content_rotation", &mContentRotation);
+    ok &= data.Read("content_rotation_center", &mContentRotationCenter);
+    return ok;
+}
+
 } // namespace detail
 
 void Widget::SetColor(const std::string& key, const Color4f& color)
@@ -1925,6 +1980,8 @@ std::unique_ptr<Widget> CreateWidget(uik::Widget::Type type)
         return std::make_unique<uik::ToggleBox>();
     else if (type == Widget::Type::ScrollArea)
         return std::make_unique<uik::ScrollArea>();
+    else if (type == Widget::Type::ShapeWidget)
+        return std::make_unique<uik::ShapeWidget>();
     else BUG("Unhandled widget type.");
     return nullptr;
 }
@@ -1954,6 +2011,8 @@ std::string Widget::GetWidgetClassName(uik::Widget::Type type)
         return "togglebox";
     else if (type == Widget::Type::ScrollArea)
         return "scroll-area";
+    else if (type == Widget::Type::ShapeWidget)
+        return "shape-widget";
     else BUG("Unhandled widget type.");
     return "";
 }
@@ -1983,6 +2042,8 @@ Widget::Type Widget::GetWidgetClassType(const std::string& klass)
         return Widget::Type::ToggleBox;
     else if (klass == "scroll-area")
         return Widget::Type::ScrollArea;
+    else if (klass == "shape-widget")
+        return Widget::Type::ShapeWidget;
     else BUG("No such widget class.");
     return Widget::Type::RadioButton;
 }
