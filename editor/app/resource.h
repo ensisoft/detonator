@@ -209,6 +209,13 @@ namespace app
         { return GetType() == Type::UI; }
         inline bool IsTilemap() const
         { return GetType() == Type::Tilemap; }
+        inline bool IsDrawable() const
+        { return GetType() == Type::Drawable; }
+
+        inline bool IsAnyDrawableType() const
+        {
+            return IsDrawable() || IsParticleEngine() || IsCustomShape();
+        }
 
         // property helpers.
         inline void SetProperty(const PropertyKey& key, const PropertyValue& value)
@@ -275,6 +282,24 @@ namespace app
             return true;
         }
 
+        bool GetContent(const gfx::DrawableClass** content) const
+        {
+            if (IsAnyDrawableType())
+            {
+                *content = static_cast<const gfx::DrawableClass*>(GetRaw());
+                return true;
+            }
+            return false;
+        }
+        bool GetContent(gfx::DrawableClass** content)
+        {
+            if (IsAnyDrawableType())
+            {
+                *content = static_cast<gfx::DrawableClass*>(GetRaw());
+                return true;
+            }
+            return false;
+        }
 
         template<typename Content>
         bool GetContent(Content** content)
@@ -333,6 +358,8 @@ namespace app
             return QIcon();
         }
     protected:
+        virtual void* GetRaw() = 0;
+        virtual const void* GetRaw() const = 0;
         virtual void* GetIf(const std::type_info& expected_type) = 0;
         virtual const void* GetIf(const std::type_info& expected_type) const = 0;
         virtual void SetVariantProperty(const PropertyKey& key, const QVariant& value) = 0;
@@ -626,6 +653,15 @@ namespace app
         GameResource& operator=(const GameResource& other) = delete;
 
     protected:
+        virtual void* GetRaw() override
+        {
+            return mContent.get();
+        }
+        virtual const void* GetRaw() const override
+        {
+            return mContent.get();
+        }
+
         virtual void* GetIf(const std::type_info& expected_type) override
         {
             if (typeid(DerivedType) == expected_type)
