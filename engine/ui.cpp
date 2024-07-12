@@ -1206,6 +1206,111 @@ void UIPainter::DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik:
     }
 }
 
+void UIPainter::DrawShape(const WidgetId& widgetId, const PaintStruct& ps, const Shape& shape) const
+{
+    if (mClassLib == nullptr)
+        return;
+
+    WidgetDrawable* drawable = nullptr;
+    WidgetMaterial* material = nullptr;
+    for (size_t i=0; i<mWidgetMaterials.size(); ++i)
+    {
+        material = &mWidgetMaterials[i];
+        if (material->widget == widgetId)
+            break;
+        material = nullptr;
+    }
+    for (size_t i=0; i<mWidgetDrawables.size(); ++i)
+    {
+        drawable = &mWidgetDrawables[i];
+        if (drawable->widget == widgetId)
+            break;
+        drawable = nullptr;
+    }
+    if (drawable == nullptr)
+    {
+        WidgetDrawable d;
+        d.widget = widgetId;
+        mWidgetDrawables.push_back(std::move(d));
+        drawable = &mWidgetDrawables.back();
+    }
+    if (material == nullptr)
+    {
+        WidgetMaterial m;
+        m.widget = widgetId;
+        mWidgetMaterials.push_back(std::move(m));
+        material = &mWidgetMaterials.back();
+    }
+
+    auto CreateDrawable = [this](const std::string& drawableId,
+                                 const std::string& widgetId, const uik::FRect& rect,
+                                 WidgetDrawable& draw) {
+        if (draw.drawable) {
+            const auto& klass = draw.drawable->GetClass();
+            if (klass->GetId() == drawableId)
+                return true;
+            draw.drawable.reset();
+        }
+        const auto& klass = mClassLib->FindDrawableClassById(drawableId);
+        if (klass == nullptr) {
+            WARN("No such drawable class was found. [id='%1', widget='%2']",
+                 drawableId, widgetId);
+            return false;
+        }
+
+        gfx::Transform transform;
+        transform.Resize(rect);
+        transform.Translate(rect);
+
+        const auto& world = glm::mat4(1.0f);
+        const auto& model = transform.GetAsMatrix();
+
+        gfx::Drawable::Environment env;
+        env.model_matrix = &model;
+        env.world_matrix = &world;
+
+        draw.drawable = gfx::CreateDrawableInstance(klass);
+        draw.drawable->Restart(env);
+        return true;
+    };
+    auto CreateMaterial = [this](const std::string& materialId, const std::string& widgetId, WidgetMaterial& mat) {
+        if (mat.material) {
+            const auto& klass = mat.material->GetClass();
+            if (klass->GetId() == materialId)
+                return true;
+            mat.material.reset();
+        }
+        const auto& klass = mClassLib->FindMaterialClassById(materialId);
+        if (klass == nullptr) {
+            WARN("No such material class was found. [id='%1', widget='%2']",
+                 materialId, widgetId);
+            return false;
+        }
+        mat.material = gfx::CreateMaterialInstance(klass);
+        return true;
+    };
+
+    if (!CreateDrawable(shape.drawableId, widgetId, ps.rect, *drawable) ||
+        !CreateMaterial(shape.materialId, widgetId, *material))
+        return;
+
+    gfx::Transform transform;
+    transform.Resize(ps.rect);
+    transform.Translate(ps.rect);
+        transform.Push();
+        transform.Translate(-shape.rotation_point.GetX(),
+                            -shape.rotation_point.GetY());
+        transform.RotateAroundZ(shape.rotation);
+        transform.Translate(shape.rotation_point.GetX(),
+                            shape.rotation_point.GetY());
+
+    mPainter->Draw(*drawable->drawable, transform, *material->material);
+
+    material->used = true;
+    drawable->used = true;
+    drawable->rect = ps.rect;
+}
+
 void UIPainter::BeginDrawWidgets()
 {
     // see EndDrawWidgets for more details
@@ -1213,7 +1318,10 @@ void UIPainter::BeginDrawWidgets()
     {
         material.used = false;
     }
-
+    for (auto& drawable : mWidgetDrawables)
+    {
+        drawable.used = false;
+    }
     mClippingStencilMaskValue.reset();
 }
 
@@ -1342,12 +1450,30 @@ void UIPainter::DeleteMaterialInstanceByClassId(const std::string& id)
     });
 }
 
+void UIPainter::DeleteDrawableInstanceByClassId(const std::string& id)
+{
+    base::EraseRemove(mWidgetDrawables, [id](const auto& drawable) {
+        if (!drawable.drawable)
+            return false;
+
+        const auto& klass = drawable.drawable->GetClass();
+        if (klass->GetId() == id)
+            return true;
+
+        return false;
+    });
+}
+
 void UIPainter::DeleteMaterialInstances()
 {
     mMaterials.clear();
     mWidgetMaterials.clear();
 }
 
+void UIPainter::DeleteDrawableInstances()
+{
+    mWidgetDrawables.clear();
+}
 
 void UIPainter::Update(double time, float dt)
 {
@@ -1362,6 +1488,28 @@ void UIPainter::Update(double time, float dt)
     {
         if (it.material)
             it.material->Update(dt);
+    }
+
+    for (auto& it : mWidgetDrawables)
+    {
+        if (it.drawable)
+        {
+            gfx::Transform transform;
+            transform.Resize(it.rect.GetSize());
+            transform.Translate(it.rect.GetPosition());
+
+            const auto& world = glm::mat4(1.0f);
+            const auto& model = transform.GetAsMatrix();
+
+            gfx::Drawable::Environment env;
+            env.editing_mode = false; // todo:
+            env.model_matrix = &model;
+            env.world_matrix = &world;
+            // todo: more matrices
+            it.drawable->Update(env, dt);
+            if (!it.drawable->IsAlive())
+                it.drawable->Restart(env);
+        }
     }
 }
 

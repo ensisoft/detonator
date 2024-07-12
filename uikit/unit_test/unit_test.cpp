@@ -98,6 +98,10 @@ public:
     {
 
     }
+    virtual void DrawShape(const WidgetId& id, const PaintStruct& ps, const Shape& shape) const override
+    {
+
+    }
 
     virtual void PushMask(const MaskStruct& mask) override
     {

@@ -39,6 +39,7 @@
 #include "uikit/animation.h"
 #include "graphics/color4f.h"
 #include "graphics/material.h"
+#include "graphics/drawable.h"
 #include "graphics/fwd.h"
 #include "wdk/keys.h"
 #include "wdk/bitflag.h"
@@ -578,6 +579,7 @@ namespace engine
         virtual void DrawProgressBar(const WidgetId&, const PaintStruct& ps, std::optional<float> percentage) const override;
         virtual void DrawScrollBar(const WidgetId& id, const PaintStruct& ps, const uik::FRect& handle) const override;
         virtual void DrawToggle(const WidgetId& id, const PaintStruct& ps, const uik::FRect& knob, bool on_off) const override;
+        virtual void DrawShape(const WidgetId& id, const PaintStruct& ps, const Shape& shape) const override;
         virtual void EndDrawWidgets() override;
         virtual bool ParseStyle(const std::string& tag, const std::string& style) override;
         virtual bool QueryStyle(const WidgetStyleKey& key, const std::string& attr, WidgetStyleProperty* property) const override;
@@ -601,6 +603,9 @@ namespace engine
         // as identified by the class id.
         void DeleteMaterialInstanceByClassId(const std::string& id);
 
+        void DeleteDrawableInstances();
+        void DeleteDrawableInstanceByClassId(const std::string& id);
+
         // Update all materials for material animations.
         void Update(double time, float dt);
 
@@ -611,6 +616,8 @@ namespace engine
         // painting operations.
         inline void SetPainter(gfx::Painter* painter) noexcept
         { mPainter = painter; }
+        inline void SetClassLib(const ClassLibrary* classlib) noexcept
+        { mClassLib = classlib; }
 
         inline gfx::Painter* GetPainter() noexcept
         { return mPainter; }
@@ -665,6 +672,7 @@ namespace engine
 
     private:
         UIStyle* mStyle = nullptr;
+        const ClassLibrary* mClassLib = nullptr;
         mutable gfx::Painter* mPainter = nullptr;
 
         struct ClippingMask {
@@ -694,6 +702,14 @@ namespace engine
             std::unique_ptr<gfx::Material> material;
             bool used = false;
         };
+        struct WidgetDrawable {
+            std::size_t hash = 0;
+            std::string widget;
+            std::unique_ptr<gfx::Drawable> drawable;
+            uik::FRect rect;
+            bool used = false;
+        };
+        mutable std::vector<WidgetDrawable> mWidgetDrawables;
         mutable std::vector<WidgetMaterial> mWidgetMaterials;
 
         // failed properties. use this to avoid spamming
