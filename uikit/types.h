@@ -38,6 +38,11 @@ namespace uik
     using ISize  = base::ISize;
     using Color4f = base::Color4f;
     using Color   = base::Color;
+    using FRadians = base::FRadians;
+    using FDegrees = base::FDegrees;
+
+    template<typename Unit>
+    using FAngle = base::Angle<float, Unit>;
 
     enum class MouseButton {
         None,
