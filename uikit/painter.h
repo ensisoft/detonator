@@ -135,6 +135,16 @@ namespace uik
 
         virtual void DrawToggle(const WidgetId& id, const PaintStruct& ps, const FRect& knob, bool on_off) const = 0;
 
+        struct Shape {
+            std::string drawableId;
+            std::string materialId;
+            uik::FPoint rotation_point;
+            float rotation = 0.0f; // radians
+            bool clipping = false;
+        };
+
+        virtual void DrawShape(const WidgetId& id, const PaintStruct& ps, const Shape& shape) const = 0;
+
         virtual void EndDrawWidgets() {}
 
         struct MaskStruct {
