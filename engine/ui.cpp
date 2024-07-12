@@ -2509,6 +2509,7 @@ void UIEngine::OpenWindowStackState(std::shared_ptr<uik::Window> window)
     state.keymap = mKeyMaps[window->GetKeyMapFile()];
     state.painter.SetFlag(UIPainter::Flags::ClipWidgets, true);
     state.painter.SetStyle(state.style.get());
+    state.painter.SetClassLib(mClassLib);
 
     // apply window and widget styling on the painter
     state.window->Style(state.painter);
