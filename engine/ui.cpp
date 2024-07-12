@@ -1228,6 +1228,11 @@ void UIPainter::EndDrawWidgets()
         [](const auto& material) {
             return  !material.used;
         });
+
+    base::EraseRemove(mWidgetDrawables,
+        [](const auto& drawable) {
+            return !drawable.used;
+        });
 }
 
 bool UIPainter::ParseStyle(const std::string& tag, const std::string& style)
@@ -1325,20 +1330,38 @@ void UIPainter::DeleteMaterialInstanceByClassId(const std::string& id)
         }
         it = mMaterials.erase(it);
     }
+
+    base::EraseRemove(mWidgetMaterials, [id](const auto& material) {
+        if (!material.material)
+            return false;
+
+        const auto& klass = material.material->GetClass();
+        if (klass->GetId() == id)
+            return true;
+        return false;
+    });
 }
 
 void UIPainter::DeleteMaterialInstances()
 {
     mMaterials.clear();
+    mWidgetMaterials.clear();
 }
+
 
 void UIPainter::Update(double time, float dt)
 {
-    for (auto& p : mMaterials)
+    for (auto& it : mMaterials)
     {
         // could be null to indicate "no have" ;-)
-        if (p.second)
-            p.second->Update(dt);
+        if (it.second)
+            it.second->Update(dt);
+    }
+
+    for (auto& it : mWidgetMaterials)
+    {
+        if (it.material)
+            it.material->Update(dt);
     }
 }
 
