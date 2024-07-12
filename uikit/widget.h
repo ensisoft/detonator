@@ -717,16 +717,16 @@ namespace uik
             inline void SetHorizontalScrollBarMode(ScrollBarMode mode) noexcept
             { mHorizontalScrollBarMode = mode; }
             inline void ShowVerticalScrollButtons(bool on_off) noexcept
-            { SetFlag(Flags::ShowVerticalScrollButtons, on_off); }
+            { SetScrollAreaFlag(Flags::ShowVerticalScrollButtons, on_off); }
             inline void ShowHorizontalScrollButtons(bool on_off) noexcept
-            { SetFlag(Flags::ShowHorizontalScrollButtons, on_off); }
+            { SetScrollAreaFlag(Flags::ShowHorizontalScrollButtons, on_off); }
             inline bool AreVerticalScrollButtonsVisible() const noexcept
-            { return TestFlag(Flags::ShowVerticalScrollButtons); }
+            { return TestScrollAreaFlag(Flags::ShowVerticalScrollButtons); }
             inline bool AreHorizontalScrollButtonsVisible() const noexcept
-            { return TestFlag(Flags::ShowHorizontalScrollButtons); }
-            inline bool TestFlag(Flags flag) const noexcept
+            { return TestScrollAreaFlag(Flags::ShowHorizontalScrollButtons); }
+            inline bool TestScrollAreaFlag(Flags flag) const noexcept
             { return mFlags.test(flag); }
-            inline void SetFlag(Flags flag, bool on_off) noexcept
+            inline void SetScrollAreaFlag(Flags flag, bool on_off) noexcept
             { mFlags.set(flag, on_off); }
 
             void UpdateContentRect(const uik::FRect& content,

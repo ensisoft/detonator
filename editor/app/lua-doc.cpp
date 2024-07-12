@@ -894,6 +894,8 @@ void InitLuaDoc()
     DOC_METHOD_0("uik.Form", "AsForm", "Cast the widget to Form. Returns nil if the cast failed.");
     DOC_METHOD_0("uik.Slider", "AsSlider", "Cast the widget to Slider. Returns nil if the cast failed.");
     DOC_METHOD_0("uik.RadioButton", "AsRadioButton", "Cast the widget to RadioButton. Returns nil if the cast failed.");
+    DOC_METHOD_0("uik.ScrollArea", "AsScrollArea", "Cast the widget to ScrollArea. Returns nil if the cast failed.");
+    DOC_METHOD_0("uik.ShapeWidget", "AsShapeWidget", "Cast the widget to ShapeWidget. Returns nil if the cast failed.");
     DOC_TABLE("uik.Label");
     DOC_METHOD_0("string", "GetText", "Get the label text.");
     DOC_METHOD_1("void", "SetText", "Set the label text.", "string", "text");
@@ -931,6 +933,20 @@ void InitLuaDoc()
     DOC_METHOD_0("bool", "IsSelected", "Check whether this radio button is currently selected or not");
     DOC_METHOD_0("string", "GetText", "Get the radio button text.");
     DOC_METHOD_1("void", "SetText", "Set the radio button text.", "string", "text");
+    DOC_TABLE("uik.ScrollArea");
+    // no scroll area specific methods
+    DOC_TABLE("uik.ShapeWidget");
+    DOC_METHOD_1("void", "SetMaterialId", "Set the material based on material ID.", "string", "id");
+    DOC_METHOD_1("void", "SetDrawableId", "Set the drawable based on drawable ID.", "string", "id");
+    DOC_METHOD_1("void", "SetContentRotation", "Set the shape's rotation around Z axis in radians.", "float", "rotation");
+    DOC_METHOD_1("void", "SetContentRotationCenter", "Set the normalized center point for content rotation. x=0.5, y=0.5 is the center point.",
+                 "glm.vec2|base.FPoint", "point");
+    DOC_METHOD_2("void", "SetContentRotationCenter", "Set the normalized center point for content rotation. x=0.5, y=0.5 is the center point.",
+                 "float", "x", "float", "y");
+    DOC_METHOD_1("void", "RotateContent", "Add some rotation in radians to the current content rotation", "float", "rotation");
+    DOC_METHOD_0("float", "GetContentRotation", "Ge the current content rotation value in radians.");
+    DOC_METHOD_0("string", "GetMaterialId", "Get the current material ID");
+    DOC_METHOD_0("string", "GetDrawableId", "Get the current drawable ID.");
 
     DOC_TABLE("uik.Window");
     DOC_METHOD_0("string", "GetId", "Get the window ID.");
