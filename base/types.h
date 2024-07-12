@@ -840,6 +840,21 @@ namespace base
             return *this;
         }
 
+        template<typename OtherUnit>
+        inline auto& operator += (const Angle<Real, OtherUnit> angle) noexcept
+        {
+            const Angle<Real, Unit> converted_value = angle;
+            mAngle += converted_value.GetValue();
+            return *this;
+        }
+        template<typename OtherUnit>
+        inline auto& operator -= (const Angle<Real, OtherUnit> angle) noexcept
+        {
+            const Angle<Real, Unit> converted_value = angle;
+            mAngle -= converted_value.GetValue();
+            return *this;
+        }
+
         inline Real ToRadians() const noexcept
         { return detail::ToRadians(mAngle, Unit{} ); }
         inline Real ToDegrees() const noexcept
