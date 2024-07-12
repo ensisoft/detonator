@@ -43,6 +43,7 @@
 #include <vector>
 
 #include "base/assert.h"
+#include "base/types.h"
 #include "graphics/bitmap.h"
 #include "graphics/color4f.h"
 #include "graphics/types.h"
@@ -811,6 +812,18 @@ inline void SetValue(QPlainTextEdit* edit, const app::AnyString& value)
     edit->setPlainText(value);
 }
 
+inline void SetValue(QDoubleSpinBox* spin, base::FDegrees value)
+{
+    QSignalBlocker s(spin);
+    spin->setValue(value.ToDegrees());
+}
+
+inline void SetValue(QDoubleSpinBox* spin, base::FRadians value)
+{
+    QSignalBlocker s(spin);
+    spin->setValue(value.ToDegrees());
+}
+
 inline void SetValue(QDoubleSpinBox* spin, float val)
 {
     QSignalBlocker s(spin);
@@ -1198,6 +1211,15 @@ struct DoubleSpinBoxValueGetter
             return spin->value() / 100.0;
         return spin->value();
     }
+    operator base::FDegrees() const
+    {
+        return base::FDegrees(spin->value());
+    }
+    operator base::FRadians() const
+    {
+        return base::FRadians(qDegreesToRadians(spin->value()));
+    }
+
     const QDoubleSpinBox* spin = nullptr;
 };
 

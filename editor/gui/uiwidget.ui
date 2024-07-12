@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>2315</width>
-    <height>1418</height>
+    <width>2353</width>
+    <height>1471</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -926,7 +926,7 @@
              <x>0</x>
              <y>0</y>
              <width>440</width>
-             <height>943</height>
+             <height>979</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -1844,6 +1844,251 @@
                    </item>
                   </layout>
                  </widget>
+                 <widget class="QWidget" name="shapePage">
+                  <layout class="QGridLayout" name="gridLayout_12">
+                   <item row="0" column="0">
+                    <widget class="QLabel" name="label_22">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="text">
+                      <string>Drawable</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="1">
+                    <layout class="QHBoxLayout" name="horizontalLayout_3">
+                     <item>
+                      <widget class="QComboBox" name="shapeMaterial">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="btnShapeContentSelectMaterial">
+                       <property name="toolTip">
+                        <string>Select material</string>
+                       </property>
+                       <property name="text">
+                        <string>...</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="../resource/resource.qrc">
+                         <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
+                       </property>
+                       <property name="arrowType">
+                        <enum>Qt::NoArrow</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="btnSetMaterialParams">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
+                       <property name="toolTip">
+                        <string>Edit material parameters</string>
+                       </property>
+                       <property name="text">
+                        <string>...</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="../resource/resource.qrc">
+                         <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="btnShapeContentEditMaterial">
+                       <property name="toolTip">
+                        <string>Edit material parameters</string>
+                       </property>
+                       <property name="text">
+                        <string>...</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="../resource/resource.qrc">
+                         <normaloff>:/16x16_ico_png/material_go.png</normaloff>:/16x16_ico_png/material_go.png</iconset>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item row="0" column="1">
+                    <layout class="QHBoxLayout" name="horizontalLayout_18">
+                     <item>
+                      <widget class="QComboBox" name="shapeDrawable">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="btnShapeContentEditDrawable">
+                       <property name="toolTip">
+                        <string>Open the entity for editing</string>
+                       </property>
+                       <property name="text">
+                        <string>...</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="../resource/resource.qrc">
+                         <normaloff>:/16x16_ico_png/particle.png</normaloff>:/16x16_ico_png/particle.png</iconset>
+                       </property>
+                       <property name="autoRaise">
+                        <bool>false</bool>
+                       </property>
+                       <property name="arrowType">
+                        <enum>Qt::NoArrow</enum>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item row="2" column="1">
+                    <layout class="QHBoxLayout" name="horizontalLayout_12">
+                     <item>
+                      <widget class="QDoubleSpinBox" name="shapeRotation">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>107</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="wrapping">
+                        <bool>true</bool>
+                       </property>
+                       <property name="suffix">
+                        <string> °</string>
+                       </property>
+                       <property name="minimum">
+                        <double>-180.000000000000000</double>
+                       </property>
+                       <property name="maximum">
+                        <double>180.000000000000000</double>
+                       </property>
+                       <property name="stepType">
+                        <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="btnShapeContentPlus90">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="toolTip">
+                        <string>Rotate the node clockwise 90 degrees</string>
+                       </property>
+                       <property name="text">
+                        <string>+ 90°</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="../resource/resource.qrc">
+                         <normaloff>:/16x16_ico_png/arrow_rotate_clockwise.png</normaloff>:/16x16_ico_png/arrow_rotate_clockwise.png</iconset>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="btnShapeContentMinus90">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="toolTip">
+                        <string>Rotate the node anti clockwise 90 degrees</string>
+                       </property>
+                       <property name="text">
+                        <string>- 90°</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="../resource/resource.qrc">
+                         <normaloff>:/16x16_ico_png/arrow_rotate_anticlockwise.png</normaloff>:/16x16_ico_png/arrow_rotate_anticlockwise.png</iconset>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item row="1" column="0">
+                    <widget class="QLabel" name="label_35">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="text">
+                      <string>Material</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="0">
+                    <widget class="QLabel" name="label_36">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="text">
+                      <string>Rotation</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="3" column="1">
+                    <layout class="QHBoxLayout" name="horizontalLayout_5">
+                     <item>
+                      <widget class="QDoubleSpinBox" name="shapeCenterX">
+                       <property name="minimum">
+                        <double>-10.000000000000000</double>
+                       </property>
+                       <property name="maximum">
+                        <double>10.000000000000000</double>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QDoubleSpinBox" name="shapeCenterY">
+                       <property name="minimum">
+                        <double>-10.000000000000000</double>
+                       </property>
+                       <property name="maximum">
+                        <double>10.000000000000000</double>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item row="3" column="0">
+                    <widget class="QLabel" name="label_37">
+                     <property name="text">
+                      <string>Center</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
                  <widget class="QWidget" name="scrollAreaPage">
                   <layout class="QGridLayout" name="gridLayout_8">
                    <item row="0" column="0">
@@ -2397,6 +2642,18 @@
     <string>Place a new scroll area</string>
    </property>
   </action>
+  <action name="actionNewShapeWidget">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/placeholder.png</normaloff>:/32x32_ico_png/placeholder.png</iconset>
+   </property>
+   <property name="text">
+    <string>ShapeWidget</string>
+   </property>
+   <property name="toolTip">
+    <string>Place new shape widget</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -2512,6 +2769,17 @@
   <tabstop>lblLineHeight</tabstop>
   <tabstop>cmbScrollAreaVerticalScrollbarMode</tabstop>
   <tabstop>cmbScrollAreaHorizontalScrollbarMode</tabstop>
+  <tabstop>shapeDrawable</tabstop>
+  <tabstop>btnShapeContentEditDrawable</tabstop>
+  <tabstop>shapeMaterial</tabstop>
+  <tabstop>btnShapeContentSelectMaterial</tabstop>
+  <tabstop>btnSetMaterialParams</tabstop>
+  <tabstop>btnShapeContentEditMaterial</tabstop>
+  <tabstop>shapeRotation</tabstop>
+  <tabstop>btnShapeContentPlus90</tabstop>
+  <tabstop>btnShapeContentMinus90</tabstop>
+  <tabstop>shapeCenterX</tabstop>
+  <tabstop>shapeCenterY</tabstop>
   <tabstop>normalGroup</tabstop>
   <tabstop>disabledGroup</tabstop>
   <tabstop>mouseOverGroup</tabstop>

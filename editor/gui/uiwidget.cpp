@@ -207,6 +207,7 @@ enum WidgetIndex {
     ToggleBox,
     Form,
     ScrollArea,
+    ShapeWidget,
     LAST
 };
 
@@ -526,6 +527,7 @@ UIWidget::UIWidget(app::Workspace* workspace) : mUndoStack(3)
     mState.workspace = workspace;
     mState.painter.reset(new engine::UIPainter);
     mState.painter->SetStyle(mState.style.get());
+    mState.painter->SetClassLib(mState.workspace);
     mState.window.SetName("My UI");
 
     LoadStyleQuiet("app://ui/style/default.json");
@@ -721,6 +723,7 @@ void UIWidget::AddActions(QToolBar& bar)
     bar.addAction(mUI.actionNewToggleBox);
     bar.addAction(mUI.actionNewForm);
     bar.addAction(mUI.actionNewScrollArea);
+    bar.addAction(mUI.actionNewShapeWidget);
 }
 void UIWidget::AddActions(QMenu& menu)
 {
@@ -744,6 +747,7 @@ void UIWidget::AddActions(QMenu& menu)
     menu.addAction(mUI.actionNewToggleBox);
     menu.addAction(mUI.actionNewForm);
     menu.addAction(mUI.actionNewScrollArea);
+    menu.addAction(mUI.actionNewShapeWidget);
 }
 bool UIWidget::SaveState(Settings& settings) const
 {
@@ -1150,6 +1154,16 @@ void UIWidget::Refresh()
     if (mUI.windowName->hasFocus())
         return;
 
+    // don't take a snapshot when these are edited (continuously)
+    if (mUI.widgetWidth->hasFocus()  ||
+        mUI.widgetHeight->hasFocus() ||
+        mUI.widgetXPos->hasFocus()   ||
+        mUI.widgetYPos->hasFocus()   ||
+        mUI.shapeRotation->hasFocus() ||
+        mUI.shapeCenterX->hasFocus() ||
+        mUI.shapeCenterY->hasFocus())
+        return;
+
     // check if any of the style widgets is under a continuous
     // edit that would disable undo stack copying.
     WidgetStyleWidget* style_widgets[] = {
@@ -1207,6 +1221,7 @@ void UIWidget::on_actionPlay_triggered()
     SetEnabled(mUI.actionNewLabel,       false);
     SetEnabled(mUI.actionNewPushButton,  false);
     SetEnabled(mUI.actionNewScrollArea,  false);
+    SetEnabled(mUI.actionNewShapeWidget, false);
 
     mUI.widget->setFocus();
 }
@@ -1225,6 +1240,7 @@ void UIWidget::on_actionStop_triggered()
     mState.active_window.reset();
     mState.animation_state.reset();
     mState.painter->DeleteMaterialInstances();
+    mState.painter->DeleteDrawableInstances();
 
     SetEnabled(mUI.actionPlay,          true);
     SetEnabled(mUI.actionPause,         false);
@@ -1247,6 +1263,7 @@ void UIWidget::on_actionStop_triggered()
     SetEnabled(mUI.actionNewRadioButton, true);
     SetEnabled(mUI.actionNewToggleBox,   true);
     SetEnabled(mUI.actionNewScrollArea,  true);
+    SetEnabled(mUI.actionNewShapeWidget, true);
     SetEnabled(mUI.cmbGrid,              true);
     SetEnabled(mUI.zoom,                 true);
     SetEnabled(mUI.chkSnap,              true);
@@ -1342,6 +1359,11 @@ void UIWidget::on_actionNewToggleBox_triggered()
 void UIWidget::on_actionNewScrollArea_triggered()
 {
     PlaceNewWidget(WidgetIndex::ScrollArea);
+}
+
+void UIWidget::on_actionNewShapeWidget_triggered()
+{
+    PlaceNewWidget(WidgetIndex::ShapeWidget);
 }
 
 void UIWidget::on_actionNewGroupBox_triggered()
@@ -1764,6 +1786,87 @@ void UIWidget::on_cmbScrollAreaHorizontalScrollbarMode_currentIndexChanged(int)
     UpdateCurrentWidgetProperties();
 }
 
+void UIWidget::on_shapeDrawable_currentIndexChanged(int)
+{
+    UpdateCurrentWidgetProperties();
+}
+void UIWidget::on_shapeMaterial_currentIndexChanged(int)
+{
+    UpdateCurrentWidgetProperties();
+}
+
+void UIWidget::on_shapeRotation_valueChanged(double)
+{
+    UpdateCurrentWidgetProperties();
+}
+
+void UIWidget::on_shapeCenterX_valueChanged(double)
+{
+    UpdateCurrentWidgetProperties();
+}
+void UIWidget::on_shapeCenterY_valueChanged(double)
+{
+    UpdateCurrentWidgetProperties();
+}
+
+void UIWidget::on_btnShapeContentEditDrawable_clicked()
+{
+    if (const auto* widget = GetCurrentWidget())
+    {
+        const auto& id = (QString)GetItemId(mUI.shapeDrawable);
+        if (id.isEmpty())
+            return;
+        auto& resource = mState.workspace->GetResourceById(id);
+        if (resource.IsPrimitive())
+            return;
+        emit OpenResource(id);
+    }
+}
+void UIWidget::on_btnShapeContentEditMaterial_clicked()
+{
+    if (const auto* widget = GetCurrentWidget())
+    {
+        const auto& id = (QString)GetItemId(mUI.shapeMaterial);
+        if (id.isEmpty())
+            return;
+        auto& resource = mState.workspace->GetResourceById(id);
+        if (resource.IsPrimitive())
+            return;
+        emit OpenResource(id);
+    }
+}
+
+void UIWidget::on_btnShapeContentSelectMaterial_clicked()
+{
+    if (const auto* widget = GetCurrentWidget())
+    {
+        DlgMaterial dlg(this, mState.workspace, GetItemId(mUI.shapeMaterial));
+        if (dlg.exec() == QDialog::Rejected)
+            return;
+
+        SetValue(mUI.shapeMaterial, ListItemId(dlg.GetSelectedMaterialId()));
+        UpdateCurrentWidgetProperties();
+    }
+}
+void UIWidget::on_btnShapeContentPlus90_clicked()
+{
+    if (auto* widget = GetCurrentWidget())
+    {
+        const float value = GetValue(mUI.shapeRotation);
+        SetValue(mUI.shapeRotation, math::clamp(-180.0f, 180.0f, value + 90.0f));
+        UpdateCurrentWidgetProperties();
+    }
+}
+void UIWidget::on_btnShapeContentMinus90_clicked()
+{
+    if (auto* widget = GetCurrentWidget())
+    {
+        const float value = GetValue(mUI.shapeRotation);
+        SetValue(mUI.shapeRotation, math::clamp(-180.0f, 180.0f, value - 90.0f));
+        UpdateCurrentWidgetProperties();
+    }
+}
+
 void UIWidget::on_btnEditWindowStyle_clicked()
 {
     std::string style_string = mState.window.GetStyleString();
@@ -2011,28 +2114,30 @@ void UIWidget::TreeClickEvent(TreeWidget::TreeItem* item)
 
 void UIWidget::ResourceAdded(const app::Resource* resource)
 {
-    if (!(resource->IsMaterial() || resource->IsScript()))
-        return;
     RebuildCombos();
 }
 void UIWidget::ResourceRemoved(const app::Resource* resource)
 {
-    if (!(resource->IsMaterial() || resource->IsScript()))
-        return;
     UpdateDeletedResourceReferences();
     RebuildCombos();
     DisplayCurrentWidgetProperties();
+
     if (resource->IsMaterial())
         mState.painter->DeleteMaterialInstanceByClassId(resource->GetIdUtf8());
+
+    if (resource->IsAnyDrawableType())
+        mState.painter->DeleteDrawableInstanceByClassId(resource->GetIdUtf8());
 }
 void UIWidget::ResourceUpdated(const app::Resource* resource)
 {
-    if (!(resource->IsMaterial() || resource->IsScript()))
-        return;
     RebuildCombos();
     DisplayCurrentWidgetProperties();
+
     if (resource->IsMaterial())
         mState.painter->DeleteMaterialInstanceByClassId(resource->GetIdUtf8());
+
+    if (resource->IsAnyDrawableType())
+        mState.painter->DeleteDrawableInstanceByClassId(resource->GetIdUtf8());
 }
 
 void UIWidget::WidgetStyleEdited()
@@ -2623,6 +2728,19 @@ void UIWidget::UpdateCurrentWidgetProperties()
             scroll->SetVerticalScrollBarMode(GetValue(mUI.cmbScrollAreaVerticalScrollbarMode));
             scroll->SetHorizontalScrollBarMode(GetValue(mUI.cmbScrollAreaHorizontalScrollbarMode));
         }
+        else if (auto* shape = uik::WidgetCast<uik::ShapeWidget>(widget))
+        {
+            shape->SetMaterialId(GetItemId(mUI.shapeMaterial));
+            shape->SetDrawableId(GetItemId(mUI.shapeDrawable));
+
+            const auto rotation = (const uik::FRadians&)GetValue(mUI.shapeRotation);
+            shape->SetContentRotation(rotation);
+
+            uik::FPoint center;
+            center.SetX(GetValue(mUI.shapeCenterX));
+            center.SetY(GetValue(mUI.shapeCenterY));
+            shape->SetContentRotationCenter(center);
+        }
     }
 }
 
@@ -2742,6 +2860,22 @@ void UIWidget::DisplayCurrentWidgetProperties()
             SetValue(mUI.cmbScrollAreaVerticalScrollbarMode, scroll->GetVerticalScrollBarMode());
             SetValue(mUI.cmbScrollAreaHorizontalScrollbarMode, scroll->GetHorizontalScrollBarMode());
         }
+        else if (const auto* shape = uik::WidgetCast<uik::ShapeWidget>(widget))
+        {
+            mUI.stackedWidget->setCurrentWidget(mUI.shapePage);
+            SetValue(mUI.shapeDrawable, ListItemId(shape->GetDrawableId()));
+            SetValue(mUI.shapeMaterial, ListItemId(shape->GetMaterialId()));
+            SetValue(mUI.shapeRotation, shape->GetContentRotation());
+
+            const auto& point = shape->GetContentRotationCenter();
+            SetValue(mUI.shapeCenterX, point.GetX());
+            SetValue(mUI.shapeCenterY, point.GetY());
+
+            SetEnabled(mUI.btnShapeContentEditDrawable,
+                       mState.workspace->IsUserDefinedResource(shape->GetDrawableId()));
+            SetEnabled(mUI.btnShapeContentEditMaterial,
+                       mState.workspace->IsUserDefinedResource(shape->GetMaterialId()));
+        }
         else
         {
             SetEnabled(mUI.widgetData, false);
@@ -2785,7 +2919,32 @@ void UIWidget::RebuildCombos()
     mUI.widgetMoused->RebuildMaterialCombos(materials);
     mUI.widgetPressed->RebuildMaterialCombos(materials);
 
+    // UI renderer doesn't know yet how to render 3D content
+    // so limit the selection to 2D drawables for now
+    auto Get2DDrawables = [this]() {
+        app::Workspace::ResourceList ret;
+
+        const auto& list = mState.workspace->ListAllDrawables();
+        for (const auto& it : list) {
+
+            const auto& resource = it.resource;
+            if (resource->IsAnyDrawableType())
+            {
+                const gfx::DrawableClass* klass = nullptr;
+                resource->GetContent(&klass);
+                if (Is3DShape(*klass))
+                    continue;
+            }
+            else BUG("Bug on getting 2D drawables.");
+
+            ret.push_back(it);
+        }
+        return ret;
+    };
+
     SetList(mUI.windowScriptFile, mState.workspace->ListUserDefinedScripts());
+    SetList(mUI.shapeMaterial, mState.workspace->ListAllMaterials());
+    SetList(mUI.shapeDrawable, Get2DDrawables());
 }
 
 void UIWidget::PlaceNewWidget(unsigned int index)
@@ -2855,6 +3014,11 @@ void UIWidget::PlaceNewWidget(unsigned int index)
     {
         widget = std::make_unique<uik::ScrollArea>();
         mUI.actionNewScrollArea->setChecked(true);
+    }
+    else if (index == WidgetIndex::ShapeWidget)
+    {
+        widget = std::make_unique<uik::ShapeWidget>("_rect", "_checkerboard");
+        mUI.actionNewShapeWidget->setChecked(true);
     }
     else BUG("Unhandled widget index.");
 
@@ -3030,6 +3194,7 @@ void UIWidget::UncheckPlacementActions()
     mUI.actionNewProgressBar->setChecked(false);
     mUI.actionNewToggleBox->setChecked(false);
     mUI.actionNewScrollArea->setChecked(false);
+    mUI.actionNewShapeWidget->setChecked(false);
 }
 
 void UIWidget::UpdateDeletedResourceReferences()
@@ -3047,6 +3212,18 @@ void UIWidget::UpdateDeletedResourceReferences()
         });
         // todo: improve the message/information about which widgets were affected.
         WARN("Some UI material references are no longer available and have been defaulted.");
+    }
+
+    for (size_t i=0; i<mState.window.GetNumWidgets(); ++i)
+    {
+        auto* widget = &mState.window.GetWidget(i);
+        if (auto* shape = uik::WidgetCast<uik::ShapeWidget>(widget))
+        {
+            if (!mState.workspace->IsValidMaterial(shape->GetMaterialId()))
+                shape->SetMaterialId("_checkerboard");
+            if (!mState.workspace->IsValidDrawable(shape->GetDrawableId()))
+                shape->SetDrawableId("_rect");
+        }
     }
 
     if (mState.window.HasScriptFile())

@@ -91,6 +91,7 @@ namespace gui
         void on_actionNewRadioButton_triggered();
         void on_actionNewToggleBox_triggered();
         void on_actionNewScrollArea_triggered();
+        void on_actionNewShapeWidget_triggered();
         void on_actionWidgetDelete_triggered();
         void on_actionWidgetDuplicate_triggered();
         void on_actionWidgetOrder_triggered();
@@ -138,6 +139,16 @@ namespace gui
         void on_btnResetWidgetAnimationString_clicked();
         void on_cmbScrollAreaVerticalScrollbarMode_currentIndexChanged(int);
         void on_cmbScrollAreaHorizontalScrollbarMode_currentIndexChanged(int);
+        void on_shapeDrawable_currentIndexChanged(int);
+        void on_shapeMaterial_currentIndexChanged(int);
+        void on_shapeRotation_valueChanged(double);
+        void on_shapeCenterX_valueChanged(double);
+        void on_shapeCenterY_valueChanged(double);
+        void on_btnShapeContentEditDrawable_clicked();
+        void on_btnShapeContentEditMaterial_clicked();
+        void on_btnShapeContentSelectMaterial_clicked();
+        void on_btnShapeContentPlus90_clicked();
+        void on_btnShapeContentMinus90_clicked();
 
         void on_btnEditWindowStyle_clicked();
         void on_btnEditWindowStyleString_clicked();
