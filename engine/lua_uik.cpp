@@ -48,6 +48,10 @@ sol::object WidgetObjectCast(sol::this_state state, uik::Widget* widget)
         return sol::make_object(lua, uik::WidgetCast<uik::PushButton>(widget));
     else if (type == uik::Widget::Type::CheckBox)
         return sol::make_object(lua, uik::WidgetCast<uik::CheckBox>(widget));
+    else if (type == uik::Widget::Type::ScrollArea)
+        return sol::make_object(lua, uik::WidgetCast<uik::ScrollArea>(widget));
+    else if (type == uik::Widget::Type::ShapeWidget)
+        return sol::make_object(lua, uik::WidgetCast<uik::ShapeWidget>(widget));
     else BUG("Unhandled widget type cast.");
     return sol::make_object(lua, sol::nil);
 }
@@ -135,6 +139,8 @@ void BindUIK(sol::state& L)
     widget["AsForm"]         = &WidgetCast<uik::Form>;
     widget["AsSlider"]       = &WidgetCast<uik::Slider>;
     widget["AsRadioButton"]  = &WidgetCast<uik::RadioButton>;
+    widget["AsScrollArea"]   = &WidgetCast<uik::ScrollArea>;
+    widget["AsShapeWidget"]  = &WidgetCast<uik::ShapeWidget>;
 
     auto form = table.new_usertype<uik::Form>("Form");
     BindWidgetInterface(form);
@@ -195,6 +201,36 @@ void BindUIK(sol::state& L)
     radio["IsSelected"] = &uik::RadioButton::IsSelected;
     radio["GetText"]    = &uik::RadioButton::GetText;
     radio["SetText"]    = &uik::RadioButton::SetText;
+
+    auto scroll_area = table.new_usertype<uik::ScrollArea>("ScrollArea");
+    BindWidgetInterface(scroll_area);
+    // nothing here.
+
+    auto shape_widget = table.new_usertype<uik::ShapeWidget>("ShapeWidget");
+    shape_widget["SetMaterialId"] = &uik::ShapeWidget::SetMaterialId;
+    shape_widget["SetDrawableId"] = &uik::ShapeWidget::SetDrawableId;
+    shape_widget["SetContentRotation"] =  [](uik::ShapeWidget& widget, float radians) {
+        widget.SetContentRotation(uik::FRadians(radians));
+    };
+    shape_widget["SetContentRotationCenter"] = sol::overload(
+        [](uik::ShapeWidget& widget, float x, float y) {
+            widget.SetContentRotationCenter(uik::FPoint(x, y));
+        },
+        [](uik::ShapeWidget& widget, glm::vec2 point) {
+            widget.SetContentRotationCenter(uik::FPoint(point.x, point.y));
+        },
+        [](uik::ShapeWidget& widget, uik::FPoint point) {
+            widget.SetContentRotationCenter(point);
+        });
+    shape_widget["RotateContent"] = [](uik::ShapeWidget& widget, float radians) {
+        widget.RotateContent(uik::FRadians(radians));
+    };
+    shape_widget["GetMaterialId"] = &uik::ShapeWidget::GetMaterialId;
+    shape_widget["GetDrawableId"] = &uik::ShapeWidget::GetDrawableId;
+    shape_widget["GetContentRotation"] = [](const uik::ShapeWidget& widget) {
+        const auto& rotation = widget.GetContentRotation();
+        return rotation.ToRadians();
+    };
 
     auto window = table.new_usertype<uik::Window>("Window",
         sol::meta_function::index, [](sol::this_state state, uik::Window* window, const char* key) {
