@@ -427,6 +427,8 @@ add_executable(Detonator
     editor/gui/childwindow.h
     editor/gui/childwindow.cpp
     editor/gui/childwindow.ui
+    editor/gui/fudialog.h
+    editor/gui/fudialog.cpp
     editor/gui/completer.ui
     editor/gui/codewidget.h
     editor/gui/codewidget.cpp
