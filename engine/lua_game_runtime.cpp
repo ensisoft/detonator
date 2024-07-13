@@ -1194,6 +1194,14 @@ void LuaRuntime::OnMouseRelease(const MouseEvent& mouse)
     DispatchMouseEvent("OnMouseRelease", mouse);
 }
 
+void LuaRuntime::UpdateUI(uik::Window* ui, double game_time, double dt)
+{
+    if (auto* env = GetTypeEnv(*ui))
+    {
+        CallLua(*env, "Update", ui, game_time, dt);
+    }
+}
+
 void LuaRuntime::OnUIOpen(uik::Window* ui)
 {
     if (mGameEnv)

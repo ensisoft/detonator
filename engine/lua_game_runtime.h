@@ -81,6 +81,7 @@ namespace engine
         virtual void OnMouseMove(const MouseEvent& mouse) override;
         virtual void OnMousePress(const MouseEvent& mouse) override;
         virtual void OnMouseRelease(const MouseEvent& mouse) override;
+        virtual void UpdateUI(uik::Window* ui, double game_time, double dt) override;
         virtual void OnUIOpen(uik::Window* ui) override;
         virtual void OnUIClose(uik::Window* ui, int result) override;
         virtual void OnUIAction(uik::Window* ui, const WidgetActionList& actions) override;
