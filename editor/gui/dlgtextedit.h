@@ -32,10 +32,11 @@
 #include <vector>
 
 #include "app/types.h"
+#include "editor/gui/fudialog.h"
 
 namespace gui
 {
-    class DlgTextEdit : public QDialog
+    class DlgTextEdit : public QWidget, public FUDialog
     {
         Q_OBJECT
     public:

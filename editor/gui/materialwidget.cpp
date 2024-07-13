@@ -560,7 +560,10 @@ void MaterialWidget::on_actionShowShader_triggered()
     dlg.SetText(source.GetSource(), "GLSL");
     dlg.SetReadOnly(true);
     dlg.SetTitle("Shader Source");
+    dlg.LoadGeometry(mWorkspace, "shader-source-dialog-geometry");
     dlg.exec();
+    dlg.SaveGeometry(mWorkspace, "shader-source-dialog-geometry");
+
 }
 
 void MaterialWidget::on_btnResetShader_clicked()
