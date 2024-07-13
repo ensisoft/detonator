@@ -24,6 +24,7 @@
 #  include <QDir>
 #  include <QFile>
 #  include <QPoint>
+#  include <QSize>
 #  include <QProcess>
 #  include <neargye/magic_enum.hpp>
 #  include <glm/vec2.hpp>
@@ -51,6 +52,8 @@ namespace app
     { return QString::fromUtf8(str); }
     inline QString toString(const QString& str)
     { return str; }
+    inline QString toString(const QSize& size)
+    { return QString("%1,%2").arg(size.width()).arg(size.height()); }
     inline QString toString(const QPoint& point)
     { return QString("%1,%2").arg(point.x()).arg(point.y()); }
     inline QString toString(const QPointF& point)
