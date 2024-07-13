@@ -2461,27 +2461,43 @@ void UIWidget::MousePress(QMouseEvent* mickey)
         const auto& view_to_scene  = glm::inverse(view.GetAsMatrix());
         const auto& mouse_in_scene = view_to_scene * ToVec4(mickey->pos());
 
-        uik::FPoint widget_hit_point;
-        auto* widget = mState.window.HitTest(uik::FPoint(mouse_in_scene.x, mouse_in_scene.y), &widget_hit_point);
-        if (widget)
+        // if we have previous selection, first check if we're hitting
+        // somewhere in that widget's rect with the mouse.
+        // this check is to reduce user annoyance when trying to move
+        // an overlapping widget ends up selecting another widget.
+        if (auto* current = GetCurrentWidget())
         {
-            const auto& widget_rect = mState.window.FindWidgetRect(widget);
+            const auto& rect = mState.window.FindWidgetRect(current);
             gfx::FRect size_box;
             size_box.Resize(10.0f, 10.0f);
-            size_box.Move(widget_rect.GetPosition());
-            size_box.Translate(widget_rect.GetWidth()-10.0f, widget_rect.GetHeight()-10.0f);
-            //DEBUG("Hit widget: %1", widget->GetName());
-            //DEBUG("Hit pos: %1,%2", widget_hit_point.GetX(), widget_hit_point.GetY());
-
+            size_box.Move(rect.GetPosition());
+            size_box.Translate(rect.GetWidth()-10.0f, rect.GetHeight()-10.0f);
             if (size_box.TestPoint(mouse_in_scene.x, mouse_in_scene.y))
-                mCurrentTool.reset(new ResizeWidgetTool(mState, widget, snap, grid_size));
-            else mCurrentTool.reset(new MoveWidgetTool(mState, widget, snap, grid_size));
-            mUI.tree->SelectItemById(app::FromUtf8(widget->GetId()));
-            DisplayCurrentWidgetProperties();
+                mCurrentTool.reset(new ResizeWidgetTool(mState, current, snap, grid_size));
+            else if (rect.TestPoint(mouse_in_scene.x, mouse_in_scene.y))
+                mCurrentTool.reset(new MoveWidgetTool(mState, current, snap, grid_size));
+            else mUI.tree->ClearSelection();
         }
-        else
+
+        if (!GetCurrentWidget())
         {
-            mUI.tree->ClearSelection();
+            // if there's no current selection then perform hit testing
+            // and select a new widget and start a tool
+            uik::FPoint widget_hit_point;
+            auto* widget = mState.window.HitTest(uik::FPoint(mouse_in_scene.x, mouse_in_scene.y), &widget_hit_point);
+            if (widget)
+            {
+                const auto& widget_rect = mState.window.FindWidgetRect(widget);
+                gfx::FRect size_box;
+                size_box.Resize(10.0f, 10.0f);
+                size_box.Move(widget_rect.GetPosition());
+                size_box.Translate(widget_rect.GetWidth() - 10.0f, widget_rect.GetHeight() - 10.0f);
+                if (size_box.TestPoint(mouse_in_scene.x, mouse_in_scene.y))
+                    mCurrentTool.reset(new ResizeWidgetTool(mState, widget, snap, grid_size));
+                else mCurrentTool.reset(new MoveWidgetTool(mState, widget, snap, grid_size));
+                mUI.tree->SelectItemById(app::FromUtf8(widget->GetId()));
+                DisplayCurrentWidgetProperties();
+            }
         }
     }
     else if (!mCurrentTool && (mickey->button() == Qt::RightButton))
