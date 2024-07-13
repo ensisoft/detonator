@@ -557,7 +557,7 @@ void MaterialWidget::on_actionShowShader_triggered()
     const auto& source = program.GetShader(gfx::MaterialInstance(mMaterial), environment, *device);
 
     DlgTextEdit dlg(this);
-    dlg.SetText(source.GetSource());
+    dlg.SetText(source.GetSource(), "GLSL");
     dlg.SetReadOnly(true);
     dlg.SetTitle("Shader Source");
     dlg.exec();

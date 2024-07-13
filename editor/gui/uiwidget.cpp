@@ -1757,7 +1757,7 @@ void UIWidget::on_btnEditWidgetAnimationString_clicked()
         std::string old_animation_string = widget->GetAnimationString();
 
         DlgTextEdit dlg(this);
-        dlg.SetText(old_animation_string);
+        dlg.SetText(old_animation_string, "TEXT");
         dlg.SetTitle("Animation String");
         if (dlg.exec() == QDialog::Rejected)
             return;
@@ -1915,7 +1915,7 @@ void UIWidget::on_btnEditWindowStyleString_clicked()
     boost::erase_all(old_style_string, "window/");
 
     DlgTextEdit dlg(this);
-    dlg.SetText(old_style_string);
+    dlg.SetText(old_style_string, "JSON");
     dlg.SetTitle("Style String");
     if (dlg.exec() == QDialog::Rejected)
         return;

@@ -25,7 +25,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QPlainTextEdit" name="text">
+       <widget class="gui::TextEditor" name="text">
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
         </property>
@@ -67,6 +67,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>gui::TextEditor</class>
+   <extends>QPlainTextEdit</extends>
+   <header>codewidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../resource/resource.qrc"/>
  </resources>

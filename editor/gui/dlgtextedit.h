@@ -22,6 +22,8 @@
 #  include <QWidget>
 #  include <QColor>
 #  include <QDialog>
+#  include <QTextDocument>
+#  include <QSyntaxHighlighter>
 #  include "ui_dlgtextedit.h"
 #include "warnpop.h"
 
@@ -38,10 +40,9 @@ namespace gui
         Q_OBJECT
     public:
         explicit DlgTextEdit(QWidget* parent);
+        ~DlgTextEdit();
 
         void SetTitle(const QString& str);
-
-        void SetText(const app::AnyString& str);
         void SetText(const app::AnyString& str, const std::string& format);
         app::AnyString GetText() const;
         app::AnyString GetText(const std::string& format) const;
@@ -57,5 +58,8 @@ namespace gui
         void on_btnCancel_clicked();
     private:
         Ui::DlgTextEdit mUI;
+    private:
+        QTextDocument mDocument;
+        QSyntaxHighlighter* mSyntaxHighlight = nullptr;
     };
 } // namespace
