@@ -1061,7 +1061,11 @@ private:
         std::vector<engine::UIEngine::WindowAction> window_actions;
         TRACE_CALL("UIEngine::UpdateWindow", mUIEngine.UpdateWindow(game_time, dt, &widget_actions));
         TRACE_CALL("UIEngine::UpdateState", mUIEngine.UpdateState(game_time, dt, &window_actions));
-        TRACE_CALL("Runtime::OnUIAction", mRuntime->OnUIAction(mUIEngine.GetUI(), widget_actions));
+        if (auto* ui = mUIEngine.GetUI())
+        {
+            TRACE_CALL("Runtime::OnUIAction", mRuntime->OnUIAction(ui, widget_actions));
+            TRACE_CALL("Runtime::UpdateUI", mRuntime->UpdateUI(ui, game_time, dt));
+        }
 
         for (const auto& w : window_actions)
         {

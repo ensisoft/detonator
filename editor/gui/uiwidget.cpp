@@ -3270,6 +3270,10 @@ QString GenerateUIScriptSource(QString window)
 -- This script will be called for every instance of '%1'.
 -- You're free to delete functions you don't need.
 
+-- Called to update the UI at game update frequency.
+function Update(ui, game_time, dt)
+end
+
 --
 -- Called whenever the UI has been opened. This is a good place for
 -- setting some initial widget state.

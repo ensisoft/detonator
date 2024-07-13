@@ -180,6 +180,8 @@ namespace engine
         // Called when a some UI action happens as a result of user input.
         using WidgetActionList = std::vector<uik::Window::WidgetAction>;
         virtual void OnUIAction(uik::Window* ui, const WidgetActionList& actions) {}
+        // Update the game UI
+        virtual void UpdateUI(uik::Window* ui, double game_time, double dt) {}
         // Act on a contact event when 2 physics bodies have come into
         // contact or have come out of contact.
         // Called when the physics engine reports collision between bodies.
