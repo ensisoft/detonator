@@ -96,7 +96,9 @@ namespace gfx
             // Clamp the texture coordinate to the boundary.
             Clamp,
             // Wrap the coordinate by ignoring the integer part.
-            Repeat
+            Repeat,
+            // todo:
+            Mirror
         };
 
         // Identify texture format based on the bit depth
