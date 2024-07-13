@@ -993,8 +993,19 @@ public:
             ASSERT(texture_min_filter != GL_NONE);
             ASSERT(texture_mag_filter != GL_NONE);
 
-            GLenum texture_wrap_x = texture->GetWrapX() == gfx::Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
-            GLenum texture_wrap_y = texture->GetWrapY() == gfx::Texture::Wrapping::Clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT;
+            auto GLWrappingModeEnum = [](gfx::Texture::Wrapping wrapping) {
+                if (wrapping == gfx::Texture::Wrapping::Clamp)
+                    return GL_CLAMP_TO_EDGE;
+                else if (wrapping == gfx::Texture::Wrapping::Repeat)
+                    return GL_REPEAT;
+                else if (wrapping == gfx::Texture::Wrapping::Mirror)
+                    return GL_MIRRORED_REPEAT;
+                else BUG("Bug on GL texture wrapping mode.");
+                return GL_NONE;
+            };
+
+            GLenum texture_wrap_x = GLWrappingModeEnum(texture->GetWrapX());
+            GLenum texture_wrap_y = GLWrappingModeEnum(texture->GetWrapY());
 
             const auto texture_handle = texture->GetHandle();
             const auto& texture_name  = texture->GetName();
@@ -1027,13 +1038,13 @@ public:
                 const auto height = texture->GetHeight();
                 if (!base::IsPowerOfTwo(width) || !base::IsPowerOfTwo(height))
                 {
-                    if (texture_wrap_x == GL_REPEAT)
+                    if (texture_wrap_x == GL_REPEAT || texture_wrap_x == GL_MIRRORED_REPEAT)
                     {
                         texture_wrap_x = GL_CLAMP_TO_EDGE;
                         texture->SetWrapX(gfx::Texture::Wrapping::Clamp);
                         force_clamp_x = true;
                     }
-                    if (texture_wrap_y == GL_REPEAT)
+                    if (texture_wrap_y == GL_REPEAT || texture_wrap_y == GL_MIRRORED_REPEAT)
                     {
                         texture_wrap_y = GL_CLAMP_TO_EDGE;
                         texture->SetWrapY(gfx::Texture::Wrapping::Clamp);

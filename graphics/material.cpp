@@ -1401,16 +1401,20 @@ void MaterialClass::BeginPacking(TexturePacker* packer) const
                 const auto& velocity = GetTextureVelocity();
                 const bool has_x_velocity = !math::equals(0.0f, velocity.x, eps);
                 const bool has_y_velocity = !math::equals(0.0f, velocity.y, eps);
-                if (has_x_velocity && mTextureWrapX == TextureWrapping::Repeat)
+                if (has_x_velocity && (mTextureWrapX == TextureWrapping::Repeat ||
+                                       mTextureWrapX == TextureWrapping::Mirror))
                     can_combine = false;
-                else if (has_y_velocity && mTextureWrapY == TextureWrapping::Repeat)
+                else if (has_y_velocity && (mTextureWrapY == TextureWrapping::Repeat ||
+                                            mTextureWrapY == TextureWrapping::Mirror))
                     can_combine = false;
 
                 // scale check
                 const auto& scale = GetTextureScale();
-                if (scale.x > 1.0f && mTextureWrapX == TextureWrapping::Repeat)
+                if (scale.x > 1.0f && (mTextureWrapX == TextureWrapping::Repeat ||
+                                       mTextureWrapX == TextureWrapping::Mirror))
                     can_combine = false;
-                else if (scale.y > 1.0f && mTextureWrapY == TextureWrapping::Repeat)
+                else if (scale.y > 1.0f && (mTextureWrapY == TextureWrapping::Repeat ||
+                                            mTextureWrapY == TextureWrapping::Mirror))
                     can_combine = false;
             }
             packer->SetTextureFlag(handle, TexturePacker::TextureFlags::CanCombine, can_combine);
@@ -1813,7 +1817,7 @@ ShaderSource MaterialClass::GetSpriteShaderSource(const State& state, const Devi
     source.AddUniform("kTextureScale", ShaderSource::UniformType::Vec2f);
     source.AddUniform("kTextureVelocity", ShaderSource::UniformType::Vec3f);
     source.AddUniform("kTextureRotation", ShaderSource::UniformType::Float);
-    source.AddUniform("kTextureWrap", ShaderSource::UniformType::Vec2i); // 0 disabled, 1 clamp, 2 wrap
+    source.AddUniform("kTextureWrap", ShaderSource::UniformType::Vec2i); // 0 disabled, 1 clamp, 2 wrap, 3 repeat
     source.AddUniform("kAlphaMask", ShaderSource::UniformType::Vec2f);
 
     source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
@@ -1821,28 +1825,30 @@ ShaderSource MaterialClass::GetSpriteShaderSource(const State& state, const Devi
     source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
 
     source.AddSource(R"(
-// Support texture coordinate wrapping (clamp or repeat)
-// for cases when hardware texture sampler setting is
-// insufficient, i.e. when sampling from a sub rectangle
-// in a packed texture. (or whenever we're using texture rects)
-// This however can introduce some sampling artifacts depending
-// on fhe filter.
-// TODO: any way to fix those artifacts ?
+
+// do software wrapping for texture coordinates.
+// used for cases when texture sub-rects are used.
+float Wrap(float x, float w, int mode) {
+    if (mode == 1) {
+        return clamp(x, 0.0, w);
+    } else if (mode == 2) {
+        return fract(x / w) * w;
+    } else if (mode == 3) {
+        float p = floor(x / w);
+        float f = fract(x / w);
+        int m = int(floor(mod(p, 2.0)));
+        if (m == 0)
+           return f * w;
+
+        return w - f * w;
+    }
+    return x;
+}
+
 vec2 WrapTextureCoords(vec2 coords, vec2 box)
 {
-  float x = coords.x;
-  float y = coords.y;
-
-  if (kTextureWrap.x == 1)
-    x = clamp(x, 0.0, box.x);
-  else if (kTextureWrap.x == 2)
-    x = fract(x / box.x) * box.x;
-
-  if (kTextureWrap.y == 1)
-    y = clamp(y, 0.0, box.y);
-  else if (kTextureWrap.y == 2)
-    y = fract(y / box.y) * box.y;
-
+  float x = Wrap(coords.x, box.x, kTextureWrap.x);
+  float y = Wrap(coords.y, box.y, kTextureWrap.y);
   return vec2(x, y);
 }
 
@@ -1973,9 +1979,16 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
     // set software wrap/clamp. 0 = disabled.
     if (need_software_wrap)
     {
-        const auto wrap_x = mTextureWrapX == TextureWrapping::Clamp ? 1 : 2;
-        const auto wrap_y = mTextureWrapY == TextureWrapping::Clamp ? 1 : 2;
-        program.SetUniform("kTextureWrap", wrap_x, wrap_y);
+        auto ToGLSL = [](TextureWrapping wrapping) {
+            if (wrapping == TextureWrapping::Clamp)
+                return 1;
+            else if (wrapping == TextureWrapping::Repeat)
+                return 2;
+            else if (wrapping == TextureWrapping::Mirror)
+                return 3;
+            else BUG("Bug on software texture wrap.");
+        };
+        program.SetUniform("kTextureWrap", ToGLSL(mTextureWrapY), ToGLSL(mTextureWrapY));
     }
     else
     {
@@ -2011,35 +2024,36 @@ ShaderSource MaterialClass::GetTextureShaderSource(const State& state, const Dev
     source.AddUniform("kTextureVelocity", ShaderSource::UniformType::Vec3f);
     source.AddUniform("kTextureRotation", ShaderSource::UniformType::Float);
     source.AddUniform("kBaseColor", ShaderSource::UniformType::Color4f);
-    source.AddUniform("kTextureWrap", ShaderSource::UniformType::Vec2i); // 0 disabled, 1 clamp, 2 wrap
+    source.AddUniform("kTextureWrap", ShaderSource::UniformType::Vec2i); // 0 disabled, 1 clamp, 2 wrap, 3 repeat
 
     source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
     source.AddVarying("vParticleRandomValue", ShaderSource::VaryingType::Float);
     source.AddVarying("vParticleAlpha", ShaderSource::VaryingType::Float);
 
     source.AddSource(R"(
-// Support texture coordinate wrapping (clamp or repeat)
-// for cases when hardware texture sampler setting is
-// insufficient, i.e. when sampling from a sub rectangle
-// in a packed texture. (or whenever we're using texture rects)
-// This however can introduce some sampling artifacts depending
-// on fhe filter.
-// TODO: any way to fix those artifacs ?
+// do software wrapping for texture coordinates.
+// used for cases when texture sub-rects are used.
+float Wrap(float x, float w, int mode) {
+    if (mode == 1) {
+        return clamp(x, 0.0, w);
+    } else if (mode == 2) {
+        return fract(x / w) * w;
+    } else if (mode == 3) {
+        float p = floor(x / w);
+        float f = fract(x / w);
+        int m = int(floor(mod(p, 2.0)));
+        if (m == 0)
+           return f * w;
+
+        return w - f * w;
+    }
+    return x;
+}
+
 vec2 WrapTextureCoords(vec2 coords, vec2 box)
 {
-  float x = coords.x;
-  float y = coords.y;
-
-  if (kTextureWrap.x == 1)
-    x = clamp(x, 0.0, box.x);
-  else if (kTextureWrap.x == 2)
-    x = fract(x / box.x) * box.x;
-
-  if (kTextureWrap.y == 1)
-    y = clamp(y, 0.0, box.y);
-  else if (kTextureWrap.y == 2)
-    y = fract(y / box.y) * box.y;
-
+  float x = Wrap(coords.x, box.x, kTextureWrap.x);
+  float y = Wrap(coords.y, box.y, kTextureWrap.y);
   return vec2(x, y);
 }
 
@@ -2151,9 +2165,16 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
     // set software wrap/clamp. 0 = disabled.
     if (need_software_wrap)
     {
-        const auto wrap_x = mTextureWrapX == TextureWrapping::Clamp ? 1 : 2;
-        const auto wrap_y = mTextureWrapY == TextureWrapping::Clamp ? 1 : 2;
-        program.SetUniform("kTextureWrap", wrap_x, wrap_y);
+        auto ToGLSL = [](TextureWrapping wrapping) {
+            if (wrapping == TextureWrapping::Clamp)
+                return 1;
+            else if (wrapping == TextureWrapping::Repeat)
+                return 2;
+            else if (wrapping == TextureWrapping::Mirror)
+                return 3;
+            else BUG("Bug on software texture wrap.");
+        };
+        program.SetUniform("kTextureWrap", ToGLSL(mTextureWrapX), ToGLSL(mTextureWrapY));
     }
     else
     {
