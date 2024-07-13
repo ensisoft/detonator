@@ -221,8 +221,8 @@ private:
 };
 
 
-DlgTextEdit::DlgTextEdit(QWidget* parent)
-  : QDialog(parent)
+DlgTextEdit::DlgTextEdit(QWidget* parent) 
+  : FUDialog(parent)
 {
 
     auto* layout = new QPlainTextDocumentLayout(&mDocument);
@@ -230,6 +230,8 @@ DlgTextEdit::DlgTextEdit(QWidget* parent)
     mDocument.setDocumentLayout(layout);
 
     mUI.setupUi(this);
+
+    SetupFU(this);
 }
 
 DlgTextEdit::~DlgTextEdit() noexcept
