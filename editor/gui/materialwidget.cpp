@@ -612,15 +612,64 @@ void MaterialWidget::on_btnEditTexture_clicked()
             if (dlg.exec() == QDialog::Rejected)
                 return;
 
-            // map the font files.
-            auto& style_and_text = text.GetText();
-            style_and_text.font = mWorkspace->MapFileToWorkspace(style_and_text.font);
+            auto* map = GetSelectedTextureMap();
 
-            // Update the texture source's TextBuffer
-            ptr->SetTextBuffer(std::move(text));
+            bool replace_with_export = false;
+            if (dlg.DidExport() && map->GetNumTextures() == 1)
+            {
+                QString file = dlg.GetSaveFile();
 
-            // update the preview.
-            ShowTextureProperties();
+                QMessageBox msg(this);
+                msg.setWindowTitle(tr("Replace Text With Image?"));
+                msg.setText(tr("Do you want to replace the text with the static PNG image you just saved?\n\n%1").arg(file));
+                msg.setIcon(QMessageBox::Question);
+                msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+                if (msg.exec() == QMessageBox::Yes)
+                    replace_with_export = true;
+            }
+            if (replace_with_export)
+            {
+                QString png = dlg.GetSaveFile();
+
+                const QFileInfo info(png);
+                const auto& name = info.baseName();
+                const auto& file = mWorkspace->MapFileToWorkspace(info.absoluteFilePath());
+
+                auto source = std::make_unique<gfx::detail::TextureFileSource>(file);
+                source->SetName(app::ToUtf8(name));
+                source->SetFileName(file);
+                source->SetColorSpace(gfx::detail::TextureFileSource::ColorSpace::sRGB);
+
+                if (map->GetType() == gfx::TextureMap::Type::Texture2D)
+                {
+                    map->SetNumTextures(1);
+                    map->SetTextureSource(0, std::move(source));
+                    map->SetTextureRect(0, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+                }
+                else if (map->GetType() == gfx::TextureMap::Type::Sprite)
+                {
+                    const auto textures = map->GetNumTextures();
+                    map->SetNumTextures(textures + 1);
+                    map->SetTextureSource(textures, std::move(source));
+                    map->SetTextureRect(textures, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+                }
+                ShowMaterialProperties();
+                SelectLastItem(mUI.textures);
+                ShowTextureMapProperties();
+                ShowTextureProperties();
+            }
+            else
+            {
+                // map the font files.
+                auto& style_and_text = text.GetText();
+                style_and_text.font = mWorkspace->MapFileToWorkspace(style_and_text.font);
+
+                // Update the texture source's TextBuffer
+                ptr->SetTextBuffer(std::move(text));
+
+                // update the preview.
+                ShowTextureProperties();
+            }
         }
         else if (auto* ptr = dynamic_cast<gfx::detail::TextureBitmapGeneratorSource*>(source))
         {
@@ -950,24 +999,58 @@ void MaterialWidget::AddNewTextureMapFromText()
     if (dlg.exec() == QDialog::Rejected)
         return;
 
-    // map the selected font files to the workspace.
-    auto& style_and_text = text.GetText();
-    style_and_text.font = mWorkspace->MapFileToWorkspace(style_and_text.font);
+    bool replace_with_export = false;
+    if (dlg.DidExport() && map->GetNumTextures() == 1)
+    {
+        QString file = dlg.GetSaveFile();
+        QMessageBox msg(this);
+        msg.setWindowTitle(tr("Replace Text With Image?"));
+        msg.setText(tr("Do you want to replace the text with static PNG image you just saved?\n\n%1").arg(file));
+        msg.setIcon(QMessageBox::Question);
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        if (msg.exec() == QMessageBox::Yes)
+            replace_with_export = true;
+    }
 
-    auto source = std::make_unique<gfx::detail::TextureTextBufferSource>(std::move(text));
-    source->SetName("TextBuffer");
+    std::unique_ptr<gfx::TextureSource> texture_source;
+
+    if (replace_with_export)
+    {
+        QString png = dlg.GetSaveFile();
+
+        const QFileInfo info(png);
+        const auto& name = info.baseName();
+        const auto& file = mWorkspace->MapFileToWorkspace(info.absoluteFilePath());
+
+        auto source = std::make_unique<gfx::detail::TextureFileSource>(file);
+        source->SetName(app::ToUtf8(name));
+        source->SetFileName(file);
+        source->SetColorSpace(gfx::detail::TextureFileSource::ColorSpace::sRGB);
+        texture_source = std::move(source);
+    }
+    else
+    {
+        // map the selected font files to the workspace.
+        auto& style_and_text = text.GetText();
+        style_and_text.font = mWorkspace->MapFileToWorkspace(style_and_text.font);
+
+        auto source = std::make_unique<gfx::detail::TextureTextBufferSource>(std::move(text));
+        source->SetName("TextBuffer");
+
+        texture_source = std::move(source);
+    }
 
     if (map->GetType() == gfx::TextureMap::Type::Texture2D)
     {
         map->SetNumTextures(1);
-        map->SetTextureSource(0, std::move(source));
+        map->SetTextureSource(0, std::move(texture_source));
         map->SetTextureRect(0, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
     }
     else if (map->GetType() == gfx::TextureMap::Type::Sprite)
     {
         auto textures = map->GetNumTextures();
         map->SetNumTextures(textures + 1);
-        map->SetTextureSource(textures, std::move(source));
+        map->SetTextureSource(textures, std::move(texture_source));
         map->SetTextureRect(0, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
     }
 
