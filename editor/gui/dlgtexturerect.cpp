@@ -34,10 +34,8 @@
 namespace gui
 {
 
-DlgTextureRect::DlgTextureRect(QWidget* parent, app::Workspace* workspace,
-                               const gfx::FRect& rect, std::unique_ptr<gfx::TextureSource> texture)
+DlgTextureRect::DlgTextureRect(QWidget* parent, const gfx::FRect& rect, std::unique_ptr<gfx::TextureSource> texture)
     : FUDialog(parent)
-    , mWorkspace(workspace)
     , mRect(rect)
 {
     mUI.setupUi(this);
@@ -93,23 +91,54 @@ DlgTextureRect::DlgTextureRect(QWidget* parent, app::Workspace* workspace,
     SetValue(mUI.Y, rc.GetY());
     SetValue(mUI.W, rc.GetWidth());
     SetValue(mUI.H, rc.GetHeight());
-
     SetValue(mUI.zoom, 1.0f);
-
-    LoadState();
 }
+
+void DlgTextureRect::LoadState(const app::Workspace* workspace,
+                               const app::AnyString& dialog, const app::AnyString& uri)
+{
+    int xpos = 0;
+    int ypos = 0;
+    GetUserProperty(*workspace, PropertyKey(dialog, "zoom"),  mUI.zoom);
+    GetUserProperty(*workspace, PropertyKey(dialog, "color"), mUI.widget);
+    GetUserProperty(*workspace, PropertyKey(dialog, "xpos"),  &xpos);
+    GetUserProperty(*workspace, PropertyKey(dialog, "ypos"),  &ypos);
+    mTrackingOffset = QPoint(xpos, ypos);
+
+    // if the texture changed then reset the tracking offset
+    // since it's possible that the dimensions are totally different
+    // and our tracking offset would be such that the texture would
+    // not display.
+    QString previous_uri;
+    if (GetUserProperty(*workspace, PropertyKey(dialog, "uri"), &previous_uri))
+    {
+        if (previous_uri != uri)
+        {
+            mTrackingOffset = QPoint(0.0f, 0.0f);
+            SetValue(mUI.zoom, 1.0f);
+        }
+    }
+
+
+}
+void DlgTextureRect::SaveState(app::Workspace* workspace,
+                               const app::AnyString& dialog, const app::AnyString& uri) const
+{
+    SetUserProperty(*workspace, PropertyKey(dialog, "zoom"), mUI.zoom);
+    SetUserProperty(*workspace, PropertyKey(dialog, "color"), mUI.widget);
+    SetUserProperty(*workspace, PropertyKey(dialog, "xpos"), mTrackingOffset.x());
+    SetUserProperty(*workspace, PropertyKey(dialog, "ypos"), mTrackingOffset.y());
+    SetUserProperty(*workspace, PropertyKey(dialog, "uri"), uri);
+}
+
 
 void DlgTextureRect::on_btnAccept_clicked()
 {
-    SaveState();
-
     accept();
 }
 
 void DlgTextureRect::on_btnCancel_clicked()
 {
-    SaveState();
-
     reject();
 }
 
@@ -138,31 +167,6 @@ void DlgTextureRect::on_widgetColor_colorChanged(QColor color)
 void DlgTextureRect::timer()
 {
     mUI.widget->triggerPaint();
-}
-
-void DlgTextureRect::LoadState()
-{
-    QByteArray geometry;
-    if (GetUserProperty(*mWorkspace, "dlg-texture-rect-geometry", &geometry))
-        restoreGeometry(geometry);
-
-    int xpos = 0;
-    int ypos = 0;
-
-    GetUserProperty(*mWorkspace, "dlg-texture-rect-zoom", mUI.zoom);
-    GetUserProperty(*mWorkspace, "dlg-texture-rect-color", mUI.widget);
-    GetUserProperty(*mWorkspace, "dlg-texture-rect-xpos", &xpos);
-    GetUserProperty(*mWorkspace, "dlg-texture-rect-ypos", &ypos);
-    mTrackingOffset = QPoint(xpos, ypos);
-}
-
-void DlgTextureRect::SaveState()
-{
-    SetUserProperty(*mWorkspace, "dlg-texture-rect-geometry", saveGeometry());
-    SetUserProperty(*mWorkspace, "dlg-texture-rect-zoom", mUI.zoom);
-    SetUserProperty(*mWorkspace, "dlg-texture-rect-color", mUI.widget);
-    SetUserProperty(*mWorkspace, "dlg-texture-rect-xpos", mTrackingOffset.x());
-    SetUserProperty(*mWorkspace, "dlg-texture-rect-ypos", mTrackingOffset.y());
 }
 
 void DlgTextureRect::UpdateRect()

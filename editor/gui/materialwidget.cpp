@@ -703,8 +703,14 @@ void MaterialWidget::on_btnSelectTextureRect_clicked()
     if (auto* src = GetSelectedTextureSrc())
     {
         auto rect = mMaterial->FindTextureRect(src->GetId());
-        DlgTextureRect dlg(this, mWorkspace, rect, src->Clone());
-        if (dlg.exec() == QDialog::Rejected)
+        DlgTextureRect dlg(this, rect, src->Clone());
+        dlg.LoadGeometry(mWorkspace, "texture-rect-dialog-geometry");
+        dlg.LoadState(mWorkspace, "texture-rect-dialog-geometry", src->GetId());
+
+        const auto ret = dlg.exec();
+        dlg.SaveGeometry(mWorkspace, "texture-rect-dialog-geometry");
+        dlg.SaveState(mWorkspace, "texture-rect-dialog-geometry", src->GetId());
+        if (ret == QDialog::Rejected)
             return;
 
         mMaterial->SetTextureRect(src->GetId(), dlg.GetRect());

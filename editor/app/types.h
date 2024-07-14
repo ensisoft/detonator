@@ -247,6 +247,10 @@ namespace app
         PropertyKey(const std::string& key, T value)
           : mKey(toString("%1:%2", key, value))
         {}
+        template<typename T>
+        PropertyKey(const app::AnyString& key, T value)
+          : mKey(toString("%1:%2", key, value))
+        {}
         operator const QString& () const
         { return mKey; }
         const QString& key() const
