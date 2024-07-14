@@ -900,9 +900,14 @@ MaterialClass::MaterialClass(const MaterialClass& other, bool copy)
     mTextureWrapY     = other.mTextureWrapY;
     mUniforms         = other.mUniforms;
 
-    for (const auto& map : other.mTextureMaps)
+    for (const auto& src : other.mTextureMaps)
     {
-        mTextureMaps.push_back(copy ? map->Copy() : map->Clone());
+        auto map = copy ? src->Copy() : src->Clone();
+        if (src->GetId() == other.mActiveTextureMap)
+        {
+            mActiveTextureMap = map->GetId();
+        }
+        mTextureMaps.push_back(std::move(map));
     }
 }
 
