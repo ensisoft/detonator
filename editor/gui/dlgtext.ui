@@ -217,7 +217,7 @@
         <item>
          <widget class="QPushButton" name="btnAdjust">
           <property name="text">
-           <string>Adjust</string>
+           <string>Adjust to Content</string>
           </property>
          </widget>
         </item>
@@ -257,7 +257,7 @@
         <item>
          <widget class="QCheckBox" name="chkScale">
           <property name="text">
-           <string>Scale to window</string>
+           <string>Scale preview to window</string>
           </property>
          </widget>
         </item>
@@ -291,6 +291,13 @@
          </widget>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnSaveAs">
+        <property name="text">
+         <string>Save as Alpha Mask Image</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -350,6 +357,7 @@
   <tabstop>bufferHeight</tabstop>
   <tabstop>btnAdjust</tabstop>
   <tabstop>chkScale</tabstop>
+  <tabstop>btnSaveAs</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
  </tabstops>
