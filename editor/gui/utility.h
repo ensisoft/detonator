@@ -1477,6 +1477,9 @@ inline void SetUserProperty(Resource& res, const PropertyKey& key, const gui::Gf
         res.SetUserProperty(key + "_clear_color", FromGfx(*color));
 }
 template<typename Resource>
+inline void SetUserProperty(Resource& res, const PropertyKey& key, const app::AnyString& value)
+{ res.SetUserProperty(key, value); }
+template<typename Resource>
 inline void SetUserProperty(Resource& res, const PropertyKey& key, const QString& value)
 { res.SetUserProperty(key, value); }
 template<typename Resource>

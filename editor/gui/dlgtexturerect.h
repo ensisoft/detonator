@@ -39,8 +39,15 @@ namespace gui
     {
         Q_OBJECT
     public:
-        DlgTextureRect(QWidget* parent, app::Workspace* workspace, const gfx::FRect& rect,
+        DlgTextureRect(QWidget* parent, const gfx::FRect& rect,
             std::unique_ptr<gfx::TextureSource> texture);
+
+        void LoadState(const app::Workspace* workspace,
+                       const app::AnyString& dialog,
+                       const app::AnyString& uri);
+        void SaveState(app::Workspace* workspace,
+                       const app::AnyString& dialog,
+                       const app::AnyString& uri) const;
 
         const gfx::FRect& GetRect() const
         { return mRect; }
@@ -55,8 +62,6 @@ namespace gui
         void on_widgetColor_colorChanged(QColor color);
         void timer();
     private:
-        void LoadState();
-        void SaveState();
         void UpdateRect();
         void OnPaintScene(gfx::Painter& painter, double secs);
         void OnMousePress(QMouseEvent* mickey);
@@ -67,7 +72,6 @@ namespace gui
     private:
         QTimer mTimer;
     private:
-        app::Workspace* mWorkspace = nullptr;
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
         std::unique_ptr<gfx::Material> mMaterial;
