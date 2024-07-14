@@ -1262,7 +1262,7 @@ size_t ScrollAreaModel::GetHash(size_t hash) const
     hash = base::hash_combine(hash, mVerticalScrollBarMode);
     hash = base::hash_combine(hash, mHorizontalScrollBarMode);
     hash = base::hash_combine(hash, mContentRect);
-    hash = base::hash_combine(hash, mFlags);
+    hash = base::hash_combine(hash, mScrollAreaFlags);
     hash = base::hash_combine(hash, mVerticalScrollBarWidth);
     hash = base::hash_combine(hash, mHorizontalScrollBarHeight);
     return hash;
@@ -1595,7 +1595,7 @@ void ScrollAreaModel::IntoJson(data::Writer& data) const
     data.Write("horizontal_scroll_bar_mode", mHorizontalScrollBarMode);
     data.Write("horizontal_scroll_bar_height", mHorizontalScrollBarHeight);
     data.Write("content_rect", mContentRect);
-    data.Write("flags", mFlags);
+    data.Write("scroll_area_flags", mScrollAreaFlags);
 }
 bool ScrollAreaModel::FromJson(const data::Reader& data)
 {
@@ -1605,7 +1605,7 @@ bool ScrollAreaModel::FromJson(const data::Reader& data)
     ok &= data.Read("horizontal_scroll_bar_mode", &mHorizontalScrollBarMode);
     ok &= data.Read("horizontal_scroll_bar_height", &mHorizontalScrollBarHeight);
     ok &= data.Read("content_rect", &mContentRect);
-    ok &= data.Read("flags", &mFlags);
+    ok &= data.Read("scroll_area_flags", &mScrollAreaFlags);
     return ok;
 }
 
