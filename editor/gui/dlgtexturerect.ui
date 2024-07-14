@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>DlgTextureRect</class>
- <widget class="QDialog" name="DlgTextureRect">
+ <widget class="QWidget" name="DlgTextureRect">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -37,6 +37,9 @@
           <width>400</width>
           <height>400</height>
          </size>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
         </property>
        </widget>
       </item>

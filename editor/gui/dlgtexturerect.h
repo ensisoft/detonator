@@ -22,17 +22,20 @@
 #  include "ui_dlgtexturerect.h"
 #  include <QTimer>
 #  include <QDialog>
+#  include <QWidget>
 #  include <QPoint>
 #include "warnpop.h"
 
 #include "graphics/material.h"
+#include "editor/gui/fudialog.h"
+
 namespace app {
     class Workspace;
 } // namespace
 
 namespace gui
 {
-    class DlgTextureRect : public QDialog
+    class DlgTextureRect : public QWidget, public FUDialog
     {
         Q_OBJECT
     public:
@@ -50,7 +53,6 @@ namespace gui
         void on_W_valueChanged(int);
         void on_H_valueChanged(int);
         void on_widgetColor_colorChanged(QColor color);
-        void finished();
         void timer();
     private:
         void LoadState();
