@@ -22,6 +22,10 @@
 #  include <QCoreApplication>
 #  include <QFileDialog>
 #  include <QFileInfo>
+#  include <QImage>
+#  include <QImageWriter>
+#  include <QMessageBox>
+#  include <QPixmap>
 #include "warnpop.h"
 
 #include "graphics/text.h"
@@ -116,6 +120,48 @@ void DlgText::on_btnAdjust_clicked()
 {
     mAdjustOnce = true;
 }
+void DlgText::on_btnSaveAs_clicked()
+{
+    const auto& png = QFileDialog::getSaveFileName(this,
+        tr("Select Save File"), "text.png", tr("PNG (*.png)"));
+    if (png.isEmpty())
+        return;
+
+    const auto* source = mClass->GetTextureMap(0)->GetTextureSource(0);
+    const auto& bitmap = source->GetData();
+    if (bitmap == nullptr || !bitmap->IsValid())
+    {
+        return;
+    }
+
+    const auto width  = bitmap->GetWidth();
+    const auto height = bitmap->GetHeight();
+    const auto depth  = bitmap->GetDepthBits();
+    QImage image;
+    if (depth == 8)
+        image = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width, QImage::Format_Alpha8);
+    else if (depth == 24)
+        image = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width * 3, QImage::Format_RGB888);
+    else if (depth == 32)
+        image = QImage((const uchar*)bitmap->GetDataPtr(), width, height, width * 4, QImage::Format_RGBA8888);
+    else return;
+
+    QImageWriter writer;
+    writer.setFormat("PNG");
+    writer.setQuality(100);
+    writer.setFileName(png);
+    if (!writer.write(image))
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setText(tr("Failed to write the image.\n%1").arg(writer.errorString()));
+        msg.exec();
+    }
+    mExportFile = png;
+    mExportHash = mText.GetHash();
+}
+
 
 void DlgText::PaintScene(gfx::Painter& painter, double secs)
 {
@@ -174,6 +220,18 @@ void DlgText::PaintScene(gfx::Painter& painter, double secs)
             }
         }
     }
+
+    // currently we can't rasterize "texture" based text since that requires
+    // HW composition and the GetData() API cannot offer that.
+    if (mText.GetRasterFormat() == gfx::TextBuffer::RasterFormat::Bitmap)
+    {
+        SetEnabled(mUI.btnSaveAs, true);
+    }
+    else
+    {
+        SetEnabled(mUI.btnSaveAs, true);
+    }
+
     if (mMaterial == nullptr)
     {
         mClass = std::make_shared<gfx::TextureMap2DClass>(gfx::MaterialClass::Type::Texture);

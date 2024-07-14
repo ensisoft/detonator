@@ -40,12 +40,26 @@ namespace gui
     public:
         DlgText(QWidget* parent, const app::Workspace* workspace, gfx::TextBuffer& text);
 
+        QString GetSaveFile() const
+        { return mExportFile; }
+
+        bool DidExport() const
+        {
+            if (mExportFile.isEmpty())
+                return false;
+            if (mExportHash != mText.GetHash())
+                return false;
+
+            return true;
+        }
+
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_btnSelectFont_clicked();
         void on_btnBrowseFont_clicked();
         void on_btnAdjust_clicked();
+        void on_btnSaveAs_clicked();
     private:
         void PaintScene(gfx::Painter& painter, double secs);
     private:
@@ -54,9 +68,11 @@ namespace gui
         const app::Workspace* mWorkspace = nullptr;
         gfx::TextBuffer& mText;
         QTimer mTimer;
+        QString mExportFile;
         bool mAdjustOnce = false;
         std::shared_ptr<gfx::TextureMap2DClass> mClass;
         std::unique_ptr<gfx::Material> mMaterial;
+        std::size_t mExportHash = 0;
     };
 
 } // namespace
