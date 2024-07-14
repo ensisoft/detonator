@@ -704,8 +704,8 @@ namespace uik
 
             ScrollAreaModel()
             {
-                mFlags.set(Flags::ShowHorizontalScrollButtons, true);
-                mFlags.set(Flags::ShowVerticalScrollButtons, true);
+                mScrollAreaFlags.set(Flags::ShowHorizontalScrollButtons, true);
+                mScrollAreaFlags.set(Flags::ShowVerticalScrollButtons, true);
             }
 
             inline ScrollBarMode GetVerticalScrollBarMode() const noexcept
@@ -725,9 +725,9 @@ namespace uik
             inline bool AreHorizontalScrollButtonsVisible() const noexcept
             { return TestScrollAreaFlag(Flags::ShowHorizontalScrollButtons); }
             inline bool TestScrollAreaFlag(Flags flag) const noexcept
-            { return mFlags.test(flag); }
+            { return mScrollAreaFlags.test(flag); }
             inline void SetScrollAreaFlag(Flags flag, bool on_off) noexcept
-            { mFlags.set(flag, on_off); }
+            { mScrollAreaFlags.set(flag, on_off); }
 
             void UpdateContentRect(const uik::FRect& content,
                                    const uik::FRect& widget,
@@ -800,7 +800,7 @@ namespace uik
             float mHorizontalScrollPos = 0.0f;
             float mVerticalScrollBarWidth = 25.0f;
             float mHorizontalScrollBarHeight = 25.0f;
-            base::bitflag<Flags> mFlags;
+            base::bitflag<Flags> mScrollAreaFlags;
         };
 
         class ShapeModel
