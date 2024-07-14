@@ -127,6 +127,9 @@ int FUDialog::exec()
 
     auto ret = mSatan.exec();
 
+    if (finished)
+        finished();
+
     mGeometry = mWindow->saveGeometry();
     mWindow->removeEventFilter(mWindowEventFilter);
     mWindow->close();

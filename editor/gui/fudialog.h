@@ -23,6 +23,8 @@
 #  include <QMainWindow>
 #include "warnpop.h"
 
+#include <functional>
+
 namespace app {
     class Workspace;
 } // app
@@ -47,6 +49,11 @@ namespace gui
         void close();
 
         bool HandleEvent(QEvent* event);
+
+        // this class isn't based on QObject (because the derived
+        // classes must inherit from QWidget which is another QObject
+        // inheritance hierarchy....
+        std::function<void()> finished;
 
     protected:
         void accept();

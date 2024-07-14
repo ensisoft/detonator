@@ -36,11 +36,14 @@ namespace gui
 
 DlgTextureRect::DlgTextureRect(QWidget* parent, app::Workspace* workspace,
                                const gfx::FRect& rect, std::unique_ptr<gfx::TextureSource> texture)
-    : QDialog(parent)
+    : FUDialog(parent)
     , mWorkspace(workspace)
     , mRect(rect)
 {
     mUI.setupUi(this);
+
+    SetupFU(this);
+
     mUI.widget->onPaintScene   = std::bind(&DlgTextureRect::OnPaintScene,   this, std::placeholders::_1, std::placeholders::_2);
     mUI.widget->onMouseMove    = std::bind(&DlgTextureRect::OnMouseMove,    this, std::placeholders::_1);
     mUI.widget->onMousePress   = std::bind(&DlgTextureRect::OnMousePress,   this, std::placeholders::_1);
@@ -57,11 +60,20 @@ DlgTextureRect::DlgTextureRect(QWidget* parent, app::Workspace* workspace,
         mTimer.setInterval(1000.0/60.0);
         mTimer.start();
     };
+    mUI.widget->onKeyPress = [this](QKeyEvent* key) {
+        if (key->key() == Qt::Key_Escape) {
+            reject();
+            return true;
+        }
+        return false;
+    };
 
     // do the graphics dispose in finished handler which is triggered
     // regardless whether we do accept/reject or the user clicks the X
     // or presses Esc.
-    connect(this, &QDialog::finished, this, &DlgTextureRect::finished);
+    this->FUDialog::finished = [this]() {
+        mUI.widget->dispose();
+    };
     // render on timer.
     connect(&mTimer, &QTimer::timeout, this, &DlgTextureRect::timer);
 
@@ -123,10 +135,6 @@ void DlgTextureRect::on_widgetColor_colorChanged(QColor color)
     mUI.widget->SetClearColor(ToGfx(color));
 }
 
-void DlgTextureRect::finished()
-{
-    mUI.widget->dispose();
-}
 void DlgTextureRect::timer()
 {
     mUI.widget->triggerPaint();
