@@ -76,7 +76,16 @@ DlgFont::DlgFont(QWidget* parent, const app::Workspace* workspace, const app::An
 
     mUI.widget->onPaintScene = std::bind(&DlgFont::PaintScene,
         this, std::placeholders::_1, std::placeholders::_2);
-    mUI.widget->onInitScene = [&](unsigned, unsigned) {
+    mUI.widget->onInitScene = [this](unsigned, unsigned) {
+        const float width  = mUI.widget->width();
+        const float height = mUI.widget->height();
+        if ((mBoxWidth  + BoxMargin) > width || (mBoxHeight + BoxMargin) > height)
+        {
+            const auto xs = width / (mBoxWidth + BoxMargin);
+            const auto ys = height / (mBoxHeight + BoxMargin);
+            SetValue(mUI.zoom, std::min(xs, ys));
+        }
+
         mTimer.setInterval(1000.0/60.0);
         mTimer.start();
     };
@@ -84,6 +93,8 @@ DlgFont::DlgFont(QWidget* parent, const app::Workspace* workspace, const app::An
     mUI.widget->onMousePress = std::bind(&DlgFont::MousePress, this, std::placeholders::_1);
     mUI.widget->onMouseWheel = std::bind(&DlgFont::MouseWheel, this, std::placeholders::_1);
     mUI.widget->onMouseDoubleClick = std::bind(&DlgFont::MouseDoubleClick, this, std::placeholders::_1);
+
+    SetValue(mUI.zoom, 1.0f);
 
     mElapsedTimer.start();
 }
@@ -127,15 +138,19 @@ void DlgFont::PaintScene(gfx::Painter& painter, double secs)
     const auto time_milliseconds = mElapsedTimer.elapsed();
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
+    const float zoom = GetValue(mUI.zoom);
+
+    const unsigned box_width = mBoxWidth * zoom;
+    const unsigned box_height = mBoxHeight * zoom;
+
     // don't render if the window is too small
-    if (width < (mBoxWidth + BoxMargin) ||
-        height < (mBoxHeight + BoxMargin))
+    if (width < (box_width + BoxMargin) || height < (box_height + BoxMargin))
         return;
 
-    const auto num_visible_cols = width / (mBoxWidth + BoxMargin);
-    const auto num_visible_rows = height / (mBoxHeight + BoxMargin);
-    const auto xoffset  = (width - ((mBoxWidth + BoxMargin) * num_visible_cols)) / 2;
-    const auto yoffset  = -mScrollOffsetRow * (mBoxHeight + BoxMargin);
+    const auto num_visible_cols = width / (box_width + BoxMargin);
+    const auto num_visible_rows = height / (box_height + BoxMargin);
+    const auto xoffset  = (width - ((box_width + BoxMargin) * num_visible_cols)) / 2;
+    const auto yoffset  = -(float)mScrollOffsetRow * (box_height + BoxMargin);
     unsigned index = 0;
 
     //mMaterialIds.clear();
@@ -147,8 +162,8 @@ void DlgFont::PaintScene(gfx::Painter& painter, double secs)
     {
         const auto col = index % num_visible_cols;
         const auto row = index / num_visible_cols;
-        const auto xpos = xoffset + col * (mBoxWidth + BoxMargin);
-        const auto ypos = yoffset + row * (mBoxHeight + BoxMargin);
+        const auto xpos = xoffset + col * (box_width + BoxMargin);
+        const auto ypos = yoffset + row * (box_height + BoxMargin);
 
         gfx::TextBuffer::Text text_and_style;
         text_and_style.text = "Quick brown fox\njumps over\nthe lazy dog.";
@@ -157,7 +172,7 @@ void DlgFont::PaintScene(gfx::Painter& painter, double secs)
         text_and_style.underline  = mDisplay.underline;
         text_and_style.lineheight = 1.0f;
         gfx::TextBuffer text;
-        text.SetBufferSize(mBoxWidth, mBoxHeight);
+        text.SetBufferSize(box_width, box_height);
         text.SetText(std::move(text_and_style));
         gfx::TextMaterial material(std::move(text));
         material.SetRuntime(time_milliseconds / 1000.0);
@@ -165,7 +180,7 @@ void DlgFont::PaintScene(gfx::Painter& painter, double secs)
         material.SetColor(ToGfx(mDisplay.text_color));
 
         gfx::FRect  rect;
-        rect.Resize(mBoxWidth, mBoxHeight);
+        rect.Resize(box_width, box_height);
         rect.Move(xpos, ypos);
         rect.Translate(BoxMargin*0.5f, BoxMargin*0.5f);
         gfx::FillRect(painter, rect, material);
@@ -200,15 +215,18 @@ void DlgFont::MousePress(QMouseEvent* mickey)
 {
     const auto width  = mUI.widget->width();
     const auto height = mUI.widget->height();
+    const float zoom = GetValue(mUI.zoom);
+    const unsigned box_width = mBoxWidth * zoom;
+    const unsigned box_height = mBoxHeight * zoom;
 
-    const auto num_cols = width / (mBoxWidth + BoxMargin);
-    const auto xoffset  = (width - ((mBoxWidth + BoxMargin) * num_cols)) / 2;
-    const auto yoffset  = mScrollOffsetRow * (mBoxHeight + BoxMargin);
+    const auto num_cols = width / (box_width + BoxMargin);
+    const auto xoffset  = (width - ((box_width + BoxMargin) * num_cols)) / 2;
+    const auto yoffset  = mScrollOffsetRow * (box_height + BoxMargin);
 
     const auto widget_xpos = mickey->pos().x();
     const auto widget_ypos = mickey->pos().y();
-    const auto col = (widget_xpos - xoffset) / (mBoxWidth + BoxMargin);
-    const auto row = (widget_ypos + yoffset) / (mBoxHeight + BoxMargin);
+    const auto col = (widget_xpos - xoffset) / (box_width + BoxMargin);
+    const auto row = (widget_ypos + yoffset) / (box_height + BoxMargin);
     const auto index = row * num_cols + col;
 
     if (index >= mFonts.size())
@@ -279,9 +297,12 @@ bool DlgFont::KeyPress(QKeyEvent* key)
         return true;
     }
 
+    const float zoom = GetValue(mUI.zoom);
+    const unsigned box_width = mBoxWidth * zoom;
+
     const auto width    = mUI.widget->width();
     const auto height   = mUI.widget->height();
-    const auto num_cols = width / (mBoxWidth + BoxMargin);
+    const auto num_cols = width / (box_width + BoxMargin);
     const auto num_rows = mFonts.size() / num_cols;
 
     if (sym == Qt::Key_Left)
