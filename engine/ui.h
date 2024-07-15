@@ -812,6 +812,9 @@ namespace engine
         void OnMousePress(const wdk::WindowEventMousePress& mouse, std::vector<WidgetAction>* actions);
         void OnMouseRelease(const wdk::WindowEventMouseRelease& mouse, std::vector<WidgetAction>* actions);
 
+        void OpenWindowStackState(std::shared_ptr<uik::Window> window);
+        void CloseWindowStackState();
+
     private:
         bool LoadStyle(const std::string& uri);
         bool LoadKeymap(const std::string& uri);
@@ -837,8 +840,6 @@ namespace engine
         };
         WindowStackState* GetState();
         const WindowStackState* GetState() const;
-        void OpenWindowStackState(std::shared_ptr<uik::Window> window);
-        void CloseWindowStackState();
 
     private:
         const ClassLibrary* mClassLib = nullptr;

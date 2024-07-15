@@ -258,6 +258,29 @@ public:
             graph->Preload(*mAudioLoader, params);
         }
 
+        if (klass.type == engine::ClassLibrary::ClassType::UI)
+        {
+            const auto& window_template = mClasslib->FindUIById(klass.id);
+            if (!window_template)
+                return;
+
+            auto ui = std::make_shared<uik::Window>(*window_template);
+            mUIEngine.OpenWindowStackState(ui);
+
+            float time = 0.0f;
+            float step = 1.0f / 60.0f;
+            while (time < 5.0f)
+            {
+                std::vector<engine::UIEngine::WidgetAction> widget_actions;
+                std::vector<engine::UIEngine::WindowAction> window_actions;
+                mUIEngine.UpdateWindow(time, step, &widget_actions);
+                mUIEngine.UpdateState(time, step, &window_actions);
+                mUIEngine.Draw(*mDevice);
+                time += step;
+            }
+            mUIEngine.CloseWindowStackState();
+        }
+
 
         auto* my_screen = static_cast<LoadingScreen*>(screen);
         const float surf_width = mSurfaceWidth;
