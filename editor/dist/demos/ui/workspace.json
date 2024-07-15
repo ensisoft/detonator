@@ -1,18 +1,128 @@
 {
+    "04w68bxEMa": {
+        "__version": 1,
+        "checked_for_packing": true,
+        "local_emitter_h": 1,
+        "local_emitter_w": 1,
+        "local_emitter_x": 0,
+        "local_emitter_y": 0,
+        "material": "y8X809gLGr",
+        "transform_height": 398,
+        "transform_rotation": 0,
+        "transform_width": 628,
+        "transform_xpos": 40,
+        "transform_ypos": -4,
+        "use_lifetime": true
+    },
+    "1zSKHEEMX8": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "26yFL7iuTt": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "2a9dGQ8L9R": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "2xdUYgjtvl": {
+        "checked_for_packing": true
+    },
+    "3vHBKZi4PZ": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "4pCEHuZXY0": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "5omg0eLKCh": {
+        "checked_for_packing": true,
+        "elem_OkowxZ29ux_pos_x": 0,
+        "elem_OkowxZ29ux_pos_y": 0,
+        "mapping_count": 0
+    },
+    "6FH0rTKGMv": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "CKyBnR2qsM": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "CYmQaZ42Q9": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "DdXp2xRthF": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "Hee8rxTCrr": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
     "PJjQktY8ud": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
+    },
+    "QmmO5gXYjv": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "SNExgliw9W": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "SPlS2A5D4Y": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "Uy6jWgursh": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "WE8iUAEdzI": {
+        "__version": 1,
+        "checked_for_packing": true,
+        "elem_PKbbAQYuEO_pos_x": -171,
+        "elem_PKbbAQYuEO_pos_y": -276,
+        "elem_kPKulBh456_pos_x": -477,
+        "elem_kPKulBh456_pos_y": -210,
+        "link_IHmberqEyX_dst_x": -171,
+        "link_IHmberqEyX_dst_y": -227,
+        "link_IHmberqEyX_src_x": -277,
+        "link_IHmberqEyX_src_y": -160,
+        "mapping_0_link": "IHmberqEyX",
+        "mapping_0_port": "kPKulBh456:out",
+        "mapping_1_link": "IHmberqEyX",
+        "mapping_1_port": "PKbbAQYuEO:in",
+        "mapping_count": 2
+    },
+    "WG0kYpqr3q": {
+        "__version": 1,
+        "checked_for_packing": true
     },
     "Xg0GdRiaQU": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
+    },
+    "YHgTw82r0o": {
+        "__version": 1,
+        "checked_for_packing": true
     },
     "hz6w2tG1gv": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
+    },
+    "lqOQq8yDtn": {
+        "__version": 1,
+        "checked_for_packing": true
     },
     "oTENvjff4e": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
     },
     "project": {
         "application_identifier": "nzHsJhRp8RDr",
@@ -20,7 +130,7 @@
         "application_library_win": "app://GameEngine.dll",
         "application_name": "",
         "application_version": "",
-        "audio_buffer_size": 20,
+        "audio_buffer_size": 40,
         "audio_channels": "Stereo",
         "audio_sample_rate": 44100,
         "audio_sample_type": "Float32",
@@ -45,7 +155,7 @@
         "game_viewport_height": 768,
         "game_viewport_width": 1024,
         "grab_mouse": false,
-        "html5_developer_ui": true,
+        "html5_developer_ui": false,
         "loading_screen_font": "app://fonts/orbitron-bold.otf",
         "logging_debug": true,
         "logging_error": true,
@@ -89,7 +199,11 @@
         "working_folder": "${workspace}"
     },
     "qNrtwb1b52": {
-        "__version": 1
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "uI5i13YzFU": {
+        "checked_for_packing": true
     },
     "workspace": {
         "packing_param_combine_textures": true,
@@ -110,15 +224,23 @@
     },
     "x8itAE59QO": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
+    },
+    "y8X809gLGr": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "yA7p0YO8u3": {
+        "__version": 1,
+        "checked_for_packing": true
     },
     "yTsaLXKonJ": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "zNOWw04fYZ": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "elem_0sroSvwwzT_pos_x": -292,
         "elem_0sroSvwwzT_pos_y": -134,
         "elem_GhszDt2nDm_pos_x": -560,
