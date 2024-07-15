@@ -1,7 +1,7 @@
 -- Top level game callbacks.
 -- You're free to delete functions that you don't need.
 local _index = 0
-local _max_index = 2
+local _max_index = 4
 
 local _TestTable = {}
 
@@ -9,12 +9,42 @@ local _TestTable = {}
 -- This is the place where you might want to load some 
 -- previous/initial game state. 
 function LoadGame()
-    _TestTable[0] = 'Widgets Demo'
+    _TestTable[0] = 'Fantasy'
     _TestTable[1] = 'Jungle'
     _TestTable[2] = 'Kenney'
+    _TestTable[3] = 'Wyrmheart'
+    _TestTable[4] = 'Demo'
     Game:OpenUI(_TestTable[0])
     Game:SetViewport(0, 0, 1024, 768)
     return true
+end
+
+function NextDemo()
+    local index = _index + 1
+    if index < 0 then
+        index = _max_index
+    elseif index > _max_index then
+        index = 0
+    end
+    if index ~= _index then
+        Game:CloseUI(0)
+        Game:OpenUI(_TestTable[index])
+        _index = index
+    end
+end
+
+function PrevDemo()
+    local index = _index - 1
+    if index < 0 then
+        index = _max_index
+    elseif index > _max_index then
+        index = 0
+    end
+    if index ~= _index then
+        Game:CloseUI(0)
+        Game:OpenUI(_TestTable[index])
+        _index = index
+    end
 end
 
 -- Called after the game has been loaded and the game can 
@@ -82,26 +112,14 @@ end
 --    ...
 -- end
 function OnKeyDown(symbol, modifier_bits)
-    local index = _index
     if symbol == wdk.Keys.ArrowLeft then
-        index = index - 1
+        PrevDemo()
     elseif symbol == wdk.Keys.ArrowRight then
-        index = index + 1
+        NextDemo()
     elseif symbol == wdk.Keys.Escape then
         Game:Quit(0)
     end
 
-    if index < 0 then
-        index = _max_index
-    elseif index > _max_index then
-        index = 0
-    end
-
-    if index ~= _index then
-        Game:CloseUI(0)
-        Game:OpenUI(_TestTable[index])
-        _index = index
-    end
 end
 
 function OnKeyUp(symbol, modifier_bits)
@@ -147,7 +165,15 @@ end
 -- 'type'  - type string ('ButtonPress' etc) of the action
 -- 'value' - value (int, float, bool, string) of the  action if any.
 function OnUIAction(ui, action)
+    local button = action.name
 
+    if button == 'next' then
+        NextDemo()
+    end
+
+    if button == 'prev' then
+        PrevDemo()
+    end
 end
 
 -- Called when an audio event happens.
