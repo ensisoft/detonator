@@ -999,6 +999,18 @@ void PlayWindow::LoadState(const QString& key_prefix, const QWidget* parent)
         });
     }
 
+    int floating_log_widget_xpos = 0;
+    int floating_log_widget_ypos = 0;
+    bool is_log_widget_floating = false;
+    if (mWorkspace.GetUserProperty(key_prefix + "_floating_log_widget_xpos", &floating_log_widget_xpos) &&
+        mWorkspace.GetUserProperty(key_prefix + "_floating_log_widget_ypos", &floating_log_widget_ypos) &&
+        mWorkspace.GetUserProperty(key_prefix + "_is_log_widget_floating", &is_log_widget_floating) && is_log_widget_floating)
+    {
+        QTimer::singleShot(50, [this, floating_log_widget_xpos, floating_log_widget_ypos]() {
+            mUI.dockWidget->move(floating_log_widget_xpos, floating_log_widget_ypos);
+        });
+    }
+
     const bool show_status_bar = mWorkspace.GetUserProperty(key_prefix + "_show_statusbar", true);
     const bool show_eventlog   = mWorkspace.GetUserProperty(key_prefix + "_show_eventlog", true);
     const bool debug_draw      = mWorkspace.GetUserProperty(key_prefix + "_debug_draw", mUI.actionToggleDebugDraw->isChecked());
@@ -1027,6 +1039,19 @@ void PlayWindow::SaveState(const QString& key_prefix)
     mWorkspace.SetUserProperty(key_prefix + "_debug_msg", (bool)GetValue(mUI.actionToggleDebugMsg));
     mWorkspace.SetUserProperty(key_prefix + "_log_filter", (QString)GetValue(mUI.logFilter));
     mWorkspace.SetUserProperty(key_prefix + "_log_filter_case_sensitive", (bool)GetValue(mUI.logFilterCaseSensitive));
+
+    if (mUI.dockWidget->isFloating())
+    {
+        const auto xpos = mUI.dockWidget->x();
+        const auto ypos = mUI.dockWidget->y();
+        mWorkspace.SetUserProperty(key_prefix + "_is_log_widget_floating", true);
+        mWorkspace.SetUserProperty(key_prefix + "_floating_log_widget_xpos", xpos);
+        mWorkspace.SetUserProperty(key_prefix + "_floating_log_widget_ypos", ypos);
+    }
+    else
+    {
+        mWorkspace.SetUserProperty(key_prefix + "_is_log_widget_floating", false);
+    }
 }
 
 void PlayWindow::ShowWithWAR()
