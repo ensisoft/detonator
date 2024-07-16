@@ -53,11 +53,13 @@ as puzzle games, platformers, side scrollers and tile based real time strategy a
 1. Download the latest binary from the releases page<br>
    https://github.com/ensisoft/detonator/releases
 2. Unzip the .zip file anywhere on your computer for example `C:\detonator` 
-4. Run `C:\detonator\Detonator.exe`
+3. Run `C:\detonator\Detonator.exe`
+4. Load any of the sample workspaces by clicking on a button in the main screen.
+5. Press F4 to launch the sample game.
 
 #### How to Uninstall
-If you want to remove the app simply delete the detonator folder.<br>
-All user settings are stored in <strong>C:\Users\<username>.GameStudio</strong> and can also be deleted.
+If you want to remove the app simply delete the detonator folder. `C:\detonator` <br>
+All user settings are stored in `C:\Users\<username>.GameStudio` and can also be deleted.
 
 #### Install from Sources
 
