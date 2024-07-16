@@ -622,6 +622,15 @@ GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
             onMouseRelease(mickey);
     };
     mWindow->onKeyPress = [&](QKeyEvent* key) {
+
+        // let the GfxWidget host take a first pass at handling the
+        // key presses.
+        if (mWindow && onKeyPress)
+        {
+            if (onKeyPress(key))
+                return true;
+        }
+
         // The context menu can no longer be used since QWindow
         // doesn't support it. Also we cannot use the context
         // menu with the container widget either because this
@@ -636,8 +645,6 @@ GfxWidget::GfxWidget(QWidget* parent) : QWidget(parent)
             FocusNextPrev(WidgetFocus::FocusNextWidget);
         else if (key->key() == Qt::Key_Backtab)
             FocusNextPrev(WidgetFocus::FocusPrevWidget);
-        else if (mWindow && onKeyPress)
-            return onKeyPress(key);
         else return false;
 
         return true;
