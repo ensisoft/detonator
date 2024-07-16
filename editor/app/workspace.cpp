@@ -3180,10 +3180,12 @@ void Workspace::UpdateUserProperty(const QString& name, const QVariant& data)
     const auto& prev = GetUserVariantProperty(name);
     if (prev.isValid())
     {
-        if (data.type() != prev.type()) {
-            ERROR("User property has unexpected type on property update! [key'%1', expected='%2', received='%3'",
+        if (data.type() != prev.type())
+        {
+            DEBUG("User property has changed type on property update! [key='%1', prev='%2', next='%3']",
                  name, prev.type(), data.type());
-            return;
+            // ok, let it pass
+            //return;
         }
     }
 
