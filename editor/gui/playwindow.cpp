@@ -1557,7 +1557,7 @@ bool PlayWindow::eventFilter(QObject* destination, QEvent* event)
         if (mWinEventLog)
             mWinEventLog->RecordEvent(release, mTimer.SinceStart());
     }
-    if (event->type() == QEvent::Resize)
+    else if (event->type() == QEvent::Resize)
     {
         wdk::WindowEventResize resize;
         resize.width  = mSurface->width();
