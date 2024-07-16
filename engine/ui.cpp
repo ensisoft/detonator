@@ -2324,7 +2324,7 @@ void UIEngine::OnKeyDown(const wdk::WindowEventKeyDown &key, std::vector<WidgetA
 
 void UIEngine::OnKeyUp(const wdk::WindowEventKeyUp &key, std::vector<WidgetAction>* actions)
 {
-    OnKeyEvent(key, &uik::Window::KeyDown, actions);
+    OnKeyEvent(key, &uik::Window::KeyUp, actions);
 }
 
 void UIEngine::OnMouseMove(const wdk::WindowEventMouseMove& mouse, std::vector<WidgetAction>* actions)
