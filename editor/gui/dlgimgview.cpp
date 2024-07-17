@@ -110,8 +110,9 @@ void DlgImgView::LoadImage(const QString& file)
         return;
     }
 
-    mWidth    = bitmap->GetWidth();
-    mHeight   = bitmap->GetHeight();
+    mWidth  = bitmap->GetWidth();
+    mHeight = bitmap->GetHeight();
+    mDepth  = bitmap->GetDepthBits();
     mClass = std::make_shared<gfx::TextureMap2DClass>(gfx::MaterialClass::Type::Texture);
     mClass->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
     mClass->SetTexture(std::move(source));
@@ -818,6 +819,8 @@ void DlgImgView::OnPaintScene(gfx::Painter& painter, double secs)
             gfx::FillShape(painter, rect, gfx::Circle(), selection_material);
         }
     }
+
+    ShowMessage(app::toString("%1 x %2 @ %3bpp", mWidth, mHeight, mDepth), painter);
 }
 
 void DlgImgView::OnMousePress(QMouseEvent* mickey)

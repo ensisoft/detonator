@@ -104,6 +104,7 @@ namespace gui
         std::unique_ptr<gfx::Material> mMaterial;
         unsigned mWidth  = 0;
         unsigned mHeight = 0;
+        unsigned mDepth  = 0;
         QTimer mTimer;
         QPoint mTrackingOffset;
         QPoint mCurrentPoint;
