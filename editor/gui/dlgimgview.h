@@ -24,6 +24,7 @@
 #  include <QString>
 #  include <QPixmap>
 #  include <QTimer>
+#  include <QRectF>
 #include "warnpop.h"
 
 #include <memory>
@@ -58,6 +59,10 @@ namespace gui
         QString GetImageFileName() const;
         QString GetJsonFileName() const;
         QString GetImageName() const;
+
+        // Get the normaliezd image rect of the first selected image.
+        // (For dialog mode)
+        QRectF GetImageRectF() const;
 
         void ResetTransform();
 

@@ -120,6 +120,11 @@ inline glm::vec2 ToVec2(const QSize& size)
 inline glm::vec2 ToVec2(const QPointF& point)
 { return glm::vec2(point.x(), point.y()); }
 
+inline gfx::FRect ToGfx(const QRectF& rect)
+{
+    return gfx::FRect(rect.x(), rect.y(), rect.width(), rect.height());
+}
+
 inline gfx::Color4f ToGfx(const QColor& color)
 {
     const float a  = color.alphaF();

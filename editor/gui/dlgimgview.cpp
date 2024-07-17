@@ -284,6 +284,22 @@ QString DlgImgView::GetImageName() const
     return "";
 }
 
+QRectF DlgImgView::GetImageRectF() const
+{
+    for (auto& img : mPack.images)
+    {
+        if (!img.selected)
+            continue;
+
+        const auto x = (float)img.xpos / (float)mWidth;
+        const auto y = (float)img.ypos / (float)mHeight;
+        const auto w = (float)img.width / (float)mWidth;
+        const auto h = (float)img.height / (float)mHeight;
+        return QRectF(x, y, w, h);
+    }
+    return QRectF{};
+}
+
 void DlgImgView::ResetTransform()
 {
     if (mWidth == 0 || mHeight == 0)
