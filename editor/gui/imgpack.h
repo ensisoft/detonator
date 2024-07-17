@@ -45,7 +45,7 @@ namespace gui
         bool premultiply_alpha_hint = false;
         bool premultiply_blend_hint = false;
         bool power_of_two_hint      = false;
-        gfx::detail::TextureFileSource::ColorSpace color_space = gfx::detail::TextureFileSource::ColorSpace::Linear;
+        gfx::detail::TextureFileSource::ColorSpace color_space = gfx::detail::TextureFileSource::ColorSpace::sRGB;
         gfx::MaterialClass::MinTextureFilter min_filter = gfx::MaterialClass::MinTextureFilter::Default;
         gfx::MaterialClass::MagTextureFilter mag_filter = gfx::MaterialClass::MagTextureFilter::Default;
 
