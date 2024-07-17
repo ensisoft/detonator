@@ -55,6 +55,7 @@
 #include "editor/gui/sampler.h"
 #include "editor/gui/dlgtexturerect.h"
 #include "editor/gui/dlgtextedit.h"
+#include "editor/gui/dlgimgview.h"
 #include "editor/gui/materialwidget.h"
 
 namespace gui
@@ -960,29 +961,67 @@ void MaterialWidget::AddNewTextureMapFromFile()
     if (map == nullptr)
         return;
 
-    for (const auto& image : images)
+    for (const auto& image: images)
     {
-        const QFileInfo info(image);
-        const auto& name = info.baseName();
-        const auto& file = mWorkspace->MapFileToWorkspace(info.absoluteFilePath());
+        QString image_name;
+        QString image_file;
+        gfx::FRect image_rect(0.0f, 0.0f, 1.0f, 1.0f);
 
-        auto source = std::make_unique<gfx::detail::TextureFileSource>(file);
-        source->SetName(app::ToUtf8(name));
-        source->SetFileName(file);
+        // If it's a sprite and we only have a single file it's
+        // probably a spritesheet that contains the sprite animation
+        // frames in some particular col,row arrangement. this is
+        // handled with the single sheet sprite settings.
+        if (map->GetType() == gfx::TextureMap::Type::Texture2D)
+        {
+            QString json_file;
+            json_file = app::FindImageJsonFile(image);
+            if (json_file.isEmpty())
+            {
+                const QFileInfo info(image);
+                image_file = info.absoluteFilePath();
+                image_name = info.baseName();
+            }
+            else
+            {
+                DlgImgView dlg(this);
+                dlg.SetDialogMode();
+                dlg.show();
+                dlg.LoadImage(image);
+                dlg.LoadJson(json_file);
+                dlg.ResetTransform();
+                if (dlg.exec() == QDialog::Rejected)
+                    return;
+                image_file = dlg.GetImageFileName();
+                image_name = dlg.GetImageName();
+                image_rect = ToGfx(dlg.GetImageRectF());
+            }
+        }
+        else
+        {
+            const QFileInfo info(image);
+            image_file = info.absoluteFilePath();
+            image_name = info.baseName();
+        }
+
+        const auto& uri = mWorkspace->MapFileToWorkspace(image_file);
+
+        auto source = std::make_unique<gfx::detail::TextureFileSource>(uri);
+        source->SetName(app::ToUtf8(image_name));
+        source->SetFileName(uri);
         source->SetColorSpace(gfx::detail::TextureFileSource::ColorSpace::sRGB);
 
         if (map->GetType() == gfx::TextureMap::Type::Texture2D)
         {
             map->SetNumTextures(1);
             map->SetTextureSource(0, std::move(source));
-            map->SetTextureRect(0, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+            map->SetTextureRect(0, image_rect);
         }
         else if (map->GetType() == gfx::TextureMap::Type::Sprite)
         {
             const auto textures = map->GetNumTextures();
             map->SetNumTextures(textures + 1);
             map->SetTextureSource(textures, std::move(source));
-            map->SetTextureRect(textures, gfx::FRect(0.0f, 0.0f, 1.0f, 1.0f));
+            map->SetTextureRect(textures, image_rect);
         }
     }
 
