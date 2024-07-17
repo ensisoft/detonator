@@ -192,6 +192,21 @@ void DlgSvgView::on_btnHalveSize_clicked()
     SetViewBox();
 }
 
+void DlgSvgView::on_btnDoubleCanvasSize_clicked()
+{
+    const int width  = GetValue(mUI.rasterWidth);
+    const int height = GetValue(mUI.rasterHeight);
+    SetValue(mUI.rasterWidth, width*2);
+    SetValue(mUI.rasterHeight, height*2);
+}
+void DlgSvgView::on_btnHalveCanvasSize_clicked()
+{
+    const int width  = GetValue(mUI.rasterWidth);
+    const int height = GetValue(mUI.rasterHeight);
+    SetValue(mUI.rasterWidth, width/2);
+    SetValue(mUI.rasterHeight, height/2);
+}
+
 void DlgSvgView::on_btnSaveAs_clicked()
 {
     QString filter;
@@ -251,6 +266,7 @@ void DlgSvgView::on_btnSaveAs_clicked()
         base::JsonWrite(json, "image_file", app::ToUtf8(info.fileName()));
         base::JsonWrite(json, "image_width", raster_size.width());
         base::JsonWrite(json, "image_height", raster_size.height());
+        base::JsonWrite(json, "color_space", "sRGB");
 
         const auto current = mUI.view->element();
 
