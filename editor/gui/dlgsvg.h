@@ -49,6 +49,9 @@ namespace gui
         void on_rasterHeight_valueChanged(int);
         void on_btnDoubleSize_clicked();
         void on_btnHalveSize_clicked();
+        void on_btnDoubleCanvasSize_clicked();
+        void on_btnHalveCanvasSize_clicked();
+
         void on_btnSaveAs_clicked();
         void on_cmbElement_currentIndexChanged(const QString&);
 
