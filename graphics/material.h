@@ -786,6 +786,9 @@ namespace gfx
             // Built-in material using a single sprite map
             // to display texture based animation.
             Sprite,
+            // Built-in material using a single tile map
+            // to display "tiles" based on a regular texture layout
+            Tilemap,
             // Custom material with user defined material
             // shader and an arbitrary number of uniforms
             // and texture maps.
@@ -948,6 +951,12 @@ namespace gfx
         { GetUniformValue<float>("kTextureRotation", 0.0f) = angle_radians; }
         inline void SetTextureVelocity(const glm::vec2& linear, float angular) noexcept
         { GetUniformValue<glm::vec3>("kTextureVelocity", {0.0f, 0.0f, 0.0f}) = glm::vec3(linear, angular); }
+        inline void SetTileSize(const glm::vec2& size) noexcept
+        { GetUniformValue<glm::vec2>("kTileSize", {0.0f, 0.0f}) = size; }
+        inline void SetTileOffset(const glm::vec2& offset) noexcept
+        { GetUniformValue<glm::vec2>("kTileOffset", {0.0, 0.0f}) = offset; }
+        inline void SetTilePadding(const glm::vec2& padding) noexcept
+        { GetUniformValue<glm::vec2>("kTilePadding", {0.0f, 0.0f}) = padding; }
 
         inline float GetAlphaCutoff() const noexcept
         { return GetUniformValue<float>("kAlphaCutoff", 0.0f); }
@@ -973,6 +982,12 @@ namespace gfx
         { return GetUniformValue<glm::vec3>("kTextureVelocity", {0.0f, 0.0f, 0.0f}); }
         inline float GetTextureRotation() const noexcept
         { return GetUniformValue<float>("kTextureRotation", 0.0f); }
+        inline glm::vec2 GetTileSize() const noexcept
+        { return GetUniformValue<glm::vec2>("kTileSize", {0.0f, 0.0f}); }
+        inline glm::vec2 GetTileOffset() const noexcept
+        { return GetUniformValue<glm::vec2>("kTileOffset", {0.0f, 0.0f}); }
+        inline glm::vec2 GetTilePadding() const noexcept
+        { return GetUniformValue<glm::vec2>("kTilePadding", {0.0f, 0.0f}); }
 
         inline MinTextureFilter GetTextureMinFilter() const noexcept
         { return mTextureMinFilter; }
@@ -1135,9 +1150,11 @@ namespace gfx
         ShaderSource GetGradientShaderSource(const State& state, const Device& device) const;
         ShaderSource GetSpriteShaderSource(const State& state, const Device& device) const;
         ShaderSource GetTextureShaderSource(const State& state, const Device& device) const;
+        ShaderSource GetTilemapShaderSource(const State& state, const Device& device) const;
         bool ApplySpriteDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
         bool ApplyCustomDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
         bool ApplyTextureDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
+        bool ApplyTilemapDynamicState(const State& state, Device& device, ProgramState& program) const noexcept;
 
     private:
         std::string mClassId;

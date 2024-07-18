@@ -968,6 +968,16 @@ std::string MaterialClass::GetShaderId(const State& state) const noexcept
             hash = base::hash_combine(hash, GetAlphaCutoff());
         }
     }
+    else if (mType == Type::Tilemap)
+    {
+        if (IsStatic())
+        {
+            hash = base::hash_combine(hash, GetBaseColor());
+            hash = base::hash_combine(hash, GetAlphaCutoff());
+            hash = base::hash_combine(hash, GetTileSize());
+            hash = base::hash_combine(hash, GetTileOffset());
+        }
+    }
     else if (mType == Type::Custom)
     {
         // todo: static uniform information
@@ -1004,6 +1014,8 @@ std::size_t MaterialClass::GetHash() const noexcept
     hash = base::hash_combine(hash, GetColor(ColorIndex::BottomRight));
     hash = base::hash_combine(hash, GetColorWeight());
     hash = base::hash_combine(hash, GetAlphaCutoff());
+    hash = base::hash_combine(hash, GetTileSize());
+    hash = base::hash_combine(hash, GetTileOffset());
 
     // remember that the order of uniforms (and texturemaps)
     // can change between IntoJson/FromJson! This can result
@@ -1053,6 +1065,9 @@ ShaderSource MaterialClass::GetShader(const State& state, const Device& device) 
         source.FoldUniform("kTextureVelocityZ", GetTextureVelocity().z);
         source.FoldUniform("kTextureRotation", GetTextureRotation());
         source.FoldUniform("kTextureScale", GetTextureScale());
+        source.FoldUniform("kTileSize", GetTileSize());
+        source.FoldUniform("kTileOffset", GetTileOffset());
+        source.FoldUniform("kTilePadding", GetTilePadding());
     }
     return source;
 }
@@ -1084,6 +1099,8 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
         return ApplySpriteDynamicState(state, device, program);
     else if (mType == Type::Texture)
         return ApplyTextureDynamicState(state, device, program);
+    else if (mType == Type::Tilemap)
+        return ApplyTilemapDynamicState(state, device, program);
     else if (mType == Type::Custom)
         return ApplyCustomDynamicState(state, device, program);
     else BUG("Unknown material type.");
@@ -1120,6 +1137,13 @@ void MaterialClass::ApplyStaticState(const State& state, Device& device, Program
         program.SetUniform("kTextureVelocity",   GetTextureVelocity());
         program.SetUniform("kTextureRotation",   GetTextureRotation());
         program.SetUniform("kAlphaCutoff",       GetAlphaCutoff());
+    }
+    else if (mType == Type::Tilemap)
+    {
+        program.SetUniform("kBaseColor",   GetBaseColor());
+        program.SetUniform("kAlphaCutoff", GetAlphaCutoff());
+        // I'm not sure if there's a use case for setting the texture
+        // scale or texture velocity. so we're not applying these now.
     }
     else if (mType == Type::Custom)
     {
@@ -1735,6 +1759,8 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
         return GetSpriteShaderSource(state, device);
     else if (mType == Type::Texture)
         return GetTextureShaderSource(state, device);
+    else if (mType == Type::Tilemap)
+        return GetTilemapShaderSource(state, device);
     else  if (mType == Type::Custom)
     {
         ERROR("Material has no shader source specified. [name='%1']", mName);
@@ -2115,6 +2141,108 @@ void FragmentShaderMain()
     return source;
 }
 
+ShaderSource MaterialClass::GetTilemapShaderSource(const State& state, const Device& device) const
+{
+    ShaderSource source;
+    source.SetType(ShaderSource::Type::Fragment);
+    source.SetPrecision(ShaderSource::Precision::High);
+    source.SetVersion(ShaderSource::Version::GLSL_100);
+    source.AddUniform("kTexture", ShaderSource::UniformType::Sampler2D);
+    source.AddUniform("kTextureBox", ShaderSource::UniformType::Vec4f);
+    source.AddUniform("kAlphaCutoff", ShaderSource::UniformType::Float);
+    source.AddUniform("kTime", ShaderSource::UniformType::Float);
+    source.AddUniform("kBaseColor", ShaderSource::UniformType::Color4f);
+    source.AddUniform("kTileSize", ShaderSource::UniformType::Vec2f);
+    source.AddUniform("kTileOffset", ShaderSource::UniformType::Vec2f);
+    source.AddUniform("kTilePadding", ShaderSource::UniformType::Vec2f);
+    source.AddUniform("kTextureSize", ShaderSource::UniformType::Vec2f);
+    source.AddUniform("kRenderPoints", ShaderSource::UniformType::Float);
+
+    source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
+    source.AddVarying("vTileData", ShaderSource::VaryingType::Vec2f);
+
+    if (state.editing_mode)
+    {
+        source.AddUniform("kTileIndex", ShaderSource::UniformType::Float);
+        source.AddSource(R"(
+// this function is a stub and only available to help debug the
+// and check the result of tile rendering visually in the editor.
+float GetTileIndex() {
+    return kTileIndex;
+}
+)");
+    }
+    else
+    {
+        source.AddSource(R"(
+float GetTileIndex() {
+    return vTileData.x;
+}
+)");
+    }
+
+    source.AddSource(R"(
+void FragmentShaderMain()
+{
+    // the tile rendering can provide geometry also through GL_POINTS.
+    // that means we must then use gl_PointCoord as the texture coordinates
+    // for the fragment.
+    vec2 frag_texture_coords = mix(vTexCoord, gl_PointCoord, kRenderPoints);
+
+    // apply texture box transformation
+    vec2 texture_box_size      = kTextureBox.zw;
+    vec2 texture_box_translate = kTextureBox.xy;
+
+    vec2 tile_texture_offset = kTileOffset * texture_box_size;
+    vec2 tile_texture_size   = kTileSize * texture_box_size;
+    vec2 tile_texture_padding = kTilePadding * texture_box_size;
+    vec2 tile_texture_box_size = tile_texture_size + (tile_texture_padding * 2.0);
+
+    vec2 tile_map_size = texture_box_size - tile_texture_offset;
+    vec2 tile_map_dims = tile_map_size / tile_texture_box_size; // rows and cols
+
+    int tile_index = int(GetTileIndex());
+    int tile_cols = int(tile_map_dims.x);
+    int tile_rows = int(tile_map_dims.y);
+    int tile_row = tile_index / tile_cols;
+    int tile_col = tile_index - (tile_row * tile_cols);
+
+    // build the final texture coordinate by successively adding offsets
+    // in order to map the frag coord to the right texture position inside
+    // the tile, inside the tile region of the tile-texture inside the
+    // texture box inside the texture atlas.
+    vec2 texture_coords = vec2(0.0, 0.0);
+
+    // add texture box offset inside the texture.
+    texture_coords += texture_box_translate;
+
+    // add the tile offset inside the texture box to get to the tiles
+    texture_coords += tile_texture_offset;
+
+    // add the tile base coord to get to the top-left of
+    // the tile coordinate.
+    texture_coords += vec2(float(tile_col), float(tile_row)) * tile_texture_box_size;
+
+    texture_coords += tile_texture_padding;
+
+    // add the frag coordinate relative to the tile's top left
+    texture_coords += tile_texture_size * frag_texture_coords;
+
+    vec4 texture_sample = texture2D(kTexture, texture_coords);
+
+    // produce color value.
+    vec4 color = texture_sample * kBaseColor;
+
+    if (color.a < kAlphaCutoff)
+        discard;
+
+    fs_out.color = color;
+}
+)");
+    return source;
+
+}
+
 bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device, ProgramState& program) const noexcept
 {
     auto* map = SelectTextureMap(state);
@@ -2192,6 +2320,64 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
         SetUniform("kTextureVelocity",   state.uniforms, GetTextureVelocity(), program);
         SetUniform("kTextureRotation",   state.uniforms, GetTextureRotation(), program);
         SetUniform("kAlphaCutoff",       state.uniforms, GetAlphaCutoff(), program);
+    }
+    return true;
+}
+
+bool MaterialClass::ApplyTilemapDynamicState(const State& state, Device& device, ProgramState& program) const noexcept
+{
+    auto* map = SelectTextureMap(state);
+    if (map == nullptr)
+    {
+        if (state.first_render)
+            ERROR("Failed to select material texture map. [material='%1']", mName);
+        return false;
+    }
+
+    TextureMap::BindingState ts;
+    ts.dynamic_content = state.editing_mode || !IsStatic();
+    ts.current_time    = 0.0;
+
+    TextureMap::BoundState binds;
+    if (!map->BindTextures(ts, device, binds))
+    {
+        if (state.first_render)
+            ERROR("Failed to bind material texture. [material='%1']", mName);
+        return false;
+    }
+
+    auto* texture = binds.textures[0];
+    texture->SetFilter(mTextureMinFilter);
+    texture->SetFilter(mTextureMagFilter);
+    texture->SetWrapX(mTextureWrapX);
+    texture->SetWrapY(mTextureWrapY);
+
+    const auto rect = binds.rects[0];
+    const float x  = rect.GetX();
+    const float y  = rect.GetY();
+    const float sx = rect.GetWidth();
+    const float sy = rect.GetHeight();
+
+    const float width  = texture->GetWidth();
+    const float height = texture->GetHeight();
+
+    program.SetUniform("kTextureSize", glm::vec2{width, height});
+    program.SetTexture("kTexture", 0, *texture);
+    program.SetUniform("kTextureBox", x, y, sx, sy);
+    program.SetTextureCount(1);
+
+    if (!IsStatic())
+    {
+        SetUniform("kBaseColor",         state.uniforms, GetBaseColor(), program);
+        SetUniform("kAlphaCutoff",       state.uniforms, GetAlphaCutoff(), program);
+        SetUniform("kTileSize",          state.uniforms, GetTileSize(), program);
+        SetUniform("kTileOffset",        state.uniforms, GetTileOffset(), program);
+        SetUniform("kTilePadding",       state.uniforms, GetTilePadding(), program);
+    }
+
+    if (state.editing_mode)
+    {
+        SetUniform("kTileIndex", state.uniforms, GetUniformValue("kTileIndex", 0.0f), program);
     }
     return true;
 }
