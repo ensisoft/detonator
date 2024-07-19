@@ -3117,6 +3117,7 @@ ShaderSource TileBatch::GetShader(const Environment& env, const Device& device) 
 #version 100
 
 attribute vec3 aTilePosition;
+attribute vec2 aTileData;
 
 uniform mat4 kTileTransform;
 uniform mat4 kTileCoordinateSpaceTransform;
@@ -3127,6 +3128,7 @@ uniform vec2 kTileRenderSize;
 
 varying float vParticleAlpha;
 varying float vParticleRandomValue;
+varying vec2 vTileData;
 varying vec2 vTexCoord;
 
 void VertexShaderMain()
@@ -3141,6 +3143,8 @@ void VertexShaderMain()
 
   gl_PointSize = kTileRenderSize.x;
 
+  vTileData = aTileData;
+
   // dummy out.
   vParticleAlpha = 1.0;
   vParticleRandomValue = 1.0;
@@ -3153,6 +3157,7 @@ void VertexShaderMain()
 
 attribute vec3 aTilePosition;
 attribute vec2 aTileCorner;
+attribute vec2 aTileData;
 
 uniform mat4 kTileTransform;
 uniform mat4 kTileCoordinateSpaceTransform;
@@ -3163,6 +3168,7 @@ uniform vec2 kTileRenderSize;
 
 varying float vParticleAlpha;
 varying float vParticleRandomValue;
+varying vec2 vTileData;
 varying vec2 vTexCoord;
 
 void VertexShaderMain()
@@ -3182,6 +3188,7 @@ void VertexShaderMain()
   gl_Position.z = 0.0;
 
   vTexCoord = aTileCorner + vec2(0.5, 1.0);
+  vTileData = aTileData;
 
   // dummy out
   vParticleAlpha = 1.0;
@@ -3231,7 +3238,8 @@ bool TileBatch::Construct(const Environment& env, Geometry::CreateArgs& create) 
     {
         using TileVertex = Tile;
         static const VertexLayout layout(sizeof(TileVertex), {
-            {"aTilePosition", 0, 3, 0, offsetof(TileVertex, pos)},
+            {"aTilePosition", 0, 4, 0, offsetof(TileVertex, pos)},
+            {"aTileData",     0, 2, 0, offsetof(TileVertex, data)}
         });
 
         create.content_name = "TileBatch";
@@ -3246,20 +3254,22 @@ bool TileBatch::Construct(const Environment& env, Geometry::CreateArgs& create) 
     {
         struct TileVertex {
             Vec3 position;
+            Vec2 data;
             Vec2 corner;
         };
         static const VertexLayout layout(sizeof(TileVertex), {
             {"aTilePosition", 0, 3, 0, offsetof(TileVertex, position)},
-            {"aTileCorner",   0, 2, 0, offsetof(TileVertex, corner)}
+            {"aTileData",     0, 2, 0, offsetof(TileVertex, data)},
+            {"aTileCorner",   0, 2, 0, offsetof(TileVertex, corner)},
         });
         std::vector<TileVertex> vertices;
         vertices.reserve(6 * mTiles.size());
         for (const auto& tile : mTiles)
         {
-            const TileVertex top_left  = {tile.pos, {-0.5f, -1.0f}};
-            const TileVertex top_right = {tile.pos, { 0.5f, -1.0f}};
-            const TileVertex bot_left  = {tile.pos, {-0.5f,  0.0f}};
-            const TileVertex bot_right = {tile.pos, { 0.5f,  0.0f}};
+            const TileVertex top_left  = {tile.pos, tile.data, {-0.5f, -1.0f}};
+            const TileVertex top_right = {tile.pos, tile.data, { 0.5f, -1.0f}};
+            const TileVertex bot_left  = {tile.pos, tile.data, {-0.5f,  0.0f}};
+            const TileVertex bot_right = {tile.pos, tile.data, { 0.5f,  0.0f}};
             vertices.push_back(top_left);
             vertices.push_back(bot_left);
             vertices.push_back(bot_right);

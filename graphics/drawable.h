@@ -1325,6 +1325,9 @@ namespace gfx
 
         struct Tile {
             Vec3 pos;
+            // x = material palette index (for using tile material)
+            // y = arbitrary data from the tile map
+            Vec2 data;
         };
         TileBatch() = default;
         explicit TileBatch(const std::vector<Tile>& tiles)
