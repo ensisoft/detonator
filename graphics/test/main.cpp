@@ -433,43 +433,223 @@ private:
 class TileBatchTest : public GraphicsTest
 {
 public:
+    TileBatchTest()
+    {
+
+    }
+    virtual void Start() override
+    {
+        {
+            gfx::TextureMap2D map;
+            map.SetNumTextures(1);
+            map.SetTextureSource(0, gfx::LoadTextureFromFile("textures/tilemap_64x64.png"));
+            map.SetSamplerName("kTexture");
+            map.SetName("Tilemap");
+
+            gfx::MaterialClass klass(gfx::MaterialClass::Type::Tilemap);
+            klass.SetNumTextureMaps(1);
+            klass.SetTextureMap(0, map);
+            klass.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
+            klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Nearest);
+
+            const auto tile_width = 64.0f;
+            const auto tile_height = 64.0f;
+            const auto texture_width = tile_width * 4.0f;
+            const auto texture_height = tile_height * 2.0f;
+
+            klass.SetTileSize(glm::vec2(tile_width / texture_width, tile_height / texture_height));
+            klass.SetTileOffset(glm::vec2(0.0f, 0.0f));
+            mTileset64x46 = gfx::CreateMaterialInstance(klass);
+        }
+
+        {
+            gfx::TextureMap2D map;
+            map.SetNumTextures(1);
+            map.SetTextureSource(0, gfx::LoadTextureFromFile("textures/tilemap_64x64_offset_32x32.png"));
+            map.SetSamplerName("kTexture");
+            map.SetName("Tilemap");
+
+            gfx::MaterialClass klass(gfx::MaterialClass::Type::Tilemap);
+            klass.SetNumTextureMaps(1);
+            klass.SetTextureMap(0, map);
+            klass.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
+            klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Nearest);
+
+            const auto tile_width = 64.0f;
+            const auto tile_height = 64.0f;
+            const auto texture_width = tile_width * 4.0f + 32.0f;
+            const auto texture_height = tile_height * 2.0f + 32.0f;
+
+            klass.SetTileSize(glm::vec2(tile_width / texture_width, tile_height / texture_height));
+            klass.SetTileOffset(glm::vec2(32.0f / texture_width, 32.0f / texture_height));
+            mTileset64x46Offset32x32 = gfx::CreateMaterialInstance(klass);
+        }
+
+        {
+            const auto tile_width = 64.0f;
+            const auto tile_height = 64.0f;
+            const auto texture_width = tile_width * 4.0f + 32.0f;
+            const auto texture_height = tile_height * 2.0f + 32.0f;
+
+            gfx::FRect texture(0.0f, 0.0f, 512.0f, 256.0f);
+            gfx::FRect rect(0.0f, 0.0f, texture_width, texture_height);
+            rect.Move(512.0f, 256.0f);
+            rect.Translate(-texture_width, -texture_height);
+            rect = MapToLocalNormalize(texture, rect);
+
+            gfx::TextureMap2D map;
+            map.SetNumTextures(1);
+            map.SetTextureSource(0, gfx::LoadTextureFromFile("textures/tilemap_64x64_offset_32x32_atlas_512x256.png"));
+            map.SetSamplerName("kTexture");
+            map.SetName("Tilemap");
+            map.SetTextureRect(0, rect);
+
+            gfx::MaterialClass klass(gfx::MaterialClass::Type::Tilemap);
+            klass.SetNumTextureMaps(1);
+            klass.SetTextureMap(0, map);
+            klass.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
+            klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Nearest);
+
+            klass.SetTileSize(glm::vec2(tile_width / texture_width, tile_height / texture_height));
+            klass.SetTileOffset(glm::vec2(32.0f / texture_width, 32.0f / texture_height));
+            mTileset64x46Offset32x32Atlas512x256 = gfx::CreateMaterialInstance(klass);
+        }
+
+        {
+            const auto tile_width = 64.0f;
+            const auto tile_height = 64.0f;
+            const auto tile_padding = 2.0f;
+            const auto texture_width = (tile_width + 2.0*tile_padding) * 4.0f;
+            const auto texture_height = tile_height + 2.0*tile_padding;
+
+            gfx::TextureMap2D map;
+            map.SetNumTextures(1);
+            map.SetTextureSource(0, gfx::LoadTextureFromFile("textures/tilemap_64x64_padding_2x2.png"));
+            map.SetSamplerName("kTexture");
+            map.SetName("Tilemap");
+
+            gfx::MaterialClass klass(gfx::MaterialClass::Type::Tilemap);
+            klass.SetNumTextureMaps(1);
+            klass.SetTextureMap(0, map);
+            klass.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
+            klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Nearest);
+
+            klass.SetTileSize(glm::vec2(tile_width / texture_width, tile_height / texture_height));
+            klass.SetTilePadding(glm::vec2(tile_padding / texture_width, tile_padding / texture_height));
+            mTileSet64x64Padding2x2 = gfx::CreateMaterialInstance(klass);
+        }
+
+
+    }
+
     virtual void Render(gfx::Painter& painter) override
     {
         const auto tile_size = 50.0f;
 
+        // these should all render the same.
+        // the difference is in the input texture and how
+        // the tiles are laid out in the texture.
+
         {
             gfx::TileBatch tiles;
-            tiles.SetTileWorldWidth(tile_size);
-            tiles.SetTileWorldHeight(tile_size);
-            tiles.SetTileRenderWidth(tile_size);
-            tiles.SetTileRenderHeight(tile_size);
-            for (unsigned row=0; row<10; ++row)
+            tiles.SetTileWorldWidth(64.0f);
+            tiles.SetTileWorldHeight(64.0f);
+            tiles.SetTileRenderWidth(64.0f);
+            tiles.SetTileRenderHeight(64.0f);
+            for (unsigned row=0; row<2; ++row)
             {
-                for (unsigned col=0; col<10; ++col)
+                for (unsigned col=0; col<4; ++col)
                 {
                     gfx::TileBatch::Tile tile;
                     tile.pos.y = row;
                     tile.pos.x = col;
+                    tile.data.x = row * 4 + col; // tile index.
                     tiles.AddTile(std::move(tile));
                 }
             }
-            gfx::Transform trans;
-            trans.MoveTo(100, 100);
-            trans.Resize(1.0f, 1.0f);
-            painter.Draw(tiles, trans, gfx::CreateMaterialFromColor(gfx::Color::DarkGray));
+            gfx::Transform transform;
+            transform.MoveTo(20.0f, 20.0f);
+            transform.Resize(1.0f, 1.0f);
+            painter.Draw(tiles, transform, *mTileset64x46);
         }
 
         {
-
-            gfx::Transform trans;
-            trans.MoveTo(100, 100);
-            trans.Resize(tile_size * 10, tile_size * 10);
-            painter.Draw(gfx::Grid(10, 10, true), trans, gfx::CreateMaterialFromColor(gfx::Color::Green));
+            gfx::TileBatch tiles;
+            tiles.SetTileWorldWidth(64.0f);
+            tiles.SetTileWorldHeight(64.0f);
+            tiles.SetTileRenderWidth(64.0f);
+            tiles.SetTileRenderHeight(64.0f);
+            for (unsigned row=0; row<2; ++row)
+            {
+                for (unsigned col=0; col<4; ++col)
+                {
+                    gfx::TileBatch::Tile tile;
+                    tile.pos.y = row;
+                    tile.pos.x = col;
+                    tile.data.x = row * 4 + col; // tile index.
+                    tiles.AddTile(std::move(tile));
+                }
+            }
+            gfx::Transform transform;
+            transform.MoveTo(20.0f, 200.0f);
+            transform.Resize(1.0f, 1.0f);
+            painter.Draw(tiles, transform, *mTileset64x46Offset32x32);
         }
+
+        {
+            gfx::TileBatch tiles;
+            tiles.SetTileWorldWidth(64.0f);
+            tiles.SetTileWorldHeight(64.0f);
+            tiles.SetTileRenderWidth(64.0f);
+            tiles.SetTileRenderHeight(64.0f);
+            for (unsigned row=0; row<2; ++row)
+            {
+                for (unsigned col=0; col<4; ++col)
+                {
+                    gfx::TileBatch::Tile tile;
+                    tile.pos.y = row;
+                    tile.pos.x = col;
+                    tile.data.x = row * 4 + col; // tile index.
+                    tiles.AddTile(std::move(tile));
+                }
+            }
+            gfx::Transform transform;
+            transform.MoveTo(20.0f, 400.0f);
+            transform.Resize(1.0f, 1.0f);
+            painter.Draw(tiles, transform, *mTileset64x46Offset32x32Atlas512x256);
+        }
+
+        {
+            gfx::TileBatch tiles;
+            tiles.SetTileWorldWidth(64.0f);
+            tiles.SetTileWorldHeight(64.0f);
+            tiles.SetTileRenderWidth(64.0f);
+            tiles.SetTileRenderHeight(64.0f);
+            for (unsigned row=0; row<2; ++row)
+            {
+                for (unsigned col=0; col<4; ++col)
+                {
+                    gfx::TileBatch::Tile tile;
+                    tile.pos.y = row;
+                    tile.pos.x = col;
+                    tile.data.x = (row * 4 + col + row) % 4; // tile index.
+                    tiles.AddTile(std::move(tile));
+                }
+            }
+            gfx::Transform transform;
+            transform.MoveTo(300.0f, 20.0f);
+            transform.Resize(1.0f, 1.0f);
+            painter.Draw(tiles, transform, *mTileSet64x64Padding2x2);
+        }
+
     }
     virtual std::string GetName() const override
     { return "TileBatchTest"; }
 private:
+    std::unique_ptr<gfx::Material> mTileset64x46;
+    std::unique_ptr<gfx::Material> mTileset64x46Offset32x32;
+    std::unique_ptr<gfx::Material> mTileset64x46Offset32x32Atlas512x256;
+    std::unique_ptr<gfx::Material> mTileSet64x64Padding2x2;
 };
 
 class StencilTest : public GraphicsTest
