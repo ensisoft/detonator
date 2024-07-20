@@ -113,8 +113,6 @@ void DlgTilemap::LoadImage(const QString& file)
     SetValue(mUI.imageFile, info.absoluteFilePath());
     SetValue(mUI.zoom, scale);
     SetEnabled(mUI.btnExport, true);
-
-    SplitIntoTiles();
 }
 
 void DlgTilemap::on_widgetColor_colorChanged(const QColor& color)
@@ -124,20 +122,20 @@ void DlgTilemap::on_widgetColor_colorChanged(const QColor& color)
 
 void DlgTilemap::on_tileWidth_valueChanged(int)
 {
-    SplitIntoTiles();
 }
 void DlgTilemap::on_tileHeight_valueChanged(int)
 {
-    SplitIntoTiles();
 }
 
 void DlgTilemap::on_offsetX_valueChanged(int)
 {
-    SplitIntoTiles();
 }
 void DlgTilemap::on_offsetY_valueChanged(int)
 {
-    SplitIntoTiles();
+}
+
+void DlgTilemap::on_padding_valueChanged(int)
+{
 }
 
 void DlgTilemap::on_btnSelectImage_clicked()
@@ -167,6 +165,7 @@ void DlgTilemap::on_btnExport_clicked()
     const unsigned tile_yoffset = GetValue(mUI.offsetY);
     const unsigned tile_width  = GetValue(mUI.tileWidth);
     const unsigned tile_height = GetValue(mUI.tileHeight);
+    const unsigned tile_padding = GetValue(mUI.padding);
 
     // we're cranking out JSON that is compatible with the
     // JSON expected by the custom bitmap font implementation
@@ -176,16 +175,18 @@ void DlgTilemap::on_btnExport_clicked()
     base::JsonWrite(json, "json_version", 1);
     base::JsonWrite(json, "made_with_app", APP_TITLE);
     base::JsonWrite(json, "made_with_ver", APP_VERSION);
+    base::JsonWrite(json, "image_type",    "tilemap");
     base::JsonWrite(json, "image_file",    app::ToUtf8(image_file_info.fileName()));
     base::JsonWrite(json, "image_width",   mWidth);
     base::JsonWrite(json, "image_height",  mHeight);
     base::JsonWrite(json, "tile_width",    tile_width);
     base::JsonWrite(json, "tile_height",   tile_height);
+    base::JsonWrite(json, "padding",       tile_padding);
     base::JsonWrite(json, "xoffset",       tile_xoffset);
     base::JsonWrite(json, "yoffset",       tile_yoffset);
-    base::JsonWrite(json, "color_space", (gfx::detail::TextureFileSource::ColorSpace)GetValue(mUI.cmbColorSpace));
-    base::JsonWrite(json, "min_filter", (gfx::MaterialClass::MinTextureFilter)GetValue(mUI.cmbMinFilter));
-    base::JsonWrite(json, "mag_filter", (gfx::MaterialClass::MagTextureFilter)GetValue(mUI.cmbMagFilter));
+    base::JsonWrite(json, "color_space",   (gfx::detail::TextureFileSource::ColorSpace)GetValue(mUI.cmbColorSpace));
+    base::JsonWrite(json, "min_filter",    (gfx::MaterialClass::MinTextureFilter)GetValue(mUI.cmbMinFilter));
+    base::JsonWrite(json, "mag_filter",    (gfx::MaterialClass::MagTextureFilter)GetValue(mUI.cmbMagFilter));
     base::JsonWrite(json, "premultiply_alpha", (bool)GetValue(mUI.chkPremulAlpha));
     base::JsonWrite(json, "premulalpha_blend", (bool)GetValue(mUI.chkPremulAlphaBlend));
     // going to skip the writing of the images array for now since it's just
@@ -245,43 +246,6 @@ void DlgTilemap::timer()
     mUI.widget->triggerPaint();
 }
 
-void DlgTilemap::SelectTile()
-{
-    const float width  = mUI.widget->width();
-    const float height = mUI.widget->height();
-    const float zoom   = GetValue(mUI.zoom);
-    const unsigned tile_xoffset = GetValue(mUI.offsetX);
-    const unsigned tile_yoffset = GetValue(mUI.offsetY);
-    const unsigned tile_width  = GetValue(mUI.tileWidth);
-    const unsigned tile_height = GetValue(mUI.tileHeight);
-    const auto max_rows = (mHeight-tile_yoffset) / tile_height;
-    const auto max_cols = (mWidth-tile_xoffset) / tile_width;
-    const float img_width  = mWidth * zoom;
-    const float img_height = mHeight * zoom;
-    const auto xpos = (width - img_width) * 0.5f;
-    const auto ypos = (height - img_height) * 0.5f;
-
-    const int mouse_posx = (mCurrentPoint.x() - mTrackingOffset.x() - xpos) / zoom;
-    const int mouse_posy = (mCurrentPoint.y() - mTrackingOffset.y() - ypos) / zoom;
-    const int current_row = (mouse_posy-tile_yoffset) / tile_height;
-    const int current_col = (mouse_posx-tile_xoffset) / tile_width;
-    if (current_row >= max_rows || current_row < 0)
-        return;
-    else if (current_col >= max_cols || current_col < 0)
-        return;
-}
-
-void DlgTilemap::SplitIntoTiles()
-{
-    const unsigned xoffset = GetValue(mUI.offsetX);
-    const unsigned yoffset = GetValue(mUI.offsetY);
-    const unsigned tile_width  = GetValue(mUI.tileWidth);
-    const unsigned tile_height = GetValue(mUI.tileHeight);
-    const auto rows = (mHeight - yoffset) / tile_height;
-    const auto cols = (mWidth -xoffset) / tile_width;
-    //mTiles.resize(rows * cols);
-}
-
 void DlgTilemap::OnPaintScene(gfx::Painter& painter, double secs)
 {
     SetValue(mUI.widgetColor, mUI.widget->GetCurrentClearColor());
@@ -293,11 +257,13 @@ void DlgTilemap::OnPaintScene(gfx::Painter& painter, double secs)
     if (!mMaterial)
     {
         ShowInstruction(
-            "Split a tilemap image into tiles.\n\n"
+            "Create a tilemap description based on an image.\n\n"
             "INSTRUCTIONS\n"
             "1. Select the tilemap image file.\n"
-            "2. Adjust the X and Y offset and tile width and height.\n"
-            "3. When done, click 'Export' to export the tile JSON.\n",
+            "2. Adjust the tile region position.\n"
+            "3. Adjust the tile dimensions.\n"
+            "4. When the tiles align with the guide grid you're done.\n"
+            "5. Click 'Export' to save the tile JSON.\n",
             gfx::FRect(0, 0, width, height),
             painter);
         return;
@@ -327,12 +293,17 @@ void DlgTilemap::OnPaintScene(gfx::Painter& painter, double secs)
     const unsigned tile_yoffset = GetValue(mUI.offsetY);
     const unsigned tile_width  = GetValue(mUI.tileWidth);
     const unsigned tile_height = GetValue(mUI.tileHeight);
-    const auto max_rows = (mHeight-tile_yoffset) / tile_height;
-    const auto max_cols = (mWidth-tile_xoffset) / tile_width;
+    const unsigned tile_padding = GetValue(mUI.padding);
+
+    const unsigned tile_box_width = tile_width + 2 * tile_padding;
+    const unsigned tile_box_height = tile_height + 2 * tile_padding;
+
+    const auto max_rows = (mHeight-tile_yoffset) / tile_box_height;
+    const auto max_cols = (mWidth-tile_xoffset) / tile_box_width;
     const int mouse_posx = (mCurrentPoint.x() - mTrackingOffset.x() - xpos) / zoom;
     const int mouse_posy = (mCurrentPoint.y() - mTrackingOffset.y() - ypos) / zoom;
-    const int current_row = (mouse_posy-tile_yoffset) / tile_height;
-    const int current_col = (mouse_posx-tile_xoffset) / tile_width;
+    const int current_row = (mouse_posy-tile_yoffset) / tile_box_height;
+    const int current_col = (mouse_posx-tile_xoffset) / tile_box_width;
 
     const gfx::Color4f grid_color(gfx::Color::HotPink, 0.8);
 
@@ -341,13 +312,12 @@ void DlgTilemap::OnPaintScene(gfx::Painter& painter, double secs)
         for (unsigned col=0; col<max_cols; ++col)
         {
             const auto tile_index  = row * max_cols + col;
-            //const auto& tile_value = base::SafeIndex(mTiles, tile_index);
 
-            gfx::FRect tile(0.0f, 0.0f, tile_width*zoom, tile_height*zoom);
+            gfx::FRect tile(0.0f, 0.0f, tile_box_width*zoom, tile_box_height*zoom);
             tile.Translate(xpos, ypos);
             tile.Translate(mTrackingOffset.x(), mTrackingOffset.y());
             tile.Translate(tile_xoffset * zoom, tile_yoffset * zoom);
-            tile.Translate(col * tile_width * zoom, row * tile_height * zoom);
+            tile.Translate(col * tile_box_width * zoom, row * tile_box_height * zoom);
             if (show_grid)
             {
                 gfx::DrawRectOutline(painter, tile, gfx::CreateMaterialFromColor(grid_color));
@@ -363,7 +333,6 @@ void DlgTilemap::OnMousePress(QMouseEvent* mickey)
 {
     if (mickey->button() == Qt::LeftButton)
     {
-        SelectTile();
         mMode = Mode::Selecting;
     }
     else if (mickey->button() == Qt::RightButton)

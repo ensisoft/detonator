@@ -54,6 +54,7 @@ namespace gui
         void on_tileHeight_valueChanged(int);
         void on_offsetX_valueChanged(int);
         void on_offsetY_valueChanged(int);
+        void on_padding_valueChanged(int);
         void on_btnSelectImage_clicked();
         void on_btnExport_clicked();
         void on_btnClose_clicked();
@@ -61,8 +62,6 @@ namespace gui
         void timer();
 
     private:
-        void SelectTile();
-        void SplitIntoTiles();
         void OnPaintScene(gfx::Painter& painter, double secs);
         void OnMousePress(QMouseEvent* mickey);
         void OnMouseMove(QMouseEvent* mickey);
