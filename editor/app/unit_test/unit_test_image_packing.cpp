@@ -148,9 +148,29 @@ void unit_test_bounded()
     }
 }
 
+void unit_test_fixed()
+{
+    std::vector<app::PackingRectangle> list;
+
+    for (int i=0; i<6; ++i)
+    {
+        app::PackingRectangle r;
+        r.width = 64;
+        r.height = 64;
+        r.index = i;
+        list.push_back(r);
+    }
+
+    auto ret = app::PackFixedSizeRectangles(list, false);
+    TEST_REQUIRE((ret.width == 3*64 && ret.height == 2*64) ||
+                 (ret.width == 2*64 && ret.height == 3*64));
+
+}
+
 int test_main(int argc, char* argv[])
 {
     unit_test_unbounded();
     unit_test_bounded();
+    unit_test_fixed();
     return 0;
 }
