@@ -23,9 +23,11 @@
 
 #include <algorithm>
 #include <memory>
+#include <limits>
 
-#include "editor/app/packing.h"
 #include "base/assert.h"
+#include "base/utility.h"
+#include "editor/app/packing.h"
 
 namespace app
 {
@@ -203,6 +205,86 @@ RectanglePackSize PackRectangles(std::vector<PackingRectangle>& images)
     ret.width  = root->GetWidth();
     return ret;
 }
+
+RectanglePackSize PackFixedSizeRectangles(std::vector<PackingRectangle>& list, bool pot)
+{
+    RectanglePackSize ret {};
+
+    if (list.empty())
+        return ret;
+
+    auto RowsRequired = [](unsigned cols, unsigned items) {
+        unsigned rows = items / cols;
+        if (items > (rows * cols))
+            ++rows;
+        return rows;
+    };
+
+
+    struct RowColCombination {
+        unsigned rows = 0;
+        unsigned cols = 0;
+    };
+    std::vector<RowColCombination> combinations;
+    for (unsigned cols=1; cols<=list.size(); ++cols)
+    {
+        const auto rows = RowsRequired(cols, list.size());
+        RowColCombination combination;
+        combination.rows = rows;
+        combination.cols = cols;
+        combinations.push_back(combination);
+    }
+
+    const auto img_rect_width  = list[0].width;
+    const auto img_rect_height = list[0].height;
+    const auto img_pixels = img_rect_width * img_rect_height * list.size();
+
+    const RowColCombination* best = nullptr;
+    unsigned difference = std::numeric_limits<unsigned>::max();
+
+    for (const auto& combination : combinations)
+    {
+        const auto height = combination.rows * img_rect_height;
+        const auto width  = combination.cols * img_rect_width;
+
+        const auto actual_height = pot ? base::NextPOT(height) : height;
+        const auto actual_width  = pot ? base::NextPOT(width) : width;
+        const auto diff = actual_height - actual_width ? actual_height - actual_width
+                                                       : actual_width - actual_height;
+        if (diff < difference)
+        {
+            difference = diff;
+            best = &combination;
+        }
+    }
+    ASSERT(best);
+    const auto rows = best->rows;
+    const auto cols = best->cols;
+
+    const auto width = cols * img_rect_width;
+    const auto height = rows * img_rect_height;
+    const auto total_width = pot ? base::NextPOT(width) : width;
+    const auto total_height = pot ? base::NextPOT(height) : height;
+
+    for (unsigned row=0; row<rows; ++row)
+    {
+        for (unsigned col=0; col<cols; ++col)
+        {
+            const auto index = row * cols + col;
+            if (index < list.size())
+            {
+                ASSERT(list[index].width == img_rect_width);
+                ASSERT(list[index].height == img_rect_height);
+                list[index].xpos = col * img_rect_width;
+                list[index].ypos = row * img_rect_height;
+            }
+        }
+    }
+    ret.height = total_height;
+    ret.width = total_width;
+    return ret;
+}
+
 
 bool PackRectangles(const RectanglePackSize& max, std::vector<PackingRectangle>& list,  RectanglePackSize* ret_pack_size)
 {

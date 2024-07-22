@@ -60,6 +60,8 @@ namespace app
     // with the container by setting the x/ypos members.
     RectanglePackSize PackRectangles(std::vector<PackingRectangle>& list);
 
+    RectanglePackSize PackFixedSizeRectangles(std::vector<PackingRectangle>& list, bool pot);
+
     bool PackRectangles(const RectanglePackSize& max, std::vector<PackingRectangle>& list,
         RectanglePackSize* ret_pack_size = nullptr);
 
