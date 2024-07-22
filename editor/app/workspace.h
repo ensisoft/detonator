@@ -46,6 +46,7 @@
 #include "game/loader.h"
 #include "editor/app/resource.h"
 #include "editor/app/utility.h"
+#include "editor/app/buffer.h"
 
 class QuaZip;
 
@@ -702,6 +703,8 @@ namespace app
         // Errors/warnings encountered during the process will be logged.
         bool BuildReleasePackage(const std::vector<const Resource*>& resources, const ContentPackingOptions& options);
 
+        static void ClearAppGraphicsCache();
+
     public slots:
         // Save or update a resource in the workspace. If the resource by the same type
         // and name exists it's overwritten, otherwise a new resource is added to
@@ -779,6 +782,13 @@ namespace app
         QVariantMap mUserProperties;
         // workspace/project settings.
         ProjectSettings mSettings;
+
+    private:
+        using GraphicsBufferCache = std::unordered_map<std::string,
+            std::shared_ptr<const GraphicsBuffer>>;
+        static GraphicsBufferCache mAppGraphicsBufferCache;
+        static bool mEnableAppResourceCaching;
+
     };
 
     class WorkspaceProxy : public QSortFilterProxyModel

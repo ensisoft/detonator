@@ -46,6 +46,7 @@
 #include "editor/app/resource.h"
 #include "editor/app/utility.h"
 #include "editor/app/workspace.h"
+#include "editor/gui/main.h"
 #include "editor/gui/settings.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
@@ -500,6 +501,11 @@ void MaterialWidget::on_actionReloadShaders_triggered()
 }
 void MaterialWidget::on_actionReloadTextures_triggered()
 {
+    if (Editor::DevEditor())
+    {
+        app::Workspace::ClearAppGraphicsCache();
+    }
+
     this->ReloadTextures();
 }
 

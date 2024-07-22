@@ -762,6 +762,11 @@ bool ResourceArchive::FindZipFile(const QString& unix_style_name) const
     return false;
 }
 
+// static
+bool Workspace::mEnableAppResourceCaching = true;
+// static
+Workspace::GraphicsBufferCache Workspace::mAppGraphicsBufferCache;
+
 Workspace::Workspace(const QString& dir)
   : mWorkspaceDir(FixWorkspacePath(dir))
 {
@@ -1198,22 +1203,32 @@ game::TilemapDataHandle Workspace::LoadTilemapData(const game::Loader::TilemapDa
 }
 
 // static
+void Workspace::ClearAppGraphicsCache()
+{
+    mAppGraphicsBufferCache.clear();
+    DEBUG("Cleared app graphics buffer cache.");
+}
+
+// static
 gfx::ResourceHandle Workspace::LoadAppResource(const std::string& URI)
 {
     // static map of resources that are part of the application, i.e.
     // app://something. They're not expected to change.
-    static std::unordered_map<std::string,
-            std::shared_ptr<const GraphicsBuffer>> application_resources;
-
-    auto it = application_resources.find(URI);
-    if (it != application_resources.end())
-        return it->second;
+    if (mEnableAppResourceCaching)
+    {
+        auto it = mAppGraphicsBufferCache.find(URI);
+        if (it != mAppGraphicsBufferCache.end())
+            return it->second;
+    }
 
     QString file = app::FromUtf8(URI);
     file = CleanPath(file.replace("app://", GetAppDir()));
 
     auto ret = GraphicsBuffer::LoadFromFile(file);
-    application_resources[URI] = ret;
+    if (mEnableAppResourceCaching)
+    {
+        mAppGraphicsBufferCache[URI] = ret;
+    }
     return ret;
 }
 
