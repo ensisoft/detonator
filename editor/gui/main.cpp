@@ -78,6 +78,8 @@ bool Editor::notify(QObject* receiver, QEvent* e)
 
 // static
 bool Editor::mDebugEditor = false;
+// static
+bool Editor::mDevEditor = false;
 
 // static
 bool Editor::DebugEditor()
@@ -85,9 +87,20 @@ bool Editor::DebugEditor()
     return mDebugEditor;
 }
 // static
+bool Editor::DevEditor()
+{
+    return mDevEditor;
+}
+
+// static
 void Editor::SetEditorDebug(bool on_off)
 {
     mDebugEditor = on_off;
+}
+// static
+void Editor::SetEditorDev(bool on_off)
+{
+    mDevEditor = on_off;
 }
 
 } // namespace
@@ -460,7 +473,8 @@ int Main(int argc, char* argv[])
     options.Add("--no-session", "Don't load any previous window session within a workspace.");
     options.Add("--help", "Print this help.");
     options.Add("--verbose", "Enable verbose debug logs.");
-    options.Add("--debug-editor", "Enable editor debug features.");
+    options.Add("--editor-debug", "Enable editor debug features.");
+    options.Add("--editor-dev", "Enable editor developer features.");
 
     bool viewer_mode = false;
     std::string arg_parse_error;
@@ -490,10 +504,16 @@ int Main(int argc, char* argv[])
         base::EnableLogEvent(base::LogEvent::Verbose, true);
     }
 
-    if (options.WasGiven("--debug-editor"))
+    if (options.WasGiven("--editor-debug"))
     {
         gui::Editor::SetEditorDebug(true);
         DEBUG("Editor debug features are enabled.");
+    }
+
+    if (options.WasGiven("--editor-dev"))
+    {
+        gui::Editor::SetEditorDev(true);
+        DEBUG("Editor developer features are enabled.");
     }
 
     // turn on Qt logging: QT_LOGGING_RULES = qt.qpa.gl

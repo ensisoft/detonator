@@ -47,6 +47,7 @@
 #include "editor/app/process.h"
 #include "editor/app/utility.h"
 #include "editor/app/eventlog.h"
+#include "editor/gui/main.h"
 #include "editor/gui/mainwindow.h"
 #include "editor/gui/mainwidget.h"
 #include "editor/gui/childwindow.h"
@@ -1166,6 +1167,12 @@ void MainWindow::on_actionReloadTextures_triggered()
 {
     if (!mCurrentWidget)
         return;
+
+    if (Editor::DevEditor())
+    {
+        app::Workspace::ClearAppGraphicsCache();
+    }
+
     mCurrentWidget->ReloadTextures();
     INFO("'%1' textures reloaded.", mCurrentWidget->windowTitle());
 }

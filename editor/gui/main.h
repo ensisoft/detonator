@@ -37,8 +37,11 @@ namespace gui {
         virtual bool notify(QObject* receiver, QEvent* e);
     public:
         static bool DebugEditor();
+        static bool DevEditor();
         static void SetEditorDebug(bool on_off);
+        static void SetEditorDev(bool on_off);
     private:
         static bool mDebugEditor;
+        static bool mDevEditor;
     };
 } // namespace
