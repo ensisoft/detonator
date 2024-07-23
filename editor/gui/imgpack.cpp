@@ -122,6 +122,7 @@ bool ReadImagePack(const QString& file, ImagePack* pack)
     }
     else
     {
+        const auto padding = pack->padding;
         unsigned image_width  = 0;
         unsigned image_height = 0;
         unsigned tile_width  = 0;
@@ -147,21 +148,24 @@ bool ReadImagePack(const QString& file, ImagePack* pack)
         if (error)
             return false;
 
-        const auto max_rows = (image_height - yoffset) / tile_height;
-        const auto max_cols = (image_width - xoffset) / tile_width;
+        const auto tile_box_width = tile_width + 2 * padding;
+        const auto tile_box_height = tile_height + 2 * padding;
+
+        const auto max_rows = (image_height - yoffset) / tile_box_height;
+        const auto max_cols = (image_width - xoffset) / tile_box_width;
         for (unsigned row=0; row<max_rows; ++row)
         {
             for (unsigned col=0; col<max_cols; ++col)
             {
                 const auto index = row * max_cols + col;
-                const auto tile_xpos = xoffset + col * tile_width;
-                const auto tile_ypos = yoffset + row * tile_height;
+                const auto tile_xpos = xoffset + col * tile_box_width;
+                const auto tile_ypos = yoffset + row * tile_box_height;
 
                 ImagePack::Image img;
                 img.width  = tile_width;
                 img.height = tile_height;
-                img.xpos   = tile_xpos;
-                img.ypos   = tile_ypos;
+                img.xpos   = tile_xpos + padding;
+                img.ypos   = tile_ypos + padding;
                 images.push_back(std::move(img));
             }
         }
