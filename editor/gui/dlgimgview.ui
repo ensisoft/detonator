@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1080</width>
-    <height>1080</height>
+    <width>1422</width>
+    <height>1200</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -257,20 +257,42 @@
           <item>
            <widget class="QGroupBox" name="groupBox_2">
             <property name="title">
-             <string>Image cutter</string>
+             <string>Image cutter - Save selected sub-images as individual image files</string>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_6">
+             <item>
+              <spacer name="verticalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Preferred</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
              <item>
               <widget class="QGroupBox" name="groupBox_7">
                <property name="title">
                 <string>Image selection</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                </property>
                <property name="flat">
                 <bool>true</bool>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_11">
                 <item>
-                 <widget class="QComboBox" name="cmbSelection">
+                 <widget class="QComboBox" name="imageCutterSelection">
                   <item>
                    <property name="text">
                     <string>All images</string>
@@ -283,13 +305,29 @@
                   </item>
                  </widget>
                 </item>
+                <item>
+                 <spacer name="verticalSpacer_9">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::MinimumExpanding</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>40</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
                </layout>
               </widget>
              </item>
              <item>
               <widget class="QGroupBox" name="groupBox_5">
                <property name="title">
-                <string>Image generation</string>
+                <string>Image file generation</string>
                </property>
                <property name="flat">
                 <bool>true</bool>
@@ -310,8 +348,50 @@
                     </property>
                    </widget>
                   </item>
+                  <item row="1" column="1">
+                   <widget class="QSpinBox" name="imageCutterQuality">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="suffix">
+                     <string> %</string>
+                    </property>
+                    <property name="prefix">
+                     <string/>
+                    </property>
+                    <property name="maximum">
+                     <number>100</number>
+                    </property>
+                    <property name="value">
+                     <number>100</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1">
+                   <widget class="QCheckBox" name="imageCutterOverwrite">
+                    <property name="text">
+                     <string>Overwrite existing images</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="label_2">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Quality</string>
+                    </property>
+                   </widget>
+                  </item>
                   <item row="0" column="1">
-                   <widget class="QComboBox" name="cmbImageFormat">
+                   <widget class="QComboBox" name="imageCutterFormat">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                       <horstretch>0</horstretch>
@@ -335,61 +415,14 @@
                     </item>
                    </widget>
                   </item>
-                  <item row="1" column="1">
-                   <widget class="QSpinBox" name="imageQuality">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="suffix">
-                     <string> %</string>
-                    </property>
-                    <property name="prefix">
-                     <string/>
-                    </property>
-                    <property name="maximum">
-                     <number>100</number>
-                    </property>
-                    <property name="value">
-                     <number>100</number>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="0">
-                   <widget class="QLabel" name="label_2">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
+                  <item row="2" column="1">
+                   <widget class="QCheckBox" name="imageCutterPOT">
                     <property name="text">
-                     <string>Quality</string>
+                     <string>Resize to power of two</string>
                     </property>
                    </widget>
                   </item>
                  </layout>
-                </item>
-                <item>
-                 <widget class="QGroupBox" name="groupBox_4">
-                  <property name="title">
-                   <string>Resizing</string>
-                  </property>
-                  <property name="flat">
-                   <bool>true</bool>
-                  </property>
-                  <layout class="QVBoxLayout" name="verticalLayout_8">
-                   <item>
-                    <widget class="QCheckBox" name="chkPOT">
-                     <property name="text">
-                      <string>Resize to power of two</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </widget>
                 </item>
                </layout>
               </widget>
@@ -417,7 +450,7 @@
                  </widget>
                 </item>
                 <item row="1" column="1">
-                 <widget class="QSpinBox" name="leftPadding">
+                 <widget class="QSpinBox" name="imageCutterLeftPadding">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -430,7 +463,7 @@
                  </widget>
                 </item>
                 <item row="2" column="1">
-                 <widget class="QSpinBox" name="rightPadding">
+                 <widget class="QSpinBox" name="imageCutterRightPadding">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -456,7 +489,7 @@
                  </widget>
                 </item>
                 <item row="3" column="1">
-                 <widget class="QSpinBox" name="bottomPadding">
+                 <widget class="QSpinBox" name="imageCutterBottomPadding">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -482,7 +515,7 @@
                  </widget>
                 </item>
                 <item row="0" column="1">
-                 <widget class="QSpinBox" name="topPadding">
+                 <widget class="QSpinBox" name="imageCutterTopPadding">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -511,16 +544,32 @@
               </widget>
              </item>
              <item>
+              <spacer name="verticalSpacer_5">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Preferred</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
               <widget class="QGroupBox" name="groupBox_6">
                <property name="title">
-                <string>Name generation</string>
+                <string>Image file name generation</string>
                </property>
                <property name="flat">
                 <bool>true</bool>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_10">
                 <item>
-                 <widget class="QLineEdit" name="nameTemplate">
+                 <widget class="QLineEdit" name="imageCutterNameTemplate">
                   <property name="placeholderText">
                    <string>%c = counter %i = index %n =  name %t = tag %w = width %h = height  %x = x %y = y</string>
                   </property>
@@ -532,7 +581,7 @@
              <item>
               <widget class="QGroupBox" name="groupBox_3">
                <property name="title">
-                <string>Output folder</string>
+                <string>Output folder for generated images</string>
                </property>
                <property name="flat">
                 <bool>true</bool>
@@ -541,7 +590,7 @@
                 <item>
                  <layout class="QHBoxLayout" name="horizontalLayout_5">
                   <item>
-                   <widget class="QLineEdit" name="outputFolder">
+                   <widget class="QLineEdit" name="imageCutterOutputFolder">
                     <property name="placeholderText">
                      <string>Output folder (none selected)</string>
                     </property>
@@ -569,20 +618,16 @@
                   </item>
                  </layout>
                 </item>
-                <item>
-                 <widget class="QCheckBox" name="chkOverwrite">
-                  <property name="text">
-                   <string>Overwrite existing images</string>
-                  </property>
-                 </widget>
-                </item>
                </layout>
               </widget>
              </item>
              <item>
-              <spacer name="verticalSpacer">
+              <spacer name="verticalSpacer_3">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::MinimumExpanding</enum>
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
@@ -593,7 +638,7 @@
               </spacer>
              </item>
              <item>
-              <widget class="QProgressBar" name="progressBar">
+              <widget class="QProgressBar" name="imageCutterProgress">
                <property name="value">
                 <number>24</number>
                </property>
@@ -601,6 +646,367 @@
              </item>
              <item>
               <widget class="QPushButton" name="btnCutImages">
+               <property name="text">
+                <string>Start</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tabTilePacker">
+         <attribute name="title">
+          <string>Tile Packer</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_15">
+          <item>
+           <widget class="QGroupBox" name="groupBox_4">
+            <property name="title">
+             <string>Tile packer - Create a tilesheet with regular grid layout</string>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_8">
+             <item>
+              <spacer name="verticalSpacer">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Preferred</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBox_9">
+               <property name="title">
+                <string>Image selection</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_13">
+                <item>
+                 <widget class="QComboBox" name="tilePackerSelection">
+                  <item>
+                   <property name="text">
+                    <string>All images</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Selected images</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="verticalSpacer_6">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::MinimumExpanding</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>40</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBox_10">
+               <property name="title">
+                <string>Image file generation</string>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_14">
+                <item>
+                 <layout class="QGridLayout" name="gridLayout_3">
+                  <item row="0" column="1">
+                   <widget class="QComboBox" name="tilePackerFormat">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <item>
+                     <property name="text">
+                      <string>PNG</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>JPG</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>BMP</string>
+                     </property>
+                    </item>
+                   </widget>
+                  </item>
+                  <item row="1" column="1">
+                   <widget class="QSpinBox" name="tilePackerQuality">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="suffix">
+                     <string> %</string>
+                    </property>
+                    <property name="prefix">
+                     <string/>
+                    </property>
+                    <property name="maximum">
+                     <number>100</number>
+                    </property>
+                    <property name="value">
+                     <number>100</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="1">
+                   <widget class="QCheckBox" name="tilePackerPOT">
+                    <property name="text">
+                     <string>Resize to power of two</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_5">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Format</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="label_7">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Quality</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1">
+                   <widget class="QCheckBox" name="tilePackerJson">
+                    <property name="text">
+                     <string>Write JSON descriptor</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBox_11">
+               <property name="title">
+                <string>Tile dimensions</string>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_4">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="label_11">
+                  <property name="text">
+                   <string>Width</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QLabel" name="label_15">
+                  <property name="text">
+                   <string>Height</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QSpinBox" name="tileWidth">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="suffix">
+                   <string> px</string>
+                  </property>
+                  <property name="prefix">
+                   <string/>
+                  </property>
+                  <property name="minimum">
+                   <number>1</number>
+                  </property>
+                  <property name="maximum">
+                   <number>16384</number>
+                  </property>
+                  <property name="value">
+                   <number>32</number>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QSpinBox" name="tileHeight">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="suffix">
+                   <string> px</string>
+                  </property>
+                  <property name="prefix">
+                   <string/>
+                  </property>
+                  <property name="minimum">
+                   <number>1</number>
+                  </property>
+                  <property name="maximum">
+                   <number>16384</number>
+                  </property>
+                  <property name="value">
+                   <number>32</number>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="label_8">
+                  <property name="text">
+                   <string>Padding</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QSpinBox" name="tilePadding">
+                  <property name="suffix">
+                   <string> px</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_7">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Preferred</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBox_13">
+               <property name="title">
+                <string>Tile content placement</string>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_5">
+                <item row="1" column="0">
+                 <widget class="QLabel" name="label_16">
+                  <property name="text">
+                   <string>Horizontal align</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <widget class="QComboBox" name="tilePackerVerticalAlign"/>
+                </item>
+                <item row="0" column="0">
+                 <widget class="QLabel" name="label_9">
+                  <property name="text">
+                   <string>Vertical align</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="1">
+                 <widget class="QComboBox" name="tilePackerHorizontalAlign"/>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QCheckBox" name="tilePackerResize">
+                  <property name="text">
+                   <string>Resample (resize) src images to fit in the tile size</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_8">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::MinimumExpanding</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QProgressBar" name="tilePackerProgress">
+               <property name="value">
+                <number>24</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnPackTiles">
                <property name="text">
                 <string>Start</string>
                </property>
@@ -753,22 +1159,38 @@
   <tabstop>tagTemplate</tabstop>
   <tabstop>btnSave</tabstop>
   <tabstop>listWidget</tabstop>
-  <tabstop>cmbSelection</tabstop>
-  <tabstop>cmbImageFormat</tabstop>
-  <tabstop>imageQuality</tabstop>
-  <tabstop>chkPOT</tabstop>
-  <tabstop>topPadding</tabstop>
-  <tabstop>leftPadding</tabstop>
-  <tabstop>rightPadding</tabstop>
-  <tabstop>bottomPadding</tabstop>
-  <tabstop>nameTemplate</tabstop>
-  <tabstop>outputFolder</tabstop>
+  <tabstop>imageCutterSelection</tabstop>
+  <tabstop>imageCutterFormat</tabstop>
+  <tabstop>imageCutterQuality</tabstop>
+  <tabstop>imageCutterPOT</tabstop>
+  <tabstop>imageCutterOverwrite</tabstop>
+  <tabstop>imageCutterTopPadding</tabstop>
+  <tabstop>imageCutterLeftPadding</tabstop>
+  <tabstop>imageCutterRightPadding</tabstop>
+  <tabstop>imageCutterBottomPadding</tabstop>
+  <tabstop>imageCutterNameTemplate</tabstop>
+  <tabstop>imageCutterOutputFolder</tabstop>
   <tabstop>btnSelectOut</tabstop>
-  <tabstop>chkOverwrite</tabstop>
   <tabstop>btnCutImages</tabstop>
+  <tabstop>tilePackerSelection</tabstop>
+  <tabstop>tilePackerFormat</tabstop>
+  <tabstop>tilePackerQuality</tabstop>
+  <tabstop>tilePackerPOT</tabstop>
+  <tabstop>tilePackerJson</tabstop>
+  <tabstop>tileWidth</tabstop>
+  <tabstop>tileHeight</tabstop>
+  <tabstop>tilePadding</tabstop>
+  <tabstop>tilePackerVerticalAlign</tabstop>
+  <tabstop>tilePackerHorizontalAlign</tabstop>
+  <tabstop>btnPackTiles</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
   <tabstop>btnClose</tabstop>
+  <tabstop>imageCutterBottomPadding</tabstop>
+  <tabstop>imageCutterLeftPadding</tabstop>
+  <tabstop>imageCutterTopPadding</tabstop>
+  <tabstop>imageCutterRightPadding</tabstop>
+  <tabstop>tilePackerResize</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
