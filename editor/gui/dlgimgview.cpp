@@ -35,9 +35,19 @@
 #include "editor/app/utility.h"
 #include "editor/app/eventlog.h"
 #include "editor/app/workspace.h"
+#include "editor/app/packing.h"
 #include "editor/gui/dlgimgview.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
+
+namespace {
+    enum class TilePackVerticalAlignment {
+        Top, Center, Bottom
+    };
+    enum class TilePackHorizontalAlignment {
+        Left, Center, Right
+    };
+}
 
 namespace gui
 {
@@ -72,9 +82,14 @@ DlgImgView::DlgImgView(QWidget* parent) : QDialog(parent)
 
     SetVisible(mUI.btnCancel, false);
     SetVisible(mUI.btnAccept, false);
-    SetVisible(mUI.progressBar, false);
+    SetVisible(mUI.imageCutterProgress, false);
+    SetVisible(mUI.tilePackerProgress, false);
     SetValue(mUI.zoom, 1.0f);
     SetValue(mUI.cmbColorSpace, gfx::detail::TextureFileSource::ColorSpace::sRGB);
+    PopulateFromEnum<TilePackVerticalAlignment>(mUI.tilePackerVerticalAlign);
+    PopulateFromEnum<TilePackHorizontalAlignment>(mUI.tilePackerHorizontalAlign);
+    SetValue(mUI.tilePackerVerticalAlign, TilePackVerticalAlignment::Center);
+    SetValue(mUI.tilePackerHorizontalAlign, TilePackHorizontalAlignment::Center);
 
     mUI.zoom->installEventFilter(this);
     mUI.cmbColorSpace->installEventFilter(this);
@@ -83,15 +98,19 @@ DlgImgView::DlgImgView(QWidget* parent) : QDialog(parent)
     mUI.listWidget->installEventFilter(this);
     mUI.renameTemplate->installEventFilter(this);
     mUI.tagTemplate->installEventFilter(this);
-    mUI.cmbSelection->installEventFilter(this);
-    mUI.cmbImageFormat->installEventFilter(this);
-    mUI.imageQuality->installEventFilter(this);
-    mUI.topPadding->installEventFilter(this);
-    mUI.leftPadding->installEventFilter(this);
-    mUI.rightPadding->installEventFilter(this);
-    mUI.bottomPadding->installEventFilter(this);
-    mUI.nameTemplate->installEventFilter(this);
-    mUI.outputFolder->installEventFilter(this);
+    mUI.imageCutterSelection->installEventFilter(this);
+    mUI.imageCutterFormat->installEventFilter(this);
+    mUI.imageCutterQuality->installEventFilter(this);
+    mUI.tilePackerQuality->installEventFilter(this);
+    mUI.imageCutterTopPadding->installEventFilter(this);
+    mUI.imageCutterLeftPadding->installEventFilter(this);
+    mUI.imageCutterRightPadding->installEventFilter(this);
+    mUI.imageCutterBottomPadding->installEventFilter(this);
+    mUI.imageCutterNameTemplate->installEventFilter(this);
+    mUI.imageCutterOutputFolder->installEventFilter(this);
+    mUI.tileWidth->installEventFilter(this);
+    mUI.tileHeight->installEventFilter(this);
+    mUI.tilePadding->installEventFilter(this);
 }
 
 void DlgImgView::LoadImage(const QString& file)
@@ -179,6 +198,7 @@ void DlgImgView::SetDialogMode()
 
     QSignalBlocker s(mUI.tabWidget);
     mUI.tabWidget->removeTab(2); // cutter tab
+    mUI.tabWidget->removeTab(3); // tile packer tab
 
     mUI.listWidget->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
     mDialogMode = true;
@@ -212,17 +232,31 @@ void DlgImgView::LoadState()
     GetUserProperty(*mWorkspace, "dlg-img-view-min-filter", mUI.cmbMinFilter);
     GetUserProperty(*mWorkspace, "dlg-img-view-mag-filter", mUI.cmbMagFilter);
     GetUserProperty(*mWorkspace, "dlg-img-view-zoom", mUI.zoom);
-    GetUserProperty(*mWorkspace, "dlg-img-view-cut-format", mUI.cmbImageFormat);
-    GetUserProperty(*mWorkspace, "dlg-img-view-cut-quality", mUI.imageQuality);
-    GetUserProperty(*mWorkspace, "dlg-img-view-cut-top-padding", mUI.topPadding);
-    GetUserProperty(*mWorkspace, "dlg-img-view-cut-left-padding", mUI.leftPadding);
-    GetUserProperty(*mWorkspace, "dlg-img-view-cut-right-padding", mUI.rightPadding);
-    GetUserProperty(*mWorkspace, "dlg-img-view-cut-bottom-padding", mUI.bottomPadding);
-    GetUserProperty(*mWorkspace, "dlg-img-view-cut-out-folder", mUI.outputFolder);
-    GetUserProperty(*mWorkspace, "dlg-img-view-cut-overwrite", mUI.chkOverwrite);
-    GetUserProperty(*mWorkspace, "dlg-img-view-cut-pot", mUI.chkPOT);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-selection-selector", mUI.imageCutterSelection);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-format", mUI.imageCutterFormat);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-quality", mUI.imageCutterQuality);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-top-padding", mUI.imageCutterTopPadding);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-left-padding", mUI.imageCutterLeftPadding);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-right-padding", mUI.imageCutterRightPadding);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-bottom-padding", mUI.imageCutterBottomPadding);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-out-folder", mUI.imageCutterOutputFolder);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-out-name-template", mUI.imageCutterNameTemplate);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-overwrite", mUI.imageCutterOverwrite);
+    GetUserProperty(*mWorkspace, "dlg-img-view-cut-pot", mUI.imageCutterPOT);
     GetUserProperty(*mWorkspace, "dlg-img-view-xpos", &xpos);
     GetUserProperty(*mWorkspace, "dlg-img-view-ypos", &ypos);
+    GetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-selection-selector", mUI.tilePackerSelection);
+    GetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-format", mUI.tilePackerFormat);
+    GetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-quality", mUI.tilePackerQuality);
+    GetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-resize-pot", mUI.tilePackerPOT);
+    GetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-write-json", mUI.tilePackerJson);
+    GetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-tile-width", mUI.tileWidth);
+    GetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-tile-height", mUI.tileHeight);
+    GetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-tile-padding", mUI.tilePadding);
+    GetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-tile-content-valign", mUI.tilePackerVerticalAlign);
+    GetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-tile-content-halign", mUI.tilePackerHorizontalAlign);
+    GetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-tile-content-resize", mUI.tilePackerResize);
+    GetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-last-image-file", &mLastTileWriteFile);
     mTrackingOffset = QPoint(xpos, ypos);
 
     on_cmbColorSpace_currentIndexChanged(0);
@@ -253,17 +287,31 @@ void DlgImgView::SaveState() const
     SetUserProperty(*mWorkspace, "dlg-img-view-min-filter", mUI.cmbMinFilter);
     SetUserProperty(*mWorkspace, "dlg-img-view-mag-filter", mUI.cmbMagFilter);
     SetUserProperty(*mWorkspace, "dlg-img-view-zoom", mUI.zoom);
-    SetUserProperty(*mWorkspace, "dlg-img-view-cut-format", mUI.cmbImageFormat);
-    SetUserProperty(*mWorkspace, "dlg-img-view-cut-quality", mUI.imageQuality);
-    SetUserProperty(*mWorkspace, "dlg-img-view-cut-top-padding", mUI.topPadding);
-    SetUserProperty(*mWorkspace, "dlg-img-view-cut-left-padding", mUI.leftPadding);
-    SetUserProperty(*mWorkspace, "dlg-img-view-cut-right-padding", mUI.rightPadding);
-    SetUserProperty(*mWorkspace, "dlg-img-view-cut-bottom-padding", mUI.bottomPadding);
-    SetUserProperty(*mWorkspace, "dlg-img-view-cut-out-folder", mUI.outputFolder);
-    SetUserProperty(*mWorkspace, "dlg-img-view-cut-overwrite", mUI.chkOverwrite);
-    SetUserProperty(*mWorkspace, "dlg-img-view-cut-pot", mUI.chkPOT);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-selection-selector", mUI.imageCutterSelection);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-format", mUI.imageCutterFormat);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-quality", mUI.imageCutterQuality);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-top-padding", mUI.imageCutterTopPadding);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-left-padding", mUI.imageCutterLeftPadding);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-right-padding", mUI.imageCutterRightPadding);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-bottom-padding", mUI.imageCutterBottomPadding);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-out-folder", mUI.imageCutterOutputFolder);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-out-name-template", mUI.imageCutterNameTemplate);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-overwrite", mUI.imageCutterOverwrite);
+    SetUserProperty(*mWorkspace, "dlg-img-view-cut-pot", mUI.imageCutterPOT);
     SetUserProperty(*mWorkspace, "dlg-img-view-xpos", mTrackingOffset.x());
     SetUserProperty(*mWorkspace, "dlg-img-view-ypos", mTrackingOffset.y());
+    SetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-selection-selector", mUI.tilePackerSelection);
+    SetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-format", mUI.tilePackerFormat);
+    SetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-quality", mUI.tilePackerQuality);
+    SetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-resize-pot", mUI.tilePackerPOT);
+    SetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-write-json", mUI.tilePackerJson);
+    SetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-tile-width", mUI.tileWidth);
+    SetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-tile-height", mUI.tileHeight);
+    SetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-tile-padding", mUI.tilePadding);
+    SetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-tile-content-valign", mUI.tilePackerVerticalAlign);
+    SetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-tile-content-halign", mUI.tilePackerHorizontalAlign);
+    SetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-tile-content-resize", mUI.tilePackerResize);
+    SetUserProperty(*mWorkspace, "dlg-img-view-tile-packer-last-image-file", mLastTileWriteFile);
 }
 
 QString DlgImgView::GetImageFileName() const
@@ -429,12 +477,12 @@ void DlgImgView::on_btnCutImages_clicked()
 {
     if (!MustHaveInput(mUI.imageFile))
         return;
-    if (!MustHaveInput(mUI.nameTemplate))
+    if (!MustHaveInput(mUI.imageCutterNameTemplate))
         return;
-    if (!MustHaveInput(mUI.outputFolder))
+    if (!MustHaveInput(mUI.imageCutterOutputFolder))
         return;
 
-    QString out_path = GetValue(mUI.outputFolder);
+    QString out_path = GetValue(mUI.imageCutterOutputFolder);
     if (!app::MakePath(out_path))
     {
         QMessageBox msg(this);
@@ -456,23 +504,23 @@ void DlgImgView::on_btnCutImages_clicked()
         return;
     }
 
-    SetValue(mUI.progressBar, 0);
-    SetRange(mUI.progressBar, 0, mPack.images.size());
-    AutoHider hider(mUI.progressBar);
+    SetValue(mUI.imageCutterProgress, 0);
+    SetRange(mUI.imageCutterProgress, 0, mPack.images.size());
+    AutoHider hider(mUI.imageCutterProgress);
     QEventLoop footgun;
 
-    const unsigned left_padding  = GetValue(mUI.leftPadding);
-    const unsigned right_padding = GetValue(mUI.rightPadding);
-    const unsigned top_padding   = GetValue(mUI.topPadding);
-    const unsigned bottom_padding = GetValue(mUI.bottomPadding);
-    const bool power_of_two = GetValue(mUI.chkPOT);
-    const bool overwrite    = GetValue(mUI.chkOverwrite);
-    const QString selection = GetValue(mUI.cmbSelection);
+    const unsigned left_padding   = GetValue(mUI.imageCutterLeftPadding);
+    const unsigned right_padding  = GetValue(mUI.imageCutterRightPadding);
+    const unsigned top_padding    = GetValue(mUI.imageCutterTopPadding);
+    const unsigned bottom_padding = GetValue(mUI.imageCutterBottomPadding);
+    const bool power_of_two = GetValue(mUI.imageCutterPOT);
+    const bool overwrite    = GetValue(mUI.imageCutterOverwrite);
+    const QString selection = GetValue(mUI.imageCutterSelection);
     const bool all_images   = selection == QString("All images");
     unsigned counter = 0;
     for (unsigned i=0; i<mPack.images.size(); ++i)
     {
-        if (Increment(mUI.progressBar))
+        if (Increment(mUI.imageCutterProgress))
             footgun.processEvents();
 
         const auto& img = mPack.images[i];
@@ -502,7 +550,7 @@ void DlgImgView::on_btnCutImages_clicked()
         else if (img_name.endsWith(".bmp", Qt::CaseInsensitive))
             img_name.chop(4);
 
-        QString out_name = GetValue(mUI.nameTemplate);
+        QString out_name = GetValue(mUI.imageCutterNameTemplate);
         out_name.replace("%c", QString::number(counter++));
         out_name.replace("%i", QString::number(img.index));
         out_name.replace("%w", QString::number(img.width));
@@ -514,7 +562,7 @@ void DlgImgView::on_btnCutImages_clicked()
         if (out_name.isEmpty())
             continue;
         out_name.append(".");
-        out_name.append(mUI.cmbImageFormat->currentText().toLower());
+        out_name.append(mUI.imageCutterFormat->currentText().toLower());
         QString out_file = app::JoinPath(out_path, out_name);
         if (app::FileExists(out_file) && !overwrite)
         {
@@ -540,8 +588,8 @@ void DlgImgView::on_btnCutImages_clicked()
                            copy);
         QImageWriter writer;
         writer.setFileName(out_file);
-        writer.setQuality(GetValue(mUI.imageQuality));
-        writer.setFormat(mUI.cmbImageFormat->currentText().toLocal8Bit());
+        writer.setQuality(GetValue(mUI.imageCutterQuality));
+        writer.setFormat(mUI.imageCutterFormat->currentText().toLocal8Bit());
         if (!writer.write(buffer))
         {
             ERROR("Failed to write image file. [file='%1', error='%2']", out_file, writer.errorString());
@@ -555,13 +603,206 @@ void DlgImgView::on_btnCutImages_clicked()
     msg.exec();
 }
 
+void DlgImgView::on_btnPackTiles_clicked()
+{
+    if (!MustHaveInput(mUI.imageFile))
+        return;
+
+    QPixmap source_image;
+    if (!source_image.load(GetValue(mUI.imageFile)) || source_image.isNull())
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setText(tr("Failed to load image file. [%1]").arg(GetValue(mUI.imageFile)));
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.exec();
+        return;
+    }
+
+    SetValue(mUI.imageCutterProgress, 0);
+    SetRange(mUI.imageCutterProgress, 0, mPack.images.size());
+    AutoHider hider(mUI.imageCutterProgress);
+    QEventLoop footgun;
+
+    const unsigned tile_width  = GetValue(mUI.tileWidth);
+    const unsigned tile_height = GetValue(mUI.tileHeight);
+    const unsigned tile_padding = GetValue(mUI.tilePadding);
+    const unsigned tile_box_width  = tile_width + 2 * tile_padding;
+    const unsigned tile_box_height = tile_height + 2 * tile_padding;
+
+    const QString selection = GetValue(mUI.tilePackerSelection);
+    const bool all_images = selection == QString("All images");
+    unsigned counter = 0;
+
+    std::vector<app::PackingRectangle> images_for_packing;
+
+    for (unsigned i=0; i<mPack.images.size(); ++i)
+    {
+        const auto& img = mPack.images[i];
+        if (!img.selected && !all_images)
+            continue;
+
+        app::PackingRectangle rect;
+        rect.width  = tile_box_width;
+        rect.height = tile_box_height;
+        rect.index  = i;
+        images_for_packing.push_back(rect);
+    }
+
+    if (images_for_packing.empty())
+        return;
+
+    const bool power_of_two = GetValue(mUI.tilePackerPOT);
+    const bool write_json = GetValue(mUI.tilePackerJson);
+    const bool resample_images = GetValue(mUI.tilePackerResize);
+
+    const auto ret = app::PackFixedSizeRectangles(images_for_packing, power_of_two);
+    if (ret.width == 0 || ret.height == 0)
+        return;
+
+    QImage buffer(ret.width, ret.height, QImage::Format_ARGB32);
+    buffer.fill(QColor(0x00, 0x00, 0x00, 0x00)); // transparent,
+
+    QPainter painter(&buffer);
+    painter.setCompositionMode(QPainter::CompositionMode_Source);
+
+    const auto valign = (TilePackVerticalAlignment) GetValue(mUI.tilePackerVerticalAlign);
+    const auto halign = (TilePackHorizontalAlignment) GetValue(mUI.tilePackerHorizontalAlign);
+
+    for (const auto& packed_img : images_for_packing)
+    {
+        const auto& src_img = mPack.images[packed_img.index];
+        const auto dst_tile_xpos   = packed_img.xpos + tile_padding;
+        const auto dst_tile_ypos   = packed_img.ypos + tile_padding;
+        const auto dst_tile_width  = packed_img.width - 2*tile_padding;
+        const auto dst_tile_height = packed_img.height - 2*tile_padding;
+
+        unsigned copy_width  = 0;
+        unsigned copy_height = 0;
+
+        auto src_img_xpos   = src_img.xpos;
+        auto src_img_ypos   = src_img.ypos;
+        auto src_img_width  = src_img.width;
+        auto src_img_height = src_img.height;
+
+        if (resample_images)
+        {
+            const auto scale_factor = std::min((double)dst_tile_width/(double)src_img_width,
+                                               (double)dst_tile_height/(double)src_img_height);
+            copy_width  = src_img_width * scale_factor;
+            copy_height = src_img_height * scale_factor;
+        }
+        else
+        {
+            copy_width  = std::min(src_img.width, dst_tile_width);
+            copy_height = std::min(src_img.height, dst_tile_height);
+
+            if (src_img.width > dst_tile_width)
+                src_img_xpos += ((src_img.width - dst_tile_width) / 2);
+            if (src_img.height > dst_tile_height)
+                src_img_ypos += ((src_img.height - dst_tile_height) / 2);
+
+        }
+
+        auto copy_xpos = dst_tile_xpos;
+        auto copy_ypos = dst_tile_ypos;
+
+        if (copy_width < dst_tile_width) {
+            if (halign == TilePackHorizontalAlignment::Center)
+                copy_xpos += ((dst_tile_width - copy_width) / 2);
+            else if (halign == TilePackHorizontalAlignment::Left)
+                copy_xpos += 0;
+            else if (halign == TilePackHorizontalAlignment::Right)
+                copy_xpos += (dst_tile_width - copy_width);
+        }
+        if (copy_height < dst_tile_height) {
+            if (valign == TilePackVerticalAlignment::Center)
+                copy_ypos += ((dst_tile_height - copy_height) / 2);
+            else if (valign == TilePackVerticalAlignment::Top)
+                copy_ypos += 0;
+            else if (valign == TilePackVerticalAlignment::Bottom)
+                copy_ypos += (dst_tile_height - copy_height);
+        }
+
+        painter.drawPixmap(QRectF(copy_xpos, copy_ypos, copy_width, copy_height), source_image,
+                           QRectF(src_img_xpos, src_img_ypos, src_img_width, src_img_height));
+
+        if (Increment(mUI.tilePackerProgress))
+            footgun.processEvents();
+    }
+
+    QString filter;
+    QString filename;
+    if (mUI.tilePackerFormat->currentText() == "JGP")
+        filter = "Images (*.jpg)";
+    else if (mUI.tilePackerFormat->currentText() == "PNG")
+        filter = "Images (*.png)";
+    else if (mUI.tilePackerFormat->currentText() == "BMP")
+        filter = "Images (*.bmp)";
+
+    filename = mLastTileWriteFile;
+    if (filename.isEmpty())
+        filename = "tilemap" + mUI.tilePackerFormat->currentText().toLower();
+
+    const auto& file = QFileDialog::getSaveFileName(this,
+        tr("Select Save File"), filename, filter);
+    if (file.isEmpty())
+        return;
+
+    QImageWriter writer;
+    writer.setFormat(mUI.tilePackerFormat->currentText().toLatin1());
+    writer.setQuality(mUI.tilePackerQuality->value());
+    writer.setFileName(file);
+    if (!writer.write(buffer))
+    {
+        QMessageBox msg(this);
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setText(tr("Failed to write the image.\n%1").arg(writer.errorString()));
+        msg.exec();
+        return;
+    }
+
+    if (write_json)
+    {
+        ImagePack::Tilemap tilemap;
+        tilemap.tile_width  = tile_width;
+        tilemap.tile_height = tile_height;
+        tilemap.xoffset     = 0;
+        tilemap.yoffset     = 0;
+
+        ImagePack pack;
+        pack.image_file   = QFileInfo(filename).fileName();
+        pack.padding      = tile_padding;
+        pack.image_width  = ret.width;
+        pack.image_height = ret.height;
+        pack.mag_filter   = GetValue(mUI.cmbMagFilter);
+        pack.min_filter   = GetValue(mUI.cmbMinFilter);
+        pack.color_space  = gfx::detail::TextureFileSource::ColorSpace::sRGB;
+        pack.tilemap      = tilemap;
+        pack.power_of_two_hint = power_of_two;
+
+        if (!WriteImagePack(filename + ".json", pack))
+        {
+            QMessageBox msg(this);
+            msg.setIcon(QMessageBox::Critical);
+            msg.setStandardButtons(QMessageBox::Ok);
+            msg.setText(tr("Failed to write the JSON description file."));
+            msg.exec();
+            return;
+        }
+    }
+    mLastTileWriteFile = filename;
+    INFO("Wrote tilemap image to '%1'", file);
+}
+
 void DlgImgView::on_btnSelectOut_clicked()
 {
     const auto& dir = QFileDialog::getExistingDirectory(this,
-        tr("Select Output Directory"), GetValue(mUI.outputFolder));
+        tr("Select Output Directory"), GetValue(mUI.imageCutterOutputFolder));
     if (dir.isEmpty())
         return;
-    SetValue(mUI.outputFolder, dir);
+    SetValue(mUI.imageCutterOutputFolder, dir);
 }
 
 void DlgImgView::on_cmbColorSpace_currentIndexChanged(int)

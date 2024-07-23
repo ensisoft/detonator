@@ -79,6 +79,7 @@ namespace gui
         void on_btnCancel_clicked();
         void on_btnSave_clicked();
         void on_btnCutImages_clicked();
+        void on_btnPackTiles_clicked();
         void on_btnSelectOut_clicked();
         void on_cmbColorSpace_currentIndexChanged(int);
         void on_cmbMinFilter_currentIndexChanged(int);
@@ -124,5 +125,7 @@ namespace gui
         };
         Mode mMode = Mode::Nada;
         std::set<size_t> mTilesTouched;
+
+        QString mLastTileWriteFile;
     };
 } // namespace
