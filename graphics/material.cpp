@@ -1447,6 +1447,15 @@ void MaterialClass::BeginPacking(TexturePacker* packer) const
                     can_combine = false;
             }
             packer->SetTextureFlag(handle, TexturePacker::TextureFlags::CanCombine, can_combine);
+
+            if (mType == Type::Tilemap)
+            {
+                // since we're using absolute sizes for the tile specification the
+                // texture cannot change or then the absolute dimensions must also change
+                // (kTileOffset, kTileSize, kTilePadding).
+                // Or then we disable the texture resizing for now.
+                packer->SetTextureFlag(handle, TexturePacker::TextureFlags::AllowedToResize, false);
+            }
         }
     }
 }
@@ -2193,9 +2202,9 @@ void FragmentShaderMain()
     vec2 texture_box_size      = kTextureBox.zw;
     vec2 texture_box_translate = kTextureBox.xy;
 
-    vec2 tile_texture_offset = kTileOffset * texture_box_size;
-    vec2 tile_texture_size   = kTileSize * texture_box_size;
-    vec2 tile_texture_padding = kTilePadding * texture_box_size;
+    vec2 tile_texture_offset   = kTileOffset / kTextureSize;
+    vec2 tile_texture_size     = kTileSize / kTextureSize;
+    vec2 tile_texture_padding  = kTilePadding / kTextureSize;
     vec2 tile_texture_box_size = tile_texture_size + (tile_texture_padding * 2.0);
 
     vec2 tile_map_size = texture_box_size - tile_texture_offset;

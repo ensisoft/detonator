@@ -452,12 +452,7 @@ public:
             klass.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
             klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Nearest);
 
-            const auto tile_width = 64.0f;
-            const auto tile_height = 64.0f;
-            const auto texture_width = tile_width * 4.0f;
-            const auto texture_height = tile_height * 2.0f;
-
-            klass.SetTileSize(glm::vec2(tile_width / texture_width, tile_height / texture_height));
+            klass.SetTileSize(glm::vec2(64.0f, 64.0f));
             klass.SetTileOffset(glm::vec2(0.0f, 0.0f));
             mTileset64x46 = gfx::CreateMaterialInstance(klass);
         }
@@ -475,13 +470,8 @@ public:
             klass.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
             klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Nearest);
 
-            const auto tile_width = 64.0f;
-            const auto tile_height = 64.0f;
-            const auto texture_width = tile_width * 4.0f + 32.0f;
-            const auto texture_height = tile_height * 2.0f + 32.0f;
-
-            klass.SetTileSize(glm::vec2(tile_width / texture_width, tile_height / texture_height));
-            klass.SetTileOffset(glm::vec2(32.0f / texture_width, 32.0f / texture_height));
+            klass.SetTileSize(glm::vec2(64.0f, 64.0f));
+            klass.SetTileOffset(glm::vec2(32.0f, 32.0f));
             mTileset64x46Offset32x32 = gfx::CreateMaterialInstance(klass);
         }
 
@@ -510,8 +500,8 @@ public:
             klass.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
             klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Nearest);
 
-            klass.SetTileSize(glm::vec2(tile_width / texture_width, tile_height / texture_height));
-            klass.SetTileOffset(glm::vec2(32.0f / texture_width, 32.0f / texture_height));
+            klass.SetTileSize(glm::vec2(64.0f, 64.0f));
+            klass.SetTileOffset(glm::vec2(32.0f, 32.0f));
             mTileset64x46Offset32x32Atlas512x256 = gfx::CreateMaterialInstance(klass);
         }
 
@@ -534,8 +524,8 @@ public:
             klass.SetTextureMagFilter(gfx::MaterialClass::MagTextureFilter::Nearest);
             klass.SetTextureMinFilter(gfx::MaterialClass::MinTextureFilter::Nearest);
 
-            klass.SetTileSize(glm::vec2(tile_width / texture_width, tile_height / texture_height));
-            klass.SetTilePadding(glm::vec2(tile_padding / texture_width, tile_padding / texture_height));
+            klass.SetTileSize(glm::vec2(64.0f, 64.0f));
+            klass.SetTilePadding(glm::vec2(2.0f, 2.0f));
             mTileSet64x64Padding2x2 = gfx::CreateMaterialInstance(klass);
         }
 
