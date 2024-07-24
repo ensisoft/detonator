@@ -194,7 +194,19 @@ void ShaderSource::FoldUniform(const std::string& name, ShaderDataDeclarationVal
     }
 }
 
-std::string ShaderSource::GetSource() const
+void ShaderSource::SetComment(const std::string& name, std::string comment)
+{
+    for (auto& decl : mData)
+    {
+        if (decl.name != name)
+            continue;
+        decl.comment = std::move(comment);
+        break;
+    }
+}
+
+
+std::string ShaderSource::GetSource(SourceVariant variant) const
 {
     std::stringstream ss;
     if (mVersion == Version::GLSL_100)
@@ -216,8 +228,20 @@ std::string ShaderSource::GetSource() const
             BUG("Missing GLSL fragment shader floating point precision handling.");
     }
 
+    ss << "\n// Warning. Do not delete the below line.";
+    ss << "\n// shader_uniform_api_version=" << mShaderUniformAPIVersion << "\n\n";
+
     for (const auto& data : mData)
     {
+        if (variant == SourceVariant::ShaderStub)
+        {
+            const auto& lines = base::SplitString(data.comment, '\n');
+            for (const auto& line: lines)
+            {
+                ss << "// " << line << "\n";
+            }
+        }
+
         if (data.decl_type == ShaderDataDeclarationType::Attribute)
             ss << "attribute ";
         else if (data.decl_type == ShaderDataDeclarationType::Uniform)
@@ -284,10 +308,16 @@ std::string ShaderSource::GetSource() const
         }
         ss << "\n";
     }
-
-    for (const auto& src : mSource)
+    if (variant == SourceVariant::ShaderStub && !mStubFunction.empty())
     {
-        ss << src;
+        ss << mStubFunction;
+    }
+    else
+    {
+        for (const auto& src: mSource)
+        {
+            ss << src;
+        }
     }
 
     return ss.str();
@@ -394,7 +424,7 @@ ShaderSource ShaderSource::FromRawSource(std::string raw_source)
             decl.name      = name.value();
             source.AddData(std::move(decl));
         }
-        else
+        else if (!base::StartsWith(trimmed, "//"))
         {
             glsl_code.append(line);
             glsl_code.append("\n");

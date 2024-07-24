@@ -33,6 +33,7 @@
 #include <optional>
 #include <variant>
 
+#include "base/bitflag.h"
 #include "graphics/color4f.h"
 
 namespace gfx
@@ -82,6 +83,7 @@ namespace gfx
             ShaderDataDeclarationType decl_type = ShaderDataDeclarationType::Attribute;
             ShaderDataType data_type = ShaderDataType::Float;
             std::string name;
+            std::string comment;
             std::optional<ShaderDataDeclarationValue> constant_value;
         };
 
@@ -109,6 +111,10 @@ namespace gfx
         { mSource.clear(); }
         inline void ClearData() noexcept
         { mData.clear(); }
+        inline void SetStub(std::string stub) noexcept
+        { mStubFunction = std::move(stub); }
+        inline void SetShaderUniformAPIVersion(unsigned version)
+        { mShaderUniformAPIVersion = version; }
 
         inline Type GetType() const noexcept
         { return mType; }
@@ -127,29 +133,69 @@ namespace gfx
             return nullptr;
         }
 
-        void AddAttribute(std::string name, AttributeType type)
+        void AddAttribute(std::string name, AttributeType type, std::string comment = "")
         {
-            AddData({ShaderDataDeclarationType::Attribute, type, std::move(name)});
+            ShaderDataDeclaration decl;
+            decl.decl_type = ShaderDataDeclarationType::Attribute;
+            decl.data_type = type;
+            decl.name      = std::move(name);
+            decl.comment   = std::move(comment);
+            AddData(std::move(decl));
         }
-        void AddUniform(std::string name, UniformType type)
+        void AddUniform(std::string name, UniformType type, std::string comment = "")
         {
-            AddData({ShaderDataDeclarationType::Uniform, type, std::move(name)});
+            ShaderDataDeclaration decl;
+            decl.decl_type = ShaderDataDeclarationType::Uniform;
+            decl.data_type = type;
+            decl.name      = std::move(name);
+            decl.comment   = std::move(comment);
+            AddData(std::move(decl));
         }
-        void AddConstant(std::string name, ConstantType type)
+        void AddConstant(std::string name, ConstantType type, std::string comment = "")
         {
-            AddData({ShaderDataDeclarationType::Constant, type, std::move(name)});
+            ShaderDataDeclaration decl;
+            decl.decl_type = ShaderDataDeclarationType::Constant;
+            decl.data_type = type;
+            decl.name      = std::move(name);
+            decl.comment   = std::move(comment);
+            AddData(std::move(decl));
         }
-        void AddVarying(std::string name, VaryingType type)
+        void AddVarying(std::string name, VaryingType type, std::string comment = "")
         {
-            AddData({ShaderDataDeclarationType::Varying, type, std::move(name)});
+            ShaderDataDeclaration decl;
+            decl.decl_type = ShaderDataDeclarationType::Varying;
+            decl.data_type = type;
+            decl.name      = std::move(name);
+            decl.comment   = std::move(comment);
+            AddData(std::move(decl));
         }
 
+        bool HasDataDeclaration(const std::string& name, ShaderDataDeclarationType type) const
+        {
+            for (const auto& data : mData)
+            {
+                if (data.decl_type == type && data.name == name)
+                    return true;
+            }
+            return false;
+        }
+        inline bool HasUniform(const std::string& name) const
+        { return HasDataDeclaration(name, ShaderDataDeclarationType::Uniform); }
+        inline bool HasVarying(const std::string& name) const
+        { return HasDataDeclaration(name, ShaderDataDeclarationType::Varying); }
+
         void FoldUniform(const std::string& name, ShaderDataDeclarationValue value);
+
+        void SetComment(const std::string& name, std::string comment);
+
+        enum class SourceVariant {
+            Production, ShaderStub
+        };
 
         // Get the actual shader source string by combining
         // the shader source object's contents (i.e. data
         // declarations and source code snippets) together.
-        std::string GetSource() const;
+        std::string GetSource(SourceVariant variant = SourceVariant::Production) const;
 
         // Merge the contents of the other shader source with this
         // shader source. The other shader source object must
@@ -162,7 +208,9 @@ namespace gfx
         bool IsCompatible(const ShaderSource& other) const noexcept;
 
         static ShaderSource FromRawSource(std::string source);
+
     private:
+        unsigned mShaderUniformAPIVersion = 1;
         Type mType = Type::NotSet;
         Version mVersion = Version::NotSet;
         Precision mPrecision = Precision::NotSet;
@@ -176,5 +224,6 @@ namespace gfx
         // Currently basically everything else other than the
         // data declarations.
         std::vector<std::string> mSource;
+        std::string mStubFunction;
     };
 } // namespace
