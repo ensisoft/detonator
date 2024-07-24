@@ -1076,6 +1076,7 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
 {
     program.SetUniform("kRenderPoints", state.render_points ? 1.0f : 0.0f);
     program.SetUniform("kTime", (float)state.material_time);
+    program.SetUniform("kEditingMode", (int)state.editing_mode);
 
     if (mType == Type::Color)
     {
@@ -1780,6 +1781,12 @@ ShaderSource MaterialClass::GetShaderSource(const State& state, const Device& de
 
 ShaderSource MaterialClass::GetColorShaderSource(const State& state, const Device& device) const
 {
+    return GetColorShaderSource();
+}
+
+// static
+ShaderSource MaterialClass::GetColorShaderSource()
+{
     ShaderSource source;
     source.SetType(ShaderSource::Type::Fragment);
     source.SetPrecision(ShaderSource::Precision::High);
@@ -1798,6 +1805,12 @@ void FragmentShaderMain()
 }
 
 ShaderSource MaterialClass::GetGradientShaderSource(const State& state, const Device& device) const
+{
+    return GetGradientShaderSource();
+}
+
+// static
+ShaderSource MaterialClass::GetGradientShaderSource()
 {
     ShaderSource source;
     source.SetType(ShaderSource::Type::Fragment);
@@ -1837,6 +1850,11 @@ void FragmentShaderMain()
 }
 
 ShaderSource MaterialClass::GetSpriteShaderSource(const State& state, const Device& device) const
+{
+    return GetSpriteShaderSource();
+}
+
+ShaderSource MaterialClass::GetSpriteShaderSource()
 {
     // todo: maybe pack some of shader uniforms
 
@@ -2047,6 +2065,12 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
 
 ShaderSource MaterialClass::GetTextureShaderSource(const State& state, const Device& device) const
 {
+    return GetTextureShaderSource();
+}
+
+// static
+ShaderSource MaterialClass::GetTextureShaderSource()
+{
     // todo: pack some of the uniforms ?
 
     ShaderSource source;
@@ -2152,6 +2176,12 @@ void FragmentShaderMain()
 
 ShaderSource MaterialClass::GetTilemapShaderSource(const State& state, const Device& device) const
 {
+    return GetTilemapShaderSource();
+}
+
+// static
+ShaderSource MaterialClass::GetTilemapShaderSource()
+{
     ShaderSource source;
     source.SetType(ShaderSource::Type::Fragment);
     source.SetPrecision(ShaderSource::Precision::High);
@@ -2161,36 +2191,26 @@ ShaderSource MaterialClass::GetTilemapShaderSource(const State& state, const Dev
     source.AddUniform("kAlphaCutoff", ShaderSource::UniformType::Float);
     source.AddUniform("kTime", ShaderSource::UniformType::Float);
     source.AddUniform("kBaseColor", ShaderSource::UniformType::Color4f);
+    source.AddUniform("kTileIndex", ShaderSource::UniformType::Float);
     source.AddUniform("kTileSize", ShaderSource::UniformType::Vec2f);
     source.AddUniform("kTileOffset", ShaderSource::UniformType::Vec2f);
     source.AddUniform("kTilePadding", ShaderSource::UniformType::Vec2f);
     source.AddUniform("kTextureSize", ShaderSource::UniformType::Vec2f);
     source.AddUniform("kRenderPoints", ShaderSource::UniformType::Float);
-
+    source.AddUniform("kEditingMode", ShaderSource::UniformType::Int);
     source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
     source.AddVarying("vTileData", ShaderSource::VaryingType::Vec2f);
 
-    if (state.editing_mode)
-    {
-        source.AddUniform("kTileIndex", ShaderSource::UniformType::Float);
-        source.AddSource(R"(
-// this function is a stub and only available to help debug the
-// and check the result of tile rendering visually in the editor.
+    source.AddSource(R"(
 float GetTileIndex() {
-    return kTileIndex;
-}
-)");
-    }
-    else
-    {
-        source.AddSource(R"(
-float GetTileIndex() {
+    // to help debugging the material in the editor we're checking the flag
+    // here whether we're editing or not and then either return a tile index
+    // based on a uniform or a "real" tile index based on tile data.
+    if (kEditingMode == 1)
+        return kTileIndex;
     return vTileData.x;
 }
-)");
-    }
 
-    source.AddSource(R"(
 void FragmentShaderMain()
 {
     // the tile rendering can provide geometry also through GL_POINTS.
