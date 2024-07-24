@@ -1131,6 +1131,8 @@ namespace gfx
         inline void SetTextureSource(std::unique_ptr<TextureSource> source) noexcept
         { SetTextureSource(0, 0, std::move(source)); }
 
+        static ShaderSource CreateShaderStub(Type type);
+
         static std::string GetColorUniformName(ColorIndex index);
 
         static std::unique_ptr<MaterialClass> ClassFromJson(const data::Reader& data);
