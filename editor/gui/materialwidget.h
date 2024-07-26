@@ -101,8 +101,13 @@ namespace gui
         void on_materialName_textChanged(const QString& text);
         void on_materialType_currentIndexChanged(int);
         void on_surfaceType_currentIndexChanged(int);
+        void on_tileWidth_valueChanged(int);
+        void on_tileHeight_valueChanged(int);
+        void on_tileLeftOffset_valueChanged(int);
+        void on_tileTopOffset_valueChanged(int);
+        void on_tileLeftPadding_valueChanged(int);
+        void on_tileTopPadding_valueChanged(int);
         void on_activeMap_currentIndexChanged(int);
-        void on_gamma_valueChanged(double value);
         void on_alphaCutoff_valueChanged(double value);
         void on_baseColor_colorChanged(QColor color);
         void on_particleAction_currentIndexChanged(int);
@@ -155,6 +160,7 @@ namespace gui
         void CreateGradientShaderStub();
         void CreateTextureShaderStub();
         void CreateSpriteShaderStub();
+        void CreateTilemapShaderStub();
         void CreateShaderStubFromSource(const char* source);
 
         void ClearCustomUniforms();
