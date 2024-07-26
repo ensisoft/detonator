@@ -35,6 +35,7 @@
 #include "editor/gui/drawing.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/dlgtilemap.h"
+#include "editor/gui/imgpack.h"
 
 namespace gui
 {
@@ -113,6 +114,21 @@ void DlgTilemap::LoadImage(const QString& file)
     SetValue(mUI.imageFile, info.absoluteFilePath());
     SetValue(mUI.zoom, scale);
     SetEnabled(mUI.btnExport, true);
+
+    const auto& json = app::FindImageJsonFile(file);
+    if (json.isEmpty())
+        return;
+
+    ImagePack pack;
+    if (!ReadImagePack(json, &pack) || !pack.tilemap.has_value())
+        return;
+
+    const auto& tilemap = pack.tilemap.value();
+    SetValue(mUI.offsetX, tilemap.xoffset);
+    SetValue(mUI.offsetY, tilemap.yoffset);
+    SetValue(mUI.tileWidth, tilemap.tile_width);
+    SetValue(mUI.tileHeight, tilemap.tile_height);
+    SetValue(mUI.padding, pack.padding);
 }
 
 void DlgTilemap::on_widgetColor_colorChanged(const QColor& color)
