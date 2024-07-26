@@ -541,6 +541,9 @@ void MaterialWidget::on_actionCreateShader_triggered()
     ApplyShaderDescription();
     ReloadShaders();
     ShowMaterialProperties();
+
+    on_actionEditShader_triggered();
+
 }
 
 void MaterialWidget::on_actionEditShader_triggered()
@@ -1293,290 +1296,29 @@ void FragmentShaderMain() {
 
 void MaterialWidget::CreateColorShaderStub()
 {
-    // Remember to update the API version
-    // indicator in the source if the Uniform API changes!
-
-    constexpr const char* glsl = R"(
-// warning. do not delete the below line.
-// MAPI=1
-
-//// material uniforms  ////
-
-// material instance time in seconds.
-uniform float kTime;
-
-// the base color set for the material
-uniform vec4 kBaseColor;
-
-//// varyings from vertex stage ////
-
-// particle specific values. only used / needed
-// when the material is used to render particles.
-varying float vParticleAlpha;
-varying float vParticleRandomValue;
-varying float vParticleTime;
-
-// texture coordinates
-varying vec2 vTexCoord;
-
-void FragmentShaderMain()
-{
-    // your code here
-
-    fs_out.color = kBaseColor;
-}
-    )";
-
-    CreateShaderStubFromSource(glsl);
+    const auto& src = gfx::MaterialClass::CreateShaderStub(gfx::MaterialClass::Type::Color);
+    const auto& glsl = src.GetSource(gfx::ShaderSource::SourceVariant::ShaderStub);
+    CreateShaderStubFromSource(glsl.c_str());
 }
 void MaterialWidget::CreateGradientShaderStub()
 {
-    // Remember to update the API version
-    // indicator in the source if the Uniform API changes!
-
-    constexpr const char* glsl = R"(
-// warning. do not delete the below line.
-// MAPI=1
-
-//// material uniforms ////
-
-// material instance time in seconds.
-uniform float kTime;
-
-// top left gradient color
-uniform vec4 kColor0;
-// top right gradient color
-uniform vec4 kColor1;
-// bottom left gradient color
-uniform vec4 kColor2;
-// bottom right gradient color
-uniform vec4 kColor3;
-
-//// varyings from vertex stage ////
-
-// particle specific values. only used / needed
-// when the material is used to render particles.
-varying float vParticleAlpha;
-varying float vParticleRandomValue;
-varying float vParticleTime;
-
-// texture coordinates
-varying vec2 vTexCoord;
-
-void FragmentShaderMain()
-{
-    // your code here
-
-    vec4 top = mix(kColor0, kColor1, vTexCoord.x);
-    vec4 bot = mix(kColor2, kColor3, vTexCoord.x);
-    fs_out.color = mix(top, bot, vTexCoord.y);
-}
-    )";
-
-
-    CreateShaderStubFromSource(glsl);
+    const auto& src = gfx::MaterialClass::CreateShaderStub(gfx::MaterialClass::Type::Gradient);
+    const auto& glsl = src.GetSource(gfx::ShaderSource::SourceVariant::ShaderStub);
+    CreateShaderStubFromSource(glsl.c_str());
 }
 void MaterialWidget::CreateTextureShaderStub()
 {
-    // Remember to update the API version
-    // indicator in the source if the Uniform API changes!
-
-     constexpr const char* glsl = R"(
-// warning. do not delete the below line.
-// MAPI=1
-
-//// material uniforms ////
-
-// material instance time in seconds.
-uniform float kTime;
-
-// The current texture to sample from.
-uniform sampler2D kTexture;
-
-// Texture box (sub-rectangle) from which to read
-// the texture. This is a packed uniform so that xy
-// components define the texture box translation
-// and zw define the size of the box.
-// You can use these data to transform the incoming
-// texture coordinates so that the sampling happens
-// from the desired area of the texture (the texture rect)
-uniform vec4 kTextureBox;
-
-// texture sampling scaling coefficients.
-uniform vec2 kTextureScale;
-
-// texture sampling velocity, xy and z = rotation (radians)
-// per seconds.
-uniform vec3 kTextureVelocity;
-
-// Texture wrapping mode. xy = both x and y axis of the texture
-// 0 = disabled
-// 1 = clamp
-// 2 = wrap
-uniform ivec2 kTextureWrap;
-
-// Texture sampling coordinate base rotation (in radians)
-uniform float kTextureRotation;
-
-// Base color set for material.
-uniform vec4 kBaseColor;
-
-// Flag to indicate whether the texture is an alpha mask
-// or not. Alpha masks only have valid data for the alpha
-// channel.
-// 0.0 = texture is normal color data
-// 1.0 = texture is an alpha mask
-uniform float kAlphaMask;
-
-// Flag to indicate whether the current rendering is
-// rendering points. (GL_POINTS)
-// When points are being rendered normal texture coordinates
-// no longer apply but 'gl_PointCoord' must be used instead.
-//
-//  to cover both cases you can do
-//
-//  vec2 c = mix(vTexCoord, gl_PointCord, kRenderPoints);
-//
-uniform float kRenderPoints;
-
-// Flag to indicate whether random particle rotation
-// should be used.
-// 0.0 = no rotation
-// 1.0 = rotation
-uniform float kApplyRandomParticleRotation;
-
-// Alpha cutoff threshold value set on the material.
-uniform float kAlphaCutoff;
-
-//// varyings from vertex stage ////
-
-// particle specific values. only used / needed
-// when the material is used to render particles.
-varying float vParticleAlpha;
-varying float vParticleRandomValue;
-varying float vParticleTime;
-
-// texture coordinates
-varying vec2 vTexCoord;
-
-
-void FragmentShaderMain()
-{
-    // your code here
-
-    fs_out.color = texture2D(kTexture, vTexCoord) * kBaseColor;
-}
-    )";
-
-    CreateShaderStubFromSource(glsl);
+    const auto& src = gfx::MaterialClass::CreateShaderStub(gfx::MaterialClass::Type::Texture);
+    const auto& glsl = src.GetSource(gfx::ShaderSource::SourceVariant::ShaderStub);
+    CreateShaderStubFromSource(glsl.c_str());
 }
 
 
 void MaterialWidget::CreateSpriteShaderStub()
 {
-    // Remember to update the API version
-    // indicator in the source if the Uniform API changes!
-
-    constexpr const char* glsl = R"(
-// warning. do not delete the below line.
-// MAPI=1
-
-//// material uniforms ////
-
-// material instance time in seconds.
-uniform float kTime;
-
-// The current textures to sample from.
-// When the sprite cycle runs the current frame
-// is bound in kTexture0 and the next frame is bound in kTexture1.
-// Blend coefficient tells you how far into the transition between
-// the two frames we are.  In other words if kBlendCoeff = 0.5 the
-// animation cycle time is exactly between two frames.
-uniform sampler2D kTexture0;
-uniform sampler2D kTexture1;
-
-// The blending factor for blending the animation frames
-// N and N+1 (kTexture0 and kTexture1)
-uniform float kBlendCoeff;
-
-// Texture box (sub-rectangle) from which to read
-// the texture. This is a packed uniform so that xy
-// components define the texture box translation
-// and zw define the size of the box.
-// You can use these data to transform the incoming
-// texture coordinates so that the sampling happens
-// from the desired area of the texture (the texture rect)
-uniform vec4 kTextureBox0;
-uniform vec4 kTextureBox1;
-
-// texture sampling scaling coefficients.
-uniform vec2 kTextureScale;
-
-// texture sampling velocity, xy and z = rotation (radians)
-// per seconds.
-uniform vec3 kTextureVelocity;
-
-// Texture wrapping mode. xy = both x and y axis of the texture
-// 0 = disabled
-// 1 = clamp
-// 2 = wrap
-uniform ivec2 kTextureWrap;
-
-// Texture sampling coordinate base rotation (in radians)
-uniform float kTextureRotation;
-
-// Base color set for material.
-uniform vec4 kBaseColor;
-
-// Flag to indicate whether the texture is an alpha mask
-// or not. Alpha masks only have valid data for the alpha
-// channel.
-// 0.0 = texture is normal color data
-// 1.0 = texture is an alpha mask
-uniform float kAlphaMask;
-
-// Flag to indicate whether the current rendering is
-// rendering points. (GL_POINTS)
-// When points are being rendered normal texture coordinates
-// no longer apply but 'gl_PointCoord' must be used instead.
-//
-//  to cover both cases you can do
-//
-//  vec2 c = mix(vTexCoord, gl_PointCord, kRenderPoints);
-//
-uniform float kRenderPoints;
-
-// Flag to indicate whether random particle rotation
-// should be used.
-// 0.0 = no rotation
-// 1.0 = rotation
-uniform float kApplyRandomParticleRotation;
-
-// Alpha cutoff threshold value set on the material.
-uniform float kAlphaCutoff;
-
-//// varyings from vertex stage ////
-
-// particle specific values. only used / needed
-// when the material is used to render particles.
-varying float vParticleAlpha;
-varying float vParticleRandomValue;
-varying float vParticleTime;
-
-// texture coordinates
-varying vec2 vTexCoord;
-
-void FragmentShaderMain()
-{
-    // your code here.
-
-    fs_out.color = mix(texture2D(kTexture0, vTexCoord),
-                       texture2D(kTexture1, vTexCoord),
-                       kBlendCoeff) * kBaseColor;
-}
-    )";
-
-    CreateShaderStubFromSource(glsl);
+    const auto& src = gfx::MaterialClass::CreateShaderStub(gfx::MaterialClass::Type::Sprite);
+    const auto& glsl = src.GetSource(gfx::ShaderSource::SourceVariant::ShaderStub);
+    CreateShaderStubFromSource(glsl.c_str());
 }
 
 void MaterialWidget::CreateShaderStubFromSource(const char* source)
