@@ -58,6 +58,7 @@
 #include "editor/gui/dlgtextedit.h"
 #include "editor/gui/dlgimgview.h"
 #include "editor/gui/materialwidget.h"
+#include "editor/gui/imgpack.h"
 
 namespace gui
 {
@@ -223,6 +224,7 @@ bool MaterialWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Material", mUI.cmbModel);
     settings.LoadWidget("Material", mUI.widget);
     settings.LoadWidget("Material", mUI.kTime);
+    settings.LoadWidget("Material", mUI.kTileIndex);
     settings.LoadWidget("Material", mUI.mainSplitter);
     settings.LoadWidget("Material", mUI.rightSplitter);
 
@@ -256,6 +258,7 @@ bool MaterialWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Material", mUI.cmbModel);
     settings.SaveWidget("Material", mUI.widget);
     settings.SaveWidget("Material", mUI.kTime);
+    settings.SaveWidget("Material", mUI.kTileIndex);
     settings.SaveWidget("Material", mUI.mainSplitter);
     settings.SaveWidget("Material", mUI.rightSplitter);
     if (auto* item = GetSelectedItem(mUI.textures))
@@ -536,6 +539,8 @@ void MaterialWidget::on_actionCreateShader_triggered()
         CreateTextureShaderStub();
     else if (type == gfx::MaterialClass::Type::Sprite)
         CreateSpriteShaderStub();
+    else if (type == gfx::MaterialClass::Type::Tilemap)
+        CreateTilemapShaderStub();
     else BUG("Unhandled material type for shader generation.");
 
     ApplyShaderDescription();
@@ -787,6 +792,17 @@ void MaterialWidget::on_materialType_currentIndexChanged(int)
         other.SetNumTextureMaps(1);
         other.SetTextureMap(0, std::move(map));
     }
+    else if (type == gfx::MaterialClass::Type::Tilemap)
+    {
+        auto map = std::make_unique<gfx::TextureMap>();
+        map->SetType(gfx::TextureMap::Type::Texture2D);
+        map->SetName("Tilemap");
+        other.SetActiveTextureMap(map->GetId());
+        other.SetNumTextureMaps(1);
+        other.SetTextureMap(0, std::move(map));
+
+        SetValue(mUI.kTileIndex, 0);
+    }
     else if (type == gfx::MaterialClass::Type::Sprite)
     {
         auto map = std::make_unique<gfx::TextureMap>();
@@ -809,9 +825,33 @@ void MaterialWidget::on_surfaceType_currentIndexChanged(int)
     SetMaterialProperties();
     ShowMaterialProperties();
 }
+void MaterialWidget::on_tileWidth_valueChanged(int)
+{
+    SetMaterialProperties();
+}
+void MaterialWidget::on_tileHeight_valueChanged(int)
+{
+    SetMaterialProperties();
+}
+
+void MaterialWidget::on_tileLeftOffset_valueChanged(int)
+{
+    SetMaterialProperties();
+}
+void MaterialWidget::on_tileTopOffset_valueChanged(int)
+{
+    SetMaterialProperties();
+}
+void MaterialWidget::on_tileLeftPadding_valueChanged(int)
+{
+    SetMaterialProperties();
+}
+void MaterialWidget::on_tileTopPadding_valueChanged(int)
+{
+    SetMaterialProperties();
+}
+
 void MaterialWidget::on_activeMap_currentIndexChanged(int)
-{ SetMaterialProperties(); }
-void MaterialWidget::on_gamma_valueChanged(double)
 { SetMaterialProperties(); }
 void MaterialWidget::on_alphaCutoff_valueChanged(double value)
 { SetMaterialProperties(); }
@@ -992,17 +1032,36 @@ void MaterialWidget::AddNewTextureMapFromFile()
             }
             else
             {
-                DlgImgView dlg(this);
-                dlg.SetDialogMode();
-                dlg.show();
-                dlg.LoadImage(image);
-                dlg.LoadJson(json_file);
-                dlg.ResetTransform();
-                if (dlg.exec() == QDialog::Rejected)
-                    return;
-                image_file = dlg.GetImageFileName();
-                image_name = dlg.GetImageName();
-                image_rect = ToGfx(dlg.GetImageRectF());
+                if (mMaterial->GetType() == gfx::MaterialClass::Type::Texture)
+                {
+                    DlgImgView dlg(this);
+                    dlg.SetDialogMode();
+                    dlg.show();
+                    dlg.LoadImage(image);
+                    dlg.LoadJson(json_file);
+                    dlg.ResetTransform();
+                    if (dlg.exec() == QDialog::Rejected)
+                        return;
+                    image_file = dlg.GetImageFileName();
+                    image_name = dlg.GetImageName();
+                    image_rect = ToGfx(dlg.GetImageRectF());
+                }
+                else if (mMaterial->GetType() == gfx::MaterialClass::Type::Tilemap)
+                {
+                    ImagePack pack;
+                    if (ReadImagePack(json_file, &pack))
+                    {
+                        ImagePack::Tilemap map;
+                        mMaterial->SetTileSize(glm::vec2(pack.tilemap.value_or(map).tile_width,
+                                                         pack.tilemap.value_or(map).tile_height));
+                        mMaterial->SetTileOffset(glm::vec2(pack.tilemap.value_or(map).xoffset,
+                                                           pack.tilemap.value_or(map).yoffset));
+                        mMaterial->SetTilePadding(glm::vec2(pack.padding, pack.padding));
+                    }
+                    const QFileInfo info(image);
+                    image_file = info.absoluteFilePath();
+                    image_name = info.baseName();
+                }
             }
         }
         else
@@ -1317,6 +1376,13 @@ void MaterialWidget::CreateTextureShaderStub()
 void MaterialWidget::CreateSpriteShaderStub()
 {
     const auto& src = gfx::MaterialClass::CreateShaderStub(gfx::MaterialClass::Type::Sprite);
+    const auto& glsl = src.GetSource(gfx::ShaderSource::SourceVariant::ShaderStub);
+    CreateShaderStubFromSource(glsl.c_str());
+}
+
+void MaterialWidget::CreateTilemapShaderStub()
+{
+    const auto& src = gfx::MaterialClass::CreateShaderStub(gfx::MaterialClass::Type::Tilemap);
     const auto& glsl = src.GetSource(gfx::ShaderSource::SourceVariant::ShaderStub);
     CreateShaderStubFromSource(glsl.c_str());
 }
@@ -1649,6 +1715,43 @@ void MaterialWidget::SetMaterialProperties()
     mMaterial->SetBlendFrames(GetValue(mUI.chkBlendFrames));
     mMaterial->SetActiveTextureMap(GetItemId(mUI.activeMap));
 
+    if (mMaterial->GetType() == gfx::MaterialClass::Type::Tilemap)
+    {
+        // the problem is that the normalized values suck for the UI
+        // and they require a texture in order to normalize.
+
+        // using absolute values (such as pixels) also sucks because
+        // they require re-computation if the texture size changes
+        // (for example when resampling/resizing when packing).
+        //
+        // It does seem that using absolute units is a bit simpler
+        // since we can also then easily represent the values in
+        // the user interface even without texture plus using them
+        // is easier.
+
+        glm::vec2 tile_size = {0.0f, 0.0f};
+        tile_size.x = GetValue(mUI.tileWidth);
+        tile_size.y = GetValue(mUI.tileHeight);
+
+        glm::vec2 tile_offset = {0.0, 0.0f};
+        tile_offset.x = GetValue(mUI.tileLeftOffset);
+        tile_offset.y = GetValue(mUI.tileTopOffset);
+
+        glm::vec2 tile_padding = {0.0f, 0.0f};
+        tile_padding.x = GetValue(mUI.tileLeftPadding);
+        tile_padding.y = GetValue(mUI.tileTopPadding);
+
+        mMaterial->SetTileSize(tile_size);
+        mMaterial->SetTileOffset(tile_offset);
+        mMaterial->SetTilePadding(tile_padding);
+    }
+    else
+    {
+        mMaterial->DeleteUniform("kTileSize");
+        mMaterial->DeleteUniform("kTileOffset");
+        mMaterial->DeleteUniform("kTilePadding");
+    }
+
     // set of known uniforms if they differ from the defaults.
     // todo: this assumes implicit knowledge about the internals
     // of the material class. refactor these names away and the
@@ -1742,9 +1845,6 @@ void MaterialWidget::ShowMaterialProperties()
     SetEnabled(mUI.actionSelectShader, false);
     SetEnabled(mUI.actionCreateShader, false);
     SetEnabled(mUI.actionEditShader,   false);
-    SetEnabled(mUI.baseColor,          false);
-    SetEnabled(mUI.particleAction,     false);
-    SetEnabled(mUI.activeMap,          false);
     SetEnabled(mUI.textureMaps,        false);
     SetEnabled(mUI.textureMap,         false);
     SetEnabled(mUI.textureProp,        false);
@@ -1754,17 +1854,34 @@ void MaterialWidget::ShowMaterialProperties()
     SetEnabled(mUI.actionEditShader,   false);
     SetEnabled(mUI.actionSelectShader, false);
 
+    SetVisible(mUI.grpRenderFlags,     false);
+    SetVisible(mUI.chkBlendPreMulAlpha,false);
+    SetVisible(mUI.chkStaticInstance,  false);
+    SetVisible(mUI.chkBlendFrames,     false);
+
     SetVisible(mUI.builtInProperties,  false);
+    SetVisible(mUI.alphaCutoff,        false);
+    SetVisible(mUI.lblAlphaCutoff,     false);
+    SetVisible(mUI.lblTileSize,        false);
+    SetVisible(mUI.tileWidth,          false);
+    SetVisible(mUI.tileHeight,         false);
+    SetVisible(mUI.lblTileOffset,      false);
+    SetVisible(mUI.tileLeftOffset,     false);
+    SetVisible(mUI.tileTopOffset,      false);
+    SetVisible(mUI.lblTilePadding,     false);
+    SetVisible(mUI.tileLeftPadding,    false);
+    SetVisible(mUI.tileTopPadding,     false);
+
+
+    SetVisible(mUI.lblParticleEffect,  false);
+    SetVisible(mUI.particleAction,     false);
+    SetVisible(mUI.lblActiveTextureMap, false);
+    SetVisible(mUI.activeMap,          false);
+
     SetVisible(mUI.gradientMap,        false);
     SetVisible(mUI.textureCoords,      false);
     SetVisible(mUI.textureFilters,     false);
     SetVisible(mUI.customUniforms,     false);
-    SetVisible(mUI.chkBlendPreMulAlpha,false);
-    SetVisible(mUI.chkStaticInstance,  false);
-    SetVisible(mUI.chkBlendFrames,     false);
-    SetVisible(mUI.alphaCutoff,        false);
-    SetVisible(mUI.lblAlphaCutoff,     false);
-    SetVisible(mUI.grpRenderFlags,     false);
 
     SetValue(mUI.materialID,          mMaterial->GetId());
     SetValue(mUI.materialType,        mMaterial->GetType());
@@ -1786,7 +1903,16 @@ void MaterialWidget::ShowMaterialProperties()
     SetValue(mUI.magFilter,           mMaterial->GetTextureMagFilter());
     SetValue(mUI.wrapX,               mMaterial->GetTextureWrapX());
     SetValue(mUI.wrapY,               mMaterial->GetTextureWrapY());
+    SetValue(mUI.tileWidth,           mMaterial->GetTileSize().x);
+    SetValue(mUI.tileHeight,          mMaterial->GetTileSize().y);
+    SetValue(mUI.tileLeftPadding,     mMaterial->GetTilePadding().x);
+    SetValue(mUI.tileTopPadding,      mMaterial->GetTilePadding().y);
+    SetValue(mUI.tileLeftOffset,      mMaterial->GetTileOffset().x);
+    SetValue(mUI.tileTopOffset,       mMaterial->GetTileOffset().y);
     ClearList(mUI.activeMap);
+
+    SetVisible(mUI.lblTileIndex, false);
+    SetVisible(mUI.kTileIndex,   false);
 
     if (mMaterial->GetType() == gfx::MaterialClass::Type::Custom)
     {
@@ -1816,7 +1942,12 @@ void MaterialWidget::ShowMaterialProperties()
         // work manually then.
         SetVisible(mUI.chkStaticInstance,   !mMaterial->HasCustomShader());
 
-        if (mMaterial->GetType() == gfx::MaterialClass::Type::Gradient)
+        if (mMaterial->GetType() == gfx::MaterialClass::Type::Color)
+        {
+            SetVisible(mUI.baseColor, true);
+            SetVisible(mUI.lblBaseColor, true);
+        }
+        else if (mMaterial->GetType() == gfx::MaterialClass::Type::Gradient)
         {
             const auto& offset = mMaterial->GetColorWeight();
             SetValue(mUI.colorMap0, mMaterial->GetColor(gfx::MaterialClass::ColorIndex::TopLeft));
@@ -1826,18 +1957,38 @@ void MaterialWidget::ShowMaterialProperties()
             SetValue(mUI.gradientOffsetY, NormalizedFloat(offset.y));
             SetValue(mUI.gradientOffsetX, NormalizedFloat(offset.x));
             SetVisible(mUI.gradientMap, true);
+            SetVisible(mUI.builtInProperties, false);
         }
-        else
+        else if (mMaterial->GetType() == gfx::MaterialClass::Type::Texture ||
+                 mMaterial->GetType() == gfx::MaterialClass::Type::Sprite)
         {
-            SetEnabled(mUI.baseColor, true);
-            if (mMaterial->GetType() == gfx::MaterialClass::Type::Texture ||
-                mMaterial->GetType() == gfx::MaterialClass::Type::Sprite)
-            {
-                SetEnabled(mUI.particleAction, true);
-                SetEnabled(mUI.activeMap,      true);
-                SetVisible(mUI.alphaCutoff,    true);
-                SetVisible(mUI.lblAlphaCutoff, true);
-            }
+            SetVisible(mUI.lblAlphaCutoff,      true);
+            SetVisible(mUI.alphaCutoff,         true);
+            SetVisible(mUI.lblParticleEffect,   true);
+            SetVisible(mUI.particleAction,      true);
+            SetVisible(mUI.lblActiveTextureMap, true);
+            SetVisible(mUI.activeMap,           true);
+            SetVisible(mUI.textureCoords,       true);
+            SetVisible(mUI.textureFilters,      true);
+        }
+        else if (mMaterial->GetType() == gfx::MaterialClass::Type::Tilemap)
+        {
+            SetVisible(mUI.lblAlphaCutoff,      true);
+            SetVisible(mUI.alphaCutoff,         true);
+            SetVisible(mUI.lblTileSize,         true);
+            SetVisible(mUI.tileWidth,           true);
+            SetVisible(mUI.tileHeight,          true);
+            SetVisible(mUI.lblTileOffset,       true);
+            SetVisible(mUI.tileLeftOffset,      true);
+            SetVisible(mUI.tileTopOffset,       true);
+            SetVisible(mUI.lblTilePadding,      true);
+            SetVisible(mUI.tileLeftPadding,     true);
+            SetVisible(mUI.tileTopPadding,      true);
+            SetVisible(mUI.lblActiveTextureMap, true);
+            SetVisible(mUI.activeMap,           true);
+            SetVisible(mUI.textureFilters,      true);
+            SetVisible(mUI.lblTileIndex,        true);
+            SetVisible(mUI.kTileIndex,          true);
         }
     }
 
@@ -2099,6 +2250,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
 
     const auto time = mState == PlayState::Playing ? mTime : GetValue(mUI.kTime);
     mMaterialInst->SetRuntime(time);
+    mMaterialInst->SetUniform("kTileIndex", (float)GetValue(mUI.kTileIndex));
     painter.Draw(*mDrawable, transform, *mMaterialInst);
 
     if (mMaterialInst->HasError())

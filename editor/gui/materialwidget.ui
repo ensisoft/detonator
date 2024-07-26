@@ -275,39 +275,6 @@
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
            <layout class="QGridLayout" name="gridLayout_2">
-            <item row="3" column="1" colspan="2">
-             <widget class="QComboBox" name="activeMap">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1" colspan="2">
-             <widget class="QComboBox" name="particleAction"/>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="lblBaseColor">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Base color</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="lblParticleEffect">
-              <property name="text">
-               <string>Particle effect</string>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="1" colspan="2">
              <widget class="color_widgets::ColorSelector" name="baseColor">
               <property name="sizePolicy">
@@ -340,17 +307,20 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="lblAlphaCutoff">
+            <item row="6" column="0">
+             <widget class="QLabel" name="lblActiveTextureMap">
               <property name="text">
-               <string>Alpha cutoff</string>
+               <string>Active texture map</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_35">
-              <property name="text">
-               <string>Active map</string>
+            <item row="6" column="1" colspan="2">
+             <widget class="QComboBox" name="activeMap">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
               </property>
              </widget>
             </item>
@@ -364,6 +334,118 @@
               </property>
               <property name="value">
                <double>1.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="lblParticleEffect">
+              <property name="text">
+               <string>Particle effect</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" colspan="2">
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <item>
+               <widget class="QSpinBox" name="tileWidth">
+                <property name="suffix">
+                 <string> px</string>
+                </property>
+                <property name="maximum">
+                 <number>1024</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="tileHeight">
+                <property name="suffix">
+                 <string> px</string>
+                </property>
+                <property name="maximum">
+                 <number>1024</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="lblBaseColor">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Base color</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1" colspan="2">
+             <widget class="QComboBox" name="particleAction"/>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="lblTileSize">
+              <property name="text">
+               <string>Tile size</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="lblTileOffset">
+              <property name="text">
+               <string>Tile offset</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="lblAlphaCutoff">
+              <property name="text">
+               <string>Alpha cutoff</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="lblTilePadding">
+              <property name="text">
+               <string>Tile padding</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="2">
+             <widget class="QSpinBox" name="tileTopPadding">
+              <property name="suffix">
+               <string> px</string>
+              </property>
+              <property name="maximum">
+               <number>1024</number>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QSpinBox" name="tileLeftPadding">
+              <property name="suffix">
+               <string> px</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="2">
+             <widget class="QSpinBox" name="tileTopOffset">
+              <property name="suffix">
+               <string> px</string>
+              </property>
+              <property name="maximum">
+               <number>1024</number>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QSpinBox" name="tileLeftOffset">
+              <property name="suffix">
+               <string> px</string>
+              </property>
+              <property name="maximum">
+               <number>1024</number>
               </property>
              </widget>
             </item>
@@ -1083,7 +1165,7 @@
            <item>
             <widget class="QLabel" name="label_4">
              <property name="text">
-              <string>kTime</string>
+              <string>Time</string>
              </property>
             </widget>
            </item>
@@ -1104,6 +1186,16 @@
             </widget>
            </item>
           </layout>
+         </item>
+         <item>
+          <widget class="QLabel" name="lblTileIndex">
+           <property name="text">
+            <string>Tile index</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="kTileIndex"/>
          </item>
          <item>
           <spacer name="horizontalSpacer">
@@ -2198,6 +2290,12 @@
   <tabstop>chkStaticInstance</tabstop>
   <tabstop>alphaCutoff</tabstop>
   <tabstop>baseColor</tabstop>
+  <tabstop>tileWidth</tabstop>
+  <tabstop>tileHeight</tabstop>
+  <tabstop>tileLeftOffset</tabstop>
+  <tabstop>tileTopOffset</tabstop>
+  <tabstop>tileLeftPadding</tabstop>
+  <tabstop>tileTopPadding</tabstop>
   <tabstop>particleAction</tabstop>
   <tabstop>activeMap</tabstop>
   <tabstop>gradientOffsetY</tabstop>
@@ -2220,6 +2318,7 @@
   <tabstop>zoom</tabstop>
   <tabstop>cmbModel</tabstop>
   <tabstop>kTime</tabstop>
+  <tabstop>kTileIndex</tabstop>
   <tabstop>widgetColor</tabstop>
   <tabstop>findMap</tabstop>
   <tabstop>textures</tabstop>
