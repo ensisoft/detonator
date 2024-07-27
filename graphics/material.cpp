@@ -1077,6 +1077,8 @@ bool MaterialClass::ApplyDynamicState(const State& state, Device& device, Progra
     program.SetUniform("kRenderPoints", state.render_points ? 1.0f : 0.0f);
     program.SetUniform("kTime", (float)state.material_time);
     program.SetUniform("kEditingMode", (int)state.editing_mode);
+    // todo: fix this, point rendering could be used without particles.
+    program.SetUniform("kParticleEffect", state.render_points ? (int)mParticleAction : 0);
 
     if (mType == Type::Color)
     {
@@ -1666,6 +1668,8 @@ ShaderSource MaterialClass::CreateShaderStub(Type type)
         source.AddUniform("kEditingMode", ShaderSource::UniformType::Int);
     if (!source.HasUniform("kRenderPoints"))
         source.AddUniform("kRenderPoints", ShaderSource::UniformType::Float);
+    if (!source.HasUniform("kParticleEffect"))
+        source.AddUniform("kParticleEffect", ShaderSource::UniformType::Int);
 
     if (!source.HasVarying("vTexCoord"))
         source.AddVarying("vTexCoord",  ShaderSource::VaryingType::Vec2f);
@@ -1712,7 +1716,7 @@ ShaderSource MaterialClass::CreateShaderStub(Type type)
     source.SetComment("kAlphaCutoff", "Alpha cutoff value to support alpha based cutouts such as sprites\n"
                                       "that aren't really transparent but just cutouts. Cutoff value is the\n"
                                       "to test against in order to discard the fragments.");
-    source.SetComment("kApplyRandomParticleRotation", "Flag to indicate to apply a particle rotation value.");
+    source.SetComment("kParticleEffect", "Particle effect enumerator value.");
 
     source.SetComment("vTileData", "Fragment's tile data coming from the vertex shader.\n"
                                    ".x = the material tile index. the product of 'row * cols_per_row + col'\n"
@@ -1993,7 +1997,7 @@ ShaderSource MaterialClass::GetSpriteShaderSource()
     source.AddUniform("kAlphaCutoff", ShaderSource::UniformType::Float);
     source.AddUniform("kTime", ShaderSource::UniformType::Float);
     source.AddUniform("kBlendCoeff", ShaderSource::UniformType::Float);
-    source.AddUniform("kApplyRandomParticleRotation", ShaderSource::UniformType::Float);
+    source.AddUniform("kParticleEffect", ShaderSource::UniformType::Int);
     source.AddUniform("kTextureScale", ShaderSource::UniformType::Vec2f);
     source.AddUniform("kTextureVelocity", ShaderSource::UniformType::Vec3f);
     source.AddUniform("kTextureRotation", ShaderSource::UniformType::Float);
@@ -2034,8 +2038,11 @@ vec2 WrapTextureCoords(vec2 coords, vec2 box)
 
 vec2 RotateCoords(vec2 coords)
 {
-    float random_angle = mix(0.0, vParticleRandomValue, kApplyRandomParticleRotation);
-    float angle = kTextureRotation + kTextureVelocity.z * kTime + random_angle * 3.1415926;
+    float random_angle = 0.0;
+    if (kParticleEffect == 1)
+        random_angle = mix(0.0, 3.1415926, vParticleRandomValue);
+
+    float angle = kTextureRotation + kTextureVelocity.z * kTime + random_angle;
     coords = coords - vec2(0.5, 0.5);
     coords = mat2(cos(angle), -sin(angle),
                   sin(angle),  cos(angle)) * coords;
@@ -2161,12 +2168,11 @@ bool MaterialClass::ApplySpriteDynamicState(const State& state, Device& device, 
             math::equals(1.0f, sy, eps))
             need_software_wrap = false;
     }
-    const float kParticleRotation = state.render_points && mParticleAction == ParticleAction::Rotate ? 1.0f : 0.0f;
-    const float kBlendCoeff       = BlendFrames() ? binds.blend_coefficient : 0.0f;
+
+    const float kBlendCoeff  = BlendFrames() ? binds.blend_coefficient : 0.0f;
     program.SetTextureCount(2);
     program.SetUniform("kBlendCoeff",                  kBlendCoeff);
     program.SetUniform("kAlphaMask",                   alpha_mask);
-    program.SetUniform("kApplyRandomParticleRotation", kParticleRotation);
 
     // set software wrap/clamp. 0 = disabled.
     if (need_software_wrap)
@@ -2217,7 +2223,7 @@ ShaderSource MaterialClass::GetTextureShaderSource()
     source.AddUniform("kAlphaMask", ShaderSource::UniformType::Float);
     source.AddUniform("kRenderPoints", ShaderSource::UniformType::Float);
     source.AddUniform("kAlphaCutoff", ShaderSource::UniformType::Float);
-    source.AddUniform("kApplyRandomParticleRotation", ShaderSource::UniformType::Float);
+    source.AddUniform("kParticleEffect", ShaderSource::UniformType::Int);
     source.AddUniform("kTime", ShaderSource::UniformType::Float);
     source.AddUniform("kTextureScale", ShaderSource::UniformType::Vec2f);
     source.AddUniform("kTextureVelocity", ShaderSource::UniformType::Vec3f);
@@ -2258,8 +2264,11 @@ vec2 WrapTextureCoords(vec2 coords, vec2 box)
 
 vec2 RotateCoords(vec2 coords)
 {
-    float random_angle = mix(0.0, vParticleRandomValue, kApplyRandomParticleRotation);
-    float angle = kTextureRotation + kTextureVelocity.z * kTime + random_angle * 3.1415926;
+    float random_angle = 0.0;
+    if (kParticleEffect == 1)
+        random_angle = mix(0.0, 3.1415926, vParticleRandomValue);
+
+    float angle = kTextureRotation + kTextureVelocity.z * kTime + random_angle;
     coords = coords - vec2(0.5, 0.5);
     coords = mat2(cos(angle), -sin(angle),
                   sin(angle),  cos(angle)) * coords;
@@ -2468,7 +2477,6 @@ bool MaterialClass::ApplyTextureDynamicState(const State& state, Device& device,
     program.SetTexture("kTexture", 0, *texture);
     program.SetUniform("kTextureBox", x, y, sx, sy);
     program.SetTextureCount(1);
-    program.SetUniform("kApplyRandomParticleRotation", state.render_points && mParticleAction == ParticleAction::Rotate ? 1.0f : 0.0f);
     program.SetUniform("kAlphaMask", binds.textures[0]->IsAlphaMask() ? 1.0f : 0.0f);
 
     // set software wrap/clamp. 0 = disabled.

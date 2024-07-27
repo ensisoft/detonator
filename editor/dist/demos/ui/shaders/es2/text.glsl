@@ -56,11 +56,9 @@ uniform float kAlphaMask;
 //
 uniform float kRenderPoints;
 
-// Flag to indicate whether random particle rotation
-// should be used.
-// 0.0 = no rotation
-// 1.0 = rotation
-uniform float kApplyRandomParticleRotation;
+// Particle effect enum.
+// 0 = off, 1 = rotate texture coordinates, 2 = custom
+uniform int kParticleEffect;
 
 // Alpha cutoff threshold value set on the material.
 uniform float kAlphaCutoff;
