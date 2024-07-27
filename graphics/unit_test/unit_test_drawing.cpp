@@ -439,17 +439,17 @@ void unit_test_material_uniforms()
 
         glm::vec2 texture_scale;
         glm::vec3 texture_velocity;
-        float particle_rotation_flag;
+        int particle_effect;
         float render_points_flag;
         float runtime;
         TEST_REQUIRE(program.GetUniform("kTextureScale", &texture_scale));
         TEST_REQUIRE(program.GetUniform("kTextureVelocity", &texture_velocity));
-        TEST_REQUIRE(program.GetUniform("kApplyRandomParticleRotation", &particle_rotation_flag));
+        TEST_REQUIRE(program.GetUniform("kParticleEffect", &particle_effect));
         TEST_REQUIRE(program.GetUniform("kRenderPoints", &render_points_flag));
         TEST_REQUIRE(program.GetUniform("kTime", &runtime));
         TEST_REQUIRE(texture_scale == glm::vec2(2.0f, 3.0f));
         TEST_REQUIRE(texture_velocity == glm::vec3(4.0f, 5.0f, -1.0f));
-        TEST_REQUIRE(particle_rotation_flag == 0.0f);
+        TEST_REQUIRE(particle_effect == 0);
         TEST_REQUIRE(render_points_flag == 0.0f);
         TEST_REQUIRE(runtime == 2.0f);
 
@@ -481,19 +481,19 @@ void unit_test_material_uniforms()
 
         glm::vec2 texture_scale;
         glm::vec3 texture_velocity;
-        float particle_rotation_flag;
+        int particle_effect = 0;
         float render_points_flag;
         float runtime;
         gfx::Color4f base_color;
         TEST_REQUIRE(program.GetUniform("kTextureScale", &texture_scale));
         TEST_REQUIRE(program.GetUniform("kTextureVelocity", &texture_velocity));
-        TEST_REQUIRE(program.GetUniform("kApplyRandomParticleRotation", &particle_rotation_flag));
+        TEST_REQUIRE(program.GetUniform("kParticleEffect", &particle_effect));
         TEST_REQUIRE(program.GetUniform("kRenderPoints", &render_points_flag));
         TEST_REQUIRE(program.GetUniform("kTime", &runtime));
         TEST_REQUIRE(program.GetUniform("kBaseColor", &base_color));
         TEST_REQUIRE(texture_scale == glm::vec2(2.0f, 3.0f));
         TEST_REQUIRE(texture_velocity == glm::vec3(4.0f, 5.0f, -1.0f));
-        TEST_REQUIRE(particle_rotation_flag == 0.0f);
+        TEST_REQUIRE(particle_effect == 0);
         TEST_REQUIRE(render_points_flag == 0.0f);
         TEST_REQUIRE(runtime == 2.0f);
         TEST_REQUIRE(base_color == gfx::Color::Green);

@@ -813,11 +813,13 @@ namespace gfx
         // be used when applying the material onto particle
         // system and to add some variation to the rendered output
         // in order to make the result visually more appealing.
-        enum class ParticleAction {
-            // Do nothing
-            None,
-            // Rotate the texture coordinates
-            Rotate
+        enum class ParticleAction : int {
+            None   =  0,
+            Custom =  1, // try to set this value so that future expansion
+                         // works without breaking stuff. 255 or so could
+                         // also work but magic_enum breaks on a value
+                         // discontinuity
+            Rotate =  2,
         };
 
 
