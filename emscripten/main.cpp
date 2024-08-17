@@ -239,19 +239,20 @@ public:
         base::JsonReadSafe(json["application"], "identifier", &identifier);
         emscripten_set_window_title(title.c_str());
 
-        // How the HTML5 canvas is sized on the page.
-        enum class CanvasMode {
-            // Canvas has a fixed size
-            Default,
-            // Canvas is resized to match the available client area in the page.
-            SoftFullScreen
+        // How the HTML5 canvas is presented on the page.
+        enum class CanvasPresentationMode {
+            // Canvas is presented as a normal HTML element among other elements.
+            Normal,
+            // Canvas is presented in fullscreen mode. Fullscreen strategy applies.
+            FullScreen
         };
-        CanvasMode canvas_mode = CanvasMode::Default;
+        CanvasPresentationMode canvas_mode = CanvasPresentationMode::Normal;
         WebGLContext::PowerPreference power_pref = WebGLContext::PowerPreference::Default;
         unsigned canvas_width  = 0;
         unsigned canvas_height = 0;
         bool antialias = true;
         bool developer_ui = false;
+        base::JsonReadSafe(json["html5"], "canvas_fs_strategy", &mCanvasFullScreenStrategy);
         base::JsonReadSafe(json["html5"], "canvas_mode", &canvas_mode);
         base::JsonReadSafe(json["html5"], "canvas_width", &canvas_width);
         base::JsonReadSafe(json["html5"], "canvas_height", &canvas_height);
@@ -274,9 +275,9 @@ public:
         DEBUG("Initial canvas render target size. [width=%1, height=%2]", canvas_render_width, canvas_render_height);
         DEBUG("Initial canvas display (CSS logical) size. [width=%1, height=%2]", canvas_display_width, canvas_display_height);
 
-        if (canvas_mode == CanvasMode::SoftFullScreen)
+        if (canvas_mode == CanvasPresentationMode::FullScreen)
         {
-            DEBUG("Enter soft fullscreen canvas mode.");
+            DEBUG("Enter full screen canvas mode.");
             SetFullScreen(true);
         }
 
@@ -716,7 +717,7 @@ public:
         if (!quit)
             return EM_TRUE;
 
-        if (mSoftFullScreen)
+        if (mFullScreen)
             SetFullScreen(false);
 
         DEBUG("Starting shutdown sequence.");
@@ -795,7 +796,7 @@ public:
 
     void SetFullScreen(bool fullscreen)
     {
-        if (fullscreen == mSoftFullScreen)
+        if (fullscreen == mFullScreen)
             return;
 
         // The soft full screen is a mode where the canvas element is
@@ -832,21 +833,43 @@ public:
             fss.canvasResizedCallbackUserData = nullptr; //this;
             fss.canvasResizedCallbackTargetThread = 0;
 
-            // looks like this will invoke the callback immediately.
-            if (emscripten_enter_soft_fullscreen("canvas", &fss) != EMSCRIPTEN_RESULT_SUCCESS)
+            if (mCanvasFullScreenStrategy == CanvasFullScreenStrategy::SoftFullScreen)
             {
-                ERROR("Failed to enter soft full screen.");
-                return;
+                // looks like this will invoke the callback immediately.
+                if (emscripten_enter_soft_fullscreen("canvas", &fss) != EMSCRIPTEN_RESULT_SUCCESS)
+                {
+                    ERROR("Failed to enter soft fullscreen presentation mode.");
+                    return;
+                }
             }
+            else if (mCanvasFullScreenStrategy == CanvasFullScreenStrategy::RealFullScreen)
+            {
+                const auto defer_until_user_interaction_handler = EM_TRUE;
+                if (emscripten_request_fullscreen_strategy("canvas",
+                        defer_until_user_interaction_handler, &fss) != EMSCRIPTEN_RESULT_SUCCESS)
+                {
+                    ERROR("Failed to enter real fullscreen presentation mode.");
+                    return;
+                }
+            }
+            else BUG("Bug on canvas fullscreen strategy");
         }
         else
         {
-            emscripten_exit_soft_fullscreen();
+            if (mCanvasFullScreenStrategy == CanvasFullScreenStrategy::SoftFullScreen)
+            {
+                emscripten_exit_soft_fullscreen();
+            }
+            else if (mCanvasFullScreenStrategy == CanvasFullScreenStrategy::RealFullScreen)
+            {
+                emscripten_exit_fullscreen();
+            }
+            else BUG("Bug on canvas fullscreen strategy");
         }
 
         // handle canvas resize.
 
-        mSoftFullScreen = fullscreen;
+        mFullScreen = fullscreen;
 
         // the canvas render size may or may not change depending
         // on how the full screen change happens. if we're just
@@ -893,12 +916,12 @@ public:
     void HandleEngineRequest(const engine::Engine::SetFullScreen& fs)
     {
         SetFullScreen(fs.fullscreen);
-        DEBUG("Request to change soft full screen mode. [fs=%1]", fs.fullscreen);
+        DEBUG("Request to change to full screen mode. [fs=%1]", fs.fullscreen);
     }
     void HandleEngineRequest(const engine::Engine::ToggleFullScreen& fs)
     {
-        SetFullScreen(!mSoftFullScreen);
-        DEBUG("Request to toggle full screen mode. [current=%1]", mSoftFullScreen);
+        SetFullScreen(!mFullScreen);
+        DEBUG("Request to toggle full screen mode. [current=%1]", mFullScreen);
     }
     void HandleEngineRequest(const engine::Engine::ShowMouseCursor& mickey)
     {
@@ -1140,8 +1163,19 @@ private:
     std::vector<WindowEvent> mEventQueue;
     // current engine debug options.
     engine::Engine::DebugOptions mDebugOptions;
+
+    enum class CanvasFullScreenStrategy {
+        // the canvas element is resized to take up all the possible space
+        // on the page. (in its client area)
+        SoftFullScreen,
+        // The canvas element is presented in a "true" fullscreen experience
+        // taking over the whole screen
+        RealFullScreen
+    };
+    CanvasFullScreenStrategy mCanvasFullScreenStrategy = CanvasFullScreenStrategy::SoftFullScreen;
+
     // flag to indicate whether currently in soft fullscreen or not
-    bool mSoftFullScreen = false;
+    bool mFullScreen = false;
 
     double mSeconds = 0;
     unsigned mCounter = 0;

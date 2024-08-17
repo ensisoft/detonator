@@ -44,7 +44,8 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     PopulateFromEnum<gfx::Device::MinFilter>(mUI.cmbMinFilter);
     PopulateFromEnum<gfx::Device::MagFilter>(mUI.cmbMagFilter);
     PopulateFromEnum<app::Workspace::ProjectSettings::WindowMode>(mUI.cmbWindowMode);
-    PopulateFromEnum<app::Workspace::ProjectSettings::CanvasMode>(mUI.cmbCanvasMode);
+    PopulateFromEnum<app::Workspace::ProjectSettings::CanvasPresentationMode>(mUI.cmbCanvasPresentationMode);
+    PopulateFromEnum<app::Workspace::ProjectSettings::CanvasFullScreenStrategy>(mUI.cmbCanvasFSStrategy);
     PopulateFromEnum<app::Workspace::ProjectSettings::PowerPreference>(mUI.cmbPowerPref);
     PopulateFromEnum<app::Workspace::ProjectSettings::MousePointerUnits>(mUI.mouseUnits);
     PopulateFromEnum<app::Workspace::ProjectSettings::DefaultAudioIOStrategy>(mUI.cmbDesktopAudioIO);
@@ -104,7 +105,8 @@ DlgProject::DlgProject(QWidget* parent, app::Workspace& workspace, app::Workspac
     SetUIValue(mUI.audioSampleRate, mSettings.audio_sample_rate);
     SetUIValue(mUI.audioBufferSize, mSettings.audio_buffer_size);
     SetUIValue(mUI.audioCaching, mSettings.enable_audio_pcm_caching);
-    SetUIValue(mUI.cmbCanvasMode, mSettings.canvas_mode);
+    SetUIValue(mUI.cmbCanvasPresentationMode, mSettings.canvas_mode);
+    SetUIValue(mUI.cmbCanvasFSStrategy, mSettings.canvas_fs_strategy);
     SetUIValue(mUI.cmbPowerPref, mSettings.webgl_power_preference);
     SetUIValue(mUI.canvasWidth, mSettings.canvas_width);
     SetUIValue(mUI.canvasHeight, mSettings.canvas_height);
@@ -171,7 +173,8 @@ void DlgProject::on_btnAccept_clicked()
     GetUIValue(mUI.audioSampleRate, &mSettings.audio_sample_rate);
     GetUIValue(mUI.audioBufferSize, &mSettings.audio_buffer_size);
     GetUIValue(mUI.audioCaching, &mSettings.enable_audio_pcm_caching);
-    GetUIValue(mUI.cmbCanvasMode, &mSettings.canvas_mode);
+    GetUIValue(mUI.cmbCanvasPresentationMode, &mSettings.canvas_mode);
+    GetUIValue(mUI.cmbCanvasFSStrategy, &mSettings.canvas_fs_strategy);
     GetUIValue(mUI.cmbPowerPref, &mSettings.webgl_power_preference);
     GetUIValue(mUI.canvasWidth, &mSettings.canvas_width);
     GetUIValue(mUI.canvasHeight, &mSettings.canvas_height);
