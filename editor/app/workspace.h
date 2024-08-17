@@ -836,4 +836,11 @@ namespace app
         const Workspace* mWorkspace = nullptr;
     };
 
+
+    std::string TranslateEnum(Workspace::ProjectSettings::CanvasPresentationMode);
+    std::string TranslateEnum(Workspace::ProjectSettings::CanvasFullScreenStrategy);
+    std::string TranslateEnum(Workspace::ProjectSettings::PowerPreference power);
+    std::string TranslateEnum(Workspace::ProjectSettings::WindowMode wm);
+
+
 } // namespace
