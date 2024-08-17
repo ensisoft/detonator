@@ -1534,6 +1534,7 @@ bool Workspace::SaveProperties(const QString& filename) const
     JsonWrite(project, "webgl_antialias"         , mSettings.webgl_antialias);
     JsonWrite(project, "html5_developer_ui"      , mSettings.html5_developer_ui);
     JsonWrite(project, "canvas_mode"             , mSettings.canvas_mode);
+    JsonWrite(project, "canvas_fs_strategy"      , mSettings.canvas_fs_strategy);
     JsonWrite(project, "canvas_width"            , mSettings.canvas_width);
     JsonWrite(project, "canvas_height"           , mSettings.canvas_height);
     JsonWrite(project, "window_mode"             , mSettings.window_mode);
@@ -1659,6 +1660,7 @@ bool Workspace::LoadProperties(const QString& filename)
     JsonReadSafe(project, "webgl_antialias"         , &mSettings.webgl_antialias);
     JsonReadSafe(project, "html5_developer_ui"      , &mSettings.html5_developer_ui);
     JsonReadSafe(project, "canvas_mode"             , &mSettings.canvas_mode);
+    JsonReadSafe(project, "canvas_fs_strategy"      , &mSettings.canvas_fs_strategy);
     JsonReadSafe(project, "canvas_width"            , &mSettings.canvas_width);
     JsonReadSafe(project, "canvas_height"           , &mSettings.canvas_height);
     JsonReadSafe(project, "window_mode",              &mSettings.window_mode);
@@ -2981,6 +2983,7 @@ bool Workspace::BuildReleasePackage(const std::vector<const Resource*>& resource
         base::JsonWrite(json["html5"], "canvas_width", mSettings.canvas_width);
         base::JsonWrite(json["html5"], "canvas_height", mSettings.canvas_height);
         base::JsonWrite(json["html5"], "canvas_mode", mSettings.canvas_mode);
+        base::JsonWrite(json["html5"], "canvas_fs_strategy", mSettings.canvas_fs_strategy);
         base::JsonWrite(json["html5"], "webgl_power_pref", mSettings.webgl_power_preference);
         base::JsonWrite(json["html5"], "webgl_antialias", mSettings.webgl_antialias);
         base::JsonWrite(json["html5"], "developer_ui", mSettings.html5_developer_ui);

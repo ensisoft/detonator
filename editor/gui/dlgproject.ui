@@ -640,23 +640,20 @@
        <item>
         <widget class="QGroupBox" name="groupBox_8">
          <property name="title">
-          <string>WebGL Canvas</string>
+          <string>WebGL canvas</string>
          </property>
          <property name="flat">
           <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_10">
-          <item row="0" column="1">
-           <widget class="QComboBox" name="cmbCanvasMode"/>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_27">
+          <item row="5" column="0">
+           <widget class="QCheckBox" name="chkAntialias">
             <property name="text">
-             <string>Mode</string>
+             <string>Antialias</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="3" column="1">
            <widget class="QSpinBox" name="canvasHeight">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -678,21 +675,24 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_32">
-            <property name="text">
-             <string>Width</string>
-            </property>
-           </widget>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="cmbCanvasPresentationMode"/>
           </item>
           <item row="2" column="0">
-           <widget class="QLabel" name="label_33">
+           <widget class="QLabel" name="label_32">
             <property name="text">
-             <string>Height</string>
+             <string>Canvas render width</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_33">
+            <property name="text">
+             <string>Canvas render height</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
            <widget class="QSpinBox" name="canvasWidth">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -714,12 +714,22 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QCheckBox" name="chkAntialias">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_27">
             <property name="text">
-             <string>Antialias</string>
+             <string>Presentation mode</string>
             </property>
            </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_41">
+            <property name="text">
+             <string>Fullscreen strategy</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="cmbCanvasFSStrategy"/>
           </item>
          </layout>
         </widget>
@@ -771,7 +781,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_18">
          <property name="title">
-          <string>Other</string>
+          <string>Other settings</string>
          </property>
          <property name="flat">
           <bool>true</bool>
@@ -1851,7 +1861,8 @@
   <tabstop>chkCursor</tabstop>
   <tabstop>chkGrabMouse</tabstop>
   <tabstop>chkSaveGeom</tabstop>
-  <tabstop>cmbCanvasMode</tabstop>
+  <tabstop>cmbCanvasPresentationMode</tabstop>
+  <tabstop>cmbCanvasFSStrategy</tabstop>
   <tabstop>canvasWidth</tabstop>
   <tabstop>canvasHeight</tabstop>
   <tabstop>chkAntialias</tabstop>

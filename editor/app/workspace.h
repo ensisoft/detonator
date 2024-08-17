@@ -502,14 +502,25 @@ namespace app
             bool log_info  = true;
             bool log_error = true;
 
-            // How the HTML5 canvas is sized on the page.
-            enum class CanvasMode {
-                // Canvas has a fixed size
-                Default,
-                // Canvas is resized to match the available client area in the page.
-                SoftFullScreen
+            // How the HTML5 canvas is presented on the page
+            enum class CanvasPresentationMode {
+                // Canvas is presented as a normal HTML element among other elements.
+                Normal,
+                // Canvas is presented in fullscreen mode. Fullscreen strategy applies.
+                FullScreen
             };
-            CanvasMode canvas_mode = CanvasMode::Default;
+            // How the canvas is presented in fullscreen mode
+            enum class CanvasFullScreenStrategy {
+                // the canvas element is resized to take up all the possible space
+                // on the page. (in its client area)
+                SoftFullScreen,
+                // The canvas element is presented in a "true" fullscreen experience
+                // taking over the whole screen
+                RealFullScreen
+            };
+
+            CanvasPresentationMode canvas_mode = CanvasPresentationMode::Normal;
+            CanvasFullScreenStrategy canvas_fs_strategy = CanvasFullScreenStrategy::SoftFullScreen;
             // WebGL power preference.
             enum class PowerPreference {
                 // Request a default power preference setting
