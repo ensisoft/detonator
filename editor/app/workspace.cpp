@@ -3276,5 +3276,49 @@ bool WorkspaceProxy::lessThan(const QModelIndex& lhs, const QModelIndex& rhs) co
     return false;
 }
 
+std::string TranslateEnum(Workspace::ProjectSettings::CanvasPresentationMode mode)
+{
+    using M = Workspace::ProjectSettings::CanvasPresentationMode;
+    if (mode == M::Normal)
+        return "Present as HTML element";
+    else if (mode == M::FullScreen)
+        return "Present in Fullscreen";
+    else BUG("Missing translation");
+    return "???";
+}
+std::string TranslateEnum(Workspace::ProjectSettings::CanvasFullScreenStrategy strategy)
+{
+    using S = Workspace::ProjectSettings::CanvasFullScreenStrategy;
+    if (strategy == S::SoftFullScreen)
+        return "Maximize Element on Page";
+    else if (strategy == S::RealFullScreen)
+        return "Use The Entire Screen";
+    else BUG("Missing translation");
+    return "???";
+}
+
+std::string TranslateEnum(Workspace::ProjectSettings::PowerPreference power)
+{
+    using P = Workspace::ProjectSettings::PowerPreference;
+    if (power == P::Default)
+        return "Browser Default";
+    else if (power == P::HighPerf)
+        return "High Performance";
+    else if (power == P::LowPower)
+        return "Battery Saving";
+    else BUG("Missing translation");
+    return "???";
+}
+
+std::string TranslateEnum(Workspace::ProjectSettings::WindowMode wm)
+{
+    using M = Workspace::ProjectSettings::WindowMode;
+    if (wm == M::Windowed)
+        return "Present in Window";
+    else if (wm == M::Fullscreen)
+        return "Present in Fullscreen";
+    else BUG("Missing translation");
+    return "???";
+}
 
 } // namespace

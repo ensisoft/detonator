@@ -58,11 +58,18 @@
 #include "editor/gui/spinboxwidget.h"
 #include "editor/gui/doubleslider.h"
 
+
 // general dumping ground for utility type of functionality
 // related to the GUI and GUI types.
 
 namespace gui
 {
+
+template<typename EnumT>
+std::string TranslateEnum(EnumT value)
+{
+    return std::string(magic_enum::enum_name(value));
+}
 
 class AutoHider  {
 public:
@@ -368,20 +375,25 @@ void PopulateFromEnum(QComboBox* combo, bool clear = true)
     QSignalBlocker s(combo);
     if (clear)
         combo->clear();
+
+    combo->setProperty("__is_enum__", true);
+
     constexpr auto& values = magic_enum::enum_values<EnumT>();
     for (const auto& val : values)
     {
-        const std::string name(magic_enum::enum_name(val));
-        combo->addItem(QString::fromStdString(name));
+        const auto enum_string = TranslateEnum(val);
+        const auto enum_value  = magic_enum::enum_integer(val);
+        combo->addItem(QString::fromStdString(enum_string), QVariant((uint)enum_value));
     }
 }
 
 template<typename EnumT>
 EnumT EnumFromCombo(const QComboBox* combo)
 {
-    const auto& text = combo->currentText();
-    const auto& name = text.toStdString();
-    const auto& val = magic_enum::enum_cast<EnumT>(name);
+    ASSERT(combo->property("__is_enum__").toBool());
+
+    const auto& value = combo->currentData().toUInt();
+    const auto& val = magic_enum::enum_cast<EnumT>(value);
     ASSERT(val.has_value());
     return val.value();
 }
@@ -473,6 +485,8 @@ inline void SetValue(QFontComboBox* combo, const QString& str)
 
 inline void SetValue(QComboBox* combo, const QString& str)
 {
+    ASSERT(combo->property("__is_enum__").toBool() == false);
+
     QSignalBlocker s(combo);
     const auto index = combo->findText(str);
     combo->setCurrentIndex(index);
@@ -486,11 +500,39 @@ inline void SetValue(QComboBox* combo, const QString& str)
 template<typename T>
 void SetValue(QComboBox* combo, T value)
 {
-    SetValue(combo, app::toString(value));
+    if constexpr (std::is_enum<T>::value)
+    {
+        // must have been populated by a call to PopulateFromEnum
+        // then it has the strings and the enum values and the
+        // property that marks it as such.
+        ASSERT(combo->property("__is_enum__").toBool());
+
+        QSignalBlocker s(combo);
+
+        // look for the item that has the value that matches the
+        // enum value we want to set.
+        for (int i=0; i<combo->count(); ++i)
+        {
+            const auto item_value = combo->itemData(i).toUInt();
+            const auto enum_value = magic_enum::enum_integer(value);
+            if (item_value == enum_value)
+            {
+                combo->setCurrentIndex(i);
+                return;
+            }
+        }
+        BUG("Bug on setting enum value on combo.");
+    }
+    else
+    {
+        SetValue(combo, app::toString(value));
+    }
 }
 
 inline bool SetValue(QComboBox* combo, const ListItemId& id)
 {
+    ASSERT(combo->property("__is_enum__").toBool() == false);
+
     QSignalBlocker s(combo);
     combo->setCurrentIndex(-1);
     if (combo->isEditable())
@@ -524,6 +566,8 @@ inline void SetValue(QComboBox* combo, int index)
 
 inline void SetText(QComboBox* combo, const ListItemId& id, const QString& text)
 {
+    ASSERT(combo->property("__is_enum__").toBool() == false);
+
     QSignalBlocker s(combo);
     for (int i=0; i<combo->count(); ++i)
     {
