@@ -47,14 +47,17 @@ namespace game
         enum class TilemapLayerType {
             Render,
             Render_DataSInt4,
-            Render_DataUInt4,
             Render_DataSInt8,
+            Render_DataSInt24,
+
+            Render_DataUInt4,
             Render_DataUInt8,
             Render_DataUInt24,
-            Render_DataSInt24,
+
             DataSInt8,
-            DataUInt8,
             DataSInt16,
+
+            DataUInt8,
             DataUInt16
         };
 
@@ -328,10 +331,10 @@ namespace game
             Cache1024
         };
         enum class Resolution {
+            Original,
             DownScale8,
             DownScale4,
             DownScale2,
-            Original,
             UpScale2,
             UpScale4,
             UpScale8
