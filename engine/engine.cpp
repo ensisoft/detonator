@@ -885,7 +885,7 @@ private:
             else
             {
                 TRACE_CALL("Tilemap::Create", mTilemap = game::CreateTilemap(map));
-                TRACE_CALL("Tilemap::Load", mTilemap->Load(*mGameLoader, 1024)); // todo:
+                TRACE_CALL("Tilemap::Load", mTilemap->Load(*mGameLoader));
                 DEBUG("Created tilemap instance");
             }
         } else mTilemap.reset();
