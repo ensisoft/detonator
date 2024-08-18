@@ -317,7 +317,6 @@ namespace game
             Dense
         };
         enum class Cache {
-            Default,
             Automatic,
             Cache8,
             Cache16,
@@ -419,6 +418,11 @@ namespace game
 
         std::size_t GetHash() const;
 
+        inline size_t GetCacheSize() const noexcept
+        {
+            return GetCacheSize(mCache);
+        }
+
         void SetPaletteMaterialId(const std::string& material, std::size_t index)
         { mPalette[index] = material; }
         void ClearPalette()
@@ -485,7 +489,7 @@ namespace game
         static size_t ComputeLayerSize(Type type, unsigned map_width, unsigned map_height);
         // Get the size of the layer's data unit.
         static size_t GetTileDataSize(Type type);
-        static size_t GetCacheSize(Cache cache, size_t default_cache_size);
+        static size_t GetCacheSize(Cache cache) noexcept;
         static unsigned MapDimension(Resolution res, unsigned dim);
         static float GetTileSizeScaler(Resolution res);
 
@@ -525,7 +529,7 @@ namespace game
         virtual bool TestFlag(Flags flag) const = 0;
         virtual bool IsLoaded() const = 0;
 
-        virtual void Load(const std::shared_ptr<TilemapData>& data, unsigned default_cache_size) = 0;
+        virtual void Load(const std::shared_ptr<TilemapData>& data) = 0;
         virtual void Save() = 0;
 
         virtual void FlushCache() = 0;
@@ -629,13 +633,13 @@ namespace game
             virtual bool IsLoaded() const override
             { return mData != nullptr; }
 
-            virtual void Load(const std::shared_ptr<TilemapData>& data, unsigned default_cache_size) override
+            virtual void Load(const std::shared_ptr<TilemapData>& data) override
             {
                 const auto cache = mClass->GetCache();
                 mData = data;
                 mDirtyCache = false;
                 mTileCache.clear();
-                mTileCache.resize(TilemapLayerClass::GetCacheSize(cache, default_cache_size));
+                mTileCache.resize(mClass->GetCacheSize());
                 mLoader->LoadState(*mData);
                 mLoader->LoadCache(*mData, mClass->GetDefaultTileValue<Tile>(), mTileCache, 0,
                                    mClass->MapDimension(mMapWidth),
@@ -894,7 +898,7 @@ namespace game
         // Load the contents of the tilemap instance layers.
         // Returns true if all layers loaded successfully or
         // false if a layer failed to load.
-        bool Load(const Loader& loader, unsigned default_tile_cache_size = 1024);
+        bool Load(const Loader& loader);
 
         void AddLayer(std::unique_ptr<TilemapLayer> layer);
         void DeleteLayer(std::size_t index);

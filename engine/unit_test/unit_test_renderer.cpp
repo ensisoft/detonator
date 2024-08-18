@@ -895,7 +895,7 @@ void unit_test_axis_aligned_map()
 
         auto layer = game::CreateTilemapLayer(layer0, map->GetMapWidth(), map->GetMapHeight());
 
-        layer->Load(data0, 1024);
+        layer->Load(data0);
 
         auto* ptr = game::TilemapLayerCast<game::TilemapLayer_Render>(layer);
         ptr->SetTile({0}, 0, 0);
@@ -909,7 +909,7 @@ void unit_test_axis_aligned_map()
     // setup layer1 tile data
     {
         auto layer = game::CreateTilemapLayer(layer1, map->GetMapWidth(), map->GetMapHeight());
-        layer->Load(data1, 1024);
+        layer->Load(data1);
 
         auto* ptr = game::TilemapLayerCast<game::TilemapLayer_Render>(layer);
         ptr->SetTile({3}, 0, 0);
@@ -924,8 +924,8 @@ void unit_test_axis_aligned_map()
     auto map_instance = game::CreateTilemap(map);
     // calling load on each layer instead of calling MapLoad because we don't
     // have the loader implemented for tilemap data.
-    map_instance->GetLayer(0).Load(data0, 1024);
-    map_instance->GetLayer(1).Load(data1, 1024);
+    map_instance->GetLayer(0).Load(data0);
+    map_instance->GetLayer(1).Load(data1);
     TEST_REQUIRE(map_instance->GetNumLayers() == 2);
     TEST_REQUIRE(map_instance->GetLayer(0).IsLoaded());
     TEST_REQUIRE(map_instance->GetLayer(1).IsLoaded());

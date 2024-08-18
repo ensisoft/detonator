@@ -856,9 +856,9 @@ size_t TilemapLayerClass::GetTileDataSize(Type type)
     return 0;
 }
 // static
-size_t TilemapLayerClass::GetCacheSize(Cache cache, size_t default_cache_size)
+size_t TilemapLayerClass::GetCacheSize(Cache cache) noexcept
 {
-    if (cache == Cache::Default) return default_cache_size;
+    if (cache == Cache::Automatic) return 512;
     else if (cache == Cache::Cache8)  return 8;
     else if (cache == Cache::Cache16) return 16;
     else if (cache == Cache::Cache32) return 32;
@@ -867,7 +867,6 @@ size_t TilemapLayerClass::GetCacheSize(Cache cache, size_t default_cache_size)
     else if (cache == Cache::Cache256) return 256;
     else if (cache == Cache::Cache512) return 512;
     else if (cache == Cache::Cache1024) return 1024;
-    else if (cache == Cache::Automatic) return 512;
     else BUG("Missing tilemap layer cache mapping.");
     return 0;
 }
@@ -1209,7 +1208,7 @@ Tilemap::Tilemap(const TilemapClass& klass)
   : Tilemap(std::make_shared<const TilemapClass>(klass))
 {}
 
-bool Tilemap::Load(const Loader& loader, unsigned default_tile_cache_size)
+bool Tilemap::Load(const Loader& loader)
 {
     bool success = true;
     for (auto& layer : mLayers)
@@ -1223,7 +1222,7 @@ bool Tilemap::Load(const Loader& loader, unsigned default_tile_cache_size)
         auto data = loader.LoadTilemapData(desc);
         if (data)
         {
-            layer->Load(data, default_tile_cache_size);
+            layer->Load(data);
             DEBUG("Loaded tilemap layer. [layer='%1']", klass.GetName());
         }
         else

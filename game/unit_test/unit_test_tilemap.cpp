@@ -351,7 +351,7 @@ void test_tilemap_layer()
         klass->Initialize(1, 1, *data);
 
         auto inst = game::CreateTilemapLayer(klass, 1, 1);
-        inst->Load(data, 1024);
+        inst->Load(data);
 
         uint8_t palette_index = 0;
         TEST_REQUIRE(inst->GetTilePaletteIndex(&palette_index, 0, 0));
@@ -370,7 +370,7 @@ void test_tilemap_layer()
         klass->Initialize(1, 1, *data);
 
         auto inst = game::CreateTilemapLayer(klass, 1, 1);
-        inst->Load(data, 1024);
+        inst->Load(data);
 
         uint8_t palette_index = 0;
         int32_t tile_value = 0;
@@ -495,7 +495,7 @@ void test_mixed_resolution_tile_access()
         auto layer = game::CreateTilemapLayer(klass,
                                               map->GetMapWidth(),
                                               map->GetMapHeight());
-        layer->Load(data, 0);
+        layer->Load(data);
 
         TEST_REQUIRE((*layer)->GetResolution() == game::TilemapLayerClass::Resolution::Original);
         TEST_REQUIRE(layer->GetWidth() == 100);
@@ -512,7 +512,7 @@ void test_mixed_resolution_tile_access()
         auto layer = game::CreateTilemapLayer(klass,
                                               map->GetMapWidth(),
                                               map->GetMapHeight());
-        layer->Load(data, 0);
+        layer->Load(data);
 
         TEST_REQUIRE((*layer)->GetResolution() == game::TilemapLayerClass::Resolution::DownScale2);
         TEST_REQUIRE(layer->GetWidth() == 50);
@@ -529,7 +529,7 @@ void test_mixed_resolution_tile_access()
         auto layer = game::CreateTilemapLayer(klass,
                                               map->GetMapWidth(),
                                               map->GetMapHeight());
-        layer->Load(data, 0);
+        layer->Load(data);
 
         TEST_REQUIRE((*layer)->GetResolution() == game::TilemapLayerClass::Resolution::UpScale2);
         TEST_REQUIRE(layer->GetWidth() == 200);
@@ -561,7 +561,7 @@ void test_tile_access_basic(game::TilemapLayerClass::Storage storage)
     klass->Initialize(map_width, map_height, *data);
 
     // first tile cache gets loaded
-    layer->Load(data, 0);
+    layer->Load(data);
 
     auto* ptr = game::TilemapLayerCast<game::TilemapLayer_Data_UInt8>(layer);
 
@@ -623,7 +623,7 @@ void test_tile_access_sparse()
     klass->Initialize(map_width, map_height, *data);
 
     // first tile cache gets loaded
-    layer->Load(data, 0);
+    layer->Load(data);
 
     auto* ptr = game::TilemapLayerCast<game::detail::TilemapLayerBase<TileType>>(layer);
 
@@ -699,7 +699,7 @@ void test_tile_access_combinations(game::TilemapLayerClass::Storage storage)
         klass->Initialize(test.map_width, test.map_height, *data);
 
         // first tile cache gets loaded
-        layer->Load(data, 0);
+        layer->Load(data);
         auto* ptr = game::TilemapLayerCast<game::detail::TilemapLayerBase<TileType>>(layer);
 
         // sequential
@@ -756,7 +756,7 @@ void test_layer_save_load(game::TilemapLayerClass::Storage storage)
         klass->Initialize(map_width, map_height, *data);
 
         // first tile cache gets loaded
-        layer->Load(data, 0);
+        layer->Load(data);
 
         auto* ptr = game::TilemapLayerCast<game::detail::TilemapLayerBase<TileType>>(layer);
         TileType tile;
@@ -773,7 +773,7 @@ void test_layer_save_load(game::TilemapLayerClass::Storage storage)
         auto layer = game::CreateTilemapLayer(klass, map_width, map_height);
 
         // first tile cache gets loaded
-        layer->Load(data, 0);
+        layer->Load(data);
 
         auto* ptr = game::TilemapLayerCast<game::detail::TilemapLayerBase<TileType>>(layer);
         TEST_REQUIRE(ptr->GetTile(0, 0).data == 55);
@@ -917,7 +917,7 @@ void test_layer_resize(game::TilemapLayerClass::Storage storage)
 
         auto data = std::make_shared<TestVectorData>();
         klass->Initialize(src_map_width, src_map_height, *data);
-        layer->Load(data, 0);
+        layer->Load(data);
 
         // fill the layer with data.
         // todo: use a non-constant value.
@@ -945,7 +945,7 @@ void test_layer_resize(game::TilemapLayerClass::Storage storage)
                               test.dst_map_size,
                               *data, *resize);
             layer->SetMapDimensions(dst_map_width, dst_map_height);
-            layer->Load(resize, 1024);
+            layer->Load(resize);
 
             TEST_REQUIRE(layer->GetWidth() == dst_layer_width);
             TEST_REQUIRE(layer->GetHeight() == dst_layer_height);

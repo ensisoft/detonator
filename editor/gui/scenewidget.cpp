@@ -1967,7 +1967,7 @@ void SceneWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
             {
                 auto klass = mState.workspace->GetTilemapClassById(mapId);
                 mTilemap = game::CreateTilemap(klass);
-                mTilemap->Load(*mState.workspace, 1024);
+                mTilemap->Load(*mState.workspace);
             }
         }
 

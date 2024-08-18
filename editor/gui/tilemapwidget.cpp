@@ -719,7 +719,7 @@ TilemapWidget::TilemapWidget(app::Workspace* workspace, const app::Resource& res
     {
         auto& layer = mState.map->GetLayer(i);
         auto data = mLayerData[layer.GetClassId()];
-        layer.Load(data, 1024 /*default cache size*/);
+        layer.Load(data);
         layer.SetFlags(layer.GetClass().GetFlags());
     }
 
@@ -947,7 +947,7 @@ bool TilemapWidget::LoadState(const Settings& settings)
     {
         auto& layer = mState.map->GetLayer(i);
         auto data = mLayerData[layer.GetClassId()];
-        layer.Load(data, 1024 /*default cache size*/);
+        layer.Load(data);
         layer.SetFlags(layer.GetClass().GetFlags());
     }
 
@@ -1189,7 +1189,7 @@ void TilemapWidget::on_btnApplyMapSize_clicked()
 
             auto& instance = mState.map->GetLayer(i);
             instance.SetMapDimensions(new_map_width, new_map_height);
-            instance.Load(dst_data, 1024);
+            instance.Load(dst_data);
             mLayerData[layer.GetId()] = dst_data;
         }
         DisplayLayerProperties();
@@ -1368,7 +1368,7 @@ void TilemapWidget::on_btnNewLayer_clicked()
 
     // create an instance of the layer for render visualization.
     auto layer_instance = game::CreateTilemapLayer(layer_class, map_width, map_height);
-    layer_instance->Load(data, 1024 /* default cache size */);
+    layer_instance->Load(data);
     mState.map->AddLayer(std::move(layer_instance));
 
     SelectLastRow(mUI.layers);
@@ -2710,7 +2710,7 @@ void TilemapWidget::ModifyCurrentLayer()
         instance->SetFlags(layer->GetFlags());
         instance->FlushCache();
         instance->Save();
-        instance->Load(mLayerData[layer->GetId()], 1024);
+        instance->Load(mLayerData[layer->GetId()]);
     }
 }
 
