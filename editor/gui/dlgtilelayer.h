@@ -25,6 +25,7 @@
 
 #include <string>
 
+#include "base/assert.h"
 #include "game/tilemap.h"
 #include "editor/app/workspace.h"
 #include "editor/gui/utility.h"
@@ -33,6 +34,97 @@
 namespace app {
     class Workspace;
 } //
+
+namespace game {
+    inline std::string TranslateEnum(game::TilemapLayerClass::Storage storage)
+    {
+        using S = game::TilemapLayerClass::Storage;
+        if (storage == S::Dense)
+            return "Dense Storage";
+        else if (storage == S::Sparse)
+            return "Sparse Storage";
+        else BUG("Missing translation");
+        return "???";
+    }
+
+    inline std::string TranslateEnum(game::TilemapLayerClass::Resolution res)
+    {
+        using R = game::TilemapLayerClass::Resolution;
+        if (res == R::Original)
+            return "Original Map Resolution (1:1)";
+        else if (res == R::DownScale2)
+            return "Downscale by 2 (1:2)";
+        else if (res == R::DownScale4)
+            return "Downscale by 4 (1:4)";
+        else if (res == R::DownScale8)
+            return "Downscale by 8 (1:8)";
+        else if (res == R::UpScale2)
+            return "Upscale by 2 (2:1)";
+        else if (res == R::UpScale4)
+            return "Upscale by 4 (4:1)";
+        else if (res == R::UpScale8)
+            return "Upscale by 8 (8:1)";
+        else BUG("Missing translation");
+        return "???";
+    }
+
+    inline std::string TranslateEnum(game::TilemapLayerClass::Cache cache)
+    {
+        using C = game::TilemapLayerClass::Cache;
+        if (cache == C::Automatic)
+            return "Automatic Cache Size";
+        else if (cache == C::Cache8)
+            return "Cache 8 Tiles";
+        else if (cache == C::Cache16)
+            return "Cache 16 Tiles";
+        else if (cache == C::Cache32)
+            return "Cache 32 Tiles";
+        else if (cache == C::Cache64)
+            return "Cache 64 Tiles";
+        else if (cache == C::Cache128)
+            return "Cache 128 Tiles";
+        else if (cache == C::Cache256)
+            return "Cache 256 Tiles";
+        else if (cache == C::Cache512)
+            return "Cache 512 Tiles";
+        else if (cache == C::Cache1024)
+            return "Cache 1024 Tiles";
+        else BUG("Missing translation");
+        return "???";
+    }
+
+    namespace detail {
+        inline std::string TranslateEnum(TilemapLayerType type)
+        {
+            using T = TilemapLayerType;
+            if (type == T::Render)
+                return "256 Color Render Layer";
+            else if (type == T::Render_DataSInt4)
+                return "16 Color Render Layer with 4bit Signed Integer Data";
+            else if (type == T::Render_DataUInt4)
+                return "16 Color Render Layer with 4bit Signed Integer Data";
+            else if (type == T::Render_DataSInt8)
+                return "256 Color Render Layer with 8bit Signed Integer Data";
+            else if (type == T::Render_DataUInt8)
+                return "256 Color Render Layer with 8bit Unsigned Integer Data";
+            else if (type == T::Render_DataSInt24)
+                return "256 Color Render Layer with 24bit Signed Integer Data";
+            else if (type == T::Render_DataUInt24)
+                return "256 Color Render Layer with 24bit Unsigned Integer Data";
+            else if (type == T::DataSInt8)
+                return "8bit Signed Integer Data Layer";
+            else if (type == T::DataUInt8)
+                return "8bit Unsigned Integer Data Layer";
+            else if (type == T::DataSInt16)
+                return "16bit Signed Integer Data Layer";
+            else if (type == T::DataUInt16)
+                return "16bit Unsigned Integer Data Layer";
+            else BUG("Missing translation");
+            return "???";
+        }
+    }
+
+} // namespace
 
 namespace gui
 {
