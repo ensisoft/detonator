@@ -2353,7 +2353,7 @@ ShaderSource MaterialClass::GetTilemapShaderSource()
     source.AddUniform("kTilePadding", ShaderSource::UniformType::Vec2f);
     source.AddUniform("kTextureSize", ShaderSource::UniformType::Vec2f);
     source.AddUniform("kRenderPoints", ShaderSource::UniformType::Float);
-    source.AddUniform("kEditingMode", ShaderSource::UniformType::Int);
+
     source.AddVarying("vTexCoord", ShaderSource::VaryingType::Vec2f);
     source.AddVarying("vTileData", ShaderSource::VaryingType::Vec2f);
 
@@ -2362,8 +2362,8 @@ float GetTileIndex() {
     // to help debugging the material in the editor we're checking the flag
     // here whether we're editing or not and then either return a tile index
     // based on a uniform or a "real" tile index based on tile data.
-    if (kEditingMode == 1)
-        return kTileIndex;
+    if (kTileIndex > 0.0)
+        return kTileIndex - 1.0;
     return vTileData.x;
 }
 
