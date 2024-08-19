@@ -2250,7 +2250,7 @@ void MaterialWidget::PaintScene(gfx::Painter& painter, double secs)
 
     const auto time = mState == PlayState::Playing ? mTime : GetValue(mUI.kTime);
     mMaterialInst->SetRuntime(time);
-    mMaterialInst->SetUniform("kTileIndex", (float)GetValue(mUI.kTileIndex));
+    mMaterialInst->SetUniform("kTileIndex", (float)GetValue(mUI.kTileIndex)+1.0f);
     painter.Draw(*mDrawable, transform, *mMaterialInst);
 
     if (mMaterialInst->HasError())
