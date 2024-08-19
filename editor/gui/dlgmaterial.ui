@@ -70,6 +70,40 @@
         </item>
        </layout>
       </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Tile index</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="tileIndex">
+          <property name="suffix">
+           <string/>
+          </property>
+          <property name="prefix">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
      </layout>
     </widget>
    </item>
@@ -130,6 +164,13 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>filter</tabstop>
+  <tabstop>widget</tabstop>
+  <tabstop>tileIndex</tabstop>
+  <tabstop>btnAccept</tabstop>
+  <tabstop>btnCancel</tabstop>
+ </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>
  </resources>
