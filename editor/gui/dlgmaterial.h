@@ -44,13 +44,16 @@ namespace gui
 
     public:
         DlgMaterial(QWidget* parent, const app::Workspace* workspace, const app::AnyString& material);
+
         app::AnyString GetSelectedMaterialId() const
         { return mSelectedMaterialId; }
-
         void SetPreviewScale(const Size2Df& scale)
         { mPreviewScale = scale; }
         void SetPreviewScale(float x, float y)
         { mPreviewScale = Size2Df(x, y); }
+
+        unsigned GetTileIndex() const;
+        void SetTileIndex(unsigned index);
 
     private slots:
         void on_btnAccept_clicked();

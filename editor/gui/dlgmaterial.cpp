@@ -79,6 +79,16 @@ DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace, const
     mMaterials = mWorkspace->ListAllMaterials();
 }
 
+unsigned DlgMaterial::GetTileIndex() const
+{
+    return GetValue(mUI.tileIndex);
+}
+
+void DlgMaterial::SetTileIndex(unsigned index)
+{
+    SetValue(mUI.tileIndex, index);
+}
+
 void DlgMaterial::on_btnAccept_clicked()
 {
     const_cast<app::Workspace*>(mWorkspace)->SetUserProperty("dlg_material_geometry", saveGeometry());
@@ -195,6 +205,8 @@ void DlgMaterial::PaintScene(gfx::Painter& painter, double secs)
 
         gfx::MaterialInstance material(klass);
         material.SetRuntime(time_milliseconds / 1000.0);
+        material.SetUniform("kTileIndex", (float)GetValue(mUI.tileIndex) + 1.0f);
+
         gfx::FillRect(painter, rect, material);
 
         if (mMaterials[index].id != mSelectedMaterialId)
