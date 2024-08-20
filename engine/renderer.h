@@ -327,6 +327,9 @@ namespace engine
         std::shared_ptr<const gfx::Material> GetTileMaterial(const game::Tilemap& map,
                                                              std::uint16_t layer_index,
                                                              std::uint16_t material_index);
+        std::uint8_t GetTileMaterialTileIndex(const game::Tilemap& map,
+                                              std::uint16_t layer_index,
+                                              std::uint16_t palette_material_index) const;
 
     private:
         const ClassLibrary* mClassLib = nullptr;

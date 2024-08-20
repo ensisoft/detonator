@@ -102,12 +102,12 @@ namespace gui
         void on_chkLayerVisible_stateChanged(int);
         void on_chkLayerEnabled_stateChanged(int);
         void on_chkLayerReadOnly_stateChanged(int);
-        void on_cmbTileMaterial_currentIndexChanged(int);
-        void on_btnSelectTileMaterial_clicked();
-        void on_btnDeleteTileMaterial_clicked();
-        void on_btnEditTileMaterial_clicked();
+        void on_tilePaletteIndex_valueChanged(int);
         void on_tileValue_valueChanged(int);
         void on_layers_customContextMenuRequested(const QPoint&);
+
+        void DeleteSelectedTileMaterial();
+        void SelectSelectedTileMaterial();
 
         void StartToolAction();
         void ResourceAdded(const app::Resource* resource);

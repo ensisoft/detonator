@@ -1535,9 +1535,11 @@ void Renderer::PrepareRenderLayerTileBatches(const game::Tilemap& map,
             // append to tile to the current batch
             auto& batch = batches.back();
             gfx::TileBatch::Tile tile;
-            tile.pos.x = col;
-            tile.pos.y = row;
-            tile.pos.z = layer.GetDepth();
+            tile.pos.x  = col;
+            tile.pos.y  = row;
+            tile.pos.z  = layer.GetDepth();
+            tile.data.x = GetTileMaterialTileIndex(map, layer_index, material_index);
+
             batch.tiles.push_back(tile);
 
             // keep track of the last material used.
@@ -1789,6 +1791,15 @@ std::shared_ptr<const gfx::Material> Renderer::GetTileMaterial(const game::Tilem
         layer_material_node.material = gfx::CreateMaterialInstance(klass);
     }
     return layer_material_node.material;
+}
+
+std::uint8_t Renderer::GetTileMaterialTileIndex(const game::Tilemap& map,
+                                                std::uint16_t layer_index,
+                                                std::uint16_t palette_material_index) const
+{
+    const auto& layer = map.GetLayer(layer_index);
+    const auto& klass = layer.GetClass();
+    return klass.GetPaletteMaterialTileIndex(palette_material_index);
 }
 
 } // namespace

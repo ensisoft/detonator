@@ -251,6 +251,16 @@
               </widget>
              </item>
              <item>
+              <widget class="QSpinBox" name="tileIndex">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QToolButton" name="btnSelectToolMaterial">
                <property name="toolTip">
                 <string>Select tool material</string>
@@ -735,6 +745,7 @@
   <tabstop>tileRow</tabstop>
   <tabstop>material</tabstop>
   <tabstop>cmbToolMaterial</tabstop>
+  <tabstop>tileIndex</tabstop>
   <tabstop>btnSelectToolMaterial</tabstop>
   <tabstop>btnSetToolMaterialParams</tabstop>
   <tabstop>btnEditToolMaterial</tabstop>

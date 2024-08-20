@@ -354,87 +354,87 @@ namespace game
 
         TilemapLayerClass();
 
-        std::string GetId() const
+        inline std::string GetId() const
         { return mId; }
-        std::string GetName() const
+        inline std::string GetName() const
         { return mName; }
-        std::string GetDataUri() const
+        inline std::string GetDataUri() const
         { return mDataUri; }
-        std::string GetDataId() const
+        inline std::string GetDataId() const
         { return mDataId; }
-        base::bitflag<Flags> GetFlags() const
+        inline base::bitflag<Flags> GetFlags() const noexcept
         { return mFlags; }
-        bool IsReadOnly() const
+        inline bool IsReadOnly() const noexcept
         { return mFlags.test(Flags::ReadOnly); }
-        bool IsVisible() const
+        inline bool IsVisible() const noexcept
         { return mFlags.test(Flags::Visible); }
-        bool IsEnabled() const
+        inline bool IsEnabled() const noexcept
         { return mFlags.test(Flags::Enabled); }
-        bool TestFlag(Flags flag) const
+        inline bool TestFlag(Flags flag) const noexcept
         { return mFlags.test(flag); }
-        Cache GetCache() const
+        inline Cache GetCache() const noexcept
         { return mCache; }
-        Resolution GetResolution() const
+        inline Resolution GetResolution() const noexcept
         { return mResolution; }
-        Storage GetStorage() const
+        inline Storage GetStorage() const noexcept
         { return mStorage; }
-        int GetDepth() const
+        inline int GetDepth() const noexcept
         { return mDepth; }
-        int GetRenderLayer() const
+        inline int GetRenderLayer() const noexcept
         { return mRenderLayer; }
-        void SetId(const std::string& id)
-        { mId = id; }
-        void SetName(const std::string& name)
-        { mName = name; }
-        void SetDataUri(const std::string& uri)
-        { mDataUri = uri; }
-        void SetDataId(const std::string& id)
-        { mDataId = id; }
-        void ResetDataId()
+        inline void SetId(std::string id) noexcept
+        { mId = std::move(id); }
+        inline void SetName(std::string name) noexcept
+        { mName = std::move(name); }
+        inline void SetDataUri(std::string uri) noexcept
+        { mDataUri = std::move(uri); }
+        inline void SetDataId(std::string id) noexcept
+        { mDataId = std::move(id); }
+        inline void ResetDataId() noexcept
         { mDataId.clear(); }
-        void ResetDataUri()
+        inline void ResetDataUri() noexcept
         { mDataUri.clear(); }
-        void SetStorage(Storage storage)
+        inline void SetStorage(Storage storage) noexcept
         { mStorage = storage; }
-        void SetCache(Cache cache)
+        inline void SetCache(Cache cache) noexcept
         { mCache = cache; }
-        void SetResolution(Resolution res)
+        inline void SetResolution(Resolution res) noexcept
         { mResolution = res; }
-        void SetFlag(Flags flag, bool on_off)
+        inline void SetFlag(Flags flag, bool on_off) noexcept
         { mFlags.set(flag, on_off); }
-        void SetVisible(bool on_off)
+        inline void SetVisible(bool on_off) noexcept
         { mFlags.set(Flags::Visible, on_off); }
-        void SetEnabled(bool on_off)
+        inline void SetEnabled(bool on_off) noexcept
         { mFlags.set(Flags::Enabled, on_off); }
-        void SetReadOnly(bool on_off)
+        inline void SetReadOnly(bool on_off) noexcept
         { mFlags.set(Flags::ReadOnly, on_off); }
-        void SetFlags(base::bitflag<Flags> flags)
+        inline void SetFlags(base::bitflag<Flags> flags) noexcept
         { mFlags = flags; }
-        void SetDepth(int depth)
+        inline void SetDepth(int depth) noexcept
         { mDepth = depth; }
-        void SetRenderLayer(int layer)
+        inline void SetRenderLayer(int layer) noexcept
         { mRenderLayer = layer; }
-
-        void SetType(Type type);
-
-        Type GetType() const;
-
-        std::size_t GetHash() const;
-
         inline size_t GetCacheSize() const noexcept
-        {
-            return GetCacheSize(mCache);
-        }
-
-        void SetPaletteMaterialId(const std::string& material, std::size_t index)
-        { mPalette[index] = material; }
-        void ClearPalette()
+        { return GetCacheSize(mCache); }
+        inline void SetPaletteMaterialId(std::string material, std::size_t palette_index)
+        { mPalette[palette_index].materialId = std::move(material); }
+        inline void SetPaletteMaterialTileIndex(std::uint8_t tile_index, std::size_t palette_index)
+        { mPalette[palette_index].tile_index = tile_index; }
+        inline void ClearPalette() noexcept
         { mPalette.clear(); }
-        void ClearMaterialId(std::size_t index)
+        inline void ClearMaterialId(std::size_t index) noexcept
         { mPalette.erase(index); }
+
+        void SetType(Type type) noexcept;
+
+        Type GetType() const noexcept;
+
+        std::size_t GetHash() const noexcept;
         std::string GetPaletteMaterialId(std::size_t index) const;
-        std::size_t FindMaterialIndex(const std::string& material) const;
-        std::size_t FindNextAvailableMaterialIndex() const;
+        std::uint8_t GetPaletteMaterialTileIndex(std::size_t index) const;
+        std::size_t FindMaterialIndexInPalette(const std::string& materialId) const;
+        std::size_t FindMaterialIndexInPalette(const std::string& materialId, std::uint8_t tile_index) const;
+        std::size_t FindNextAvailablePaletteIndex() const;
 
         template<typename T>
         const T& GetDefaultTileValue() const
@@ -507,7 +507,12 @@ namespace game
         std::string mDataUri;
         std::string mDataId;
         base::bitflag<Flags> mFlags;
-        std::unordered_map<std::size_t, std::string> mPalette;
+
+        struct PaletteEntry {
+            std::string materialId;
+            std::uint8_t tile_index = 0;
+        };
+        std::unordered_map<std::size_t, PaletteEntry> mPalette;
         Storage mStorage = Storage::Dense;
         Cache mCache = Cache::Cache64;
         Resolution mResolution = Resolution::Original;

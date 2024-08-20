@@ -43,9 +43,8 @@ namespace {
 namespace gui
 {
 
-DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace, const app::AnyString& material)
+DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace)
   : QDialog(parent)
-  , mSelectedMaterialId(material)
   , mWorkspace(workspace)
   , mPreviewScale(1.0f, 1.0f)
 {
@@ -77,6 +76,17 @@ DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace, const
         this->restoreGeometry(geometry);
 
     mMaterials = mWorkspace->ListAllMaterials();
+}
+
+DlgMaterial::DlgMaterial(QWidget* parent, const app::Workspace* workspace, const app::AnyString& material)
+  : DlgMaterial(parent, workspace)
+{
+    mSelectedMaterialId = material;
+}
+
+void DlgMaterial::SetMaterialId(const app::AnyString& material)
+{
+    mSelectedMaterialId = material;
 }
 
 unsigned DlgMaterial::GetTileIndex() const
