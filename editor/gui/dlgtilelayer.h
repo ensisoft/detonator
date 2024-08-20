@@ -166,6 +166,8 @@ namespace gui
         { return GetValue(mUI.cmbLayerResolution); }
         std::int32_t GetDataValue() const
         { return GetValue(mUI.value); }
+        std::uint8_t GetTileIndex() const
+        { return GetValue(mUI.tileIndex); }
     private slots:
         void on_btnAccept_clicked()
         {
@@ -180,13 +182,17 @@ namespace gui
         void on_btnResetMaterial_clicked()
         {
             SetValue(mUI.cmbMaterial, -1);
+            SetValue(mUI.tileIndex, 0);
         }
         void on_btnSelectMaterial_clicked()
         {
-            DlgMaterial dlg(this, mWorkspace, GetItemId(mUI.cmbMaterial));
+            DlgMaterial dlg(this, mWorkspace);
+            dlg.SetMaterialId(GetItemId(mUI.cmbMaterial));
+            dlg.SetTileIndex(GetValue(mUI.tileIndex));
             if (dlg.exec() == QDialog::Rejected)
                 return;
             SetValue(mUI.cmbMaterial, ListItemId(dlg.GetSelectedMaterialId()));
+            SetValue(mUI.tileIndex, dlg.GetTileIndex());
         }
         void on_cmbLayerType_currentIndexChanged(int)
         {

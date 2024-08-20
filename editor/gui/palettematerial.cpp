@@ -27,7 +27,6 @@ PaletteMaterial::PaletteMaterial(const app::Workspace* workspace, QWidget* paren
    , mWorkspace(workspace)
 {
     mUI.setupUi(this);
-    SetList(mUI.cmbMaterial, mWorkspace->ListAllMaterials());
     SetEnabled(mUI.btnSetMaterialParams, false);
     SetEnabled(mUI.btnResetMaterial, false);
 }
@@ -39,11 +38,15 @@ void PaletteMaterial::UpdateMaterialList(const ResourceList& list)
 
 void PaletteMaterial::on_btnSelectMaterial_clicked()
 {
-    DlgMaterial dlg(this, mWorkspace, GetValue(mUI.cmbMaterial));
+    DlgMaterial dlg(this, mWorkspace);
     dlg.SetPreviewScale(mPreviewScale);
+    dlg.SetMaterialId(GetValue(mUI.cmbMaterial));
+    dlg.SetTileIndex(GetValue(mUI.tileIndex));
+
     if (dlg.exec() == QDialog::Rejected)
         return;
     SetValue(mUI.cmbMaterial, ListItemId(dlg.GetSelectedMaterialId()));
+    SetValue(mUI.tileIndex, dlg.GetTileIndex());
     SetEnabled(mUI.btnResetMaterial, true);
     emit ValueChanged(this);
 }
@@ -54,6 +57,7 @@ void PaletteMaterial::on_btnSetMaterialParams_clicked()
 void PaletteMaterial::on_btnResetMaterial_clicked()
 {
     SetValue(mUI.cmbMaterial, -1);
+    SetValue(mUI.tileIndex, 0);
     SetEnabled(mUI.btnResetMaterial, false);
     emit ValueChanged(this);
 }
@@ -64,7 +68,10 @@ void PaletteMaterial::on_cmbMaterial_currentIndexChanged(int)
     emit ValueChanged(this);
 }
 
-
+void PaletteMaterial::on_tileIndex_valueChanged(int)
+{
+    emit ValueChanged(this);
+}
 
 } // namespace
 

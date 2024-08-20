@@ -49,8 +49,10 @@ namespace gui
         {
             SetValue(mUI.label, str);
         }
-        void SetIndex(std::size_t index)
-        { mIndex = index; }
+        void SetPaletteIndex(std::size_t index)
+        {
+            mIndex = index;
+        }
         void ResetMaterial()
         {
             SetValue(mUI.cmbMaterial, -1);
@@ -62,12 +64,25 @@ namespace gui
                 ? SetEnabled(mUI.btnResetMaterial, true)
                 : SetEnabled(mUI.btnResetMaterial, false);
         }
+        void SetTileIndex(unsigned tile_index)
+        {
+            SetValue(mUI.tileIndex, tile_index);
+        }
+
         app::AnyString GetMaterialId() const
         {
             return GetItemId(mUI.cmbMaterial);
         }
-        std::size_t GetIndex() const
-        { return mIndex; }
+
+        std::size_t GetPaletteIndex() const
+        {
+            return mIndex;
+        }
+
+        unsigned GetTileIndex() const
+        {
+            return GetValue(mUI.tileIndex);
+        }
 
         void UpdateMaterialList(const ResourceList& list);
     signals:
@@ -78,6 +93,7 @@ namespace gui
         void on_btnSetMaterialParams_clicked();
         void on_btnResetMaterial_clicked();
         void on_cmbMaterial_currentIndexChanged(int);
+        void on_tileIndex_valueChanged(int);
     private:
         Ui::PaletteMaterial mUI;
     private:

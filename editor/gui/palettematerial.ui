@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>314</width>
-    <height>28</height>
+    <width>571</width>
+    <height>37</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -33,7 +33,7 @@
     <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>0</number>
+    <number>10</number>
    </property>
    <property name="bottomMargin">
     <number>0</number>
@@ -67,6 +67,16 @@
      </property>
      <property name="placeholderText">
       <string>Nothing</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QSpinBox" name="tileIndex">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
     </widget>
    </item>
@@ -128,6 +138,7 @@
  </widget>
  <tabstops>
   <tabstop>cmbMaterial</tabstop>
+  <tabstop>tileIndex</tabstop>
   <tabstop>btnSelectMaterial</tabstop>
   <tabstop>btnSetMaterialParams</tabstop>
   <tabstop>btnResetMaterial</tabstop>

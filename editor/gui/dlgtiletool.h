@@ -51,13 +51,15 @@ namespace gui
 
         struct Tile {
             std::string material;
+            // tile index in the material (when material is tilemap)
+            unsigned tile_index = 0;
             std::int32_t value  = 0;
             int palette_index   = -1;
             bool apply_material = true;
             bool apply_value    = false;
 
             // filled at runtime when the tool is used.
-            mutable std::unique_ptr<gfx::Material> instance;
+            mutable std::unique_ptr<gfx::Material> material_instance;
             mutable std::int32_t material_palette_index = 0;
             mutable std::int32_t data_value = 0;
         };
@@ -107,6 +109,7 @@ namespace gui
         void on_widgetColor_colorChanged(QColor color);
         void on_tileCol_valueChanged(int);
         void on_tileRow_valueChanged(int);
+        void on_tileIndex_valueChanged(int);
 
         void ResourceAdded(const app::Resource* resource);
         void ResourceRemoved(const app::Resource* resource);

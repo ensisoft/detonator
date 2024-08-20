@@ -534,7 +534,7 @@ TilemapLayerClass::TilemapLayerClass()
     SetFlag(Flags::ReadOnly, false);
 }
 
-std::size_t TilemapLayerClass::GetHash() const
+std::size_t TilemapLayerClass::GetHash() const noexcept
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
@@ -553,29 +553,51 @@ std::size_t TilemapLayerClass::GetHash() const
     std::set<size_t> keys;
     for (const auto& [key, val] : mPalette)
         keys.insert(key);
+
     for (auto key : keys)
     {
-        hash = base::hash_combine(hash, *base::SafeFind(mPalette, key));
+        const auto* entry = base::SafeFind(mPalette, key);
+        hash = base::hash_combine(hash, entry->materialId);
+        hash = base::hash_combine(hash, entry->tile_index);
     }
     return hash;
 }
 
 std::string TilemapLayerClass::GetPaletteMaterialId(std::size_t index) const
 {
-    if (const auto* material = base::SafeFind(mPalette, index))
-        return *material;
+    if (const auto* entry = base::SafeFind(mPalette, index))
+        return entry->materialId;
+
     return "";
 }
-std::size_t TilemapLayerClass::FindMaterialIndex(const std::string& material) const
+std::uint8_t TilemapLayerClass::GetPaletteMaterialTileIndex(std::size_t index) const
+{
+    if (const auto* entry = base::SafeFind(mPalette, index))
+        return entry->tile_index;
+
+    return 0;
+}
+
+std::size_t TilemapLayerClass::FindMaterialIndexInPalette(const std::string& material) const
 {
     for (const auto& [index, val] : mPalette)
     {
-        if (val == material)
+        if (val.materialId == material)
             return index;
     }
     return 0xff;
 }
-std::size_t TilemapLayerClass::FindNextAvailableMaterialIndex() const
+std::size_t TilemapLayerClass::FindMaterialIndexInPalette(const std::string& materialId, std::uint8_t tile_index) const
+{
+    for (const auto& [index, val] : mPalette)
+    {
+        if (val.materialId == materialId && val.tile_index == tile_index)
+            return index;
+    }
+    return 0xff;
+}
+
+std::size_t TilemapLayerClass::FindNextAvailablePaletteIndex() const
 {
     for (size_t i=0; i<GetMaxPaletteIndex(GetType()); ++i)
     {
@@ -617,7 +639,7 @@ int32_t TilemapLayerClass::GetDefaultTileDataValue() const
     return value;
 }
 
-void TilemapLayerClass::SetType(Type type)
+void TilemapLayerClass::SetType(Type type) noexcept
 {
     if (type == Type::Render)
         mDefault = detail::Render_Tile {};
@@ -644,7 +666,7 @@ void TilemapLayerClass::SetType(Type type)
     else BUG("Missing tilemap layer type mapping.");
 }
 
-TilemapLayerClass::Type TilemapLayerClass::GetType() const
+TilemapLayerClass::Type TilemapLayerClass::GetType() const noexcept
 {
     Type ret;
     std::visit([&ret](const auto& variant_value) {
@@ -707,26 +729,30 @@ void TilemapLayerClass::ResizeCopy(const USize& src_map_size,
 void TilemapLayerClass::IntoJson(data::Writer& data) const
 {
     const auto type = GetType();
-    data.Write("id",       mId);
-    data.Write("name",     mName);
-    data.Write("data_uri", mDataUri);
-    data.Write("data_id",  mDataId);
-    data.Write("flags",    mFlags);
-    data.Write("storage",  mStorage);
-    data.Write("type",     type);
-    data.Write("cache",    mCache);
-    data.Write("rez",      mResolution);
-    data.Write("depth",    mDepth);
-    data.Write("layer",    mRenderLayer);
+    data.Write("id",           mId);
+    data.Write("name",         mName);
+    data.Write("data_uri",     mDataUri);
+    data.Write("data_id",      mDataId);
+    data.Write("flags",        mFlags);
+    data.Write("storage",      mStorage);
+    data.Write("type",         type);
+    data.Write("cache",        mCache);
+    data.Write("rez",          mResolution);
+    data.Write("depth",        mDepth);
+    data.Write("layer",        mRenderLayer);
 
     std::set<size_t> keys;
     for (const auto [key, val] : mPalette)
         keys.insert(key);
+
     for (size_t key : keys)
     {
+        const auto* entry = base::SafeFind(mPalette, key);
+
         auto chunk = data.NewWriteChunk();
         chunk->Write("index", (unsigned)key);
-        chunk->Write("value", *base::SafeFind(mPalette, key));
+        chunk->Write("value", entry->materialId);
+        chunk->Write("tile_index", (unsigned)entry->tile_index);
         data.AppendChunk("palette", std::move(chunk));
     }
 
@@ -746,25 +772,30 @@ void TilemapLayerClass::IntoJson(data::Writer& data) const
 bool TilemapLayerClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
-    ok &= data.Read("id",       &mId);
-    ok &= data.Read("name",     &mName);
-    ok &= data.Read("data_uri", &mDataUri);
-    ok &= data.Read("data_id",  &mDataId);
-    ok &= data.Read("flags",    &mFlags);
-    ok &= data.Read("storage",  &mStorage);
-    ok &= data.Read("cache",    &mCache);
-    ok &= data.Read("rez",      &mResolution);
-    ok &= data.Read("depth",    &mDepth);
-    ok &= data.Read("layer",    &mRenderLayer);
+    ok &= data.Read("id",           &mId);
+    ok &= data.Read("name",         &mName);
+    ok &= data.Read("data_uri",     &mDataUri);
+    ok &= data.Read("data_id",      &mDataId);
+    ok &= data.Read("flags",        &mFlags);
+    ok &= data.Read("storage",      &mStorage);
+    ok &= data.Read("cache",        &mCache);
+    ok &= data.Read("rez",          &mResolution);
+    ok &= data.Read("depth",        &mDepth);
+    ok &= data.Read("layer",        &mRenderLayer);
 
     for (unsigned i=0; i<data.GetNumChunks("palette"); ++i)
     {
         std::string material;
+        unsigned tile_index;
         unsigned key = 0;
         const auto& chunk = data.GetReadChunk("palette", i);
         ok &= chunk->Read("index", &key);
         ok &= chunk->Read("value", &material);
-        mPalette[key] = std::move(material);
+        ok &= chunk->Read("tile_index", &tile_index);
+        PaletteEntry entry;
+        entry.materialId = std::move(material);
+        entry.tile_index = tile_index;
+        mPalette[key] = std::move(entry);
     }
 
     Type type;

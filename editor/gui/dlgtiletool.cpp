@@ -170,13 +170,19 @@ void DlgTileTool::on_btnSelectToolMaterial_clicked()
 {
     if (auto* tile = GetCurrentTile())
     {
-        DlgMaterial dlg(this, mWorkspace, tile->material);
+        DlgMaterial dlg(this, mWorkspace);
+        dlg.SetMaterialId(tile->material);
+        dlg.SetTileIndex(tile->tile_index);
         dlg.SetPreviewScale(GetMaterialPreviewScale(*mClass));
         if (dlg.exec() == QDialog::Rejected)
             return;
+
         tile->material = app::ToUtf8(dlg.GetSelectedMaterialId());
+        tile->tile_index = dlg.GetTileIndex();
         tile->apply_material = true;
+
         ShowCurrentTool();
+        ShowCurrentTile();
     }
 }
 
@@ -267,6 +273,11 @@ void DlgTileTool::on_tileRow_valueChanged(int)
     }
 }
 
+void DlgTileTool::on_tileIndex_valueChanged(int)
+{
+    ModifyCurrentTile();
+}
+
 void DlgTileTool::ResourceAdded(const app::Resource* resource)
 {
     if (resource->IsMaterial())
@@ -304,7 +315,7 @@ void DlgTileTool::ResourceUpdated(const app::Resource* resource)
             for (auto& tile : tool->tiles)
             {
                 if (tile.material == resource->GetId())
-                    tile.instance.reset();
+                    tile.material_instance.reset();
             }
         }
     }
@@ -372,6 +383,7 @@ void DlgTileTool::PaintScene(gfx::Painter& painter, double)
             tile.pos.x = col - (tool->width / 2.0f);
             tile.pos.y = row - (tool->height / 2.0f);
             tile.pos.z = 0;
+            tile.data.x = tile_data.tile_index;
 
             gfx::TileBatch batch;
             batch.AddTile(tile);
@@ -386,12 +398,14 @@ void DlgTileTool::PaintScene(gfx::Painter& painter, double)
             else BUG("missing tile projection.");
 
             // re-create the material if the tool's material setting has changed.
-            if (!tile_data.instance ||
-                tile_data.instance->GetClassId() != tile_data.material) {
+            if (!tile_data.material_instance ||
+                 tile_data.material_instance->GetClassId() != tile_data.material)
+            {
                 auto klass = mWorkspace->GetMaterialClassById(tile_data.material);
-                tile_data.instance = gfx::CreateMaterialInstance(klass);
+                tile_data.material_instance = gfx::CreateMaterialInstance(klass);
             }
-            scene_painter.Draw(batch, tile_projection_transform_matrix, *tile_data.instance);
+
+            scene_painter.Draw(batch, tile_projection_transform_matrix, *tile_data.material_instance);
         }
     }
 
@@ -576,6 +590,7 @@ void DlgTileTool::ShowCurrentTile()
         SetValue(mUI.toolValue,        tile->value);
         SetValue(mUI.material,         tile->apply_material);
         SetValue(mUI.data,             tile->apply_value);
+        SetValue(mUI.tileIndex,        tile->tile_index);
         SetEnabled(mUI.currentTile, true);
 
         if (mWorkspace->IsUserDefinedResource(tile->material))
@@ -726,6 +741,7 @@ void DlgTileTool::ModifyCurrentTile()
         tile->value          = GetValue(mUI.toolValue);
         tile->apply_material = GetValue(mUI.material);
         tile->apply_value    = GetValue(mUI.data);
+        tile->tile_index     = GetValue(mUI.tileIndex);
 
         if (tile->apply_material)
         {

@@ -44,6 +44,7 @@ namespace gui
 
     public:
         DlgMaterial(QWidget* parent, const app::Workspace* workspace, const app::AnyString& material);
+        DlgMaterial(QWidget* parent, const app::Workspace* workspace);
 
         app::AnyString GetSelectedMaterialId() const
         { return mSelectedMaterialId; }
@@ -51,6 +52,8 @@ namespace gui
         { mPreviewScale = scale; }
         void SetPreviewScale(float x, float y)
         { mPreviewScale = Size2Df(x, y); }
+
+        void SetMaterialId(const app::AnyString& material);
 
         unsigned GetTileIndex() const;
         void SetTileIndex(unsigned index);
