@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <cstdio>
 
+#include "base/assert.h"
 #include "base/math.h"
 #include "base/logging.h"
 #include "engine/camera.h"
@@ -45,6 +46,20 @@ namespace {
 
 namespace gui
 {
+std::string TranslateEnum(GridDensity density)
+{
+    if (density == GridDensity::Grid10x10)
+        return "Grid 10x10";
+    else if (density == GridDensity::Grid20x20)
+        return "Grid 20x20";
+    else if (density == GridDensity::Grid50x50)
+        return "Grid 50x50";
+    else if (density == GridDensity::Grid100x100)
+        return "Grid 100x100";
+    else BUG("Missing translation");
+    return "???";
+}
+
 void DrawLine(gfx::Painter& painter, const glm::vec2& src, const glm::vec2& dst)
 {
     gfx::DebugDrawLine(painter, gfx::FPoint(src.x, src.y), gfx::FPoint(dst.x, dst.y), gfx::Color::DarkYellow, 2.0f);
