@@ -60,6 +60,8 @@ enum class GridDensity {
     Grid100x100 = 100
 };
 
+std::string TranslateEnum(GridDensity density);
+
 void SetGridColor(const gfx::Color4f& color);
 
 void DrawCoordinateGrid(gfx::Painter& painter, gfx::Transform& view,
