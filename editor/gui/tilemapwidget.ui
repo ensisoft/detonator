@@ -1140,8 +1140,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>345</width>
-                   <height>426</height>
+                   <width>94</width>
+                   <height>24</height>
                   </rect>
                  </property>
                  <property name="sizePolicy">
@@ -1336,13 +1336,13 @@
   <action name="actionTools">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/32x32_ico_png/wrench.png</normaloff>:/32x32_ico_png/wrench.png</iconset>
+     <normaloff>:/32x32_ico_png/brush.png</normaloff>:/32x32_ico_png/brush.png</iconset>
    </property>
    <property name="text">
-    <string>Tools</string>
+    <string>Brush Editor</string>
    </property>
    <property name="toolTip">
-    <string>Toggle tool palette</string>
+    <string>Open tile brush editor</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+T</string>
