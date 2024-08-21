@@ -11,11 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Tilemap Tool Palette</string>
+   <string>Brush Editor</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../resource/resource.qrc">
-    <normaloff>:/16x16_ico_png/tilemap.png</normaloff>:/16x16_ico_png/tilemap.png</iconset>
+    <normaloff>:/16x16_ico_png/brush.png</normaloff>:/16x16_ico_png/brush.png</iconset>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_5">
    <item>
@@ -35,7 +35,7 @@
         </size>
        </property>
        <property name="title">
-        <string>Tools</string>
+        <string>Brushes</string>
        </property>
        <property name="flat">
         <bool>false</bool>
@@ -89,7 +89,7 @@
         <item>
          <widget class="QGroupBox" name="groupBox_3">
           <property name="title">
-           <string>Tool Name</string>
+           <string>Brush name</string>
           </property>
           <property name="flat">
            <bool>true</bool>
@@ -104,7 +104,7 @@
         <item>
          <widget class="QGroupBox" name="groupBox_7">
           <property name="title">
-           <string>Tool Function and Shape</string>
+           <string>Brush function and shape</string>
           </property>
           <property name="flat">
            <bool>true</bool>
@@ -122,7 +122,7 @@
         <item>
          <widget class="QGroupBox" name="groupBox_4">
           <property name="title">
-           <string>Tool Size in Tiles</string>
+           <string>Brush size in tiles (width x height)</string>
           </property>
           <property name="flat">
            <bool>true</bool>
@@ -194,13 +194,13 @@
         </size>
        </property>
        <property name="title">
-        <string>Current Tile</string>
+        <string>Brush tile</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
          <widget class="QGroupBox" name="groupBox_8">
           <property name="title">
-           <string>Tile Index</string>
+           <string>Tile coordinate in brush</string>
           </property>
           <property name="flat">
            <bool>true</bool>
@@ -425,7 +425,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
-      <string>Tile Palette</string>
+      <string>Brush preview</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>

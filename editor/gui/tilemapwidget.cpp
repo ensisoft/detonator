@@ -2603,7 +2603,7 @@ void TilemapWidget::UpdateToolToolbar()
             action->setShortcut(QKeySequence(Qt::CTRL | (Qt::Key_1 + i)));
 
         if (tool->tool == ToolFunction::TileBrush)
-            action->setIcon(QIcon("icons:brush.png"));
+            action->setIcon(QIcon("level:brush.png"));
 
         connect(action, &QAction::triggered,this, &TilemapWidget::StartToolAction);
         mToolActions.push_back(action);
