@@ -413,7 +413,7 @@ void EditorMain(QApplication& app)
     public:
         ForwardingLogger() : mLogger(std::cout)
         {
-            mLogger.EnableTerminalColors(true);
+            mLogger.SetStyle(base::OStreamLogger::Style::FancyColor);
         }
 
         virtual void Write(base::LogEvent type, const char* file, int line, const char* msg, double time) override
@@ -432,13 +432,13 @@ void EditorMain(QApplication& app)
         }
 
         virtual void Write(base::LogEvent type, const char* msg) override
-        {
-            mLogger.Write(type, msg);
-        }
+        {}
         virtual void Flush() override
         {
             mLogger.Flush();
         }
+        virtual base::bitflag<WriteType> GetWriteMask() const override
+        { return WriteType::WriteRaw; }
     private:
         base::OStreamLogger mLogger;
     };
