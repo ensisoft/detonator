@@ -390,6 +390,87 @@ void CenterWindowOnScreen(wdk::Window& window)
     DEBUG("Reformat the window. %1x%2 @ %3,%4", surface_width, surface_height, xpos, ypos);
 }
 
+class MainLogger : public base::Logger
+{
+public:
+    struct LogMessage {
+        base::LogEvent type;
+        std::string msg;
+        std::string file;
+        int line;
+        double time;
+    };
+    MainLogger()
+    {
+        std::lock_guard<std::mutex> lock(mMutex);
+        mRunning = true;
+        mThread = std::thread([this]() {
+
+            base::OStreamLogger logger(std::cout);
+            logger.SetStyle(base::OStreamLogger::Style::FancyColor);
+
+            LogBuffer buffer;
+            while (true) {
+                {
+                    std::lock_guard<std::mutex> lock(mMutex);
+                    if (!mRunning)
+                        return;
+
+                    std::swap(buffer, mBuffer);
+                }
+                for (const auto& entry : buffer)
+                {
+                    logger.Write(entry.type,
+                                 entry.file.c_str(),
+                                 entry.line,
+                                 entry.msg.c_str(),
+                                 entry.time);
+                }
+                buffer.clear();
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+        });
+    }
+    ~MainLogger()
+    {
+        {
+            std::lock_guard<std::mutex> lock(mMutex);
+            mRunning = false;
+        }
+        mThread.join();
+    }
+
+    virtual void Write(base::LogEvent type, const char* file, int line, const char* msg, double time) override
+    {
+        LogMessage m;
+        m.type = type;
+        m.msg  = msg;
+        m.file = file;
+        m.line = line;
+        m.time = time;
+        m.msg  = msg;
+
+        std::lock_guard<std::mutex> lock(mMutex);
+
+        mBuffer.push_back(std::move(m));
+    }
+    virtual void Write(base::LogEvent type, const char* msg) override
+    { /* not supported */ }
+    virtual void Flush() override
+    { /* not supported */ }
+
+    virtual base::bitflag<WriteType> GetWriteMask() const override
+    { return WriteType::WriteRaw; }
+private:
+    std::mutex mMutex;
+    std::thread mThread;
+
+    using LogBuffer = std::vector<LogMessage>;
+    LogBuffer mBuffer;
+
+    bool mRunning = true;
+};
+
 int main(int argc, char* argv[])
 {
 #if defined(LINUX_OS)
@@ -545,7 +626,7 @@ int main(int argc, char* argv[])
         // Two(?) solutions for this:
         //  - move the shared common code into a shared library
         //  - change the locking mechanism and put it into the logger.
-        base::LockedLogger<base::OStreamLogger> logger((base::OStreamLogger(std::cout)));
+        MainLogger logger;
         base::SetGlobalLog(&logger);
         base::EnableLogEvent(base::LogEvent::Debug,   global_log_debug);
         base::EnableLogEvent(base::LogEvent::Info,    global_log_info);
