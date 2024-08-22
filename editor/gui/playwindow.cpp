@@ -366,7 +366,7 @@ public:
         mLogger.setShowTag(false);
     }
     // base::Logger implementation
-    virtual void Write(base::LogEvent type, const char* file, int line, const char* msg) override
+    virtual void Write(base::LogEvent type, const char* file, int line, const char* msg, double time) override
     {
         // this one is not implemented since we're implementing
         // only the alternative with pre-formatted messages.

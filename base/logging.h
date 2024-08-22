@@ -94,7 +94,7 @@ namespace base
         virtual ~Logger() = default;
 
         // Write a not-formatted log message to the log.
-        virtual void Write(LogEvent type, const char* file, int line, const char* msg)  = 0;
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg, double time)  = 0;
 
         // Write a preformatted log event to the log.
         // The log message has information such as the source file/line
@@ -126,7 +126,7 @@ namespace base
     class NullLogger : public Logger
     {
     public:
-        virtual void Write(LogEvent type, const char* file, int line, const char* msg) override
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg, double time) override
         { }
         virtual void Write(LogEvent type, const char* msg) override
         {}
@@ -144,7 +144,7 @@ namespace base
         OStreamLogger() = default;
         OStreamLogger(std::ostream& out);
 
-        virtual void Write(LogEvent type, const char* file, int line, const char* msg) override
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg, double time) override
         { /* not supported */ }
         virtual void Write(LogEvent type, const char* msg) override;
         virtual void Flush() override;
@@ -165,7 +165,7 @@ namespace base
         CursesLogger();
        ~CursesLogger();
 
-        virtual void Write(LogEvent type, const char* file, int line, const char* msg) override
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg, double time) override
         { /* not supported */ }
         virtual void Write(LogEvent type, const char* msg) override;
         virtual void Flush() override
@@ -190,10 +190,10 @@ namespace base
         LockedLogger(WrappedLogger&& other) : LockedLogger()
         { mLogger = std::move(other); }
 
-        virtual void Write(LogEvent type, const char* file, int line, const char* msg) override
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg, double time) override
         {
             std::unique_lock<std::mutex> lock(mMutex);
-            mLogger.Write(type, file, line, msg);
+            mLogger.Write(type, file, line, msg, time);
         }
         virtual void Write(LogEvent type, const char* msg) override
         {
@@ -255,6 +255,7 @@ namespace base
             std::string file;
             std::string msg;
             int line = 0;
+            double time = 0.0f;
         };
         BufferLogger()
         {
@@ -264,13 +265,14 @@ namespace base
         BufferLogger(WrappedLogger&& other) : BufferLogger()
         {  mLogger = std::move(other); }
 
-        virtual void Write(LogEvent type, const char* file, int line, const char* msg) override
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg, double time) override
         {
             LogMessage log;
             log.type = type;
             log.file = file;
             log.line = line;
             log.msg  = msg;
+            log.time = time;
             mBuffer.push_back(std::move(log));
         }
         virtual void Write(LogEvent type, const char* msg) override
@@ -300,7 +302,7 @@ namespace base
                 if (msg.file.empty()) {
                     mLogger.Write(msg.type, msg.msg.c_str());
                 } else {
-                    mLogger.Write(msg.type, msg.file.c_str(), msg.line, msg.msg.c_str());
+                    mLogger.Write(msg.type, msg.file.c_str(), msg.line, msg.msg.c_str(), msg.time);
                 }
             }
             mBuffer.clear();
@@ -325,7 +327,7 @@ namespace base
     class EmscriptenLogger : public Logger
     {
     public:
-        virtual void Write(LogEvent type, const char* file, int line, const char* msg) override;
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg, double time) override;
         virtual void Write(LogEvent type, const char* msg) override;
         virtual void Flush() override;
         virtual base::bitflag<WriteType> GetWriteMask() const override

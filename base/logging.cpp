@@ -218,7 +218,7 @@ void CursesLogger::Write(LogEvent type, const char* msg)
 }
 
 #if defined(__EMSCRIPTEN__)
-void EmscriptenLogger::Write(LogEvent type, const char* file, int line, const char* msg)
+void EmscriptenLogger::Write(LogEvent type, const char* file, int line, const char* msg, double time)
 {
     // not implemented
 }
@@ -364,7 +364,7 @@ void WriteLogMessage(LogEvent type, const char* file, int line, const std::strin
     if (thread_log)
     {
         if (thread_log->TestWriteMask(Logger::WriteType::WriteRaw))
-            thread_log->Write(type, file, line, message.c_str());
+            thread_log->Write(type, file, line, message.c_str(), seconds);
         if (thread_log->TestWriteMask(Logger::WriteType::WriteFormatted))
             thread_log->Write(type, formatted_log_message);
         return;
@@ -375,7 +375,7 @@ void WriteLogMessage(LogEvent type, const char* file, int line, const std::strin
         return;
 
     if (global_log->TestWriteMask(Logger::WriteType::WriteRaw))
-        global_log->Write(type, file, line, message.c_str());
+        global_log->Write(type, file, line, message.c_str(), seconds);
     if (global_log->TestWriteMask(Logger::WriteType::WriteFormatted))
         global_log->Write(type, formatted_log_message);
 }
