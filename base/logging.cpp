@@ -30,6 +30,7 @@
 #endif
 
 #include <iostream>
+#include <iomanip>
 #include <atomic>
 #include <chrono>
 #include <cstdio>
@@ -67,7 +68,7 @@ const char* ToString(base::LogEvent e)
         case LogEvent::Info:
            return "Info";
         case LogEvent::Warning:
-           return "Warn";
+           return "Warning";
         case LogEvent::Error:
             return "Error";
     }
@@ -78,9 +79,91 @@ const char* ToString(base::LogEvent e)
 OStreamLogger::OStreamLogger(std::ostream& out) : m_out(&out)
 {}
 
+void OStreamLogger::Write(LogEvent type, const char* file, int line, const char* msg, double time)
+{
+#if defined(LINUX_OS)
+    if (mStyle == Style::FancyColor)
+    {
+        auto& out = *m_out;
+        std::ios old_state(nullptr);
+        old_state.copyfmt(out);
+
+        out << "\033[" << 2 << "m"
+            << "["
+            << std::fixed
+            << std::setprecision(3) // after the radix point
+            //<< std::setw(10)
+            //<< std::setfill('0')
+            << time
+            << "]  "
+            << "\033[m";
+
+        out << std::setfill(' ');
+
+        out << "\033[" << 1 << "m"
+            << std::left
+            << std::setw(7)
+            << ToString(type) << " "
+            << "\033[m";
+
+        std::stringstream  ss;
+        std::string file_and_line;
+        ss << file << ":" << line;
+        ss >> file_and_line;
+        if (file_and_line.size() > 25)
+        {
+            const auto count = file_and_line.size() - 25;
+            file_and_line = file_and_line.substr(count);
+        }
+
+        out << "\033[" << 3 << "m"
+            << std::right
+            << std::setw(25)
+            << file_and_line
+            << "  "
+            << "\033[m";
+
+        if (type == LogEvent::Error)
+        {
+            out << "\033[" << 1 << "m";
+            out << "\033[" << 91 << "m";
+        }
+        else if (type == LogEvent::Warning)
+        {
+            out << "\033[" << 1 << "m";
+            out << "\033[" << 93 << "m";
+        }
+        else if (type == LogEvent::Info)
+        {
+            //out << "\033[" << 1 << "m";
+            out << "\033[" << 97 << "m";
+        }
+        else if (type == LogEvent::Debug || type == LogEvent::Verbose)
+        {
+            //out << "\033[" << 90 << "m";
+        }
+        out << msg
+            << "\033[m";
+
+        out << "\n";
+
+        out.copyfmt(old_state);
+        return;
+    }
+#endif
+
+    // format the whole log string.
+    // todo: fix this potential buffer issue here.
+    char formatted_log_message[512] = {0};
+    std::snprintf(formatted_log_message, sizeof(formatted_log_message) - 1,
+                  "[%f] %s: %s:%d \"%s\"\n",
+                  time, ToString(type), file, line, msg);
+    Write(type, formatted_log_message);
+}
+
 void OStreamLogger::Write(LogEvent type, const char* msg)
 {
-    if (!mTerminalColors)
+    if (mStyle == Style::Basic)
     {
         (*m_out) << msg;
         return;

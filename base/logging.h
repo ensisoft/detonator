@@ -141,20 +141,30 @@ namespace base
     class OStreamLogger : public Logger
     {
     public:
+        enum class Style {
+            Basic, SimpleColor, FancyColor
+        };
+
         OStreamLogger() = default;
         OStreamLogger(std::ostream& out);
 
-        virtual void Write(LogEvent type, const char* file, int line, const char* msg, double time) override
-        { /* not supported */ }
+        virtual void Write(LogEvent type, const char* file, int line, const char* msg, double time) override;
         virtual void Write(LogEvent type, const char* msg) override;
         virtual void Flush() override;
         virtual base::bitflag<WriteType> GetWriteMask() const override
-        { return WriteType::WriteFormatted; }
+        { return WriteType::WriteRaw; }
+        void SetStyle(Style style)
+        { mStyle = style; }
+        // compatibility api
         void EnableTerminalColors(bool on_off)
-        { mTerminalColors = on_off; }
+        {
+            if (on_off)
+                mStyle = Style::SimpleColor;
+            else mStyle = Style::Basic;
+        }
     private:
         std::ostream* m_out = nullptr;
-        bool mTerminalColors = true;
+        Style mStyle = Style::Basic;
     };
 
     // Similar to OStreamLogger except uses
