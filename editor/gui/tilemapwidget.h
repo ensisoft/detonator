@@ -151,6 +151,13 @@ namespace gui
         bool ValidateToolAgainstLayer(const Tool& tool, const game::TilemapLayer& layer);
         void ToolIntoJson(const Tool& tool, QJsonObject& json) const;
         bool ToolFromJson(Tool& tool, const QJsonObject& json) const;
+
+        struct Tile {
+            unsigned col = 0;
+            unsigned row = 0;
+        };
+        std::optional<Tile> FindTileUnderMouse()const;
+
     private:
         Ui::Tilemap mUI;
     private:
@@ -158,6 +165,7 @@ namespace gui
         class LayerData;
         class TileBrushTool;
         class TileSelectTool;
+        class TileMoveTool;
 
         using ToolFunction = TileToolFunction;
         using ToolShape    = TileToolShape;
