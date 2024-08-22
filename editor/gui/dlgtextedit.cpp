@@ -82,6 +82,7 @@ protected:
             {QStringLiteral("\\bvarying\\b"),       RuleType::Keyword},
             {QStringLiteral("\\bstruct\\b"),        RuleType::Keyword},
             {QStringLiteral("\\bconst\\b"),         RuleType::Keyword},
+            {QStringLiteral("\\breturn\\b"),        RuleType::Keyword},
 
             {QStringLiteral("\\bint\\b"),           RuleType::DataType},
             {QStringLiteral("\\bfloat\\b"),         RuleType::DataType},
