@@ -284,6 +284,12 @@ void EventLoop(QApplication& app, Window& window)
 
 void ViewerMain(const std::string& style, const std::string& ipc_socket, QApplication& app)
 {
+    // This logger forwards lower level log events
+    // from the subsystems that to the stdout (ostream)
+    // with the idea that the editor's "main" instance
+    // will read the stdout and extract the log data
+    // coming from *this* process and display it in the
+    // editor process's event log.
     class ForwardingLogger : public base::Logger
     {
     public:
@@ -291,7 +297,7 @@ void ViewerMain(const std::string& style, const std::string& ipc_socket, QApplic
         {
             mLogger.EnableTerminalColors(false);
         }
-        virtual void Write(base::LogEvent type, const char* file, int line, const char* msg) override
+        virtual void Write(base::LogEvent type, const char* file, int line, const char* msg, double time) override
         {
             // 1. strip the file/line information. Events written into
             // gamehosts's app::EventLog don't have this.
@@ -311,6 +317,9 @@ void ViewerMain(const std::string& style, const std::string& ipc_socket, QApplic
             message.append(prefix);
             message.append(msg);
             message.append("\n");
+            // write to the stdout (via OStreamLogger and std::cout)
+            // so that the main editor process can capture the output
+            // and write it to the event log.
             mLogger.Write(type, message.c_str());
         }
 
@@ -364,7 +373,8 @@ void ViewerMain(const std::string& style, const std::string& ipc_socket, QApplic
         // information.
         auto* logger = base::GetGlobalLog();
         if (logger->TestWriteMask(base::Logger::WriteType::WriteRaw)) {
-            logger->Write(type, __FILE__, __LINE__, msg.c_str());
+            logger->Write(type, __FILE__, __LINE__, msg.c_str(), 0.0); // todo: time value (the forwarding
+                                                                       // logger doesn't use it now either
         }
         if (logger->TestWriteMask(base::Logger::WriteType::WriteFormatted)) {
             msg.append("\n");
@@ -395,6 +405,9 @@ void EditorMain(QApplication& app)
     // which is the convention on Linux
     app::InitializeAppHome(".Gamestudio Editor");
 
+    // This logger forwards lower level log events
+    // from the subsystems that use base/logging to
+    // the application's event log and to the console.
     class ForwardingLogger : public base::Logger
     {
     public:
@@ -403,7 +416,7 @@ void EditorMain(QApplication& app)
             mLogger.EnableTerminalColors(true);
         }
 
-        virtual void Write(base::LogEvent type, const char* file, int line, const char* msg) override
+        virtual void Write(base::LogEvent type, const char* file, int line, const char* msg, double time) override
         {
             auto& event_log = app::EventLog::get();
             // forward Error and warnings to the application log too.
@@ -413,7 +426,9 @@ void EditorMain(QApplication& app)
                 event_log.write(app::Event::Type::Warning, app::toString(msg), "engine");
             else if (type == base::LogEvent::Info)
                 event_log.write(app::Event::Type::Info, app::toString(msg), "engine");
-            mLogger.Write(type, file, line, msg);
+
+            // write to the console/terminal as well.
+            mLogger.Write(type, file, line, msg, time);
         }
 
         virtual void Write(base::LogEvent type, const char* msg) override

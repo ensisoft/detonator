@@ -49,7 +49,7 @@ class ForwardingLogger : public base::Logger
 public:
     ForwardingLogger() : mLogger(std::cout)
     {}
-    virtual void Write(base::LogEvent type, const char* file, int line, const char* msg) override
+    virtual void Write(base::LogEvent type, const char* file, int line, const char* msg, double time) override
     {
         // 1. strip the file/line information. Events written into
         // gamehosts's app::EventLog don't have this.
@@ -175,7 +175,8 @@ void Main(int argc, char* argv[])
         // information.
         auto* logger = base::GetGlobalLog();
         if (logger->TestWriteMask(base::Logger::WriteType::WriteRaw))
-            logger->Write(type, __FILE__, __LINE__, msg.c_str());
+            logger->Write(type, __FILE__, __LINE__, msg.c_str(), 0.0); // todo: time value (the forwarding
+                                                                       // logger doesn't use it now either
 
         if (logger->TestWriteMask(base::Logger::WriteType::WriteFormatted)) {
             msg.append("\n");
