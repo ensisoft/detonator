@@ -543,12 +543,13 @@ bool WriteTextFile(const QString& file, const std::string& contents, QFile::File
     {
         if (err_val) *err_val = out.error();
         if (err_str) *err_str = out.errorString();
+        return false;
     }
     if (contents.empty())
         return true;
-    out.write(&contents[0], contents.size());
+    const auto ret = out.write(&contents[0], contents.size());
     out.close();
-    return true;
+    return ret != -1;
 }
 bool WriteTextFile(const QString& file, const char* contents, QFile::FileError* err_val, QString* err_str)
 {
@@ -559,6 +560,7 @@ bool WriteTextFile(const QString& file, const char* contents, QFile::FileError* 
     {
         if (err_val) *err_val = out.error();
         if (err_str) *err_str = out.errorString();
+        return false;
     }
     if (!contents)
         return true;
@@ -566,9 +568,9 @@ bool WriteTextFile(const QString& file, const char* contents, QFile::FileError* 
     if (!len)
         return true;
 
-    out.write(contents, len);
+    const auto ret = out.write(contents, len);
     out.close();
-    return true;
+    return ret != -1;
 }
 
 
