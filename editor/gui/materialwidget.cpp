@@ -1219,6 +1219,8 @@ void MaterialWidget::CreateCustomShaderStub()
 {
     QString name = GetValue(mUI.materialName);
     name.replace(' ', '_');
+    name.replace('/', '_');
+    name.replace('\\', '_');
     const auto& glsl_uri = QString("ws://shaders/es2/%1.glsl").arg(name);
     const auto& json_uri = QString("ws://shaders/es2/%1.json").arg(name);
     const auto& glsl_file = mWorkspace->MapFileToFilesystem(glsl_uri);
@@ -1391,8 +1393,10 @@ void MaterialWidget::CreateShaderStubFromSource(const char* source)
 {
     QString name = GetValue(mUI.materialName);
     name.replace(' ', '_');
+    name.replace('/', '_');
+    name.replace('\\', '_');
     const auto& glsl_uri  = app::toString("ws://shaders/es2/%1.glsl", name);
-    const auto& glsl_path = mWorkspace->MapFileToFilesystem(app::toString("ws://shaders/es2"));
+    const auto& glsl_path = mWorkspace->MapFileToFilesystem("ws://shaders/es2");
     const auto& glsl_file = mWorkspace->MapFileToFilesystem(glsl_uri);
 
     if (FileExists(glsl_file))
