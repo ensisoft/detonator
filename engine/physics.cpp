@@ -1014,8 +1014,8 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             b2DistanceJointDef def = {};
             def.bodyA = src_physics_node->world_body;
             def.bodyB = dst_physics_node->world_body;
-            def.localAnchorA = ToBox2D(src_local_anchor);
-            def.localAnchorB = ToBox2D(dst_local_anchor);
+            def.localAnchorA = ToBox2D(MapVectorFromGame(src_local_anchor));
+            def.localAnchorB = ToBox2D(MapVectorFromGame(dst_local_anchor));
             if (params.min_distance.has_value())
                 def.minLength = MapLengthFromGame(params.min_distance.value());
             else def.minLength = distance;
