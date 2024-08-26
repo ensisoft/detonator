@@ -1,16 +1,17 @@
-💣💥 DETONATOR 2D 💥💣
+DETONATOR 2D 💣💥
 ===================
 An OpenGL ES based 2D game engine and editor for Linux, Windows and HTML5. Designed for simple single player games such
-as puzzle games, platformers, side scrollers and tile based real time strategy and tactics. 🍄🧩🗺️
+as puzzle games 🧩, platformers 🍄, side scrollers and tile based real time strategy and tactics 🗺️.
 
 ![Demos](screens/demos.gif "Animated demo content GIF")
 
-### 💥 CURRENT TOP FEATURES !
+### CURRENT TOP FEATURES 🔥
 
 * Supports native Windows and Linux.
 * Supports HTML5 and WASM.
 * Fully featured editor for game development.
 * Fully documented Lua API for game development.
+* Simple object oriented APIs.
 * Demo content and examples.
 
 <details><summary>Click here for more features</summary>
@@ -48,34 +49,36 @@ as puzzle games, platformers, side scrollers and tile based real time strategy a
 
 </details>
 
-## GETTING STARTED
+## GETTING STARTED 👈
 
 1. Download the latest binary from the releases page<br>
    https://github.com/ensisoft/detonator/releases
-2. Unzip the .zip file anywhere on your computer for example `C:\detonator` 
+2. Unzip the .zip file anywhere on your computer for example `C:\detonator`
 3. Run `C:\detonator\Detonator.exe`
 4. Load any of the sample workspaces by clicking on a button in the main screen.
 5. Press F4 to launch the sample game.
 
 #### How to Uninstall
-If you want to remove the app simply delete the detonator folder. `C:\detonator` <br>
-All user settings are stored in `C:\Users\<username>.GameStudio` and can also be deleted.
+If you want to remove the app simply:
+1. Delete the detonator folder. `C:\detonator`
+2. Delete the user settings folder `C:\Users\<username>.GameStudio`
 
 #### Install from Sources
 
 <i>
-If you're a developer type and want to build from sources or you want to:
+If you want to:
 
 * Use the latest development version
 * Use Detonator on LINUX
-* Build your own safe binary
 * Hack on the engine or the editor
 
-then follow the [Build Instructions](BUILDING.md)  
+then follow the [Build Instructions](BUILDING.md)
 </i>
-<br>
+
+## SCREENSHOTS
 
 ![Demos](screens/editor-demo.gif "Animated demo content GIF")
+<br>Everything visual can be completed in the editor.
 
 <details><summary>Click here for more screenshots</summary>
 
@@ -91,7 +94,7 @@ Each entity type can then be associated with a Lua script where you can write yo
 
 ![Screenshot](screens/editor-material.png "Material editor")
 Create materials using the material editor by adjusting properties for the provided default material shaders or
-create your own materials with custom shaders! Currently supports sprite animations, textures (including text and noise), 
+create your own materials with custom shaders! Currently supports sprite animations, textures (including text and noise),
 gradient and color fills out of box.
 
 ![Screenshot](screens/editor-scene.png "Scene editor")
@@ -105,18 +108,18 @@ can have their style properties fine-tuned in the editor. The style system integ
 
 ![Screenshot](screens/editor-audio.png "Audio graph editor")
 Create audio graphs using the audio editor. Each audio graph can have a number of elements added to it. The graph then
-specifies the flow of audio PCM data from source elements to processing elements to finally to the graph output. 
-Currently, supported audio backends are Waveout on Windows, Pulseaudio on Linux and OpenAL on HTML5/WASM. 
+specifies the flow of audio PCM data from source elements to processing elements to finally to the graph output.
+Currently, supported audio backends are Waveout on Windows, Pulseaudio on Linux and OpenAL on HTML5/WASM.
 Supported formats are wav, mp3, ogg and flac.
 
 ![Screenshot](screens/editor-script.png "Script editor")
 Use the built-in code editor to write the Lua scripts for the entities, scenes, game or UI. The editor has a built-in
 help system for accessing the engine side Lua API documentation as well as automatic Lua code formatting, linting and
-a code completion system! 
+a code completion system!
 
 ![Screenshot](screens/editor-particle.png "Particle editor")
-Create different types of particle effects in the particle editor by conveniently adjusting several sliders 
-and knobs that control the particle effect. 
+Create different types of particle effects in the particle editor by conveniently adjusting several sliders
+and knobs that control the particle effect.
 
 </details>
 
@@ -129,6 +132,6 @@ and knobs that control the particle effect.
 
 ## THANKS 🙏
 
-This project would not be possible without the following 
+This project would not be possible without the following
 * Qt, GLM, Freetype, Harfbuzz, Lua, sol3, STB, nlohmann/json, mpg123, libsndfile, Box2D, Emscripten and many others!
 * Royalty free art from [https://opengameart.com](https://opengameart.com "https://opengameart.com")

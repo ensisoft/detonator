@@ -15,10 +15,10 @@ Build Instructions 👨🏼‍💻
 3. If you want to work on the engine itself it's advisory to also run the (unit) tests.
 
 <i>
-<strong>The build process assumes some familiarity with building C++ based projects using 
+<strong>The build process assumes some familiarity with building C++ based projects using
 toolchains and tools such as GCC or MSVS and CMake.<br>
 
-You'll need to have Qt5 in order to build the Editor. If you're using Linux you can get Qt from your distributions repositories. 
+You'll need to have Qt5 in order to build the Editor. If you're using Linux you can get Qt from your distributions repositories.
 <br>If you're using Windows you'll need to download a prebuilt Qt5 package (installer) from the Qt Company's website.<br>
 You can try the link below. If that doesn't work  you'll need an account with the Qt Company
 
@@ -27,7 +27,7 @@ http://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-
 </strong>
 </i>
 
-### Step 1) Building the Editor & Engine for Desktop Windows
+## Step 1) Building the Editor & Engine for Desktop Windows 🪟
 
 These build instructions are for MSVS 2019 Community Edition 64bit build.
 
@@ -104,7 +104,7 @@ This means that in order to link to 3rd party libraries the debug versions of th
 
 
 
-### Step 1) Building the Editor & Engine for Desktop Linux
+## Step 1) Building the Editor & Engine for Desktop Linux 🐧
 
 <details><summary>How to install dependencies</summary>
 
@@ -160,7 +160,7 @@ Install these packages:
   $ git submodule update --init --recursive
   $ mkdir build_profile
   $ cd build_profile
-  $ conan install .. --output-folder=conan --build missing -s build_type=RelWithDebInfo 
+  $ conan install .. --output-folder=conan --build missing -s build_type=RelWithDebInfo
   $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_TOOLCHAIN_FILE=conan/conan_toolchain.cmake
   $ make -j16 install
 ```
@@ -181,14 +181,14 @@ Install these packages:
   $ export CC=/usr/bin/clang
   $ export CXX=/usr/bin/clang++
   $ conan profile new detonator-clang --detect
-  
+
   $ git clone https://github.com/ensisoft/detonator
   $ cd detonator
   $ git submodule update --init --recursive
   $ mkdir build
   $ cd build
   $ conan install .. --build missing --profile detonator-clang
-  $ cmake -G "Ninja" .. -DCMAKE_BUILD_TYPE=Release -DUSE_MOLD_LINKER=ON 
+  $ cmake -G "Ninja" .. -DCMAKE_BUILD_TYPE=Release -DUSE_MOLD_LINKER=ON
   $ ninja -j16 install
 ```
 </details>
@@ -199,7 +199,7 @@ Install these packages:
   $ cd detonator/editor/gui/qt
   $ mkdir build
   $ cmake -G "Unix Makefiles" .. -DCMAKE_BUILD_TYPE=Release
-  $ make -j16 
+  $ make -j16
   $ sudo make install
 ```
 
@@ -220,7 +220,7 @@ you can try edit ~/.conan/settings.yaml. Search for the GCC versions and edit th
 
 
 
-### Step 2) Building the Engine for HTML5/WASM
+## Step 2) Building the Engine for HTML5/WASM 🌐
 
 <strong>
 <i>HTML5/WASM build is only required if you want to build and package  your game for the web.<br>
@@ -267,7 +267,7 @@ Some notes about building to HTML5/WASM.
   $ cd build
   $ emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
   $ make -j16 install
-``` 
+```
 </details>
 
 <details><summary>How to build on Windows</summary>
@@ -325,7 +325,7 @@ When a game is packaged for web these files will then be deployed (copied) into 
 Without SharedArrayBuffer Web worker threads can't run and the engine cannot work.
 </i>🤬🤬🤬
 
-When you're ready to publish your game and want to upload it to your web server you must turn on `HTTP Cross-Origin` 
+When you're ready to publish your game and want to upload it to your web server you must turn on `HTTP Cross-Origin`
 policy flags in order to enable `SharedArrayBuffer`.
 <br> https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer
 
@@ -339,12 +339,12 @@ Header set Cross-Origin-Opener-Policy   "same-origin"
 Header set Access-Control-Allow-Headers "range"
 ```
 
-Copy the following files to your webserver using `sftp`or similar mechanism.<br> 
+Copy the following files to your webserver using `sftp`or similar mechanism.<br>
 You'll find these in your package output folder after the successful completion of your game packaging
 in the editor.
 
 ```
-  $ ssh my-user@my-server.com 
+  $ ssh my-user@my-server.com
   $ cd www\my-game\
   $ put GameEngine.js
   $ put GameEngine.wasm
@@ -357,12 +357,12 @@ in the editor.
 </details>
 
 
-### Step 3) Running (Unit) Tests 🫣
+## Step 3) Running (Unit) Tests 🫣
 
 <details><summary>Instructions to run unit tests</summary>
 
 There's a bunch of unit tests that are built as part of the normal build process. Basically anything that begins with
-a "*unit_test_*" is a unit test.  
+a "*unit_test_*" is a unit test.
 For writing tests there's a very simple testing utility that is available in base. [base/test_minimal.h](base/test_minimal.h)
 
 In addition to having the unit tests both the audio and graphics subsystems also have "rendering" tests, i.e. playing audio
@@ -411,7 +411,7 @@ that were not the same between result and gold and the result will be actual ren
   $ cd detonator/graphics/test/dist
   $ ./graphics_test --test --msaa4
   $ ...
-  $ ./graphics_test --help 
+  $ ./graphics_test --help
 ```
 
 </details>
