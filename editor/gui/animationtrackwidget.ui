@@ -24,11 +24,17 @@
       <enum>Qt::Vertical</enum>
      </property>
      <widget class="QSplitter" name="centerSplitter">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+        <horstretch>0</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
       <widget class="QWidget" name="layoutWidget">
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QVBoxLayout" name="left">
         <item>
          <widget class="QGroupBox" name="baseGroup">
           <property name="sizePolicy">
@@ -39,7 +45,7 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>0</width>
+            <width>400</width>
             <height>0</height>
            </size>
           </property>
@@ -215,11 +221,11 @@
         </item>
        </layout>
       </widget>
-      <widget class="QGroupBox" name="groupBox">
+      <widget class="QGroupBox" name="center">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
+         <horstretch>1</horstretch>
+         <verstretch>1</verstretch>
         </sizepolicy>
        </property>
        <property name="title">
@@ -543,7 +549,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QGroupBox" name="groupBox_2">
+      <widget class="QGroupBox" name="right">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -552,7 +558,7 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>0</width>
+         <width>400</width>
          <height>0</height>
         </size>
        </property>
@@ -595,14 +601,20 @@
       </widget>
      </widget>
      <widget class="QSplitter" name="timelineSplitter">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
       <widget class="QGroupBox" name="timelineGroup">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+        <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
+         <verstretch>1</verstretch>
         </sizepolicy>
        </property>
        <property name="title">
@@ -627,7 +639,7 @@
         <item>
          <widget class="gui::TimelineWidget" name="timeline" native="true">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -647,7 +659,7 @@
       </widget>
       <widget class="QGroupBox" name="actuatorGroup">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
