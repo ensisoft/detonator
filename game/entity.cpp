@@ -1394,11 +1394,11 @@ std::size_t EntityClass::GetHash() const
         jh = base::hash_combine(jh, joint->type);
         jh = base::hash_combine(jh, joint->src_node_id);
         jh = base::hash_combine(jh, joint->dst_node_id);
-        jh = base::hash_combine(jh, joint->dst_node_anchor_point);
-        jh = base::hash_combine(jh, joint->src_node_anchor_point);
         jh = base::hash_combine(jh, joint->name);
         if (const auto* ptr = std::get_if<DistanceJointParams>(&joint->params))
         {
+            jh = base::hash_combine(jh, ptr->dst_node_anchor_point);
+            jh = base::hash_combine(jh, ptr->src_node_anchor_point);
             jh = base::hash_combine(jh, ptr->min_distance.has_value());
             jh = base::hash_combine(jh, ptr->max_distance.has_value());
             jh = base::hash_combine(jh, ptr->max_distance.value_or(0.0f));
@@ -1455,11 +1455,11 @@ void EntityClass::IntoJson(data::Writer& data) const
         chunk->Write("type", joint->type);
         chunk->Write("src_node_id", joint->src_node_id);
         chunk->Write("dst_node_id", joint->dst_node_id);
-        chunk->Write("src_node_anchor_point", joint->src_node_anchor_point);
-        chunk->Write("dst_node_anchor_point", joint->dst_node_anchor_point);
         chunk->Write("name", joint->name);
         if (const auto* ptr = std::get_if<DistanceJointParams>(&joint->params))
         {
+            chunk->Write("src_node_anchor_point", ptr->src_node_anchor_point);
+            chunk->Write("dst_node_anchor_point", ptr->dst_node_anchor_point);
             if (ptr->min_distance.has_value())
                 chunk->Write("min_dist", ptr->min_distance.value());
             if (ptr->max_distance.has_value())
@@ -1531,12 +1531,12 @@ bool EntityClass::FromJson(const data::Reader& data)
         ok &= chunk->Read("type",                  &jref.type);
         ok &= chunk->Read("src_node_id",           &jref.src_node_id);
         ok &= chunk->Read("dst_node_id",           &jref.dst_node_id);
-        ok &= chunk->Read("src_node_anchor_point", &jref.src_node_anchor_point);
-        ok &= chunk->Read("dst_node_anchor_point", &jref.dst_node_anchor_point);
         ok &= chunk->Read("name",                  &jref.name);
         if (jref.type == PhysicsJointType::Distance)
         {
             DistanceJointParams params;
+            ok &= chunk->Read("src_node_anchor_point", &params.src_node_anchor_point);
+            ok &= chunk->Read("dst_node_anchor_point", &params.dst_node_anchor_point);
             ok &= chunk->Read("damping", &params.damping);
             ok &= chunk->Read("stiffness", &params.stiffness);
             if (chunk->HasValue("min_dist"))

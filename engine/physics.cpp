@@ -978,7 +978,6 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
     const auto& tree = entity.GetRenderTree();
     tree.PreOrderTraverse(visitor);
 
-    Transform transform(entity_to_world);
     // create joints between physics bodies based on the
     // entity joint definitions
     for (size_t i=0; i<entity.GetNumJoints(); ++i)
@@ -986,30 +985,39 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
         const auto& joint = entity.GetJoint(i);
         const auto* src_node = joint.GetSrcNode();
         const auto* dst_node = joint.GetDstNode();
+        if (src_node == dst_node)
+        {
+            ERROR("Cannot create a rigid body physics joint that would connect a rigid body to itself. "
+                  "[entity='%1', joint='%2', node='%3']", entity.GetClassName(), joint.GetName(), src_node);
+            continue;
+        }
+
+
         RigidBodyData* src_physics_node = base::SafeFind(mNodes, src_node->GetId());
         RigidBodyData* dst_physics_node = base::SafeFind(mNodes, dst_node->GetId());
         ASSERT(src_physics_node && dst_physics_node);
-
-        // the local anchor points are relative to the node itself.
-        const auto& src_local_anchor = joint.GetSrcAnchorPoint();
-        const auto& dst_local_anchor = joint.GetDstAnchorPoint();
-
-        // transform the anchor points into the physics world.
-        transform.Push(entity.FindNodeTransform(src_node));
-            const auto& src_world_anchor = transform.GetAsMatrix() * glm::vec4(src_local_anchor, 1.0f, 1.0f);
-        transform.Pop();
-        transform.Push(entity.FindNodeTransform(dst_node));
-            const auto& dst_world_anchor = transform.GetAsMatrix() * glm::vec4(dst_local_anchor, 1.0f, 1.0f);
-        transform.Pop();
-        // distance between the anchor points is the same as the distance
-        // between the anchor points in the physics world.
-        const auto distance = glm::length(dst_world_anchor - src_world_anchor);
 
         const auto type = joint.GetType();
 
         if (type == Entity::PhysicsJointType::Distance)
         {
             const auto& params = std::get<EntityClass::DistanceJointParams>(joint.GetParams());
+            // the local anchor points are relative to the node itself.
+            const auto& src_local_anchor = params.src_node_anchor_point;
+            const auto& dst_local_anchor = params.dst_node_anchor_point;
+
+            // transform the anchor points into the physics world.
+            Transform transform(entity_to_world);
+            transform.Push(entity.FindNodeTransform(src_node));
+                const auto& src_world_anchor = transform.GetAsMatrix() * glm::vec4(src_local_anchor, 1.0f, 1.0f);
+            transform.Pop();
+
+            transform.Push(entity.FindNodeTransform(dst_node));
+                const auto& dst_world_anchor = transform.GetAsMatrix() * glm::vec4(dst_local_anchor, 1.0f, 1.0f);
+            transform.Pop();
+            // distance between the anchor points is the same as the distance
+            // between the anchor points in the physics world.
+            const auto distance = glm::length(dst_world_anchor - src_world_anchor);
 
             b2DistanceJointDef def = {};
             def.bodyA = src_physics_node->world_body;
@@ -1024,7 +1032,8 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             else def.maxLength = distance;
             def.stiffness    = params.stiffness;
             def.damping      = params.damping;
-            if (def.minLength > def.maxLength) {
+            if (def.minLength > def.maxLength)
+            {
                 WARN("Entity distance joint min distance exceeds max distance. [entity='%1', joint='%2', min_dist=%3, max_dist=%4]",
                      entity.GetClassName(), entity.GetName(), joint.GetName(), def.minLength, def.maxLength);
                 def.minLength = def.maxLength;
