@@ -84,8 +84,8 @@ public:
             switch (index.column()) {
                 case 0: return app::toString(joint.type);
                 case 1: return app::FromUtf8(joint.name);
-                case 2: return app::FromUtf8(src->GetName());
-                case 3: return app::FromUtf8(dst->GetName());
+                case 2: return app::FromUtf8(src ? src->GetName() : "???");
+                case 3: return app::FromUtf8(dst ? dst->GetName() : "???");
                 default: BUG("Unknown script variable data index.");
             }
         }
@@ -124,6 +124,11 @@ public:
         mState.entity->SetJoint(row, std::move(joint));
         emit dataChanged(index(row, 0), index(row, 4));
     }
+    void UpdateJoint(size_t row)
+    {
+        emit dataChanged(index(row, 0), index(row, 4));
+    }
+
     void DeleteJoint(size_t row)
     {
         beginRemoveRows(QModelIndex(), row, row);
@@ -1928,13 +1933,25 @@ void EntityWidget::on_btnResetLifetime_clicked()
 
 void EntityWidget::on_btnNewJoint_clicked()
 {
-    game::EntityClass::PhysicsJoint joint;
-    joint.id = base::RandomString(10);
+    const auto index = mState.entity->GetNumJoints();
+    {
+        game::EntityClass::PhysicsJoint joint;
+        joint.id     = base::RandomString(10);
+        joint.name   = "My Joint";
+        joint.type   = game::EntityClass::PhysicsJointType::Distance;
+        joint.params = game::EntityClass::DistanceJointParams {};
+        mJointModel->AddJoint(std::move(joint));
+    }
+    auto& joint = mState.entity->GetJoint(index);
+
     DlgJoint dlg(this, *mState.entity, joint);
     if (dlg.exec() == QDialog::Rejected)
+    {
+        mJointModel->DeleteJoint(index);
         return;
+    }
 
-    mJointModel->AddJoint(std::move(joint));
+    mJointModel->EditJoint(index, std::move(joint));
     SetEnabled(mUI.btnEditJoint, true);
     SetEnabled(mUI.btnDeleteJoint, true);
 }
@@ -1946,12 +1963,18 @@ void EntityWidget::on_btnEditJoint_clicked()
 
     // single selection for now.
     const auto index = items[0];
-    auto joint = mState.entity->GetJoint(index.row());
+
+    auto backup = mState.entity->GetJoint(index.row());
+
+    auto& joint = mState.entity->GetJoint(index.row());
     DlgJoint dlg(this, *mState.entity, joint);
     if (dlg.exec() == QDialog::Rejected)
+    {
+        mJointModel->EditJoint(index.row(), std::move(backup));
         return;
+    }
 
-    mJointModel->EditJoint(index.row(), std::move(joint));
+    mJointModel->UpdateJoint(index.row());
 
 }
 void EntityWidget::on_btnDeleteJoint_clicked()
@@ -3167,12 +3190,16 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
     for (size_t i=0; i<mState.entity->GetNumJoints(); ++i)
     {
         const auto& joint = mState.entity->GetJoint(i);
+        if (!joint.IsValid())
+            continue;
+
         if (joint.type == game::EntityClass::PhysicsJointType::Distance)
         {
+            const auto& params = std::get<game::EntityClass::DistanceJointParams>(joint.params);
             const auto* src_node = mState.entity->FindNodeById(joint.src_node_id);
             const auto* dst_node = mState.entity->FindNodeById(joint.dst_node_id);
-            const auto& src_anchor_point = src_node->GetSize() * 0.5f + joint.src_node_anchor_point;
-            const auto& dst_anchor_point = dst_node->GetSize() * 0.5f + joint.dst_node_anchor_point;
+            const auto& src_anchor_point = src_node->GetSize() * 0.5f + params.src_node_anchor_point;
+            const auto& dst_anchor_point = dst_node->GetSize() * 0.5f + params.dst_node_anchor_point;
             const auto& src_point = mState.entity->MapCoordsFromNodeBox(src_anchor_point, src_node);
             const auto& dst_point = mState.entity->MapCoordsFromNodeBox(dst_anchor_point, dst_node);
             DrawLine(entity_painter, src_point, dst_point);

@@ -1814,6 +1814,10 @@ namespace game
         };
 
         struct DistanceJointParams {
+            // the anchor point within the body
+            glm::vec2 src_node_anchor_point = {0.0f, 0.0f};
+            // the anchor point within the body.
+            glm::vec2 dst_node_anchor_point = {0.0f, 0.0f};
             std::optional<float> min_distance;
             std::optional<float> max_distance;
             float stiffness = 0.0f;
@@ -1840,16 +1844,21 @@ namespace game
             std::string src_node_id;
             // The destination node ID.
             std::string dst_node_id;
-            // the anchor point within the body
-            glm::vec2 src_node_anchor_point = {0.0f, 0.0f};
-            // the anchor point within the body.
-            glm::vec2 dst_node_anchor_point = {0.0f, 0.0f};
             // ID of this joint.
             std::string id;
             // human-readable name of the joint.
             std::string name;
             // PhysicsJoint parameters (depending on the type)
             PhysicsJointParams params;
+
+            inline bool IsValid() const noexcept
+            {
+                if (src_node_id.empty() || dst_node_id.empty())
+                    return false;
+                if (src_node_id == dst_node_id)
+                    return false;
+                return true;
+            }
         };
 
         EntityClass();
@@ -2449,10 +2458,6 @@ namespace game
             { return mId; }
             const std::string GetName() const noexcept
             { return mClass->name; }
-            const glm::vec2& GetSrcAnchorPoint() const noexcept
-            { return mClass->src_node_anchor_point; }
-            const glm::vec2& GetDstAnchorPoint() const noexcept
-            { return mClass->dst_node_anchor_point; }
             const PhysicsJointClass* operator->() const noexcept
             { return mClass.get(); }
             const PhysicsJointClass& GetClass() const noexcept

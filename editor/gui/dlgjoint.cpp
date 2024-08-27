@@ -47,13 +47,14 @@ DlgJoint::DlgJoint(QWidget* parent, const game::EntityClass& klass, game::Entity
     SetList(mUI.cmbDstNode, nodes_with_rigid_bodies);
     SetValue(mUI.cmbSrcNode, ListItemId(mJoint.src_node_id));
     SetValue(mUI.cmbDstNode, ListItemId(mJoint.dst_node_id));
-    SetValue(mUI.srcX, mJoint.src_node_anchor_point.x);
-    SetValue(mUI.srcY, mJoint.src_node_anchor_point.y);
-    SetValue(mUI.dstX, mJoint.dst_node_anchor_point.x);
-    SetValue(mUI.dstY, mJoint.dst_node_anchor_point.y);
+
     if (mJoint.type == game::EntityClass::PhysicsJointType::Distance)
     {
         const auto& params = std::get<game::EntityClass::DistanceJointParams>(mJoint.params);
+        SetValue(mUI.srcX, params.src_node_anchor_point.x);
+        SetValue(mUI.srcY, params.src_node_anchor_point.y);
+        SetValue(mUI.dstX, params.dst_node_anchor_point.x);
+        SetValue(mUI.dstY, params.dst_node_anchor_point.y);
         SetValue(mUI.stiffness, params.stiffness);
         SetValue(mUI.damping, params.damping);
         SetValue(mUI.minDist, params.min_distance.value_or(-0.1f));
@@ -65,24 +66,38 @@ DlgJoint::~DlgJoint()
 
 }
 
-void DlgJoint::on_btnAccept_clicked()
+bool DlgJoint::Apply()
 {
     if (!MustHaveInput(mUI.cmbDstNode))
-        return;
+        return false;
     if (!MustHaveInput(mUI.cmbSrcNode))
-        return;
+        return false;
 
+    std::string src_node_id = GetItemId(mUI.cmbSrcNode);
+    std::string dst_node_id = GetItemId(mUI.cmbDstNode);
+    if (src_node_id == dst_node_id)
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Warning);
+        msg.setText("The src an dst nodes are the same node.\n"
+                    "You can't create a joint that would connect a rigid body to itself.");
+        msg.setStandardButtons(QMessageBox::StandardButton::Ok);
+        msg.exec();
+        mUI.cmbSrcNode->setFocus();
+        return false;
+    }
     mJoint.name        = GetValue(mUI.jointName);
     mJoint.type        = GetValue(mUI.cmbType);
-    mJoint.src_node_id = GetItemId(mUI.cmbSrcNode);
-    mJoint.dst_node_id = GetItemId(mUI.cmbDstNode);
-    mJoint.dst_node_anchor_point.x = GetValue(mUI.dstX);
-    mJoint.dst_node_anchor_point.y = GetValue(mUI.dstY);
-    mJoint.src_node_anchor_point.x = GetValue(mUI.srcX);
-    mJoint.src_node_anchor_point.y = GetValue(mUI.srcY);
+    mJoint.src_node_id = std::move(src_node_id);
+    mJoint.dst_node_id = std::move(dst_node_id);
+
     if (mJoint.type == game::EntityClass::PhysicsJointType::Distance)
     {
         game::EntityClass::DistanceJointParams params;
+        params.dst_node_anchor_point.x = GetValue(mUI.dstX);
+        params.dst_node_anchor_point.y = GetValue(mUI.dstY);
+        params.src_node_anchor_point.x = GetValue(mUI.srcX);
+        params.src_node_anchor_point.y = GetValue(mUI.srcY);
         params.stiffness = GetValue(mUI.stiffness);
         params.damping   = GetValue(mUI.damping);
         const float min_dist = GetValue(mUI.minDist);
@@ -93,10 +108,20 @@ void DlgJoint::on_btnAccept_clicked()
             params.max_distance = max_dist;
         mJoint.params = params;
     }
-
-    accept();
-
+    return true;
 }
+
+void DlgJoint::on_btnApply_clicked()
+{
+    Apply();
+}
+
+void DlgJoint::on_btnAccept_clicked()
+{
+    if (Apply())
+        accept();
+}
+
 void DlgJoint::on_btnCancel_clicked()
 {
     reject();

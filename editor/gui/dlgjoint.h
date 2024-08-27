@@ -38,12 +38,17 @@ namespace gui
        ~DlgJoint();
 
     private slots:
+        void on_btnApply_clicked();
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
         void on_btnResetSrcAnchor_clicked();
         void on_btnResetDstAnchor_clicked();
         void on_btnResetMinDistance_clicked();
         void on_btnResetMaxDistance_clicked();
+
+    private:
+        bool Apply();
+
     private:
         Ui::DlgJoint mUI;
     private:
