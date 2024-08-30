@@ -179,7 +179,7 @@
      <x>0</x>
      <y>0</y>
      <width>832</width>
-     <height>36</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuTemp">
@@ -220,6 +220,12 @@
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
     <string>toolBar</string>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>26</width>
+     <height>26</height>
+    </size>
    </property>
    <property name="toolButtonStyle">
     <enum>Qt::ToolButtonTextUnderIcon</enum>
