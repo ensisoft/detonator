@@ -802,13 +802,13 @@ Workspace::Workspace(const QString& dir)
     // these same IDs to create primitive resources.
     mResources.emplace_back(new DrawableResource<gfx::CapsuleClass>(gfx::CapsuleClass("_capsule"), "Capsule"));
     mResources.emplace_back(new DrawableResource<gfx::RectangleClass>(gfx::RectangleClass("_rect"), "Rectangle"));
-    mResources.emplace_back(new DrawableResource<gfx::IsoscelesTriangleClass>(gfx::IsoscelesTriangleClass("_isosceles_triangle"), "IsoscelesTriangle"));
-    mResources.emplace_back(new DrawableResource<gfx::RightTriangleClass>(gfx::RightTriangleClass("_right_triangle"), "RightTriangle"));
+    mResources.emplace_back(new DrawableResource<gfx::IsoscelesTriangleClass>(gfx::IsoscelesTriangleClass("_isosceles_triangle"), "Isosceles Triangle"));
+    mResources.emplace_back(new DrawableResource<gfx::RightTriangleClass>(gfx::RightTriangleClass("_right_triangle"), "Right Triangle"));
     mResources.emplace_back(new DrawableResource<gfx::CircleClass>(gfx::CircleClass("_circle"), "Circle"));
-    mResources.emplace_back(new DrawableResource<gfx::SemiCircleClass>(gfx::SemiCircleClass("_semi_circle"), "SemiCircle"));
+    mResources.emplace_back(new DrawableResource<gfx::SemiCircleClass>(gfx::SemiCircleClass("_semi_circle"), "Semi Circle"));
     mResources.emplace_back(new DrawableResource<gfx::TrapezoidClass>(gfx::TrapezoidClass("_trapezoid"), "Trapezoid"));
     mResources.emplace_back(new DrawableResource<gfx::ParallelogramClass>(gfx::ParallelogramClass("_parallelogram"), "Parallelogram"));
-    mResources.emplace_back(new DrawableResource<gfx::RoundRectangleClass>(gfx::RoundRectangleClass("_round_rect", "", 0.05f), "RoundRect"));
+    mResources.emplace_back(new DrawableResource<gfx::RoundRectangleClass>(gfx::RoundRectangleClass("_round_rect", "", 0.05f), "Round Rectangle"));
     mResources.emplace_back(new DrawableResource<gfx::ArrowCursorClass>(gfx::ArrowCursorClass("_arrow_cursor"), "Arrow Cursor"));
     mResources.emplace_back(new DrawableResource<gfx::BlockCursorClass>(gfx::BlockCursorClass("_block_cursor"), "Block Cursor"));
 
