@@ -1810,7 +1810,18 @@ namespace game
         };
 
         enum class PhysicsJointType {
-            Distance
+            Distance, Revolute
+        };
+
+        struct RevoluteJointParams {
+            glm::vec2 src_node_anchor_point = {0.0f, 0.0f};
+            glm::vec2 dst_node_anchor_point = {0.0f, 0.0f};
+            bool enable_limit = false;
+            bool enable_motor = false;
+            FRadians lower_angle_limit;
+            FRadians upper_angle_limit;
+            float motor_speed = 0.0f; // radians per second
+            float motor_torque = 0.0f; // Nm
         };
 
         struct DistanceJointParams {
@@ -1829,7 +1840,8 @@ namespace game
             }
         };
 
-        using PhysicsJointParams = std::variant<DistanceJointParams>;
+        using PhysicsJointParams = std::variant<DistanceJointParams,
+                RevoluteJointParams>;
 
         // PhysicsJoint defines an optional physics engine constraint
         // between two bodies in the physics world. In other words
@@ -2558,6 +2570,8 @@ namespace game
         { return mNodes.size(); }
         std::size_t GetNumJoints() const noexcept
         { return mJoints.size(); }
+        std::string GetDebugName() const
+        { return mClass->GetName() + "/" + mInstanceName; }
         int GetLayer() const noexcept
         { return mLayer; }
         bool TestFlag(ControlFlags flag) const noexcept

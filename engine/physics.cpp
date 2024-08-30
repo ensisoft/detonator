@@ -740,6 +740,14 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter) const
                 gfx::DebugDrawLine(painter,
                                    gfx::FPoint(src_world_anchor.x, src_world_anchor.y),
                                    gfx::FPoint(dst_world_anchor.x, dst_world_anchor.y), gfx::Color::HotPink, 2.0f);
+                gfx::DebugDrawCircle(painter, gfx::FCircle(src_world_anchor.x, src_world_anchor.y, 5.0f), gfx::Color::HotPink, 2.0f);
+                gfx::DebugDrawCircle(painter, gfx::FCircle(dst_world_anchor.x, dst_world_anchor.y, 5.0f), gfx::Color::HotPink, 2.0f);
+            }
+            else if (joint->GetType() == b2JointType::e_revoluteJoint)
+            {
+                b2RevoluteJoint* rj = static_cast<b2RevoluteJoint*>(joint);
+                const auto& world_anchor = MapVectorToGame(ToGlm(rj->GetAnchorA()));
+                gfx::DebugDrawCircle(painter, gfx::FCircle(world_anchor.x, world_anchor.y, 5.0f), gfx::Color::HotPink, 2.0f);
             }
             joints.insert(joint);
             joint_list = joint_list->next;
@@ -992,10 +1000,13 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             continue;
         }
 
-
         RigidBodyData* src_physics_node = base::SafeFind(mNodes, src_node->GetId());
         RigidBodyData* dst_physics_node = base::SafeFind(mNodes, dst_node->GetId());
-        ASSERT(src_physics_node && dst_physics_node);
+        if (!src_physics_node || !dst_physics_node)
+        {
+            ERROR("Failed to find a rigid body for physics joint creation.");
+            continue;
+        }
 
         const auto type = joint.GetType();
 
@@ -1039,12 +1050,43 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
                 def.minLength = def.maxLength;
             }
             // the joint is deleted whenever either body is deleted.
-            auto* ret = mWorld->CreateJoint(&def);
-            DEBUG("Created new physics distance joint. [entity='%1/%2' joint='%3', src='%4', dst='%5', min=%6, max=%7]",
-                  entity.GetClassName(), entity.GetName(), joint.GetName(), src_node->GetName(), dst_node->GetName(),
+            mWorld->CreateJoint(&def);
+
+            DEBUG("Distance joint info: [min distance=%1, max distance=%2]",
                   def.minLength, def.maxLength);
         }
+        else if (type == Entity::PhysicsJointType::Revolute)
+        {
+            const auto& params = std::get<EntityClass::RevoluteJointParams>(joint.GetParams());
+            // the revolute joint is a hinge like joint with one single point of rotation
+            // around which the bodies rotate.
+            const auto& src_local_anchor = params.src_node_anchor_point;
+
+            Transform transform(entity_to_world);
+            transform.Push(entity.FindNodeTransform(src_node));
+                const auto& src_world_anchor = transform * glm::vec4(src_local_anchor, 1.0f, 1.0f);
+            transform.Pop();
+
+            b2RevoluteJointDef def = {};
+            def.Initialize(src_physics_node->world_body, dst_physics_node->world_body, ToBox2D(src_world_anchor));
+            def.enableLimit    = params.enable_limit;
+            def.enableMotor    = params.enable_motor;
+            def.upperAngle     = params.upper_angle_limit.ToRadians();
+            def.lowerAngle     = params.lower_angle_limit.ToRadians() * -1.0f;
+            def.motorSpeed     = params.motor_speed;
+            def.maxMotorTorque = params.motor_torque;
+            mWorld->CreateJoint(&def);
+
+            DEBUG("Revolute joint info: [limit=%1, motor=%2, range=%3-%4, speed=%5, torque=%6",
+                  params.enable_limit, params.enable_motor,
+                  params.lower_angle_limit.ToDegrees(),
+                  params.upper_angle_limit.ToDegrees(),
+                  params.motor_speed, params.motor_torque);
+        }
         else BUG("Unhandled physics joint type.");
+
+        DEBUG("Created new physics joint. [entity='%1', type=%2, joint='%3', node='%4', node='%5']",
+              entity.GetDebugName(), joint.GetType(), joint.GetName(), src_node->GetName(), dst_node->GetName());
     }
 }
 

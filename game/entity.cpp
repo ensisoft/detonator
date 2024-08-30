@@ -1406,6 +1406,17 @@ std::size_t EntityClass::GetHash() const
             jh = base::hash_combine(jh, ptr->stiffness);
             jh = base::hash_combine(jh, ptr->damping);
         }
+        else if (const auto* ptr = std::get_if<RevoluteJointParams>(&joint->params))
+        {
+            jh = base::hash_combine(jh, ptr->src_node_anchor_point);
+            jh = base::hash_combine(jh, ptr->dst_node_anchor_point);
+            jh = base::hash_combine(jh, ptr->enable_limit);
+            jh = base::hash_combine(jh, ptr->enable_motor);
+            jh = base::hash_combine(jh, ptr->lower_angle_limit);
+            jh = base::hash_combine(jh, ptr->upper_angle_limit);
+            jh = base::hash_combine(jh, ptr->motor_speed);
+            jh = base::hash_combine(jh, ptr->motor_torque);
+        }
         hash = base::hash_combine(hash, jh);
     }
 
@@ -1466,6 +1477,17 @@ void EntityClass::IntoJson(data::Writer& data) const
                 chunk->Write("max_dist", ptr->max_distance.value());
             chunk->Write("damping", ptr->damping);
             chunk->Write("stiffness", ptr->stiffness);
+        }
+        else if (const auto* ptr = std::get_if<RevoluteJointParams>(&joint->params))
+        {
+            chunk->Write("src_node_anchor_point", ptr->src_node_anchor_point);
+            chunk->Write("dst_node_anchor_point", ptr->dst_node_anchor_point);
+            chunk->Write("enable_limit", ptr->enable_limit);
+            chunk->Write("enable_motor", ptr->enable_motor);
+            chunk->Write("lower_angle_limit", ptr->lower_angle_limit);
+            chunk->Write("upper_angle_limit", ptr->upper_angle_limit);
+            chunk->Write("motor_speed", ptr->motor_speed);
+            chunk->Write("motor_torque", ptr->motor_torque);
         }
         data.AppendChunk("joints", std::move(chunk));
     }
@@ -1552,6 +1574,19 @@ bool EntityClass::FromJson(const data::Reader& data)
                 params.max_distance = value;
             }
             joint->params = params;
+        }
+        else if (jref.type == PhysicsJointType::Revolute)
+        {
+            RevoluteJointParams params;
+            ok &= chunk->Read("src_node_anchor_point", &params.src_node_anchor_point);
+            ok &= chunk->Read("dst_node_anchor_point", &params.dst_node_anchor_point);
+            ok &= chunk->Read("enable_limit", &params.enable_limit);
+            ok &= chunk->Read("enable_motor", &params.enable_motor);
+            ok &= chunk->Read("lower_angle_limit", &params.lower_angle_limit);
+            ok &= chunk->Read("upper_angle_limit", &params.upper_angle_limit);
+            ok &= chunk->Read("motor_speed", &params.motor_speed);
+            ok &= chunk->Read("motor_torque", &params.motor_torque);
+            joint->params = std::move(params);
         }
         mJoints.push_back(std::move(joint));
     }
