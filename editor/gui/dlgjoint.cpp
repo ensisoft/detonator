@@ -58,10 +58,8 @@ DlgJoint::~DlgJoint()
 
 void DlgJoint::Show()
 {
-    SetValue(mUI.cmbType, mJoint.type);
-
-    SetVisible(mUI.lblANodeAnchor,      false);
-    SetVisible(mUI.lblBNodeAnchor,      false);
+    SetVisible(mUI.lblNodeAPosition,    false);
+    SetVisible(mUI.lblNodeBPosition,    false);
     SetVisible(mUI.lblMinDistance,      false);
     SetVisible(mUI.lblMaxDistance,      false);
     SetVisible(mUI.lblStiffness,        false);
@@ -91,10 +89,16 @@ void DlgJoint::Show()
     SetVisible(mUI.btnResetDstAnchor,   false);
     SetVisible(mUI.btnResetSrcAnchor,   false);
 
+    SetValue(mUI.cmbType, mJoint.type);
+    SetValue(mUI.srcX, mJoint.src_node_anchor_point.x);
+    SetValue(mUI.srcY, mJoint.src_node_anchor_point.y);
+    SetValue(mUI.dstX, mJoint.dst_node_anchor_point.x);
+    SetValue(mUI.dstY, mJoint.dst_node_anchor_point.y);
+
     if (mJoint.type == game::EntityClass::PhysicsJointType::Distance)
     {
-        SetVisible(mUI.lblANodeAnchor,      true);
-        SetVisible(mUI.lblBNodeAnchor,      true);
+        SetVisible(mUI.lblNodeAPosition,    true);
+        SetVisible(mUI.lblNodeBPosition,    true);
         SetVisible(mUI.lblMinDistance,      true);
         SetVisible(mUI.lblMaxDistance,      true);
         SetVisible(mUI.lblStiffness,        true);
@@ -113,10 +117,7 @@ void DlgJoint::Show()
         SetVisible(mUI.btnResetSrcAnchor,   true);
 
         const auto& params = std::get<game::EntityClass::DistanceJointParams>(mJoint.params);
-        SetValue(mUI.srcX, params.src_node_anchor_point.x);
-        SetValue(mUI.srcY, params.src_node_anchor_point.y);
-        SetValue(mUI.dstX, params.dst_node_anchor_point.x);
-        SetValue(mUI.dstY, params.dst_node_anchor_point.y);
+
         SetValue(mUI.stiffness, params.stiffness);
         SetValue(mUI.damping, params.damping);
         SetValue(mUI.minDist, params.min_distance.value_or(-0.1f));
@@ -127,7 +128,8 @@ void DlgJoint::Show()
     }
     else if (mJoint.type == game::EntityClass::PhysicsJointType::Revolute)
     {
-        SetVisible(mUI.lblANodeAnchor,      true);
+        SetVisible(mUI.lblNodeAPosition,    true);
+        SetVisible(mUI.lblNodeBPosition,    false);
         SetVisible(mUI.srcX,                true);
         SetVisible(mUI.srcY,                true);
         SetVisible(mUI.btnResetSrcAnchor,   true);
@@ -145,10 +147,6 @@ void DlgJoint::Show()
         SetVisible(mUI.cmbMotorRotation,    true);
 
         const auto& params = std::get<game::EntityClass::RevoluteJointParams>(mJoint.params);
-        SetValue(mUI.srcX, params.src_node_anchor_point.x);
-        SetValue(mUI.srcY, params.src_node_anchor_point.y);
-        SetValue(mUI.dstX, params.dst_node_anchor_point.x);
-        SetValue(mUI.dstY, params.dst_node_anchor_point.y);
         SetValue(mUI.lowerAngle, params.lower_angle_limit);
         SetValue(mUI.upperAngle, params.upper_angle_limit);
         SetValue(mUI.motorSpeed, std::fabs(params.motor_speed));
@@ -164,7 +162,8 @@ void DlgJoint::Show()
     }
     else if (mJoint.type == game::EntityClass::PhysicsJointType::Weld)
     {
-        SetVisible(mUI.lblANodeAnchor,      true);
+        SetVisible(mUI.lblNodeAPosition,    true);
+        SetVisible(mUI.lblNodeBPosition,    false);
         SetVisible(mUI.srcX,                true);
         SetVisible(mUI.srcY,                true);
         SetVisible(mUI.btnResetSrcAnchor,   true);
@@ -174,10 +173,6 @@ void DlgJoint::Show()
         SetVisible(mUI.damping,             true);
 
         const auto& params = std::get<game::EntityClass::WeldJointParams>(mJoint.params);
-        SetValue(mUI.srcX, params.src_node_anchor_point.x);
-        SetValue(mUI.srcY, params.src_node_anchor_point.y);
-        SetValue(mUI.dstX, params.dst_node_anchor_point.x);
-        SetValue(mUI.dstY, params.dst_node_anchor_point.y);
         SetValue(mUI.damping, params.damping);
         SetValue(mUI.stiffness, params.stiffness);
 
@@ -210,14 +205,14 @@ bool DlgJoint::Apply()
     mJoint.type        = GetValue(mUI.cmbType);
     mJoint.src_node_id = std::move(src_node_id);
     mJoint.dst_node_id = std::move(dst_node_id);
+    mJoint.dst_node_anchor_point.x = GetValue(mUI.dstX);
+    mJoint.dst_node_anchor_point.y = GetValue(mUI.dstY);
+    mJoint.src_node_anchor_point.x = GetValue(mUI.srcX);
+    mJoint.src_node_anchor_point.y = GetValue(mUI.srcY);
 
     if (mJoint.type == game::EntityClass::PhysicsJointType::Distance)
     {
         game::EntityClass::DistanceJointParams params;
-        params.dst_node_anchor_point.x = GetValue(mUI.dstX);
-        params.dst_node_anchor_point.y = GetValue(mUI.dstY);
-        params.src_node_anchor_point.x = GetValue(mUI.srcX);
-        params.src_node_anchor_point.y = GetValue(mUI.srcY);
         params.stiffness = GetValue(mUI.stiffness);
         params.damping   = GetValue(mUI.damping);
         const float min_dist = GetValue(mUI.minDist);
@@ -233,10 +228,6 @@ bool DlgJoint::Apply()
         const auto& motor_direction = mUI.cmbMotorRotation->currentText();
 
         game::EntityClass::RevoluteJointParams params;
-        params.src_node_anchor_point.x = GetValue(mUI.srcX);
-        params.src_node_anchor_point.y = GetValue(mUI.srcY);
-        params.dst_node_anchor_point.x = GetValue(mUI.dstX);
-        params.dst_node_anchor_point.y = GetValue(mUI.dstY);
         params.upper_angle_limit = GetValue(mUI.upperAngle);
         params.lower_angle_limit = GetValue(mUI.lowerAngle);
         params.motor_torque = GetValue(mUI.motorTorque);
@@ -250,8 +241,6 @@ bool DlgJoint::Apply()
     else if (mJoint.type == game::EntityClass::PhysicsJointType::Weld)
     {
         game::EntityClass::WeldJointParams params;
-        params.src_node_anchor_point.x = GetValue(mUI.srcX);
-        params.src_node_anchor_point.y = GetValue(mUI.srcY);
         params.damping = GetValue(mUI.damping);
         params.stiffness = GetValue(mUI.stiffness);
         mJoint.params = params;

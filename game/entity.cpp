@@ -1395,10 +1395,10 @@ std::size_t EntityClass::GetHash() const
         jh = base::hash_combine(jh, joint->src_node_id);
         jh = base::hash_combine(jh, joint->dst_node_id);
         jh = base::hash_combine(jh, joint->name);
+        jh = base::hash_combine(jh, joint->dst_node_anchor_point);
+        jh = base::hash_combine(jh, joint->src_node_anchor_point);
         if (const auto* ptr = std::get_if<DistanceJointParams>(&joint->params))
         {
-            jh = base::hash_combine(jh, ptr->dst_node_anchor_point);
-            jh = base::hash_combine(jh, ptr->src_node_anchor_point);
             jh = base::hash_combine(jh, ptr->min_distance.has_value());
             jh = base::hash_combine(jh, ptr->max_distance.has_value());
             jh = base::hash_combine(jh, ptr->max_distance.value_or(0.0f));
@@ -1408,8 +1408,6 @@ std::size_t EntityClass::GetHash() const
         }
         else if (const auto* ptr = std::get_if<RevoluteJointParams>(&joint->params))
         {
-            jh = base::hash_combine(jh, ptr->src_node_anchor_point);
-            jh = base::hash_combine(jh, ptr->dst_node_anchor_point);
             jh = base::hash_combine(jh, ptr->enable_limit);
             jh = base::hash_combine(jh, ptr->enable_motor);
             jh = base::hash_combine(jh, ptr->lower_angle_limit);
@@ -1419,8 +1417,6 @@ std::size_t EntityClass::GetHash() const
         }
         else if (const auto* ptr = std::get_if<WeldJointParams>(&joint->params))
         {
-            jh = base::hash_combine(jh, ptr->src_node_anchor_point);
-            jh = base::hash_combine(jh, ptr->dst_node_anchor_point);
             jh = base::hash_combine(jh, ptr->stiffness);
             jh = base::hash_combine(jh, ptr->damping);
         }
@@ -1474,10 +1470,10 @@ void EntityClass::IntoJson(data::Writer& data) const
         chunk->Write("src_node_id", joint->src_node_id);
         chunk->Write("dst_node_id", joint->dst_node_id);
         chunk->Write("name", joint->name);
+        chunk->Write("src_node_anchor_point", joint->src_node_anchor_point);
+        chunk->Write("dst_node_anchor_point", joint->dst_node_anchor_point);
         if (const auto* ptr = std::get_if<DistanceJointParams>(&joint->params))
         {
-            chunk->Write("src_node_anchor_point", ptr->src_node_anchor_point);
-            chunk->Write("dst_node_anchor_point", ptr->dst_node_anchor_point);
             if (ptr->min_distance.has_value())
                 chunk->Write("min_dist", ptr->min_distance.value());
             if (ptr->max_distance.has_value())
@@ -1487,8 +1483,6 @@ void EntityClass::IntoJson(data::Writer& data) const
         }
         else if (const auto* ptr = std::get_if<RevoluteJointParams>(&joint->params))
         {
-            chunk->Write("src_node_anchor_point", ptr->src_node_anchor_point);
-            chunk->Write("dst_node_anchor_point", ptr->dst_node_anchor_point);
             chunk->Write("enable_limit", ptr->enable_limit);
             chunk->Write("enable_motor", ptr->enable_motor);
             chunk->Write("lower_angle_limit", ptr->lower_angle_limit);
@@ -1498,8 +1492,6 @@ void EntityClass::IntoJson(data::Writer& data) const
         }
         else if (const auto* ptr = std::get_if<WeldJointParams>(&joint->params))
         {
-            chunk->Write("src_node_anchor_point", ptr->src_node_anchor_point);
-            chunk->Write("dst_node_anchor_point", ptr->dst_node_anchor_point);
             chunk->Write("stiffness", ptr->stiffness);
             chunk->Write("damping", ptr->damping);
         }
@@ -1568,11 +1560,11 @@ bool EntityClass::FromJson(const data::Reader& data)
         ok &= chunk->Read("src_node_id",           &jref.src_node_id);
         ok &= chunk->Read("dst_node_id",           &jref.dst_node_id);
         ok &= chunk->Read("name",                  &jref.name);
+        ok &= chunk->Read("src_node_anchor_point", &jref.src_node_anchor_point);
+        ok &= chunk->Read("dst_node_anchor_point", &jref.dst_node_anchor_point);
         if (jref.type == PhysicsJointType::Distance)
         {
             DistanceJointParams params;
-            ok &= chunk->Read("src_node_anchor_point", &params.src_node_anchor_point);
-            ok &= chunk->Read("dst_node_anchor_point", &params.dst_node_anchor_point);
             ok &= chunk->Read("damping", &params.damping);
             ok &= chunk->Read("stiffness", &params.stiffness);
             if (chunk->HasValue("min_dist"))
@@ -1592,8 +1584,6 @@ bool EntityClass::FromJson(const data::Reader& data)
         else if (jref.type == PhysicsJointType::Revolute)
         {
             RevoluteJointParams params;
-            ok &= chunk->Read("src_node_anchor_point", &params.src_node_anchor_point);
-            ok &= chunk->Read("dst_node_anchor_point", &params.dst_node_anchor_point);
             ok &= chunk->Read("enable_limit", &params.enable_limit);
             ok &= chunk->Read("enable_motor", &params.enable_motor);
             ok &= chunk->Read("lower_angle_limit", &params.lower_angle_limit);
@@ -1605,8 +1595,6 @@ bool EntityClass::FromJson(const data::Reader& data)
         else if (jref.type == PhysicsJointType::Weld)
         {
             WeldJointParams params;
-            ok &= chunk->Read("src_node_anchor_point", &params.src_node_anchor_point);
-            ok &= chunk->Read("dst_node_anchor_point", &params.dst_node_anchor_point);
             ok &= chunk->Read("stiffness", &params.stiffness);
             ok &= chunk->Read("damping", &params.damping);
             joint->params = params;

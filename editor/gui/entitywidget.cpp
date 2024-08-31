@@ -3201,8 +3201,8 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         if (joint.type == game::EntityClass::PhysicsJointType::Distance)
         {
             const auto& params = std::get<game::EntityClass::DistanceJointParams>(joint.params);
-            const auto& src_anchor_point = src_node->GetSize() * 0.5f + params.src_node_anchor_point;
-            const auto& dst_anchor_point = dst_node->GetSize() * 0.5f + params.dst_node_anchor_point;
+            const auto& src_anchor_point = src_node->GetSize() * 0.5f + joint.src_node_anchor_point;
+            const auto& dst_anchor_point = dst_node->GetSize() * 0.5f + joint.dst_node_anchor_point;
             const auto& src_point = mState.entity->MapCoordsFromNodeBox(src_anchor_point, src_node);
             const auto& dst_point = mState.entity->MapCoordsFromNodeBox(dst_anchor_point, dst_node);
             DrawLine(entity_painter, src_point, dst_point);
@@ -3212,14 +3212,14 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         else if (joint.type == game::EntityClass::PhysicsJointType::Revolute)
         {
             const auto& params = std::get<game::EntityClass::RevoluteJointParams>(joint.params);
-            const auto& src_anchor_point_node = src_node->GetSize() * 0.5f + params.src_node_anchor_point;
+            const auto& src_anchor_point_node = src_node->GetSize() * 0.5f + joint.src_node_anchor_point;
             const auto& src_anchor_point_entity = mState.entity->MapCoordsFromNodeBox(src_anchor_point_node, src_node);
             DrawDot(entity_painter, src_anchor_point_entity);
         }
         else if (joint.type == game::EntityClass::PhysicsJointType::Weld)
         {
             const auto& params = std::get<game::EntityClass::WeldJointParams>(joint.params);
-            const auto& src_anchor_point_node = src_node->GetSize() * 0.5f + params.src_node_anchor_point;
+            const auto& src_anchor_point_node = src_node->GetSize() * 0.5f + joint.src_node_anchor_point;
             const auto& src_anchor_point_entity = mState.entity->MapCoordsFromNodeBox(src_anchor_point_node, src_node);
             DrawDot(entity_painter, src_anchor_point_entity);
         }
