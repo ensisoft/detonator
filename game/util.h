@@ -87,10 +87,35 @@ inline glm::vec2 GetTranslationFromMatrix(const glm::mat4& mat)
     return glm::vec2(translation.x, translation.y);
 }
 
+// Rotate a vector on the xy plane around the Z axis.
 inline glm::vec2 RotateVector(const glm::vec2& vec, float angle)
 {
     auto ret = glm::eulerAngleZ(angle) * glm::vec4(vec.x, vec.y, 0.0f, 0.0f);
     return glm::vec2(ret.x, ret.y);
+}
+
+// transform a direction vector (such as a normal) safely even if the
+// transformation matrix contains a non-uniform scale.
+inline glm::vec4 TransformVector(const glm::mat4& matrix, const glm::vec4& vector)
+{
+    return glm::normalize(glm::transpose(glm::inverse(matrix)) * vector);
+}
+// transform a direction vector (such as a normal) safely even if the
+// transformation matrix contains a non-uniform scale.
+inline glm::vec2 TransformVector(const glm::mat4& matrix, const glm::vec2& vector)
+{
+    return TransformVector(matrix, glm::vec4(vector, 0.0f, 0.0f));
+}
+
+// Find the angle that rotates the basis vector X such that
+// it's collinear with the parameter vector.
+// returns the angle in radians.
+inline float FindVectorRotation(const glm::vec2& vec)
+{
+    const auto cosine = glm::dot(glm::normalize(vec), glm::vec2(1.0f, 0.0f));
+    if (vec.y > 0.0f)
+        return std::acos(cosine);
+    return -std::acos(cosine);
 }
 
 inline FBox TransformRect(const FRect& rect, const glm::mat4& mat)
