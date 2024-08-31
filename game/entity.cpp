@@ -1420,6 +1420,16 @@ std::size_t EntityClass::GetHash() const
             jh = base::hash_combine(jh, ptr->stiffness);
             jh = base::hash_combine(jh, ptr->damping);
         }
+        else if (const auto* ptr = std::get_if<PrismaticJointParams>(&joint->params))
+        {
+            jh = base::hash_combine(jh, ptr->enable_limit);
+            jh = base::hash_combine(jh, ptr->enable_motor);
+            jh = base::hash_combine(jh, ptr->lower_limit);
+            jh = base::hash_combine(jh, ptr->upper_limit);
+            jh = base::hash_combine(jh, ptr->motor_torque);
+            jh = base::hash_combine(jh, ptr->motor_speed);
+            jh = base::hash_combine(jh, ptr->direction_angle);
+        }
         hash = base::hash_combine(hash, jh);
     }
 
@@ -1494,6 +1504,16 @@ void EntityClass::IntoJson(data::Writer& data) const
         {
             chunk->Write("stiffness", ptr->stiffness);
             chunk->Write("damping", ptr->damping);
+        }
+        else if (const auto* ptr = std::get_if<PrismaticJointParams>(&joint->params))
+        {
+            chunk->Write("enable_limit", ptr->enable_limit);
+            chunk->Write("enable_motor", ptr->enable_motor);
+            chunk->Write("lower_limit", ptr->lower_limit);
+            chunk->Write("upper_limit", ptr->upper_limit);
+            chunk->Write("motor_torque", ptr->motor_torque);
+            chunk->Write("motor_speed", ptr->motor_speed);
+            chunk->Write("direction_angle", ptr->direction_angle);
         }
         data.AppendChunk("joints", std::move(chunk));
     }
@@ -1597,6 +1617,18 @@ bool EntityClass::FromJson(const data::Reader& data)
             WeldJointParams params;
             ok &= chunk->Read("stiffness", &params.stiffness);
             ok &= chunk->Read("damping", &params.damping);
+            joint->params = params;
+        }
+        else if (jref.type == PhysicsJointType::Prismatic)
+        {
+            PrismaticJointParams params;
+            ok &= chunk->Read("enable_limit", &params.enable_limit);
+            ok &= chunk->Read("enable_motor", &params.enable_motor);
+            ok &= chunk->Read("lower_limit", &params.lower_limit);
+            ok &= chunk->Read("upper_limit", &params.upper_limit);
+            ok &= chunk->Read("motor_torque", &params.motor_torque);
+            ok &= chunk->Read("motor_speed", &params.motor_speed);
+            ok &= chunk->Read("direction_angle", &params.direction_angle);
             joint->params = params;
         }
         mJoints.push_back(std::move(joint));

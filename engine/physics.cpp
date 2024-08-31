@@ -755,6 +755,12 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter) const
                 const auto& world_anchor = MapVectorToGame(ToGlm(wj->GetAnchorA()));
                 gfx::DebugDrawCircle(painter, gfx::FCircle(world_anchor.x, world_anchor.y, 5.0f), gfx::Color::HotPink, 2.0f);
             }
+            else if (joint->GetType() == b2JointType::e_prismaticJoint)
+            {
+                b2PrismaticJoint* pj = static_cast<b2PrismaticJoint*>(joint);
+                const auto& world_anchor = MapVectorToGame(ToGlm(pj->GetAnchorA()));
+                gfx::DebugDrawCircle(painter, gfx::FCircle(world_anchor.x, world_anchor.y, 5.0f), gfx::Color::HotPink, 2.0f);
+            }
             joints.insert(joint);
             joint_list = joint_list->next;
         }
@@ -1094,6 +1100,33 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             mWorld->CreateJoint(&def);
 
             DEBUG("Weld joint info: [damping=%1, stiffness=%2]", params.damping, params.stiffness);
+        }
+        else if (type == Entity::PhysicsJointType::Prismatic)
+        {
+            Transform transform(entity_to_world);
+            transform.Push(entity.FindNodeTransform(src_node));
+
+            const auto& params = std::get<EntityClass::PrismaticJointParams>(joint.GetParams());
+            const auto& local_direction_vector = RotateVector(glm::vec2(1.0f, 0.0f), params.direction_angle.ToRadians());
+            const auto& world_direction_vector = TransformVector(transform, local_direction_vector);
+
+            b2PrismaticJointDef def {};
+            def.Initialize(src_physics_node->world_body, dst_physics_node->world_body,
+                           ToBox2D(src_world_anchor),
+                           ToBox2D(world_direction_vector));
+
+            def.enableLimit = params.enable_limit;
+            def.enableMotor = params.enable_motor;
+            def.motorSpeed  = params.motor_speed;
+            def.maxMotorForce = params.motor_torque;
+            def.lowerTranslation = params.lower_limit * -1.0f;
+            def.upperTranslation = params.upper_limit;
+            mWorld->CreateJoint(&def);
+
+            DEBUG("Prismatic joint info: [limit=%1, motor=%2, range=%3-%4, speed=%5, torque=%6]",
+                  params.enable_limit, params.enable_motor,
+                  def.lowerTranslation, def.upperTranslation,
+                  params.motor_speed, params.motor_torque);
         }
         else BUG("Unhandled physics joint type.");
 
