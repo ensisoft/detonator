@@ -22,6 +22,38 @@
 #include "editor/gui/utility.h"
 #include "game/scriptvar.h"
 
+namespace game {
+    std::string TranslateEnum(game::ScriptVar::Type type)
+    {
+        using T = game::ScriptVar::Type;
+        if (type == T::String)
+            return "String";
+        else if (type == T::Integer)
+            return "Integer";
+        else if (type == T::Float)
+            return "Float";
+        else if (type == T::Vec2)
+            return "Vec2";
+        else if (type == T::Vec3)
+            return "Vec3";
+        else if (type == T::Vec4)
+            return "Vec4";
+        else if (type == T::Color)
+            return "Color4f";
+        else if (type == T::Boolean)
+            return "Bool";
+        else if (type == T::EntityReference)
+            return "Entity Reference";
+        else if (type == T::EntityNodeReference)
+            return "Entity Node Reference";
+        else if (type == T::MaterialReference)
+            return "Material Reference";
+        else BUG("Missing translation");
+        return "???";
+    }
+} // namespace game
+
+
 namespace gui
 {
 
