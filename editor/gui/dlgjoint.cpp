@@ -48,8 +48,70 @@ DlgJoint::DlgJoint(QWidget* parent, const game::EntityClass& klass, game::Entity
     SetValue(mUI.cmbSrcNode, ListItemId(mJoint.src_node_id));
     SetValue(mUI.cmbDstNode, ListItemId(mJoint.dst_node_id));
 
+    Show();
+
+}
+DlgJoint::~DlgJoint()
+{
+
+}
+
+void DlgJoint::Show()
+{
+    SetValue(mUI.cmbType, mJoint.type);
+
+    SetVisible(mUI.lblANodeAnchor,      false);
+    SetVisible(mUI.lblBNodeAnchor,      false);
+    SetVisible(mUI.lblMinDistance,      false);
+    SetVisible(mUI.lblMaxDistance,      false);
+    SetVisible(mUI.lblStiffness,        false);
+    SetVisible(mUI.lblDamping,          false);
+    SetVisible(mUI.lblLowerAngleLimit,  false);
+    SetVisible(mUI.lblUpperangleLimit,  false);
+    SetVisible(mUI.lblMotorSpeed,       false);
+    SetVisible(mUI.lblMotorTorque,      false);
+    SetVisible(mUI.lblMotorRotation,    false);
+    SetVisible(mUI.upperAngle,          false);
+    SetVisible(mUI.lowerAngle,          false);
+    SetVisible(mUI.motorSpeed,          false);
+    SetVisible(mUI.motorTorque,         false);
+    SetVisible(mUI.cmbMotorRotation,    false);
+    SetVisible(mUI.chkEnableMotor,      false);
+    SetVisible(mUI.chkEnableLimit,      false);
+    SetVisible(mUI.srcX,                false);
+    SetVisible(mUI.srcY,                false);
+    SetVisible(mUI.dstX,                false);
+    SetVisible(mUI.dstY,                false);
+    SetVisible(mUI.minDist,             false);
+    SetVisible(mUI.maxDist,             false);
+    SetVisible(mUI.stiffness,           false);
+    SetVisible(mUI.damping,             false);
+    SetVisible(mUI.btnResetMinDistance, false);
+    SetVisible(mUI.btnResetMaxDistance, false);
+    SetVisible(mUI.btnResetDstAnchor,   false);
+    SetVisible(mUI.btnResetSrcAnchor,   false);
+
     if (mJoint.type == game::EntityClass::PhysicsJointType::Distance)
     {
+        SetVisible(mUI.lblANodeAnchor,      true);
+        SetVisible(mUI.lblBNodeAnchor,      true);
+        SetVisible(mUI.lblMinDistance,      true);
+        SetVisible(mUI.lblMaxDistance,      true);
+        SetVisible(mUI.lblStiffness,        true);
+        SetVisible(mUI.lblDamping,          true);
+        SetVisible(mUI.srcX,                true);
+        SetVisible(mUI.srcY,                true);
+        SetVisible(mUI.dstX,                true);
+        SetVisible(mUI.dstY,                true);
+        SetVisible(mUI.minDist,             true);
+        SetVisible(mUI.maxDist,             true);
+        SetVisible(mUI.stiffness,           true);
+        SetVisible(mUI.damping,             true);
+        SetVisible(mUI.btnResetMinDistance, true);
+        SetVisible(mUI.btnResetMaxDistance, true);
+        SetVisible(mUI.btnResetDstAnchor,   true);
+        SetVisible(mUI.btnResetSrcAnchor,   true);
+
         const auto& params = std::get<game::EntityClass::DistanceJointParams>(mJoint.params);
         SetValue(mUI.srcX, params.src_node_anchor_point.x);
         SetValue(mUI.srcY, params.src_node_anchor_point.y);
@@ -59,11 +121,69 @@ DlgJoint::DlgJoint(QWidget* parent, const game::EntityClass& klass, game::Entity
         SetValue(mUI.damping, params.damping);
         SetValue(mUI.minDist, params.min_distance.value_or(-0.1f));
         SetValue(mUI.maxDist, params.max_distance.value_or(-0.1f));
-    }
-}
-DlgJoint::~DlgJoint()
-{
 
+        SetSuffix(mUI.stiffness, " N/m"); // Newtons per meter
+        SetSuffix(mUI.damping, " N⋅s/m"); // Newton seconds per meter
+    }
+    else if (mJoint.type == game::EntityClass::PhysicsJointType::Revolute)
+    {
+        SetVisible(mUI.lblANodeAnchor,      true);
+        SetVisible(mUI.srcX,                true);
+        SetVisible(mUI.srcY,                true);
+        SetVisible(mUI.btnResetSrcAnchor,   true);
+        SetVisible(mUI.lblLowerAngleLimit,  true);
+        SetVisible(mUI.lblUpperangleLimit,  true);
+        SetVisible(mUI.lblMotorSpeed,       true);
+        SetVisible(mUI.lblMotorTorque,      true);
+        SetVisible(mUI.upperAngle,          true);
+        SetVisible(mUI.lowerAngle,          true);
+        SetVisible(mUI.motorSpeed,          true);
+        SetVisible(mUI.motorTorque,         true);
+        SetVisible(mUI.chkEnableLimit,      true);
+        SetVisible(mUI.chkEnableMotor,      true);
+        SetVisible(mUI.lblMotorRotation,    true);
+        SetVisible(mUI.cmbMotorRotation,    true);
+
+        const auto& params = std::get<game::EntityClass::RevoluteJointParams>(mJoint.params);
+        SetValue(mUI.srcX, params.src_node_anchor_point.x);
+        SetValue(mUI.srcY, params.src_node_anchor_point.y);
+        SetValue(mUI.dstX, params.dst_node_anchor_point.x);
+        SetValue(mUI.dstY, params.dst_node_anchor_point.y);
+        SetValue(mUI.lowerAngle, params.lower_angle_limit);
+        SetValue(mUI.upperAngle, params.upper_angle_limit);
+        SetValue(mUI.motorSpeed, std::fabs(params.motor_speed));
+        SetValue(mUI.motorTorque, params.motor_torque);
+        SetValue(mUI.chkEnableMotor, params.enable_motor);
+        SetValue(mUI.chkEnableLimit, params.enable_limit);
+
+        // positive speed is counterclockwise rotation of the joint
+        if (params.motor_speed >= 0.0f)
+            SetValue(mUI.cmbMotorRotation, "Counterclockwise");
+        else SetValue(mUI.cmbMotorRotation, "Clockwise");
+
+    }
+    else if (mJoint.type == game::EntityClass::PhysicsJointType::Weld)
+    {
+        SetVisible(mUI.lblANodeAnchor,      true);
+        SetVisible(mUI.srcX,                true);
+        SetVisible(mUI.srcY,                true);
+        SetVisible(mUI.btnResetSrcAnchor,   true);
+        SetVisible(mUI.lblStiffness,        true);
+        SetVisible(mUI.lblDamping,          true);
+        SetVisible(mUI.stiffness,           true);
+        SetVisible(mUI.damping,             true);
+
+        const auto& params = std::get<game::EntityClass::WeldJointParams>(mJoint.params);
+        SetValue(mUI.srcX, params.src_node_anchor_point.x);
+        SetValue(mUI.srcY, params.src_node_anchor_point.y);
+        SetValue(mUI.dstX, params.dst_node_anchor_point.x);
+        SetValue(mUI.dstY, params.dst_node_anchor_point.y);
+        SetValue(mUI.damping, params.damping);
+        SetValue(mUI.stiffness, params.stiffness);
+
+        SetSuffix(mUI.stiffness, " N⋅m");
+        SetSuffix(mUI.damping, " N⋅m/s");
+    }
 }
 
 bool DlgJoint::Apply()
@@ -108,6 +228,34 @@ bool DlgJoint::Apply()
             params.max_distance = max_dist;
         mJoint.params = params;
     }
+    else if (mJoint.type == game::EntityClass::PhysicsJointType::Revolute)
+    {
+        const auto& motor_direction = mUI.cmbMotorRotation->currentText();
+
+        game::EntityClass::RevoluteJointParams params;
+        params.src_node_anchor_point.x = GetValue(mUI.srcX);
+        params.src_node_anchor_point.y = GetValue(mUI.srcY);
+        params.dst_node_anchor_point.x = GetValue(mUI.dstX);
+        params.dst_node_anchor_point.y = GetValue(mUI.dstY);
+        params.upper_angle_limit = GetValue(mUI.upperAngle);
+        params.lower_angle_limit = GetValue(mUI.lowerAngle);
+        params.motor_torque = GetValue(mUI.motorTorque);
+        params.motor_speed = GetValue(mUI.motorSpeed);
+        params.enable_limit = GetValue(mUI.chkEnableLimit);
+        params.enable_motor = GetValue(mUI.chkEnableMotor);
+        if (motor_direction == "Clockwise")
+            params.motor_speed *= -1.0f;
+        mJoint.params = params;
+    }
+    else if (mJoint.type == game::EntityClass::PhysicsJointType::Weld)
+    {
+        game::EntityClass::WeldJointParams params;
+        params.src_node_anchor_point.x = GetValue(mUI.srcX);
+        params.src_node_anchor_point.y = GetValue(mUI.srcY);
+        params.damping = GetValue(mUI.damping);
+        params.stiffness = GetValue(mUI.stiffness);
+        mJoint.params = params;
+    }
     return true;
 }
 
@@ -147,5 +295,43 @@ void DlgJoint::on_btnResetMaxDistance_clicked()
     SetValue(mUI.maxDist, -0.1f);
 }
 
+void DlgJoint::on_cmbType_currentIndexChanged(int)
+{
+    const game::EntityClass::PhysicsJointType type = GetValue(mUI.cmbType);
+    if (type == game::EntityClass::PhysicsJointType::Distance)
+    {
+        mJoint.type = type;
+        mJoint.params = game::EntityClass::DistanceJointParams {};
+    }
+    else if (type == game::EntityClass::PhysicsJointType::Revolute)
+    {
+        mJoint.type = type;
+        mJoint.params = game::EntityClass::RevoluteJointParams {};
+    }
+    else if (type == game::EntityClass::PhysicsJointType::Weld)
+    {
+        mJoint.type = type;
+        mJoint.params = game::EntityClass::WeldJointParams {};
+    }
+
+    Show();
+}
+
+void DlgJoint::on_srcX_valueChanged(double)
+{
+    Apply();
+}
+void DlgJoint::on_srcY_valueChanged(double)
+{
+    Apply();
+}
+void DlgJoint::on_dstX_valueChanged(double)
+{
+    Apply();
+}
+void DlgJoint::on_dstY_valueChanged(double)
+{
+    Apply();
+}
 
 } // namespace
