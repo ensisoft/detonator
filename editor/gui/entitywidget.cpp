@@ -1951,7 +1951,7 @@ void EntityWidget::on_btnNewJoint_clicked()
         return;
     }
 
-    mJointModel->EditJoint(index, std::move(joint));
+    mJointModel->UpdateJoint(index);
     SetEnabled(mUI.btnEditJoint, true);
     SetEnabled(mUI.btnDeleteJoint, true);
 }
@@ -3193,16 +3193,35 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         if (!joint.IsValid())
             continue;
 
+        const auto* src_node = mState.entity->FindNodeById(joint.src_node_id);
+        const auto* dst_node = mState.entity->FindNodeById(joint.dst_node_id);
+        if (!src_node || !dst_node)
+            continue;
+
         if (joint.type == game::EntityClass::PhysicsJointType::Distance)
         {
             const auto& params = std::get<game::EntityClass::DistanceJointParams>(joint.params);
-            const auto* src_node = mState.entity->FindNodeById(joint.src_node_id);
-            const auto* dst_node = mState.entity->FindNodeById(joint.dst_node_id);
             const auto& src_anchor_point = src_node->GetSize() * 0.5f + params.src_node_anchor_point;
             const auto& dst_anchor_point = dst_node->GetSize() * 0.5f + params.dst_node_anchor_point;
             const auto& src_point = mState.entity->MapCoordsFromNodeBox(src_anchor_point, src_node);
             const auto& dst_point = mState.entity->MapCoordsFromNodeBox(dst_anchor_point, dst_node);
             DrawLine(entity_painter, src_point, dst_point);
+            DrawDot(entity_painter, src_point);
+            DrawDot(entity_painter, dst_point);
+        }
+        else if (joint.type == game::EntityClass::PhysicsJointType::Revolute)
+        {
+            const auto& params = std::get<game::EntityClass::RevoluteJointParams>(joint.params);
+            const auto& src_anchor_point_node = src_node->GetSize() * 0.5f + params.src_node_anchor_point;
+            const auto& src_anchor_point_entity = mState.entity->MapCoordsFromNodeBox(src_anchor_point_node, src_node);
+            DrawDot(entity_painter, src_anchor_point_entity);
+        }
+        else if (joint.type == game::EntityClass::PhysicsJointType::Weld)
+        {
+            const auto& params = std::get<game::EntityClass::WeldJointParams>(joint.params);
+            const auto& src_anchor_point_node = src_node->GetSize() * 0.5f + params.src_node_anchor_point;
+            const auto& src_anchor_point_entity = mState.entity->MapCoordsFromNodeBox(src_anchor_point_node, src_node);
+            DrawDot(entity_painter, src_anchor_point_entity);
         }
     }
     // Draw comments, drawn in entity space

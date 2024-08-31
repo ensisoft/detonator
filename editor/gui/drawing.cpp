@@ -65,6 +65,11 @@ void DrawLine(gfx::Painter& painter, const glm::vec2& src, const glm::vec2& dst)
     gfx::DebugDrawLine(painter, gfx::FPoint(src.x, src.y), gfx::FPoint(dst.x, dst.y), gfx::Color::DarkYellow, 2.0f);
 }
 
+void DrawDot(gfx::Painter& painter, const glm::vec2& pos)
+{
+    gfx::DebugDrawCircle(painter, gfx::FCircle(pos.x, pos.y, 5.0f), gfx::Color::DarkYellow, 2.0f);
+}
+
 void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans)
 {
     // draw the X vector

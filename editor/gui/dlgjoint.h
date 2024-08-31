@@ -45,9 +45,15 @@ namespace gui
         void on_btnResetDstAnchor_clicked();
         void on_btnResetMinDistance_clicked();
         void on_btnResetMaxDistance_clicked();
+        void on_cmbType_currentIndexChanged(int);
+        void on_srcX_valueChanged(double);
+        void on_srcY_valueChanged(double);
+        void on_dstX_valueChanged(double);
+        void on_dstY_valueChanged(double);
 
     private:
         bool Apply();
+        void Show();
 
     private:
         Ui::DlgJoint mUI;

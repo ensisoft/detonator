@@ -236,12 +236,15 @@
             <property name="text">
              <string>Updates</string>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
            </widget>
           </item>
           <item row="3" column="1" colspan="2">
            <widget class="QComboBox" name="scriptFile">
             <property name="placeholderText">
-             <string>Select Entity Script [None]</string>
+             <string>No entity script selected</string>
             </property>
            </widget>
           </item>
@@ -296,6 +299,9 @@
            <widget class="QLabel" name="label_22">
             <property name="text">
              <string>Input</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
@@ -377,12 +383,15 @@
             <property name="text">
              <string>Name</string>
             </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
            </widget>
           </item>
           <item row="4" column="1" colspan="2">
            <widget class="QComboBox" name="idleTrack">
             <property name="placeholderText">
-             <string>Select Idle Animation [None]</string>
+             <string>No idle animation selected</string>
             </property>
            </widget>
           </item>
@@ -425,7 +434,7 @@
           </size>
          </property>
          <property name="title">
-          <string>Enable Entity Animator </string>
+          <string>Entity animator</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -433,79 +442,15 @@
          <property name="checked">
           <bool>false</bool>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_20">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
-            <item>
-             <widget class="QComboBox" name="animatorScript">
-              <property name="placeholderText">
-               <string>Select Animator Script [None]</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="btnEditAnimatorScript">
-              <property name="toolTip">
-               <string>Open the script for editing</string>
-              </property>
-              <property name="text">
-               <string>...</string>
-              </property>
-              <property name="icon">
-               <iconset resource="../resource/resource.qrc">
-                <normaloff>:/16x16_ico_png/script_go.png</normaloff>:/16x16_ico_png/script_go.png</iconset>
-              </property>
-              <property name="autoRaise">
-               <bool>false</bool>
-              </property>
-              <property name="arrowType">
-               <enum>Qt::NoArrow</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="btnAddAnimatorScript">
-              <property name="toolTip">
-               <string>Add new entity script</string>
-              </property>
-              <property name="text">
-               <string>...</string>
-              </property>
-              <property name="icon">
-               <iconset resource="../resource/resource.qrc">
-                <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
-              </property>
-              <property name="autoRaise">
-               <bool>false</bool>
-              </property>
-              <property name="arrowType">
-               <enum>Qt::NoArrow</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="btnResetAnimatorScript">
-              <property name="toolTip">
-               <string>Reset entity script to nothing</string>
-              </property>
-              <property name="text">
-               <string>...</string>
-              </property>
-              <property name="icon">
-               <iconset resource="../resource/resource.qrc">
-                <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
-              </property>
-              <property name="autoRaise">
-               <bool>false</bool>
-              </property>
-              <property name="arrowType">
-               <enum>Qt::NoArrow</enum>
-              </property>
-             </widget>
-            </item>
-           </layout>
+         <layout class="QGridLayout" name="gridLayout_9">
+          <item row="0" column="1">
+           <widget class="QComboBox" name="animatorScript">
+            <property name="placeholderText">
+             <string>No animator script selected</string>
+            </property>
+           </widget>
           </item>
-          <item>
+          <item row="1" column="1">
            <widget class="QPushButton" name="btnEditAnimator">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -519,6 +464,76 @@
             <property name="icon">
              <iconset resource="../resource/resource.qrc">
               <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QToolButton" name="btnResetAnimatorScript">
+            <property name="toolTip">
+             <string>Reset entity script to nothing</string>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+            </property>
+            <property name="autoRaise">
+             <bool>false</bool>
+            </property>
+            <property name="arrowType">
+             <enum>Qt::NoArrow</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QToolButton" name="btnAddAnimatorScript">
+            <property name="toolTip">
+             <string>Add new entity script</string>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+            </property>
+            <property name="autoRaise">
+             <bool>false</bool>
+            </property>
+            <property name="arrowType">
+             <enum>Qt::NoArrow</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QToolButton" name="btnEditAnimatorScript">
+            <property name="toolTip">
+             <string>Open the script for editing</string>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../resource/resource.qrc">
+              <normaloff>:/16x16_ico_png/script_go.png</normaloff>:/16x16_ico_png/script_go.png</iconset>
+            </property>
+            <property name="autoRaise">
+             <bool>false</bool>
+            </property>
+            <property name="arrowType">
+             <enum>Qt::NoArrow</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_58">
+            <property name="text">
+             <string>Script</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
@@ -560,7 +575,7 @@
                <x>0</x>
                <y>0</y>
                <width>437</width>
-               <height>734</height>
+               <height>736</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_17">
@@ -3130,7 +3145,7 @@
                     <item row="7" column="0">
                      <widget class="QLabel" name="label_33">
                       <property name="text">
-                       <string>Density (kg/m²)</string>
+                       <string>Density</string>
                       </property>
                      </widget>
                     </item>
@@ -3162,6 +3177,9 @@
                         <horstretch>0</horstretch>
                         <verstretch>0</verstretch>
                        </sizepolicy>
+                      </property>
+                      <property name="suffix">
+                       <string> kg/m²</string>
                       </property>
                      </widget>
                     </item>
