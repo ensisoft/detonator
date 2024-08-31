@@ -749,6 +749,12 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter) const
                 const auto& world_anchor = MapVectorToGame(ToGlm(rj->GetAnchorA()));
                 gfx::DebugDrawCircle(painter, gfx::FCircle(world_anchor.x, world_anchor.y, 5.0f), gfx::Color::HotPink, 2.0f);
             }
+            else if (joint->GetType() == b2JointType::e_weldJoint)
+            {
+                b2WeldJoint* wj = static_cast<b2WeldJoint*>(joint);
+                const auto& world_anchor = MapVectorToGame(ToGlm(wj->GetAnchorA()));
+                gfx::DebugDrawCircle(painter, gfx::FCircle(world_anchor.x, world_anchor.y, 5.0f), gfx::Color::HotPink, 2.0f);
+            }
             joints.insert(joint);
             joint_list = joint_list->next;
         }
@@ -1043,17 +1049,17 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             else def.maxLength = distance;
             def.stiffness    = params.stiffness;
             def.damping      = params.damping;
+
             if (def.minLength > def.maxLength)
             {
-                WARN("Entity distance joint min distance exceeds max distance. [entity='%1', joint='%2', min_dist=%3, max_dist=%4]",
-                     entity.GetClassName(), entity.GetName(), joint.GetName(), def.minLength, def.maxLength);
                 def.minLength = def.maxLength;
             }
             // the joint is deleted whenever either body is deleted.
             mWorld->CreateJoint(&def);
 
-            DEBUG("Distance joint info: [min distance=%1, max distance=%2]",
-                  def.minLength, def.maxLength);
+            DEBUG("Distance joint info: [min distance=%1, max distance=%2, stiffness=%3, damping=%4]",
+                  def.minLength, def.maxLength, params.stiffness, params.damping);
+
         }
         else if (type == Entity::PhysicsJointType::Revolute)
         {
@@ -1082,6 +1088,29 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
                   params.lower_angle_limit.ToDegrees(),
                   params.upper_angle_limit.ToDegrees(),
                   params.motor_speed, params.motor_torque);
+        }
+        else if (type == Entity::PhysicsJointType::Weld)
+        {
+            const auto& params = std::get<EntityClass::WeldJointParams>(joint.GetParams());
+            const auto& src_local_anchor = params.src_node_anchor_point;
+            const auto& dst_local_anchor = params.dst_node_anchor_point;
+
+            Transform transform(entity_to_world);
+            transform.Push(entity.FindNodeTransform(src_node));
+                const auto& src_world_anchor = transform * glm::vec4(src_local_anchor, 1.0f, 1.0f);
+            transform.Pop();
+
+            transform.Push(entity.FindNodeTransform(dst_node));
+                const auto& dst_world_anchor = transform * glm::vec4(dst_local_anchor, 1.0f, 1.0f);
+            transform.Pop();
+
+            b2WeldJointDef def = {};
+            def.Initialize(src_physics_node->world_body, dst_physics_node->world_body, ToBox2D(src_world_anchor));
+            def.damping   = params.damping;
+            def.stiffness = params.stiffness;
+            mWorld->CreateJoint(&def);
+
+            DEBUG("Weld joint info: [damping=%1, stiffness=%2]", params.damping, params.stiffness);
         }
         else BUG("Unhandled physics joint type.");
 

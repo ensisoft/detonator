@@ -1810,7 +1810,7 @@ namespace game
         };
 
         enum class PhysicsJointType {
-            Distance, Revolute
+            Distance, Revolute, Weld
         };
 
         struct RevoluteJointParams {
@@ -1821,7 +1821,7 @@ namespace game
             FRadians lower_angle_limit;
             FRadians upper_angle_limit;
             float motor_speed = 0.0f; // radians per second
-            float motor_torque = 0.0f; // Nm
+            float motor_torque = 0.0f; // newton-meters
         };
 
         struct DistanceJointParams {
@@ -1831,8 +1831,8 @@ namespace game
             glm::vec2 dst_node_anchor_point = {0.0f, 0.0f};
             std::optional<float> min_distance;
             std::optional<float> max_distance;
-            float stiffness = 0.0f;
-            float damping   = 0.0f;
+            float stiffness = 0.0f; // Newtons per meter, N/m
+            float damping   = 0.0f; // Newton seconds per meter
             DistanceJointParams()
             {
                 min_distance.reset();
@@ -1840,8 +1840,16 @@ namespace game
             }
         };
 
+        struct WeldJointParams {
+            glm::vec2 src_node_anchor_point = {0.0f, 0.0f};
+            glm::vec2 dst_node_anchor_point = {0.0f, 0.0f};
+            float stiffness = 0.0f; // Newton-meters
+            float damping   = 0.0f; // Newton-meters per second
+
+        };
+
         using PhysicsJointParams = std::variant<DistanceJointParams,
-                RevoluteJointParams>;
+                RevoluteJointParams, WeldJointParams>;
 
         // PhysicsJoint defines an optional physics engine constraint
         // between two bodies in the physics world. In other words
