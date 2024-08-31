@@ -50,6 +50,7 @@ namespace gui
         void on_srcY_valueChanged(double);
         void on_dstX_valueChanged(double);
         void on_dstY_valueChanged(double);
+        void on_dirAngle_valueChanged(double);
 
     private:
         bool Apply();

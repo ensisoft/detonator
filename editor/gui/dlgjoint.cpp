@@ -58,36 +58,42 @@ DlgJoint::~DlgJoint()
 
 void DlgJoint::Show()
 {
-    SetVisible(mUI.lblNodeAPosition,    false);
-    SetVisible(mUI.lblNodeBPosition,    false);
-    SetVisible(mUI.lblMinDistance,      false);
-    SetVisible(mUI.lblMaxDistance,      false);
-    SetVisible(mUI.lblStiffness,        false);
-    SetVisible(mUI.lblDamping,          false);
-    SetVisible(mUI.lblLowerAngleLimit,  false);
-    SetVisible(mUI.lblUpperangleLimit,  false);
-    SetVisible(mUI.lblMotorSpeed,       false);
-    SetVisible(mUI.lblMotorTorque,      false);
-    SetVisible(mUI.lblMotorRotation,    false);
-    SetVisible(mUI.upperAngle,          false);
-    SetVisible(mUI.lowerAngle,          false);
-    SetVisible(mUI.motorSpeed,          false);
-    SetVisible(mUI.motorTorque,         false);
-    SetVisible(mUI.cmbMotorRotation,    false);
-    SetVisible(mUI.chkEnableMotor,      false);
-    SetVisible(mUI.chkEnableLimit,      false);
-    SetVisible(mUI.srcX,                false);
-    SetVisible(mUI.srcY,                false);
-    SetVisible(mUI.dstX,                false);
-    SetVisible(mUI.dstY,                false);
-    SetVisible(mUI.minDist,             false);
-    SetVisible(mUI.maxDist,             false);
-    SetVisible(mUI.stiffness,           false);
-    SetVisible(mUI.damping,             false);
-    SetVisible(mUI.btnResetMinDistance, false);
-    SetVisible(mUI.btnResetMaxDistance, false);
-    SetVisible(mUI.btnResetDstAnchor,   false);
-    SetVisible(mUI.btnResetSrcAnchor,   false);
+    SetVisible(mUI.lblNodeAPosition,         false);
+    SetVisible(mUI.lblNodeBPosition,         false);
+    SetVisible(mUI.lblMinDistance,           false);
+    SetVisible(mUI.lblMaxDistance,           false);
+    SetVisible(mUI.lblStiffness,             false);
+    SetVisible(mUI.lblDamping,               false);
+    SetVisible(mUI.lblLowerAngleLimit,       false);
+    SetVisible(mUI.lblUpperangleLimit,       false);
+    SetVisible(mUI.lblMotorSpeed,            false);
+    SetVisible(mUI.lblMotorTorque,           false);
+    SetVisible(mUI.lblMotorRotation,         false);
+    SetVisible(mUI.upperAngle,               false);
+    SetVisible(mUI.lowerAngle,               false);
+    SetVisible(mUI.motorSpeed,               false);
+    SetVisible(mUI.motorTorque,              false);
+    SetVisible(mUI.motorRotation,            false);
+    SetVisible(mUI.chkEnableMotor,           false);
+    SetVisible(mUI.chkEnableLimit,           false);
+    SetVisible(mUI.srcX,                     false);
+    SetVisible(mUI.srcY,                     false);
+    SetVisible(mUI.dstX,                     false);
+    SetVisible(mUI.dstY,                     false);
+    SetVisible(mUI.minDist,                  false);
+    SetVisible(mUI.maxDist,                  false);
+    SetVisible(mUI.stiffness,                false);
+    SetVisible(mUI.damping,                  false);
+    SetVisible(mUI.btnResetMinDistance,      false);
+    SetVisible(mUI.btnResetMaxDistance,      false);
+    SetVisible(mUI.btnResetDstAnchor,        false);
+    SetVisible(mUI.btnResetSrcAnchor,        false);
+    SetVisible(mUI.lowerTranslationLimit,    false);
+    SetVisible(mUI.upperTranslationLimit,    false);
+    SetVisible(mUI.lblLowerTranslationLimit, false);
+    SetVisible(mUI.lblUpperTranslationLimit, false);
+    SetVisible(mUI.lblDirAngle,              false);
+    SetVisible(mUI.dirAngle,                 false);
 
     SetValue(mUI.cmbType, mJoint.type);
     SetValue(mUI.srcX, mJoint.src_node_anchor_point.x);
@@ -129,7 +135,6 @@ void DlgJoint::Show()
     else if (mJoint.type == game::EntityClass::PhysicsJointType::Revolute)
     {
         SetVisible(mUI.lblNodeAPosition,    true);
-        SetVisible(mUI.lblNodeBPosition,    false);
         SetVisible(mUI.srcX,                true);
         SetVisible(mUI.srcY,                true);
         SetVisible(mUI.btnResetSrcAnchor,   true);
@@ -144,7 +149,8 @@ void DlgJoint::Show()
         SetVisible(mUI.chkEnableLimit,      true);
         SetVisible(mUI.chkEnableMotor,      true);
         SetVisible(mUI.lblMotorRotation,    true);
-        SetVisible(mUI.cmbMotorRotation,    true);
+        SetVisible(mUI.motorRotation,       true);
+        SetRange(mUI.motorSpeed, 0.0f, 100.0f);
 
         const auto& params = std::get<game::EntityClass::RevoluteJointParams>(mJoint.params);
         SetValue(mUI.lowerAngle, params.lower_angle_limit);
@@ -156,14 +162,13 @@ void DlgJoint::Show()
 
         // positive speed is counterclockwise rotation of the joint
         if (params.motor_speed >= 0.0f)
-            SetValue(mUI.cmbMotorRotation, "Counterclockwise");
-        else SetValue(mUI.cmbMotorRotation, "Clockwise");
+            SetValue(mUI.motorRotation, "Counterclockwise");
+        else SetValue(mUI.motorRotation, "Clockwise");
 
     }
     else if (mJoint.type == game::EntityClass::PhysicsJointType::Weld)
     {
         SetVisible(mUI.lblNodeAPosition,    true);
-        SetVisible(mUI.lblNodeBPosition,    false);
         SetVisible(mUI.srcX,                true);
         SetVisible(mUI.srcY,                true);
         SetVisible(mUI.btnResetSrcAnchor,   true);
@@ -178,6 +183,36 @@ void DlgJoint::Show()
 
         SetSuffix(mUI.stiffness, " N⋅m");
         SetSuffix(mUI.damping, " N⋅m/s");
+    }
+    else if (mJoint.type == game::EntityClass::PhysicsJointType::Prismatic)
+    {
+        SetVisible(mUI.lblNodeAPosition,         true);
+        SetVisible(mUI.srcX,                     true);
+        SetVisible(mUI.srcY,                     true);
+        SetVisible(mUI.btnResetSrcAnchor,        true);
+        SetVisible(mUI.motorTorque,              true);
+        SetVisible(mUI.lblMotorTorque,           true);
+        SetVisible(mUI.lblMotorSpeed,            true);
+        SetVisible(mUI.motorSpeed,               true);
+        SetVisible(mUI.motorTorque,              true);
+        SetVisible(mUI.chkEnableLimit,           true);
+        SetVisible(mUI.chkEnableMotor,           true);
+        SetVisible(mUI.lowerTranslationLimit,    true);
+        SetVisible(mUI.upperTranslationLimit,    true);
+        SetVisible(mUI.lblUpperTranslationLimit, true);
+        SetVisible(mUI.lblLowerTranslationLimit, true);
+        SetVisible(mUI.lblDirAngle,              true);
+        SetVisible(mUI.dirAngle,                 true);
+        SetRange(mUI.motorSpeed, -100.0f, 100.0f);
+
+        const auto& params = std::get<game::EntityClass::PrismaticJointParams>(mJoint.params);
+        SetValue(mUI.chkEnableLimit, params.enable_limit);
+        SetValue(mUI.chkEnableMotor, params.enable_motor);
+        SetValue(mUI.motorSpeed,     params.motor_speed);
+        SetValue(mUI.motorTorque,    params.motor_torque);
+        SetValue(mUI.lowerTranslationLimit, params.lower_limit);
+        SetValue(mUI.upperTranslationLimit, params.upper_limit);
+        SetValue(mUI.dirAngle, params.direction_angle);
     }
 }
 
@@ -225,7 +260,7 @@ bool DlgJoint::Apply()
     }
     else if (mJoint.type == game::EntityClass::PhysicsJointType::Revolute)
     {
-        const auto& motor_direction = mUI.cmbMotorRotation->currentText();
+        const auto& motor_direction = mUI.motorRotation->currentText();
 
         game::EntityClass::RevoluteJointParams params;
         params.upper_angle_limit = GetValue(mUI.upperAngle);
@@ -243,6 +278,18 @@ bool DlgJoint::Apply()
         game::EntityClass::WeldJointParams params;
         params.damping = GetValue(mUI.damping);
         params.stiffness = GetValue(mUI.stiffness);
+        mJoint.params = params;
+    }
+    else if (mJoint.type == game::EntityClass::PhysicsJointType::Prismatic)
+    {
+        game::EntityClass::PrismaticJointParams params;
+        params.upper_limit = GetValue(mUI.upperTranslationLimit);
+        params.lower_limit = GetValue(mUI.lowerTranslationLimit);
+        params.motor_torque = GetValue(mUI.motorTorque);
+        params.motor_speed = GetValue(mUI.motorSpeed);
+        params.enable_limit = GetValue(mUI.chkEnableLimit);
+        params.enable_motor = GetValue(mUI.chkEnableMotor);
+        params.direction_angle = GetValue(mUI.dirAngle);
         mJoint.params = params;
     }
     return true;
@@ -302,6 +349,11 @@ void DlgJoint::on_cmbType_currentIndexChanged(int)
         mJoint.type = type;
         mJoint.params = game::EntityClass::WeldJointParams {};
     }
+    else if (type == game::EntityClass::PhysicsJointType::Prismatic)
+    {
+        mJoint.type = type;
+        mJoint.params = game::EntityClass::PrismaticJointParams {};
+    }
 
     Show();
 }
@@ -319,6 +371,11 @@ void DlgJoint::on_dstX_valueChanged(double)
     Apply();
 }
 void DlgJoint::on_dstY_valueChanged(double)
+{
+    Apply();
+}
+
+void DlgJoint::on_dirAngle_valueChanged(double)
 {
     Apply();
 }

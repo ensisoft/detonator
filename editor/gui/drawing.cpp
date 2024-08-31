@@ -70,6 +70,26 @@ void DrawDot(gfx::Painter& painter, const glm::vec2& pos)
     gfx::DebugDrawCircle(painter, gfx::FCircle(pos.x, pos.y, 5.0f), gfx::Color::DarkYellow, 2.0f);
 }
 
+void DrawDir(gfx::Painter& painter, const glm::vec2& pos, const glm::vec2& dir)
+{
+    const auto normalized = glm::normalize(dir);
+    const auto cosine = glm::dot(normalized, glm::vec2(1.0f, 0.0f));
+    const auto angle = dir.y > 0.0f ? cosine : -cosine;
+
+    DrawDir(painter, pos, angle);
+}
+
+void DrawDir(gfx::Painter& painter, const glm::vec2& pos, float angle)
+{
+    gfx::Transform transform;
+    transform.Translate(pos);
+    transform.Push();
+      transform.Scale(20.0f, 5.0f);
+      transform.Translate(0.0f, -2.5f);
+      transform.RotateAroundZ(angle);
+    painter.Draw(gfx::Arrow(), transform, gfx::CreateMaterialFromColor(gfx::Color::DarkYellow));
+}
+
 void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans)
 {
     // draw the X vector
