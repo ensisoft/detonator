@@ -1014,24 +1014,26 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             continue;
         }
 
+        // the local anchor points are relative to the node itself.
+        const auto& src_local_anchor = joint.GetSrcAnchor();
+        const auto& dst_local_anchor = joint.GetDstAnchor();
+
+        // transform the anchor points into the physics world.
+        Transform transform(entity_to_world);
+        transform.Push(entity.FindNodeTransform(src_node));
+            const auto& src_world_anchor = transform.GetAsMatrix() * glm::vec4(src_local_anchor, 1.0f, 1.0f);
+        transform.Pop();
+
+        transform.Push(entity.FindNodeTransform(dst_node));
+            const auto& dst_world_anchor = transform.GetAsMatrix() * glm::vec4(dst_local_anchor, 1.0f, 1.0f);
+        transform.Pop();
+
         const auto type = joint.GetType();
 
         if (type == Entity::PhysicsJointType::Distance)
         {
             const auto& params = std::get<EntityClass::DistanceJointParams>(joint.GetParams());
-            // the local anchor points are relative to the node itself.
-            const auto& src_local_anchor = params.src_node_anchor_point;
-            const auto& dst_local_anchor = params.dst_node_anchor_point;
 
-            // transform the anchor points into the physics world.
-            Transform transform(entity_to_world);
-            transform.Push(entity.FindNodeTransform(src_node));
-                const auto& src_world_anchor = transform.GetAsMatrix() * glm::vec4(src_local_anchor, 1.0f, 1.0f);
-            transform.Pop();
-
-            transform.Push(entity.FindNodeTransform(dst_node));
-                const auto& dst_world_anchor = transform.GetAsMatrix() * glm::vec4(dst_local_anchor, 1.0f, 1.0f);
-            transform.Pop();
             // distance between the anchor points is the same as the distance
             // between the anchor points in the physics world.
             const auto distance = glm::length(dst_world_anchor - src_world_anchor);
@@ -1066,13 +1068,6 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             const auto& params = std::get<EntityClass::RevoluteJointParams>(joint.GetParams());
             // the revolute joint is a hinge like joint with one single point of rotation
             // around which the bodies rotate.
-            const auto& src_local_anchor = params.src_node_anchor_point;
-
-            Transform transform(entity_to_world);
-            transform.Push(entity.FindNodeTransform(src_node));
-                const auto& src_world_anchor = transform * glm::vec4(src_local_anchor, 1.0f, 1.0f);
-            transform.Pop();
-
             b2RevoluteJointDef def = {};
             def.Initialize(src_physics_node->world_body, dst_physics_node->world_body, ToBox2D(src_world_anchor));
             def.enableLimit    = params.enable_limit;
@@ -1092,18 +1087,6 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
         else if (type == Entity::PhysicsJointType::Weld)
         {
             const auto& params = std::get<EntityClass::WeldJointParams>(joint.GetParams());
-            const auto& src_local_anchor = params.src_node_anchor_point;
-            const auto& dst_local_anchor = params.dst_node_anchor_point;
-
-            Transform transform(entity_to_world);
-            transform.Push(entity.FindNodeTransform(src_node));
-                const auto& src_world_anchor = transform * glm::vec4(src_local_anchor, 1.0f, 1.0f);
-            transform.Pop();
-
-            transform.Push(entity.FindNodeTransform(dst_node));
-                const auto& dst_world_anchor = transform * glm::vec4(dst_local_anchor, 1.0f, 1.0f);
-            transform.Pop();
-
             b2WeldJointDef def = {};
             def.Initialize(src_physics_node->world_body, dst_physics_node->world_body, ToBox2D(src_world_anchor));
             def.damping   = params.damping;

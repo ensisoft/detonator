@@ -1814,8 +1814,6 @@ namespace game
         };
 
         struct RevoluteJointParams {
-            glm::vec2 src_node_anchor_point = {0.0f, 0.0f};
-            glm::vec2 dst_node_anchor_point = {0.0f, 0.0f};
             bool enable_limit = false;
             bool enable_motor = false;
             FRadians lower_angle_limit;
@@ -1825,10 +1823,6 @@ namespace game
         };
 
         struct DistanceJointParams {
-            // the anchor point within the body
-            glm::vec2 src_node_anchor_point = {0.0f, 0.0f};
-            // the anchor point within the body.
-            glm::vec2 dst_node_anchor_point = {0.0f, 0.0f};
             std::optional<float> min_distance;
             std::optional<float> max_distance;
             float stiffness = 0.0f; // Newtons per meter, N/m
@@ -1841,11 +1835,8 @@ namespace game
         };
 
         struct WeldJointParams {
-            glm::vec2 src_node_anchor_point = {0.0f, 0.0f};
-            glm::vec2 dst_node_anchor_point = {0.0f, 0.0f};
             float stiffness = 0.0f; // Newton-meters
             float damping   = 0.0f; // Newton-meters per second
-
         };
 
         using PhysicsJointParams = std::variant<DistanceJointParams,
@@ -1868,6 +1859,10 @@ namespace game
             std::string id;
             // human-readable name of the joint.
             std::string name;
+            // the anchor point within the body
+            glm::vec2 src_node_anchor_point = {0.0f, 0.0f};
+            // the anchor point within the body.
+            glm::vec2 dst_node_anchor_point = {0.0f, 0.0f};
             // PhysicsJoint parameters (depending on the type)
             PhysicsJointParams params;
 
@@ -2470,13 +2465,17 @@ namespace game
             { return mSrcNode; }
             const EntityNode* GetDstNode() const noexcept
             { return mDstNode; }
-            const std::string GetSrcId() const noexcept
+            std::string GetSrcId() const noexcept
             { return mDstNode->GetId(); }
-            const std::string GetDstId() const noexcept
+            std::string GetDstId() const noexcept
             { return mDstNode->GetId(); }
-            const std::string GetId() const noexcept
+            const std::string& GetId() const noexcept
             { return mId; }
-            const std::string GetName() const noexcept
+            const auto& GetSrcAnchor() const noexcept
+            { return mClass->src_node_anchor_point; }
+            const auto& GetDstAnchor() const noexcept
+            { return mClass->dst_node_anchor_point; }
+            const std::string& GetName() const noexcept
             { return mClass->name; }
             const PhysicsJointClass* operator->() const noexcept
             { return mClass.get(); }
