@@ -94,6 +94,7 @@ inline glm::vec2 RotateVector(const glm::vec2& vec, float angle)
     return glm::vec2(ret.x, ret.y);
 }
 
+
 // transform a direction vector (such as a normal) safely even if the
 // transformation matrix contains a non-uniform scale.
 inline glm::vec4 TransformVector(const glm::mat4& matrix, const glm::vec4& vector)

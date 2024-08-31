@@ -3198,30 +3198,40 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
         if (!src_node || !dst_node)
             continue;
 
+        const auto& src_anchor_point_local = src_node->GetSize() * 0.5f + joint.src_node_anchor_point;
+        const auto& dst_anchor_point_local = dst_node->GetSize() * 0.5f + joint.dst_node_anchor_point;
+        const auto& src_anchor_point_world = mState.entity->MapCoordsFromNodeBox(src_anchor_point_local, src_node);
+        const auto& dst_anchor_point_world = mState.entity->MapCoordsFromNodeBox(dst_anchor_point_local, dst_node);
+
         if (joint.type == game::EntityClass::PhysicsJointType::Distance)
         {
-            const auto& params = std::get<game::EntityClass::DistanceJointParams>(joint.params);
-            const auto& src_anchor_point = src_node->GetSize() * 0.5f + joint.src_node_anchor_point;
-            const auto& dst_anchor_point = dst_node->GetSize() * 0.5f + joint.dst_node_anchor_point;
-            const auto& src_point = mState.entity->MapCoordsFromNodeBox(src_anchor_point, src_node);
-            const auto& dst_point = mState.entity->MapCoordsFromNodeBox(dst_anchor_point, dst_node);
-            DrawLine(entity_painter, src_point, dst_point);
-            DrawDot(entity_painter, src_point);
-            DrawDot(entity_painter, dst_point);
+            // const auto& params = std::get<game::EntityClass::DistanceJointParams>(joint.params);
+
+            DrawLine(entity_painter, src_anchor_point_world, dst_anchor_point_world);
+            DrawDot(entity_painter, src_anchor_point_world);
+            DrawDot(entity_painter, dst_anchor_point_world);
         }
         else if (joint.type == game::EntityClass::PhysicsJointType::Revolute)
         {
-            const auto& params = std::get<game::EntityClass::RevoluteJointParams>(joint.params);
-            const auto& src_anchor_point_node = src_node->GetSize() * 0.5f + joint.src_node_anchor_point;
-            const auto& src_anchor_point_entity = mState.entity->MapCoordsFromNodeBox(src_anchor_point_node, src_node);
-            DrawDot(entity_painter, src_anchor_point_entity);
+            //const auto& params = std::get<game::EntityClass::RevoluteJointParams>(joint.params);
+
+            DrawDot(entity_painter, src_anchor_point_world);
         }
         else if (joint.type == game::EntityClass::PhysicsJointType::Weld)
         {
-            const auto& params = std::get<game::EntityClass::WeldJointParams>(joint.params);
-            const auto& src_anchor_point_node = src_node->GetSize() * 0.5f + joint.src_node_anchor_point;
-            const auto& src_anchor_point_entity = mState.entity->MapCoordsFromNodeBox(src_anchor_point_node, src_node);
-            DrawDot(entity_painter, src_anchor_point_entity);
+            //const auto& params = std::get<game::EntityClass::WeldJointParams>(joint.params);
+
+            DrawDot(entity_painter, src_anchor_point_world);
+        }
+        else if (joint.type == game::EntityClass::PhysicsJointType::Prismatic)
+        {
+            const auto& params = std::get<game::EntityClass::PrismaticJointParams>(joint.params);
+
+            const auto& direction_vector_local = game::RotateVector(glm::vec2(1.0f, 0.0f), params.direction_angle.ToRadians());
+            const auto& direction_vector_world = game::TransformVector(mState.entity->FindNodeTransform(src_node), direction_vector_local);
+
+            DrawDot(entity_painter, src_anchor_point_world);
+            DrawDir(entity_painter, src_anchor_point_world, game::FindVectorRotation(direction_vector_world));
         }
     }
     // Draw comments, drawn in entity space
@@ -3273,7 +3283,7 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
             "Hit 'Play' to animate materials and shapes.\n"
             "Hit 'Test Run' to test the entity.\n"
             "Hit 'Save' to save the entity.",
-            gfx::FRect(0, 0, width, height),
+            gfx::FRect(0, 0, float(width), float(height)),
             painter, 28
         );
         return;
