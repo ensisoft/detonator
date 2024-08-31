@@ -1417,6 +1417,13 @@ std::size_t EntityClass::GetHash() const
             jh = base::hash_combine(jh, ptr->motor_speed);
             jh = base::hash_combine(jh, ptr->motor_torque);
         }
+        else if (const auto* ptr = std::get_if<WeldJointParams>(&joint->params))
+        {
+            jh = base::hash_combine(jh, ptr->src_node_anchor_point);
+            jh = base::hash_combine(jh, ptr->dst_node_anchor_point);
+            jh = base::hash_combine(jh, ptr->stiffness);
+            jh = base::hash_combine(jh, ptr->damping);
+        }
         hash = base::hash_combine(hash, jh);
     }
 
@@ -1488,6 +1495,13 @@ void EntityClass::IntoJson(data::Writer& data) const
             chunk->Write("upper_angle_limit", ptr->upper_angle_limit);
             chunk->Write("motor_speed", ptr->motor_speed);
             chunk->Write("motor_torque", ptr->motor_torque);
+        }
+        else if (const auto* ptr = std::get_if<WeldJointParams>(&joint->params))
+        {
+            chunk->Write("src_node_anchor_point", ptr->src_node_anchor_point);
+            chunk->Write("dst_node_anchor_point", ptr->dst_node_anchor_point);
+            chunk->Write("stiffness", ptr->stiffness);
+            chunk->Write("damping", ptr->damping);
         }
         data.AppendChunk("joints", std::move(chunk));
     }
@@ -1586,7 +1600,16 @@ bool EntityClass::FromJson(const data::Reader& data)
             ok &= chunk->Read("upper_angle_limit", &params.upper_angle_limit);
             ok &= chunk->Read("motor_speed", &params.motor_speed);
             ok &= chunk->Read("motor_torque", &params.motor_torque);
-            joint->params = std::move(params);
+            joint->params = params;
+        }
+        else if (jref.type == PhysicsJointType::Weld)
+        {
+            WeldJointParams params;
+            ok &= chunk->Read("src_node_anchor_point", &params.src_node_anchor_point);
+            ok &= chunk->Read("dst_node_anchor_point", &params.dst_node_anchor_point);
+            ok &= chunk->Read("stiffness", &params.stiffness);
+            ok &= chunk->Read("damping", &params.damping);
+            joint->params = params;
         }
         mJoints.push_back(std::move(joint));
     }

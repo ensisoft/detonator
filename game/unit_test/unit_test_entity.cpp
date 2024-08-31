@@ -460,6 +460,24 @@ void unit_test_entity_class()
         entity.AddJoint(std::move(joint));
     }
 
+    // physics joint
+    {
+        game::EntityClass::PhysicsJoint joint;
+        joint.name = "weld-joint";
+        joint.dst_node_id = entity.GetNode(0).GetId();
+        joint.src_node_id = entity.GetNode(1).GetId();
+        joint.type        = game::EntityClass::PhysicsJointType::Weld;
+        joint.id          = base::RandomString(10);
+
+        game::EntityClass::WeldJointParams params;
+        params.src_node_anchor_point = glm::vec2(-1.0f, 2.0f);
+        params.dst_node_anchor_point = glm::vec2(2.0f, -1.0f);
+        params.stiffness = 2.0f;
+        params.damping = 1.5f;
+        joint.params = params;
+        entity.AddJoint(std::move(joint));
+    }
+
 
     TEST_REQUIRE(entity.GetName() == "TestEntityClass");
     TEST_REQUIRE(entity.GetLifetime() == real::float32(5.0f));
@@ -494,7 +512,7 @@ void unit_test_entity_class()
     TEST_REQUIRE(entity.GetScriptVar(2).IsArray() == true);
     TEST_REQUIRE(entity.FindScriptVarByName("foobar") == nullptr);
     TEST_REQUIRE(entity.FindScriptVarByName("something"));
-    TEST_REQUIRE(entity.GetNumJoints() == 2);
+    TEST_REQUIRE(entity.GetNumJoints() == 3);
     TEST_REQUIRE(entity.GetJoint(0).dst_node_id == entity.GetNode(0).GetId());
     TEST_REQUIRE(entity.GetJoint(0).src_node_id == entity.GetNode(1).GetId());
     TEST_REQUIRE(entity.GetNumAnimators() == 1);
@@ -539,7 +557,7 @@ void unit_test_entity_class()
         TEST_REQUIRE(ret.GetScriptVar(2).GetName() == "array");
         TEST_REQUIRE(ret.GetScriptVar(2).IsReadOnly() == false);
         TEST_REQUIRE(ret.GetScriptVar(2).IsArray() == true);
-        TEST_REQUIRE(ret.GetNumJoints() == 2);
+        TEST_REQUIRE(ret.GetNumJoints() == 3);
 
         {
             TEST_REQUIRE(ret.GetJoint(0).name == "distance-joint");
@@ -571,6 +589,18 @@ void unit_test_entity_class()
             TEST_REQUIRE(joint_params->upper_angle_limit == game::FRadians(2.0f));
             TEST_REQUIRE(joint_params->motor_speed  == real::float32(2.0f));
             TEST_REQUIRE(joint_params->motor_torque == real::float32(1.5f));
+        }
+
+        {
+            TEST_REQUIRE(ret.GetJoint(2).name == "weld-joint");
+            TEST_REQUIRE(ret.GetJoint(2).dst_node_id == entity.GetNode(0).GetId());
+            TEST_REQUIRE(ret.GetJoint(2).src_node_id == entity.GetNode(1).GetId());
+            const auto* joint_params = std::get_if<game::EntityClass::WeldJointParams>(&entity.GetJoint(2).params);
+            TEST_REQUIRE(joint_params);
+            TEST_REQUIRE(joint_params->src_node_anchor_point == glm::vec2(-1.0f, 2.0f));
+            TEST_REQUIRE(joint_params->dst_node_anchor_point == glm::vec2(2.0f, -1.0f));
+            TEST_REQUIRE(joint_params->stiffness == real::float32(2.0f));
+            TEST_REQUIRE(joint_params->damping == real::float32(1.5f));
         }
 
 
