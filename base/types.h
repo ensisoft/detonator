@@ -18,6 +18,12 @@
 
 #include "config.h"
 
+#include "warnpush.h"
+#  if defined(BASE_TYPES_SUPPORT_GLM)
+#    include <glm/vec2.hpp>
+#  endif
+#include "warnpop.h"
+
 #include <algorithm> // for min, max
 #include <tuple>
 #include <cmath>
@@ -35,6 +41,14 @@ namespace base
           : mWidth(width)
           , mHeight(height)
         {}
+
+#if defined(BASE_TYPES_SUPPORT_GLM)
+        Size(const glm::vec2& vector) noexcept
+           : mWidth(vector.x)
+           , mHeight(vector.y)
+        {}
+#endif
+
         template<typename F> explicit
         Size(const Size<F>& other) noexcept
           : mWidth(other.GetWidth())
@@ -113,6 +127,14 @@ namespace base
           : mX(x)
           , mY(y)
         {}
+
+#if defined(BASE_TYPES_SUPPORT_GLM)
+        Point(const glm::vec2& vector) noexcept
+          : mX(vector.x)
+          , mY(vector.y)
+        {}
+#endif
+
         template<typename F> explicit
         Point(const Point<F>& other) noexcept
           : mX(other.GetX())
@@ -538,6 +560,15 @@ namespace base
           , mY(pos.GetY())
           , mRadius(radius)
         {}
+
+#if defined(BASE_TYPES_SUPPORT_GLM)
+        Circle(const glm::vec2& pos, float radius) noexcept
+          : mX(pos.x)
+          , mY(pos.y)
+          , mRadius(radius)
+        {}
+#endif
+
         inline T GetRadius() const noexcept
         { return mRadius; }
         inline T GetX() const noexcept
@@ -608,6 +639,14 @@ namespace base
           : mPointA(a)
           , mPointB(b)
         {}
+
+#if defined(BASE_TYPES_SUPPORT_GLM)
+        Line(const glm::vec2& a, const glm::vec2& b)
+          : mPointA(a)
+          , mPointB(b)
+        {}
+#endif
+
         const Point<T>& GetPointA() const noexcept
         { return mPointA; }
         const Point<T>& GetPointB() const noexcept
