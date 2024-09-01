@@ -35,8 +35,8 @@ namespace game
 {
     class NodeTransformerClass;
     class NodeTransformer;
-    class RigidBodyItemClass;
-    class RigidBodyItem;
+    class RigidBodyClass;
+    class RigidBody;
     class DrawableItemClass;
     class DrawableItem;
     class TextItemClass;
@@ -124,7 +124,7 @@ namespace game
         { return mBitFlags.test(flag); }
 
         // Attach a rigid body to this node class.
-        void SetRigidBody(const RigidBodyItemClass& body);
+        void SetRigidBody(const RigidBodyClass& body);
         // Attach a simple static drawable item to this node class.
         void SetDrawable(const DrawableItemClass& drawable);
         // Attach a text item to this node class.
@@ -169,7 +169,7 @@ namespace game
         { mTransformer.reset(); }
 
         // Get the rigid body shared class object if any.
-        std::shared_ptr<const RigidBodyItemClass> GetSharedRigidBody() const noexcept
+        std::shared_ptr<const RigidBodyClass> GetSharedRigidBody() const noexcept
         { return mRigidBody; }
         // Get the drawable shared class object if any.
         std::shared_ptr<const DrawableItemClass> GetSharedDrawable() const noexcept
@@ -209,7 +209,7 @@ namespace game
 
         // Get the rigid body object if any. If no rigid body class object
         // has been set then returns nullptr.
-        RigidBodyItemClass* GetRigidBody() noexcept
+        RigidBodyClass* GetRigidBody() noexcept
         { return mRigidBody.get(); }
         // Get the drawable shape object if any. If no drawable shape class object
         // has been set then returns nullptr.
@@ -234,7 +234,7 @@ namespace game
 
         // Get the rigid body object if any. If no rigid body class object
         // has been set then returns nullptr.
-        const RigidBodyItemClass* GetRigidBody() const noexcept
+        const RigidBodyClass* GetRigidBody() const noexcept
         { return mRigidBody.get(); }
         // Get the drawable shape object if any. If no drawable shape class object
         // has been set then returns nullptr.
@@ -296,7 +296,7 @@ namespace game
         // Rotation around z axis in radians.
         float mRotation = 0.0f;
         // rigid body if any.
-        std::shared_ptr<RigidBodyItemClass> mRigidBody;
+        std::shared_ptr<RigidBodyClass> mRigidBody;
         // drawable item if any.
         std::shared_ptr<DrawableItemClass> mDrawable;
         // text item if any.
@@ -487,7 +487,7 @@ namespace game
         DrawableItem* GetDrawable();
         // Get the node's rigid body item if any. If no rigid body
         // item is set then returns nullptr.
-        RigidBodyItem* GetRigidBody();
+        RigidBody* GetRigidBody();
         // Get the node's text item if any. If no text item
         // is set then returns nullptr.
         TextItem* GetTextItem();
@@ -506,7 +506,7 @@ namespace game
         const DrawableItem* GetDrawable() const;
         // Get the node's rigid body item if any. If no rigid body
         // item is set then returns nullptr.
-        const RigidBodyItem* GetRigidBody() const;
+        const RigidBody* GetRigidBody() const;
         // Get the node's text item if any. If no text item
         // is set then returns nullptr.
         const TextItem* GetTextItem() const;
@@ -568,7 +568,7 @@ namespace game
         // data object
         EntityNodeData* mNodeData = nullptr;
         // rigid body if any.
-        std::unique_ptr<RigidBodyItem> mRigidBody;
+        std::unique_ptr<RigidBody> mRigidBody;
         // drawable if any.
         std::unique_ptr<DrawableItem> mDrawable;
         // text item if any

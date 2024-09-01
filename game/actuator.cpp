@@ -298,7 +298,7 @@ void KinematicActuator::Start(EntityNode& node)
         {
             mStartLinearVelocity = body->GetLinearVelocity();
             mStartAngularVelocity = body->GetAngularVelocity();
-            if (body->GetSimulation() == RigidBodyItemClass::Simulation::Static)
+            if (body->GetSimulation() == RigidBodyClass::Simulation::Static)
             {
                 WARN("Kinematic actuator can't apply on a static rigid body. [actuator='%1', node='%2']", mClass->GetName(), node.GetName());
             }
@@ -418,15 +418,15 @@ void SetFlagActuator::Start(EntityNode& node)
     else if (flag == FlagName::Drawable_PPEnableBloom)
         mStartState = draw->TestFlag(DrawableItem::Flags::PP_EnableBloom);
     else if (flag == FlagName::RigidBody_Bullet)
-        mStartState = body->TestFlag(RigidBodyItem::Flags::Bullet);
+        mStartState = body->TestFlag(RigidBody::Flags::Bullet);
     else if (flag == FlagName::RigidBody_Sensor)
-        mStartState = body->TestFlag(RigidBodyItem::Flags::Sensor);
+        mStartState = body->TestFlag(RigidBody::Flags::Sensor);
     else if (flag == FlagName::RigidBody_Enabled)
-        mStartState = body->TestFlag(RigidBodyItem::Flags::Enabled);
+        mStartState = body->TestFlag(RigidBody::Flags::Enabled);
     else if (flag == FlagName::RigidBody_CanSleep)
-        mStartState = body->TestFlag(RigidBodyItem::Flags::CanSleep);
+        mStartState = body->TestFlag(RigidBody::Flags::CanSleep);
     else if (flag == FlagName::RigidBody_DiscardRotation)
-        mStartState = body->TestFlag(RigidBodyItem::Flags::DiscardRotation);
+        mStartState = body->TestFlag(RigidBody::Flags::DiscardRotation);
     else if (flag == FlagName::TextItem_VisibleInGame)
         mStartState = text->TestFlag(TextItem::Flags::VisibleInGame);
     else if (flag == FlagName::TextItem_Blink)
@@ -510,15 +510,15 @@ void SetFlagActuator::SetFlag(EntityNode& node) const
     else if (flag == FlagName::Drawable_PPEnableBloom)
         draw->SetFlag(DrawableItem::Flags::PP_EnableBloom, next_value);
     else if (flag == FlagName::RigidBody_Bullet)
-        body->SetFlag(RigidBodyItem::Flags::Bullet, next_value);
+        body->SetFlag(RigidBody::Flags::Bullet, next_value);
     else if (flag == FlagName::RigidBody_Sensor)
-        body->SetFlag(RigidBodyItem::Flags::Sensor, next_value);
+        body->SetFlag(RigidBody::Flags::Sensor, next_value);
     else if (flag == FlagName::RigidBody_Enabled)
-        body->SetFlag(RigidBodyItem::Flags::Enabled, next_value);
+        body->SetFlag(RigidBody::Flags::Enabled, next_value);
     else if (flag == FlagName::RigidBody_CanSleep)
-        body->SetFlag(RigidBodyItem::Flags::CanSleep, next_value);
+        body->SetFlag(RigidBody::Flags::CanSleep, next_value);
     else if (flag == FlagName::RigidBody_DiscardRotation)
-        body->SetFlag(RigidBodyItem::Flags::DiscardRotation, next_value);
+        body->SetFlag(RigidBody::Flags::DiscardRotation, next_value);
     else if (flag == FlagName::TextItem_VisibleInGame)
         text->SetFlag(TextItem::Flags::VisibleInGame, next_value);
     else if (flag == FlagName::TextItem_Blink)

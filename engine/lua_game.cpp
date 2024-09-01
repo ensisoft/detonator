@@ -632,58 +632,58 @@ void BindGameLib(sol::state& L)
         return sol::make_object(L, sol::nil);
     };
 
-    auto body = table.new_usertype<RigidBodyItem>("RigidBody");
-    body["IsEnabled"]                           = &RigidBodyItem::IsEnabled;
-    body["IsSensor"]                            = &RigidBodyItem::IsSensor;
-    body["IsBullet"]                            = &RigidBodyItem::IsBullet;
-    body["CanSleep"]                            = &RigidBodyItem::CanSleep;
-    body["DiscardRotation"]                     = &RigidBodyItem::DiscardRotation;
-    body["GetFriction"]                         = &RigidBodyItem::GetFriction;
-    body["GetRestitution"]                      = &RigidBodyItem::GetRestitution;
-    body["GetAngularDamping"]                   = &RigidBodyItem::GetAngularDamping;
-    body["GetLinearDamping"]                    = &RigidBodyItem::GetLinearDamping;
-    body["GetDensity"]                          = &RigidBodyItem::GetDensity;
-    body["GetPolygonShapeId"]                   = &RigidBodyItem::GetPolygonShapeId;
-    body["GetLinearVelocity"]                   = &RigidBodyItem::GetLinearVelocity;
-    body["GetAngularVelocity"]                  = &RigidBodyItem::GetAngularVelocity;
-    body["Enable"]                              = &RigidBodyItem::Enable;
-    body["AdjustAngularVelocity"]               = &RigidBodyItem::AdjustAngularVelocity;
-    body["TestFlag"]                            = &TestFlag<RigidBodyItem>;
-    body["SetFlag"]                             = &SetFlag<RigidBodyItem>;
-    body["ClearImpulse"]                        = &RigidBodyItem::ClearImpulse;
-    body["HasPendingImpulse"]                   = &RigidBodyItem::HasCenterImpulse;
-    body["HasPendingLinearVelocityAdjustment"]  = &RigidBodyItem::HasLinearVelocityAdjustment;
-    body["HasPendingAngularVelocityAdjustment"] = &RigidBodyItem::HasAngularVelocityAdjustment;
-    body["GetPendingImpulse"]                   = &RigidBodyItem::GetLinearImpulseToCenter;
-    body["GetPendingLinearVelocityAdjustment"]  = &RigidBodyItem::GetLinearVelocityAdjustment;
-    body["GetPendingAngularVelocityAdjustment"] = &RigidBodyItem::GetAngularVelocityAdjustment;
+    auto body = table.new_usertype<RigidBody>("RigidBody");
+    body["IsEnabled"]                           = &RigidBody::IsEnabled;
+    body["IsSensor"]                            = &RigidBody::IsSensor;
+    body["IsBullet"]                            = &RigidBody::IsBullet;
+    body["CanSleep"]                            = &RigidBody::CanSleep;
+    body["DiscardRotation"]                     = &RigidBody::DiscardRotation;
+    body["GetFriction"]                         = &RigidBody::GetFriction;
+    body["GetRestitution"]                      = &RigidBody::GetRestitution;
+    body["GetAngularDamping"]                   = &RigidBody::GetAngularDamping;
+    body["GetLinearDamping"]                    = &RigidBody::GetLinearDamping;
+    body["GetDensity"]                          = &RigidBody::GetDensity;
+    body["GetPolygonShapeId"]                   = &RigidBody::GetPolygonShapeId;
+    body["GetLinearVelocity"]                   = &RigidBody::GetLinearVelocity;
+    body["GetAngularVelocity"]                  = &RigidBody::GetAngularVelocity;
+    body["Enable"]                              = &RigidBody::Enable;
+    body["AdjustAngularVelocity"]               = &RigidBody::AdjustAngularVelocity;
+    body["TestFlag"]                            = &TestFlag<RigidBody>;
+    body["SetFlag"]                             = &SetFlag<RigidBody>;
+    body["ClearImpulse"]                        = &RigidBody::ClearImpulse;
+    body["HasPendingImpulse"]                   = &RigidBody::HasCenterImpulse;
+    body["HasPendingLinearVelocityAdjustment"]  = &RigidBody::HasLinearVelocityAdjustment;
+    body["HasPendingAngularVelocityAdjustment"] = &RigidBody::HasAngularVelocityAdjustment;
+    body["GetPendingImpulse"]                   = &RigidBody::GetLinearImpulseToCenter;
+    body["GetPendingLinearVelocityAdjustment"]  = &RigidBody::GetLinearVelocityAdjustment;
+    body["GetPendingAngularVelocityAdjustment"] = &RigidBody::GetAngularVelocityAdjustment;
     body["ApplyImpulse"]          = sol::overload(
-        [](RigidBodyItem& body, const glm::vec2& impulse) {
+        [](RigidBody& body, const glm::vec2& impulse) {
             body.ApplyLinearImpulseToCenter(impulse);
         },
-        [](RigidBodyItem& body, float x, float y) {
+        [](RigidBody& body, float x, float y) {
             body.ApplyLinearImpulseToCenter(glm::vec2(x, y));
         });
 
     body["AdjustLinearVelocity"]  = sol::overload(
-        [](RigidBodyItem& body, const glm::vec2& velocity) {
+        [](RigidBody& body, const glm::vec2& velocity) {
             body.AdjustLinearVelocity(velocity);
         },
-        [](RigidBodyItem& body, float x, float y) {
+        [](RigidBody& body, float x, float y) {
             body.AdjustLinearVelocity(glm::vec2(x, y));
         });
     body["AddImpulse"] = sol::overload(
-        [](RigidBodyItem& body, const glm::vec2& impulse) {
+        [](RigidBody& body, const glm::vec2& impulse) {
             body.AddLinearImpulseToCenter(impulse);
         },
-        [](RigidBodyItem& body, float x, float y) {
+        [](RigidBody& body, float x, float y) {
             body.AddLinearImpulseToCenter(glm::vec2{x, y});
         });
 
-    body["GetSimulationType"] = [](const RigidBodyItem* item) {
+    body["GetSimulationType"] = [](const RigidBody* item) {
         return magic_enum::enum_name(item->GetSimulation());
     };
-    body["GetCollisionShapeType"] = [](const RigidBodyItem* item) {
+    body["GetCollisionShapeType"] = [](const RigidBody* item) {
         return magic_enum::enum_name(item->GetCollisionShape());
     };
 
@@ -749,7 +749,7 @@ void BindGameLib(sol::state& L)
     entity_node["HasDrawable"]    = &EntityNode::HasDrawable;
     entity_node["HasSpatialNode"] = &EntityNode::HasSpatialNode;
     entity_node["GetDrawable"]    = (DrawableItem*(EntityNode::*)(void))&EntityNode::GetDrawable;
-    entity_node["GetRigidBody"]   = (RigidBodyItem*(EntityNode::*)(void))&EntityNode::GetRigidBody;
+    entity_node["GetRigidBody"]   = (RigidBody*(EntityNode::*)(void))&EntityNode::GetRigidBody;
     entity_node["GetTextItem"]    = (TextItem*(EntityNode::*)(void))&EntityNode::GetTextItem;
     entity_node["GetSpatialNode"] = (SpatialNode*(EntityNode::*)(void))&EntityNode::GetSpatialNode;
     entity_node["GetTransformer"] = (NodeTransformer*(EntityNode::*)(void))&EntityNode::GetTransformer;

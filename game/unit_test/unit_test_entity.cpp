@@ -91,10 +91,10 @@ void unit_test_entity_node()
     draw.SetRotator(game::Rotator(1.0f, 2.0f, 3.0f, 4.0f));
     draw.SetOffset(glm::vec3(1.0f, 2.0f, 3.0f));
 
-    game::RigidBodyItemClass body;
-    body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Circle);
-    body.SetSimulation(game::RigidBodyItemClass::Simulation::Dynamic);
-    body.SetFlag(game::RigidBodyItemClass::Flags::Bullet, true);
+    game::RigidBodyClass body;
+    body.SetCollisionShape(game::RigidBodyClass::CollisionShape::Circle);
+    body.SetSimulation(game::RigidBodyClass::Simulation::Dynamic);
+    body.SetFlag(game::RigidBodyClass::Flags::Bullet, true);
     body.SetFriction(2.0f);
     body.SetRestitution(3.0f);
     body.SetAngularDamping(4.0f);
@@ -177,9 +177,9 @@ void unit_test_entity_node()
     TEST_REQUIRE(node.GetDrawable()->GetOffset() == glm::vec3(1.0f, 2.0f, 3.0f));
     TEST_REQUIRE(node.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::UpdateDrawable) == true);
     TEST_REQUIRE(node.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::RestartDrawable) == false);
-    TEST_REQUIRE(node.GetRigidBody()->GetCollisionShape() == game::RigidBodyItemClass::CollisionShape::Circle);
-    TEST_REQUIRE(node.GetRigidBody()->GetSimulation() == game::RigidBodyItemClass::Simulation::Dynamic);
-    TEST_REQUIRE(node.GetRigidBody()->TestFlag(game::RigidBodyItemClass::Flags::Bullet));
+    TEST_REQUIRE(node.GetRigidBody()->GetCollisionShape() == game::RigidBodyClass::CollisionShape::Circle);
+    TEST_REQUIRE(node.GetRigidBody()->GetSimulation() == game::RigidBodyClass::Simulation::Dynamic);
+    TEST_REQUIRE(node.GetRigidBody()->TestFlag(game::RigidBodyClass::Flags::Bullet));
     TEST_REQUIRE(node.GetRigidBody()->GetFriction()       == real::float32(2.0f));
     TEST_REQUIRE(node.GetRigidBody()->GetRestitution()    == real::float32(3.0f));
     TEST_REQUIRE(node.GetRigidBody()->GetAngularDamping() == real::float32(4.0f));
@@ -228,9 +228,9 @@ void unit_test_entity_node()
         TEST_REQUIRE(ret.GetDrawable()->TestFlag(game::DrawableItemClass::Flags::RestartDrawable) == false);
         TEST_REQUIRE(ret.GetDrawable()->GetRotator() == game::Rotator(1.0f, 2.0f, 3.0f, 4.0f));
         TEST_REQUIRE(ret.GetDrawable()->GetOffset() == glm::vec3(1.0f, 2.0f, 3.0f));
-        TEST_REQUIRE(ret.GetRigidBody()->GetCollisionShape() == game::RigidBodyItemClass::CollisionShape::Circle);
-        TEST_REQUIRE(ret.GetRigidBody()->GetSimulation() == game::RigidBodyItemClass::Simulation::Dynamic);
-        TEST_REQUIRE(ret.GetRigidBody()->TestFlag(game::RigidBodyItemClass::Flags::Bullet));
+        TEST_REQUIRE(ret.GetRigidBody()->GetCollisionShape() == game::RigidBodyClass::CollisionShape::Circle);
+        TEST_REQUIRE(ret.GetRigidBody()->GetSimulation() == game::RigidBodyClass::Simulation::Dynamic);
+        TEST_REQUIRE(ret.GetRigidBody()->TestFlag(game::RigidBodyClass::Flags::Bullet));
         TEST_REQUIRE(ret.GetRigidBody()->GetFriction()       == real::float32(2.0f));
         TEST_REQUIRE(ret.GetRigidBody()->GetRestitution()    == real::float32(3.0f));
         TEST_REQUIRE(ret.GetRigidBody()->GetAngularDamping() == real::float32(4.0f));
@@ -1239,9 +1239,9 @@ namespace mem {
     };
 
     template<>
-    struct AllocatorInstance<mem::DefaultAllocatorTag<game::RigidBodyItem>> {
+    struct AllocatorInstance<mem::DefaultAllocatorTag<game::RigidBody>> {
         static mem::Allocator& Get() noexcept {
-            using AllocatorType = mem::MemoryPool<game::RigidBodyItem>;
+            using AllocatorType = mem::MemoryPool<game::RigidBody>;
             static AllocatorType allocator(512);
             return allocator;
         }
@@ -1306,10 +1306,10 @@ void measure_entity_allocation_time()
         draw.SetRenderPass(game::DrawableItemClass::RenderPass::MaskCover);
         node.SetDrawable(draw);
 
-        game::RigidBodyItemClass body;
-        body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Circle);
-        body.SetSimulation(game::RigidBodyItemClass::Simulation::Dynamic);
-        body.SetFlag(game::RigidBodyItemClass::Flags::Bullet, true);
+        game::RigidBodyClass body;
+        body.SetCollisionShape(game::RigidBodyClass::CollisionShape::Circle);
+        body.SetSimulation(game::RigidBodyClass::Simulation::Dynamic);
+        body.SetFlag(game::RigidBodyClass::Flags::Bullet, true);
         body.SetFriction(2.0f);
         node.SetRigidBody(body);
 

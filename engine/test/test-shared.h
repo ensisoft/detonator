@@ -127,9 +127,9 @@ public:
             draw.SetDrawableId("rectangle");
             draw.SetMaterialId("uv_test");
             box.SetDrawable(draw);
-            game::RigidBodyItemClass body;
-            body.SetSimulation(game::RigidBodyItemClass::Simulation::Dynamic);
-            body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Box);
+            game::RigidBodyClass body;
+            body.SetSimulation(game::RigidBodyClass::Simulation::Dynamic);
+            body.SetCollisionShape(game::RigidBodyClass::CollisionShape::Box);
             box.SetRigidBody(body);
 
             klass->LinkChild(nullptr, klass->AddNode(std::move(box)));
@@ -145,9 +145,9 @@ public:
             draw.SetDrawableId("circle");
             draw.SetMaterialId("uv_test");
             circle.SetDrawable(draw);
-            game::RigidBodyItemClass body;
-            body.SetSimulation(game::RigidBodyItemClass::Simulation::Dynamic);
-            body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Circle);
+            game::RigidBodyClass body;
+            body.SetSimulation(game::RigidBodyClass::Simulation::Dynamic);
+            body.SetCollisionShape(game::RigidBodyClass::CollisionShape::Circle);
             circle.SetRigidBody(body);
 
             klass->LinkChild(nullptr, klass->AddNode(std::move(circle)));
@@ -166,9 +166,9 @@ public:
             draw.SetDrawableId("rectangle");
             draw.SetMaterialId("ground");
             node.SetDrawable(draw);
-            game::RigidBodyItemClass body;
-            body.SetSimulation(game::RigidBodyItemClass::Simulation::Static);
-            body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Box);
+            game::RigidBodyClass body;
+            body.SetSimulation(game::RigidBodyClass::Simulation::Static);
+            body.SetCollisionShape(game::RigidBodyClass::CollisionShape::Box);
             node.SetRigidBody(body);
 
             klass->LinkChild(nullptr, klass->AddNode(std::move(node)));

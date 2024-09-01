@@ -147,12 +147,12 @@ void unit_test_setflag_actuator()
         draw_class.SetFlag(game::DrawableItemClass::Flags::FlipHorizontally, true);
         node_klass.SetDrawable(draw_class);
 
-        game::RigidBodyItemClass rigid_body_class;
-        rigid_body_class.SetFlag(game::RigidBodyItemClass::Flags::Bullet, true);
-        rigid_body_class.SetFlag(game::RigidBodyItemClass::Flags::Sensor, true);
-        rigid_body_class.SetFlag(game::RigidBodyItemClass::Flags::Enabled, true);
-        rigid_body_class.SetFlag(game::RigidBodyItemClass::Flags::CanSleep, true);
-        rigid_body_class.SetFlag(game::RigidBodyItemClass::Flags::DiscardRotation, true);
+        game::RigidBodyClass rigid_body_class;
+        rigid_body_class.SetFlag(game::RigidBodyClass::Flags::Bullet, true);
+        rigid_body_class.SetFlag(game::RigidBodyClass::Flags::Sensor, true);
+        rigid_body_class.SetFlag(game::RigidBodyClass::Flags::Enabled, true);
+        rigid_body_class.SetFlag(game::RigidBodyClass::Flags::CanSleep, true);
+        rigid_body_class.SetFlag(game::RigidBodyClass::Flags::DiscardRotation, true);
         node_klass.SetRigidBody(rigid_body_class);
 
         game::TextItemClass text_class;
@@ -211,11 +211,11 @@ void unit_test_setflag_actuator()
                    game::SetFlagActuatorClass::FlagAction::Off, node);
         apply_flag(game::SetFlagActuatorClass::FlagName::RigidBody_DiscardRotation,
                    game::SetFlagActuatorClass::FlagAction::Off, node);
-        TEST_REQUIRE(body->TestFlag(game::RigidBodyItem::Flags::Bullet)          == false);
-        TEST_REQUIRE(body->TestFlag(game::RigidBodyItem::Flags::Sensor)          == false);
-        TEST_REQUIRE(body->TestFlag(game::RigidBodyItem::Flags::CanSleep)        == false);
-        TEST_REQUIRE(body->TestFlag(game::RigidBodyItem::Flags::Enabled)         == false);
-        TEST_REQUIRE(body->TestFlag(game::RigidBodyItem::Flags::DiscardRotation) == false);
+        TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::Bullet) == false);
+        TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::Sensor) == false);
+        TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::CanSleep) == false);
+        TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::Enabled) == false);
+        TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::DiscardRotation) == false);
         apply_flag(game::SetFlagActuatorClass::FlagName::RigidBody_Bullet,
                    game::SetFlagActuatorClass::FlagAction::Toggle, node);
         apply_flag(game::SetFlagActuatorClass::FlagName::RigidBody_Sensor,
@@ -226,11 +226,11 @@ void unit_test_setflag_actuator()
                    game::SetFlagActuatorClass::FlagAction::Toggle, node);
         apply_flag(game::SetFlagActuatorClass::FlagName::RigidBody_DiscardRotation,
                    game::SetFlagActuatorClass::FlagAction::Toggle, node);
-        TEST_REQUIRE(body->TestFlag(game::RigidBodyItem::Flags::Bullet)          == true);
-        TEST_REQUIRE(body->TestFlag(game::RigidBodyItem::Flags::Sensor)          == true);
-        TEST_REQUIRE(body->TestFlag(game::RigidBodyItem::Flags::CanSleep)        == true);
-        TEST_REQUIRE(body->TestFlag(game::RigidBodyItem::Flags::Enabled)         == true);
-        TEST_REQUIRE(body->TestFlag(game::RigidBodyItem::Flags::DiscardRotation) == true);
+        TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::Bullet) == true);
+        TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::Sensor) == true);
+        TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::CanSleep) == true);
+        TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::Enabled) == true);
+        TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::DiscardRotation) == true);
 
         // text item flags.
         apply_flag(game::SetFlagActuatorClass::FlagName::TextItem_Blink,
@@ -319,7 +319,7 @@ void unit_test_setval_actuator()
         draw_class.SetTimeScale(1.0f);
         node_klass.SetDrawable(draw_class);
 
-        game::RigidBodyItemClass rigid_body_class;
+        game::RigidBodyClass rigid_body_class;
         rigid_body_class.SetAngularDamping(-6.0f);
         node_klass.SetRigidBody(rigid_body_class);
 
@@ -426,7 +426,7 @@ void unit_test_kinematic_actuator()
         game::KinematicActuator instance(klass);
 
         game::EntityNodeClass klass;
-        game::RigidBodyItemClass body;
+        game::RigidBodyClass body;
         klass.SetRigidBody(body);
 
         // create node instance
