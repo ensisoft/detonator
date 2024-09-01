@@ -46,6 +46,7 @@
 #include "game/color.h"
 #include "game/scriptvar.h"
 #include "game/entity_node.h"
+#include "game/entity_node_rigid_body_joint.h"
 
 namespace game
 {
@@ -57,6 +58,16 @@ namespace game
         using RenderTree      = game::RenderTree<EntityNodeClass>;
         using RenderTreeNode  = EntityNodeClass;
         using RenderTreeValue = EntityNodeClass;
+
+        using PhysicsJoint = RigidBodyJointClass;
+        using PhysicsJointType = RigidBodyJointClass::JointType;
+        using PhysicsJointParams = RigidBodyJointClass::JointParams;
+        using RevoluteJointParams = RigidBodyJointClass::RevoluteJointParams;
+        using DistanceJointParams = RigidBodyJointClass::DistanceJointParams;
+        using WeldJointParams = RigidBodyJointClass::WeldJointParams;
+        using MotorJointParams = RigidBodyJointClass::MotorJointParams;
+        using PrismaticJointParams = RigidBodyJointClass::PrismaticJointParams;
+        using PulleyJointParams = RigidBodyJointClass::PulleyJointParams;
 
         enum class Flags {
             // Only pertains to editor (todo: maybe this flag should be removed)
@@ -87,109 +98,6 @@ namespace game
             WantsKeyEvents,
             // Whether to pass mouse events to the entity or not.
             WantsMouseEvents,
-        };
-
-        enum class PhysicsJointType {
-            Distance, Revolute, Weld, Prismatic, Motor, Pulley
-        };
-
-        struct RevoluteJointParams {
-            bool enable_limit = false;
-            bool enable_motor = false;
-            FRadians lower_angle_limit;
-            FRadians upper_angle_limit;
-            float motor_speed = 0.0f; // radians per second
-            float motor_torque = 0.0f; // newton-meters
-        };
-
-        struct DistanceJointParams {
-            std::optional<float> min_distance;
-            std::optional<float> max_distance;
-            float stiffness = 0.0f; // Newtons per meter, N/m
-            float damping   = 0.0f; // Newton seconds per meter
-            DistanceJointParams()
-            {
-                min_distance.reset();
-                max_distance.reset();
-            }
-        };
-
-        struct WeldJointParams {
-            float stiffness = 0.0f; // Newton-meters
-            float damping   = 0.0f; // Newton-meters per second
-        };
-
-        struct MotorJointParams {
-            float max_force = 1.0f; // Newtons
-            float max_torque = 1.0f; // Newton-meters
-        };
-
-        struct PrismaticJointParams {
-            bool enable_limit = false;
-            bool enable_motor = false;
-            float lower_limit = 0.0f; // distance, meters
-            float upper_limit = 0.0f; // distance, meters
-            float motor_torque = 0.0f; // newton-meters
-            float motor_speed = 0.0f; // radians per second
-            FRadians direction_angle;
-        };
-
-        struct PulleyJointParams {
-            std::string anchor_nodes[2];
-            float ratio = 1.0f;
-        };
-
-        using PhysicsJointParams = std::variant<DistanceJointParams,
-                RevoluteJointParams, WeldJointParams, MotorJointParams,
-                PrismaticJointParams, PulleyJointParams>;
-
-        // PhysicsJoint defines an optional physics engine constraint
-        // between two bodies in the physics world. In other words
-        // between two entity nodes that both have a rigid body
-        // attachment. The two entity nodes are identified by their
-        // node IDs. The distinction between "source" and "destination"
-        // is arbitrary and not relevant.
-        struct PhysicsJoint {
-            enum class Flags {
-                // Let the bodies connected to the joint collide
-                CollideConnected
-            };
-            // The type of the joint.
-            PhysicsJointType type = PhysicsJointType::Distance;
-            // The source node ID.
-            std::string src_node_id;
-            // The destination node ID.
-            std::string dst_node_id;
-            // ID of this joint.
-            std::string id;
-            // human-readable name of the joint.
-            std::string name;
-            // the anchor point within the body
-            glm::vec2 src_node_anchor_point = {0.0f, 0.0f};
-            // the anchor point within the body.
-            glm::vec2 dst_node_anchor_point = {0.0f, 0.0f};
-            // PhysicsJoint parameters (depending on the type)
-            PhysicsJointParams params;
-
-            base::bitflag<Flags> flags;
-
-            inline bool IsValid() const noexcept
-            {
-                if (src_node_id.empty() || dst_node_id.empty())
-                    return false;
-                if (src_node_id == dst_node_id)
-                    return false;
-                if (const auto* ptr = std::get_if<PulleyJointParams>(&params))
-                {
-                    if (ptr->anchor_nodes[0].empty() || ptr->anchor_nodes[1].empty())
-                        return false;
-                }
-                return true;
-            }
-            inline bool CollideConnected() const noexcept
-            { return flags.test(Flags::CollideConnected); }
-            inline void SetFlag(Flags flag, bool on_off) noexcept
-            { flags.set(flag, on_off); }
         };
 
         EntityClass();
@@ -763,48 +671,7 @@ namespace game
         using PhysicsJointClass = EntityClass::PhysicsJoint;
         using PhysicsJointType  = EntityClass::PhysicsJointType;
         using PhysicsJointParams = EntityClass::PhysicsJointParams;
-        class PhysicsJoint
-        {
-        public:
-            PhysicsJoint(const std::shared_ptr<const PhysicsJointClass>& joint,
-                         std::string joint_id,
-                         EntityNode* src_node,
-                         EntityNode* dst_node)
-              : mClass(joint)
-              , mId(std::move(joint_id))
-              , mSrcNode(src_node)
-              , mDstNode(dst_node)
-            {}
-            PhysicsJointType GetType() const noexcept
-            { return mClass->type; }
-            const EntityNode* GetSrcNode() const noexcept
-            { return mSrcNode; }
-            const EntityNode* GetDstNode() const noexcept
-            { return mDstNode; }
-            std::string GetSrcId() const noexcept
-            { return mDstNode->GetId(); }
-            std::string GetDstId() const noexcept
-            { return mDstNode->GetId(); }
-            const std::string& GetId() const noexcept
-            { return mId; }
-            const auto& GetSrcAnchor() const noexcept
-            { return mClass->src_node_anchor_point; }
-            const auto& GetDstAnchor() const noexcept
-            { return mClass->dst_node_anchor_point; }
-            const std::string& GetName() const noexcept
-            { return mClass->name; }
-            const PhysicsJointClass* operator->() const noexcept
-            { return mClass.get(); }
-            const PhysicsJointClass& GetClass() const noexcept
-            { return *mClass; }
-            const PhysicsJointParams& GetParams() const noexcept
-            { return mClass->params; }
-        private:
-            std::shared_ptr<const PhysicsJointClass> mClass;
-            std::string mId;
-            EntityNode* mSrcNode = nullptr;
-            EntityNode* mDstNode = nullptr;
-        };
+        using PhysicsJoint = RigidBodyJoint;
 
         const PhysicsJoint& GetJoint(std::size_t index) const;
         const PhysicsJoint* FindJointById(const std::string& id) const;
