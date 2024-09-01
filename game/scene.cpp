@@ -34,6 +34,7 @@
 #include "game/entity.h"
 #include "game/treeop.h"
 #include "game/transform.h"
+#include "game/entity_node_spatial_node.h"
 
 namespace {
 template<typename Result, typename Entity, typename Node>

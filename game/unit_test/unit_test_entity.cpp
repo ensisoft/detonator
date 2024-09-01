@@ -30,6 +30,13 @@
 #include "base/memory.h"
 #include "data/json.h"
 #include "game/entity.h"
+#include "game/entity_node_transformer.h"
+#include "game/entity_node_rigid_body.h"
+#include "game/entity_node_drawable_item.h"
+#include "game/entity_node_text_item.h"
+#include "game/entity_node_spatial_node.h"
+#include "game/entity_node_fixture.h"
+#include "game/entity_node_tilemap_node.h"
 
 // build easily comparable representation of the render tree
 // by concatenating node names into a string in the order

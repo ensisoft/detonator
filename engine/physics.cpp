@@ -30,6 +30,8 @@
 #include "game/types.h"
 #include "game/scene.h"
 #include "game/transform.h"
+#include "game/entity_node_rigid_body.h"
+#include "game/entity_node_fixture.h"
 
 using namespace game;
 
@@ -69,11 +71,11 @@ std::unique_ptr<b2Shape> CreateCollisionShape(const engine::ClassLibrary& classl
                                               const glm::vec2& shape_size,
                                               const glm::vec2& shape_offset,
                                               float shape_rotation,
-                                              game::detail::CollisionShape shape)
+                                              game::CollisionShape shape)
 {
     // collision shape used for collision resolver for the body.
     std::unique_ptr<b2Shape> collision_shape;
-    if (shape == game::detail::CollisionShape::Box)
+    if (shape == game::CollisionShape::Box)
     {
         b2Vec2 verts[4];
         verts[0] = b2Vec2(-0.5, -0.5);
@@ -677,7 +679,7 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter) const
         while (fixture)
         {
             const auto* fixture_data = base::SafeFind(mFixtures, (b2Fixture*)fixture);
-            game::detail::CollisionShape shape;
+            game::CollisionShape shape;
             std::string polygon;
             if (const auto* ptr = fixture_data->node->GetRigidBody()) {
                 shape   = ptr->GetCollisionShape();

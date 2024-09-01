@@ -28,6 +28,8 @@
 #include "engine/renderer.h"
 #include "game/treeop.h"
 #include "game/enum.h"
+#include "game/entity_node_drawable_item.h"
+#include "game/entity_node_text_item.h"
 #include "graphics/material.h"
 #include "graphics/painter.h"
 #include "graphics/transform.h"

@@ -33,6 +33,7 @@
 #include "game/util.h"
 #include "game/tilemap.h"
 #include "game/loader.h"
+#include "game/entity_node_drawable_item.h"
 #include "engine/renderer.h"
 #include "engine/classlib.h"
 

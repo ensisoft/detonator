@@ -28,6 +28,9 @@
 #include <unordered_map>
 
 #include "base/assert.h"
+#include "game/entity_node_rigid_body.h"
+#include "game/entity_node_drawable_item.h"
+#include "game/entity_node_text_item.h"
 #include "engine/ui.h"
 #include "editor/app/buffer.h"
 #include "editor/app/eventlog.h"
