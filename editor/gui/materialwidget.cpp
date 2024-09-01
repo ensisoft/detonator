@@ -99,6 +99,8 @@ MaterialWidget::MaterialWidget(app::Workspace* workspace)
         mUI.btnAddShader->setMenu(menu);
     }
 
+    connect(&mFileWatcher, &QFileSystemWatcher::fileChanged, this, &MaterialWidget::ShaderFileChanged);
+
     PopulateFromEnum<gfx::MaterialClass::MinTextureFilter>(mUI.minFilter);
     PopulateFromEnum<gfx::MaterialClass::MagTextureFilter>(mUI.magFilter);
     PopulateFromEnum<gfx::MaterialClass::TextureWrapping>(mUI.wrapX);
@@ -1215,6 +1217,17 @@ void MaterialWidget::UniformValueChanged(const Uniform* uniform)
     SetMaterialProperties();
 }
 
+void MaterialWidget::ShaderFileChanged()
+{
+    const auto& uri = mMaterial->GetShaderUri();
+    if (uri.empty())
+        return;
+    const auto& file = mWorkspace->MapFileToFilesystem(uri);
+
+    DEBUG("Material shader was changed on file. Reloading.. [file='%1']", file);
+    on_actionReloadShaders_triggered();
+}
+
 void MaterialWidget::CreateCustomShaderStub()
 {
     QString name = GetValue(mUI.materialName);
@@ -1917,6 +1930,14 @@ void MaterialWidget::ShowMaterialProperties()
 
     SetVisible(mUI.lblTileIndex, false);
     SetVisible(mUI.kTileIndex,   false);
+
+    if (mMaterial->HasShaderUri())
+    {
+        const auto& uri = mMaterial->GetShaderUri();
+        const auto& file = mWorkspace->MapFileToFilesystem(uri);
+        // ignores duplicates
+        mFileWatcher.addPath(file);
+    }
 
     if (mMaterial->GetType() == gfx::MaterialClass::Type::Custom)
     {

@@ -22,6 +22,7 @@
 #  include "ui_materialwidget.h"
 #  include <QMap>
 #  include <QString>
+#  include <QFileSystemWatcher>
 #include "warnpop.h"
 
 #include <vector>
@@ -153,6 +154,7 @@ namespace gui
         void AddNewTextureMapFromText();
         void AddNewTextureMapFromBitmap();
         void UniformValueChanged(const Uniform* uniform);
+        void ShaderFileChanged();
 
     private:
         void CreateCustomShaderStub();
@@ -195,6 +197,8 @@ namespace gui
         std::size_t mOriginalHash = 0;
         std::vector<Uniform*> mUniforms;
         std::vector<Sampler*> mSamplers;
+
+        QFileSystemWatcher mFileWatcher;
 
     };
 } // namespace
