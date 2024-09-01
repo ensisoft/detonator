@@ -1392,6 +1392,7 @@ std::size_t EntityClass::GetHash() const
         size_t jh = 0;
         jh = base::hash_combine(jh, joint->id);
         jh = base::hash_combine(jh, joint->type);
+        jh = base::hash_combine(jh, joint->flags);
         jh = base::hash_combine(jh, joint->src_node_id);
         jh = base::hash_combine(jh, joint->dst_node_id);
         jh = base::hash_combine(jh, joint->name);
@@ -1483,6 +1484,7 @@ void EntityClass::IntoJson(data::Writer& data) const
         auto chunk = data.NewWriteChunk();
         chunk->Write("id", joint->id);
         chunk->Write("type", joint->type);
+        chunk->Write("flags", joint->flags);
         chunk->Write("src_node_id", joint->src_node_id);
         chunk->Write("dst_node_id", joint->dst_node_id);
         chunk->Write("name", joint->name);
@@ -1588,6 +1590,7 @@ bool EntityClass::FromJson(const data::Reader& data)
         auto& jref = *joint;
         ok &= chunk->Read("id",                    &jref.id);
         ok &= chunk->Read("type",                  &jref.type);
+        ok &= chunk->Read("flags",                 &jref.flags);
         ok &= chunk->Read("src_node_id",           &jref.src_node_id);
         ok &= chunk->Read("dst_node_id",           &jref.dst_node_id);
         ok &= chunk->Read("name",                  &jref.name);

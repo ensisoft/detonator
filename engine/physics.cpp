@@ -1045,10 +1045,11 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             const auto distance = glm::length(dst_world_anchor - src_world_anchor);
 
             b2DistanceJointDef def = {};
-            def.bodyA = src_physics_node->world_body;
-            def.bodyB = dst_physics_node->world_body;
-            def.localAnchorA = ToBox2D(MapVectorFromGame(src_local_anchor));
-            def.localAnchorB = ToBox2D(MapVectorFromGame(dst_local_anchor));
+            def.collideConnected = joint->CollideConnected();
+            def.bodyA            = src_physics_node->world_body;
+            def.bodyB            = dst_physics_node->world_body;
+            def.localAnchorA     = ToBox2D(MapVectorFromGame(src_local_anchor));
+            def.localAnchorB     = ToBox2D(MapVectorFromGame(dst_local_anchor));
             if (params.min_distance.has_value())
                 def.minLength = MapLengthFromGame(params.min_distance.value());
             else def.minLength = distance;
@@ -1076,12 +1077,13 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             // around which the bodies rotate.
             b2RevoluteJointDef def = {};
             def.Initialize(src_physics_node->world_body, dst_physics_node->world_body, ToBox2D(src_world_anchor));
-            def.enableLimit    = params.enable_limit;
-            def.enableMotor    = params.enable_motor;
-            def.upperAngle     = params.upper_angle_limit.ToRadians();
-            def.lowerAngle     = params.lower_angle_limit.ToRadians() * -1.0f;
-            def.motorSpeed     = params.motor_speed;
-            def.maxMotorTorque = params.motor_torque;
+            def.collideConnected = joint->CollideConnected();
+            def.enableLimit      = params.enable_limit;
+            def.enableMotor      = params.enable_motor;
+            def.upperAngle       = params.upper_angle_limit.ToRadians();
+            def.lowerAngle       = params.lower_angle_limit.ToRadians() * -1.0f;
+            def.motorSpeed       = params.motor_speed;
+            def.maxMotorTorque   = params.motor_torque;
             mWorld->CreateJoint(&def);
 
             DEBUG("Revolute joint info: [limit=%1, motor=%2, range=%3-%4, speed=%5, torque=%6",
@@ -1095,8 +1097,9 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             const auto& params = std::get<EntityClass::WeldJointParams>(joint.GetParams());
             b2WeldJointDef def = {};
             def.Initialize(src_physics_node->world_body, dst_physics_node->world_body, ToBox2D(src_world_anchor));
-            def.damping   = params.damping;
-            def.stiffness = params.stiffness;
+            def.collideConnected = joint->CollideConnected();
+            def.damping          = params.damping;
+            def.stiffness        = params.stiffness;
             mWorld->CreateJoint(&def);
 
             DEBUG("Weld joint info: [damping=%1, stiffness=%2]", params.damping, params.stiffness);
@@ -1114,6 +1117,7 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             def.Initialize(src_physics_node->world_body, dst_physics_node->world_body,
                            ToBox2D(src_world_anchor),
                            ToBox2D(world_direction_vector));
+            def.collideConnected = joint->CollideConnected();
 
             def.enableLimit = params.enable_limit;
             def.enableMotor = params.enable_motor;
@@ -1134,6 +1138,7 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
 
             b2MotorJointDef def = {};
             def.Initialize(src_physics_node->world_body, dst_physics_node->world_body);
+            def.collideConnected = joint->CollideConnected();
             def.maxForce = params.max_force;
             def.maxTorque = params.max_torque;
             def.correctionFactor = 0.3f;
