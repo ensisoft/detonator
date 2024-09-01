@@ -229,6 +229,7 @@ add_library(EngineLib
     game/entity_node.cpp
     game/entity_node_transformer.cpp
     game/entity_node_rigid_body.cpp
+    game/entity_node_rigid_body_joint.cpp
     game/entity_node_drawable_item.cpp
     game/entity_node_text_item.cpp
     game/entity_node_spatial_node.cpp
@@ -967,6 +968,7 @@ add_library(GameLibTesting
     game/entity_node.cpp
     game/entity_node_transformer.cpp
     game/entity_node_rigid_body.cpp
+    game/entity_node_rigid_body_joint.cpp
     game/entity_node_drawable_item.cpp
     game/entity_node_text_item.cpp
     game/entity_node_spatial_node.cpp
