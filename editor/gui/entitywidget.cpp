@@ -539,8 +539,8 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     PopulateFromEnum<game::DrawableItemClass::RenderStyle>(mUI.dsRenderStyle);
     PopulateFromEnum<game::DrawableItemClass::RenderView>(mUI.dsRenderView);
     PopulateFromEnum<game::DrawableItemClass::RenderProjection>(mUI.dsRenderProj);
-    PopulateFromEnum<game::RigidBodyItemClass::Simulation>(mUI.rbSimulation);
-    PopulateFromEnum<game::RigidBodyItemClass::CollisionShape>(mUI.rbShape);
+    PopulateFromEnum<game::RigidBodyClass::Simulation>(mUI.rbSimulation);
+    PopulateFromEnum<game::RigidBodyClass::CollisionShape>(mUI.rbShape);
     PopulateFromEnum<game::TextItemClass::VerticalTextAlign>(mUI.tiVAlign);
     PopulateFromEnum<game::TextItemClass::HorizontalTextAlign>(mUI.tiHAlign);
     PopulateFromEnum<game::SpatialNodeClass::Shape>(mUI.spnShape);
@@ -2734,30 +2734,30 @@ void EntityWidget::ToggleRigidBody(bool on)
     }
     else if (!node->HasRigidBody())
     {
-        game::RigidBodyItemClass body;
+        game::RigidBodyClass body;
         // try to see if we can figure out the right collision
         // box for this rigid body based on the drawable.
         if (auto* item = node->GetDrawable())
         {
             const auto& drawableId = item->GetDrawableId();
             if (drawableId == "_circle")
-                body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Circle);
+                body.SetCollisionShape(game::RigidBodyClass::CollisionShape::Circle);
             else if (drawableId == "_parallelogram")
-                body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Parallelogram);
+                body.SetCollisionShape(game::RigidBodyClass::CollisionShape::Parallelogram);
             else if (drawableId == "_rect" || drawableId == "_round_rect")
-                body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Box);
+                body.SetCollisionShape(game::RigidBodyClass::CollisionShape::Box);
             else if (drawableId == "_isosceles_triangle")
-                body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::IsoscelesTriangle);
+                body.SetCollisionShape(game::RigidBodyClass::CollisionShape::IsoscelesTriangle);
             else if (drawableId == "_right_triangle")
-                body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::RightTriangle);
+                body.SetCollisionShape(game::RigidBodyClass::CollisionShape::RightTriangle);
             else if (drawableId == "_trapezoid")
-                body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Trapezoid);
+                body.SetCollisionShape(game::RigidBodyClass::CollisionShape::Trapezoid);
             else if (drawableId == "_semi_circle")
-                body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::SemiCircle);
+                body.SetCollisionShape(game::RigidBodyClass::CollisionShape::SemiCircle);
             else if (auto klass = mState.workspace->FindDrawableClassById(drawableId)) {
                 if (klass->GetType() == gfx::DrawableClass::Type::Polygon) {
                     body.SetPolygonShapeId(drawableId);
-                    body.SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Polygon);
+                    body.SetCollisionShape(game::RigidBodyClass::CollisionShape::Polygon);
                 }
             }
         }
@@ -3776,12 +3776,12 @@ void EntityWidget::DisplayCurrentNodeProperties()
             SetValue(mUI.rbAngularDamping, body->GetAngularDamping());
             SetValue(mUI.rbLinearDamping, body->GetLinearDamping());
             SetValue(mUI.rbDensity, body->GetDensity());
-            SetValue(mUI.rbIsBullet, body->TestFlag(game::RigidBodyItemClass::Flags::Bullet));
-            SetValue(mUI.rbIsSensor, body->TestFlag(game::RigidBodyItemClass::Flags::Sensor));
-            SetValue(mUI.rbIsEnabled, body->TestFlag(game::RigidBodyItemClass::Flags::Enabled));
-            SetValue(mUI.rbCanSleep, body->TestFlag(game::RigidBodyItemClass::Flags::CanSleep));
-            SetValue(mUI.rbDiscardRotation, body->TestFlag(game::RigidBodyItemClass::Flags::DiscardRotation));
-            if (body->GetCollisionShape() == game::RigidBodyItemClass::CollisionShape::Polygon)
+            SetValue(mUI.rbIsBullet, body->TestFlag(game::RigidBodyClass::Flags::Bullet));
+            SetValue(mUI.rbIsSensor, body->TestFlag(game::RigidBodyClass::Flags::Sensor));
+            SetValue(mUI.rbIsEnabled, body->TestFlag(game::RigidBodyClass::Flags::Enabled));
+            SetValue(mUI.rbCanSleep, body->TestFlag(game::RigidBodyClass::Flags::CanSleep));
+            SetValue(mUI.rbDiscardRotation, body->TestFlag(game::RigidBodyClass::Flags::DiscardRotation));
+            if (body->GetCollisionShape() == game::RigidBodyClass::CollisionShape::Polygon)
             {
                 SetEnabled(mUI.rbPolygon, true);
                 SetValue(mUI.rbPolygon, ListItemId(body->GetPolygonShapeId()));
@@ -3982,11 +3982,11 @@ void EntityWidget::UpdateCurrentNodeProperties()
         body->SetDensity(GetValue(mUI.rbDensity));
 
         // flags
-        body->SetFlag(game::RigidBodyItemClass::Flags::Bullet, GetValue(mUI.rbIsBullet));
-        body->SetFlag(game::RigidBodyItemClass::Flags::Sensor, GetValue(mUI.rbIsSensor));
-        body->SetFlag(game::RigidBodyItemClass::Flags::Enabled, GetValue(mUI.rbIsEnabled));
-        body->SetFlag(game::RigidBodyItemClass::Flags::CanSleep, GetValue(mUI.rbCanSleep));
-        body->SetFlag(game::RigidBodyItemClass::Flags::DiscardRotation, GetValue(mUI.rbDiscardRotation));
+        body->SetFlag(game::RigidBodyClass::Flags::Bullet, GetValue(mUI.rbIsBullet));
+        body->SetFlag(game::RigidBodyClass::Flags::Sensor, GetValue(mUI.rbIsSensor));
+        body->SetFlag(game::RigidBodyClass::Flags::Enabled, GetValue(mUI.rbIsEnabled));
+        body->SetFlag(game::RigidBodyClass::Flags::CanSleep, GetValue(mUI.rbCanSleep));
+        body->SetFlag(game::RigidBodyClass::Flags::DiscardRotation, GetValue(mUI.rbDiscardRotation));
     }
 
     if (auto* text = node->GetTextItem())
@@ -4160,7 +4160,7 @@ void EntityWidget::UpdateDeletedResourceReferences()
         }
         if (auto* body = node.GetRigidBody())
         {
-            if (body->GetCollisionShape() == game::RigidBodyItemClass::CollisionShape::Polygon)
+            if (body->GetCollisionShape() == game::RigidBodyClass::CollisionShape::Polygon)
             {
                 if (!mState.workspace->IsValidDrawable(body->GetPolygonShapeId()))
                 {

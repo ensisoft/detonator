@@ -89,14 +89,14 @@ std::unique_ptr<b2Shape> CreateCollisionShape(const engine::ClassLibrary& classl
         box->Set(verts, 4);
         collision_shape = std::move(box);
     }
-    else if (shape == RigidBodyItemClass::CollisionShape::Circle)
+    else if (shape == RigidBodyClass::CollisionShape::Circle)
     {
         auto circle = std::make_unique<b2CircleShape>();
         circle->m_radius = std::max(shape_size.x * 0.5, shape_size.y * 0.5);
         circle->m_p = ToBox2D(shape_offset);
         collision_shape = std::move(circle);
     }
-    else if (shape == RigidBodyItemClass::CollisionShape::SemiCircle)
+    else if (shape == RigidBodyClass::CollisionShape::SemiCircle)
     {
         b2Vec2 verts[7];
         verts[0] = b2Vec2( 0.0,      -0.5);
@@ -112,7 +112,7 @@ std::unique_ptr<b2Shape> CreateCollisionShape(const engine::ClassLibrary& classl
         poly->Set(verts, 7);
         collision_shape = std::move(poly);
     }
-    else if (shape == RigidBodyItemClass::CollisionShape::RightTriangle)
+    else if (shape == RigidBodyClass::CollisionShape::RightTriangle)
     {
         b2Vec2 verts[3];
         verts[0] = b2Vec2(-0.5, -0.5);
@@ -124,7 +124,7 @@ std::unique_ptr<b2Shape> CreateCollisionShape(const engine::ClassLibrary& classl
         poly->Set(verts, 3);
         collision_shape = std::move(poly);
     }
-    else if (shape == RigidBodyItemClass::CollisionShape::IsoscelesTriangle)
+    else if (shape == RigidBodyClass::CollisionShape::IsoscelesTriangle)
     {
         b2Vec2 verts[3];
         verts[0] = b2Vec2( 0.0, -0.5);
@@ -136,7 +136,7 @@ std::unique_ptr<b2Shape> CreateCollisionShape(const engine::ClassLibrary& classl
         poly->Set(verts, 3);
         collision_shape = std::move(poly);
     }
-    else if (shape == RigidBodyItemClass::CollisionShape::Trapezoid)
+    else if (shape == RigidBodyClass::CollisionShape::Trapezoid)
     {
         b2Vec2 verts[4];
         verts[0] = b2Vec2(-0.3, -0.5);
@@ -149,7 +149,7 @@ std::unique_ptr<b2Shape> CreateCollisionShape(const engine::ClassLibrary& classl
         poly->Set(verts, 4);
         collision_shape = std::move(poly);
     }
-    else if (shape == RigidBodyItemClass::CollisionShape::Parallelogram)
+    else if (shape == RigidBodyClass::CollisionShape::Parallelogram)
     {
         b2Vec2 verts[4];
         verts[0] = b2Vec2(-0.3, -0.5);
@@ -162,7 +162,7 @@ std::unique_ptr<b2Shape> CreateCollisionShape(const engine::ClassLibrary& classl
         poly->Set(verts, 4);
         collision_shape = std::move(poly);
     }
-    else if (shape == RigidBodyItemClass::CollisionShape::Polygon)
+    else if (shape == RigidBodyClass::CollisionShape::Polygon)
     {
         if (polygon_shape_id.empty())
         {
@@ -695,21 +695,21 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter) const
             model.RotateAroundZ(fixture_data->shape_rotation);
             model.Translate(fixture_data->shape_offset);
 
-            if (shape == RigidBodyItemClass::CollisionShape::Box)
+            if (shape == RigidBodyClass::CollisionShape::Box)
                 painter.Draw(gfx::Rectangle(), model, mat);
-            else if (shape == RigidBodyItemClass::CollisionShape::Circle)
+            else if (shape == RigidBodyClass::CollisionShape::Circle)
                 painter.Draw(gfx::Circle(), model, mat);
-            else if (shape == RigidBodyItemClass::CollisionShape::SemiCircle)
+            else if (shape == RigidBodyClass::CollisionShape::SemiCircle)
                 painter.Draw(gfx::SemiCircle(), model, mat);
-            else if (shape == RigidBodyItemClass::CollisionShape::RightTriangle)
+            else if (shape == RigidBodyClass::CollisionShape::RightTriangle)
                 painter.Draw(gfx::RightTriangle(), model, mat);
-            else if (shape == RigidBodyItemClass::CollisionShape::IsoscelesTriangle)
+            else if (shape == RigidBodyClass::CollisionShape::IsoscelesTriangle)
                 painter.Draw(gfx::IsoscelesTriangle(), model, mat);
-            else if (shape == RigidBodyItemClass::CollisionShape::Trapezoid)
+            else if (shape == RigidBodyClass::CollisionShape::Trapezoid)
                 painter.Draw(gfx::Trapezoid(), model, mat);
-            else if (shape == RigidBodyItemClass::CollisionShape::Parallelogram)
+            else if (shape == RigidBodyClass::CollisionShape::Parallelogram)
                 painter.Draw(gfx::Parallelogram(), model, mat);
-            else if (shape == RigidBodyItemClass::CollisionShape::Polygon)
+            else if (shape == RigidBodyClass::CollisionShape::Polygon)
             {
                 const auto& klass = mClassLib->FindDrawableClassById(polygon);
                 if (klass == nullptr) {
@@ -813,16 +813,16 @@ void PhysicsEngine::UpdateWorld(const glm::mat4& entity_to_world, const game::En
 
             if (phys_node->flags != rigid_body->GetFlags().value())
             {
-                world_body->SetEnabled(rigid_body->TestFlag(RigidBodyItem::Flags::Enabled));
-                world_body->SetBullet(rigid_body->TestFlag(RigidBodyItem::Flags::Bullet));
-                world_body->SetFixedRotation(rigid_body->TestFlag(RigidBodyItem::Flags::DiscardRotation));
-                world_body->SetSleepingAllowed(rigid_body->TestFlag(RigidBodyItem::Flags::CanSleep));
+                world_body->SetEnabled(rigid_body->TestFlag(RigidBody::Flags::Enabled));
+                world_body->SetBullet(rigid_body->TestFlag(RigidBody::Flags::Bullet));
+                world_body->SetFixedRotation(rigid_body->TestFlag(RigidBody::Flags::DiscardRotation));
+                world_body->SetSleepingAllowed(rigid_body->TestFlag(RigidBody::Flags::CanSleep));
                 b2Fixture* fixture_list_head = world_body->GetFixtureList();
                 while (fixture_list_head)
                 {
                     auto* fixture_data = base::SafeFind(mEngine.mFixtures, fixture_list_head);
                     if (auto* ptr = fixture_data->node->GetRigidBody())
-                        fixture_list_head->SetSensor(rigid_body->TestFlag(RigidBodyItem::Flags::Sensor));
+                        fixture_list_head->SetSensor(rigid_body->TestFlag(RigidBody::Flags::Sensor));
 
                     fixture_list_head = fixture_list_head->GetNext();
                 }
@@ -1243,21 +1243,21 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
 
         // body def is used to define a new physics body in the world.
         b2BodyDef body_def;
-        if (body->GetSimulation() == RigidBodyItemClass::Simulation::Static)
+        if (body->GetSimulation() == RigidBodyClass::Simulation::Static)
             body_def.type = b2_staticBody;
-        else if (body->GetSimulation() == RigidBodyItemClass::Simulation::Dynamic)
+        else if (body->GetSimulation() == RigidBodyClass::Simulation::Dynamic)
             body_def.type = b2_dynamicBody;
-        else if (body->GetSimulation() == RigidBodyItemClass::Simulation::Kinematic)
+        else if (body->GetSimulation() == RigidBodyClass::Simulation::Kinematic)
             body_def.type = b2_kinematicBody;
 
         body_def.position.Set(node_world_position.x, node_world_position.y);
         body_def.angle          = node_world_rotation;
         body_def.angularDamping = body->GetAngularDamping();
         body_def.linearDamping  = body->GetLinearDamping();
-        body_def.enabled        = body->TestFlag(RigidBodyItem::Flags::Enabled);
-        body_def.bullet         = body->TestFlag(RigidBodyItem::Flags::Bullet);
-        body_def.fixedRotation  = body->TestFlag(RigidBodyItem::Flags::DiscardRotation);
-        body_def.allowSleep     = body->TestFlag(RigidBodyItem::Flags::CanSleep);
+        body_def.enabled        = body->TestFlag(RigidBody::Flags::Enabled);
+        body_def.bullet         = body->TestFlag(RigidBody::Flags::Bullet);
+        body_def.fixedRotation  = body->TestFlag(RigidBody::Flags::DiscardRotation);
+        body_def.allowSleep     = body->TestFlag(RigidBody::Flags::CanSleep);
         b2Body* world_body = mWorld->CreateBody(&body_def);
 
         // fixture attaches a collision shape to the body.
@@ -1266,7 +1266,7 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
         fixture_def.density     = body->GetDensity();
         fixture_def.friction    = body->GetFriction();
         fixture_def.restitution = body->GetRestitution();
-        fixture_def.isSensor    = body->TestFlag(RigidBodyItem::Flags::Sensor);
+        fixture_def.isSensor    = body->TestFlag(RigidBody::Flags::Sensor);
         b2Fixture* fixture = world_body->CreateFixture(&fixture_def);
 
         FixtureData fixture_data;

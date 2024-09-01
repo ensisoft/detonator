@@ -56,7 +56,7 @@ EntityNodeClass::EntityNodeClass(const EntityNodeClass& other)
     mRotation = other.mRotation;
     mBitFlags = other.mBitFlags;
     if (other.mRigidBody)
-        mRigidBody = std::make_shared<RigidBodyItemClass>(*other.mRigidBody);
+        mRigidBody = std::make_shared<RigidBodyClass>(*other.mRigidBody);
     if (other.mDrawable)
         mDrawable = std::make_shared<DrawableItemClass>(*other.mDrawable);
     if (other.mTextItem)
@@ -118,9 +118,9 @@ std::size_t EntityNodeClass::GetHash() const
     return hash;
 }
 
-void EntityNodeClass::SetRigidBody(const RigidBodyItemClass &body)
+void EntityNodeClass::SetRigidBody(const RigidBodyClass &body)
 {
-    mRigidBody = std::make_shared<RigidBodyItemClass>(body);
+    mRigidBody = std::make_shared<RigidBodyClass>(body);
 }
 
 void EntityNodeClass::SetDrawable(const DrawableItemClass &drawable)
@@ -154,7 +154,7 @@ void EntityNodeClass::SetTransformer(const NodeTransformerClass& transformer)
 
 void EntityNodeClass::CreateRigidBody()
 {
-    mRigidBody = std::make_shared<RigidBodyItemClass>();
+    mRigidBody = std::make_shared<RigidBodyClass>();
 }
 
 void EntityNodeClass::CreateDrawable()
@@ -354,7 +354,7 @@ EntityNode::EntityNode(std::shared_ptr<const EntityNodeClass> klass, EntityNodeA
     if (mClass->HasDrawable())
         mDrawable = std::make_unique<DrawableItem>(mClass->GetSharedDrawable());
     if (mClass->HasRigidBody())
-        mRigidBody = std::make_unique<RigidBodyItem>(mClass->GetSharedRigidBody());
+        mRigidBody = std::make_unique<RigidBody>(mClass->GetSharedRigidBody());
     if (mClass->HasTextItem())
         mTextItem = std::make_unique<TextItem>(mClass->GetSharedTextItem());
     if (mClass->HasSpatialNode())
@@ -411,7 +411,7 @@ void EntityNode::Release(EntityNodeAllocator* allocator)
 DrawableItem* EntityNode::GetDrawable()
 { return mDrawable.get(); }
 
-RigidBodyItem* EntityNode::GetRigidBody()
+RigidBody* EntityNode::GetRigidBody()
 { return mRigidBody.get(); }
 
 TextItem* EntityNode::GetTextItem()
@@ -436,7 +436,7 @@ NodeTransformer* EntityNode::GetTransformer()
 const DrawableItem* EntityNode::GetDrawable() const
 { return mDrawable.get(); }
 
-const RigidBodyItem* EntityNode::GetRigidBody() const
+const RigidBody* EntityNode::GetRigidBody() const
 { return mRigidBody.get(); }
 
 const TextItem* EntityNode::GetTextItem() const

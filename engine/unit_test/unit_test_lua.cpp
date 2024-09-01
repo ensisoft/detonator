@@ -925,20 +925,20 @@ end
 
     // Rigid body
     {
-        auto klass = std::make_shared<game::RigidBodyItemClass>();
-        klass->SetFlag(game::RigidBodyItemClass::Flags::Bullet, true);
-        klass->SetFlag(game::RigidBodyItemClass::Flags::Enabled, false);
-        klass->SetFlag(game::RigidBodyItemClass::Flags::Sensor, false);
+        auto klass = std::make_shared<game::RigidBodyClass>();
+        klass->SetFlag(game::RigidBodyClass::Flags::Bullet, true);
+        klass->SetFlag(game::RigidBodyClass::Flags::Enabled, false);
+        klass->SetFlag(game::RigidBodyClass::Flags::Sensor, false);
         klass->SetLinearDamping(-1.0f);
         klass->SetAngularDamping(1.0f);
         klass->SetDensity(2.0f);
         klass->SetRestitution(3.0f);
-        klass->SetSimulation(game::RigidBodyItemClass::Simulation::Kinematic);
-        klass->SetCollisionShape(game::RigidBodyItemClass::CollisionShape::Polygon);
+        klass->SetSimulation(game::RigidBodyClass::Simulation::Kinematic);
+        klass->SetCollisionShape(game::RigidBodyClass::CollisionShape::Polygon);
         klass->SetPolygonShapeId("polygon");
         klass->SetFriction(5.0f);
 
-        game::RigidBodyItem body(klass);
+        game::RigidBody body(klass);
         body.SetLinearVelocity(glm::vec2(1.0f, 2.0f));
         body.SetAngularVelocity(2.0f);
 
@@ -1040,7 +1040,7 @@ void unit_test_scene_interface()
         draw.SetFlag(game::DrawableItemClass::Flags::FlipHorizontally, true);
         draw.SetFlag(game::DrawableItemClass::Flags::RestartDrawable, false);
 
-        game::RigidBodyItemClass body;
+        game::RigidBodyClass body;
         // todo: body data
 
         game::EntityNodeClass node;

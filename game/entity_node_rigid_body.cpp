@@ -24,7 +24,7 @@
 namespace game
 {
 
-std::size_t RigidBodyItemClass::GetHash() const
+std::size_t RigidBodyClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mSimulation);
@@ -39,7 +39,7 @@ std::size_t RigidBodyItemClass::GetHash() const
     return hash;
 }
 
-void RigidBodyItemClass::IntoJson(data::Writer& data) const
+void RigidBodyClass::IntoJson(data::Writer& data) const
 {
     data.Write("simulation",      mSimulation);
     data.Write("shape",           mCollisionShape);
@@ -52,7 +52,7 @@ void RigidBodyItemClass::IntoJson(data::Writer& data) const
     data.Write("density",         mDensity);
 }
 
-bool RigidBodyItemClass::FromJson(const data::Reader& data)
+bool RigidBodyClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
     ok &= data.Read("simulation",      &mSimulation);
@@ -67,7 +67,7 @@ bool RigidBodyItemClass::FromJson(const data::Reader& data)
     return ok;
 }
 
-void RigidBodyItem::ApplyLinearImpulseToCenter(const glm::vec2& impulse) noexcept
+void RigidBody::ApplyLinearImpulseToCenter(const glm::vec2& impulse) noexcept
 {
     if (mCenterImpulse.has_value())
         WARN("Overwriting pending impulse on rigid body.");
@@ -75,12 +75,12 @@ void RigidBodyItem::ApplyLinearImpulseToCenter(const glm::vec2& impulse) noexcep
     mCenterImpulse = impulse;
 }
 
-void RigidBodyItem::AddLinearImpulseToCenter(const glm::vec2& impulse) noexcept
+void RigidBody::AddLinearImpulseToCenter(const glm::vec2& impulse) noexcept
 {
     mCenterImpulse = GetLinearImpulseToCenter() + impulse;
 }
 
-void RigidBodyItem::AdjustLinearVelocity(const glm::vec2& velocity) noexcept
+void RigidBody::AdjustLinearVelocity(const glm::vec2& velocity) noexcept
 {
     if (mLinearVelocityAdjustment.has_value())
         WARN("Overwriting pending rigid body linear adjustment.");
@@ -88,7 +88,7 @@ void RigidBodyItem::AdjustLinearVelocity(const glm::vec2& velocity) noexcept
     mLinearVelocityAdjustment = velocity;
 }
 
-void RigidBodyItem::AdjustAngularVelocity(float radians) noexcept
+void RigidBody::AdjustAngularVelocity(float radians) noexcept
 {
     if (mAngularVelocityAdjustment.has_value())
         WARN("Overwriting pending angular velocity adjustment.");

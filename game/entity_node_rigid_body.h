@@ -34,7 +34,7 @@
 
 namespace game
 {
-    class RigidBodyItemClass
+    class RigidBodyClass
     {
     public:
         using CollisionShape = game::CollisionShape;
@@ -73,7 +73,7 @@ namespace game
             // Useful for things such as player character that should stay "upright
             DiscardRotation
         };
-        RigidBodyItemClass() noexcept
+        RigidBodyClass() noexcept
         {
             mBitFlags.set(Flags::Enabled, true);
             mBitFlags.set(Flags::CanSleep, true);
@@ -138,14 +138,14 @@ namespace game
         float mDensity = 1.0f;
     };
 
-    class RigidBodyItem
+    class RigidBody
     {
     public:
-        using Simulation = RigidBodyItemClass::Simulation;
-        using Flags      = RigidBodyItemClass::Flags;
-        using CollisionShape = RigidBodyItemClass::CollisionShape;
+        using Simulation = RigidBodyClass::Simulation;
+        using Flags      = RigidBodyClass::Flags;
+        using CollisionShape = RigidBodyClass::CollisionShape;
 
-        RigidBodyItem(std::shared_ptr<const RigidBodyItemClass> klass)
+        explicit RigidBody(std::shared_ptr<const RigidBodyClass> klass) noexcept
           : mClass(std::move(klass))
           , mInstanceFlags(mClass->GetFlags())
         {}
@@ -248,12 +248,12 @@ namespace game
         bool DiscardRotation() const noexcept
         { return TestFlag(Flags::DiscardRotation); }
 
-        const RigidBodyItemClass& GetClass() const noexcept
+        const RigidBodyClass& GetClass() const noexcept
         { return *mClass.get(); }
-        const RigidBodyItemClass* operator->() const noexcept
+        const RigidBodyClass* operator->() const noexcept
         { return mClass.get(); }
     private:
-        std::shared_ptr<const RigidBodyItemClass> mClass;
+        std::shared_ptr<const RigidBodyClass> mClass;
         // Current linear velocity in meters per second.
         // For dynamically driven bodies
         // the physics engine will update this value, whereas for
