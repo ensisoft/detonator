@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>995</width>
-    <height>877</height>
+    <width>1100</width>
+    <height>950</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -113,12 +113,12 @@
    <item>
     <widget class="QGroupBox" name="groupBox_3">
      <property name="title">
-      <string>Joint nodes A and B</string>
+      <string>Joint bodies A and B</string>
      </property>
      <property name="flat">
       <bool>true</bool>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_4">
+     <layout class="QGridLayout" name="gridLayout_4">
       <property name="leftMargin">
        <number>10</number>
       </property>
@@ -131,39 +131,38 @@
       <property name="bottomMargin">
        <number>10</number>
       </property>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Node A</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="cmbSrcNode"/>
-        </item>
-       </layout>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="cmbSrcNode"/>
       </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Node B</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="cmbDstNode"/>
-        </item>
-       </layout>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="cmbDstNode"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Body B</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Body A</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QCheckBox" name="chkCollideConnected">
+        <property name="text">
+         <string>Allow collision between body A and body B</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -193,6 +192,18 @@
       <bool>true</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
+      <property name="leftMargin">
+       <number>10</number>
+      </property>
+      <property name="topMargin">
+       <number>10</number>
+      </property>
+      <property name="rightMargin">
+       <number>10</number>
+      </property>
+      <property name="bottomMargin">
+       <number>10</number>
+      </property>
       <item row="0" column="0">
        <widget class="QLabel" name="lblNodeAPosition">
         <property name="text">
@@ -277,13 +288,6 @@
         </item>
        </layout>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="lblNodeBPosition">
-        <property name="text">
-         <string>Node B position</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
@@ -360,6 +364,13 @@
          </widget>
         </item>
        </layout>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lblNodeBPosition">
+        <property name="text">
+         <string>Node B position</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -864,6 +875,7 @@
   <tabstop>cmbType</tabstop>
   <tabstop>cmbSrcNode</tabstop>
   <tabstop>cmbDstNode</tabstop>
+  <tabstop>chkCollideConnected</tabstop>
   <tabstop>srcX</tabstop>
   <tabstop>srcY</tabstop>
   <tabstop>btnResetSrcAnchor</tabstop>

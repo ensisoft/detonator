@@ -1865,6 +1865,10 @@ namespace game
         // node IDs. The distinction between "source" and "destination"
         // is arbitrary and not relevant.
         struct PhysicsJoint {
+            enum class Flags {
+                // Let the bodies connected to the joint collide
+                CollideConnected
+            };
             // The type of the joint.
             PhysicsJointType type = PhysicsJointType::Distance;
             // The source node ID.
@@ -1882,6 +1886,8 @@ namespace game
             // PhysicsJoint parameters (depending on the type)
             PhysicsJointParams params;
 
+            base::bitflag<Flags> flags;
+
             inline bool IsValid() const noexcept
             {
                 if (src_node_id.empty() || dst_node_id.empty())
@@ -1890,6 +1896,10 @@ namespace game
                     return false;
                 return true;
             }
+            inline bool CollideConnected() const noexcept
+            { return flags.test(Flags::CollideConnected); }
+            inline void SetFlag(Flags flag, bool on_off) noexcept
+            { flags.set(flag, on_off); }
         };
 
         EntityClass();

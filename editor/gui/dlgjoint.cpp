@@ -105,6 +105,7 @@ void DlgJoint::Show()
     SetValue(mUI.srcY, mJoint.src_node_anchor_point.y);
     SetValue(mUI.dstX, mJoint.dst_node_anchor_point.x);
     SetValue(mUI.dstY, mJoint.dst_node_anchor_point.y);
+    SetValue(mUI.chkCollideConnected, mJoint.CollideConnected());
 
     if (mJoint.type == game::EntityClass::PhysicsJointType::Distance)
     {
@@ -261,6 +262,7 @@ bool DlgJoint::Apply()
     mJoint.dst_node_anchor_point.y = GetValue(mUI.dstY);
     mJoint.src_node_anchor_point.x = GetValue(mUI.srcX);
     mJoint.src_node_anchor_point.y = GetValue(mUI.srcY);
+    mJoint.SetFlag(game::EntityClass::PhysicsJoint::Flags::CollideConnected, GetValue(mUI.chkCollideConnected));
 
     if (mJoint.type == game::EntityClass::PhysicsJointType::Distance)
     {
