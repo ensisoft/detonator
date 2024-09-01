@@ -71,6 +71,7 @@ add_executable(UnitTest
     ../game/actuator.cpp
     ../game/animation.cpp
     ../game/entity.cpp
+    ../game/entity_node.cpp
     ../game/entity_node_transformer.cpp
     ../game/entity_node_rigid_body.cpp
     ../game/entity_node_drawable_item.cpp
@@ -195,6 +196,7 @@ add_executable(GameEngine
     ../game/animation.cpp
     ../game/actuator.cpp
     ../game/entity.cpp
+    ../game/entity_node.cpp
     ../game/entity_node_transformer.cpp
     ../game/entity_node_rigid_body.cpp
     ../game/entity_node_drawable_item.cpp
