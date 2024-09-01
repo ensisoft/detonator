@@ -69,11 +69,13 @@ void DlgJoint::Show()
     SetVisible(mUI.lblMotorSpeed,            false);
     SetVisible(mUI.lblMotorTorque,           false);
     SetVisible(mUI.lblMotorRotation,         false);
+    SetVisible(mUI.lblMotorForce,            false);
     SetVisible(mUI.upperAngle,               false);
     SetVisible(mUI.lowerAngle,               false);
     SetVisible(mUI.motorSpeed,               false);
     SetVisible(mUI.motorTorque,              false);
     SetVisible(mUI.motorRotation,            false);
+    SetVisible(mUI.motorForce,               false);
     SetVisible(mUI.chkEnableMotor,           false);
     SetVisible(mUI.chkEnableLimit,           false);
     SetVisible(mUI.srcX,                     false);
@@ -94,6 +96,9 @@ void DlgJoint::Show()
     SetVisible(mUI.lblUpperTranslationLimit, false);
     SetVisible(mUI.lblDirAngle,              false);
     SetVisible(mUI.dirAngle,                 false);
+
+    SetVisible(mUI.jointAnchors,             true);
+
 
     SetValue(mUI.cmbType, mJoint.type);
     SetValue(mUI.srcX, mJoint.src_node_anchor_point.x);
@@ -214,6 +219,18 @@ void DlgJoint::Show()
         SetValue(mUI.upperTranslationLimit, params.upper_limit);
         SetValue(mUI.dirAngle, params.direction_angle);
     }
+    else if (mJoint.type == game::EntityClass::PhysicsJointType::Motor)
+    {
+        SetVisible(mUI.jointAnchors,             false);
+        SetVisible(mUI.lblMotorForce,            true);
+        SetVisible(mUI.lblMotorTorque,           true);
+        SetVisible(mUI.motorForce,               true);
+        SetVisible(mUI.motorTorque,              true);
+
+        const auto& params = std::get<game::EntityClass::MotorJointParams>(mJoint.params);
+        SetValue(mUI.motorForce, params.max_force);
+        SetValue(mUI.motorTorque, params.max_torque);
+    }
 }
 
 bool DlgJoint::Apply()
@@ -292,6 +309,13 @@ bool DlgJoint::Apply()
         params.direction_angle = GetValue(mUI.dirAngle);
         mJoint.params = params;
     }
+    else if (mJoint.type == game::EntityClass::PhysicsJointType::Motor)
+    {
+        game::EntityClass::MotorJointParams params;
+        params.max_torque = GetValue(mUI.motorTorque);
+        params.max_force = GetValue(mUI.motorForce);
+        mJoint.params = params;
+    }
     return true;
 }
 
@@ -353,6 +377,11 @@ void DlgJoint::on_cmbType_currentIndexChanged(int)
     {
         mJoint.type = type;
         mJoint.params = game::EntityClass::PrismaticJointParams {};
+    }
+    else if (type == game::EntityClass::PhysicsJointType::Motor)
+    {
+        mJoint.type = type;
+        mJoint.params = game::EntityClass::MotorJointParams {};
     }
 
     Show();
