@@ -761,6 +761,22 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter) const
                 const auto& world_anchor = MapVectorToGame(ToGlm(pj->GetAnchorA()));
                 gfx::DebugDrawCircle(painter, gfx::FCircle(world_anchor.x, world_anchor.y, 5.0f), gfx::Color::HotPink, 2.0f);
             }
+            else if (joint->GetType() == b2JointType::e_pulleyJoint)
+            {
+                b2PulleyJoint* pj = static_cast<b2PulleyJoint*>(joint);
+                const auto& world_ground_anchor_a = MapVectorToGame(ToGlm(pj->GetGroundAnchorA()));
+                const auto& world_ground_anchor_b = MapVectorToGame(ToGlm(pj->GetGroundAnchorB()));
+                const auto& world_body_anchor_a = MapVectorToGame(ToGlm(pj->GetAnchorA()));
+                const auto& world_body_anchor_b = MapVectorToGame(ToGlm(pj->GetAnchorB()));
+                gfx::DebugDrawLine(painter, world_body_anchor_a, world_ground_anchor_a, gfx::Color::HotPink, 2.0f);
+                gfx::DebugDrawLine(painter, world_body_anchor_b, world_ground_anchor_b, gfx::Color::HotPink, 2.0f);
+                gfx::DebugDrawLine(painter, world_ground_anchor_a, world_ground_anchor_b, gfx::Color::HotPink, 2.0f);
+
+                gfx::DebugDrawCircle(painter, gfx::FCircle(world_ground_anchor_a, 5.0f), gfx::Color::HotPink, 2.0f);
+                gfx::DebugDrawCircle(painter, gfx::FCircle(world_ground_anchor_b, 5.0f), gfx::Color::HotPink, 2.0f);
+                gfx::DebugDrawCircle(painter, gfx::FCircle(world_body_anchor_a, 5.0f), gfx::Color::HotPink, 2.0f);
+                gfx::DebugDrawCircle(painter, gfx::FCircle(world_body_anchor_b, 5.0f), gfx::Color::HotPink, 2.0f);
+            }
             joints.insert(joint);
             joint_list = joint_list->next;
         }
@@ -1145,6 +1161,44 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             mWorld->CreateJoint(&def);
 
             DEBUG("Motor joint info: [max_force=%1, max_torque=%2]", def.maxForce, def.maxTorque);
+        }
+        else if (type == Entity::PhysicsJointType::Pulley)
+        {
+            const auto& params = std::get<EntityClass::PulleyJointParams>(joint.GetParams());
+            const auto* world_anchor_node_a = entity.FindNodeByClassId(params.anchor_nodes[0]);
+            const auto* world_anchor_node_b = entity.FindNodeByClassId(params.anchor_nodes[1]);
+            if (!world_anchor_node_a || !world_anchor_node_b)
+            {
+                ERROR("Failed to find pulley joint world anchor node.");
+                continue;
+            }
+
+            // we're taking the center point of the node as the point that
+            // will be transformed into world coordinates as the ground
+            // anchor point for the pulley joint. This could also be use
+            // configurable, similar to the regular joint anchors that the
+            // user can adjust.
+
+            Transform trans(entity_to_world);
+            trans.Push(entity.FindNodeTransform(world_anchor_node_a));
+                const auto world_ground_anchor_a = trans * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            trans.Pop();
+            trans.Push(entity.FindNodeTransform(world_anchor_node_b));
+               const auto world_ground_anchor_b = trans * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            trans.Pop();
+
+            b2PulleyJointDef def = {};
+            def.Initialize(src_physics_node->world_body, dst_physics_node->world_body,
+                           ToBox2D(world_ground_anchor_a),
+                           ToBox2D(world_ground_anchor_b),
+                           ToBox2D(src_world_anchor),
+                           ToBox2D(dst_world_anchor),
+                           params.ratio);
+
+            mWorld->CreateJoint(&def);
+
+            DEBUG("Pulley joint info: [ratio=%1]", def.ratio);
+
         }
 
         else BUG("Unhandled physics joint type.");

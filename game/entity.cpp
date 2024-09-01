@@ -1436,6 +1436,12 @@ std::size_t EntityClass::GetHash() const
             jh = base::hash_combine(jh, ptr->max_force);
             jh = base::hash_combine(jh, ptr->max_torque);
         }
+        else if (const auto* ptr = std::get_if<PulleyJointParams>(&joint->params))
+        {
+            jh = base::hash_combine(jh, ptr->anchor_nodes[0]);
+            jh = base::hash_combine(jh, ptr->anchor_nodes[1]);
+            jh = base::hash_combine(jh, ptr->ratio);
+        }
 
         hash = base::hash_combine(hash, jh);
     }
@@ -1527,6 +1533,12 @@ void EntityClass::IntoJson(data::Writer& data) const
         {
             chunk->Write("max_force", ptr->max_force);
             chunk->Write("max_torque", ptr->max_torque);
+        }
+        else if (const auto* ptr = std::get_if<PulleyJointParams>(&joint->params))
+        {
+            chunk->Write("anchor_node_0", ptr->anchor_nodes[0]);
+            chunk->Write("anchor_node_1", ptr->anchor_nodes[1]);
+            chunk->Write("ratio", ptr->ratio);
         }
         data.AppendChunk("joints", std::move(chunk));
     }
@@ -1650,6 +1662,14 @@ bool EntityClass::FromJson(const data::Reader& data)
             MotorJointParams params;
             ok &= chunk->Read("max_force", &params.max_force);
             ok &= chunk->Read("max_torque", &params.max_torque);
+            joint->params = params;
+        }
+        else if (jref.type == PhysicsJointType::Pulley)
+        {
+            PulleyJointParams params;
+            ok &= chunk->Read("anchor_node_0", &params.anchor_nodes[0]);
+            ok &= chunk->Read("anchor_node_1", &params.anchor_nodes[1]);
+            ok &= chunk->Read("ratio", &params.ratio);
             joint->params = params;
         }
         mJoints.push_back(std::move(joint));
