@@ -1810,7 +1810,7 @@ namespace game
         };
 
         enum class PhysicsJointType {
-            Distance, Revolute, Weld, Prismatic, Motor
+            Distance, Revolute, Weld, Prismatic, Motor, Pulley
         };
 
         struct RevoluteJointParams {
@@ -1854,9 +1854,14 @@ namespace game
             FRadians direction_angle;
         };
 
+        struct PulleyJointParams {
+            std::string anchor_nodes[2];
+            float ratio = 1.0f;
+        };
+
         using PhysicsJointParams = std::variant<DistanceJointParams,
                 RevoluteJointParams, WeldJointParams, MotorJointParams,
-                PrismaticJointParams>;
+                PrismaticJointParams, PulleyJointParams>;
 
         // PhysicsJoint defines an optional physics engine constraint
         // between two bodies in the physics world. In other words
@@ -1894,6 +1899,11 @@ namespace game
                     return false;
                 if (src_node_id == dst_node_id)
                     return false;
+                if (const auto* ptr = std::get_if<PulleyJointParams>(&params))
+                {
+                    if (ptr->anchor_nodes[0].empty() || ptr->anchor_nodes[1].empty())
+                        return false;
+                }
                 return true;
             }
             inline bool CollideConnected() const noexcept
