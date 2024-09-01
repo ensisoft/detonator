@@ -185,7 +185,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox_4">
+    <widget class="QGroupBox" name="jointAnchors">
      <property name="title">
       <string>Joint position in local node coordinates</string>
      </property>
@@ -401,7 +401,7 @@
       <property name="bottomMargin">
        <number>10</number>
       </property>
-      <item row="13" column="1">
+      <item row="14" column="1">
        <widget class="QCheckBox" name="chkEnableLimit">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -437,6 +437,9 @@
         </property>
         <property name="suffix">
          <string> N⋅m</string>
+        </property>
+        <property name="maximum">
+         <double>1000.000000000000000</double>
         </property>
        </widget>
       </item>
@@ -702,6 +705,19 @@
         </property>
        </widget>
       </item>
+      <item row="9" column="1">
+       <widget class="QDoubleSpinBox" name="dirAngle">
+        <property name="suffix">
+         <string>  °</string>
+        </property>
+        <property name="minimum">
+         <double>-180.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>180.000000000000000</double>
+        </property>
+       </widget>
+      </item>
       <item row="11" column="1">
        <widget class="QDoubleSpinBox" name="motorSpeed">
         <property name="sizePolicy">
@@ -728,6 +744,13 @@
         </property>
        </widget>
       </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="lblLowerTranslationLimit">
+        <property name="text">
+         <string>Maximum backwards travel</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="lblMinDistance">
         <property name="text">
@@ -735,7 +758,7 @@
         </property>
        </widget>
       </item>
-      <item row="14" column="1">
+      <item row="15" column="1">
        <widget class="QCheckBox" name="chkEnableMotor">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -755,13 +778,6 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="lblLowerTranslationLimit">
-        <property name="text">
-         <string>Maximum backwards travel</string>
-        </property>
-       </widget>
-      </item>
       <item row="7" column="0">
        <widget class="QLabel" name="lblUpperTranslationLimit">
         <property name="text">
@@ -769,16 +785,20 @@
         </property>
        </widget>
       </item>
-      <item row="9" column="1">
-       <widget class="QDoubleSpinBox" name="dirAngle">
+      <item row="13" column="1">
+       <widget class="QDoubleSpinBox" name="motorForce">
         <property name="suffix">
-         <string>  °</string>
-        </property>
-        <property name="minimum">
-         <double>-180.000000000000000</double>
+         <string> N</string>
         </property>
         <property name="maximum">
-         <double>180.000000000000000</double>
+         <double>1000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="0">
+       <widget class="QLabel" name="lblMotorForce">
+        <property name="text">
+         <string>Motor force</string>
         </property>
        </widget>
       </item>
@@ -864,6 +884,7 @@
   <tabstop>motorRotation</tabstop>
   <tabstop>motorSpeed</tabstop>
   <tabstop>motorTorque</tabstop>
+  <tabstop>motorForce</tabstop>
   <tabstop>chkEnableLimit</tabstop>
   <tabstop>chkEnableMotor</tabstop>
   <tabstop>btnAccept</tabstop>
