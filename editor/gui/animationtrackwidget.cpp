@@ -945,6 +945,7 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
 
     QMenu menu(this);
     QMenu actuators(this);
+    actuators.setEnabled(selected == nullptr);
     actuators.setTitle("New Actuator On ...");
     actuators.setIcon(QIcon("icons:add.png"));
 
