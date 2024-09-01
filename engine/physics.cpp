@@ -1128,6 +1128,20 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
                   def.lowerTranslation, def.upperTranslation,
                   params.motor_speed, params.motor_torque);
         }
+        else if (type == Entity::PhysicsJointType ::Motor)
+        {
+            const auto& params = std::get<EntityClass::MotorJointParams>(joint.GetParams());
+
+            b2MotorJointDef def = {};
+            def.Initialize(src_physics_node->world_body, dst_physics_node->world_body);
+            def.maxForce = params.max_force;
+            def.maxTorque = params.max_torque;
+            def.correctionFactor = 0.3f;
+            mWorld->CreateJoint(&def);
+
+            DEBUG("Motor joint info: [max_force=%1, max_torque=%2]", def.maxForce, def.maxTorque);
+        }
+
         else BUG("Unhandled physics joint type.");
 
         DEBUG("Created new physics joint. [entity='%1', type=%2, joint='%3', node='%4', node='%5']",

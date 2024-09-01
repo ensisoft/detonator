@@ -1810,7 +1810,7 @@ namespace game
         };
 
         enum class PhysicsJointType {
-            Distance, Revolute, Weld, Prismatic
+            Distance, Revolute, Weld, Prismatic, Motor
         };
 
         struct RevoluteJointParams {
@@ -1839,6 +1839,11 @@ namespace game
             float damping   = 0.0f; // Newton-meters per second
         };
 
+        struct MotorJointParams {
+            float max_force = 1.0f; // Newtons
+            float max_torque = 1.0f; // Newton-meters
+        };
+
         struct PrismaticJointParams {
             bool enable_limit = false;
             bool enable_motor = false;
@@ -1850,7 +1855,8 @@ namespace game
         };
 
         using PhysicsJointParams = std::variant<DistanceJointParams,
-                RevoluteJointParams, WeldJointParams, PrismaticJointParams>;
+                RevoluteJointParams, WeldJointParams, MotorJointParams,
+                PrismaticJointParams>;
 
         // PhysicsJoint defines an optional physics engine constraint
         // between two bodies in the physics world. In other words

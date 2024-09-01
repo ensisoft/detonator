@@ -1430,6 +1430,12 @@ std::size_t EntityClass::GetHash() const
             jh = base::hash_combine(jh, ptr->motor_speed);
             jh = base::hash_combine(jh, ptr->direction_angle);
         }
+        else if (const auto* ptr = std::get_if<MotorJointParams>(&joint->params))
+        {
+            jh = base::hash_combine(jh, ptr->max_force);
+            jh = base::hash_combine(jh, ptr->max_torque);
+        }
+
         hash = base::hash_combine(hash, jh);
     }
 
@@ -1514,6 +1520,11 @@ void EntityClass::IntoJson(data::Writer& data) const
             chunk->Write("motor_torque", ptr->motor_torque);
             chunk->Write("motor_speed", ptr->motor_speed);
             chunk->Write("direction_angle", ptr->direction_angle);
+        }
+        else if (const auto* ptr = std::get_if<MotorJointParams>(&joint->params))
+        {
+            chunk->Write("max_force", ptr->max_force);
+            chunk->Write("max_torque", ptr->max_torque);
         }
         data.AppendChunk("joints", std::move(chunk));
     }
@@ -1629,6 +1640,13 @@ bool EntityClass::FromJson(const data::Reader& data)
             ok &= chunk->Read("motor_torque", &params.motor_torque);
             ok &= chunk->Read("motor_speed", &params.motor_speed);
             ok &= chunk->Read("direction_angle", &params.direction_angle);
+            joint->params = params;
+        }
+        else if (jref.type == PhysicsJointType::Motor)
+        {
+            MotorJointParams params;
+            ok &= chunk->Read("max_force", &params.max_force);
+            ok &= chunk->Read("max_torque", &params.max_torque);
             joint->params = params;
         }
         mJoints.push_back(std::move(joint));
