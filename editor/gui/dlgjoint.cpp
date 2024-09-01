@@ -31,20 +31,25 @@ DlgJoint::DlgJoint(QWidget* parent, const game::EntityClass& klass, game::Entity
     PopulateFromEnum<game::EntityClass::PhysicsJointType>(mUI.cmbType);
 
     std::vector<ResourceListItem> nodes_with_rigid_bodies;
+    std::vector<ResourceListItem> all_nodes;
+
     for (size_t i=0; i<mEntity.GetNumNodes(); ++i)
     {
         const auto& node = mEntity.GetNode(i);
-        if (!node.HasRigidBody())
-            continue;
         ResourceListItem item;
-        item.name = app::FromUtf8(node.GetName());
-        item.id   = app::FromUtf8(node.GetId());
-        nodes_with_rigid_bodies.push_back(std::move(item));
+        item.name = node.GetName();
+        item.id   = node.GetId();
+            all_nodes.push_back(item);
+
+        if (node.HasRigidBody())
+            nodes_with_rigid_bodies.push_back(std::move(item));
     }
     SetValue(mUI.jointID, mJoint.id);
     SetValue(mUI.jointName, mJoint.name);
     SetList(mUI.cmbSrcNode, nodes_with_rigid_bodies);
     SetList(mUI.cmbDstNode, nodes_with_rigid_bodies);
+    SetList(mUI.pulleyGroundAnchorA, all_nodes);
+    SetList(mUI.pulleyGroundAnchorB, all_nodes);
     SetValue(mUI.cmbSrcNode, ListItemId(mJoint.src_node_id));
     SetValue(mUI.cmbDstNode, ListItemId(mJoint.dst_node_id));
 
@@ -96,6 +101,11 @@ void DlgJoint::Show()
     SetVisible(mUI.lblUpperTranslationLimit, false);
     SetVisible(mUI.lblDirAngle,              false);
     SetVisible(mUI.dirAngle,                 false);
+    SetVisible(mUI.pulleyGroundAnchorA,      false);
+    SetVisible(mUI.pulleyGroundAnchorB,      false);
+    SetVisible(mUI.lblPulleyAnchorA,         false);
+    SetVisible(mUI.lblPulleyAnchorB,         false);
+
 
     SetVisible(mUI.jointAnchors,             true);
 
@@ -232,6 +242,17 @@ void DlgJoint::Show()
         SetValue(mUI.motorForce, params.max_force);
         SetValue(mUI.motorTorque, params.max_torque);
     }
+    else if (mJoint.type == game::EntityClass::PhysicsJointType::Pulley)
+    {
+        SetVisible(mUI.pulleyGroundAnchorA,      true);
+        SetVisible(mUI.pulleyGroundAnchorB,      true);
+        SetVisible(mUI.lblPulleyAnchorA,         true);
+        SetVisible(mUI.lblPulleyAnchorB,         true);
+
+        const auto& params = std::get<game::EntityClass::PulleyJointParams>(mJoint.params);
+        SetValue(mUI.pulleyGroundAnchorA, ListItemId(params.anchor_nodes[0]));
+        SetValue(mUI.pulleyGroundAnchorB, ListItemId(params.anchor_nodes[1]));
+    }
 }
 
 bool DlgJoint::Apply()
@@ -241,8 +262,8 @@ bool DlgJoint::Apply()
     if (!MustHaveInput(mUI.cmbSrcNode))
         return false;
 
-    std::string src_node_id = GetItemId(mUI.cmbSrcNode);
-    std::string dst_node_id = GetItemId(mUI.cmbDstNode);
+    const std::string src_node_id = GetItemId(mUI.cmbSrcNode);
+    const std::string dst_node_id = GetItemId(mUI.cmbDstNode);
     if (src_node_id == dst_node_id)
     {
         QMessageBox msg(this);
@@ -256,8 +277,8 @@ bool DlgJoint::Apply()
     }
     mJoint.name        = GetValue(mUI.jointName);
     mJoint.type        = GetValue(mUI.cmbType);
-    mJoint.src_node_id = std::move(src_node_id);
-    mJoint.dst_node_id = std::move(dst_node_id);
+    mJoint.src_node_id = src_node_id;
+    mJoint.dst_node_id = dst_node_id;
     mJoint.dst_node_anchor_point.x = GetValue(mUI.dstX);
     mJoint.dst_node_anchor_point.y = GetValue(mUI.dstY);
     mJoint.src_node_anchor_point.x = GetValue(mUI.srcX);
@@ -316,6 +337,46 @@ bool DlgJoint::Apply()
         game::EntityClass::MotorJointParams params;
         params.max_torque = GetValue(mUI.motorTorque);
         params.max_force = GetValue(mUI.motorForce);
+        mJoint.params = params;
+    }
+    else if (mJoint.type == game::EntityClass::PhysicsJointType::Pulley)
+    {
+        if (!MustHaveInput(mUI.pulleyGroundAnchorA))
+            return false;
+        if (!MustHaveInput(mUI.pulleyGroundAnchorB))
+            return false;
+
+        game::EntityClass::PulleyJointParams params;
+        params.anchor_nodes[0] = GetItemId(mUI.pulleyGroundAnchorA);
+        params.anchor_nodes[1] = GetItemId(mUI.pulleyGroundAnchorB);
+        params.ratio = 1.0f;
+
+        const bool anchor_node_a_invalid = params.anchor_nodes[0] == params.anchor_nodes[1] ||
+                                           params.anchor_nodes[0] == src_node_id ||
+                                           params.anchor_nodes[0] == dst_node_id;
+        const bool anchor_node_b_invalid = params.anchor_nodes[1] == params.anchor_nodes[0] ||
+                                           params.anchor_nodes[1] == src_node_id ||
+                                           params.anchor_nodes[1] == dst_node_id;
+        if (anchor_node_a_invalid)
+        {
+            QMessageBox msg(this);
+            msg.setIcon(QMessageBox::Warning);
+            msg.setText("Pulley anchor node A is invalid. The node has to be a node that isn't used elsewhere in the joint.");
+            msg.setStandardButtons(QMessageBox::StandardButton::Ok);
+            msg.exec();
+            mUI.pulleyGroundAnchorA->setFocus();
+            return false;
+        }
+        if (anchor_node_b_invalid)
+        {
+            QMessageBox msg(this);
+            msg.setIcon(QMessageBox::Warning);
+            msg.setText("Pulley anchor node B is invalid. The node has to be a node that isn't used elsewhere in the joint.");
+            msg.setStandardButtons(QMessageBox::StandardButton::Ok);
+            msg.exec();
+            mUI.pulleyGroundAnchorB->setFocus();
+            return false;
+        }
         mJoint.params = params;
     }
     return true;
@@ -384,6 +445,11 @@ void DlgJoint::on_cmbType_currentIndexChanged(int)
     {
         mJoint.type = type;
         mJoint.params = game::EntityClass::MotorJointParams {};
+    }
+    else if (type == game::EntityClass::PhysicsJointType::Pulley)
+    {
+        mJoint.type = type;
+        mJoint.params = game::EntityClass::PulleyJointParams {};
     }
 
     Show();

@@ -3233,6 +3233,24 @@ void EntityWidget::PaintScene(gfx::Painter& painter, double /*secs*/)
             DrawDot(entity_painter, src_anchor_point_world);
             DrawDir(entity_painter, src_anchor_point_world, game::FindVectorRotation(direction_vector_world));
         }
+        else if (joint.type == game::EntityClass::PhysicsJointType::Pulley)
+        {
+            const auto& params = std::get<game::EntityClass::PulleyJointParams>(joint.params);
+            const auto* world_anchor_node_a = mState.entity->FindNodeById(params.anchor_nodes[0]);
+            const auto* world_anchor_node_b = mState.entity->FindNodeById(params.anchor_nodes[1]);
+            if (!world_anchor_node_a || !world_anchor_node_b)
+                continue;
+
+            const auto& anchor_node_a_world = mState.entity->MapCoordsFromNodeBox(world_anchor_node_a->GetSize() * 0.5f, world_anchor_node_a);
+            const auto& anchor_node_b_world = mState.entity->MapCoordsFromNodeBox(world_anchor_node_b->GetSize() * 0.5f, world_anchor_node_b);
+            DrawLine(entity_painter, src_anchor_point_world, anchor_node_a_world);
+            DrawLine(entity_painter, dst_anchor_point_world, anchor_node_b_world);
+            DrawLine(entity_painter, anchor_node_a_world, anchor_node_b_world);
+            DrawDot(entity_painter, src_anchor_point_world);
+            DrawDot(entity_painter, dst_anchor_point_world);
+            DrawDot(entity_painter, anchor_node_a_world);
+            DrawDot(entity_painter, anchor_node_b_world);
+        }
     }
     // Draw comments, drawn in entity space
     if (GetValue(mUI.chkShowComments))
