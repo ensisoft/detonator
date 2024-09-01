@@ -34,6 +34,7 @@
 #include "base/trace.h"
 #include "audio/graph.h"
 #include "game/entity.h"
+#include "game/entity_node_drawable_item.h"
 #include "game/treeop.h"
 #include "game/tilemap.h"
 #include "graphics/image.h"

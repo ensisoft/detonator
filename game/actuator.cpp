@@ -30,6 +30,11 @@
 #include "data/reader.h"
 #include "game/actuator.h"
 #include "game/entity.h"
+#include "game/entity_node_transformer.h"
+#include "game/entity_node_rigid_body.h"
+#include "game/entity_node_drawable_item.h"
+#include "game/entity_node_text_item.h"
+#include "game/entity_node_spatial_node.h"
 
 namespace game
 {

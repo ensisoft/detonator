@@ -20,6 +20,32 @@
 
 namespace game {
 
+    // Selection for collision shapes when the collision shape detection
+    // is set to manual.
+    enum class CollisionShape {
+        // The collision shape is a box based on the size of node's box.
+        Box,
+        // The collision shape is a circle based on the largest extent of
+        // the node's box.
+        Circle,
+        // The collision shape is a right-angled triangle where the
+        // height of the triangle is the height of the box and the
+        // width is the width of the node's box
+        RightTriangle,
+        // Isosceles triangle
+        IsoscelesTriangle,
+        // Trapezoid
+        Trapezoid,
+        //
+        Parallelogram,
+        // The collision shape is the upper half of a circle.
+        SemiCircle,
+        // The collision shape is a convex polygon. The polygon shape id
+        // must then be selected in order to be able to extract the
+        // polygon's convex hull.
+        Polygon
+    };
+
     enum class RenderPass {
         DrawColor,
         MaskCover,

@@ -28,6 +28,11 @@
 #include "data/json.h"
 #include "game/animation.h"
 #include "game/entity.h"
+#include "game/entity_node_rigid_body.h"
+#include "game/entity_node_drawable_item.h"
+#include "game/entity_node_text_item.h"
+#include "game/entity_node_spatial_node.h"
+#include "game/entity_node_fixture.h"
 
 void apply_flag(game::SetFlagActuatorClass::FlagName flag,
                 game::SetFlagActuatorClass::FlagAction action,

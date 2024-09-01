@@ -27,6 +27,7 @@
 
 #include "editor/app/workspace.h"
 #include "game/fwd.h"
+#include "game/entity_node_drawable_item.h"
 #include "graphics/fwd.h"
 
 namespace gui
