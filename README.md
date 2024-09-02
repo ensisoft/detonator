@@ -14,7 +14,8 @@ as puzzle games 🧩, platformers 🍄, side scrollers and tile based real time 
 * Simple object oriented APIs.
 * Demo content and examples.
 
-<details><summary>Click here for more features</summary>
+<details><summary><strong>Click here for more features...</strong></summary>
+<br>
 
 * Windows, Linux and HTML5/WASM support
 * Qt5 based WYSIWYG editor
@@ -78,52 +79,53 @@ then follow the [Build Instructions](BUILDING.md)
 ## SCREENSHOTS
 
 ![Demos](screens/editor-demo.gif "Animated demo content GIF")
-<br>Everything visual can be completed in the editor.
+<br><i>Everything visual can be completed in the editor. Cool, huh?</i> 😎
 
-<details><summary>Click here for more screenshots</summary>
+<details><summary><strong>Click here for more screenshots...</strong></summary>
+<br>
 
 ![Screenshot](screens/editor-tilemap.png "Map editor")
-Create tile based maps using the tile editor. The map supports multiple layers and both isometric and axis aligned perspective.
-The map can then be combined with the scene and the scene based entities in order to produce the final game world.
+<i>Create tile based maps using the tile editor. The map supports multiple layers and both isometric and axis aligned perspective.
+The map can then be combined with the scene and the scene based entities in order to produce the final game world.</i><br><br>
 
 ![Screenshot](screens/editor-animation.png "Entity editor")
-Create animated game play characters in the entity editor. Each entity can contain an arbitrary render tree
+<i>Create animated game play characters in the entity editor. Each entity can contain an arbitrary render tree
 of nodes with various attachments for physics, rendering, text display etc. The entity system supports scriptable
 animation state graph as well as animation tracks for managing animation and entity state over time.
-Each entity type can then be associated with a Lua script where you can write your entity specific game play code.
+Each entity type can then be associated with a Lua script where you can write your entity specific game play code.</i><br><br>
 
 ![Screenshot](screens/editor-material.png "Material editor")
-Create materials using the material editor by adjusting properties for the provided default material shaders or
+<i>Create materials using the material editor by adjusting properties for the provided default material shaders or
 create your own materials with custom shaders! Currently supports sprite animations, textures (including text and noise),
-gradient and color fills out of box.
+gradient and color fills out of box.</i><br><br>
 
 ![Screenshot](screens/editor-scene.png "Scene editor")
-Create the game play scenes using the scene editor. The entities you create in the entity editor are available here
+<i>Create the game play scenes using the scene editor. The entities you create in the entity editor are available here
 for placing in the scene. Viewport visualization will quickly show you how much of the game world will be seen when
-the game plays.
+the game plays.</i><br><br>
 
 ![Screenshot](screens/editor-ui.png "UI editor")
-Create the game's UI in the UI editor. The UI and the widgets can be styled using a JSON based style file and then individual widgets
-can have their style properties fine-tuned in the editor. The style system integrates with the editor's material system too!
+<i>Create the game's UI in the UI editor. The UI and the widgets can be styled using a JSON based style file and then individual widgets
+can have their style properties fine-tuned in the editor. The style system integrates with the editor's material system too!</i><br><br>
 
 ![Screenshot](screens/editor-audio.png "Audio graph editor")
-Create audio graphs using the audio editor. Each audio graph can have a number of elements added to it. The graph then
+<i>Create audio graphs using the audio editor. Each audio graph can have a number of elements added to it. The graph then
 specifies the flow of audio PCM data from source elements to processing elements to finally to the graph output.
 Currently, supported audio backends are Waveout on Windows, Pulseaudio on Linux and OpenAL on HTML5/WASM.
-Supported formats are wav, mp3, ogg and flac.
+Supported formats are wav, mp3, ogg and flac.</i><br><br>
 
 ![Screenshot](screens/editor-script.png "Script editor")
-Use the built-in code editor to write the Lua scripts for the entities, scenes, game or UI. The editor has a built-in
+<i>Use the built-in code editor to write the Lua scripts for the entities, scenes, game or UI. The editor has a built-in
 help system for accessing the engine side Lua API documentation as well as automatic Lua code formatting, linting and
-a code completion system!
+a code completion system!</i><br><br>
 
 ![Screenshot](screens/editor-particle.png "Particle editor")
-Create different types of particle effects in the particle editor by conveniently adjusting several sliders
-and knobs that control the particle effect.
+<i>Create different types of particle effects in the particle editor by conveniently adjusting several sliders
+and knobs that control the particle effect.</i><br><br>
 
 </details>
 
-## DEV ZONE
+## DEV ZONE 👨🏼‍💻
 ### [Build Instructions](BUILDING.md)
 ### [System Architecture](ARCHITECTURE.md)
 ### [Design Document](DESIGN.md)

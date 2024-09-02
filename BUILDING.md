@@ -15,17 +15,20 @@ Build Instructions 👨🏼‍💻
 3. If you want to work on the engine itself it's advisory to also run the (unit) tests.
 
 <i>
-<strong>The build process assumes some familiarity with building C++ based projects using
-toolchains and tools such as GCC or MSVS and CMake.<br>
-
-You'll need to have Qt5 in order to build the Editor. If you're using Linux you can get Qt from your distributions repositories.
-<br>If you're using Windows you'll need to download a prebuilt Qt5 package (installer) from the Qt Company's website.<br>
-You can try the link below. If that doesn't work  you'll need an account with the Qt Company
-
-http://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.zip
-
+<strong>
+The build process assumes some familiarity with building C++ based projects using
+toolchains and tools such as GCC, MSVS, Emscripten💩 and CMake.
+<br><br>
+You'll need to have Qt5 in order to build the Editor.
 </strong>
 </i>
+
+* If you're using Linux you can get Qt from your distribution's repositories.
+  * `sudo pacman -S qt5-base`
+* If you're using Windows you'll need to download a prebuilt Qt5 package (installer) from the Qt Company's website.<br>
+You can try the link below. If that doesn't work  you'll need an account with the Qt Company
+  * http://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.zip
+
 
 ## Step 1) Building the Editor & Engine for Desktop Windows 🪟
 
@@ -53,7 +56,7 @@ These build instructions are for MSVS 2019 Community Edition 64bit build.
 
 <details><summary>How to build the project in RELEASE</summary>
 
-- Open "Developer Command Prompt for VS 2019"
+- Open `Developer Command Prompt for VS 2019`
 
 ```
   $ git clone https://github.com/ensisoft/detonator
@@ -71,10 +74,13 @@ These build instructions are for MSVS 2019 Community Edition 64bit build.
 
 <details><summary>How to build the project in DEBUG [OPTIONAL]</summary>
 
-_Note that on MSVS the library interfaces change between debug/release build configs. (e.g. iterator debug levels).
-This means that in order to link to 3rd party libraries the debug versions of those libraries must be used._
+<br><i>
+Note that on MSVS the library interfaces change between debug/release build configs. (e.g. iterator debug levels).
+This means that in order to link to 3rd party libraries the debug versions of those libraries must be used.
+</i>
+</br>
 
-- Open "Developer Command Prompt for VS 2019"
+- Open `Developer Command Prompt for VS 2019`
 
 ```
   $ git clone https://github.com/ensisoft/detonator
@@ -205,7 +211,7 @@ Install these packages:
 
 </details>
 
-<details><summary>Build troubleshooting</summary>
+<details><summary>Build troubleshooting 💩</summary>
 
 When you create a Conan profile with
 
@@ -220,7 +226,7 @@ you can try edit ~/.conan/settings.yaml. Search for the GCC versions and edit th
 
 
 
-## Step 2) Building the Engine for HTML5/WASM 🌐
+## Step 2) Building the Engine for HTML5/WASM 💩
 
 <strong>
 <i>HTML5/WASM build is only required if you want to build and package  your game for the web.<br>
@@ -231,32 +237,32 @@ If you just want to try the editor or build native games you don't need this.
 Some notes about building to HTML5/WASM.
 
 * Building to HTML5/WASM is currently supported only for the engine but not the editor.
-* Current Emscripten version is 3.0.0. Using other version will likely break things.
+* Current Emscripten💩 version is 3.1.10. Using other version will likely break things.
 * Building to HTML5/WASM will produce the required JS and WASM files to run games in the browser,<br>
   but you still need to build the editor in order to develop the game and package it.<br>
-  When you package your game through the editor, the HTML5/WASM game files are copied by the editor<br>
-  during the packaging process in order to produce the final deployable game package.
+  * When you package your game through the editor, the HTML5/WASM game files are copied by the editor<br>
+    during the packaging process in order to produce the final deployable game package.
 
-<details><summary>How to build on Linux</summary>
+<details><summary>How to build on Linux 🐧</summary>
 
-- Install Emscripten
+- Install Emscripten💩
 ```
   $ cd detonator
   $ git clone https://github.com/emscripten-core/emsdk.git
   $ cd emsdk
   $ git pull
-  $ ./emsdk install latest
-  $ ./emsdk activate 3.0.0
+  $ ./emsdk install 3.1.10
+  $ ./emsdk activate 3.1.10
   $ source ./emsdk_env.sh
 ```
-- Check your Emscripten installation
+- Check your Emscripten💩 installation
 ```
   $ which emcc
   $ /home/user/emsdk/upstream/emscripten/emcc
   $ emcc --version
   $ emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.0.0 (3fd52e107187b8a169bb04a02b9f982c8a075205)
 ```
-- Build the DETONATOR 2D engine into a WASM blob. Make sure that you have the emscripten tools in your path,
+- Build the DETONATOR 2D engine into a WASM blob. Make sure that you have the Emscripten💩 tools in your path,
   i.e. you have sourced emsdk_env.sh in your current shell.
 ```
   $ git clone https://github.com/ensisoft/detonator
@@ -270,30 +276,30 @@ Some notes about building to HTML5/WASM.
 ```
 </details>
 
-<details><summary>How to build on Windows</summary>
+<details><summary>How to build on Windows 🪟</summary>
 
-- Install Ninja built tool https://github.com/ninja-build/ninja/releases
+- Install Ninja🥷 build tool https://github.com/ninja-build/ninja/releases
 
   Drop the ninja.exe for example into the emsdk/ folder or anywhere on your PATH.
 
 
-- Install Emscripten
+- Install Emscripten💩
 ```
   $ cd detonator
   $ git clone https://github.com/emscripten-core/emsdk.git
   $ cd emsdk
   $ git pull
-  $ emsdk.bat install latest
-  $ emsdk.bat activate 3.0.0
+  $ emsdk.bat install 3.1.10
+  $ emsdk.bat activate 3.1.10
   $ emsdk_env.bat
 ```
-- Check your Emscripten and Ninja installation
+- Check your Emscripten💩 and Ninja🥷 installation
 ```
   $ where emcc
   $ C:\coding\detonator\emsdk\upstream\emscripten\emcc
   $ C:\coding\detonator\emsdk\upstream\emscripten\emcc.bat
   $ emcc --version
-  $ emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.0.0 (3fd52e107187b8a169bb04a02b9f982c8a075205)
+  $ emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.10 (c3fe57af0504fe24fc4ba697feb8c204f3c80022)
   $ where ninja
   $ C:\coding\detonator\emsdk\ninja.exe
   $ ninja --version
@@ -314,22 +320,60 @@ Some notes about building to HTML5/WASM.
 ```
 </details>
 
-If everything went well there should now be `GameEngine.js`, `GameEngine.wasm` and `GameEngine.worker.js` files in the editor's dist folder.<br>
-The .js file contains the JavaScript glue code needed to manhandle the WASM code into the browser's WASM engine when the web page loads.<br>
-When a game is packaged for web these files will then be deployed (copied) into the game's output directory.
+<details><summary>Build troubleshooting 💩</summary>
 
-<details><summary>Deploying your game on the web [MUST DO]</summary>
-<br>
-<i>
-<strong>You must enable the correct web policies in order to support SharedArrayBuffer in order to enable threads !!</strong><br>
-Without SharedArrayBuffer Web worker threads can't run and the engine cannot work.
-</i>🤬🤬🤬
+Windows: Emscripten💩 3.0.0 build fails with 
 
-When you're ready to publish your game and want to upload it to your web server you must turn on `HTTP Cross-Origin`
-policy flags in order to enable `SharedArrayBuffer`.
-<br> https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer
+```
+error: undefined symbol: _get_daylight (referenced by tzset_impl__deps: ['_get_daylight','_get_timezone','_get_tzname'], referenced by tzset__deps: ['tzset_impl'], referenced by localtime_r__deps: ['tzset'], referenced by __localtime_r__deps: ['localtime_r'], referenced by top-level compiled C/C++ code)
+error: undefined symbol: _get_timezone (referenced by tzset_impl__deps: ['_get_daylight','_get_timezone','_get_tzname'], referenced by tzset__deps: ['tzset_impl'], referenced by localtime_r__deps: ['tzset'], referenced by __localtime_r__deps: ['localtime_r'], referenced by top-level compiled C/C++ code)
+warning: __get_timezone may need to be added to EXPORTED_FUNCTIONS if it arrives from a system library
+error: undefined symbol: _get_tzname (referenced by tzset_impl__deps: ['_get_daylight','_get_timezone','_get_tzname'], referenced by tzset__deps: ['tzset_impl'], referenced by localtime_r__deps: ['tzset'], referenced by __localtime_r__deps: ['localtime_r'], referenced by top-level compiled C/C++ code)
+warning: __get_tzname may need to be added to EXPORTED_FUNCTIONS if it arrives from a system library
+...
+```
 
-You can achieve this with a .htaccess file.
+ * https://github.com/emscripten-core/emscripten/issues/15958
+ * Current fix is to upgrade to Emscripten💩 3.1.10
+
+Build fails with 
+```
+wasm-ld: error: --shared-memory is disallowed by ldo.c.o because it was not compiled with 'atomics' or 'bulk-memory' features.
+```
+
+ * https://github.com/emscripten-core/emsdk/issues/790
+ * This is trying to communicate that something was built without thread support when thread support should be enabled.<br>
+   In other words trying to mix + match translation units / libs built with different build configuration.
+ * Make sure to double check the build flags including `third_party/CMakeLists.txt`  
+
+</details>
+
+If your build was successful there should now be `GameEngine.js`, `GameEngine.wasm` and `GameEngine.worker.js` files in the editor's `dist` folder.<br>
+
+### Step 2.1) Deploying the Game for the Web 💩
+
+When you package your game for the web the editor will copy all the required files to your chosen output directory. 
+
+* GameEngine.js
+* GameEngine.wasm
+* GameEngine.worker.js
+* FILESYSTEM
+* FILESYSTEM.js 
+* game.html 
+
+These 6 files are then all the files that you need to deploy/copy over to your web server.<br><br>
+<i>Hint: You can rename `game.html` to whatever you want, for example  `my-amazing-game.html`. Just don't change the names of any other files</i>
+ 
+<details><summary>1. Configure Your Web Server</summary>
+
+<strong><i>You must enable the correct web policies💩 in order to enable SharedArrayBuffer💩 in order to enable threads !! </i>💩💩</strong><br>
+<strong><i>Without SharedArrayBuffer web worker threads can't run and the engine cannot work. </i>💩💩</strong><br>
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer
+
+You must set the HTTP `Cross-Origin-Opener-Policy` to `same-origin` and `Cross-Origin-Embedder-Policy` to `require-corp`.<br>
+
+You can achieve this with a `.htaccess` file.<br>
+
 
 ```
 Header set Access-Control-Allow-Origin  "https://your-domain.com"
@@ -338,13 +382,16 @@ Header set Cross-Origin-Resource-Policy "same-site"
 Header set Cross-Origin-Opener-Policy   "same-origin"
 Header set Access-Control-Allow-Headers "range"
 ```
+</details>
+
+<details><summary>2. Deploy Your Game to Your Web Server</summary>
 
 Copy the following files to your webserver using `sftp`or similar mechanism.<br>
 You'll find these in your package output folder after the successful completion of your game packaging
 in the editor.
 
 ```
-  $ ssh my-user@my-server.com
+  $ sftp my-user@my-server.com
   $ cd www\my-game\
   $ put GameEngine.js
   $ put GameEngine.wasm
@@ -374,7 +421,7 @@ don't have any automated way of verifying the test output.
 
 #### [See this list for known Issues](ISSUES.md)
 
-### On the desktop (Linux/Windows)
+### On the desktop (Linux/Windows) 🐧🪟
 
 <details><summary>How to run all tests</summary>
 
@@ -405,7 +452,7 @@ don't have any automated way of verifying the test output.
 (press any key to continue) and will generate a *Delta_* and *Result_* images. The former will help visualize the pixels
 that were not the same between result and gold and the result will be actual rendering result.*
 
-* Run all tests with MSAA4. Use --help for more information
+* For example to run all tests with MSAA4. (Use --help for more information)
 
 ```
   $ cd detonator/graphics/test/dist
@@ -416,24 +463,35 @@ that were not the same between result and gold and the result will be actual ren
 
 </details>
 
-### On the Web (WASM+HTML5)
+### On the Web (WASM+HTML5) 💩
 *Currently, only some unit tests are available on the web. More tests will be enabled as needed.*
 
 <details><summary>How to run unit tests</summary>
 
-The detonator/emscripten/bin folder should contain the following build artifacts:
-* unit-test.html
-* UnitTest.js
-* UnitTest.wasm
+<i>The `detonator/emscripten/bin` folder should contain the following build artifacts:</i>
 
-Launch a web server for serving the test HTML page.
+  * http-server.py
+  * unit-test.html
+  * UnitTest.js
+  * UnitTest.wasm
+  * UnitTestThread.js
+  * UnitTestThread.wasm
+  * UnitTestThread.worker.js
+
+1. Launch a web server for serving the test HTML pages.
 
 ```
   $ cd detonator/emscripten/bin
-  $ python -m http.server
+  $ python http-server.py
+  $ Serving at port 8000
 ```
 
-Open your web browser and navigate to http://localhost:8000/unit-test.html.
+2. Open your web browser and navigate to http://localhost:8000/unit-test.html
+3. Open your web browser and navigate to http://localhost:8000/unit-test-thread.html
+
+The test execution may take some time. The performance tests will execute without running the JS main thread,
+thus the page will seem "stuck" to the browser. But if you let it run it should complete and print `Success!`
+to indicate completion.
 
 </details>
 
