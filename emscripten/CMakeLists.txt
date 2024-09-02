@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(Detonator-Emscripten)
+project(Detonator-Shitscripten)
 message(STATUS "
-           ~~ DETONATOR 2D ~~
+        ~~ DETONATOR 2D Emscripten ~~
 
     \\\\o Brought to you by Ensisoft o//
         http://www.ensisoft.com
@@ -90,14 +90,19 @@ target_compile_definitions(UnitTest PRIVATE DETONATOR_UNIT_TEST_WASM_BUILD)
 target_compile_options(UnitTest PRIVATE -O3)
 target_compile_options(UnitTest PRIVATE -fexceptions)
 target_compile_options(UnitTest PRIVATE -fbracket-depth=1024)
+target_compile_options(UnitTest PRIVATE -sUSE_BOOST_HEADERS)
+target_compile_options(UnitTest PRIVATE -pthread)
 target_link_options(UnitTest PRIVATE -sNO_DISABLE_EXCEPTION_CATCHING)
 target_link_options(UnitTest PRIVATE -sWASM)
 target_link_options(UnitTest PRIVATE -sALLOW_MEMORY_GROWTH)
 target_link_options(UnitTest PRIVATE -sUSE_MPG123)
+target_link_options(UnitTest PRIVATE -sUSE_BOOST_HEADERS)
+target_link_options(UnitTest PRIVATE -pthread)
 target_link_libraries(UnitTest sndfile)
 target_link_libraries(UnitTest samplerate)
 target_link_libraries(UnitTest Lua)
 target_link_libraries(UnitTest box2d)
+
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/UnitTest.js"   DESTINATION "${CMAKE_CURRENT_LIST_DIR}/bin")
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/UnitTest.wasm" DESTINATION "${CMAKE_CURRENT_LIST_DIR}/bin")
 
@@ -130,10 +135,14 @@ target_compile_options(UnitTestThread PRIVATE -pthread)
 target_compile_options(UnitTestThread PRIVATE -O3)
 target_compile_options(UnitTestThread PRIVATE -fexceptions)
 target_compile_options(UnitTestThread PRIVATE -fbracket-depth=1024)
+target_compile_options(UnitTestThread PRIVATE -sUSE_BOOST_HEADERS)
+target_compile_options(UnitTestThread PRIVATE -sUSE_MPG123)
 target_link_options(UnitTestThread PRIVATE -sNO_DISABLE_EXCEPTION_CATCHING)
 target_link_options(UnitTestThread PRIVATE -sWASM)
 target_link_options(UnitTestThread PRIVATE -sALLOW_MEMORY_GROWTH)
 target_link_options(UnitTestThread PRIVATE -pthread)
+target_link_options(UnitTestThread PRIVATE -sUSE_BOOST_HEADERS)
+target_link_options(UnitTestThread PRIVATE -sUSE_MPG123)
 
 # Shitscripten shitting itself on string decode
 # https://github.com/emscripten-core/emscripten/issues/18034
@@ -150,6 +159,7 @@ target_link_options(UnitTestThread PRIVATE -sTEXTDECODER=0)
 #
 target_link_options(UnitTestThread PRIVATE -sPTHREAD_POOL_SIZE=10)
 target_link_options(UnitTestThread PRIVATE -sUSE_MPG123)
+target_link_options(UnitTestThread PRIVATE -pthread)
 target_link_libraries(UnitTestThread sndfile)
 target_link_libraries(UnitTestThread samplerate)
 

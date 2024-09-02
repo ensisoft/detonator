@@ -24,13 +24,19 @@ if (UNIX)
 endif()
 
 if (CMAKE_SYSTEM_NAME MATCHES "Emscripten")
-    message(STATUS "Enable emscripten optimization build flags.")
+    message(STATUS "third_party/CMakelist Emscripten build.")
+    message(STATUS " -03")
     add_compile_options(-O3)
     # -msse flag is needed to enable SSEx extensions
     # -msimd128 is needed because of -msse flag
     # disabled for now since this seems to be broken somehow
     # and creates distortion in the sound.
     #add_compile_options(-msse2 -msimd128)
+
+    message(STATUS " -pthread")
+    add_compile_options(-pthread)
+    add_link_options(-pthread)
+
 endif()
 # Lua 5.4.3
 add_library(Lua
