@@ -63,6 +63,24 @@ template<typename Actuator> inline
 Actuator* ActuatorCast(game::Actuator* actuator)
 { return dynamic_cast<Actuator*>(actuator); }
 
+template<typename T>
+auto GetTypeString(const T& object)
+{
+   return base::ToString(object.GetType());
+}
+
+template<typename Class, typename RetVal, typename... Args> constexpr
+auto GetMutable(RetVal* (Class::*Getter)(Args...))
+{
+    return Getter;
+}
+
+template<typename Class, typename RetVal, typename... Args> constexpr
+auto GetMutable(RetVal& (Class::*Getter)(Args...))
+{
+    return Getter;
+}
+
 template<typename Actuator>
 void BindActuatorInterface(sol::usertype<Actuator>& actuator)
 {
@@ -713,12 +731,10 @@ void BindGameLib(sol::state& L)
     transformer["GetLinearAcceleration"]  = &NodeTransformer::GetLinearAcceleration;
     transformer["GetAngularVelocity"]     = &NodeTransformer::GetAngularVelocity;
     transformer["GetAngularAcceleration"] = &NodeTransformer::GetAngularAcceleration;
-    transformer["GetIntegrator"] = [](const NodeTransformer& transformer) {
-        return magic_enum::enum_name(transformer.GetIntegrator());
-    };
-    transformer["SetAngularVelocity"] = &NodeTransformer::SetAngularVelocity;
+    transformer["GetIntegrator"]          = [](const NodeTransformer& transformer) { return base::ToString(transformer.GetIntegrator()); };
+    transformer["SetAngularVelocity"]     = &NodeTransformer::SetAngularVelocity;
     transformer["SetAngularAcceleration"] = &NodeTransformer::SetAngularAcceleration;
-    transformer["SetLinearVelocity"] = sol::overload(
+    transformer["SetLinearVelocity"]      = sol::overload(
         [](NodeTransformer& transformer, glm::vec2 vector) {
             transformer.SetLinearVelocity(vector);
         },
@@ -748,15 +764,15 @@ void BindGameLib(sol::state& L)
     entity_node["HasTextItem"]    = &EntityNode::HasTextItem;
     entity_node["HasDrawable"]    = &EntityNode::HasDrawable;
     entity_node["HasSpatialNode"] = &EntityNode::HasSpatialNode;
-    entity_node["GetDrawable"]    = (DrawableItem*(EntityNode::*)(void))&EntityNode::GetDrawable;
-    entity_node["GetRigidBody"]   = (RigidBody*(EntityNode::*)(void))&EntityNode::GetRigidBody;
-    entity_node["GetTextItem"]    = (TextItem*(EntityNode::*)(void))&EntityNode::GetTextItem;
-    entity_node["GetSpatialNode"] = (SpatialNode*(EntityNode::*)(void))&EntityNode::GetSpatialNode;
-    entity_node["GetTransformer"] = (NodeTransformer*(EntityNode::*)(void))&EntityNode::GetTransformer;
-    entity_node["GetEntity"]      = (Entity*(EntityNode::*)(void))&EntityNode::GetEntity;
+    entity_node["GetDrawable"]    = GetMutable(&EntityNode::GetDrawable);
+    entity_node["GetRigidBody"]   = GetMutable(&EntityNode::GetRigidBody);
+    entity_node["GetTextItem"]    = GetMutable(&EntityNode::GetTextItem);
+    entity_node["GetSpatialNode"] = GetMutable(&EntityNode::GetSpatialNode);
+    entity_node["GetTransformer"] = GetMutable(&EntityNode::GetTransformer);
+    entity_node["GetEntity"]      = GetMutable(&EntityNode::GetEntity);
     entity_node["SetName"]        = &EntityNode::SetName;
     entity_node["SetRotation"]    = &EntityNode::SetRotation;
-    entity_node["SetScale"] = sol::overload(
+    entity_node["SetScale"]       = sol::overload(
         [](EntityNode& node, const glm::vec2& scale) { node.SetScale(scale); },
         [](EntityNode& node, float sx, float sy) { node.SetScale(sx, sy); });
     entity_node["SetSize"] = sol::overload(
@@ -786,9 +802,7 @@ void BindGameLib(sol::state& L)
     actuator_class["GetNodeId"]     = &ActuatorClass::GetNodeId;
     actuator_class["GetStartTime"]  = &ActuatorClass::GetStartTime;
     actuator_class["GetDuration"]   = &ActuatorClass::GetDuration;
-    actuator_class["GetType"]       = [](const ActuatorClass* klass) {
-        return magic_enum::enum_name(klass->GetType());
-    };
+    actuator_class["GetType"]       = &GetTypeString<ActuatorClass>;
 
     auto actuator = table.new_usertype<Actuator>("Actuator");
     BindActuatorInterface<Actuator>(actuator);
@@ -842,19 +856,17 @@ void BindGameLib(sol::state& L)
     auto animator = table.new_usertype<Animator>("Animator",
         sol::meta_function::index,     &GetAnimatorVar,
         sol::meta_function::new_index, &SetAnimatorVar);
-    animator["GetName"]   = &Animator::GetName;
-    animator["GetTime"]   = &Animator::GetTime;
-    animator["HasValue"]  = &Animator::HasValue;
-    animator["SetValue"]  = &SetAnimatorVar;
-    animator["FindValue"] = &GetAnimatorVar;
-    animator["GetState"]  = [](const Animator& animator) {
-        return base::ToString(animator.GetAnimatorState());
-    };
+    animator["GetName"]              = &Animator::GetName;
+    animator["GetTime"]              = &Animator::GetTime;
+    animator["HasValue"]             = &Animator::HasValue;
+    animator["SetValue"]             = &SetAnimatorVar;
+    animator["FindValue"]            = &GetAnimatorVar;
+    animator["GetState"]             = [](const Animator& animator) { return base::ToString(animator.GetAnimatorState()); };
     animator["GetCurrentState"]      = &Animator::GetCurrentState;
     animator["GetNextState"]         = &Animator::GetNextState;
     animator["GetPrevState"]         = &Animator::GetPrevState;
     animator["GetCurrentTransition"] = &Animator::GetTransition;
-    animator["IsInState"] = sol::overload(
+    animator["IsInState"]            = sol::overload(
         [](const Animator& animator, const std::string& name) {
             if (const auto* state = animator.GetCurrentState())
                 return state->GetName() == name;
@@ -976,15 +988,15 @@ void BindGameLib(sol::state& L)
     entity["HasBeenSpawned"]       = &Entity::HasBeenSpawned;
     entity["HasAnimator"]          = &Entity::HasAnimator;
     entity["GetNumAnimations"]     = &Entity::GetNumCurrentAnimations;
-    entity["GetAnimation"]         = (Animation*(Entity::*)(size_t))&Entity::GetCurrentAnimation;
-    entity["GetAnimator"]          = (Animator*(Entity::*)(void))&Entity::GetAnimator;
-    entity["GetScene"]             = (Scene*(Entity::*)(void))&Entity::GetScene;
-    entity["GetNode"]              = (EntityNode&(Entity::*)(size_t))&Entity::GetNode;
-    entity["FindScriptVarById"]    = (ScriptVar*(Entity::*)(const std::string&))&Entity::FindScriptVarById;
-    entity["FindScriptVarByName"]  = (ScriptVar*(Entity::*)(const std::string&))&Entity::FindScriptVarByName;
-    entity["FindNodeByClassName"]  = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByClassName;
-    entity["FindNodeByClassId"]    = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByClassId;
-    entity["FindNodeByInstanceId"] = (EntityNode*(Entity::*)(const std::string&))&Entity::FindNodeByInstanceId;
+    entity["GetAnimation"]         = GetMutable(&Entity::GetCurrentAnimation);
+    entity["GetAnimator"]          = GetMutable(&Entity::GetAnimator);
+    entity["GetScene"]             = GetMutable(&Entity::GetScene);
+    entity["GetNode"]              = GetMutable(&Entity::GetNode);
+    entity["FindNodeByClassName"]  = GetMutable(&Entity::FindNodeByClassName);
+    entity["FindNodeByClassId"]    = GetMutable(&Entity::FindNodeByClassId);
+    entity["FindNodeByInstanceId"] = GetMutable(&Entity::FindNodeByInstanceId);
+    entity["FindScriptVarById"]    = &Entity::FindScriptVarById;
+    entity["FindScriptVarByName"]  = &Entity::FindScriptVarByName;
     entity["PlayIdle"]             = &Entity::PlayIdle;
     entity["PlayAnimationByName"]  = &Entity::PlayAnimationByName;
     entity["PlayAnimationById"]    = &Entity::PlayAnimationById;
@@ -1079,13 +1091,13 @@ void BindGameLib(sol::state& L)
 
     auto scene_class = table.new_usertype<SceneClass>("SceneClass",
         sol::meta_function::index,     &GetScriptVar<SceneClass>);
-    scene_class["GetName"] = &SceneClass::GetName;
-    scene_class["GetId"]   = &SceneClass::GetId;
-    scene_class["GetNumScriptVars"] = &SceneClass::GetNumScriptVars;
-    scene_class["GetScriptVar"]     = (const ScriptVar&(SceneClass::*)(size_t)const)&SceneClass::GetScriptVar;
-    scene_class["FindScriptVarById"] = (const ScriptVar*(SceneClass::*)(const std::string&)const)&SceneClass::FindScriptVarById;
-    scene_class["FindScriptVarByName"] = (const ScriptVar*(SceneClass::*)(const std::string&)const)&SceneClass::FindScriptVarByName;
-    scene_class["GetLeftBoundary"] = [](const SceneClass& klass, sol::this_state state) {
+    scene_class["GetName"]             = &SceneClass::GetName;
+    scene_class["GetId"]               = &SceneClass::GetId;
+    scene_class["GetNumScriptVars"]    = &SceneClass::GetNumScriptVars;
+    scene_class["GetScriptVar"]        = GetMutable(&SceneClass::GetScriptVar);
+    scene_class["FindScriptVarById"]   = GetMutable(&SceneClass::FindScriptVarById);
+    scene_class["FindScriptVarByName"] = GetMutable(&SceneClass::FindScriptVarByName);
+    scene_class["GetLeftBoundary"]     = [](const SceneClass& klass, sol::this_state state) {
         const float* val = klass.GetLeftBoundary();
         sol::state_view lua(state);
         return val ? sol::make_object(lua, *val)
@@ -1147,9 +1159,9 @@ void BindGameLib(sol::state& L)
     map["GetTileWidth"]         = &Tilemap::GetTileWidth;
     map["GetTileHeight"]        = &Tilemap::GetTileHeight;
     map["GetPerspective"]       = [](Tilemap& map) { return base::ToString(map.GetPerspective()); };
-    map["GetLayer"]             = (TilemapLayer&(Tilemap::*)(size_t))&Tilemap::GetLayer;
-    map["FindLayerByClassName"] = (TilemapLayer*(Tilemap::*)(const std::string&))&Tilemap::FindLayerByClassName;
-    map["FindLayerByClassId"]   = (TilemapLayer*(Tilemap::*)(const std::string&))&Tilemap::FindLayerByClassId;
+    map["GetLayer"]             = GetMutable(&Tilemap::GetLayer);
+    map["FindLayerByClassName"] = GetMutable(&Tilemap::FindLayerByClassName);
+    map["FindLayerByClassId"]   = GetMutable(&Tilemap::FindLayerByClassId);
     map["MapToTile"]            = sol::overload(
         [](Tilemap& map, TilemapLayer& layer, const glm::vec2& point) {
             const auto tile_width = map.GetTileWidth() * layer.GetTileSizeScaler();
@@ -1229,11 +1241,11 @@ void BindGameLib(sol::state& L)
     scene["GetClassId"]                 = &Scene::GetClassId;
     scene["GetClass"]                   = &Scene::GetClass;
     scene["GetNumEntities"]             = &Scene::GetNumEntities;
-    scene["GetEntity"]                  = (Entity&(Scene::*)(size_t))&Scene::GetEntity;
-    scene["FindEntityByInstanceId"]     = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceId;
-    scene["FindEntityByInstanceName"]   = (Entity*(Scene::*)(const std::string&))&Scene::FindEntityByInstanceName;
-    scene["FindScriptVarById"]          = (ScriptVar*(Scene::*)(const std::string&))&Scene::FindScriptVarById;
-    scene["FindScriptVarByName"]        = (ScriptVar*(Scene::*)(const std::string&))&Scene::FindScriptVarByName;
+    scene["GetEntity"]                  = GetMutable(&Scene::GetEntity);
+    scene["FindEntityByInstanceId"]     = GetMutable(&Scene::FindEntityByInstanceId);
+    scene["FindEntityByInstanceName"]   = GetMutable(&Scene::FindEntityByInstanceName);
+    scene["FindScriptVarById"]          = &Scene::FindScriptVarById;
+    scene["FindScriptVarByName"]        = &Scene::FindScriptVarByName;
     scene["KillEntity"]                 = &Scene::KillEntity;
     scene["FindEntityTransform"]        = &Scene::FindEntityTransform;
     scene["FindEntityNodeTransform"]    = &Scene::FindEntityNodeTransform;
@@ -1480,17 +1492,17 @@ void BindGameLib(sol::state& L)
             return std::make_unique<RayCastResultVector>(std::move(result));
         });
 
-    physics["GetScale"]   = &PhysicsEngine::GetScale;
-    physics["GetGravity"] = &PhysicsEngine::GetGravity;
-    physics["GetTimeStep"] = &PhysicsEngine::GetTimeStep;
-    physics["GetNumPositionIterations"] = &PhysicsEngine::GetNumPositionIterations;
-    physics["GetNumVelocityIterations"] = &PhysicsEngine::GetNumVelocityIterations;
-    physics["MapVectorFromGame"] = &PhysicsEngine::MapVectorFromGame;
-    physics["MapVectorToGame"]   = &PhysicsEngine::MapVectorToGame;
-    physics["MapAngleFromGame"]  = &PhysicsEngine::MapAngleFromGame;
-    physics["MapAngleToGame"]    = &PhysicsEngine::MapAngleToGame;
-    physics["SetGravity"]        = &PhysicsEngine::SetGravity;
-    physics["SetScale"]          = &PhysicsEngine::SetScale;
+    physics["GetScale"]                  = &PhysicsEngine::GetScale;
+    physics["GetGravity"]                = &PhysicsEngine::GetGravity;
+    physics["GetTimeStep"]               = &PhysicsEngine::GetTimeStep;
+    physics["GetNumPositionIterations"]  = &PhysicsEngine::GetNumPositionIterations;
+    physics["GetNumVelocityIterations"]  = &PhysicsEngine::GetNumVelocityIterations;
+    physics["MapVectorFromGame"]         = &PhysicsEngine::MapVectorFromGame;
+    physics["MapVectorToGame"]           = &PhysicsEngine::MapVectorToGame;
+    physics["MapAngleFromGame"]          = &PhysicsEngine::MapAngleFromGame;
+    physics["MapAngleToGame"]            = &PhysicsEngine::MapAngleToGame;
+    physics["SetGravity"]                = &PhysicsEngine::SetGravity;
+    physics["SetScale"]                  = &PhysicsEngine::SetScale;
 
     auto audio = table.new_usertype<AudioEngine>("Audio");
     audio["PrepareMusicGraph"] = sol::overload(
@@ -1574,11 +1586,8 @@ void BindGameLib(sol::state& L)
             });
 
     audio["CancelMusicCmds"] = &AudioEngine::CancelMusicCmds;
-    audio["SetMusicGain"]   = &AudioEngine::SetMusicGain;
-    audio["SetMusicEffect"] = [](AudioEngine& engine,
-                                 const std::string& track,
-                                 const std::string& effect,
-                                 unsigned duration) {
+    audio["SetMusicGain"]    = &AudioEngine::SetMusicGain;
+    audio["SetMusicEffect"]  = [](AudioEngine& engine, const std::string& track, const std::string& effect, unsigned duration) {
         const auto effect_value = magic_enum::enum_cast<AudioEngine::Effect>(effect);
         if (!effect_value.has_value())
             throw GameError("No such audio effect:" + effect);
