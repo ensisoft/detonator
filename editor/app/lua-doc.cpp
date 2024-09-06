@@ -746,11 +746,14 @@ void InitLuaDoc()
     DOC_FUNCTION_1("glm.vec4", "normalize", "Return a normalized copy of the vector.", "glm.vec4", "vec");
 
     DOC_TABLE("glm.mat4");
-    DOC_FUNCTION_0("glm.vec2, glm.vec2, float", "decompose", "Decompose the given 4x4 transformation matrix.<br>"
-                                                           "Returns: <br>"
-                                                           "a glm.vec2 with the translation coefficients.<br>"
-                                                           "a glm.vec2 with the scale coefficients.<br>"
-                                                           "a float with the rotation around Z axis in radians.");
+    DOC_FUNCTION_0("glm.vec2, glm.vec2, float", "decompose",
+                   "Decompose the given 4x4 transformation matrix into components.<br>"
+                   "Returns: <br>"
+                   "a glm.vec2 with the translation coefficients.<br>"
+                   "a glm.vec2 with the scale coefficients.<br>"
+                   "a float with the rotation around Z axis in radians.");
+    DOC_FUNCTION_0("glm.mat4", "inverse", "Compute the matrix inverse of the given transformation matrix."
+                                          "Returns the inverse matrix.");
 
     DOC_TABLE("glm.vec2");
     DOC_METHOD_0("glm.vec2", "new", "Construct a new glm.vec2.");

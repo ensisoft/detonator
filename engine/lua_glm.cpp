@@ -142,6 +142,9 @@ void BindGLM(sol::state& L)
                                glm::vec2(scale.x, scale.y),
                                glm::angle(orientation));
     };
+    mat4["inverse"] = [](const glm::mat4& mat) {
+        return glm::inverse(mat);
+    };
 }
 
 
