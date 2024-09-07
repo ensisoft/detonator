@@ -683,8 +683,14 @@ namespace game
         // Map a point relative to the entity node's local origin into a world space point.
         // If the entity is not in the scene or if the node is not part of the entity
         // the result is undefined.
-        FPoint MapPointFromEntityNode(const Entity* entity, const EntityNode* node, const FPoint& point) const;
         glm::vec2 MapPointFromEntityNode(const Entity* entity, const EntityNode* node, const glm::vec2& point) const;
+
+        glm::vec2 MapVectorToEntityNode(const Entity* entity, const EntityNode* node, const glm::vec2& vector) const;
+        // Map a world point in world (scene) space to the entity node coordinate space.
+        // In other words returns the vector that describes the point relative to the entity node's origin.
+        // If the entity is not in the scene or if the node is not part of the entity
+        // the result is undefined.
+        glm::vec2 MapPointToEntityNode(const Entity* entity, const EntityNode* node, const glm::vec2& point) const;
 
         struct EntityTimerEvent {
             Entity* entity = nullptr;

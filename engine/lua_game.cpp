@@ -1249,17 +1249,56 @@ void BindGameLib(sol::state& L)
     scene["KillEntity"]                 = &Scene::KillEntity;
     scene["FindEntityTransform"]        = &Scene::FindEntityTransform;
     scene["FindEntityNodeTransform"]    = &Scene::FindEntityNodeTransform;
-    scene["FindEntityBoundingRect"]     = &Scene::FindEntityBoundingRect;
     scene["FindEntityNodeBoundingRect"] = &Scene::FindEntityNodeBoundingRect;
     scene["FindEntityNodeBoundingBox"]  = &Scene::FindEntityNodeBoundingBox;
-    scene["MapVectorFromEntityNode"]    = &Scene::MapVectorFromEntityNode;
-    scene["MapPointFromEntityNode"]     = sol::overload(
-        [](Scene& scene, const Entity* entity, const EntityNode* node, const base::FPoint& point) {
-            return scene.MapPointFromEntityNode(entity, node, point);
+    scene["FindEntityBoundingRect"]     = &Scene::FindEntityBoundingRect;
+    scene["MapVectorFromEntityNode"]    = sol::overload(
+        [](const Scene& scene, const Entity* entity, const EntityNode* node, float x, float y) {
+            const auto ret = scene.MapVectorFromEntityNode(entity, node, glm::vec2(x, y));
+            return std::make_tuple(ret.x, ret.y);
         },
-        [](Scene& scene, const Entity* entity, const EntityNode* node, const glm::vec2& point) {
+        [](const Scene& scene, const Entity* entity, const EntityNode* node, const glm::vec2& vec) {
+            return scene.MapVectorFromEntityNode(entity, node, vec);
+        });
+    scene["MapPointFromEntityNode"]     = sol::overload(
+        [](const Scene& scene, const Entity* entity, const EntityNode* node, float x, float y) {
+            const auto ret = scene.MapPointFromEntityNode(entity, node, glm::vec2(x, y));
+            return std::make_tuple(ret.x, ret.y);
+        },
+        [](const Scene& scene, const Entity* entity, const EntityNode* node, const base::FPoint& point) {
+            const auto x = point.GetX();
+            const auto y = point.GetY();
+            const auto ret = scene.MapPointFromEntityNode(entity, node, glm::vec2(x, y));
+            return FPoint(ret.x, ret.y);
+        },
+        [](const Scene& scene, const Entity* entity, const EntityNode* node, const glm::vec2& point) {
             return scene.MapPointFromEntityNode(entity, node, point);
         });
+
+    scene["MapVectorToEntityNode"]    = sol::overload(
+            [](const Scene& scene, const Entity* entity, const EntityNode* node, float x, float y) {
+                const auto ret = scene.MapVectorToEntityNode(entity, node, glm::vec2(x, y));
+                return std::make_tuple(ret.x, ret.y);
+            },
+            [](const Scene& scene, const Entity* entity, const EntityNode* node, const glm::vec2& vec) {
+                return scene.MapVectorToEntityNode(entity, node, vec);
+            });
+    scene["MapPointToEntityNode"]     = sol::overload(
+            [](const Scene& scene, const Entity* entity, const EntityNode* node, float x, float y) {
+                const auto ret = scene.MapPointToEntityNode(entity, node, glm::vec2(x, y));
+                return std::make_tuple(ret.x, ret.y);
+            },
+            [](const Scene& scene, const Entity* entity, const EntityNode* node, const base::FPoint& point) {
+                const auto x = point.GetX();
+                const auto y = point.GetY();
+                const auto ret = scene.MapPointToEntityNode(entity, node, glm::vec2(x, y));
+                return FPoint(ret.x, ret.y);
+            },
+            [](const Scene& scene, const Entity* entity, const EntityNode* node, const glm::vec2& point) {
+                return scene.MapPointToEntityNode(entity, node, point);
+            });
+
+
     scene["SpawnEntity"] = sol::overload(
         [](Scene& scene, const EntityArgs& args) {
             if (args.klass == nullptr)
