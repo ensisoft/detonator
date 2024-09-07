@@ -282,8 +282,12 @@ void InitLuaDoc()
                  "glm.vec2", "matrix");
     DOC_FUNCTION_1("glm.vec2", "GetTranslationFromMatrix", "Get the translation component from the given matrix.",
                  "glm.vec2", "matrix");
-    DOC_FUNCTION_2("glm.vec2", "RotateVector",  "Transform a vector through a rotation matrix based on the given angle in radians.",
+    DOC_FUNCTION_2("glm.vec2", "RotateVectorAroundZ",  "Transform a vector through a rotation matrix based on the given angle in radians.",
                  "glm.vec2", "vector", "float", "angle");
+    DOC_FUNCTION_1("glm.vec2", "FindVectorRotationAroundZ", "Find the angle of rotation for the given vector relative to the X basis vector.",
+                                                            "Returns the angle in radians between [-Pi, Pi] "
+                                                            "glm.vec2", "vector");
+
     DOC_FUNCTION_1("glm.vec2", "ToVec2", "glm.vec2 conversion helper", "base.FPoint", "point");
     DOC_FUNCTION_1("base.FPoint", "ToPoint", "base.FPoint conversion  helper", "glm.vec2", "vec2");
 

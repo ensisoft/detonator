@@ -1128,7 +1128,7 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             transform.Push(entity.FindNodeTransform(src_node));
 
             const auto& params = std::get<EntityClass::PrismaticJointParams>(joint.GetParams());
-            const auto& local_direction_vector = RotateVector(glm::vec2(1.0f, 0.0f), params.direction_angle.ToRadians());
+            const auto& local_direction_vector = RotateVectorAroundZ(glm::vec2(1.0f, 0.0f), params.direction_angle.ToRadians());
             const auto& world_direction_vector = TransformVector(transform, local_direction_vector);
 
             b2PrismaticJointDef def {};
