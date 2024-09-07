@@ -30,6 +30,7 @@
 #include "base/hash.h"
 #include "data/reader.h"
 #include "data/writer.h"
+#include "game/util.h"
 #include "game/scene.h"
 #include "game/entity.h"
 #include "game/treeop.h"
@@ -1535,25 +1536,28 @@ FBox Scene::FindEntityNodeBoundingBox(const Entity* entity, const EntityNode* no
 
 glm::vec2 Scene::MapVectorFromEntityNode(const Entity* entity, const EntityNode* node, const glm::vec2& vector) const
 {
-    const auto& mat = FindEntityNodeTransform(entity, node);
-    // we assume here that the vector represents a direction
-    // thus translation is not desired. hence, _w = 0.0f.
-    const auto& ret = mat * glm::vec4(vector, 1.0f, 0.0f);
-    // return normalized result.
-    return glm::normalize(glm::vec2(ret.x, ret.y));
+    const auto& from_entity_to_world = FindEntityNodeTransform(entity, node);
+    return TransformVector(from_entity_to_world, vector);
 }
 
-FPoint Scene::MapPointFromEntityNode(const Entity* entity, const EntityNode* node, const FPoint& point) const
-{
-    const auto& mat = FindEntityNodeTransform(entity, node);
-    const auto& ret = mat * glm::vec4(point.GetY(), point.GetY(), 1.0f, 1.0f);
-    return FPoint(ret.x, ret.y);
-}
 glm::vec2 Scene::MapPointFromEntityNode(const Entity* entity, const EntityNode* node, const glm::vec2& point) const
 {
-    const auto& mat = FindEntityNodeTransform(entity, node);
-    const auto& ret = mat * glm::vec4(point.x, point.y, 1.0f, 1.0f);
-    return glm::vec2(ret.x, ret.y);
+    const auto& from_entity_to_world = FindEntityNodeTransform(entity, node);
+    return TransformPoint(from_entity_to_world, point);
+}
+
+glm::vec2 Scene::MapVectorToEntityNode(const Entity* entity, const EntityNode* node, const glm::vec2& vector) const
+{
+    const auto& from_entity_to_world = FindEntityNodeTransform(entity, node);
+    const auto& from_world_to_entity = glm::inverse(from_entity_to_world);
+    return TransformVector(from_world_to_entity, vector);
+}
+
+glm::vec2 Scene::MapPointToEntityNode(const Entity* entity, const EntityNode* node, const glm::vec2& point) const
+{
+    const auto& from_entity_to_world = FindEntityNodeTransform(entity, node);
+    const auto& from_world_to_entity = glm::inverse(from_entity_to_world);
+    return TransformPoint(from_world_to_entity, point);
 }
 
 const ScriptVar* Scene::FindScriptVarByName(const std::string& name) const

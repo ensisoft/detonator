@@ -1735,13 +1735,35 @@ void InitLuaDoc()
                  "game.Entity", "entity", "game.EntityNode", "node");
     DOC_METHOD_2("base.FBox", "FindEntityNodeBoundingBox", "Find the object oriented bounding box (OOB) for the entity node in the scene.",
                  "game.Entity", "entity", "game.EntityNode", "node");
-    DOC_METHOD_3("glm.vec2", "MapVectorFromEntityNode", "Map a a directional vector relative to entity node coordinate basis into scene/world space.<br>"
-                                                    "The resulting vector is not translated, unit length direction vector in world/scene space.",
+    DOC_METHOD_3("glm.vec2", "MapVectorFromEntityNode", "Map a vector (such as a direction vector) relative to entity node coordinate basis to game world space.<br>"
+                                                    "The resulting vector is not translated, unit length direction vector in game world space.",
                  "game.Entity", "entity", "game.EntityNode", "node", "glm.vec2", "vector");
+    DOC_METHOD_4("float, float", "MapVectorFromEntityNode", "Map a vector (such as a direction vector) relative to entity node coordinate basis to game world space.<br>"
+                                                        "The resulting vector is not translated, unit length direction vector in game world space.",
+                 "game.Entity", "entity", "game.EntityNode", "node", "float", "x", "float", "y");
+
+    DOC_METHOD_3("glm.vec", "MapVectorToEntityNode", "Map a vector (such as a direction a vector) from game world coordinate space to entity node coordinate space. <br>"
+                                                     "The resulting vector is not translated, unit length direction vector in game world space.",
+                 "game.Entity", "entity", "game.EntityNode", "node", "glm.vec2", "vector");
+    DOC_METHOD_4("glm.vec", "MapVectorToEntityNode", "Map a vector (such as a direction a vector) from game world coordinate space to entity node coordinate space. <br>"
+                                                     "The resulting vector is not translated, unit length direction vector in game world space.",
+                 "game.Entity", "entity", "game.EntityNode", "node", "float", "x", "float", "y");
+
     DOC_METHOD_3("base.FPoint", "MapPointFromEntityNode", "Map a point relative to entity node coordinate space into world/scene space.",
                  "game.Entity", "entity", "game.EntityNode", "node", "base.FPoint", "point");
     DOC_METHOD_3("glm.vec2", "MapPointFromEntityNode", "Map a point relative to entity node coordinate space into world/scene space.",
                  "game.Entity", "entity", "game.EntityNode", "node", "glm.vec2", "point");
+    DOC_METHOD_4("float, float", "MapPointFromEntityNode", "Map a point relative to entity node coordinate space into world/scene space.",
+                 "game.Entity", "entity", "game.EntityNode", "node", "float", "x", "float", "y");
+
+    DOC_METHOD_3("base.FPoint", "MapPointToEntityNode", "Map a point from game world coordinate space to entity node coordinate space.<br>",
+                                                        "game.Entity", "entity", "game.EntityNode", "node", "base.FPoint", "point");
+    DOC_METHOD_3("glm.vec2", "MapPointToEntityNode", "Map a point from game world coordinate space to entity node coordinate space.<br>",
+                 "game.Entity", "entity", "game.EntityNode", "node", "glm.vec2", "point");
+    DOC_METHOD_4("float, float", "MapPointToEntityNode", "Map a point from game world coordinate space to entity node coordinate space.<br>",
+                 "game.Entity", "entity", "game.EntityNode", "node", "float", "x", "float", "y");
+
+
     DOC_METHOD_0("game.Map", "GetMap", "Get the associated tilemap if any. If there's no current map nil is returned.");
     DOC_METHOD_0("float", "GetTime", "Get the scene's current time.");
     DOC_METHOD_0("string", "GetClassName", "Get the name of the scene's class.");
