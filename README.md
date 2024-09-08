@@ -7,12 +7,16 @@ as puzzle games 🧩, platformers 🍄, side scrollers and tile based real time 
 
 ### CURRENT TOP FEATURES 🔥
 
-* Supports native Windows and Linux.
-* Supports HTML5 and WASM.
-* Fully featured editor for game development.
-* Fully documented Lua API for game development.
-* Simple object oriented APIs.
-* Demo content and examples.
+* <b>Supports Windows, Linux and HTML5/WASM</b> 🪟🐧🌐
+  * <i>Game packages for all platforms built directly in the editor</i> 
+* <b>Fully featured editor for game development </b> 💯
+  * <i>Everything visual can be completed in the editor </i> 
+* <b>Fully documented Lua API for game development</b> 💯
+  * <i>Over 1000 methods and over 100 tables !</i> 
+* <b>Simple object oriented APIs.</b> 🧱
+  * <i>Main game object and game play APIs are Scene, Entity and EntityNode + Attachments</i>
+* <b>Demo content and examples. </b> 🪜
+  * <i>Multiple demo projects ready to run!</i>  
 
 <details><summary><strong>Click here for more features...</strong></summary>
 <br>

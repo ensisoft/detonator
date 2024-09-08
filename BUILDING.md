@@ -27,7 +27,7 @@ You'll need to have Qt5 in order to build the Editor.
   * `sudo pacman -S qt5-base`
 * If you're using Windows you'll need to download a prebuilt Qt5 package (installer) from the Qt Company's website.<br>
 You can try the link below. If that doesn't work  you'll need an account with the Qt Company
-  * http://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.zip
+* http://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.zip
 
 
 ## Step 1) Building the Editor & Engine for Desktop Windows 🪟
@@ -36,19 +36,23 @@ These build instructions are for MSVS 2019 Community Edition 64bit build.
 
 <details><summary>How to install dependencies</summary>
 
-- Install Git version control system
+- Install Git version control system<br>
   https://git-scm.com/download/win
 
-- Install Microsoft Visual Studio 2019 Community
+
+- Install Microsoft Visual Studio 2019 Community<br>
   https://www.visualstudio.com/downloads/
 
-- Install prebuilt Qt 5.15.2
-  http://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.zip
 
-- Install Conan package manager (VERSION 2)
+- Install prebuilt Qt 5.15.2<br>
+  http://download.qt.io/official_releases/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.zip
+  
+
+- Install Conan package manager (VERSION 2)<br>
   https://docs.conan.io/en/latest/installation.html
 
-- Install CMake build tool
+
+- Install CMake build tool<br>
   https://cmake.org/install/
 
 </details>
@@ -452,7 +456,7 @@ don't have any automated way of verifying the test output.
 (press any key to continue) and will generate a *Delta_* and *Result_* images. The former will help visualize the pixels
 that were not the same between result and gold and the result will be actual rendering result.*
 
-* For example to run all tests with MSAA4. (Use --help for more information)
+For example to run all tests with MSAA4. (Use --help for more information)
 
 ```
   $ cd detonator/graphics/test/dist
