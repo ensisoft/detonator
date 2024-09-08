@@ -2141,17 +2141,18 @@ void UIEngine::UpdateState(double game_time, float dt,
         {
             OpenWindowStackState(open_action->window);
 
-            // generate open event
-            {
-                WindowOpen open;
-                open.window = GetUI();
-                window_actions->push_back(open);
-            }
             // generate update event
             {
                 WindowUpdate update;
                 update.window = GetUI();
                 window_actions->push_back(update);
+            }
+
+            // generate open event
+            {
+                WindowOpen open;
+                open.window = GetUI();
+                window_actions->push_back(open);
             }
 
             mUIActionQueue.pop();
