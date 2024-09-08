@@ -248,6 +248,12 @@ void DlgJoint::Show()
         SetVisible(mUI.pulleyGroundAnchorB,      true);
         SetVisible(mUI.lblPulleyAnchorA,         true);
         SetVisible(mUI.lblPulleyAnchorB,         true);
+        SetVisible(mUI.lblNodeAPosition,         true);
+        SetVisible(mUI.lblNodeBPosition,         true);
+        SetVisible(mUI.srcX,                     true);
+        SetVisible(mUI.srcY,                     true);
+        SetVisible(mUI.dstX,                     true);
+        SetVisible(mUI.dstY,                     true);
 
         const auto& params = std::get<game::EntityClass::PulleyJointParams>(mJoint.params);
         SetValue(mUI.pulleyGroundAnchorA, ListItemId(params.anchor_nodes[0]));
