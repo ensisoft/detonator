@@ -372,6 +372,16 @@ public:
 
         if (mAudio)
             mAudio->SetDebugPause(debug.debug_pause);
+
+        if (mDebug.debug_show_fps || mDebug.debug_show_msg)
+        {
+            if (mDebug.debug_font.empty())
+            {
+                WARN("Debug font is empty (no font selected).");
+                WARN("Debug prints will not be available.");
+                WARN("You can set the debug font in the project settings.");
+            }
+        }
     }
     virtual void DebugPrintString(const std::string& message) override
     {
@@ -485,7 +495,7 @@ public:
             painter.SetProjectionMatrix(gfx::MakeOrthographicProjection(0, 0, surf_width, surf_height));
             painter.SetEditingMode(mFlags.test(Flags::EditingMode));
         }
-        if (mDebug.debug_show_fps)
+        if (mDebug.debug_show_fps && !mDebug.debug_font.empty())
         {
             char hallelujah[512] = {0};
             std::snprintf(hallelujah, sizeof(hallelujah) - 1,
@@ -498,7 +508,7 @@ public:
                 mDebug.debug_font, 14, rect, gfx::Color::HotPink,
                 gfx::TextAlign::AlignLeft | gfx::TextAlign::AlignVCenter);
         }
-        if (mDebug.debug_show_msg && mFlags.test(Flags::ShowDebugs))
+        if (mDebug.debug_show_msg && mFlags.test(Flags::ShowDebugs) && !mDebug.debug_font.empty())
         {
             gfx::FRect rect(10, 30, 500, 20);
             for (const auto& print : mDebugPrints)
