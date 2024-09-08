@@ -29,6 +29,7 @@
 #include "editor/gui/dlgproject.h"
 #include "editor/gui/dlgmaterial.h"
 #include "editor/gui/utility.h"
+#include "editor/gui/translation.h"
 #include "graphics/device.h"
 
 namespace gui

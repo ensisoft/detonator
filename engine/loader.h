@@ -69,7 +69,7 @@ namespace engine
     {
     public:
         enum class DefaultAudioIOStrategy {
-            Automatic, Memmap, Stream, Buffer
+            Automatic, Stream, Memmap, Buffer
         };
 
         // Load the meta information how to load some particular types of
