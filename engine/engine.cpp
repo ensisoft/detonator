@@ -1021,6 +1021,10 @@ private:
 
         TRACE_CALL("Runtime::Update", mRuntime->Update(game_time, dt));
 
+        std::vector<engine::DebugDraw> debug_draws;
+        mRuntime->TransferDebugQueue(&debug_draws);
+        std::swap(mDebugDraws, debug_draws);
+
         // Tick game
         {
             mTickAccum += dt;
@@ -1147,9 +1151,6 @@ private:
 
     void DrawDebugObjects()
     {
-        std::vector<engine::DebugDraw> debug_draws;
-        mRuntime->TransferDebugQueue(&debug_draws);
-
         if (!mDebug.debug_draw)
         {
             return;
@@ -1174,7 +1175,7 @@ private:
          TRACE_BLOCK("DebugDrawLines",
             if (mDebug.debug_draw_flags.test(DebugOptions::DebugDraw::GameDebugDraw))
             {
-                for (const auto& draw: debug_draws)
+                for (const auto& draw: mDebugDraws)
                 {
                     if (const auto* ptr = std::get_if<engine::DebugDrawLine>(&draw))
                         gfx::DebugDrawLine(painter, ptr->a, ptr->b, ptr->color, ptr->width);
@@ -1321,6 +1322,7 @@ private:
         short lifetime = 3;
     };
     boost::circular_buffer<DebugPrint> mDebugPrints;
+    std::vector<engine::DebugDraw > mDebugDraws;
     // Time to consume until game actions are processed.
     float mActionDelay = 0.0;
     // The size of the game time step (in seconds) to take for each
