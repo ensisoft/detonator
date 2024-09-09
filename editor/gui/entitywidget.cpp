@@ -692,6 +692,15 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     setWindowTitle("My Entity");
 
     mUI.tiFontName->lineEdit()->setReadOnly(true);
+
+    mUI.btnAddNodeItem->addAction(mUI.actionAddDrawable);
+    mUI.btnAddNodeItem->addAction(mUI.actionAddTextItem);
+    mUI.btnAddNodeItem->addAction(mUI.actionAddRigidBody);
+    mUI.btnAddNodeItem->addAction(mUI.actionAddFixture);
+    mUI.btnAddNodeItem->addAction(mUI.actionAddTilemapNode);
+    mUI.btnAddNodeItem->addAction(mUI.actionAddSpatialNode);
+    mUI.btnAddNodeItem->addAction(mUI.actionAddTransformer);
+
 }
 
 EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -2984,6 +2993,36 @@ void EntityWidget::on_btnDelTransformer_clicked()
     ToggleTransformer(false);
 }
 
+void EntityWidget::on_actionAddDrawable_triggered()
+{
+    ToggleDrawable(true);
+}
+void EntityWidget::on_actionAddTextItem_triggered()
+{
+    ToggleTextItem(true);
+}
+void EntityWidget::on_actionAddRigidBody_triggered()
+{
+    ToggleRigidBody(true);
+}
+void EntityWidget::on_actionAddFixture_triggered()
+{
+    ToggleFixture(true);
+}
+void EntityWidget::on_actionAddTilemapNode_triggered()
+{
+    ToggleTilemapNode(true);
+}
+void EntityWidget::on_actionAddSpatialNode_triggered()
+{
+    ToggleSpatialNode(true);
+}
+void EntityWidget::on_actionAddTransformer_triggered()
+{
+    ToggleTransformer(true);
+}
+
+
 void EntityWidget::ToggleSpatialNode(bool on)
 {
     if (auto* node = GetCurrentNode())
@@ -3861,17 +3900,27 @@ void EntityWidget::DisplayCurrentNodeProperties()
     SetEnabled(mUI.nodeItems, false);
 
     // attachments (node items)
-    SetVisible(mUI.btnAddDrawable, true);
-    SetVisible(mUI.btnAddTextItem, true);
-    SetVisible(mUI.btnAddRigidBody, true);
-    SetVisible(mUI.btnAddFixture, true);
-    SetVisible(mUI.btnAddTilemapNode, true);
-    SetVisible(mUI.btnAddSpatialNode, true);
-    SetVisible(mUI.btnAddTransformer, true);
-    SetVisible(mUI.drawable, false);
-    SetVisible(mUI.textItem, false);
-    SetVisible(mUI.rigidBody, false);
-    SetVisible(mUI.fixture, false);
+    // these are currently hidden, using the actions instead
+    SetVisible(mUI.btnAddDrawable,    false);
+    SetVisible(mUI.btnAddTextItem,    false);
+    SetVisible(mUI.btnAddRigidBody,   false);
+    SetVisible(mUI.btnAddFixture,     false);
+    SetVisible(mUI.btnAddTilemapNode, false);
+    SetVisible(mUI.btnAddSpatialNode, false);
+    SetVisible(mUI.btnAddTransformer, false);
+
+    SetEnabled(mUI.actionAddDrawable,    true);
+    SetEnabled(mUI.actionAddTextItem,    true);
+    SetEnabled(mUI.actionAddRigidBody,   true);
+    SetEnabled(mUI.actionAddFixture,     true);
+    SetEnabled(mUI.actionAddTilemapNode, true);
+    SetEnabled(mUI.actionAddSpatialNode, true);
+    SetEnabled(mUI.actionAddTransformer, true);
+
+    SetVisible(mUI.drawable,    false);
+    SetVisible(mUI.textItem,    false);
+    SetVisible(mUI.rigidBody,   false);
+    SetVisible(mUI.fixture,     false);
     SetVisible(mUI.tilemapNode, false);
     SetVisible(mUI.spatialNode, false);
     SetVisible(mUI.transformer, false);
@@ -3901,6 +3950,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
 
         if (const auto* item = node->GetDrawable())
         {
+            SetEnabled(mUI.actionAddDrawable, false);
             SetVisible(mUI.btnAddDrawable, false);
             SetVisible(mUI.drawable, true);
             SetValue(mUI.dsMaterial, ListItemId(item->GetMaterialId()));
@@ -3945,6 +3995,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
         }
         if (const auto* body = node->GetRigidBody())
         {
+            SetEnabled(mUI.actionAddRigidBody, false);
             SetVisible(mUI.btnAddRigidBody, false);
             SetVisible(mUI.rigidBody, true);
             SetValue(mUI.rbSimulation, body->GetSimulation());
@@ -3972,6 +4023,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
         }
         if (const auto* text = node->GetTextItem())
         {
+            SetEnabled(mUI.actionAddTextItem, false);
             SetVisible(mUI.textItem, true);
             SetVisible(mUI.btnAddTextItem, false);
             SetValue(mUI.tiFontName, text->GetFontName());
@@ -3992,6 +4044,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
         }
         if (const auto* sp = node->GetSpatialNode())
         {
+            SetEnabled(mUI.actionAddSpatialNode, false);
             SetVisible(mUI.btnAddSpatialNode, false);
             SetVisible(mUI.spatialNode, true);
 
@@ -4000,6 +4053,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
         }
         if (const auto* fixture = node->GetFixture())
         {
+            SetEnabled(mUI.actionAddFixture, false);
             SetVisible(mUI.btnAddFixture, false);
             SetVisible(mUI.fixture, true);
 
@@ -4026,6 +4080,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
         }
         if (const auto* map = node->GetMapNode())
         {
+            SetEnabled(mUI.actionAddTilemapNode, false);
             SetVisible(mUI.btnAddTilemapNode, false);
             SetVisible(mUI.tilemapNode, true);
 
@@ -4035,6 +4090,7 @@ void EntityWidget::DisplayCurrentNodeProperties()
         }
         if (const auto* trans = node->GetTransformer())
         {
+            SetEnabled(mUI.actionAddTransformer, false);
             SetVisible(mUI.btnAddTransformer, false);
             SetVisible(mUI.transformer, true);
 

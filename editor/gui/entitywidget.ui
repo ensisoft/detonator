@@ -2025,6 +2025,32 @@
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_26">
               <item>
+               <widget class="QToolButton" name="btnAddNodeItem">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Add node attachment</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resource/resource.qrc">
+                  <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+                </property>
+                <property name="popupMode">
+                 <enum>QToolButton::MenuButtonPopup</enum>
+                </property>
+                <property name="toolButtonStyle">
+                 <enum>Qt::ToolButtonTextBesideIcon</enum>
+                </property>
+                <property name="arrowType">
+                 <enum>Qt::NoArrow</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QPushButton" name="btnAddDrawable">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -2047,7 +2073,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="text" stdset="0">
-                 <string>Renderer Model And Material</string>
+                 <string>Model &amp; Material</string>
                 </property>
                 <property name="frameShape" stdset="0">
                  <enum>QFrame::NoFrame</enum>
@@ -2056,6 +2082,18 @@
                  <layout class="QVBoxLayout" name="verticalLayout_27">
                   <item>
                    <layout class="QGridLayout" name="gridLayout_5">
+                    <property name="leftMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>4</number>
+                    </property>
                     <item row="7" column="0">
                      <widget class="QLabel" name="label_65">
                       <property name="text">
@@ -2358,7 +2396,7 @@
                        </sizepolicy>
                       </property>
                       <property name="text">
-                       <string>Remove Renderer Model and Material</string>
+                       <string>Remove Model &amp;&amp; Material</string>
                       </property>
                       <property name="icon">
                        <iconset resource="../resource/resource.qrc">
@@ -2641,7 +2679,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="text" stdset="0">
-                 <string>Renderer Text Item</string>
+                 <string>Text Item</string>
                 </property>
                 <property name="frameShape" stdset="0">
                  <enum>QFrame::NoFrame</enum>
@@ -2650,6 +2688,18 @@
                  <layout class="QVBoxLayout" name="verticalLayout_29">
                   <item>
                    <layout class="QGridLayout" name="gridLayout_7">
+                    <property name="leftMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>4</number>
+                    </property>
                     <item row="13" column="1">
                      <widget class="QCheckBox" name="tiStatic">
                       <property name="sizePolicy">
@@ -3096,7 +3146,7 @@
                        </sizepolicy>
                       </property>
                       <property name="text">
-                       <string>Remove Renderer Text Item</string>
+                       <string>Remove Text Item</string>
                       </property>
                       <property name="icon">
                        <iconset resource="../resource/resource.qrc">
@@ -3133,7 +3183,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="text" stdset="0">
-                 <string>Physics Rigid Body</string>
+                 <string>Rigid Body</string>
                 </property>
                 <property name="frameShape" stdset="0">
                  <enum>QFrame::NoFrame</enum>
@@ -3142,6 +3192,18 @@
                  <layout class="QVBoxLayout" name="verticalLayout_28">
                   <item>
                    <layout class="QGridLayout" name="gridLayout_6">
+                    <property name="leftMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>4</number>
+                    </property>
                     <item row="7" column="0">
                      <widget class="QLabel" name="label_33">
                       <property name="text">
@@ -3348,7 +3410,7 @@
                     <item row="14" column="0" colspan="2">
                      <widget class="QPushButton" name="btnDelRigidBody">
                       <property name="text">
-                       <string>Remove Physics Rigid Body</string>
+                       <string>Remove Rigid Body</string>
                       </property>
                       <property name="icon">
                        <iconset resource="../resource/resource.qrc">
@@ -3385,7 +3447,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="text" stdset="0">
-                 <string>Physics Rigid Body Fixture</string>
+                 <string>Rigid Body Fixture</string>
                 </property>
                 <property name="frameShape" stdset="0">
                  <enum>QFrame::NoFrame</enum>
@@ -3394,6 +3456,18 @@
                  <layout class="QVBoxLayout" name="verticalLayout_30">
                   <item>
                    <layout class="QGridLayout" name="gridLayout_4">
+                    <property name="leftMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>4</number>
+                    </property>
                     <item row="0" column="0">
                      <widget class="QLabel" name="label_50">
                       <property name="text">
@@ -3635,7 +3709,7 @@
                     <item row="7" column="0" colspan="2">
                      <widget class="QPushButton" name="btnDelFixture">
                       <property name="text">
-                       <string>Remove Physics Rigid Body Fixture</string>
+                       <string>Remove Rigid Body Fixture</string>
                       </property>
                       <property name="icon">
                        <iconset resource="../resource/resource.qrc">
@@ -3719,6 +3793,18 @@
                     </item>
                     <item row="0" column="1">
                      <layout class="QHBoxLayout" name="horizontalLayout_5">
+                      <property name="leftMargin">
+                       <number>4</number>
+                      </property>
+                      <property name="topMargin">
+                       <number>4</number>
+                      </property>
+                      <property name="rightMargin">
+                       <number>4</number>
+                      </property>
+                      <property name="bottomMargin">
+                       <number>4</number>
+                      </property>
                       <item>
                        <widget class="QDoubleSpinBox" name="mnHCenter">
                         <property name="sizePolicy">
@@ -3806,7 +3892,7 @@
                  <bool>true</bool>
                 </property>
                 <property name="text" stdset="0">
-                 <string>Spatial Query Support Node</string>
+                 <string>Spatial Query Node</string>
                 </property>
                 <property name="frameShape" stdset="0">
                  <enum>QFrame::NoFrame</enum>
@@ -3815,6 +3901,18 @@
                  <layout class="QVBoxLayout" name="verticalLayout_32">
                   <item>
                    <layout class="QGridLayout" name="gridLayout_13">
+                    <property name="leftMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>4</number>
+                    </property>
                     <item row="1" column="0">
                      <widget class="QLabel" name="label_20">
                       <property name="text">
@@ -3855,7 +3953,7 @@
                     <item row="2" column="0" colspan="2">
                      <widget class="QPushButton" name="btnDelSpatialNode">
                       <property name="text">
-                       <string>Remove Spatial Query Support Node</string>
+                       <string>Remove Spatial Query Node</string>
                       </property>
                       <property name="icon">
                        <iconset resource="../resource/resource.qrc">
@@ -3907,10 +4005,25 @@
                 <property name="text" stdset="0">
                  <string>Node Transformer</string>
                 </property>
+                <property name="frameShape" stdset="0">
+                 <enum>QFrame::NoFrame</enum>
+                </property>
                 <widget class="QWidget" name="page">
                  <layout class="QVBoxLayout" name="verticalLayout_2">
                   <item>
                    <layout class="QGridLayout" name="gridLayout_8">
+                    <property name="leftMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>4</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>4</number>
+                    </property>
                     <item row="3" column="1">
                      <widget class="QDoubleSpinBox" name="tfVelocityA">
                       <property name="sizePolicy">
@@ -3918,6 +4031,9 @@
                         <horstretch>0</horstretch>
                         <verstretch>0</verstretch>
                        </sizepolicy>
+                      </property>
+                      <property name="suffix">
+                       <string> rad/s</string>
                       </property>
                       <property name="minimum">
                        <double>-1000.000000000000000</double>
@@ -3939,7 +4055,7 @@
                        </sizepolicy>
                       </property>
                       <property name="text">
-                       <string>Angular acceleration (rad/s²)</string>
+                       <string>Angular acceleration</string>
                       </property>
                      </widget>
                     </item>
@@ -3953,6 +4069,9 @@
                       </property>
                       <property name="prefix">
                        <string/>
+                      </property>
+                      <property name="suffix">
+                       <string> u/s²</string>
                       </property>
                       <property name="minimum">
                        <double>-1000.000000000000000</double>
@@ -3976,6 +4095,9 @@
                       <property name="prefix">
                        <string/>
                       </property>
+                      <property name="suffix">
+                       <string> u/s</string>
+                      </property>
                       <property name="minimum">
                        <double>-1000.000000000000000</double>
                       </property>
@@ -3997,6 +4119,9 @@
                       </property>
                       <property name="prefix">
                        <string/>
+                      </property>
+                      <property name="suffix">
+                       <string> u/s²</string>
                       </property>
                       <property name="minimum">
                        <double>-1000.000000000000000</double>
@@ -4031,7 +4156,7 @@
                        </sizepolicy>
                       </property>
                       <property name="text">
-                       <string>Angular velocity (rad/s)</string>
+                       <string>Angular velocity</string>
                       </property>
                      </widget>
                     </item>
@@ -4044,7 +4169,7 @@
                        </sizepolicy>
                       </property>
                       <property name="text">
-                       <string>Linear acceleration (u/s²)</string>
+                       <string>Linear acceleration)</string>
                       </property>
                      </widget>
                     </item>
@@ -4060,7 +4185,7 @@
                        </sizepolicy>
                       </property>
                       <property name="text">
-                       <string>Linear velocity (u/s)</string>
+                       <string>Linear velocity</string>
                       </property>
                      </widget>
                     </item>
@@ -4071,6 +4196,9 @@
                         <horstretch>0</horstretch>
                         <verstretch>0</verstretch>
                        </sizepolicy>
+                      </property>
+                      <property name="suffix">
+                       <string> rad/s²</string>
                       </property>
                       <property name="minimum">
                        <double>-1000.000000000000000</double>
@@ -4093,6 +4221,9 @@
                       </property>
                       <property name="prefix">
                        <string/>
+                      </property>
+                      <property name="suffix">
+                       <string> u/s</string>
                       </property>
                       <property name="minimum">
                        <double>-1000.000000000000000</double>
@@ -4635,6 +4766,69 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+J</string>
+   </property>
+  </action>
+  <action name="actionAddDrawable">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/material.png</normaloff>:/16x16_ico_png/material.png</iconset>
+   </property>
+   <property name="text">
+    <string>Model &amp; Material</string>
+   </property>
+  </action>
+  <action name="actionAddTextItem">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/text.png</normaloff>:/16x16_ico_png/text.png</iconset>
+   </property>
+   <property name="text">
+    <string>Text Item</string>
+   </property>
+  </action>
+  <action name="actionAddRigidBody">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/bricks.png</normaloff>:/16x16_ico_png/bricks.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rigid Body</string>
+   </property>
+  </action>
+  <action name="actionAddFixture">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/bricks.png</normaloff>:/16x16_ico_png/bricks.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rigid Body Fixture</string>
+   </property>
+  </action>
+  <action name="actionAddTilemapNode">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/tilemap.png</normaloff>:/16x16_ico_png/tilemap.png</iconset>
+   </property>
+   <property name="text">
+    <string>Tilemap Placement Node</string>
+   </property>
+  </action>
+  <action name="actionAddSpatialNode">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/database.png</normaloff>:/16x16_ico_png/database.png</iconset>
+   </property>
+   <property name="text">
+    <string>Spatial Query Node</string>
+   </property>
+  </action>
+  <action name="actionAddTransformer">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/vector.png</normaloff>:/16x16_ico_png/vector.png</iconset>
+   </property>
+   <property name="text">
+    <string>Node Transformer</string>
    </property>
   </action>
  </widget>
