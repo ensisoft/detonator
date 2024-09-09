@@ -574,7 +574,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>437</width>
+               <width>423</width>
                <height>736</height>
               </rect>
              </property>
@@ -4617,6 +4617,24 @@
    </property>
    <property name="toolTip">
     <string>Cut selected node</string>
+   </property>
+  </action>
+  <action name="actionNewJoint">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/32x32_ico_png/connect.png</normaloff>:/32x32_ico_png/connect.png</iconset>
+   </property>
+   <property name="text">
+    <string>Joint Bodies</string>
+   </property>
+   <property name="toolTip">
+    <string>Connect rigid bodies by a joint</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+J</string>
    </property>
   </action>
  </widget>

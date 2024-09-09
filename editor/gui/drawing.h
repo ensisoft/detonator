@@ -46,6 +46,7 @@ void DrawLine(gfx::Painter& painter, const glm::vec2& src, const glm::vec2& dst)
 void DrawDot(gfx::Painter& painter, const glm::vec2& pos);
 void DrawDir(gfx::Painter& painter, const glm::vec2& pos, const glm::vec2& dir);
 void DrawDir(gfx::Painter& painter, const glm::vec2& pos, float angle);
+void DrawCursorHotspot(gfx::Painter& painter, const glm::vec2& pos);
 void DrawBasisVectors(gfx::Painter& painter, gfx::Transform& trans);
 void DrawBasisVectors(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets);
 void DrawSelectionBox(gfx::Transform& trans, std::vector<engine::DrawPacket>& packets, const gfx::FRect& rect);
