@@ -275,6 +275,13 @@ namespace gui
         void on_btnDelSpatialNode_clicked();
         void on_btnAddTransformer_clicked();
         void on_btnDelTransformer_clicked();
+        void on_actionAddDrawable_triggered();
+        void on_actionAddTextItem_triggered();
+        void on_actionAddRigidBody_triggered();
+        void on_actionAddFixture_triggered();
+        void on_actionAddTilemapNode_triggered();
+        void on_actionAddSpatialNode_triggered();
+        void on_actionAddTransformer_triggered();
 
         void on_animator_toggled(bool on);
         void on_tree_customContextMenuRequested(QPoint);
