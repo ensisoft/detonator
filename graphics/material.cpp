@@ -2746,6 +2746,10 @@ bool TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
         texture->SetWrapY(Texture::Wrapping::Clamp);
         // see the comment above about mipmaps. it's relevant regarding
         // the possible filtering settings that we can use here.
+
+        // see issue 207
+        // https://github.com/ensisoft/detonator/issues/207
+#if 0
         if (mPointSampling)
         {
             texture->SetFilter(Texture::MagFilter::Nearest);
@@ -2756,6 +2760,10 @@ bool TextMaterial::ApplyDynamicState(const Environment& env, Device& device, Pro
             texture->SetFilter(Texture::MagFilter::Linear);
             texture->SetFilter(Texture::MinFilter::Linear);
         }
+#endif
+        texture->SetFilter(Texture::MinFilter::Linear);
+        texture->SetFilter(Texture::MagFilter::Linear);
+
     }
     program.SetTexture("kTexture", 0, *texture);
     program.SetUniform("kColor", mColor);
