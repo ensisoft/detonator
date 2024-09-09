@@ -340,10 +340,138 @@ private:
     EntityWidget::State& mState;
 };
 
+class EntityWidget::JointTool : public MouseTool
+{
+public:
+    explicit JointTool(gui::EntityWidget::State& state, glm::vec2 mouse_pos)
+       : mState(state)
+       , mCurrent(mouse_pos)
+    {}
+    virtual void Render(gfx::Painter& painter, gfx::Painter& entity) const override
+    {
+        if (mCurrentNode)
+        {
+            if (mCurrentNode == mNodeA)
+                ShowMessage("Already selected!", entity);
+            else if (!mCurrentNode->HasRigidBody())
+                ShowMessage("No rigid body...", entity);
+        }
+        else if (!mNodeA)
+            ShowMessage("Select node A.", entity);
+        else if (!mNodeB)
+            ShowMessage("Select node B.", entity);
+
+        if (mNodeA)
+        {
+            const auto hit_point_node = mNodeA->GetSize() * 0.5f + mHitPointA;
+            const auto hit_point_world = mState.entity->MapCoordsFromNodeBox(hit_point_node, mNodeA);
+            DrawDot(entity, hit_point_world);
+        }
+        if (mNodeB)
+        {
+            const auto hit_point_node = mNodeB->GetSize() * 0.5f + mHitPointB;
+            const auto hit_point_world = mState.entity->MapCoordsFromNodeBox(hit_point_node, mNodeB);
+            DrawDot(entity, hit_point_world);
+        }
+    }
+
+    virtual void MouseMove(const MouseEvent& mickey, gfx::Transform&) override
+    {
+        mCurrent = mickey.MapToPlane();
+
+        std::vector<game::EntityNodeClass*> hit_nodes;
+        std::vector<glm::vec2> hit_boxes;
+        mState.entity->CoarseHitTest(mCurrent, &hit_nodes, &hit_boxes);
+
+        if (hit_nodes.empty())
+        {
+            mCurrentNode = nullptr;
+            return;
+        }
+        auto* node = hit_nodes[0];
+        mCurrentNode = node;
+    }
+    virtual void MousePress(const MouseEvent& mickey, gfx::Transform&) override
+    {
+        std::vector<game::EntityNodeClass*> hit_nodes;
+        std::vector<glm::vec2> hit_boxes;
+        mState.entity->CoarseHitTest(mCurrent, &hit_nodes, &hit_boxes);
+
+        if (hit_nodes.empty())
+            return;
+
+        auto* node = hit_nodes[0];
+        if (!node->HasRigidBody())
+            return;
+
+        if (node == mNodeA || node == mNodeB)
+            return;
+
+        auto hit_pos = hit_boxes[0] - node->GetSize() * 0.5f;
+        if (!mNodeA)
+        {
+            mNodeA = node;
+            mHitPointA = hit_pos;
+        }
+        else if (!mNodeB)
+        {
+            mNodeB = node;
+            mHitPointB = hit_pos;
+        }
+        DEBUG("Joint tool node selection. [node='%1', pos='%2']", node->GetName(), hit_pos);
+    }
+
+    virtual bool MouseRelease(const MouseEvent& mickey, gfx::Transform&) override
+    {
+         if (mNodeA && mNodeB)
+             return true;
+
+         return false;
+    }
+
+    game::EntityNodeClass* GetNodeA() const
+    {
+        return mNodeA;
+    }
+    game::EntityNodeClass* GetNodeB() const
+    {
+        return mNodeB;
+    }
+
+    glm::vec2 GetHitPointA() const
+    {
+        return mHitPointA;
+    }
+    glm::vec2 GetHitPointB() const
+    {
+        return mHitPointB;
+    }
+private:
+    void ShowMessage(const std::string& str, gfx::Painter& p) const
+    {
+        gfx::FRect rect(0.0f, 0.0f, 300.0f, 20.0f);
+        rect.Translate(mCurrent.x, mCurrent.y);
+        rect.Translate(20.0f, 20.0f);
+        gui::ShowMessage(str, rect, p);
+    }
+
+private:
+    gui::EntityWidget::State& mState;
+
+    glm::vec2 mCurrent = {0.0f, 0.0f};
+
+    glm::vec2 mHitPointA = {0.0f, 0.0f};
+    glm::vec2 mHitPointB = {0.0f, 0.0f};
+    game::EntityNodeClass* mNodeA = nullptr;
+    game::EntityNodeClass* mNodeB = nullptr;
+    game::EntityNodeClass* mCurrentNode = nullptr;
+
+};
+
 class EntityWidget::PlaceShapeTool : public MouseTool
 {
 public:
-    PlaceShapeTool(EntityWidget::State& state, const QString& material, const QString& drawable)
+    PlaceShapeTool(EntityWidget::State& state, QString material, QString drawable, glm::vec2 mouse_pos)
         : mState(state)
         , mMaterialId(material)
         , mDrawableId(drawable)
@@ -352,6 +480,7 @@ public:
         mMaterialClass = mState.workspace->GetMaterialClassById(mMaterialId);
         mMaterial = gfx::CreateMaterialInstance(mMaterialClass);
         mDrawable = gfx::CreateDrawableInstance(mDrawableClass);
+        mCurrent  = mouse_pos;
     }
     virtual void Render(gfx::Painter&, gfx::Painter& entity) const override
     {
@@ -458,11 +587,11 @@ private:
     EntityWidget::State& mState;
     // the starting object position in model coordinates of the placement
     // based on the mouse position at the time.
-    glm::vec2 mStart;
+    glm::vec2 mStart = {0.0f, 0.0f};
     // the current object ending position in model coordinates.
     // the object occupies the rectangular space between the start
     // and current positions on the X and Y axis.
-    glm::vec2 mCurrent;
+    glm::vec2 mCurrent = {0.0f, 0.0f};
     bool mEngaged = false;
     bool mAlwaysSquare = false;
 private:
@@ -730,6 +859,8 @@ void EntityWidget::AddActions(QToolBar& bar)
     bar.addAction(mCustomShapes->menuAction());
     bar.addSeparator();
     bar.addAction(mParticleSystems->menuAction());
+    bar.addSeparator();
+    bar.addAction(mUI.actionNewJoint);
 }
 void EntityWidget::AddActions(QMenu& menu)
 {
@@ -754,6 +885,8 @@ void EntityWidget::AddActions(QMenu& menu)
     menu.addAction(mCustomShapes->menuAction());
     menu.addSeparator();
     menu.addAction(mParticleSystems->menuAction());
+    menu.addSeparator();
+    menu.addAction(mUI.actionNewJoint);
 }
 
 bool EntityWidget::SaveState(Settings& settings) const
@@ -1372,16 +1505,26 @@ void EntityWidget::on_actionPreview_triggered()
     }
 }
 
+void EntityWidget::on_actionNewJoint_triggered()
+{
+    mCurrentTool.reset(new JointTool(mState, MapMouseCursorToWorld()));
+
+    UncheckPlacementActions();
+    mUI.actionNewJoint->setChecked(true);
+
+    mUI.widget->SetCursorShape(GfxWidget::CursorShape::CrossHair);
+}
+
 void EntityWidget::on_actionNewRect_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_rect"));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_rect", MapMouseCursorToWorld()));
 
     UncheckPlacementActions();
     mUI.actionNewRect->setChecked(true);
 }
 void EntityWidget::on_actionNewCircle_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_circle"));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_circle", MapMouseCursorToWorld()));
 
     UncheckPlacementActions();
     mUI.actionNewCircle->setChecked(true);
@@ -1389,7 +1532,7 @@ void EntityWidget::on_actionNewCircle_triggered()
 
 void EntityWidget::on_actionNewSemiCircle_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_semi_circle"));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_semi_circle", MapMouseCursorToWorld()));
 
     UncheckPlacementActions();
     mUI.actionNewSemiCircle->setChecked(true);
@@ -1397,42 +1540,42 @@ void EntityWidget::on_actionNewSemiCircle_triggered()
 
 void EntityWidget::on_actionNewIsoscelesTriangle_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_isosceles_triangle"));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_isosceles_triangle", MapMouseCursorToWorld()));
 
     UncheckPlacementActions();
     mUI.actionNewIsoscelesTriangle->setChecked(true);
 }
 void EntityWidget::on_actionNewRightTriangle_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_right_triangle"));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_right_triangle", MapMouseCursorToWorld()));
 
     UncheckPlacementActions();
     mUI.actionNewRightTriangle->setChecked(true);
 }
 void EntityWidget::on_actionNewRoundRect_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_round_rect"));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_round_rect", MapMouseCursorToWorld()));
 
     UncheckPlacementActions();
     mUI.actionNewRoundRect->setChecked(true);
 }
 void EntityWidget::on_actionNewTrapezoid_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_trapezoid"));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_trapezoid", MapMouseCursorToWorld()));
 
     UncheckPlacementActions();
     mUI.actionNewTrapezoid->setChecked(true);
 }
 void EntityWidget::on_actionNewCapsule_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_capsule"));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_capsule", MapMouseCursorToWorld()));
 
     UncheckPlacementActions();
     mUI.actionNewCapsule->setChecked(true);
 }
 void EntityWidget::on_actionNewParallelogram_triggered()
 {
-    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_parallelogram"));
+    mCurrentTool.reset(new PlaceShapeTool(mState, "_checkerboard", "_parallelogram", MapMouseCursorToWorld()));
 
     UncheckPlacementActions();
     mUI.actionNewParallelogram->setChecked(true);
@@ -3118,7 +3261,7 @@ void EntityWidget::PlaceNewParticleSystem()
     QString material = resource.GetProperty("material",  QString("_checkerboard"));
     if (!mState.workspace->IsValidMaterial(material))
         material = "_checkerboard";
-    mCurrentTool.reset(new PlaceShapeTool(mState, material, drawable));
+    mCurrentTool.reset(new PlaceShapeTool(mState, material, drawable, MapMouseCursorToWorld()));
     mParticleSystems->menuAction()->setChecked(true);
 }
 void EntityWidget::PlaceNewCustomShape()
@@ -3132,7 +3275,7 @@ void EntityWidget::PlaceNewCustomShape()
     QString material = resource.GetProperty("material",  QString("_checkerboard"));
     if (!mState.workspace->IsValidMaterial(material))
         material = "_checkerboard";
-    mCurrentTool.reset(new PlaceShapeTool(mState, material, drawable));
+    mCurrentTool.reset(new PlaceShapeTool(mState, material, drawable, MapMouseCursorToWorld()));
     mCustomShapes->menuAction()->setChecked(true);
 }
 
@@ -3435,6 +3578,40 @@ void EntityWidget::MouseRelease(QMouseEvent* event)
 
     if (mCurrentTool->MouseRelease(mickey))
     {
+        if (const auto* joint_tool = dynamic_cast<JointTool*>(mCurrentTool.get()))
+        {
+            const auto* nodeA = joint_tool->GetNodeA();
+            const auto* nodeB = joint_tool->GetNodeB();
+
+            const auto index = mState.entity->GetNumJoints();
+            {
+                game::EntityClass::PhysicsJoint joint;
+                joint.id          = base::RandomString(10);
+                joint.name        = "My Joint";
+                joint.type        = game::EntityClass::PhysicsJointType::Distance;
+                joint.params      = game::EntityClass::DistanceJointParams {};
+                joint.type        = game::EntityClass::PhysicsJointType::Distance;
+                joint.src_node_id = nodeA->GetId();
+                joint.dst_node_id = nodeB->GetId();
+                joint.src_node_anchor_point = joint_tool->GetHitPointA();
+                joint.dst_node_anchor_point = joint_tool->GetHitPointB();
+                mJointModel->AddJoint(std::move(joint));
+            }
+            auto& joint = mState.entity->GetJoint(index);
+
+            DlgJoint dlg(this, *mState.entity, joint);
+            if (dlg.exec() == QDialog::Rejected)
+            {
+                mJointModel->DeleteJoint(index);
+            }
+            else
+            {
+                mJointModel->UpdateJoint(index);
+                SetEnabled(mUI.btnEditJoint, true);
+                SetEnabled(mUI.btnDeleteJoint, true);
+            }
+        }
+
         mCurrentTool.reset();
         UncheckPlacementActions();
         DisplayCurrentNodeProperties();
@@ -3452,6 +3629,7 @@ void EntityWidget::MouseDoubleClick(QMouseEvent* event)
     // than to set a timer (which adds latency).
     // Going to simply discard any tool selection here on double click.
     mCurrentTool.reset();
+    UncheckPlacementActions();
 
     auto [hitnode, hitpos] = SelectNode(mUI, mState, mickey->pos(), *mState.entity, GetCurrentNode());
     if (!hitnode)
@@ -3893,6 +4071,10 @@ void EntityWidget::UncheckPlacementActions()
     mUI.actionNewSemiCircle->setChecked(false);
     mParticleSystems->menuAction()->setChecked(false);
     mCustomShapes->menuAction()->setChecked(false);
+    mUI.actionNewJoint->setChecked(false);
+
+    // this is the wrong place but.. it's convenient
+    mUI.widget->SetCursorShape(GfxWidget::CursorShape::ArrowCursor);
 }
 
 void EntityWidget::TranslateCamera(float dx, float dy)
@@ -4235,6 +4417,12 @@ size_t EntityWidget::ComputeHash() const
         hash = base::hash_combine(hash, app::ToUtf8(comment));
     }
     return hash;
+}
+
+glm::vec2 EntityWidget::MapMouseCursorToWorld() const
+{
+    const auto& mickey = mUI.widget->mapFromGlobal(QCursor::pos());
+    return MapWindowCoordinateToWorld(mUI, mState, mickey);
 }
 
 QString GenerateEntityScriptSource(QString entity)

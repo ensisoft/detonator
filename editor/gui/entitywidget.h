@@ -98,6 +98,7 @@ namespace gui
         void on_actionStop_triggered();
         void on_actionSave_triggered();
         void on_actionPreview_triggered();
+        void on_actionNewJoint_triggered();
         void on_actionNewRect_triggered();
         void on_actionNewCircle_triggered();
         void on_actionNewSemiCircle_triggered();
@@ -321,6 +322,8 @@ namespace gui
         game::EntityNodeClass* GetCurrentNode();
         const game::EntityNodeClass* GetCurrentNode() const;
         size_t ComputeHash() const;
+
+        glm::vec2 MapMouseCursorToWorld() const;
     private:
         Ui::EntityWidget mUI;
         // there doesn't seem to be a way to do this in the designer
@@ -331,6 +334,7 @@ namespace gui
 
         UIAnimator mAnimator;
     private:
+        class JointTool;
         class PlaceShapeTool;
         class ScriptVarModel;
         class JointModel;
