@@ -303,24 +303,41 @@ void GfxWindow::paintGL()
 
     if (WindowMouseCursor == MouseCursor::Custom)
     {
-        static std::shared_ptr<gfx::ColorClass> cursor_material;
-        if (!cursor_material)
+        static std::shared_ptr<gfx::ColorClass> arrow_cursor_material;
+        if (!arrow_cursor_material)
         {
-            cursor_material = std::make_shared<gfx::ColorClass>(gfx::MaterialClass::Type::Color);
-            cursor_material->SetBaseColor(gfx::Color::Silver);
+            arrow_cursor_material = std::make_shared<gfx::MaterialClass>(gfx::MaterialClass::Type::Color);
+            arrow_cursor_material->SetBaseColor(gfx::Color::Silver);
         }
+        static std::shared_ptr<gfx::TextureMap2DClass> crosshair_cursor_material;
+        if (!crosshair_cursor_material)
+        {
+            crosshair_cursor_material = std::make_shared<gfx::MaterialClass>(gfx::CreateMaterialClassFromImage("app://textures/crosshair009.png"));
+            crosshair_cursor_material->SetSurfaceType(gfx::MaterialClass::SurfaceType::Transparent);
+            crosshair_cursor_material->SetBaseColor(gfx::Color::HotPink);
+        }
+
 
         const auto& mickey = mapFromGlobal(QCursor::pos());
         const auto width = this->width();
         const auto height = this->height();
-        if (mickey.x() >= 0 && mickey.x() <= width &&
-            mickey.y() >= 0 && mickey.y() < height)
+        if (mickey.x() >= 0 && mickey.x() <= width && mickey.y() >= 0 && mickey.y() < height)
         {
             gfx::Transform transform;
             transform.Resize(20.0f, 20.0f);
-            transform.MoveTo(mickey.x(), mickey.y());
-            mCustomGraphicsPainter->Draw(gfx::ArrowCursor(), transform,
-                                         gfx::MaterialInstance(cursor_material));
+            transform.MoveTo((float)mickey.x(), (float)mickey.y());
+            if (mCursorShape == CursorShape::ArrowCursor)
+            {
+                mCustomGraphicsPainter->Draw(gfx::ArrowCursor(), transform,
+                                             gfx::MaterialInstance(arrow_cursor_material));
+            }
+            else if (mCursorShape == CursorShape::CrossHair)
+            {
+                transform.Resize(40.0f, 40.0f);
+                transform.Translate(-20.0f, -20.0f);
+                mCustomGraphicsPainter->Draw(gfx::BlockCursor(), transform,
+                                             gfx::MaterialInstance(crosshair_cursor_material));
+            }
         }
     }
 
@@ -347,6 +364,23 @@ void GfxWindow::CreateRenderingSurface(bool vsync)
 
     mVsync = vsync;
     DEBUG("Created rendering surface. [VSYNC=%1]", vsync);
+}
+
+void GfxWindow::SetCursorShape(CursorShape shape)
+{
+    if (WindowMouseCursor == MouseCursor::Native)
+    {
+        if (shape == CursorShape::ArrowCursor)
+            setCursor(Qt::ArrowCursor);
+        else if (shape == CursorShape::CrossHair)
+            setCursor(Qt::CrossCursor);
+        else BUG("Bug on mouse cursor");
+    }
+    else
+    {
+        setCursor(Qt::BlankCursor);
+    }
+    mCursorShape = shape;
 }
 
 void GfxWindow::doInit()
@@ -591,7 +625,14 @@ void GfxWindow::SetMouseCursor(MouseCursor cursor)
     for (auto* window : surfaces)
     {
         if (cursor == MouseCursor::Native)
-            window->setCursor(Qt::ArrowCursor);
+        {
+            const auto shape = window->GetCursorShape();
+            if (shape == CursorShape::ArrowCursor)
+                window->setCursor(Qt::ArrowCursor);
+            else if (shape == CursorShape::CrossHair)
+                window->setCursor(Qt::CrossCursor);
+            else BUG("But on mouse cursor");
+        }
         else window->setCursor(Qt::BlankCursor);
     }
 }
@@ -749,6 +790,13 @@ void GfxWidget::ShowColorDialog()
         return;
     }
     mWindow->SetClearColor(ToGfx(dlg.color()));
+}
+
+void GfxWidget::SetCursorShape(CursorShape shape)
+{
+    mWindow->SetCursorShape(shape);
+
+
 }
 
 void GfxWidget::TranslateZoomInOut(QWheelEvent* wheel)
