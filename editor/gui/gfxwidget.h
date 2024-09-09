@@ -46,10 +46,14 @@ namespace gui
 
     public:
         GfxWindow();
-       ~GfxWindow();
+       ~GfxWindow() override;
 
         enum class MouseCursor {
             Native, Custom
+        };
+
+        enum class CursorShape {
+            ArrowCursor, CrossHair
         };
 
         // Important to call dispose to cleanly dispose of all the graphics
@@ -110,6 +114,11 @@ namespace gui
         { return mCurrentFps; }
 
         void CreateRenderingSurface(bool vsync);
+
+        void SetCursorShape(CursorShape shape);
+
+        CursorShape GetCursorShape() const
+        { return mCursorShape; }
 
         QImage TakeScreenshot() const;
 
@@ -180,7 +189,7 @@ namespace gui
     private:
         quint64 mNumFrames = 0;
         float mCurrentFps  = 0.0f;
-
+        CursorShape mCursorShape = CursorShape::ArrowCursor;
     private:
         std::shared_ptr<QOpenGLContext> mContext;
     private:
@@ -199,6 +208,8 @@ namespace gui
         Q_OBJECT
 
     public:
+        using CursorShape = GfxWindow::CursorShape;
+
         GfxWidget(QWidget* parent);
        ~GfxWidget();
 
@@ -255,6 +266,8 @@ namespace gui
         std::function<void ()> onZoomOut;
 
         void ShowColorDialog();
+
+        void SetCursorShape(CursorShape shape);
     public slots:
         void dispose();
         void reloadShaders();
