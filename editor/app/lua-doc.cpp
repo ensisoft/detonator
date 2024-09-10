@@ -1539,7 +1539,32 @@ void InitLuaDoc()
                  "game.EntityEvent", "event");
     DOC_METHOD_1("game.ScriptVar", "FindScriptVarById", "Find a script variable by ID. Returns nil if no such variable was found.", "string", "id");
     DOC_METHOD_1("game.ScriptVar", "FindScriptVarByName", "Find a script variable byt name. Returns nil if no such variable was found.", "string", "name");
+    DOC_METHOD_2("game.EntityNodeList", "HitTest", "Perform a simplistic hit test to see which nodes boxes intersect with the given point.",
+                 "float", "x", "float", "y");
+    DOC_METHOD_1("game.EntityNodeList", "HitTest", "Perform a simplistic hit test to see which nodes boxes intersect with the given point.",
+                 "glm.vec2|base.FPoint", "point");
 
+
+    DOC_TABLE("game.EntityNodeList");
+    DOC_METHOD_0("bool", "IsEmpty", "Check whether the list is an empty list or not.");
+    DOC_METHOD_0("bool", "HasNext", "Check whether the list has a next item or not.");
+    DOC_METHOD_0("bool", "Next", "Move to the next item (if any) in the list. <br>"
+                                 "Returns true if there is a next item or false when there are no more items.");
+    DOC_METHOD_0("void", "Begin", "(Re)start the iteration over the list. <br>"
+                                  "The iteration is already started automatically when the list is created,<br>"
+                                  "so this only needs to be called if restarting.");
+    DOC_METHOD_0("game.EntityNode", "Get", "Get the current item at this point of iteration over the list.");
+    DOC_METHOD_1("game.EntityNode", "GetAt", "Get an item at a given index. The indexing is zero based and the index must be a valid index.", "unsigned", "index");
+    DOC_METHOD_0("game.EntityNode", "GetNext", "Get the current item and move on to the next item.");
+    DOC_METHOD_0("unsigned", "Size", "Get the number of items in the list.");
+    DOC_FUNCTION_2("game.EntityNodeList", "Join", "Join two lists together into a new list.",
+                   "game.EntityNodeList", "first", "game.EntityNodeList", "second");
+    DOC_METHOD_2("void", "ForEach", "Call a callback function one ach item in the list. Any optional argument is passed as-is to the callback.",
+                 "function", "callback", "...", "...");
+    DOC_METHOD_1("game.EntityNode", "Find", "Find an item in the list by invoking a predicate function on each item. <br>"
+                                            "Your callback (predicate) should return true to indicate that the object has been found.<br>"
+                                            "If there's no item in the list for which the predicate returns true 'Find' returns nil.",
+                 "function", "predicate");
 
     DOC_TABLE("game.EntityEvent");
     DOC_OBJECT_PROPERTY("string", "message", "Free form message string.");

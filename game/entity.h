@@ -271,12 +271,19 @@ namespace game
         // hitbox_positions vector.
         void CoarseHitTest(float x, float y, std::vector<EntityNodeClass*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr);
-        void CoarseHitTest(const glm::vec2& pos, std::vector<EntityNodeClass*>* hits,
-                           std::vector<glm::vec2>* hitbox_positions = nullptr);
         void CoarseHitTest(float x, float y, std::vector<const EntityNodeClass*>* hits,
                            std::vector<glm::vec2>* hitbox_positions = nullptr) const;
-        void CoarseHitTest(const glm::vec2& pos, std::vector<const EntityNodeClass*>* hits,
-                           std::vector<glm::vec2>* hitbox_positions = nullptr) const;
+
+        inline void CoarseHitTest(const glm::vec2& pos, std::vector<EntityNodeClass*>* hits,
+                           std::vector<glm::vec2>* hitbox_positions = nullptr)
+        {
+            return CoarseHitTest(pos.x, pos.y, hits, hitbox_positions);
+        }
+        inline void CoarseHitTest(const glm::vec2& pos, std::vector<const EntityNodeClass*>* hits,
+                                  std::vector<glm::vec2>* hitbox_positions = nullptr) const
+        {
+            return CoarseHitTest(pos.x, pos.y, hits, hitbox_positions);
+        }
 
         // Map coordinates in node's OOB space into entity coordinate space. The origin of
         // the OOB space is relative to the "TopLeft" corner of the OOB of the node.
