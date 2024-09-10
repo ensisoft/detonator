@@ -1614,8 +1614,8 @@ void InitLuaDoc()
     DOC_METHOD_0("float|nil", "GetBottomBoundary", "Get the bottom boundary of the scene if any. If not set then nil is returned.");
 
     DOC_TABLE("game.EntityList");
-    DOC_METHOD_0("bool", "IsEmpty", "Check whether the entity list is an empty list or not.");
-    DOC_METHOD_0("bool", "HasNext", "Check whether the entity list has a next item or not.");
+    DOC_METHOD_0("bool", "IsEmpty", "Check whether the list is an empty list or not.");
+    DOC_METHOD_0("bool", "HasNext", "Check whether the list has a next item or not.");
     DOC_METHOD_0("bool", "Next", "Move to the next item (if any) in the list. <br>"
                                  "Returns true if there is a next item or false when there are no more items.");
     DOC_METHOD_0("void", "Begin", "(Re)start the iteration over the list. <br>"
@@ -1624,11 +1624,15 @@ void InitLuaDoc()
     DOC_METHOD_0("game.Entity", "Get", "Get the current item at this point of iteration over the list.");
     DOC_METHOD_1("game.Entity", "GetAt", "Get an item at a given index. The indexing is zero based and the index must be a valid index.", "unsigned", "index");
     DOC_METHOD_0("game.Entity", "GetNext", "Get the current item and move on to the next item.");
-    DOC_METHOD_0("unsigned", "Size", "Get the number of items in the entity list.");
-    DOC_FUNCTION_2("game.EntityList", "Join", "Join two entity lists together into a new entity list.",
+    DOC_METHOD_0("unsigned", "Size", "Get the number of items in the list.");
+    DOC_FUNCTION_2("game.EntityList", "Join", "Join two lists together into a new list.",
                    "game.EntityList", "first", "game.EntityList", "second");
-    DOC_METHOD_2("void", "ForEach", "Call a callback function one ach entity in the list. Any optional argument is passed as-is to the callback.",
+    DOC_METHOD_2("void", "ForEach", "Call a callback function one ach item in the list. Any optional argument is passed as-is to the callback.",
                  "function", "callback", "...", "...");
+    DOC_METHOD_1("game.Entity", "Find", "Find an item in the list by invoking a predicate function on each item. <br>"
+                                        "Your callback (predicate) should return true to indicate that the object has been found.<br>"
+                                        "If there's no item in the list for which the predicate returns true 'Find' returns nil.",
+                 "function", "predicate");
 
     DOC_TABLE("game.MapLayer");
     DOC_METHOD_0("string", "GetClassName", "Get the map layer's class name.");

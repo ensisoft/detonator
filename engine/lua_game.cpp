@@ -1140,6 +1140,16 @@ void BindGameLib(sol::state& L)
             callback(entity, args);
         }
     };
+    entity_list["Find"] = [](EntityList& list, const sol::function& predicate) {
+        list.BeginIteration();
+        while (list.HasNext()) {
+            Entity* node = list.GetNext();
+            const bool this_is_it = predicate(node);
+            if (this_is_it)
+                return node;
+        }
+        return (Entity*)nullptr;
+    };
 
     auto layer = table.new_usertype<TilemapLayer>("MapLayer");
     layer["GetClassName"]     = &TilemapLayer::GetClassName;
