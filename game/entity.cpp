@@ -443,18 +443,12 @@ void EntityClass::CoarseHitTest(float x, float y, std::vector<EntityNodeClass*>*
 {
     game::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
 }
-void EntityClass::CoarseHitTest(const glm::vec2& pos, std::vector<EntityNodeClass*>* hits, std::vector<glm::vec2>* hitbox_positions)
-{
-    game::CoarseHitTest(mRenderTree, pos.x,pos.y, hits, hitbox_positions);
-}
+
 void EntityClass::CoarseHitTest(float x, float y, std::vector<const EntityNodeClass*>* hits, std::vector<glm::vec2>* hitbox_positions) const
 {
     game::CoarseHitTest(mRenderTree, x, y, hits, hitbox_positions);
 }
-void EntityClass::CoarseHitTest(const glm::vec2& pos, std::vector<const EntityNodeClass*>* hits, std::vector<glm::vec2>* hitbox_positions) const
-{
-    game::CoarseHitTest(mRenderTree, pos.x, pos.y, hits, hitbox_positions);
-}
+
 glm::vec2 EntityClass::MapCoordsFromNodeBox(float x, float y, const EntityNodeClass* node) const
 {
     return game::MapCoordsFromNodeBox(mRenderTree, x, y, node);

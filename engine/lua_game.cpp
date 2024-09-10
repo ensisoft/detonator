@@ -967,6 +967,35 @@ void BindGameLib(sol::state& L)
             else BUG("Unhandled actuator type.");
         });
 
+    using EntityNodeList = ResultVector<EntityNode*>;
+    auto entity_node_list = table.new_usertype<EntityNodeList>("EntityNodeList");
+    entity_node_list["IsEmpty"] = &EntityNodeList::IsEmpty;
+    entity_node_list["HasNext"] = &EntityNodeList::HasNext;
+    entity_node_list["Next"]    = &EntityNodeList::Next;
+    entity_node_list["Begin"]   = &EntityNodeList::BeginIteration;
+    entity_node_list["Get"]     = &EntityNodeList::GetCurrent;
+    entity_node_list["GetAt"]   = &EntityNodeList::GetAt;
+    entity_node_list["Size"]    = &EntityNodeList::GetSize;
+    entity_node_list["GetNext"] = &EntityNodeList::GetNext;
+    entity_node_list["Join"]    = &EntityNodeList::Join;
+    entity_node_list["ForEach"] = [](EntityNodeList& list, const sol::function& callback, sol::variadic_args args) {
+        list.BeginIteration();
+        while (list.HasNext()) {
+            EntityNode* node = list.GetNext();
+            callback(node, args);
+        }
+    };
+    entity_node_list["Find"] = [](EntityNodeList& list, const sol::function& predicate) {
+        list.BeginIteration();
+        while (list.HasNext()) {
+            EntityNode* node = list.GetNext();
+            const bool this_is_it = predicate(node);
+            if (this_is_it)
+                return node;
+        }
+        return (EntityNode*)nullptr;
+    };
+
     auto entity = table.new_usertype<Entity>("Entity",
         sol::meta_function::index,     &GetScriptVar<Entity>,
         sol::meta_function::new_index, &SetScriptVar<Entity>);
@@ -1033,6 +1062,22 @@ void BindGameLib(sol::state& L)
         },
         [](Entity* entity, const Entity::PostedEvent& event) {
             entity->PostEvent(event);
+        });
+    entity["HitTest"] = sol::overload(
+        [](Entity& entity, float x, float y) {
+            std::vector<EntityNode*> hits;
+            entity.CoarseHitTest(x, y, &hits);
+            return EntityNodeList(std::move(hits));
+        },
+        [](Entity& entity, glm::vec2 pos) {
+            std::vector<EntityNode*> hits;
+            entity.CoarseHitTest(pos, &hits);
+            return EntityNodeList(std::move(hits));
+        },
+        [](Entity& entity, FPoint point) {
+            std::vector<EntityNode*> hits;
+            entity.CoarseHitTest(point.GetX(), point.GetY(), &hits);
+            return EntityNodeList(std::move(hits));
         });
 
     auto entity_posted_event = table.new_usertype<Entity::PostedEvent>("EntityEvent", sol::constructors<Entity::PostedEvent()>());
