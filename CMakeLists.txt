@@ -517,6 +517,9 @@ add_executable(Detonator
     editor/gui/dlgopen.h
     editor/gui/dlgopen.ui
     editor/gui/dlgopen.cpp
+    editor/gui/dlgscriptvarname.h
+    editor/gui/dlgscriptvarname.ui
+    editor/gui/dlgscriptvarname.cpp
     editor/gui/dlgscriptvar.h
     editor/gui/dlgscriptvar.ui
     editor/gui/dlgscriptvar.cpp
