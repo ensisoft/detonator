@@ -77,22 +77,31 @@ Rect center_rect_on_target(const Rect& target, const Rect& source)
 namespace app
 {
 
-QString GenerateScriptVarName(QString suggestion)
+QString GenerateScriptVarName(QString suggestion, QString backup)
 {
     if (auto pos = suggestion.lastIndexOf('/'); pos != -1)
         suggestion = suggestion.mid(pos+1);
     else if (auto pos = suggestion.lastIndexOf('\\'); pos != -1)
         suggestion = suggestion.mid(pos+1);
 
+    while (!suggestion.isEmpty())
+    {
+        if (suggestion[0].isDigit())
+            suggestion.remove(0, 1);
+        else break;
+    }
+
     if (suggestion.isEmpty())
-        return "var";
+        return backup;
 
     QString tmp;
     for (int i=0; i<suggestion.size(); ++i)
     {
-        if (suggestion[i].isLetterOrNumber())
+        if (suggestion[i].isDigit() || suggestion[i].isLetter())
             tmp += suggestion[i];
         else if (suggestion[i].isSpace())
+            tmp += '_';
+        else if (suggestion[i] == '_')
             tmp += '_';
     }
     return tmp.toLower();

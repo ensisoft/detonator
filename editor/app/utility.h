@@ -53,7 +53,7 @@
 namespace app
 {
 
-QString GenerateScriptVarName(QString suggestion);
+QString GenerateScriptVarName(QString suggestion, QString backup = "var");
 
 // Find the json file associated with an image file (if any)
 QString FindImageJsonFile(const QString& image_file);

@@ -25,6 +25,7 @@
 #  include <QFile>
 #  include <QFileInfo>
 #  include <QFileDialog>
+#  include <QInputDialog>
 #  include <QTextStream>
 #  include <base64/base64.h>
 #  include <glm/glm.hpp>
@@ -47,6 +48,7 @@
 #include "editor/gui/scriptwidget.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/drawing.h"
+#include "editor/gui/dlgscriptvarname.h"
 #include "editor/gui/dlgscriptvar.h"
 #include "editor/gui/dlgmaterial.h"
 #include "editor/gui/dlgfont.h"
@@ -1864,7 +1866,7 @@ void EntityWidget::on_btnAddScript_clicked()
     //const auto& filename = app::FromUtf8(script.GetId());
     const auto& uri  = app::toString("ws://lua/%1.lua", script.GetId());
     const auto& file = mState.workspace->MapFileToFilesystem(uri);
-    const auto& name = GetValue(mUI.entityName);
+
     if (app::FileExists(file))
     {
         QMessageBox msg(this);
@@ -1876,7 +1878,18 @@ void EntityWidget::on_btnAddScript_clicked()
             return;
     }
 
-    QString source = GenerateEntityScriptSource(GetValue(mUI.entityName));
+    bool accepted = false;
+    QString name = app::GenerateScriptVarName(GetValue(mUI.entityName), "entity");
+
+    DlgScriptVarName dlg(this, name, "entity");
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    name = dlg.GetName();
+    if (name.isEmpty())
+        return;
+
+    QString source = GenerateEntityScriptSource(name);
 
     QFile::FileError err_val = QFile::FileError::NoError;
     QString err_str;
@@ -4483,7 +4496,7 @@ glm::vec2 EntityWidget::MapMouseCursorToWorld() const
 
 QString GenerateEntityScriptSource(QString entity)
 {
-    entity = app::GenerateScriptVarName(entity);
+    entity = app::GenerateScriptVarName(entity, "entity");
 
 QString source(R"(
 --
