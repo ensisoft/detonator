@@ -657,7 +657,7 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter) const
     gfx::Transform model;
     model.Scale(mScale);
 
-    std::unordered_set<b2Joint*> joints;
+    std::unordered_set<const b2Joint*> joints;
 
     // there's b2Draw api for debug drawing but it seems that
     // when wanting to debug the *game* (not the physics engine
@@ -727,45 +727,51 @@ void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter) const
         const b2JointEdge* joint_list = world_body->GetJointList();
         while (joint_list)
         {
-            b2Joint* joint = joint_list->joint;
+            const b2Joint* joint = joint_list->joint;
             if (base::Contains(joints, joint))
             {
                 joint_list = joint_list->next;
                 continue;
             }
-
-            if (joint->GetType() == b2JointType::e_distanceJoint)
+            if (joint->GetType() == b2JointType::e_motorJoint)
             {
-                b2DistanceJoint* dj = static_cast<b2DistanceJoint*>(joint);
+                const auto* mj = static_cast<const b2MotorJoint*>(joint);
+                const auto& src_world_anchor = MapVectorToGame(ToGlm(mj->GetAnchorA()));
+                const auto& dst_world_anchor = MapVectorToGame(ToGlm(mj->GetAnchorB()));
+                gfx::DebugDrawLine(painter, src_world_anchor, dst_world_anchor, gfx::Color::HotPink, 2.0f);
+                gfx::DebugDrawCircle(painter, gfx::FCircle(src_world_anchor, 5.0f), gfx::Color::HotPink, 2.0f);
+                gfx::DebugDrawCircle(painter, gfx::FCircle(dst_world_anchor, 5.0f), gfx::Color::HotPink, 2.0f);
+            }
+            else if (joint->GetType() == b2JointType::e_distanceJoint)
+            {
+                const auto* dj = static_cast<const b2DistanceJoint*>(joint);
                 const auto& src_world_anchor = MapVectorToGame(ToGlm(dj->GetAnchorA()));
                 const auto& dst_world_anchor = MapVectorToGame(ToGlm(dj->GetAnchorB()));
-                gfx::DebugDrawLine(painter,
-                                   gfx::FPoint(src_world_anchor.x, src_world_anchor.y),
-                                   gfx::FPoint(dst_world_anchor.x, dst_world_anchor.y), gfx::Color::HotPink, 2.0f);
-                gfx::DebugDrawCircle(painter, gfx::FCircle(src_world_anchor.x, src_world_anchor.y, 5.0f), gfx::Color::HotPink, 2.0f);
-                gfx::DebugDrawCircle(painter, gfx::FCircle(dst_world_anchor.x, dst_world_anchor.y, 5.0f), gfx::Color::HotPink, 2.0f);
+                gfx::DebugDrawLine(painter, src_world_anchor, dst_world_anchor, gfx::Color::HotPink, 2.0f);
+                gfx::DebugDrawCircle(painter, gfx::FCircle(src_world_anchor, 5.0f), gfx::Color::HotPink, 2.0f);
+                gfx::DebugDrawCircle(painter, gfx::FCircle(dst_world_anchor, 5.0f), gfx::Color::HotPink, 2.0f);
             }
             else if (joint->GetType() == b2JointType::e_revoluteJoint)
             {
-                b2RevoluteJoint* rj = static_cast<b2RevoluteJoint*>(joint);
+                const auto* rj = static_cast<const b2RevoluteJoint*>(joint);
                 const auto& world_anchor = MapVectorToGame(ToGlm(rj->GetAnchorA()));
-                gfx::DebugDrawCircle(painter, gfx::FCircle(world_anchor.x, world_anchor.y, 5.0f), gfx::Color::HotPink, 2.0f);
+                gfx::DebugDrawCircle(painter, gfx::FCircle(world_anchor, 5.0f), gfx::Color::HotPink, 2.0f);
             }
             else if (joint->GetType() == b2JointType::e_weldJoint)
             {
-                b2WeldJoint* wj = static_cast<b2WeldJoint*>(joint);
+                const auto* wj = static_cast<const b2WeldJoint*>(joint);
                 const auto& world_anchor = MapVectorToGame(ToGlm(wj->GetAnchorA()));
-                gfx::DebugDrawCircle(painter, gfx::FCircle(world_anchor.x, world_anchor.y, 5.0f), gfx::Color::HotPink, 2.0f);
+                gfx::DebugDrawCircle(painter, gfx::FCircle(world_anchor, 5.0f), gfx::Color::HotPink, 2.0f);
             }
             else if (joint->GetType() == b2JointType::e_prismaticJoint)
             {
-                b2PrismaticJoint* pj = static_cast<b2PrismaticJoint*>(joint);
+                const auto* pj = static_cast<const b2PrismaticJoint*>(joint);
                 const auto& world_anchor = MapVectorToGame(ToGlm(pj->GetAnchorA()));
-                gfx::DebugDrawCircle(painter, gfx::FCircle(world_anchor.x, world_anchor.y, 5.0f), gfx::Color::HotPink, 2.0f);
+                gfx::DebugDrawCircle(painter, gfx::FCircle(world_anchor, 5.0f), gfx::Color::HotPink, 2.0f);
             }
             else if (joint->GetType() == b2JointType::e_pulleyJoint)
             {
-                b2PulleyJoint* pj = static_cast<b2PulleyJoint*>(joint);
+                const auto* pj = static_cast<const b2PulleyJoint*>(joint);
                 const auto& world_ground_anchor_a = MapVectorToGame(ToGlm(pj->GetGroundAnchorA()));
                 const auto& world_ground_anchor_b = MapVectorToGame(ToGlm(pj->GetGroundAnchorB()));
                 const auto& world_body_anchor_a = MapVectorToGame(ToGlm(pj->GetAnchorA()));
