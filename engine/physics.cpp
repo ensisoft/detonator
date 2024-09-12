@@ -43,10 +43,53 @@ inline b2Vec2 GetPosition(const b2Vec2& vec2)
 inline b2Vec2 ToBox2D(const glm::vec2& vector)
 { return b2Vec2 {vector.x, vector.y}; }
 
-inline glm::vec2 ToGlm(const b2Vec2& vector)
+inline glm::vec2 ToGlm(const b2Vec2& vector) noexcept
 { return glm::vec2 { vector.x, vector.y }; }
 
+inline float ToGlm(float val) noexcept
+{ return val; }
+inline bool ToGlm(bool val) noexcept
+{ return val; }
+
 namespace {
+template<typename Joint, typename Value, b2JointType ExpectedType>
+bool MaybeSetJointValue(b2Joint* joint, void (Joint::*SetFunction)(Value), const game::RigidBodyJoint::JointSettingValue& value)
+{
+    if (joint->GetType() != ExpectedType)
+        return false;
+
+    if (!std::holds_alternative<Value>(value))
+        return false;
+
+    auto* da_joint = static_cast<Joint*>(joint);
+    (da_joint->*SetFunction)(std::get<Value>(value));
+    return true;
+}
+
+template<typename Joint, b2JointType ExpectedType, typename Value>
+bool MaybeGetJointValue(const b2Joint* joint, Value (Joint::*GetFunction)(void) const, engine::PhysicsEngine::JointValueType* out)
+{
+    if (joint->GetType() != ExpectedType)
+        return false;
+
+    const auto* da_joint = static_cast<const Joint*>(joint);
+
+    *out = ToGlm((da_joint->*GetFunction)());
+    return true;
+}
+
+template<typename Joint, b2JointType ExpectedType, typename Value>
+bool MaybeGetJointValue(const b2Joint* joint, Value (Joint::*GetFunction)(float inv_dt) const, engine::PhysicsEngine::JointValueType* out, float inv_dt)
+{
+    if (joint->GetType() != ExpectedType)
+        return false;
+
+    const auto* da_joint = static_cast<const Joint*>(joint);
+
+    *out = ToGlm((da_joint->*GetFunction)(inv_dt));
+    return true;
+}
+
 void TransformVertices(const glm::vec2& shape_size,
                        const glm::vec2& shape_offset,
                        float shape_rotation,
@@ -648,6 +691,117 @@ std::tuple<bool, float> PhysicsEngine::FindMass(const std::string& node) const
     }
     return std::make_tuple(false, 0.0f);
 }
+std::tuple<bool, PhysicsEngine::JointValueType> PhysicsEngine::FindJointValue(const game::RigidBodyJoint& game_joint, JointValue value) const
+{
+    // any of these nodes should connect us to the rigid body which
+    // is connected to the joint list which has the joint we're looking for
+    const auto* src_node = game_joint.GetSrcNode();
+    const auto* dst_node = game_joint.GetDstNode();
+    ASSERT(src_node->HasRigidBody());
+    ASSERT(dst_node->HasRigidBody());
+
+    const auto* world_joint = FindJoint(*src_node, game_joint);
+    if (!world_joint)
+        return {false, 0.0f};
+
+    auto ret = false;
+   JointValueType val;
+
+    if (value == JointValue::MinimumLength)
+        ret = MaybeGetJointValue<b2DistanceJoint, e_distanceJoint, float>(world_joint, &b2DistanceJoint::GetMinLength, &val);
+    else if (value == JointValue::MaximumLength)
+        ret = MaybeGetJointValue<b2DistanceJoint, e_distanceJoint, float>(world_joint, &b2DistanceJoint::GetMaxLength, &val);
+    else if (value == JointValue::CurrentLength)
+        ret = MaybeGetJointValue<b2DistanceJoint, e_distanceJoint, float>(world_joint, &b2DistanceJoint::GetCurrentLength, &val);
+    else if (value == JointValue::JointTranslation)
+        ret = MaybeGetJointValue<b2PrismaticJoint, e_prismaticJoint, float>(world_joint, &b2PrismaticJoint::GetJointTranslation, &val);
+    else if (value == JointValue::JointSpeed)
+    {
+        ret = MaybeGetJointValue<b2PrismaticJoint, e_prismaticJoint, float>(world_joint, &b2PrismaticJoint::GetJointSpeed, &val) ||
+              MaybeGetJointValue<b2RevoluteJoint, e_revoluteJoint, float>(world_joint, &b2RevoluteJoint::GetJointSpeed, &val);
+    }
+    else if (value == JointValue::JointAngle)
+    {
+        ret = MaybeGetJointValue<b2RevoluteJoint, e_revoluteJoint, float>(world_joint, &b2RevoluteJoint::GetJointAngle, &val);
+    }
+    else if (value == JointValue::MotorSpeed)
+    {
+        ret = MaybeGetJointValue<b2PrismaticJoint, e_prismaticJoint, float>(world_joint, &b2PrismaticJoint::GetMotorSpeed, &val) ||
+              MaybeGetJointValue<b2RevoluteJoint, e_revoluteJoint, float>(world_joint, &b2RevoluteJoint::GetMotorSpeed, &val);
+    }
+    else if (value == JointValue::MotorTorque)
+    {
+        const auto inv_dt = 1.0 / mTimestep;
+        ret = MaybeGetJointValue<b2RevoluteJoint, e_revoluteJoint, float>(world_joint, &b2RevoluteJoint::GetMotorTorque, &val, inv_dt);
+    }
+
+    else if (value == JointValue::IsMotorEnabled)
+    {
+        ret = MaybeGetJointValue<b2PrismaticJoint, e_prismaticJoint, bool>(world_joint, &b2PrismaticJoint::IsMotorEnabled, &val) ||
+              MaybeGetJointValue<b2RevoluteJoint, e_revoluteJoint, bool>(world_joint, &b2RevoluteJoint::IsMotorEnabled, &val);
+    }
+    else if (value == JointValue::IsLimitEnabled)
+    {
+        ret = MaybeGetJointValue<b2PrismaticJoint, e_prismaticJoint, bool>(world_joint, &b2PrismaticJoint::IsLimitEnabled, &val) ||
+              MaybeGetJointValue<b2RevoluteJoint, e_revoluteJoint, bool>(world_joint, &b2RevoluteJoint::IsLimitEnabled, &val);
+    }
+    else if (value == JointValue::Stiffness)
+    {
+        ret = MaybeGetJointValue<b2DistanceJoint, e_distanceJoint, float>(world_joint, &b2DistanceJoint::GetStiffness, &val) ||
+              MaybeGetJointValue<b2WeldJoint, e_weldJoint, float>(world_joint, &b2WeldJoint::GetStiffness, &val);
+    }
+    else if (value == JointValue::Damping)
+    {
+        ret = MaybeGetJointValue<b2DistanceJoint, e_distanceJoint, float>(world_joint, &b2DistanceJoint::GetDamping, &val) ||
+              MaybeGetJointValue<b2WeldJoint, e_weldJoint, float>(world_joint, &b2WeldJoint::GetDamping, &val);
+    }
+    else if (value == JointValue::LinearOffset)
+    {
+        if (world_joint->GetType() == e_motorJoint)
+        {
+            val = ToGlm(static_cast<const b2MotorJoint*>(world_joint)->GetLinearOffset());
+            ret = true;
+        }
+    }
+    else if (value == JointValue::AngularOffset)
+    {
+        ret = MaybeGetJointValue<b2MotorJoint, e_motorJoint, float>(world_joint, &b2MotorJoint::GetAngularOffset, &val);
+    }
+    else if (value == JointValue::SegmentLengthA)
+    {
+        ret = MaybeGetJointValue<b2PulleyJoint, e_pulleyJoint, float>(world_joint, &b2PulleyJoint::GetCurrentLengthA, &val);
+    }
+    else if (value == JointValue::SegmentLengthB)
+    {
+        ret = MaybeGetJointValue<b2PulleyJoint, e_pulleyJoint, float>(world_joint, &b2PulleyJoint::GetCurrentLengthB, &val);
+    }
+
+    return std::make_tuple(ret, val);
+}
+
+std::tuple<bool, glm::vec2> PhysicsEngine::FindJointConnectionPoint(const game::EntityNode& node,
+                                                                    const game::RigidBodyJoint& game_joint) const
+
+{
+    glm::vec2 ret = {0.0f, 0.0f};
+
+    const auto* world_joint = FindJoint(node, game_joint);
+    if (!world_joint)
+        return {false, ret};
+
+    if (game_joint.GetDstNode() == &node)
+    {
+        ret = ToGlm(world_joint->GetAnchorB());
+    }
+    else if (game_joint.GetSrcNode() == &node)
+    {
+        ret = ToGlm(world_joint->GetAnchorA());
+    }
+    else return {false, ret};
+
+    return {true, ret};
+}
+
 
 #if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
 void PhysicsEngine::DebugDrawObjects(gfx::Painter& painter) const
@@ -863,6 +1017,85 @@ void PhysicsEngine::UpdateWorld(const glm::mat4& entity_to_world, const game::En
 
                 rigid_body->ClearPhysicsAdjustments();
             }
+
+            // the set of joints connected to the body should be the same
+            // whether we look at the physics body object or the game rigid
+            // body object. But the world body object already stores a direct
+            // pointer to the game joint object so it's faster and simpler
+            // that way to access the joint data.
+            // we clear the joint after processing so in case we see
+            // the same joint multiple times the settings are cleared
+            // so no double change will take place.
+            const b2JointEdge* joint_list = world_body->GetJointList();
+            while (joint_list)
+            {
+                b2Joint* joint = joint_list->joint;
+
+                const auto type = joint->GetType();
+
+                auto* game_joint = (RigidBodyJoint*)joint->GetUserData().pointer;
+                if (game_joint->CanSettingsChangeRuntime())
+                {
+                    for (size_t i=0; i<game_joint->GetNumPendingSettings(); ++i)
+                    {
+                        const auto* setting = game_joint->GetPendingSetting(i);
+
+                        bool ok = true;
+
+                        if (setting->setting == RigidBodyJoint::JointSetting::EnableMotor)
+                        {
+                            ok &= MaybeSetJointValue<b2PrismaticJoint, bool, e_prismaticJoint>(joint, &b2PrismaticJoint::EnableMotor, setting->value);
+                            ok &= MaybeSetJointValue<b2RevoluteJoint,  bool, e_revoluteJoint>(joint, &b2RevoluteJoint::EnableMotor, setting->value);
+                        }
+                        else if (setting->setting == RigidBodyJoint::JointSetting::EnableLimit)
+                        {
+                            ok &= MaybeSetJointValue<b2PrismaticJoint, bool, e_prismaticJoint>(joint, &b2PrismaticJoint::EnableLimit, setting->value);
+                            ok &= MaybeSetJointValue<b2RevoluteJoint,  bool, e_revoluteJoint>(joint, &b2RevoluteJoint::EnableLimit, setting->value);
+                        }
+                        else if (setting->setting == RigidBodyJoint::JointSetting::MotorTorque)
+                        {
+                            ok &= MaybeSetJointValue<b2RevoluteJoint, float, e_revoluteJoint>(joint, &b2RevoluteJoint::SetMaxMotorTorque, setting->value);
+                            // this seems actually it's torque (according to b2_prismatic_joint header)
+                            ok &= MaybeSetJointValue<b2PrismaticJoint, float, e_prismaticJoint>(joint, &b2PrismaticJoint::SetMaxMotorForce, setting->value);
+                            ok &= MaybeSetJointValue<b2MotorJoint, float, e_motorJoint>(joint, &b2MotorJoint::SetMaxTorque, setting->value);
+                        }
+                        else if (setting->setting == RigidBodyJoint::JointSetting::MotorSpeed)
+                        {
+                            ok &= MaybeSetJointValue<b2PrismaticJoint, float, e_prismaticJoint>(joint, &b2PrismaticJoint::SetMotorSpeed, setting->value);
+                            ok &= MaybeSetJointValue<b2RevoluteJoint,  float, e_revoluteJoint>(joint, &b2RevoluteJoint::SetMotorSpeed, setting->value);
+                        }
+                        else if (setting->setting == RigidBodyJoint::JointSetting::MotorForce)
+                        {
+                            ok &= MaybeSetJointValue<b2MotorJoint, float, e_motorJoint>(joint, &b2MotorJoint::SetMaxForce, setting->value);
+                        }
+                        else if(setting->setting == RigidBodyJoint::JointSetting::Stiffness)
+                        {
+                            ok &= MaybeSetJointValue<b2WeldJoint, float, e_weldJoint>(joint, &b2WeldJoint::SetStiffness, setting->value);
+                            ok &= MaybeSetJointValue<b2DistanceJoint, float, e_distanceJoint>(joint, &b2DistanceJoint::SetStiffness, setting->value);
+                        }
+                        else if (setting->setting == RigidBodyJoint::JointSetting::Damping)
+                        {
+                            ok &= MaybeSetJointValue<b2WeldJoint, float, e_weldJoint>(joint, &b2WeldJoint::SetDamping, setting->value);
+                            ok &= MaybeSetJointValue<b2DistanceJoint, float, e_distanceJoint>(joint, &b2DistanceJoint::SetDamping, setting->value);
+                        } else BUG("Missing joint setting.");
+
+                        if (!ok)
+                        {
+                            WARN("Failed to apply change on physics joint setting(s). [entity='%1', joint='%2', setting='%2']",
+                                 phys_node->debug_name,  game_joint->GetName(), setting->setting);
+                        }
+                    }
+                }
+                else if (game_joint->HasPendingSettings())
+                {
+                    WARN("Physics joint settings are ignored since joint is statically configured. [entity='%1', joint='%2']",
+                         phys_node->debug_name, game_joint->GetName());
+                }
+                game_joint->ClearPendingSettings();
+
+                joint_list = joint_list->next;
+            }
+
         }
         virtual void LeaveNode(const EntityNode* node) override
         {
@@ -1404,6 +1637,27 @@ void PhysicsEngine::AddEntityNode(const glm::mat4& model_to_world, const Entity&
             return;
         }
     }
+}
+
+const b2Joint* PhysicsEngine::FindJoint(const game::EntityNode& node, const game::RigidBodyJoint& game_joint) const
+{
+    //const auto*
+    const auto* src_world_node = base::SafeFind(mNodes, node.GetId());
+    if (!src_world_node)
+        return nullptr;
+
+    const auto* src_world_body = src_world_node->world_body;
+    const auto* src_joint_list = src_world_body->GetJointList();
+    while (src_joint_list)
+    {
+        const b2Joint* joint = src_joint_list->joint;
+        if ((const game::RigidBodyJoint*)joint->GetUserData().pointer == &game_joint)
+        {
+            return joint;
+        }
+        src_joint_list = src_joint_list->next;
+    }
+    return nullptr;
 }
 
 } // namespace

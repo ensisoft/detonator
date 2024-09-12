@@ -210,6 +210,58 @@ namespace engine
         std::tuple<bool, float> FindMass(const game::EntityNode& node) const;
         std::tuple<bool, float> FindMass(const std::string& node) const;
 
+        enum class JointValue {
+            // distance joint
+            MinimumLength, // meters
+            MaximumLength, // meters
+            CurrentLength, // meters
+
+            // prismatic joint: meters
+            JointTranslation,
+
+            // prismatic joint: meters per second
+            // revolute joint: radians per second
+            JointSpeed,
+
+            // revolute joint: radians
+            JointAngle,
+
+            // prismatic joint: meters per second
+            // revolute joint: radians per second
+            MotorSpeed,
+
+            // current motor torque,
+            // revolute joint: Nm
+            MotorTorque,
+
+            // distance joint: N/m
+            // weld joint: newton meters Nm
+            Stiffness,
+
+            // distance joint: newton seconds per meter
+            // weld: joint: newton meters per second
+            Damping,
+
+            // Motor joint, meters
+            LinearOffset,
+
+            // motor joint: radians
+            AngularOffset,
+
+            // pulley joint: meters
+            SegmentLengthA,
+            SegmentLengthB,
+
+            IsMotorEnabled,
+            IsLimitEnabled
+        };
+        using JointValueType = std::variant<bool, float, glm::vec2>;
+
+        std::tuple<bool, JointValueType> FindJointValue(const game::RigidBodyJoint& joint, JointValue value) const;
+
+        std::tuple<bool, glm::vec2> FindJointConnectionPoint(const game::EntityNode& node, const game::RigidBodyJoint& joint) const;
+
+
 #if defined(GAMESTUDIO_ENABLE_PHYSICS_DEBUG)
         // Visualize the physics world object's by drawing OOBs around them.
         void DebugDrawObjects(gfx::Painter& painter) const;
@@ -223,6 +275,9 @@ namespace engine
         void UpdateWorld(const glm::mat4& model_to_world, const game::Entity& entity);
         void AddEntity(const glm::mat4& model_to_world, const game::Entity& entity);
         void AddEntityNode(const glm::mat4& model_to_world, const game::Entity& entity, const game::EntityNode& node);
+
+        const b2Joint* FindJoint(const game::EntityNode& node, const game::RigidBodyJoint& joint) const;
+
     private:
         // The class loader instance for loading resources.
         const ClassLibrary* mClassLib = nullptr;
