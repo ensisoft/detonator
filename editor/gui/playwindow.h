@@ -176,6 +176,8 @@ namespace gui
         bool mClosed = false;
         // False until DoInit has run.
         bool mInitDone = false;
+        // game controlled debug drawing
+        bool mGameDebugDraw = false;
         // Logger that we give to the application.
         // Note the thread safety because of for example audio threading.
         std::unique_ptr<SessionLogger> mLogger;

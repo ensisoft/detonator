@@ -518,6 +518,11 @@ void LuaRuntime::Init()
         action.enabled = enabled;
         self.mActionQueue.push(action);
     };
+    engine["EnableDebugDraw"] = [](LuaRuntime& self, bool enabled) {
+        EnableDebugDraw action;
+        action.enabled = enabled;
+        self.mActionQueue.push(action);
+    };
 
     engine["MoveCamera"] = sol::overload(
          [](LuaRuntime& self, float x, float y) {
@@ -1076,7 +1081,7 @@ bool LuaRuntime::GetNextAction(Action* out)
     return true;
 }
 
-void LuaRuntime::TransferDebugQueue(std::vector<DebugDraw>* out)
+void LuaRuntime::TransferDebugQueue(std::vector<DebugDrawCmd>* out)
 {
     std::swap(mDebugDrawQueue, *out);
 }

@@ -114,11 +114,11 @@ namespace engine
     };
     struct DebugDrawCircle {
         FPoint center;
-        float radius;
         Color4f color;
+        float radius = 0.0f;
         float width = 1.0f;
     };
-    using DebugDraw = std::variant<
+    using DebugDrawCmd = std::variant<
             DebugDrawLine,
             DebugDrawCircle,
             DebugDrawRect>;
@@ -133,6 +133,9 @@ namespace engine
     };
 
     struct EnableTracing {
+        bool enabled = false;
+    };
+    struct EnableDebugDraw {
         bool enabled = false;
     };
 
@@ -158,6 +161,7 @@ namespace engine
             PostEventAction,
             ShowDeveloperUIAction,
             EnableEffectAction,
-            EnableTracing>;
+            EnableTracing,
+            EnableDebugDraw>;
 
 } // namespace

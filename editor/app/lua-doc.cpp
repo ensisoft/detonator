@@ -1023,6 +1023,11 @@ void InitLuaDoc()
                                           "by the user via the (developer/debug) UI this actually only controls a global counter"
                                           "and only when every caller has turned the tracing off will the actual tracing stop.",
                  "bool", "enabled");
+    DOC_METHOD_1("void", "EnableDebugDraw", "Request to enable / disable debug drawing.<br>"
+                                            "Debug drawing is ultimately controlled by the combination of game state<br>"
+                                            "and the state set by the user via any developer UI.<br>"
+                                            "Debug drawing will be off when both states are off and on when either one is on.",
+                                            "bool", "enabled");
     DOC_METHOD_1("void", "DebugPause", "Initiate a debug pause or leave previous debug pause.", "bool", "pause");
     DOC_METHOD_1("void", "DebugPrint", "Print a debug message in the game window.", "string", "message");
     DOC_METHOD_4("void", "DebugDrawCircle", "Draw a debug circle with the given radius around the center point in game space.",

@@ -1000,6 +1000,11 @@ private:
         DEBUG("Enable function tracing. [value=%1]", action.enabled ? "enable" : "disable");
         mRequests.EnableTracing(action.enabled);
     }
+    void OnAction(const engine::EnableDebugDraw& action)
+    {
+        DEBUG("Enable debug draw. [value=%1]", action.enabled ? "enable" : "disable");
+        mRequests.EnableDebugDraw(action.enabled);
+    }
 
     void UpdateGame(double game_time,  double dt)
     {
@@ -1031,7 +1036,7 @@ private:
 
         TRACE_CALL("Runtime::Update", mRuntime->Update(game_time, dt));
 
-        std::vector<engine::DebugDraw> debug_draws;
+        std::vector<engine::DebugDrawCmd> debug_draws;
         mRuntime->TransferDebugQueue(&debug_draws);
         std::swap(mDebugDraws, debug_draws);
 
@@ -1332,7 +1337,7 @@ private:
         short lifetime = 3;
     };
     boost::circular_buffer<DebugPrint> mDebugPrints;
-    std::vector<engine::DebugDraw > mDebugDraws;
+    std::vector<engine::DebugDrawCmd> mDebugDraws;
     // Time to consume until game actions are processed.
     float mActionDelay = 0.0;
     // The size of the game time step (in seconds) to take for each

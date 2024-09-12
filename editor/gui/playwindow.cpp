@@ -701,7 +701,8 @@ void PlayWindow::RunGameLoopOnce()
             for (auto it = mEventQueue.begin(); it != mEventQueue.end(); ++it)
             {
                 const auto& event = *it;
-                if (const auto* ptr = std::get_if<wdk::WindowEventResize>(&event)) {
+                if (const auto* ptr = std::get_if<wdk::WindowEventResize>(&event))
+                {
                     mEngine->OnRenderingSurfaceResized(ptr->width, ptr->height);
                     mEngine->DebugPrintString(base::FormatString("Surface resized to %1x%2", ptr->width, ptr->height));
                     ActivateWindow();
@@ -738,15 +739,26 @@ void PlayWindow::RunGameLoopOnce()
                 DebugPause(ptr->pause);
             else if (const auto* ptr = std::get_if<engine::Engine::EnableTracing>(&request))
                 mEnableTrace.push_back(ptr->enabled);
-            else if (const auto* ptr = std::get_if<engine::Engine::ShowMouseCursor>(&request)) {
-                if (ptr->show) {
+            else if (const auto* ptr = std::get_if<engine::Engine::EnableDebugDraw>(&request))
+            {
+                mGameDebugDraw = ptr->enabled;
+                SetDebugOptions();
+            }
+            else if (const auto* ptr = std::get_if<engine::Engine::ShowMouseCursor>(&request))
+            {
+                if (ptr->show)
+                {
                     mContainer->setCursor(Qt::ArrowCursor);
                     mSurface->setCursor(Qt::ArrowCursor);
-                } else {
+                }
+                else
+                {
                     mContainer->setCursor(Qt::BlankCursor);
                     mSurface->setCursor(Qt::BlankCursor);
                 }
-            } else if (const auto* ptr = std::get_if<engine::Engine::QuitApp>(&request)) {
+            }
+            else if (const auto* ptr = std::get_if<engine::Engine::QuitApp>(&request))
+            {
                 INFO("Quit with exit code %1", ptr->exit_code);
                 quit = true;
             }
@@ -1711,7 +1723,7 @@ void PlayWindow::SetDebugOptions()
     engine::Engine::DebugOptions debug;
     debug.debug_draw_flags.set_from_value(~0);
     debug.debug_pause     = GetValue(mUI.actionPause);
-    debug.debug_draw      = GetValue(mUI.actionToggleDebugDraw);
+    debug.debug_draw      = GetValue(mUI.actionToggleDebugDraw) || mGameDebugDraw;
     debug.debug_show_msg  = GetValue(mUI.actionToggleDebugMsg);
     debug.debug_font      = "app://fonts/orbitron-medium.otf";
     debug.debug_show_fps  = InFullScreen();
