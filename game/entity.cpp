@@ -876,6 +876,10 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
 
     // create local joints by mapping the entity class joints from
     // entity class nodes to entity nodes in this entity instance.
+
+    // make sure the joints stay valid.
+    mJoints.reserve(mClass->GetNumJoints());
+
     for (size_t i=0; i<mClass->GetNumJoints(); ++i)
     {
         const auto& joint_klass = mClass->GetSharedJoint(i);
@@ -889,6 +893,13 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
                            FastId(10),
                            inst_src_node, inst_dst_node);
         mJoints.push_back(std::move(joint));
+
+        auto* joint_ptr = &mJoints.back();
+        if (auto* rigid_body = inst_src_node->GetRigidBody())
+            rigid_body->AddJointConnection(joint_ptr);
+
+        if (auto* rigid_body = inst_dst_node->GetRigidBody())
+            rigid_body->AddJointConnection(joint_ptr);
     }
 
     if (mClass->GetNumAnimators())

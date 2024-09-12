@@ -27,13 +27,18 @@
 #include <memory>
 #include <string>
 #include <optional>
+#include <vector>
 
 #include "game/enum.h"
+#include "base/utility.h"
 #include "base/bitflag.h"
 #include "data/fwd.h"
 
 namespace game
 {
+    class RigidBodyJointClass;
+    class RigidBodyJoint;
+
     class RigidBodyClass
     {
     public:
@@ -150,6 +155,19 @@ namespace game
           , mInstanceFlags(mClass->GetFlags())
         {}
 
+        void AddJointConnection(RigidBodyJoint* joint)
+        { mJointConnections.push_back(joint); }
+
+        size_t GetNumJoints() const noexcept
+        { return mJointConnections.size(); }
+        RigidBodyJoint* GetJoint(size_t index) noexcept
+        { return base::SafeIndex(mJointConnections, index); }
+        const RigidBodyJoint* GetJoint(size_t index) const noexcept
+        { return base::SafeIndex(mJointConnections, index); }
+
+        RigidBodyJoint* FindJointByName(const std::string& name) noexcept;
+        RigidBodyJoint* FindJointByClassId(const std::string& id) noexcept;
+
         Simulation GetSimulation() const noexcept
         { return mClass->GetSimulation(); }
         CollisionShape GetCollisionShape() const noexcept
@@ -254,6 +272,8 @@ namespace game
         { return mClass.get(); }
     private:
         std::shared_ptr<const RigidBodyClass> mClass;
+        // List of joints this rigid body is connected to.
+        std::vector<RigidBodyJoint*> mJointConnections;
         // Current linear velocity in meters per second.
         // For dynamically driven bodies
         // the physics engine will update this value, whereas for

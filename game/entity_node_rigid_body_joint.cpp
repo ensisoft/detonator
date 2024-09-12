@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "base/assert.h"
 #include "base/hash.h"
+#include "base/logging.h"
 #include "data/writer.h"
 #include "data/reader.h"
 #include "game/entity_node_rigid_body_joint.h"
@@ -220,6 +222,74 @@ bool RigidBodyJointClass::FromJson(const data::Reader& data)
         jref.params = params;
     }
     return ok;
+}
+
+bool RigidBodyJoint::ValidateJointSetting(game::RigidBodyJoint::JointSetting setting, JointSettingValue value) const noexcept
+{
+    const auto type = mClass->GetJointType();
+
+    if (setting == JointSetting::EnableMotor || setting == JointSetting::EnableLimit)
+    {
+        if (!std::holds_alternative<bool>(value))
+            return false;
+
+        if (type == JointType::Prismatic || type == JointType::Revolute)
+            return true;
+
+    }
+    else if (setting == JointSetting::MotorTorque)
+    {
+        if (!std::holds_alternative<float>(value))
+            return false;
+
+        if (type == JointType::Revolute || type == JointType::Motor || type == JointType::Prismatic)
+            return true;
+    }
+    else if (setting == JointSetting::MotorSpeed)
+    {
+        if (!std::holds_alternative<float>(value))
+            return false;
+
+        if (type == JointType::Revolute || type == JointType::Prismatic)
+            return true;
+    }
+    else if (setting == JointSetting::MotorForce)
+    {
+        if (!std::holds_alternative<float>(value))
+            return false;
+
+        if (type == JointType::Motor)
+            return true;
+    }
+    else if (setting == JointSetting::Stiffness || setting == JointSetting::Damping)
+    {
+        if (!std::holds_alternative<float>(value))
+            return false;
+
+        if (type == JointType::Weld || type == JointType::Distance)
+            return true;
+    } else BUG("Missing joint setting.");
+    return false;
+}
+
+void RigidBodyJoint::SetJointSetting(JointSetting setting, JointSettingValue value)
+{
+    // schedule a pending setting change on the joint.
+    // the physics subsystem will then set the setting on the joint
+    // in the next update
+    for (auto& pending : mSettings)
+    {
+        if (pending.setting == setting)
+        {
+            WARN("Overwriting previous joint setting with a new value. [setting='%1']", setting);
+            pending.value = value;
+            return;
+        }
+    }
+    JointValueSetting pending;
+    pending.setting = setting;
+    pending.value   = value;
+    mSettings.push_back(pending);
 }
 
 } // namespace

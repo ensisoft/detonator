@@ -20,6 +20,16 @@
 
 namespace game {
 
+    enum class RigidBodyJointSetting {
+        EnableMotor,
+        EnableLimit,
+        MotorTorque,
+        MotorSpeed,
+        MotorForce,
+        Stiffness,
+        Damping,
+    };
+
     // Selection for collision shapes when the collision shape detection
     // is set to manual.
     enum class CollisionShape {
