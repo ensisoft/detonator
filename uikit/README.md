@@ -29,23 +29,45 @@ Current features:
 
 Currently, the following widgets have been implemented.
 * Form
+  * <i>Basic container widget for other widgets</i>
+  * <i>Can show optional background / border </i>
 * GroupBox
+  * <i>Basic container widget for other widgets</i>
+  * <i>Can show optional background / border </i>
+  * <i>Performs automatic mutual exclusion on radio buttons</i>
 * Label
+  * <i>Basic widget to show some static text</i> 
 * ProgressBar
+  * <i>Used to visually indicate "progress" of some kind</i>
+  * <i>Can be configured to be an endless "spinner"</i> 
 * Slider
+  * <i>Used to let the user change a value by dragging a handle</i>
 * PushButton
+  * <i>Used to let the user perform some action such as "start" or "quit".</i> 
 * RadioButton
+  * <i>Used to indicate a selection within a group</i>
+  * <i>Has automatic single selection (exclusion) between radio buttons inside the same groupbox</i>  
 * CheckBox
+  * <i>Used to let the user indicate a desired selection</i>
 * SpinBox (integer)
+  * <i>Used to let the user increment or decrement a value</i>
+  * <i>Supports min, max value limit(s)</i>
 * ToggleBox
+  * <i>Similar to checkbox except animated toggle between on and off states</i> 
 * ScrollArea
+  * <i>Container widget for other widgets</i>
+  * Supports virtual viewport with vertical and horizontal scrolling</i>
 * ShapeWidget
-
+  * <i> Widget that renders arbitrary shape (drawable) and material</i>
+  * <i> Used to add visual elements to the UI, for example particles</i>
+  
 TODO widgets:
 * Spinbox (float)
 * Dropdown and/or ComboBox
 * LineEdit (for text input)
-* ListWidget
+* ListWidget 
+* Main menu
+* Context menu
 
 ## Widget Styling
 
@@ -148,11 +170,6 @@ This type of animation involves a sequence of actions or changes that are mapped
 Each action has a specific start time, duration, and set of properties that change. 
 It is often represented on a timeline, making it easy to see when each action occurs and how long it lasts.
 
-<i><b>Event-Driven Animation</b></i><br> 
-This type of animation is triggered by specific events (such as user interactions, system events, 
-or other predefined conditions). Each event triggers an action that occurs over a specified duration 
-and affects certain properties.
-
 
 <i><b>Key-Frame Animation</b></i><br> 
 This type of animation involves defining the starting and ending points (key frames) of any smooth transition. 
@@ -174,6 +191,12 @@ The key frames act as control points that define the major transitions in the an
 <i><b>Interpolation Methods</i></b><br>
 Easing functions specify the rate of change of a parameter over time to give it more natural movement where the objects velocity is continuously adjusted.
 For example an object that is dropped will first accelerate downwards and then bounce upwards after hitting the floor.
+
+<i><b>Event-Driven Animation</b></i><br>
+This type of animation is triggered by specific events (such as user interactions, system events,
+or other predefined conditions). Each event triggers an action that occurs over a specified duration
+and affects certain properties. both <i>Timeline</i> and </i>key frame</i> animations are event driven.
+
 
 <details><summary>List of Interpolation Methods</summary>
 

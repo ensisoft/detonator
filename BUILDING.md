@@ -124,8 +124,9 @@ Install these packages:
 
 - GCC (or Clang) compiler suite
 - CMake build tool
-- Conan package manager (VERSION 2)
+- Conan💩💩 package manager (VERSION 2)
   - On Archlinux you can use 'yay' to install conan + its dependencies from AUR*
+  - See below for installing yay + conan💩💩 
 - Git version control system
 - Qt5 application framework
 
@@ -500,3 +501,37 @@ to indicate completion.
 </details>
 
 </details>
+
+### How to install Conan💩💩 using Yay on ArchLinux
+
+
+Download the yay package from AUR<br>
+https://aur.archlinux.org/packages/yay
+  
+WARNING! BOTH YAY AND CONAN💩💩 WILL LIKELY HAVE MISSING DEPENDENCIES
+
+ install missing yay dependencies
+```
+$ sudo pacman -S debugedit
+```
+
+build yay 
+```
+$ cd yay
+$ makepkg
+$ sudo pacman -U yay-12.3.5-1-x86_64.pkg.tar.zst
+$ yay --version
+$ yay v12.3.5 - libalpm v14.0.0
+$
+```
+use yay to install Conan💩💩
+
+
+```
+$ yay -S conan
+$ yay -S python-patch-ng
+$ ... 
+$ conan --version
+$ Conan version 2.6.0
+$ 
+```
