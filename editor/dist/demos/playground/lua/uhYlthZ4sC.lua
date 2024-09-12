@@ -109,20 +109,20 @@ end
 
 -- Called on key down events.
 function OnKeyDown(spatial_query_test, symbol, modifier_bits)
-    if symbol == wdk.Keys.Key1 then
+    if symbol == wdk.Keys.KeyR then
         selection_method = SelectionMethod.Rectangle
-    elseif symbol == wdk.Keys.Key2 then
+    elseif symbol == wdk.Keys.KeyP then
         selection_method = SelectionMethod.Point
-    elseif symbol == wdk.Keys.Key3 then
-        selection_method = SelectionMethod.PointRadius
-    elseif symbol == wdk.Keys.Key4 then
-        selection_method = SelectionMethod.PointPoint
-    elseif symbol == wdk.Keys.KeyA then
-        selection_mode = SelectionMode.All
-    elseif symbol == wdk.Keys.KeyF then
-        selection_mode = SelectionMode.First
     elseif symbol == wdk.Keys.KeyC then
+        selection_method = SelectionMethod.PointRadius
+    elseif symbol == wdk.Keys.KeyL then
+        selection_method = SelectionMethod.PointPoint
+    elseif symbol == wdk.Keys.Key1 then
+        selection_mode = SelectionMode.All
+    elseif symbol == wdk.Keys.Key2 then
         selection_mode = SelectionMode.Closest
+    elseif symbol == wdk.Keys.Key3 then
+        selection_mode = SelectionMode.First
     end
     Game:DebugPrint('Selection method ' .. selection_method)
     Game:DebugPrint('Selection mode ' .. selection_mode)
