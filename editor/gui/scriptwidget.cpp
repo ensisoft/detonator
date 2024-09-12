@@ -457,6 +457,8 @@ private:
         // special cases heuristics.
         if (word.endsWith("entity"))
             return "game.Entity";
+        else if (word.endsWith("joint"))
+            return "game.RigidBodyJoint";
         else if (word.endsWith("node"))
             if (word.contains("spatial"))
                 return "game.SpatialNode";
