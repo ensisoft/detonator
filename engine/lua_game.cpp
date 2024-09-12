@@ -1594,6 +1594,30 @@ void BindGameLib(sol::state& L)
             return self.FindMass(node);
         }
     );
+    physics["FindJointConnectionPoint"] = &PhysicsEngine::FindJointConnectionPoint;
+    physics["FindJointValue"] = [](PhysicsEngine& engine, const game::RigidBodyJoint& joint, const std::string& value, sol::this_state state) {
+        const auto enum_val = magic_enum::enum_cast<PhysicsEngine::JointValue>(value);
+        if (!enum_val.has_value())
+            throw GameError("No such joint value: " + value);
+        auto ret = engine.FindJointValue(joint, enum_val.value());
+
+        sol::state_view lua(state);
+
+        if (!std::get<0>(ret)) {
+            return sol::make_object(lua, sol::nil);
+        }
+
+        PhysicsEngine::JointValueType val = std::get<1>(ret);
+        if (auto ptr = std::get_if<bool>(&val))
+            return sol::make_object(lua, *ptr);
+        else if (auto ptr = std::get_if<float>(&val))
+            return sol::make_object(lua, *ptr);
+        else if (auto ptr = std::get_if<glm::vec2>(&val))
+            return sol::make_object(lua, *ptr);
+        else BUG("bug on missing joint value type");
+
+        return sol::make_object(lua, sol::nil);
+    };
 
     auto ray_cast_result = table.new_usertype<PhysicsEngine::RayCastResult>("RayCastResult");
     ray_cast_result["node"]     = &PhysicsEngine::RayCastResult::node;
