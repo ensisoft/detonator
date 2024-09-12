@@ -1570,31 +1570,10 @@ void BindGameLib(sol::state& L)
         [](PhysicsEngine& self, const EntityNode& node, const glm::vec2& vector) {
             return self.SetLinearVelocity(node, vector);
         });
-    physics["FindCurrentLinearVelocity"] = sol::overload(
-        [](PhysicsEngine& self, const std::string& id) {
-            return self.FindCurrentLinearVelocity(id);
-        },
-        [](PhysicsEngine& self, const EntityNode& node) {
-            return self.FindCurrentLinearVelocity(node);
-        }
-    );
-    physics["FindCurrentAngularVelocity"] = sol::overload(
-        [](PhysicsEngine& self, const std::string& id) {
-            return self.FindCurrentAngularVelocity(id);
-        },
-        [](PhysicsEngine& self, const EntityNode& node) {
-            return self.FindCurrentAngularVelocity(node);
-        }
-    );
-    physics["FindMass"] = sol::overload(
-        [](PhysicsEngine& self, const std::string& id) {
-            return self.FindMass(id);
-        },
-        [](PhysicsEngine& self, const EntityNode& node) {
-            return self.FindMass(node);
-        }
-    );
-    physics["FindJointConnectionPoint"] = &PhysicsEngine::FindJointConnectionPoint;
+    physics["FindCurrentLinearVelocity"]  = &PhysicsEngine::FindCurrentLinearVelocity;
+    physics["FindCurrentAngularVelocity"] = &PhysicsEngine::FindCurrentAngularVelocity;
+    physics["FindMass"]                   = &PhysicsEngine::FindMass;
+    physics["FindJointConnectionPoint"]   = &PhysicsEngine::FindJointConnectionPoint;
     physics["FindJointValue"] = [](PhysicsEngine& engine, const game::RigidBodyJoint& joint, const std::string& value, sol::this_state state) {
         const auto enum_val = magic_enum::enum_cast<PhysicsEngine::JointValue>(value);
         if (!enum_val.has_value())

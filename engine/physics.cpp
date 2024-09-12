@@ -654,43 +654,34 @@ void PhysicsEngine::DestroyWorld()
 
 std::tuple<bool, glm::vec2> PhysicsEngine::FindCurrentLinearVelocity(const game::EntityNode& node) const
 {
-    return FindCurrentLinearVelocity(node.GetId());
-}
-std::tuple<bool, glm::vec2> PhysicsEngine::FindCurrentLinearVelocity(const std::string& node) const
-{
-    if (const auto* ptr = base::SafeFind(mNodes, node))
+    if (const auto* ptr = base::SafeFind(mNodes, node.GetId()))
     {
         const auto* body = ptr->world_body;
         return std::make_tuple(true, ToGlm(body->GetLinearVelocity()));
     }
     return std::make_tuple(false, glm::vec2(0.0f, 0.0f));
 }
+
 std::tuple<bool, float> PhysicsEngine::FindCurrentAngularVelocity(const game::EntityNode& node) const
 {
-    return FindCurrentAngularVelocity(node.GetId());
-}
-std::tuple<bool, float> PhysicsEngine::FindCurrentAngularVelocity(const std::string& node) const
-{
-    if (const auto* ptr = base::SafeFind(mNodes, node))
+    if (const auto* ptr = base::SafeFind(mNodes, node.GetId()))
     {
         const auto* body = ptr->world_body;
         return std::make_tuple(true, body->GetAngularVelocity());
     }
     return std::make_tuple(false, 0.0f);
 }
+
 std::tuple<bool, float> PhysicsEngine::FindMass(const game::EntityNode& node) const
 {
-    return FindMass(node.GetId());
-}
-std::tuple<bool, float> PhysicsEngine::FindMass(const std::string& node) const
-{
-    if (const auto* ptr = base::SafeFind(mNodes, node))
+    if (const auto* ptr = base::SafeFind(mNodes, node.GetId()))
     {
         const auto* body = ptr->world_body;
         return std::make_tuple(true, body->GetMass());
     }
     return std::make_tuple(false, 0.0f);
 }
+
 std::tuple<bool, PhysicsEngine::JointValueType> PhysicsEngine::FindJointValue(const game::RigidBodyJoint& game_joint, JointValue value) const
 {
     // any of these nodes should connect us to the rigid body which

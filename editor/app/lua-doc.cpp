@@ -1908,13 +1908,13 @@ void InitLuaDoc()
 
     DOC_METHOD_1("bool, glm.vec2", "FindCurrentLinearVelocity", "Find the current linear velocity of a physics body in meters/s in world space.<br>"
                                                                 "Returns true and the current velocity if the body was found otherwise false and zero vector.<br>",
-                 "game.EntityNode|string", "node|id");
+                 "game.EntityNode", "node");
     DOC_METHOD_1("bool, float", "FindCurrentAngularVelocity", "Find the current angular velocity of a physics body in radians/s in world space.<br>"
                                                               "Returns true and the current velocity if the body was found, otherwise false and 0 velocity.<br>",
-                 "game.EntityNode|string", "node|id");
+                 "game.EntityNode", "node");
     DOC_METHOD_1("bool, float", "FindMass", "Find the mass (Kg) of a physics body based on size and density.<br>"
                                             "Returns true and mass if the body was found, otherwise false and 0 mass.",
-                 "game.EntityNode|string", "node|id");
+                 "game.EntityNode", "node");
     DOC_METHOD_2("bool, glm.vec2", "FindJointConnectionPoint", "Find joint connection point on the given node in world coordinates.<br>"
                                                       "Returns true and world coordinate if the joint was found, otherwise false and 0.0, 0.0.<br>",
                                                       "game.EntityNode", "node", "game.RigidBodyJoint", "joint");
