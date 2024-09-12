@@ -36,6 +36,7 @@
 #include "game/entity.h"
 #include "game/entity_node_transformer.h"
 #include "game/entity_node_rigid_body.h"
+#include "game/entity_node_rigid_body_joint.h"
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_text_item.h"
 #include "game/entity_node_spatial_node.h"
@@ -650,7 +651,47 @@ void BindGameLib(sol::state& L)
         return sol::make_object(L, sol::nil);
     };
 
+    auto joint = table.new_usertype<RigidBodyJoint>("RigidBodyJoint");
+    joint["GetId"]      = &RigidBodyJoint::GetId;
+    joint["GetClassId"] = &RigidBodyJoint::GetClassId;
+    joint["GetName"]    = &RigidBodyJoint::GetName;
+    joint["GetType"]    = &GetTypeString<RigidBodyJoint>;
+    joint["GetNodeA"]   = GetMutable(&RigidBodyJoint::GetSrcNode);
+    joint["GetNodeB"]   = GetMutable(&RigidBodyJoint::GetDstNode);
+    joint["SetValue"]   = sol::overload(
+        [](RigidBodyJoint& joint, const std::string& setting, bool value) {
+            const auto enum_val = magic_enum::enum_cast<RigidBodyJoint::JointSetting>(setting);
+            if (!enum_val.has_value())
+                throw GameError("No such JointSetting: " + setting);
+            if (!joint.ValidateJointSetting(enum_val.value(), value))
+            {
+                WARN("Invalid joint setting value type (bool). [joint='%1', setting=%2]",
+                     joint.GetName(), enum_val.value());
+                return false;
+            }
+
+            joint.SetJointSetting(enum_val.value(), value);
+            return true;
+        },
+        [](RigidBodyJoint& joint, const std::string& setting, float value) {
+            const auto enum_val = magic_enum::enum_cast<RigidBodyJoint::JointSetting>(setting);
+            if (!enum_val.has_value())
+                throw GameError("No such JointSetting: " + setting);
+            if (!joint.ValidateJointSetting(enum_val.value(), value))
+            {
+                WARN("Invalid joint setting value type (float). [joint='%1', setting='%2']'",
+                     joint.GetName(), enum_val.value());
+                return false;
+            }
+            joint.SetJointSetting(enum_val.value(), value);
+            return true;
+        });
+
     auto body = table.new_usertype<RigidBody>("RigidBody");
+    body["GetNumJoints"]                        = &RigidBody::GetNumJoints;
+    body["GetJoint"]                            = GetMutable(&RigidBody::GetJoint);
+    body["FindJointByName"]                     = &RigidBody::FindJointByName;
+    body["FindJointByClassId"]                  = &RigidBody::FindJointByClassId;
     body["IsEnabled"]                           = &RigidBody::IsEnabled;
     body["IsSensor"]                            = &RigidBody::IsSensor;
     body["IsBullet"]                            = &RigidBody::IsBullet;
