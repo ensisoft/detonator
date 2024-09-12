@@ -14,12 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "game/entity_node_rigid_body.h"
 
 #include "base/hash.h"
 #include "base/logging.h"
 #include "data/writer.h"
 #include "data/reader.h"
+#include "game/entity_node_rigid_body.h"
+#include "game/entity_node_rigid_body_joint.h"
 
 namespace game
 {
@@ -94,6 +95,25 @@ void RigidBody::AdjustAngularVelocity(float radians) noexcept
         WARN("Overwriting pending angular velocity adjustment.");
 
     mAngularVelocityAdjustment = radians;
+}
+
+RigidBodyJoint* RigidBody::FindJointByName(const std::string& name) noexcept
+{
+    for (auto& joint : mJointConnections)
+    {
+        if (joint->GetName() == name)
+            return joint;
+    }
+    return nullptr;
+}
+RigidBodyJoint* RigidBody::FindJointByClassId(const std::string& id) noexcept
+{
+    for (auto& joint : mJointConnections)
+    {
+        if (joint->GetClassId() == id)
+            return joint;
+    }
+    return nullptr;
 }
 
 } // namespace

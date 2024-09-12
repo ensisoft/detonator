@@ -21,9 +21,14 @@
 #include <string>
 #include <variant>
 #include <optional>
+#include <memory>
+#include <vector>
 
 #include "base/bitflag.h"
+#include "base/utility.h"
 #include "game/types.h"
+#include "game/enum.h"
+#include "data/fwd.h"
 
 namespace game
 {
@@ -43,7 +48,10 @@ namespace game
         };
         enum class Flags {
             // Let the bodies connected to the joint collide
-            CollideConnected
+            CollideConnected,
+            // Let the joint settings be changed at runtime
+            // i.e., after the joint has been created.
+            EnableRuntimeSettings
         };
 
         struct RevoluteJointParams {
@@ -145,6 +153,9 @@ namespace game
         }
         inline bool CollideConnected() const noexcept
         { return flags.test(Flags::CollideConnected); }
+        inline bool CanSettingsChangeRuntime() const noexcept
+        { return flags.test(Flags::EnableRuntimeSettings); }
+
         inline void SetFlag(Flags flag, bool on_off) noexcept
         { flags.set(flag, on_off); }
         inline JointType GetJointType() const noexcept
@@ -155,8 +166,10 @@ namespace game
     class RigidBodyJoint
     {
     public:
-        using JointType   = RigidBodyJointClass::JointType;
-        using JointParams = RigidBodyJointClass::JointParams;
+        using JointType         = RigidBodyJointClass::JointType;
+        using JointParams       = RigidBodyJointClass::JointParams;
+        using JointSetting      = RigidBodyJointSetting;
+        using JointSettingValue = std::variant<float, bool>;
 
         RigidBodyJoint(std::shared_ptr<const RigidBodyJointClass> joint,
                        std::string joint_id,
@@ -171,10 +184,17 @@ namespace game
         inline JointType GetType() const noexcept
         { return mClass->GetJointType(); }
 
-        const EntityNode* GetSrcNode() const noexcept
+        inline const EntityNode* GetSrcNode() const noexcept
         { return mSrcNode; }
-        const EntityNode* GetDstNode() const noexcept
+        inline const EntityNode* GetDstNode() const noexcept
         { return mDstNode; }
+
+        inline EntityNode* GetSrcNode() noexcept
+        { return mSrcNode; }
+
+        inline EntityNode* GetDstNode() noexcept
+        { return mDstNode; }
+
         std::string GetSrcId() const noexcept
         { return mClass->GetSrcNodeId(); }
         std::string GetDstId() const noexcept
@@ -187,6 +207,8 @@ namespace game
         { return mClass->dst_node_anchor_point; }
         const std::string& GetName() const noexcept
         { return mClass->name; }
+        const std::string& GetClassId() const noexcept
+        { return mClass->id; }
         const RigidBodyJointClass* operator->() const noexcept
         { return mClass.get(); }
         const RigidBodyJointClass& GetClass() const noexcept
@@ -194,11 +216,34 @@ namespace game
         const JointParams& GetParams() const noexcept
         { return mClass->params; }
 
+        inline bool HasPendingSettings() const noexcept
+        { return !mSettings.empty(); }
+
+        inline void ClearPendingSettings() noexcept
+        { mSettings.clear(); }
+
+        inline bool CanSettingsChangeRuntime() const noexcept
+        { return mClass->CanSettingsChangeRuntime(); }
+
+        bool ValidateJointSetting(JointSetting setting, JointSettingValue value) const noexcept;
+        void SetJointSetting(JointSetting setting, JointSettingValue value);
+
+        struct JointValueSetting {
+            JointSetting setting;
+            JointSettingValue  value;
+        };
+        inline size_t GetNumPendingSettings() const noexcept
+        { return mSettings.size(); }
+
+        const JointValueSetting* GetPendingSetting(size_t index) const noexcept
+        { return &base::SafeIndex(mSettings, index); }
+
     private:
         std::shared_ptr<const RigidBodyJointClass> mClass;
         std::string mId;
         EntityNode* mSrcNode = nullptr;
         EntityNode* mDstNode = nullptr;
+        std::vector<JointValueSetting> mSettings;
     };
 
 } // namespace

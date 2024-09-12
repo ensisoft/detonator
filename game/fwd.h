@@ -45,6 +45,12 @@ namespace game {
     class SetValueActuator;
     class KinematicActuator;
     class MaterialActuator;
+
+    class RigidBodyClass;
+    class RigidBody;
+    class RigidBodyJointClass;
+    class RigidBodyJoint;
+
 } // namespace
 
 namespace base {
