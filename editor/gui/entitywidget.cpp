@@ -390,8 +390,15 @@ public:
             mCurrentNode = nullptr;
             return;
         }
-        auto* node = hit_nodes[0];
-        mCurrentNode = node;
+        mCurrentNode = hit_nodes[0];
+        for (auto* node : hit_nodes)
+        {
+            if (node->HasRigidBody())
+            {
+                mCurrentNode = node;
+                break;
+            }
+        }
     }
     virtual void MousePress(const MouseEvent& mickey, gfx::Transform&) override
     {
@@ -403,13 +410,24 @@ public:
             return;
 
         auto* node = hit_nodes[0];
+        glm::vec2 hit_box = hit_boxes[0];
+
+        for (size_t i=0; i<hit_nodes.size(); ++i)
+        {
+            if (hit_nodes[i]->HasRigidBody())
+            {
+                node = hit_nodes[i];
+                hit_box = hit_boxes[i];
+                break;
+            }
+        }
         if (!node->HasRigidBody())
             return;
 
         if (node == mNodeA || node == mNodeB)
             return;
 
-        auto hit_pos = hit_boxes[0] - node->GetSize() * 0.5f;
+        auto hit_pos = hit_box - node->GetSize() * 0.5f;
         if (!mNodeA)
         {
             mNodeA = node;
