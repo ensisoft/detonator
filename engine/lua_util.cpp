@@ -145,10 +145,11 @@ namespace engine
             return math::lerp(y0, y1, t);
         });
 
-    util["GetRotationFromMatrix"]    = &GetRotationFromMatrix;
-    util["GetScaleFromMatrix"]       = &GetScaleFromMatrix;
-    util["GetTranslationFromMatrix"] = &GetTranslationFromMatrix;
-    util["RotateVector"]             = &RotateVector;
+    util["GetRotationFromMatrix"]     = &GetRotationFromMatrix;
+    util["GetScaleFromMatrix"]        = &GetScaleFromMatrix;
+    util["GetTranslationFromMatrix"]  = &GetTranslationFromMatrix;
+    util["RotateVectorAroundZ"]       = &RotateVectorAroundZ;
+    util["FindVectorRotationAroundZ"] = &FindVectorRotationAroundZ;
     util["ToVec2"] = [](const base::FPoint& point) {
         return glm::vec2(point.GetX(), point.GetY());
     };
@@ -290,7 +291,9 @@ namespace engine
                 str = base::detail::ReplaceIndex(index, str, arg.get<glm::vec3>());
             else if (arg.is<glm::vec4>())
                 str = base::detail::ReplaceIndex(index, str, arg.get<glm::vec4>());
-            else throw GameError("Unsupported string format value type.");
+            else if (arg.is<sol::nil_t>())
+                throw GameError("Nil argument in FormatString at index " + std::to_string(i));
+            else throw GameError("Unsupported FormatString value type at index " + std::to_string(i));
         }
         return str;
     };
