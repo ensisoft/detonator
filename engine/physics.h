@@ -204,11 +204,8 @@ namespace engine
         void DestroyWorld();
 
         std::tuple<bool, glm::vec2> FindCurrentLinearVelocity(const game::EntityNode& node) const;
-        std::tuple<bool, glm::vec2> FindCurrentLinearVelocity(const std::string& node) const;
         std::tuple<bool, float> FindCurrentAngularVelocity(const game::EntityNode& node) const;
-        std::tuple<bool, float> FindCurrentAngularVelocity(const std::string& node) const;
         std::tuple<bool, float> FindMass(const game::EntityNode& node) const;
-        std::tuple<bool, float> FindMass(const std::string& node) const;
 
         enum class JointValue {
             // distance joint
