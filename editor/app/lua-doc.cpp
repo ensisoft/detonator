@@ -28,6 +28,7 @@
 #include <map>
 
 #include "base/assert.h"
+#include "base/logging.h"
 #include "base/color4f.h"
 #include "base/format.h"
 #include "base/utility.h"
@@ -1167,6 +1168,47 @@ void InitLuaDoc()
                  "float", "time");
     DOC_METHOD_0("float", "GetMaterialTime", "Get the current material time based on the renderer's material time for this drawable item.");
 
+    DOC_TABLE2("game.RigidBodyJoint", "Connection between two rigid bodies");
+    DOC_METHOD_0("string", "GetId", "Get the joint instance ID.");
+    DOC_METHOD_0("string", "GetClassId", "Get the joint class ID.");
+    DOC_METHOD_0("string", "GetName", "Get the joint name.");
+    DOC_METHOD_0("string", "GetType", "Get the type of the joint. Possible types:<br>"
+                                      "'Distance','Revolute', 'Prismatic', 'Weld', 'Pulley', 'Motor'");
+    DOC_METHOD_0("game.EntityNode", "GetNodeA", "Get the 1st node (A) this joint is connected to.");
+    DOC_METHOD_0("game.EntityNode", "GetNodeB", "Get the 2nd node (B) this joint is connected to.");
+    DOC_METHOD_2("bool", "SetValue",
+                 "Change a joint setting. If the setting is valid it will take place on the next "
+                 "iteration of the physics engine update and the function returns true.<br>"
+                 "If the setting is not valid for the joint false is returned.<br>"
+                 "Joint settings per joint type: <br>"
+
+                 "<b>Prismatic Joint:</b><br>"
+                 "EnableMotor, bool, enable/disable the joint motor.<br>"
+                 "EnableLimit, bool, enable/disable the joint limits.<br>"
+                 "MotorTorque, float, set the maximum motor torque. Nm.<br>"
+                 "MotorSpeed, float, set the maximum motor speed. M/s.<br><br>"
+
+                 "<b>Revolute Joint:</b><br>"
+                 "EnableMotor, bool, enable/disable the joint motor.<br>"
+                 "EnableLimit, bool, enable/disable the joint limits.<br>"
+                 "MotorTorque, float, set the maximum motor torque. Nm<br>"
+                 "MotorSpeed, float, set the maximum motor speed. rad/s<br><br>"
+
+                 "<b>Motor Joint:</b><br>"
+                 "MotorTorque, float, set the maximum motor torque. Nm<br>"
+                 "MotorForce, float, set the maximum motor force. N<br>"
+
+                 "<b>Weld Joint:</b><br>"
+                 "Stiffness, float, set the stiffness of the joint. Nm <br>"
+                 "Damping, float, set the damping of the joint. Nm/s<br>"
+
+                 "<b>Distance Joint:</b><br>"
+                 "Stiffness, float, set the stiffness of the joint. N/m <br>"
+                 "Damping, float, set the damping of the joint. N*s/m <br>"
+
+    ,"string", "setting", "bool|float", "value");
+
+
     DOC_TABLE("game.RigidBody");
     DOC_METHOD_0("bool", "IsEnabled", "Check whether the body is enabled in the physics simulation or not.");
     DOC_METHOD_0("bool", "IsSensor", "Check whether the body is a sensor only body.");
@@ -1873,6 +1915,57 @@ void InitLuaDoc()
     DOC_METHOD_1("bool, float", "FindMass", "Find the mass (Kg) of a physics body based on size and density.<br>"
                                             "Returns true and mass if the body was found, otherwise false and 0 mass.",
                  "game.EntityNode|string", "node|id");
+    DOC_METHOD_2("bool, glm.vec2", "FindJointConnectionPoint", "Find joint connection point on the given node in world coordinates.<br>"
+                                                      "Returns true and world coordinate if the joint was found, otherwise false and 0.0, 0.0.<br>",
+                                                      "game.EntityNode", "node", "game.RigidBodyJoint", "joint");
+    DOC_METHOD_2("bool|float|glm.vec2", "FindJointValue",
+                 "Find a joint measure such as as joint rotation velocity or joint angle.<br>"
+                 "Returns a valid measure if such measure was available on the joint otherwise nil.<br>"
+                 "Not all joints provide all measures of data.<br><br>"
+
+                 "<b>Distance Joint:</b><br>"
+                 "MinimumLength, float, minimum length of the joint, i.e. minimum distance between the anchor points. m<br>"
+                 "MaximumLength, float, maximum length of the joint, i.e. maximum distance between the anchor points. m<br>"
+                 "CurrentLength, float, current length of the joint, i.e. the distance between the anchor points.     m<br>"
+                 "Stiffness,     float, stiffness of the joint. N/m<br>"
+                 "Damping,       float, damping of the joint. N*s / m<br>"
+                 "<br>"
+
+                 "<b>Prismatic Joint:</b><br>"
+                 "JointTranslation, float, movement (translation of the moving body) on the joint axis. m<br>"
+                 "JointSpeed,       float, current speed at which the body is moving on the joint axis. m/s<br>"
+                 "MotorSpeed,       float, current motor speed. m/s<br>"
+                 "IsMotorEnabled,   bool, flag to indicate whether motor is on/off.<br>"
+                 "IsLimitEnabled,   bool, flag to indicate whether limits are on/off.<br>"
+                 "<br>"
+
+                 "<b>Revolute Joint:</b><br>"
+                 "JointSpeed,     float, current rotational speed of the joint. rad/s<br>"
+                 "JointAngle,     float, current angle of the joint. rad<br>"
+                 "MotorSpeed,     float, current motor speed. rad/s<br>"
+                 "MotorTorque,    float, current motor torque. Nm<br>"
+                 "IsMotorEnabled, bool,  flag to indicate whether motor is on/off. bool<br>"
+                 "IsLimitEnabled, bool,  flag to indicate whether limits are on/off. bool<br>"
+                 "<br>"
+
+                 "<b>Weld Joint:</b><br>"
+                 "Stiffness, float, stiffness of the joint. Nm<br>"
+                 "Damping,   float, damping of the joint. N*m/s<br>"
+                 "<br>"
+
+                 "<b>Pulley Joint:</b><br>"
+                 "SegmentLengthA, float, length of the segment connected to body A. m<br>"
+                 "SegmentLengthB, float, length of the segment connected to body B. m<br>"
+                 "<br>"
+
+                 "<b>Motor Joint:</b><br>"
+                 "LinearOffset,  glm.vec2, expected (target) linear offset from Body A to body B. m<br>"
+                 "AngularOffset, float,    expected (target) angular offset to body B from body A. rad</br>"
+                 "IsMotorEnabled, bool,    flag to indicate whether motor is on/off.<br>"
+                 "IsLimitEnabled, bool,    flag to indicate whether limits are on/off.<br>"
+
+    ,"game.RigidBodyJoint", "joint", "string", "name");
+
     DOC_METHOD_0("glm.vec2", "GetScale", "Get the current scaling coefficient for scaling game units to physics world.");
     DOC_METHOD_0("glm.vec2", "GetGravity", "Get the current physics world gravity vector.");
     DOC_METHOD_0("float", "GetTimeStep", "Get the current time step (in seconds) taken on every simulation step.<br>"
@@ -2079,7 +2172,8 @@ void InitLuaDoc()
                            "Up arrow = Up, Left Arrow = Left, Right Arrow = Right, Down Arrow = Down and Space = Fire");
 
     DOC_TABLE("util");
-    DOC_FUNCTION_2("glm.vec2", "RandomVec2", "Generate a random glm.vec2 with x and y inside min, max (inclusive).",
+    DOC_FUNCTION_2("glm.vec2", "RandomVec2", "Generate a random glm.vec2 with x and y inside min, max (inclusive).<br>"
+                                             "require('app://scripts/utility/utility.lua')",
                                              "float", "min", "float", "max");
     DOC_FUNCTION_3("...", "lerp", "Linearly interpolate between two values y0 and y1.",
                    "...", "y0", "...", "y1", "float", "t");
@@ -2109,6 +2203,7 @@ void InitLuaDoc()
             else return false;
         });
     done = true;
+    DEBUG("Initialized Lua documentation. %1 methods and %2 tables.", g_method_docs.size(), g_table_docs.size());
 }
 
 QString FindLuaDocTableMatch(const QString& word)
