@@ -51,7 +51,7 @@ namespace engine
     {
     public:
         using Action = engine::Action;
-        using DebugDraw = engine::DebugDraw;
+        using DebugDrawCmd = engine::DebugDrawCmd;
 
         virtual ~GameRuntime() = default;
         // Set current frame counter value. This can loop over.
@@ -152,7 +152,7 @@ namespace engine
 
         // Transfer the contents of the current debug draw queue
         // into the given out queue
-        virtual void TransferDebugQueue(std::vector<DebugDraw>* out) {}
+        virtual void TransferDebugQueue(std::vector<DebugDrawCmd>* out) {}
 
         struct Camera {
             // Get the game's logical viewport into the game world.

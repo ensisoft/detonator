@@ -116,6 +116,9 @@ namespace engine
         struct EnableTracing {
             bool enabled = true;
         };
+        struct EnableDebugDraw {
+            bool enabled = true;
+        };
 
         // Union of possible window requests.
         using Request = std::variant<
@@ -127,7 +130,8 @@ namespace engine
             ShowMouseCursor,
             ShowDeveloperUI,
             DebugPause,
-            EnableTracing>;
+            EnableTracing,
+            EnableDebugDraw>;
 
         // During the lifetime of the game process the engine may request
         // the host application to provide some services. The engine may queue
@@ -472,6 +476,8 @@ namespace engine
         { mQueue.push(engine::Engine::DebugPause {pause}); }
         inline void EnableTracing(bool enabled)
         { mQueue.push(engine::Engine::EnableTracing { enabled } ); }
+        inline void EnableDebugDraw(bool enabled)
+        { mQueue.push(engine::Engine::EnableDebugDraw { enabled } ); }
     private:
         std::queue<Request> mQueue;
     };

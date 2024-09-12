@@ -582,9 +582,9 @@ public:
                         base::EnableLogEvent(base::LogEvent::Warning, ptr->enabled);
                     else if (ptr->name == "chk-log-error")
                         base::EnableLogEvent(base::LogEvent::Error, ptr->enabled);
-                    else if (ptr->name == "chk-toggle-trace") {
+                    else if (ptr->name == "chk-toggle-trace")
                         mEnableTracing.push_back(ptr->enabled);
-                    } else WARN("Unknown debug flag. [flag='%1']", ptr->name);
+                    else WARN("Unknown debug flag. [flag='%1']", ptr->name);
                 }
                 gui_commands.pop();
             }
@@ -642,6 +642,13 @@ public:
                 HandleEngineRequest(*ptr);
             else if (auto* ptr = std::get_if<engine::Engine::EnableTracing>(&request))
                 mEnableTracing.push_back(ptr->enabled);
+            else if (auto* ptr = std::get_if<engine::Engine::EnableDebugDraw>(&request))
+            {
+                auto debug = mDebugOptions;
+                debug.debug_draw = mDebugOptions.debug_draw || ptr->enabled;
+                mEngine->SetDebugOptions(debug);
+
+            }
             else if (auto* ptr = std::get_if<engine::Engine::QuitApp>(&request))
                 quit = true;
             else BUG("Unhandled engine request type.");

@@ -500,6 +500,8 @@ int main(int argc, char* argv[])
     try
     {
         engine::Engine::DebugOptions debug;
+        debug.debug_draw_flags.set_from_value(~0);
+
         std::optional<bool> debug_log_override;
         std::optional<bool> vsync_override;
         bool debug_context = false;
@@ -1040,7 +1042,14 @@ int main(int argc, char* argv[])
                     window.GrabMouse(ptr->grab);
                 else if (auto* ptr = std::get_if<engine::Engine::EnableTracing>(&request))
                     enable_tracing.push_back(ptr->enabled);
-                else if (auto* ptr = std::get_if<engine::Engine::QuitApp>(&request)) {
+                else if (auto* ptr = std::get_if<engine::Engine::EnableDebugDraw>(&request))
+                {
+                    auto d = debug;
+                    d.debug_draw = debug.debug_draw || ptr->enabled;
+                    engine->SetDebugOptions(d);
+                }
+                else if (auto* ptr = std::get_if<engine::Engine::QuitApp>(&request))
+                {
                     quit = true;
                     exit_code = ptr->exit_code;
                     INFO("Quit with exit code %1", exit_code);
