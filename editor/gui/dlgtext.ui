@@ -40,33 +40,6 @@
          </widget>
         </item>
         <item>
-         <widget class="QSpinBox" name="fontSize">
-          <property name="suffix">
-           <string> px</string>
-          </property>
-          <property name="minimum">
-           <number>6</number>
-          </property>
-          <property name="maximum">
-           <number>500</number>
-          </property>
-          <property name="value">
-           <number>22</number>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="btnBrowseFont">
-          <property name="text">
-           <string>Select Font ...</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../resource/resource.qrc">
-            <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QToolButton" name="btnSelectFont">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -83,6 +56,33 @@
           <property name="icon">
            <iconset resource="../resource/resource.qrc">
             <normaloff>:/16x16_ico_png/font.png</normaloff>:/16x16_ico_png/font.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="btnBrowseFont">
+          <property name="text">
+           <string>Select Font ...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resource/resource.qrc">
+            <normaloff>:/16x16_ico_png/folder.png</normaloff>:/16x16_ico_png/folder.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="fontSize">
+          <property name="suffix">
+           <string> px</string>
+          </property>
+          <property name="minimum">
+           <number>6</number>
+          </property>
+          <property name="maximum">
+           <number>500</number>
+          </property>
+          <property name="value">
+           <number>22</number>
           </property>
          </widget>
         </item>
@@ -345,9 +345,9 @@
  </customwidgets>
  <tabstops>
   <tabstop>cmbFont</tabstop>
-  <tabstop>fontSize</tabstop>
-  <tabstop>btnBrowseFont</tabstop>
   <tabstop>btnSelectFont</tabstop>
+  <tabstop>btnBrowseFont</tabstop>
+  <tabstop>fontSize</tabstop>
   <tabstop>cmbVAlign</tabstop>
   <tabstop>cmbHAlign</tabstop>
   <tabstop>lineHeight</tabstop>
