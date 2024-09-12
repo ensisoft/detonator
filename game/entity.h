@@ -211,21 +211,21 @@ namespace game
 
         // Add a new animator class object. Returns a pointer to the animator
         // that was added to the entity class.
-        AnimatorClass* AddAnimator(AnimatorClass&& animator);
-        AnimatorClass* AddAnimator(const AnimatorClass& animator);
-        AnimatorClass* AddAnimator(const std::shared_ptr<AnimatorClass>& animator);
+        EntityStateControllerClass* AddController(EntityStateControllerClass&& animator);
+        EntityStateControllerClass* AddController(const EntityStateControllerClass& animator);
+        EntityStateControllerClass* AddController(const std::shared_ptr<EntityStateControllerClass>& animator);
 
-        void DeleteAnimator(size_t index);
-        bool DeleteAnimatorByName(const std::string& name);
-        bool DeleteAnimatorById(const std::string& id);
+        void DeleteController(size_t index);
+        bool DeleteControllerByName(const std::string& name);
+        bool DeleteControllerById(const std::string& id);
 
-        AnimatorClass& GetAnimator(size_t index);
-        AnimatorClass* FindAnimatorByName(const std::string& name);
-        AnimatorClass* FindAnimatorById(const std::string& id);
+        EntityStateControllerClass& GetController(size_t index);
+        EntityStateControllerClass* FindControllerByName(const std::string& name);
+        EntityStateControllerClass* FindControllerById(const std::string& id);
 
-        const AnimatorClass& GetAnimator(size_t index) const;
-        const AnimatorClass* FindAnimatorByName(const std::string& name) const;
-        const AnimatorClass* FindAnimatorById(const std::string& id) const;
+        const EntityStateControllerClass& GetController(size_t index) const;
+        const EntityStateControllerClass* FindControllerByName(const std::string& name) const;
+        const EntityStateControllerClass* FindControllerById(const std::string& id) const;
 
         // Link the given child node with the parent.
         // The parent may be a nullptr in which case the child
@@ -403,7 +403,7 @@ namespace game
         { return mScriptVars[index]; }
         std::shared_ptr<const PhysicsJoint> GetSharedJoint(size_t index) const noexcept
         { return mJoints[index]; }
-        std::shared_ptr<const AnimatorClass> GEtSharedAnimatorClass(size_t index) const noexcept
+        std::shared_ptr<const EntityStateControllerClass> GEtSharedAnimatorClass(size_t index) const noexcept
         { return mAnimators[index]; }
 
         EntityNodeAllocator& GetAllocator() const
@@ -435,7 +435,7 @@ namespace game
         // the list of joints that belong to this entity.
         std::vector<std::shared_ptr<PhysicsJoint>> mJoints;
         // the list of animators
-        std::vector<std::shared_ptr<AnimatorClass>> mAnimators;
+        std::vector<std::shared_ptr<EntityStateControllerClass>> mAnimators;
         // The render tree for hierarchical traversal and
         // transformation of the entity and its nodes.
         RenderTree mRenderTree;
@@ -620,9 +620,9 @@ namespace game
 
         void Update(float dt, std::vector<Event>* events = nullptr);
 
-        using AnimatorAction = game::Animator::Action;
-        using AnimationState = game::AnimationState;
-        using AnimationTransition = game::AnimationTransition;
+        using AnimatorAction = game::EntityStateController::Action;
+        using AnimationState = game::EntityState;
+        using AnimationTransition = game::EntityStateTransition;
 
         void UpdateAnimator(float dt, std::vector<AnimatorAction>* actions);
         void UpdateAnimator(const AnimationTransition* transition, const AnimationState* next);
@@ -781,9 +781,9 @@ namespace game
         { return !mIdleTrackId.empty() || mClass->HasIdleTrack(); }
         bool HasAnimator() const noexcept
         { return mAnimator.has_value(); }
-        const Animator* GetAnimator() const
+        const EntityStateController* GetStateController() const
         { return base::GetOpt(mAnimator); }
-        Animator* GetAnimator()
+        EntityStateController* GetStateController()
         { return base::GetOpt(mAnimator); }
         RenderTree& GetRenderTree() noexcept
         { return mRenderTree; }
@@ -808,7 +808,7 @@ namespace game
         // entity's render tree that is to be used as the parent
         // of this entity's nodes.
         std::string mParentNodeId;
-        std::optional<game::Animator> mAnimator;
+        std::optional<game::EntityStateController> mAnimator;
         // The current animation if any.
         std::vector<std::unique_ptr<Animation>> mCurrentAnimations;
         // the list of nodes that are in the entity.

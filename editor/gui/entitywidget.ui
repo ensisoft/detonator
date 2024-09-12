@@ -434,7 +434,7 @@
           </size>
          </property>
          <property name="title">
-          <string>Entity animator</string>
+          <string>Entity state controller</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -446,7 +446,7 @@
           <item row="0" column="1">
            <widget class="QComboBox" name="animatorScript">
             <property name="placeholderText">
-             <string>No animator script selected</string>
+             <string>No controller  script selected</string>
             </property>
            </widget>
           </item>
@@ -459,7 +459,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>Edit Animator State Graph</string>
+             <string>Edit State Graph</string>
             </property>
             <property name="icon">
              <iconset resource="../resource/resource.qrc">

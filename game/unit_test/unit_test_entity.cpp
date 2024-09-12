@@ -405,25 +405,25 @@ void unit_test_entity_class()
 
     // animator
     {
-        game::AnimationStateClass src_state;
+        game::EntityStateClass src_state;
         src_state.SetName("src_state");
 
-        game::AnimationStateClass dst_state;
+        game::EntityStateClass dst_state;
         dst_state.SetName("dst_state");
 
-        game::AnimationStateTransitionClass transition;
+        game::EntityStateTransitionClass transition;
         transition.SetName("transition");
         transition.SetSrcStateId("srcId");
         transition.SetDstStateId("dstId");
         transition.SetDuration(1.0f);
 
-        game::AnimatorClass animator;
+        game::EntityStateControllerClass animator;
         animator.SetName("animator");
         animator.AddState(std::move(src_state));
         animator.AddState(std::move(dst_state));
         animator.AddTransition(std::move(transition));
         animator.SetInitialStateId("1234");
-        entity.AddAnimator(std::move(animator));
+        entity.AddController(std::move(animator));
     }
 
     // physics joint
@@ -546,12 +546,12 @@ void unit_test_entity_class()
     TEST_REQUIRE(entity.GetJoint(0).dst_node_id == entity.GetNode(0).GetId());
     TEST_REQUIRE(entity.GetJoint(0).src_node_id == entity.GetNode(1).GetId());
     TEST_REQUIRE(entity.GetNumAnimators() == 1);
-    TEST_REQUIRE(entity.GetAnimator(0).GetNumStates() == 2);
-    TEST_REQUIRE(entity.GetAnimator(0).GetNumTransitions() == 1);
-    TEST_REQUIRE(entity.GetAnimator(0).GetState(0).GetName() == "src_state");
-    TEST_REQUIRE(entity.GetAnimator(0).GetState(1).GetName() == "dst_state");
-    TEST_REQUIRE(entity.GetAnimator(0).GetTransition(0).GetSrcStateId() == "srcId");
-    TEST_REQUIRE(entity.GetAnimator(0).GetTransition(0).GetDstStateId() == "dstId");
+    TEST_REQUIRE(entity.GetController(0).GetNumStates() == 2);
+    TEST_REQUIRE(entity.GetController(0).GetNumTransitions() == 1);
+    TEST_REQUIRE(entity.GetController(0).GetState(0).GetName() == "src_state");
+    TEST_REQUIRE(entity.GetController(0).GetState(1).GetName() == "dst_state");
+    TEST_REQUIRE(entity.GetController(0).GetTransition(0).GetSrcStateId() == "srcId");
+    TEST_REQUIRE(entity.GetController(0).GetTransition(0).GetDstStateId() == "dstId");
 
     // test linking.
     entity.LinkChild(nullptr, entity.FindNodeByName("root"));
@@ -654,12 +654,12 @@ void unit_test_entity_class()
 
 
         TEST_REQUIRE(ret.GetNumAnimators() == 1);
-        TEST_REQUIRE(ret.GetAnimator(0).GetNumStates() == 2);
-        TEST_REQUIRE(ret.GetAnimator(0).GetNumTransitions() == 1);
-        TEST_REQUIRE(ret.GetAnimator(0).GetState(0).GetName() == "src_state");
-        TEST_REQUIRE(ret.GetAnimator(0).GetState(1).GetName() == "dst_state");
-        TEST_REQUIRE(ret.GetAnimator(0).GetTransition(0).GetSrcStateId() == "srcId");
-        TEST_REQUIRE(ret.GetAnimator(0).GetTransition(0).GetDstStateId() == "dstId");
+        TEST_REQUIRE(ret.GetController(0).GetNumStates() == 2);
+        TEST_REQUIRE(ret.GetController(0).GetNumTransitions() == 1);
+        TEST_REQUIRE(ret.GetController(0).GetState(0).GetName() == "src_state");
+        TEST_REQUIRE(ret.GetController(0).GetState(1).GetName() == "dst_state");
+        TEST_REQUIRE(ret.GetController(0).GetTransition(0).GetSrcStateId() == "srcId");
+        TEST_REQUIRE(ret.GetController(0).GetTransition(0).GetDstStateId() == "dstId");
         TEST_REQUIRE(WalkTree(ret) == "root child_1 child_2");
     }
 
@@ -1126,40 +1126,40 @@ void unit_test_entity_animation_state()
     entity_class.SetName("entity");
 
     {
-        game::AnimatorClass klass;
+        game::EntityStateControllerClass klass;
 
-        game::AnimationStateClass idle;
+        game::EntityStateClass idle;
         idle.SetName("idle");
         klass.AddState(idle);
 
-        game::AnimationStateClass run;
+        game::EntityStateClass run;
         run.SetName("run");
         klass.AddState(run);
 
-        game::AnimationStateClass jump;
+        game::EntityStateClass jump;
         jump.SetName("jump");
         klass.AddState(jump);
 
-        game::AnimationStateTransitionClass idle_to_run;
+        game::EntityStateTransitionClass idle_to_run;
         idle_to_run.SetName("idle to run");
         idle_to_run.SetSrcStateId(idle.GetId());
         idle_to_run.SetDstStateId(run.GetId());
         klass.AddTransition(idle_to_run);
 
-        game::AnimationStateTransitionClass run_to_idle;
+        game::EntityStateTransitionClass run_to_idle;
         run_to_idle.SetName("run to idle");
         run_to_idle.SetSrcStateId(run.GetId());
         run_to_idle.SetDstStateId(idle.GetId());
         run_to_idle.SetDuration(1.0f);
         klass.AddTransition(run_to_idle);
 
-        game::AnimationStateTransitionClass idle_to_jump;
+        game::EntityStateTransitionClass idle_to_jump;
         idle_to_jump.SetName("idle to jump");
         idle_to_jump.SetSrcStateId(idle.GetId());
         idle_to_jump.SetDstStateId(jump.GetId());
         klass.AddTransition(idle_to_jump);
 
-        game::AnimationStateTransitionClass jump_to_idle;
+        game::EntityStateTransitionClass jump_to_idle;
         jump_to_idle.SetName("jump to idle");
         jump_to_idle.SetSrcStateId(jump.GetId());
         jump_to_idle.SetDstStateId(idle.GetId());
@@ -1167,7 +1167,7 @@ void unit_test_entity_animation_state()
 
         klass.SetInitialStateId(idle.GetId());
 
-        entity_class.AddAnimator(std::move(klass));
+        entity_class.AddController(std::move(klass));
     }
 
     auto entity = game::CreateEntityInstance(entity_class);
@@ -1177,12 +1177,12 @@ void unit_test_entity_animation_state()
     TEST_REQUIRE(entity->HasAnimator());
     entity->UpdateAnimator(1.0/60.0f, &actions);
     TEST_REQUIRE(actions.size() == 4);
-    TEST_REQUIRE(std::get_if<game::Animator::EnterState>(&actions[0]));
-    TEST_REQUIRE(std::get_if<game::Animator::UpdateState>(&actions[1]));
-    TEST_REQUIRE(std::get_if<game::Animator::EvalTransition>(&actions[2])->from->GetName() == "idle");
-    TEST_REQUIRE(std::get_if<game::Animator::EvalTransition>(&actions[2])->to->GetName() == "run");
-    TEST_REQUIRE(std::get_if<game::Animator::EvalTransition>(&actions[3])->from->GetName() == "idle");
-    TEST_REQUIRE(std::get_if<game::Animator::EvalTransition>(&actions[3])->to->GetName() == "jump");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::EnterState>(&actions[0]));
+    TEST_REQUIRE(std::get_if<game::EntityStateController::UpdateState>(&actions[1]));
+    TEST_REQUIRE(std::get_if<game::EntityStateController::EvalTransition>(&actions[2])->from->GetName() == "idle");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::EvalTransition>(&actions[2])->to->GetName() == "run");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::EvalTransition>(&actions[3])->from->GetName() == "idle");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::EvalTransition>(&actions[3])->to->GetName() == "jump");
 }
 
 void unit_test_entity_args()

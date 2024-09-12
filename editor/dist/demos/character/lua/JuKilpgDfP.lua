@@ -30,13 +30,13 @@ function AcquireTarget(skeleton)
 end
 
 function AttackTarget(skeleton, target)
-    local animator = skeleton:GetAnimator()
+    local animator = skeleton:GetStateController()
     animator.attack = true
 end
 
 -- Called once when the game play begins for the entity in the scene.
 function BeginPlay(skeleton, scene, map)
-    local animator = skeleton:GetAnimator()
+    local animator = skeleton:GetStateController()
     animator.attack = false
 end
 

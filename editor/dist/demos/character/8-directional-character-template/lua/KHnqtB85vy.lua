@@ -67,7 +67,7 @@ function Update(player, game_time, dt)
     local node = player:GetNode(0)
     node:Translate(dt * hori_speed, dt * vert_speed)
 
-    local animator = player:GetAnimator()
+    local animator = player:GetStateController()
     animator.velocity = glm.vec2:new(hori_speed, vert_speed)
 end
 

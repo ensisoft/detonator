@@ -90,7 +90,7 @@ namespace gui
         { return mState.entity->GetId(); }
 
         void SaveAnimation(const game::AnimationClass& track, const QVariantMap& properties);
-        void SaveAnimator(const game::AnimatorClass& animator, const QVariantMap& properties);
+        void SaveAnimator(const game::EntityStateControllerClass& animator, const QVariantMap& properties);
     private slots:
         void on_widgetColor_colorChanged(const QColor& color);
         void on_actionPlay_triggered();

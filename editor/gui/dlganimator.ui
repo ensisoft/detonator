@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Animator</string>
+   <string>Entity State Controller</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_8">
    <item>
@@ -19,7 +19,7 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
         <widget class="QGroupBox" name="groupBox_3">
@@ -36,7 +36,7 @@
           <item>
            <widget class="QGroupBox" name="groupBox_4">
             <property name="title">
-             <string>Animator Name</string>
+             <string>Controller name</string>
             </property>
             <property name="flat">
              <bool>true</bool>

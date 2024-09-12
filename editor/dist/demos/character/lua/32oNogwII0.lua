@@ -12,7 +12,7 @@ local walk_power = 3.0
 --
 -- Called once when the game play begins for the entity in the scene.
 function BeginPlay(bandit, scene, map)
-    local animator = bandit:GetAnimator()
+    local animator = bandit:GetStateController()
     animator.attack = false
     animator.jump = false
 end
@@ -57,7 +57,7 @@ function SetDirection(bandit, dir)
 end
 
 function ApplyWalkingImpulse(bandit, dir, walk_power)
-    local animator = bandit:GetAnimator()
+    local animator = bandit:GetStateController()
     local state = animator:GetStateName()
     local action = animator.action
 
@@ -77,13 +77,13 @@ function ApplyWalkingImpulse(bandit, dir, walk_power)
     -- the object above the "sticking point"
 
     if direction == dir and state == 'Idle' then
-        -- if we're idle and already facing that direction then 
+        -- if we're idle and already facing that direction then
         -- apply the initial impulse to start walking
         rigid_body:ApplyImpulse(walk_power, 0.0)
 
     elseif direction == dir and (action == 'Walk' or action == 'Jump') then
         -- if we're walking and already facing that direction then
-        -- apply a throttled impulse to maintain walking without 
+        -- apply a throttled impulse to maintain walking without
         -- picking up too much velocity.
         -- also if have jumped (positive Y velocity) then maintain
         -- that velocity too since using 0 for target vertical velocity
@@ -108,7 +108,7 @@ function ApplyWalkingImpulse(bandit, dir, walk_power)
 end
 
 function ApplyJumpingImpulse(bandit, jump)
-    local animator = bandit:GetAnimator()
+    local animator = bandit:GetStateController()
     local state = animator:GetStateName()
     local action = animator.action
 
@@ -123,7 +123,7 @@ end
 -- game time so far in seconds not including the next time step dt.
 function Update(bandit, game_time, dt)
 
-    local animator = bandit:GetAnimator()
+    local animator = bandit:GetStateController()
     if animator:IsInTransition() then
         return
     end

@@ -788,40 +788,40 @@ void unit_test_animation_state()
 {
     TEST_CASE(test::Type::Feature)
 
-    game::AnimatorClass klass;
+    game::EntityStateControllerClass klass;
 
-    game::AnimationStateClass idle;
+    game::EntityStateClass idle;
     idle.SetName("idle");
     klass.AddState(idle);
 
-    game::AnimationStateClass run;
+    game::EntityStateClass run;
     run.SetName("run");
     klass.AddState(run);
 
-    game::AnimationStateClass jump;
+    game::EntityStateClass jump;
     jump.SetName("jump");
     klass.AddState(jump);
 
-    game::AnimationStateTransitionClass idle_to_run;
+    game::EntityStateTransitionClass idle_to_run;
     idle_to_run.SetName("idle to run");
     idle_to_run.SetSrcStateId(idle.GetId());
     idle_to_run.SetDstStateId(run.GetId());
     klass.AddTransition(idle_to_run);
 
-    game::AnimationStateTransitionClass run_to_idle;
+    game::EntityStateTransitionClass run_to_idle;
     run_to_idle.SetName("run to idle");
     run_to_idle.SetSrcStateId(run.GetId());
     run_to_idle.SetDstStateId(idle.GetId());
     run_to_idle.SetDuration(1.0f);
     klass.AddTransition(run_to_idle);
 
-    game::AnimationStateTransitionClass idle_to_jump;
+    game::EntityStateTransitionClass idle_to_jump;
     idle_to_jump.SetName("idle to jump");
     idle_to_jump.SetSrcStateId(idle.GetId());
     idle_to_jump.SetDstStateId(jump.GetId());
     klass.AddTransition(idle_to_jump);
 
-    game::AnimationStateTransitionClass jump_to_idle;
+    game::EntityStateTransitionClass jump_to_idle;
     jump_to_idle.SetName("jump to idle");
     jump_to_idle.SetSrcStateId(jump.GetId());
     jump_to_idle.SetDstStateId(idle.GetId());
@@ -829,27 +829,27 @@ void unit_test_animation_state()
 
     klass.SetInitialStateId(idle.GetId());
 
-    auto anim = game::CreateAnimatorInstance(klass);
-    std::vector<game::Animator::Action> actions;
+    auto anim = game::CreateStateControllerInstance(klass);
+    std::vector<game::EntityStateController::Action> actions;
 
     anim->Update(0.0f, &actions);
-    TEST_REQUIRE(anim->GetAnimatorState() == game::Animator::State::InState);
+    TEST_REQUIRE(anim->GetControllerState() == game::EntityStateController::State::InState);
     TEST_REQUIRE(anim->GetCurrentState()->GetId() == idle.GetId());
     TEST_REQUIRE(actions.size() == 4);
-    TEST_REQUIRE(std::get_if<game::Animator::EnterState>(&actions[0]));
-    TEST_REQUIRE(std::get_if<game::Animator::UpdateState>(&actions[1]));
-    TEST_REQUIRE(std::get_if<game::Animator::EvalTransition>(&actions[2])->from->GetName() == "idle");
-    TEST_REQUIRE(std::get_if<game::Animator::EvalTransition>(&actions[2])->to->GetName() == "run");
-    TEST_REQUIRE(std::get_if<game::Animator::EvalTransition>(&actions[3])->from->GetName() == "idle");
-    TEST_REQUIRE(std::get_if<game::Animator::EvalTransition>(&actions[3])->to->GetName() == "jump");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::EnterState>(&actions[0]));
+    TEST_REQUIRE(std::get_if<game::EntityStateController::UpdateState>(&actions[1]));
+    TEST_REQUIRE(std::get_if<game::EntityStateController::EvalTransition>(&actions[2])->from->GetName() == "idle");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::EvalTransition>(&actions[2])->to->GetName() == "run");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::EvalTransition>(&actions[3])->from->GetName() == "idle");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::EvalTransition>(&actions[3])->to->GetName() == "jump");
 
     // immediate transition from idle to run
     {
-        auto* eval = std::get_if<game::Animator::EvalTransition>(&actions[2]);
+        auto* eval = std::get_if<game::EntityStateController::EvalTransition>(&actions[2]);
         anim->Update(eval->transition, eval->to);
     }
 
-    TEST_REQUIRE(anim->GetAnimatorState() == game::Animator::State::InTransition);
+    TEST_REQUIRE(anim->GetControllerState() == game::EntityStateController::State::InTransition);
     TEST_REQUIRE(anim->GetCurrentState() == nullptr);
     TEST_REQUIRE(anim->GetPrevState()->GetName() == "idle");
     TEST_REQUIRE(anim->GetNextState()->GetName() == "run");
@@ -858,50 +858,50 @@ void unit_test_animation_state()
     actions.clear();
     anim->Update(1.0f/60.0f, &actions);
     TEST_REQUIRE(actions.size() == 5);
-    TEST_REQUIRE(std::get_if<game::Animator::LeaveState>(&actions[0])->state->GetName() == "idle");
-    TEST_REQUIRE(std::get_if<game::Animator::StartTransition>(&actions[1])->transition->GetName() == "idle to run");
-    TEST_REQUIRE(std::get_if<game::Animator::StartTransition>(&actions[1])->from->GetName() == "idle");
-    TEST_REQUIRE(std::get_if<game::Animator::StartTransition>(&actions[1])->to->GetName() == "run");
-    TEST_REQUIRE(std::get_if<game::Animator::UpdateTransition>(&actions[2])->transition->GetName() == "idle to run");
-    TEST_REQUIRE(std::get_if<game::Animator::FinishTransition>(&actions[3])->transition->GetName() == "idle to run");
-    TEST_REQUIRE(std::get_if<game::Animator::EnterState>(&actions[4])->state->GetName() == "run");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::LeaveState>(&actions[0])->state->GetName() == "idle");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::StartTransition>(&actions[1])->transition->GetName() == "idle to run");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::StartTransition>(&actions[1])->from->GetName() == "idle");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::StartTransition>(&actions[1])->to->GetName() == "run");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::UpdateTransition>(&actions[2])->transition->GetName() == "idle to run");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::FinishTransition>(&actions[3])->transition->GetName() == "idle to run");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::EnterState>(&actions[4])->state->GetName() == "run");
 
     TEST_REQUIRE(anim->GetCurrentState()->GetName() == "run");
     TEST_REQUIRE(anim->GetPrevState() == nullptr);
     TEST_REQUIRE(anim->GetNextState() == nullptr);
     TEST_REQUIRE(anim->GetTransition() == nullptr);
-    TEST_REQUIRE(anim->GetAnimatorState() == game::Animator::State::InState);
+    TEST_REQUIRE(anim->GetControllerState() == game::EntityStateController::State::InState);
 
     actions.clear();
     anim->Update(1.0f/60.0f, &actions);
     TEST_REQUIRE(actions.size() == 2);
-    TEST_REQUIRE(std::get_if<game::Animator::UpdateState>(&actions[0])->state->GetName() == "run");
-    TEST_REQUIRE(std::get_if<game::Animator::EvalTransition>(&actions[1])->transition->GetName() == "run to idle");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::UpdateState>(&actions[0])->state->GetName() == "run");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::EvalTransition>(&actions[1])->transition->GetName() == "run to idle");
 
     // begin transition from run to idle.
     {
-        auto* eval = std::get_if<game::Animator::EvalTransition>(&actions[1]);
+        auto* eval = std::get_if<game::EntityStateController::EvalTransition>(&actions[1]);
         anim->Update(eval->transition, eval->to);
     }
 
     actions.clear();
     anim->Update(1.0f/60.0f, &actions);
     TEST_REQUIRE(actions.size() == 3);
-    TEST_REQUIRE(std::get_if<game::Animator::LeaveState>(&actions[0])->state->GetName() == "run");
-    TEST_REQUIRE(std::get_if<game::Animator::StartTransition>(&actions[1])->transition->GetName() == "run to idle");
-    TEST_REQUIRE(std::get_if<game::Animator::UpdateTransition>(&actions[2])->transition->GetName() == "run to idle");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::LeaveState>(&actions[0])->state->GetName() == "run");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::StartTransition>(&actions[1])->transition->GetName() == "run to idle");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::UpdateTransition>(&actions[2])->transition->GetName() == "run to idle");
 
     actions.clear();
     anim->Update(1.0f/60.0f, &actions);
     TEST_REQUIRE(actions.size() == 1);
-    TEST_REQUIRE(std::get_if<game::Animator::UpdateTransition>(&actions[0])->transition->GetName() == "run to idle");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::UpdateTransition>(&actions[0])->transition->GetName() == "run to idle");
 
     actions.clear();
     anim->Update(1.0f - (2 * 1.0f/60.0f), &actions);
     TEST_REQUIRE(actions.size() == 3);
-    TEST_REQUIRE(std::get_if<game::Animator::UpdateTransition>(&actions[0])->transition->GetName() == "run to idle");
-    TEST_REQUIRE(std::get_if<game::Animator::FinishTransition>(&actions[1])->transition->GetName() == "run to idle");
-    TEST_REQUIRE(std::get_if<game::Animator::EnterState>(&actions[2])->state->GetName() == "idle");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::UpdateTransition>(&actions[0])->transition->GetName() == "run to idle");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::FinishTransition>(&actions[1])->transition->GetName() == "run to idle");
+    TEST_REQUIRE(std::get_if<game::EntityStateController::EnterState>(&actions[2])->state->GetName() == "idle");
 
 }
 

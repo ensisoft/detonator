@@ -1446,34 +1446,34 @@ void InitLuaDoc()
     DOC_TABLE("game.MaterialActuator");
 
 
-    DOC_TABLE("game.AnimatorState");
-    DOC_METHOD_0("string", "GetName", "Get the animator state name.");
-    DOC_METHOD_0("string", "GetId", "Get the animator state ID.");
+    DOC_TABLE("game.EntityState");
+    DOC_METHOD_0("string", "GetName", "Get the entity state name.");
+    DOC_METHOD_0("string", "GetId", "Get the entity state ID.");
 
-    DOC_TABLE("game.Animator");
-    DOC_METHOD_0("string", "GetName", "Get the animator name.");
-    DOC_METHOD_0("string", "GetId", "Get the animator class ID.");
-    DOC_METHOD_1("bool", "HasValue", "Check whether the animator has a value by the given name.", "string", "name");
-    DOC_METHOD_2("void", "SetValue", "Set an animator value.",
+    DOC_TABLE("game.EntityStateController");
+    DOC_METHOD_0("string", "GetName", "Get the controller name.");
+    DOC_METHOD_0("string", "GetId", "Get the controller class ID.");
+    DOC_METHOD_1("bool", "HasValue", "Check whether the controller has a value by the given name.", "string", "name");
+    DOC_METHOD_2("void", "SetValue", "Set a controller value.",
                  "string", "name", "bool|int|float|string|glm.vec2", "value");
-    DOC_METHOD_1("bool|int|float|string|glm.vec2", "FindValue", "Find an animator value if any. If no such value exists then return nil.",
+    DOC_METHOD_1("bool|int|float|string|glm.vec2", "FindValue", "Find a controller value if any. If no such value exists then return nil.",
                  "string", "name");
-    DOC_METHOD_0("float", "GetTime", "Get the animator time. When the animator is not transitioning from one state to another the time "
-                                     "measures the time spent in the current animation state. When a transition to another state is taking "
+    DOC_METHOD_0("float", "GetTime", "Get the controller time. When the controller is not transitioning from one state to another the time "
+                                     "measures the time spent in the current state. When a transition to another state is taking "
                                      "place the time measures the time spent in transition.");
     DOC_META_METHOD_0("...", "index", "Lua index meta method.");
     DOC_META_METHOD_0("...", "newindex", "Lua new index meta method.");
-    DOC_METHOD_0("string", "GetState", "Get the animator state. 'InTransition' or 'InState'");
-    DOC_METHOD_0("game.Animation", "GetCurrentState", "Get the current state the animator is in. This is not available during "
+    DOC_METHOD_0("string", "GetState", "Get the controller state. 'InTransition' or 'InState'");
+    DOC_METHOD_0("game.EntityState", "GetCurrentState", "Get the current state the controller is in. This is not available during "
                                                       "transitions but then you should use GetNextState and GetPrevState.");
-    DOC_METHOD_0("game.Animation", "GetNextState", "Get the next (target) state the animator is transitioning to. Only valid during transition.");
-    DOC_METHOD_0("game.Animation", "GetPrevState", "Get the previous (starting) state the animator started transitioning away from. Only valid during transition");
-    DOC_METHOD_1("bool", "IsInState", "Check whether the animator is currently in the given state.",
+    DOC_METHOD_0("game.EntityState", "GetNextState", "Get the next (target) state the controller is transitioning to. Only valid during transition.");
+    DOC_METHOD_0("game.EntityState", "GetPrevState", "Get the previous (starting) state the controller started transitioning away from. Only valid during transition");
+    DOC_METHOD_1("bool", "IsInState", "Check whether the controller is currently in the given state.",
                  "string", "name");
-    DOC_METHOD_0("bool", "IsInState", "Check whether the animator is currently in any state (i.e. not in transition).");
-    DOC_METHOD_2("bool", "IsInTransition", "Check whether the animator is currently transitioning from one specific state to another.",
+    DOC_METHOD_0("bool", "IsInState", "Check whether the controller is currently in any state (i.e. not in transition).");
+    DOC_METHOD_2("bool", "IsInTransition", "Check whether the controller is currently transitioning from one specific state to another.",
                  "string", "from", "string", "to");
-    DOC_METHOD_0("bool", "IsInTransition", "Check whether the animator is currently transitioning from one state to another.");
+    DOC_METHOD_0("bool", "IsInTransition", "Check whether the controller is currently transitioning from one state to another.");
     DOC_METHOD_0("string", "GetStateName", "Get the name of the current state. If in transition an empty string is returned.");
 
     DOC_TABLE("game.Animation");
@@ -1534,7 +1534,7 @@ void InitLuaDoc()
                                                    "The indexing is 0 based and the index must be a valid index.",
                  "unsigned", "index");
     DOC_METHOD_0("unsigned", "GetNumAnimations", "Get the number of current animations.");
-    DOC_METHOD_0("game.Animator", "GetAnimator", "Get the entity animator instance if any.");
+    DOC_METHOD_0("game.EntityStateController", "GetStateController", "Get the entity animator instance if any.");
     DOC_METHOD_0("game.Scene", "GetScene", "Get the current scene.");
     DOC_METHOD_1("game.EntityNode", "GetNode", "Get an entity node at the the given index. The indexing is 0 based and the index must be a valid index.",
                  "unsigned", "index");

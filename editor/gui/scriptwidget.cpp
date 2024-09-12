@@ -472,7 +472,7 @@ private:
         else if (word.endsWith("ui"))
             return "uik.Window";
         else if (word.endsWith("animator"))
-            return "game.Animator";
+            return "game.EntityStateController";
         else if (word.endsWith("drawable"))
             return "game.Drawable";
         else if (word.endsWith("item"))

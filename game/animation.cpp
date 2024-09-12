@@ -360,11 +360,11 @@ const Actuator* Animation::FindActuatorByName(const std::string& name) const noe
     return nullptr;
 }
 
-AnimationStateClass::AnimationStateClass(std::string id)
+EntityStateClass::EntityStateClass(std::string id)
   : mId(std::move(id))
 {}
 
-std::size_t AnimationStateClass::GetHash() const noexcept
+std::size_t EntityStateClass::GetHash() const noexcept
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mName);
@@ -372,12 +372,12 @@ std::size_t AnimationStateClass::GetHash() const noexcept
     return hash;
 }
 
-void AnimationStateClass::IntoJson(data::Writer& data) const
+void EntityStateClass::IntoJson(data::Writer& data) const
 {
     data.Write("name", mName);
     data.Write("id", mId);
 }
-bool AnimationStateClass::FromJson(const data::Reader& data)
+bool EntityStateClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
     ok &= data.Read("name", &mName);
@@ -385,18 +385,18 @@ bool AnimationStateClass::FromJson(const data::Reader& data)
     return ok;
 }
 
-AnimationStateClass AnimationStateClass::Clone() const
+EntityStateClass EntityStateClass::Clone() const
 {
-    AnimationStateClass dolly(base::RandomString(10));
+    EntityStateClass dolly(base::RandomString(10));
     dolly.mName = mName;
     return dolly;
 }
 
-AnimationStateTransitionClass::AnimationStateTransitionClass(std::string id)
+EntityStateTransitionClass::EntityStateTransitionClass(std::string id)
   : mId(std::move(id))
 {}
 
-std::size_t AnimationStateTransitionClass::GetHash() const noexcept
+std::size_t EntityStateTransitionClass::GetHash() const noexcept
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mName);
@@ -407,7 +407,7 @@ std::size_t AnimationStateTransitionClass::GetHash() const noexcept
     return hash;
 }
 
-void AnimationStateTransitionClass::IntoJson(data::Writer& data) const
+void EntityStateTransitionClass::IntoJson(data::Writer& data) const
 {
     data.Write("name", mName);
     data.Write("id", mId);
@@ -415,7 +415,7 @@ void AnimationStateTransitionClass::IntoJson(data::Writer& data) const
     data.Write("dst_state_id", mDstStateId);
     data.Write("duration", mDuration);
 }
-bool AnimationStateTransitionClass::FromJson(const data::Reader& data)
+bool EntityStateTransitionClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
     ok &= data.Read("name", &mName);
@@ -426,9 +426,9 @@ bool AnimationStateTransitionClass::FromJson(const data::Reader& data)
     return ok;
 }
 
-AnimationStateTransitionClass AnimationStateTransitionClass::Clone() const
+EntityStateTransitionClass EntityStateTransitionClass::Clone() const
 {
-    AnimationStateTransitionClass dolly(base::RandomString(10));
+    EntityStateTransitionClass dolly(base::RandomString(10));
     dolly.mName = mName;
     dolly.mDstStateId = mDstStateId;
     dolly.mSrcStateId = mSrcStateId;
@@ -436,18 +436,18 @@ AnimationStateTransitionClass AnimationStateTransitionClass::Clone() const
     return dolly;
 }
 
-AnimatorClass::AnimatorClass(std::string id)
+EntityStateControllerClass::EntityStateControllerClass(std::string id)
   : mId(std::move(id))
 {}
 
-void AnimatorClass::DeleteTransitionById(const std::string& id)
+void EntityStateControllerClass::DeleteTransitionById(const std::string& id)
 {
     base::EraseRemove(mTransitions, [&id](const auto& trans) {
         return trans.GetId() == id;
     });
 }
 
-void AnimatorClass::DeleteStateById(const std::string& id)
+void EntityStateControllerClass::DeleteStateById(const std::string& id)
 {
     base::EraseRemove(mStates, [&id](const auto& state) {
         return state.GetId() == id;
@@ -458,57 +458,57 @@ void AnimatorClass::DeleteStateById(const std::string& id)
     });
 }
 
-const AnimationStateClass* AnimatorClass::FindStateById(const std::string& id) const noexcept
+const EntityStateClass* EntityStateControllerClass::FindStateById(const std::string& id) const noexcept
 {
     return base::SafeFind(mStates, [&id](const auto& state) {
         return state.GetId() == id;
     });
 }
-const AnimationStateClass* AnimatorClass::FindStateByName(const std::string& name) const noexcept
+const EntityStateClass* EntityStateControllerClass::FindStateByName(const std::string& name) const noexcept
 {
     return base::SafeFind(mStates, [&name](const auto& state) {
         return state.GetName() == name;
     });
 }
-const AnimationStateTransitionClass* AnimatorClass::FindTransitionByName(const std::string& name) const noexcept
+const EntityStateTransitionClass* EntityStateControllerClass::FindTransitionByName(const std::string& name) const noexcept
 {
     return base::SafeFind(mTransitions, [&name](const auto& trans) {
         return trans.GetName() == name;
     });
 }
-const AnimationStateTransitionClass* AnimatorClass::FindTransitionById(const std::string& id) const noexcept
+const EntityStateTransitionClass* EntityStateControllerClass::FindTransitionById(const std::string& id) const noexcept
 {
     return base::SafeFind(mTransitions, [&id](const auto& trans) {
         return trans.GetId() == id;
     });
 }
 
-AnimationStateClass* AnimatorClass::FindStateById(const std::string& id) noexcept
+EntityStateClass* EntityStateControllerClass::FindStateById(const std::string& id) noexcept
 {
     return base::SafeFind(mStates, [&id](const auto& state) {
         return state.GetId() == id;
     });
 }
-AnimationStateClass* AnimatorClass::FindStateByName(const std::string& name) noexcept
+EntityStateClass* EntityStateControllerClass::FindStateByName(const std::string& name) noexcept
 {
     return base::SafeFind(mStates, [&name](const auto& state) {
         return state.GetName() == name;
     });
 }
-AnimationStateTransitionClass* AnimatorClass::FindTransitionByName(const std::string& name) noexcept
+EntityStateTransitionClass* EntityStateControllerClass::FindTransitionByName(const std::string& name) noexcept
 {
     return base::SafeFind(mTransitions, [&name](const auto& trans) {
         return trans.GetName() == name;
     });
 }
-AnimationStateTransitionClass* AnimatorClass::FindTransitionById(const std::string& id) noexcept
+EntityStateTransitionClass* EntityStateControllerClass::FindTransitionById(const std::string& id) noexcept
 {
     return base::SafeFind(mTransitions, [&id](const auto& trans) {
         return trans.GetId() == id;
     });
 }
 
-std::size_t AnimatorClass::GetHash() const noexcept
+std::size_t EntityStateControllerClass::GetHash() const noexcept
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mName);
@@ -527,7 +527,7 @@ std::size_t AnimatorClass::GetHash() const noexcept
     return hash;
 }
 
-void AnimatorClass::IntoJson(data::Writer& data) const
+void EntityStateControllerClass::IntoJson(data::Writer& data) const
 {
     data.Write("name", mName);
     data.Write("id", mId);
@@ -547,7 +547,7 @@ void AnimatorClass::IntoJson(data::Writer& data) const
         data.AppendChunk("transitions", std::move(chunk));
     }
 }
-bool AnimatorClass::FromJson(const data::Reader& data)
+bool EntityStateControllerClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
     ok &= data.Read("name", &mName);
@@ -558,23 +558,23 @@ bool AnimatorClass::FromJson(const data::Reader& data)
     for (unsigned i=0; i<data.GetNumChunks("states"); ++i)
     {
         const auto& chunk = data.GetReadChunk("states", i);
-        AnimationStateClass state;
+        EntityStateClass state;
         ok &= state.FromJson(*chunk);
         mStates.push_back(std::move(state));
     }
     for (unsigned i=0; i<data.GetNumChunks("transitions"); ++i)
     {
         const auto& chunk = data.GetReadChunk("transitions", i);
-        AnimationStateTransitionClass transition;
+        EntityStateTransitionClass transition;
         ok &= transition.FromJson(*chunk);
         mTransitions.push_back(std::move(transition));
     }
     return ok;
 }
 
-AnimatorClass AnimatorClass::Clone() const
+EntityStateControllerClass EntityStateControllerClass::Clone() const
 {
-    AnimatorClass dolly;
+    EntityStateControllerClass dolly;
     dolly.mId = base::RandomString(10);
     dolly.mName = mName;
     dolly.mScriptId = mScriptId;
@@ -602,19 +602,19 @@ AnimatorClass AnimatorClass::Clone() const
     return dolly;
 }
 
-Animator::Animator(const std::shared_ptr<const AnimatorClass>& klass)
+EntityStateController::EntityStateController(const std::shared_ptr<const EntityStateControllerClass>& klass)
   : mClass(klass)
 {}
 
-Animator::Animator(const AnimatorClass& klass)
-  : Animator(std::make_shared<AnimatorClass>(klass))
+EntityStateController::EntityStateController(const EntityStateControllerClass& klass)
+  : EntityStateController(std::make_shared<EntityStateControllerClass>(klass))
 {}
 
-Animator::Animator(AnimatorClass&& klass)
-  : Animator(std::make_shared<AnimatorClass>(std::move(klass)))
+EntityStateController::EntityStateController(EntityStateControllerClass&& klass)
+  : EntityStateController(std::make_shared<EntityStateControllerClass>(std::move(klass)))
 {}
 
-void Animator::Update(float dt, std::vector<Action>* actions)
+void EntityStateController::Update(float dt, std::vector<Action>* actions)
 {
     if (!mCurrent && !mTransition)
     {
@@ -670,7 +670,7 @@ void Animator::Update(float dt, std::vector<Action>* actions)
         actions->push_back( EvalTransition { mCurrent, next, &transition });
     }
 }
-void Animator::Update(const AnimationTransition* transition, const AnimationState* next)
+void EntityStateController::Update(const EntityStateTransition* transition, const EntityState* next)
 {
     ASSERT(transition);
     ASSERT(next);
@@ -681,7 +681,7 @@ void Animator::Update(const AnimationTransition* transition, const AnimationStat
     mCurrent    = nullptr;
 }
 
-Animator::State Animator::GetAnimatorState() const noexcept
+EntityStateController::State EntityStateController::GetControllerState() const noexcept
 {
     if (mTransition)
         return State::InTransition;
@@ -693,18 +693,18 @@ std::unique_ptr<Animation> CreateAnimationInstance(const std::shared_ptr<const A
     return std::make_unique<Animation>(klass);
 }
 
-std::unique_ptr<Animator> CreateAnimatorInstance(const std::shared_ptr<const AnimatorClass>& klass)
+std::unique_ptr<EntityStateController> CreateStateControllerInstance(const std::shared_ptr<const EntityStateControllerClass>& klass)
 {
-    return std::make_unique<Animator>(klass);
+    return std::make_unique<EntityStateController>(klass);
 }
 
-std::unique_ptr<Animator> CreateAnimatorInstance(const AnimatorClass& klass)
+std::unique_ptr<EntityStateController> CreateStateControllerInstance(const EntityStateControllerClass& klass)
 {
-    return std::make_unique<Animator>(klass);
+    return std::make_unique<EntityStateController>(klass);
 }
-std::unique_ptr<Animator> CreateAnimatorInstance(AnimatorClass&& klass)
+std::unique_ptr<EntityStateController> CreateStateControllerInstance(EntityStateControllerClass&& klass)
 {
-    return std::make_unique<Animator>(std::move(klass));
+    return std::make_unique<EntityStateController>(std::move(klass));
 }
 
 } // namespace

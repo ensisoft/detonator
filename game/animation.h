@@ -229,10 +229,10 @@ namespace game
         float mCurrentTime = 0.0f;
     };
 
-    class AnimationStateClass
+    class EntityStateClass
     {
     public:
-        explicit AnimationStateClass(std::string id = base::RandomString(10));
+        explicit EntityStateClass(std::string id = base::RandomString(10));
 
         inline void SetName(std::string name) noexcept
         { mName = std::move(name); }
@@ -246,16 +246,16 @@ namespace game
         void IntoJson(data::Writer& data) const;
         bool FromJson(const data::Reader& data);
 
-        AnimationStateClass Clone() const;
+        EntityStateClass Clone() const;
     private:
         std::string mName;
         std::string mId;
     };
 
-    class AnimationStateTransitionClass
+    class EntityStateTransitionClass
     {
     public:
-        explicit AnimationStateTransitionClass(std::string id = base::RandomString(10));
+        explicit EntityStateTransitionClass(std::string id = base::RandomString(10));
 
         inline void SetDuration(float duration) noexcept
         { mDuration = duration; }
@@ -280,7 +280,7 @@ namespace game
         void IntoJson(data::Writer& data) const;
         bool FromJson(const data::Reader& data);
 
-        AnimationStateTransitionClass Clone() const;
+        EntityStateTransitionClass Clone() const;
     private:
         std::string mName;
         std::string mId;
@@ -290,18 +290,18 @@ namespace game
     };
 
 
-    class AnimatorClass
+    class EntityStateControllerClass
     {
     public:
-        explicit AnimatorClass(std::string id = base::RandomString(10));
+        explicit EntityStateControllerClass(std::string id = base::RandomString(10));
 
-        void AddState(const AnimationStateClass& state)
+        void AddState(const EntityStateClass& state)
         { mStates.push_back(state); }
-        void AddState(AnimationStateClass&& state)
+        void AddState(EntityStateClass&& state)
         { mStates.push_back(std::move(state)); }
-        void AddTransition(const AnimationStateTransitionClass& transition)
+        void AddTransition(const EntityStateTransitionClass& transition)
         { mTransitions.push_back(transition); }
-        void AddTransition(AnimationStateTransitionClass&& transition)
+        void AddTransition(EntityStateTransitionClass&& transition)
         { mTransitions.push_back(std::move(transition)); }
 
         inline void SetInitialStateId(std::string id) noexcept
@@ -325,13 +325,13 @@ namespace game
         { return mStates.size(); }
         inline std::size_t GetNumTransitions() const noexcept
         { return mTransitions.size(); }
-        inline const AnimationStateClass& GetState(size_t index) const noexcept
+        inline const EntityStateClass& GetState(size_t index) const noexcept
         { return base::SafeIndex(mStates, index); }
-        inline const AnimationStateTransitionClass& GetTransition(size_t index) const noexcept
+        inline const EntityStateTransitionClass& GetTransition(size_t index) const noexcept
         { return base::SafeIndex(mTransitions, index); }
-        inline AnimationStateClass& GetState(size_t index) noexcept
+        inline EntityStateClass& GetState(size_t index) noexcept
         { return base::SafeIndex(mStates, index); }
-        inline AnimationStateTransitionClass& GetTransition(size_t index) noexcept
+        inline EntityStateTransitionClass& GetTransition(size_t index) noexcept
         { return base::SafeIndex(mTransitions, index); }
         inline void ClearStates() noexcept
         { mStates.clear(); }
@@ -340,68 +340,68 @@ namespace game
 
         void DeleteTransitionById(const std::string& id);
         void DeleteStateById(const std::string& id);
-        const AnimationStateClass* FindStateById(const std::string& id) const noexcept;
-        const AnimationStateClass* FindStateByName(const std::string& name) const noexcept;
-        const AnimationStateTransitionClass* FindTransitionByName(const std::string& name) const noexcept;
-        const AnimationStateTransitionClass* FindTransitionById(const std::string& id) const noexcept;
+        const EntityStateClass* FindStateById(const std::string& id) const noexcept;
+        const EntityStateClass* FindStateByName(const std::string& name) const noexcept;
+        const EntityStateTransitionClass* FindTransitionByName(const std::string& name) const noexcept;
+        const EntityStateTransitionClass* FindTransitionById(const std::string& id) const noexcept;
 
-        AnimationStateClass* FindStateById(const std::string& id) noexcept;
-        AnimationStateClass* FindStateByName(const std::string& name) noexcept;
-        AnimationStateTransitionClass* FindTransitionByName(const std::string& name) noexcept;
-        AnimationStateTransitionClass* FindTransitionById(const std::string& id) noexcept;
+        EntityStateClass* FindStateById(const std::string& id) noexcept;
+        EntityStateClass* FindStateByName(const std::string& name) noexcept;
+        EntityStateTransitionClass* FindTransitionByName(const std::string& name) noexcept;
+        EntityStateTransitionClass* FindTransitionById(const std::string& id) noexcept;
 
         std::size_t GetHash() const noexcept;
         void IntoJson(data::Writer& data) const;
         bool FromJson(const data::Reader& data);
 
-        AnimatorClass Clone() const;
+        EntityStateControllerClass Clone() const;
     private:
         std::string mName;
         std::string mId;
         std::string mInitState;
         std::string mScriptId;
-        std::vector<AnimationStateClass> mStates;
-        std::vector<AnimationStateTransitionClass> mTransitions;
+        std::vector<EntityStateClass> mStates;
+        std::vector<EntityStateTransitionClass> mTransitions;
     };
 
-    using AnimationState = AnimationStateClass;
-    using AnimationTransition = AnimationStateTransitionClass;
+    using EntityState = EntityStateClass;
+    using EntityStateTransition = EntityStateTransitionClass;
 
-    class Animator
+    class EntityStateController
     {
     public:
         struct EnterState {
-            const AnimationState* state;
+            const EntityState* state;
         };
         struct LeaveState {
-            const AnimationState* state;
+            const EntityState* state;
         };
         struct UpdateState {
-            const AnimationState* state;
+            const EntityState* state;
             float time;
             float dt;
         };
         struct StartTransition {
-            const AnimationState* from;
-            const AnimationState* to;
-            const AnimationTransition* transition;
+            const EntityState* from;
+            const EntityState* to;
+            const EntityStateTransition* transition;
         };
         struct FinishTransition {
-            const AnimationState* from;
-            const AnimationState* to;
-            const AnimationTransition* transition;
+            const EntityState* from;
+            const EntityState* to;
+            const EntityStateTransition* transition;
         };
         struct UpdateTransition {
-            const AnimationState* from;
-            const AnimationState* to;
-            const AnimationTransition* transition;
+            const EntityState* from;
+            const EntityState* to;
+            const EntityStateTransition* transition;
             float time;
             float dt;
         };
         struct EvalTransition {
-            const AnimationState* from;
-            const AnimationState* to;
-            const AnimationTransition* transition;
+            const EntityState* from;
+            const EntityState* to;
+            const EntityStateTransition* transition;
         };
 
         using Action = std::variant<std::monostate,
@@ -411,9 +411,9 @@ namespace game
         using Value = std::variant<bool, int, float,
             std::string, glm::vec2>;
 
-        explicit Animator(AnimatorClass&& klass);
-        explicit Animator(const AnimatorClass& klass);
-        explicit Animator(const std::shared_ptr<const AnimatorClass>& klass);
+        explicit EntityStateController(EntityStateControllerClass&& klass);
+        explicit EntityStateController(const EntityStateControllerClass& klass);
+        explicit EntityStateController(const std::shared_ptr<const EntityStateControllerClass>& klass);
 
         // Update the animator state machine state.
         // When the current animator state is updated the resulting actions that should
@@ -424,13 +424,13 @@ namespace game
         void Update(float dt, std::vector<Action>* actions);
         // Update the animator state machine by starting a transition from the current
         // state towards the next state.
-        void Update(const AnimationTransition* transition, const AnimationState* next);
+        void Update(const EntityStateTransition* transition, const EntityState* next);
 
         enum class State {
             InTransition, InState
         };
         // Get the current animator state state, i.e. whether in state or in transition.
-        State GetAnimatorState() const noexcept;
+        State GetControllerState() const noexcept;
 
         // Check whether the animator has a value by the given name or not.
         inline bool HasValue(const std::string& name) const noexcept
@@ -446,18 +446,18 @@ namespace game
         { mValues.clear(); }
         // Get current state object. This only exists when the animator is InState.
         // During transitions there's no current state.
-        inline const AnimationState* GetCurrentState() const noexcept
+        inline const EntityState* GetCurrentState() const noexcept
         { return mCurrent; }
         // Get the next state (the state we're transitioning to) when doing a transition.
         // The next state only exists during transition.
-        inline const AnimationState* GetNextState() const noexcept
+        inline const EntityState* GetNextState() const noexcept
         { return mNext; }
         // Get the prev state (the state we're transitioning from) when doing a transition.
         // The prev state only exists during transition.
-        inline const AnimationState* GetPrevState() const noexcept
+        inline const EntityState* GetPrevState() const noexcept
         { return mPrev; }
         // Get the current transition if any.
-        inline const AnimationTransition* GetTransition() const noexcept
+        inline const EntityStateTransition* GetTransition() const noexcept
         { return mTransition; }
         // Get the currently accumulated time. If there's a current transition
         // then the time value measures the time elapsed in the transition, other
@@ -465,9 +465,9 @@ namespace game
         inline float GetTime() const noexcept
         { return mTime; }
         // Class object
-        inline const AnimatorClass& GetClass() const
+        inline const EntityStateControllerClass& GetClass() const
         { return *mClass; }
-        inline const AnimatorClass* operator ->() const
+        inline const EntityStateControllerClass* operator ->() const
         { return mClass.get(); }
 
         inline std::string GetName() const noexcept
@@ -475,15 +475,15 @@ namespace game
         inline std::string GetId() const noexcept
         { return mClass->GetId(); }
     public:
-        std::shared_ptr<const AnimatorClass> mClass;
+        std::shared_ptr<const EntityStateControllerClass> mClass;
         // Current state if any. no state during transition
-        const AnimationState* mCurrent = nullptr;
+        const EntityState* mCurrent = nullptr;
         // previous state when doing a transition (if any)
-        const AnimationState * mPrev = nullptr;
+        const EntityState * mPrev = nullptr;
         // next state when doing a transition (if any)
-        const AnimationState* mNext = nullptr;
+        const EntityState* mNext = nullptr;
         // the current transition (if any)
-        const AnimationTransition* mTransition = nullptr;
+        const EntityStateTransition* mTransition = nullptr;
         // the current transition or state time.
         float mTime = 0.0f;
         // some values that can be routed through the animator
@@ -493,8 +493,8 @@ namespace game
     };
 
     std::unique_ptr<Animation> CreateAnimationInstance(const std::shared_ptr<const AnimationClass>& klass);
-    std::unique_ptr<Animator> CreateAnimatorInstance(const std::shared_ptr<const AnimatorClass>& klass);
-    std::unique_ptr<Animator> CreateAnimatorInstance(const AnimatorClass& klass);
-    std::unique_ptr<Animator> CreateAnimatorInstance(AnimatorClass&& klass);
+    std::unique_ptr<EntityStateController> CreateStateControllerInstance(const std::shared_ptr<const EntityStateControllerClass>& klass);
+    std::unique_ptr<EntityStateController> CreateStateControllerInstance(const EntityStateControllerClass& klass);
+    std::unique_ptr<EntityStateController> CreateStateControllerInstance(EntityStateControllerClass&& klass);
 
 } // namespace

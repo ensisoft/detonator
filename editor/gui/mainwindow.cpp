@@ -1302,7 +1302,7 @@ void MainWindow::on_actionNewAnimatorScript_triggered()
     }
 
     script.SetFileURI(uri);
-    app::ScriptResource resource(script, "Entity/Animator Script");
+    app::ScriptResource resource(script, "Entity/EntityStateController Script");
     mWorkspace->SaveResource(resource);
     auto widget = new ScriptWidget(mWorkspace.get(), resource);
 
