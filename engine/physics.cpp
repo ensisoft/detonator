@@ -1082,6 +1082,11 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             else def.maxLength = distance;
             def.stiffness    = params.stiffness;
             def.damping      = params.damping;
+            /// UGLY UGLY DANGEROUS
+            // Store a reference to our joint data object in the joint itself
+            // so that it's quick and easy to check if the joint parameters/settings
+            // have been changed.
+            def.userData.pointer = (uintptr_t)&joint;
 
             if (def.minLength > def.maxLength)
             {
@@ -1108,6 +1113,12 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             def.lowerAngle       = params.lower_angle_limit.ToRadians() * -1.0f;
             def.motorSpeed       = params.motor_speed;
             def.maxMotorTorque   = params.motor_torque;
+            /// UGLY UGLY DANGEROUS
+            // Store a reference to our joint data object in the joint itself
+            // so that it's quick and easy to check if the joint parameters/settings
+            // have been changed.
+            def.userData.pointer = (uintptr_t)&joint;
+
             mWorld->CreateJoint(&def);
 
             DEBUG("Revolute joint info: [limit=%1, motor=%2, range=%3-%4, speed=%5, torque=%6",
@@ -1124,6 +1135,12 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             def.collideConnected = joint->CollideConnected();
             def.damping          = params.damping;
             def.stiffness        = params.stiffness;
+            /// UGLY UGLY DANGEROUS
+            // Store a reference to our joint data object in the joint itself
+            // so that it's quick and easy to check if the joint parameters/settings
+            // have been changed.
+            def.userData.pointer = (uintptr_t)&joint;
+
             mWorld->CreateJoint(&def);
 
             DEBUG("Weld joint info: [damping=%1, stiffness=%2]", params.damping, params.stiffness);
@@ -1146,9 +1163,16 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             def.enableLimit = params.enable_limit;
             def.enableMotor = params.enable_motor;
             def.motorSpeed  = params.motor_speed;
+            // called force but the comments in the b2_prismatic_joint cay it's *torque*
             def.maxMotorForce = params.motor_torque;
             def.lowerTranslation = params.lower_limit * -1.0f;
             def.upperTranslation = params.upper_limit;
+            /// UGLY UGLY DANGEROUS
+            // Store a reference to our joint data object in the joint itself
+            // so that it's quick and easy to check if the joint parameters/settings
+            // have been changed.
+            def.userData.pointer = (uintptr_t)&joint;
+
             mWorld->CreateJoint(&def);
 
             DEBUG("Prismatic joint info: [limit=%1, motor=%2, range=%3-%4, speed=%5, torque=%6]",
@@ -1166,6 +1190,12 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             def.maxForce = params.max_force;
             def.maxTorque = params.max_torque;
             def.correctionFactor = 0.3f;
+            /// UGLY UGLY DANGEROUS
+            // Store a reference to our joint data object in the joint itself
+            // so that it's quick and easy to check if the joint parameters/settings
+            // have been changed.
+            def.userData.pointer = (uintptr_t)&joint;
+
             mWorld->CreateJoint(&def);
 
             DEBUG("Motor joint info: [max_force=%1, max_torque=%2]", def.maxForce, def.maxTorque);
@@ -1202,6 +1232,11 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
                            ToBox2D(src_world_anchor),
                            ToBox2D(dst_world_anchor),
                            params.ratio);
+            /// UGLY UGLY DANGEROUS
+            // Store a reference to our joint data object in the joint itself
+            // so that it's quick and easy to check if the joint parameters/settings
+            // have been changed.
+            def.userData.pointer = (uintptr_t)&joint;
 
             mWorld->CreateJoint(&def);
 
