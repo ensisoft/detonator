@@ -1,27 +1,100 @@
 -- Top level game callbacks.
 -- You're free to delete functions that you don't need.
-local _num_scenes = 9
-local _cur_scene = 0
-
+-- LuaFormatter off
 local TestTable = {}
+
+--dd = debug draw
+TestTable[0] = {name='Kinematic C Velocity Balls', dd=false, gravity=false, msg=''}
+TestTable[1] = {name='Dynamic C Velocity Balls',   dd=false, gravity=false, msg=''}
+TestTable[2] = {name='Dynamic Balls',              dd=false, gravity=false, msg=''}
+TestTable[3] = {name='Friction',                   dd=false, gravity=true,  msg='Last box down is a square!'}
+TestTable[4] = {name='Restitution',                dd=false, gravity=true,  msg='Boing Boing!'}
+TestTable[5] = {name='Distance Joint',             dd=true,  gravity=true,  msg='Distance Joint'}
+TestTable[6] = {name='Revolute Joint',             dd=true,  gravity=true,  msg='Revolute Joint'}
+TestTable[7] = {name='Pulley Joint',               dd=true,  gravity=true,  msg='Pulley Joint'}
+TestTable[8] = {name='Weld Joint',                 dd=true,  gravity=true,  msg='Weld Joint'}
+TestTable[9] = {name='Prismatic Joint',            dd=true,  gravity=true,  msg='Prismatic Joint'}
+TestTable[10] = {name='Motor Joint',               dd=true,  gravity=true,  msg='Motor Joint'}
+TestTable[11] = {name='Bridge',                     dd=false, gravity=true,  msg='The bridge to nowhere?'}
+TestTable[12] = {name='Wrecking Ball',              dd=false, gravity=true,  msg='Crush Them!'}
+TestTable[13] = {name='Boxes',                     dd=false, gravity=true,  msg='Find the special box!'}
+TestTable[14] = {name='Raycast',                   dd=true,  gravity=false, 
+    msg='Use the mouse left button (click & hold)\n' ..
+        'Press keys 1, 2, 3 to change the ray cast mode.\n\n' ..
+        '1 = All      = Find all objects\n' ..
+        '2 = Closest  = Find geometrically closest object\n' ..
+        '3 = First    = Find whichever object comes first\n\n'
+}
+TestTable[15] = {name='Spatial Query', dd=true, gravity=false, 
+    msg='Use the mouse left button (click & hold)\n' ..
+        'Press keys 1, 2, 3 to change the query mode.\n\n' ..
+        '1 = All     = Find all objects\n' .. 
+        '2 = Closest = Find geometrically closest object\n' ..
+        '3 = First   = Find whichever object comes first\n\n' ..
+        'Press R, P, C, L to change spatial query method.\n\n' ..
+        'R = Rectangle   = Query rectangular area\n' ..
+        'P = Point       = Query at a single point\n' .. 
+        'C = PointRadius = Query circular area\n' ..
+        'L = PointPoint  = Query between two points (ray)\n\n'
+    }
+
+local scene_count = #TestTable + 1
+local scene_index = 0
+
+-- LuaFormatter on
+
+function LoadScene(index)
+    scene_index = index
+    if TestTable[index].gravity then
+        Physics:SetGravity(glm.vec2:new(0.0, 10.0))
+    else
+        Physics:SetGravity(glm.vec2:new(0.0, 0.0))
+    end
+    Game:Play(TestTable[index].name)
+
+    local menu = Game:GetTopUI()
+
+    local test_list_text = 'Press arrow up/down to change test\n\n'
+
+    for i = 0, scene_count - 1 do
+        if i == scene_index then
+            test_list_text = test_list_text .. ' > '
+        else
+            test_list_text = test_list_text .. '   '
+        end
+
+        local index = tostring(i + 1)
+        if i < 9 then
+            index = ' ' .. index
+        end
+
+        test_list_text = test_list_text .. index .. '. ' .. TestTable[i].name
+        test_list_text = test_list_text .. '\n'
+    end
+    menu.list:SetText(test_list_text)
+    menu.msg:SetText(TestTable[scene_index].msg)
+
+    if TestTable[scene_index].msg == '' then
+        menu.msg:SetVisible(false)
+    else
+        menu.msg:SetVisible(true)
+    end
+
+    Game:EnableDebugDraw(TestTable[scene_index].dd)
+
+end
 
 -- Called when the game is first loaded.
 -- This is the place where you might want to load some 
 -- previous/initial game state. 
 function LoadGame()
-    TestTable[0] = 'Kinematic C Velocity Balls'
-    TestTable[1] = 'Dynamic C Velocity Balls'
-    TestTable[2] = 'Dynamic Balls'
-    TestTable[3] = 'Distance Joint'
-    TestTable[4] = 'Downhill Balls'
-    TestTable[5] = 'Wrecking Ball'
-    TestTable[6] = 'Raycast'
-    TestTable[7] = 'Fixture Widget'
-    TestTable[8] = 'Spatial Query'
+    --    TestTable[3] = 'Distance Joint'
+    --    TestTable[5] = 'Wrecking Ball'
+    --    TestTable[7] = 'Fixture Widget'
 
     Game:DebugPrint('LoadGame called.')
     Game:SetViewport(-500.0, -400.0, 1000.0, 800.0)
-    Game:Play(TestTable[0])
+    Game:OpenUI('Main Menu')
     return true
 end
 
@@ -73,6 +146,21 @@ end
 -- Note that this is *not* called when the game has been suspended.
 function Update(game_time, dt)
 
+    if Scene == nil then
+        return
+    end
+
+    local demo_entity = Scene:FindEntityByInstanceName('Demo Entity')
+    if demo_entity == nil then
+        return
+    end
+
+    local message = demo_entity:FindScriptVarByName('message')
+    if message == nil then
+        return
+    end
+    local menu = Game:GetTopUI()
+    menu.msg:SetText(message:GetValue())
 end
 
 -- Event/input callback handlers.
@@ -90,31 +178,17 @@ end
 --    ...
 -- end
 function OnKeyDown(symbol, modifier_bits)
-    if symbol == wdk.Keys.ArrowRight then
-        _cur_scene = _cur_scene + 1
-        if _cur_scene >= _num_scenes then
-            _cur_scene = 0
-        end
-    elseif symbol == wdk.Keys.ArrowLeft then
-        _cur_scene = _cur_scene - 1
-        if _cur_scene < 0 then
-            _cur_scene = _num_scenes - 1
-        end
+    if symbol == wdk.Keys.ArrowDown then
+        scene_index = scene_index + 1
+    elseif symbol == wdk.Keys.ArrowUp then
+        scene_index = scene_index - 1
     else
         return
     end
 
-    local name = TestTable[_cur_scene]
-    local scene = ClassLib:FindSceneClassByName(name)
-    local gravity = glm.vec2:new(0.0, 0.0)
-    local variable = scene:FindScriptVarByName('gravity')
-    if variable ~= nil then
-        gravity = variable:GetValue()
-    end
-    Physics:SetGravity(gravity)
+    scene_index = base.wrap(0, scene_count - 1, scene_index)
 
-    -- start the play of scene
-    Game:Play(scene)
+    LoadScene(scene_index)
 end
 
 function OnKeyUp(symbol, modifier_bits)
@@ -143,7 +217,7 @@ end
 
 -- Called when the UI has been opened through a call to Game:OpenUI
 function OnUIOpen(ui)
-
+    LoadScene(0)
 end
 
 -- Called when the UI is has been closed. Result is the int value

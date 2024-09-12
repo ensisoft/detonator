@@ -1308,10 +1308,10 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
             def.localAnchorA     = ToBox2D(MapVectorFromGame(src_local_anchor));
             def.localAnchorB     = ToBox2D(MapVectorFromGame(dst_local_anchor));
             if (params.min_distance.has_value())
-                def.minLength = MapLengthFromGame(params.min_distance.value());
+                def.minLength = params.min_distance.value();
             else def.minLength = distance;
             if (params.max_distance.has_value())
-                def.maxLength = MapLengthFromGame(params.max_distance.value());
+                def.maxLength = params.max_distance.value();
             else def.maxLength = distance;
             def.stiffness    = params.stiffness;
             def.damping      = params.damping;

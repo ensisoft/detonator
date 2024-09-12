@@ -1,134 +1,338 @@
 {
+    "0dmT3Z3FHx": {
+        "__version": 1,
+        "checked_for_packing": true,
+        "comment_3G3oqeEyop": "",
+        "comment_3RiKNWdnGt": "",
+        "comment_8ZK2BWwwAQ": "",
+        "comment_9pxZJDITdA": "",
+        "comment_AwReuvJZ5I": "",
+        "comment_ClNwYim5fj": "",
+        "comment_DsEQwShFxY": "",
+        "comment_EGD4IaaEMa": "",
+        "comment_EH8upeUEvE": "",
+        "comment_EeZifgbw0T": "",
+        "comment_ID3gGDAwHJ": "",
+        "comment_KAOydnIwYs": "",
+        "comment_LeJRqFDW4o": "",
+        "comment_LgbGFPJ91H": "",
+        "comment_PgZdqnRqRu": "",
+        "comment_QNjahYthOH": "",
+        "comment_Qt538CgT27": "",
+        "comment_RTbER3prz6": "",
+        "comment_T8vigLnjjz": "",
+        "comment_TNfvIMLMQr": "",
+        "comment_TZ93bMyDIC": "",
+        "comment_Tmgz1iW3WG": "",
+        "comment_U70jCyNvM4": "",
+        "comment_XsLOpoZD6z": "",
+        "comment_bMKOsFt7Au": "",
+        "comment_bT0eEpy5B3": "",
+        "comment_edgyyg5LeW": "",
+        "comment_fmaRB5euY9": "",
+        "comment_gB2MfxbFGu": "",
+        "comment_gTkL93Y59O": "",
+        "comment_jbMZTMizIs": "",
+        "comment_jw4gJ0RtK3": "",
+        "comment_kFSa1B7Ctx": "",
+        "comment_lPT1pIuorG": "",
+        "comment_mCewC2Sxxr": "",
+        "comment_nD7g7gBStM": "",
+        "comment_o3Xkb5InsC": "",
+        "comment_o7AEGo2mFC": "",
+        "comment_ompjdCvl3Q": "",
+        "comment_pZ19nEiEMG": "",
+        "comment_tR3ppfpENy": "",
+        "comment_uNJvdazP3X": "",
+        "comment_uZ1RQmEPn1": "",
+        "comment_xaC8DKI64j": "",
+        "comment_ytovb3u92D": "",
+        "comment_zAQBZB62C3": "",
+        "comment_zYhfd59Wi8": ""
+    },
+    "0gsBaQh3gG": {
+        "__version": 1,
+        "checked_for_packing": true,
+        "comment_1gtE2LrFBy": "",
+        "comment_5v5bG75wrG": "",
+        "comment_LkejTNB3bF": "",
+        "comment_OzguChCMWN": "",
+        "comment_SB3soZozyb": "",
+        "comment_p1SOl5u50I": ""
+    },
+    "0whhJXfg3t": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
     "2rSIWqteXS": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
+    },
+    "50YhrrBTZy": {
+        "__version": 1,
+        "checked_for_packing": true,
+        "comment_6kokqtxuKI": "",
+        "comment_8iqSLDHIUv": "",
+        "comment_A67L1YkyOH": "",
+        "comment_BDYjWsjYUy": "",
+        "comment_BSUwgpb8lh": "",
+        "comment_DtqzN4KHSn": "",
+        "comment_EPbgY8M2lv": "",
+        "comment_UdJSZvOol9": "",
+        "comment_Y6lWYnbLFE": "",
+        "comment_gLwn5L6taE": "",
+        "comment_kPe9HBASoq": "",
+        "comment_pAmhSWQvxI": "",
+        "comment_uPT2R6pKmJ": "",
+        "comment_xpaCqpLl9m": ""
+    },
+    "5KUxLyDMdS": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "5uDea9Wvry": {
+        "__version": 1,
+        "checked_for_packing": true,
+        "comment_fUJx4OyC4z": "",
+        "comment_gu1bvRvusB": ""
     },
     "67oHYYDttT": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "6M7kjbtJOK": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_FXED8Wa7Of": ""
     },
-    "7zQLUleDer": {
+    "6XbPDf5din": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
+    },
+    "8v8KMi39RJ": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "91zq35Pw74": {
+        "__version": 1,
+        "checked_for_packing": true
     },
     "9jMLWUyAWj": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
+    },
+    "AKwmKiP2Wr": {
+        "__version": 1,
+        "checked_for_packing": true,
+        "comment_Btz6FPZ3x9": "",
+        "comment_oSRr4BjhzU": ""
+    },
+    "C2J85i8wGW": {
+        "__version": 1,
+        "checked_for_packing": true,
+        "comment_78POfNygjo": "",
+        "comment_EvvsEwsUZM": "",
+        "comment_ToDnHsvlKQ": ""
+    },
+    "CHxdJlF4hy": {
+        "__version": 1,
+        "checked_for_packing": true,
+        "comment_H40xKvd4rk": "",
+        "comment_Nvdbiq1Hbm": "",
+        "comment_P7XihnI23W": "",
+        "comment_lXHBN7xw1X": "",
+        "comment_o4isvTtn89": ""
+    },
+    "E16J1jPh3e": {
+        "__version": 1,
+        "checked_for_packing": true,
+        "comment_Mgs9eFOmAK": "",
+        "comment_he0IF53pNl": ""
     },
     "ETnTKLXRXi": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_fTLOPJMsQ3": ""
-    },
-    "EnPRIQkKBO": {
-        "__version": 1,
-        "checked_for_packing": 1,
-        "comment_vY9O53eRKB": ""
     },
     "EsFlY7oEfM": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_1MPsnG38m5": ""
     },
     "Fwn9yS1gWF": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_a0Pfoh2tIx": "",
         "comment_xw2qQ4qDJe": ""
     },
+    "HjpI2ov2Uf": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "HkWn4XMjQu": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "JhzGly7HEo": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "Kk02rATEFs": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "LeswpwTmim": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "Od4ASPzqb7": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "P6qp0Clu3U": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
     "QCSIpWak63": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
-    "TfojPSWQmJ": {
+    "SDWDwiNlOp": {
         "__version": 1,
-        "checked_for_packing": 1,
-        "comment_SGHkKNqZ8G": "",
-        "comment_mh4szTs1tr": "",
-        "comment_uNSbgrIAfJ": ""
+        "checked_for_packing": true
     },
     "UWnXOsuD6o": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
+    },
+    "WiBLRaLxr6": {
+        "__version": 1,
+        "checked_for_packing": true
     },
     "Xg0GdRiaQU": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "XwQTFkhxPJ": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
+    },
+    "YAWlC9mfq8": {
+        "__version": 1,
+        "checked_for_packing": true
     },
     "a8UWU1fUNZ": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_x5LUp0CItR": ""
+    },
+    "bpOdKJ2WFi": {
+        "__version": 1,
+        "checked_for_packing": true
     },
     "dK1EdyK1h8": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_6w1qxl64Dk": ""
+    },
+    "dgbRAN2Z8Q": {
+        "__version": 1,
+        "checked_for_packing": true,
+        "comment_5n8aH5AqXj": "",
+        "comment_CYBkERgaLw": "",
+        "comment_DbU3aF3ftt": "",
+        "comment_Mdd8ybD3di": "",
+        "comment_QPJKn8WH1W": "",
+        "comment_SlibHyeWuS": "",
+        "comment_WpICYPqNXi": "",
+        "comment_bQir4QCyZ8": "",
+        "comment_bQq33rdkIr": "",
+        "comment_dhN8YGJsjD": "",
+        "comment_ffPqZvSunY": "",
+        "comment_hPFsvpeHJJ": "",
+        "comment_kFwMufI6XM": "",
+        "comment_ksml363YrJ": "",
+        "comment_o8SlA3ZSQH": "",
+        "comment_pOWOB5S0p9": "",
+        "comment_s4G40JS3pT": "",
+        "comment_vSRMetoMdI": ""
     },
     "dgq5ss7Iy9": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_xPnegFZrhB": ""
     },
-    "f7S1HTDAgE": {
+    "hLwuC0RD7O": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
-    "fy5aapEM0F": {
+    "isAzfBPIpr": {
         "__version": 1,
-        "checked_for_packing": 1,
-        "comment_jpk3WllX74": ""
+        "checked_for_packing": true
+    },
+    "j2ofYbIJ19": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "j3IkLhQmfq": {
+        "__version": 1,
+        "checked_for_packing": true
     },
     "k4Stm2rLJJ": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "kpR98Mlxaz": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_FFW46rIdfi": "",
         "comment_QeRCmrPDmR": "",
         "comment_kMOWg6MbOn": ""
     },
     "kppKkQuA0g": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "lCSj0gMTqU": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
+        "comment_0yFT4fPdB1": "",
+        "comment_11IsfiUDjs": "",
+        "comment_5MCaZyBHTB": "",
+        "comment_5lDZKR45f1": "",
+        "comment_6JouotNkuL": "",
+        "comment_7xyY6jMDg6": "",
+        "comment_86GQo13KqA": "",
+        "comment_8zQtpNa3FC": "",
+        "comment_GCZ4Uszvzn": "",
+        "comment_J6Bqis1OA3": "",
+        "comment_WzSn9gDaRZ": "",
+        "comment_dNvbL18DAH": "",
+        "comment_dSUjfDZfZR": "",
         "comment_fBdB6MvNul": "",
+        "comment_msrIJrFjPY": "",
+        "comment_pPoSISmFZh": "",
         "comment_xAMylSIBUS": ""
     },
     "lTi7YXjdsz": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
+    },
+    "mRaJ8E2T2X": {
+        "__version": 1,
+        "checked_for_packing": true
     },
     "n9hH3dGv20": {
         "__version": 1,
-        "checked_for_packing": 1
-    },
-    "oC0fUUJnzk": {
-        "__version": 1,
-        "checked_for_packing": 1,
-        "comment_OWBR9G82wD": ""
+        "checked_for_packing": true
     },
     "pATaRMBTR7": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "pK3rRC7a5h": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_dqzf0vCHTn": ""
     },
     "project": {
@@ -141,14 +345,15 @@
         "audio_channels": "Stereo",
         "audio_sample_rate": 44100,
         "audio_sample_type": "Float32",
-        "canvas_height": 768,
-        "canvas_mode": "Default",
-        "canvas_width": 1024,
+        "canvas_fs_strategy": "SoftFullScreen",
+        "canvas_height": 800,
+        "canvas_mode": "Normal",
+        "canvas_width": 1000,
         "clear_color": "4280492835",
         "command_line_arguments": "",
         "config_srgb": true,
-        "debug_draw": true,
-        "debug_font": "",
+        "debug_draw": false,
+        "debug_font": "app://fonts/orbitron-bold.otf",
         "debug_print_fps": false,
         "debug_show_fps": true,
         "debug_show_msg": false,
@@ -184,7 +389,7 @@
         "num_position_iterations": 3,
         "num_velocity_iterations": 8,
         "phys_gravity_x": 0,
-        "phys_gravity_y": 0,
+        "phys_gravity_y": 10,
         "phys_scale_x": 100,
         "phys_scale_y": 100,
         "preview_entity_script": "app://scripts/preview/entity.lua",
@@ -199,40 +404,69 @@
         "window_can_resize": true,
         "window_cursor": true,
         "window_has_border": true,
-        "window_height": 768,
+        "window_height": 800,
         "window_mode": "Windowed",
-        "window_vsync": true,
-        "window_width": 1024,
+        "window_vsync": false,
+        "window_width": 1000,
         "working_folder": "${workspace}"
+    },
+    "rFu8E6tjzf": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "sCQDCzRWej": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "sTGqtln7OZ": {
+        "__version": 1,
+        "checked_for_packing": true,
+        "comment_7w8O3vR1G1": ""
+    },
+    "tHryztXiQ3": {
+        "__version": 1,
+        "checked_for_packing": true
     },
     "uhYlthZ4sC": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "v8AR2h5m8R": {
         "__version": 1,
-        "checked_for_packing": 1
+        "checked_for_packing": true
     },
     "workspace": {
-        "packing_param_combine_textures": 1,
-        "packing_param_copy_html5": 1,
-        "packing_param_copy_native": 1,
-        "packing_param_delete_prev": 1,
-        "packing_param_generate_html5": 1,
-        "packing_param_generate_html5_filesys": 1,
+        "packing_param_combine_textures": true,
+        "packing_param_copy_html5": true,
+        "packing_param_copy_native": true,
+        "packing_param_delete_prev": true,
+        "packing_param_generate_html5": true,
+        "packing_param_generate_html5_filesys": true,
         "packing_param_max_tex_height": "1024",
         "packing_param_max_tex_width": "1024",
         "packing_param_output_dir": "ws://dist",
         "packing_param_pack_height": "1024",
         "packing_param_pack_width": "1024",
-        "packing_param_resize_large_textures": 1,
+        "packing_param_resize_large_textures": true,
         "packing_param_tex_padding": 2,
-        "packing_param_write_config": 1,
+        "packing_param_write_config": true,
         "packing_param_write_content": true
+    },
+    "wtkuOomt3P": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "x6nxsa4XuD": {
+        "__version": 1,
+        "checked_for_packing": true
+    },
+    "xlPb8LHBFS": {
+        "__version": 1,
+        "checked_for_packing": true
     },
     "zFZFKpipES": {
         "__version": 1,
-        "checked_for_packing": 1,
+        "checked_for_packing": true,
         "comment_BAaFunDDPL": ""
     }
 }
