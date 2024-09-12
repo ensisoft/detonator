@@ -773,7 +773,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     // load animator properties
     for (size_t i=0; i<mState.entity->GetNumAnimators(); ++i)
     {
-        const auto& anim = mState.entity->GetAnimator(i);
+        const auto& anim = mState.entity->GetController(i);
         const auto& Id = anim.GetId();
         QVariantMap properties;
         GetProperty(resource, "animator_" + Id, &properties);
@@ -1021,7 +1021,7 @@ bool EntityWidget::LoadState(const Settings& settings)
     // load animator properties
     for (size_t i=0; i<mState.entity->GetNumAnimators(); ++i)
     {
-        const auto& anim = mState.entity->GetAnimator(i);
+        const auto& anim = mState.entity->GetController(i);
         const auto& Id = anim.GetId();
         QVariantMap properties;
         settings.GetValue("Entity", "animator_" + Id, &properties);
@@ -1417,27 +1417,27 @@ void EntityWidget::SaveAnimation(const game::AnimationClass& track, const QVaria
     DisplayEntityProperties();
 }
 
-void EntityWidget::SaveAnimator(const game::AnimatorClass& animator, const QVariantMap& properties)
+void EntityWidget::SaveAnimator(const game::EntityStateControllerClass& animator, const QVariantMap& properties)
 {
     mAnimatorProperties[animator.GetId()] = properties;
 
     for (size_t i=0; i<mState.entity->GetNumAnimators(); ++i)
     {
-        auto& other = mState.entity->GetAnimator(i);
+        auto& other = mState.entity->GetController(i);
         if (other.GetId() != animator.GetId())
             continue;
 
         // copy it over.
         other = animator;
-        INFO("Saved animator '%1'", animator.GetName());
-        NOTE("Saved animator '%1'", animator.GetName());
+        INFO("Saved entity controller '%1'", animator.GetName());
+        NOTE("Saved entity controller '%1'", animator.GetName());
         DisplayEntityProperties();
         return;
     }
     // add a copy
-    mState.entity->AddAnimator(animator);
-    INFO("Saved animator '%1'", animator.GetName());
-    NOTE("Saved animator '%1'", animator.GetName());
+    mState.entity->AddController(animator);
+    INFO("Saved entity controller '%1'", animator.GetName());
+    NOTE("Saved entity controller '%1'", animator.GetName());
     DisplayEntityProperties();
 }
 
@@ -1953,7 +1953,7 @@ void EntityWidget::on_btnEditAnimator_clicked()
 {
     if (mState.entity->GetNumAnimators() == 0)
         return;
-    const auto& animator = mState.entity->GetAnimator(0);
+    const auto& animator = mState.entity->GetController(0);
 
     QVariantMap props;
     if (const auto* ptr = base::SafeFind(mAnimatorProperties, animator.GetId()))
@@ -2257,7 +2257,7 @@ void EntityWidget::on_btnAddAnimatorScript_clicked()
     if (mState.entity->GetNumAnimators() == 0)
         return;
 
-    auto& animator = mState.entity->GetAnimator(0);
+    auto& animator = mState.entity->GetController(0);
 
     app::Script script;
     const auto& uri = app::toString("ws://lua/%1.lua", script.GetId());
@@ -2287,8 +2287,8 @@ void EntityWidget::on_btnAddAnimatorScript_clicked()
         return;
     }
     script.SetFileURI(uri);
-    script.SetName(base::FormatString("%1 / Animator", mState.entity->GetName()));
-    app::ScriptResource resource(script, app::toString("%1 / Animator", mState.entity->GetName()));
+    script.SetName(base::FormatString("%1 / EntityStateController", mState.entity->GetName()));
+    app::ScriptResource resource(script, app::toString("%1 / EntityStateController", mState.entity->GetName()));
     mState.workspace->SaveResource(resource);
 
     animator.SetScriptId(script.GetId());
@@ -2305,7 +2305,7 @@ void EntityWidget::on_btnResetAnimatorScript_clicked()
     if (mState.entity->GetNumAnimators() == 0)
         return;
 
-    auto& animator = mState.entity->GetAnimator(0);
+    auto& animator = mState.entity->GetController(0);
     animator.SetScriptId("");
     SetValue(mUI.animatorScript, -1);
     SetEnabled(mUI.btnEditAnimatorScript, false);
@@ -2357,7 +2357,7 @@ void EntityWidget::on_animatorScript_currentIndexChanged(int index)
     {
         for (size_t i=0; i<mState.entity->GetNumAnimators(); ++i)
         {
-            auto& anim = mState.entity->GetAnimator(i);
+            auto& anim = mState.entity->GetController(i);
             anim.SetScriptId("");
         }
         SetEnabled(mUI.btnEditAnimatorScript, false);
@@ -2367,7 +2367,7 @@ void EntityWidget::on_animatorScript_currentIndexChanged(int index)
     {
         for (size_t i=0; i<mState.entity->GetNumAnimators(); ++i)
         {
-            auto& anim = mState.entity->GetAnimator(i);
+            auto& anim = mState.entity->GetController(i);
             anim.SetScriptId(GetItemId(mUI.animatorScript));
         }
         SetEnabled(mUI.btnEditAnimatorScript, true);
@@ -3195,14 +3195,14 @@ void EntityWidget::on_animator_toggled(bool on)
 {
     if (on)
     {
-        game::AnimatorClass animator;
-        animator.SetName("My Animator");
-        mState.entity->AddAnimator(std::move(animator));
+        game::EntityStateControllerClass animator;
+        animator.SetName("My EntityStateController");
+        mState.entity->AddController(std::move(animator));
     }
     else
     {
         ASSERT(mState.entity->GetNumAnimators() == 1);
-        mState.entity->DeleteAnimator(0);
+        mState.entity->DeleteController(0);
     }
 }
 
@@ -3824,7 +3824,7 @@ void EntityWidget::DisplayEntityProperties()
 
     if (animators > 0)
     {
-        const auto& animator = mState.entity->GetAnimator(0);
+        const auto& animator = mState.entity->GetController(0);
         if (animator.HasScriptId())
         {
             SetValue(mUI.animatorScript, ListItemId(animator.GetScriptId()));
@@ -4646,60 +4646,61 @@ QString GenerateAnimatorScriptSource()
 {
     static const QString source = R"(
 --
--- Entity animator script.
--- This script will be called for every entity animator instance that
--- has this particular script assigned.
+-- Entity state controller script.
+-- This script will be called for every entity controller instance
+-- that has this particular script assigned.
 -- This script allows you to write the logic for performing some
--- particular actions when entering/leaving animation states and
+-- particular actions when entering/leaving entity states and
 -- when transitioning from one state to another.
 --
 -- You're free to delete functions you don't need.
 --
 
--- Called once when the animator is first created.
--- This is the place where you can set the initial entity and animator
--- state to a known/desired first state.
-function Init(animator, entity)
+-- Called once when the controller is first created.
+-- This is the place where you can set the initial entity and
+-- controller state to a known/desired first state.
+function Init(controller, entity)
 
 end
 
 
--- Called once when the entity enters a new animation state at the end
+-- Called once when the entity enters a new state at the end
 -- of a transition.
-function EnterState(animator, state, entity)
+function EnterState(controller, state, entity)
 
 end
 
--- Called once when the entity is leaving an animation state at the start
+-- Called once when the entity is leaving a state at the start
 -- of a transition.
-function LeaveState(animator, state, entity)
+function LeaveState(controller, state, entity)
 
 end
 
--- Called continuously on the current state. This is the place where you can
--- realize changes to the current input when in some particular state.
-function UpdateState(animator, state, time, dt, entity)
+-- Called continuously on the current state. This is the place
+-- where you can realize changes to the current input when in
+-- some particular state.
+function UpdateState(controller, state, time, dt, entity)
 
 end
 
--- Evaluate the condition to trigger a transition from one animation state
+-- Evaluate the condition to trigger a transition from one state
 -- to another. Return true to take the transition or false to reject it.
-function EvalTransition(animator, from, to, entity)
+function EvalTransition(controller, from, to, entity)
     return false
 end
 
 -- Called once when a transition is started from one state to another.
-function StartTransition(animator, from, to, duration, entity)
+function StartTransition(controller, from, to, duration, entity)
 
 end
 
 -- Called once when the transition from one state to another is finished.
-function FinishTransition(animator, from, to, entity)
+function FinishTransition(controller, from, to, entity)
 
 end
 
 -- Called continuously on a transition while it's in progress.
-function UpdateTransition(animator, from, to, duration, time, dt, entity)
+function UpdateTransition(controller, from, to, duration, time, dt, entity)
 
 end
 )";

@@ -303,8 +303,8 @@ QVariantMap DuplicateResourceProperties(const game::EntityClass& src, const game
     // from properties using the old IDs to properties using new IDs
     for (size_t i=0; i<src.GetNumAnimators(); ++i)
     {
-        const auto& src_animator = src.GetAnimator(i);
-        const auto& dst_animator = dupe.GetAnimator(i);
+        const auto& src_animator = src.GetController(i);
+        const auto& dst_animator = dupe.GetController(i);
         // map state and link IDs from the src animator IDs to the
         // duplicate animator IDs
         std::unordered_map<std::string, std::string> mapping;
@@ -458,7 +458,7 @@ QStringList ListResourceDependencies(const game::EntityClass& entity, const QVar
 
     for (size_t i=0; i<entity.GetNumAnimators(); ++i)
     {
-        const auto& animator = entity.GetAnimator(0);
+        const auto& animator = entity.GetController(0);
         if (animator.HasScriptId())
             PushBack(ret, animator.GetScriptId());
     }

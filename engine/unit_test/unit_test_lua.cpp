@@ -1560,42 +1560,42 @@ end
     foo->SetName("foo");
 
     {
-        game::AnimatorClass klass;
-        klass.SetName("Animator");
+        game::EntityStateControllerClass klass;
+        klass.SetName("EntityStateController");
         klass.SetScriptId("entity_animator");
 
-        game::AnimationStateClass idle;
+        game::EntityStateClass idle;
         idle.SetName("idle");
         klass.AddState(idle);
 
-        game::AnimationStateClass run;
+        game::EntityStateClass run;
         run.SetName("run");
         klass.AddState(run);
 
-        game::AnimationStateClass jump;
+        game::EntityStateClass jump;
         jump.SetName("jump");
         klass.AddState(jump);
 
-        game::AnimationStateTransitionClass idle_to_run;
+        game::EntityStateTransitionClass idle_to_run;
         idle_to_run.SetName("idle to run");
         idle_to_run.SetSrcStateId(idle.GetId());
         idle_to_run.SetDstStateId(run.GetId());
         klass.AddTransition(idle_to_run);
 
-        game::AnimationStateTransitionClass run_to_idle;
+        game::EntityStateTransitionClass run_to_idle;
         run_to_idle.SetName("run to idle");
         run_to_idle.SetSrcStateId(run.GetId());
         run_to_idle.SetDstStateId(idle.GetId());
         run_to_idle.SetDuration(1.0f);
         klass.AddTransition(run_to_idle);
 
-        game::AnimationStateTransitionClass idle_to_jump;
+        game::EntityStateTransitionClass idle_to_jump;
         idle_to_jump.SetName("idle to jump");
         idle_to_jump.SetSrcStateId(idle.GetId());
         idle_to_jump.SetDstStateId(jump.GetId());
         klass.AddTransition(idle_to_jump);
 
-        game::AnimationStateTransitionClass jump_to_idle;
+        game::EntityStateTransitionClass jump_to_idle;
         jump_to_idle.SetName("jump to idle");
         jump_to_idle.SetSrcStateId(jump.GetId());
         jump_to_idle.SetDstStateId(idle.GetId());
@@ -1603,7 +1603,7 @@ end
 
         klass.SetInitialStateId(idle.GetId());
 
-        foo->AddAnimator(std::move(klass));
+        foo->AddController(std::move(klass));
     }
 
     game::SceneClass scene_class;

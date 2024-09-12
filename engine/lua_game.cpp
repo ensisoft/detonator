@@ -92,7 +92,7 @@ void BindActuatorInterface(sol::usertype<Actuator>& actuator)
     actuator["GetDuration"]  = &Actuator::GetDuration;
 }
 
-sol::object GetAnimatorVar(const game::Animator& animator, const char* key, sol::this_state this_state)
+sol::object GetAnimatorVar(const game::EntityStateController& animator, const char* key, sol::this_state this_state)
 {
     sol::state_view state(this_state);
     if (const auto* ptr = animator.FindValue(key))
@@ -111,7 +111,7 @@ sol::object GetAnimatorVar(const game::Animator& animator, const char* key, sol:
     }
     return sol::nil;
 }
-void SetAnimatorVar(game::Animator& animator, const char* key, sol::object value, sol::this_state this_state)
+void SetAnimatorVar(game::EntityStateController& animator, const char* key, sol::object value, sol::this_state this_state)
 {
     if (value.is<bool>())
         animator.SetValue(key, value.as<bool>());
@@ -890,36 +890,36 @@ void BindGameLib(sol::state& L)
     auto material_actuator = table.new_usertype<MaterialActuator>("MaterialActuator");
     BindActuatorInterface<MaterialActuator>(material_actuator);
 
-    auto animator_state = table.new_usertype<AnimationState>("AnimatorState");
-    animator_state["GetName"] = &AnimationState::GetName;
-    animator_state["GetId"]   = &AnimationState::GetId;
+    auto animator_state = table.new_usertype<EntityState>("EntityState");
+    animator_state["GetName"] = &EntityState::GetName;
+    animator_state["GetId"]   = &EntityState::GetId;
 
-    auto animator = table.new_usertype<Animator>("Animator",
-        sol::meta_function::index,     &GetAnimatorVar,
-        sol::meta_function::new_index, &SetAnimatorVar);
-    animator["GetName"]              = &Animator::GetName;
-    animator["GetTime"]              = &Animator::GetTime;
-    animator["HasValue"]             = &Animator::HasValue;
+    auto animator = table.new_usertype<EntityStateController>("EntityStateController",
+                                                              sol::meta_function::index, &GetAnimatorVar,
+                                                              sol::meta_function::new_index, &SetAnimatorVar);
+    animator["GetName"]              = &EntityStateController::GetName;
+    animator["GetTime"]              = &EntityStateController::GetTime;
+    animator["HasValue"]             = &EntityStateController::HasValue;
     animator["SetValue"]             = &SetAnimatorVar;
     animator["FindValue"]            = &GetAnimatorVar;
-    animator["GetState"]             = [](const Animator& animator) { return base::ToString(animator.GetAnimatorState()); };
-    animator["GetCurrentState"]      = &Animator::GetCurrentState;
-    animator["GetNextState"]         = &Animator::GetNextState;
-    animator["GetPrevState"]         = &Animator::GetPrevState;
-    animator["GetCurrentTransition"] = &Animator::GetTransition;
+    animator["GetState"]             = [](const EntityStateController& animator) { return base::ToString(animator.GetControllerState()); };
+    animator["GetCurrentState"]      = &EntityStateController::GetCurrentState;
+    animator["GetNextState"]         = &EntityStateController::GetNextState;
+    animator["GetPrevState"]         = &EntityStateController::GetPrevState;
+    animator["GetCurrentTransition"] = &EntityStateController::GetTransition;
     animator["IsInState"]            = sol::overload(
-        [](const Animator& animator, const std::string& name) {
+        [](const EntityStateController& animator, const std::string& name) {
             if (const auto* state = animator.GetCurrentState())
                 return state->GetName() == name;
             return false;
         },
-        [](const Animator& animator) {
-            if (animator.GetAnimatorState() == Animator::State::InState)
+        [](const EntityStateController& animator) {
+            if (animator.GetControllerState() == EntityStateController::State::InState)
                 return true;
             return false;
         });
     animator["IsInTransition"] = sol::overload(
-        [](const Animator& animator, const std::string& from, const std::string& to) {
+        [](const EntityStateController& animator, const std::string& from, const std::string& to) {
             const auto* prev = animator.GetPrevState();
             const auto* next = animator.GetNextState();
             if (prev && next) {
@@ -928,12 +928,12 @@ void BindGameLib(sol::state& L)
             }
             return false;
         },
-        [](const Animator& animator) {
-            if (animator.GetAnimatorState() == Animator::State::InTransition)
+        [](const EntityStateController& animator) {
+            if (animator.GetControllerState() == EntityStateController::State::InTransition)
                 return true;
             return false;
         });
-    animator["GetStateName"] = [](const Animator& animator) {
+    animator["GetStateName"] = [](const EntityStateController& animator) {
         if (const auto* state = animator.GetCurrentState()) {
             return state->GetName();
         }
@@ -1059,7 +1059,7 @@ void BindGameLib(sol::state& L)
     entity["HasAnimator"]          = &Entity::HasAnimator;
     entity["GetNumAnimations"]     = &Entity::GetNumCurrentAnimations;
     entity["GetAnimation"]         = GetMutable(&Entity::GetCurrentAnimation);
-    entity["GetAnimator"]          = GetMutable(&Entity::GetAnimator);
+    entity["GetStateController"]   = GetMutable(&Entity::GetStateController);
     entity["GetScene"]             = GetMutable(&Entity::GetScene);
     entity["GetNode"]              = GetMutable(&Entity::GetNode);
     entity["FindNodeByClassName"]  = GetMutable(&Entity::FindNodeByClassName);

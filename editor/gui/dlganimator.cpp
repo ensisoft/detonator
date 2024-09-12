@@ -71,13 +71,13 @@ public:
         return true;
     }
 
-    void ApplyState(game::AnimatorClass& klass) const
+    void ApplyState(game::EntityStateControllerClass& klass) const
     {
-        game::AnimationStateClass state(mId);
+        game::EntityStateClass state(mId);
         state.SetName(GetName());
         klass.AddState(std::move(state));
     }
-    void LoadState(const game::AnimationStateClass& klass)
+    void LoadState(const game::EntityStateClass& klass)
     {
         mId = klass.GetId();
         mName = app::FromUtf8(klass.GetName());
@@ -211,16 +211,16 @@ public:
     float GetDuration() const
     { return mDuration; }
 
-    void ApplyState(game::AnimatorClass& klass) const
+    void ApplyState(game::EntityStateControllerClass& klass) const
     {
-        game::AnimationStateTransitionClass transition(mId);
+        game::EntityStateTransitionClass transition(mId);
         transition.SetDstStateId(mDstState->GetId());
         transition.SetSrcStateId(mSrcState->GetId());
         transition.SetName(GetName());
         transition.SetDuration(mDuration);
         klass.AddTransition(std::move(transition));
     }
-    void LoadState(const game::AnimationStateTransitionClass& transition)
+    void LoadState(const game::EntityStateTransitionClass& transition)
     {
         mId = transition.GetId();
         mName = app::FromUtf8(transition.GetName());
@@ -360,7 +360,7 @@ void AnimatorGraphScene::DeleteState(detail::StateItem* state)
 }
 
 
-void AnimatorGraphScene::ApplyGraphState(game::AnimatorClass& klass) const
+void AnimatorGraphScene::ApplyGraphState(game::EntityStateControllerClass& klass) const
 {
     const auto& list = this->items();
     for (const auto& item : list)
@@ -498,7 +498,7 @@ void AnimatorGraphScene::AdjustLink(detail::StateLink* link)
 
 DlgAnimator::DlgAnimator(QWidget* parent,
                          const game::EntityClass& entity,
-                         const game::AnimatorClass& animator,
+                         const game::EntityStateControllerClass& animator,
                          const QVariantMap& props)
   : QDialog(parent)
   , mEntity(&entity)

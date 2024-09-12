@@ -22,8 +22,8 @@ namespace game {
     class AnimationClass;
     class Animation;
     class ActuatorClass;
-    class AnimatorClass;
-    class Animator;
+    class EntityStateControllerClass;
+    class EntityStateController;
     class TilemapClass;
     class Tilemap;
     class EntityNodeClass;

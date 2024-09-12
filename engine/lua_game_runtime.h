@@ -91,7 +91,7 @@ namespace engine
         bool HasAction() const
         { return !mActionQueue.empty(); }
     private:
-        sol::environment* GetTypeEnv(const game::AnimatorClass& klass);
+        sol::environment* GetTypeEnv(const game::EntityStateControllerClass& klass);
         sol::environment* GetTypeEnv(const game::EntityClass& klass);
         sol::environment* GetTypeEnv(const uik::Window& window);
         sol::object CallCrossEnvMethod(sol::object object, const std::string& method, sol::variadic_args va);

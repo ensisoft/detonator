@@ -28,7 +28,7 @@ function BeginPlay(entity, scene, map)
     entity.direction = glm.vec2:new(0.0, 1.0)
     entity.velocity = glm.vec2:new(0.0, 0.0)
 
-    local animator = entity:GetAnimator()
+    local animator = entity:GetStateController()
     animator.attack = false
 
 end
@@ -83,7 +83,7 @@ end
 -- the corresponding key up!
 function OnKeyDown(entity, symbol, modifier_bits)
     if symbol == wdk.Keys.Space then
-        local animator = entity:GetAnimator()
+        local animator = entity:GetStateController()
         animator.attack = true
     elseif symbol == wdk.Keys.Key1 then
         entity.weapon = 'Spear'

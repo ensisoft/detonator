@@ -52,7 +52,7 @@ namespace gui
 
         void DeleteLink(detail::StateLink* link);
         void DeleteState(detail::StateItem* state);
-        void ApplyGraphState(game::AnimatorClass& klass) const;
+        void ApplyGraphState(game::EntityStateControllerClass& klass) const;
         void SaveGraphProperties(QVariantMap& props) const;
 
     protected:
@@ -72,7 +72,7 @@ namespace gui
     public:
         DlgAnimator(QWidget* parent,
                     const game::EntityClass& entity,
-                    const game::AnimatorClass& animator,
+                    const game::EntityStateControllerClass& animator,
                     const QVariantMap& props);
        ~DlgAnimator() override;
         void SetEntityWidget(EntityWidget* widget)
@@ -104,7 +104,7 @@ namespace gui
     private:
         std::unique_ptr<AnimatorGraphScene> mScene;
         const game::EntityClass* mEntity = nullptr;
-        game::AnimatorClass mAnimator;
+        game::EntityStateControllerClass mAnimator;
         EntityWidget* mEntityWidget = nullptr;
     };
 

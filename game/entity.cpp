@@ -102,7 +102,7 @@ EntityClass::EntityClass(const EntityClass& other)
     // Deepy copy animators
     for (const auto& animator : other.mAnimators)
     {
-        mAnimators.push_back(std::make_shared<AnimatorClass>(*animator));
+        mAnimators.push_back(std::make_shared<EntityStateControllerClass>(*animator));
     }
 
     mRenderTree.FromTree(other.GetRenderTree(), [&map](const EntityNodeClass* node) {
@@ -345,58 +345,58 @@ const AnimationClass* EntityClass::FindAnimationByName(const std::string& name) 
     return FindByName(mAnimations, name);
 }
 
-AnimatorClass* EntityClass::AddAnimator(AnimatorClass&& animator)
+EntityStateControllerClass* EntityClass::AddController(EntityStateControllerClass&& animator)
 {
-    mAnimators.push_back(std::make_shared<AnimatorClass>(std::move(animator)));
+    mAnimators.push_back(std::make_shared<EntityStateControllerClass>(std::move(animator)));
     return mAnimators.back().get();
 }
-AnimatorClass* EntityClass::AddAnimator(const AnimatorClass& animator)
+EntityStateControllerClass* EntityClass::AddController(const EntityStateControllerClass& animator)
 {
-    mAnimators.push_back(std::make_shared<AnimatorClass>(animator));
+    mAnimators.push_back(std::make_shared<EntityStateControllerClass>(animator));
     return mAnimators.back().get();
 }
-AnimatorClass* EntityClass::AddAnimator(const std::shared_ptr<AnimatorClass>& animator)
+EntityStateControllerClass* EntityClass::AddController(const std::shared_ptr<EntityStateControllerClass>& animator)
 {
     mAnimators.push_back(animator);
     return mAnimators.back().get();
 }
 
-void EntityClass::DeleteAnimator(size_t index)
+void EntityClass::DeleteController(size_t index)
 {
     base::SafeErase(mAnimators, index);
 }
-bool EntityClass::DeleteAnimatorByName(const std::string& name)
+bool EntityClass::DeleteControllerByName(const std::string& name)
 {
     return EraseByName(mAnimators, name);
 }
 
-bool EntityClass::DeleteAnimatorById(const std::string& id)
+bool EntityClass::DeleteControllerById(const std::string& id)
 {
     return EraseById(mAnimators, id);
 }
 
-AnimatorClass& EntityClass::GetAnimator(size_t index)
+EntityStateControllerClass& EntityClass::GetController(size_t index)
 {
     return *base::SafeIndex(mAnimators, index);
 }
-AnimatorClass* EntityClass::FindAnimatorByName(const std::string& name)
+EntityStateControllerClass* EntityClass::FindControllerByName(const std::string& name)
 {
     return FindByName(mAnimators, name);
 }
-AnimatorClass* EntityClass::FindAnimatorById(const std::string& id)
+EntityStateControllerClass* EntityClass::FindControllerById(const std::string& id)
 {
     return FindById(mAnimators, id);
 }
 
-const AnimatorClass& EntityClass::GetAnimator(size_t index) const
+const EntityStateControllerClass& EntityClass::GetController(size_t index) const
 {
     return *base::SafeIndex(mAnimators, index);
 }
-const AnimatorClass* EntityClass::FindAnimatorByName(const std::string& name) const
+const EntityStateControllerClass* EntityClass::FindControllerByName(const std::string& name) const
 {
     return FindByName(mAnimators, name);
 }
-const AnimatorClass* EntityClass::FindAnimatorById(const std::string& id) const
+const EntityStateControllerClass* EntityClass::FindControllerById(const std::string& id) const
 {
     return FindById(mAnimators, id);
 }
@@ -705,7 +705,7 @@ bool EntityClass::FromJson(const data::Reader& data)
     for (unsigned i=0; i<data.GetNumChunks("animators"); ++i)
     {
         const auto& chunk = data.GetReadChunk("animators", i);
-        auto animator = std::make_shared<AnimatorClass>();
+        auto animator = std::make_shared<EntityStateControllerClass>();
         ok &= animator->FromJson(*chunk);
         mAnimators.push_back(std::move(animator));
     }
@@ -798,7 +798,7 @@ EntityClass EntityClass::Clone() const
 
     for (const auto& animator : mAnimators)
     {
-        auto clone = std::make_shared<AnimatorClass>(animator->Clone());
+        auto clone = std::make_shared<EntityStateControllerClass>(animator->Clone());
         ret.mAnimators.push_back(std::move(clone));
     }
 
@@ -904,7 +904,7 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
 
     if (mClass->GetNumAnimators())
     {
-        mAnimator = Animator(mClass->GEtSharedAnimatorClass(0));
+        mAnimator = EntityStateController(mClass->GEtSharedAnimatorClass(0));
     }
 }
 

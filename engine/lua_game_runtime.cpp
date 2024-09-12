@@ -743,7 +743,7 @@ void LuaRuntime::BeginPlay(Scene* scene, Tilemap* map)
         const auto& klass  = entity.GetClass();
         if (klass.GetNumAnimators() == 0)
             continue;
-        const auto& animator = klass.GetAnimator(0);
+        const auto& animator = klass.GetController(0);
         if (!animator.HasScriptId())
             continue;
 
@@ -846,7 +846,7 @@ void LuaRuntime::BeginPlay(Scene* scene, Tilemap* map)
             CallLua(*env, "BeginPlay", entity, scene, map);
         }
 
-        if (auto* animator = entity->GetAnimator())
+        if (auto* animator = entity->GetStateController())
         {
             if (auto* env = GetTypeEnv(animator->GetClass()))
             {
@@ -973,23 +973,23 @@ void LuaRuntime::Update(double game_time, double dt)
             continue;
 
         const auto& entity_klass = entity->GetClass();
-        const auto& animator_klass = entity_klass.GetAnimator(0);
+        const auto& animator_klass = entity_klass.GetController(0);
 
         std::vector<game::Entity::AnimatorAction> actions;
         entity->UpdateAnimator(dt, &actions);
         if (auto* env = GetTypeEnv(animator_klass))
         {
             auto& e = *env;
-            auto* animator = entity->GetAnimator();
+            auto* animator = entity->GetStateController();
             for (auto& action : actions)
             {
-                if (auto* ptr = std::get_if<Animator::EnterState>(&action))
+                if (auto* ptr = std::get_if<EntityStateController::EnterState>(&action))
                     CallLua(e, "EnterState", animator, ptr->state->GetName(), entity);
-                else if (auto* ptr = std::get_if<Animator::LeaveState>(&action))
+                else if (auto* ptr = std::get_if<EntityStateController::LeaveState>(&action))
                     CallLua(e, "LeaveState", animator, ptr->state->GetName(), entity);
-                else if (auto* ptr = std::get_if<Animator::UpdateState>(&action))
+                else if (auto* ptr = std::get_if<EntityStateController::UpdateState>(&action))
                     CallLua(e, "UpdateState", animator, ptr->state->GetName(), ptr->time, ptr->dt, entity);
-                else if (auto* ptr = std::get_if<Animator::EvalTransition>(&action))
+                else if (auto* ptr = std::get_if<EntityStateController::EvalTransition>(&action))
                 {
                     // if the call to Lua succeeds and the return value is true then update the animator to
                     // take a transition from the current state to the next state.
@@ -997,11 +997,11 @@ void LuaRuntime::Update(double game_time, double dt)
                     if (CallLua(&return_value_from_lua, e, "EvalTransition", animator, ptr->from->GetName(), ptr->to->GetName(), entity) && return_value_from_lua)
                         entity->UpdateAnimator(ptr->transition, ptr->to);
                 }
-                else if (auto* ptr = std::get_if<Animator::StartTransition>(&action))
+                else if (auto* ptr = std::get_if<EntityStateController::StartTransition>(&action))
                     CallLua(e, "StartTransition", animator, ptr->from->GetName(), ptr->to->GetName(), ptr->transition->GetDuration(), entity);
-                else if (auto* ptr = std::get_if<Animator::FinishTransition>(&action))
+                else if (auto* ptr = std::get_if<EntityStateController::FinishTransition>(&action))
                     CallLua(e, "FinishTransition", animator, ptr->from->GetName(), ptr->to->GetName(),entity);
-                else if (auto* ptr = std::get_if<Animator::UpdateTransition>(&action))
+                else if (auto* ptr = std::get_if<EntityStateController::UpdateTransition>(&action))
                     CallLua(e, "UpdateTransition", animator, ptr->from->GetName(), ptr->to->GetName(), ptr->transition->GetDuration(), ptr->time, ptr->dt, entity);
             }
         }
@@ -1042,7 +1042,7 @@ void LuaRuntime::BeginLoop()
             CallLua(*env, "BeginPlay", entity, mScene, mTilemap);
         }
 
-        if (auto* animator = entity->GetAnimator())
+        if (auto* animator = entity->GetStateController())
         {
             if (auto* env = GetTypeEnv(animator->GetClass()))
             {
@@ -1378,7 +1378,7 @@ sol::object LuaRuntime::CallCrossEnvMethod(sol::object object, const std::string
     return sol::make_object(*mLuaState, sol::nil);
 }
 
-sol::environment* LuaRuntime::GetTypeEnv(const AnimatorClass& klass)
+sol::environment* LuaRuntime::GetTypeEnv(const EntityStateControllerClass& klass)
 {
     if (!klass.HasScriptId())
         return nullptr;
