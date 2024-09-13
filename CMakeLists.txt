@@ -227,6 +227,8 @@ add_library(EngineLib
     game/actuator.cpp
     game/entity.cpp
     game/entity_node.cpp
+    game/entity_state.cpp
+    game/entity_state_controller.cpp
     game/entity_node_transformer.cpp
     game/entity_node_rigid_body.cpp
     game/entity_node_rigid_body_joint.cpp
@@ -971,6 +973,8 @@ target_link_libraries(unit_test_event_log Qt5::Core DataLib BaseLib)
 add_library(GameLibTesting
     game/entity.cpp
     game/entity_node.cpp
+    game/entity_state.cpp
+    game/entity_state_controller.cpp
     game/entity_node_transformer.cpp
     game/entity_node_rigid_body.cpp
     game/entity_node_rigid_body_joint.cpp
