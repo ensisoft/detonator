@@ -47,6 +47,7 @@
 #include "game/scriptvar.h"
 #include "game/entity_node.h"
 #include "game/entity_node_rigid_body_joint.h"
+#include "game/entity_state_controller.h"
 
 namespace game
 {
