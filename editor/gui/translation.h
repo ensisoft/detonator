@@ -20,8 +20,12 @@
 
 #include <string>
 
+#include "base/math.h"
 #include "editor/app/workspace.h"
 #include "engine/loader.h"
+#include "game/animator.h"
+#include "game/property_animator.h"
+#include "game/kinematic_animator.h"
 
 // TranslateEnum overloads must be in the same namespace as the enum
 // types they overload on in order for the overload resolution to
@@ -37,3 +41,14 @@ namespace app {
 namespace engine {
     std::string TranslateEnum(FileResourceLoader::DefaultAudioIOStrategy strategy);
 } // namespace
+
+namespace game {
+    std::string TranslateEnum(AnimatorClass::Type type);
+    std::string TranslateEnum(PropertyAnimatorClass::PropertyName name);
+    std::string TranslateEnum(BooleanPropertyAnimatorClass::PropertyName name);
+    std::string TranslateEnum(KinematicAnimatorClass::Target target);
+} // namespace
+
+namespace math {
+    std::string TranslateEnum(Interpolation);
+}
