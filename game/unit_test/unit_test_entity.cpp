@@ -37,6 +37,7 @@
 #include "game/entity_node_spatial_node.h"
 #include "game/entity_node_fixture.h"
 #include "game/entity_node_tilemap_node.h"
+#include "game/transform_animator.h"
 
 // build easily comparable representation of the render tree
 // by concatenating node names into a string in the order

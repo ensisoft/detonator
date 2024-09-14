@@ -22,6 +22,11 @@
 #include "data/writer.h"
 #include "data/reader.h"
 #include "game/animation.h"
+#include "game/animator.h"
+#include "game/transform_animator.h"
+#include "game/kinematic_animator.h"
+#include "game/material_animator.h"
+#include "game/property_animator.h"
 #include "game/entity.h"
 
 namespace game

@@ -27,6 +27,7 @@
 #include "base/json.h"
 #include "game/entity.h"
 #include "game/animation.h"
+#include "game/material_animator.h"
 #include "editor/gui/dlgmaterialparams.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/uniform.h"

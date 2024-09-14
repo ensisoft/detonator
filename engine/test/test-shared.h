@@ -23,6 +23,7 @@
 #include "graphics/color4f.h"
 #include "game/entity.h"
 #include "game/scene.h"
+#include "game/transform_animator.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"
 #include "engine/classlib.h"

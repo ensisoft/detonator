@@ -41,6 +41,11 @@
 #include "editor/gui/tool.h"
 #include "editor/gui/nerd.h"
 #include "game/animation.h"
+#include "game/animator.h"
+#include "game/transform_animator.h"
+#include "game/kinematic_animator.h"
+#include "game/material_animator.h"
+#include "game/property_animator.h"
 #include "graphics/transform.h"
 #include "graphics/painter.h"
 

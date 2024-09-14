@@ -29,6 +29,7 @@
 
 #include "base/assert.h"
 #include "data/chunk.h"
+#include "game/animator.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_text_item.h"
