@@ -36,11 +36,13 @@
 namespace data
 {
     class IODevice;
+    class Chunk;
 
     class Writer
     {
     public:
         virtual ~Writer() = default;
+        virtual std::unique_ptr<Chunk> NewChunk() const = 0;
         virtual std::unique_ptr<Writer> NewWriteChunk() const = 0;
         virtual void Write(const char* name, int value) = 0;
         virtual void Write(const char* name, unsigned value) = 0;
@@ -60,7 +62,9 @@ namespace data
         virtual void Write(const char* name, const base::Color4f& color) = 0;
         virtual void Write(const char* name, const base::Rotator& rotator) = 0;
         virtual void Write(const char* name, const Writer& chunk) = 0;
+        virtual void Write(const char* name, const Chunk& chunk) = 0;
         virtual void Write(const char* name, std::unique_ptr<Writer> chunk) = 0;
+        virtual void Write(const char* name, std::unique_ptr<Chunk> chunk) = 0;
         // array writing for primitive types (object types should be done through chunks)
         virtual void Write(const char* name, const int* array, size_t size) = 0;
         virtual void Write(const char* name, const unsigned* array, size_t size) = 0;
@@ -70,11 +74,14 @@ namespace data
         virtual void Write(const char* name, const char* const* array, size_t size) = 0;
         virtual void Write(const char* name, const std::string* array, size_t size) = 0;
         virtual void AppendChunk(const char* name, const Writer& chunk) = 0;
+        virtual void AppendChunk(const char* name, const Chunk& chunk) = 0;
         virtual void AppendChunk(const char* name, std::unique_ptr<Writer> chunk) = 0;
+        virtual void AppendChunk(const char* name, std::unique_ptr<Chunk> chunk) = 0;
+
         virtual bool HasValue(const char* name) const = 0;
 
-        // Dump and write the contents of this chunk to the IO device.
-        virtual bool Dump(IODevice& device) const = 0;
+        virtual const Chunk* GetChunkFromWriter() const = 0;
+        virtual Chunk* GetChunkFromWriter() noexcept = 0;
 
         // helpers
         template<typename... T>

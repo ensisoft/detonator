@@ -18,11 +18,26 @@
 
 #include "config.h"
 
-namespace data {
-    class Chunk;
+namespace data
+{
     class Reader;
     class Writer;
-    class JsonObject;
-    class JsonFile;
     class IODevice;
+
+    class Chunk
+    {
+    public:
+        virtual ~Chunk() = default;
+
+        virtual const Reader* GetReader() const noexcept = 0;
+        virtual Writer* GetWriter() noexcept = 0;
+
+        virtual void OverwriteChunk(const char* name, std::unique_ptr<Chunk> chunk) = 0;
+        virtual void OverwriteChunk(const char* name, std::unique_ptr<Chunk> chunk, unsigned index) = 0;
+
+        // Dump and write the contents of this chunk to the IO device.
+        virtual bool Dump(IODevice& device) const = 0;
+    private:
+
+    };
 } // namespace

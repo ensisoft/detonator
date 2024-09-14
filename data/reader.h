@@ -35,12 +35,17 @@
 
 namespace data
 {
+    class Chunk;
+
     class Reader
     {
     public:
         virtual ~Reader() = default;
         virtual std::unique_ptr<Reader> GetReadChunk(const char* name) const = 0;
         virtual std::unique_ptr<Reader> GetReadChunk(const char* name, unsigned index) const = 0;
+        virtual std::unique_ptr<Chunk> GetChunk(const char* name) const = 0;
+        virtual std::unique_ptr<Chunk> GetChunk(const char* name, unsigned index) const = 0;
+
         virtual bool Read(const char* name, double* out) const = 0;
         virtual bool Read(const char* name, float* out) const = 0;
         virtual bool Read(const char* name, int* out) const = 0;
@@ -71,6 +76,9 @@ namespace data
         virtual bool IsEmpty() const = 0;
         virtual unsigned GetNumItems(const char* array) const = 0;
         virtual unsigned GetNumChunks(const char* name) const = 0;
+
+        virtual const Chunk* GetChunkFromReader() const = 0;
+        virtual Chunk* GetChunkFromReader() noexcept = 0;
 
         // helpers
         template<typename... T>
