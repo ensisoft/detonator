@@ -91,23 +91,23 @@ bool LoadResources(const char* type,
     bool success = true;
     for (unsigned i=0; i<data.GetNumChunks(type); ++i)
     {
-        auto chunk = data.GetReadChunk(type, i);
+        auto chunk = data.GetChunk(type, i);
         std::string name;
         std::string id;
-        if (!chunk->Read("resource_name", &name) ||
-            !chunk->Read("resource_id", &id))
+        if (!chunk->GetReader()->Read("resource_name", &name) ||
+            !chunk->GetReader()->Read("resource_id", &id))
         {
             ERROR("Unexpected JSON. Maybe old workspace version?");
             success = false;
             continue;
         }
         unsigned version = 0;
-        chunk->Read("resource_ver", &version);
+        chunk->GetReader()->Read("resource_ver", &version);
 
         chunk = app::detail::MigrateResourceDataChunk<ClassType>(std::move(chunk), log);
 
         ClassType ret;
-        if (!ret.FromJson(*chunk))
+        if (!ret.FromJson(*chunk->GetReader()))
         {
             WARN("Incomplete resource load from JSON. [type='%1', name='%2']", type, name);
             success = false;
@@ -142,22 +142,22 @@ bool LoadMaterials(const char* type,
     bool success = true;
     for (unsigned i=0; i<data.GetNumChunks(type); ++i)
     {
-        auto chunk = data.GetReadChunk(type, i);
+        auto chunk = data.GetChunk(type, i);
         std::string name;
         std::string id;
-        if (!chunk->Read("resource_name", &name) ||
-            !chunk->Read("resource_id", &id))
+        if (!chunk->GetReader()->Read("resource_name", &name) ||
+            !chunk->GetReader()->Read("resource_id", &id))
         {
             ERROR("Unexpected JSON. Maybe old workspace version?");
             success = false;
             continue;
         }
         unsigned version = 0;
-        chunk->Read("resource_ver", &version);
+        chunk->GetReader()->Read("resource_ver", &version);
 
         chunk = app::detail::MigrateResourceDataChunk<ClassType>(std::move(chunk), log);
 
-        auto ret = ClassType::ClassFromJson(*chunk);
+        auto ret = ClassType::ClassFromJson(*chunk->GetReader());
         if (!ret)
         {
             WARN("Incomplete resource load from JSON. [type='%1', name='%2']", type, name);
