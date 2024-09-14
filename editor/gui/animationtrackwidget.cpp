@@ -40,6 +40,7 @@
 #include "editor/gui/settings.h"
 #include "editor/gui/tool.h"
 #include "editor/gui/nerd.h"
+#include "editor/gui/translation.h"
 #include "game/animation.h"
 #include "game/animator.h"
 #include "game/transform_animator.h"
@@ -155,8 +156,8 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     PopulateFromEnum<game::PropertyAnimatorClass::PropertyName>(mUI.setvalName);
     PopulateFromEnum<game::KinematicAnimatorClass::Interpolation>(mUI.kinematicInterpolation);
     PopulateFromEnum<game::KinematicAnimatorClass::Target>(mUI.kinematicTarget);
-    PopulateFromEnum<game::BooleanPropertyAnimatorClass::PropertyName>(mUI.itemFlags);
-    PopulateFromEnum<game::BooleanPropertyAnimatorClass::PropertyAction>(mUI.flagAction);
+    PopulateFromEnum<game::BooleanPropertyAnimatorClass::PropertyName>(mUI.itemFlags, true, true);
+    PopulateFromEnum<game::BooleanPropertyAnimatorClass::PropertyAction>(mUI.flagAction, true, true);
     PopulateFromEnum<game::MaterialAnimatorClass::Interpolation >(mUI.materialInterpolation);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
@@ -937,11 +938,10 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
     }
 
     QMenu show(this);
-    show.setTitle(tr("Show Actuators ..."));
+    show.setTitle(tr("Show Animators ..."));
     for (const auto val : magic_enum::enum_values<game::AnimatorClass::Type>())
     {
-        const std::string name(magic_enum::enum_name(val));
-        QAction* action = show.addAction(app::FromUtf8(name));
+        QAction* action = show.addAction(app::FromUtf8(TranslateEnum(val)));
         connect(action, &QAction::toggled, this, &AnimationTrackWidget::ToggleShowResource);
         action->setData(magic_enum::enum_integer(val));
         action->setCheckable(true);
@@ -953,7 +953,6 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
     actuators.setEnabled(selected == nullptr);
     actuators.setTitle("New Animator ...");
     actuators.setIcon(QIcon("icons:add.png"));
-    actuators.setEnabled(timeline != nullptr);
 
     struct Actuator {
         game::AnimatorClass::Type type;
@@ -961,12 +960,12 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
     };
     std::vector<Actuator> actuator_list;
 
-    actuator_list.push_back( {game::AnimatorClass::Type::TransformAnimator,       "Transform Animator Animator" });
-    actuator_list.push_back( {game::AnimatorClass::Type::KinematicAnimator,       "Kinematic Animator (Rigid Body)" });
-    actuator_list.push_back( {game::AnimatorClass::Type::KinematicAnimator,       "Kinematic Animator (Transformer)" });
+    actuator_list.push_back( {game::AnimatorClass::Type::TransformAnimator,       "Transform Animator" });
+    actuator_list.push_back( {game::AnimatorClass::Type::KinematicAnimator,       "Kinematic Animator on Rigid Body" });
+    actuator_list.push_back( {game::AnimatorClass::Type::KinematicAnimator,       "Kinematic Animator on Node Transformer" });
     actuator_list.push_back( {game::AnimatorClass::Type::MaterialAnimator,        "Material Animator" });
     actuator_list.push_back( {game::AnimatorClass::Type::PropertyAnimator,        "Property Animator" });
-    actuator_list.push_back( {game::AnimatorClass::Type::BooleanPropertyAnimator, "Property Animator (Boolean Flag)" });
+    actuator_list.push_back( {game::AnimatorClass::Type::BooleanPropertyAnimator, "Property Animator (Boolean))" });
 
     // build menu for adding actuators.
     for (const auto& act : actuator_list)
@@ -999,6 +998,7 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
     menu.addSeparator();
     menu.addAction(mUI.actionDeleteActuator);
     menu.addAction(mUI.actionDeleteActuators);
+    menu.addSeparator();
     menu.addAction(mUI.actionDeleteTimeline);
     menu.addSeparator();
     menu.addMenu(&show);

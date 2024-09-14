@@ -41,6 +41,7 @@
 #include <string_view>
 #include <type_traits>
 #include <vector>
+#include <algorithm>
 
 #include "base/assert.h"
 #include "base/types.h"
@@ -370,7 +371,7 @@ inline void SetVisible(QWidget* widget, bool visible)
 }
 
 template<typename EnumT>
-void PopulateFromEnum(QComboBox* combo, bool clear = true)
+void PopulateFromEnum(QComboBox* combo, bool clear = true, bool sort = false)
 {
     QSignalBlocker s(combo);
     if (clear)
@@ -378,12 +379,30 @@ void PopulateFromEnum(QComboBox* combo, bool clear = true)
 
     combo->setProperty("__is_enum__", true);
 
+    struct Enum {
+        unsigned value;
+        std::string str;
+    };
+
+    std::vector<Enum> enums;
+
     constexpr auto& values = magic_enum::enum_values<EnumT>();
     for (const auto& val : values)
     {
-        const auto enum_string = TranslateEnum(val);
-        const auto enum_value  = magic_enum::enum_integer(val);
-        combo->addItem(QString::fromStdString(enum_string), QVariant((uint)enum_value));
+        Enum e;
+        e.value = magic_enum::enum_integer(val);
+        e.str   = TranslateEnum(val);
+        enums.push_back(e);
+    }
+    if (sort)
+    {
+        std::sort(enums.begin(), enums.end(), [](const auto& a, const auto& b) {
+            return a.str < b.str;
+        });
+    }
+    for (const auto& e : enums)
+    {
+        combo->addItem(QString::fromStdString(e.str), QVariant((uint)e.value));
     }
 }
 
