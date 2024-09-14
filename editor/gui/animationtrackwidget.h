@@ -155,14 +155,14 @@ namespace gui
         void SetSelectedActuatorProperties();
         void SetActuatorUIEnabled(bool enabled);
         void SetActuatorUIDefaults();
-        void AddActuatorFromTimeline(game::ActuatorClass::Type type, float start_time);
+        void AddActuatorFromTimeline(game::AnimatorClass::Type type, float start_time);
         void DisplayCurrentCameraLocation();
         void CreateTimelines();
         void RemoveDeletedItems();
         void ReturnToDefault();
         void UpdateKinematicUnits();
         game::EntityNode* GetCurrentEntityNode();
-        game::ActuatorClass* GetCurrentActuator();
+        game::AnimatorClass* GetCurrentActuator();
         gui::TimelineWidget::TimelineItem* GetCurrentTimelineItem();
     private:
         Ui::AnimationTrack mUI;
@@ -190,7 +190,7 @@ namespace gui
             float camera_offset_y = 0.0f;
             std::shared_ptr<game::EntityClass> entity;
             std::shared_ptr<game::AnimationClass> track;
-            base::bitflag<game::ActuatorClass::Type> show_flags = {~0u};
+            base::bitflag<game::AnimatorClass::Type> show_flags = {~0u};
             std::vector<Timeline> timelines;
             std::unordered_map<std::string, std::string> actuator_to_timeline;
         } mState;

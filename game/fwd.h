@@ -21,7 +21,7 @@
 namespace game {
     class AnimationClass;
     class Animation;
-    class ActuatorClass;
+    class AnimatorClass;
     class EntityStateControllerClass;
     class EntityStateController;
     class TilemapClass;
@@ -34,17 +34,17 @@ namespace game {
     class SceneClass;
     class Scene;
     class ScriptVar;
-    class MaterialActuatorClass;
-    class TransformActuatorClass;
-    class SetFlagActuatorClass;
-    class SetValueActuatorClass;
-    class KinematicActuatorClass;
-    class MaterialActuator;
-    class TransformActuator;
-    class SetFlagActuator;
-    class SetValueActuator;
-    class KinematicActuator;
-    class MaterialActuator;
+    class MaterialAnimatorClass;
+    class TransformAnimatorClass;
+    class BooleanPropertyAnimatorClass;
+    class PropertyAnimatorClass;
+    class KinematicAnimatorClass;
+    class MaterialAnimator;
+    class TransformAnimator;
+    class BooleanPropertyAnimator;
+    class PropertyAnimator;
+    class KinematicAnimator;
+    class MaterialAnimator;
 
     class RigidBodyClass;
     class RigidBody;

@@ -893,12 +893,12 @@ void unit_test_entity_clone_track_bug()
     game::EntityNodeClass node;
     node.SetName("root");
 
-    game::TransformActuatorClass actuator;
+    game::TransformAnimatorClass actuator;
     actuator.SetNodeId(node.GetId());
 
     game::AnimationClass track;
     track.SetName("test1");
-    track.AddActuator(actuator);
+    track.AddAnimator(actuator);
 
     game::EntityClass klass;
     klass.AddNode(std::move(node));
@@ -908,7 +908,7 @@ void unit_test_entity_clone_track_bug()
         auto clone = klass.Clone();
         const auto& cloned_node = clone.GetNode(0);
         const auto& cloned_track = clone.GetAnimation(0);
-        TEST_REQUIRE(cloned_track.GetActuatorClass(0).GetNodeId() == cloned_node.GetId());
+        TEST_REQUIRE(cloned_track.GetAnimatorClass(0).GetNodeId() == cloned_node.GetId());
     }
 }
 

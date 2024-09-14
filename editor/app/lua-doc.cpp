@@ -1396,54 +1396,54 @@ void InitLuaDoc()
                  "The entity class's script variables are accessible as properties of the entity class object.<br>"
                  "For example a script variable named 'score' would be accessible as object.score.<br>");
 
-    DOC_TABLE("game.ActuatorClass");
-    DOC_METHOD_0("string", "GetName", "Get the actuator class name.");
-    DOC_METHOD_0("string", "GetId", "Get the actuator class ID.");
-    DOC_METHOD_0("string", "GetNodeId", "Get the entity node ID that the actuator will apply on.");
-    DOC_METHOD_0("float", "GetStartTime", "Get the animation time in seconds when the actuator will start.");
-    DOC_METHOD_0("float", "GetDuration", "Get the duration of the actuator's operation in seconds.");
-    DOC_METHOD_0("string", "GetType", "Get the type of actuator. <br>"
-                                      "One of: 'Transform', 'Kinematic', 'SetValue', 'SetFlag', 'Material'");
-    DOC_TABLE("game.Actuator");
-    DOC_METHOD_0("string", "GetClassId", "Get the actuator class ID.");
-    DOC_METHOD_0("string", "GetName", "Get the actuator class name.");
-    DOC_METHOD_0("string", "GetNodeId", "Get the entity node ID that the actuator will apply on.");
-    DOC_METHOD_0("float", "GetStartTime", "Get the animation time in seconds when the actuator will start.");
-    DOC_METHOD_0("float", "GetDuration", "Get the duration of the actuator's operation.");
-    DOC_METHOD_0("game.TransformActuator", "AsTransformActuator", "Cast the actuator to a TransformActuator. Returns nil if the cast failed.");
-    DOC_METHOD_0("game.SetFlagActuator", "AsFlagActuator", "Cast the actuator to a SetFlagActuator. Returns nil if the cast failed.");
-    DOC_METHOD_0("game.SetValueActuator", "AsValueActuator", "Cast the actuator to a SetValueActuator. Returns nil if the cast failed.");
-    DOC_METHOD_0("game.KinematicActuator", "AsKinematicActuator", "Cast the actuator to a KinematicActuator. Returns nil if the cast failed.");
-    DOC_METHOD_0("game.MaterialActuator", "AsMaterialActuator", "Cast the actuator to a MaterialActuator. Returns nil if the cast failed.");
+    DOC_TABLE("game.AnimatorClass");
+    DOC_METHOD_0("string", "GetName", "Get the animator class name.");
+    DOC_METHOD_0("string", "GetId", "Get the animator class ID.");
+    DOC_METHOD_0("string", "GetNodeId", "Get the entity node ID that the animator will apply on.");
+    DOC_METHOD_0("float", "GetStartTime", "Get the animation time in seconds when the animator will start.");
+    DOC_METHOD_0("float", "GetDuration", "Get the duration of the animators's operation in seconds.");
+    DOC_METHOD_0("string", "GetType", "Get the type of animator. <br>"
+                                      "One of: 'TransformAnimator', 'KinematicAnimator', 'PropertyAnimator', 'BooleanPropertyAnimator', 'MaterialAnimator'");
+    DOC_TABLE("game.Animator");
+    DOC_METHOD_0("string", "GetClassId", "Get the animator class ID.");
+    DOC_METHOD_0("string", "GetName", "Get the animator class name.");
+    DOC_METHOD_0("string", "GetNodeId", "Get the entity node ID that the animator will apply on.");
+    DOC_METHOD_0("float", "GetStartTime", "Get the animation time in seconds when the animator will start.");
+    DOC_METHOD_0("float", "GetDuration", "Get the duration of the animator's operation.");
+    DOC_METHOD_0("game.TransformAnimator", "AsTransformAnimator", "Cast the animator to a TransformAnimator. Returns nil if the cast failed.");
+    DOC_METHOD_0("game.BooleanPropertyAnimator", "AsBooleanPropertyAnimator", "Cast the animator to a BooleanPropertyAnimator. Returns nil if the cast failed.");
+    DOC_METHOD_0("game.PropertyAnimator", "AsPropertyAnimator", "Cast the animator to a PropertyAnimator. Returns nil if the cast failed.");
+    DOC_METHOD_0("game.KinematicAnimator", "AsKinematicAnimator", "Cast the animator to a KinematicAnimator. Returns nil if the cast failed.");
+    DOC_METHOD_0("game.MaterialAnimator", "AsMaterialAnimator", "Cast the animator to a MaterialAnimator. Returns nil if the cast failed.");
 
-    DOC_TABLE("game.TransformActuator");
-    DOC_METHOD_1("void", "SetEndPosition", "Set the ending position for actuator movement.<br>"
-                                           "This takes effect only when the actuator is not static.",
+    DOC_TABLE("game.TransformAnimator");
+    DOC_METHOD_1("void", "SetEndPosition", "Set the ending position for animator movement.<br>"
+                                           "This takes effect only when the animator is not static.",
                  "glm.vec2", "position");
-    DOC_METHOD_2("void", "SetEndPosition", "Set the ending position for actuator movement.<br>"
-                                           "This takes effect only when the actuator is not static.",
+    DOC_METHOD_2("void", "SetEndPosition", "Set the ending position for animator movement.<br>"
+                                           "This takes effect only when the animator is not static.",
                  "float", "x", "float", "y");
-    DOC_METHOD_1("void", "SetEndScale", "Set the ending scale for actuator movement.<br>"
-                                           "This takes effect only when the actuator is not static.",
+    DOC_METHOD_1("void", "SetEndScale", "Set the ending scale for animator movement.<br>"
+                                           "This takes effect only when the animator is not static.",
                  "glm.vec2", "scale");
-    DOC_METHOD_2("void", "SetEndScale", "Set the ending scale for actuator movement.<br>"
-                                           "This takes effect only when the actuator is not static.",
+    DOC_METHOD_2("void", "SetEndScale", "Set the ending scale for animator movement.<br>"
+                                           "This takes effect only when the animator is not static.",
                  "float", "x", "float", "y");
-    DOC_METHOD_1("void", "SetEndSize", "Set the ending size for actuator movement.<br>"
-                                        "This takes effect only when the actuator is not static.",
+    DOC_METHOD_1("void", "SetEndSize", "Set the ending size for animator movement.<br>"
+                                        "This takes effect only when the animator is not static.",
                  "glm.vec2", "scale");
-    DOC_METHOD_2("void", "SetEndSize", "Set the ending size for actuator movement.<br>"
-                                        "This takes effect only when the actuator is not static.",
+    DOC_METHOD_2("void", "SetEndSize", "Set the ending size for animator movement.<br>"
+                                        "This takes effect only when the animator is not static.",
                  "float", "x", "float", "y");
-    DOC_METHOD_1("void", "SetEndRotation", "Set the ending rotation in radians for the actuator movement.<br>"
-                                           "This takes effect only when the actuator is not static.",
+    DOC_METHOD_1("void", "SetEndRotation", "Set the ending rotation in radians for the animator movement.<br>"
+                                           "This takes effect only when the animator is not static.",
                  "float", "angle");
 
     // todo:
-    DOC_TABLE("game.SetFlagActuator");
-    DOC_TABLE("game.SetValueActuator");
-    DOC_TABLE("game.SetKinematicActuator");
-    DOC_TABLE("game.MaterialActuator");
+    DOC_TABLE("game.BooleanPropertyAnimator");
+    DOC_TABLE("game.PropertyAnimator");
+    DOC_TABLE("game.KinematicAnimator");
+    DOC_TABLE("game.MaterialAnimator");
 
 
     DOC_TABLE("game.EntityState");
@@ -1493,14 +1493,14 @@ void InitLuaDoc()
     DOC_METHOD_0("float", "GetCurrentTime", "Get the current animation time in seconds.");
     DOC_METHOD_0("float", "GetDuration", "Get the animation duration in seconds.");
     DOC_METHOD_0("game.AnimationClass", "GetClass", "Get the class object.");
-    DOC_METHOD_2("game.Actuator", "FindActuatorById", "Find an animation actuator by its class ID.<br>"
-                                                      "Returns nil if no such actuator could be found.<br>"
-                                                      "Takes an optional type string for down casting the actuator to a specific type.",
+    DOC_METHOD_2("game.Animator", "FindAnimatorById", "Find an animator by its class ID.<br>"
+                                                      "Returns nil if no such animator could be found.<br>"
+                                                      "Takes an optional type string for down casting the animator to a specific type.",
                  "string", "id", "string", "type");
-    DOC_METHOD_2("game.Actuator", "FindActuatorByName", "Find an animation actuator by its class name.<br>"
-                                                        "Returns nil if no such actuator could be found.<br>"
-                                                        "In case multiple actuators have the same name it's unspecified which one is returned.<br>"
-                                                        "Takes an optional type string for down casting the actuator to a specific type.",
+    DOC_METHOD_2("game.Animator", "FindAnimatorByName", "Find an animator by its class name.<br>"
+                                                        "Returns nil if no such animator could be found.<br>"
+                                                        "In case multiple animator have the same name it's unspecified which one is returned.<br>"
+                                                        "Takes an optional type string for down casting the animator to a specific type.",
                  "string", "name", "string", "type");
 
     DOC_TABLE("game.Entity");

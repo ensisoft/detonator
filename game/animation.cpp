@@ -54,7 +54,7 @@ AnimationClass::AnimationClass(AnimationClass&& other) noexcept
     mDelay     = other.mDelay;
 }
 
-void AnimationClass::DeleteActuator(size_t index) noexcept
+void AnimationClass::DeleteAnimator(std::size_t index) noexcept
 {
     ASSERT(index < mActuators.size());
     auto it = mActuators.begin();
@@ -62,7 +62,7 @@ void AnimationClass::DeleteActuator(size_t index) noexcept
     mActuators.erase(it);
 }
 
-bool AnimationClass::DeleteActuatorById(const std::string& id) noexcept
+bool AnimationClass::DeleteAnimatorById(const std::string& id) noexcept
 {
     for (auto it = mActuators.begin(); it != mActuators.end(); ++it)
     {
@@ -73,7 +73,7 @@ bool AnimationClass::DeleteActuatorById(const std::string& id) noexcept
     }
     return false;
 }
-ActuatorClass* AnimationClass::FindActuatorById(const std::string& id) noexcept
+AnimatorClass* AnimationClass::FindAnimatorById(const std::string& id) noexcept
 {
     for (auto& actuator : mActuators) {
         if (actuator->GetId() == id)
@@ -81,7 +81,7 @@ ActuatorClass* AnimationClass::FindActuatorById(const std::string& id) noexcept
     }
     return nullptr;
 }
-const ActuatorClass* AnimationClass::FindActuatorById(const std::string& id) const noexcept
+const AnimatorClass* AnimationClass::FindAnimatorById(const std::string& id) const noexcept
 {
     for (auto& actuator : mActuators) {
         if (actuator->GetId() == id)
@@ -90,19 +90,19 @@ const ActuatorClass* AnimationClass::FindActuatorById(const std::string& id) con
     return nullptr;
 }
 
-std::unique_ptr<Actuator> AnimationClass::CreateActuatorInstance(size_t index) const
+std::unique_ptr<Animator> AnimationClass::CreateAnimatorInstance(std::size_t index) const
 {
     const auto& klass = mActuators[index];
-    if (klass->GetType() == ActuatorClass::Type::Transform)
-        return std::make_unique<TransformActuator>(std::static_pointer_cast<TransformActuatorClass>(klass));
-    else if (klass->GetType() == ActuatorClass::Type::SetValue)
-        return std::make_unique<SetValueActuator>(std::static_pointer_cast<SetValueActuatorClass>(klass));
-    else if (klass->GetType() == ActuatorClass::Type::Kinematic)
-        return std::make_unique<KinematicActuator>(std::static_pointer_cast<KinematicActuatorClass>(klass));
-    else if (klass->GetType() == ActuatorClass::Type::SetFlag)
-        return std::make_unique<SetFlagActuator>(std::static_pointer_cast<SetFlagActuatorClass>(klass));
-    else if (klass->GetType() == ActuatorClass::Type::Material)
-        return std::make_unique<MaterialActuator>(std::static_pointer_cast<MaterialActuatorClass>(klass));
+    if (klass->GetType() == AnimatorClass::Type::TransformAnimator)
+        return std::make_unique<TransformAnimator>(std::static_pointer_cast<TransformAnimatorClass>(klass));
+    else if (klass->GetType() == AnimatorClass::Type::PropertyAnimator)
+        return std::make_unique<PropertyAnimator>(std::static_pointer_cast<PropertyAnimatorClass>(klass));
+    else if (klass->GetType() == AnimatorClass::Type::KinematicAnimator)
+        return std::make_unique<KinematicAnimator>(std::static_pointer_cast<KinematicAnimatorClass>(klass));
+    else if (klass->GetType() == AnimatorClass::Type::BooleanPropertyAnimator)
+        return std::make_unique<BooleanPropertyAnimator>(std::static_pointer_cast<BooleanPropertyAnimatorClass>(klass));
+    else if (klass->GetType() == AnimatorClass::Type::MaterialAnimator)
+        return std::make_unique<MaterialAnimator>(std::static_pointer_cast<MaterialAnimatorClass>(klass));
     else BUG("Unknown actuator type");
     return {};
 }
@@ -149,22 +149,22 @@ bool AnimationClass::FromJson(const data::Reader& data)
 
     for (unsigned i=0; i<data.GetNumChunks("actuators"); ++i)
     {
-        ActuatorClass::Type type;
+        AnimatorClass::Type type;
         const auto& meta_chunk = data.GetReadChunk("actuators", i);
         const auto& data_chunk = meta_chunk->GetReadChunk("actuator");
         if (data_chunk && meta_chunk->Read("type", &type))
         {
-            std::shared_ptr<ActuatorClass> actuator;
-            if (type == ActuatorClass::Type::Transform)
-                actuator = std::make_shared<TransformActuatorClass>();
-            else if (type == ActuatorClass::Type::SetValue)
-                actuator = std::make_shared<SetValueActuatorClass>();
-            else if (type == ActuatorClass::Type::Kinematic)
-                actuator = std::make_shared<KinematicActuatorClass>();
-            else if (type == ActuatorClass::Type::SetFlag)
-                actuator = std::make_shared<SetFlagActuatorClass>();
-            else if (type == ActuatorClass::Type::Material)
-                actuator = std::make_shared<MaterialActuatorClass>();
+            std::shared_ptr<AnimatorClass> actuator;
+            if (type == AnimatorClass::Type::TransformAnimator)
+                actuator = std::make_shared<TransformAnimatorClass>();
+            else if (type == AnimatorClass::Type::PropertyAnimator)
+                actuator = std::make_shared<PropertyAnimatorClass>();
+            else if (type == AnimatorClass::Type::KinematicAnimator)
+                actuator = std::make_shared<KinematicAnimatorClass>();
+            else if (type == AnimatorClass::Type::BooleanPropertyAnimator)
+                actuator = std::make_shared<BooleanPropertyAnimatorClass>();
+            else if (type == AnimatorClass::Type::MaterialAnimator)
+                actuator = std::make_shared<MaterialAnimatorClass>();
             else BUG("Unknown actuator type.");
 
             mActuators.push_back(actuator);
@@ -211,10 +211,10 @@ AnimationClass& AnimationClass::operator=(const AnimationClass& other)
 Animation::Animation(const std::shared_ptr<const AnimationClass>& klass)
     : mClass(klass)
 {
-    for (size_t i=0; i<mClass->GetNumActuators(); ++i)
+    for (size_t i=0; i< mClass->GetNumAnimators(); ++i)
     {
         NodeTrack track;
-        track.actuator = mClass->CreateActuatorInstance(i);
+        track.actuator = mClass->CreateAnimatorInstance(i);
         track.node     = track.actuator->GetNodeId();
         track.ended    = false;
         track.started  = false;
@@ -322,7 +322,7 @@ bool Animation::IsComplete() const noexcept
     return false;
 }
 
-Actuator* Animation::FindActuatorById(const std::string& id) noexcept
+Animator* Animation::FindActuatorById(const std::string& id) noexcept
 {
     for (auto& item : mTracks)
     {
@@ -331,7 +331,7 @@ Actuator* Animation::FindActuatorById(const std::string& id) noexcept
     }
     return nullptr;
 }
-Actuator* Animation::FindActuatorByName(const std::string& name) noexcept
+Animator* Animation::FindActuatorByName(const std::string& name) noexcept
 {
     for (auto& item : mTracks)
     {
@@ -341,7 +341,7 @@ Actuator* Animation::FindActuatorByName(const std::string& name) noexcept
     return nullptr;
 }
 
-const Actuator* Animation::FindActuatorById(const std::string& id) const noexcept
+const Animator* Animation::FindActuatorById(const std::string& id) const noexcept
 {
     for (auto& item : mTracks)
     {
@@ -350,7 +350,7 @@ const Actuator* Animation::FindActuatorById(const std::string& id) const noexcep
     }
     return nullptr;
 }
-const Actuator* Animation::FindActuatorByName(const std::string& name) const noexcept
+const Animator* Animation::FindActuatorByName(const std::string& name) const noexcept
 {
     for (auto& item : mTracks)
     {

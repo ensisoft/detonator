@@ -39,7 +39,7 @@
 namespace game
 {
 
-std::size_t SetFlagActuatorClass::GetHash() const
+std::size_t BooleanPropertyAnimatorClass::GetHash() const
 {
     std::size_t hash = 0;
     hash = base::hash_combine(hash, mId);
@@ -54,7 +54,7 @@ std::size_t SetFlagActuatorClass::GetHash() const
     return hash;
 }
 
-void SetFlagActuatorClass::IntoJson(data::Writer& data) const
+void BooleanPropertyAnimatorClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",        mId);
     data.Write("name",      mName);
@@ -67,7 +67,7 @@ void SetFlagActuatorClass::IntoJson(data::Writer& data) const
     data.Write("time",      mTime);
 }
 
-bool SetFlagActuatorClass::FromJson(const data::Reader& data)
+bool BooleanPropertyAnimatorClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
     ok &= data.Read("id",        &mId);
@@ -82,7 +82,7 @@ bool SetFlagActuatorClass::FromJson(const data::Reader& data)
     return ok;
 }
 
-std::size_t KinematicActuatorClass::GetHash() const
+std::size_t KinematicAnimatorClass::GetHash() const
 {
     std::size_t hash = 0;
     hash = base::hash_combine(hash, mId);
@@ -100,7 +100,7 @@ std::size_t KinematicActuatorClass::GetHash() const
     return hash;
 }
 
-void KinematicActuatorClass::IntoJson(data::Writer& data) const
+void KinematicAnimatorClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",                   mId);
     data.Write("name",                 mName);
@@ -116,7 +116,7 @@ void KinematicActuatorClass::IntoJson(data::Writer& data) const
     data.Write("flags",                mFlags);
 }
 
-bool KinematicActuatorClass::FromJson(const data::Reader& data)
+bool KinematicAnimatorClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
     ok &= data.Read("id",                   &mId);
@@ -134,7 +134,7 @@ bool KinematicActuatorClass::FromJson(const data::Reader& data)
     return ok;
 }
 
-size_t SetValueActuatorClass::GetHash() const
+size_t PropertyAnimatorClass::GetHash() const
 {
     std::size_t hash = 0;
     hash = base::hash_combine(hash, mId);
@@ -149,7 +149,7 @@ size_t SetValueActuatorClass::GetHash() const
     return hash;
 }
 
-void SetValueActuatorClass::IntoJson(data::Writer& data) const
+void PropertyAnimatorClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",        mId);
     data.Write("cname",     mName);
@@ -162,7 +162,7 @@ void SetValueActuatorClass::IntoJson(data::Writer& data) const
     data.Write("flags",     mFlags);
 }
 
-bool SetValueActuatorClass::FromJson(const data::Reader& data)
+bool PropertyAnimatorClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
     ok &= data.Read("id",        &mId);
@@ -177,7 +177,7 @@ bool SetValueActuatorClass::FromJson(const data::Reader& data)
     return ok;
 }
 
-void TransformActuatorClass::IntoJson(data::Writer& data) const
+void TransformAnimatorClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",        mId);
     data.Write("name",      mName);
@@ -192,7 +192,7 @@ void TransformActuatorClass::IntoJson(data::Writer& data) const
     data.Write("flags",     mFlags);
 }
 
-bool TransformActuatorClass::FromJson(const data::Reader& data)
+bool TransformAnimatorClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
     ok &= data.Read("id",        &mId);
@@ -209,7 +209,7 @@ bool TransformActuatorClass::FromJson(const data::Reader& data)
     return ok;
 }
 
-std::size_t TransformActuatorClass::GetHash() const
+std::size_t TransformAnimatorClass::GetHash() const
 {
     std::size_t hash = 0;
     hash = base::hash_combine(hash, mId);
@@ -226,7 +226,7 @@ std::size_t TransformActuatorClass::GetHash() const
     return hash;
 }
 
-void MaterialActuatorClass::IntoJson(data::Writer& data) const
+void MaterialAnimatorClass::IntoJson(data::Writer& data) const
 {
     data.Write("id",       mId);
     data.Write("cname",    mName);
@@ -244,7 +244,7 @@ void MaterialActuatorClass::IntoJson(data::Writer& data) const
     }
 }
 
-bool MaterialActuatorClass::FromJson(const data::Reader& data)
+bool MaterialAnimatorClass::FromJson(const data::Reader& data)
 {
     bool ok = true;
     ok &= data.Read("id",       &mId);
@@ -265,7 +265,7 @@ bool MaterialActuatorClass::FromJson(const data::Reader& data)
     }
     return ok;
 }
-std::size_t MaterialActuatorClass::GetHash() const
+std::size_t MaterialAnimatorClass::GetHash() const
 {
     size_t hash = 0;
     hash = base::hash_combine(hash, mId);
@@ -289,10 +289,10 @@ std::size_t MaterialActuatorClass::GetHash() const
     return hash;
 }
 
-void KinematicActuator::Start(EntityNode& node)
+void KinematicAnimator::Start(EntityNode& node)
 {
     const auto target = mClass->GetTarget();
-    if (target == KinematicActuatorClass::Target::RigidBody)
+    if (target == KinematicAnimatorClass::Target::RigidBody)
     {
         if (const auto* body = node.GetRigidBody())
         {
@@ -308,7 +308,7 @@ void KinematicActuator::Start(EntityNode& node)
             WARN("Kinematic actuator can't apply on a node without rigid body. [actuator='%1']", mClass->GetName());
         }
     }
-    else if (target == KinematicActuatorClass::Target::Transformer)
+    else if (target == KinematicAnimatorClass::Target::Transformer)
     {
         if (const auto* transformer = node.GetTransformer())
         {
@@ -323,10 +323,10 @@ void KinematicActuator::Start(EntityNode& node)
         }
     } else BUG("Missing kinematic actuator target.");
 }
-void KinematicActuator::Apply(EntityNode& node, float t)
+void KinematicAnimator::Apply(EntityNode& node, float t)
 {
     const auto target = mClass->GetTarget();
-    if (target == KinematicActuatorClass::Target::RigidBody)
+    if (target == KinematicAnimatorClass::Target::RigidBody)
     {
         if (auto* body = node.GetRigidBody())
         {
@@ -339,7 +339,7 @@ void KinematicActuator::Apply(EntityNode& node, float t)
             body->AdjustAngularVelocity(angular_velocity);
         }
     }
-    else if (target == KinematicActuatorClass::Target::Transformer)
+    else if (target == KinematicAnimatorClass::Target::Transformer)
     {
         if (auto* transformer = node.GetTransformer())
         {
@@ -361,10 +361,10 @@ void KinematicActuator::Apply(EntityNode& node, float t)
     } else BUG("Missing kinematic actuator target.");
 }
 
-void KinematicActuator::Finish(EntityNode& node)
+void KinematicAnimator::Finish(EntityNode& node)
 {
     const auto target = mClass->GetTarget();
-    if (target == KinematicActuatorClass::Target::RigidBody)
+    if (target == KinematicAnimatorClass::Target::RigidBody)
     {
         if (auto* body = node.GetRigidBody())
         {
@@ -372,7 +372,7 @@ void KinematicActuator::Finish(EntityNode& node)
             body->AdjustAngularVelocity(mClass->GetEndAngularVelocity());
         }
     }
-    else if (target == KinematicActuatorClass::Target::Transformer)
+    else if (target == KinematicAnimatorClass::Target::Transformer)
     {
         if (auto* transformer = node.GetTransformer())
         {
@@ -385,7 +385,7 @@ void KinematicActuator::Finish(EntityNode& node)
     else BUG("Missing kinematic actuator target.");
 }
 
-void SetFlagActuator::Start(EntityNode& node)
+void BooleanPropertyAnimator::Start(EntityNode& node)
 {
     if (!CanApply(node, true /*verbose*/))
         return;
@@ -396,7 +396,7 @@ void SetFlagActuator::Start(EntityNode& node)
     const auto* spatial = node.GetSpatialNode();
     const auto* transformer= node.GetTransformer();
 
-    using FlagName = SetFlagActuatorClass::FlagName;
+    using FlagName = BooleanPropertyAnimatorClass::Property;
     const auto flag = mClass->GetFlagName();
 
     if (flag == FlagName::Drawable_VisibleInGame)
@@ -448,7 +448,7 @@ void SetFlagActuator::Start(EntityNode& node)
     }
 
 }
-void SetFlagActuator::Apply(EntityNode& node, float t)
+void BooleanPropertyAnimator::Apply(EntityNode& node, float t)
 {
     if (t >= mTime && mTime != -1.0f)
     {
@@ -456,7 +456,7 @@ void SetFlagActuator::Apply(EntityNode& node, float t)
         mTime = -1.0f;
     }
 }
-void SetFlagActuator::Finish(EntityNode& node)
+void BooleanPropertyAnimator::Finish(EntityNode& node)
 {
     if (mTime == 1.0f)
     {
@@ -465,7 +465,7 @@ void SetFlagActuator::Finish(EntityNode& node)
     }
 }
 
-void SetFlagActuator::SetFlag(EntityNode& node) const
+void BooleanPropertyAnimator::SetFlag(EntityNode& node) const
 {
     if (mTime == -1)
         return;
@@ -488,7 +488,7 @@ void SetFlagActuator::SetFlag(EntityNode& node) const
     auto* spatial = node.GetSpatialNode();
     auto* transformer = node.GetTransformer();
 
-    using FlagName = SetFlagActuatorClass::FlagName;
+    using FlagName = BooleanPropertyAnimatorClass::Property;
     const auto flag = mClass->GetFlagName();
 
     if (flag == FlagName::Drawable_VisibleInGame)
@@ -537,7 +537,7 @@ void SetFlagActuator::SetFlag(EntityNode& node) const
     // DEBUG("Set EntityNode '%1' flag '%2' to '%3'.", node.GetName(), flag, next_value ? "On" : "Off");
 }
 
-bool SetFlagActuator::CanApply(EntityNode& node, bool verbose) const
+bool BooleanPropertyAnimator::CanApply(EntityNode& node, bool verbose) const
 {
     auto* draw = node.GetDrawable();
     auto* body = node.GetRigidBody();
@@ -545,7 +545,7 @@ bool SetFlagActuator::CanApply(EntityNode& node, bool verbose) const
     auto* spatial = node.GetSpatialNode();
     auto* transformer = node.GetTransformer();
 
-    using FlagName = SetFlagActuatorClass::FlagName;
+    using FlagName = BooleanPropertyAnimatorClass::Property;
     const auto flag = mClass->GetFlagName();
 
     if (flag == FlagName::Drawable_VisibleInGame ||
@@ -611,7 +611,7 @@ bool SetFlagActuator::CanApply(EntityNode& node, bool verbose) const
     return true;
 }
 
-void SetValueActuator::Start(EntityNode& node)
+void PropertyAnimator::Start(EntityNode& node)
 {
     if (!CanApply(node, true /*verbose */))
         return;
@@ -669,12 +669,12 @@ void SetValueActuator::Start(EntityNode& node)
     else BUG("Unhandled node item value.");
 }
 
-void SetValueActuator::Apply(EntityNode& node, float t)
+void PropertyAnimator::Apply(EntityNode& node, float t)
 {
     SetValue(node, t, true);
 }
 
-void SetValueActuator::SetValue(EntityNode& node, float t, bool interpolate) const
+void PropertyAnimator::SetValue(EntityNode& node, float t, bool interpolate) const
 {
     if (!CanApply(node, false /*verbose*/))
         return;
@@ -822,12 +822,12 @@ void SetValueActuator::SetValue(EntityNode& node, float t, bool interpolate) con
     } else BUG("Unhandled value actuator param type.");
 }
 
-void SetValueActuator::Finish(EntityNode& node)
+void PropertyAnimator::Finish(EntityNode& node)
 {
     SetValue(node, 1.0f, false);
 }
 
-bool SetValueActuator::CanApply(EntityNode& node, bool verbose) const
+bool PropertyAnimator::CanApply(EntityNode& node, bool verbose) const
 {
     const auto param = mClass->GetParamName();
     const auto* draw = node.GetDrawable();
@@ -905,7 +905,7 @@ bool SetValueActuator::CanApply(EntityNode& node, bool verbose) const
     return false;
 }
 
-TransformActuator::TransformActuator(const std::shared_ptr<const TransformActuatorClass>& klass)
+TransformAnimator::TransformAnimator(const std::shared_ptr<const TransformAnimatorClass>& klass)
     : mClass(klass)
 {
     if (!mClass->TestFlag(Flags::StaticInstance))
@@ -919,14 +919,14 @@ TransformActuator::TransformActuator(const std::shared_ptr<const TransformActuat
     }
 }
 
-void TransformActuator::Start(EntityNode& node)
+void TransformAnimator::Start(EntityNode& node)
 {
     mStartPosition = node.GetTranslation();
     mStartSize     = node.GetSize();
     mStartScale    = node.GetScale();
     mStartRotation = node.GetRotation();
 }
-void TransformActuator::Apply(EntityNode& node, float t)
+void TransformAnimator::Apply(EntityNode& node, float t)
 {
     const auto& inst = GetInstance();
 
@@ -941,7 +941,7 @@ void TransformActuator::Apply(EntityNode& node, float t)
     node.SetRotation(r);
     node.SetScale(f);
 }
-void TransformActuator::Finish(EntityNode& node)
+void TransformAnimator::Finish(EntityNode& node)
 {
     const auto& inst = GetInstance();
 
@@ -951,7 +951,7 @@ void TransformActuator::Finish(EntityNode& node)
     node.SetScale(inst.end_scale);
 }
 
-void TransformActuator::SetEndPosition(const glm::vec2& pos)
+void TransformAnimator::SetEndPosition(const glm::vec2& pos)
 {
     if (mClass->TestFlag(Flags::StaticInstance))
     {
@@ -960,7 +960,7 @@ void TransformActuator::SetEndPosition(const glm::vec2& pos)
     }
     mDynamicInstance.value().end_position = pos;
 }
-void TransformActuator::SetEndScale(const glm::vec2& scale)
+void TransformAnimator::SetEndScale(const glm::vec2& scale)
 {
     if (mClass->TestFlag(Flags::StaticInstance))
     {
@@ -969,7 +969,7 @@ void TransformActuator::SetEndScale(const glm::vec2& scale)
     }
     mDynamicInstance.value().end_position = scale;
 }
-void TransformActuator::SetEndSize(const glm::vec2& size)
+void TransformAnimator::SetEndSize(const glm::vec2& size)
 {
     if (mClass->TestFlag(Flags::StaticInstance))
     {
@@ -978,7 +978,7 @@ void TransformActuator::SetEndSize(const glm::vec2& size)
     }
     mDynamicInstance.value().end_position = size;
 }
-void TransformActuator::SetEndRotation(float angle)
+void TransformAnimator::SetEndRotation(float angle)
 {
     if (mClass->TestFlag(Flags::StaticInstance))
     {
@@ -988,7 +988,7 @@ void TransformActuator::SetEndRotation(float angle)
     mDynamicInstance.value().end_rotation = angle;
 }
 
-TransformActuator::Instance TransformActuator::GetInstance() const
+TransformAnimator::Instance TransformAnimator::GetInstance() const
 {
     if (mDynamicInstance.has_value())
         return mDynamicInstance.value();
@@ -1000,7 +1000,7 @@ TransformActuator::Instance TransformActuator::GetInstance() const
     return inst;
 }
 
-void MaterialActuator::Start(EntityNode& node)
+void MaterialAnimator::Start(EntityNode& node)
 {
     const auto* draw = node.GetDrawable();
     if (draw == nullptr)
@@ -1017,7 +1017,7 @@ void MaterialActuator::Start(EntityNode& node)
     }
 }
 
-void MaterialActuator::Apply(EntityNode& node, float t)
+void MaterialAnimator::Apply(EntityNode& node, float t)
 {
     if (auto* draw = node.GetDrawable())
     {
@@ -1043,7 +1043,7 @@ void MaterialActuator::Apply(EntityNode& node, float t)
         }
     }
 }
-void MaterialActuator::Finish(EntityNode& node)
+void MaterialAnimator::Finish(EntityNode& node)
 {
     if (auto* draw = node.GetDrawable())
     {

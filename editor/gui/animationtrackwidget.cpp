@@ -82,9 +82,9 @@ public:
         }
         // go over the existing actuators and create timeline items
         // for visual representation of each actuator.
-        for (size_t i=0; i<track.GetNumActuators(); ++i)
+        for (size_t i=0; i< track.GetNumAnimators(); ++i)
         {
-            const auto& actuator = track.GetActuatorClass(i);
+            const auto& actuator = track.GetAnimatorClass(i);
             const auto type  = actuator.GetType();
             if (!mState.show_flags.test(type))
                 continue;
@@ -105,15 +105,15 @@ public:
             item.id        = app::FromUtf8(actuator.GetId());
             item.starttime = actuator.GetStartTime();
             item.duration  = actuator.GetDuration();
-            if (type == game::ActuatorClass::Type::SetFlag)
+            if (type == game::AnimatorClass::Type::BooleanPropertyAnimator)
                 item.color = QColor(0xa3, 0xdd, 0xcb, 150);
-            else if (type == game::ActuatorClass::Type::Transform)
+            else if (type == game::AnimatorClass::Type::TransformAnimator)
                 item.color = QColor(0xe8, 0xe9, 0xa1, 150);
-            else if (type == game::ActuatorClass::Type::Kinematic)
+            else if (type == game::AnimatorClass::Type::KinematicAnimator)
                 item.color = QColor(0xe6, 0xb5, 0x66, 150);
-            else if (type == game::ActuatorClass::Type::SetValue)
+            else if (type == game::AnimatorClass::Type::PropertyAnimator)
                 item.color = QColor(0xe5, 0x70, 0x7e, 150);
-            else if (type == game::ActuatorClass::Type::Material)
+            else if (type == game::AnimatorClass::Type::MaterialAnimator)
                 item.color = QColor(0xe7, 0x80, 0x7e, 150);
             else BUG("Unhandled type for item colorization.");
 
@@ -145,14 +145,14 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     mUI.timeline->SetModel(mTimelineModel.get());
 
     const auto& settings = workspace->GetProjectSettings();
-    PopulateFromEnum<game::TransformActuatorClass::Interpolation>(mUI.transformInterpolation);
-    PopulateFromEnum<game::SetValueActuatorClass::Interpolation>(mUI.setvalInterpolation);
-    PopulateFromEnum<game::SetValueActuatorClass::ParamName>(mUI.setvalName);
-    PopulateFromEnum<game::KinematicActuatorClass::Interpolation>(mUI.kinematicInterpolation);
-    PopulateFromEnum<game::KinematicActuatorClass::Target>(mUI.kinematicTarget);
-    PopulateFromEnum<game::SetFlagActuatorClass::FlagName>(mUI.itemFlags);
-    PopulateFromEnum<game::SetFlagActuatorClass::FlagAction>(mUI.flagAction);
-    PopulateFromEnum<game::MaterialActuatorClass::Interpolation >(mUI.materialInterpolation);
+    PopulateFromEnum<game::TransformAnimatorClass::Interpolation>(mUI.transformInterpolation);
+    PopulateFromEnum<game::PropertyAnimatorClass::Interpolation>(mUI.setvalInterpolation);
+    PopulateFromEnum<game::PropertyAnimatorClass::ParamName>(mUI.setvalName);
+    PopulateFromEnum<game::KinematicAnimatorClass::Interpolation>(mUI.kinematicInterpolation);
+    PopulateFromEnum<game::KinematicAnimatorClass::Target>(mUI.kinematicTarget);
+    PopulateFromEnum<game::BooleanPropertyAnimatorClass::Property>(mUI.itemFlags);
+    PopulateFromEnum<game::BooleanPropertyAnimatorClass::PropertyAction>(mUI.flagAction);
+    PopulateFromEnum<game::MaterialAnimatorClass::Interpolation >(mUI.materialInterpolation);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
     SetValue(mUI.cmbGrid, GridDensity::Grid50x50);
     SetValue(mUI.actionUsePhysics, settings.enable_physics);
@@ -227,9 +227,9 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace,
         tl.nodeId = app::ToUtf8(properties[QString("timeline_%1_node_id").arg(i)].toString());
         mState.timelines.push_back(std::move(tl));
     }
-    for (size_t i = 0; i < mState.track->GetNumActuators(); ++i)
+    for (size_t i = 0; i < mState.track->GetNumAnimators(); ++i)
     {
-        const auto& actuator = mState.track->GetActuatorClass(i);
+        const auto& actuator = mState.track->GetAnimatorClass(i);
         const auto& timeline = properties[app::FromUtf8(actuator.GetId())].toString();
         mState.actuator_to_timeline[actuator.GetId()] = app::ToUtf8(timeline);
     }
@@ -399,9 +399,9 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
     mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
 
-    for (size_t i=0; i<mState.track->GetNumActuators(); ++i)
+    for (size_t i=0; i< mState.track->GetNumAnimators(); ++i)
     {
-        const auto& actuator = mState.track->GetActuatorClass(i);
+        const auto& actuator = mState.track->GetAnimatorClass(i);
         std::string trackId;
         settings.GetValue("TrackWidget", app::FromUtf8(actuator.GetId()), &trackId);
         mState.actuator_to_timeline[actuator.GetId()] = trackId;
@@ -744,7 +744,7 @@ void AnimationTrackWidget::on_actionDeleteActuator_triggered()
 {
     if (auto* actuator = GetCurrentActuator())
     {
-        mState.track->DeleteActuatorById(actuator->GetId());
+        mState.track->DeleteAnimatorById(actuator->GetId());
         mUI.timeline->ClearSelection();
         mUI.timeline->Rebuild();
         SetActuatorUIDefaults();
@@ -772,9 +772,9 @@ void AnimationTrackWidget::on_actionDeleteTimeline_triggered()
     auto tl = mState.timelines[index];
 
     size_t count = 0;
-    for (size_t i=0; i<mState.track->GetNumActuators(); ++i)
+    for (size_t i=0; i< mState.track->GetNumAnimators(); ++i)
     {
-        const auto& actuator = mState.track->GetActuatorClass(i);
+        const auto& actuator = mState.track->GetAnimatorClass(i);
         const auto& timeline = mState.actuator_to_timeline[actuator.GetId()];
         if (timeline == tl.selfId)
             ++count;
@@ -792,12 +792,12 @@ void AnimationTrackWidget::on_actionDeleteTimeline_triggered()
             return;
     }
 
-    for (size_t i=0; i<mState.track->GetNumActuators();)
+    for (size_t i=0; i< mState.track->GetNumAnimators();)
     {
-        const auto& actuator = mState.track->GetActuatorClass(i);
+        const auto& actuator = mState.track->GetAnimatorClass(i);
         const auto& timeline = mState.actuator_to_timeline[actuator.GetId()];
         if (timeline == tl.selfId) {
-            mState.track->DeleteActuator(i);
+            mState.track->DeleteAnimator(i);
         } else {
             ++i;
         }
@@ -911,7 +911,7 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
 {
     const auto* selected = mUI.timeline->GetSelectedItem();
     mUI.actionDeleteActuator->setEnabled(selected != nullptr);
-    mUI.actionDeleteActuators->setEnabled(mState.track->GetNumActuators());
+    mUI.actionDeleteActuators->setEnabled(mState.track->GetNumAnimators());
 
     // map the click point to a position in the timeline.
     const auto* timeline = mUI.timeline->GetCurrentTimeline();
@@ -933,7 +933,7 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
 
     QMenu show(this);
     show.setTitle(tr("Show Actuators ..."));
-    for (const auto val : magic_enum::enum_values<game::ActuatorClass::Type>())
+    for (const auto val : magic_enum::enum_values<game::AnimatorClass::Type>())
     {
         const std::string name(magic_enum::enum_name(val));
         QAction* action = show.addAction(app::FromUtf8(name));
@@ -946,21 +946,22 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
     QMenu menu(this);
     QMenu actuators(this);
     actuators.setEnabled(selected == nullptr);
-    actuators.setTitle("New Actuator On ...");
+    actuators.setTitle("New Animator ...");
     actuators.setIcon(QIcon("icons:add.png"));
+    actuators.setEnabled(timeline != nullptr);
 
     struct Actuator {
-        game::ActuatorClass::Type type;
+        game::AnimatorClass::Type type;
         QString name;
     };
     std::vector<Actuator> actuator_list;
 
-    actuator_list.push_back( { game::ActuatorClass::Type::Transform, "Node Transform" });
-    actuator_list.push_back( { game::ActuatorClass::Type::Kinematic, "Rigid Body" });
-    actuator_list.push_back( { game::ActuatorClass::Type::Kinematic, "Transformer" });
-    actuator_list.push_back( { game::ActuatorClass::Type::Material, "Material Uniform" });
-    actuator_list.push_back( { game::ActuatorClass::Type::SetValue, "Property Value" });
-    actuator_list.push_back( { game::ActuatorClass::Type::SetFlag, "Property Flag" });
+    actuator_list.push_back( {game::AnimatorClass::Type::TransformAnimator,       "Transform Animator Animator" });
+    actuator_list.push_back( {game::AnimatorClass::Type::KinematicAnimator,       "Kinematic Animator (Rigid Body)" });
+    actuator_list.push_back( {game::AnimatorClass::Type::KinematicAnimator,       "Kinematic Animator (Transformer)" });
+    actuator_list.push_back( {game::AnimatorClass::Type::MaterialAnimator,        "Material Animator" });
+    actuator_list.push_back( {game::AnimatorClass::Type::PropertyAnimator,        "Property Animator" });
+    actuator_list.push_back( {game::AnimatorClass::Type::BooleanPropertyAnimator, "Property Animator (Boolean Flag)" });
 
     // build menu for adding actuators.
     for (const auto& act : actuator_list)
@@ -970,9 +971,9 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
         action->setProperty("type", static_cast<int>(act.type));
         action->setEnabled(false);
         if (act.name == "Rigid Body")
-            action->setProperty("kinematic_target", static_cast<int>(game::KinematicActuatorClass::Target::RigidBody));
+            action->setProperty("kinematic_target", static_cast<int>(game::KinematicAnimatorClass::Target::RigidBody));
         else if (act.name == "Transformer")
-            action->setProperty("kinematic_target", static_cast<int>(game::KinematicActuatorClass::Target::Transformer));
+            action->setProperty("kinematic_target", static_cast<int>(game::KinematicAnimatorClass::Target::Transformer));
 
         connect(action, &QAction::triggered, this, &AnimationTrackWidget::AddActuatorAction);
         if (timeline)
@@ -991,9 +992,9 @@ void AnimationTrackWidget::on_timeline_customContextMenuRequested(QPoint)
     menu.addSeparator();
     menu.addMenu(&add_timeline);
     menu.addSeparator();
-    menu.addAction(mUI.actionDeleteTimeline);
     menu.addAction(mUI.actionDeleteActuator);
     menu.addAction(mUI.actionDeleteActuators);
+    menu.addAction(mUI.actionDeleteTimeline);
     menu.addSeparator();
     menu.addMenu(&show);
     menu.exec(QCursor::pos());
@@ -1160,7 +1161,7 @@ void AnimationTrackWidget::on_btnMaterialParameters_clicked()
     auto* node = GetCurrentEntityNode();
     auto* klass = mState.entity->FindNodeById(node->GetClassId());
     auto* drawable = klass ? klass->GetDrawable() : nullptr;
-    auto* actuator = dynamic_cast<game::MaterialActuatorClass*>(GetCurrentActuator());
+    auto* actuator = dynamic_cast<game::MaterialAnimatorClass*>(GetCurrentActuator());
     if (!node || !drawable || !actuator)
         return;
 
@@ -1184,7 +1185,7 @@ void AnimationTrackWidget::SetActuatorUIEnabled(bool enabled)
 
 void AnimationTrackWidget::SetActuatorUIDefaults()
 {
-    SetValue(mUI.actuatorGroup, QString("Actuator (Nothing selected)"));
+    SetValue(mUI.actuatorGroup, QString("Animator (Nothing selected)"));
     SetMinMax(mUI.actuatorStartTime, 0.0, 0.0f);
     SetMinMax(mUI.actuatorEndTime, 0.0, 0.0);
     SetValue(mUI.actuatorName, QString(""));
@@ -1194,7 +1195,7 @@ void AnimationTrackWidget::SetActuatorUIDefaults()
     SetValue(mUI.actuatorStartTime, 0.0f);
     SetValue(mUI.actuatorEndTime, 0.0f);
     SetValue(mUI.actuatorIsStatic, false);
-    SetValue(mUI.transformInterpolation, game::TransformActuatorClass::Interpolation::Cosine);
+    SetValue(mUI.transformInterpolation, game::TransformAnimatorClass::Interpolation::Cosine);
     SetValue(mUI.transformEndPosX, 0.0f);
     SetValue(mUI.transformEndPosY, 0.0f);
     SetValue(mUI.transformEndSizeX, 0.0f);
@@ -1202,20 +1203,20 @@ void AnimationTrackWidget::SetActuatorUIDefaults()
     SetValue(mUI.transformEndScaleX, 0.0f);
     SetValue(mUI.transformEndScaleY, 0.0f);
     SetValue(mUI.transformEndRotation, 0.0f);
-    SetValue(mUI.setvalInterpolation, game::SetValueActuatorClass::Interpolation::Cosine);
-    SetValue(mUI.setvalName, game::SetValueActuatorClass::ParamName::Drawable_TimeScale);
+    SetValue(mUI.setvalInterpolation, game::PropertyAnimatorClass::Interpolation::Cosine);
+    SetValue(mUI.setvalName, game::PropertyAnimatorClass::ParamName::Drawable_TimeScale);
     SetValue(mUI.setvalEndValue, 0.0f);
-    SetValue(mUI.kinematicTarget, game::KinematicActuatorClass::Target::RigidBody);
-    SetValue(mUI.kinematicInterpolation, game::KinematicActuatorClass::Interpolation::Cosine);
+    SetValue(mUI.kinematicTarget, game::KinematicAnimatorClass::Target::RigidBody);
+    SetValue(mUI.kinematicInterpolation, game::KinematicAnimatorClass::Interpolation::Cosine);
     SetValue(mUI.kinematicEndVeloX, 0.0f);
     SetValue(mUI.kinematicEndVeloY, 0.0f);
     SetValue(mUI.kinematicEndVeloZ, 0.0f);
     SetValue(mUI.kinematicEndAccelX, 0.0f);
     SetValue(mUI.kinematicEndAccelY, 0.0f);
     SetValue(mUI.kinematicEndAccelZ, 0.0f);
-    SetValue(mUI.materialInterpolation, game::MaterialActuatorClass::Interpolation::Cosine);
-    SetValue(mUI.itemFlags, game::SetFlagActuatorClass::FlagName::Drawable_VisibleInGame);
-    SetValue(mUI.flagAction, game::SetFlagActuatorClass::FlagAction::On);
+    SetValue(mUI.materialInterpolation, game::MaterialAnimatorClass::Interpolation::Cosine);
+    SetValue(mUI.itemFlags, game::BooleanPropertyAnimatorClass::Property::Drawable_VisibleInGame);
+    SetValue(mUI.flagAction, game::BooleanPropertyAnimatorClass::PropertyAction::On);
     SetValue(mUI.flagTime, 1.0f);
 
     mUI.curve->ClearFunction();
@@ -1238,9 +1239,9 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
         return;
 
     actuator->SetName(GetValue(mUI.actuatorName));
-    actuator->SetFlag(game::ActuatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
+    actuator->SetFlag(game::AnimatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
 
-    if (auto* transform = dynamic_cast<game::TransformActuatorClass*>(actuator))
+    if (auto* transform = dynamic_cast<game::TransformAnimatorClass*>(actuator))
     {
         transform->SetInterpolation(GetValue(mUI.transformInterpolation));
         transform->SetEndPosition(GetValue(mUI.transformEndPosX), GetValue(mUI.transformEndPosY));
@@ -1250,9 +1251,9 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
 
         mUI.curve->SetFunction(transform->GetInterpolation());
     }
-    else if (auto* setter = dynamic_cast<game::SetValueActuatorClass*>(actuator))
+    else if (auto* setter = dynamic_cast<game::PropertyAnimatorClass*>(actuator))
     {
-        using Name = game::SetValueActuatorClass::ParamName;
+        using Name = game::PropertyAnimatorClass::ParamName;
         const auto name = (Name)GetValue(mUI.setvalName);
         if (name == Name::Drawable_TimeScale)
         {
@@ -1370,7 +1371,7 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
 
         mUI.curve->SetFunction(setter->GetInterpolation());
     }
-    else if (auto* kinematic = dynamic_cast<game::KinematicActuatorClass*>(actuator))
+    else if (auto* kinematic = dynamic_cast<game::KinematicAnimatorClass*>(actuator))
     {
         glm::vec2 linear_velocity;
         glm::vec2 linear_acceleration;
@@ -1388,7 +1389,7 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
 
         mUI.curve->SetFunction(kinematic->GetInterpolation());
     }
-    else if (auto* setflag = dynamic_cast<game::SetFlagActuatorClass*>(actuator))
+    else if (auto* setflag = dynamic_cast<game::BooleanPropertyAnimatorClass*>(actuator))
     {
         setflag->SetFlagAction(GetValue(mUI.flagAction));
         setflag->SetFlagName(GetValue(mUI.itemFlags));
@@ -1396,7 +1397,7 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
 
         mUI.curve->ClearFunction();
     }
-    else if (auto* material = dynamic_cast<game::MaterialActuatorClass*>(actuator))
+    else if (auto* material = dynamic_cast<game::MaterialAnimatorClass*>(actuator))
     {
         material->SetInterpolation(GetValue(mUI.materialInterpolation));
 
@@ -1485,7 +1486,7 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
 
     SetActuatorUIEnabled(true);
 
-    const auto* actuator = mState.track->FindActuatorById(app::ToUtf8(item->id));
+    const auto* actuator = mState.track->FindAnimatorById(app::ToUtf8(item->id));
     const auto duration = mState.track->GetDuration();
     const auto start = actuator->GetStartTime() * duration;
     const auto end = actuator->GetDuration() * duration + start;
@@ -1495,9 +1496,9 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
     // and time values for this actuator.
     float lo_bound = 0.0f;
     float hi_bound = 1.0f;
-    for (size_t i = 0; i < mState.track->GetNumActuators(); ++i)
+    for (size_t i = 0; i < mState.track->GetNumAnimators(); ++i)
     {
-        const auto& other = mState.track->GetActuatorClass(i);
+        const auto& other = mState.track->GetAnimatorClass(i);
         if (other.GetId() == actuator->GetId())
             continue;
         else if (other.GetNodeId() != actuator->GetNodeId())
@@ -1523,14 +1524,14 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
     SetValue(mUI.actuatorID, actuator->GetId());
     SetValue(mUI.actuatorNode, node->GetName());
     SetValue(mUI.actuatorType, app::toString(actuator->GetType()));
-    SetValue(mUI.actuatorIsStatic, actuator->TestFlag(game::ActuatorClass::Flags::StaticInstance));
+    SetValue(mUI.actuatorIsStatic, actuator->TestFlag(game::AnimatorClass::Flags::StaticInstance));
     SetMinMax(mUI.actuatorStartTime, lo_bound * duration, hi_bound * duration);
     SetMinMax(mUI.actuatorEndTime, lo_bound * duration, hi_bound * duration);
     SetValue(mUI.actuatorStartTime, start);
     SetValue(mUI.actuatorEndTime, end);
-    SetValue(mUI.actuatorGroup, app::toString("Actuator - %1, %2s", item->text, len));
+    SetValue(mUI.actuatorGroup, app::toString("Animator - %1, %2s", item->text, len));
 
-    if (const auto* ptr = dynamic_cast<const game::TransformActuatorClass*>(actuator))
+    if (const auto* ptr = dynamic_cast<const game::TransformAnimatorClass*>(actuator))
     {
         const auto& pos = ptr->GetEndPosition();
         const auto& size = ptr->GetEndSize();
@@ -1552,10 +1553,10 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         node->SetScale(scale);
         node->SetRotation(rotation);
     }
-    else if (const auto* ptr = dynamic_cast<const game::SetValueActuatorClass*>(actuator))
+    else if (const auto* ptr = dynamic_cast<const game::PropertyAnimatorClass*>(actuator))
     {
         const auto name = ptr->GetParamName();
-        using Name = game::SetValueActuatorClass::ParamName;
+        using Name = game::PropertyAnimatorClass::ParamName;
         if (name == Name::Drawable_TimeScale)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
         else if (name == Name::Drawable_RotationX)
@@ -1608,7 +1609,7 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
 
         mUI.curve->SetFunction(ptr->GetInterpolation());
     }
-    else if (const auto* ptr = dynamic_cast<const game::KinematicActuatorClass*>(actuator))
+    else if (const auto* ptr = dynamic_cast<const game::KinematicAnimatorClass*>(actuator))
     {
         const auto& linear_velocity = ptr->GetEndLinearVelocity();
         const auto& linear_acceleration = ptr->GetEndLinearAcceleration();
@@ -1626,7 +1627,7 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
 
         mUI.actuatorProperties->setCurrentWidget(mUI.kinematicActuator);
     }
-    else if (const auto* ptr = dynamic_cast<const game::SetFlagActuatorClass*>(actuator))
+    else if (const auto* ptr = dynamic_cast<const game::BooleanPropertyAnimatorClass*>(actuator))
     {
         SetValue(mUI.itemFlags, ptr->GetFlagName());
         SetValue(mUI.flagAction, ptr->GetFlagAction());
@@ -1635,7 +1636,7 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
 
         mUI.curve->ClearFunction();
     }
-    else if (const auto* ptr = dynamic_cast<const game::MaterialActuatorClass*>(actuator))
+    else if (const auto* ptr = dynamic_cast<const game::MaterialAnimatorClass*>(actuator))
     {
         SetValue(mUI.materialInterpolation, ptr->GetInterpolation());
         mUI.actuatorProperties->setCurrentWidget(mUI.materialActuator);
@@ -1651,7 +1652,7 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
 
 void AnimationTrackWidget::SelectedItemDragged(const TimelineWidget::TimelineItem* item)
 {
-    auto* actuator = mState.track->FindActuatorById(app::ToUtf8(item->id));
+    auto* actuator = mState.track->FindAnimatorById(app::ToUtf8(item->id));
     actuator->SetStartTime(item->starttime);
     actuator->SetDuration(item->duration);
 
@@ -1661,14 +1662,14 @@ void AnimationTrackWidget::SelectedItemDragged(const TimelineWidget::TimelineIte
     const auto len   = QString::number(end-start, 'f', 2);
     SetValue(mUI.actuatorStartTime, start);
     SetValue(mUI.actuatorEndTime, end);
-    SetValue(mUI.actuatorGroup, tr("Actuator - %1, %2s").arg(item->text).arg(len));
+    SetValue(mUI.actuatorGroup, tr("Animator - %1, %2s").arg(item->text).arg(len));
 }
 
 void AnimationTrackWidget::ToggleShowResource()
 {
     QAction* action = qobject_cast<QAction*>(sender());
     const auto payload = action->data().toInt();
-    const auto type = magic_enum::enum_cast<game::ActuatorClass::Type>(payload);
+    const auto type = magic_enum::enum_cast<game::AnimatorClass::Type>(payload);
     ASSERT(type.has_value());
     mState.show_flags.set(type.value(), action->isChecked());
     mUI.timeline->Rebuild();
@@ -1683,17 +1684,17 @@ void AnimationTrackWidget::AddActuatorAction()
     // is set when the context menu with this QAction is opened.
     const auto seconds = action->data().toFloat();
     // the name of the action carries the type
-    const auto type = static_cast<game::ActuatorClass::Type>(action->property("type").toInt());
+    const auto type = static_cast<game::AnimatorClass::Type>(action->property("type").toInt());
 
     AddActuatorFromTimeline(type, seconds);
 
     // hack for now
-    if (type == game::ActuatorClass::Type::Kinematic)
+    if (type == game::AnimatorClass::Type::KinematicAnimator)
     {
-        const auto target = static_cast<game::KinematicActuatorClass::Target>(action->property("kinematic_target").toInt());
+        const auto target = static_cast<game::KinematicAnimatorClass::Target>(action->property("kinematic_target").toInt());
 
         if (auto* selected = GetCurrentActuator()) {
-            auto* ptr = dynamic_cast<game::KinematicActuatorClass*>(selected);
+            auto* ptr = dynamic_cast<game::KinematicAnimatorClass*>(selected);
             ptr->SetTarget(target);
             SetValue(mUI.kinematicTarget, target);
         }
@@ -1940,7 +1941,7 @@ void AnimationTrackWidget::UpdateTransformActuatorUI()
     }
 }
 
-void AnimationTrackWidget::AddActuatorFromTimeline(game::ActuatorClass::Type type, float seconds)
+void AnimationTrackWidget::AddActuatorFromTimeline(game::AnimatorClass::Type type, float seconds)
 {
     if (!mUI.timeline->GetCurrentTimeline())
         return;
@@ -1955,9 +1956,9 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::ActuatorClass::Type typ
 
     float lo_bound = 0.0f;
     float hi_bound = 1.0f;
-    for (size_t i=0; i<mState.track->GetNumActuators(); ++i)
+    for (size_t i=0; i< mState.track->GetNumAnimators(); ++i)
     {
-        const auto& klass = mState.track->GetActuatorClass(i);
+        const auto& klass = mState.track->GetAnimatorClass(i);
         if (mState.actuator_to_timeline[klass.GetId()] != timeline.selfId)
             continue;
         const auto start = klass.GetStartTime();
@@ -1967,14 +1968,14 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::ActuatorClass::Type typ
         if (end <= position)
             lo_bound = std::max(lo_bound, end);
     }
-    const auto& name = base::FormatString("Actuator_%1", mState.track->GetNumActuators());
+    const auto& name = base::FormatString("Animator_%1", mState.track->GetNumAnimators());
     const auto node_duration   = hi_bound - lo_bound;
     const auto node_start_time = lo_bound;
     const float node_end_time  = node_start_time + duration;
 
     QString actuator;
 
-    if (type == game::ActuatorClass::Type::Transform)
+    if (type == game::AnimatorClass::Type::TransformAnimator)
     {
         const auto& pos     = node->GetTranslation();
         const auto& size    = node->GetSize();
@@ -1988,10 +1989,10 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::ActuatorClass::Type typ
         SetValue(mUI.transformEndScaleY, scale.y);
         SetValue(mUI.transformEndRotation, qRadiansToDegrees(rotation));
 
-        game::TransformActuatorClass klass;
+        game::TransformAnimatorClass klass;
         klass.SetName(name);
         klass.SetNodeId(node->GetId());
-        klass.SetFlag(game::ActuatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
+        klass.SetFlag(game::AnimatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
         klass.SetStartTime(node_start_time);
         klass.SetDuration(node_duration);
         klass.SetEndPosition(pos);
@@ -2001,16 +2002,16 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::ActuatorClass::Type typ
         klass.SetEndRotation(qDegreesToRadians((float) GetValue(mUI.transformEndRotation)));
         actuator = app::FromUtf8(klass.GetId());
         mState.actuator_to_timeline[klass.GetId()] = timeline.selfId;
-        mState.track->AddActuator(klass);
+        mState.track->AddAnimator(klass);
     }
-    else if (type == game::ActuatorClass::Type::SetValue)
+    else if (type == game::AnimatorClass::Type::PropertyAnimator)
     {
-        using ValName = game::SetValueActuatorClass::ParamName;
+        using ValName = game::PropertyAnimatorClass::ParamName;
         const auto value = (ValName)GetValue(mUI.setvalName);
-        game::SetValueActuatorClass klass;
+        game::PropertyAnimatorClass klass;
         klass.SetName(name);
         klass.SetNodeId(node->GetId());
-        klass.SetFlag(game::ActuatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
+        klass.SetFlag(game::AnimatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
         klass.SetStartTime(node_start_time);
         klass.SetDuration(node_duration);
         klass.SetParamName(GetValue(mUI.setvalName));
@@ -2046,14 +2047,14 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::ActuatorClass::Type typ
         else BUG("Unhandled value actuator value type.");
         actuator = app::FromUtf8(klass.GetId());
         mState.actuator_to_timeline[klass.GetId()] = timeline.selfId;
-        mState.track->AddActuator(klass);
+        mState.track->AddAnimator(klass);
     }
-    else if (type == game::ActuatorClass::Type::Kinematic)
+    else if (type == game::AnimatorClass::Type::KinematicAnimator)
     {
-        game::KinematicActuatorClass klass;
+        game::KinematicAnimatorClass klass;
         klass.SetName(name);
         klass.SetNodeId(node->GetId());
-        klass.SetFlag(game::ActuatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
+        klass.SetFlag(game::AnimatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
         klass.SetStartTime(node_start_time);
         klass.SetDuration(node_duration);
         klass.SetEndAngularVelocity(GetValue(mUI.kinematicEndVeloZ));
@@ -2063,32 +2064,32 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::ActuatorClass::Type typ
         klass.SetEndLinearVelocity(velocity);
         actuator = app::FromUtf8(klass.GetId());
         mState.actuator_to_timeline[klass.GetId()] = timeline.selfId;
-        mState.track->AddActuator(klass);
+        mState.track->AddAnimator(klass);
     }
-    else if (type == game::ActuatorClass::Type::SetFlag)
+    else if (type == game::AnimatorClass::Type::BooleanPropertyAnimator)
     {
-        game::SetFlagActuatorClass klass;
+        game::BooleanPropertyAnimatorClass klass;
         klass.SetName(name);
         klass.SetNodeId(node->GetId());
-        klass.SetFlag(game::ActuatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
+        klass.SetFlag(game::AnimatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
         klass.SetStartTime(node_start_time);
         klass.SetDuration(node_duration);
         klass.SetFlagName(GetValue(mUI.itemFlags));
         klass.SetFlagAction(GetValue(mUI.flagAction));
         actuator = app::FromUtf8(klass.GetId());
         mState.actuator_to_timeline[klass.GetId()] = timeline.selfId;
-        mState.track->AddActuator(klass);
+        mState.track->AddAnimator(klass);
     }
-    else if (type ==game::ActuatorClass::Type::Material)
+    else if (type ==game::AnimatorClass::Type::MaterialAnimator)
     {
-        game::MaterialActuatorClass klass;
+        game::MaterialAnimatorClass klass;
         klass.SetName(name);
         klass.SetNodeId(node->GetId());
         klass.SetStartTime(node_start_time);
         klass.SetDuration(node_duration);
         actuator = app::FromUtf8(klass.GetId());
         mState.actuator_to_timeline[klass.GetId()] = timeline.selfId;
-        mState.track->AddActuator(klass);
+        mState.track->AddAnimator(klass);
     }
 
     mUI.timeline->Rebuild();
@@ -2122,9 +2123,9 @@ void AnimationTrackWidget::RemoveDeletedItems()
 {
     // remove orphaned actuators.
     std::vector<std::string> dead_actuators;
-    for (size_t i=0; i<mState.track->GetNumActuators(); ++i)
+    for (size_t i=0; i< mState.track->GetNumAnimators(); ++i)
     {
-        const auto& actuator = mState.track->GetActuatorClass(i);
+        const auto& actuator = mState.track->GetAnimatorClass(i);
         const auto& node = actuator.GetNodeId();
         if (mState.entity->FindNodeById(node))
             continue;
@@ -2132,7 +2133,7 @@ void AnimationTrackWidget::RemoveDeletedItems()
     }
     for (const auto& id : dead_actuators)
     {
-        mState.track->DeleteActuatorById(id);
+        mState.track->DeleteAnimatorById(id);
         mState.actuator_to_timeline.erase(id);
     }
 
@@ -2160,8 +2161,8 @@ void AnimationTrackWidget::ReturnToDefault()
 
 void AnimationTrackWidget::UpdateKinematicUnits()
 {
-    const game::KinematicActuatorClass::Target target = GetValue(mUI.kinematicTarget);
-    if (target == game::KinematicActuatorClass::Target::RigidBody)
+    const game::KinematicAnimatorClass::Target target = GetValue(mUI.kinematicTarget);
+    if (target == game::KinematicAnimatorClass::Target::RigidBody)
     {
         SetSuffix(mUI.kinematicEndVeloX, " m/s");
         SetSuffix(mUI.kinematicEndVeloY, " m/s");
@@ -2173,7 +2174,7 @@ void AnimationTrackWidget::UpdateKinematicUnits()
         SetEnabled(mUI.kinematicEndAccelY, false);
         SetEnabled(mUI.kinematicEndAccelZ, false);
     }
-    else if (target == game::KinematicActuatorClass::Target::Transformer)
+    else if (target == game::KinematicAnimatorClass::Target::Transformer)
     {
         SetSuffix(mUI.kinematicEndVeloX, " u/s");
         SetSuffix(mUI.kinematicEndVeloY, " u/s");
@@ -2197,17 +2198,17 @@ game::EntityNode* AnimationTrackWidget::GetCurrentEntityNode()
 {
     if (const auto* item = mUI.timeline->GetSelectedItem())
     {
-        const auto* actuator = mState.track->FindActuatorById(app::ToUtf8(item->id));
+        const auto* actuator = mState.track->FindAnimatorById(app::ToUtf8(item->id));
         return mEntity->FindNodeByClassId(actuator->GetNodeId());
     }
     return nullptr;
 }
 
-game::ActuatorClass* AnimationTrackWidget::GetCurrentActuator()
+game::AnimatorClass* AnimationTrackWidget::GetCurrentActuator()
 {
     if (auto* item = mUI.timeline->GetSelectedItem())
     {
-        return mState.track->FindActuatorById(app::ToUtf8(item->id));
+        return mState.track->FindAnimatorById(app::ToUtf8(item->id));
     }
     return nullptr;
 }

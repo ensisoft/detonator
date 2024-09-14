@@ -34,49 +34,49 @@
 #include "game/entity_node_spatial_node.h"
 #include "game/entity_node_fixture.h"
 
-void apply_flag(game::SetFlagActuatorClass::FlagName flag,
-                game::SetFlagActuatorClass::FlagAction action,
+void apply_flag(game::BooleanPropertyAnimatorClass::Property flag,
+                game::BooleanPropertyAnimatorClass::PropertyAction action,
                 game::EntityNode& node)
 {
-    game::SetFlagActuatorClass klass;
+    game::BooleanPropertyAnimatorClass klass;
     klass.SetNodeId(node.GetClassId());
     klass.SetStartTime(0.1f);
     klass.SetDuration(0.5f);
     klass.SetFlagName(flag);
     klass.SetFlagAction(action);
 
-    game::SetFlagActuator actuator(klass);
+    game::BooleanPropertyAnimator actuator(klass);
     actuator.Start(node);
     actuator.Finish(node);
 }
 
-void apply_value(game::SetValueActuatorClass::ParamName name,
-                 game::SetValueActuatorClass::ParamValue value,
+void apply_value(game::PropertyAnimatorClass::ParamName name,
+                 game::PropertyAnimatorClass::ParamValue value,
                  game::EntityNode& node)
 {
-    game::SetValueActuatorClass klass;
+    game::PropertyAnimatorClass klass;
     klass.SetNodeId(node.GetClassId());
     klass.SetStartTime(0.1f);
     klass.SetDuration(0.5f);
     klass.SetParamName(name);
     klass.SetEndValue(value);
 
-    game::SetValueActuator actuator(klass);
+    game::PropertyAnimator actuator(klass);
     actuator.Start(node);
     actuator.Finish(node);
 }
 
 void apply_material_value(const char* name,
-                          game::MaterialActuatorClass::MaterialParam  value,
+                          game::MaterialAnimatorClass::MaterialParam  value,
                           game::EntityNode& node)
 {
-    game::MaterialActuatorClass klass;
+    game::MaterialAnimatorClass klass;
     klass.SetNodeId(node.GetClassId());
     klass.SetStartTime(0.1f);
     klass.SetDuration(0.5f);
     klass.SetMaterialParam(name, value);
 
-    game::MaterialActuator actuator(klass);
+    game::MaterialAnimator actuator(klass);
     actuator.Start(node);
     actuator.Finish(node);
 }
@@ -85,25 +85,25 @@ void unit_test_setflag_actuator()
 {
     TEST_CASE(test::Type::Feature)
 
-    game::SetFlagActuatorClass klass;
+    game::BooleanPropertyAnimatorClass klass;
     klass.SetName("test");
     klass.SetNodeId("1234");
     klass.SetStartTime(0.1f);
     klass.SetDuration(0.5f);
-    klass.SetFlagName(game::SetFlagActuatorClass::FlagName::Drawable_VisibleInGame);
-    klass.SetFlagAction(game::SetFlagActuatorClass::FlagAction::Off);
+    klass.SetFlagName(game::BooleanPropertyAnimatorClass::Property::Drawable_VisibleInGame);
+    klass.SetFlagAction(game::BooleanPropertyAnimatorClass::PropertyAction::Off);
 
     TEST_REQUIRE(klass.GetNodeId() == "1234");
     TEST_REQUIRE(klass.GetStartTime() == real::float32(0.1f));
     TEST_REQUIRE(klass.GetDuration()  == real::float32(0.5f));
-    TEST_REQUIRE(klass.GetFlagName() == game::SetFlagActuatorClass::FlagName::Drawable_VisibleInGame);
-    TEST_REQUIRE(klass.GetFlagAction() == game::SetFlagActuatorClass::FlagAction::Off);
+    TEST_REQUIRE(klass.GetFlagName() == game::BooleanPropertyAnimatorClass::Property::Drawable_VisibleInGame);
+    TEST_REQUIRE(klass.GetFlagAction() == game::BooleanPropertyAnimatorClass::PropertyAction::Off);
 
     // serialize
     {
         data::JsonObject json;
         klass.IntoJson(json);
-        game::SetFlagActuatorClass copy;
+        game::BooleanPropertyAnimatorClass copy;
         TEST_REQUIRE(copy.FromJson(json));
         TEST_REQUIRE(copy.GetId() == klass.GetId());
         TEST_REQUIRE(copy.GetHash() == klass.GetHash());
@@ -111,13 +111,13 @@ void unit_test_setflag_actuator()
         TEST_REQUIRE(copy.GetNodeId() == "1234");
         TEST_REQUIRE(copy.GetStartTime() == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()  == real::float32(0.5f));
-        TEST_REQUIRE(copy.GetFlagName() == game::SetFlagActuatorClass::FlagName::Drawable_VisibleInGame);
-        TEST_REQUIRE(copy.GetFlagAction() == game::SetFlagActuatorClass::FlagAction::Off);
+        TEST_REQUIRE(copy.GetFlagName() == game::BooleanPropertyAnimatorClass::Property::Drawable_VisibleInGame);
+        TEST_REQUIRE(copy.GetFlagAction() == game::BooleanPropertyAnimatorClass::PropertyAction::Off);
     }
 
     // copy assignment
     {
-        game::SetFlagActuatorClass copy(klass);
+        game::BooleanPropertyAnimatorClass copy(klass);
         TEST_REQUIRE(copy.GetId() == klass.GetId());
         TEST_REQUIRE(copy.GetHash() == klass.GetHash());
         copy = klass;
@@ -168,32 +168,32 @@ void unit_test_setflag_actuator()
         const auto* text = node.GetTextItem();
 
         // drawable flags.
-        apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_VisibleInGame,
-                   game::SetFlagActuatorClass::FlagAction::Off, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_UpdateDrawable,
-                   game::SetFlagActuatorClass::FlagAction::Off, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_UpdateMaterial,
-                   game::SetFlagActuatorClass::FlagAction::Off, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_FlipHorizontally,
-                   game::SetFlagActuatorClass::FlagAction::Off, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_Restart,
-                   game::SetFlagActuatorClass::FlagAction::Off, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_VisibleInGame,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_UpdateDrawable,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_UpdateMaterial,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_FlipHorizontally,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_Restart,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::VisibleInGame) == false);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::UpdateDrawable) == false);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::UpdateMaterial) == false);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::FlipHorizontally) == false);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::RestartDrawable) == false);
 
-        apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_VisibleInGame,
-                   game::SetFlagActuatorClass::FlagAction::Toggle, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_UpdateDrawable,
-                   game::SetFlagActuatorClass::FlagAction::Toggle, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_UpdateMaterial,
-                   game::SetFlagActuatorClass::FlagAction::Toggle, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_FlipHorizontally,
-                   game::SetFlagActuatorClass::FlagAction::Toggle, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::Drawable_Restart,
-                   game::SetFlagActuatorClass::FlagAction::Toggle, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_VisibleInGame,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_UpdateDrawable,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_UpdateMaterial,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_FlipHorizontally,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_Restart,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::VisibleInGame)   == true);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::UpdateDrawable)  == true);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::UpdateMaterial)  == true);
@@ -201,31 +201,31 @@ void unit_test_setflag_actuator()
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::RestartDrawable) == true);
 
         // ridig body flags.
-        apply_flag(game::SetFlagActuatorClass::FlagName::RigidBody_Bullet,
-                   game::SetFlagActuatorClass::FlagAction::Off, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::RigidBody_Sensor,
-                   game::SetFlagActuatorClass::FlagAction::Off, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::RigidBody_Enabled,
-                   game::SetFlagActuatorClass::FlagAction::Off, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::RigidBody_CanSleep,
-                   game::SetFlagActuatorClass::FlagAction::Off, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::RigidBody_DiscardRotation,
-                   game::SetFlagActuatorClass::FlagAction::Off, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_Bullet,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_Sensor,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_Enabled,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_CanSleep,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_DiscardRotation,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
         TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::Bullet) == false);
         TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::Sensor) == false);
         TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::CanSleep) == false);
         TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::Enabled) == false);
         TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::DiscardRotation) == false);
-        apply_flag(game::SetFlagActuatorClass::FlagName::RigidBody_Bullet,
-                   game::SetFlagActuatorClass::FlagAction::Toggle, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::RigidBody_Sensor,
-                   game::SetFlagActuatorClass::FlagAction::Toggle, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::RigidBody_Enabled,
-                   game::SetFlagActuatorClass::FlagAction::Toggle, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::RigidBody_CanSleep,
-                   game::SetFlagActuatorClass::FlagAction::Toggle, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::RigidBody_DiscardRotation,
-                   game::SetFlagActuatorClass::FlagAction::Toggle, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_Bullet,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_Sensor,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_Enabled,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_CanSleep,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_DiscardRotation,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
         TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::Bullet) == true);
         TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::Sensor) == true);
         TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::CanSleep) == true);
@@ -233,21 +233,21 @@ void unit_test_setflag_actuator()
         TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::DiscardRotation) == true);
 
         // text item flags.
-        apply_flag(game::SetFlagActuatorClass::FlagName::TextItem_Blink,
-                   game::SetFlagActuatorClass::FlagAction::Off, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::TextItem_Underline,
-                   game::SetFlagActuatorClass::FlagAction::Off, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::TextItem_VisibleInGame,
-                   game::SetFlagActuatorClass::FlagAction::Off, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::TextItem_Blink,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::TextItem_Underline,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::TextItem_VisibleInGame,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
         TEST_REQUIRE(text->TestFlag(game::TextItemClass::Flags::BlinkText) == false);
         TEST_REQUIRE(text->TestFlag(game::TextItemClass::Flags::UnderlineText) == false);
         TEST_REQUIRE(text->TestFlag(game::TextItemClass::Flags::VisibleInGame) == false);
-        apply_flag(game::SetFlagActuatorClass::FlagName::TextItem_Blink,
-                   game::SetFlagActuatorClass::FlagAction::Toggle, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::TextItem_Underline,
-                   game::SetFlagActuatorClass::FlagAction::Toggle, node);
-        apply_flag(game::SetFlagActuatorClass::FlagName::TextItem_VisibleInGame,
-                   game::SetFlagActuatorClass::FlagAction::Toggle, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::TextItem_Blink,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::TextItem_Underline,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
+        apply_flag(game::BooleanPropertyAnimatorClass::Property::TextItem_VisibleInGame,
+                   game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
         TEST_REQUIRE(text->TestFlag(game::TextItemClass::Flags::BlinkText) == true);
         TEST_REQUIRE(text->TestFlag(game::TextItemClass::Flags::UnderlineText) == true);
         TEST_REQUIRE(text->TestFlag(game::TextItemClass::Flags::VisibleInGame) == true);
@@ -258,27 +258,27 @@ void unit_test_setval_actuator()
 {
     TEST_CASE(test::Type::Feature)
 
-    game::SetValueActuatorClass klass;
+    game::PropertyAnimatorClass klass;
     klass.SetName("test");
     klass.SetNodeId("1234");
     klass.SetStartTime(0.1f);
     klass.SetDuration(0.5f);
-    klass.SetInterpolation(game::SetValueActuatorClass::Interpolation::Cosine);
-    klass.SetParamName(game::SetValueActuatorClass::ParamName::RigidBody_LinearVelocity);
+    klass.SetInterpolation(game::PropertyAnimatorClass::Interpolation::Cosine);
+    klass.SetParamName(game::PropertyAnimatorClass::ParamName::RigidBody_LinearVelocity);
     klass.SetEndValue(glm::vec2(2.0f, -3.0f));
 
     // serialize.
     {
         data::JsonObject json;
         klass.IntoJson(json);
-        game::SetValueActuatorClass copy;
+        game::PropertyAnimatorClass copy;
         TEST_REQUIRE(copy.FromJson(json));
-        TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetInterpolation() == game::TransformAnimatorClass::Interpolation::Cosine);
         TEST_REQUIRE(copy.GetName()          == "test");
         TEST_REQUIRE(copy.GetNodeId()        == "1234");
         TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()      == real::float32(0.5f));
-        TEST_REQUIRE(copy.GetParamName() == game::SetValueActuatorClass::ParamName::RigidBody_LinearVelocity);
+        TEST_REQUIRE(copy.GetParamName() == game::PropertyAnimatorClass::ParamName::RigidBody_LinearVelocity);
         TEST_REQUIRE(*copy.GetEndValue<glm::vec2>() == glm::vec2(2.0f, -3.0f));
         TEST_REQUIRE(copy.GetId() == klass.GetId());
         TEST_REQUIRE(copy.GetHash() == klass.GetHash());
@@ -286,13 +286,13 @@ void unit_test_setval_actuator()
 
     // copy assignment and ctor.
     {
-        game::SetValueActuatorClass copy(klass);
-        TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
+        game::PropertyAnimatorClass copy(klass);
+        TEST_REQUIRE(copy.GetInterpolation() == game::TransformAnimatorClass::Interpolation::Cosine);
         TEST_REQUIRE(copy.GetName()          == "test");
         TEST_REQUIRE(copy.GetNodeId()        == "1234");
         TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()      == real::float32(0.5f));
-        TEST_REQUIRE(copy.GetParamName() == game::SetValueActuatorClass::ParamName::RigidBody_LinearVelocity);
+        TEST_REQUIRE(copy.GetParamName() == game::PropertyAnimatorClass::ParamName::RigidBody_LinearVelocity);
         TEST_REQUIRE(*copy.GetEndValue<glm::vec2>() == glm::vec2(2.0f, -3.0f));
         TEST_REQUIRE(copy.GetId() == klass.GetId());
         TEST_REQUIRE(copy.GetHash() == klass.GetHash());
@@ -330,11 +330,11 @@ void unit_test_setval_actuator()
 
         game::EntityNode node(node_klass);
 
-        apply_value(game::SetValueActuatorClass::ParamName::Drawable_TimeScale, 2.0f, node);
-        apply_value(game::SetValueActuatorClass::ParamName::RigidBody_LinearVelocity, glm::vec2(-1.0f, -1.0f), node);
-        apply_value(game::SetValueActuatorClass::ParamName::RigidBody_AngularVelocity, 4.0f, node);
-        apply_value(game::SetValueActuatorClass::ParamName::TextItem_Text, std::string("hello"), node);
-        apply_value(game::SetValueActuatorClass::ParamName::TextItem_Color, game::Color::Blue, node);
+        apply_value(game::PropertyAnimatorClass::ParamName::Drawable_TimeScale, 2.0f, node);
+        apply_value(game::PropertyAnimatorClass::ParamName::RigidBody_LinearVelocity, glm::vec2(-1.0f, -1.0f), node);
+        apply_value(game::PropertyAnimatorClass::ParamName::RigidBody_AngularVelocity, 4.0f, node);
+        apply_value(game::PropertyAnimatorClass::ParamName::TextItem_Text, std::string("hello"), node);
+        apply_value(game::PropertyAnimatorClass::ParamName::TextItem_Color, game::Color::Blue, node);
 
         const auto* draw = node.GetDrawable();
         const auto* body = node.GetRigidBody();
@@ -352,19 +352,19 @@ void unit_test_kinematic_actuator()
 {
     TEST_CASE(test::Type::Feature)
 
-    game::KinematicActuatorClass klass;
+    game::KinematicAnimatorClass klass;
     klass.SetName("test");
     klass.SetNodeId("1234");
     klass.SetStartTime(0.1f);
     klass.SetDuration(0.5f);
-    klass.SetTarget(game::KinematicActuatorClass::Target::RigidBody);
-    klass.SetInterpolation(game::TransformActuatorClass::Interpolation::Cosine);
+    klass.SetTarget(game::KinematicAnimatorClass::Target::RigidBody);
+    klass.SetInterpolation(game::TransformAnimatorClass::Interpolation::Cosine);
     klass.SetEndAngularVelocity(3.0f);
     klass.SetEndAngularAcceleration(5.0f);
     klass.SetEndLinearVelocity(glm::vec2(1.0f, 2.0f));
     klass.SetEndLinearAcceleration(glm::vec2(-1.0f, -2.0f));
 
-    TEST_REQUIRE(klass.GetInterpolation()          == game::TransformActuatorClass::Interpolation::Cosine);
+    TEST_REQUIRE(klass.GetInterpolation()          == game::TransformAnimatorClass::Interpolation::Cosine);
     TEST_REQUIRE(klass.GetName()                   == "test");
     TEST_REQUIRE(klass.GetNodeId()                 == "1234");
     TEST_REQUIRE(klass.GetStartTime()              == real::float32(0.1f));
@@ -378,9 +378,9 @@ void unit_test_kinematic_actuator()
     {
         data::JsonObject json;
         klass.IntoJson(json);
-        game::KinematicActuatorClass copy;
+        game::KinematicAnimatorClass copy;
         TEST_REQUIRE(copy.FromJson(json));
-        TEST_REQUIRE(copy.GetInterpolation()          == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetInterpolation()          == game::TransformAnimatorClass::Interpolation::Cosine);
         TEST_REQUIRE(copy.GetName()                   == "test");
         TEST_REQUIRE(copy.GetNodeId()                 == "1234");
         TEST_REQUIRE(copy.GetStartTime()              == real::float32(0.1f));
@@ -396,8 +396,8 @@ void unit_test_kinematic_actuator()
 
     // copy assignment and copy ctor
     {
-        game::KinematicActuatorClass copy(klass);
-        TEST_REQUIRE(copy.GetInterpolation()       == game::TransformActuatorClass::Interpolation::Cosine);
+        game::KinematicAnimatorClass copy(klass);
+        TEST_REQUIRE(copy.GetInterpolation()       == game::TransformAnimatorClass::Interpolation::Cosine);
         TEST_REQUIRE(copy.GetName()                == "test");
         TEST_REQUIRE(copy.GetNodeId()              == "1234");
         TEST_REQUIRE(copy.GetStartTime()           == real::float32(0.1f));
@@ -423,7 +423,7 @@ void unit_test_kinematic_actuator()
 
     // instance
     {
-        game::KinematicActuator instance(klass);
+        game::KinematicAnimator instance(klass);
 
         game::EntityNodeClass klass;
         game::RigidBodyClass body;
@@ -450,18 +450,18 @@ void unit_test_transform_actuator()
 {
     TEST_CASE(test::Type::Feature)
 
-    game::TransformActuatorClass act;
+    game::TransformAnimatorClass act;
     act.SetName("test");
     act.SetNodeId("123");
     act.SetStartTime(0.1f);
     act.SetDuration(0.5f);
-    act.SetInterpolation(game::TransformActuatorClass::Interpolation::Cosine);
+    act.SetInterpolation(game::TransformAnimatorClass::Interpolation::Cosine);
     act.SetEndPosition(glm::vec2(100.0f, 50.0f));
     act.SetEndSize(glm::vec2(5.0f, 6.0f));
     act.SetEndScale(glm::vec2(3.0f, 8.0f));
     act.SetEndRotation(1.5f);
 
-    TEST_REQUIRE(act.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
+    TEST_REQUIRE(act.GetInterpolation() == game::TransformAnimatorClass::Interpolation::Cosine);
     TEST_REQUIRE(act.GetName()          == "test");
     TEST_REQUIRE(act.GetNodeId()        == "123");
     TEST_REQUIRE(act.GetStartTime()     == real::float32(0.1f));
@@ -475,9 +475,9 @@ void unit_test_transform_actuator()
     {
         data::JsonObject json;
         act.IntoJson(json);
-        game::TransformActuatorClass copy;
+        game::TransformAnimatorClass copy;
         copy.FromJson(json);
-        TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetInterpolation() == game::TransformAnimatorClass::Interpolation::Cosine);
         TEST_REQUIRE(copy.GetName()          == "test");
         TEST_REQUIRE(copy.GetNodeId()        == "123");
         TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));
@@ -495,7 +495,7 @@ void unit_test_transform_actuator()
         auto copy(act);
         TEST_REQUIRE(copy.GetHash()          == act.GetHash());
         TEST_REQUIRE(copy.GetId()            == act.GetId());
-        TEST_REQUIRE(copy.GetInterpolation() == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetInterpolation() == game::TransformAnimatorClass::Interpolation::Cosine);
         TEST_REQUIRE(copy.GetName()          == "test");
         TEST_REQUIRE(copy.GetNodeId()        == "123");
         TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));
@@ -530,7 +530,7 @@ void unit_test_transform_actuator()
 
     // instance
     {
-        game::TransformActuator instance(act);
+        game::TransformAnimator instance(act);
         game::EntityNodeClass klass;
         klass.SetTranslation(glm::vec2(5.0f, 5.0f));
         klass.SetSize(glm::vec2(1.0f, 1.0f));
@@ -567,21 +567,21 @@ void unit_test_material_actuator()
 {
     TEST_CASE(test::Type::Feature)
 
-    game::MaterialActuatorClass klass;
+    game::MaterialAnimatorClass klass;
     klass.SetName("test");
     klass.SetNodeId("1234");
     klass.SetStartTime(0.1f);
     klass.SetDuration(0.5f);
-    klass.SetInterpolation(game::MaterialActuatorClass::Interpolation::Cosine);
+    klass.SetInterpolation(game::MaterialAnimatorClass::Interpolation::Cosine);
     klass.SetMaterialParam("kColor", game::Color4f(game::Color::Green));
 
     // serialize.
     {
         data::JsonObject json;
         klass.IntoJson(json);
-        game::MaterialActuatorClass copy;
+        game::MaterialAnimatorClass copy;
         TEST_REQUIRE(copy.FromJson(json));
-        TEST_REQUIRE(copy.GetInterpolation()              == game::TransformActuatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetInterpolation()              == game::TransformAnimatorClass::Interpolation::Cosine);
         TEST_REQUIRE(copy.GetName()                       == "test");
         TEST_REQUIRE(copy.GetNodeId()                     == "1234");
         TEST_REQUIRE(copy.GetStartTime()                  == real::float32(0.1f));
@@ -593,8 +593,8 @@ void unit_test_material_actuator()
     }
     // copy assignment and copy ctor
     {
-        game::MaterialActuatorClass copy(klass);
-        TEST_REQUIRE(copy.GetInterpolation()              == game::TransformActuatorClass::Interpolation::Cosine);
+        game::MaterialAnimatorClass copy(klass);
+        TEST_REQUIRE(copy.GetInterpolation()              == game::TransformAnimatorClass::Interpolation::Cosine);
         TEST_REQUIRE(copy.GetName()                       == "test");
         TEST_REQUIRE(copy.GetNodeId()                     == "1234");
         TEST_REQUIRE(copy.GetStartTime()                  == real::float32(0.1f));
@@ -669,20 +669,20 @@ void unit_test_animation_track()
     TEST_REQUIRE(track.GetName() == "test");
     TEST_REQUIRE(track.IsLooping());
     TEST_REQUIRE(track.GetDuration() == real::float32(10.0f));
-    TEST_REQUIRE(track.GetNumActuators() == 0);
+    TEST_REQUIRE(track.GetNumAnimators() == 0);
 
-    game::TransformActuatorClass act;
+    game::TransformAnimatorClass act;
     act.SetNodeId(node.GetClassId());
     act.SetStartTime(0.1f);
     act.SetDuration(0.5f);
-    act.SetInterpolation(game::TransformActuatorClass::Interpolation::Cosine);
+    act.SetInterpolation(game::TransformAnimatorClass::Interpolation::Cosine);
     act.SetEndPosition(glm::vec2(100.0f, 50.0f));
     act.SetEndSize(glm::vec2(5.0f, 6.0f));
     act.SetEndScale(glm::vec2(3.0f, 8.0f));
     act.SetEndRotation(1.5f);
 
-    track.AddActuator(act);
-    TEST_REQUIRE(track.GetNumActuators() == 1);
+    track.AddAnimator(act);
+    TEST_REQUIRE(track.GetNumAnimators() == 1);
 
     // serialize
     {
@@ -691,7 +691,7 @@ void unit_test_animation_track()
 
         game::AnimationClass ret;
         TEST_REQUIRE(ret.FromJson(json));
-        TEST_REQUIRE(ret.GetNumActuators() == 1);
+        TEST_REQUIRE(ret.GetNumAnimators() == 1);
         TEST_REQUIRE(ret.IsLooping()       == true);
         TEST_REQUIRE(ret.GetName()         == "test");
         TEST_REQUIRE(ret.GetDuration()     == real::float32(10.0f));
@@ -702,7 +702,7 @@ void unit_test_animation_track()
     // copy assignment and copy ctor
     {
         auto copy(track);
-        TEST_REQUIRE(copy.GetNumActuators() == 1);
+        TEST_REQUIRE(copy.GetNumAnimators() == 1);
         TEST_REQUIRE(copy.IsLooping()       == true);
         TEST_REQUIRE(copy.GetName()         == "test");
         TEST_REQUIRE(copy.GetDuration()     == real::float32(10.0f));
@@ -754,9 +754,9 @@ void unit_test_animation_complete()
     anim.SetLooping(false);
     anim.SetDuration(1.0f);
     anim.SetDelay(0.0f);
-    game::TransformActuatorClass transform;
+    game::TransformAnimatorClass transform;
     transform.SetNodeId(node0.GetId());
-    anim.AddActuator(transform);
+    anim.AddAnimator(transform);
 
     game::EntityClass klass;
     klass.SetName("entity");

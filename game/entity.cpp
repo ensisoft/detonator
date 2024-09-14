@@ -743,12 +743,12 @@ EntityClass EntityClass::Clone() const
             ret.mIdleTrackId = clone->GetId();
         ret.mAnimations.push_back(std::move(clone));
     }
-    // remap the actuator node ids.
+    // remap the animator node ids.
     for (auto& track : ret.mAnimations)
     {
-        for (size_t i=0; i<track->GetNumActuators(); ++i)
+        for (size_t i=0; i< track->GetNumAnimators(); ++i)
         {
-            auto& actuator = track->GetActuatorClass(i);
+            auto& actuator = track->GetAnimatorClass(i);
             const auto* source_node = FindNodeById(actuator.GetNodeId());
             if (source_node == nullptr)
                 continue;

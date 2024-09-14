@@ -469,6 +469,9 @@ namespace app
         std::unique_ptr<data::Chunk> MigrateResourceDataChunk(std::unique_ptr<data::Chunk> chunk, MigrationLog* log)
         { return chunk; }
 
+        template<>
+        std::unique_ptr<data::Chunk> MigrateResourceDataChunk<game::EntityClass>(std::unique_ptr<data::Chunk> chunk, MigrationLog* log);
+
         template<typename ResourceType> inline
         void MigrateResource(const ResourceType&, MigrationLog*, unsigned old_version, unsigned new_version)
         {}

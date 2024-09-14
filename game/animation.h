@@ -77,43 +77,43 @@ namespace game
         inline bool IsLooping() const noexcept
         { return mLooping; }
 
-        // Add a new actuator that applies state update/action on some animation node.
+        // Add a new animator that applies state update/action on some animation node.
         template<typename Actuator>
-        void AddActuator(const Actuator& actuator)
+        void AddAnimator(const Actuator& actuator)
         {
-            std::shared_ptr<ActuatorClass> foo(new Actuator(actuator));
+            std::shared_ptr<AnimatorClass> foo(new Actuator(actuator));
             mActuators.push_back(std::move(foo));
         }
-        // Add a new actuator that applies state update/action on some animation node.
-        void AddActuator(std::shared_ptr<ActuatorClass> actuator)
+        // Add a new animator that applies state update/action on some animation node.
+        void AddAnimator(std::shared_ptr<AnimatorClass> actuator)
         { mActuators.push_back(std::move(actuator)); }
 
-        // Delete the actuator at the given actuator index.
-        void DeleteActuator(std::size_t index) noexcept;
-        // Delete the actuator by the given ID. Returns true if actuator was deleted
+        // Delete the animator at the given actuator index.
+        void DeleteAnimator(std::size_t index) noexcept;
+        // Delete the animator by the given ID. Returns true if animator was deleted
         // or false to indicate that nothing was done.
-        bool DeleteActuatorById(const std::string& id) noexcept;
+        bool DeleteAnimatorById(const std::string& id) noexcept;
         // Find an actuator by the given ID. Returns nullptr if no such actuator exists.
-        ActuatorClass* FindActuatorById(const std::string& id) noexcept;
+        AnimatorClass* FindAnimatorById(const std::string& id) noexcept;
         // Find an actuator by the given ID. Returns nullptr if no such actuator exists.
-        const ActuatorClass* FindActuatorById(const std::string& id) const noexcept;
+        const AnimatorClass* FindAnimatorById(const std::string& id) const noexcept;
         // Clear (and delete) all actuators previously added to the animation.
         inline void Clear() noexcept
         { mActuators.clear(); }
         // Get the number of actuators currently added to this animation track.
-        inline std::size_t GetNumActuators() const noexcept
+        inline std::size_t GetNumAnimators() const noexcept
         { return mActuators.size(); }
         // Get the animation actuator class object at the given index.
-        inline ActuatorClass& GetActuatorClass(std::size_t index) noexcept
+        inline AnimatorClass& GetAnimatorClass(std::size_t index) noexcept
         { return *mActuators[index]; }
         // Get the animation actuator class object at the given index.
-        inline const ActuatorClass& GetActuatorClass(std::size_t index) const noexcept
+        inline const AnimatorClass& GetAnimatorClass(std::size_t index) const noexcept
         { return *mActuators[index]; }
         // Create an instance of some actuator class type at the given index.
         // For example if the type of actuator class at index N is
-        // TransformActuatorClass then the returned object will be an
-        // instance of TransformActuator.
-        std::unique_ptr<Actuator> CreateActuatorInstance(std::size_t index) const;
+        // TransformAnimatorClass then the returned object will be an
+        // instance of TransformAnimator.
+        std::unique_ptr<Animator> CreateAnimatorInstance(std::size_t index) const;
         // Get the hash value based on the static data.
         std::size_t GetHash() const noexcept;
         // Serialize actuator state into JSON.
@@ -129,7 +129,7 @@ namespace game
     private:
         std::string mId;
         // The list of animation actuators that apply transforms
-        std::vector<std::shared_ptr<ActuatorClass>> mActuators;
+        std::vector<std::shared_ptr<AnimatorClass>> mActuators;
         // Human-readable name of the animation.
         std::string mName;
         // One time delay before starting the playback.
@@ -171,16 +171,16 @@ namespace game
 
         // Find an actuator instance by on its class ID.
         // If there's no such actuator with such class ID then nullptr is returned.
-        Actuator* FindActuatorById(const std::string& id) noexcept;
+        Animator* FindActuatorById(const std::string& id) noexcept;
         // Find an actuator instance by its class name.
         // If there's no such actuator with such class ID then nullptr is returned.
-        Actuator* FindActuatorByName(const std::string& name) noexcept;
+        Animator* FindActuatorByName(const std::string& name) noexcept;
         // Find an actuator instance by on its class ID.
         // If there's no such actuator with such class ID then nullptr is returned.
-        const Actuator* FindActuatorById(const std::string& id) const noexcept;
+        const Animator* FindActuatorById(const std::string& id) const noexcept;
         // Find an actuator instance by its class name.
         // If there's no such actuator with such class ID then nullptr is returned.
-        const Actuator* FindActuatorByName(const std::string& name) const noexcept;
+        const Animator* FindActuatorByName(const std::string& name) const noexcept;
 
         // Set one time animation delay that takes place
         // before the animation starts. The delay is in seconds.
@@ -218,7 +218,7 @@ namespace game
         // at specific times.
         struct NodeTrack {
             std::string node;
-            std::unique_ptr<Actuator> actuator;
+            std::unique_ptr<Animator> actuator;
             mutable bool started = false;
             mutable bool ended   = false;
         };

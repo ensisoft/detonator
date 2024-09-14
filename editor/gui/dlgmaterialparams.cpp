@@ -71,7 +71,7 @@ DlgMaterialParams::DlgMaterialParams(QWidget* parent, game::DrawableItemClass* i
     SetVisible(mUI.customUniforms, false);
 }
 
-DlgMaterialParams::DlgMaterialParams(QWidget* parent, game::DrawableItemClass* item, game::MaterialActuatorClass* actuator)
+DlgMaterialParams::DlgMaterialParams(QWidget* parent, game::DrawableItemClass* item, game::MaterialAnimatorClass* actuator)
   : QDialog(parent)
   , mItem(item)
   , mActuator(actuator)
