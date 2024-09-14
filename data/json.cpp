@@ -42,7 +42,7 @@ JsonObject::JsonObject(const nlohmann::json& json) : mJson(new nlohmann::json(js
 {}
 JsonObject::JsonObject(nlohmann::json&& json) : mJson(new nlohmann::json(std::move(json)))
 {}
-JsonObject::JsonObject(std::shared_ptr<nlohmann::json> json) : mJson(json)
+JsonObject::JsonObject(std::shared_ptr<nlohmann::json> json) noexcept : mJson(std::move(json))
 {}
 JsonObject::JsonObject() : mJson(new nlohmann::json) {}
 JsonObject::~JsonObject() = default;
@@ -57,6 +57,25 @@ std::unique_ptr<Reader> JsonObject::GetReadChunk(const char* name) const
     return std::make_unique<JsonObject>(obj);
 }
 std::unique_ptr<Reader> JsonObject::GetReadChunk(const char* name, unsigned index) const
+{
+    if (!mJson->contains(name))
+        return nullptr;
+    const auto& obj = ((*mJson)[name])[index];
+    if (!obj.is_object())
+        return nullptr;
+    return std::make_unique<JsonObject>(obj);
+}
+
+std::unique_ptr<Chunk> JsonObject::GetChunk(const char* name) const
+{
+    if (!mJson->contains(name))
+        return nullptr;
+    const auto& obj = (*mJson)[name];
+    if (!obj.is_object())
+        return nullptr;
+    return std::make_unique<JsonObject>(obj);
+}
+std::unique_ptr<Chunk> JsonObject::GetChunk(const char* name, unsigned index) const
 {
     if (!mJson->contains(name))
         return nullptr;
@@ -151,15 +170,25 @@ bool JsonObject::Read(const char* name, unsigned index, double* out) const
     return read_array(name, index, out);
 }
 bool JsonObject::Read(const char* name, unsigned index, float* out) const
-{ return read_array(name, index, out); }
+{
+    return read_array(name, index, out);
+}
 bool JsonObject::Read(const char* name, unsigned index, int* out) const
-{ return read_array(name, index, out); }
+{
+    return read_array(name, index, out);
+}
 bool JsonObject::Read(const char* name, unsigned index, unsigned* out) const
-{ return read_array(name, index, out); }
+{
+    return read_array(name, index, out);
+}
 bool JsonObject::Read(const char* name, unsigned index, bool* out) const
-{ return read_array(name, index, out); }
+{
+    return read_array(name, index, out);
+}
 bool JsonObject::Read(const char* name, unsigned index, std::string* out) const
-{ return read_array(name, index, out); }
+{
+    return read_array(name, index, out);
+}
 
 bool JsonObject::HasValue(const char* name) const
 {
@@ -192,8 +221,15 @@ unsigned JsonObject::GetNumChunks(const char* name) const
     return 0;
 }
 
+std::unique_ptr<Chunk> JsonObject::NewChunk() const
+{
+    return std::make_unique<JsonObject>();
+}
+
 std::unique_ptr<Writer> JsonObject::NewWriteChunk() const
-{ return std::make_unique<JsonObject>(); }
+{
+    return std::make_unique<JsonObject>();
+}
 
 void JsonObject::Write(const char* name, int value)
 {
@@ -271,6 +307,14 @@ void JsonObject::Write(const char* name, const Writer& chunk)
     ASSERT(json);
     base::detail::JsonWriteJson(*mJson, name, *json->mJson);
 }
+
+void JsonObject::Write(const char* name, const Chunk& chunk)
+{
+    const auto* json = dynamic_cast<const JsonObject*>(&chunk);
+    ASSERT(json);
+    base::detail::JsonWriteJson(*mJson, name, *json->mJson);
+}
+
 void JsonObject::Write(const char* name, std::unique_ptr<Writer> chunk)
 {
     auto* json = dynamic_cast<JsonObject*>(chunk.get());
@@ -278,20 +322,41 @@ void JsonObject::Write(const char* name, std::unique_ptr<Writer> chunk)
     base::detail::JsonWriteJson(*mJson, name, std::move(*json->mJson));
 }
 
+void JsonObject::Write(const char* name, std::unique_ptr<Chunk> chunk)
+{
+    auto* json = dynamic_cast<JsonObject*>(chunk.get());
+    ASSERT(json);
+    base::detail::JsonWriteJson(*mJson, name, std::move(*json->mJson));
+}
+
 void JsonObject::Write(const char* name, const int* array, size_t size)
-{ write_array<int>(name, array, size); }
+{
+    write_array<int>(name, array, size);
+}
 void JsonObject::Write(const char* name, const unsigned* array, size_t size)
-{ write_array<unsigned>(name, array, size); }
+{
+    write_array<unsigned>(name, array, size);
+}
 void JsonObject::Write(const char* name, const double* array, size_t size)
-{ write_array<double>(name, array, size); }
+{
+    write_array<double>(name, array, size);
+}
 void JsonObject::Write(const char* name, const float* array, size_t size)
-{ write_array<float>(name, array, size); }
+{
+    write_array<float>(name, array, size);
+}
 void JsonObject::Write(const char* name, const bool* array, size_t size)
-{ write_array<bool>(name, array, size); }
+{
+    write_array<bool>(name, array, size);
+}
 void JsonObject::Write(const char* name, const char* const * array, size_t size)
-{ write_array<const char*>(name, array, size); }
+{
+    write_array<const char*>(name, array, size);
+}
 void JsonObject::Write(const char* name, const std::string* array, size_t size)
-{ write_array<std::string>(name, array, size); }
+{
+    write_array<std::string>(name, array, size);
+}
 
 void JsonObject::AppendChunk(const char* name, const Writer& chunk)
 {
@@ -299,11 +364,44 @@ void JsonObject::AppendChunk(const char* name, const Writer& chunk)
     ASSERT(json);
     (*mJson)[name].push_back(*json->mJson);
 }
+void JsonObject::AppendChunk(const char* name, const data::Chunk& chunk)
+{
+    const auto* json = dynamic_cast<const JsonObject*>(&chunk);
+    ASSERT(json);
+    (*mJson)[name].push_back(*json->mJson);
+}
+
 void JsonObject::AppendChunk(const char* name, std::unique_ptr<Writer> chunk)
 {
     auto* json = dynamic_cast<JsonObject*>(chunk.get());
     ASSERT(json);
     (*mJson)[name].push_back(std::move(*json->mJson));
+}
+void JsonObject::AppendChunk(const char* name, std::unique_ptr<Chunk> chunk)
+{
+    auto* json = dynamic_cast<JsonObject*>(chunk.get());
+    ASSERT(json);
+    (*mJson)[name].push_back(std::move(*json->mJson));
+}
+
+void JsonObject::OverwriteChunk(const char* name, std::unique_ptr<Chunk> chunk)
+{
+    auto* json = dynamic_cast<JsonObject*>(chunk.get());
+    ASSERT(json);
+    base::detail::JsonWriteJson(*mJson, name, std::move(*json->mJson));
+}
+
+void JsonObject::OverwriteChunk(const char* name, std::unique_ptr<Chunk> chunk, unsigned int index)
+{
+    auto* json = dynamic_cast<JsonObject*>(chunk.get());
+    ASSERT(json);
+
+    ASSERT((*mJson)[name].is_array());
+    auto& array = (*mJson)[name];
+    const auto size = array.size();
+
+    ASSERT(index < size);
+    array[index] = std::move(*json->mJson);
 }
 
 bool JsonObject::Dump(IODevice& device) const

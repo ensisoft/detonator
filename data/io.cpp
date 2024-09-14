@@ -20,6 +20,7 @@
 
 #include "base/utility.h"
 #include "data/writer.h"
+#include "data/chunk.h"
 #include "data/io.h"
 
 namespace data
@@ -44,13 +45,13 @@ bool FileDevice::WriteBytes(const void* data, size_t bytes)
     return true;
 }
 
-std::tuple<bool, std::string> WriteFile(const Writer& chunk, const std::string& file)
+std::tuple<bool, std::string> WriteFile(const Writer& writer, const std::string& file)
 {
     FileDevice io;
     if (!io.Open(file))
         return std::make_tuple(false, "failed to open file: " + file);
 
-    if (!chunk.Dump(io))
+    if (!writer.GetChunkFromWriter()->Dump(io))
         return std::make_tuple(false, "file write failed.");
 
     io.Close();

@@ -22,6 +22,7 @@
 #  include <nlohmann/json_fwd.hpp>
 #include "warnpop.h"
 
+#include "data/chunk.h"
 #include "data/reader.h"
 #include "data/writer.h"
 
@@ -30,20 +31,21 @@
 
 namespace data
 {
-    class JsonObject : public Reader,
-                       public Writer
+    class JsonObject : public Chunk, public Reader, public Writer
     {
     public:
-        JsonObject(const nlohmann::json& json);
-        JsonObject(nlohmann::json&& json);
-        JsonObject(std::shared_ptr<nlohmann::json> json);
+        explicit JsonObject(const nlohmann::json& json);
+        explicit JsonObject(nlohmann::json&& json);
+        explicit JsonObject(std::shared_ptr<nlohmann::json> json) noexcept;
         JsonObject(const JsonObject&) = delete;
         JsonObject();
-       ~JsonObject();
+       ~JsonObject() override;
 
         // reader interface impl
         virtual std::unique_ptr<Reader> GetReadChunk(const char* name) const override;
         virtual std::unique_ptr<Reader> GetReadChunk(const char* name, unsigned index) const override;
+        virtual std::unique_ptr<Chunk> GetChunk(const char* name) const override;
+        virtual std::unique_ptr<Chunk> GetChunk(const char* name, unsigned index) const override;
         virtual bool Read(const char* name, double* out) const override;
         virtual bool Read(const char* name, float* out) const override;
         virtual bool Read(const char* name, int* out) const override;
@@ -75,6 +77,7 @@ namespace data
         virtual unsigned GetNumChunks(const char* name) const override;
 
         // writer interface impl.
+        virtual std::unique_ptr<Chunk> NewChunk() const override;
         virtual std::unique_ptr<Writer> NewWriteChunk() const override;
         virtual void Write(const char* name, int value) override;
         virtual void Write(const char* name, unsigned value) override;
@@ -94,7 +97,9 @@ namespace data
         virtual void Write(const char* name, const base::Color4f& value) override;
         virtual void Write(const char* name, const base::Rotator& value) override;
         virtual void Write(const char* name, const Writer& chunk) override;
+        virtual void Write(const char* name, const Chunk& chunk) override;
         virtual void Write(const char* name, std::unique_ptr<Writer> chunk) override;
+        virtual void Write(const char* name, std::unique_ptr<Chunk> chunk) override;
         virtual void Write(const char* name, const int* array, size_t size) override;
         virtual void Write(const char* name, const unsigned* array, size_t size) override;
         virtual void Write(const char* name, const double* array, size_t size) override;
@@ -103,13 +108,32 @@ namespace data
         virtual void Write(const char* name, const char* const * array, size_t size) override;
         virtual void Write(const char* name, const std::string* array, size_t size) override;
         virtual void AppendChunk(const char* name, const Writer& chunk) override;
+        virtual void AppendChunk(const char* name, const Chunk& chunk) override;
         virtual void AppendChunk(const char* name, std::unique_ptr<Writer> chunk) override;
-
-        virtual bool Dump(IODevice& device) const override;
+        virtual void AppendChunk(const char* name, std::unique_ptr<Chunk> chunk) override;
 
         // bring the template helpers into scope when using this type.
         using Writer::Write;
         using Reader::Read;
+
+        // From Chunk API
+        virtual Writer* GetWriter() noexcept override
+        { return this; }
+        virtual const Reader* GetReader() const noexcept override
+        { return this; }
+
+        virtual Chunk* GetChunkFromWriter() noexcept override
+        { return this; }
+        virtual Chunk* GetChunkFromReader() noexcept override
+        { return this; }
+        virtual const Chunk* GetChunkFromWriter() const noexcept override
+        { return this; }
+        virtual const Chunk* GetChunkFromReader() const noexcept override
+        { return this; }
+
+        virtual void OverwriteChunk(const char* name, std::unique_ptr<Chunk> chunk) override;
+        virtual void OverwriteChunk(const char* name, std::unique_ptr<Chunk> chunk, unsigned index) override;
+        virtual bool Dump(IODevice& device) const override;
 
         JsonObject& operator=(const JsonObject&) = delete;
 
