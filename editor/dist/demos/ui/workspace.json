@@ -27,6 +27,7 @@
         "checked_for_packing": true
     },
     "2xdUYgjtvl": {
+        "__version": 1,
         "checked_for_packing": true
     },
     "3vHBKZi4PZ": {
@@ -38,6 +39,7 @@
         "checked_for_packing": true
     },
     "5omg0eLKCh": {
+        "__version": 1,
         "checked_for_packing": true,
         "elem_OkowxZ29ux_pos_x": 0,
         "elem_OkowxZ29ux_pos_y": 0,
@@ -134,8 +136,9 @@
         "audio_channels": "Stereo",
         "audio_sample_rate": 44100,
         "audio_sample_type": "Float32",
+        "canvas_fs_strategy": "SoftFullScreen",
         "canvas_height": 768,
-        "canvas_mode": "Default",
+        "canvas_mode": "Normal",
         "canvas_width": 1024,
         "clear_color": "4280492835",
         "command_line_arguments": "",
@@ -203,6 +206,7 @@
         "checked_for_packing": true
     },
     "uI5i13YzFU": {
+        "__version": 1,
         "checked_for_packing": true
     },
     "workspace": {

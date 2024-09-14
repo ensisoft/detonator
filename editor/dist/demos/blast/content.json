@@ -1323,9 +1323,9 @@
       "tag": "",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "duration": 1.0,
                 "flags": {
                   "StaticInstance": true
@@ -1349,7 +1349,7 @@
                 },
                 "starttime": 0.0
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             }
           ],
           "delay": 0.0,
@@ -1359,9 +1359,9 @@
           "name": "Fly In"
         },
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.4969097375869751,
                 "flags": {
                   "StaticInstance": false
@@ -1385,10 +1385,10 @@
                 },
                 "starttime": 0.0
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.5030902624130249,
                 "flags": {
                   "StaticInstance": false
@@ -1412,7 +1412,7 @@
                 },
                 "starttime": 0.4969097375869751
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             }
           ],
           "delay": 0.0,
@@ -1711,9 +1711,9 @@
       "tag": "#enemy",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.20245298743247986,
                 "flags": {
                   "StaticInstance": false
@@ -1737,10 +1737,10 @@
                 },
                 "starttime": 0.00038343557389453053
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.2618864178657532,
                 "flags": {
                   "StaticInstance": false
@@ -1764,10 +1764,10 @@
                 },
                 "starttime": 0.5019168853759766
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.2990804612636566,
                 "flags": {
                   "StaticInstance": false
@@ -1791,10 +1791,10 @@
                 },
                 "starttime": 0.20283642411231995
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.23619669675827026,
                 "flags": {
                   "StaticInstance": false
@@ -1818,7 +1818,7 @@
                 },
                 "starttime": 0.7638033032417297
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             }
           ],
           "delay": 0.0,
@@ -2714,9 +2714,9 @@
       "tag": "",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "cname": "",
                 "duration": 1.0,
                 "flags": {
@@ -2729,10 +2729,10 @@
                 "starttime": 0.0,
                 "value": 10.0
               },
-              "type": "SetValue"
+              "type": "PropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "cname": "Actuator_2",
                 "duration": 1.0,
                 "flags": {
@@ -2745,7 +2745,7 @@
                 "starttime": 0.0,
                 "value": 2.0
               },
-              "type": "SetValue"
+              "type": "PropertyAnimator"
             }
           ],
           "delay": 0.0,
@@ -2946,9 +2946,9 @@
       "tag": "",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.5013895034790039,
                 "flags": {
                   "StaticInstance": true
@@ -2972,10 +2972,10 @@
                 },
                 "starttime": 0.0
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.4986104965209961,
                 "flags": {
                   "StaticInstance": true
@@ -2999,10 +2999,10 @@
                 },
                 "starttime": 0.5013895034790039
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "duration": 1.0,
                 "flags": {
                   "StaticInstance": true
@@ -3026,7 +3026,7 @@
                 },
                 "starttime": 0.0
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             }
           ],
           "delay": 0.0,
@@ -4339,9 +4339,9 @@
       "tag": "",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "cname": "Actuator_0",
                 "duration": 1.0,
                 "flags": {
@@ -4354,7 +4354,7 @@
                 "starttime": 0.0,
                 "value": 2.0
               },
-              "type": "SetValue"
+              "type": "PropertyAnimator"
             }
           ],
           "delay": 0.0,
@@ -5221,9 +5221,9 @@
       "tag": "",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "duration": 1.0,
                 "flags": {
                   "StaticInstance": false
@@ -5247,7 +5247,7 @@
                 },
                 "starttime": 0.0
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             }
           ],
           "delay": 0.0,
@@ -5378,9 +5378,9 @@
       "tag": "",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "duration": 1.0,
                 "flags": {
                   "StaticInstance": false
@@ -5404,7 +5404,7 @@
                 },
                 "starttime": 0.0
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             }
           ],
           "delay": 0.0,
@@ -5666,9 +5666,9 @@
       "tag": "",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "duration": 1.0,
                 "flags": {
                   "StaticInstance": false
@@ -5692,7 +5692,7 @@
                 },
                 "starttime": 0.0
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             }
           ],
           "delay": 0.0,
@@ -6866,9 +6866,9 @@
       "tag": "#enemy",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.40061694383621216,
                 "flags": {
                   "StaticInstance": false
@@ -6892,10 +6892,10 @@
                 },
                 "starttime": 0.0
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.2010781466960907,
                 "flags": {
                   "StaticInstance": false
@@ -6919,10 +6919,10 @@
                 },
                 "starttime": 0.4010021388530731
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.3971492648124695,
                 "flags": {
                   "StaticInstance": false
@@ -6946,7 +6946,7 @@
                 },
                 "starttime": 0.6020802855491638
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             }
           ],
           "delay": 0.0,

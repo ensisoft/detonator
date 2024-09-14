@@ -91,7 +91,6 @@
     },
     "5FdaYIIRiM": {
         "__version": 1,
-        "checked_for_packing": true,
         "comment_2YG2JES08A": "",
         "comment_4RPa0LW6RA": "",
         "comment_X3GTqzIPkk": "",
@@ -222,7 +221,6 @@
     },
     "AWExQiuWgf": {
         "__version": 1,
-        "checked_for_packing": true,
         "comment_jmPXbaRGqI": "",
         "comment_l3DH0ryh1Q": "",
         "comment_lp3EsUUTsk": "",
@@ -849,7 +847,6 @@
             "src_point_y:othAlfk1Wr": -475,
             "src_point_y:ugX6hSA45a": -475
         },
-        "checked_for_packing": true,
         "comment_7Crfe3nh27": "",
         "comment_Ev2HUk2eXz": "",
         "comment_I5uXgDruJd": "",
@@ -1106,8 +1103,9 @@
         "audio_channels": "Stereo",
         "audio_sample_rate": 44100,
         "audio_sample_type": "Float32",
+        "canvas_fs_strategy": "SoftFullScreen",
         "canvas_height": 1000,
-        "canvas_mode": "Default",
+        "canvas_mode": "Normal",
         "canvas_width": 1000,
         "clear_color": "4279846176",
         "command_line_arguments": "",

@@ -3682,9 +3682,9 @@
       "tag": "",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "cname": "Actuator_0",
                 "duration": 0.40026044845581055,
                 "flags": {
@@ -3700,7 +3700,7 @@
                   "y": 500.0
                 }
               },
-              "type": "SetValue"
+              "type": "PropertyAnimator"
             }
           ],
           "delay": 0.0,
@@ -4364,9 +4364,9 @@
       "tag": "enemy",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "action": "On",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -4379,10 +4379,10 @@
                 "starttime": 0.0,
                 "time": 0.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -4395,7 +4395,7 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             }
           ],
           "delay": 0.0,
@@ -17865,118 +17865,147 @@
           "palette": [
             {
               "index": 0,
+              "tile_index": 61,
               "value": "0dTWpI1Me5"
             },
             {
               "index": 2,
+              "tile_index": 61,
               "value": "zCpu7JKpe1"
             },
             {
               "index": 4,
+              "tile_index": 61,
               "value": "EOzBPYNSQj"
             },
             {
               "index": 5,
+              "tile_index": 61,
               "value": "BH5y29ivk0"
             },
             {
               "index": 6,
+              "tile_index": 61,
               "value": "lKWarvA3wS"
             },
             {
               "index": 7,
+              "tile_index": 61,
               "value": "5N6rzKovar"
             },
             {
               "index": 8,
+              "tile_index": 61,
               "value": "9iqRAxeiDj"
             },
             {
               "index": 9,
+              "tile_index": 61,
               "value": "YAX7F8rFl4"
             },
             {
               "index": 10,
+              "tile_index": 61,
               "value": "fW04Lutwft"
             },
             {
               "index": 11,
+              "tile_index": 61,
               "value": "HwSMq307AY"
             },
             {
               "index": 12,
+              "tile_index": 61,
               "value": "RGER2xwOqi"
             },
             {
               "index": 13,
+              "tile_index": 61,
               "value": "5qR2nFLdOr"
             },
             {
               "index": 14,
+              "tile_index": 61,
               "value": "BT2F7Z5hGL"
             },
             {
               "index": 15,
+              "tile_index": 61,
               "value": "ayNiGRKsSq"
             },
             {
               "index": 17,
+              "tile_index": 61,
               "value": "59WubFuFwk"
             },
             {
               "index": 18,
+              "tile_index": 61,
               "value": "Dv3En2rQaH"
             },
             {
               "index": 20,
+              "tile_index": 61,
               "value": "qQzzv1O6qU"
             },
             {
               "index": 21,
+              "tile_index": 61,
               "value": "XQugyzOWnA"
             },
             {
               "index": 23,
+              "tile_index": 61,
               "value": "io73OI74FB"
             },
             {
               "index": 24,
+              "tile_index": 61,
               "value": "DDrxI60R5y"
             },
             {
               "index": 25,
+              "tile_index": 61,
               "value": "YBFOUKbHlT"
             },
             {
               "index": 28,
+              "tile_index": 61,
               "value": "WZBr22zLiC"
             },
             {
               "index": 29,
+              "tile_index": 61,
               "value": "hBXgLe8Alw"
             },
             {
               "index": 30,
+              "tile_index": 61,
               "value": "nneqd4aFlL"
             },
             {
               "index": 31,
+              "tile_index": 61,
               "value": "QOPlhzDfx4"
             },
             {
               "index": 32,
+              "tile_index": 61,
               "value": "PFHeR5z8le"
             },
             {
               "index": 33,
+              "tile_index": 61,
               "value": "6AvH8rBpLR"
             },
             {
               "index": 34,
+              "tile_index": 61,
               "value": "BdMfIzkp2d"
             },
             {
               "index": 41,
+              "tile_index": 61,
               "value": "lv1MSXu1NU"
             }
           ],
@@ -18005,34 +18034,42 @@
           "palette": [
             {
               "index": 0,
+              "tile_index": 61,
               "value": "59WubFuFwk"
             },
             {
               "index": 1,
+              "tile_index": 61,
               "value": "EOzBPYNSQj"
             },
             {
               "index": 3,
+              "tile_index": 61,
               "value": "BH5y29ivk0"
             },
             {
               "index": 9,
+              "tile_index": 61,
               "value": "TkkzDE08h4"
             },
             {
               "index": 10,
+              "tile_index": 61,
               "value": "hBXgLe8Alw"
             },
             {
               "index": 11,
+              "tile_index": 61,
               "value": "qQzzv1O6qU"
             },
             {
               "index": 12,
+              "tile_index": 61,
               "value": "QOPlhzDfx4"
             },
             {
               "index": 13,
+              "tile_index": 61,
               "value": "io73OI74FB"
             }
           ],
@@ -18061,58 +18098,72 @@
           "palette": [
             {
               "index": 0,
+              "tile_index": 61,
               "value": "vHygmkluU4"
             },
             {
               "index": 1,
+              "tile_index": 61,
               "value": "1Lmrz5nn9j"
             },
             {
               "index": 2,
+              "tile_index": 61,
               "value": "iMP1G8Nztj"
             },
             {
               "index": 3,
+              "tile_index": 61,
               "value": "GEqGx5T87e"
             },
             {
               "index": 4,
+              "tile_index": 61,
               "value": "pnKj8mixy5"
             },
             {
               "index": 5,
+              "tile_index": 61,
               "value": "2zTJ4peMyW"
             },
             {
               "index": 6,
+              "tile_index": 61,
               "value": "EOzBPYNSQj"
             },
             {
               "index": 7,
+              "tile_index": 61,
               "value": "BH5y29ivk0"
             },
             {
               "index": 8,
+              "tile_index": 61,
               "value": "TkkzDE08h4"
             },
             {
               "index": 9,
+              "tile_index": 61,
               "value": "hBXgLe8Alw"
             },
             {
               "index": 10,
+              "tile_index": 61,
               "value": "qQzzv1O6qU"
             },
             {
               "index": 11,
+              "tile_index": 61,
               "value": "QOPlhzDfx4"
             },
             {
               "index": 12,
+              "tile_index": 61,
               "value": "io73OI74FB"
             },
             {
               "index": 13,
+              "tile_index": 61,
               "value": "59WubFuFwk"
             }
           ],
