@@ -665,7 +665,7 @@
         </sizepolicy>
        </property>
        <property name="title">
-        <string>Actuator</string>
+        <string>Animator</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_9">
         <item>
@@ -698,7 +698,7 @@
             <item row="5" column="0">
              <widget class="QLabel" name="label_13">
               <property name="text">
-               <string>Actuator type</string>
+               <string>Animator type</string>
               </property>
              </widget>
             </item>
@@ -712,7 +712,7 @@
             <item row="4" column="0">
              <widget class="QLabel" name="label_33">
               <property name="text">
-               <string>Actuator ID</string>
+               <string>Animator ID</string>
               </property>
              </widget>
             </item>
@@ -726,7 +726,7 @@
             <item row="1" column="0">
              <widget class="QLabel" name="label_32">
               <property name="text">
-               <string>Actuator name</string>
+               <string>Animator name</string>
               </property>
              </widget>
             </item>
@@ -1648,10 +1648,10 @@
      <normaloff>:/16x16_ico_png/delete.png</normaloff>:/16x16_ico_png/delete.png</iconset>
    </property>
    <property name="text">
-    <string>Delete Actuator</string>
+    <string>Delete Animator</string>
    </property>
    <property name="toolTip">
-    <string>Delete selected actuator</string>
+    <string>Delete selected animator</string>
    </property>
    <property name="shortcut">
     <string>Del</string>

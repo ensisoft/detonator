@@ -40,7 +40,7 @@ namespace gui
 
     public:
         DlgMaterialParams(QWidget* parent, game::DrawableItemClass* item);
-        DlgMaterialParams(QWidget* parent, game::DrawableItemClass* item, game::MaterialActuatorClass* actuator);
+        DlgMaterialParams(QWidget* parent, game::DrawableItemClass* item, game::MaterialAnimatorClass* actuator);
 
         void AdaptInterface(const app::Workspace* workspace, const gfx::MaterialClass* material);
     private slots:
@@ -56,7 +56,7 @@ namespace gui
         Ui::DlgMaterialParams mUI;
     private:
         game::DrawableItemClass* mItem = nullptr;
-        game::MaterialActuatorClass* mActuator = nullptr;
+        game::MaterialAnimatorClass* mActuator = nullptr;
         game::DrawableItemClass::MaterialParamMap mOldParams;
         std::vector<gui::Uniform*> mUniforms;
     };

@@ -28,6 +28,7 @@
 #include <unordered_map>
 
 #include "base/assert.h"
+#include "data/chunk.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_text_item.h"
@@ -392,13 +393,13 @@ QVariantMap DuplicateResourceProperties(const game::EntityClass& src, const game
         if (variant.isNull())
             continue;
 
-        ASSERT(src_track.GetNumActuators() == dst_track.GetNumActuators());
+        ASSERT(src_track.GetNumAnimators() == dst_track.GetNumAnimators());
 
         std::unordered_map<std::string, std::string> actuator_id_map;
-        for (size_t i=0; i<src_track.GetNumActuators(); ++i)
+        for (size_t i=0; i< src_track.GetNumAnimators(); ++i)
         {
-            const auto& src_actuator = src_track.GetActuatorClass(i);
-            const auto& dst_actuator = dst_track.GetActuatorClass(i);
+            const auto& src_actuator = src_track.GetAnimatorClass(i);
+            const auto& dst_actuator = dst_track.GetAnimatorClass(i);
             actuator_id_map[src_actuator.GetId()] = dst_actuator.GetId();
         }
 
@@ -417,10 +418,10 @@ QVariantMap DuplicateResourceProperties(const game::EntityClass& src, const game
             new_properties[QString("timeline_%1_node_id").arg(i)] = app::FromUtf8(dst_node_id);
             timeline_id_map[src_line_id] = dst_line_id;
         }
-        for (size_t i=0; i<src_track.GetNumActuators(); ++i)
+        for (size_t i=0; i< src_track.GetNumAnimators(); ++i)
         {
-            const auto& src_actuator = src_track.GetActuatorClass(i);
-            const auto& dst_actuator = dst_track.GetActuatorClass(i);
+            const auto& src_actuator = src_track.GetAnimatorClass(i);
+            const auto& dst_actuator = dst_track.GetAnimatorClass(i);
             const auto& src_id = src_actuator.GetId();
             const auto& dst_id = dst_actuator.GetId();
 
@@ -752,6 +753,58 @@ bool PackResource(gfx::MaterialClass& material, ResourcePacker& packer)
     ok &= packer.CopyFile(shader_glsl_uri, "shaders/es2/");
     material.SetShaderUri(packer.MapUri(shader_glsl_uri));
     return ok;
+}
+
+template<>
+std::unique_ptr<data::Chunk> MigrateResourceDataChunk<game::EntityClass>(std::unique_ptr<data::Chunk> chunk, MigrationLog* log)
+{
+    std::string resource_name;
+    std::string resource_id;
+    chunk->GetReader()->Read("resource_name", &resource_name);
+    chunk->GetReader()->Read("resource_id", &resource_id);
+
+    for (unsigned i=0; i<chunk->GetReader()->GetNumChunks("tracks"); ++i)
+    {
+        auto animation_chunk = chunk->GetReader()->GetChunk("tracks", i);
+        if (!animation_chunk)
+            continue;
+
+        for (unsigned i=0; i<animation_chunk->GetReader()->GetNumChunks("actuators"); ++i)
+        {
+            auto actuator_meta_chunk = animation_chunk->GetReader()->GetChunk("actuators", i);
+            auto actuator_data_chunk = actuator_meta_chunk->GetReader()->GetChunk("actuator");
+            if (!actuator_data_chunk || !actuator_meta_chunk)
+                continue;
+
+            std::string old_type_string;
+            std::string new_type_string;
+            actuator_meta_chunk->GetReader()->Read("type", &old_type_string);
+
+            // map old type string to new type string
+            if (old_type_string == "Transform")
+                new_type_string = "TransformAnimator";
+            else if (old_type_string == "Material")
+                new_type_string = "MaterialAnimator";
+            else if (old_type_string == "Kinematic")
+                new_type_string = "KinematicAnimator";
+            else if (old_type_string == "SetFlag")
+                new_type_string = "BooleanPropertyAnimator";
+            else if (old_type_string == "SetValue")
+                new_type_string = "PropertyAnimator";
+            else new_type_string = old_type_string;
+
+            actuator_meta_chunk->GetWriter()->Write("type", new_type_string);
+            if (new_type_string != old_type_string)
+            {
+                if (log)
+                    log->Log(resource_id, resource_name, "EntityClass", toString("Animator type mapped from '%1' to '%2'", old_type_string, new_type_string));
+            }
+            actuator_meta_chunk->OverwriteChunk("actuator", std::move(actuator_data_chunk));
+            animation_chunk->OverwriteChunk("actuators", std::move(actuator_meta_chunk), i);
+        }
+        chunk->OverwriteChunk("tracks", std::move(animation_chunk), i);
+    }
+    return chunk;
 }
 
 void MigrateResource(uik::Window& window, app::MigrationLog* log, unsigned old_version, unsigned  new_version)

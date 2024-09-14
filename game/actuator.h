@@ -41,71 +41,72 @@ namespace game
 {
     class EntityNode;
 
-    // ActuatorClass defines an interface for classes of actuators.
-    // Actuators are objects that modify the state of some render
-    // tree node over time. For example a transform actuator will
-    // perform linear interpolation of the node's transform over time.
-    class ActuatorClass
+    // AnimatorClass defines an interface for classes of animators.
+    // Animators are objects that modify the state of some object
+    // (such as an entity node) over time. For example a transform
+    // animator will  animate the object by manipulating its transform
+    // matrix over time.
+    class AnimatorClass
     {
     public:
-        // The type of the actuator class.
+        // The type of the animator class.
         enum class Type {
-            // Transform actuators modify the transform state of the node
+            // TransformAnimator animators modify the transform state of the node
             // i.e. the translation, scale and rotation variables directly.
-            Transform,
-            // Kinematic actuators modify the kinematic physics properties
+            TransformAnimator,
+            // Kinematic animators modify the kinematic physics properties
             // for example, linear or angular velocity, of the node's rigid body.
             // This will result in a kinematically driven change in the nodes
             // transform.
-            Kinematic,
-            // SetValue actuators sets some parameter to the specific value on the node.
-            SetValue,
-            // SetFlag actuator sets a binary flag to the specific state on the node.
-            SetFlag,
-            // Material actuator changes material parameters
-            Material
+            KinematicAnimator,
+            // PropertyAnimator animators sets some parameter to the specific value on the node.
+            PropertyAnimator,
+            // SetFlag animators sets a binary flag to the specific state on the node.
+            BooleanPropertyAnimator,
+            // Material animator changes material parameters
+            MaterialAnimator
         };
         enum class Flags {
             StaticInstance
         };
         // dtor.
-        virtual ~ActuatorClass() = default;
-        // Get human-readable name of the actuator class.
+        virtual ~AnimatorClass() = default;
+        // Get human-readable name of the class.
         virtual std::string GetName() const = 0;
-        // Get the id of this actuator
+        // Get the id of this class
         virtual std::string GetId() const = 0;
-        // Get the ID of the node affected by this actuator.
+        // Get the ID of the node affected by this animator.
         virtual std::string GetNodeId() const = 0;
         // Get the hash of the object state.
         virtual std::size_t GetHash() const = 0;
-        // Create an exact copy of this actuator class object.
-        virtual std::unique_ptr<ActuatorClass> Copy() const = 0;
-        // Create a new actuator class instance with same property values
-        // with this object but with a unique id.
-        virtual std::unique_ptr<ActuatorClass> Clone() const = 0;
-        // Get the dynamic type of the represented actuator.
+        // Create an exact copy of this class object.
+        virtual std::unique_ptr<AnimatorClass> Copy() const = 0;
+        // Create a new class instance with same property values
+        // than this object but with a unique id.
+        virtual std::unique_ptr<AnimatorClass> Clone() const = 0;
+        // Get the dynamic type of the represented animator.
         virtual Type GetType() const = 0;
-        // Get the normalized start time when this actuator starts.
+        // Get the normalized start time when this animator starts.
         virtual float GetStartTime() const = 0;
-        // Get the normalized duration of this actuator.
+        // Get the normalized duration of this animator.
         virtual float GetDuration() const = 0;
         // Set a class flag to on/off.
         virtual void SetFlag(Flags flag, bool on_off) = 0;
         // Test a class flag.
         virtual bool TestFlag(Flags flag) const = 0;
-        // Set a new normalized start time for the actuator.
+        // Set a new normalized start time for the animator.
         // The value will be clamped to [0.0f, 1.0f].
         virtual void SetStartTime(float start) = 0;
-        // Set a new normalized duration value for the actuator.
+        // Set a new normalized duration value for the animator.
         // The value will be clamped to [0.0f, 1.0f].
         virtual void SetDuration(float duration) = 0;
-        // Set the ID of the node affected by this actuator.
+        // Set the ID of the node affected by this animator.
         virtual void SetNodeId(const std::string& id) = 0;
-        // Set the human-readable name of the actuator class.
+        // Set the human-readable name of the animator class.
         virtual void SetName(const std::string& name) = 0;
-        // Serialize the actuator class object into JSON.
+        // Serialize the class object into JSON.
         virtual void IntoJson(data::Writer& data) const = 0;
-        // Load the actuator class object state from JSON. Returns true
+        // Load the class object state from JSON. Returns true when
         // successful otherwise false and the object is not valid state.
         virtual bool FromJson(const data::Reader& data) = 0;
     private:
@@ -113,7 +114,7 @@ namespace game
 
     namespace detail {
         template<typename T>
-        class ActuatorClassBase : public ActuatorClass
+        class AnimatorClassBase : public AnimatorClass
         {
         public:
             virtual void SetNodeId(const std::string& id) override
@@ -138,25 +139,25 @@ namespace game
             { mStartTime = math::clamp(0.0f, 1.0f, start); }
             virtual void SetDuration(float duration) override
             { mDuration = math::clamp(0.0f, 1.0f, duration); }
-            virtual std::unique_ptr<ActuatorClass> Copy() const override
+            virtual std::unique_ptr<AnimatorClass> Copy() const override
             { return std::make_unique<T>(*static_cast<const T*>(this)); }
-            virtual std::unique_ptr<ActuatorClass> Clone() const override
+            virtual std::unique_ptr<AnimatorClass> Clone() const override
             {
                 auto ret = std::make_unique<T>(*static_cast<const T*>(this));
                 ret->mId = base::RandomString(10);
                 return ret;
             }
         protected:
-            ActuatorClassBase()
+            AnimatorClassBase()
             {
                 mId = base::RandomString(10);
                 mFlags.set(Flags::StaticInstance, true);
             }
-           ~ActuatorClassBase() = default;
+           ~AnimatorClassBase() = default;
         protected:
-            // ID of the actuator class.
+            // ID of the class.
             std::string mId;
-            // Human-readable name of the actuator class
+            // Human-readable name of the class
             std::string mName;
             // id of the node that the action will be applied onto
             std::string mNodeId;
@@ -170,10 +171,10 @@ namespace game
         };
     } // namespace detail
 
-    class SetFlagActuatorClass : public detail::ActuatorClassBase<SetFlagActuatorClass>
+    class BooleanPropertyAnimatorClass : public detail::AnimatorClassBase<BooleanPropertyAnimatorClass>
     {
     public:
-        enum class FlagName {
+        enum class Property {
             Drawable_VisibleInGame,
             Drawable_UpdateMaterial,
             Drawable_UpdateDrawable,
@@ -196,36 +197,36 @@ namespace game
             Transformer_Enabled
         };
 
-        enum class FlagAction {
+        enum class PropertyAction {
             On, Off, Toggle
         };
         virtual Type GetType() const override
-        { return Type::SetFlag;}
+        { return Type::BooleanPropertyAnimator;}
         virtual std::size_t GetHash() const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson(const data::Reader& data) override;
 
-        inline FlagAction GetFlagAction() const noexcept
+        inline PropertyAction GetFlagAction() const noexcept
         { return mFlagAction; }
-        inline FlagName GetFlagName() const noexcept
+        inline Property GetFlagName() const noexcept
         { return mFlagName; }
         inline float GetTime() const noexcept
         { return mTime; }
-        inline void SetFlagName(const FlagName name) noexcept
+        inline void SetFlagName(const Property name) noexcept
         { mFlagName = name; }
-        inline void SetFlagAction(FlagAction action) noexcept
+        inline void SetFlagAction(PropertyAction action) noexcept
         { mFlagAction = action; }
         inline void SetTime(float time) noexcept
         { mTime = math::clamp(0.0f, 1.0f, time); }
     private:
-        FlagAction mFlagAction = FlagAction::Off;
-        FlagName   mFlagName   = FlagName::Drawable_FlipHorizontally;
+        PropertyAction mFlagAction = PropertyAction::Off;
+        Property   mFlagName   = Property::Drawable_FlipHorizontally;
         float      mTime       = 1.0f;
     };
 
     // Modify the kinematic physics body properties, i.e.
     // the instantaneous linear and angular velocities.
-    class KinematicActuatorClass : public detail::ActuatorClassBase<KinematicActuatorClass>
+    class KinematicAnimatorClass : public detail::AnimatorClassBase<KinematicAnimatorClass>
     {
     public:
         enum class Target {
@@ -261,7 +262,7 @@ namespace game
         { mEndAngularAcceleration = acceleration; }
 
         virtual Type GetType() const override
-        { return Type::Kinematic; }
+        { return Type::KinematicAnimator; }
         virtual std::size_t GetHash() const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson(const data::Reader& data) override;
@@ -278,7 +279,7 @@ namespace game
     };
 
     // Modify node parameter value over time.
-    class SetValueActuatorClass : public detail::ActuatorClassBase<SetValueActuatorClass>
+    class PropertyAnimatorClass : public detail::AnimatorClassBase<PropertyAnimatorClass>
     {
     public:
         // Enumeration of support node parameters that can be changed.
@@ -333,7 +334,7 @@ namespace game
         { mEndValue = value; }
 
         virtual Type GetType() const override
-        { return Type::SetValue; }
+        { return Type::PropertyAnimator; }
         virtual std::size_t GetHash() const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson(const data::Reader& data) override;
@@ -346,9 +347,9 @@ namespace game
         ParamValue mEndValue;
     };
 
-    // TransformActuatorClass holds the transform data for some
+    // TransformAnimatorClass holds the transform data for some
     // particular type of linear transform of a node.
-    class TransformActuatorClass : public detail::ActuatorClassBase<TransformActuatorClass>
+    class TransformAnimatorClass : public detail::AnimatorClassBase<TransformAnimatorClass>
     {
     public:
         // The interpolation method.
@@ -383,7 +384,7 @@ namespace game
         { mEndScale = glm::vec2(x, y); }
 
         virtual Type GetType() const override
-        { return Type::Transform; }
+        { return Type::TransformAnimator; }
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson(const data::Reader& data) override;
         virtual std::size_t GetHash() const override;
@@ -401,7 +402,7 @@ namespace game
         float mEndRotation = 0.0f;
     };
 
-    class MaterialActuatorClass : public detail::ActuatorClassBase<MaterialActuatorClass>
+    class MaterialAnimatorClass : public detail::AnimatorClassBase<MaterialAnimatorClass>
     {
     public:
         using Interpolation = math::Interpolation;
@@ -450,7 +451,7 @@ namespace game
         { mMaterialParams = std::move(map); }
 
         virtual Type GetType() const override
-        { return Type::Material; }
+        { return Type::MaterialAnimator; }
         virtual std::size_t GetHash() const override;
         virtual void IntoJson(data::Writer& data) const override;
         virtual bool FromJson(const data::Reader& data) override;
@@ -461,66 +462,66 @@ namespace game
         MaterialParamMap mMaterialParams;
     };
 
-    class KinematicActuator;
-    class TransformActuator;
-    class MaterialActuator;
-    class SetFlagActuator;
-    class SetValueActuator;
+    class KinematicAnimator;
+    class TransformAnimator;
+    class MaterialAnimator;
+    class BooleanPropertyAnimator;
+    class PropertyAnimator;
 
-    // An instance of ActuatorClass object.
-    class Actuator
+    // An instance of AnimatorClass object.
+    class Animator
     {
     public:
-        using Type  = ActuatorClass::Type;
-        using Flags = ActuatorClass::Flags;
-        virtual ~Actuator() = default;
-        // Start the action/transition to be applied by this actuator.
+        using Type  = AnimatorClass::Type;
+        using Flags = AnimatorClass::Flags;
+        virtual ~Animator() = default;
+        // Start the action/transition to be applied by this animator.
         // The node is the node in question that the changes will be applied to.
         virtual void Start(EntityNode& node) = 0;
         // Apply an interpolation of the state based on the time value t onto to the node.
         virtual void Apply(EntityNode& node, float t) = 0;
-        // Finish the action/transition to be applied by this actuator.
+        // Finish the action/transition to be applied by this animator.
         // The node is the node in question that the changes will (were) applied to.
         virtual void Finish(EntityNode& node) = 0;
-        // Get the normalized start time when this actuator begins to take effect.
+        // Get the normalized start time when this animator begins to take effect.
         virtual float GetStartTime() const = 0;
-        // Get the normalized duration of the duration of the actuator's transformation.
+        // Get the normalized duration of the duration of the animator's transformation.
         virtual float GetDuration() const = 0;
-        // Get the id of the node that will be modified by this actuator.
+        // Get the id of the node that will be modified by this animator.
         virtual std::string GetNodeId() const = 0;
-        // Get the actuator class ID.
+        // Get the class ID.
         virtual std::string GetClassId() const = 0;
-        // Get the actuator class name.
+        // Get the class name.
         virtual std::string GetClassName() const = 0;
-        // Create an exact copy of this actuator object.
-        virtual std::unique_ptr<Actuator> Copy() const = 0;
-        // Get the dynamic type of the actuator.
+        // Create an exact copy of this animator object.
+        virtual std::unique_ptr<Animator> Copy() const = 0;
+        // Get the dynamic type of the animator.
         virtual Type GetType() const = 0;
 
-        inline KinematicActuator* AsKinematicActuator()
-        { return Cast<KinematicActuator>(Type::Kinematic); }
-        inline const KinematicActuator* AsKinematicActuator() const
-        { return Cast<KinematicActuator>(Type::Kinematic); }
+        inline KinematicAnimator* AsKinematicAnimator()
+        { return Cast<KinematicAnimator>(Type::KinematicAnimator); }
+        inline const KinematicAnimator* AsKinematicAnimator() const
+        { return Cast<KinematicAnimator>(Type::KinematicAnimator); }
 
-        inline TransformActuator* AsTransformActuator()
-        { return Cast<TransformActuator>(Type::Transform); }
-        inline const TransformActuator* AsTransformActuator() const
-        { return Cast<TransformActuator>(Type::Transform); }
+        inline TransformAnimator* AsTransformAnimator()
+        { return Cast<TransformAnimator>(Type::TransformAnimator); }
+        inline const TransformAnimator* AsTransformAnimator() const
+        { return Cast<TransformAnimator>(Type::TransformAnimator); }
 
-        inline MaterialActuator* AsMaterialActuator()
-        { return Cast<MaterialActuator>(Type::Material); }
-        inline const MaterialActuator* AsMaterialActuator() const
-        { return Cast<MaterialActuator>(Type::Material); }
+        inline MaterialAnimator* AsMaterialAnimator()
+        { return Cast<MaterialAnimator>(Type::MaterialAnimator); }
+        inline const MaterialAnimator* AsMaterialAnimator() const
+        { return Cast<MaterialAnimator>(Type::MaterialAnimator); }
 
-        inline SetValueActuator* AsValueActuator()
-        { return Cast<SetValueActuator>(Type::SetValue); }
-        inline const SetValueActuator* AsValueActuator() const
-        { return Cast<SetValueActuator>(Type::SetValue); }
+        inline PropertyAnimator* AsPropertyAnimator()
+        { return Cast<PropertyAnimator>(Type::PropertyAnimator); }
+        inline const PropertyAnimator* AsPropertyAnimator() const
+        { return Cast<PropertyAnimator>(Type::PropertyAnimator); }
 
-        inline SetFlagActuator* AsFlagActuator()
-        { return Cast<SetFlagActuator>(Type::SetValue); }
-        inline const SetFlagActuator* AsFlagActuator() const
-        { return Cast<SetFlagActuator>(Type::SetValue); }
+        inline BooleanPropertyAnimator* AsBooleanPropertyAnimator()
+        { return Cast<BooleanPropertyAnimator>(Type::BooleanPropertyAnimator); }
+        inline const BooleanPropertyAnimator* AsBooleanPropertyAnimator() const
+        { return Cast<BooleanPropertyAnimator>(Type::BooleanPropertyAnimator); }
     private:
         template<typename T>
         T* Cast(Type desire)
@@ -539,17 +540,17 @@ namespace game
     };
 
     // Apply a kinematic change to a rigid body's linear or angular velocity.
-    class KinematicActuator final : public Actuator
+    class KinematicAnimator final : public Animator
     {
     public:
-        explicit KinematicActuator(std::shared_ptr<const KinematicActuatorClass> klass) noexcept
+        explicit KinematicAnimator(std::shared_ptr<const KinematicAnimatorClass> klass) noexcept
           : mClass(std::move(klass))
         {}
-        explicit KinematicActuator(const KinematicActuatorClass& klass)
-          : mClass(std::make_shared<KinematicActuatorClass>(klass))
+        explicit KinematicAnimator(const KinematicAnimatorClass& klass)
+          : mClass(std::make_shared<KinematicAnimatorClass>(klass))
         {}
-        explicit KinematicActuator(KinematicActuatorClass&& klass)
-          : mClass(std::make_shared<KinematicActuatorClass>(std::move(klass)))
+        explicit KinematicAnimator(KinematicAnimatorClass&& klass)
+          : mClass(std::make_shared<KinematicAnimatorClass>(std::move(klass)))
         {}
         virtual void Start(EntityNode& node) override;
         virtual void Apply(EntityNode& node, float t) override;
@@ -565,33 +566,33 @@ namespace game
         { return mClass->GetId(); }
         virtual std::string GetClassName() const override
         { return mClass->GetName(); }
-        virtual std::unique_ptr<Actuator> Copy() const override
-        { return std::make_unique<KinematicActuator>(*this); }
+        virtual std::unique_ptr<Animator> Copy() const override
+        { return std::make_unique<KinematicAnimator>(*this); }
         virtual Type GetType() const override
-        { return Type::Kinematic;}
+        { return Type::KinematicAnimator;}
     private:
-        std::shared_ptr<const KinematicActuatorClass> mClass;
+        std::shared_ptr<const KinematicAnimatorClass> mClass;
         glm::vec2 mStartLinearVelocity     = {0.0f, 0.0f};
         glm::vec2 mStartLinearAcceleration = {0.0f, 0.0f};
         float mStartAngularVelocity     = 0.0f;
         float mStartAngularAcceleration = 0.0f;
     };
 
-    class SetFlagActuator final : public Actuator
+    class BooleanPropertyAnimator final : public Animator
     {
     public:
-        using FlagAction = SetFlagActuatorClass::FlagAction;
+        using FlagAction = BooleanPropertyAnimatorClass::PropertyAction;
 
-        explicit SetFlagActuator(std::shared_ptr<const SetFlagActuatorClass> klass) noexcept
+        explicit BooleanPropertyAnimator(std::shared_ptr<const BooleanPropertyAnimatorClass> klass) noexcept
             : mClass(std::move(klass))
             , mTime(mClass->GetTime())
         {}
-        explicit SetFlagActuator(const SetFlagActuatorClass& klass)
-            : mClass(std::make_shared<SetFlagActuatorClass>(klass))
+        explicit BooleanPropertyAnimator(const BooleanPropertyAnimatorClass& klass)
+            : mClass(std::make_shared<BooleanPropertyAnimatorClass>(klass))
             , mTime(mClass->GetTime())
         {}
-        explicit SetFlagActuator(SetFlagActuatorClass&& klass) noexcept
-            : mClass(std::make_shared<SetFlagActuatorClass>(std::move(klass)))
+        explicit BooleanPropertyAnimator(BooleanPropertyAnimatorClass&& klass) noexcept
+            : mClass(std::make_shared<BooleanPropertyAnimatorClass>(std::move(klass)))
             , mTime(mClass->GetTime())
         {}
         virtual void Start(EntityNode& node) override;
@@ -607,34 +608,34 @@ namespace game
         { return mClass->GetId(); }
         virtual std::string GetClassName() const override
         { return mClass->GetName(); }
-        virtual std::unique_ptr<Actuator> Copy() const override
-        { return std::make_unique<SetFlagActuator>(*this); }
+        virtual std::unique_ptr<Animator> Copy() const override
+        { return std::make_unique<BooleanPropertyAnimator>(*this); }
         virtual Type GetType() const override
-        { return Type::SetFlag; }
+        { return Type::BooleanPropertyAnimator; }
 
         bool CanApply(EntityNode& node, bool verbose) const;
         void SetFlag(EntityNode& node) const;
     private:
-        std::shared_ptr<const SetFlagActuatorClass> mClass;
+        std::shared_ptr<const BooleanPropertyAnimatorClass> mClass;
         bool mStartState = false;
         float mTime = 0.0f;
     };
 
     // Modify node parameter over time.
-    class SetValueActuator final : public Actuator
+    class PropertyAnimator final : public Animator
     {
     public:
-        using ParamName  = SetValueActuatorClass::ParamName;
-        using ParamValue = SetValueActuatorClass::ParamValue;
-        using Inteprolation = SetValueActuatorClass::Interpolation;
-        SetValueActuator(const std::shared_ptr<const SetValueActuatorClass>& klass)
+        using ParamName  = PropertyAnimatorClass::ParamName;
+        using ParamValue = PropertyAnimatorClass::ParamValue;
+        using Inteprolation = PropertyAnimatorClass::Interpolation;
+        PropertyAnimator(const std::shared_ptr<const PropertyAnimatorClass>& klass)
            : mClass(klass)
         {}
-        SetValueActuator(const SetValueActuatorClass& klass)
-            : mClass(std::make_shared<SetValueActuatorClass>(klass))
+        PropertyAnimator(const PropertyAnimatorClass& klass)
+            : mClass(std::make_shared<PropertyAnimatorClass>(klass))
         {}
-        SetValueActuator(SetValueActuatorClass&& klass)
-            : mClass(std::make_shared<SetValueActuatorClass>(std::move(klass)))
+        PropertyAnimator(PropertyAnimatorClass&& klass)
+            : mClass(std::make_shared<PropertyAnimatorClass>(std::move(klass)))
         {}
         virtual void Start(EntityNode& node) override;
         virtual void Apply(EntityNode& node, float t) override;
@@ -650,10 +651,10 @@ namespace game
         { return mClass->GetId(); }
         virtual std::string GetClassName() const override
         { return mClass->GetName(); }
-        virtual std::unique_ptr<Actuator> Copy() const override
-        { return std::make_unique<SetValueActuator>(*this); }
+        virtual std::unique_ptr<Animator> Copy() const override
+        { return std::make_unique<PropertyAnimator>(*this); }
         virtual Type GetType() const override
-        { return Type::SetValue; }
+        { return Type::PropertyAnimator; }
         bool CanApply(EntityNode& node, bool verbose) const;
     private:
         template<typename T>
@@ -686,17 +687,17 @@ namespace game
         }
         void SetValue(EntityNode& node, float t, bool interpolate) const;
     private:
-        std::shared_ptr<const SetValueActuatorClass> mClass;
+        std::shared_ptr<const PropertyAnimatorClass> mClass;
         ParamValue mStartValue;
     };
 
     // Apply change to the target nodes' transform.
-    class TransformActuator final : public Actuator
+    class TransformAnimator final : public Animator
     {
     public:
-        TransformActuator(const std::shared_ptr<const TransformActuatorClass>& klass);
-        TransformActuator(const TransformActuatorClass& klass)
-            : TransformActuator(std::make_shared<TransformActuatorClass>(klass))
+        TransformAnimator(const std::shared_ptr<const TransformAnimatorClass>& klass);
+        TransformAnimator(const TransformAnimatorClass& klass)
+            : TransformAnimator(std::make_shared<TransformAnimatorClass>(klass))
         {}
         virtual void Start(EntityNode& node) override;
         virtual void Apply(EntityNode& node, float t) override;
@@ -712,10 +713,10 @@ namespace game
         { return mClass->GetId(); }
         virtual std::string GetClassName() const override
         { return mClass->GetName(); }
-        virtual std::unique_ptr<Actuator> Copy() const override
-        { return std::make_unique<TransformActuator>(*this); }
+        virtual std::unique_ptr<Animator> Copy() const override
+        { return std::make_unique<TransformAnimator>(*this); }
         virtual Type GetType() const override
-        { return Type::Transform; }
+        { return Type::TransformAnimator; }
 
         void SetEndPosition(const glm::vec2& pos);
         void SetEndScale(const glm::vec2& scale);
@@ -737,11 +738,11 @@ namespace game
         };
         Instance GetInstance() const;
     private:
-        std::shared_ptr<const TransformActuatorClass> mClass;
+        std::shared_ptr<const TransformAnimatorClass> mClass;
         // exists only if StaticInstance is not set.
         std::optional<Instance> mDynamicInstance;
         // The starting state for the transformation.
-        // the transform actuator will then interpolate between the
+        // the transform animator will then interpolate between the
         // current starting and expected ending state.
         glm::vec2 mStartPosition = {0.0f, 0.0f};
         glm::vec2 mStartSize  = {1.0f, 1.0f};
@@ -749,17 +750,17 @@ namespace game
         float mStartRotation  = 0.0f;
     };
 
-    class MaterialActuator final : public Actuator
+    class MaterialAnimator final : public Animator
     {
     public:
-        using Interpolation    = MaterialActuatorClass::Interpolation;
-        using MaterialParam    = MaterialActuatorClass::MaterialParam;
-        using MaterialParamMap = MaterialActuatorClass::MaterialParamMap;
-        MaterialActuator(const std::shared_ptr<const MaterialActuatorClass>& klass)
+        using Interpolation    = MaterialAnimatorClass::Interpolation;
+        using MaterialParam    = MaterialAnimatorClass::MaterialParam;
+        using MaterialParamMap = MaterialAnimatorClass::MaterialParamMap;
+        MaterialAnimator(const std::shared_ptr<const MaterialAnimatorClass>& klass)
           : mClass(klass)
         {}
-        MaterialActuator(const MaterialActuatorClass& klass)
-          : mClass(std::make_shared<MaterialActuatorClass>(klass))
+        MaterialAnimator(const MaterialAnimatorClass& klass)
+          : mClass(std::make_shared<MaterialAnimatorClass>(klass))
         {}
         virtual void Start(EntityNode& node) override;
         virtual void Apply(EntityNode& node, float t) override;
@@ -775,10 +776,10 @@ namespace game
         { return mClass->GetId(); }
         virtual std::string GetClassName() const override
         { return mClass->GetName(); }
-        virtual std::unique_ptr<Actuator> Copy() const override
-        { return std::make_unique<MaterialActuator>(*this); }
+        virtual std::unique_ptr<Animator> Copy() const override
+        { return std::make_unique<MaterialAnimator>(*this); }
         virtual Type GetType() const override
-        { return Type::Material; }
+        { return Type::MaterialAnimator; }
     private:
         template<typename T>
         T Interpolate(const MaterialParam& start, const MaterialParam& end, float t)
@@ -789,7 +790,7 @@ namespace game
             return math::interpolate(std::get<T>(start), std::get<T>(end), t, method);
         }
     private:
-        std::shared_ptr<const MaterialActuatorClass> mClass;
+        std::shared_ptr<const MaterialAnimatorClass> mClass;
         MaterialParamMap mStartValues;
     };
 
