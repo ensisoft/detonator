@@ -84,7 +84,7 @@ void BooleanPropertyAnimator::Start(EntityNode& node)
     const auto* spatial = node.GetSpatialNode();
     const auto* transformer= node.GetTransformer();
 
-    using FlagName = BooleanPropertyAnimatorClass::Property;
+    using FlagName = BooleanPropertyAnimatorClass::PropertyName;
     const auto flag = mClass->GetFlagName();
 
     if (flag == FlagName::Drawable_VisibleInGame)
@@ -127,7 +127,7 @@ void BooleanPropertyAnimator::Start(EntityNode& node)
         mStartState = spatial->TestFlag(SpatialNode::Flags::Enabled);
     else if (flag == FlagName::Transformer_Enabled)
         mStartState = transformer->TestFlag(NodeTransformer::Flags::Enabled);
-    else BUG("Unhandled flag in set flag actuator.");
+    else BUG("Unhandled property.");
 
     if (mTime == 0.0f)
     {
@@ -176,7 +176,7 @@ void BooleanPropertyAnimator::SetFlag(EntityNode& node) const
     auto* spatial = node.GetSpatialNode();
     auto* transformer = node.GetTransformer();
 
-    using FlagName = BooleanPropertyAnimatorClass::Property;
+    using FlagName = BooleanPropertyAnimatorClass::PropertyName;
     const auto flag = mClass->GetFlagName();
 
     if (flag == FlagName::Drawable_VisibleInGame)
@@ -219,7 +219,7 @@ void BooleanPropertyAnimator::SetFlag(EntityNode& node) const
         spatial->SetFlag(SpatialNode::Flags::Enabled, next_value);
     else if (flag == FlagName::Transformer_Enabled)
         transformer->SetFlag(NodeTransformer::Flags::Enabled, next_value);
-    else BUG("Unhandled flag in set flag actuator.");
+    else BUG("Unhandled property.");
 
     // spams the log
     // DEBUG("Set EntityNode '%1' flag '%2' to '%3'.", node.GetName(), flag, next_value ? "On" : "Off");
@@ -233,7 +233,7 @@ bool BooleanPropertyAnimator::CanApply(EntityNode& node, bool verbose) const
     auto* spatial = node.GetSpatialNode();
     auto* transformer = node.GetTransformer();
 
-    using FlagName = BooleanPropertyAnimatorClass::Property;
+    using FlagName = BooleanPropertyAnimatorClass::PropertyName;
     const auto flag = mClass->GetFlagName();
 
     if (flag == FlagName::Drawable_VisibleInGame ||
@@ -248,7 +248,7 @@ bool BooleanPropertyAnimator::CanApply(EntityNode& node, bool verbose) const
     {
         if (!draw && verbose)
         {
-            WARN("Flag actuator can't apply a drawable flag on a node without drawable item. [actuator='%1', node='%2', flag=%3]",
+            WARN("Property animator can't apply a drawable flag on a node without drawable item. [animator='%1', node='%2', flag=%3]",
                  mClass->GetName(), node.GetName(), flag);
         }
         return draw != nullptr;
@@ -261,7 +261,7 @@ bool BooleanPropertyAnimator::CanApply(EntityNode& node, bool verbose) const
     {
         if (!body && verbose)
         {
-            WARN("Flag actuator can't apply a rigid body flag on a node without a rigid body. [actuator='%1', node='%2', flag=%3]",
+            WARN("Property animator can't apply a rigid body flag on a node without a rigid body. [animator='%1', node='%2', flag=%3]",
                  mClass->GetName(), node.GetName(), flag);
         }
         return body != nullptr;
@@ -273,7 +273,7 @@ bool BooleanPropertyAnimator::CanApply(EntityNode& node, bool verbose) const
     {
         if (!text && verbose)
         {
-            WARN("Flag actuator can't apply a text item flag on a node without a text item. [actuator='%1', node='%2', flag=%3]",
+            WARN("Property animator can't apply a text item flag on a node without a text item. [animator='%1', node='%2', flag=%3]",
                  mClass->GetName(), node.GetName(), flag);
         }
         return text != nullptr;
@@ -282,7 +282,7 @@ bool BooleanPropertyAnimator::CanApply(EntityNode& node, bool verbose) const
     {
         if (!spatial && verbose)
         {
-            WARN("Flag actuator can't apply a spatial node flag on a node without a spatial item. [actuator='%1', node='%2', flag=%3]",
+            WARN("Propety animator can't apply a spatial node flag on a node without a spatial item. [animator='%1', node='%2', flag=%3]",
                  mClass->GetName(), node.GetName(), flag);
         }
         return spatial != nullptr;
@@ -291,11 +291,11 @@ bool BooleanPropertyAnimator::CanApply(EntityNode& node, bool verbose) const
     {
         if (!transformer && verbose)
         {
-            WARN("Flag actuator can't apply a node transformer flag on a node without a transformer. [actuator='%1', node='%2', flag=%3]",
+            WARN("Property animator can't apply a node transformer flag on a node without a transformer. [animator='%1', node='%2', flag=%3]",
                  mClass->GetName(), node.GetName(), flag);
         }
     }
-    else BUG("Unhandled flag in set flag actuator.");
+    else BUG("Unhandled property.");
     return true;
 }
 
@@ -347,57 +347,57 @@ void PropertyAnimator::Start(EntityNode& node)
     if (!CanApply(node, true /*verbose */))
         return;
 
-    const auto param = mClass->GetParamName();
+    const auto param = mClass->GetPropertyName();
     const auto* draw = node.GetDrawable();
     const auto* body = node.GetRigidBody();
     const auto* text = node.GetTextItem();
     const auto* transformer = node.GetTransformer();
 
-    if (param == ParamName::Drawable_TimeScale)
+    if (param == PropertyName::Drawable_TimeScale)
         mStartValue = draw->GetTimeScale();
-    else if (param == ParamName::Drawable_RotationX)
+    else if (param == PropertyName::Drawable_RotationX)
         mStartValue = draw->GetRotator().GetEulerAngleX().ToRadians();
-    else if (param == ParamName::Drawable_RotationY)
+    else if (param == PropertyName::Drawable_RotationY)
         mStartValue = draw->GetRotator().GetEulerAngleY().ToRadians();
-    else if (param == ParamName::Drawable_RotationZ)
+    else if (param == PropertyName::Drawable_RotationZ)
         mStartValue = draw->GetRotator().GetEulerAngleZ().ToRadians();
-    else if (param == ParamName::Drawable_TranslationX)
+    else if (param == PropertyName::Drawable_TranslationX)
         mStartValue = draw->GetOffset().x;
-    else if (param == ParamName::Drawable_TranslationY)
+    else if (param == PropertyName::Drawable_TranslationY)
         mStartValue = draw->GetOffset().y;
-    else if (param == ParamName::Drawable_TranslationZ)
+    else if (param == PropertyName::Drawable_TranslationZ)
         mStartValue = draw->GetOffset().z;
-    else if (param == ParamName::Drawable_SizeZ)
+    else if (param == PropertyName::Drawable_SizeZ)
         mStartValue = draw->GetDepth();
-    else if (param == ParamName::RigidBody_AngularVelocity)
+    else if (param == PropertyName::RigidBody_AngularVelocity)
         mStartValue = body->GetAngularVelocity();
-    else if (param == ParamName::RigidBody_LinearVelocityX)
+    else if (param == PropertyName::RigidBody_LinearVelocityX)
         mStartValue = body->GetLinearVelocity().x;
-    else if (param == ParamName::RigidBody_LinearVelocityY)
+    else if (param == PropertyName::RigidBody_LinearVelocityY)
         mStartValue = body->GetLinearVelocity().y;
-    else if (param == ParamName::RigidBody_LinearVelocity)
+    else if (param == PropertyName::RigidBody_LinearVelocity)
         mStartValue = body->GetLinearVelocity();
-    else if (param == ParamName::TextItem_Text)
+    else if (param == PropertyName::TextItem_Text)
         mStartValue = text->GetText();
-    else if (param == ParamName::TextItem_Color)
+    else if (param == PropertyName::TextItem_Color)
         mStartValue = text->GetTextColor();
-    else if (param == ParamName::Transformer_LinearVelocity)
+    else if (param == PropertyName::Transformer_LinearVelocity)
         mStartValue = transformer->GetLinearVelocity();
-    else if (param == ParamName::Transformer_LinearVelocityX)
+    else if (param == PropertyName::Transformer_LinearVelocityX)
         mStartValue = transformer->GetLinearVelocity().x;
-    else if (param == ParamName::Transformer_LinearVelocityY)
+    else if (param == PropertyName::Transformer_LinearVelocityY)
         mStartValue = transformer->GetLinearVelocity().y;
-    else if (param == ParamName::Transformer_LinearAcceleration)
+    else if (param == PropertyName::Transformer_LinearAcceleration)
         mStartValue = transformer->GetLinearAcceleration();
-    else if (param == ParamName::Transformer_LinearAccelerationX)
+    else if (param == PropertyName::Transformer_LinearAccelerationX)
         mStartValue = transformer->GetLinearAcceleration().x;
-    else if (param == ParamName::Transformer_LinearAccelerationY)
+    else if (param == PropertyName::Transformer_LinearAccelerationY)
         mStartValue = transformer->GetLinearAcceleration().y;
-    else if (param == ParamName::Transformer_AngularVelocity)
+    else if (param == PropertyName::Transformer_AngularVelocity)
         mStartValue = transformer->GetAngularVelocity();
-    else if (param == ParamName::Transformer_AngularAcceleration)
+    else if (param == PropertyName::Transformer_AngularAcceleration)
         mStartValue = transformer->GetAngularAcceleration();
-    else BUG("Unhandled node item value.");
+    else BUG("Unhandled property.");
 }
 
 void PropertyAnimator::Apply(EntityNode& node, float t)
@@ -411,7 +411,7 @@ void PropertyAnimator::SetValue(EntityNode& node, float t, bool interpolate) con
         return;
 
     const auto method = mClass->GetInterpolation();
-    const auto param  = mClass->GetParamName();
+    const auto param  = mClass->GetPropertyName();
     const auto end    = mClass->GetEndValue();
     const auto start  = mStartValue;
 
@@ -420,11 +420,11 @@ void PropertyAnimator::SetValue(EntityNode& node, float t, bool interpolate) con
     auto* text = node.GetTextItem();
     auto* transformer = node.GetTransformer();
 
-    if (param == ParamName::Drawable_TimeScale)
+    if (param == PropertyName::Drawable_TimeScale)
     {
         draw->SetTimeScale(Interpolate<float>(t, interpolate));
     }
-    else if (param == ParamName::Drawable_RotationX)
+    else if (param == PropertyName::Drawable_RotationX)
     {
         const auto& rotator = draw->GetRotator();
         const auto& angles  = rotator.GetEulerAngles();
@@ -433,7 +433,7 @@ void PropertyAnimator::SetValue(EntityNode& node, float t, bool interpolate) con
         auto z = std::get<2>(angles);
         draw->SetRotator(Rotator(FRadians(x), y, z));
     }
-    else if (param == ParamName::Drawable_RotationY)
+    else if (param == PropertyName::Drawable_RotationY)
     {
         const auto& rotator = draw->GetRotator();
         const auto& angles  = rotator.GetEulerAngles();
@@ -442,7 +442,7 @@ void PropertyAnimator::SetValue(EntityNode& node, float t, bool interpolate) con
         auto z = std::get<2>(angles);
         draw->SetRotator(Rotator(x, FRadians(y), z));
     }
-    else if (param == ParamName::Drawable_RotationZ)
+    else if (param == PropertyName::Drawable_RotationZ)
     {
         const auto& rotator = draw->GetRotator();
         const auto& angles  = rotator.GetEulerAngles();
@@ -451,95 +451,95 @@ void PropertyAnimator::SetValue(EntityNode& node, float t, bool interpolate) con
         auto z = Interpolate<float>(t, interpolate);
         draw->SetRotator(Rotator(x, y, FRadians(z)));
     }
-    else if (param == ParamName::Drawable_TranslationX)
+    else if (param == PropertyName::Drawable_TranslationX)
     {
         auto vec = draw->GetOffset();
         vec.x = Interpolate<float>(t, interpolate);
         draw->SetOffset(vec);
     }
-    else if (param == ParamName::Drawable_TranslationY)
+    else if (param == PropertyName::Drawable_TranslationY)
     {
         auto vec = draw->GetOffset();
         vec.y = Interpolate<float>(t, interpolate);
         draw->SetOffset(vec);
     }
-    else if (param == ParamName::Drawable_TranslationZ)
+    else if (param == PropertyName::Drawable_TranslationZ)
     {
         auto vec = draw->GetOffset();
         vec.z = Interpolate<float>(t, interpolate);
         draw->SetOffset(vec);
     }
-    else if (param == ParamName::Drawable_SizeZ)
+    else if (param == PropertyName::Drawable_SizeZ)
     {
         auto size = draw->GetDepth();
         size = Interpolate<float>(t, interpolate);
         draw->SetDepth(size);
     }
-    else if (param == ParamName::RigidBody_AngularVelocity)
+    else if (param == PropertyName::RigidBody_AngularVelocity)
     {
         body->AdjustAngularVelocity(Interpolate<float>(t, interpolate));
     }
-    else if (param == ParamName::RigidBody_LinearVelocityX)
+    else if (param == PropertyName::RigidBody_LinearVelocityX)
     {
         auto velocity = body->GetLinearVelocity();
         velocity.x = Interpolate<float>(t, interpolate);
         body->AdjustLinearVelocity(velocity);
     }
-    else if (param == ParamName::RigidBody_LinearVelocityY)
+    else if (param == PropertyName::RigidBody_LinearVelocityY)
     {
         auto velocity = body->GetLinearVelocity();
         velocity.y = Interpolate<float>(t, interpolate);
         body->AdjustLinearVelocity(velocity);
     }
-    else if (param == ParamName::RigidBody_LinearVelocity)
+    else if (param == PropertyName::RigidBody_LinearVelocity)
     {
         body->AdjustLinearVelocity(Interpolate<glm::vec2>(t, interpolate));
     }
-    else if (param == ParamName::Transformer_LinearVelocity)
+    else if (param == PropertyName::Transformer_LinearVelocity)
     {
         transformer->SetLinearVelocity(Interpolate<glm::vec2>(t, interpolate));
     }
-    else if (param == ParamName::Transformer_LinearVelocityX)
+    else if (param == PropertyName::Transformer_LinearVelocityX)
     {
         auto velocity = transformer->GetLinearVelocity();
         velocity.x = Interpolate<float>(t, interpolate);
         transformer->SetLinearVelocity(velocity);
     }
-    else if (param == ParamName::Transformer_LinearVelocityY)
+    else if (param == PropertyName::Transformer_LinearVelocityY)
     {
         auto velocity = transformer->GetLinearVelocity();
         velocity.y = Interpolate<float>(t, interpolate);
         transformer->SetLinearVelocity(velocity);
     }
-    else if (param == ParamName::Transformer_LinearAcceleration)
+    else if (param == PropertyName::Transformer_LinearAcceleration)
     {
         transformer->SetLinearAcceleration(Interpolate<glm::vec2>(t, interpolate));
     }
-    else if (param == ParamName::Transformer_LinearAccelerationX)
+    else if (param == PropertyName::Transformer_LinearAccelerationX)
     {
         auto accel = transformer->GetLinearAcceleration();
         accel.x = Interpolate<float>(t, interpolate);
         transformer->SetLinearAcceleration(accel);
     }
-    else if (param == ParamName::Transformer_LinearAccelerationY)
+    else if (param == PropertyName::Transformer_LinearAccelerationY)
     {
         auto accel = transformer->GetLinearAcceleration();
         accel.y = Interpolate<float>(t, interpolate);
         transformer->SetLinearAcceleration(accel);
     }
-    else if (param == ParamName::Transformer_AngularVelocity)
+    else if (param == PropertyName::Transformer_AngularVelocity)
     {
         transformer->SetAngularVelocity(Interpolate<float>(t, interpolate));
     }
-    else if (param == ParamName::Transformer_AngularAcceleration)
+    else if (param == PropertyName::Transformer_AngularAcceleration)
     {
         transformer->SetAngularAcceleration(Interpolate<float>(t, interpolate));
     }
-    else if (param == ParamName::TextItem_Color)
+    else if (param == PropertyName::TextItem_Color)
     {
         text->SetTextColor(Interpolate<Color4f>(t, interpolate));
     }
-    else if (param == ParamName::TextItem_Text)
+    else if (param == PropertyName::TextItem_Text)
     {
         if (method == math::Interpolation::StepStart)
             text->SetText(std::get<std::string>(mClass->GetEndValue()));
@@ -550,7 +550,7 @@ void PropertyAnimator::SetValue(EntityNode& node, float t, bool interpolate) con
         else if (t >= 1.0f)
             text->SetText(std::get<std::string>(mClass->GetEndValue()));
 
-    } else BUG("Unhandled value actuator param type.");
+    } else BUG("Unhandled property.");
 }
 
 void PropertyAnimator::Finish(EntityNode& node)
@@ -560,46 +560,46 @@ void PropertyAnimator::Finish(EntityNode& node)
 
 bool PropertyAnimator::CanApply(EntityNode& node, bool verbose) const
 {
-    const auto param = mClass->GetParamName();
+    const auto param = mClass->GetPropertyName();
     const auto* draw = node.GetDrawable();
     const auto* body = node.GetRigidBody();
     const auto* text = node.GetTextItem();
     const auto* transformer = node.GetTransformer();
 
-    if (param == ParamName::Drawable_TimeScale ||
-        param == ParamName::Drawable_RotationX ||
-        param == ParamName::Drawable_RotationY ||
-        param == ParamName::Drawable_RotationZ ||
-        param == ParamName::Drawable_TranslationX ||
-        param == ParamName::Drawable_TranslationY ||
-        param == ParamName::Drawable_TranslationZ ||
-        param == ParamName::Drawable_SizeZ)
+    if (param == PropertyName::Drawable_TimeScale ||
+        param == PropertyName::Drawable_RotationX ||
+        param == PropertyName::Drawable_RotationY ||
+        param == PropertyName::Drawable_RotationZ ||
+        param == PropertyName::Drawable_TranslationX ||
+        param == PropertyName::Drawable_TranslationY ||
+        param == PropertyName::Drawable_TranslationZ ||
+        param == PropertyName::Drawable_SizeZ)
     {
         if (!draw && verbose)
         {
-            WARN("Value actuator can't set a drawable value on a node without a drawable item. [actuator='%1', node='%2', value=%3]",
+            WARN("Property animator can't set a drawable value on a node without a drawable item. [animator='%1', node='%2', value=%3]",
                  mClass->GetName(), node.GetName(), param);
         }
         return draw != nullptr;
     }
-    else if ((param == ParamName::RigidBody_LinearVelocityY ||
-              param == ParamName::RigidBody_LinearVelocityX ||
-              param == ParamName::RigidBody_LinearVelocity  ||
-              param == ParamName::RigidBody_AngularVelocity))
+    else if ((param == PropertyName::RigidBody_LinearVelocityY ||
+              param == PropertyName::RigidBody_LinearVelocityX ||
+              param == PropertyName::RigidBody_LinearVelocity  ||
+              param == PropertyName::RigidBody_AngularVelocity))
     {
         if (!body && verbose)
         {
-            WARN("Value actuator can't set a rigid body value on a node without a rigid body. [actuator='%1', node='%2', value=%3]",
+            WARN("Property animator can't set a rigid body value on a node without a rigid body. [animator='%1', node='%2', value=%3]",
                  mClass->GetName(), node.GetName(), param);
         }
         return body != nullptr;
     }
-    else if ((param == ParamName::TextItem_Text ||
-              param == ParamName::TextItem_Color))
+    else if ((param == PropertyName::TextItem_Text ||
+              param == PropertyName::TextItem_Color))
     {
         if (!text && verbose)
         {
-            WARN("Value actuator can't set a text item value on a node without a text item. [actuator='%1', node='%2', value=%3]",
+            WARN("Property animator can't set a text item value on a node without a text item. [animator='%1', node='%2', value=%3]",
                  mClass->GetName(), node.GetName(), param);
         }
         if (text)
@@ -610,29 +610,29 @@ bool PropertyAnimator::CanApply(EntityNode& node, bool verbose) const
                                      interpolation == math::Interpolation::StepStart;
             if (!step_change && verbose)
             {
-                WARN("Value actuator can't apply interpolation on text. [actuator='%1', node='%2', interpolation=%3]",
+                WARN("Property animator can't apply interpolation on text. [animator='%1', node='%2', interpolation=%3]",
                      mClass->GetName(), node.GetName(), interpolation);
             }
         }
         return text != nullptr;
     }
-    else if (param == ParamName::Transformer_LinearVelocity ||
-             param == ParamName::Transformer_LinearVelocityX ||
-             param == ParamName::Transformer_LinearVelocityY ||
-             param == ParamName::Transformer_LinearAcceleration  ||
-             param == ParamName::Transformer_LinearAccelerationX ||
-             param == ParamName::Transformer_LinearAccelerationY ||
-             param == ParamName::Transformer_AngularVelocity ||
-             param == ParamName::Transformer_AngularAcceleration)
+    else if (param == PropertyName::Transformer_LinearVelocity ||
+             param == PropertyName::Transformer_LinearVelocityX ||
+             param == PropertyName::Transformer_LinearVelocityY ||
+             param == PropertyName::Transformer_LinearAcceleration  ||
+             param == PropertyName::Transformer_LinearAccelerationX ||
+             param == PropertyName::Transformer_LinearAccelerationY ||
+             param == PropertyName::Transformer_AngularVelocity ||
+             param == PropertyName::Transformer_AngularAcceleration)
     {
         if (!transformer && verbose)
         {
-            WARN("Value actuator can't set a transformer value on a node without a transformer. [actuator='%1', node='%2', value=%3]",
+            WARN("Property animator can't set a transformer value on a node without a transformer. [animator='%1', node='%2', value=%3]",
                  mClass->GetName(), node.GetName(), param);
         }
         return transformer != nullptr;
     }
-    else BUG("Unhandled value actuator param type.");
+    else BUG("Unhandled property.");
     return false;
 }
 

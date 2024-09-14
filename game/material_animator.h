@@ -94,10 +94,10 @@ namespace game
         using Interpolation    = MaterialAnimatorClass::Interpolation;
         using MaterialParam    = MaterialAnimatorClass::MaterialParam;
         using MaterialParamMap = MaterialAnimatorClass::MaterialParamMap;
-        MaterialAnimator(const std::shared_ptr<const MaterialAnimatorClass>& klass)
-          : mClass(klass)
+        explicit MaterialAnimator(std::shared_ptr<const MaterialAnimatorClass> klass) noexcept
+          : mClass(std::move(klass))
         {}
-        MaterialAnimator(const MaterialAnimatorClass& klass)
+        explicit MaterialAnimator(const MaterialAnimatorClass& klass)
           : mClass(std::make_shared<MaterialAnimatorClass>(klass))
         {}
         virtual void Start(EntityNode& node) override;

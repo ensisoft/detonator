@@ -32,7 +32,7 @@ namespace game
     {
     public:
         // Enumeration of support node parameters that can be changed.
-        enum class ParamName {
+        enum class PropertyName {
             Drawable_TimeScale,
             Drawable_RotationX,
             Drawable_RotationY,
@@ -57,7 +57,7 @@ namespace game
             Transformer_AngularAcceleration
         };
 
-        using ParamValue = std::variant<float,
+        using PropertyValue = std::variant<float,
                 std::string, glm::vec2, Color4f>;
 
         // The interpolation method.
@@ -65,13 +65,13 @@ namespace game
 
         Interpolation GetInterpolation() const
         { return mInterpolation; }
-        ParamName GetParamName() const
+        PropertyName GetPropertyName() const
         { return mParamName; }
-        void SetParamName(ParamName name)
+        void SetPropertyName(PropertyName name)
         { mParamName = name; }
         void SetInterpolation(Interpolation method)
         { mInterpolation = method; }
-        ParamValue GetEndValue() const
+        PropertyValue GetEndValue() const
         { return mEndValue; }
         template<typename T>
         const T* GetEndValue() const
@@ -79,7 +79,7 @@ namespace game
         template<typename T>
         T* GetEndValue()
         { return std::get_if<T>(&mEndValue); }
-        void SetEndValue(ParamValue value)
+        void SetEndValue(PropertyValue value)
         { mEndValue = value; }
 
         virtual Type GetType() const override
@@ -91,16 +91,16 @@ namespace game
         // the interpolation method to be used.
         Interpolation mInterpolation = Interpolation::Linear;
         // which parameter to adjust
-        ParamName mParamName = ParamName::Drawable_TimeScale;
+        PropertyName mParamName = PropertyName::Drawable_TimeScale;
         // the end value
-        ParamValue mEndValue;
+        PropertyValue mEndValue;
     };
 
 
     class BooleanPropertyAnimatorClass : public detail::AnimatorClassBase<BooleanPropertyAnimatorClass>
     {
     public:
-        enum class Property {
+        enum class PropertyName {
             Drawable_VisibleInGame,
             Drawable_UpdateMaterial,
             Drawable_UpdateDrawable,
@@ -134,11 +134,11 @@ namespace game
 
         inline PropertyAction GetFlagAction() const noexcept
         { return mFlagAction; }
-        inline Property GetFlagName() const noexcept
+        inline PropertyName GetFlagName() const noexcept
         { return mFlagName; }
         inline float GetTime() const noexcept
         { return mTime; }
-        inline void SetFlagName(const Property name) noexcept
+        inline void SetFlagName(const PropertyName name) noexcept
         { mFlagName = name; }
         inline void SetFlagAction(PropertyAction action) noexcept
         { mFlagAction = action; }
@@ -146,7 +146,7 @@ namespace game
         { mTime = math::clamp(0.0f, 1.0f, time); }
     private:
         PropertyAction mFlagAction = PropertyAction::Off;
-        Property   mFlagName   = Property::Drawable_FlipHorizontally;
+        PropertyName   mFlagName   = PropertyName::Drawable_FlipHorizontally;
         float      mTime       = 1.0f;
     };
 
@@ -154,8 +154,8 @@ namespace game
     class PropertyAnimator final : public Animator
     {
     public:
-        using ParamName     = PropertyAnimatorClass::ParamName;
-        using ParamValue    = PropertyAnimatorClass::ParamValue;
+        using PropertyName  = PropertyAnimatorClass::PropertyName;
+        using PropertyValue = PropertyAnimatorClass::PropertyValue;
         using Inteprolation = PropertyAnimatorClass::Interpolation;
         explicit PropertyAnimator(std::shared_ptr<const PropertyAnimatorClass> klass) noexcept
            : mClass(std::move(klass))
@@ -217,7 +217,7 @@ namespace game
         void SetValue(EntityNode& node, float t, bool interpolate) const;
     private:
         std::shared_ptr<const PropertyAnimatorClass> mClass;
-        ParamValue mStartValue;
+        PropertyValue mStartValue;
     };
 
     class BooleanPropertyAnimator final : public Animator

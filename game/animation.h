@@ -58,11 +58,11 @@ namespace game
         inline void SetDelay(float delay) noexcept
         { mDelay = delay; }
         // Enable/disable looping flag. A looping animation will never end
-        // and will reset after the reaching the end. I.e. all the actuators
+        // and will reset after the reaching the end. I.e. all the animators
         // involved will have their states reset to the initial state which
-        // will be re-applied to the node instances. For an animation without
-        // any perceived jumps or discontinuity it's important that the animation
-        // should transform nodes back to their initial state before the end
+        // will be re-applied to the node instances. In order to have a smooth
+        // animation without any perceived jumps or discontinuity it's important
+        // that the animation nodes back to their initial state before the end
         // of the animation track.
         inline void SetLooping(bool looping) noexcept
         { mLooping = looping; }
@@ -83,58 +83,58 @@ namespace game
         { return mLooping; }
 
         // Add a new animator that applies state update/action on some animation node.
-        template<typename Actuator>
-        void AddAnimator(const Actuator& actuator)
+        template<typename Animator>
+        void AddAnimator(const Animator& animator)
         {
-            std::shared_ptr<AnimatorClass> foo(new Actuator(actuator));
-            mActuators.push_back(std::move(foo));
+            std::shared_ptr<AnimatorClass> foo(new Animator(animator));
+            mAnimators.push_back(std::move(foo));
         }
         // Add a new animator that applies state update/action on some animation node.
-        void AddAnimator(std::shared_ptr<AnimatorClass> actuator)
-        { mActuators.push_back(std::move(actuator)); }
+        void AddAnimator(std::shared_ptr<AnimatorClass> animator)
+        { mAnimators.push_back(std::move(animator)); }
 
-        // Delete the animator at the given actuator index.
+        // Delete the animator at the given index.
         void DeleteAnimator(std::size_t index) noexcept;
         // Delete the animator by the given ID. Returns true if animator was deleted
         // or false to indicate that nothing was done.
         bool DeleteAnimatorById(const std::string& id) noexcept;
-        // Find an actuator by the given ID. Returns nullptr if no such actuator exists.
+        // Find an animator by the given ID. Returns nullptr if no such animator exists.
         AnimatorClass* FindAnimatorById(const std::string& id) noexcept;
-        // Find an actuator by the given ID. Returns nullptr if no such actuator exists.
+        // Find an animator by the given ID. Returns nullptr if no such animator exists.
         const AnimatorClass* FindAnimatorById(const std::string& id) const noexcept;
-        // Clear (and delete) all actuators previously added to the animation.
+        // Clear (and delete) all animator previously added to the animation.
         inline void Clear() noexcept
-        { mActuators.clear(); }
-        // Get the number of actuators currently added to this animation track.
+        { mAnimators.clear(); }
+        // Get the number of animators currently added to this animation track.
         inline std::size_t GetNumAnimators() const noexcept
-        { return mActuators.size(); }
-        // Get the animation actuator class object at the given index.
+        { return mAnimators.size(); }
+        // Get the animator class object at the given index.
         inline AnimatorClass& GetAnimatorClass(std::size_t index) noexcept
-        { return *mActuators[index]; }
-        // Get the animation actuator class object at the given index.
+        { return *mAnimators[index]; }
+        // Get the animator class object at the given index.
         inline const AnimatorClass& GetAnimatorClass(std::size_t index) const noexcept
-        { return *mActuators[index]; }
-        // Create an instance of some actuator class type at the given index.
-        // For example if the type of actuator class at index N is
+        { return *mAnimators[index]; }
+        // Create an instance of some animator class type at the given index.
+        // For example if the type of animator class at index N is
         // TransformAnimatorClass then the returned object will be an
         // instance of TransformAnimator.
         std::unique_ptr<Animator> CreateAnimatorInstance(std::size_t index) const;
         // Get the hash value based on the static data.
         std::size_t GetHash() const noexcept;
-        // Serialize actuator state into JSON.
+        // Serialize the animation into JSON.
         void IntoJson(data::Writer& json) const;
-        // Load actuator state from JSON.
+        // Load the animation from JSON.
         // Returns true on success or false to indicate that some data failed to load.
         bool FromJson(const data::Reader& data);
-        // Make a complete bitwise clone of this actuator excluding the ID. I.e. create
-        // a new animation class object with similar animation state.
+        // Make a complete bitwise clone of this animation class  excluding the ID.
+        // I.e. create a new animation class object with similar animation state.
         AnimationClass Clone() const;
         // Do a deep copy on the assignment of a new object.
         AnimationClass& operator=(const AnimationClass& other);
     private:
         std::string mId;
-        // The list of animation actuators that apply transforms
-        std::vector<std::shared_ptr<AnimatorClass>> mActuators;
+        // The list of animators that apply transforms
+        std::vector<std::shared_ptr<AnimatorClass>> mAnimators;
         // Human-readable name of the animation.
         std::string mName;
         // One time delay before starting the playback.
@@ -148,7 +148,7 @@ namespace game
 
     // Animation is an instance of some type of AnimationClass.
     // It contains the per instance data of the animation track which is
-    // modified over time through updates to the track and its actuators states.
+    // modified over time through updates to the track and its animator states.
     class Animation
     {
     public:
@@ -174,18 +174,18 @@ namespace game
         // actions have been performed.
         bool IsComplete() const noexcept;
 
-        // Find an actuator instance by on its class ID.
-        // If there's no such actuator with such class ID then nullptr is returned.
-        Animator* FindActuatorById(const std::string& id) noexcept;
-        // Find an actuator instance by its class name.
-        // If there's no such actuator with such class ID then nullptr is returned.
-        Animator* FindActuatorByName(const std::string& name) noexcept;
-        // Find an actuator instance by on its class ID.
-        // If there's no such actuator with such class ID then nullptr is returned.
-        const Animator* FindActuatorById(const std::string& id) const noexcept;
-        // Find an actuator instance by its class name.
-        // If there's no such actuator with such class ID then nullptr is returned.
-        const Animator* FindActuatorByName(const std::string& name) const noexcept;
+        // Find an animator instance by on its class ID.
+        // If there's no such animator with such class ID then nullptr is returned.
+        Animator* FindAnimatorById(const std::string& id) noexcept;
+        // Find an animator instance by its class name.
+        // If there's no such animator with such class ID then nullptr is returned.
+        Animator* FindAnimatorByName(const std::string& name) noexcept;
+        // Find an animator instance by on its class ID.
+        // If there's no such animator with such class ID then nullptr is returned.
+        const Animator* FindAnimatorById(const std::string& id) const noexcept;
+        // Find an animator instance by its class name.
+        // If there's no such animator with such class ID then nullptr is returned.
+        const Animator* FindAnimatorByName(const std::string& name) const noexcept;
 
         // Set one time animation delay that takes place
         // before the animation starts. The delay is in seconds.
@@ -221,13 +221,13 @@ namespace game
         std::shared_ptr<const AnimationClass> mClass;
         // For each node we keep a list of actions that are to be performed
         // at specific times.
-        struct NodeTrack {
+        struct AnimatorState {
             std::string node;
-            std::unique_ptr<Animator> actuator;
+            std::unique_ptr<Animator> animator;
             mutable bool started = false;
             mutable bool ended   = false;
         };
-        std::vector<NodeTrack> mTracks;
+        std::vector<AnimatorState> mTracks;
         // One time delay before starting the animation.
         float mDelay = 0.0f;
         // current play back time for this track.

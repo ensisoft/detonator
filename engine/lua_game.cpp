@@ -964,11 +964,11 @@ void BindGameLib(sol::state& L)
     animation["GetClass"]           =  &Animation::GetClass;
     animation["FindAnimatorById"]   = sol::overload(
         [](game::Animation* animation, const std::string& name) {
-            return animation->FindActuatorById(name);
+            return animation->FindAnimatorById(name);
         },
         [](game::Animation* animation, const std::string& name, const std::string& type, sol::this_state state) {
             sol::state_view lua(state);
-            auto* actuator = animation->FindActuatorById(name);
+            auto* actuator = animation->FindAnimatorById(name);
             if (!actuator)
                 return sol::make_object(lua, sol::nil);
             const auto enum_val = magic_enum::enum_cast<game::AnimatorClass::Type>(type);
@@ -989,11 +989,11 @@ void BindGameLib(sol::state& L)
         });
     animation["FindAnimatorByName"] = sol::overload(
         [](game::Animation* animation, const std::string& name) {
-           return animation->FindActuatorByName(name);
+           return animation->FindAnimatorByName(name);
         },
         [](game::Animation* animation, const std::string& name, const std::string& type, sol::this_state state) {
             sol::state_view lua(state);
-            auto* actuator = animation->FindActuatorByName(name);
+            auto* actuator = animation->FindAnimatorByName(name);
             if (!actuator)
                 return sol::make_object(lua, sol::nil);
             const auto enum_val = magic_enum::enum_cast<game::AnimatorClass::Type>(type);

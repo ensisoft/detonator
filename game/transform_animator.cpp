@@ -74,8 +74,8 @@ std::size_t TransformAnimatorClass::GetHash() const
     return hash;
 }
 
-TransformAnimator::TransformAnimator(const std::shared_ptr<const TransformAnimatorClass>& klass)
-    : mClass(klass)
+TransformAnimator::TransformAnimator(std::shared_ptr<const TransformAnimatorClass> klass) noexcept
+    : mClass(std::move(klass))
 {
     if (!mClass->TestFlag(Flags::StaticInstance))
     {
