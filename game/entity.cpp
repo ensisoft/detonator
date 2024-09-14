@@ -34,6 +34,7 @@
 #include "game/treeop.h"
 #include "game/entity.h"
 #include "game/transform.h"
+#include "game/animator.h"
 #include "game/entity_node_transformer.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"

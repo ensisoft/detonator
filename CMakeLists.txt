@@ -224,7 +224,11 @@ add_library(GfxLib
     third_party/base64/base64.cpp)
 add_library(EngineLib
     game/animation.cpp
-    game/actuator.cpp
+    game/animator.cpp
+    game/transform_animator.cpp
+    game/kinematic_animator.cpp
+    game/property_animator.cpp
+    game/material_animator.cpp
     game/entity.cpp
     game/entity_node.cpp
     game/entity_state.cpp
@@ -985,7 +989,11 @@ add_library(GameLibTesting
     game/entity_node_tilemap_node.cpp
     game/scriptvar.cpp
     game/animation.cpp
-    game/actuator.cpp
+    game/animator.cpp
+    game/transform_animator.cpp
+    game/kinematic_animator.cpp
+    game/property_animator.cpp
+    game/material_animator.cpp
     game/scene.cpp
     game/tilemap.cpp)
 add_library(EngineLibTesting

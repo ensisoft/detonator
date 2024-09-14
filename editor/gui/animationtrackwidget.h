@@ -35,6 +35,7 @@
 #include "editor/app/workspace.h"
 #include "game/entity.h"
 #include "game/animation.h"
+#include "game/animator.h"
 #include "engine/renderer.h"
 #include "engine/physics.h"
 

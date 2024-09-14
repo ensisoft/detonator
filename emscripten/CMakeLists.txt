@@ -68,7 +68,11 @@ add_executable(UnitTest
     ../engine/lua_wdk.cpp
     ../engine/physics.cpp
     ../engine/state.cpp
-    ../game/actuator.cpp
+    ../game/animator.cpp
+    ../game/transform_animator.cpp
+    ../game/kinematic_animator.cpp
+    ../game/material_animator.cpp
+    ../game/property_animator.cpp
     ../game/animation.cpp
     ../game/entity.cpp
     ../game/entity_node.cpp
@@ -197,7 +201,11 @@ add_executable(GameEngine
     ../data/json.cpp
     ../data/io.cpp
     ../game/animation.cpp
-    ../game/actuator.cpp
+    ../game/animator.cpp
+    ../game/transform_animator.cpp
+    ../game/kinematic_animator.cpp
+    ../game/material_animator.cpp
+    ../game/property_animator.cpp
     ../game/entity.cpp
     ../game/entity_node.cpp
     ../game/entity_state.cpp

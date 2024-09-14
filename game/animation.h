@@ -27,10 +27,15 @@
 #include <unordered_map>
 
 #include "base/utility.h"
-#include "game/actuator.h"
+#include "data/fwd.h"
+
+#include "base/snafu.h"
 
 namespace game
 {
+    class Animator;
+    class AnimatorClass;
+    class EntityNode;
 
     // AnimationClass defines a new type of animation that includes the
     // static state of the animation such as the modified ending results
