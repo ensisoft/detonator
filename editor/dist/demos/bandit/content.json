@@ -155,9 +155,9 @@
       "tag": "",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "angular_acceleration": 0.0,
                 "angular_velocity": 0.0,
                 "duration": 1.0,
@@ -179,7 +179,7 @@
                 "starttime": 0.0,
                 "target": "RigidBody"
               },
-              "type": "Kinematic"
+              "type": "KinematicAnimator"
             }
           ],
           "delay": 0.30000001192092896,
@@ -2969,9 +2969,9 @@
       "tag": "",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "action": "On",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -2984,10 +2984,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -3000,10 +3000,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -3016,10 +3016,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -3032,10 +3032,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -3048,10 +3048,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -3064,7 +3064,7 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             }
           ],
           "delay": 0.0,
@@ -3074,9 +3074,9 @@
           "name": "Idle"
         },
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.09909459948539734,
                 "flag": "Drawable_VisibleInGame",
@@ -3089,10 +3089,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "On",
                 "duration": 0.09859158843755722,
                 "flag": "Drawable_VisibleInGame",
@@ -3105,10 +3105,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.09959757328033447,
                 "flag": "Drawable_VisibleInGame",
@@ -3121,10 +3121,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.09657948464155197,
                 "flag": "Drawable_VisibleInGame",
@@ -3137,10 +3137,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.09507054090499878,
                 "flag": "Drawable_VisibleInGame",
@@ -3153,10 +3153,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.09305836260318756,
                 "flag": "Drawable_VisibleInGame",
@@ -3169,7 +3169,7 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             }
           ],
           "delay": 0.0,
@@ -3179,9 +3179,9 @@
           "name": "Walk"
         },
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.10261563211679459,
                 "flag": "Drawable_VisibleInGame",
@@ -3194,10 +3194,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.10311861336231232,
                 "flag": "Drawable_VisibleInGame",
@@ -3210,10 +3210,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "On",
                 "duration": 0.1021127998828888,
                 "flag": "Drawable_VisibleInGame",
@@ -3226,10 +3226,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.1006036028265953,
                 "flag": "Drawable_VisibleInGame",
@@ -3242,10 +3242,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.10060364007949829,
                 "flag": "Drawable_VisibleInGame",
@@ -3258,10 +3258,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.10261568427085876,
                 "flag": "Drawable_VisibleInGame",
@@ -3274,7 +3274,7 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             }
           ],
           "delay": 0.0,
@@ -3284,9 +3284,9 @@
           "name": "Attack"
         },
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.0985916405916214,
                 "flag": "Drawable_VisibleInGame",
@@ -3299,10 +3299,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.09909455478191376,
                 "flag": "Drawable_VisibleInGame",
@@ -3315,10 +3315,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.09808850288391113,
                 "flag": "Drawable_VisibleInGame",
@@ -3331,10 +3331,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "On",
                 "duration": 0.09909453988075256,
                 "flag": "Drawable_VisibleInGame",
@@ -3347,10 +3347,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.09708249568939209,
                 "flag": "Drawable_VisibleInGame",
@@ -3363,10 +3363,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.09758555144071579,
                 "flag": "Drawable_VisibleInGame",
@@ -3379,7 +3379,7 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             }
           ],
           "delay": 0.0,
@@ -3389,9 +3389,9 @@
           "name": "Jump"
         },
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.20271632075309753,
                 "flag": "Drawable_VisibleInGame",
@@ -3404,10 +3404,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.20120733976364136,
                 "flag": "Drawable_VisibleInGame",
@@ -3420,10 +3420,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.20020131766796112,
                 "flag": "Drawable_VisibleInGame",
@@ -3436,10 +3436,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.2002009004354477,
                 "flag": "Drawable_VisibleInGame",
@@ -3452,10 +3452,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "On",
                 "duration": 0.1971834897994995,
                 "flag": "Drawable_VisibleInGame",
@@ -3468,10 +3468,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.1986924558877945,
                 "flag": "Drawable_VisibleInGame",
@@ -3484,7 +3484,7 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             }
           ],
           "delay": 0.0,
@@ -3494,9 +3494,9 @@
           "name": "Fall"
         },
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.19969822466373444,
                 "flag": "Drawable_VisibleInGame",
@@ -3509,10 +3509,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.1996982842683792,
                 "flag": "Drawable_VisibleInGame",
@@ -3525,10 +3525,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.20020121335983276,
                 "flag": "Drawable_VisibleInGame",
@@ -3541,10 +3541,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.19969843327999115,
                 "flag": "Drawable_VisibleInGame",
@@ -3557,10 +3557,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.20070414245128632,
                 "flag": "Drawable_VisibleInGame",
@@ -3573,10 +3573,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "On",
                 "duration": 0.19919505715370178,
                 "flag": "Drawable_VisibleInGame",
@@ -3589,7 +3589,7 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             }
           ],
           "delay": 0.0,
@@ -3967,9 +3967,9 @@
       "tag": "",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "angular_acceleration": 0.0,
                 "angular_velocity": 0.0,
                 "duration": 0.24949704110622406,
@@ -3991,10 +3991,10 @@
                 "starttime": 0.0,
                 "target": "RigidBody"
               },
-              "type": "Kinematic"
+              "type": "KinematicAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "angular_acceleration": 0.0,
                 "angular_velocity": 0.0,
                 "duration": 0.24899399280548096,
@@ -4016,10 +4016,10 @@
                 "starttime": 0.5,
                 "target": "RigidBody"
               },
-              "type": "Kinematic"
+              "type": "KinematicAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "angular_acceleration": 0.0,
                 "angular_velocity": 0.0,
                 "duration": 0.25050294399261475,
@@ -4041,10 +4041,10 @@
                 "starttime": 0.24949704110622406,
                 "target": "RigidBody"
               },
-              "type": "Kinematic"
+              "type": "KinematicAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "angular_acceleration": 0.0,
                 "angular_velocity": 0.0,
                 "duration": 0.25100600719451904,
@@ -4066,7 +4066,7 @@
                 "starttime": 0.748993992805481,
                 "target": "RigidBody"
               },
-              "type": "Kinematic"
+              "type": "KinematicAnimator"
             }
           ],
           "delay": 0.0,
@@ -4394,9 +4394,9 @@
       "tag": "",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "angular_acceleration": 0.0,
                 "angular_velocity": 0.0,
                 "duration": 0.24949704110622406,
@@ -4418,10 +4418,10 @@
                 "starttime": 0.0,
                 "target": "RigidBody"
               },
-              "type": "Kinematic"
+              "type": "KinematicAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "angular_acceleration": 0.0,
                 "angular_velocity": 0.0,
                 "duration": 0.24899399280548096,
@@ -4443,10 +4443,10 @@
                 "starttime": 0.5,
                 "target": "RigidBody"
               },
-              "type": "Kinematic"
+              "type": "KinematicAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "angular_acceleration": 0.0,
                 "angular_velocity": 0.0,
                 "duration": 0.25050294399261475,
@@ -4468,10 +4468,10 @@
                 "starttime": 0.24949704110622406,
                 "target": "RigidBody"
               },
-              "type": "Kinematic"
+              "type": "KinematicAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "angular_acceleration": 0.0,
                 "angular_velocity": 0.0,
                 "duration": 0.25100600719451904,
@@ -4493,7 +4493,7 @@
                 "starttime": 0.748993992805481,
                 "target": "RigidBody"
               },
-              "type": "Kinematic"
+              "type": "KinematicAnimator"
             }
           ],
           "delay": 0.0,
@@ -4503,9 +4503,9 @@
           "name": "Move up then down"
         },
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "angular_acceleration": 0.0,
                 "angular_velocity": 0.0,
                 "duration": 0.25,
@@ -4527,10 +4527,10 @@
                 "starttime": 0.0,
                 "target": "RigidBody"
               },
-              "type": "Kinematic"
+              "type": "KinematicAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "angular_acceleration": 0.0,
                 "angular_velocity": 0.0,
                 "duration": 0.25,
@@ -4552,10 +4552,10 @@
                 "starttime": 0.25,
                 "target": "RigidBody"
               },
-              "type": "Kinematic"
+              "type": "KinematicAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "angular_acceleration": 0.0,
                 "angular_velocity": 0.0,
                 "duration": 0.25,
@@ -4577,10 +4577,10 @@
                 "starttime": 0.5,
                 "target": "RigidBody"
               },
-              "type": "Kinematic"
+              "type": "KinematicAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "angular_acceleration": 0.0,
                 "angular_velocity": 0.0,
                 "duration": 0.25,
@@ -4602,7 +4602,7 @@
                 "starttime": 0.75,
                 "target": "RigidBody"
               },
-              "type": "Kinematic"
+              "type": "KinematicAnimator"
             }
           ],
           "delay": 0.0,
@@ -6871,9 +6871,9 @@
       "tag": "",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "duration": 1.0,
                 "flags": {
                   "StaticInstance": true
@@ -6897,7 +6897,7 @@
                 },
                 "starttime": 0.0
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             }
           ],
           "delay": 0.0,

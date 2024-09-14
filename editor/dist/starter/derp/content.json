@@ -358,9 +358,9 @@
       "tag": "",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.10009009391069412,
                 "flag": "Drawable_VisibleInGame",
@@ -373,10 +373,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "On",
                 "duration": 0.10414785146713257,
                 "flag": "Drawable_VisibleInGame",
@@ -389,10 +389,10 @@
                 "starttime": 0.8958521485328674,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "On",
                 "duration": 0.09963932633399963,
                 "flag": "Drawable_VisibleInGame",
@@ -405,10 +405,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 0.10414791107177734,
                 "flag": "Drawable_VisibleInGame",
@@ -421,7 +421,7 @@
                 "starttime": 0.8958520889282227,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             }
           ],
           "delay": 0.0,

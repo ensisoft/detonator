@@ -480,9 +480,9 @@
       "tag": "",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -495,10 +495,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "On",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -511,10 +511,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -527,7 +527,7 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             }
           ],
           "delay": 0.0,
@@ -537,9 +537,9 @@
           "name": "Shrink"
         },
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "action": "On",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -552,10 +552,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -568,10 +568,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -584,7 +584,7 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             }
           ],
           "delay": 0.0,
@@ -594,9 +594,9 @@
           "name": "Enlarge"
         },
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "action": "On",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -609,10 +609,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -625,10 +625,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -641,7 +641,7 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             }
           ],
           "delay": 0.0,
@@ -651,9 +651,9 @@
           "name": "Restore"
         },
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -666,10 +666,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "Off",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -682,10 +682,10 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "action": "On",
                 "duration": 1.0,
                 "flag": "Drawable_VisibleInGame",
@@ -698,7 +698,7 @@
                 "starttime": 0.0,
                 "time": 1.0
               },
-              "type": "SetFlag"
+              "type": "BooleanPropertyAnimator"
             }
           ],
           "delay": 0.0,
@@ -2364,9 +2364,9 @@
       "tag": "",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.5004440546035767,
                 "flags": {
                   "StaticInstance": true
@@ -2390,10 +2390,10 @@
                 },
                 "starttime": 0.0
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.49955594539642334,
                 "flags": {
                   "StaticInstance": true
@@ -2417,10 +2417,10 @@
                 },
                 "starttime": 0.5004440546035767
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.5004439353942871,
                 "flags": {
                   "StaticInstance": true
@@ -2444,10 +2444,10 @@
                 },
                 "starttime": 0.0
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.4995560646057129,
                 "flags": {
                   "StaticInstance": true
@@ -2471,7 +2471,7 @@
                 },
                 "starttime": 0.5004439353942871
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             }
           ],
           "delay": 0.0,
@@ -2720,9 +2720,9 @@
       "tag": "",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.900941789150238,
                 "flags": {
                   "StaticInstance": false
@@ -2746,10 +2746,10 @@
                 },
                 "starttime": 0.0
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.9009431600570679,
                 "flags": {
                   "StaticInstance": false
@@ -2773,7 +2773,7 @@
                 },
                 "starttime": 0.0
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             }
           ],
           "delay": 0.0,
@@ -3551,9 +3551,9 @@
       "tag": "",
       "tracks": [
         {
-          "actuators": [
+          "animators": [
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.9017605781555176,
                 "flags": {
                   "StaticInstance": false
@@ -3577,10 +3577,10 @@
                 },
                 "starttime": 0.0
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             },
             {
-              "actuator": {
+              "animator": {
                 "duration": 0.9017602801322937,
                 "flags": {
                   "StaticInstance": false
@@ -3604,7 +3604,7 @@
                 },
                 "starttime": 0.0
               },
-              "type": "Transform"
+              "type": "TransformAnimator"
             }
           ],
           "delay": 0.0,
