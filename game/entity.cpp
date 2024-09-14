@@ -749,12 +749,12 @@ EntityClass EntityClass::Clone() const
     {
         for (size_t i=0; i< track->GetNumAnimators(); ++i)
         {
-            auto& actuator = track->GetAnimatorClass(i);
-            const auto* source_node = FindNodeById(actuator.GetNodeId());
+            auto& animator = track->GetAnimatorClass(i);
+            const auto* source_node = FindNodeById(animator.GetNodeId());
             if (source_node == nullptr)
                 continue;
             const auto* cloned_node = map[source_node];
-            actuator.SetNodeId(cloned_node->GetId());
+            animator.SetNodeId(cloned_node->GetId());
         }
     }
     // make a deep copy of the scripting variables.

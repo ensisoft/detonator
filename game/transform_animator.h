@@ -88,8 +88,8 @@ namespace game
     class TransformAnimator final : public Animator
     {
     public:
-        TransformAnimator(const std::shared_ptr<const TransformAnimatorClass>& klass);
-        TransformAnimator(const TransformAnimatorClass& klass)
+        explicit TransformAnimator(std::shared_ptr<const TransformAnimatorClass> klass) noexcept;
+        explicit TransformAnimator(const TransformAnimatorClass& klass)
             : TransformAnimator(std::make_shared<TransformAnimatorClass>(klass))
         {}
         virtual void Start(EntityNode& node) override;

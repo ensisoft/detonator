@@ -39,9 +39,9 @@ AnimationClass::AnimationClass()
 
 AnimationClass::AnimationClass(const AnimationClass& other)
 {
-    for (const auto& a : other.mActuators)
+    for (const auto& a : other.mAnimators)
     {
-        mActuators.push_back(a->Copy());
+        mAnimators.push_back(a->Copy());
     }
     mId       = other.mId;
     mName     = other.mName;
@@ -52,7 +52,7 @@ AnimationClass::AnimationClass(const AnimationClass& other)
 AnimationClass::AnimationClass(AnimationClass&& other) noexcept
 {
     mId        = std::move(other.mId);
-    mActuators = std::move(other.mActuators);
+    mAnimators = std::move(other.mAnimators);
     mName      = std::move(other.mName);
     mDuration  = other.mDuration;
     mLooping   = other.mLooping;
@@ -61,18 +61,18 @@ AnimationClass::AnimationClass(AnimationClass&& other) noexcept
 
 void AnimationClass::DeleteAnimator(std::size_t index) noexcept
 {
-    ASSERT(index < mActuators.size());
-    auto it = mActuators.begin();
+    ASSERT(index < mAnimators.size());
+    auto it = mAnimators.begin();
     std::advance(it, index);
-    mActuators.erase(it);
+    mAnimators.erase(it);
 }
 
 bool AnimationClass::DeleteAnimatorById(const std::string& id) noexcept
 {
-    for (auto it = mActuators.begin(); it != mActuators.end(); ++it)
+    for (auto it = mAnimators.begin(); it != mAnimators.end(); ++it)
     {
         if ((*it)->GetId() == id) {
-            mActuators.erase(it);
+            mAnimators.erase(it);
             return true;
         }
     }
@@ -80,24 +80,24 @@ bool AnimationClass::DeleteAnimatorById(const std::string& id) noexcept
 }
 AnimatorClass* AnimationClass::FindAnimatorById(const std::string& id) noexcept
 {
-    for (auto& actuator : mActuators) {
-        if (actuator->GetId() == id)
-            return actuator.get();
+    for (auto& animator : mAnimators) {
+        if (animator->GetId() == id)
+            return animator.get();
     }
     return nullptr;
 }
 const AnimatorClass* AnimationClass::FindAnimatorById(const std::string& id) const noexcept
 {
-    for (auto& actuator : mActuators) {
-        if (actuator->GetId() == id)
-            return actuator.get();
+    for (auto& animator : mAnimators) {
+        if (animator->GetId() == id)
+            return animator.get();
     }
     return nullptr;
 }
 
 std::unique_ptr<Animator> AnimationClass::CreateAnimatorInstance(std::size_t index) const
 {
-    const auto& klass = mActuators[index];
+    const auto& klass = mAnimators[index];
     if (klass->GetType() == AnimatorClass::Type::TransformAnimator)
         return std::make_unique<TransformAnimator>(std::static_pointer_cast<TransformAnimatorClass>(klass));
     else if (klass->GetType() == AnimatorClass::Type::PropertyAnimator)
@@ -108,7 +108,7 @@ std::unique_ptr<Animator> AnimationClass::CreateAnimatorInstance(std::size_t ind
         return std::make_unique<BooleanPropertyAnimator>(std::static_pointer_cast<BooleanPropertyAnimatorClass>(klass));
     else if (klass->GetType() == AnimatorClass::Type::MaterialAnimator)
         return std::make_unique<MaterialAnimator>(std::static_pointer_cast<MaterialAnimatorClass>(klass));
-    else BUG("Unknown actuator type");
+    else BUG("Unknown animator type");
     return {};
 }
 
@@ -120,8 +120,8 @@ std::size_t AnimationClass::GetHash() const noexcept
     hash = base::hash_combine(hash, mDuration);
     hash = base::hash_combine(hash, mLooping);
     hash = base::hash_combine(hash, mDelay);
-    for (const auto& actuator : mActuators)
-        hash = base::hash_combine(hash, actuator->GetHash());
+    for (const auto& animator : mAnimators)
+        hash = base::hash_combine(hash, animator->GetHash());
     return hash;
 }
 
@@ -132,14 +132,14 @@ void AnimationClass::IntoJson(data::Writer& data) const
     data.Write("duration", mDuration);
     data.Write("delay", mDelay);
     data.Write("looping", mLooping);
-    for (const auto &actuator : mActuators)
+    for (const auto &animator : mAnimators)
     {
         auto meta = data.NewWriteChunk();
         auto act  = data.NewWriteChunk();
-        actuator->IntoJson(*act);
-        meta->Write("type", actuator->GetType());
-        meta->Write("actuator", std::move(act));
-        data.AppendChunk("actuators", std::move(meta));
+        animator->IntoJson(*act);
+        meta->Write("type", animator->GetType());
+        meta->Write("animator", std::move(act));
+        data.AppendChunk("animators", std::move(meta));
     }
 }
 
@@ -152,35 +152,36 @@ bool AnimationClass::FromJson(const data::Reader& data)
     ok &= data.Read("delay",    &mDelay);
     ok &= data.Read("looping",  &mLooping);
 
-    for (unsigned i=0; i<data.GetNumChunks("actuators"); ++i)
+    // legacy name before animators became animators.
+    for (unsigned i=0; i<data.GetNumChunks("animators"); ++i)
     {
         AnimatorClass::Type type;
-        const auto& meta_chunk = data.GetReadChunk("actuators", i);
-        const auto& data_chunk = meta_chunk->GetReadChunk("actuator");
+        const auto& meta_chunk = data.GetReadChunk("animators", i);
+        const auto& data_chunk = meta_chunk->GetReadChunk("animator");
         if (data_chunk && meta_chunk->Read("type", &type))
         {
-            std::shared_ptr<AnimatorClass> actuator;
+            std::shared_ptr<AnimatorClass> animator;
             if (type == AnimatorClass::Type::TransformAnimator)
-                actuator = std::make_shared<TransformAnimatorClass>();
+                animator = std::make_shared<TransformAnimatorClass>();
             else if (type == AnimatorClass::Type::PropertyAnimator)
-                actuator = std::make_shared<PropertyAnimatorClass>();
+                animator = std::make_shared<PropertyAnimatorClass>();
             else if (type == AnimatorClass::Type::KinematicAnimator)
-                actuator = std::make_shared<KinematicAnimatorClass>();
+                animator = std::make_shared<KinematicAnimatorClass>();
             else if (type == AnimatorClass::Type::BooleanPropertyAnimator)
-                actuator = std::make_shared<BooleanPropertyAnimatorClass>();
+                animator = std::make_shared<BooleanPropertyAnimatorClass>();
             else if (type == AnimatorClass::Type::MaterialAnimator)
-                actuator = std::make_shared<MaterialAnimatorClass>();
-            else BUG("Unknown actuator type.");
+                animator = std::make_shared<MaterialAnimatorClass>();
+            else BUG("Unknown animator type.");
 
-            mActuators.push_back(actuator);
-            if (actuator->FromJson(*data_chunk))
+            mAnimators.push_back(animator);
+            if (animator->FromJson(*data_chunk))
                 continue;
 
-            WARN("Animation actuator failed to load completely. [animation='%1']", mName);
+            WARN("Animator failed to load completely. [animation='%1']", mName);
         }
         else if (!data_chunk)
-            WARN("Missing actuator data chunk. [animation='%1']", mName);
-        else WARN("Unrecognized animation actuator type. [animation='%1']", mName);
+            WARN("Missing animator data chunk. [animation='%1']", mName);
+        else WARN("Unrecognized animator type. [animation='%1']", mName);
 
         ok = false;
     }
@@ -194,8 +195,8 @@ AnimationClass AnimationClass::Clone() const
     ret.mDuration = mDuration;
     ret.mLooping  = mLooping;
     ret.mDelay    = mDelay;
-    for (const auto& klass : mActuators)
-        ret.mActuators.push_back(klass->Clone());
+    for (const auto& klass : mAnimators)
+        ret.mAnimators.push_back(klass->Clone());
     return ret;
 }
 
@@ -205,7 +206,7 @@ AnimationClass& AnimationClass::operator=(const AnimationClass& other)
         return *this;
     AnimationClass copy(other);
     std::swap(mId, copy.mId);
-    std::swap(mActuators, copy.mActuators);
+    std::swap(mAnimators, copy.mAnimators);
     std::swap(mName, copy.mName);
     std::swap(mDuration, copy.mDuration);
     std::swap(mLooping, copy.mLooping);
@@ -218,9 +219,9 @@ Animation::Animation(const std::shared_ptr<const AnimationClass>& klass)
 {
     for (size_t i=0; i< mClass->GetNumAnimators(); ++i)
     {
-        NodeTrack track;
-        track.actuator = mClass->CreateAnimatorInstance(i);
-        track.node     = track.actuator->GetNodeId();
+        AnimatorState track;
+        track.animator = mClass->CreateAnimatorInstance(i);
+        track.node     = track.animator->GetNodeId();
         track.ended    = false;
         track.started  = false;
         mTracks.push_back(std::move(track));
@@ -238,9 +239,9 @@ Animation::Animation(const Animation& other) : mClass(other.mClass)
 {
     for (size_t i=0; i<other.mTracks.size(); ++i)
     {
-        NodeTrack track;
+        AnimatorState track;
         track.node     = other.mTracks[i].node;
-        track.actuator = other.mTracks[i].actuator->Copy();
+        track.animator = other.mTracks[i].animator->Copy();
         track.ended    = other.mTracks[i].ended;
         track.started  = other.mTracks[i].started;
         mTracks.push_back(std::move(track));
@@ -279,8 +280,8 @@ void Animation::Apply(EntityNode& node) const
         if (track.node != node.GetClassId())
             continue;
 
-        const auto start = track.actuator->GetStartTime();
-        const auto len   = track.actuator->GetDuration();
+        const auto start = track.animator->GetStartTime();
+        const auto len   = track.animator->GetDuration();
         const auto end   = math::clamp(0.0f, 1.0f, start + len);
         if (pos < start)
             continue;
@@ -288,18 +289,18 @@ void Animation::Apply(EntityNode& node) const
         {
             if (!track.ended)
             {
-                track.actuator->Finish(node);
+                track.animator->Finish(node);
                 track.ended = true;
             }
             continue;
         }
         if (!track.started)
         {
-            track.actuator->Start(node);
+            track.animator->Start(node);
             track.started = true;
         }
         const auto t = math::clamp(0.0f, 1.0f, (pos - start) / len);
-        track.actuator->Apply(node, t);
+        track.animator->Apply(node, t);
     }
 }
 
@@ -327,40 +328,40 @@ bool Animation::IsComplete() const noexcept
     return false;
 }
 
-Animator* Animation::FindActuatorById(const std::string& id) noexcept
+Animator* Animation::FindAnimatorById(const std::string& id) noexcept
 {
     for (auto& item : mTracks)
     {
-        if (item.actuator->GetClassId() == id)
-            return item.actuator.get();
+        if (item.animator->GetClassId() == id)
+            return item.animator.get();
     }
     return nullptr;
 }
-Animator* Animation::FindActuatorByName(const std::string& name) noexcept
+Animator* Animation::FindAnimatorByName(const std::string& name) noexcept
 {
     for (auto& item : mTracks)
     {
-        if (item.actuator->GetClassName() == name)
-            return item.actuator.get();
+        if (item.animator->GetClassName() == name)
+            return item.animator.get();
     }
     return nullptr;
 }
 
-const Animator* Animation::FindActuatorById(const std::string& id) const noexcept
+const Animator* Animation::FindAnimatorById(const std::string& id) const noexcept
 {
     for (auto& item : mTracks)
     {
-        if (item.actuator->GetClassId() == id)
-            return item.actuator.get();
+        if (item.animator->GetClassId() == id)
+            return item.animator.get();
     }
     return nullptr;
 }
-const Animator* Animation::FindActuatorByName(const std::string& name) const noexcept
+const Animator* Animation::FindAnimatorByName(const std::string& name) const noexcept
 {
     for (auto& item : mTracks)
     {
-        if (item.actuator->GetClassName() == name)
-            return item.actuator.get();
+        if (item.animator->GetClassName() == name)
+            return item.animator.get();
     }
     return nullptr;
 }

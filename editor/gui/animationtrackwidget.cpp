@@ -152,10 +152,10 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace)
     const auto& settings = workspace->GetProjectSettings();
     PopulateFromEnum<game::TransformAnimatorClass::Interpolation>(mUI.transformInterpolation);
     PopulateFromEnum<game::PropertyAnimatorClass::Interpolation>(mUI.setvalInterpolation);
-    PopulateFromEnum<game::PropertyAnimatorClass::ParamName>(mUI.setvalName);
+    PopulateFromEnum<game::PropertyAnimatorClass::PropertyName>(mUI.setvalName);
     PopulateFromEnum<game::KinematicAnimatorClass::Interpolation>(mUI.kinematicInterpolation);
     PopulateFromEnum<game::KinematicAnimatorClass::Target>(mUI.kinematicTarget);
-    PopulateFromEnum<game::BooleanPropertyAnimatorClass::Property>(mUI.itemFlags);
+    PopulateFromEnum<game::BooleanPropertyAnimatorClass::PropertyName>(mUI.itemFlags);
     PopulateFromEnum<game::BooleanPropertyAnimatorClass::PropertyAction>(mUI.flagAction);
     PopulateFromEnum<game::MaterialAnimatorClass::Interpolation >(mUI.materialInterpolation);
     PopulateFromEnum<GridDensity>(mUI.cmbGrid);
@@ -1209,7 +1209,7 @@ void AnimationTrackWidget::SetActuatorUIDefaults()
     SetValue(mUI.transformEndScaleY, 0.0f);
     SetValue(mUI.transformEndRotation, 0.0f);
     SetValue(mUI.setvalInterpolation, game::PropertyAnimatorClass::Interpolation::Cosine);
-    SetValue(mUI.setvalName, game::PropertyAnimatorClass::ParamName::Drawable_TimeScale);
+    SetValue(mUI.setvalName, game::PropertyAnimatorClass::PropertyName::Drawable_TimeScale);
     SetValue(mUI.setvalEndValue, 0.0f);
     SetValue(mUI.kinematicTarget, game::KinematicAnimatorClass::Target::RigidBody);
     SetValue(mUI.kinematicInterpolation, game::KinematicAnimatorClass::Interpolation::Cosine);
@@ -1220,7 +1220,7 @@ void AnimationTrackWidget::SetActuatorUIDefaults()
     SetValue(mUI.kinematicEndAccelY, 0.0f);
     SetValue(mUI.kinematicEndAccelZ, 0.0f);
     SetValue(mUI.materialInterpolation, game::MaterialAnimatorClass::Interpolation::Cosine);
-    SetValue(mUI.itemFlags, game::BooleanPropertyAnimatorClass::Property::Drawable_VisibleInGame);
+    SetValue(mUI.itemFlags, game::BooleanPropertyAnimatorClass::PropertyName::Drawable_VisibleInGame);
     SetValue(mUI.flagAction, game::BooleanPropertyAnimatorClass::PropertyAction::On);
     SetValue(mUI.flagTime, 1.0f);
 
@@ -1258,7 +1258,7 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
     }
     else if (auto* setter = dynamic_cast<game::PropertyAnimatorClass*>(actuator))
     {
-        using Name = game::PropertyAnimatorClass::ParamName;
+        using Name = game::PropertyAnimatorClass::PropertyName;
         const auto name = (Name)GetValue(mUI.setvalName);
         if (name == Name::Drawable_TimeScale)
         {
@@ -1372,7 +1372,7 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
         }
         else BUG("Unhandled value actuator value type.");
         setter->SetInterpolation(GetValue(mUI.setvalInterpolation));
-        setter->SetParamName(name);
+        setter->SetPropertyName(name);
 
         mUI.curve->SetFunction(setter->GetInterpolation());
     }
@@ -1560,8 +1560,8 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
     }
     else if (const auto* ptr = dynamic_cast<const game::PropertyAnimatorClass*>(actuator))
     {
-        const auto name = ptr->GetParamName();
-        using Name = game::PropertyAnimatorClass::ParamName;
+        const auto name = ptr->GetPropertyName();
+        using Name = game::PropertyAnimatorClass::PropertyName;
         if (name == Name::Drawable_TimeScale)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
         else if (name == Name::Drawable_RotationX)
@@ -1609,7 +1609,7 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         else BUG("Unhandled set value actuator value type.");
 
         SetValue(mUI.setvalInterpolation, ptr->GetInterpolation());
-        SetValue(mUI.setvalName, ptr->GetParamName());
+        SetValue(mUI.setvalName, ptr->GetPropertyName());
         mUI.actuatorProperties->setCurrentWidget(mUI.setvalActuator);
 
         mUI.curve->SetFunction(ptr->GetInterpolation());
@@ -2011,7 +2011,7 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::AnimatorClass::Type typ
     }
     else if (type == game::AnimatorClass::Type::PropertyAnimator)
     {
-        using ValName = game::PropertyAnimatorClass::ParamName;
+        using ValName = game::PropertyAnimatorClass::PropertyName;
         const auto value = (ValName)GetValue(mUI.setvalName);
         game::PropertyAnimatorClass klass;
         klass.SetName(name);
@@ -2019,7 +2019,7 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::AnimatorClass::Type typ
         klass.SetFlag(game::AnimatorClass::Flags::StaticInstance, GetValue(mUI.actuatorIsStatic));
         klass.SetStartTime(node_start_time);
         klass.SetDuration(node_duration);
-        klass.SetParamName(GetValue(mUI.setvalName));
+        klass.SetPropertyName(GetValue(mUI.setvalName));
         klass.SetInterpolation(GetValue(mUI.setvalInterpolation));
         if (value == ValName::Drawable_TimeScale)
             klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());

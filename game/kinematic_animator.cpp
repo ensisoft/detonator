@@ -90,12 +90,12 @@ void KinematicAnimator::Start(EntityNode& node)
             mStartAngularVelocity = body->GetAngularVelocity();
             if (body->GetSimulation() == RigidBodyClass::Simulation::Static)
             {
-                WARN("Kinematic actuator can't apply on a static rigid body. [actuator='%1', node='%2']", mClass->GetName(), node.GetName());
+                WARN("Kinematic actuator can't apply on a static rigid body. [animator='%1', node='%2']", mClass->GetName(), node.GetName());
             }
         }
         else
         {
-            WARN("Kinematic animator can't apply on a node without rigid body. [actuator='%1']", mClass->GetName());
+            WARN("Kinematic animator can't apply on a node without rigid body. [animator='%1']", mClass->GetName());
         }
     }
     else if (target == KinematicAnimatorClass::Target::Transformer)
@@ -109,9 +109,9 @@ void KinematicAnimator::Start(EntityNode& node)
         }
         else
         {
-            WARN("Kinematic animator can't apply on a node without a transformer. [actuator='%1']", mClass->GetName());
+            WARN("Kinematic animator can't apply on a node without a transformer. [animator='%1']", mClass->GetName());
         }
-    } else BUG("Missing kinematic actuator target.");
+    } else BUG("Missing kinematic animator target.");
 }
 
 void KinematicAnimator::Apply(EntityNode& node, float t)
@@ -149,7 +149,7 @@ void KinematicAnimator::Apply(EntityNode& node, float t)
             transformer->SetAngularVelocity(angular_velocity);
             transformer->SetAngularAcceleration(angular_acceleration);
         }
-    } else BUG("Missing kinematic actuator target.");
+    } else BUG("Missing kinematic animator target.");
 }
 
 void KinematicAnimator::Finish(EntityNode& node)
@@ -173,7 +173,7 @@ void KinematicAnimator::Finish(EntityNode& node)
             transformer->SetAngularAcceleration(mClass->GetEndAngularAcceleration());
         }
     }
-    else BUG("Missing kinematic actuator target.");
+    else BUG("Missing kinematic animator target.");
 }
 
 } // namespace

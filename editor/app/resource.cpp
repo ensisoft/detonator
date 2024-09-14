@@ -800,8 +800,10 @@ std::unique_ptr<data::Chunk> MigrateResourceDataChunk<game::EntityClass>(std::un
                 if (log)
                     log->Log(resource_id, resource_name, "EntityClass", toString("Animator type mapped from '%1' to '%2'", old_type_string, new_type_string));
             }
-            actuator_meta_chunk->OverwriteChunk("actuator", std::move(actuator_data_chunk));
-            animation_chunk->OverwriteChunk("actuators", std::move(actuator_meta_chunk), i);
+            //actuator_meta_chunk->OverwriteChunk("actuator", std::move(actuator_data_chunk));
+            //animation_chunk->OverwriteChunk("actuators", std::move(actuator_meta_chunk), i);
+            actuator_meta_chunk->GetWriter()->Write("animator", std::move(actuator_data_chunk));
+            animation_chunk->GetWriter()->AppendChunk("animators", std::move(actuator_meta_chunk));
         }
         chunk->OverwriteChunk("tracks", std::move(animation_chunk), i);
     }

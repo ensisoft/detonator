@@ -39,7 +39,7 @@
 #include "game/entity_node_spatial_node.h"
 #include "game/entity_node_fixture.h"
 
-void apply_flag(game::BooleanPropertyAnimatorClass::Property flag,
+void apply_flag(game::BooleanPropertyAnimatorClass::PropertyName flag,
                 game::BooleanPropertyAnimatorClass::PropertyAction action,
                 game::EntityNode& node)
 {
@@ -55,15 +55,15 @@ void apply_flag(game::BooleanPropertyAnimatorClass::Property flag,
     actuator.Finish(node);
 }
 
-void apply_value(game::PropertyAnimatorClass::ParamName name,
-                 game::PropertyAnimatorClass::ParamValue value,
+void apply_value(game::PropertyAnimatorClass::PropertyName name,
+                 game::PropertyAnimatorClass::PropertyValue value,
                  game::EntityNode& node)
 {
     game::PropertyAnimatorClass klass;
     klass.SetNodeId(node.GetClassId());
     klass.SetStartTime(0.1f);
     klass.SetDuration(0.5f);
-    klass.SetParamName(name);
+    klass.SetPropertyName(name);
     klass.SetEndValue(value);
 
     game::PropertyAnimator actuator(klass);
@@ -95,13 +95,13 @@ void unit_test_setflag_actuator()
     klass.SetNodeId("1234");
     klass.SetStartTime(0.1f);
     klass.SetDuration(0.5f);
-    klass.SetFlagName(game::BooleanPropertyAnimatorClass::Property::Drawable_VisibleInGame);
+    klass.SetFlagName(game::BooleanPropertyAnimatorClass::PropertyName::Drawable_VisibleInGame);
     klass.SetFlagAction(game::BooleanPropertyAnimatorClass::PropertyAction::Off);
 
     TEST_REQUIRE(klass.GetNodeId() == "1234");
     TEST_REQUIRE(klass.GetStartTime() == real::float32(0.1f));
     TEST_REQUIRE(klass.GetDuration()  == real::float32(0.5f));
-    TEST_REQUIRE(klass.GetFlagName() == game::BooleanPropertyAnimatorClass::Property::Drawable_VisibleInGame);
+    TEST_REQUIRE(klass.GetFlagName() == game::BooleanPropertyAnimatorClass::PropertyName::Drawable_VisibleInGame);
     TEST_REQUIRE(klass.GetFlagAction() == game::BooleanPropertyAnimatorClass::PropertyAction::Off);
 
     // serialize
@@ -116,7 +116,7 @@ void unit_test_setflag_actuator()
         TEST_REQUIRE(copy.GetNodeId() == "1234");
         TEST_REQUIRE(copy.GetStartTime() == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()  == real::float32(0.5f));
-        TEST_REQUIRE(copy.GetFlagName() == game::BooleanPropertyAnimatorClass::Property::Drawable_VisibleInGame);
+        TEST_REQUIRE(copy.GetFlagName() == game::BooleanPropertyAnimatorClass::PropertyName::Drawable_VisibleInGame);
         TEST_REQUIRE(copy.GetFlagAction() == game::BooleanPropertyAnimatorClass::PropertyAction::Off);
     }
 
@@ -173,15 +173,15 @@ void unit_test_setflag_actuator()
         const auto* text = node.GetTextItem();
 
         // drawable flags.
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_VisibleInGame,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::Drawable_VisibleInGame,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_UpdateDrawable,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::Drawable_UpdateDrawable,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_UpdateMaterial,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::Drawable_UpdateMaterial,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_FlipHorizontally,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::Drawable_FlipHorizontally,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_Restart,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::Drawable_Restart,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::VisibleInGame) == false);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::UpdateDrawable) == false);
@@ -189,15 +189,15 @@ void unit_test_setflag_actuator()
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::FlipHorizontally) == false);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::RestartDrawable) == false);
 
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_VisibleInGame,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::Drawable_VisibleInGame,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_UpdateDrawable,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::Drawable_UpdateDrawable,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_UpdateMaterial,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::Drawable_UpdateMaterial,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_FlipHorizontally,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::Drawable_FlipHorizontally,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::Drawable_Restart,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::Drawable_Restart,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::VisibleInGame)   == true);
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::UpdateDrawable)  == true);
@@ -206,30 +206,30 @@ void unit_test_setflag_actuator()
         TEST_REQUIRE(draw->TestFlag(game::DrawableItem::Flags::RestartDrawable) == true);
 
         // ridig body flags.
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_Bullet,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::RigidBody_Bullet,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_Sensor,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::RigidBody_Sensor,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_Enabled,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::RigidBody_Enabled,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_CanSleep,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::RigidBody_CanSleep,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_DiscardRotation,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::RigidBody_DiscardRotation,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
         TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::Bullet) == false);
         TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::Sensor) == false);
         TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::CanSleep) == false);
         TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::Enabled) == false);
         TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::DiscardRotation) == false);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_Bullet,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::RigidBody_Bullet,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_Sensor,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::RigidBody_Sensor,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_Enabled,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::RigidBody_Enabled,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_CanSleep,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::RigidBody_CanSleep,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::RigidBody_DiscardRotation,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::RigidBody_DiscardRotation,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
         TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::Bullet) == true);
         TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::Sensor) == true);
@@ -238,20 +238,20 @@ void unit_test_setflag_actuator()
         TEST_REQUIRE(body->TestFlag(game::RigidBody::Flags::DiscardRotation) == true);
 
         // text item flags.
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::TextItem_Blink,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::TextItem_Blink,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::TextItem_Underline,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::TextItem_Underline,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::TextItem_VisibleInGame,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::TextItem_VisibleInGame,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Off, node);
         TEST_REQUIRE(text->TestFlag(game::TextItemClass::Flags::BlinkText) == false);
         TEST_REQUIRE(text->TestFlag(game::TextItemClass::Flags::UnderlineText) == false);
         TEST_REQUIRE(text->TestFlag(game::TextItemClass::Flags::VisibleInGame) == false);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::TextItem_Blink,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::TextItem_Blink,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::TextItem_Underline,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::TextItem_Underline,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
-        apply_flag(game::BooleanPropertyAnimatorClass::Property::TextItem_VisibleInGame,
+        apply_flag(game::BooleanPropertyAnimatorClass::PropertyName::TextItem_VisibleInGame,
                    game::BooleanPropertyAnimatorClass::PropertyAction::Toggle, node);
         TEST_REQUIRE(text->TestFlag(game::TextItemClass::Flags::BlinkText) == true);
         TEST_REQUIRE(text->TestFlag(game::TextItemClass::Flags::UnderlineText) == true);
@@ -269,7 +269,7 @@ void unit_test_setval_actuator()
     klass.SetStartTime(0.1f);
     klass.SetDuration(0.5f);
     klass.SetInterpolation(game::PropertyAnimatorClass::Interpolation::Cosine);
-    klass.SetParamName(game::PropertyAnimatorClass::ParamName::RigidBody_LinearVelocity);
+    klass.SetPropertyName(game::PropertyAnimatorClass::PropertyName::RigidBody_LinearVelocity);
     klass.SetEndValue(glm::vec2(2.0f, -3.0f));
 
     // serialize.
@@ -283,7 +283,7 @@ void unit_test_setval_actuator()
         TEST_REQUIRE(copy.GetNodeId()        == "1234");
         TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()      == real::float32(0.5f));
-        TEST_REQUIRE(copy.GetParamName() == game::PropertyAnimatorClass::ParamName::RigidBody_LinearVelocity);
+        TEST_REQUIRE(copy.GetPropertyName() == game::PropertyAnimatorClass::PropertyName::RigidBody_LinearVelocity);
         TEST_REQUIRE(*copy.GetEndValue<glm::vec2>() == glm::vec2(2.0f, -3.0f));
         TEST_REQUIRE(copy.GetId() == klass.GetId());
         TEST_REQUIRE(copy.GetHash() == klass.GetHash());
@@ -297,7 +297,7 @@ void unit_test_setval_actuator()
         TEST_REQUIRE(copy.GetNodeId()        == "1234");
         TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));
         TEST_REQUIRE(copy.GetDuration()      == real::float32(0.5f));
-        TEST_REQUIRE(copy.GetParamName() == game::PropertyAnimatorClass::ParamName::RigidBody_LinearVelocity);
+        TEST_REQUIRE(copy.GetPropertyName() == game::PropertyAnimatorClass::PropertyName::RigidBody_LinearVelocity);
         TEST_REQUIRE(*copy.GetEndValue<glm::vec2>() == glm::vec2(2.0f, -3.0f));
         TEST_REQUIRE(copy.GetId() == klass.GetId());
         TEST_REQUIRE(copy.GetHash() == klass.GetHash());
@@ -335,11 +335,11 @@ void unit_test_setval_actuator()
 
         game::EntityNode node(node_klass);
 
-        apply_value(game::PropertyAnimatorClass::ParamName::Drawable_TimeScale, 2.0f, node);
-        apply_value(game::PropertyAnimatorClass::ParamName::RigidBody_LinearVelocity, glm::vec2(-1.0f, -1.0f), node);
-        apply_value(game::PropertyAnimatorClass::ParamName::RigidBody_AngularVelocity, 4.0f, node);
-        apply_value(game::PropertyAnimatorClass::ParamName::TextItem_Text, std::string("hello"), node);
-        apply_value(game::PropertyAnimatorClass::ParamName::TextItem_Color, game::Color::Blue, node);
+        apply_value(game::PropertyAnimatorClass::PropertyName::Drawable_TimeScale, 2.0f, node);
+        apply_value(game::PropertyAnimatorClass::PropertyName::RigidBody_LinearVelocity, glm::vec2(-1.0f, -1.0f), node);
+        apply_value(game::PropertyAnimatorClass::PropertyName::RigidBody_AngularVelocity, 4.0f, node);
+        apply_value(game::PropertyAnimatorClass::PropertyName::TextItem_Text, std::string("hello"), node);
+        apply_value(game::PropertyAnimatorClass::PropertyName::TextItem_Color, game::Color::Blue, node);
 
         const auto* draw = node.GetDrawable();
         const auto* body = node.GetRigidBody();
