@@ -466,7 +466,7 @@ namespace app
         // This stub does nothing and returns the original chunk. Resources that
         // require this functionality should then have a specialization of this stub.
         template<typename ResourceType> inline
-        std::unique_ptr<data::Reader> MigrateResourceDataChunk(std::unique_ptr<data::Reader> chunk, MigrationLog* log)
+        std::unique_ptr<data::Chunk> MigrateResourceDataChunk(std::unique_ptr<data::Chunk> chunk, MigrationLog* log)
         { return chunk; }
 
         template<typename ResourceType> inline
