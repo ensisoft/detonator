@@ -252,12 +252,25 @@ bool JsonReadSafe(const nlohmann::json& json, const char* name, Color4f* color)
 
 bool JsonReadSafe(const nlohmann::json& json, const char* name, Rotator* rotator)
 {
-    glm::quat quaternion;
-    if (!JsonReadSafe(json, name, &quaternion))
-        return false;
+    // the underlying implementation has changed from quaternion
+    // to vec3 because the quaternion can't store arbitrary angles
+    // such as 450 deg.
 
-    *rotator = Rotator(quaternion);
-    return true;
+    // we check the quaternion here for backwards compatibility
+    glm::quat quaternion;
+    if (JsonReadSafe(json, name, &quaternion))
+    {
+        *rotator = Rotator(quaternion);
+        return true;
+    }
+
+    glm::vec3 vector;
+    if (JsonReadSafe(json, name, &vector))
+    {
+        *rotator = Rotator(vector);
+        return true;
+    }
+    return false;
 }
 
 bool JsonReadSafe(const nlohmann::json& value, double* out)
@@ -465,7 +478,7 @@ void JsonWrite(nlohmann::json& json, const char* name, const Color4f& color)
 }
 void JsonWrite(nlohmann::json& json, const char* name, const Rotator& rotator)
 {
-    JsonWrite(json, name, rotator.GetAsQuaternion());
+    JsonWrite(json, name, rotator.ToVector());
 }
 
 void JsonWrite(nlohmann::json& json, const char* name, const nlohmann::json& js)
