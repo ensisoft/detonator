@@ -76,6 +76,10 @@ end
 -- Called on mouse button release events.
 function OnMouseRelease(phys_test_5, mouse)
 
+    if _mouse_pos == nil then
+        return
+    end
+
     local found = Physics:RayCast(Physics:MapVectorFromGame(_mouse_down),
                                   Physics:MapVectorFromGame(_mouse_pos),
                                   _raycast_mode)
