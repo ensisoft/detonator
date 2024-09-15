@@ -122,4 +122,7 @@ namespace game
         float mStartAngularAcceleration = 0.0f;
     };
 
+    ANIMATOR_INSTANCE_CASTING_MACROS(KinematicAnimator, Animator::Type::KinematicAnimator)
+    ANIMATOR_CLASS_CASTING_MACROS(KinematicAnimatorClass, Animator::Type::KinematicAnimator)
+
 } // namespace

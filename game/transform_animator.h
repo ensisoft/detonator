@@ -22,7 +22,6 @@
 #  include <glm/vec2.hpp>
 #include "warnpop.h"
 
-
 #include "game/animator_base.h"
 
 #include "base/snafu.h"
@@ -142,4 +141,9 @@ namespace game
         glm::vec2 mStartScale = {1.0f, 1.0f};
         float mStartRotation  = 0.0f;
     };
+
+
+    ANIMATOR_INSTANCE_CASTING_MACROS(TransformAnimator, Animator::Type::TransformAnimator)
+    ANIMATOR_CLASS_CASTING_MACROS(TransformAnimatorClass, Animator::Type::TransformAnimator)
+
 } // namespace

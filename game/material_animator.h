@@ -132,5 +132,7 @@ namespace game
         MaterialParamMap mStartValues;
     };
 
+    ANIMATOR_INSTANCE_CASTING_MACROS(MaterialAnimator, Animator::Type::MaterialAnimator)
+    ANIMATOR_CLASS_CASTING_MACROS(MaterialAnimatorClass, Animator::Type::MaterialAnimator)
 
 } // namespace
