@@ -1027,9 +1027,9 @@ void PhysicsEngine::UpdateWorld(const glm::mat4& entity_to_world, const game::En
                 auto* game_joint = (RigidBodyJoint*)joint->GetUserData().pointer;
                 if (game_joint->CanSettingsChangeRuntime())
                 {
-                    for (size_t i=0; i<game_joint->GetNumPendingSettings(); ++i)
+                    for (size_t i=0; i<game_joint->GetNumPendingAdjustments(); ++i)
                     {
-                        const auto* setting = game_joint->GetPendingSetting(i);
+                        const auto* setting = game_joint->GetPendingAdjustment(i);
 
                         bool ok = true;
 
@@ -1077,12 +1077,15 @@ void PhysicsEngine::UpdateWorld(const glm::mat4& entity_to_world, const game::En
                         }
                     }
                 }
-                else if (game_joint->HasPendingSettings())
+                else if (game_joint->HasPendingAdjustments())
                 {
                     WARN("Physics joint settings are ignored since joint is statically configured. [entity='%1', joint='%2']",
                          phys_node->debug_name, game_joint->GetName());
+
                 }
-                game_joint->ClearPendingSettings();
+                // the pending adjustments now become the current values.
+                game_joint->RealizePendingAdjustments();
+                game_joint->ClearPendingAdjustments();
 
                 joint_list = joint_list->next;
             }
@@ -1165,6 +1168,68 @@ void PhysicsEngine::UpdateEntity(const glm::mat4& model_to_world, Entity& entity
             // (except when the parent is the scene root)
             rigid_body->SetLinearVelocity(glm::vec2(linear_velocity.x, linear_velocity.y));
             rigid_body->SetAngularVelocity(angular_velocity);
+
+            // in order to support joint animation we must make the current
+            // joint values available in the rigid body joint so the
+            // animation system can change the values properly.
+
+            // we don't actually need this block right now since the only
+            // way to change joint settings is by using the adjust joint
+            // settings API in the joint class. That means that when the
+            // adjustments are realized they become the current values
+            // and they remain current until any other adjustment is done
+            // thus there's no need to update the current values dynamically
+            // continuously. Only if something else would be allowed to
+            // change the settings then we'd need this.
+#if 0
+            const b2JointEdge* joint_list = world_body->GetJointList();
+            while (joint_list)
+            {
+                const b2Joint* joint = joint_list->joint;
+
+                const auto type = joint->GetType();
+
+                auto* dst = (RigidBodyJoint*)joint->GetUserData().pointer;
+                if (dst->CanSettingsChangeRuntime())
+                {
+                    if (type == e_revoluteJoint)
+                    {
+                        const auto* src = static_cast<const b2RevoluteJoint*>(joint);
+                        dst->UpdateCurrentJointValue(RigidBodyJointSetting::EnableMotor, src->IsMotorEnabled());
+                        dst->UpdateCurrentJointValue(RigidBodyJointSetting::EnableLimit, src->IsLimitEnabled());
+                        dst->UpdateCurrentJointValue(RigidBodyJointSetting::MotorTorque, src->GetMaxMotorTorque());
+                        dst->UpdateCurrentJointValue(RigidBodyJointSetting::MotorSpeed, src->GetMotorSpeed());
+                    }
+                    else if (type == e_prismaticJoint)
+                    {
+                        const auto* src = static_cast<const b2PrismaticJoint*>(joint);
+                        dst->UpdateCurrentJointValue(RigidBodyJointSetting::EnableMotor, src->IsMotorEnabled());
+                        dst->UpdateCurrentJointValue(RigidBodyJointSetting::EnableLimit, src->IsLimitEnabled());
+                        dst->UpdateCurrentJointValue(RigidBodyJointSetting::MotorTorque, src->GetMaxMotorForce());
+                        dst->UpdateCurrentJointValue(RigidBodyJointSetting::MotorSpeed, src->GetMotorSpeed());
+                    }
+                    else if (type == e_motorJoint)
+                    {
+                        const auto* src = static_cast<const b2MotorJoint*>(joint);
+                        dst->UpdateCurrentJointValue(RigidBodyJointSetting::MotorForce, src->GetMaxForce());
+                        dst->UpdateCurrentJointValue(RigidBodyJointSetting::MotorTorque, src->GetMaxTorque());
+                    }
+                    else if (type == e_distanceJoint)
+                    {
+                        const auto* src = static_cast<const b2DistanceJoint*>(joint);
+                        dst->UpdateCurrentJointValue(RigidBodyJointSetting::Stiffness, src->GetStiffness());
+                        dst->UpdateCurrentJointValue(RigidBodyJointSetting::Damping, src->GetDamping());
+                    }
+                    else if (type == e_weldJoint)
+                    {
+                        const auto* src = static_cast<const b2WeldJoint*>(joint);
+                        dst->UpdateCurrentJointValue(RigidBodyJointSetting::Stiffness, src->GetStiffness());
+                        dst->UpdateCurrentJointValue(RigidBodyJointSetting::Damping, src->GetDamping());
+                    }
+                }
+            }
+#endif
+
         }
         virtual void LeaveNode(EntityNode* node) override
         {
@@ -1472,6 +1537,12 @@ void PhysicsEngine::AddEntity(const glm::mat4& entity_to_world, const Entity& en
 
         DEBUG("Created new physics joint. [entity='%1', type=%2, joint='%3', node='%4', node='%5']",
               entity.GetDebugName(), joint.GetType(), joint.GetName(), src_node->GetName(), dst_node->GetName());
+
+        // If the joint supports changing the settings at runtime
+        // dynamically after the joint has been created then fill
+        // out the current (same as initial) values in the current
+        // joint setting values.
+        joint.InitializeCurrentValues();
     }
 }
 
