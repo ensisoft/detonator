@@ -1035,44 +1035,44 @@ void PhysicsEngine::UpdateWorld(const glm::mat4& entity_to_world, const game::En
 
                         if (setting->setting == RigidBodyJoint::JointSetting::EnableMotor)
                         {
-                            ok &= MaybeSetJointValue<b2PrismaticJoint, bool, e_prismaticJoint>(joint, &b2PrismaticJoint::EnableMotor, setting->value);
-                            ok &= MaybeSetJointValue<b2RevoluteJoint,  bool, e_revoluteJoint>(joint, &b2RevoluteJoint::EnableMotor, setting->value);
+                            ok = MaybeSetJointValue<b2PrismaticJoint, bool, e_prismaticJoint>(joint, &b2PrismaticJoint::EnableMotor, setting->value) ||
+                                 MaybeSetJointValue<b2RevoluteJoint,  bool, e_revoluteJoint>(joint, &b2RevoluteJoint::EnableMotor, setting->value);
                         }
                         else if (setting->setting == RigidBodyJoint::JointSetting::EnableLimit)
                         {
-                            ok &= MaybeSetJointValue<b2PrismaticJoint, bool, e_prismaticJoint>(joint, &b2PrismaticJoint::EnableLimit, setting->value);
-                            ok &= MaybeSetJointValue<b2RevoluteJoint,  bool, e_revoluteJoint>(joint, &b2RevoluteJoint::EnableLimit, setting->value);
+                            ok = MaybeSetJointValue<b2PrismaticJoint, bool, e_prismaticJoint>(joint, &b2PrismaticJoint::EnableLimit, setting->value) ||
+                                 MaybeSetJointValue<b2RevoluteJoint,  bool, e_revoluteJoint>(joint, &b2RevoluteJoint::EnableLimit, setting->value);
                         }
                         else if (setting->setting == RigidBodyJoint::JointSetting::MotorTorque)
                         {
-                            ok &= MaybeSetJointValue<b2RevoluteJoint, float, e_revoluteJoint>(joint, &b2RevoluteJoint::SetMaxMotorTorque, setting->value);
-                            // this seems actually it's torque (according to b2_prismatic_joint header)
-                            ok &= MaybeSetJointValue<b2PrismaticJoint, float, e_prismaticJoint>(joint, &b2PrismaticJoint::SetMaxMotorForce, setting->value);
-                            ok &= MaybeSetJointValue<b2MotorJoint, float, e_motorJoint>(joint, &b2MotorJoint::SetMaxTorque, setting->value);
+                            ok = MaybeSetJointValue<b2RevoluteJoint, float, e_revoluteJoint>(joint, &b2RevoluteJoint::SetMaxMotorTorque, setting->value) ||
+                                 MaybeSetJointValue<b2PrismaticJoint, float, e_prismaticJoint>(joint, &b2PrismaticJoint::SetMaxMotorForce, setting->value) || // this seems actually it's torque (according to b2_prismatic_joint header)
+                                 MaybeSetJointValue<b2MotorJoint, float, e_motorJoint>(joint, &b2MotorJoint::SetMaxTorque, setting->value);
                         }
                         else if (setting->setting == RigidBodyJoint::JointSetting::MotorSpeed)
                         {
-                            ok &= MaybeSetJointValue<b2PrismaticJoint, float, e_prismaticJoint>(joint, &b2PrismaticJoint::SetMotorSpeed, setting->value);
-                            ok &= MaybeSetJointValue<b2RevoluteJoint,  float, e_revoluteJoint>(joint, &b2RevoluteJoint::SetMotorSpeed, setting->value);
+                            ok = MaybeSetJointValue<b2PrismaticJoint, float, e_prismaticJoint>(joint, &b2PrismaticJoint::SetMotorSpeed, setting->value) ||
+                                 MaybeSetJointValue<b2RevoluteJoint,  float, e_revoluteJoint>(joint, &b2RevoluteJoint::SetMotorSpeed, setting->value);
                         }
                         else if (setting->setting == RigidBodyJoint::JointSetting::MotorForce)
                         {
-                            ok &= MaybeSetJointValue<b2MotorJoint, float, e_motorJoint>(joint, &b2MotorJoint::SetMaxForce, setting->value);
+                            ok = MaybeSetJointValue<b2MotorJoint, float, e_motorJoint>(joint, &b2MotorJoint::SetMaxForce, setting->value);
                         }
                         else if(setting->setting == RigidBodyJoint::JointSetting::Stiffness)
                         {
-                            ok &= MaybeSetJointValue<b2WeldJoint, float, e_weldJoint>(joint, &b2WeldJoint::SetStiffness, setting->value);
-                            ok &= MaybeSetJointValue<b2DistanceJoint, float, e_distanceJoint>(joint, &b2DistanceJoint::SetStiffness, setting->value);
+                            ok = MaybeSetJointValue<b2WeldJoint, float, e_weldJoint>(joint, &b2WeldJoint::SetStiffness, setting->value) ||
+                                 MaybeSetJointValue<b2DistanceJoint, float, e_distanceJoint>(joint, &b2DistanceJoint::SetStiffness, setting->value);
                         }
                         else if (setting->setting == RigidBodyJoint::JointSetting::Damping)
                         {
-                            ok &= MaybeSetJointValue<b2WeldJoint, float, e_weldJoint>(joint, &b2WeldJoint::SetDamping, setting->value);
-                            ok &= MaybeSetJointValue<b2DistanceJoint, float, e_distanceJoint>(joint, &b2DistanceJoint::SetDamping, setting->value);
+                            ok = MaybeSetJointValue<b2WeldJoint, float, e_weldJoint>(joint, &b2WeldJoint::SetDamping, setting->value) ||
+                                 MaybeSetJointValue<b2DistanceJoint, float, e_distanceJoint>(joint, &b2DistanceJoint::SetDamping, setting->value);
+
                         } else BUG("Missing joint setting.");
 
                         if (!ok)
                         {
-                            WARN("Failed to apply change on physics joint setting(s). [entity='%1', joint='%2', setting='%2']",
+                            WARN("Failed to apply change on physics joint setting(s). [entity='%1', joint='%2', setting='%3']",
                                  phys_node->debug_name,  game_joint->GetName(), setting->setting);
                         }
                     }
