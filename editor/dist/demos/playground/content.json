@@ -48,7 +48,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -156,7 +155,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -338,7 +336,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -512,7 +509,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -627,7 +623,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -713,7 +708,7 @@
           "dst_node_id": "QeRCmrPDmR",
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "nkfj8s40v3",
           "max_dist": 500.0,
@@ -760,7 +755,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -832,7 +826,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -1071,7 +1064,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -1165,7 +1157,7 @@
           "enable_motor": false,
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "3DWmA9PWHP",
           "lower_angle_limit": 0.0,
@@ -1190,7 +1182,7 @@
           "enable_motor": false,
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "bS2ZegyFG1",
           "lower_angle_limit": 0.0,
@@ -1215,7 +1207,7 @@
           "enable_motor": false,
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "q97k7q2RqA",
           "lower_angle_limit": 0.0,
@@ -1240,7 +1232,7 @@
           "enable_motor": false,
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "gbTaQAYmPA",
           "lower_angle_limit": 0.0,
@@ -1265,7 +1257,7 @@
           "enable_motor": false,
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "UXMMZtNHwY",
           "lower_angle_limit": 0.0,
@@ -1290,7 +1282,7 @@
           "enable_motor": false,
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "H06lTh2hxf",
           "lower_angle_limit": 0.0,
@@ -1338,7 +1330,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -1410,7 +1401,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -1482,7 +1472,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -1554,7 +1543,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -1626,7 +1614,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -1698,7 +1685,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -1770,7 +1756,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -1880,7 +1865,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -1935,7 +1919,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -1990,7 +1973,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -2045,7 +2027,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -2100,7 +2081,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -2155,7 +2135,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -2210,7 +2189,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -2265,7 +2243,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -2320,7 +2297,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -2493,7 +2469,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -2563,7 +2538,7 @@
           "enable_motor": false,
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "av6TZJW3WU",
           "lower_angle_limit": 0.0,
@@ -2588,7 +2563,7 @@
           "enable_motor": false,
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "Uth9FC4Tiz",
           "lower_angle_limit": 0.0,
@@ -2613,7 +2588,7 @@
           "enable_motor": false,
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "txotFW9rid",
           "lower_angle_limit": 0.0,
@@ -2638,7 +2613,7 @@
           "enable_motor": false,
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "4JjO11hJSb",
           "lower_angle_limit": 0.0,
@@ -2663,7 +2638,7 @@
           "enable_motor": false,
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "aJbYZ8zmlj",
           "lower_angle_limit": 0.0,
@@ -2688,7 +2663,7 @@
           "enable_motor": false,
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "ORy0wX2Ipj",
           "lower_angle_limit": 0.0,
@@ -2713,7 +2688,7 @@
           "enable_motor": false,
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "hpDFj6JA1E",
           "lower_angle_limit": 0.0,
@@ -2761,7 +2736,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -2833,7 +2807,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -2905,7 +2878,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -2977,7 +2949,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -3049,7 +3020,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -3121,7 +3091,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -3193,7 +3162,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -3248,7 +3216,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -3303,7 +3270,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -3379,7 +3345,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -3451,7 +3416,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -3523,7 +3487,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -3578,7 +3541,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -3633,7 +3595,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -3705,7 +3666,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -3777,7 +3737,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -3849,7 +3808,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -3921,7 +3879,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -4121,7 +4078,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -4267,7 +4223,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -4339,7 +4294,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -4411,7 +4365,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -4483,7 +4436,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -4555,7 +4507,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -4627,7 +4578,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -4699,7 +4649,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -4771,7 +4720,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -4826,7 +4774,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -4881,7 +4828,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -4936,7 +4882,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -4991,7 +4936,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -5046,7 +4990,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -5101,7 +5044,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -5156,7 +5098,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -5211,7 +5152,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -5266,7 +5206,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -5480,7 +5419,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -5552,7 +5490,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -5624,7 +5561,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -5696,7 +5632,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -5768,7 +5703,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -5840,7 +5774,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -5895,7 +5828,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -5950,7 +5882,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -6005,7 +5936,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -6060,7 +5990,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -6115,7 +6044,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -6261,7 +6189,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -6333,7 +6260,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -6405,7 +6331,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -6477,7 +6402,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -6549,7 +6473,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -6621,7 +6544,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -6693,7 +6615,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -6765,7 +6686,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -6837,7 +6757,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -6909,7 +6828,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -6981,7 +6899,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -7053,7 +6970,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -7125,7 +7041,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -7197,7 +7112,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -7269,7 +7183,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -7341,7 +7254,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -7413,7 +7325,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -7485,7 +7396,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -7557,7 +7467,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -7629,7 +7538,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -7701,7 +7609,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -7773,7 +7680,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -7845,7 +7751,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -7917,7 +7822,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -7989,7 +7893,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -8061,7 +7964,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -8133,7 +8035,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -8205,7 +8106,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -8277,7 +8177,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -8349,7 +8248,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -8421,7 +8319,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -8493,7 +8390,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -8565,7 +8461,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -8637,7 +8532,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -8709,7 +8603,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -8781,7 +8674,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -8891,7 +8783,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -8946,7 +8837,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -9001,7 +8891,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -9056,7 +8945,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -9111,7 +8999,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -9166,7 +9053,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -9221,7 +9107,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -9276,7 +9161,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -9331,7 +9215,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -9386,7 +9269,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -9685,7 +9567,7 @@
           "dst_node_id": "EvvsEwsUZM",
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "5QmO9jLybw",
           "max_dist": 2.799999952316284,
@@ -9732,7 +9614,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -9812,7 +9693,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -9920,7 +9800,7 @@
           "enable_motor": true,
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "DemNDZBaWv",
           "lower_angle_limit": 0.6108652353286743,
@@ -9968,7 +9848,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -10040,7 +9919,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -10112,7 +9990,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -10167,7 +10044,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -10222,7 +10098,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -10328,7 +10203,7 @@
           "dst_node_id": "H40xKvd4rk",
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "1OeHqsJRLq",
           "name": "joint",
@@ -10373,7 +10248,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -10445,7 +10319,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -10538,7 +10411,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -10610,7 +10482,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -10732,7 +10603,7 @@
           "dst_node_id": "AZh8a3T2lU",
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "seyJP9CulZ",
           "name": "joint",
@@ -10777,7 +10648,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -10849,7 +10719,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -10958,7 +10827,7 @@
           "enable_motor": true,
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "ImlORfg7Nf",
           "lower_limit": 1.5,
@@ -11006,7 +10875,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -11078,7 +10946,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -11184,7 +11051,7 @@
           "dst_node_id": "oSRr4BjhzU",
           "flags": {
             "CollideConnected": false,
-            "EnableRuntimeSettings": false
+            "StaticSettings": true
           },
           "id": "rBgaAkQnnB",
           "max_force": 5.0,
@@ -11230,7 +11097,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -11302,7 +11168,6 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 1.0,
               "x": 0.0,
               "y": 0.0,
               "z": 0.0
@@ -11397,8 +11262,1249 @@
         "WantsKeyEvents": false,
         "WantsMouseEvents": false
       },
-      "id": "5uDea9Wvry",
+      "id": "00QMHmSzSt",
       "idle_track": "",
+      "joints": [
+        {
+          "dst_node_anchor_point": {
+            "x": -1.4199999570846558,
+            "y": -16.389999389648438
+          },
+          "dst_node_id": "ddJ4rw6zYn",
+          "enable_limit": false,
+          "enable_motor": false,
+          "flags": {
+            "CollideConnected": false,
+            "StaticSettings": true
+          },
+          "id": "NGrhhjjhqJ",
+          "lower_angle_limit": 0.0,
+          "motor_speed": 0.0,
+          "motor_torque": 0.0,
+          "name": "My Joint",
+          "src_node_anchor_point": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "src_node_id": "AYzXdMzYdx",
+          "type": "Revolute",
+          "upper_angle_limit": 0.0
+        },
+        {
+          "dst_node_anchor_point": {
+            "x": 1.3300000429153442,
+            "y": -14.59000015258789
+          },
+          "dst_node_id": "eJsphM3OiE",
+          "enable_limit": false,
+          "enable_motor": false,
+          "flags": {
+            "CollideConnected": false,
+            "StaticSettings": true
+          },
+          "id": "JaHzRNneKs",
+          "lower_angle_limit": 0.0,
+          "motor_speed": 0.0,
+          "motor_torque": 0.0,
+          "name": "My Joint",
+          "src_node_anchor_point": {
+            "x": 0.8600000143051147,
+            "y": 16.81999969482422
+          },
+          "src_node_id": "ddJ4rw6zYn",
+          "type": "Revolute",
+          "upper_angle_limit": 0.0
+        },
+        {
+          "dst_node_anchor_point": {
+            "x": 2.5999999046325684,
+            "y": -16.610000610351563
+          },
+          "dst_node_id": "v87llCMg4m",
+          "enable_limit": false,
+          "enable_motor": false,
+          "flags": {
+            "CollideConnected": false,
+            "StaticSettings": true
+          },
+          "id": "C20p7MWXYi",
+          "lower_angle_limit": 0.0,
+          "motor_speed": 0.0,
+          "motor_torque": 0.0,
+          "name": "My Joint",
+          "src_node_anchor_point": {
+            "x": 2.069999933242798,
+            "y": 16.649999618530273
+          },
+          "src_node_id": "eJsphM3OiE",
+          "type": "Revolute",
+          "upper_angle_limit": 0.0
+        },
+        {
+          "dst_node_anchor_point": {
+            "x": 1.899999976158142,
+            "y": -17.079999923706055
+          },
+          "dst_node_id": "ekJ9ylb4XR",
+          "enable_limit": false,
+          "enable_motor": false,
+          "flags": {
+            "CollideConnected": false,
+            "StaticSettings": true
+          },
+          "id": "I81wK5Xgdg",
+          "lower_angle_limit": 0.0,
+          "motor_speed": 0.0,
+          "motor_torque": 0.0,
+          "name": "My Joint",
+          "src_node_anchor_point": {
+            "x": 1.090000033378601,
+            "y": 14.8100004196167
+          },
+          "src_node_id": "v87llCMg4m",
+          "type": "Revolute",
+          "upper_angle_limit": 0.0
+        },
+        {
+          "dst_node_anchor_point": {
+            "x": 2.1600000858306885,
+            "y": -14.329999923706055
+          },
+          "dst_node_id": "WWArn4NXof",
+          "enable_limit": false,
+          "enable_motor": false,
+          "flags": {
+            "CollideConnected": false,
+            "StaticSettings": true
+          },
+          "id": "bhRTYUrE5X",
+          "lower_angle_limit": 0.0,
+          "motor_speed": 0.0,
+          "motor_torque": 0.0,
+          "name": "My Joint",
+          "src_node_anchor_point": {
+            "x": 2.119999885559082,
+            "y": 18.549999237060547
+          },
+          "src_node_id": "ekJ9ylb4XR",
+          "type": "Revolute",
+          "upper_angle_limit": 0.0
+        },
+        {
+          "dst_node_anchor_point": {
+            "x": 0.6600000262260437,
+            "y": -17.040000915527344
+          },
+          "dst_node_id": "YqP8M2Qg5u",
+          "enable_limit": false,
+          "enable_motor": false,
+          "flags": {
+            "CollideConnected": false,
+            "StaticSettings": true
+          },
+          "id": "tbgvk2qwKe",
+          "lower_angle_limit": 0.0,
+          "motor_speed": 0.0,
+          "motor_torque": 0.0,
+          "name": "My Joint",
+          "src_node_anchor_point": {
+            "x": 2.7899999618530273,
+            "y": 17.790000915527344
+          },
+          "src_node_id": "WWArn4NXof",
+          "type": "Revolute",
+          "upper_angle_limit": 0.0
+        },
+        {
+          "dst_node_anchor_point": {
+            "x": 0.9300000071525574,
+            "y": -16.559999465942383
+          },
+          "dst_node_id": "e4R3T3zwtn",
+          "enable_limit": false,
+          "enable_motor": false,
+          "flags": {
+            "CollideConnected": false,
+            "StaticSettings": true
+          },
+          "id": "NaQwlx9TUq",
+          "lower_angle_limit": 0.0,
+          "motor_speed": 0.0,
+          "motor_torque": 0.0,
+          "name": "My Joint",
+          "src_node_anchor_point": {
+            "x": 2.069999933242798,
+            "y": 16.059999465942383
+          },
+          "src_node_id": "YqP8M2Qg5u",
+          "type": "Revolute",
+          "upper_angle_limit": 0.0
+        },
+        {
+          "dst_node_anchor_point": {
+            "x": 1.7200000286102295,
+            "y": -15.470000267028809
+          },
+          "dst_node_id": "Y2TTpsELiu",
+          "enable_limit": false,
+          "enable_motor": false,
+          "flags": {
+            "CollideConnected": false,
+            "StaticSettings": true
+          },
+          "id": "IFuzf3sgB4",
+          "lower_angle_limit": 0.0,
+          "motor_speed": 0.0,
+          "motor_torque": 0.0,
+          "name": "My Joint",
+          "src_node_anchor_point": {
+            "x": 0.9700000286102295,
+            "y": 16.829999923706055
+          },
+          "src_node_id": "e4R3T3zwtn",
+          "type": "Revolute",
+          "upper_angle_limit": 0.0
+        },
+        {
+          "dst_node_anchor_point": {
+            "x": -4.320000171661377,
+            "y": -29.729999542236328
+          },
+          "dst_node_id": "Fogdqf6asE",
+          "enable_limit": false,
+          "enable_motor": false,
+          "flags": {
+            "CollideConnected": false,
+            "StaticSettings": true
+          },
+          "id": "GCDTRJWPHi",
+          "lower_angle_limit": 0.0,
+          "motor_speed": 0.0,
+          "motor_torque": 0.0,
+          "name": "My Joint",
+          "src_node_anchor_point": {
+            "x": -1.0,
+            "y": 20.09000015258789
+          },
+          "src_node_id": "Y2TTpsELiu",
+          "type": "Revolute",
+          "upper_angle_limit": 0.0
+        }
+      ],
+      "lifetime": 0.0,
+      "name": "DETONATOR On Chain",
+      "nodes": [
+        {
+          "class": "zzSLz7poNs",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 2,
+            "linewidth": 1.0,
+            "material": "sCQDCzRWej",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Perspective",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": 0.767944872379303,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "text",
+          "position": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 578.0,
+            "y": 122.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "LFLMl5LQYE",
+          "drawable_item": {
+            "depth": 75.0,
+            "drawable": "_cube",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 1,
+            "linewidth": 1.0,
+            "material": "isAzfBPIpr",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Perspective",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": 0.767944872379303,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "block",
+          "position": {
+            "x": 9.62713623046875,
+            "y": 8.966636657714844
+          },
+          "rotation": 0.06727147102355957,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 525.4000244140625,
+            "y": 131.97000122070313
+          },
+          "tag": ""
+        },
+        {
+          "class": "Fogdqf6asE",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": 10.0,
+            "y": 330.0
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 1.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "polygon": "",
+            "restitution": 0.5,
+            "shape": "Box",
+            "simulation": "Dynamic"
+          },
+          "rotation": 0.8212844133377075,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 468.453857421875,
+            "y": 102.45948791503906
+          },
+          "tag": ""
+        },
+        {
+          "class": "AYzXdMzYdx",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "_circle",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "_Silver",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Chain",
+          "position": {
+            "x": 0.0,
+            "y": -350.0
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 1.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "polygon": "",
+            "restitution": 0.5,
+            "shape": "Box",
+            "simulation": "Static"
+          },
+          "rotation": -0.9166468977928162,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 24.0,
+            "y": 23.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "ddJ4rw6zYn",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "j2ofYbIJ19",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Link 0",
+          "position": {
+            "x": 0.05000000074505806,
+            "y": 31.860000610351563
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 30.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "polygon": "",
+            "restitution": 0.5,
+            "shape": "Box",
+            "simulation": "Dynamic"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 20.0,
+            "y": 40.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "eJsphM3OiE",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "j2ofYbIJ19",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Link1 ",
+          "position": {
+            "x": 0.5,
+            "y": 70.5
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 30.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "polygon": "",
+            "restitution": 0.5,
+            "shape": "Box",
+            "simulation": "Dynamic"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 20.0,
+            "y": 40.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "v87llCMg4m",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "j2ofYbIJ19",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Link 3",
+          "position": {
+            "x": 0.5,
+            "y": 110.5
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 30.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "polygon": "",
+            "restitution": 0.5,
+            "shape": "Box",
+            "simulation": "Dynamic"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 20.0,
+            "y": 40.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "ekJ9ylb4XR",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "j2ofYbIJ19",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Link 4",
+          "position": {
+            "x": 0.5,
+            "y": 150.5
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 30.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "polygon": "",
+            "restitution": 0.5,
+            "shape": "Box",
+            "simulation": "Dynamic"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 20.0,
+            "y": 40.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "WWArn4NXof",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "j2ofYbIJ19",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Link 5",
+          "position": {
+            "x": 0.5,
+            "y": 190.5
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 30.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "polygon": "",
+            "restitution": 0.5,
+            "shape": "Box",
+            "simulation": "Dynamic"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 20.0,
+            "y": 40.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "YqP8M2Qg5u",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "j2ofYbIJ19",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "LInk 6",
+          "position": {
+            "x": 2.0005569458007813,
+            "y": 230.59649658203125
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 30.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "polygon": "",
+            "restitution": 0.5,
+            "shape": "Box",
+            "simulation": "Dynamic"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 20.0,
+            "y": 40.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "e4R3T3zwtn",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "j2ofYbIJ19",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Link 7",
+          "position": {
+            "x": 3.071136474609375,
+            "y": 271.2193298339844
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 30.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "polygon": "",
+            "restitution": 0.5,
+            "shape": "Box",
+            "simulation": "Dynamic"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 20.0,
+            "y": 40.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "Y2TTpsELiu",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 0,
+            "linewidth": 1.0,
+            "material": "j2ofYbIJ19",
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Link 8",
+          "position": {
+            "x": 4.1161651611328125,
+            "y": 310.8529968261719
+          },
+          "rigid_body": {
+            "angular_damping": 0.5,
+            "density": 30.0,
+            "flags": {
+              "Bullet": false,
+              "CanSleep": true,
+              "DiscardRotation": false,
+              "Enabled": true,
+              "Sensor": false
+            },
+            "friction": 0.30000001192092896,
+            "linear_damping": 0.5,
+            "polygon": "",
+            "restitution": 0.5,
+            "shape": "Box",
+            "simulation": "Dynamic"
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 20.0,
+            "y": 40.0
+          },
+          "tag": ""
+        },
+        {
+          "class": "9FSUMBPaiu",
+          "drawable_item": {
+            "depth": 1.0,
+            "drawable": "_rect",
+            "flags": {
+              "DepthTest": false,
+              "DoubleSided": false,
+              "FlipHorizontally": false,
+              "FlipVertically": false,
+              "PP_EnableBloom": true,
+              "RestartDrawable": true,
+              "UpdateDrawable": true,
+              "UpdateMaterial": true,
+              "VisibleInGame": true
+            },
+            "layer": 2,
+            "linewidth": 1.0,
+            "material": "_Black",
+            "material_params": [
+              {
+                "name": "kBaseColor",
+                "value": {
+                  "a": 0.2705882489681244,
+                  "b": 0.0,
+                  "g": 0.0,
+                  "r": 0.0
+                }
+              }
+            ],
+            "offset": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "renderpass": "DrawColor",
+            "renderproj": "Orthographic",
+            "renderstyle": "Solid",
+            "renderview": "AxisAligned",
+            "rotator": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "timescale": 1.0
+          },
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Node 0",
+          "position": {
+            "x": 0.0,
+            "y": 200.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 500.0,
+            "y": 100.0
+          },
+          "tag": "",
+          "text_item": {
+            "flags": {
+              "BlinkText": false,
+              "PP_EnableBloom": true,
+              "StaticContent": false,
+              "UnderlineText": false,
+              "VisibleInGame": true
+            },
+            "font_name": "app://fonts/NK57 Monospace No Rg.otf",
+            "font_size": 20,
+            "horizontal_align": "Center",
+            "layer": 3,
+            "line_height": 1.5,
+            "raster_height": 0,
+            "raster_width": 0,
+            "text": "Welcome to the physics demo.\nSelect demo on the left!",
+            "text_color": {
+              "a": 1.0,
+              "b": 1.0,
+              "g": 1.0,
+              "r": 1.0
+            },
+            "vertical_align": "Center"
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "children": [
+              {
+                "node": {
+                  "id": "ddJ4rw6zYn"
+                }
+              },
+              {
+                "node": {
+                  "id": "eJsphM3OiE"
+                }
+              },
+              {
+                "node": {
+                  "id": "v87llCMg4m"
+                }
+              },
+              {
+                "node": {
+                  "id": "ekJ9ylb4XR"
+                }
+              },
+              {
+                "node": {
+                  "id": "WWArn4NXof"
+                }
+              },
+              {
+                "node": {
+                  "id": "YqP8M2Qg5u"
+                }
+              },
+              {
+                "node": {
+                  "id": "e4R3T3zwtn"
+                }
+              },
+              {
+                "node": {
+                  "id": "Y2TTpsELiu"
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "node": {
+                          "id": "zzSLz7poNs"
+                        }
+                      }
+                    ],
+                    "node": {
+                      "id": "LFLMl5LQYE"
+                    }
+                  }
+                ],
+                "node": {
+                  "id": "Fogdqf6asE"
+                }
+              }
+            ],
+            "node": {
+              "id": "AYzXdMzYdx"
+            }
+          },
+          {
+            "node": {
+              "id": "9FSUMBPaiu"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "00QMHmSzSt",
+      "resource_name": "DETONATOR On Chain",
+      "resource_ver": 1,
+      "script_file": "",
+      "tag": "",
+      "tracks": [
+        {
+          "animators": [
+            {
+              "animator": {
+                "duration": 1.0,
+                "flags": {
+                  "StaticInstance": false
+                },
+                "id": "Dfl2BY8S4g",
+                "method": "EaseOutBounce",
+                "name": "Animator_0",
+                "node": "LFLMl5LQYE",
+                "position": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rotation": 0.0,
+                "scale": {
+                  "x": 1.0,
+                  "y": 1.0
+                },
+                "size": {
+                  "x": 525.4000244140625,
+                  "y": 131.97000122070313
+                },
+                "starttime": 0.0
+              },
+              "type": "TransformAnimator"
+            }
+          ],
+          "delay": 0.0,
+          "duration": 1.0,
+          "id": "nsFKLRhwR9",
+          "looping": false,
+          "name": "My Track"
+        }
+      ]
+    },
+    {
+      "flags": {
+        "KillAtBoundary": true,
+        "KillAtLifetime": true,
+        "LimitLifetime": false,
+        "PostUpdate": true,
+        "TickEntity": true,
+        "UpdateEntity": true,
+        "UpdateNodes": false,
+        "VisibleInEditor": true,
+        "VisibleInGame": true,
+        "WantsKeyEvents": false,
+        "WantsMouseEvents": false
+      },
+      "id": "5uDea9Wvry",
+      "idle_track": "avP3rIJ4jE",
       "lifetime": 0.0,
       "name": "DETONATOR",
       "nodes": [
@@ -11431,9 +12537,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 0.8870108127593994,
               "x": 0.0,
-              "y": 0.4617486000061035,
+              "y": 0.767944872379303,
               "z": 0.0
             },
             "timescale": 1.0
@@ -11443,8 +12548,8 @@
           },
           "name": "text",
           "position": {
-            "x": 30.0,
-            "y": 11.0
+            "x": -13.0,
+            "y": -4.0
           },
           "rotation": 0.0,
           "scale": {
@@ -11452,8 +12557,8 @@
             "y": 1.0
           },
           "size": {
-            "x": 578.0006103515625,
-            "y": 121.99545288085938
+            "x": 578.0,
+            "y": 122.0
           },
           "tag": ""
         },
@@ -11486,9 +12591,8 @@
             "renderstyle": "Solid",
             "renderview": "AxisAligned",
             "rotator": {
-              "q": 0.8870108127593994,
               "x": 0.0,
-              "y": 0.4617486000061035,
+              "y": 0.767944872379303,
               "z": 0.0
             },
             "timescale": 1.0
@@ -11498,8 +12602,8 @@
           },
           "name": "block",
           "position": {
-            "x": 52.5,
-            "y": 2.5
+            "x": 50.0,
+            "y": -600.0
           },
           "rotation": 0.0,
           "scale": {
@@ -11511,18 +12615,48 @@
             "y": 131.97000122070313
           },
           "tag": ""
+        },
+        {
+          "class": "WEI61eiEOE",
+          "flags": {
+            "VisibleInEditor": true
+          },
+          "name": "Body",
+          "position": {
+            "x": -0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          },
+          "size": {
+            "x": 127.0,
+            "y": 113.0
+          },
+          "tag": ""
         }
       ],
       "render_tree": {
         "children": [
           {
+            "children": [
+              {
+                "children": [
+                  {
+                    "node": {
+                      "id": "gu1bvRvusB"
+                    }
+                  }
+                ],
+                "node": {
+                  "id": "fUJx4OyC4z"
+                }
+              }
+            ],
             "node": {
-              "id": "fUJx4OyC4z"
-            }
-          },
-          {
-            "node": {
-              "id": "gu1bvRvusB"
+              "id": "WEI61eiEOE"
             }
           }
         ],
@@ -11532,7 +12666,45 @@
       "resource_name": "DETONATOR",
       "resource_ver": 1,
       "script_file": "",
-      "tag": ""
+      "tag": "",
+      "tracks": [
+        {
+          "animators": [
+            {
+              "animator": {
+                "duration": 1.0,
+                "flags": {
+                  "StaticInstance": false
+                },
+                "id": "QUSNiSOjGk",
+                "method": "EaseOutBounce",
+                "name": "Animator_0",
+                "node": "fUJx4OyC4z",
+                "position": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rotation": 0.0,
+                "scale": {
+                  "x": 1.0,
+                  "y": 1.0
+                },
+                "size": {
+                  "x": 525.4000244140625,
+                  "y": 131.97000122070313
+                },
+                "starttime": 0.0
+              },
+              "type": "TransformAnimator"
+            }
+          ],
+          "delay": 0.0,
+          "duration": 1.0,
+          "id": "avP3rIJ4jE",
+          "looping": false,
+          "name": "My Track"
+        }
+      ]
     }
   ],
   "materials": [
@@ -15139,10 +16311,10 @@
             "WantsKeyEvents": false,
             "WantsMouseEvents": false
           },
-          "id": "ux9UTSE85T",
+          "id": "xDbxWp4RSP",
           "idle_animation_id": "",
-          "layer": 0,
-          "name": "Copy of DETONATOR_0",
+          "layer": 1,
+          "name": "Detonator",
           "parent_render_tree_node": "",
           "position": {
             "x": 150.0,
@@ -15164,7 +16336,7 @@
           },
           {
             "node": {
-              "id": "ux9UTSE85T"
+              "id": "xDbxWp4RSP"
             }
           }
         ],
@@ -15205,7 +16377,7 @@
           "flag_set_bits": {
             "KillAtBoundary": false,
             "KillAtLifetime": false,
-            "LimitLifetime": false,
+            "LimitLifetime": true,
             "PostUpdate": false,
             "TickEntity": false,
             "UpdateEntity": false,
@@ -18203,6 +19375,71 @@
       "resource_ver": 1,
       "script_file": "",
       "tilemap": ""
+    },
+    {
+      "dynamic_spatial_index": "Disabled",
+      "id": "gq19L0R1vB",
+      "name": "Welcome",
+      "nodes": [
+        {
+          "entity": "00QMHmSzSt",
+          "flag_set_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "flag_val_bits": {
+            "KillAtBoundary": false,
+            "KillAtLifetime": false,
+            "LimitLifetime": false,
+            "PostUpdate": false,
+            "TickEntity": false,
+            "UpdateEntity": false,
+            "UpdateNodes": false,
+            "VisibleInEditor": true,
+            "VisibleInGame": true,
+            "WantsKeyEvents": false,
+            "WantsMouseEvents": false
+          },
+          "id": "OgF4J9YKUg",
+          "idle_animation_id": "",
+          "layer": 0,
+          "name": "Copy of Copy of DETONATOR_1",
+          "parent_render_tree_node": "",
+          "position": {
+            "x": -0.0,
+            "y": 0.0
+          },
+          "rotation": 0.0,
+          "scale": {
+            "x": 1.0,
+            "y": 1.0
+          }
+        }
+      ],
+      "render_tree": {
+        "children": [
+          {
+            "node": {
+              "id": "OgF4J9YKUg"
+            }
+          }
+        ],
+        "node": null
+      },
+      "resource_id": "gq19L0R1vB",
+      "resource_name": "Welcome",
+      "resource_ver": 1,
+      "script_file": "",
+      "tilemap": ""
     }
   ],
   "scripts": [
@@ -18381,7 +19618,7 @@
                     "h": 300.0,
                     "w": 400.0
                   },
-                  "style": "{\"materials\":[{\"color\":{\"a\":0.2666666805744171,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"background\",\"type\":\"Color\"}],\"properties\":[{\"key\":\"text-vertical-align\",\"value\":\"Top\"},{\"key\":\"text-font\",\"value\":\"app://fonts/NK57 Monospace No Sb.otf\"},{\"key\":\"text-horizontal-align\",\"value\":\"Left\"},{\"key\":\"text-size\",\"value\":12}]}",
+                  "style": "{\"materials\":[{\"color\":{\"a\":0.2666666805744171,\"b\":0.0,\"g\":0.0,\"r\":0.0},\"key\":\"background\",\"type\":\"Color\"}],\"properties\":[{\"key\":\"text-color\",\"value\":{\"a\":1.0,\"b\":1.0,\"g\":1.0,\"r\":1.0}},{\"key\":\"text-font\",\"value\":\"app://fonts/NK57 Monospace No Sb.otf\"},{\"key\":\"text-size\",\"value\":12},{\"key\":\"text-vertical-align\",\"value\":\"Top\"},{\"key\":\"text-horizontal-align\",\"value\":\"Left\"}]}",
                   "tab_index": 0,
                   "text": "",
                   "type": "Label"

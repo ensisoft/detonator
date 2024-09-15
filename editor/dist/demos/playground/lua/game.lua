@@ -4,28 +4,29 @@
 local TestTable = {}
 
 --dd = debug draw
-TestTable[0] = {name='Kinematic C Velocity Balls', dd=false, gravity=false, msg=''}
-TestTable[1] = {name='Dynamic C Velocity Balls',   dd=false, gravity=false, msg=''}
-TestTable[2] = {name='Dynamic Balls',              dd=false, gravity=false, msg=''}
-TestTable[3] = {name='Friction',                   dd=false, gravity=true,  msg='Last box down is a square!'}
-TestTable[4] = {name='Restitution',                dd=false, gravity=true,  msg='Boing Boing!'}
-TestTable[5] = {name='Distance Joint',             dd=true,  gravity=true,  msg='Distance Joint'}
-TestTable[6] = {name='Revolute Joint',             dd=true,  gravity=true,  msg='Revolute Joint'}
-TestTable[7] = {name='Pulley Joint',               dd=true,  gravity=true,  msg='Pulley Joint'}
-TestTable[8] = {name='Weld Joint',                 dd=true,  gravity=true,  msg='Weld Joint'}
-TestTable[9] = {name='Prismatic Joint',            dd=true,  gravity=true,  msg='Prismatic Joint'}
-TestTable[10] = {name='Motor Joint',               dd=true,  gravity=true,  msg='Motor Joint'}
-TestTable[11] = {name='Bridge',                     dd=false, gravity=true,  msg='The bridge to nowhere?'}
-TestTable[12] = {name='Wrecking Ball',              dd=false, gravity=true,  msg='Crush Them!'}
-TestTable[13] = {name='Boxes',                     dd=false, gravity=true,  msg='Find the special box!'}
-TestTable[14] = {name='Raycast',                   dd=true,  gravity=false, 
+TestTable[0] = {name='Welcome',                    dd=false, gravity=true, msg=''}
+TestTable[1] = {name='Kinematic C Velocity Balls', dd=false, gravity=false, msg=''}
+TestTable[2] = {name='Dynamic C Velocity Balls',   dd=false, gravity=false, msg=''}
+TestTable[3] = {name='Dynamic Balls',              dd=false, gravity=false, msg=''}
+TestTable[4] = {name='Friction',                   dd=false, gravity=true,  msg='Last box down is a square!'}
+TestTable[5] = {name='Restitution',                dd=false, gravity=true,  msg='Boing Boing!'}
+TestTable[6] = {name='Distance Joint',             dd=true,  gravity=true,  msg='Distance Joint'}
+TestTable[7] = {name='Revolute Joint',             dd=true,  gravity=true,  msg='Revolute Joint'}
+TestTable[8] = {name='Pulley Joint',               dd=true,  gravity=true,  msg='Pulley Joint'}
+TestTable[9] = {name='Weld Joint',                 dd=true,  gravity=true,  msg='Weld Joint'}
+TestTable[10] = {name='Prismatic Joint',            dd=true,  gravity=true,  msg='Prismatic Joint'}
+TestTable[11] = {name='Motor Joint',               dd=true,  gravity=true,  msg='Motor Joint'}
+TestTable[12] = {name='Bridge',                     dd=false, gravity=true,  msg='The bridge to nowhere?'}
+TestTable[13] = {name='Wrecking Ball',              dd=false, gravity=true,  msg='Crush Them!'}
+TestTable[14] = {name='Boxes',                     dd=false, gravity=true,  msg='Find the special box!'}
+TestTable[15] = {name='Raycast',                   dd=true,  gravity=false, 
     msg='Use the mouse left button (click & hold)\n' ..
         'Press keys 1, 2, 3 to change the ray cast mode.\n\n' ..
         '1 = All      = Find all objects\n' ..
         '2 = Closest  = Find geometrically closest object\n' ..
         '3 = First    = Find whichever object comes first\n\n'
 }
-TestTable[15] = {name='Spatial Query', dd=true, gravity=false, 
+TestTable[16] = {name='Spatial Query', dd=true, gravity=false, 
     msg='Use the mouse left button (click & hold)\n' ..
         'Press keys 1, 2, 3 to change the query mode.\n\n' ..
         '1 = All     = Find all objects\n' .. 
