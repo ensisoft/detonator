@@ -681,9 +681,13 @@ namespace game
         using PhysicsJointParams = EntityClass::PhysicsJointParams;
         using PhysicsJoint = RigidBodyJoint;
 
+        PhysicsJoint* FindJointById(const std::string& id);
+        PhysicsJoint* FindJointByClassId(const std::string& id);
+
         const PhysicsJoint& GetJoint(std::size_t index) const;
         const PhysicsJoint* FindJointById(const std::string& id) const;
         const PhysicsJoint* FindJointByNodeId(const std::string& id) const;
+        const PhysicsJoint* FindJointByClassId(const std::string& id) const;
 
         // Find a scripting variable.
         // Returns nullptr if there was no variable by this name.
