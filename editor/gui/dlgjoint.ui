@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1100</width>
-    <height>1005</height>
+    <width>1015</width>
+    <height>1040</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -61,12 +61,15 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_6">
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_7">
         <property name="text">
-         <string>Name</string>
+         <string>Type</string>
         </property>
        </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="cmbType"/>
       </item>
       <item row="1" column="1">
        <widget class="QLineEdit" name="jointName">
@@ -81,15 +84,12 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_7">
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_6">
         <property name="text">
-         <string>Type</string>
+         <string>Name</string>
         </property>
        </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QComboBox" name="cmbType"/>
       </item>
      </layout>
     </widget>
@@ -119,23 +119,42 @@
       <bool>true</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout_4">
-      <property name="leftMargin">
-       <number>10</number>
-      </property>
-      <property name="topMargin">
-       <number>10</number>
-      </property>
-      <property name="rightMargin">
-       <number>10</number>
-      </property>
-      <property name="bottomMargin">
-       <number>10</number>
-      </property>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="cmbSrcNode"/>
-      </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="cmbDstNode"/>
+      <item row="0" column="1" rowspan="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QComboBox" name="cmbSrcNode"/>
+          </item>
+          <item>
+           <widget class="QComboBox" name="cmbDstNode"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnSwap">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../resource/resource.qrc">
+            <normaloff>:/32x32_ico_png/swap.png</normaloff>:/32x32_ico_png/swap.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>32</width>
+            <height>32</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="label_2">
@@ -412,21 +431,8 @@
       <property name="bottomMargin">
        <number>10</number>
       </property>
-      <item row="16" column="1">
-       <widget class="QCheckBox" name="chkEnableLimit">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Enable limits</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QDoubleSpinBox" name="stiffness">
+      <item row="12" column="1">
+       <widget class="QDoubleSpinBox" name="motorTorque">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -434,70 +440,10 @@
          </sizepolicy>
         </property>
         <property name="suffix">
-         <string> N/m</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QDoubleSpinBox" name="lowerTranslationLimit">
-        <property name="suffix">
-         <string> m</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QDoubleSpinBox" name="upperAngle">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="suffix">
-         <string>  °</string>
-        </property>
-        <property name="minimum">
-         <double>0.000000000000000</double>
+         <string> N⋅m</string>
         </property>
         <property name="maximum">
-         <double>360.000000000000000</double>
-        </property>
-        <property name="stepType">
-         <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="lblMinDistance">
-        <property name="text">
-         <string>Min distance</string>
-        </property>
-       </widget>
-      </item>
-      <item row="13" column="0">
-       <widget class="QLabel" name="lblMotorForce">
-        <property name="text">
-         <string>Motor force</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="lblUpperangleLimit">
-        <property name="text">
-         <string>Max rotation CCW</string>
-        </property>
-        <property name="scaledContents">
-         <bool>false</bool>
-        </property>
-        <property name="wordWrap">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="11" column="0">
-       <widget class="QLabel" name="lblMotorSpeed">
-        <property name="text">
-         <string>Motor speed</string>
+         <double>1000.000000000000000</double>
         </property>
        </widget>
       </item>
@@ -520,208 +466,6 @@
         </property>
         <property name="stepType">
          <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="lblUpperTranslationLimit">
-        <property name="text">
-         <string>Maximum forward travel</string>
-        </property>
-       </widget>
-      </item>
-      <item row="17" column="1">
-       <widget class="QCheckBox" name="chkEnableMotor">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Enable motor</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="1">
-       <widget class="QDoubleSpinBox" name="dirAngle">
-        <property name="suffix">
-         <string>  °</string>
-        </property>
-        <property name="minimum">
-         <double>-180.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>180.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout_6">
-        <item>
-         <widget class="QDoubleSpinBox" name="minDist">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="specialValueText">
-           <string>Initial distance between nodes</string>
-          </property>
-          <property name="decimals">
-           <number>1</number>
-          </property>
-          <property name="minimum">
-           <double>-0.100000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>1000000.000000000000000</double>
-          </property>
-          <property name="stepType">
-           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-          </property>
-          <property name="value">
-           <double>-0.100000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="btnResetMinDistance">
-          <property name="toolTip">
-           <string>Reset idle track to nothing</string>
-          </property>
-          <property name="text">
-           <string>...</string>
-          </property>
-          <property name="icon">
-           <iconset resource="../resource/resource.qrc">
-            <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
-          </property>
-          <property name="autoRaise">
-           <bool>false</bool>
-          </property>
-          <property name="arrowType">
-           <enum>Qt::NoArrow</enum>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="2" column="1">
-       <widget class="QDoubleSpinBox" name="damping">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="prefix">
-         <string/>
-        </property>
-        <property name="suffix">
-         <string> N⋅s/m</string>
-        </property>
-       </widget>
-      </item>
-      <item row="14" column="1">
-       <widget class="QComboBox" name="pulleyGroundAnchorA"/>
-      </item>
-      <item row="9" column="0">
-       <widget class="QLabel" name="lblDirAngle">
-        <property name="text">
-         <string>Direction angle</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="lblLowerTranslationLimit">
-        <property name="text">
-         <string>Maximum backwards travel</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="lblDamping">
-        <property name="text">
-         <string>Damping</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="lblLowerAngleLimit">
-        <property name="text">
-         <string>Max rotation CW</string>
-        </property>
-        <property name="wordWrap">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="1">
-       <widget class="QDoubleSpinBox" name="upperTranslationLimit">
-        <property name="suffix">
-         <string> m</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="lblMaxDistance">
-        <property name="text">
-         <string>Max distance</string>
-        </property>
-       </widget>
-      </item>
-      <item row="12" column="0">
-       <widget class="QLabel" name="lblMotorTorque">
-        <property name="text">
-         <string>Motor torque</string>
-        </property>
-       </widget>
-      </item>
-      <item row="13" column="1">
-       <widget class="QDoubleSpinBox" name="motorForce">
-        <property name="suffix">
-         <string> N</string>
-        </property>
-        <property name="maximum">
-         <double>1000.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="0">
-       <widget class="QLabel" name="lblMotorRotation">
-        <property name="text">
-         <string>Motor rotation</string>
-        </property>
-       </widget>
-      </item>
-      <item row="11" column="1">
-       <widget class="QDoubleSpinBox" name="motorSpeed">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="suffix">
-         <string> rad/s</string>
-        </property>
-        <property name="minimum">
-         <double>0.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>100.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="lblStiffness">
-        <property name="text">
-         <string>Stiffness</string>
         </property>
        </widget>
       </item>
@@ -780,8 +524,141 @@
         </item>
        </layout>
       </item>
-      <item row="12" column="1">
-       <widget class="QDoubleSpinBox" name="motorTorque">
+      <item row="14" column="0">
+       <widget class="QLabel" name="lblPulleyAnchorA">
+        <property name="text">
+         <string>Static anchor node A</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="0">
+       <widget class="QLabel" name="lblMotorSpeed">
+        <property name="text">
+         <string>Motor speed</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QDoubleSpinBox" name="damping">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="prefix">
+         <string/>
+        </property>
+        <property name="suffix">
+         <string> N⋅s/m</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="lblDirAngle">
+        <property name="text">
+         <string>Direction angle</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lblMaxDistance">
+        <property name="text">
+         <string>Max distance</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="lblUpperangleLimit">
+        <property name="text">
+         <string>Max rotation CCW</string>
+        </property>
+        <property name="scaledContents">
+         <bool>false</bool>
+        </property>
+        <property name="wordWrap">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="0">
+       <widget class="QLabel" name="lblMotorForce">
+        <property name="text">
+         <string>Motor force</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QDoubleSpinBox" name="upperTranslationLimit">
+        <property name="suffix">
+         <string> m</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="lblUpperTranslationLimit">
+        <property name="text">
+         <string>Maximum forward travel</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QDoubleSpinBox" name="minDist">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="specialValueText">
+           <string>Initial distance between nodes</string>
+          </property>
+          <property name="decimals">
+           <number>1</number>
+          </property>
+          <property name="minimum">
+           <double>-0.100000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>1000000.000000000000000</double>
+          </property>
+          <property name="stepType">
+           <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+          </property>
+          <property name="value">
+           <double>-0.100000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="btnResetMinDistance">
+          <property name="toolTip">
+           <string>Reset idle track to nothing</string>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resource/resource.qrc">
+            <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>false</bool>
+          </property>
+          <property name="arrowType">
+           <enum>Qt::NoArrow</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="3" column="1">
+       <widget class="QDoubleSpinBox" name="stiffness">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -789,10 +666,49 @@
          </sizepolicy>
         </property>
         <property name="suffix">
-         <string> N⋅m</string>
+         <string> N/m</string>
+        </property>
+       </widget>
+      </item>
+      <item row="15" column="1">
+       <widget class="QComboBox" name="pulleyGroundAnchorB"/>
+      </item>
+      <item row="11" column="1">
+       <widget class="QDoubleSpinBox" name="motorSpeed">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="suffix">
+         <string> rad/s</string>
+        </property>
+        <property name="minimum">
+         <double>0.000000000000000</double>
         </property>
         <property name="maximum">
-         <double>1000.000000000000000</double>
+         <double>100.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="lblStiffness">
+        <property name="text">
+         <string>Stiffness</string>
+        </property>
+       </widget>
+      </item>
+      <item row="16" column="1">
+       <widget class="QCheckBox" name="chkEnableLimit">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Enable limits</string>
         </property>
        </widget>
       </item>
@@ -816,13 +732,64 @@
         </item>
        </widget>
       </item>
-      <item row="15" column="1">
-       <widget class="QComboBox" name="pulleyGroundAnchorB"/>
-      </item>
-      <item row="14" column="0">
-       <widget class="QLabel" name="lblPulleyAnchorA">
+      <item row="12" column="0">
+       <widget class="QLabel" name="lblMotorTorque">
         <property name="text">
-         <string>Static anchor node A</string>
+         <string>Motor torque</string>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="1">
+       <widget class="QDoubleSpinBox" name="motorForce">
+        <property name="suffix">
+         <string> N</string>
+        </property>
+        <property name="maximum">
+         <double>1000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QDoubleSpinBox" name="lowerTranslationLimit">
+        <property name="suffix">
+         <string> m</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="lblLowerTranslationLimit">
+        <property name="text">
+         <string>Maximum backwards travel</string>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="0">
+       <widget class="QLabel" name="lblMotorRotation">
+        <property name="text">
+         <string>Motor rotation</string>
+        </property>
+       </widget>
+      </item>
+      <item row="14" column="1">
+       <widget class="QComboBox" name="pulleyGroundAnchorA"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="lblMinDistance">
+        <property name="text">
+         <string>Min distance</string>
+        </property>
+       </widget>
+      </item>
+      <item row="17" column="1">
+       <widget class="QCheckBox" name="chkEnableMotor">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Enable motor</string>
         </property>
        </widget>
       </item>
@@ -830,6 +797,68 @@
        <widget class="QLabel" name="lblPulleyAnchorB">
         <property name="text">
          <string>Static anchor node B</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lblDamping">
+        <property name="text">
+         <string>Damping</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QDoubleSpinBox" name="upperAngle">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="suffix">
+         <string>  °</string>
+        </property>
+        <property name="minimum">
+         <double>0.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
+        </property>
+        <property name="stepType">
+         <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="lblLowerAngleLimit">
+        <property name="text">
+         <string>Max rotation CW</string>
+        </property>
+        <property name="wordWrap">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <widget class="QDoubleSpinBox" name="dirAngle">
+        <property name="suffix">
+         <string>  °</string>
+        </property>
+        <property name="minimum">
+         <double>-180.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>180.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="18" column="1">
+       <widget class="QCheckBox" name="chkStaticSettings">
+        <property name="text">
+         <string>Static joint settings </string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -895,6 +924,7 @@
   <tabstop>cmbType</tabstop>
   <tabstop>cmbSrcNode</tabstop>
   <tabstop>cmbDstNode</tabstop>
+  <tabstop>btnSwap</tabstop>
   <tabstop>chkCollideConnected</tabstop>
   <tabstop>srcX</tabstop>
   <tabstop>srcY</tabstop>
@@ -921,6 +951,7 @@
   <tabstop>pulleyGroundAnchorB</tabstop>
   <tabstop>chkEnableLimit</tabstop>
   <tabstop>chkEnableMotor</tabstop>
+  <tabstop>chkStaticSettings</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnApply</tabstop>
   <tabstop>btnCancel</tabstop>

@@ -803,7 +803,7 @@ EntityClass EntityClass::Clone() const
         ret.mJoints.push_back(std::move(clone));
     }
     // remap property animator joint ids
-    for (auto& animation : mAnimations)
+    for (auto& animation : ret.mAnimations)
     {
         for (size_t i=0; i<animation->GetNumAnimators(); ++i)
         {
