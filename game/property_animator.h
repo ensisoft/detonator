@@ -19,6 +19,7 @@
 #include "config.h"
 
 #include <variant>
+#include <string>
 
 #include "game/color.h"
 #include "game/animator_base.h"
@@ -54,7 +55,12 @@ namespace game
             Transformer_LinearAccelerationX,
             Transformer_LinearAccelerationY,
             Transformer_AngularVelocity,
-            Transformer_AngularAcceleration
+            Transformer_AngularAcceleration,
+            RigidBodyJoint_MotorTorque,
+            RigidBodyJoint_MotorSpeed,
+            RigidBodyJoint_MotorForce,
+            RigidBodyJoint_Stiffness,
+            RigidBodyJoint_Damping
         };
 
         using PropertyValue = std::variant<float,
@@ -82,6 +88,23 @@ namespace game
         void SetEndValue(PropertyValue value)
         { mEndValue = value; }
 
+        void SetJointId(std::string id) noexcept
+        { mJointId = std::move(id); }
+
+        std::string GetJointId() const
+        { return mJointId; }
+
+        bool RequiresJoint() const noexcept
+        {
+            if (mParamName == PropertyName::RigidBodyJoint_MotorTorque ||
+                mParamName == PropertyName::RigidBodyJoint_MotorSpeed ||
+                mParamName == PropertyName::RigidBodyJoint_MotorForce ||
+                mParamName == PropertyName::RigidBodyJoint_Stiffness ||
+                mParamName == PropertyName::RigidBodyJoint_Damping)
+                return true;
+            return false;
+        }
+
         virtual Type GetType() const override
         { return Type::PropertyAnimator; }
         virtual std::size_t GetHash() const override;
@@ -94,6 +117,8 @@ namespace game
         PropertyName mParamName = PropertyName::Drawable_TimeScale;
         // the end value
         PropertyValue mEndValue;
+        // if the property applies to a joint we need a joint ID
+        std::string mJointId;
     };
 
 
@@ -120,7 +145,9 @@ namespace game
             TextItem_Underline,
             TextItem_PPEnableBloom,
             SpatialNode_Enabled,
-            Transformer_Enabled
+            Transformer_Enabled,
+            RigidBodyJoint_EnableMotor,
+            RigidBodyJoint_EnableLimits
         };
 
         enum class PropertyAction {
@@ -144,10 +171,25 @@ namespace game
         { mFlagAction = action; }
         inline void SetTime(float time) noexcept
         { mTime = math::clamp(0.0f, 1.0f, time); }
+
+        inline void SetJointId(std::string jointId) noexcept
+        { mJointId = std::move(jointId); }
+        inline std::string GetJointId() const
+        { return mJointId; }
+
+        bool RequiresJoint() const noexcept
+        {
+            if (mFlagName == PropertyName::RigidBodyJoint_EnableMotor ||
+                mFlagName == PropertyName::RigidBodyJoint_EnableLimits)
+                return true;
+            return false;
+        }
+
     private:
         PropertyAction mFlagAction = PropertyAction::Off;
         PropertyName   mFlagName   = PropertyName::Drawable_FlipHorizontally;
-        float      mTime       = 1.0f;
+        float mTime = 1.0f;
+        std::string mJointId;
     };
 
         // Modify node parameter over time.

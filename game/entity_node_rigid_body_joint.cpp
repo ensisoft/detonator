@@ -24,6 +24,12 @@
 namespace game
 {
 
+RigidBodyJointClass::RigidBodyJointClass()
+{
+    flags.set(Flags::StaticSettings, true);
+    flags.set(Flags::CollideConnected, false);
+}
+
 size_t RigidBodyJointClass::GetHash() const noexcept
 {
     auto* joint = this;
@@ -274,6 +280,9 @@ bool RigidBodyJoint::ValidateJointSetting(game::RigidBodyJoint::JointSetting set
 
 void RigidBodyJoint::AdjustJoint(JointSetting setting, JointSettingValue value)
 {
+    if (!CanSettingsChangeRuntime())
+        return;
+
     // schedule a pending setting change on the joint.
     // the physics subsystem will then set the setting on the joint
     // in the next update
@@ -378,13 +387,13 @@ void RigidBodyJoint::RealizePendingAdjustments()
     }
 }
 
-std::optional<RigidBodyJoint::JointValueSetting> RigidBodyJoint::FindCurrentJointValue(
+std::optional<RigidBodyJoint::JointSettingValue> RigidBodyJoint::FindCurrentJointValue(
         game::RigidBodyJoint::JointSetting setting) const
 {
     for (const auto& current : mCurrentValues)
     {
         if (current.setting == setting)
-            return current;
+            return current.value;
     }
     return std::nullopt;
 }

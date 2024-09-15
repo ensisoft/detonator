@@ -25,6 +25,7 @@
 #include <vector>
 #include <optional>
 
+#include "base/assert.h"
 #include "base/bitflag.h"
 #include "base/utility.h"
 #include "game/types.h"
@@ -52,7 +53,7 @@ namespace game
             CollideConnected,
             // Let the joint settings be changed at runtime
             // i.e., after the joint has been created.
-            EnableRuntimeSettings
+            StaticSettings
         };
 
         struct RevoluteJointParams {
@@ -127,8 +128,12 @@ namespace game
 
         base::bitflag<Flags> flags;
 
+        RigidBodyJointClass();
+
         std::size_t GetHash() const noexcept;
 
+        inline std::string GetId() const noexcept
+        { return id; }
         inline std::string GetName() const noexcept
         { return name; }
         inline std::string GetSrcNodeId() const noexcept
@@ -155,7 +160,9 @@ namespace game
         inline bool CollideConnected() const noexcept
         { return flags.test(Flags::CollideConnected); }
         inline bool CanSettingsChangeRuntime() const noexcept
-        { return flags.test(Flags::EnableRuntimeSettings); }
+        { return !flags.test(Flags::StaticSettings); }
+        inline bool IsStatic() const noexcept
+        { return flags.test(Flags::StaticSettings); }
 
         inline void SetFlag(Flags flag, bool on_off) noexcept
         { flags.set(flag, on_off); }
@@ -245,7 +252,19 @@ namespace game
 
         void RealizePendingAdjustments();
 
-        std::optional<JointValueSetting> FindCurrentJointValue(JointSetting setting) const;
+        std::optional<JointSettingValue> FindCurrentJointValue(JointSetting setting) const;
+
+        template<typename T>
+        T GetCurrentJointValue(JointSetting setting) const
+        {
+            const auto& value = FindCurrentJointValue(setting);
+            if (!value.has_value())
+                return T();
+
+            ASSERT(value.has_value());
+            ASSERT(std::holds_alternative<T>(value.value()));
+            return std::get<T>(value.value());
+        }
 
     private:
         std::shared_ptr<const RigidBodyJointClass> mClass;

@@ -97,6 +97,7 @@ void unit_test_setflag_actuator()
     klass.SetDuration(0.5f);
     klass.SetFlagName(game::BooleanPropertyAnimatorClass::PropertyName::Drawable_VisibleInGame);
     klass.SetFlagAction(game::BooleanPropertyAnimatorClass::PropertyAction::Off);
+    klass.SetJointId("joint123");
 
     TEST_REQUIRE(klass.GetNodeId() == "1234");
     TEST_REQUIRE(klass.GetStartTime() == real::float32(0.1f));
@@ -118,6 +119,7 @@ void unit_test_setflag_actuator()
         TEST_REQUIRE(copy.GetDuration()  == real::float32(0.5f));
         TEST_REQUIRE(copy.GetFlagName() == game::BooleanPropertyAnimatorClass::PropertyName::Drawable_VisibleInGame);
         TEST_REQUIRE(copy.GetFlagAction() == game::BooleanPropertyAnimatorClass::PropertyAction::Off);
+        TEST_REQUIRE(copy.GetJointId() == "joint123");
     }
 
     // copy assignment
@@ -271,6 +273,7 @@ void unit_test_setval_actuator()
     klass.SetInterpolation(game::PropertyAnimatorClass::Interpolation::Cosine);
     klass.SetPropertyName(game::PropertyAnimatorClass::PropertyName::RigidBody_LinearVelocity);
     klass.SetEndValue(glm::vec2(2.0f, -3.0f));
+    klass.SetJointId("joint123");
 
     // serialize.
     {
@@ -279,6 +282,7 @@ void unit_test_setval_actuator()
         game::PropertyAnimatorClass copy;
         TEST_REQUIRE(copy.FromJson(json));
         TEST_REQUIRE(copy.GetInterpolation() == game::TransformAnimatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetJointId() == "joint123");
         TEST_REQUIRE(copy.GetName()          == "test");
         TEST_REQUIRE(copy.GetNodeId()        == "1234");
         TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));
@@ -293,6 +297,7 @@ void unit_test_setval_actuator()
     {
         game::PropertyAnimatorClass copy(klass);
         TEST_REQUIRE(copy.GetInterpolation() == game::TransformAnimatorClass::Interpolation::Cosine);
+        TEST_REQUIRE(copy.GetJointId()       == "joint123");
         TEST_REQUIRE(copy.GetName()          == "test");
         TEST_REQUIRE(copy.GetNodeId()        == "1234");
         TEST_REQUIRE(copy.GetStartTime()     == real::float32(0.1f));

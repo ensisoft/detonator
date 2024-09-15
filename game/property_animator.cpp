@@ -19,12 +19,14 @@
 #include "base/logging.h"
 #include "data/reader.h"
 #include "data/writer.h"
+#include "game/entity.h"
 #include "game/entity_node.h"
 #include "game/entity_node_drawable_item.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_text_item.h"
 #include "game/entity_node_spatial_node.h"
 #include "game/entity_node_transformer.h"
+#include "game/entity_node_rigid_body_joint.h"
 #include "game/property_animator.h"
 
 namespace game
@@ -42,6 +44,7 @@ namespace game
     hash = base::hash_combine(hash, mFlagAction);
     hash = base::hash_combine(hash, mFlags);
     hash = base::hash_combine(hash, mTime);
+    hash = base::hash_combine(hash, mJointId);
     return hash;
 }
 
@@ -56,6 +59,7 @@ void BooleanPropertyAnimatorClass::IntoJson(data::Writer& data) const
     data.Write("action",    mFlagAction);
     data.Write("flags",     mFlags);
     data.Write("time",      mTime);
+    data.Write("joint_id",  mJointId);
 }
 
 bool BooleanPropertyAnimatorClass::FromJson(const data::Reader& data)
@@ -70,6 +74,7 @@ bool BooleanPropertyAnimatorClass::FromJson(const data::Reader& data)
     ok &= data.Read("action",    &mFlagAction);
     ok &= data.Read("flags",     &mFlags);
     ok &= data.Read("time",      &mTime);
+    ok &= data.Read("joint_id",  &mJointId);
     return ok;
 }
 
@@ -127,6 +132,17 @@ void BooleanPropertyAnimator::Start(EntityNode& node)
         mStartState = spatial->TestFlag(SpatialNode::Flags::Enabled);
     else if (flag == FlagName::Transformer_Enabled)
         mStartState = transformer->TestFlag(NodeTransformer::Flags::Enabled);
+    else if (flag == FlagName::RigidBodyJoint_EnableLimits)
+    {
+        const auto* joint = node.GetEntity()->FindJointByClassId(mClass->GetJointId());
+        mStartState = joint->GetCurrentJointValue<bool>(RigidBodyJointSetting::EnableLimit);
+    }
+    else if (flag == FlagName::RigidBodyJoint_EnableMotor)
+    {
+        const auto* joint = node.GetEntity()->FindJointByClassId(mClass->GetJointId());
+        mStartState = joint->GetCurrentJointValue<bool>(RigidBodyJointSetting::EnableMotor);
+    }
+
     else BUG("Unhandled property.");
 
     if (mTime == 0.0f)
@@ -219,6 +235,16 @@ void BooleanPropertyAnimator::SetFlag(EntityNode& node) const
         spatial->SetFlag(SpatialNode::Flags::Enabled, next_value);
     else if (flag == FlagName::Transformer_Enabled)
         transformer->SetFlag(NodeTransformer::Flags::Enabled, next_value);
+    else if (flag == FlagName::RigidBodyJoint_EnableMotor)
+    {
+        auto* joint = node.GetEntity()->FindJointByClassId(mClass->GetJointId());
+        joint->AdjustJoint(RigidBodyJointSetting::EnableMotor, next_value);
+    }
+    else if (flag == FlagName::RigidBodyJoint_EnableLimits)
+    {
+        auto* joint = node.GetEntity()->FindJointByClassId(mClass->GetJointId());
+        joint->AdjustJoint(RigidBodyJointSetting::EnableLimit, next_value);
+    }
     else BUG("Unhandled property.");
 
     // spams the log
@@ -282,7 +308,7 @@ bool BooleanPropertyAnimator::CanApply(EntityNode& node, bool verbose) const
     {
         if (!spatial && verbose)
         {
-            WARN("Propety animator can't apply a spatial node flag on a node without a spatial item. [animator='%1', node='%2', flag=%3]",
+            WARN("Property animator can't apply a spatial node flag on a node without a spatial item. [animator='%1', node='%2', flag=%3]",
                  mClass->GetName(), node.GetName(), flag);
         }
         return spatial != nullptr;
@@ -293,6 +319,29 @@ bool BooleanPropertyAnimator::CanApply(EntityNode& node, bool verbose) const
         {
             WARN("Property animator can't apply a node transformer flag on a node without a transformer. [animator='%1', node='%2', flag=%3]",
                  mClass->GetName(), node.GetName(), flag);
+        }
+    }
+    else if (flag == FlagName::RigidBodyJoint_EnableMotor ||
+             flag == FlagName ::RigidBodyJoint_EnableLimits)
+    {
+        const auto* joint = node.GetEntity()->FindJointByClassId(mClass->GetJointId());
+        if (!joint)
+        {
+            if (verbose)
+            {
+                WARN("Property animator can't apply joint setting since the joint is not found. [animator='%1', node='%2', joint='%3']",
+                     mClass->GetName(), node.GetName(), mClass->GetJointId());
+            }
+            return false;
+        }
+        else if (!joint->CanSettingsChangeRuntime())
+        {
+            if (verbose)
+            {
+                WARN("Property animator can't change joint settings since the joint settings are static. [animator='%1, node='%2', joint='%3'",
+                     mClass->GetName(), node.GetName(), joint->GetName());
+            }
+            return  false;
         }
     }
     else BUG("Unhandled property.");
@@ -311,6 +360,7 @@ size_t PropertyAnimatorClass::GetHash() const
     hash = base::hash_combine(hash, mDuration);
     hash = base::hash_combine(hash, mEndValue);
     hash = base::hash_combine(hash, mFlags);
+    hash = base::hash_combine(hash, mJointId);
     return hash;
 }
 
@@ -325,6 +375,7 @@ void PropertyAnimatorClass::IntoJson(data::Writer& data) const
     data.Write("duration",  mDuration);
     data.Write("value",     mEndValue);
     data.Write("flags",     mFlags);
+    data.Write("joint_id",  mJointId);
 }
 
 bool PropertyAnimatorClass::FromJson(const data::Reader& data)
@@ -339,6 +390,7 @@ bool PropertyAnimatorClass::FromJson(const data::Reader& data)
     ok &= data.Read("duration",  &mDuration);
     ok &= data.Read("value",     &mEndValue);
     ok &= data.Read("flags",     &mFlags);
+    ok &= data.Read("joint_id",  &mJointId);
     return ok;
 }
 
@@ -352,6 +404,16 @@ void PropertyAnimator::Start(EntityNode& node)
     const auto* body = node.GetRigidBody();
     const auto* text = node.GetTextItem();
     const auto* transformer = node.GetTransformer();
+
+    const RigidBodyJoint* joint = nullptr;
+    if (param == PropertyName::RigidBodyJoint_MotorTorque ||
+        param == PropertyName::RigidBodyJoint_MotorSpeed ||
+        param == PropertyName::RigidBodyJoint_MotorForce ||
+        param == PropertyName::RigidBodyJoint_Stiffness ||
+        param == PropertyName::RigidBodyJoint_Damping)
+    {
+        joint = node.GetEntity()->FindJointByClassId(mClass->GetJointId());
+    }
 
     if (param == PropertyName::Drawable_TimeScale)
         mStartValue = draw->GetTimeScale();
@@ -397,6 +459,16 @@ void PropertyAnimator::Start(EntityNode& node)
         mStartValue = transformer->GetAngularVelocity();
     else if (param == PropertyName::Transformer_AngularAcceleration)
         mStartValue = transformer->GetAngularAcceleration();
+    else if (param == PropertyName::RigidBodyJoint_MotorTorque)
+        mStartValue = joint->GetCurrentJointValue<float>(RigidBodyJointSetting::MotorTorque);
+    else if (param == PropertyName::RigidBodyJoint_MotorSpeed)
+        mStartValue = joint->GetCurrentJointValue<float>(RigidBodyJointSetting::MotorSpeed);
+    else if (param == PropertyName::RigidBodyJoint_MotorForce)
+        mStartValue = joint->GetCurrentJointValue<float>(RigidBodyJointSetting::MotorForce);
+    else if (param == PropertyName::RigidBodyJoint_Stiffness)
+        mStartValue = joint->GetCurrentJointValue<float>(RigidBodyJointSetting::Stiffness);
+    else if (param == PropertyName::RigidBodyJoint_Damping)
+        mStartValue = joint->GetCurrentJointValue<float>(RigidBodyJointSetting::Damping);
     else BUG("Unhandled property.");
 }
 
@@ -550,7 +622,29 @@ void PropertyAnimator::SetValue(EntityNode& node, float t, bool interpolate) con
         else if (t >= 1.0f)
             text->SetText(std::get<std::string>(mClass->GetEndValue()));
 
-    } else BUG("Unhandled property.");
+    }
+    else if (param == PropertyName::RigidBodyJoint_MotorTorque ||
+             param == PropertyName::RigidBodyJoint_MotorSpeed ||
+             param == PropertyName::RigidBodyJoint_MotorForce ||
+             param == PropertyName::RigidBodyJoint_Stiffness ||
+             param == PropertyName::RigidBodyJoint_Damping)
+    {
+        RigidBodyJoint* joint = node.GetEntity()->FindJointByClassId(mClass->GetJointId());
+        ASSERT(joint);
+
+        if (param == PropertyName::RigidBodyJoint_MotorTorque)
+            joint->AdjustJoint(RigidBodyJointSetting::MotorTorque, Interpolate<float>(t, interpolate));
+        else if (param == PropertyName::RigidBodyJoint_MotorSpeed)
+            joint->AdjustJoint(RigidBodyJointSetting::MotorSpeed, Interpolate<float>(t, interpolate));
+        else if (param == PropertyName::RigidBodyJoint_MotorForce)
+            joint->AdjustJoint(RigidBodyJointSetting::MotorForce, Interpolate<float>(t, interpolate));
+        else if (param == PropertyName::RigidBodyJoint_Stiffness)
+            joint->AdjustJoint(RigidBodyJointSetting::Stiffness, Interpolate<float>(t, interpolate));
+        else if (param == PropertyName::RigidBodyJoint_Damping)
+            joint->AdjustJoint(RigidBodyJointSetting::Damping, Interpolate<float>(t, interpolate));
+        else BUG("Missing joint setting");
+    }
+    else BUG("Unhandled property.");
 }
 
 void PropertyAnimator::Finish(EntityNode& node)
@@ -632,7 +726,36 @@ bool PropertyAnimator::CanApply(EntityNode& node, bool verbose) const
         }
         return transformer != nullptr;
     }
+    else if (param == PropertyName::RigidBodyJoint_MotorTorque ||
+             param == PropertyName::RigidBodyJoint_MotorSpeed ||
+             param == PropertyName::RigidBodyJoint_MotorForce ||
+             param == PropertyName::RigidBodyJoint_Stiffness ||
+             param == PropertyName::RigidBodyJoint_Damping)
+    {
+        const auto* entity = node.GetEntity();
+        const auto* joint = entity->FindJointByClassId(mClass->GetJointId());
+        if (!joint)
+        {
+            if (verbose)
+            {
+                WARN("Property animator can't apply joint setting since the joint is not found. [animator='%1', node='%2', joint='%3'",
+                     mClass->GetName(), node.GetName(), mClass->GetJointId());
+            }
+            return false;
+        }
+        else if (!joint->CanSettingsChangeRuntime())
+        {
+            if (verbose)
+            {
+                WARN("Property animator can't change joint settings since the joint settings are static. [animator='%1, node='%2', joint='%3'",
+                     mClass->GetName(), node.GetName(), joint->GetName());
+            }
+            return false;
+        }
+        return true;
+    }
     else BUG("Unhandled property.");
+
     return false;
 }
 

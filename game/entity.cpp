@@ -35,6 +35,7 @@
 #include "game/entity.h"
 #include "game/transform.h"
 #include "game/animator.h"
+#include "game/property_animator.h"
 #include "game/entity_node_transformer.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"
@@ -783,11 +784,16 @@ EntityClass EntityClass::Clone() const
         else ret.mScriptVars.push_back(std::make_shared<ScriptVar>(*var));
     }
 
+    std::unordered_map<std::string, std::string> joint_mapping;
+
     // make a deep clone of the joints.
     for (const auto& joint : mJoints)
     {
         auto clone   = std::make_shared<PhysicsJoint>(*joint);
-        clone->id    = base::RandomString(10);
+        clone->id = base::RandomString(10);
+
+        joint_mapping[joint->id] = clone->id;
+
         // map the src and dst node IDs.
         const auto* old_src_node = FindNodeById(joint->src_node_id);
         const auto* old_dst_node = FindNodeById(joint->dst_node_id);
@@ -795,6 +801,23 @@ EntityClass EntityClass::Clone() const
         clone->src_node_id = map[old_src_node]->GetId();
         clone->dst_node_id = map[old_dst_node]->GetId();
         ret.mJoints.push_back(std::move(clone));
+    }
+    // remap property animator joint ids
+    for (auto& animation : mAnimations)
+    {
+        for (size_t i=0; i<animation->GetNumAnimators(); ++i)
+        {
+            auto& animator = animation->GetAnimatorClass(i);
+            if (auto* ptr = AsPropertyAnimatorClass(&animator))
+            {
+                // map old joint ID to a new joint ID, empty string maps to an empty string.
+                ptr->SetJointId(joint_mapping[ptr->GetJointId()]);
+            }
+            else if (auto* ptr = AsBooleanPropertyAnimatorClass(&animator))
+            {
+                ptr->SetJointId(joint_mapping[ptr->GetJointId()]);
+            }
+        }
     }
 
     for (const auto& animator : mAnimators)
@@ -1448,6 +1471,26 @@ bool Entity::HasRenderableItems() const
     return false;
 }
 
+Entity::PhysicsJoint* Entity::FindJointById(const std::string& id)
+{
+    for (auto& joint : mJoints)
+    {
+        if (joint.GetId() == id)
+            return &joint;
+    }
+    return nullptr;
+}
+
+Entity::PhysicsJoint* Entity::FindJointByClassId(const std::string& id)
+{
+    for (auto& joint : mJoints)
+    {
+        if (joint.GetClassId() == id)
+            return &joint;
+    }
+    return nullptr;
+}
+
 const Entity::PhysicsJoint& Entity::GetJoint(std::size_t index) const
 {
     return base::SafeIndex(mJoints, index);
@@ -1473,6 +1516,17 @@ const Entity::PhysicsJoint* Entity::FindJointByNodeId(const std::string& id) con
     }
     return nullptr;
 }
+
+const Entity::PhysicsJoint* Entity::FindJointByClassId(const std::string& id) const
+{
+    for (const auto& joint : mJoints)
+    {
+        if (joint.GetClassId() == id)
+            return &joint;
+    }
+    return nullptr;
+}
+
 
 const ScriptVar* Entity::FindScriptVarByName(const std::string& name) const
 {
