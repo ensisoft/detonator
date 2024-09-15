@@ -65,10 +65,6 @@ using namespace engine::lua;
 using namespace game;
 
 namespace {
-template<typename Actuator> inline
-Actuator* ActuatorCast(game::Animator* actuator)
-{ return dynamic_cast<Actuator*>(actuator); }
-
 template<typename T>
 auto GetTypeString(const T& object)
 {
@@ -852,20 +848,18 @@ void BindGameLib(sol::state& L)
 
     auto animator = table.new_usertype<Animator>("Animator");
     BindAnimatorInterface<Animator>(animator);
-    animator["AsKinematicAnimator"]       = &ActuatorCast<KinematicAnimator>;
-    animator["AsBooleanPropertyAnimator"] = &ActuatorCast<BooleanPropertyAnimator>;
-    animator["AsPropertyAnimator"]        = &ActuatorCast<PropertyAnimator>;
-    animator["AsTransformAnimator"]       = &ActuatorCast<TransformAnimator>;
-    animator["AsMaterialAnimator"]        = &ActuatorCast<MaterialAnimator>;
 
     auto kinematic_animator = table.new_usertype<KinematicAnimator>("KinematicAnimator");
     BindAnimatorInterface<KinematicAnimator>(kinematic_animator);
+    // todo:
 
     auto boolean_property_animator = table.new_usertype<BooleanPropertyAnimator>("BooleanPropertyAnimator");
     BindAnimatorInterface<BooleanPropertyAnimator>(boolean_property_animator);
+    // todo:
 
     auto property_animator = table.new_usertype<PropertyAnimator>("PropertyAnimator");
     BindAnimatorInterface<PropertyAnimator>(property_animator);
+    // todo
 
     auto transform_animator = table.new_usertype<TransformAnimator>("TransformAnimator");
     BindAnimatorInterface<TransformAnimator>(transform_animator);
@@ -894,6 +888,7 @@ void BindGameLib(sol::state& L)
 
     auto material_animator = table.new_usertype<MaterialAnimator>("MaterialAnimator");
     BindAnimatorInterface<MaterialAnimator>(material_animator);
+    // todo:
 
     auto entity_state = table.new_usertype<EntityState>("EntityState");
     entity_state["GetName"] = &EntityState::GetName;
@@ -962,56 +957,51 @@ void BindGameLib(sol::state& L)
     animation["GetCurrentTime"]     =  &Animation::GetCurrentTime;
     animation["GetDuration"]        =  &Animation::GetDuration;
     animation["GetClass"]           =  &Animation::GetClass;
-    animation["FindAnimatorById"]   = sol::overload(
-        [](game::Animation* animation, const std::string& name) {
-            return animation->FindAnimatorById(name);
-        },
-        [](game::Animation* animation, const std::string& name, const std::string& type, sol::this_state state) {
+    animation["FindAnimatorById"]   =
+        [](game::Animation* animation, const std::string& id, sol::this_state state) {
             sol::state_view lua(state);
-            auto* actuator = animation->FindAnimatorById(name);
-            if (!actuator)
+
+            auto* animator = animation->FindAnimatorById(id);
+            if (!animator)
                 return sol::make_object(lua, sol::nil);
-            const auto enum_val = magic_enum::enum_cast<game::AnimatorClass::Type>(type);
-            if (!enum_val.has_value())
-                throw GameError("No such animator type: " + type);
-            const auto value = enum_val.value();
-            if (value == game::AnimatorClass::Type::TransformAnimator)
-                return sol::make_object(lua, AsTransformAnimator(actuator));
-            else if (value == game::AnimatorClass::Type::MaterialAnimator)
-                return sol::make_object(lua, AsMaterialAnimator(actuator));
-            else if (value== game::AnimatorClass::Type::KinematicAnimator)
-                return sol::make_object(lua, AsKinematicAnimator(actuator));
-            else if (value == game::AnimatorClass::Type::BooleanPropertyAnimator)
-                return sol::make_object(lua, AsBooleanPropertyAnimator(actuator));
-            else if (value == game::AnimatorClass::Type::PropertyAnimator)
-                return sol::make_object(lua, AsPropertyAnimator(actuator));
-            else BUG("Unhandled animator type.");
-        });
-    animation["FindAnimatorByName"] = sol::overload(
-        [](game::Animation* animation, const std::string& name) {
-           return animation->FindAnimatorByName(name);
-        },
-        [](game::Animation* animation, const std::string& name, const std::string& type, sol::this_state state) {
+
+            if (auto* ptr = game::AsPropertyAnimator(animator))
+                return sol::make_object(lua, ptr);
+            else if (auto* ptr = game::AsBooleanPropertyAnimator(animator))
+                return sol::make_object(lua, ptr);
+            else if (auto* ptr = game::AsKinematicAnimator(animator))
+                return sol::make_object(lua, ptr);
+            else if (auto* ptr = game::AsTransformAnimator(animator))
+                return sol::make_object(lua, ptr);
+            else if (auto* ptr = game::AsMaterialAnimator(animator))
+                return sol::make_object(lua, ptr);
+            else BUG("Missing animator type");
+
+            return sol::make_object(lua, sol::nil);
+        };
+
+    animation["FindAnimatorByName"] =
+        [](game::Animation* animation, const std::string& name, sol::this_state state) {
             sol::state_view lua(state);
-            auto* actuator = animation->FindAnimatorByName(name);
-            if (!actuator)
+
+            auto* animator = animation->FindAnimatorByName(name);
+            if (!animator)
                 return sol::make_object(lua, sol::nil);
-            const auto enum_val = magic_enum::enum_cast<game::AnimatorClass::Type>(type);
-            if (!enum_val.has_value())
-                throw GameError("No such animator type: " + type);
-            const auto value = enum_val.value();
-            if (value == game::AnimatorClass::Type::TransformAnimator)
-                return sol::make_object(lua, AsTransformAnimator(actuator));
-            else if (value == game::AnimatorClass::Type::MaterialAnimator)
-                return sol::make_object(lua, AsMaterialAnimator(actuator));
-            else if (value== game::AnimatorClass::Type::KinematicAnimator)
-                return sol::make_object(lua, AsKinematicAnimator(actuator));
-            else if (value == game::AnimatorClass::Type::BooleanPropertyAnimator)
-                return sol::make_object(lua, AsBooleanPropertyAnimator(actuator));
-            else if (value == game::AnimatorClass::Type::PropertyAnimator)
-                return sol::make_object(lua, AsPropertyAnimator(actuator));
-            else BUG("Unhandled animator type.");
-        });
+
+            if (auto* ptr = game::AsPropertyAnimator(animator))
+                return sol::make_object(lua, ptr);
+            else if (auto* ptr = game::AsBooleanPropertyAnimator(animator))
+                return sol::make_object(lua, ptr);
+            else if (auto* ptr = game::AsKinematicAnimator(animator))
+                return sol::make_object(lua, ptr);
+            else if (auto* ptr = game::AsTransformAnimator(animator))
+                return sol::make_object(lua, ptr);
+            else if (auto* ptr = game::AsMaterialAnimator(animator))
+                return sol::make_object(lua, ptr);
+            else BUG("Missing animator type");
+
+            return sol::make_object(lua, sol::nil);
+        };
 
     using EntityNodeList = ResultVector<EntityNode*>;
     auto entity_node_list = table.new_usertype<EntityNodeList>("EntityNodeList");

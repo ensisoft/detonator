@@ -1410,11 +1410,6 @@ void InitLuaDoc()
     DOC_METHOD_0("string", "GetNodeId", "Get the entity node ID that the animator will apply on.");
     DOC_METHOD_0("float", "GetStartTime", "Get the animation time in seconds when the animator will start.");
     DOC_METHOD_0("float", "GetDuration", "Get the duration of the animator's operation.");
-    DOC_METHOD_0("game.TransformAnimator", "AsTransformAnimator", "Cast the animator to a TransformAnimator. Returns nil if the cast failed.");
-    DOC_METHOD_0("game.BooleanPropertyAnimator", "AsBooleanPropertyAnimator", "Cast the animator to a BooleanPropertyAnimator. Returns nil if the cast failed.");
-    DOC_METHOD_0("game.PropertyAnimator", "AsPropertyAnimator", "Cast the animator to a PropertyAnimator. Returns nil if the cast failed.");
-    DOC_METHOD_0("game.KinematicAnimator", "AsKinematicAnimator", "Cast the animator to a KinematicAnimator. Returns nil if the cast failed.");
-    DOC_METHOD_0("game.MaterialAnimator", "AsMaterialAnimator", "Cast the animator to a MaterialAnimator. Returns nil if the cast failed.");
 
     DOC_TABLE("game.TransformAnimator");
     DOC_METHOD_1("void", "SetEndPosition", "Set the ending position for animator movement.<br>"
@@ -1493,15 +1488,13 @@ void InitLuaDoc()
     DOC_METHOD_0("float", "GetCurrentTime", "Get the current animation time in seconds.");
     DOC_METHOD_0("float", "GetDuration", "Get the animation duration in seconds.");
     DOC_METHOD_0("game.AnimationClass", "GetClass", "Get the class object.");
-    DOC_METHOD_2("game.Animator", "FindAnimatorById", "Find an animator by its class ID.<br>"
-                                                      "Returns nil if no such animator could be found.<br>"
-                                                      "Takes an optional type string for down casting the animator to a specific type.",
-                 "string", "id", "string", "type");
-    DOC_METHOD_2("game.Animator", "FindAnimatorByName", "Find an animator by its class name.<br>"
+    DOC_METHOD_1("game.Animator", "FindAnimatorById", "Find an animator by its class ID.<br>"
+                                                      "Returns nil if no such animator could be found.<br>",
+                 "string", "id");
+    DOC_METHOD_1("game.Animator", "FindAnimatorByName", "Find an animator by its class name.<br>"
                                                         "Returns nil if no such animator could be found.<br>"
-                                                        "In case multiple animator have the same name it's unspecified which one is returned.<br>"
-                                                        "Takes an optional type string for down casting the animator to a specific type.",
-                 "string", "name", "string", "type");
+                                                        "In case multiple animator have the same name it's unspecified which one is returned.<br>",
+                 "string", "name");
 
     DOC_TABLE("game.Entity");
     DOC_METHOD_0("bool|float|string|int|vec2", "index", "Lua index meta method.<br>"
