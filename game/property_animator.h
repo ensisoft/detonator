@@ -263,5 +263,9 @@ namespace game
         float mTime = 0.0f;
     };
 
+    ANIMATOR_INSTANCE_CASTING_MACROS(PropertyAnimator, Animator::Type::PropertyAnimator)
+    ANIMATOR_CLASS_CASTING_MACROS(PropertyAnimatorClass, Animator::Type::PropertyAnimator)
 
+    ANIMATOR_INSTANCE_CASTING_MACROS(BooleanPropertyAnimator, Animator::Type::BooleanPropertyAnimator)
+    ANIMATOR_CLASS_CASTING_MACROS(BooleanPropertyAnimatorClass, Animator::Type::BooleanPropertyAnimator)
 } // namespace

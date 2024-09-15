@@ -27,7 +27,6 @@
 
 namespace game
 {
-
     // AnimatorClass defines an interface for classes of animators.
     // Animators are objects that modify the state of some object
     // (such as an entity node) over time. For example a transform
@@ -100,11 +99,6 @@ namespace game
     };
 
     class EntityNode;
-    class KinematicAnimator;
-    class TransformAnimator;
-    class MaterialAnimator;
-    class PropertyAnimator;
-    class BooleanPropertyAnimator;
 
     // An instance of AnimatorClass object.
     class Animator
@@ -135,24 +129,39 @@ namespace game
         virtual std::unique_ptr<Animator> Copy() const = 0;
         // Get the dynamic type of the animator.
         virtual Type GetType() const = 0;
-
-        KinematicAnimator* AsKinematicAnimator();
-        TransformAnimator* AsTransformAnimator();
-        MaterialAnimator* AsMaterialAnimator();
-        PropertyAnimator* AsPropertyAnimator();
-        BooleanPropertyAnimator* AsBooleanPropertyAnimator();
-
-        const KinematicAnimator* AsKinematicAnimator() const;
-        const TransformAnimator* AsTransformAnimator() const;
-        const MaterialAnimator* AsMaterialAnimator() const;
-        const PropertyAnimator* AsPropertyAnimator() const;
-        const BooleanPropertyAnimator* AsBooleanPropertyAnimator() const;
     private:
-        template<typename T>
-        T* Cast(Type desire);
-
-        template<typename T>
-        const T* Cast(Type desire) const;
     };
+
+    template<typename Dst, typename Src>
+    Dst* AnimatorCast(game::AnimatorClass::Type desire, Src* src)
+    {
+        if (src->GetType() == desire)
+            return static_cast<Dst*>(src);
+        return nullptr;
+    }
+
+    template<typename Dst, typename Src>
+    const Dst* AnimatorCast(game::AnimatorClass::Type desire, const Src* src)
+    {
+        if (src->GetType() == desire)
+            return static_cast<const Dst*>(src);
+        return nullptr;
+    }
+
+#define ANIMATOR_INSTANCE_CASTING_MACROS(Class, Type)                                        \
+    inline Class * As##Class(Animator* animator) noexcept {                                  \
+        return AnimatorCast<Class>(Type, animator);                                          \
+    }                                                                                        \
+    inline const Class * As##Class(const Animator* animator) noexcept {                      \
+        return AnimatorCast<Class>(Type, animator);                                          \
+    }                                                                                        \
+
+#define ANIMATOR_CLASS_CASTING_MACROS(Class, Type)                                           \
+    inline Class * As##Class(AnimatorClass* animator) noexcept {                             \
+        return AnimatorCast<Class>(Type, animator);                                          \
+    }                                                                                        \
+    inline const Class * As##Class(const AnimatorClass* animator) noexcept {                 \
+        return AnimatorCast<Class>(Type, animator);                                          \
+    }                                                                                        \
 
 } // namespace

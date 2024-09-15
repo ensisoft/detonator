@@ -976,15 +976,15 @@ void BindGameLib(sol::state& L)
                 throw GameError("No such animator type: " + type);
             const auto value = enum_val.value();
             if (value == game::AnimatorClass::Type::TransformAnimator)
-                return sol::make_object(lua, actuator->AsTransformAnimator());
+                return sol::make_object(lua, AsTransformAnimator(actuator));
             else if (value == game::AnimatorClass::Type::MaterialAnimator)
-                return sol::make_object(lua, actuator->AsMaterialAnimator());
+                return sol::make_object(lua, AsMaterialAnimator(actuator));
             else if (value== game::AnimatorClass::Type::KinematicAnimator)
-                return sol::make_object(lua, actuator->AsKinematicAnimator());
+                return sol::make_object(lua, AsKinematicAnimator(actuator));
             else if (value == game::AnimatorClass::Type::BooleanPropertyAnimator)
-                return sol::make_object(lua, actuator->AsBooleanPropertyAnimator());
+                return sol::make_object(lua, AsBooleanPropertyAnimator(actuator));
             else if (value == game::AnimatorClass::Type::PropertyAnimator)
-                return sol::make_object(lua, actuator->AsPropertyAnimator());
+                return sol::make_object(lua, AsPropertyAnimator(actuator));
             else BUG("Unhandled animator type.");
         });
     animation["FindAnimatorByName"] = sol::overload(
@@ -1001,15 +1001,15 @@ void BindGameLib(sol::state& L)
                 throw GameError("No such animator type: " + type);
             const auto value = enum_val.value();
             if (value == game::AnimatorClass::Type::TransformAnimator)
-                return sol::make_object(lua, actuator->AsTransformAnimator());
+                return sol::make_object(lua, AsTransformAnimator(actuator));
             else if (value == game::AnimatorClass::Type::MaterialAnimator)
-                return sol::make_object(lua, actuator->AsMaterialAnimator());
+                return sol::make_object(lua, AsMaterialAnimator(actuator));
             else if (value== game::AnimatorClass::Type::KinematicAnimator)
-                return sol::make_object(lua, actuator->AsKinematicAnimator());
+                return sol::make_object(lua, AsKinematicAnimator(actuator));
             else if (value == game::AnimatorClass::Type::BooleanPropertyAnimator)
-                return sol::make_object(lua, actuator->AsBooleanPropertyAnimator());
+                return sol::make_object(lua, AsBooleanPropertyAnimator(actuator));
             else if (value == game::AnimatorClass::Type::PropertyAnimator)
-                return sol::make_object(lua, actuator->AsPropertyAnimator());
+                return sol::make_object(lua, AsPropertyAnimator(actuator));
             else BUG("Unhandled animator type.");
         });
 
