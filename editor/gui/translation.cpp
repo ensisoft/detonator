@@ -150,6 +150,16 @@ std::string TranslateEnum(PropertyAnimatorClass::PropertyName name)
         return "Transformer Angular Velocity";
     else if (name == P::Transformer_AngularAcceleration)
         return "Transformer Angular Acceleration";
+    else if (name == P::RigidBodyJoint_MotorTorque)
+        return "Rigid Body Joint Motor Torque";
+    else if (name == P::RigidBodyJoint_MotorSpeed)
+        return "Rigid Body Joint Motor Speed";
+    else if (name == P::RigidBodyJoint_MotorForce)
+        return "Rigid Body Joint Motor Force";
+    else if (name == P::RigidBodyJoint_Damping)
+        return "Rigid Body Joint Damping";
+    else if (name == P::RigidBodyJoint_Stiffness)
+        return "Rigid Body Joint Stiffness";
     else BUG("Missing translation");
     return "???";
 }
@@ -196,6 +206,10 @@ std::string TranslateEnum(BooleanPropertyAnimatorClass::PropertyName name)
         return "Enable Spatial Node";
     else if (name == P::Transformer_Enabled)
         return "Enable Node Transformer";
+    else if (name == P::RigidBodyJoint_EnableLimits)
+        return "Enable Joint Limits";
+    else if (name == P::RigidBodyJoint_EnableMotor)
+        return "Enable Joint Motor";
     else BUG("Missing translation");
     return "???";
 }

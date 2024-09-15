@@ -200,6 +200,7 @@ AnimationTrackWidget::AnimationTrackWidget(app::Workspace* workspace, const std:
     mUI.tree->SetModel(mTreeModel.get());
     mUI.tree->Rebuild();
 
+    RemoveDeletedItems();
     CreateTimelines();
     mUI.timeline->SetDuration(mState.track->GetDuration());
     mUI.timeline->Rebuild();
@@ -414,6 +415,8 @@ bool AnimationTrackWidget::LoadState(const Settings& settings)
     }
     mUI.timeline->SetDuration(mState.track->GetDuration());
     mUI.timeline->Rebuild();
+
+    RemoveDeletedItems();
 
     UpdateTrackUI();
     return true;
@@ -1085,6 +1088,14 @@ void AnimationTrackWidget::on_setvalEndValue_ValueChanged()
     }
 }
 
+void AnimationTrackWidget::on_setvalJoint_currentIndexChanged(int index)
+{
+    if (auto* node = GetCurrentEntityNode())
+    {
+        SetSelectedActuatorProperties();
+    }
+}
+
 void AnimationTrackWidget::on_kinematicEndVeloX_valueChanged(double value)
 {
     if (auto* node = GetCurrentEntityNode())
@@ -1153,6 +1164,14 @@ void AnimationTrackWidget::on_flagTime_valueChanged(double)
     }
 }
 
+void AnimationTrackWidget::on_flagJoint_currentIndexChanged(int)
+{
+    if (auto* node = GetCurrentEntityNode())
+    {
+        SetSelectedActuatorProperties();
+    }
+}
+
 void AnimationTrackWidget::on_materialInterpolation_currentIndexChanged(int)
 {
     if (auto* node = GetCurrentEntityNode())
@@ -1211,6 +1230,7 @@ void AnimationTrackWidget::SetActuatorUIDefaults()
     SetValue(mUI.setvalInterpolation, game::PropertyAnimatorClass::Interpolation::Cosine);
     SetValue(mUI.setvalName, game::PropertyAnimatorClass::PropertyName::Drawable_TimeScale);
     SetValue(mUI.setvalEndValue, 0.0f);
+    SetValue(mUI.setvalJoint, -1);
     SetValue(mUI.kinematicTarget, game::KinematicAnimatorClass::Target::RigidBody);
     SetValue(mUI.kinematicInterpolation, game::KinematicAnimatorClass::Interpolation::Cosine);
     SetValue(mUI.kinematicEndVeloX, 0.0f);
@@ -1223,6 +1243,8 @@ void AnimationTrackWidget::SetActuatorUIDefaults()
     SetValue(mUI.itemFlags, game::BooleanPropertyAnimatorClass::PropertyName::Drawable_VisibleInGame);
     SetValue(mUI.flagAction, game::BooleanPropertyAnimatorClass::PropertyAction::On);
     SetValue(mUI.flagTime, 1.0f);
+    SetValue(mUI.flagJoint, -1);
+
 
     mUI.curve->ClearFunction();
 
@@ -1370,9 +1392,38 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
             mUI.setvalEndValue->SetType(Uniform::Type::Color);
             setter->SetEndValue(ToGfx(mUI.setvalEndValue->GetAsColor()));
         }
+        else if (name == Name::RigidBodyJoint_MotorTorque)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::RigidBodyJoint_MotorSpeed)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::RigidBodyJoint_MotorForce)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::RigidBodyJoint_Stiffness)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
+        else if (name == Name::RigidBodyJoint_Damping)
+        {
+            mUI.setvalEndValue->SetType(Uniform::Type::Float);
+            setter->SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        }
         else BUG("Unhandled value actuator value type.");
+
         setter->SetInterpolation(GetValue(mUI.setvalInterpolation));
         setter->SetPropertyName(name);
+        setter->SetJointId(GetItemId(mUI.setvalJoint));
+
+        SetEnabled(mUI.setvalJoint, setter->RequiresJoint());
 
         mUI.curve->SetFunction(setter->GetInterpolation());
     }
@@ -1399,6 +1450,9 @@ void AnimationTrackWidget::SetSelectedActuatorProperties()
         setflag->SetFlagAction(GetValue(mUI.flagAction));
         setflag->SetFlagName(GetValue(mUI.itemFlags));
         setflag->SetTime(GetValue(mUI.flagTime));
+        setflag->SetJointId(GetItemId(mUI.flagJoint));
+
+        SetEnabled(mUI.flagJoint, setflag->RequiresJoint());
 
         mUI.curve->ClearFunction();
     }
@@ -1606,10 +1660,23 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<base::Color4f>());
         else if (name == Name::TextItem_Text)
             SetValue(mUI.setvalEndValue, *ptr->GetEndValue<std::string>());
+        else if (name == Name::RigidBodyJoint_MotorTorque)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::RigidBodyJoint_MotorSpeed)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::RigidBodyJoint_MotorForce)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::RigidBodyJoint_Stiffness)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
+        else if (name == Name::RigidBodyJoint_Damping)
+            SetValue(mUI.setvalEndValue, *ptr->GetEndValue<float>());
         else BUG("Unhandled set value actuator value type.");
 
         SetValue(mUI.setvalInterpolation, ptr->GetInterpolation());
         SetValue(mUI.setvalName, ptr->GetPropertyName());
+        SetValue(mUI.setvalJoint, ListItemId(ptr->GetJointId()));
+        SetEnabled(mUI.setvalJoint, ptr->RequiresJoint());
+
         mUI.actuatorProperties->setCurrentWidget(mUI.setvalActuator);
 
         mUI.curve->SetFunction(ptr->GetInterpolation());
@@ -1637,6 +1704,9 @@ void AnimationTrackWidget::SelectedItemChanged(const TimelineWidget::TimelineIte
         SetValue(mUI.itemFlags, ptr->GetFlagName());
         SetValue(mUI.flagAction, ptr->GetFlagAction());
         SetValue(mUI.flagTime, ptr->GetTime());
+        SetValue(mUI.flagJoint, ListItemId(ptr->GetJointId()));
+        SetEnabled(mUI.flagJoint, ptr->RequiresJoint());
+
         mUI.actuatorProperties->setCurrentWidget(mUI.setflagActuator);
 
         mUI.curve->ClearFunction();
@@ -2021,6 +2091,8 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::AnimatorClass::Type typ
         klass.SetDuration(node_duration);
         klass.SetPropertyName(GetValue(mUI.setvalName));
         klass.SetInterpolation(GetValue(mUI.setvalInterpolation));
+        klass.SetJointId(GetItemId(mUI.setvalJoint));
+
         if (value == ValName::Drawable_TimeScale)
             klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
         else if (value == ValName::Drawable_RotationX)
@@ -2049,7 +2121,18 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::AnimatorClass::Type typ
             klass.SetEndValue(app::ToUtf8(mUI.setvalEndValue->GetAsString()));
         else if (value == ValName::TextItem_Color)
             klass.SetEndValue(ToGfx(mUI.setvalEndValue->GetAsColor()));
+        else if (value == ValName::RigidBodyJoint_MotorTorque)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        else if (value == ValName::RigidBodyJoint_MotorSpeed)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        else if (value == ValName::RigidBodyJoint_MotorForce)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        else if (value == ValName::RigidBodyJoint_Stiffness)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
+        else if (value == ValName::RigidBodyJoint_Damping)
+            klass.SetEndValue(mUI.setvalEndValue->GetAsFloat());
         else BUG("Unhandled value actuator value type.");
+
         actuator = app::FromUtf8(klass.GetId());
         mState.actuator_to_timeline[klass.GetId()] = timeline.selfId;
         mState.track->AddAnimator(klass);
@@ -2081,6 +2164,7 @@ void AnimationTrackWidget::AddActuatorFromTimeline(game::AnimatorClass::Type typ
         klass.SetDuration(node_duration);
         klass.SetFlagName(GetValue(mUI.itemFlags));
         klass.SetFlagAction(GetValue(mUI.flagAction));
+        klass.SetJointId(GetItemId(mUI.flagJoint));
         actuator = app::FromUtf8(klass.GetId());
         mState.actuator_to_timeline[klass.GetId()] = timeline.selfId;
         mState.track->AddAnimator(klass);
@@ -2126,17 +2210,37 @@ void AnimationTrackWidget::CreateTimelines()
 
 void AnimationTrackWidget::RemoveDeletedItems()
 {
-    // remove orphaned actuators.
-    std::vector<std::string> dead_actuators;
+    // delete animators that refer to a node/joint that no longer exists
+    std::vector<std::string> dead_animators;
     for (size_t i=0; i< mState.track->GetNumAnimators(); ++i)
     {
-        const auto& actuator = mState.track->GetAnimatorClass(i);
-        const auto& node = actuator.GetNodeId();
-        if (mState.entity->FindNodeById(node))
-            continue;
-        dead_actuators.push_back(actuator.GetId());
+        const auto& animator = mState.track->GetAnimatorClass(i);
+        const auto& node = animator.GetNodeId();
+        if (!mState.entity->FindNodeById(node))
+        {
+            dead_animators.push_back(animator.GetId());
+            DEBUG("Deleting animator because the entity node is no longer available. [animator='%1']", animator.GetName());
+        }
+        else if (const auto* ptr = game::AsPropertyAnimatorClass(&animator))
+        {
+            const auto* joint = mState.entity->FindJointById(ptr->GetJointId());
+            if (!joint && ptr->RequiresJoint())
+            {
+                dead_animators.push_back(animator.GetId());
+                DEBUG("Deleting animator because the joint is no longer available. [animator='%1']", animator.GetName());
+            }
+        }
+        else if (const auto* ptr = game::AsBooleanPropertyAnimatorClass(&animator))
+        {
+            const auto* joint = mState.entity->FindJointById(ptr->GetJointId());
+            if (!joint && ptr->RequiresJoint())
+            {
+                dead_animators.push_back(animator.GetId());
+                DEBUG("Deleting animator because the joint is no longer available. [animator='%1']", animator.GetName());
+            }
+        }
     }
-    for (const auto& id : dead_actuators)
+    for (const auto& id : dead_animators)
     {
         mState.track->DeleteAnimatorById(id);
         mState.actuator_to_timeline.erase(id);
@@ -2146,13 +2250,29 @@ void AnimationTrackWidget::RemoveDeletedItems()
     for (auto it = mState.timelines.begin();  it != mState.timelines.end();)
     {
         const auto& timeline = *it;
-        if (mState.entity->FindNodeById(timeline.nodeId)) {
+        if (mState.entity->FindNodeById(timeline.nodeId))
+        {
             ++it;
             continue;
-        } else {
+        }
+        else
+        {
             it = mState.timelines.erase(it);
         }
     }
+
+
+    std::vector<ListItem> joints;
+    for (size_t i=0; i<mState.entity->GetNumJoints(); ++i)
+    {
+        const auto& joint = mState.entity->GetJoint(i);
+        ListItem li;
+        li.id   = joint.GetId();
+        li.name = joint.GetName();
+        joints.push_back(li);
+    }
+    SetList(mUI.setvalJoint, joints);
+    SetList(mUI.flagJoint, joints);
 }
 
 void AnimationTrackWidget::ReturnToDefault()

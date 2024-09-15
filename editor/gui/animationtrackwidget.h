@@ -124,6 +124,7 @@ namespace gui
         void on_transformEndScaleY_valueChanged(double value);
         void on_transformEndRotation_valueChanged(double value);
         void on_setvalEndValue_ValueChanged();
+        void on_setvalJoint_currentIndexChanged(int index);
 
         void on_kinematicInterpolation_currentIndexChanged(int index);
         void on_kinematicTarget_currentIndexChanged(int index);
@@ -137,6 +138,7 @@ namespace gui
         void on_itemFlags_currentIndexChanged(int);
         void on_flagAction_currentIndexChanged(int index);
         void on_flagTime_valueChanged(double);
+        void on_flagJoint_currentIndexChanged(int);
         void on_materialInterpolation_currentIndexChanged(int);
         void on_btnMaterialParameters_clicked();
         void SelectedItemChanged(const TimelineWidget::TimelineItem* item);
