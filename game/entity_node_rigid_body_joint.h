@@ -23,6 +23,7 @@
 #include <optional>
 #include <memory>
 #include <vector>
+#include <optional>
 
 #include "base/bitflag.h"
 #include "base/utility.h"
@@ -216,34 +217,46 @@ namespace game
         const JointParams& GetParams() const noexcept
         { return mClass->params; }
 
-        inline bool HasPendingSettings() const noexcept
-        { return !mSettings.empty(); }
+        inline bool HasPendingAdjustments() const noexcept
+        { return !mAdjustments.empty(); }
 
-        inline void ClearPendingSettings() noexcept
-        { mSettings.clear(); }
+        inline void ClearPendingAdjustments() noexcept
+        { mAdjustments.clear(); }
 
         inline bool CanSettingsChangeRuntime() const noexcept
         { return mClass->CanSettingsChangeRuntime(); }
 
         bool ValidateJointSetting(JointSetting setting, JointSettingValue value) const noexcept;
-        void SetJointSetting(JointSetting setting, JointSettingValue value);
+        void AdjustJoint(JointSetting setting, JointSettingValue value);
 
         struct JointValueSetting {
             JointSetting setting;
             JointSettingValue  value;
         };
-        inline size_t GetNumPendingSettings() const noexcept
-        { return mSettings.size(); }
+        inline size_t GetNumPendingAdjustments() const noexcept
+        { return mAdjustments.size(); }
 
-        const JointValueSetting* GetPendingSetting(size_t index) const noexcept
-        { return &base::SafeIndex(mSettings, index); }
+        const JointValueSetting* GetPendingAdjustment(size_t index) const noexcept
+        { return &base::SafeIndex(mAdjustments, index); }
+
+        void UpdateCurrentJointValue(JointSetting setting, JointSettingValue value);
+
+        void InitializeCurrentValues() const;
+
+        void RealizePendingAdjustments();
+
+        std::optional<JointValueSetting> FindCurrentJointValue(JointSetting setting) const;
 
     private:
         std::shared_ptr<const RigidBodyJointClass> mClass;
         std::string mId;
         EntityNode* mSrcNode = nullptr;
         EntityNode* mDstNode = nullptr;
-        std::vector<JointValueSetting> mSettings;
+        std::vector<JointValueSetting> mAdjustments;
+        // current joint values as provided by the physics
+        // engine. only filled in when the joint has been
+        // flagged with EnableRuntimeSettings (dynamic)
+        mutable std::vector<JointValueSetting> mCurrentValues;
     };
 
 } // namespace

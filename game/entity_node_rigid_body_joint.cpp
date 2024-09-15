@@ -272,12 +272,12 @@ bool RigidBodyJoint::ValidateJointSetting(game::RigidBodyJoint::JointSetting set
     return false;
 }
 
-void RigidBodyJoint::SetJointSetting(JointSetting setting, JointSettingValue value)
+void RigidBodyJoint::AdjustJoint(JointSetting setting, JointSettingValue value)
 {
     // schedule a pending setting change on the joint.
     // the physics subsystem will then set the setting on the joint
     // in the next update
-    for (auto& pending : mSettings)
+    for (auto& pending : mAdjustments)
     {
         if (pending.setting == setting)
         {
@@ -289,7 +289,104 @@ void RigidBodyJoint::SetJointSetting(JointSetting setting, JointSettingValue val
     JointValueSetting pending;
     pending.setting = setting;
     pending.value   = value;
-    mSettings.push_back(pending);
+    mAdjustments.push_back(pending);
+}
+
+void RigidBodyJoint::UpdateCurrentJointValue(game::RigidBodyJoint::JointSetting setting,
+                                             game::RigidBodyJoint::JointSettingValue value)
+{
+    for (auto& current : mCurrentValues)
+    {
+        if (current.setting == setting)
+        {
+            current.value = value;
+            return;
+        }
+    }
+}
+
+void RigidBodyJoint::InitializeCurrentValues() const
+{
+    // we only provide dynamic joint settings if the flag
+    // is set to indicate this feature
+
+    if (!CanSettingsChangeRuntime())
+        return;
+
+    auto SetValue = [this](JointSetting setting, JointSettingValue  value) {
+        JointValueSetting jvs;
+        jvs.setting = setting;
+        jvs.value   = value;
+        mCurrentValues.push_back(jvs);
+    };
+
+    const auto& params= GetParams();
+
+    if (const auto* ptr = std::get_if<RigidBodyJointClass::RevoluteJointParams>(&params))
+    {
+        SetValue(JointSetting::EnableLimit, ptr->enable_limit);
+        SetValue(JointSetting::EnableMotor, ptr->enable_motor);
+        SetValue(JointSetting::MotorSpeed, ptr->motor_speed);
+        SetValue(JointSetting::MotorTorque, ptr->motor_torque);
+    }
+    else if (const auto* ptr = std::get_if<RigidBodyJointClass::DistanceJointParams>(&params))
+    {
+        SetValue(JointSetting::Damping, ptr->damping);
+        SetValue(JointSetting::Stiffness, ptr->stiffness);
+    }
+    else if (const auto* ptr = std::get_if<RigidBodyJointClass::WeldJointParams>(&params))
+    {
+        SetValue(JointSetting::Damping, ptr->damping);
+        SetValue(JointSetting::Stiffness, ptr->stiffness);
+    }
+    else if (const auto* ptr = std::get_if<RigidBodyJointClass::MotorJointParams>(&params))
+    {
+        SetValue(JointSetting::MotorForce, ptr->max_force);
+        SetValue(JointSetting::MotorTorque, ptr->max_torque);
+    }
+    else if (const auto* ptr = std::get_if<RigidBodyJointClass::PrismaticJointParams>(&params))
+    {
+        SetValue(JointSetting::EnableLimit, ptr->enable_limit);
+        SetValue(JointSetting::EnableMotor, ptr->enable_motor);
+        SetValue(JointSetting::MotorSpeed, ptr->motor_speed);
+        SetValue(JointSetting::MotorTorque, ptr->motor_torque);
+    }
+}
+
+void RigidBodyJoint::RealizePendingAdjustments()
+{
+    if (!CanSettingsChangeRuntime())
+        return;
+
+    // Right now the only API to change joint settings is through
+    // the joint adjustment API. that means that any adjustment
+    // will then become the current value and it's only ever
+    // reflected towards the physics engine joint.
+
+    auto SetCurrent = [this](JointSetting setting, JointSettingValue value) {
+        for (auto& s : mCurrentValues) {
+            if (s.setting == setting) {
+                s.value = value;
+                return true;
+            }
+        }
+        return false;
+    };
+    for (auto& adjustment : mAdjustments)
+    {
+        ASSERT(SetCurrent(adjustment.setting, adjustment.value));
+    }
+}
+
+std::optional<RigidBodyJoint::JointValueSetting> RigidBodyJoint::FindCurrentJointValue(
+        game::RigidBodyJoint::JointSetting setting) const
+{
+    for (const auto& current : mCurrentValues)
+    {
+        if (current.setting == setting)
+            return current;
+    }
+    return std::nullopt;
 }
 
 } // namespace

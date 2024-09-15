@@ -657,13 +657,13 @@ void BindGameLib(sol::state& L)
     };
 
     auto joint = table.new_usertype<RigidBodyJoint>("RigidBodyJoint");
-    joint["GetId"]      = &RigidBodyJoint::GetId;
-    joint["GetClassId"] = &RigidBodyJoint::GetClassId;
-    joint["GetName"]    = &RigidBodyJoint::GetName;
-    joint["GetType"]    = &GetTypeString<RigidBodyJoint>;
-    joint["GetNodeA"]   = GetMutable(&RigidBodyJoint::GetSrcNode);
-    joint["GetNodeB"]   = GetMutable(&RigidBodyJoint::GetDstNode);
-    joint["SetValue"]   = sol::overload(
+    joint["GetId"]        = &RigidBodyJoint::GetId;
+    joint["GetClassId"]   = &RigidBodyJoint::GetClassId;
+    joint["GetName"]      = &RigidBodyJoint::GetName;
+    joint["GetType"]      = &GetTypeString<RigidBodyJoint>;
+    joint["GetNodeA"]     = GetMutable(&RigidBodyJoint::GetSrcNode);
+    joint["GetNodeB"]     = GetMutable(&RigidBodyJoint::GetDstNode);
+    joint["AdjustJoint"]  = sol::overload(
         [](RigidBodyJoint& joint, const std::string& setting, bool value) {
             const auto enum_val = magic_enum::enum_cast<RigidBodyJoint::JointSetting>(setting);
             if (!enum_val.has_value())
@@ -675,7 +675,7 @@ void BindGameLib(sol::state& L)
                 return false;
             }
 
-            joint.SetJointSetting(enum_val.value(), value);
+            joint.AdjustJoint(enum_val.value(), value);
             return true;
         },
         [](RigidBodyJoint& joint, const std::string& setting, float value) {
@@ -688,7 +688,7 @@ void BindGameLib(sol::state& L)
                      joint.GetName(), enum_val.value());
                 return false;
             }
-            joint.SetJointSetting(enum_val.value(), value);
+            joint.AdjustJoint(enum_val.value(), value);
             return true;
         });
 

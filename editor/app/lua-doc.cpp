@@ -1176,10 +1176,10 @@ void InitLuaDoc()
                                       "'Distance','Revolute', 'Prismatic', 'Weld', 'Pulley', 'Motor'");
     DOC_METHOD_0("game.EntityNode", "GetNodeA", "Get the 1st node (A) this joint is connected to.");
     DOC_METHOD_0("game.EntityNode", "GetNodeB", "Get the 2nd node (B) this joint is connected to.");
-    DOC_METHOD_2("bool", "SetValue",
+    DOC_METHOD_2("bool", "AdjustJoint",
                  "Change a joint setting. If the setting is valid it will take place on the next "
                  "iteration of the physics engine update and the function returns true.<br>"
-                 "If the setting is not valid for the joint false is returned.<br>"
+                 "If the setting is not valid for the joint, false is returned.<br>"
                  "Joint settings per joint type: <br>"
 
                  "<b>Prismatic Joint:</b><br>"
