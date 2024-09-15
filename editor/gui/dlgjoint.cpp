@@ -116,6 +116,7 @@ void DlgJoint::Show()
     SetValue(mUI.dstX, mJoint.dst_node_anchor_point.x);
     SetValue(mUI.dstY, mJoint.dst_node_anchor_point.y);
     SetValue(mUI.chkCollideConnected, mJoint.CollideConnected());
+    SetValue(mUI.chkStaticSettings, mJoint.IsStatic());
 
     if (mJoint.type == game::EntityClass::PhysicsJointType::Distance)
     {
@@ -290,6 +291,7 @@ bool DlgJoint::Apply()
     mJoint.src_node_anchor_point.x = GetValue(mUI.srcX);
     mJoint.src_node_anchor_point.y = GetValue(mUI.srcY);
     mJoint.SetFlag(game::EntityClass::PhysicsJoint::Flags::CollideConnected, GetValue(mUI.chkCollideConnected));
+    mJoint.SetFlag(game::EntityClass::PhysicsJoint::Flags::StaticSettings, GetValue(mUI.chkStaticSettings));
 
     if (mJoint.type == game::EntityClass::PhysicsJointType::Distance)
     {
@@ -386,6 +388,14 @@ bool DlgJoint::Apply()
         mJoint.params = params;
     }
     return true;
+}
+
+void DlgJoint::on_btnSwap_clicked()
+{
+    QString nodeA = GetItemId(mUI.cmbSrcNode);
+    QString nodeB = GetItemId(mUI.cmbDstNode);
+    SetValue(mUI.cmbDstNode, ListItemId(nodeA));
+    SetValue(mUI.cmbSrcNode, ListItemId(nodeB));
 }
 
 void DlgJoint::on_btnApply_clicked()

@@ -38,6 +38,7 @@ namespace gui
        ~DlgJoint();
 
     private slots:
+        void on_btnSwap_clicked();
         void on_btnApply_clicked();
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();

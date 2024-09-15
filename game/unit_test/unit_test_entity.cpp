@@ -30,6 +30,7 @@
 #include "base/memory.h"
 #include "data/json.h"
 #include "game/entity.h"
+#include "game/entity_node_rigid_body_joint.h"
 #include "game/entity_node_transformer.h"
 #include "game/entity_node_rigid_body.h"
 #include "game/entity_node_drawable_item.h"
@@ -38,6 +39,7 @@
 #include "game/entity_node_fixture.h"
 #include "game/entity_node_tilemap_node.h"
 #include "game/transform_animator.h"
+#include "game/property_animator.h"
 
 // build easily comparable representation of the render tree
 // by concatenating node names into a string in the order
@@ -151,6 +153,7 @@ void unit_test_entity_node()
     node.SetFixture(fix);
     node.SetMapNode(map);
     node.SetTransformer(transformer);
+
 
     TEST_REQUIRE(node.HasDrawable());
     TEST_REQUIRE(node.HasRigidBody());
@@ -404,7 +407,7 @@ void unit_test_entity_class()
         entity.AddScriptVar(std::move(var));
     }
 
-    // animator
+    // state controller
     {
         game::EntityStateClass src_state;
         src_state.SetName("src_state");
@@ -509,6 +512,20 @@ void unit_test_entity_class()
         entity.AddJoint(std::move(joint));
     }
 
+    // joint property animator (needed for joint ID mapping on clone)
+    {
+        game::PropertyAnimatorClass prop;
+        prop.SetJointId(entity.GetJoint(0).GetId());
+        prop.SetName("Joint Animator");
+
+        game::AnimationClass anim;
+        anim.SetName("Joint Animation");
+        anim.AddAnimator(prop);
+
+        entity.AddAnimation(anim);
+
+    }
+
 
     TEST_REQUIRE(entity.GetName() == "TestEntityClass");
     TEST_REQUIRE(entity.GetLifetime() == real::float32(5.0f));
@@ -525,7 +542,7 @@ void unit_test_entity_class()
     TEST_REQUIRE(entity.FindNodeById(entity.GetNode(0).GetId()));
     TEST_REQUIRE(entity.FindNodeById(entity.GetNode(1).GetId()));
     TEST_REQUIRE(entity.FindNodeById("asg") == nullptr);
-    TEST_REQUIRE(entity.GetNumAnimations() == 2);
+    TEST_REQUIRE(entity.GetNumAnimations() == 3);
     TEST_REQUIRE(entity.FindAnimationByName("test1"));
     TEST_REQUIRE(entity.FindAnimationByName("sdgasg") == nullptr);
     TEST_REQUIRE(entity.GetIdleTrackId() == entity.GetAnimation(1).GetId());
@@ -574,7 +591,7 @@ void unit_test_entity_class()
         TEST_REQUIRE(ret.GetNode(2).GetName() == "child_2");
         TEST_REQUIRE(ret.GetId() == entity.GetId());
         TEST_REQUIRE(ret.GetHash() == entity.GetHash());
-        TEST_REQUIRE(ret.GetNumAnimations() == 2);
+        TEST_REQUIRE(ret.GetNumAnimations() == 3);
         TEST_REQUIRE(ret.FindAnimationByName("test1"));
         TEST_REQUIRE(ret.GetNumScriptVars() == 4);
         TEST_REQUIRE(ret.GetScriptVar(0).GetName() == "something");
@@ -669,7 +686,7 @@ void unit_test_entity_class()
         auto copy(entity);
         TEST_REQUIRE(copy.GetId() == entity.GetId());
         TEST_REQUIRE(copy.GetHash() == entity.GetHash());
-        TEST_REQUIRE(copy.GetNumAnimations() == 2);
+        TEST_REQUIRE(copy.GetNumAnimations() == 3);
         TEST_REQUIRE(copy.FindAnimationByName("test1"));
         TEST_REQUIRE(WalkTree(copy) == "root child_1 child_2");
 
@@ -677,7 +694,7 @@ void unit_test_entity_class()
         temp = entity;
         TEST_REQUIRE(temp.GetId() == entity.GetId());
         TEST_REQUIRE(temp.GetHash() == entity.GetHash());
-        TEST_REQUIRE(temp.GetNumAnimations() == 2);
+        TEST_REQUIRE(temp.GetNumAnimations() == 3);
         TEST_REQUIRE(temp.FindAnimationByName("test1"));
         TEST_REQUIRE(WalkTree(temp) == "root child_1 child_2");
     }
@@ -690,7 +707,7 @@ void unit_test_entity_class()
         TEST_REQUIRE(clone.GetLifetime() == real::float32(5.0f));
         TEST_REQUIRE(clone.TestFlag(game::EntityClass::Flags::UpdateEntity) == false);
         TEST_REQUIRE(clone.TestFlag(game::EntityClass::Flags::WantsMouseEvents) == true);
-        TEST_REQUIRE(clone.GetNumAnimations() == 2);
+        TEST_REQUIRE(clone.GetNumAnimations() == 3);
         TEST_REQUIRE(clone.FindAnimationByName("test1"));
         TEST_REQUIRE(clone.FindAnimationByName("test2"));
         TEST_REQUIRE(clone.GetIdleTrackId() == clone.GetAnimation(1).GetId());
@@ -700,9 +717,48 @@ void unit_test_entity_class()
         TEST_REQUIRE(clone.GetNode(2).GetName() == "child_2");
         TEST_REQUIRE(clone.GetId() != entity.GetId());
         TEST_REQUIRE(clone.GetHash() != entity.GetHash());
-        TEST_REQUIRE(clone.GetNumAnimations() == 2);
+        TEST_REQUIRE(clone.GetNumAnimations() == 3);
         TEST_REQUIRE(clone.FindAnimationByName("test1"));
         TEST_REQUIRE(WalkTree(clone) == "root child_1 child_2");
+
+        TEST_REQUIRE(clone.GetNumJoints() == 4);
+        {
+            TEST_REQUIRE(clone.GetJoint(0).name == "distance-joint");
+            TEST_REQUIRE(clone.GetJoint(0).dst_node_id == clone.GetNode(0).GetId());
+            TEST_REQUIRE(clone.GetJoint(0).src_node_id == clone.GetNode(1).GetId());
+            TEST_REQUIRE(clone.GetJoint(0).src_node_anchor_point == glm::vec2(-1.0f, 2.0f));
+            TEST_REQUIRE(clone.GetJoint(0).dst_node_anchor_point == glm::vec2(2.0f, -1.0f));
+            const auto* joint_params = std::get_if<game::EntityClass::DistanceJointParams>(&clone.GetJoint(0).params);;
+            TEST_REQUIRE(joint_params);
+            TEST_REQUIRE(joint_params->damping == real::float32(2.0f));
+            TEST_REQUIRE(joint_params->stiffness == real::float32(3.0f));
+            TEST_REQUIRE(joint_params->min_distance.has_value());
+            TEST_REQUIRE(joint_params->max_distance.has_value());
+            TEST_REQUIRE(joint_params->min_distance.value() == real::float32(4.0f));
+            TEST_REQUIRE(joint_params->max_distance.value() == real::float32(5.0f));
+        }
+        {
+            TEST_REQUIRE(clone.GetJoint(1).name == "revolute-joint");
+            TEST_REQUIRE(clone.GetJoint(1).dst_node_id == clone.GetNode(0).GetId());
+            TEST_REQUIRE(clone.GetJoint(1).src_node_id == clone.GetNode(1).GetId());
+            TEST_REQUIRE(clone.GetJoint(1).src_node_anchor_point == glm::vec2(-1.0f, 2.0f));
+            TEST_REQUIRE(clone.GetJoint(1).dst_node_anchor_point == glm::vec2(2.0f, -1.0f));
+            const auto* joint_params = std::get_if<game::EntityClass::RevoluteJointParams>(&clone.GetJoint(1).params);
+            TEST_REQUIRE(joint_params);
+            TEST_REQUIRE(joint_params->enable_limit == true);
+            TEST_REQUIRE(joint_params->enable_motor == true);
+            TEST_REQUIRE(joint_params->lower_angle_limit == game::FRadians(1.0f));
+            TEST_REQUIRE(joint_params->upper_angle_limit == game::FRadians(2.0f));
+            TEST_REQUIRE(joint_params->motor_speed  == real::float32(2.0f));
+            TEST_REQUIRE(joint_params->motor_torque == real::float32(1.5f));
+        }
+
+        const auto* joint_animation = clone.FindAnimationByName("Joint Animation");
+        TEST_REQUIRE(joint_animation);
+        TEST_REQUIRE(joint_animation->GetNumAnimators() == 1);
+        const auto* joint_animator = game::AsPropertyAnimatorClass(&joint_animation->GetAnimatorClass(0));
+        TEST_REQUIRE(joint_animator);
+        TEST_REQUIRE(joint_animator->GetJointId() == clone.GetJoint(0).GetId());
 
         const auto* node = clone.FindNodeByName("child_2");
         const auto& var = clone.GetScriptVar(3);
