@@ -1335,13 +1335,26 @@ void MainWindow::on_actionImportModel_triggered()
     dlg.exec();
 }
 
-void MainWindow::on_actionImportFiles_triggered()
+void MainWindow::on_actionImportAudioFile_triggered()
 {
-    QStringList files = QFileDialog::getOpenFileNames(this, tr("Select Files"));
+    QStringList files = QFileDialog::getOpenFileNames(this,
+        tr("Select Audio File(s)"), "",
+        tr("Audio (*.mp3 *.ogg *.wav *.flac)"));
     if (files.isEmpty())
         return;
     ImportFiles(files);
 }
+
+void MainWindow::on_actionImportImageFile_triggered()
+{
+    QStringList files = QFileDialog::getOpenFileNames(this,
+        tr("Select Image File(s)"), "",
+        tr("Image (*.png *.jpg *.jpeg)"));
+    if (files.isEmpty())
+        return;
+    ImportFiles(files);
+}
+
 
 void MainWindow::on_actionImportTiles_triggered()
 {
@@ -2066,7 +2079,8 @@ void MainWindow::on_workspace_customContextMenuRequested(QPoint)
     import.setIcon(QIcon("icons:import.png"));
     import.setTitle("Import Resource...");
     import.addAction(mUI.actionImportTiles);
-    import.addAction(mUI.actionImportFiles);
+    import.addAction(mUI.actionImportAudioFile);
+    import.addAction(mUI.actionImportImageFile);
     import.addAction(mUI.actionImportJSON);
     import.addAction(mUI.actionImportZIP);
 
@@ -3307,7 +3321,8 @@ void MainWindow::ShowHelpWidget()
             mImportMenu->setTitle("Import Resource...");
             mImportMenu->addAction(mUI.actionImportModel);
             mImportMenu->addAction(mUI.actionImportTiles);
-            mImportMenu->addAction(mUI.actionImportFiles);
+            mImportMenu->addAction(mUI.actionImportAudioFile);
+            mImportMenu->addAction(mUI.actionImportImageFile);
             mImportMenu->addAction(mUI.actionImportJSON);
             mImportMenu->addAction(mUI.actionImportZIP);
         }
