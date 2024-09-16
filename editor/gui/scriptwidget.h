@@ -34,6 +34,7 @@
 namespace app {
     class Resource;
     class Workspace;
+    class CodeAssistant;
 } // namespace
 
 namespace gui
@@ -116,8 +117,7 @@ namespace gui
     private:
         Ui::ScriptWidget mUI;
     private:
-        class LuaParser;
-        std::unique_ptr<LuaParser> mLuaParser;
+        std::unique_ptr<app::CodeAssistant> mAssistant;
         app::LuaDocTableModel mLuaHelpData;
         app::LuaDocModelProxy mLuaHelpFilter;
         app::Workspace* mWorkspace = nullptr;
