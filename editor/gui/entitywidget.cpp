@@ -861,6 +861,8 @@ void EntityWidget::SetViewerMode()
     SetValue(mUI.chkSnap,           false);
     SetValue(mUI.chkShowComments,   false);
 
+    mUI.mainSplitter->setSizes({0, 100, 0});
+
     QTimer::singleShot(10, this, &EntityWidget::on_btnViewReset_clicked);
     on_actionPlay_triggered();
 }
