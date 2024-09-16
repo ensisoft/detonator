@@ -42,7 +42,29 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings,
     , mSettings(settings)
     , mScriptSettings(script)
     , mWidgetSettings(widget)
+    , mAssistant(nullptr)
 {
+
+    auto* layout = new QPlainTextDocumentLayout(&mSampleCode);
+    layout->setParent(this);
+    mSampleCode.setDocumentLayout(layout);
+    mSampleCode.setPlainText(R"(-- this is a comment
+
+local my_integer = 123
+local my_string  = 'hello'
+local my_float   = 123.0
+
+function MyFunction()
+  if my_integer == 42 then
+     print('hello')
+  end
+end
+
+)");
+
+    mAssistant.ParseSource(mSampleCode);
+    mAssistant.ApplyHighlight(mSampleCode);
+
     mUI.setupUi(this);
     PopulateFromEnum<MainWidget::GridDensity>(mUI.cmbGrid);
     PopulateFromEnum<GfxWindow::MouseCursor>(mUI.cmbMouseCursor);
@@ -51,6 +73,9 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings,
     PopulateQtStyles(mUI.cmbStyle);
 
     mUI.editorTheme->addItem("Monokai");
+    mUI.code->SetDocument(&mSampleCode);
+    mUI.code->SetSettings(script.editor_settings);
+    mUI.code->ApplySettings();
 
     // general application settings.
     SetUIValue(mUI.edtImageEditorExecutable,    settings.image_editor_executable);
@@ -98,6 +123,25 @@ DlgSettings::DlgSettings(QWidget* parent, AppSettings& settings,
     SetUIValue(mUI.editorInsertSpaces,          script.editor_settings.replace_tabs_with_spaces);
     SetUIValue(mUI.editorFontSize,              script.editor_settings.font_size);
     SetUIValue(mUI.editorFontName,              script.editor_settings.font_description);
+}
+
+void DlgSettings::UpdateSampleCode()
+{
+    TextEditor::Settings editor_settings;
+    GetUIValue(mUI.chkUseCodeCompletion,        &editor_settings.use_code_completer);
+    GetUIValue(mUI.editorShowLineNumbers,       &editor_settings.show_line_numbers);
+    GetUIValue(mUI.editorHightlightCurrentLine, &editor_settings.highlight_current_line);
+    GetUIValue(mUI.editorHightlightSyntax,      &editor_settings.highlight_syntax);
+    GetUIValue(mUI.editorInsertSpaces,          &editor_settings.replace_tabs_with_spaces);
+    GetUIValue(mUI.editorFontSize,              &editor_settings.font_size);
+    GetUIValue(mUI.editorFontName,              &editor_settings.font_description);
+    mUI.code->SetSettings(editor_settings);
+    mUI.code->ApplySettings();
+    if (editor_settings.highlight_syntax)
+        mAssistant.ApplyHighlight(mSampleCode);
+    else mAssistant.RemoveHighlight(mSampleCode);
+
+    mUI.code->update();
 }
 
 void DlgSettings::on_btnAccept_clicked()
@@ -268,6 +312,42 @@ void DlgSettings::on_btnResetGridColor_clicked()
 {
     constexpr QColor color = {0xe3, 0xe3, 0xe3, 50};
     SetUIValue(mUI.gridColor, color);
+}
+
+void DlgSettings::on_editorFontName_currentIndexChanged(int)
+{
+    // fucking doesn't work, wtf, gives the previous font value.. wtf!?
+    // have no interest to debug this now, so fucking hammer it!
+    //UpdateSampleCode();
+
+    QTimer::singleShot(0, this, [this]() {
+        UpdateSampleCode();
+    });
+
+}
+void DlgSettings::on_editorFontSize_currentIndexChanged(int)
+{
+    UpdateSampleCode();
+}
+void DlgSettings::on_editorHightlightSyntax_stateChanged(int)
+{
+    UpdateSampleCode();
+}
+void DlgSettings::on_editorHightlightCurrentLine_stateChanged(int)
+{
+    UpdateSampleCode();
+}
+void DlgSettings::on_editorShowLineNumbers_stateChanged(int)
+{
+    QTimer::singleShot(0, this, [this]() {
+        UpdateSampleCode();
+    });
+
+    //UpdateSampleCode();
+}
+void DlgSettings::on_editorInsertSpaces_stateChanged(int)
+{
+    UpdateSampleCode();
 }
 
 } // namespace

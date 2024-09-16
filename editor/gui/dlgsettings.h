@@ -21,8 +21,10 @@
 #include "warnpush.h"
 #  include "ui_dlgsettings.h"
 #  include <QDialog>
+#  include <QTextDocument>
 #include "warnpop.h"
 
+#include "editor/app/code-tools.h"
 #include "editor/gui/appsettings.h"
 #include "editor/gui/scriptwidget.h"
 #include "editor/gui/mainwidget.h"
@@ -36,6 +38,9 @@ namespace gui
         DlgSettings(QWidget* parent, AppSettings& settings,
                     ScriptWidget::Settings& script,
                     MainWidget::UISettings& widget);
+
+    private:
+        void UpdateSampleCode();
     private slots:
         void on_btnAccept_clicked();
         void on_btnCancel_clicked();
@@ -48,12 +53,23 @@ namespace gui
         void on_btnResetClearColor_clicked();
         void on_btnResetGridColor_clicked();
 
+        void on_editorFontName_currentIndexChanged(int);
+        void on_editorFontSize_currentIndexChanged(int);
+        void on_editorHightlightSyntax_stateChanged(int);
+        void on_editorHightlightCurrentLine_stateChanged(int);
+        void on_editorShowLineNumbers_stateChanged(int);
+        void on_editorInsertSpaces_stateChanged(int);
+
     private:
         Ui::DlgSettings mUI;
     private:
         AppSettings& mSettings;
         ScriptWidget::Settings& mScriptSettings;
         MainWidget::UISettings& mWidgetSettings;
+
+    private:
+        QTextDocument mSampleCode;
+        app::CodeAssistant mAssistant;
     };
 } // namespace
 
