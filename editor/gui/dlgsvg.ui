@@ -93,10 +93,10 @@
          <item>
           <widget class="QSpinBox" name="viewX">
            <property name="minimum">
-            <number>-10000</number>
+            <number>-100000</number>
            </property>
            <property name="maximum">
-            <number>10000</number>
+            <number>100000</number>
            </property>
            <property name="stepType">
             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
@@ -113,10 +113,10 @@
          <item>
           <widget class="QSpinBox" name="viewY">
            <property name="minimum">
-            <number>-10000</number>
+            <number>-100000</number>
            </property>
            <property name="maximum">
-            <number>10000</number>
+            <number>100000</number>
            </property>
            <property name="stepType">
             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
@@ -133,10 +133,10 @@
          <item>
           <widget class="QSpinBox" name="viewW">
            <property name="minimum">
-            <number>-100000</number>
+            <number>0</number>
            </property>
            <property name="maximum">
-            <number>10000</number>
+            <number>100000</number>
            </property>
            <property name="stepType">
             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
@@ -153,10 +153,10 @@
          <item>
           <widget class="QSpinBox" name="viewH">
            <property name="minimum">
-            <number>-10000</number>
+            <number>0</number>
            </property>
            <property name="maximum">
-            <number>10000</number>
+            <number>100000</number>
            </property>
            <property name="stepType">
             <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
