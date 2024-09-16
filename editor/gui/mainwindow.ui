@@ -1318,7 +1318,7 @@
      <x>0</x>
      <y>0</y>
      <width>1872</width>
-     <height>29</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1407,7 +1407,7 @@
     </property>
     <widget class="QMenu" name="menuImport">
      <property name="title">
-      <string>Import Resource...</string>
+      <string>Import Resource</string>
      </property>
      <property name="icon">
       <iconset resource="../resource/resource.qrc">
@@ -1415,7 +1415,8 @@
      </property>
      <addaction name="actionImportModel"/>
      <addaction name="actionImportTiles"/>
-     <addaction name="actionImportFiles"/>
+     <addaction name="actionImportAudioFile"/>
+     <addaction name="actionImportImageFile"/>
      <addaction name="actionImportJSON"/>
      <addaction name="actionImportZIP"/>
     </widget>
@@ -1428,10 +1429,9 @@
     <addaction name="actionNewTilemap"/>
     <addaction name="actionNewAudioGraph"/>
     <addaction name="actionNewScript"/>
+    <addaction name="separator"/>
     <addaction name="actionNewResource"/>
-    <addaction name="separator"/>
     <addaction name="actionSelectResourceForEditing"/>
-    <addaction name="separator"/>
     <addaction name="menuImport"/>
     <addaction name="separator"/>
     <addaction name="actionProjectSync"/>
@@ -1439,7 +1439,6 @@
     <addaction name="actionProjectSettings"/>
     <addaction name="separator"/>
     <addaction name="actionPackageResources"/>
-    <addaction name="separator"/>
     <addaction name="actionProjectPlay"/>
     <addaction name="actionProjectPlayClean"/>
    </widget>
@@ -1820,7 +1819,7 @@
      <normaloff>:/16x16_ico_png/settings.png</normaloff>:/16x16_ico_png/settings.png</iconset>
    </property>
    <property name="text">
-    <string>Editor Settings ...</string>
+    <string>Editor Settings...</string>
    </property>
   </action>
   <action name="actionReloadTextures">
@@ -1841,7 +1840,7 @@
      <normaloff>:/16x16_ico_png/package.png</normaloff>:/16x16_ico_png/package.png</iconset>
    </property>
    <property name="text">
-    <string>Image Packer ...</string>
+    <string>Image Packer...</string>
    </property>
   </action>
   <action name="actionLoadWorkspace">
@@ -1850,7 +1849,7 @@
      <normaloff>:/16x16_ico_png/workspace_open.png</normaloff>:/16x16_ico_png/workspace_open.png</iconset>
    </property>
    <property name="text">
-    <string>Open Workspace ...</string>
+    <string>Open Workspace...</string>
    </property>
   </action>
   <action name="actionNewWorkspace">
@@ -1888,7 +1887,7 @@
      <normaloff>:/16x16_ico_png/edit.png</normaloff>:/16x16_ico_png/edit.png</iconset>
    </property>
    <property name="text">
-    <string>Open Resource ...</string>
+    <string>Open Resource...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+O</string>
@@ -1900,7 +1899,7 @@
      <normaloff>:/32x32_ico_png/add.png</normaloff>:/32x32_ico_png/add.png</iconset>
    </property>
    <property name="text">
-    <string>New Resource ...</string>
+    <string>New Resource...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+N</string>
@@ -1912,7 +1911,7 @@
      <normaloff>:/16x16_ico_png/settings.png</normaloff>:/16x16_ico_png/settings.png</iconset>
    </property>
    <property name="text">
-    <string>Game Settings ...</string>
+    <string>Edit Game Settings...</string>
    </property>
    <property name="toolTip">
     <string>Workspace settings</string>
@@ -2101,16 +2100,16 @@
     <string>Undo the last action</string>
    </property>
   </action>
-  <action name="actionImportFiles">
+  <action name="actionImportAudioFile">
    <property name="icon">
     <iconset resource="../resource/resource.qrc">
-     <normaloff>:/32x32_ico_png/folder.png</normaloff>:/32x32_ico_png/folder.png</iconset>
+     <normaloff>:/32x32_ico_png/audio.png</normaloff>:/32x32_ico_png/audio.png</iconset>
    </property>
    <property name="text">
-    <string>From Audio and Image Files</string>
+    <string>From Audio File</string>
    </property>
    <property name="toolTip">
-    <string>Import files as resources</string>
+    <string>Import new audio resource from file</string>
    </property>
   </action>
   <action name="actionNewUI">
@@ -2317,7 +2316,7 @@
      <normaloff>:/16x16_ico_png/font.png</normaloff>:/16x16_ico_png/font.png</iconset>
    </property>
    <property name="text">
-    <string>Font Map ...</string>
+    <string>Font Map...</string>
    </property>
   </action>
   <action name="actionProjectSync">
@@ -2326,10 +2325,10 @@
      <normaloff>:/16x16_ico_png/git-icon.png</normaloff>:/16x16_ico_png/git-icon.png</iconset>
    </property>
    <property name="text">
-    <string>VCS Sync...</string>
+    <string>Commit Changes...</string>
    </property>
    <property name="toolTip">
-    <string>Synchronoize changes in the project to version control</string>
+    <string>Commit changes in the project to version con</string>
    </property>
   </action>
   <action name="actionSvgViewer">
@@ -2395,7 +2394,7 @@
      <normaloff>:/32x32_ico_png/play.png</normaloff>:/32x32_ico_png/play.png</iconset>
    </property>
    <property name="text">
-    <string>Clean Game Home &amp;&amp; Play</string>
+    <string>Play Game (Clean Game Home)</string>
    </property>
    <property name="toolTip">
     <string>Clean game home and then play</string>
@@ -2417,6 +2416,18 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+Shift+M</string>
+   </property>
+  </action>
+  <action name="actionImportImageFile">
+   <property name="icon">
+    <iconset resource="../resource/resource.qrc">
+     <normaloff>:/16x16_ico_png/image.png</normaloff>:/16x16_ico_png/image.png</iconset>
+   </property>
+   <property name="text">
+    <string>From Image File</string>
+   </property>
+   <property name="toolTip">
+    <string>Import new image resource from file</string>
    </property>
   </action>
  </widget>
