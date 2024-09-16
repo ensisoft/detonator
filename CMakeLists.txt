@@ -433,6 +433,7 @@ add_executable(Detonator
     editor/app/resource.cpp
     editor/app/lua-tools.cpp
     editor/app/lua-doc.cpp
+    editor/app/code-tools.cpp
     editor/gui/audiowidget.h
     editor/gui/audiowidget.ui
     editor/gui/audiowidget.cpp

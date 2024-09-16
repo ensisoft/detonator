@@ -29,6 +29,8 @@
 #include <vector>
 #include <unordered_map>
 
+#include "base/utility.h"
+
 namespace app
 {
     enum class LuaSyntax {

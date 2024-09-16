@@ -20,7 +20,6 @@
 
 #include "warnpush.h"
 #  include <QString>
-
 #include "warnpop.h"
 
 class QAbstractItemModel;
@@ -29,8 +28,19 @@ class QTextDocument;
 class QTextCursor;
 class QKeyEvent;
 
+#include "editor/app/lua-tools.h"
+#include "editor/app/lua-doc.h"
+
+#include "game/fwd.h"
+
+namespace uik {
+    class Window;
+}
+
 namespace app
 {
+    class Workspace;
+
     class CodeCompleter
     {
     public:
@@ -80,6 +90,57 @@ namespace app
         virtual void ApplyHighlight(QTextDocument& document) = 0;
         virtual void RemoveHighlight(QTextDocument& document) = 0;
     private:
+    };
+
+    class CodeAssistant : public app::CodeCompleter,
+                          public app::CodeHighlighter
+    {
+    public:
+        using Symbol = app::LuaParser::Symbol;
+
+        explicit CodeAssistant(app::Workspace* workspace);
+        virtual ~CodeAssistant();
+
+        const Symbol* FindSymbol(const QString& name) const;
+
+        virtual bool StartCompletion(const QKeyEvent* event,
+                                     const QTextDocument& document,
+                                     const QTextCursor& cursor)  override;
+        virtual void FilterPossibleCompletions(const QString& input) override;
+        virtual bool FinishCompletion(const QString& input,
+                                      const QModelIndex& index,
+                                      const QTextDocument& document,
+                                      QTextCursor& cursor)  override;
+        virtual ApiHelp GetCompletionHelp(const QModelIndex& index) const override;
+        virtual QAbstractItemModel* GetCompletionModel() override;
+
+        virtual void ApplyHighlight(QTextDocument& document) override;
+        virtual void RemoveHighlight(QTextDocument& document) override;
+
+        void SetScriptId(const std::string& id)
+        { mScriptId = id; }
+        void SetCodeCompletionHeuristics(bool on_off)
+        { mUseCodeCompletionHeuristics = on_off; }
+
+        void CleanState();
+        void ParseSource(QTextDocument& document);
+        void EditSource(QTextDocument& document, uint32_t position, uint32_t chars_removed, uint32_t chars_added);
+    private:
+        QString DiscoverDynamicCompletions(const QString& word);
+        void AddTableSuggestions(const game::EntityClass* klass);
+        void AddTableSuggestions(const game::SceneClass* klass);
+        void AddTableSuggestions(const uik::Window* window);
+    private:
+        class SyntaxHighlightImpl;
+        SyntaxHighlightImpl* mHilight = nullptr;
+        app::LuaTheme mTheme;
+        app::LuaParser mParser;
+        app::LuaDocTableModel mModel;
+        app::LuaDocModelProxy mProxy;
+        app::Workspace* mWorkspace = nullptr;
+        std::string mScriptId;
+        bool mUseCodeCompletionHeuristics = true;
+        QString mSource;
     };
 
 } // namespace
