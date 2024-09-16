@@ -483,16 +483,23 @@ void TextEditor::ApplySettings()
     }
     else WARN("Text editor font description is invalid. [font='%1']", font_name);
 
-    if (mSettings.show_line_numbers && !mLineNumberArea)
+    if (mSettings.show_line_numbers)
     {
-        mLineNumberArea = new LineNumberArea(this);
-        mLineNumberArea->show();
-        UpdateLineNumberAreaWidth(0);
+        if (!mLineNumberArea)
+        {
+            mLineNumberArea = new LineNumberArea(this);
+            mLineNumberArea->show();
+            UpdateLineNumberAreaWidth(0);
+        }
     }
-    else if (!mSettings.show_line_numbers && mLineNumberArea)
+    else
     {
-        delete mLineNumberArea;
-        mLineNumberArea = nullptr;
+        if (mLineNumberArea)
+        {
+            delete mLineNumberArea;
+            mLineNumberArea = nullptr;
+        }
+        setViewportMargins(0, 0, 0, 0);
     }
 
     HighlightCurrentLine();
