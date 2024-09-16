@@ -175,6 +175,9 @@ void MaterialWidget::SetViewerMode()
     SetVisible(mUI.textureRect,       false);
     SetVisible(mUI.textureMap,        false);
     SetVisible(mUI.scrollArea,        false);
+
+    mUI.mainSplitter->setSizes({0, 100, 0});
+
     on_actionPlay_triggered();
 }
 
