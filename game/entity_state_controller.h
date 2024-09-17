@@ -35,6 +35,20 @@ namespace game
     class EntityStateControllerClass
     {
     public:
+        // dictates when the evaluation to change state (i.e. transition)
+        // happens.
+        enum class StateTransitionMode {
+            // Continuously evaluate the current state in order to
+            // immediately detect possible threshold value etc to
+            // change to a different state. Useful for things such
+            // as physics driven characters where some physics measure
+            // that updates continuously is used to drive the state.
+            Continuous,
+            // Only evaluate possible state transitions on trigger, i.e.
+            // when an explicit call is made to evaluate.
+            OnTrigger
+        };
+
         explicit EntityStateControllerClass(std::string id = base::RandomString(10));
 
         void AddState(const EntityStateClass& state)
@@ -80,6 +94,11 @@ namespace game
         inline void ClearTransitions() noexcept
         { mTransitions.clear(); }
 
+        inline StateTransitionMode GetTransitionMode() const noexcept
+        { return mTransitionMode; }
+        inline void SetTransitionMode(StateTransitionMode mode) noexcept
+        { mTransitionMode = mode; }
+
         void DeleteTransitionById(const std::string& id);
         void DeleteStateById(const std::string& id);
         const EntityStateClass* FindStateById(const std::string& id) const noexcept;
@@ -104,11 +123,14 @@ namespace game
         std::string mScriptId;
         std::vector<EntityStateClass> mStates;
         std::vector<EntityStateTransitionClass> mTransitions;
+        StateTransitionMode mTransitionMode = StateTransitionMode::Continuous;
     };
 
     class EntityStateController
     {
     public:
+        using StateTransitionMode = EntityStateControllerClass::StateTransitionMode;
+
         struct EnterState {
             const EntityState* state;
         };
@@ -164,6 +186,9 @@ namespace game
         // Update the controller state machine by starting a transition from the current
         // state towards the next state.
         bool BeginStateTransition(const EntityStateTransition* transition, const EntityState* next);
+
+        inline void TriggerTransition() noexcept
+        { mTriggerTransitionEvaluation = true; }
 
         enum class State {
             InTransition, InState
@@ -232,6 +257,8 @@ namespace game
         // from one part of the system (the entity script) to another
         // part of the system (the animator script)
         std::unordered_map<std::string, Value> mValues;
+
+        bool mTriggerTransitionEvaluation = false;
     };
 
     std::unique_ptr<EntityStateController> CreateStateControllerInstance(const std::shared_ptr<const EntityStateControllerClass>& klass);
