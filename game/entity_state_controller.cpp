@@ -101,6 +101,7 @@ std::size_t EntityStateControllerClass::GetHash() const noexcept
     hash = base::hash_combine(hash, mId);
     hash = base::hash_combine(hash, mScriptId);
     hash = base::hash_combine(hash, mInitState);
+    hash = base::hash_combine(hash, mTransitionMode);
 
     for (const auto& state : mStates)
     {
@@ -119,6 +120,7 @@ void EntityStateControllerClass::IntoJson(data::Writer& data) const
     data.Write("id", mId);
     data.Write("initial_state", mInitState);
     data.Write("script_id", mScriptId);
+    data.Write("transition_mode", mTransitionMode);
 
     for (const auto& state : mStates)
     {
@@ -140,6 +142,7 @@ bool EntityStateControllerClass::FromJson(const data::Reader& data)
     ok &= data.Read("id",   &mId);
     ok &= data.Read("initial_state", &mInitState);
     ok &= data.Read("script_id", &mScriptId);
+    ok &= data.Read("transition_mode", &mTransitionMode);
 
     for (unsigned i=0; i<data.GetNumChunks("states"); ++i)
     {
@@ -164,6 +167,7 @@ EntityStateControllerClass EntityStateControllerClass::Clone() const
     dolly.mId = base::RandomString(10);
     dolly.mName = mName;
     dolly.mScriptId = mScriptId;
+    dolly.mTransitionMode = mTransitionMode;
 
     std::unordered_map<std::string, std::string> state_map;
     for (const auto& state : mStates)
@@ -251,6 +255,12 @@ void EntityStateController::Update(float dt, std::vector<StateUpdate>* updates)
     // cannot be started (and no point to evaluate) so return early.
     if (mTransition)
         return;
+
+    const auto state_transition_mode = mClass->GetTransitionMode();
+    if (state_transition_mode == StateTransitionMode::OnTrigger && !mTriggerTransitionEvaluation)
+        return;
+
+    mTriggerTransitionEvaluation = false;
 
     for (size_t i=0; i<mClass->GetNumTransitions(); ++i)
     {

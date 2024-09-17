@@ -939,6 +939,7 @@ void BindGameLib(sol::state& L)
         }
         return std::string("");
     };
+    entity_state_controller["TriggerTransition"] = &EntityStateController::TriggerTransition;
 
     auto animation_class = table.new_usertype<AnimationClass>("AnimationClass");
     animation_class["GetName"]     = &AnimationClass::GetName;

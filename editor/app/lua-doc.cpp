@@ -1470,6 +1470,9 @@ void InitLuaDoc()
                  "string", "from", "string", "to");
     DOC_METHOD_0("bool", "IsInTransition", "Check whether the controller is currently transitioning from one state to another.");
     DOC_METHOD_0("string", "GetStateName", "Get the name of the current state. If in transition an empty string is returned.");
+    DOC_METHOD_0("void", "TriggerTransition", "Trigger evaluation whether any state transition should be taken.<br>"
+                                              "When your entity state controller's state transition mode is 'OnTrigger' call this to trigger evaluation "
+                                              "to see whether any state transition should take place.");
 
     DOC_TABLE("game.Animation");
     DOC_METHOD_0("string", "GetName", "Get the animation class name.");
