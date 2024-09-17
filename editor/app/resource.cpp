@@ -226,12 +226,14 @@ namespace {
             require.setPattern(R"(\s*require\('([^']*)'\)\s*)");
             ASSERT(require.isValid());
             QRegularExpressionMatch match = require.match(line);
+
             if (!match.hasMatch())
             {
-                if (!DiscardLuaContent(src_stream, &i))
+                if (!packer.IsReleasePackage() || !DiscardLuaContent(src_stream, &i))
                     dst_stream << line;
                 continue;
             }
+
             ASSERT(require.captureCount() == 1);
             // cap(0) is the whole regex
             QString module = match.captured(1);

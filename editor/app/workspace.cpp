@@ -2026,6 +2026,8 @@ QStringList Workspace::ListFileResources(const ModelIndexList& indices) const
         { return uri; }
         virtual bool HasMapping(const AnyString& uri) const override
         { return true; }
+        virtual bool IsReleasePackage() const override
+        { return false; }
 
         QStringList ListUris() const
         {
