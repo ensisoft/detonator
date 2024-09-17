@@ -1051,7 +1051,7 @@ void BindGameLib(sol::state& L)
     entity["HasExpired"]           = &Entity::HasExpired;
     entity["HasBeenKilled"]        = &Entity::HasBeenKilled;
     entity["HasBeenSpawned"]       = &Entity::HasBeenSpawned;
-    entity["HasAnimator"]          = &Entity::HasAnimator;
+    entity["HasStateController"]   = &Entity::HasStateController;
     entity["GetNumAnimations"]     = &Entity::GetNumCurrentAnimations;
     entity["GetAnimation"]         = GetMutable(&Entity::GetCurrentAnimation);
     entity["GetStateController"]   = GetMutable(&Entity::GetStateController);

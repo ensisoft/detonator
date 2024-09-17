@@ -928,7 +928,7 @@ Entity::Entity(std::shared_ptr<const EntityClass> klass)
 
     if (mClass->GetNumAnimators())
     {
-        mAnimator = EntityStateController(mClass->GEtSharedAnimatorClass(0));
+        mAnimator = EntityStateController(mClass->GetSharedEntityControllerClass(0));
     }
 }
 
@@ -1302,23 +1302,23 @@ void Entity::Update(float dt, std::vector<Event>* events)
     mAnimationQueue.pop();
 }
 
-void Entity::UpdateAnimator(float dt, std::vector<AnimatorAction>* actions)
+void Entity::UpdateStateController(float dt, std::vector<EntityStateUpdate>* updates)
 {
     if (auto* animator = base::GetOpt(mAnimator))
     {
-        animator->Update(dt, actions);
+        animator->Update(dt, updates);
     }
 }
-void Entity::UpdateAnimator(const game::Entity::AnimationTransition* transition,
-                            const game::Entity::AnimationState* next)
+bool Entity::TransitionStateController(const EntityStateTransition* transition, const EntityState* next)
 {
     if (auto* animator = base::GetOpt(mAnimator))
     {
-        animator->Update(transition, next);
+        return animator->BeginStateTransition(transition, next);
     }
+    return false;
 }
 
-const Entity::AnimationState* Entity::GetCurrentAnimatorState() noexcept
+const EntityState* Entity::GetCurrentEntityState() noexcept
 {
     if (auto* animator = base::GetOpt(mAnimator))
     {
@@ -1327,7 +1327,7 @@ const Entity::AnimationState* Entity::GetCurrentAnimatorState() noexcept
     return nullptr;
 }
 
-const Entity::AnimationTransition* Entity::GetCurrentAnimationTransition() noexcept
+const EntityStateTransition* Entity::GetCurrentEntityStateTransition() noexcept
 {
     if (auto* animator = base::GetOpt(mAnimator))
     {

@@ -404,7 +404,7 @@ namespace game
         { return mScriptVars[index]; }
         std::shared_ptr<const PhysicsJoint> GetSharedJoint(size_t index) const noexcept
         { return mJoints[index]; }
-        std::shared_ptr<const EntityStateControllerClass> GEtSharedAnimatorClass(size_t index) const noexcept
+        std::shared_ptr<const EntityStateControllerClass> GetSharedEntityControllerClass(size_t index) const noexcept
         { return mAnimators[index]; }
 
         EntityNodeAllocator& GetAllocator() const
@@ -621,15 +621,26 @@ namespace game
 
         void Update(float dt, std::vector<Event>* events = nullptr);
 
-        using AnimatorAction = game::EntityStateController::Action;
-        using AnimationState = game::EntityState;
-        using AnimationTransition = game::EntityStateTransition;
+        using EntityStateUpdate = game::EntityStateController::StateUpdate;
+        using EntityState = game::EntityState;
+        using EntityStateTransition = game::EntityStateTransition;
 
-        void UpdateAnimator(float dt, std::vector<AnimatorAction>* actions);
-        void UpdateAnimator(const AnimationTransition* transition, const AnimationState* next);
+        // update the entity state controller and receive back a bunch of
+        // state updates indicating what is happening. All the updates are
+        // notifications, except for the EvalTransition which the caller
+        // must handle in order to progress the state machine from one state
+        // to another state.
+        void UpdateStateController(float dt, std::vector<EntityStateUpdate>* updates);
 
-        const AnimationState* GetCurrentAnimatorState() noexcept;
-        const AnimationTransition* GetCurrentAnimationTransition() noexcept;
+        // Request the entity state controller to begin a chosen state
+        // transition to the given next state.
+        // Returns true if the transition was started or false to
+        // indicate that the transition was not started. At any given
+        // time a maximum of one transition is allowed.
+        bool TransitionStateController(const EntityStateTransition* transition, const EntityState* next);
+
+        const EntityState* GetCurrentEntityState() noexcept;
+        const EntityStateTransition* GetCurrentEntityStateTransition() noexcept;
 
         // Play the given animation immediately. If there's any
         // current animation it is replaced.
@@ -784,7 +795,7 @@ namespace game
         { return TestFlag(Flags::VisibleInGame); }
         bool HasIdleTrack() const noexcept
         { return !mIdleTrackId.empty() || mClass->HasIdleTrack(); }
-        bool HasAnimator() const noexcept
+        bool HasStateController() const noexcept
         { return mAnimator.has_value(); }
         const EntityStateController* GetStateController() const
         { return base::GetOpt(mAnimator); }

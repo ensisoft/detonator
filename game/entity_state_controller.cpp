@@ -188,8 +188,8 @@ EntityStateControllerClass EntityStateControllerClass::Clone() const
     return dolly;
 }
 
-EntityStateController::EntityStateController(const std::shared_ptr<const EntityStateControllerClass>& klass)
-  : mClass(klass)
+EntityStateController::EntityStateController(std::shared_ptr<const EntityStateControllerClass> klass) noexcept
+  : mClass(std::move(klass))
 {}
 
 EntityStateController::EntityStateController(const EntityStateControllerClass& klass)
@@ -200,7 +200,7 @@ EntityStateController::EntityStateController(EntityStateControllerClass&& klass)
   : EntityStateController(std::make_shared<EntityStateControllerClass>(std::move(klass)))
 {}
 
-void EntityStateController::Update(float dt, std::vector<Action>* actions)
+void EntityStateController::Update(float dt, std::vector<StateUpdate>* updates)
 {
     if (!mCurrent && !mTransition)
     {
@@ -208,7 +208,7 @@ void EntityStateController::Update(float dt, std::vector<Action>* actions)
         if (!mCurrent)
             return;
 
-        actions->push_back( EnterState { mCurrent } );
+        updates->emplace_back( EnterState { mCurrent } );
     }
 
     if (mTransition)
@@ -218,17 +218,17 @@ void EntityStateController::Update(float dt, std::vector<Action>* actions)
         {
             ASSERT(mPrev);
             ASSERT(mNext);
-            actions->push_back( LeaveState { mPrev } );
-            actions->push_back( StartTransition { mPrev, mNext, mTransition } );
+            updates->emplace_back( LeaveState { mPrev } );
+            updates->emplace_back( StartTransition { mPrev, mNext, mTransition } );
         }
 
         const auto transition_time = mTransition->GetDuration();
         if (mTime + dt >= transition_time)
         {
             dt = transition_time - mTime;
-            actions->push_back( UpdateTransition { mPrev, mNext, mTransition, mTime, dt });
-            actions->push_back( FinishTransition { mPrev, mNext, mTransition } );
-            actions->push_back( EnterState { mNext } );
+            updates->emplace_back( UpdateTransition { mPrev, mNext, mTransition, mTime, dt });
+            updates->emplace_back( FinishTransition { mPrev, mNext, mTransition } );
+            updates->emplace_back( EnterState { mNext } );
             mCurrent = mNext;
             mTime = 0.0f;
             mNext = nullptr;
@@ -237,15 +237,20 @@ void EntityStateController::Update(float dt, std::vector<Action>* actions)
         }
         else
         {
-            actions->push_back( UpdateTransition { mPrev, mNext, mTransition, mTime, dt });
+            updates->emplace_back( UpdateTransition { mPrev, mNext, mTransition, mTime, dt });
             mTime += dt;
         }
         return;
     }
 
-    actions->push_back( UpdateState { mCurrent, mTime, dt } );
+    updates->emplace_back( UpdateState { mCurrent, mTime, dt } );
     // update the current state time, i.e. how long have been at this state.
     mTime += dt;
+
+    // if we're currently in transition then another transition
+    // cannot be started (and no point to evaluate) so return early.
+    if (mTransition)
+        return;
 
     for (size_t i=0; i<mClass->GetNumTransitions(); ++i)
     {
@@ -253,18 +258,26 @@ void EntityStateController::Update(float dt, std::vector<Action>* actions)
         if (transition.GetSrcStateId() != mCurrent->GetId())
             continue;
         const auto* next = mClass->FindStateById(transition.GetDstStateId());
-        actions->push_back( EvalTransition { mCurrent, next, &transition });
+        updates->emplace_back( EvalTransition { mCurrent, next, &transition });
     }
 }
-void EntityStateController::Update(const EntityStateTransition* transition, const EntityState* next)
+bool EntityStateController::BeginStateTransition(const EntityStateTransition* transition, const EntityState* next)
 {
     ASSERT(transition);
     ASSERT(next);
+
+    // already have a pending transition ?
+    if (mTransition)
+        return false;
+
+    ASSERT(mCurrent);
+
     mTime       = 0.0f;
     mTransition = transition;
     mNext       = next;
     mPrev       = mCurrent;
     mCurrent    = nullptr;
+    return true;
 }
 
 EntityStateController::State EntityStateController::GetControllerState() const noexcept

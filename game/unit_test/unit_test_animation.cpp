@@ -840,7 +840,7 @@ void unit_test_animation_state()
     klass.SetInitialStateId(idle.GetId());
 
     auto anim = game::CreateStateControllerInstance(klass);
-    std::vector<game::EntityStateController::Action> actions;
+    std::vector<game::Entity::EntityStateUpdate> actions;
 
     anim->Update(0.0f, &actions);
     TEST_REQUIRE(anim->GetControllerState() == game::EntityStateController::State::InState);
@@ -856,7 +856,7 @@ void unit_test_animation_state()
     // immediate transition from idle to run
     {
         auto* eval = std::get_if<game::EntityStateController::EvalTransition>(&actions[2]);
-        anim->Update(eval->transition, eval->to);
+        anim->BeginStateTransition(eval->transition, eval->to);
     }
 
     TEST_REQUIRE(anim->GetControllerState() == game::EntityStateController::State::InTransition);
@@ -891,7 +891,7 @@ void unit_test_animation_state()
     // begin transition from run to idle.
     {
         auto* eval = std::get_if<game::EntityStateController::EvalTransition>(&actions[1]);
-        anim->Update(eval->transition, eval->to);
+        anim->BeginStateTransition(eval->transition, eval->to);
     }
 
     actions.clear();

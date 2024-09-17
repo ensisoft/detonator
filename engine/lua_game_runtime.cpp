@@ -969,40 +969,55 @@ void LuaRuntime::Update(double game_time, double dt)
         // animator a) be scriptable b) have access to the same Lua APIs that exist everywhere
         // else too.. This should be pretty flexible in terms of what can be done to the
         // entity when changing animation states. Also possible to play audio effects etc.
-        if (!entity->HasAnimator())
+        if (!entity->HasStateController())
             continue;
 
         const auto& entity_klass = entity->GetClass();
-        const auto& animator_klass = entity_klass.GetController(0);
+        const auto& entity_state_controller_class = entity_klass.GetController(0);
 
-        std::vector<game::Entity::AnimatorAction> actions;
-        entity->UpdateAnimator(dt, &actions);
-        if (auto* env = GetTypeEnv(animator_klass))
+        // we must always update the state controller if it exists
+        // regardless whether it as an associated script with it or not.
+        std::vector<game::Entity::EntityStateUpdate> actions;
+        entity->UpdateStateController(dt, &actions);
+
+        auto* controller_env = GetTypeEnv(entity_state_controller_class);
+        if (!controller_env)
+            return;
+
+        auto* state_controller = entity->GetStateController();
+
+        for (auto& action: actions)
         {
-            auto& e = *env;
-            auto* animator = entity->GetStateController();
-            for (auto& action : actions)
+            if (auto* ptr = std::get_if<EntityStateController::EnterState>(&action))
+                CallLua(*controller_env, "EnterState", state_controller, ptr->state->GetName(), entity);
+            else if (auto* ptr = std::get_if<EntityStateController::LeaveState>(&action))
+                CallLua(*controller_env, "LeaveState", state_controller, ptr->state->GetName(), entity);
+            else if (auto* ptr = std::get_if<EntityStateController::UpdateState>(&action))
+                CallLua(*controller_env, "UpdateState", state_controller, ptr->state->GetName(), ptr->time, ptr->dt, entity);
+            else if (auto* ptr = std::get_if<EntityStateController::StartTransition>(&action))
+                CallLua(*controller_env, "StartTransition", state_controller, ptr->from->GetName(), ptr->to->GetName(),
+                        ptr->transition->GetDuration(), entity);
+            else if (auto* ptr = std::get_if<EntityStateController::FinishTransition>(&action))
+                CallLua(*controller_env, "FinishTransition", state_controller, ptr->from->GetName(), ptr->to->GetName(), entity);
+            else if (auto* ptr = std::get_if<EntityStateController::UpdateTransition>(&action))
+                CallLua(*controller_env, "UpdateTransition", state_controller, ptr->from->GetName(), ptr->to->GetName(),
+                        ptr->transition->GetDuration(), ptr->time, ptr->dt, entity);
+            else if (auto* ptr = std::get_if<EntityStateController::EvalTransition>(&action))
             {
-                if (auto* ptr = std::get_if<EntityStateController::EnterState>(&action))
-                    CallLua(e, "EnterState", animator, ptr->state->GetName(), entity);
-                else if (auto* ptr = std::get_if<EntityStateController::LeaveState>(&action))
-                    CallLua(e, "LeaveState", animator, ptr->state->GetName(), entity);
-                else if (auto* ptr = std::get_if<EntityStateController::UpdateState>(&action))
-                    CallLua(e, "UpdateState", animator, ptr->state->GetName(), ptr->time, ptr->dt, entity);
-                else if (auto* ptr = std::get_if<EntityStateController::EvalTransition>(&action))
+                // if we had multiple EvalTransition updates and the game decided on
+                // one of them, subsequent transition possibilities will not need to
+                // evaluated
+                if (state_controller->IsTransitioning())
+                    continue;
+
+                // if the call to Lua succeeds and the return value is true then update the animator to
+                // take a transition from the current state to the next state.
+                bool return_value_from_lua = false;
+                if (CallLua(&return_value_from_lua, *controller_env, "EvalTransition", state_controller, ptr->from->GetName(),
+                            ptr->to->GetName(), entity) && return_value_from_lua)
                 {
-                    // if the call to Lua succeeds and the return value is true then update the animator to
-                    // take a transition from the current state to the next state.
-                    bool return_value_from_lua = false;
-                    if (CallLua(&return_value_from_lua, e, "EvalTransition", animator, ptr->from->GetName(), ptr->to->GetName(), entity) && return_value_from_lua)
-                        entity->UpdateAnimator(ptr->transition, ptr->to);
+                    entity->TransitionStateController(ptr->transition, ptr->to);
                 }
-                else if (auto* ptr = std::get_if<EntityStateController::StartTransition>(&action))
-                    CallLua(e, "StartTransition", animator, ptr->from->GetName(), ptr->to->GetName(), ptr->transition->GetDuration(), entity);
-                else if (auto* ptr = std::get_if<EntityStateController::FinishTransition>(&action))
-                    CallLua(e, "FinishTransition", animator, ptr->from->GetName(), ptr->to->GetName(),entity);
-                else if (auto* ptr = std::get_if<EntityStateController::UpdateTransition>(&action))
-                    CallLua(e, "UpdateTransition", animator, ptr->from->GetName(), ptr->to->GetName(), ptr->transition->GetDuration(), ptr->time, ptr->dt, entity);
             }
         }
     }
