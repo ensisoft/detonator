@@ -224,6 +224,17 @@ std::string TranslateEnum(KinematicAnimatorClass::Target target)
     return "???";
 }
 
+std::string TranslateEnum(EntityStateControllerClass::StateTransitionMode mode)
+{
+    using M = EntityStateControllerClass::StateTransitionMode;
+    if (mode == M::Continuous)
+        return "Evaluate Continuously";
+    else if (mode == M::OnTrigger)
+        return "Evaluate on Request Only";
+    else BUG("Missing translation");
+    return "???";
+}
+
 } // namespace
 
 namespace math

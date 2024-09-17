@@ -31,6 +31,7 @@
 #include "editor/gui/entitywidget.h"
 #include "editor/gui/dlganimator.h"
 #include "editor/gui/utility.h"
+#include "editor/gui/translation.h"
 
 namespace gui::detail {
 class StateItem : public QGraphicsItem
@@ -259,32 +260,45 @@ protected:
         painter->setRenderHint(QPainter::Antialiasing);
         painter->setRenderHint(QPainter::TextAntialiasing);
 
+        QPen pen;
+        pen.setWidth(3);
+        pen.setColor(isSelected() ? palette.color(QPalette::Highlight)
+                                  : palette.color(QPalette::Light));
+        painter->setPen(pen);
+
         const auto& src = mapFromScene(mSrcPoint);
         const auto& dst = mapFromScene(mDstPoint);
-        const QLineF line(src, dst);
 
-        QPen pen;
-        if (isSelected())
-            pen.setColor(palette.color(QPalette::Highlight));
-        else pen.setColor(palette.color(QPalette::Light));
+        QPointF waypoint;
+        if (dst.x() < src.x())
+        {
+            waypoint = QPointF(dst.x(), src.y());
+        }
+        else
+        {
+            waypoint = QPointF(dst.x(), src.y());
+        }
 
-        pen.setWidth(3);
-        painter->setPen(pen);
-        painter->drawLine(line);
+        //painter->drawLine(src, waypoint);
+        //painter->drawLine(waypoint, dst);
+
+        QPainterPath path;
+        path.moveTo(src);
+        path.cubicTo(src, waypoint, dst);
+        painter->drawPath(path);
 
         QPolygonF arrow;
-        arrow << QPointF( 5.0f,  0.0f);
-        arrow << QPointF(-5.0f,  5.0f);
-        arrow << QPointF(-5.0f, -5.0f);
+        arrow << QPointF( 10.0f,  0.0f);
+        arrow << QPointF(-10.0f,  10.0f);
+        arrow << QPointF(-10.0f, -10.0f);
+        //pen.setWidth(2);
+        //painter->setPen(pen);
 
-        const auto length = line.length();
-        const auto arrow_size = 10.0 / length;
+        const auto p = path.pointAtPercent(0.75);
 
-        QPointF arrow_pos = src + (dst-src)*(0.5+arrow_size); //line.center();
         QTransform transform;
-        transform.translate(arrow_pos.x(), arrow_pos.y());
-        transform.rotate(-line.angle());
-
+        transform.translate(p.x(), p.y());
+        transform.rotate(math::Pi - path.angleAtPercent(0.75));
         painter->setTransform(transform, true);
         painter->drawPolygon(arrow);
     }
@@ -505,6 +519,9 @@ DlgAnimator::DlgAnimator(QWidget* parent,
   , mAnimator(animator)
 {
     mUI.setupUi(this);
+
+    PopulateFromEnum<game::EntityStateControllerClass::StateTransitionMode>(mUI.cmbTransitionMode);
+
     mScene = std::make_unique<AnimatorGraphScene>();
     mUI.stateView->setScene(mScene.get());
     mUI.stateView->setInteractive(true);
@@ -516,6 +533,7 @@ DlgAnimator::DlgAnimator(QWidget* parent,
     SetVisible(mUI.linkProperties, false);
     SetVisible(mUI.nodeProperties, false);
     SetVisible(mUI.propertyHelp, true);
+    SetValue(mUI.cmbTransitionMode, mAnimator.GetTransitionMode());
 
     std::unordered_map<std::string, detail::StateItem*> states;
 
@@ -660,6 +678,7 @@ void DlgAnimator::on_btnCancel_clicked()
 void DlgAnimator::on_btnAccept_clicked()
 {
     mAnimator.SetName(GetValue(mUI.animName));
+    mAnimator.SetTransitionMode(GetValue(mUI.cmbTransitionMode));
     mAnimator.SetInitialStateId(GetItemId(mUI.cmbInitState));
     mAnimator.ClearStates();
     mAnimator.ClearTransitions();
