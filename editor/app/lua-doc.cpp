@@ -1522,7 +1522,7 @@ void InitLuaDoc()
                                           "Entities that have been killed will be deleted from the scene at the end of this game loop.");
     DOC_METHOD_0("bool", "HasBeenSpawned", "Checks whether the entity has just been spawned and exists for the first iteration of the game loop.<br>"
                                            "This flag is only ever true on the first iteration of the game loop during the entity's lifetime.");
-    DOC_METHOD_0("bool", "HasAnimator", "Checks whether the entity has an animator component or not.");
+    DOC_METHOD_0("bool", "HasStateController", "Checks whether the entity has a state controller component or not.");
     DOC_METHOD_1("game.Animation", "GetAnimation", "Get a current entity animation."
                                                    "The indexing is 0 based and the index must be a valid index.",
                  "unsigned", "index");

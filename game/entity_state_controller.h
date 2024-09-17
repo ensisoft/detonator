@@ -143,7 +143,7 @@ namespace game
             const EntityStateTransition* transition;
         };
 
-        using Action = std::variant<std::monostate,
+        using StateUpdate = std::variant<std::monostate,
                 EnterState, LeaveState, UpdateState,
                 StartTransition, FinishTransition, UpdateTransition, EvalTransition>;
 
@@ -152,18 +152,18 @@ namespace game
 
         explicit EntityStateController(EntityStateControllerClass&& klass);
         explicit EntityStateController(const EntityStateControllerClass& klass);
-        explicit EntityStateController(const std::shared_ptr<const EntityStateControllerClass>& klass);
+        explicit EntityStateController(std::shared_ptr<const EntityStateControllerClass> klass) noexcept;
 
-        // Update the animator state machine state.
-        // When the current animator state is updated the resulting actions that should
-        // be taken  as a result are stored into the actions vector. The caller can then
+        // Update the state controller's state machine.
+        // When the current controller state is updated the resulting updates that should
+        // be taken as a result are stored into the updates vector. The caller can then
         // perform some actions (such as call some evaluation code) or choose do nothing.
-        // The only action that should be handled is the response to a state transition
+        // The only action that *must* be handled is the response to a state transition
         // evaluation, otherwise no state transitions are possible.
-        void Update(float dt, std::vector<Action>* actions);
-        // Update the animator state machine by starting a transition from the current
+        void Update(float dt, std::vector<StateUpdate>* updates);
+        // Update the controller state machine by starting a transition from the current
         // state towards the next state.
-        void Update(const EntityStateTransition* transition, const EntityState* next);
+        bool BeginStateTransition(const EntityStateTransition* transition, const EntityState* next);
 
         enum class State {
             InTransition, InState
@@ -213,6 +213,9 @@ namespace game
         { return mClass->GetName(); }
         inline std::string GetId() const noexcept
         { return mClass->GetId(); }
+
+        inline bool IsTransitioning() const noexcept
+        { return GetControllerState() == State::InTransition; }
     public:
         std::shared_ptr<const EntityStateControllerClass> mClass;
         // Current state if any. no state during transition

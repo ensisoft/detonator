@@ -1229,10 +1229,10 @@ void unit_test_entity_animation_state()
 
     auto entity = game::CreateEntityInstance(entity_class);
 
-    std::vector<game::Entity::AnimatorAction> actions;
+    std::vector<game::Entity::EntityStateUpdate> actions;
 
-    TEST_REQUIRE(entity->HasAnimator());
-    entity->UpdateAnimator(1.0/60.0f, &actions);
+    TEST_REQUIRE(entity->HasStateController());
+    entity->UpdateStateController(1.0/60.0f, &actions);
     TEST_REQUIRE(actions.size() == 4);
     TEST_REQUIRE(std::get_if<game::EntityStateController::EnterState>(&actions[0]));
     TEST_REQUIRE(std::get_if<game::EntityStateController::UpdateState>(&actions[1]));
