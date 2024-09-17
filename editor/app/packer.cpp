@@ -267,6 +267,12 @@ bool ZipArchiveImporter::CopyFile(const AnyString& uri, const AnyString& dir)
 }
 bool ZipArchiveImporter::WriteFile(const AnyString& uri, const AnyString& dir, const void* data, size_t len)
 {
+    if (base::StartsWith(uri, "app://"))
+    {
+        DEBUG("Skip re-writing application resource on resource pack (zip) import. [uri='%1']", uri);
+        return true;
+    }
+
     // write the file contents into the workspace directory.
 
     const auto& src_file = MapUriToZipFile(uri);
@@ -303,6 +309,19 @@ bool ZipArchiveImporter::WriteFile(const AnyString& uri, const AnyString& dir, c
 }
 bool ZipArchiveImporter::ReadFile(const AnyString& uri, QByteArray* array) const
 {
+    // this is a hack in order to support dependant script resolution
+    // the packing code iterates and recurses the dependant lua scripts.
+    // a game script can refer to a script under the editor and then
+    // the packing code (mentioned above) would try to process the app://
+    // scripts which isn't packed in the .zip file! 
+    // we're going to lie here and return an empty buffer so the iteration
+    // stops
+    if (base::StartsWith(uri, "app://"))
+    {
+        DEBUG("Skip reading application resource on resource pack (zip) import. [uri='%1']", uri);
+        return true;
+    }
+
     const auto& src_file = MapUriToZipFile(uri);
     if (!FindZipFile(src_file))
         return false;
@@ -331,7 +350,6 @@ app::AnyString ZipArchiveImporter::MapUri(const AnyString& uri) const
 bool ZipArchiveImporter::CopyFile(const QString& src_file, const AnyString& dir, QString*  dst_name)
 {
     // copy file from the zip into the workspace directory.
-
     if (!FindZipFile(src_file))
         return false;
 
