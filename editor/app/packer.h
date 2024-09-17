@@ -40,6 +40,8 @@ namespace app
         virtual bool ReadFile(const AnyString& uri, QByteArray* bytes) const = 0;
         virtual bool HasMapping(const AnyString& uri) const = 0;
         virtual AnyString MapUri(const AnyString& uri) const = 0;
+
+        virtual bool IsReleasePackage() const = 0;
     private:
     };
 
@@ -54,6 +56,8 @@ namespace app
         virtual bool ReadFile(const AnyString& uri, QByteArray* bytes) const override;
         virtual bool HasMapping(const AnyString& uri) const override;
         virtual AnyString MapUri(const AnyString& uri) const override;
+        virtual bool IsReleasePackage() const override
+        { return true; }
 
         using app::ResourcePacker::HasMapping;
         using app::ResourcePacker::MapUri;
@@ -90,7 +94,10 @@ namespace app
         virtual bool ReadFile(const AnyString& uri, QByteArray* array) const override;
         virtual bool HasMapping(const AnyString& uri) const override;
         virtual AnyString MapUri(const AnyString& uri) const override;
+        virtual bool IsReleasePackage() const override
+        { return false; }
         bool CopyFile(const QString& src_file, const AnyString& dir, QString*  dst_name);
+
     private:
         QString MapUriToZipFile(const std::string& uri) const;
         bool FindZipFile(const QString& unix_style_name) const;
@@ -112,6 +119,8 @@ namespace app
         virtual bool ReadFile(const AnyString& uri, QByteArray* array) const override;
         virtual bool HasMapping(const AnyString& uri) const override;
         virtual AnyString MapUri(const AnyString& uri) const override;
+        virtual bool IsReleasePackage() const override
+        { return false; }
 
         void WriteText(const std::string& text, const char* name);
         void WriteBytes(const QByteArray& bytes, const char* name);
