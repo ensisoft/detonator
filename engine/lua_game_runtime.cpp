@@ -1389,19 +1389,46 @@ sol::object LuaRuntime::CallCrossEnvMethod(sol::object object, const std::string
         target_name = window->GetName();
         target_type = "Window";
     }
-    else throw GameError("Unsupported object type CallMethod method call. Only entity, scene or window object is supported.");
+    else if (object.is<game::EntityStateController*>())
+    {
+        auto* controller = object.as<game::EntityStateController*>();
+        env = GetTypeEnv(controller->GetClass());
+        target_name = controller->GetName();
+        target_type = "EntityStateController";
+    }
+    else
+    {
+        ERROR("Your game tried to call a Lua method across Lua environments.");
+        ERROR("But the target object type is unsupported.");
+        ERROR("Only Entity, EntityStateController, Scene or Window object are supported.");
+        throw GameError("Unsupported object type in CallMethod method call");
+
+    }
 
     if (env == nullptr)
-        throw GameError(base::FormatString("CallMethod method call target '%1/%2' object doesn't have a Lua environment.", target_type, target_name));
+    {
+        ERROR("Your game tried to call a Lua method (%1) on an object (%2) that doesn't have a Lua environment.",
+              method, target_name);
+        throw GameError(
+                base::FormatString("CallMethod target object '%1' doesn't have a Lua environment.",
+                                   target_name));
+    }
 
     sol::protected_function func = (*env)[method];
     if (!func.valid())
+    {
+        ERROR("Your game tried to call a Lua method (%1) on an object (%2) that doesn't have such a method.",
+              method, target_name);
         throw GameError(base::FormatString("No such CallMethod method '%1' was found. ", method));
+    }
 
     const auto& result = func(object, args);
     if (!result.valid())
     {
         const sol::error err = result;
+        ERROR("The Lua method (%1) invoked on object (%2) failed.", method, target_name);
+        ERROR("Error in the called function.");
+        ERROR("%1", err.what());
         throw GameError(base::FormatString("CallMethod '%1' failed. %2", method, err.what()));
     }
     // todo: how to return any number of return values ?
