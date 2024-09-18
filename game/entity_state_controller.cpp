@@ -102,6 +102,7 @@ std::size_t EntityStateControllerClass::GetHash() const noexcept
     hash = base::hash_combine(hash, mScriptId);
     hash = base::hash_combine(hash, mInitState);
     hash = base::hash_combine(hash, mTransitionMode);
+    hash = base::hash_combine(hash, mFlags);
 
     for (const auto& state : mStates)
     {
@@ -121,6 +122,7 @@ void EntityStateControllerClass::IntoJson(data::Writer& data) const
     data.Write("initial_state", mInitState);
     data.Write("script_id", mScriptId);
     data.Write("transition_mode", mTransitionMode);
+    data.Write("flags", mFlags);
 
     for (const auto& state : mStates)
     {
@@ -143,6 +145,7 @@ bool EntityStateControllerClass::FromJson(const data::Reader& data)
     ok &= data.Read("initial_state", &mInitState);
     ok &= data.Read("script_id", &mScriptId);
     ok &= data.Read("transition_mode", &mTransitionMode);
+    ok &= data.Read("flags", &mFlags);
 
     for (unsigned i=0; i<data.GetNumChunks("states"); ++i)
     {
@@ -168,6 +171,7 @@ EntityStateControllerClass EntityStateControllerClass::Clone() const
     dolly.mName = mName;
     dolly.mScriptId = mScriptId;
     dolly.mTransitionMode = mTransitionMode;
+    dolly.mFlags = mFlags;
 
     std::unordered_map<std::string, std::string> state_map;
     for (const auto& state : mStates)

@@ -939,7 +939,9 @@ void BindGameLib(sol::state& L)
         }
         return std::string("");
     };
-    entity_state_controller["TriggerTransition"] = &EntityStateController::TriggerTransition;
+    entity_state_controller["TriggerTransition"]         = &EntityStateController::TriggerTransition;
+    entity_state_controller["IsReceivingKeyboardEvents"] = &EntityStateController::IsReceivingKeyboardEvents;
+    entity_state_controller["IsReceivingMouseEvents"]    = &EntityStateController::IsReceivingMouseEvents;
 
     auto animation_class = table.new_usertype<AnimationClass>("AnimationClass");
     animation_class["GetName"]     = &AnimationClass::GetName;
