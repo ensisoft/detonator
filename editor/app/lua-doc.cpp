@@ -1534,6 +1534,9 @@ void InitLuaDoc()
     DOC_METHOD_0("game.Scene", "GetScene", "Get the current scene.");
     DOC_METHOD_1("game.EntityNode", "GetNode", "Get an entity node at the the given index. The indexing is 0 based and the index must be a valid index.",
                  "unsigned", "index");
+    DOC_METHOD_1("game.EntityNode", "FindNode", "Find a node in the entity by its class name. Returns nil if no such node could be found.<br>"
+                                                           "If multiple nodes have the same class name it's unspecified which one is returned.<br>",
+                 "string", "name");
     DOC_METHOD_1("game.EntityNode", "FindNodeByClassName", "Find a node in the entity by its class name. Returns nil if no such node could be found.<br>"
                                                            "If multiple nodes have the same class name it's unspecified which one is returned.<br>",
                  "string", "name");
@@ -1754,6 +1757,10 @@ void InitLuaDoc()
     DOC_METHOD_1("game.Entity", "FindEntityByInstanceName", "Find an entity with the given instance name.<br>"
                                                             "Returns nil if no such entity could be found.<br>"
                                                             "In case of multiple entities with the same name the first one with a matching name is returned.",
+                 "string", "name");
+    DOC_METHOD_1("game.Entity", "FindEntity", "Find an entity with the given instance name.<br>"
+                                              "Returns nil if no such entity could be found.<br>"
+                                              "In case of multiple entities with the same name the first one with a matching name is returned.",
                  "string", "name");
     DOC_METHOD_1("game.Entity", "GetEntity", "Get an entity at the given index. The indexing is zero based and the index must be a valid index.", "unsigned", "index");
     DOC_METHOD_1("void", "KillEntity", "Flag an entity for removal from the scene. <br>"

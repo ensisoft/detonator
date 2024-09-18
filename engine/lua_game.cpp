@@ -1116,6 +1116,7 @@ void BindGameLib(sol::state& L)
             entity.CoarseHitTest(point.GetX(), point.GetY(), &hits);
             return EntityNodeList(std::move(hits));
         });
+    entity["FindNode"] = GetMutable(&Entity::FindNodeByClassName);
 
     auto entity_posted_event = table.new_usertype<Entity::PostedEvent>("EntityEvent", sol::constructors<Entity::PostedEvent()>());
     entity_posted_event["message"] = &Entity::PostedEvent::message;
@@ -1334,6 +1335,7 @@ void BindGameLib(sol::state& L)
     scene["GetClass"]                   = &Scene::GetClass;
     scene["GetNumEntities"]             = &Scene::GetNumEntities;
     scene["GetEntity"]                  = GetMutable(&Scene::GetEntity);
+    scene["FindEntity"]                 = GetMutable(&Scene::FindEntityByInstanceName);
     scene["FindEntityByInstanceId"]     = GetMutable(&Scene::FindEntityByInstanceId);
     scene["FindEntityByInstanceName"]   = GetMutable(&Scene::FindEntityByInstanceName);
     scene["FindScriptVarById"]          = &Scene::FindScriptVarById;
