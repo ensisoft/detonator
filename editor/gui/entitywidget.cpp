@@ -3619,18 +3619,31 @@ void EntityWidget::MousePress(QMouseEvent* event)
                 mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.entity, current, snap, grid_size));
             else if (hotspot == ToolHotspot::Rotate)
                 mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.entity, current));
+            else if (hotspot == ToolHotspot::Remove)
+                mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.entity, current, snap, grid_size));
+            else mUI.tree->ClearSelection();
         }
-        if (!mCurrentTool)
+
+        if (!GetCurrentNode())
         {
             auto [hitnode, hitpos] = SelectNode(mUI, mState, click_point, *mState.entity, GetCurrentNode());
             if (hitnode)
             {
+                const auto node_box_size = hitnode->GetSize();
+                const auto& node_to_world = mState.entity->FindNodeTransform(hitnode);
+                gfx::FRect box;
+                box.Resize(node_box_size.x, node_box_size.y);
+                box.Translate(-node_box_size.x*0.5f, -node_box_size.y*0.5f);
+
+                const auto hotspot = TestToolHotspot(mUI, mState, node_to_world, box, click_point);
+                if (hotspot == ToolHotspot::Resize)
+                    mCurrentTool.reset(new ResizeRenderTreeNodeTool(*mState.entity, hitnode, snap, grid_size));
+                else if (hotspot == ToolHotspot::Rotate)
+                    mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.entity, hitnode));
+                else if (hotspot == ToolHotspot::Remove)
+                    mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.entity, hitnode, snap, grid_size));
+
                 mUI.tree->SelectItemById(hitnode->GetId());
-                mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.entity, hitnode, snap, grid_size));
-            }
-            else
-            {
-                mUI.tree->ClearSelection();
             }
         }
     }
