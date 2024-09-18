@@ -2109,18 +2109,33 @@ void SceneWidget::MousePress(QMouseEvent* event)
                 mCurrentTool.reset(new ScaleRenderTreeNodeTool(*mState.scene, current));
             else if (hotspot == ToolHotspot::Rotate)
                 mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.scene, current));
-            //DEBUG("hotspot %1", hotspot);
+            else if (hotspot == ToolHotspot::Remove)
+                mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.scene, current, snap, grid_size, GetValue(mUI.cmbPerspective)));
+            else mUI.tree->ClearSelection();
+
         }
-        if (!mCurrentTool)
+
+        // pick another node
+        if (!GetCurrentNode())
         {
             if (auto* selection = SelectNode(click_point))
             {
-                mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.scene, selection, snap, grid_size, GetValue(mUI.cmbPerspective)));
+                const auto& entity_klass = selection->GetEntityClass();
+                if (!entity_klass)
+                    return;
+                const auto& box  = entity_klass->GetBoundingRect();
+
+                const base::Transform model(mState.scene->FindEntityTransform(selection));
+
+                const auto hotspot = TestToolHotspot(mUI, mState, model, box, click_point);
+                if (hotspot == ToolHotspot::Resize)
+                    mCurrentTool.reset(new ScaleRenderTreeNodeTool(*mState.scene, selection));
+                else if (hotspot == ToolHotspot::Rotate)
+                    mCurrentTool.reset(new RotateRenderTreeNodeTool(*mState.scene, selection));
+                else if (hotspot == ToolHotspot::Remove)
+                    mCurrentTool.reset(new MoveRenderTreeNodeTool(*mState.scene, selection, snap, grid_size, GetValue(mUI.cmbPerspective)));
+
                 mUI.tree->SelectItemById(selection->GetId());
-            }
-            else
-            {
-                mUI.tree->ClearSelection();
             }
         }
     }
