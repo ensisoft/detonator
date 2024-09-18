@@ -71,6 +71,7 @@ namespace gui
 
     public:
         DlgAnimator(QWidget* parent,
+                    app::Workspace* workspace,
                     const game::EntityClass& entity,
                     const game::EntityStateControllerClass& animator,
                     const QVariantMap& props);
@@ -87,6 +88,11 @@ namespace gui
         detail::StateLink* GetSelectedLink();
 
     private slots:
+        void on_btnEditAnimatorScript_clicked();
+        void on_btnAddAnimatorScript_clicked();
+        void on_btnResetAnimatorScript_clicked();
+        void on_animatorScript_currentIndexChanged(int);
+
         void on_btnCancel_clicked();
         void on_btnAccept_clicked();
         void on_stateView_customContextMenuRequested(QPoint pos);
@@ -98,11 +104,13 @@ namespace gui
         void on_linkName_textChanged(const QString&);
 
         void SceneSelectionChanged();
+        void UpdateScriptList();
 
     private:
         Ui::DlgAnimator mUI;
     private:
         std::unique_ptr<AnimatorGraphScene> mScene;
+        app::Workspace* mWorkspace = nullptr;
         const game::EntityClass* mEntity = nullptr;
         game::EntityStateControllerClass mAnimator;
         EntityWidget* mEntityWidget = nullptr;
