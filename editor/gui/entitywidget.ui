@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>2055</width>
-    <height>1478</height>
+    <width>1816</width>
+    <height>1064</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,58 +43,27 @@
           <string>Base properties</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="2" column="1" colspan="5">
-           <widget class="QLineEdit" name="entityTag">
+          <item row="7" column="0">
+           <widget class="QLabel" name="label_9">
+            <property name="text">
+             <string>Killing</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="3">
+           <widget class="QLineEdit" name="entityID">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-           </widget>
-          </item>
-          <item row="10" column="1" colspan="5">
-           <widget class="QCheckBox" name="chkKillAtBoundary">
-            <property name="text">
-             <string>Kill at scene boundary</string>
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item row="4" column="5">
-           <widget class="QToolButton" name="btnResetIdleTrack">
-            <property name="toolTip">
-             <string>Reset idle track to nothing</string>
-            </property>
-            <property name="text">
-             <string>...</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resource/resource.qrc">
-              <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
-            </property>
-            <property name="autoRaise">
-             <bool>false</bool>
-            </property>
-            <property name="arrowType">
-             <enum>Qt::NoArrow</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="1" colspan="5">
-           <widget class="QCheckBox" name="chkKillAtLifetime">
-            <property name="text">
-             <string>Kill at lifetime</string>
-            </property>
-           </widget>
-          </item>
-          <item row="15" column="1">
-           <widget class="QCheckBox" name="chkKeyEvents">
-            <property name="text">
-             <string>Receive keyboard events</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1" colspan="2">
+          <item row="3" column="1" colspan="2">
            <widget class="QDoubleSpinBox" name="entityLifetime">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -128,184 +97,14 @@
             </property>
            </widget>
           </item>
-          <item row="11" column="1">
-           <widget class="QCheckBox" name="chkTickEntity">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Tick entity script</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="5">
-           <widget class="QToolButton" name="btnResetScript">
-            <property name="toolTip">
-             <string>Reset entity script to nothing</string>
-            </property>
-            <property name="text">
-             <string>...</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resource/resource.qrc">
-              <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
-            </property>
-            <property name="autoRaise">
-             <bool>false</bool>
-            </property>
-            <property name="arrowType">
-             <enum>Qt::NoArrow</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="12" column="1">
-           <widget class="QCheckBox" name="chkUpdateEntity">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Update entity script</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="3">
-           <widget class="QToolButton" name="btnEditIdleTrack">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="toolTip">
-             <string>Open the script for editing</string>
-            </property>
-            <property name="text">
-             <string>...</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resource/resource.qrc">
-              <normaloff>:/16x16_ico_png/script_go.png</normaloff>:/16x16_ico_png/script_go.png</iconset>
-            </property>
-            <property name="autoRaise">
-             <bool>false</bool>
-            </property>
-            <property name="arrowType">
-             <enum>Qt::NoArrow</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1" colspan="5">
-           <widget class="QLineEdit" name="entityID">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="16" column="1">
-           <widget class="QCheckBox" name="chkMouseEvents">
-            <property name="text">
-             <string>Receive mouse events</string>
-            </property>
-           </widget>
-          </item>
-          <item row="13" column="1">
-           <widget class="QCheckBox" name="chkPostUpdate">
-            <property name="text">
-             <string>Post update entity script</string>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="0">
-           <widget class="QLabel" name="label_9">
-            <property name="text">
-             <string>Killing</string>
-            </property>
-           </widget>
-          </item>
-          <item row="11" column="0">
-           <widget class="QLabel" name="label_21">
-            <property name="text">
-             <string>Updates</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1" colspan="2">
-           <widget class="QComboBox" name="scriptFile">
-            <property name="placeholderText">
-             <string>None</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Idle animation</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="3">
-           <widget class="QToolButton" name="btnEditScript">
-            <property name="toolTip">
-             <string>Open the script for editing</string>
-            </property>
-            <property name="text">
-             <string>...</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resource/resource.qrc">
-              <normaloff>:/16x16_ico_png/script_go.png</normaloff>:/16x16_ico_png/script_go.png</iconset>
-            </property>
-            <property name="autoRaise">
-             <bool>false</bool>
-            </property>
-            <property name="arrowType">
-             <enum>Qt::NoArrow</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
+          <item row="3" column="0">
            <widget class="QLabel" name="label_40">
             <property name="text">
              <string>Lifetime</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_11">
-            <property name="text">
-             <string>Tag</string>
-            </property>
-           </widget>
-          </item>
-          <item row="15" column="0">
-           <widget class="QLabel" name="label_22">
-            <property name="text">
-             <string>Input</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="5">
+          <item row="3" column="3">
            <widget class="QToolButton" name="btnResetLifetime">
             <property name="toolTip">
              <string>Reset entity lifetime to unlimited</string>
@@ -325,45 +124,32 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_13">
-            <property name="text">
-             <string>ID</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_39">
-            <property name="text">
-             <string>Script</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="4">
-           <widget class="QToolButton" name="btnAddIdleTrack">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="toolTip">
-             <string>Add new idle track</string>
-            </property>
-            <property name="text">
-             <string>...</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resource/resource.qrc">
-              <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
-            </property>
-            <property name="autoRaise">
-             <bool>false</bool>
-            </property>
-            <property name="arrowType">
-             <enum>Qt::NoArrow</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1" colspan="5">
+          <item row="0" column="1" colspan="3">
            <widget class="QLineEdit" name="entityName">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_11">
+            <property name="text">
+             <string>Tag</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="1" colspan="3">
+           <widget class="QCheckBox" name="chkKillAtBoundary">
+            <property name="text">
+             <string>Kill at scene boundary</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1" colspan="3">
+           <widget class="QLineEdit" name="entityTag">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -388,37 +174,17 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="1" colspan="2">
-           <widget class="QComboBox" name="idleTrack">
-            <property name="placeholderText">
-             <string>None</string>
+          <item row="7" column="1" colspan="3">
+           <widget class="QCheckBox" name="chkKillAtLifetime">
+            <property name="text">
+             <string>Kill at lifetime</string>
             </property>
            </widget>
           </item>
-          <item row="3" column="4">
-           <widget class="QToolButton" name="btnAddScript">
-            <property name="toolTip">
-             <string>Add new entity script</string>
-            </property>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_13">
             <property name="text">
-             <string>...</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../resource/resource.qrc">
-              <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
-            </property>
-            <property name="autoRaise">
-             <bool>false</bool>
-            </property>
-            <property name="arrowType">
-             <enum>Qt::NoArrow</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="14" column="1">
-           <widget class="QCheckBox" name="chkUpdateNodes">
-            <property name="text">
-             <string>Update entity nodes</string>
+             <string>ID</string>
             </property>
            </widget>
           </item>
@@ -497,8 +263,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>397</width>
-               <height>737</height>
+               <width>353</width>
+               <height>563</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_17">
@@ -514,6 +280,198 @@
               <property name="bottomMargin">
                <number>0</number>
               </property>
+              <item>
+               <widget class="gui::CollapsibleWidget" name="scripting">
+                <property name="collapsed" stdset="0">
+                 <bool>true</bool>
+                </property>
+                <property name="text" stdset="0">
+                 <string>Entity script</string>
+                </property>
+                <property name="frameShape" stdset="0">
+                 <enum>QFrame::NoFrame</enum>
+                </property>
+                <widget class="QWidget" name="page_11">
+                 <layout class="QVBoxLayout" name="verticalLayout_11">
+                  <property name="leftMargin">
+                   <number>4</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>4</number>
+                  </property>
+                  <item>
+                   <widget class="QWidget" name="widget_2" native="true">
+                    <layout class="QGridLayout" name="gridLayout_10">
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item row="0" column="1">
+                      <widget class="QToolButton" name="btnEditScript">
+                       <property name="toolTip">
+                        <string>Open the script for editing</string>
+                       </property>
+                       <property name="text">
+                        <string>...</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="../resource/resource.qrc">
+                         <normaloff>:/16x16_ico_png/script_go.png</normaloff>:/16x16_ico_png/script_go.png</iconset>
+                       </property>
+                       <property name="autoRaise">
+                        <bool>false</bool>
+                       </property>
+                       <property name="arrowType">
+                        <enum>Qt::NoArrow</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="2">
+                      <widget class="QToolButton" name="btnAddScript">
+                       <property name="toolTip">
+                        <string>Add new entity script</string>
+                       </property>
+                       <property name="text">
+                        <string>...</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="../resource/resource.qrc">
+                         <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+                       </property>
+                       <property name="autoRaise">
+                        <bool>false</bool>
+                       </property>
+                       <property name="arrowType">
+                        <enum>Qt::NoArrow</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="3">
+                      <widget class="QToolButton" name="btnResetScript">
+                       <property name="toolTip">
+                        <string>Reset entity script to nothing</string>
+                       </property>
+                       <property name="text">
+                        <string>...</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="../resource/resource.qrc">
+                         <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+                       </property>
+                       <property name="autoRaise">
+                        <bool>false</bool>
+                       </property>
+                       <property name="arrowType">
+                        <enum>Qt::NoArrow</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="0">
+                      <widget class="QComboBox" name="scriptFile">
+                       <property name="placeholderText">
+                        <string>None</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="2" column="0" colspan="4">
+                      <widget class="QGroupBox" name="groupBox_4">
+                       <property name="title">
+                        <string>Tick and update</string>
+                       </property>
+                       <property name="flat">
+                        <bool>true</bool>
+                       </property>
+                       <layout class="QVBoxLayout" name="verticalLayout_12">
+                        <property name="leftMargin">
+                         <number>10</number>
+                        </property>
+                        <item>
+                         <widget class="QCheckBox" name="chkTickEntity">
+                          <property name="sizePolicy">
+                           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                           </sizepolicy>
+                          </property>
+                          <property name="text">
+                           <string>Tick entity script</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QCheckBox" name="chkUpdateEntity">
+                          <property name="sizePolicy">
+                           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                           </sizepolicy>
+                          </property>
+                          <property name="text">
+                           <string>Update entity script</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QCheckBox" name="chkUpdateNodes">
+                          <property name="text">
+                           <string>Update entity nodes</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QCheckBox" name="chkPostUpdate">
+                          <property name="text">
+                           <string>Post update entity script</string>
+                          </property>
+                         </widget>
+                        </item>
+                       </layout>
+                      </widget>
+                     </item>
+                     <item row="1" column="0" colspan="4">
+                      <widget class="QGroupBox" name="groupBox_3">
+                       <property name="title">
+                        <string>Input events</string>
+                       </property>
+                       <property name="flat">
+                        <bool>true</bool>
+                       </property>
+                       <layout class="QVBoxLayout" name="verticalLayout_13">
+                        <property name="leftMargin">
+                         <number>10</number>
+                        </property>
+                        <item>
+                         <widget class="QCheckBox" name="chkMouseEvents">
+                          <property name="text">
+                           <string>Receive mouse events</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QCheckBox" name="chkKeyEvents">
+                          <property name="text">
+                           <string>Receive keyboard events</string>
+                          </property>
+                         </widget>
+                        </item>
+                       </layout>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </widget>
+              </item>
               <item>
                <widget class="gui::CollapsibleWidget" name="variables">
                 <property name="sizePolicy">
@@ -540,16 +498,16 @@
                 <widget class="QWidget" name="page_2">
                  <layout class="QVBoxLayout" name="verticalLayout_24">
                   <property name="leftMargin">
-                   <number>10</number>
+                   <number>4</number>
                   </property>
                   <property name="topMargin">
-                   <number>10</number>
+                   <number>4</number>
                   </property>
                   <property name="rightMargin">
-                   <number>10</number>
+                   <number>4</number>
                   </property>
                   <property name="bottomMargin">
-                   <number>10</number>
+                   <number>4</number>
                   </property>
                   <item>
                    <widget class="QTableView" name="scriptVarList">
@@ -652,7 +610,7 @@
                 <property name="maximumSize">
                  <size>
                   <width>16777215</width>
-                  <height>200</height>
+                  <height>300</height>
                  </size>
                 </property>
                 <property name="collapsed" stdset="0">
@@ -667,16 +625,16 @@
                 <widget class="QWidget" name="page_3">
                  <layout class="QVBoxLayout" name="verticalLayout_18">
                   <property name="leftMargin">
-                   <number>10</number>
+                   <number>4</number>
                   </property>
                   <property name="topMargin">
-                   <number>10</number>
+                   <number>4</number>
                   </property>
                   <property name="rightMargin">
-                   <number>10</number>
+                   <number>4</number>
                   </property>
                   <property name="bottomMargin">
-                   <number>10</number>
+                   <number>4</number>
                   </property>
                   <item>
                    <widget class="QListWidget" name="trackList">
@@ -749,6 +707,103 @@
                     </item>
                    </layout>
                   </item>
+                  <item>
+                   <widget class="QGroupBox" name="groupBox">
+                    <property name="title">
+                     <string>Idle animation</string>
+                    </property>
+                    <property name="flat">
+                     <bool>true</bool>
+                    </property>
+                    <layout class="QHBoxLayout" name="horizontalLayout">
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>10</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>10</number>
+                     </property>
+                     <item>
+                      <widget class="QComboBox" name="idleTrack">
+                       <property name="placeholderText">
+                        <string>None</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="btnEditIdleTrack">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
+                       <property name="toolTip">
+                        <string>Edit current idle animation</string>
+                       </property>
+                       <property name="text">
+                        <string>...</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="../resource/resource.qrc">
+                         <normaloff>:/16x16_ico_png/script_go.png</normaloff>:/16x16_ico_png/script_go.png</iconset>
+                       </property>
+                       <property name="autoRaise">
+                        <bool>false</bool>
+                       </property>
+                       <property name="arrowType">
+                        <enum>Qt::NoArrow</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="btnAddIdleTrack">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
+                       <property name="toolTip">
+                        <string>Create new idle animation</string>
+                       </property>
+                       <property name="text">
+                        <string>...</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="../resource/resource.qrc">
+                         <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+                       </property>
+                       <property name="autoRaise">
+                        <bool>false</bool>
+                       </property>
+                       <property name="arrowType">
+                        <enum>Qt::NoArrow</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QToolButton" name="btnResetIdleTrack">
+                       <property name="toolTip">
+                        <string>Reset idle animation to nothing</string>
+                       </property>
+                       <property name="text">
+                        <string>...</string>
+                       </property>
+                       <property name="icon">
+                        <iconset resource="../resource/resource.qrc">
+                         <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+                       </property>
+                       <property name="autoRaise">
+                        <bool>false</bool>
+                       </property>
+                       <property name="arrowType">
+                        <enum>Qt::NoArrow</enum>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
                  </layout>
                 </widget>
                </widget>
@@ -779,16 +834,16 @@
                 <widget class="QWidget" name="page_4">
                  <layout class="QVBoxLayout" name="verticalLayout_19">
                   <property name="leftMargin">
-                   <number>10</number>
+                   <number>4</number>
                   </property>
                   <property name="topMargin">
-                   <number>10</number>
+                   <number>4</number>
                   </property>
                   <property name="rightMargin">
-                   <number>10</number>
+                   <number>4</number>
                   </property>
                   <property name="bottomMargin">
-                   <number>10</number>
+                   <number>4</number>
                   </property>
                   <item>
                    <widget class="QTableView" name="jointList">
@@ -1392,7 +1447,7 @@
           <x>0</x>
           <y>0</y>
           <width>440</width>
-          <height>984</height>
+          <height>920</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -4787,29 +4842,27 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>widget</tabstop>
   <tabstop>entityName</tabstop>
   <tabstop>entityID</tabstop>
   <tabstop>entityTag</tabstop>
-  <tabstop>scriptFile</tabstop>
-  <tabstop>btnEditScript</tabstop>
-  <tabstop>btnAddScript</tabstop>
-  <tabstop>btnResetScript</tabstop>
-  <tabstop>idleTrack</tabstop>
-  <tabstop>btnEditIdleTrack</tabstop>
-  <tabstop>btnAddIdleTrack</tabstop>
-  <tabstop>btnResetIdleTrack</tabstop>
   <tabstop>entityLifetime</tabstop>
   <tabstop>btnResetLifetime</tabstop>
   <tabstop>chkKillAtLifetime</tabstop>
   <tabstop>chkKillAtBoundary</tabstop>
-  <tabstop>chkTickEntity</tabstop>
-  <tabstop>chkUpdateEntity</tabstop>
-  <tabstop>chkPostUpdate</tabstop>
-  <tabstop>chkUpdateNodes</tabstop>
-  <tabstop>chkKeyEvents</tabstop>
-  <tabstop>chkMouseEvents</tabstop>
   <tabstop>animator</tabstop>
   <tabstop>btnEditAnimator</tabstop>
+  <tabstop>scripting</tabstop>
+  <tabstop>scriptFile</tabstop>
+  <tabstop>btnEditScript</tabstop>
+  <tabstop>btnAddScript</tabstop>
+  <tabstop>btnResetScript</tabstop>
+  <tabstop>chkMouseEvents</tabstop>
+  <tabstop>chkKeyEvents</tabstop>
+  <tabstop>chkTickEntity</tabstop>
+  <tabstop>chkUpdateEntity</tabstop>
+  <tabstop>chkUpdateNodes</tabstop>
+  <tabstop>chkPostUpdate</tabstop>
   <tabstop>variables</tabstop>
   <tabstop>scriptVarList</tabstop>
   <tabstop>btnNewScriptVar</tabstop>
@@ -4820,29 +4873,15 @@
   <tabstop>btnNewTrack</tabstop>
   <tabstop>btnEditTrack</tabstop>
   <tabstop>btnDeleteTrack</tabstop>
+  <tabstop>idleTrack</tabstop>
+  <tabstop>btnEditIdleTrack</tabstop>
+  <tabstop>btnAddIdleTrack</tabstop>
+  <tabstop>btnResetIdleTrack</tabstop>
   <tabstop>joints</tabstop>
   <tabstop>jointList</tabstop>
   <tabstop>btnNewJoint</tabstop>
   <tabstop>btnEditJoint</tabstop>
   <tabstop>btnDeleteJoint</tabstop>
-  <tabstop>zoom</tabstop>
-  <tabstop>cmbGrid</tabstop>
-  <tabstop>cmbStyle</tabstop>
-  <tabstop>chkSnap</tabstop>
-  <tabstop>chkShowViewport</tabstop>
-  <tabstop>chkShowOrigin</tabstop>
-  <tabstop>chkShowGrid</tabstop>
-  <tabstop>chkShowComments</tabstop>
-  <tabstop>widgetColor</tabstop>
-  <tabstop>btnMoreViewportSettings</tabstop>
-  <tabstop>translateX</tabstop>
-  <tabstop>translateY</tabstop>
-  <tabstop>scaleX</tabstop>
-  <tabstop>scaleY</tabstop>
-  <tabstop>rotation</tabstop>
-  <tabstop>btnViewPlus90</tabstop>
-  <tabstop>btnViewMinus90</tabstop>
-  <tabstop>btnViewReset</tabstop>
   <tabstop>tree</tabstop>
   <tabstop>scrollArea_2</tabstop>
   <tabstop>nodeID</tabstop>
@@ -4859,6 +4898,7 @@
   <tabstop>nodeRotation</tabstop>
   <tabstop>nodePlus90</tabstop>
   <tabstop>nodeMinus90</tabstop>
+  <tabstop>btnAddNodeItem</tabstop>
   <tabstop>btnAddDrawable</tabstop>
   <tabstop>drawable</tabstop>
   <tabstop>dsDrawable</tabstop>
@@ -4952,7 +4992,6 @@
   <tabstop>spnShape</tabstop>
   <tabstop>spnEnabled</tabstop>
   <tabstop>btnDelSpatialNode</tabstop>
-  <tabstop>widget</tabstop>
   <tabstop>btnAddTransformer</tabstop>
   <tabstop>transformer</tabstop>
   <tabstop>tfIntegrator</tabstop>
@@ -4964,6 +5003,24 @@
   <tabstop>tfAccelA</tabstop>
   <tabstop>tfEnabled</tabstop>
   <tabstop>btnDelTransformer</tabstop>
+  <tabstop>zoom</tabstop>
+  <tabstop>cmbGrid</tabstop>
+  <tabstop>cmbStyle</tabstop>
+  <tabstop>chkSnap</tabstop>
+  <tabstop>chkShowViewport</tabstop>
+  <tabstop>chkShowOrigin</tabstop>
+  <tabstop>chkShowGrid</tabstop>
+  <tabstop>chkShowComments</tabstop>
+  <tabstop>widgetColor</tabstop>
+  <tabstop>btnMoreViewportSettings</tabstop>
+  <tabstop>translateX</tabstop>
+  <tabstop>translateY</tabstop>
+  <tabstop>scaleX</tabstop>
+  <tabstop>scaleY</tabstop>
+  <tabstop>rotation</tabstop>
+  <tabstop>btnViewPlus90</tabstop>
+  <tabstop>btnViewMinus90</tabstop>
+  <tabstop>btnViewReset</tabstop>
  </tabstops>
  <resources>
   <include location="../resource/resource.qrc"/>

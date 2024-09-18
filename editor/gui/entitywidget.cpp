@@ -721,6 +721,11 @@ EntityWidget::EntityWidget(app::Workspace* workspace) : mUndoStack(3)
     mUI.btnAddNodeItem->addAction(mUI.actionAddSpatialNode);
     mUI.btnAddNodeItem->addAction(mUI.actionAddTransformer);
 
+    QTimer::singleShot(10, this, [this]() {
+        mUI.widget->activateWindow();
+        mUI.widget->setFocus();
+    });
+
 }
 
 EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resource)
@@ -744,6 +749,7 @@ EntityWidget::EntityWidget(app::Workspace* workspace, const app::Resource& resou
     GetUserProperty(resource, "variables_group", mUI.variables);
     GetUserProperty(resource, "animations_group", mUI.animations);
     GetUserProperty(resource, "joints_group", mUI.joints);
+    GetUserProperty(resource, "scripting_group", mUI.scripting);
     GetUserProperty(resource, "main_splitter", mUI.mainSplitter);
     GetUserProperty(resource, "right_splitter", mUI.rightSplitter);
     GetUserProperty(resource, "camera_offset_x", &mState.camera_offset_x) &&
@@ -958,6 +964,7 @@ bool EntityWidget::SaveState(Settings& settings) const
     settings.SaveWidget("Entity", mUI.widget);
     settings.SaveWidget("Entity", mUI.variables);
     settings.SaveWidget("Entity", mUI.animations);
+    settings.SaveWidget("Entity", mUI.scripting);
     settings.SaveWidget("Entity", mUI.joints);
     settings.SaveWidget("Entity", mUI.mainSplitter);
     settings.SaveWidget("Entity", mUI.rightSplitter);
@@ -985,6 +992,7 @@ bool EntityWidget::LoadState(const Settings& settings)
     settings.LoadWidget("Entity", mUI.widget);
     settings.LoadWidget("Entity", mUI.variables);
     settings.LoadWidget("Entity", mUI.animations);
+    settings.LoadWidget("Entity", mUI.scripting);
     settings.LoadWidget("Entity", mUI.joints);
     settings.LoadWidget("Entity", mUI.mainSplitter);
     settings.LoadWidget("Entity", mUI.rightSplitter);
@@ -1505,6 +1513,7 @@ void EntityWidget::on_actionSave_triggered()
     SetUserProperty(resource, "variables_group", mUI.variables);
     SetUserProperty(resource, "animations_group", mUI.animations);
     SetUserProperty(resource, "joints_group", mUI.joints);
+    SetUserProperty(resource, "scripting_group", mUI.scripting);
     SetUserProperty(resource, "main_splitter", mUI.mainSplitter);
     SetUserProperty(resource, "right_splitter", mUI.rightSplitter);
 
