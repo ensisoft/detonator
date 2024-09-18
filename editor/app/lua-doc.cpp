@@ -1473,6 +1473,8 @@ void InitLuaDoc()
     DOC_METHOD_0("void", "TriggerTransition", "Trigger evaluation whether any state transition should be taken.<br>"
                                               "When your entity state controller's state transition mode is 'OnTrigger' call this to trigger evaluation "
                                               "to see whether any state transition should take place.");
+    DOC_METHOD_0("bool", "IsReceivingKeyboardEvents", "Check whether the controller is currently configured to receive keyboard events.");
+    DOC_METHOD_0("bool", "IsReceivingMouseEvents", "Check whether the controller is currently configured to receive mouse events.");
 
     DOC_TABLE("game.Animation");
     DOC_METHOD_0("string", "GetName", "Get the animation class name.");

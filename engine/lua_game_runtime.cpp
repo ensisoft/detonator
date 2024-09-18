@@ -1273,39 +1273,49 @@ void LuaRuntime::OnUIAction(uik::Window* ui, const WidgetActionList& actions)
 template<typename KeyEvent>
 void LuaRuntime::DispatchKeyboardEvent(const char* method, const KeyEvent& key)
 {
+    const auto key_sym = static_cast<int>(key.symbol);
+    const auto key_mod = static_cast<int>(key.modifiers.value());
+
     if (mGameEnv)
-        CallLua(*mGameEnv, method,
-                static_cast<int>(key.symbol),
-                static_cast<int>(key.modifiers.value()));
+    {
+        CallLua(*mGameEnv, method, key_sym, key_mod);
+    }
 
     if (mWindow && mWindow->TestFlag(uik::Window::Flags::WantsKeyEvents))
     {
         if (auto* env = GetTypeEnv(*mWindow))
         {
-            CallLua(*env, method, mWindow,
-                    static_cast<int>(key.symbol),
-                    static_cast<int>(key.modifiers.value()));
+            CallLua(*env, method, mWindow, key_sym, key_mod);
         }
     }
 
-    if (mScene)
-    {
-        if (mSceneEnv)
-            CallLua(*mSceneEnv, method, mScene,
-                    static_cast<int>(key.symbol),
-                    static_cast<int>(key.modifiers.value()));
+    if (!mScene)
+        return;
 
-        for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
+    if (mSceneEnv)
+    {
+        CallLua(*mSceneEnv, method, mScene, key_sym, key_mod);
+    }
+
+    for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
+    {
+        auto* entity = &mScene->GetEntity(i);
+        if (entity->TestFlag(Entity::Flags::WantsKeyEvents) || mPreviewMode)
         {
-            auto* entity = &mScene->GetEntity(i);
-            if (!entity->TestFlag(Entity::Flags::WantsKeyEvents) && !mPreviewMode)
-                continue;
             if (auto* env = GetTypeEnv(entity->GetClass()))
             {
-                CallLua(*env, method, entity,
-                        static_cast<int>(key.symbol),
-                        static_cast<int>(key.modifiers.value()));
+                CallLua(*env, method, entity, key_sym, key_mod);
             }
+        }
+
+        auto* controller = entity->GetStateController();
+        if (!controller || !controller->IsReceivingKeyboardEvents())
+            continue;
+
+
+        if (auto* env = GetTypeEnv(controller->GetClass()))
+        {
+            CallLua(*env, method, controller, key_sym, key_mod, entity);
         }
     }
 }
@@ -1331,11 +1341,21 @@ void LuaRuntime::DispatchMouseEvent(const char* method, const MouseEvent& mouse)
         for (size_t i = 0; i < mScene->GetNumEntities(); ++i)
         {
             auto* entity = &mScene->GetEntity(i);
-            if (!entity->TestFlag(Entity::Flags::WantsMouseEvents))
-                continue;
-            if (auto* env = GetTypeEnv(entity->GetClass()))
+            if (entity->TestFlag(Entity::Flags::WantsMouseEvents))
             {
-                CallLua(*env, method, entity, mouse);
+                if (auto* env = GetTypeEnv(entity->GetClass()))
+                {
+                    CallLua(*env, method, entity, mouse);
+                }
+            }
+
+            auto* controller = entity->GetStateController();
+            if (!controller || !controller->IsReceivingMouseEvents())
+                continue;
+
+            if (auto* env = GetTypeEnv(controller->GetClass()))
+            {
+                CallLua(*env, method, controller, mouse, controller);
             }
         }
     }

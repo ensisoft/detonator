@@ -26,6 +26,7 @@
 #include <variant>
 #include <memory>
 
+#include "base/bitflag.h"
 #include "base/utility.h"
 #include "data/fwd.h"
 #include "game/entity_state.h"
@@ -47,6 +48,11 @@ namespace game
             // Only evaluate possible state transitions on trigger, i.e.
             // when an explicit call is made to evaluate.
             OnTrigger
+        };
+
+        enum class Flags {
+            ReceiveKeyboardInput,
+            ReceiveMouseInput
         };
 
         explicit EntityStateControllerClass(std::string id = base::RandomString(10));
@@ -93,11 +99,22 @@ namespace game
         { mStates.clear(); }
         inline void ClearTransitions() noexcept
         { mTransitions.clear(); }
-
+        inline void SetFlag(Flags flag, bool on_off) noexcept
+        { mFlags.set(flag, on_off); }
         inline StateTransitionMode GetTransitionMode() const noexcept
         { return mTransitionMode; }
         inline void SetTransitionMode(StateTransitionMode mode) noexcept
         { mTransitionMode = mode; }
+        inline bool TestFlag(Flags flag) const noexcept
+        { return mFlags.test(flag); }
+        inline bool ShouldReceiveKeyboardInput() const noexcept
+        { return TestFlag(Flags::ReceiveKeyboardInput); }
+        inline bool ShouldReceiveMouseInput() const noexcept
+        { return TestFlag(Flags::ReceiveMouseInput); }
+        inline void SetKeyboardInput(bool on_off) noexcept
+        { SetFlag(Flags::ReceiveKeyboardInput, on_off); }
+        inline void SetMouseInput(bool on_off) noexcept
+        { SetFlag(Flags::ReceiveMouseInput, on_off); }
 
         void DeleteTransitionById(const std::string& id);
         void DeleteStateById(const std::string& id);
@@ -124,6 +141,7 @@ namespace game
         std::vector<EntityStateClass> mStates;
         std::vector<EntityStateTransitionClass> mTransitions;
         StateTransitionMode mTransitionMode = StateTransitionMode::Continuous;
+        base::bitflag<Flags> mFlags;
     };
 
     class EntityStateController
@@ -228,11 +246,11 @@ namespace game
         // it measures the time spent in some particular state.
         inline float GetTime() const noexcept
         { return mTime; }
-        // Class object
-        inline const EntityStateControllerClass& GetClass() const
-        { return *mClass; }
-        inline const EntityStateControllerClass* operator ->() const
-        { return mClass.get(); }
+
+        inline bool IsReceivingKeyboardEvents() const noexcept
+        { return mClass->ShouldReceiveKeyboardInput(); }
+        inline bool IsReceivingMouseEvents() const noexcept
+        { return mClass->ShouldReceiveMouseInput(); }
 
         inline std::string GetName() const noexcept
         { return mClass->GetName(); }
@@ -241,6 +259,12 @@ namespace game
 
         inline bool IsTransitioning() const noexcept
         { return GetControllerState() == State::InTransition; }
+
+        // Class object
+        inline const EntityStateControllerClass& GetClass() const
+        { return *mClass; }
+        inline const EntityStateControllerClass* operator ->() const
+        { return mClass.get(); }
     public:
         std::shared_ptr<const EntityStateControllerClass> mClass;
         // Current state if any. no state during transition
