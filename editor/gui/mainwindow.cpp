@@ -1108,6 +1108,8 @@ void MainWindow::on_actionWindowPopOut_triggered()
     // somewhat fucked up in its appearance. (Layout is off)
     QTimer::singleShot(10, window, &QWidget::updateGeometry);
     QTimer::singleShot(10, widget, &QWidget::updateGeometry);
+
+    FocusPreviousTab();
 }
 
 void MainWindow::on_actionCut_triggered()
@@ -3442,7 +3444,8 @@ void MainWindow::FocusPreviousTab()
         for (int i=0; i<GetCount(mUI.mainTab); ++i)
         {
             const auto* widget = qobject_cast<const MainWidget*>(mUI.mainTab->widget(i));
-            if (widget->GetId() == widget_id) {
+            if (widget->GetId() == widget_id)
+            {
                 mUI.mainTab->setCurrentIndex(i);
                 mFocusStack.pop();
                 return;
