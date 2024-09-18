@@ -161,14 +161,10 @@ namespace gui
         void on_btnSetMaterialParams_clicked();
         void on_btnEditDrawable_clicked();
         void on_btnEditMaterial_clicked();
-        void on_btnEditAnimatorScript_clicked();
-        void on_btnAddAnimatorScript_clicked();
-        void on_btnResetAnimatorScript_clicked();
         void on_btnMoreViewportSettings_clicked();
         void on_trackList_itemSelectionChanged();
         void on_idleTrack_currentIndexChanged(int);
         void on_scriptFile_currentIndexChanged(int);
-        void on_animatorScript_currentIndexChanged(int);
         void on_nodeName_textChanged(const QString& text);
         void on_nodeComment_textChanged(const QString& text);
         void on_nodeTag_textChanged(const QString& text);

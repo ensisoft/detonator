@@ -21,6 +21,7 @@
 #  include <QMenu>
 #  include <QVariant>
 #  include <QVariantMap>
+#  include <QMessageBox>
 #include "warnpop.h"
 
 #include <cmath>
@@ -28,10 +29,14 @@
 #include "game/animation.h"
 #include "game/entity.h"
 #include "editor/app/eventlog.h"
+#include "editor/app/workspace.h"
+#include "editor/app/resource.h"
+#include "editor/app/utility.h"
 #include "editor/gui/entitywidget.h"
 #include "editor/gui/dlganimator.h"
 #include "editor/gui/utility.h"
 #include "editor/gui/translation.h"
+#include "editor/gui/types.h"
 
 namespace gui::detail {
 class StateItem : public QGraphicsItem
@@ -511,10 +516,12 @@ void AnimatorGraphScene::AdjustLink(detail::StateLink* link)
 
 
 DlgAnimator::DlgAnimator(QWidget* parent,
+                         app::Workspace* workspace,
                          const game::EntityClass& entity,
                          const game::EntityStateControllerClass& animator,
                          const QVariantMap& props)
   : QDialog(parent)
+  , mWorkspace(workspace)
   , mEntity(&entity)
   , mAnimator(animator)
 {
@@ -558,10 +565,15 @@ DlgAnimator::DlgAnimator(QWidget* parent,
         mScene->addItem(item);
     }
 
+    UpdateScriptList();
+
     ShowProperties((detail::StateItem*)nullptr);
     ShowProperties((detail::StateLink*)nullptr);
     UpdateStateList();
     SetValue(mUI.cmbInitState, ListItemId(mAnimator.GetInitialStateId()));
+    SetValue(mUI.animatorScript, ListItemId(mAnimator.GetScriptId()));
+    SetValue(mUI.chkMouseEvents, mAnimator.ShouldReceiveMouseInput());
+    SetValue(mUI.chkKeyboardEvents, mAnimator.ShouldReceiveKeyboardInput());
 
     mUI.splitter->setSizes({100, 600});
 }
@@ -670,6 +682,83 @@ detail::StateLink* DlgAnimator::GetSelectedLink()
     return dynamic_cast<detail::StateLink*>(selected[0]);
 }
 
+void DlgAnimator::on_btnEditAnimatorScript_clicked()
+{
+    ActionEvent::OpenResource open;
+    open.id = GetItemId(mUI.animatorScript);
+    ActionEvent::Post(open);
+}
+
+void DlgAnimator::on_btnAddAnimatorScript_clicked()
+{
+    app::Script script;
+    const auto& uri = app::toString("ws://lua/%1.lua", script.GetId());
+    const auto& file = mWorkspace->MapFileToFilesystem(uri);
+    if (app::FileExists(file))
+    {
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Question);
+        msg.setWindowTitle("File Exists");
+        msg.setText(tr("Overwrite existing script file?\n%1").arg(file));
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+        if (msg.exec() == QMessageBox::Cancel)
+            return;
+    }
+    QString source = GenerateAnimatorScriptSource();
+    QFile::FileError err_val = QFile::FileError::NoError;
+    QString err_str;
+    if (!app::WriteTextFile(file, source, &err_val, &err_str))
+    {
+        ERROR("Failed to write file. [file='%1', err_val=%2, err_str='%3']", file, err_val, err_str);
+        QMessageBox msg(this);
+        msg.setIcon(QMessageBox::Critical);
+        msg.setWindowTitle("Error Occurred");
+        msg.setText(tr("Failed to write the script file. [%1]").arg(err_str));
+        msg.setStandardButtons(QMessageBox::Ok);
+        msg.exec();
+        return;
+    }
+    script.SetFileURI(uri);
+    script.SetName(base::FormatString("%1 / Controller", mEntity->GetName()));
+    app::ScriptResource resource(script, app::toString("%1 / Controller", mEntity->GetName()));
+    mWorkspace->SaveResource(resource);
+
+    mAnimator.SetScriptId(script.GetId());
+
+    UpdateScriptList();
+    SetValue(mUI.animatorScript, ListItemId(script.GetId()));
+    SetEnabled(mUI.btnEditAnimatorScript, true);
+    SetEnabled(mUI.btnResetAnimatorScript, true);
+
+    ActionEvent::OpenResource open;
+    open.id = GetItemId(mUI.animatorScript);
+    ActionEvent::Post(open);
+}
+void DlgAnimator::on_btnResetAnimatorScript_clicked()
+{
+    mAnimator.SetScriptId("");
+    SetValue(mUI.animatorScript, -1);
+    SetEnabled(mUI.btnEditAnimatorScript, false);
+    SetEnabled(mUI.btnResetAnimatorScript, false);
+}
+
+void DlgAnimator::on_animatorScript_currentIndexChanged(int index)
+{
+    if (index == -1)
+    {
+        mAnimator.SetScriptId("");
+        SetEnabled(mUI.btnEditAnimatorScript, false);
+        SetEnabled(mUI.btnResetAnimatorScript, false);
+    }
+    else
+    {
+        mAnimator.SetScriptId(GetItemId(mUI.animatorScript));
+        SetEnabled(mUI.btnEditAnimatorScript, true);
+        SetEnabled(mUI.btnResetAnimatorScript, true);
+    }
+}
+
+
 void DlgAnimator::on_btnCancel_clicked()
 {
     reject();
@@ -680,12 +769,13 @@ void DlgAnimator::on_btnAccept_clicked()
     mAnimator.SetName(GetValue(mUI.animName));
     mAnimator.SetTransitionMode(GetValue(mUI.cmbTransitionMode));
     mAnimator.SetInitialStateId(GetItemId(mUI.cmbInitState));
+    mAnimator.SetFlag(game::EntityStateControllerClass::Flags::ReceiveMouseInput, GetValue(mUI.chkMouseEvents));
+    mAnimator.SetFlag(game::EntityStateControllerClass::Flags::ReceiveKeyboardInput, GetValue(mUI.chkKeyboardEvents));
     mAnimator.ClearStates();
     mAnimator.ClearTransitions();
+    mScene->ApplyGraphState(mAnimator);
 
     QVariantMap properties;
-
-    mScene->ApplyGraphState(mAnimator);
     mScene->SaveGraphProperties(properties);
 
     mEntityWidget->SaveAnimator(mAnimator, properties);
@@ -805,6 +895,21 @@ void DlgAnimator::SceneSelectionChanged()
         ShowProperties(link);
 
     UpdateStateList();
+}
+
+void DlgAnimator::UpdateScriptList()
+{
+    std::vector<ResourceListItem> scripts;
+    for (size_t i=0; i<mWorkspace->GetNumUserDefinedResources(); ++i)
+    {
+        const auto& res = mWorkspace->GetUserDefinedResource(i);
+        ResourceListItem pair;
+        pair.name = res.GetName();
+        pair.id   = res.GetId();
+        if (res.GetType() == app::Resource::Type::Script)
+            scripts.push_back(pair);
+    }
+    SetList(mUI.animatorScript, scripts);
 }
 
 }// namespace

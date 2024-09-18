@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1326</width>
-    <height>742</height>
+    <width>1660</width>
+    <height>830</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,6 +16,12 @@
   <layout class="QVBoxLayout" name="verticalLayout_8">
    <item>
     <widget class="QSplitter" name="splitter">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -25,7 +31,7 @@
         <widget class="QGroupBox" name="groupBox_3">
          <property name="minimumSize">
           <size>
-           <width>450</width>
+           <width>400</width>
            <height>0</height>
           </size>
          </property>
@@ -34,16 +40,16 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <property name="leftMargin">
-           <number>10</number>
+           <number>4</number>
           </property>
           <property name="topMargin">
-           <number>10</number>
+           <number>4</number>
           </property>
           <property name="rightMargin">
-           <number>10</number>
+           <number>4</number>
           </property>
           <property name="bottomMargin">
-           <number>10</number>
+           <number>4</number>
           </property>
           <item>
            <widget class="QGroupBox" name="groupBox_4">
@@ -83,7 +89,7 @@
           <item>
            <widget class="QGroupBox" name="groupBox_5">
             <property name="title">
-             <string>Initial State</string>
+             <string>Initial state</string>
             </property>
             <property name="flat">
              <bool>true</bool>
@@ -105,247 +111,371 @@
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_9">
              <property name="leftMargin">
-              <number>10</number>
+              <number>4</number>
              </property>
              <property name="topMargin">
-              <number>10</number>
+              <number>4</number>
              </property>
              <property name="rightMargin">
-              <number>10</number>
+              <number>4</number>
              </property>
              <property name="bottomMargin">
-              <number>10</number>
+              <number>4</number>
              </property>
              <item>
               <widget class="QComboBox" name="cmbTransitionMode"/>
              </item>
-             <item>
-              <widget class="QLabel" name="label_5">
-               <property name="text">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Call TriggerTransition in your Lua script in order to request evaluation to start a state transition.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="groupBox">
+            <property name="title">
+             <string>Controller script</string>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_3">
+             <item row="0" column="0">
+              <widget class="QComboBox" name="animatorScript">
+               <property name="placeholderText">
+                <string>None</string>
                </property>
-               <property name="scaledContents">
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QToolButton" name="btnAddAnimatorScript">
+               <property name="toolTip">
+                <string>Create new script</string>
+               </property>
+               <property name="text">
+                <string>...</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../resource/resource.qrc">
+                 <normaloff>:/16x16_ico_png/add.png</normaloff>:/16x16_ico_png/add.png</iconset>
+               </property>
+               <property name="autoRaise">
                 <bool>false</bool>
                </property>
-               <property name="wordWrap">
-                <bool>true</bool>
+               <property name="arrowType">
+                <enum>Qt::NoArrow</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QToolButton" name="btnEditAnimatorScript">
+               <property name="toolTip">
+                <string>Open script for editing</string>
+               </property>
+               <property name="text">
+                <string>...</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../resource/resource.qrc">
+                 <normaloff>:/16x16_ico_png/script_go.png</normaloff>:/16x16_ico_png/script_go.png</iconset>
+               </property>
+               <property name="autoRaise">
+                <bool>false</bool>
+               </property>
+               <property name="arrowType">
+                <enum>Qt::NoArrow</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <widget class="QToolButton" name="btnResetAnimatorScript">
+               <property name="toolTip">
+                <string>Reset script to nothing</string>
+               </property>
+               <property name="text">
+                <string>...</string>
+               </property>
+               <property name="icon">
+                <iconset resource="../resource/resource.qrc">
+                 <normaloff>:/16x16_ico_png/reset.png</normaloff>:/16x16_ico_png/reset.png</iconset>
+               </property>
+               <property name="autoRaise">
+                <bool>false</bool>
+               </property>
+               <property name="arrowType">
+                <enum>Qt::NoArrow</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0" colspan="4">
+              <widget class="QCheckBox" name="chkMouseEvents">
+               <property name="text">
+                <string>Receive mouse events in script</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0" colspan="4">
+              <widget class="QCheckBox" name="chkKeyboardEvents">
+               <property name="text">
+                <string>Receive keyboard events in script</string>
                </property>
               </widget>
              </item>
             </layout>
            </widget>
           </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox_2">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="title">
-          <string>States and transitions</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
-           <widget class="QListWidget" name="stateList">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
             </property>
-            <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
             </property>
-            <property name="editTriggers">
-             <set>QAbstractItemView::NoEditTriggers</set>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
             </property>
-            <property name="selectionBehavior">
-             <enum>QAbstractItemView::SelectRows</enum>
-            </property>
-           </widget>
+           </spacer>
           </item>
          </layout>
         </widget>
        </item>
       </layout>
      </widget>
-     <widget class="QGroupBox" name="groupBox">
+     <widget class="QWidget" name="widget" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
         <horstretch>1</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <property name="title">
-       <string>State graph</string>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="spacing">
+        <number>3</number>
+       </property>
+       <property name="leftMargin">
+        <number>4</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>4</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
-        <widget class="QGraphicsView" name="stateView">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="contextMenuPolicy">
-          <enum>Qt::CustomContextMenu</enum>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
-         </property>
-         <property name="viewportUpdateMode">
-          <enum>QGraphicsView::FullViewportUpdate</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="nodeProperties">
+        <widget class="QGroupBox" name="groupBox_7">
          <property name="title">
-          <string>State properties</string>
+          <string>State graph</string>
          </property>
-         <property name="flat">
-          <bool>true</bool>
-         </property>
-         <layout class="QGridLayout" name="gridLayout">
-          <item row="1" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Name</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="stateName">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>ID</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="stateID">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="linkProperties">
-         <property name="title">
-          <string>Transition properties</string>
-         </property>
-         <property name="flat">
-          <bool>true</bool>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_2">
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="linkName">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>ID</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Name</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="linkID">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QDoubleSpinBox" name="linkDuration">
-            <property name="suffix">
-             <string> s</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>Duration</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="propertyHelp">
-         <property name="title">
-          <string>Properties</string>
-         </property>
-         <property name="flat">
-          <bool>true</bool>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_6">
+         <layout class="QVBoxLayout" name="verticalLayout_10">
+          <property name="topMargin">
+           <number>4</number>
+          </property>
           <item>
-           <widget class="QLabel" name="label_9">
-            <property name="text">
-             <string>Nothing selected</string>
+           <widget class="QGraphicsView" name="stateView">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="contextMenuPolicy">
+             <enum>Qt::CustomContextMenu</enum>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="viewportUpdateMode">
+             <enum>QGraphicsView::FullViewportUpdate</enum>
             </property>
            </widget>
           </item>
          </layout>
         </widget>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QGroupBox" name="groupBox_2">
+           <property name="minimumSize">
+            <size>
+             <width>400</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="title">
+            <string>States and transitions</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <item>
+             <widget class="QListWidget" name="stateList">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="nodeProperties">
+           <property name="title">
+            <string>State properties</string>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="1" column="0">
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Name</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="stateName">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_2">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>ID</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="stateID">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="linkProperties">
+           <property name="title">
+            <string>Transition properties</string>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="linkName">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_3">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>ID</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>Name</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="linkID">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QDoubleSpinBox" name="linkDuration">
+              <property name="suffix">
+               <string> s</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>Duration</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="propertyHelp">
+           <property name="title">
+            <string>Properties</string>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <widget class="QLabel" name="label_9">
+              <property name="text">
+               <string>Nothing selected</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -433,13 +563,20 @@
   <tabstop>animName</tabstop>
   <tabstop>animID</tabstop>
   <tabstop>cmbInitState</tabstop>
+  <tabstop>cmbTransitionMode</tabstop>
+  <tabstop>animatorScript</tabstop>
+  <tabstop>btnEditAnimatorScript</tabstop>
+  <tabstop>btnAddAnimatorScript</tabstop>
+  <tabstop>btnResetAnimatorScript</tabstop>
+  <tabstop>chkMouseEvents</tabstop>
+  <tabstop>chkKeyboardEvents</tabstop>
+  <tabstop>stateView</tabstop>
   <tabstop>stateList</tabstop>
   <tabstop>stateID</tabstop>
   <tabstop>stateName</tabstop>
   <tabstop>linkID</tabstop>
   <tabstop>linkName</tabstop>
   <tabstop>linkDuration</tabstop>
-  <tabstop>stateView</tabstop>
   <tabstop>btnAccept</tabstop>
   <tabstop>btnCancel</tabstop>
  </tabstops>

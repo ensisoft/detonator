@@ -1382,14 +1382,22 @@ bool EntityWidget::OnEscape()
 
 bool EntityWidget::LaunchScript(const QString& id)
 {
-    const auto& entity_script_id = (QString)GetItemId(mUI.scriptFile);
-    const auto& animator_script_id = (QString)GetItemId(mUI.animatorScript);
-    if (entity_script_id ==  id || animator_script_id == id)
+    const auto& entity_script_id = mState.entity->GetScriptFileId();
+    if (!entity_script_id.empty())
     {
         on_actionPreview_triggered();
         return true;
     }
-    return false;
+    if (mState.entity->GetNumAnimators() == 0)
+        return false;
+
+    const auto& entity_controller_script_id = mState.entity->GetController(0).GetScriptId();
+    if (entity_controller_script_id.empty())
+        return false;
+
+
+    on_actionPreview_triggered();
+    return true;
 }
 
 void EntityWidget::SaveAnimation(const game::AnimationClass& track, const QVariantMap& properties)
@@ -1960,7 +1968,7 @@ void EntityWidget::on_btnEditAnimator_clicked()
     QVariantMap props;
     if (const auto* ptr = base::SafeFind(mAnimatorProperties, animator.GetId()))
         props = *ptr;
-    DlgAnimator dlg(this, *mState.entity, animator, props);
+    DlgAnimator dlg(this, mState.workspace, *mState.entity, animator, props);
     dlg.SetEntityWidget(this);
     dlg.exec();
 }
@@ -2245,74 +2253,7 @@ void EntityWidget::on_btnEditMaterial_clicked()
     }
 }
 
-void EntityWidget::on_btnEditAnimatorScript_clicked()
-{
-    const auto& id = (QString)GetItemId(mUI.animatorScript);
-    if (id.isEmpty())
-        return;
 
-    emit OpenResource(id);
-}
-
-void EntityWidget::on_btnAddAnimatorScript_clicked()
-{
-    if (mState.entity->GetNumAnimators() == 0)
-        return;
-
-    auto& animator = mState.entity->GetController(0);
-
-    app::Script script;
-    const auto& uri = app::toString("ws://lua/%1.lua", script.GetId());
-    const auto& file = mState.workspace->MapFileToFilesystem(uri);
-    if (app::FileExists(file))
-    {
-        QMessageBox msg(this);
-        msg.setIcon(QMessageBox::Question);
-        msg.setWindowTitle("File Exists");
-        msg.setText(tr("Overwrite existing script file?\n%1").arg(file));
-        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
-        if (msg.exec() == QMessageBox::Cancel)
-            return;
-    }
-    QString source = GenerateAnimatorScriptSource();
-    QFile::FileError err_val = QFile::FileError::NoError;
-    QString err_str;
-    if (!app::WriteTextFile(file, source, &err_val, &err_str))
-    {
-        ERROR("Failed to write file. [file='%1', err_val=%2, err_str='%3']", file, err_val, err_str);
-        QMessageBox msg(this);
-        msg.setIcon(QMessageBox::Critical);
-        msg.setWindowTitle("Error Occurred");
-        msg.setText(tr("Failed to write the script file. [%1]").arg(err_str));
-        msg.setStandardButtons(QMessageBox::Ok);
-        msg.exec();
-        return;
-    }
-    script.SetFileURI(uri);
-    script.SetName(base::FormatString("%1 / EntityStateController", mState.entity->GetName()));
-    app::ScriptResource resource(script, app::toString("%1 / EntityStateController", mState.entity->GetName()));
-    mState.workspace->SaveResource(resource);
-
-    animator.SetScriptId(script.GetId());
-
-    auto* widget = new ScriptWidget(mState.workspace, resource);
-    emit OpenNewWidget(widget);
-
-    SetValue(mUI.animatorScript, ListItemId(script.GetId()));
-    SetEnabled(mUI.btnEditAnimatorScript, true);
-    SetEnabled(mUI.btnResetAnimatorScript, true);
-}
-void EntityWidget::on_btnResetAnimatorScript_clicked()
-{
-    if (mState.entity->GetNumAnimators() == 0)
-        return;
-
-    auto& animator = mState.entity->GetController(0);
-    animator.SetScriptId("");
-    SetValue(mUI.animatorScript, -1);
-    SetEnabled(mUI.btnEditAnimatorScript, false);
-    SetEnabled(mUI.btnResetAnimatorScript, false);
-}
 
 void EntityWidget::on_btnMoreViewportSettings_clicked()
 {
@@ -2351,30 +2292,6 @@ void EntityWidget::on_scriptFile_currentIndexChanged(int index)
     }
     mState.entity->SetSriptFileId(GetItemId(mUI.scriptFile));
     SetEnabled(mUI.btnEditScript, true);
-}
-
-void EntityWidget::on_animatorScript_currentIndexChanged(int index)
-{
-    if (index == -1)
-    {
-        for (size_t i=0; i<mState.entity->GetNumAnimators(); ++i)
-        {
-            auto& anim = mState.entity->GetController(i);
-            anim.SetScriptId("");
-        }
-        SetEnabled(mUI.btnEditAnimatorScript, false);
-        SetEnabled(mUI.btnResetAnimatorScript, false);
-    }
-    else
-    {
-        for (size_t i=0; i<mState.entity->GetNumAnimators(); ++i)
-        {
-            auto& anim = mState.entity->GetController(i);
-            anim.SetScriptId(GetItemId(mUI.animatorScript));
-        }
-        SetEnabled(mUI.btnEditAnimatorScript, true);
-        SetEnabled(mUI.btnResetAnimatorScript, true);
-    }
 }
 
 void EntityWidget::on_nodeName_textChanged(const QString& text)
@@ -3837,27 +3754,6 @@ void EntityWidget::DisplayEntityProperties()
     SetValue(mUI.chkKeyEvents, mState.entity->TestFlag(game::EntityClass::Flags::WantsKeyEvents));
     SetValue(mUI.chkMouseEvents, mState.entity->TestFlag(game::EntityClass::Flags::WantsMouseEvents));
 
-    if (animators > 0)
-    {
-        const auto& animator = mState.entity->GetController(0);
-        if (animator.HasScriptId())
-        {
-            SetValue(mUI.animatorScript, ListItemId(animator.GetScriptId()));
-            SetEnabled(mUI.btnResetAnimatorScript, true);
-            SetEnabled(mUI.btnEditAnimatorScript, true);
-        }
-        else
-        {
-            SetValue(mUI.animatorScript, -1);
-            SetEnabled(mUI.btnResetAnimatorScript, false);
-            SetEnabled(mUI.btnEditAnimatorScript, false);
-        }
-    }
-    else
-    {
-        SetValue(mUI.animatorScript, -1);
-    }
-
     if (!mUI.trackList->selectedItems().isEmpty())
     {
         SetEnabled(mUI.btnDeleteTrack, true);
@@ -4399,7 +4295,6 @@ void EntityWidget::RebuildCombos()
     SetList(mUI.rbPolygon, polygons);
     SetList(mUI.fxPolygon, polygons);
     SetList(mUI.scriptFile, scripts);
-    SetList(mUI.animatorScript, scripts);
 }
 
 void EntityWidget::RebuildCombosInternal()
@@ -4534,7 +4429,9 @@ QString GenerateEntityScriptSource(QString entity)
 QString source(R"(
 --
 -- Entity '%1' script.
--- This script will be called for every instance of '%1' in the scene during gameplay.
+--
+-- This script will be called for every instance of '%1' in the scene
+-- during gameplay.
 -- You're free to delete functions you don't need.
 --
 
@@ -4662,44 +4559,61 @@ QString GenerateAnimatorScriptSource()
     static const QString source = R"(
 --
 -- Entity state controller script.
--- This script will be called for every entity controller instance
--- that has this particular script assigned.
--- This script allows you to write the logic for performing some
--- particular actions when entering/leaving entity states and
--- when transitioning from one state to another.
+--
+-- This script will be called for every entity controller instance that has
+-- this particular script assigned. This script allows you to write the logic
+-- for performing some particular actions when entering/leaving entity states
+-- and when transitioning from one state to another. Good examples are changing
+-- the material, drawable states etc. to visually indicate what your character
+-- is currently doing.
 --
 -- You're free to delete functions you don't need.
 --
 
 -- Called once when the controller is first created.
--- This is the place where you can set the initial entity and
--- controller state to a known/desired first state.
+-- This is the place where you can set the initial entity and controller state
+-- to a known/desired first state.
 function Init(controller, entity)
 
 end
 
 
--- Called once when the entity enters a new state at the end
--- of a transition.
+-- Called once when the entity enters a new state at the end of a transition.
 function EnterState(controller, state, entity)
 
 end
 
--- Called once when the entity is leaving a state at the start
--- of a transition.
+-- Called once when the entity is leaving a state at the start of a transition.
 function LeaveState(controller, state, entity)
 
 end
 
--- Called continuously on the current state. This is the place
--- where you can realize changes to the current input when in
--- some particular state.
+-- Called continuously on the current state.
+-- This is the place where you can realize changes to the current input when in
+-- some particular state. For example check the current entity velocity or
+-- direction to determine which sprite animation to play or which way the
+-- character on screen should be looking.
 function UpdateState(controller, state, time, dt, entity)
 
 end
 
--- Evaluate the condition to trigger a transition from one state
--- to another. Return true to take the transition or false to reject it.
+-- Evaluate the condition to trigger a transition from one state to another.
+-- Return true to take the transition or false to reject it.
+--
+-- Only a single transition can ever be progress at any given time. If the
+-- state has possible transitions to multiple states then whichever state
+-- transition evaluation returns true first will be taken and the other
+-- transitions will not be considered.
+--
+-- For example if your state chart has states 'Idle', 'Walk" and 'Run'
+-- and 'Idle' can transition to either 'Walk' or 'Run', if the evaluation
+-- of 'Idle to Walk' returns true then 'Idle to Run' is never considered.
+-- The order in which the possible transitions are evaluated is unspecified.
+--
+-- This is is controlled by the state evaluation mode in the controller
+-- settings. Only when the mode is "Evaluate Continuously' will this be called.
+-- Otherwise call TriggerTransition in order to trigger evaluation.
+--
 function EvalTransition(controller, from, to, entity)
     return false
 end
@@ -4718,6 +4632,25 @@ end
 function UpdateTransition(controller, from, to, duration, time, dt, entity)
 
 end
+
+-- Called on key down events. This is only called when the controller
+-- has enabled the keyboard input processing to take place.
+--
+-- Symbol is one of the virtual key symbols rom the wdk.Keys table and
+-- modifier bits is the bitwise combination of control keys (Ctrl, Shift, etc)
+-- at the time of the key event. The modifier_bits are expressed as an object
+-- of wdk.KeyBitSet.
+--
+-- Note that because some platforms post repeated events when a key is
+-- continuously held you can get this event multiple times without getting
+-- the corresponding key up!
+function OnKeyDown(controller, symbol, modifier_bits, entity)
+end
+
+-- Called on key up events. See OnKeyDown for more details.
+function OnKeyUp(controller, symbol, modifier_bits, entity)
+end
+
 )";
     return source;
 }
